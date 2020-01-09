@@ -14,15 +14,14 @@ use strict;
 use warnings;
 use Thruk::Utils::IO ();
 use Thruk::Utils::CookieAuth ();
-use Carp qw/confess croak/;
+use Carp qw/confess croak longmess/;
 use Data::Dumper qw/Dumper/;
-use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
+use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Add_Delta_Days Normalize_DHMS/;
 use File::Slurp qw/read_file/;
 use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Digest::MD5 qw(md5_hex);
 use POSIX ();
 use MIME::Base64 ();
 use URI::Escape ();
@@ -44,7 +43,7 @@ sub parse_date {
     my($c, $string) = @_;
     my $timestamp;
     eval {
-        $timestamp = Thruk::Utils::_parse_date($c, $string);
+        $timestamp = _parse_date($c, $string);
         if(defined $timestamp) {
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         } else {
@@ -52,7 +51,8 @@ sub parse_date {
         }
     };
     if($@) {
-        $c->log->error($@);
+        $c->log->error("parse_date error for '".$string."' - ".$@);
+        $c->log->error(longmess());
     }
     return $timestamp;
 }
@@ -70,6 +70,7 @@ return date from timestamp in given format
 sub format_date {
     my($timestamp, $format) = @_;
     confess("no format") unless defined $format;
+    confess("no timestamp") unless defined $timestamp;
     my $date = POSIX::strftime($format, localtime($timestamp));
     return $date;
 }
@@ -105,8 +106,12 @@ return cron entry as string
 
 =cut
 sub format_cronentry {
-    my($c, $cr) = @_;
+    my($c, $entry) = @_;
     my $cron;
+    my $cr = {};
+    for my $key (keys %{$entry}) {
+        $cr->{$key} = Thruk::Utils::Filter::escape_html($entry->{$key});
+    }
     if($cr->{'type'} eq 'month') {
         my $app = 'th';
         if($cr->{'day'} == 1) { $app = 'st'; }
@@ -171,73 +176,6 @@ sub format_cronentry {
     return $cron;
 }
 
-
-######################################
-
-=head2 read_cgi_cfg
-
-  read_cgi_cfg($c);
-
-parse the cgi.cfg and put it into $c->config
-
-=cut
-sub read_cgi_cfg {
-    my($c, $config) = @_;
-    if(defined $c) {
-        $config = $c->config;
-    }
-
-    $c->stats->profile(begin => "Utils::read_cgi_cfg()") if defined $c;
-
-    # read only if its changed
-    my $file = $config->{'cgi.cfg'};
-    if(!defined $file || $file eq '') {
-        $config->{'cgi_cfg'} = 'undef';
-        if(defined $c) {
-            $c->log->error("cgi.cfg not set");
-            $c->error("cgi.cfg not set");
-            return $c->detach('/error/index/4');
-        }
-        print STDERR "cgi.cfg option must be set in thruk.conf or thruk_local.conf\n\n";
-        return;
-    }
-    elsif( -r $file ) {
-        # perfect, file exists and is readable
-    }
-    elsif(-r $config->{'project_root'}.'/'.$file) {
-        $file = $config->{'project_root'}.'/'.$file;
-    }
-    else {
-        if(defined $c) {
-            $c->log->error("cgi.cfg not readable: ".$!);
-            $c->error("cgi.cfg not readable: ".$!);
-            return $c->detach('/error/index/4');
-        }
-        print STDERR "$file not readable: ".$!."\n\n";
-        return;
-    }
-
-    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
-    my @cgi_cfg_stat = stat($file);
-
-    my $last_stat = $config->{'cgi_cfg_stat'};
-    if(!defined $last_stat
-       || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
-       || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
-      ) {
-        $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
-        $c->log->debug("reading $file") if defined $c;
-        $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
-        $config->{'cgi.cfg_effective'} = $file;
-        $config->{'cgi_cfg'}           = Thruk::Config::read_config_file($file);
-    }
-
-    $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;
-
-    return 1;
-}
-
-
 ######################################
 
 =head2 is_valid_regular_expression
@@ -254,12 +192,12 @@ sub is_valid_regular_expression {
     local $SIG{__DIE__} = '';
     eval { "test" =~ m/$expression/mx; };
     if($@) {
-        my $error_message = "invalid regular expression: ".$@;
+        my $error_message = "invalid regular expression: ".Thruk::Utils::Filter::escape_html($@);
         $error_message =~ s/\s+at\s+.*$//gmx;
         $error_message =~ s/in\s+regex\;/in regex<br \/>/gmx;
         $error_message =~ s/HERE\s+in\s+m\//HERE in <br \/>/gmx;
         $error_message =~ s/\/$//gmx;
-        set_message($c, 'fail_message', $error_message);
+        set_message($c, { style => 'fail_message', msg => $error_message, escape => 0});
         return;
     }
     return 1;
@@ -404,13 +342,13 @@ sub get_start_end_for_timeperiod {
     }
     else {
         if(defined $t1) {
-            $start = $t1;
+            $start = _parse_date($c, $t1);
         } else {
             $start = normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
         }
 
         if(defined $t2) {
-            $end   = $t2;
+            $end = _parse_date($c, $t2);
         } else {
             $end   = normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
         }
@@ -441,7 +379,7 @@ will use cgi params for input
 
 =cut
 sub get_start_end_for_timeperiod_from_param {
-    my $c = shift;
+    my($c) = @_;
 
     confess("no c") unless defined($c);
 
@@ -466,11 +404,70 @@ sub get_start_end_for_timeperiod_from_param {
     return Thruk::Utils::get_start_end_for_timeperiod($c, $timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 }
 
+
+########################################
+
+=head2 get_start_end_from_date_select_params
+
+  my($start, $end) = get_start_end_from_date_select_params($c)
+
+returns a start and end timestamp from date select, like ex.: on the showlog page
+
+=cut
+sub get_start_end_from_date_select_params {
+    my($c) = @_;
+    confess("no c") unless defined($c);
+
+    my($start,$end);
+    my $archive     = $c->req->parameters->{'archive'} || 0;
+    my $param_start = $c->req->parameters->{'start'};
+    my $param_end   = $c->req->parameters->{'end'};
+
+    # start / end date from formular values?
+    if(defined $param_start and defined $param_end) {
+        # convert to timestamps
+        $start = Thruk::Utils::parse_date($c, $param_start);
+        $end   = Thruk::Utils::parse_date($c, $param_end);
+    }
+    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
+        # start with today 00:00
+        $start = Mktime(Today(), 0,0,0);
+        $end   = Mktime(Add_Delta_Days(Today(), 1), 0,0,0);
+    }
+    if($archive eq '+1') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
+        $start = Mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+        ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
+        $end = Mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+    }
+    elsif($archive eq '-1') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
+        $start = Mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+        ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
+        $end = Mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+    }
+
+    # swap date if they are mixed up
+    if($start > $end) {
+        my $tmp = $start;
+        $start = $end;
+        $end   = $tmp;
+    }
+    return($start, $end);
+}
+
 ########################################
 
 =head2 set_message
 
-  set_message($c, $style, $text, [ $details ])
+  set_message($c, $style, $text, [ $details ], [$code], [$escape])
+  set_message($c, {
+      'style'   => 'class', # usually fail_message or success_message
+      'msg'     => 'text',
+      'details' => 'more details',
+      'code'    => 'http response code',
+      'escape'  => 'flag wether html should be escaped, default is true',
+    })
 
 set a message in an cookie for later display
 
@@ -478,23 +475,36 @@ set a message in an cookie for later display
 sub set_message {
     my $c   = shift;
     my $dat = shift;
-    my($style, $message, $details, $code);
+    my($style, $message, $details, $code, $escape);
 
     if(ref $dat eq 'HASH') {
         $style   = $dat->{'style'};
         $message = $dat->{'msg'};
         $details = $dat->{'details'};
         $code    = $dat->{'code'};
+        $escape  = $dat->{'escape'};
     } else {
         $style   = $dat;
         $message = shift;
         $details = shift;
         $code    = shift;
+        $escape  = shift;
+    }
+    $escape = $escape // 1;
+    my($escaped_message, $escaped_details);
+    if($escape) {
+        $escaped_message = Thruk::Utils::Filter::escape_html($message);
+        $escaped_details = Thruk::Utils::Filter::escape_html($details);
     }
 
+    # cookie does not get escaped, it will be escaped upon read
     $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });
-    $c->stash->{'thruk_message'}         = $style.'~~'.$message;
-    $c->stash->{'thruk_message_details'} = $details;
+    # use escaped data if possible, but store original data as well
+    $c->stash->{'thruk_message'}         = $style.'~~'.($escaped_message // $message);
+    $c->stash->{'thruk_message_details'} = $escaped_details // $details;
+    $c->stash->{'thruk_message_style'}       = $style;
+    $c->stash->{'thruk_message_raw'}         = $message;
+    $c->stash->{'thruk_message_details_raw'} = $details;
     $c->res->code($code) if defined $code;
 
     return 1;
@@ -539,6 +549,11 @@ sub ssi_include {
     $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $page, 'header');
     $c->stash->{ssi_footer}  = Thruk::Utils::read_ssi($c, 'common', 'footer');
     $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $page, 'footer');
+
+    $c->stash->{real_page} = "";
+    if($c->stash->{controller} =~ m/Thruk::Controller::([^:]*)::.*?$/gmx) {
+        $c->stash->{real_page} = $1;
+    }
 
     return 1;
 }
@@ -587,7 +602,7 @@ sub read_ssi {
 
 =head2 read_resource_file
 
-  read_resource_file($file, [ $macros ], [$with_comments])
+  read_resource_file($files, [ $macros ], [$with_comments])
 
 returns a hash with all USER1-32 macros. macros can
 be a predefined hash.
@@ -595,27 +610,32 @@ be a predefined hash.
 =cut
 
 sub read_resource_file {
-    my($file, $macros, $with_comments) = @_;
+    my($files, $macros, $with_comments) = @_;
+
+    $files = Thruk::Utils::list($files);
+    return unless scalar @{$files} > 0;
+
     my $comments    = {};
     my $lastcomment = "";
-    return unless defined $file;
-    return unless -f $file;
-    $macros   = {} unless defined $macros;
-    open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
-    while(my $line = <$fh>) {
-        if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
-            $macros->{$1}   = $2;
-            $comments->{$1} = $lastcomment;
-            $lastcomment    = "";
+    $macros         = {} unless defined $macros;
+    for my $file (@{$files}) {
+        next unless -f $file;
+        open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
+        while(my $line = <$fh>) {
+            if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
+                $macros->{$1}   = $2;
+                $comments->{$1} = $lastcomment;
+                $lastcomment    = "";
+            }
+            elsif($line =~ m/^(\#.*$)/mx) {
+                $lastcomment .= $1;
+            }
+            elsif($line =~ m/^\s*$/mx) {
+                $lastcomment = '';
+            }
         }
-        elsif($line =~ m/^(\#.*$)/mx) {
-            $lastcomment .= $1;
-        }
-        elsif($line =~ m/^\s*$/mx) {
-            $lastcomment = '';
-        }
+        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     }
-    CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     return($macros) unless $with_comments;
     return($macros, $comments);
 }
@@ -835,14 +855,13 @@ sub get_custom_vars {
 
 =head2 set_custom_vars
 
-  set_custom_vars($c)
+  set_custom_vars($c, { options... })
 
 set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my $c      = shift;
-    my $args   = shift;
+    my($c, $args) = @_;
 
     my $prefix   = $args->{'prefix'} || '';
     my $search   = $args->{'search'} || 'show_custom_vars';
@@ -867,53 +886,40 @@ sub set_custom_vars {
     return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
     return unless defined $c->config->{$search};
 
-    my $vars        = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
+    my $vars        = Thruk::Utils::list($c->config->{$search});
     my $custom_vars = get_custom_vars($c, $data, $prefix, $add_host);
 
     my $already_added = {};
-    for my $test (@{$vars}) {
-        for my $cust_name (sort keys %{$custom_vars}) {
-            my $found      = 0;
-            if($test eq $cust_name or $test eq '_'.$cust_name) {
-                $found = 1;
-            } else {
-                my $v = "".$test;
-                next if CORE::index($v, '*') == -1;
-                $v =~ s/\*/.*/gmx;
-                if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
-                    $found = 1;
-                }
-            }
-            next unless $found;
+    for my $cust_name (sort keys %{$custom_vars}) {
+        next unless Thruk::Utils::check_custom_var_list($cust_name, $vars);
 
-            # expand macros in custom vars
-            my $cust_value = $custom_vars->{$cust_name};
-            if(defined $host and defined $service) {
-                    #($cust_value, $rc)...
-                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                        string  => $cust_value,
-                        host    => $host,
-                        service => $service,
-                    });
-            } elsif (defined $host) {
-                    #($cust_value, $rc)...
-                    ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                        string  => $cust_value,
-                        host    => $host,
-                    });
-            }
-
-            # add to dest
-            my $is_host = defined $service ? 0 : 1;
-            if($add_host) {
-                if($cust_name =~ s/^HOST//gmx) {
-                    $is_host = 1;
-                }
-            }
-            next if $already_added->{$cust_name};
-            $already_added->{$cust_name} = 1;
-            push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
+        # expand macros in custom vars
+        my $cust_value = $custom_vars->{$cust_name};
+        if(defined $host and defined $service) {
+                #($cust_value, $rc)...
+                ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                    string  => $cust_value,
+                    host    => $host,
+                    service => $service,
+                });
+        } elsif (defined $host) {
+                #($cust_value, $rc)...
+                ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                    string  => $cust_value,
+                    host    => $host,
+                });
         }
+
+        # add to dest
+        my $is_host = defined $service ? 0 : 1;
+        if($add_host) {
+            if($cust_name =~ s/^HOST//gmx) {
+                $is_host = 1;
+            }
+        }
+        next if $already_added->{$cust_name};
+        $already_added->{$cust_name} = 1;
+        push @{$c->stash->{$dest}}, [ $cust_name, $cust_value, $is_host ];
     }
     return;
 }
@@ -927,7 +933,6 @@ sub set_custom_vars {
 returns true if custom variable name is in the list of allowed variable names
 
 =cut
-
 sub check_custom_var_list {
     my($varname, $allowed) = @_;
 
@@ -935,13 +940,21 @@ sub check_custom_var_list {
 
     for my $cust_name (@{$allowed}) {
         $cust_name =~ s/^_//gmx;
+        # direct match
         if($varname eq $cust_name) {
             return(1);
         } else {
-            my $v = "".$varname;
+            # wildcard match
+            my $v = "".$cust_name;
             next if CORE::index($v, '*') == -1;
             $v =~ s/\*/.*/gmx;
-            if($cust_name =~ m/^$v$/mx) {
+
+            # if variable starts with HOST, the matcher has to start with HOST too
+            if($varname =~ m/^host/mxi && $v !~ m/^host/mxi) {
+                next;
+            }
+
+            if($varname =~ m/^$v$/mx) {
                 return(1);
             }
         }
@@ -958,7 +971,6 @@ sub check_custom_var_list {
 returns normalized timestamp for given date
 
 =cut
-
 sub normal_mktime {
     my($year,$mon,$day,$hour,$min,$sec) = @_;
 
@@ -998,7 +1010,6 @@ sub _initialassumedhoststate_to_state {
 returns user profile data
 
 =cut
-
 sub get_user_data {
     my($c, $username) = @_;
 
@@ -1028,7 +1039,6 @@ sub get_user_data {
 store user profile data
 
 =cut
-
 sub store_user_data {
     my($c, $data, $username) = @_;
 
@@ -1165,16 +1175,28 @@ sub array_uniq_obj {
 
     my @unique;
     my %seen;
+    my $x = 0;
     for my $el (@{$array}) {
         my $values = [];
         for my $key (sort keys %{$el}) {
-            next if $key =~ /^peer_(key|addr|name)$/mx;
+            if($key =~ /^peer_(key|addr|name)$/mx) {
+                $el->{$key} = list($el->{$key});
+                next;
+            }
             push @{$values}, ($el->{$key} // "");
         }
         my $ident = join(";", @{$values});
-        next if $seen{$ident};
-        $seen{$ident} = 1;
+        if(defined $seen{$ident}) {
+            # join peer_* information
+            for my $key (qw/peer_key peer_addr peer_name/) {
+                next unless $el->{$key};
+                push @{$unique[$seen{$ident}]->{$key}}, @{$el->{$key}};
+            }
+            next;
+        }
+        $seen{$ident} = $x;
         push @unique, $el;
+        $x++;
     }
 
     return \@unique;
@@ -1325,7 +1347,11 @@ sub get_remote_thruk_url {
         $url = $peer->{'addr'};
     }
     if($url) {
-        $url =~ s|^https?://[^/]*/|/|gmx;
+        if($url !~ m/^https?:\/\//mx) {
+            return("");
+        }
+        $url =~ s|^https?://[^/]*/?|/|gmx;
+        $url =~ s|cgi-bin\/remote\.cgi$||gmx;
         $url =~ s|thruk/?$||gmx;
         $url =~ s|/$||gmx;
         $url = $url.'/thruk/';
@@ -1461,12 +1487,12 @@ sub get_perf_image {
     $options->{'show_title'}  = 1      unless defined $options->{'show_title'};
     $options->{'show_legend'} = 1      unless defined $options->{'show_legend'};
     if(defined $options->{'end'}) {
-        $options->{'end'} = Thruk::Utils::_parse_date($c, $options->{'end'});
+        $options->{'end'} = _parse_date($c, $options->{'end'});
     } else {
         $options->{'end'} = time();
     }
     if(defined $options->{'start'}) {
-        $options->{'start'} = Thruk::Utils::_parse_date($c, $options->{'start'});
+        $options->{'start'} = _parse_date($c, $options->{'start'});
     } else {
         $options->{'start'} = $options->{'end'} - 86400;
     }
@@ -1582,7 +1608,7 @@ sub get_perf_image {
     }
 
     # create fake session
-    my $sessionid = get_fake_session($c);
+    my($sessionid) = get_fake_session($c);
     local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$options->{'format'};
 
     # call login hook, because it might transfer our sessions to remote graphers
@@ -1738,14 +1764,27 @@ sub absolute_url {
 
 =head2 get_fake_session
 
-  get_fake_session($c, [$sessionid], [$roles])
+  get_fake_session($c, [$sessionid], [$roles], [$address])
 
-create and return fake session id for current user
+create and return fake session id along with session data for current user
 
 =cut
 
 sub get_fake_session {
     my($c, $id, $username, $roles, $ip) = @_;
+
+    if(!$c->user_exists) {
+        confess("no user");
+    }
+    if(!$c->user->{'superuser'}) {
+        $username = $c->stash->{'remote_user'};
+    }
+
+    # get intersection of roles
+    if($roles && ref $roles eq 'ARRAY') {
+        $roles = $c->user->clean_roles($roles);
+    }
+
     my $sessiondata = {
         hash     => 'none',
         address  => $ip,
@@ -1755,10 +1794,11 @@ sub get_fake_session {
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
     }
-    my($sessionid, $sessionfile) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
+    my($sessionid, $sessionfile,$newsessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessionid;
     $c->stash->{'fake_session_file'} = $sessionfile;
-    return($sessionid);
+    $sessiondata->{'file'}           = $sessionfile;
+    return($sessionid, $newsessiondata);
 }
 
 ########################################
@@ -1859,6 +1899,27 @@ sub list {
 
 ########################################
 
+=head2 extract_list
+
+  extract_list($var, $separator)
+
+return list by splitting $var by $sep ($var can be an array or string)
+
+=cut
+
+sub extract_list {
+    my($var, $sep) = @_;
+    my $result = [];
+    for my $v (@{list($var)}) {
+        for my $v2 (split($sep, $v)) {
+            push @{$result}, $v2;
+        }
+    }
+    return($result);
+}
+
+########################################
+
 =head2 array_chunk
 
   array_chunk($list, $number)
@@ -1869,9 +1930,28 @@ return list of <number> evenly chunked parts
 
 sub array_chunk {
     my($list, $number) = @_;
+    my $size   = POSIX::ceil(scalar @{$list} / $number);
+    my $chunks = array_chunk_fixed_size($list, $size);
+    return($chunks);
+}
+
+########################################
+
+=head2 array_chunk_fixed_size
+
+  array_chunk_fixed_size($list, $size)
+
+return list of chunked parts each with $size
+
+=cut
+
+sub array_chunk_fixed_size {
+    my($list, $size) = @_;
+    if(scalar @{$list} < $size) {
+        return([$list]);
+    }
     my $chunks = [];
-    my $size = POSIX::floor(scalar @{$list} / $number);
-    while(my @chunk = splice( @{$list}, 0, $size+1 ) ) {
+    while(my @chunk = splice( @{$list}, 0, $size ) ) {
         push @{$chunks}, \@chunk;
     }
     return($chunks);
@@ -1912,7 +1992,7 @@ possible conversions are
 =cut
 sub expand_duration {
     my($value) = @_;
-    if($value =~ m/^(\d+)(y|w|d|h|m|s)/gmx) {
+    if($value =~ m/^(\-?\d+)(y|w|d|h|m|s)/gmx) {
         if($2 eq 'y') { return $1 * 86400*365; }# year
         if($2 eq 'w') { return $1 * 86400*7; }  # weeks
         if($2 eq 'd') { return $1 * 86400; }    # days
@@ -1982,9 +2062,6 @@ sub update_cron_file {
     # this function must be run on all cluster nodes
     return if $c->cluster->run_cluster("all", "cmd: cron install");
 
-    # prevents 'No child processes' error
-    local $SIG{CHLD} = 'DEFAULT';
-
     my $errorlog = $c->config->{'var_path'}.'/cron.log';
     # ensure proper cron.log permission
     open(my $fh, '>>', $errorlog);
@@ -1994,21 +2071,13 @@ sub update_cron_file {
         my($fh2, $tmperror) = tempfile();
         Thruk::Utils::IO::close($fh2, $tmperror);
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
-        my $output = `$cmd`;
-        my $rc     = $?;
+        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
         my $errors = read_file($tmperror);
         unlink($tmperror);
         print $fh $errors;
-        if ($rc == -1) {
-            die("cron_pre_edit_cmd (".$cmd.") failed: ".$!);
-        } elsif ($rc & 127) {
-            die(sprintf("cron_pre_edit_cmd (%s) died with signal %d: %s\n%s\n", $cmd, ($rc & 127), $output, $errors));
-        } else {
-            $rc = $rc >> 8;
-            # override know error with initial crontab
-            if($rc != 1 or $errors !~ m/no\ crontab\ for/mx) {
-                die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors)) if $rc != 0;
-            }
+        # override know error with initial crontab
+        if($rc != 0 && ($rc != 1 || $errors !~ m/no\ crontab\ for/mx)) {
+            die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors));
         }
     }
     Thruk::Utils::IO::close($fh, $errorlog);
@@ -2086,17 +2155,36 @@ sub update_cron_file {
     if($c->config->{'cron_post_edit_cmd'}) {
         local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
-        my $output = `$cmd`;
-        if ($? == -1) {
-            die("cron_post_edit_cmd (".$cmd.") failed: ".$!);
-        } elsif ($? & 127) {
-            die(sprintf("cron_post_edit_cmd (".$cmd.") died with signal %d:\n", ($? & 127), $output));
-        } else {
-            my $rc = $? >> 8;
-            die(sprintf("cron_post_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output)) if $rc != 0;
+        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+        if($rc != 0) {
+            die(sprintf("cron_post_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output));
         }
     }
     return 1;
+}
+
+##########################################################
+
+=head2 update_cron_file_maintenance
+
+    update_cron_file_maintenance($c)
+
+update maintenance cronjobs
+
+=cut
+sub update_cron_file_maintenance {
+    my($c) = @_;
+    my $cron_entries = [[
+         '20,50 * * * *',
+         sprintf("cd %s && %s '%s maintenance' >/dev/null 2>>%s/cron.log",
+                                $c->config->{'project_root'},
+                                $c->config->{'thruk_shell'},
+                                $c->config->{'thruk_bin'},
+                                $c->config->{'var_path'},
+                ),
+    ]];
+    Thruk::Utils::update_cron_file($c, 'general', $cron_entries);
+    return;
 }
 
 ##############################################
@@ -2161,19 +2249,82 @@ sub get_cron_time_entry {
 
 =head2 set_user
 
-  set_user($c, $username)
+  set_user($c, %options)
 
 set and authenticate a user
+
+options are: {
+    username  => username of the resulting user
+    auth_src  => hint about where this user came from
+    superuser => superuser can change to other user names, roles will not exceed initial role set
+    internal  => internal technical user can change into any user and has admin roles
+    force     => force setting new user, even if already authenticated
+    roles     => maximum set of roles
+}
 
 =cut
 
 sub set_user {
-    my($c, $username) = @_;
-    $c->authenticate(0, $username);
+    my($c, %options) = @_;
+    confess("no username") unless $options{'username'};
+    confess("no auth_src") unless $options{'auth_src'};
+    $c->log->debug(sprintf("set_user: %s, superuser: %s, internal: %s", $options{'username'}, $options{'superuser'} ? 'yes' : 'no', $options{'internal'} ? 'yes' : 'no'));
+    if($c->user_exists) {
+        if($c->user->{'internal'} || $options{'force'}) {
+            # ok
+        } elsif($c->user->{'superuser'}) {
+            return(change_user($c, $options{'username'}, $options{'auth_src'}));
+        } else {
+            # not allowed
+            return;
+        }
+        delete $c->{'user'};
+        delete $c->stash->{'remote_user'};
+        delete $c->{'session'};
+    }
+    $c->authenticate(
+            username  => $options{'username'},
+            superuser => $options{'superuser'},
+            internal  => $options{'internal'},
+            auth_src  => $options{'auth_src'},
+            roles     => $options{'roles'},
+    );
     confess("no user") unless $c->user_exists;
-    return;
+    $c->user->{'auth_src'} = $options{'auth_src'};
+    return $c->user;
 }
 
+##############################################
+
+=head2 change_user
+
+  change_user($c, $username)
+
+changes username to given user, cannot exceed current roles and permissions
+
+=cut
+
+sub change_user {
+    my($c, $username, $auth_src) = @_;
+    confess("no username") unless $username;
+    confess("not yet authenticated") unless $c->user_exists;
+    confess("not allowed") unless $c->user->{'superuser'};
+    return $c->user if $c->user->{'username'} eq $username;
+
+    $c->log->debug(sprintf("change_user: %s", $username));
+    my $previous_user = delete $c->{'user'};
+    delete $c->stash->{'remote_user'};
+    delete $c->{'session'};
+
+    # replace current user
+    $c->authenticate(
+        username => $username,
+        auth_src => $auth_src,
+        roles    => $previous_user->{'roles'},
+    );
+
+    return $c->user;
+}
 
 ##############################################
 
@@ -2286,7 +2437,6 @@ sub wait_after_reload {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
-            local $SIG{'PIPE'} = sub { die "pipe error\n" };
             alarm(5);
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey, options => $options);
@@ -2424,7 +2574,7 @@ sub write_data_file {
     my($filename, $data, $changed_only) = @_;
 
     # store new data files in json format
-    return(Thruk::Utils::IO::json_lock_store($filename, $data, 1, $changed_only));
+    return(Thruk::Utils::IO::json_lock_store($filename, $data, { pretty => 1, changed_only => $changed_only }));
 }
 
 ##############################################
@@ -2453,9 +2603,9 @@ sub backup_data_file {
         }
     }
 
-    my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
-    my $new_md5 = md5_hex(read_file($filename));
-    if($force || $new_md5 ne $old_md5) {
+    my $old_hash = $last_backup ? Thruk::Utils::Crypt::hexdigest(scalar read_file($last_backup)) : '';
+    my $new_hash = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
+    if($force || $new_hash ne $old_hash) {
         copy($filename, $targetfile.'.'.$now.'.'.$mode);
 
         # cleanup old backups
@@ -2511,7 +2661,7 @@ returns path to program or undef
 =cut
 sub which {
     my($prog) = @_;
-    my $path = `which $prog 2>/dev/null`;
+    my $path = Thruk::Utils::IO::cmd("which $prog 2>/dev/null");
     return unless $path;
     chomp($path);
     return($path);
@@ -2732,25 +2882,31 @@ check if memory limit is above the threshold
 
 sub check_memory_usage {
     my($c) = @_;
-    my $mem = Thruk::Backend::Pool::get_memory_usage();
+    my $mem = $c->stash->{'memory_end'} || Thruk::Backend::Pool::get_memory_usage();
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
-        $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
-        if($c->env->{'psgix.harakiri'}) {
-            # if plack server does support harakiri mode, only supported if plack uses a procmanager
-            $c->env->{'psgix.harakiri.commit'} = 1;
-        }
-        elsif($c->env->{'psgix.cleanup'}) {
-            # supported since plack 1.0046
-            push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
-                kill(15, $$);
-            };
-        } else {
-            # kill it the hard way
-            kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
-        }
+        my $msg = "[$$] Thruk exiting process due to memory usage: ".$mem.'mb (limit: '.$c->config->{'max_process_memory'}.'mb)';
+        $c->log->debug($msg);
+        print STDERR $msg,"\n";
+        $c->app->graceful_stop($c);
     }
     return;
+}
+
+##########################################################
+
+=head2 stop_all
+
+    stop_all()
+
+stop all thruk pids
+
+=cut
+sub stop_all {
+    my($c) = @_;
+    $c->app->stop_all();
+    $c->app->graceful_stop($c);
+    return(1);
 }
 
 ##########################################################
@@ -2779,7 +2935,7 @@ make sure this is a post request
 sub is_post {
     my($c) = @_;
     return(1) if $c->req->method eq 'POST';
-    $c->log->error("insecure request, post method required: ".Dumper($c->req));
+    $c->error("insecure request, post method required");
     $c->detach('/error/index/24');
     return;
 }
@@ -2794,25 +2950,31 @@ ensure valid cross site request forgery token
 
 =cut
 sub check_csrf {
-    my($c) = @_;
-    return 1 if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
-    return unless is_post($c);
+    my($c, $skip_request_method) = @_;
+
+    # script generated sessions are ok, we only want to protect browsers here
+    return 1 if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI');
+    return 1 if $c->req->header('X-Thruk-Auth-Key');
+    return 1 if($c->{'session'} && $c->{'session'}->{'fake'});
+
+    return unless($skip_request_method || is_post($c));
+    my $req_addr = $c->env->{'HTTP_X_FORWARDED_FOR'} || $c->req->address;
     for my $addr (@{$c->config->{'csrf_allowed_hosts'}}) {
-        return 1 if $c->req->address eq $addr;
+        return 1 if $req_addr eq $addr;
         if(CORE::index( $addr, '*' ) >= 0) {
             # convert wildcards into real regexp
             my $search = $addr;
             $search =~ s/\.\*/*/gmx;
             $search =~ s/\*/.*/gmx;
-            return 1 if $c->req->address =~ m/$search/mx;
+            return 1 if $req_addr =~ m/$search/mx;
         }
     }
-    my $post_token  = $c->req->parameters->{'token'};
+    my $post_token  = $c->req->parameters->{'CSRFtoken'} // $c->req->parameters->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
-    if($valid_token and $post_token and $valid_token eq $post_token) {
+    if($valid_token && $post_token && $valid_token eq $post_token) {
         return(1);
     }
-    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));
+    $c->error("possible csrf, no or invalid token");
     $c->detach('/error/index/24');
     return;
 }
@@ -2872,10 +3034,16 @@ sub backends_list_to_hash {
         backends => $backendslist,
     };
     if($c->{'db'}->{'sections_depth'} >= 1) {
+        # save original list
+        my($selected_backends, undef, undef) = $c->{'db'}->select_backends('get_hosts');
+
         # save completly enabled sections
         Thruk::Action::AddDefaults::update_site_panel_hashes($c, $backends);
         my $sections = _collect_enabled_sections($c->stash->{'sites'}, "/");
         $hashlist->{'sections'} = $sections if scalar @{$sections} > 0;
+
+        # restore original list
+        Thruk::Action::AddDefaults::update_site_panel_hashes($c, $selected_backends);
     }
     return($hashlist);
 }
@@ -2969,19 +3137,57 @@ sub _initialassumedservicestate_to_state {
 sub _parse_date {
     my($c, $string) = @_;
 
-    # just a timestamp?
-    if($string =~ m/^(\d+)$/mx) {
-        return($1);
+    # simply try to expand first
+    return(_expand_timestring($string)) if $string =~ m/:/mx;
+
+    # time arithmetic
+    my @parts = split(/\s*(\-|\+)\s*/mx, $string);
+    my $timestamp;
+
+    if(scalar @parts >= 3 && $parts[0] eq '') { $parts[0] = time(); }
+    if(scalar @parts == 1 && $parts[0] =~ m/^\d+$/mx && length($parts[0]) <= 8) { unshift(@parts, "now", "+"); }
+
+    while(scalar @parts > 0) {
+        my $part1 = shift @parts;
+        my $val1  = _expand_timestring($part1);
+        if(!defined $val1) {
+            die("parse error, cannot expand '".$part1."' in ".$string);
+        }
+        if(!defined $timestamp) {
+            $timestamp = $val1;
+        }
+        if(scalar @parts == 0) {
+            return($timestamp);
+        }
+        if(scalar @parts == 1) {
+            die("operator expected, got '".$parts[0]."' in ".$string);
+        }
+        my $op    = shift @parts;
+        my $part2 = shift @parts;
+        my $val2  = _expand_timestring($part2);
+        if(!defined $val2) {
+            die("parse error, cannot expand '".$part2."' in ".$string);
+        }
+        if($op eq '+') {
+            $timestamp += $val2;
+        }
+        elsif($op eq '-') {
+            $timestamp -= $val2;
+        } else {
+            die("unknown operator: "+$op+", +- are supported only");
+        }
     }
 
-    # relative time?
-    if($string =~ m/^(\-|\+)(\d+\w)$/mx) {
-        my $direction = $1;
-        my $val = expand_duration($2);
-        if($direction eq '-') {
-            return(time() - $val);
-        }
-        return(time() + $val);
+    return($timestamp);
+}
+
+##############################################
+sub _expand_timestring {
+    my($string) = @_;
+
+    # just a timestamp?
+    if($string =~ m/^(\d+)$/mx && length($string) >= 9) {
+        return($1);
     }
 
     # real date (YYYY-MM-DD HH:MM:SS)
@@ -3002,15 +3208,74 @@ sub _parse_date {
         return($timestamp);
     }
 
+    # relative time?
+    if($string =~ m/^(\-|\+|)(\d+\w*)$/mx) {
+        my $direction = $1;
+        my $val = expand_duration($2);
+        if($direction eq '-') {
+            return -$val;
+        }
+        return $val;
+    }
+
+    # known terms
+    if($string eq 'lastmonday' || $string eq 'thisweek') {
+        my @today  = Today();
+        my @monday = Monday_of_Week(Week_of_Year(@today));
+        my $ts = Mktime(@monday, 0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'lastweek') {
+        my @lastmonday = Monday_of_Week(Week_of_Year(Add_Delta_Days(Today(), -7)));
+        my $ts = Mktime(@lastmonday, 0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'nextweek') {
+        my @lastmonday = Monday_of_Week(Week_of_Year(Add_Delta_Days(Today(), 7)));
+        my $ts = Mktime(@lastmonday, 0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'thismonth') {
+        # start on month
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year,$month,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'lastmonth') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $lastmonth = $month - 1;
+        if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
+        my $ts = Mktime($year,$lastmonth,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'nextmonth') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $nextmonth = $month + 1;
+        if($nextmonth > 12) { $nextmonth = $nextmonth - 12; $year++; }
+        my $ts = Mktime($year,$nextmonth,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'thisyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year,1,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'lastyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year-1,1,1,  0,0,0);
+        return($ts);
+    }
+    elsif($string eq 'nextyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        my $ts = Mktime($year+1,1,1,  0,0,0);
+        return($ts);
+    }
+
     # everything else
     # Date::Manip increases start time, so load it here upon request
     require Date::Manip;
     Date::Manip->import(qw/UnixDate/);
     my $timestamp = UnixDate($string, '%s');
-    $c->log->debug("not a valid date: ".$string) if $c;
-    if(!defined $timestamp) {
-        return;
-    }
     return($timestamp);
 }
 
@@ -3088,6 +3353,8 @@ sub clean_regex {
     $regex =~ s/^\s+//mx;
     $regex =~ s/\s+$//mx;
 
+    return $regex if $regex eq '.*';
+
     # trim leading and trailing .*(?)
     $regex =~ s/^\.\*\??//mx;
     $regex =~ s/\.\*\??$//mx;
@@ -3116,17 +3383,9 @@ sub get_timezone_data {
     } else {
         load "DateTime";
         load "DateTime::TimeZone";
-        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+        my $dt = DateTime->now;
         for my $name (DateTime::TimeZone->all_names) {
-            my $dt = DateTime->new(
-                year      => $year+1900,
-                month     => $mon+1,
-                day       => $mday,
-                hour      => $hour,
-                minute    => $min,
-                second    => $sec,
-                time_zone => $name,
-            );
+            $dt->set_time_zone($name);
             push @{$timezones}, {
                 text   => $name,
                 abbr   => $dt->time_zone()->short_name_for_datetime($dt),
@@ -3216,7 +3475,7 @@ returns true if nasty characters have been found and the filename is NOT safe fo
 sub check_for_nasty_filename {
     my($name) = @_;
     confess("no name") unless defined $name;
-    if($name =~ m/(\.\.|\/)/mx) {
+    if($name =~ m/(\.\.|\/|\n)/mx) {
         return(1);
     }
     return;
@@ -3238,7 +3497,7 @@ sub merge_service_dependencies {
         next unless $l;
         for my $el (@{$l}) {
             if(ref $el eq 'ARRAY') {
-                push @{$depends}, @{$el};
+                push @{$depends}, $el;
             } else {
                 push @{$depends}, [$service->{'host_name'}, $el];
             }
@@ -3287,6 +3546,55 @@ sub dump_params {
     $dump    =~ s%"credential":"[^"]+",?%%gmx;
     $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
     return($dump);
+}
+
+##############################################
+
+=head2 basename
+
+    basename($path)
+
+returns basename for given path
+
+=cut
+sub basename {
+    my($path) = @_;
+    my $basename = $path;
+    $basename    =~ s%^.*/%%gmx;
+    return($basename);
+}
+
+##############################################
+
+=head2 dirname
+
+    dirname($path)
+
+returns dirname for given path
+
+=cut
+sub dirname {
+    my($path) = @_;
+    my $dirname = $path;
+    $dirname    =~ s%/[^/]*$%%gmx;
+    return($dirname);
+}
+
+##############################################
+
+=head2 looks_like_regex
+
+    looks_like_regex($str)
+
+returns true if $string looks like a regular expression
+
+=cut
+sub looks_like_regex {
+    my($str) = @_;
+    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
+        return(1);
+    }
+    return;
 }
 
 ##############################################

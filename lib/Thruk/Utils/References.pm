@@ -400,7 +400,7 @@ sub _add_panorama_matches {
         $d  = Thruk::Utils::Panorama::load_dashboard($c, $d->{'nr'});
 
         for my $key (sort keys %{$d}) {
-            next unless $key =~ m/^tabpan\-/mx;
+            next unless $key =~ m/^panlet_/mx;
             next unless(ref $d->{$key} eq 'HASH' && $d->{$key}->{'xdata'} && $d->{$key}->{'xdata'}->{'general'});
 
             if($type eq 'service') {

@@ -6,8 +6,11 @@ wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
 	   curl http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi >/dev/null 2>&1; \
 	   if [ $$? -eq 0 ]; then break; else sleep 1; fi; \
-	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "ERROR: startup failed"; docker ps; curl http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi; exit 1; fi; \
+	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
+
+wait_start_failed_extra:
+	-curl -kv http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi
 
 test: test_chrome test_firefox
 

@@ -157,6 +157,89 @@ TP.get_group_status = function(options) {
     return({state: s, downtime: downtime, acknowledged: acknowledged, hostProblem: hostProblem });
 }
 
+/* returns state position */
+TP.get_state_position = function(order, state, isHostProblem, acknowledged, downtime) {
+    var pos;
+    for(var x = 0; x < order.length; x++) {
+        switch (order[x]) {
+            case "down":
+                if(state == 1 && isHostProblem && !acknowledged && !downtime)   { pos = x; }
+                break;
+            case "unreachable":
+                if(state == 2 && isHostProblem && !acknowledged && !downtime)   { pos = x; }
+                break;
+            case "unknown":
+                if(state == 3 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "acknowledged_unknown":
+                if(state == 3 && !isHostProblem && acknowledged)                { pos = x; }
+                break;
+            case "downtime_unknown":
+                if(state == 3 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "acknowledged_unreachable":
+                if(state == 2 && isHostProblem && acknowledged)                 { pos = x; }
+                break;
+            case "acknowledged_down":
+                if(state == 1 && isHostProblem && acknowledged)                 { pos = x; }
+                break;
+            case "downtime_down":
+                if(state == 1 && isHostProblem && downtime)                     { pos = x; }
+                break;
+            case "downtime_unreachable":
+                if(state == 2 && isHostProblem && downtime)                     { pos = x; }
+                break;
+            case "critical":
+                if(state == 2 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "acknowledged_critical":
+                if(state == 2 && !isHostProblem && acknowledged)                { pos = x; }
+                break;
+            case "downtime_critical":
+                if(state == 2 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "warning":
+                if(state == 1 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "acknowledged_warning":
+                if(state == 1 && !isHostProblem && acknowledged)                { pos = x; }
+                break;
+            case "downtime_warning":
+                if(state == 1 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "ok":
+                if(state == 0 && !isHostProblem && !acknowledged && !downtime)  { pos = x; }
+                break;
+            case "up":
+                if(state == 0 && isHostProblem && !acknowledged && !downtime)   { pos = x; }
+                break;
+            case "downtime_up":
+                if(state == 0 && isHostProblem && downtime)                     { pos = x; }
+                break;
+            case "downtime_ok":
+                if(state == 0 && !isHostProblem && downtime)                    { pos = x; }
+                break;
+            case "pending":
+                if(state == 4 && !acknowledged && !downtime)                    { pos = x; }
+                break;
+            case "downtime_pending":
+                if(state == 4 && downtime)                                      { pos = x; }
+                break;
+            default:
+                //throw new Error("unhandled state: '"+order[x]+"'");
+                break;
+        }
+        // first hit sets the current overall state
+        if(pos != undefined) {
+            break;
+        }
+    }
+    if(pos == undefined) {
+        return(0);
+    }
+    return(order.length - pos);
+}
+
 TP.resetMoveIcons = function() {
     Ext.Array.each(TP.moveIcons, function(item) {
         item.el.dom.style.outline = "";
@@ -233,17 +316,17 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         link = undefined;
         if(special[1].match(/^\d+$/)) {
             // is that tab already open?
-            var tabpan = Ext.getCmp('tabpan');
-            var tab_id = "tabpan-tab_"+special[1];
+            var tabbar = Ext.getCmp('tabbar');
+            var tab_id = "pantab_"+special[1];
             var tab    = Ext.getCmp(tab_id);
             if(tab && tab.rendered) {
-                tabpan.setActiveTab(tab);
+                tabbar.setActiveTab(tab);
             } else {
                 var replace;
                 if(!target) {
-                    replace = tabpan.getActiveTab().id;
+                    replace = tabbar.getActiveTab().id;
                 }
-                TP.add_pantab(tab_id, replace);
+                TP.add_pantab({ id: tab_id, replace_id: replace });
             }
         }
         else if(special[1] == 'show_details') {
@@ -251,21 +334,20 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         }
         else if(special[1] == 'refresh') {
             var el = panel.getEl();
-            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, undefined, el)
+            TP.updateAllIcons(panel.tab, panel.id, undefined, el)
             el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
         } else {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
         }
     }
     if(action && action[1]) {
-        var panel_id = panel.panel_id.replace(/^tabpan\-tab_/, '');
         var params = {
             host:      panel.xdata.general.host,
             service:   panel.xdata.general.service,
             link:      link,
-            dashboard: panel_id,
+            dashboard: panel.tab.nr(),
             icon:      id,
-            token:     user_token
+            CSRFtoken: CSRFtoken
         };
         Ext.Ajax.request({
             url:    url_prefix+'cgi-bin/panorama.cgi?task=serveraction',
@@ -307,15 +389,15 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
             TP.iconClickHandlerClickLink(panel, link, target);
             if(extraOptions.callback) { extraOptions.callback(true, extraOptions); }
         } else {
-            var tab = Ext.getCmp(panel.panel_id);
+            var tab = panel.tab;
             Ext.Ajax.request({
                 url:    url_prefix+'cgi-bin/status.cgi?replacemacros=1',
                 params:  {
-                    host:    panel.xdata.general.host,
-                    service: panel.xdata.general.service,
-                    backend: TP.getActiveBackendsPanel(tab, panel),
-                    data:    link,
-                    token:   user_token
+                    host:      panel.xdata.general.host,
+                    service:   panel.xdata.general.service,
+                    backend:   TP.getActiveBackendsPanel(tab, panel),
+                    data:      link,
+                    CSRFtoken: CSRFtoken
                 },
                 method: 'POST',
                 callback: function(options, success, response) {
@@ -381,7 +463,7 @@ TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
 }
 
 /* parse action menu from json string data */
-TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
+TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plain) {
     var tmp = str.split(/\//);
     var menuName = tmp.shift();
     var menuArgs = tmp;
@@ -413,7 +495,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions) {
             return(false);
         }
     }
-    if(!menuData['menu']) {
+    if(!menuData['menu'] || plain) {
         return(menuData);
     }
     return(TP.parseActionMenuItems(menuData['menu'], id, panel, target, extraOptions));
@@ -508,7 +590,7 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
 }
 
 TP.getMenuArgs = function(panel, target, args) {
-    var tab      = Ext.getCmp(panel.panel_id);
+    var tab      = panel.tab;
     args.panel   = panel;
     args.target  = target;
     args.backend = TP.getActiveBackendsPanel(tab, panel);
@@ -551,7 +633,7 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     }
     var cfg = panel.xdata.general;
     var options = {
-        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id), panel)
+        backends: TP.getActiveBackendsPanel(panel.tab, panel)
     };
     var base = "status.cgi";
     if(cfg.hostgroup) {
@@ -691,7 +773,7 @@ function availability(panel, opts) {
             return(TP.availabilities[panel.id][opts_enc]['last']);
         }
         TP.availabilities[panel.id][opts_enc]['last_refresh'] = now;
-        TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
+        TP.updateAllLabelAvailability(panel.tab);
     }
     if(!Ext.isNumeric(TP.availabilities[panel.id][opts_enc]['last'])) {
         TP.lastAvailError = TP.availabilities[panel.id][opts_enc]['last'];
@@ -809,8 +891,8 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
 
     if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
     if(forceColor != undefined) { fillcolor = forceColor; }
-    else if(panel.acknowledged) { fillcolor = xdata.appearance[type+"color_ok"]; }
-    else if(panel.downtime)     { fillcolor = xdata.appearance[type+"color_ok"]; }
+    else if(panel.acknowledged && !xdata.general.incl_ack)   { fillcolor = xdata.appearance[type+"color_ok"]; }
+    else if(panel.downtime && !xdata.general.incl_downtimes) { fillcolor = xdata.appearance[type+"color_ok"]; }
     else if(state == 0)         { fillcolor = xdata.appearance[type+"color_ok"]; }
     else if(state == 1)         { fillcolor = xdata.appearance[type+"color_warning"]; }
     else if(state == 2)         { fillcolor = xdata.appearance[type+"color_critical"]; }
@@ -909,8 +991,8 @@ TP.evalInContext = function(js, context) {
 
 TP.getPanelMacros = function(panel) {
     var macros = { panel: panel };
-    if(panel.servicegroup) { macros.totals = panel.servicegroup; }
-    if(panel.hostgroup)    { macros.totals = panel.hostgroup; }
+    if(panel.servicegroup) { macros.totals = panel.servicegroup; macros['alias'] = panel.servicegroup.alias; macros['name'] = panel.servicegroup.name; }
+    if(panel.hostgroup)    { macros.totals = panel.hostgroup;    macros['alias'] = panel.hostgroup.alias;    macros['name'] = panel.hostgroup.name; }
     if(panel.results)      { macros.totals = panel.results; }
     if(panel.host)         { for(var key in panel.host)    { macros[key] = panel.host[key];    } macros['performance_data'] = panel.host['perf_data']; }
     if(panel.service)      { for(var key in panel.service) { macros[key] = panel.service[key]; } macros['performance_data'] = panel.service['perf_data']; }

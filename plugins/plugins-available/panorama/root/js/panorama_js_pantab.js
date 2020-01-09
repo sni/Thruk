@@ -16,26 +16,16 @@ Ext.define('TP.Pantab', {
         } else {
             this.xdata = TP.clone(this.xdata);
         }
+
+        TP.allDashboards[this.id] = this;
         // defaults are set in panorama.pm
 
         // fetch window ids from ExtState
         this.window_ids = [];
         for(var key in ExtState) {
-            var matches = key.match(/^(tabpan-tab_\d+)_panlet_(\d+)$/);
+            var matches = key.match(/^(pantab_\d+)_panlet_(\d+)$/);
             if(matches && matches[1] == this.id) {
                 this.window_ids.push(key);
-            }
-        }
-
-        if(TP.initial_active_tab && TP.initial_active_tab == this.id && TP.initMask == undefined && this.window_ids.length > 1) {
-            TP.initial_create_delay_active   = 0;
-            TP.initial_create_delay_inactive = 0;
-            TP.cur_panels                    = 1;
-            TP.num_panels                    = this.window_ids.length;
-            if(!this.hidden) {
-                TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
-                TP.initMask.show();
-                this.keepMask = true;
             }
         }
 
@@ -44,39 +34,33 @@ Ext.define('TP.Pantab', {
         this.callParent();
     },
     listeners: {
-        beforeclose: function( This, eOpts ) {
-            var tabpan = Ext.getCmp('tabpan');
-            var tabState = tabpan.getState(); // recalculate open_tabs
-            if(tabpan.open_tabs.length <= 1) {
-                TP.add_pantab("tabpan-tab_0");
-            }
-            TP.log('['+This.id+'] closing tab');
-            return true;
+        beforedestroy: function( This, eOpts ) {
+            This.destroying = true;
         },
         destroy: function( This, eOpts ) {
             TP.log('['+This.id+'] destroy');
             This.stopTimeouts();
-            var tabpan = Ext.getCmp('tabpan');
-            This.destroyPanlets();
-            TP.cp.clear(This.id);
-            // activate first tab
-            if(!tabpan.getActiveTab()) {
-                var tabs = Ext.query('.x-tab-closable');
-                for(var nr=0; nr<tabs.length; nr++) {
-                    if(tabpan.tabs_tr[tabs[nr].id] != undefined) {
-                        tabpan.setActiveTab(tabpan.tabs_tr[tabs[nr].id]);
-                    }
-                }
+            if(!This.redraw) {
+                This.destroyPanlets();
+                TP.cp.clear(This.id);
+                delete TP.allDashboards[This.id];
             }
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
             if(This.map)      { This.map.destroy();      }
+            if(This.maintEl)  { This.maintEl.destroy();  }
+            if(This.maintenanceMask) { This.maintenanceMask.destroy(); }
             if(TP.initialized) {
                 // remove ?maps= from url
                 TP.cleanPanoramUrl();
             }
-            tabpan.saveState();
+            if(!This.redraw) {
+                TP.reduceDelayEvents(TP, function() {
+                    TP.closeAllHiddenDashboards();
+                }, 3000, 'timeout_close_hidden_dashboards', true);
+            }
+            delete This.redraw;
         },
         beforeactivate: function( This, eOpts ) {
             /* must be done before active, otherwise map zoom control flicker */
@@ -85,7 +69,7 @@ Ext.define('TP.Pantab', {
                 TP.suppressIconTip = false;
                 This.disableMapControls();
             }
-            This.setBaseHtmlClass();
+            This.setBaseHtmlClass(true);
             /* scroll to top, otherwise geomap icons would be at wrong position */
             try {
                 document.documentElement.scrollIntoView();
@@ -97,7 +81,7 @@ Ext.define('TP.Pantab', {
         },
         activate: function(This, eOpts) {
             /* close start page */
-            var startPage = Ext.getCmp('tabpan-tab_0');
+            var startPage = Ext.getCmp('pantab_0');
             if(startPage && startPage.id != This.id) {
                 try {
                     startPage.destroy();
@@ -120,12 +104,14 @@ Ext.define('TP.Pantab', {
             var delay = 0;
             var missingPanlets = 0;
             for(var nr=0; nr<This.window_ids.length; nr++) {
-                var panlet = Ext.getCmp(This.window_ids[nr]);
+                if(This.destroying) { return; }
+                var panlet_nr = This.window_ids[nr];
+                var panlet    = Ext.getCmp(panlet_nr);
                 if(panlet) { // may not yet exists due to delayed rendering
                     try {    // so allow it to fail
                         if(panlet.rendered == false) {
                             /* delay initial show when its not yet rendered */
-                            window.setTimeout(Ext.bind(panlet.show, panlet, []), delay);
+                            window.setTimeout(Ext.bind(TP.showPanletById, This, [This, panlet.id]), delay);
                             delay = delay + 25;
                         } else {
                             panlet.show(false);
@@ -136,20 +122,16 @@ Ext.define('TP.Pantab', {
                 }
                 else { missingPanlets++ }
             }
-            var tabpan = Ext.getCmp('tabpan');
+            var tabbar = Ext.getCmp('tabbar');
             if(delay > 0) {
                 // make sure we hide all panlets if the user meanwhile changed tab again
                 TP.timeouts['timeout_'+this.id+'_check_panel_show'] = window.setTimeout(function() {
-                    if(This.id != tabpan.getActiveTab().id) {
+                    if(!This.isActiveTab()) {
                         // hide all except the active one
-                        tabpan.checkPanletVisibility(tabpan.getActiveTab());
+                        tabbar.checkPanletVisibility(tabbar.getActiveTab());
                     }
                 }, delay + 100);
             }
-
-            var curNr = this.nr();
-            cookieSave('thruk_panorama_active', curNr);
-            tabpan.getState(); // saves open dashboards
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
@@ -169,6 +151,7 @@ Ext.define('TP.Pantab', {
                 }
             }
             if(This.bgDragEl) { This.bgDragEl.show(); }
+            if(This.maintEl)  { This.maintEl.show();  }
             if(This.bgImgEl)  { This.bgImgEl.show();  }
             if(This.mapEl)    { This.mapEl.show();    }
             if(This.map)      { This.map.controlsDiv.dom.style.display = ""; }
@@ -187,12 +170,14 @@ Ext.define('TP.Pantab', {
             /* set id from active tab, otherwise adding new background tabs might become visible (they set autoshow if this id matches) */
             TP.initial_active_tab = This.id;
 
-            // set title
-            document.title = This.xdata.title;
+            if(!This.title) {
+                This.applyXdata();
+            }
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
             if(This.bgDragEl) { This.bgDragEl.hide(); }
+            if(This.maintEl)  { This.maintEl.hide();  }
             if(This.bgImgEl)  { This.bgImgEl.hide();  }
             if(This.mapEl)    { This.mapEl.hide();    }
             if(This.map)      { This.map.controlsDiv.dom.style.display = "none"; }
@@ -207,23 +192,10 @@ Ext.define('TP.Pantab', {
             if(!tab.title) {
                 tab.applyXdata();
             }
-            var header = tab.getDockedItems()[0];
-            if(header) { header.hide() }
-            tab.el.on("contextmenu", function(evt) {
-                tab.contextmenu(evt);
+            This.el.on("contextmenu", function(evt) {
+                This.contextmenu(evt);
             });
-            tab.el.on("click", tab.tabBodyClick);
-            if(This.xdata.hide_tab_header) {
-                This.tab.hide();
-            }
-            if(one_tab_only) {
-                document.title = This.xdata.title;
-            }
-            if(readonly || dashboard_ignore_changes) {
-                This.updateHeaderTooltip("this is dashboard #"+This.nr());
-            } else {
-                This.updateHeaderTooltip("double click to open settings (dashboard #"+This.nr()+")");
-            }
+            This.el.on("click", This.tabBodyClick);
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -235,10 +207,12 @@ Ext.define('TP.Pantab', {
         },
         resize: function(This, adjWidth, adjHeight, eOpts) {
             This.adjustTabHeaderOffset();
+            This.size = This.getSize();
             if(This.map) {
-                This.map.setSize(This.getSize());
+                This.map.setSize(This.size);
                 This.moveMapIcons();
                 This.saveState();
+                This.setZoomControl(); // zoom functionality gets lost when screen resizes
             }
         },
         beforestatesave: function( This, state, eOpts ) {
@@ -248,16 +222,21 @@ Ext.define('TP.Pantab', {
             return(true);
         }
     },
-    updateHeaderTooltip: function(text) {
-        var tab         = this;
-        var tabpan      = Ext.getCmp('tabpan');
-        if(!tabpan || !tabpan.getTabBar) { return; }
-        var tabbarItems = tabpan.getTabBar().items.items;
+    updateHeaderTooltip: function() {
+        var tab    = this;
+        var tabbar = Ext.getCmp('tabbar');
+        if(!tabbar || !tabbar.getTabBar) { return; }
+        var tabbarItems = tabbar.getTabBar().items.items;
         var tabhead;
         for(var x = 0; x < tabbarItems.length; x++) {
             if(tabbarItems[x].card && tabbarItems[x].card.id == tab.id) {
                 tabhead = tabbarItems[x];
             }
+        }
+
+        var text = "double click to open settings (dashboard #"+tab.nr()+")";
+        if(readonly || dashboard_ignore_changes) {
+            text = "this is dashboard #"+tab.nr();
         }
         if(tabhead == undefined) {
             return;
@@ -276,7 +255,7 @@ Ext.define('TP.Pantab', {
     },
     nr: function() {
         var tab = this;
-        var nr  = tab.id.replace(/^tabpan-tab_/, '');
+        var nr  = tab.id.replace(/^pantab_/, '');
         return(nr);
     },
     tabBodyClick: function(evt) {
@@ -285,13 +264,18 @@ Ext.define('TP.Pantab', {
         }
         TP.skipResetMoveIcons = false;
     },
-    setBaseHtmlClass: function() {
+    setBaseHtmlClass: function(hidescroll) {
         var This = this;
+        if(!This.isActiveTab()) { return; }
         var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
         if(This.mapEl) {
             htmlRootEl.addCls('geomap');
+            htmlRootEl.removeCls('hidescroll');
         } else {
             htmlRootEl.removeCls('geomap');
+            if(hidescroll) {
+                TP.setBaseHTMLScroll();
+            }
         }
     },
     forceSaveState: function() {
@@ -374,21 +358,28 @@ Ext.define('TP.Pantab', {
         if(!this.map) { return; }
         var This = this;
         if(!This.isActiveTab()) { return; }
-        var size = This.getSize();
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
             if(panel.xdata.layout && panel.xdata.layout.lon != undefined) {
-                panel.moveToMapLonLat(size, movedOnly);
+                panel.moveToMapLonLat(movedOnly);
             }
         }
     },
-    isActiveTab: function() {
-        if(one_tab_only) {
-            return(true);
+    // moves all visible icons
+    moveVisibleMapIcons: function() {
+        if(!this.map) { return; }
+        var This = this;
+        if(!This.isActiveTab()) { return; }
+        if(!This.visibleIcons) { return; }
+        for(var nr=0; nr<This.visibleIcons.length; nr++) {
+            var panel = This.visibleIcons[nr];
+            panel.moveToMapLonLat();
         }
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
+    },
+    isActiveTab: function() {
+        var tabbar    = Ext.getCmp('tabbar');
+        var activeTab = tabbar.getActiveTab();
         if(activeTab && this.id == activeTab.id) { return(true); }
         return(false);
     },
@@ -396,7 +387,7 @@ Ext.define('TP.Pantab', {
         this.callParent(arguments);
         this.applyXdata();
         if(state) {
-            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
+            //TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             /* create panlets */
             Ext.apply(this.xdata, state.xdata);
             this.createInitialPanlets();
@@ -414,11 +405,9 @@ Ext.define('TP.Pantab', {
             TP.logError(tab.id, "tooManyRetriesException", err);
             return;
         }
-        if(tab.rendered && tab.xdata.map && (!tab.mapEl || !tab.map)) {
-            if(autoshow) {
-                window.setTimeout(Ext.bind(tab.createInitialPanlets, tab, [retries+1, autoshow]), 50);
-            } else {
-            }
+        // wait for the map in geomaps
+        if(tab.rendered && autoshow && tab.xdata.map && (!tab.mapEl || !tab.map)) {
+            window.setTimeout(Ext.bind(tab.createInitialPanlets, tab, [retries+1, autoshow]), 50);
             return;
         }
 
@@ -432,7 +421,10 @@ Ext.define('TP.Pantab', {
                && state[id].xdata.layout) {
                 zIndex = state[id].xdata.layout.zindex || 0;
             }
-            zIndex = Number(zIndex) + 10;
+            zIndex = Number(zIndex) + 100;
+            if(zIndex < 0) {
+                zIndex = 0;
+            }
             if(zIndexList[zIndex] == undefined) { zIndexList[zIndex] = []; }
             zIndexList[zIndex].push(id);
         }
@@ -459,14 +451,7 @@ Ext.define('TP.Pantab', {
             }
         });
 
-        // adding panels completed
-        if(TP.initMask && tab.keepMask) {
-            TP.timeouts['timeout_'+tab.id+'_remove_mask'] = window.setTimeout(function() {
-                if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete tab.keepMask; }
-            }, TP.initial_create_delay_active);
-            TP.initial_create_delay_active = TP.initial_create_delay_active + 200;
-        }
-        if(one_tab_only) {
+        if(one_tab_only || TP.num_panels == 0) {
             TP.timeouts['timeout_' + tab.id + '_starttimeouts'] = window.setTimeout(function() {
                 TP.initComplete();
                 tab.startTimeouts();
@@ -487,14 +472,23 @@ Ext.define('TP.Pantab', {
         if(!Ext.isArray(This.xdata.state_order)) {
             This.xdata.state_order = This.xdata.state_order.split(',');
         }
+
+        // convert old binary autohideheader
+        if(This.xdata.autohideheader === true)  { This.xdata.autohideheader = 1; }
+        if(This.xdata.autohideheader === false) { This.xdata.autohideheader = 0; }
+
         xdata.locked = This.locked;
+
+        This.applyMaintenance();
+
+        if(This.hidden) { return; }
+
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
         if(!xdata.map) {
             if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
-        if(This.hidden) { return; }
         This.setUserStyles();
         if(xdata.hide_tab_header && This.tab) {
             This.tab.hide();
@@ -505,9 +499,21 @@ Ext.define('TP.Pantab', {
             if(TP.initialized) {
                 This.startTimeouts();
             } else {
+                This.setBaseHtmlClass(true);
                 TP.timeouts['timeout_' + This.id + '_starttimeouts'] = window.setTimeout(Ext.bind(This.startTimeouts, This, []), 30000);
             }
         }
+
+        var header = This.getDockedItems()[0];
+        if(header) { header.hide() }
+
+        if(This.xdata.hide_tab_header && This.tab) {
+            This.tab.hide();
+        }
+        if(one_tab_only) {
+            document.title = This.xdata.title;
+        }
+        This.updateHeaderTooltip();
     },
 
     hidePanlets: function() {
@@ -533,30 +539,30 @@ Ext.define('TP.Pantab', {
 
     /* start all timed actions for this tab and its panels */
     startTimeouts: function() {
-        this.stopTimeouts();
-        TP.log('['+this.id+'] startTimeouts');
-
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
+        var tab = this;
+        if(!tab.rendered) { return; }
+        tab.stopTimeouts();
+        TP.log('['+tab.id+'] startTimeouts');
 
         /* ensure panels from the active tab are displayed */
-        if(activeTab && this.id == activeTab.id) {
-            if(this.window_ids) {
-                for(var nr=0; nr<this.window_ids.length; nr++) {
-                    var panlet = Ext.getCmp(this.window_ids[nr]);
-                    if(panlet) { // may not yet exists due to delayed rendering
-                        try {    // so allow it to fail
-                            panlet.show(false);
-                        } catch(err) {
-                            TP.logError(this.id, "panelStarttimeoutException", err);
-                        }
+        if(!tab.isActiveTab()) {
+            return;
+        }
+        if(tab.window_ids) {
+            for(var nr=0; nr<tab.window_ids.length; nr++) {
+                var panlet = Ext.getCmp(tab.window_ids[nr]);
+                if(panlet) { // may not yet exists due to delayed rendering
+                    try {    // so allow it to fail
+                        panlet.show(false);
+                    } catch(err) {
+                        TP.logError(tab.id, "panelStarttimeoutException", err);
                     }
                 }
             }
         }
 
         /* start refresh for all panlets with our refresh rate */
-        var panels = TP.getAllPanel(this);
+        var panels = TP.getAllPanel(tab);
         if(panels.length > 0) {
             // spread panel reload
             var delay    = 0;
@@ -569,27 +575,14 @@ Ext.define('TP.Pantab', {
                     delay = delay + Math.round(interval*1000);
                 }
                 if(p.header) {
-                    if(this.xdata.autohideheader) { p.header.hide() } else { p.header.show() }
+                    if(tab.xdata.autohideheader === 1) { p.header.hide() }
                 }
             }
         }
-        var This = this;
-        if(This.xdata && This.xdata.refresh > 0) {
-            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
-            var skipUpdate = false;
-            if(TP.lastFullIconRefresh[This.id]) {
-                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[This.id].getTime())/1000;
-                /* no update neccessary if the last update is not older than half of the usual refresh interval */
-                if(deltaRefresh < (This.xdata.refresh / 2)) {
-                    skipUpdate = true;
-                }
-            }
-            if(!skipUpdate) {
-                TP.updateAllIcons(This);
-            }
+        if(tab.xdata && tab.xdata.refresh > 0) {
+            TP.timeouts['interval_global_icons' + tab.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(tab) }, tab.xdata.refresh * 1000);
+            TP.updateAllIcons(tab);
         }
-
-        if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
@@ -635,7 +628,7 @@ Ext.define('TP.Pantab', {
             }
 
             /* remove chrome workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "", "");
+            Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "", "");
 
             /* get wms provider */
             var wmsData;
@@ -649,7 +642,7 @@ Ext.define('TP.Pantab', {
                 TP.log('['+tab.id+'] fallback to default wms provider, "'+xdata.wms_provider+'" does not exist.');
                 xdata.wms_provider = wmsProvider.getAt(0).data.name;
             }
-            wmsData = Ext.JSON.decode(wmsData);
+            wmsData = anyDecode(wmsData);
             if(tab.mapEl && tab.mapEl.lastWMSProvider != xdata.wms_provider) {
                 if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
                 if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
@@ -673,13 +666,13 @@ Ext.define('TP.Pantab', {
             OpenLayers.ImgPath               = url_prefix +'vendor/openlayer-2.13.1/images/';
             OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
             var controlsBody = Ext.getBody();
-            var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 100001; top: 50px; left: 3px; display: none;">');
-            var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 100001; top: 0; left: 0;">');
+            var controlsDiv  = controlsBody.createChild('<div style="position: absolute; z-index: 9000; top: 50px; left: 3px; display: none;">');
+            var zoomDiv      = controlsDiv.createChild('<div style="position: absolute; z-index: 9000; top: 0; left: 0;">');
             var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'vendor/openlayer-2.13.1/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
-            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom});
+            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom})
             map.addControl(zoomControl);
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
@@ -712,11 +705,15 @@ Ext.define('TP.Pantab', {
                         tab.saveState();
                     },
                     destroy: function(This){
+                        tab.zoomControl = null;
+                        tab.zoomControlMap = null;
                         zoomControl.destroy();
                         zoomDiv.destroy();
                         controlsDiv.destroy();
                         tab.lockButton.destroy();
                         tab.lockButton = undefined;
+                        tab.keyMap.destroy();
+                        tab.keyMap = null;
                     }
                 }
             };
@@ -727,7 +724,33 @@ Ext.define('TP.Pantab', {
             tab.mapEl.lastCenter = [mapData.center[0], mapData.center[1], mapData.zoom];
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
             map.events.register("move", map, function() {
-                tab.moveMapIcons(true);
+                tab.moveVisibleMapIcons();
+            });
+            // if there are too many icons, hide them before moving the map to reduce lag
+            map.events.register("movestart", map, function() {
+                var panels = TP.getAllPanel(tab);
+                var visible = [];
+                for(var nr=0; nr<panels.length; nr++) {
+                    var panel = panels[nr];
+                    if(!panel.xdata.layout || panel.xdata.layout.lon == undefined || panel.isHidden()) {
+                        continue;
+                    }
+                    visible.push(panel);
+                }
+                if(visible.length > 30) {
+                    for(var nr=0; nr<visible.length; nr++) {
+                        var panel = visible[nr];
+                        panel.hide();
+                    }
+                    visible = [];
+                }
+                tab.visibleIcons = visible;
+            });
+            map.events.register("moveend", map, function() {
+                tab.moveMapIcons();
+            });
+            map.events.register("zoomend", map, function() {
+                tab.moveMapIcons();
             });
             controlsDiv.dom.style.display = "";
             tab.lockButton = controlsDiv.createChild('<div class="lockButton unlocked">', controlsDiv.dom.childNodes[0]);
@@ -739,9 +762,9 @@ Ext.define('TP.Pantab', {
                 }
             });
             /* create our own zoom controls, because they do not work when not using default div from map */
-            zoomControl.buttons[0].onclick = function() { map.zoomIn() }
-            zoomControl.buttons[1].onclick = function() { map.zoomOut() }
-            zoomControl.buttons[2].onclick = function() { map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom) }
+            tab.zoomControl    = zoomControl;
+            tab.zoomControlMap = map;
+            tab.setZoomControl();
             if(tab.xdata.map == undefined) {
                 var data = map.getCenter();
                 tab.xdata.map = {
@@ -751,11 +774,25 @@ Ext.define('TP.Pantab', {
                 };
                 tab.saveState();
             }
+            // toggle map navigation on space
+            tab.keyMap = new Ext.util.KeyMap({
+                target: Ext.getBody(),
+                key: Ext.EventObject.SPACE,
+                fn: function(key, evt) {
+                    if(!tab.map) { return; }
+                    if(evt.target.tagName == "INPUT" || evt.target.tagName == "TEXTAREA") { return; }
+                    if(tab.lockButton.hasCls('unlocked')) {
+                        tab.disableMapControls();
+                    } else {
+                        tab.enableMapControls();
+                    }
+                }
+            });
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
             /* add chrome workaround */
-            Ext.get('tabpan') && Ext.get('tabpan').dom.style.setProperty('z-index', "21", "important");
+            Ext.get('tabbar') && Ext.get('tabbar').dom.style.setProperty('z-index', "21", "important");
         }
         tab.setBaseHtmlClass();
 
@@ -825,6 +862,14 @@ Ext.define('TP.Pantab', {
         tab.fixIconsMapPosition(xdata);
 
         return;
+    },
+    setZoomControl: function() {
+        var tab = this;
+        var map = tab.zoomControlMap;
+        if(!map || !tab.zoomControl) { return; }
+        tab.zoomControl.buttons[0].onclick = function() { map.zoomIn() }
+        tab.zoomControl.buttons[1].onclick = function() { map.zoomOut() }
+        tab.zoomControl.buttons[2].onclick = function() { map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom) }
     },
     // set current position to each panel which does not have a lon/lat yet
     fixIconsMapPosition: function(xdata) {
@@ -1027,6 +1072,22 @@ Ext.define('TP.Pantab', {
                     handler: function() { thruk_debug_window_handler() },
                     hidden:  (!thruk_debug_js || thruk_demo_mode)
                 }]
+            }, {
+                text:   'Set Maintenance Mode',
+                icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
+                hidden: readonly || tab.readonly || tab.isMaintenance(),
+                handler: function() {
+                    Ext.Msg.prompt('Put Dashboard into Maintenance Mode', 'Please enter maintenance message:', function(btn, text){
+                        if (btn == 'ok'){
+                            tab.setMaintenance(text, true);
+                        }
+                    }, null, true, (default_maintenance_text || 'this dashboard is currently in maintenance mode'));
+                }
+            }, {
+                text:   'Remove Maintenance Mode',
+                icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
+                hidden: readonly || tab.readonly || !tab.isMaintenance(),
+                handler: function() { tab.setMaintenance(null, true); }
             }, '-', {
                 text:   'Save Dashboard',
                 icon:    url_prefix+'plugins/panorama/images/disk.png',
@@ -1046,7 +1107,7 @@ Ext.define('TP.Pantab', {
                     text:   'Paste',
                     icon:   url_prefix+'plugins/panorama/images/page_paste.png',
                     handler: function() {
-                        var tb = Ext.getCmp('tabpan').getActiveTab();
+                        var tb = Ext.getCmp('tabbar').getActiveTab();
                         if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
                             // workaround for not existing gradient after copy&paste
                             if(TP.clipboard.state.xdata.appearance.piegradient) {
@@ -1173,6 +1234,139 @@ Ext.define('TP.Pantab', {
             document.getElementsByTagName('head')[0].appendChild(style);
         }
         style.innerHTML = value;
+    },
+    // zoom and pad a geomap so all icon from list are visible
+    zoomIntoView: function(list) {
+        var tab = this;
+        if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
+        if(!list || list.length == 0) { return; }
+        var bounds = new OpenLayers.Bounds();
+        for(var x = 0; x<list.length; x++) {
+            var panel = list[x];
+            bounds.extend(panel.getMapBounds());
+        }
+        tab.map.map.zoomToExtent(bounds);
+        if(bounds.getHeight() == 0) {
+            tab.map.map.zoomTo(17);
+        }
+    },
+
+    showLoadMask: function() {
+        if(this.window_ids.length  == 0) { return; }
+        TP.initial_create_delay_active   = 0;
+        TP.initial_create_delay_inactive = 0;
+        TP.cur_panels                    = 1;
+        TP.num_panels                    = this.window_ids.length;
+        TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
+        TP.initMask.show();
+    },
+
+    // returns all dashboard ids from dashboard icons
+    getAllSubDashboards: function(recursive, dashboards) {
+        var tab = this;
+        if(dashboards == undefined) { dashboards = {} };
+        var panels = TP.getAllPanel(tab);
+        for(var nr=0; nr<panels.length; nr++) {
+            var p = panels[nr];
+            if(p.xdata && p.xdata.general) {
+                if(p.xdata.general.dashboard) {
+                    var subtab_id = TP.nr2TabId(p.xdata.general.dashboard);
+                    if(dashboards[subtab_id]) { continue; }
+                    dashboards[subtab_id] = true;
+                    if(recursive) {
+                        var subtab = Ext.getCmp(subtab_id);
+                        if(subtab) {
+                            subtab.getAllSubDashboards(true, dashboards);
+                        }
+                    }
+                }
+            }
+        }
+        return(Object.keys(dashboards));
+    },
+
+    isMaintenance: function() {
+        if(this.maintenance) {
+            return true;
+        }
+        return false;
+    },
+    setMaintenance: function(text, save) {
+        var tab = this;
+        if(text) {
+            tab.maintenance = text;
+            if(save) {
+                Ext.Ajax.request({
+                    url:     '../r/thruk/panorama/'+tab.nr()+'/maintenance',
+                    method:  'POST',
+                    params: {
+                        text:      text,
+                        CSRFtoken: CSRFtoken
+                    },
+                    callback: TP.defaultHTTPCallback
+                });
+            }
+        } else {
+            delete tab.maintenance;
+            if(save) {
+                Ext.Ajax.request({
+                    url:     '../r/thruk/panorama/'+tab.nr()+'/maintenance',
+                    method:  'DELETE',
+                    params: {
+                        CSRFtoken: CSRFtoken
+                    },
+                    callback: TP.defaultHTTPCallback
+                });
+            }
+        }
+        tab.applyMaintenance();
+        return;
+    },
+    applyMaintenance: function() {
+        var tab = this;
+        var text = tab.maintenance;
+        if(text) {
+            if(!readonly && !tab.readonly) {
+                text += '<center><a href="#" class="show" onclick="Ext.getCmp(\''+tab.id+'\').maintEl.hide(); return false;">show anyway<\/a><\/center>';
+            }
+            if(!tab.maintEl) {
+                var iconContainer = Ext.fly('iconContainer');
+                tab.maintEl = iconContainer.createChild('<div>', iconContainer.dom.childNodes[0]);
+                tab.maintEl.dom.style.position = "fixed";
+                tab.maintEl.dom.style.top      = TP.offset_y+"px";
+                tab.maintEl.dom.style.left     = "0px";
+                tab.maintEl.dom.style.width    = "100%";
+                tab.maintEl.dom.style.height   = "100%";
+                tab.maintEl.dom.style.zIndex   = 9001;
+                tab.maintenanceMask = new Ext.LoadMask(tab.maintEl, {msg:text, maskCls: 'maintenance', msgCls: 'maintenance'});
+                if(tab.isActiveTab()) {
+                    tab.maintEl.show();
+                    tab.maintenanceMask.show();
+                    tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+                    tab.maintEl.dom.style.display  = "";
+                } else {
+                    tab.maintEl.hide();
+                }
+                tab.maintEl.on("contextmenu", function(evt) {
+                    tab.contextmenu(evt);
+                });
+            } else {
+                tab.maintenanceMask.msg = text;
+                if(tab.isActiveTab()) {
+                    tab.maintEl.show();
+                    tab.maintenanceMask.show();
+                    tab.maintenanceMask.ownerCt.getCache().data.maskEl.el.addCls("maintenance");
+                } else {
+                    tab.maintEl.hide();
+                }
+            }
+        } else if(tab.maintenanceMask) {
+            tab.maintenanceMask.destroy();
+            delete tab.maintenanceMask;
+            tab.maintEl.destroy();
+            delete tab.maintEl;
+        }
+        return;
     }
 });
 
@@ -1191,8 +1385,8 @@ Ext.onReady(function() {
     });
     Ext.getBody().on("dragstart", function(evt) {
         evt.preventDefault();
-        var tabpan = Ext.getCmp('tabpan');
-        var tab    = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var tab    = tabbar.getActiveTab();
         if(tab.locked)            { return(false); };
         if(TP.iconSettingsWindow) { return(false); };
         var pos = evt.getXY();
@@ -1258,8 +1452,8 @@ TP.lassoMarkIcons = function(x, y) {
     window.clearTimeout(TP.timeouts['timeout_icon_mark_update']);
     if(!TP.lassoEl) { return; }
     var lassoPos = TP.lassoEl.getPosition();
-    var tabpan = Ext.getCmp('tabpan');
-    var tab    = tabpan.getActiveTab();
+    var tabbar = Ext.getCmp('tabbar');
+    var tab    = tabbar.getActiveTab();
     var panels = TP.getAllPanel(tab);
     TP.moveIcons = [];
     var elements = [];

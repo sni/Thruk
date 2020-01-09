@@ -22,8 +22,8 @@
   <tr class='[% class %]' id="[% name2id(d.name, 'hostgroup') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
-        [% IF d.backend.size < backends.size %]
-          [% d.backend.join(', ') %]
+        [% IF d.peer_key.size < backends.size %]
+          [% d.peer_name.join(', ') %]
         [% ELSE %]
         <i>all</i>
         [% END %]

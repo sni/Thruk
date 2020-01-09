@@ -151,11 +151,10 @@ Ext.define('TP.DashboardManagementWindow', {
         }
 
         /* import / export */
-        var tabpan = Ext.getCmp('tabpan');
-        var tab    = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var tab    = tabbar.getActiveTab();
         if(!tab) {
-            debug("forced setting activeTab");
-            tab = tabpan.setActiveTab(0);
+            tabbar.setActiveTab();
         }
         win.exportTab = TP.getExportTab({listeners: listeners, tab: tab});
         win.items.get(0).add(win.exportTab);

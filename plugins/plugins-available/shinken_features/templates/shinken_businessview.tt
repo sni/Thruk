@@ -130,7 +130,7 @@
                         [% SET s_status_text = 'UNKNOWN' %]
                         [% END %]
                          [%# subsub element %]
-                         <li><table><tr class='dataOdd'><td class='[% s_status %]' width="80">[% s_status_text %]</td><td><div class='elementTitle3'><a href="extinfo.cgi?type=2&amp;host=[% subparent.host_name | uri %]&amp;service=[% subparent.description | uri %]&amp;backend=[% subparent.peer_key %]">[% subparent.host_name / html %]/[% subparent.description | html %]</a></div></td></tr></table></li>
+                         <li><table><tr class='dataOdd'><td class='[% s_status %]' width="80">[% s_status_text %]</td><td><div class='elementTitle3'><a href="extinfo.cgi?type=2&amp;host=[% subparent.host_name | uri %]&amp;service=[% subparent.description | uri %]&amp;backend=[% subparent.peer_key %]">[% subparent.host_name | html %]/[% subparent.description | html %]</a></div></td></tr></table></li>
                       [% END %]
                       [%# End of subsub parent listing%]
                       </ul>

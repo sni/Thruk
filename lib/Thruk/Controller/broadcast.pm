@@ -106,7 +106,7 @@ sub index {
             $broadcast = Thruk::Utils::Broadcast::update_broadcast_from_param($c, $broadcast);
 
             Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
-            Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, 1, 1);
+            Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$id, $broadcast, { pretty => 1, changed_only => 1 });
 
             Thruk::Utils::set_message( $c, 'success_message', 'Broadcast saved' );
             return $c->redirect_to('broadcast.cgi');

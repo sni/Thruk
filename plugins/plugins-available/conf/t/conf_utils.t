@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 713;
+    plan tests => 718;
 }
 
 BEGIN {
@@ -128,7 +128,7 @@ $objects->init();
 isa_ok( $objects, 'Monitoring::Config' );
 is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files:\n".Dumper($objects));
 my $parsedfile = $objects->{'files'}->[0];
-is( $parsedfile->{'md5'}, '789b8aee75f4e6f991e18af683384bdb', 'files md5 sum' );
+is( $parsedfile->{'hex'}, '0ae051461b6c74992f731f47ade93a366a50775c6b83a1ebc23e6834f36ef858', 'files hexdigest sum' );
 like( $parsedfile->{'parse_errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
 my $obj = $parsedfile->{'objects'}->[0];
 my $host = {
@@ -201,7 +201,7 @@ isa_ok( $obj, 'Monitoring::Config::Object::Host' );
 is( $obj->get_type(), 'host', 'got a type' );
 is( $obj->get_name(), 'host_name', 'got a name' );
 is( $obj->get_long_name(), 'host_name', 'got a long name' );
-is( $obj->get_id(), 'de894', 'got a id' );
+is( $obj->get_id(), 'e62c8', 'got a id' );
 my $templates = $obj->get_used_templates($objects);
 $expected     = [
           'template1',
@@ -416,3 +416,53 @@ for my $mergedir (qw/1/) {
     is($out, "", "diff successfull");
     unlink($filename);
 }
+
+###########################################################
+# parsing params from request
+{
+    my $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/2' });
+    $objects->init();
+    my $tmp = $objects->get_objects_by_name('host', 'host_name');
+    $obj = $tmp->[0];
+    isa_ok( $obj, 'Monitoring::Config::Object::Host' );
+    my $params = {
+        "type" => "host",
+        "data.id" => "18c66",
+        "obj.host_name" => "A host with spaces",
+        "obj.alias" => "A host with spaces",
+        "obj.address" => "127.0.0.12",
+        "obj.parents" => "omd-devel",
+        "obj.use" => "generic-host",
+        "obj.check_command.1" => "check-host-alive",
+        "obj.check_command.2" => "test",
+        "obj.contact_groups" => "omd",
+        "objkey.9" => "_IRMC_ADDRESS",
+        "obj._IRMC_ADDRESS" => "https://localhost/test",
+        "objkey.10" => "_TEST",
+        "obj._TEST" => "_TESThost",
+    };
+    my $data = $obj->get_data_from_param($params);
+    my $expected = {
+          '_IRMC_ADDRESS' => 'https://localhost/test',
+          '_TEST' => '_TESThost',
+          'address' => '127.0.0.12',
+          'alias' => 'A host with spaces',
+          'check_command' => 'check-host-alive!test',
+          'contact_groups' => [ 'omd' ],
+          'host_name' => 'A host with spaces',
+          'parents' => [ 'omd-devel' ],
+          'use' => [ 'generic-host' ]
+    };
+    is_deeply($data, $expected, 'getting request params');
+};
+
+###########################################################
+# using regex matching
+{
+    $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/12' });
+    $objects->init();
+    $file = $objects->{'files'}->[0];
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    my $ref_errors = $objects->_check_references();
+    is(scalar @{$ref_errors}, 0, "number of reference errors") or diag(Dumper($ref_errors));
+};

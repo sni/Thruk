@@ -20,8 +20,8 @@
   <tr class='[% class %]' id="[% name2id(d.name, 'timeperiod') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
-        [% IF d.backend.peer_name.size < backends.size %]
-          [% d.backend.peer_name.join(', ') %]
+        [% IF d.peer_key.size < backends.size %]
+          [% d.peer_name.join(', ') %]
         [% ELSE %]
         <i>all</i>
         [% END %]

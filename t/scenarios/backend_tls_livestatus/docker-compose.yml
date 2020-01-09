@@ -11,6 +11,5 @@ services:
         - TZ=Europe/Berlin
         - PREFIX=omd
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
         - .:/scenario:ro

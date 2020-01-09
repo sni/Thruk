@@ -18,12 +18,15 @@ use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
+use IO::Select ();
 use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
+use Cwd qw/abs_path/;
 use Time::HiRes qw/sleep/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::config = undef;
+$Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
 
 ##############################################
 =head1 METHODS
@@ -193,6 +196,7 @@ locks given file. Returns locked filehandle.
 
 sub file_lock {
     my($file, $mode) = @_;
+    confess("no file") unless $file;
 
     alarm(30);
     local $SIG{'ALRM'} = sub { confess("timeout while trying to flock(".$mode."): ".$file); };
@@ -222,10 +226,11 @@ sub file_lock {
                     my $new_inode = (stat($lock_fh))[1];
                     if($new_inode && $new_inode == $old_inode) {
                         $retrys++;
-                        if($retrys > 20) {
+                        if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
                             # lock seems to be orphaned, continue normally unless in test mode
                             confess("got orphaned lock") if $ENV{'TEST_RACE'};
                             $locked = 1;
+                            warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
                             last;
                         }
                         next;
@@ -236,16 +241,17 @@ sub file_lock {
                     }
                 } else {
                     $retrys++;
-                    if($retrys > 20) {
+                    if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
                         unlink($lock_file);
                         # we have to move and copy the file itself, otherwise
                         # the orphaned process may overwrite the file
                         # and the later flock() might hang again
                         copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
-                        move($file, $file.'.orphaned') or confess("cannot move file $file: $!");
-                        move($file.'.copy', $file) or confess("cannot move file $file: $!");
+                        move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
+                        move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
                         unlink($file.'.orphaned');
-                        $retrys = 0;
+                        warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                        $retrys = 0; # start over...
                     }
                 }
             }
@@ -262,8 +268,10 @@ sub file_lock {
     }
 
     my $fh;
-    my $retrys = 5;
-    while($retrys > 0) {
+    my $retrys = 0;
+    my $err;
+    while($retrys < 5) {
+        undef $fh;
         eval {
             sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
             if($mode eq 'ex') {
@@ -273,11 +281,20 @@ sub file_lock {
                 flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
             }
         };
-        if(!$@ && $fh) {
+        $err = $@;
+        if(!$err && $fh) {
             last;
         }
-        $retrys--;
+        $retrys++;
         sleep(0.5);
+    }
+
+    if($err) {
+        die("failed to lock $file: $err");
+    }
+
+    if($retrys > 0) {
+        warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
@@ -291,7 +308,7 @@ sub file_lock {
 
 =head2 file_unlock
 
-  file_unlock($file, $fh)
+  file_unlock($file, $fh, $lock_fh)
 
 unlocks file lock previously with file_lock exclusivly. Returns nothing.
 
@@ -309,27 +326,43 @@ sub file_unlock {
 
 =head2 json_store
 
-  json_store($file, $data, [$pretty], [$changed_only])
+  json_store($file, $data, $options)
 
 stores data json encoded
+
+$options can be {
+    pretty       => 0/1,       # don't write json into a single line and use human readable intendation
+    tmpfile      => <filename> # use this tmpfile while writing new contents
+    changed_only => 0/1,       # only write the file if it has changed
+    compare_data => "...",     # use this string to compare for changed content
+}
 
 =cut
 
 sub json_store {
-    my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $data, $options) = @_;
+
+    if(defined $options && ref $options ne 'HASH') {
+        confess("json_store options have been changed to hash.");
+    }
 
     my $json = Cpanel::JSON::XS->new->utf8;
-    $json = $json->pretty if $pretty;
+    $json = $json->pretty if $options->{'pretty'};
     $json = $json->canonical; # keys will be randomly ordered otherwise
 
     my $write_out;
-    if($changed_only && -f $file) {
+    if($options->{'changed_only'}) {
         $write_out = $json->encode($data);
-        my $old = read_file($file);
-        return 1 if $old eq $write_out;
+        if(defined $options->{'compare_data'}) {
+            return 1 if $options->{'compare_data'} eq $write_out;
+        }
+        elsif(-f $file) {
+            my $old = read_file($file);
+            return 1 if $old eq $write_out;
+        }
     }
 
-    $tmpfile = $file.'.new' unless $tmpfile;
+    my $tmpfile = $options->{'tmpfile'} // $file.'.new';
     open(my $fh2, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
     print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
     Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
@@ -351,16 +384,16 @@ sub json_store {
 
 =head2 json_lock_store
 
-  json_lock_store($file, $data, [$pretty], [$changed_only])
+  json_lock_store($file, $data, [$options])
 
-stores data json encoded
+stores data json encoded. options are passed to json_store.
 
 =cut
 
 sub json_lock_store {
-    my($file, $data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $data, $options) = @_;
     my($fh, $lock_fh) = file_lock($file, 'ex');
-    json_store($file, $data, $pretty, $changed_only, $tmpfile);
+    json_store($file, $data, $options);
     file_unlock($file, $fh, $lock_fh);
     return 1;
 }
@@ -382,25 +415,21 @@ sub json_retrieve {
     my $json = Cpanel::JSON::XS->new->utf8;
     $json->relaxed();
 
-    local $/ = undef;
-    my $data;
-
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
     sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
+    my $data;
     my $content;
     eval {
+        local $/ = undef;
         $content = scalar <$fh>;
         $data    = $json->decode($content);
     };
     my $err = $@;
-    if($err && !$data) {
-        if($content && $content =~ m/^\$VAR/mx) {
-            warn("cannot read old datafile format, use .../support/convert_old_datafile.pl '$file' to migrate this file.");
-            return;
-        }
-        confess("error while reading $file: ".$@);
+    if($err) {
+        confess("error while reading $file: ".$err);
     }
+    return($data, $content) if wantarray;
     return $data;
 }
 
@@ -428,16 +457,16 @@ sub json_lock_retrieve {
 
 =head2 json_lock_patch
 
-  json_lock_patch($file, $patch_data, [$pretty], [$changed_only], [$tmpfile])
+  json_lock_patch($file, $patch_data, [$options])
 
-update json data
+update json data with locking. options are passed to json_store.
 
 =cut
 
 sub json_lock_patch {
-    my($file, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $patch_data, $options) = @_;
     my($fh, $lock_fh) = file_lock($file, 'ex');
-    my $data = json_patch($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile);
+    my $data = json_patch($file, $fh, $patch_data, $options);
     file_unlock($file, $fh, $lock_fh);
     return $data;
 }
@@ -446,18 +475,28 @@ sub json_lock_patch {
 
 =head2 json_patch
 
-  json_patch($file, $fh, $patch_data, [$pretty], [$changed_only], [$tmpfile])
+  json_patch($file, $fh, $patch_data, [$options])
 
-update json data
+update json data. options are passed to json_store.
 
 =cut
 
 sub json_patch {
-    my($file, $fh, $patch_data, $pretty, $changed_only, $tmpfile) = @_;
+    my($file, $fh, $patch_data, $options) = @_;
+    if(defined $options && ref $options ne 'HASH') {
+        confess("json_store options have been changed to hash.");
+    }
     confess("got no filehandle") unless defined $fh;
-    my $data = -s $file ? json_retrieve($file, $fh) : {};
+    my($data, $content);
+    if(-s $file) {
+        ($data, $content) = json_retrieve($file, $fh);
+    } else {
+        ($data, $content) = ({}, "");
+    }
     $data = merge_deep($data, $patch_data);
-    json_store($file, $data, $pretty, $changed_only, $tmpfile);
+    $options->{'changed_only'} = 1;
+    $options->{'compare_data'} = $content;
+    json_store($file, $data, $options);
     return $data;
 }
 
@@ -489,6 +528,7 @@ sub save_logs_to_tempfile {
 
 =head2 cmd
 
+  cmd($command)
   cmd($c, $command [, $stdin] [, $print_prefix] [, $detached])
 
 run command and return exit code and output
@@ -504,11 +544,14 @@ optional detached will run the command detached in the background
 
 sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
+    if(defined $c && !defined $cmd) {
+        $cmd = $c;
+        $c = undef;
+    }
 
-    local $SIG{CHLD} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
+    local $SIG{PIPE} = 'DEFAULT';
     local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;
     my $groups = [];
     if($c && $c->user_exists) {
@@ -535,21 +578,31 @@ sub cmd {
         $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        my $sel = IO::Select->new;
+        $sel->add($rdr);
         if($stdin) {
             print $wtr $stdin,"\n";
-            CORE::close($wtr);
         }
+        CORE::close($wtr);
 
-        while(POSIX::waitpid($pid, WNOHANG) == 0) {
-            my @line = <$rdr>;
-            push @lines, @line;
-            print $print_prefix.join($print_prefix, @line) if defined $print_prefix;
+        while(my @ready = $sel->can_read) {
+            foreach my $fh (@ready) {
+                my $line;
+                my $len = sysread $fh, $line, 8192;
+                if(!defined $len){
+                    die "Error from child: $!\n";
+                } elsif ($len == 0){
+                    $sel->remove($fh);
+                    next;
+                } else {
+                    push @lines, $line;
+                    print $print_prefix, $line if defined $print_prefix;
+                }
+            }
         }
+        # reap process
+        POSIX::waitpid($pid, 0);
         $rc = $?;
-        while(defined <$rdr>) {
-            push @lines, ($_ // '');
-            print $print_prefix.($_ // '') if defined $print_prefix;
-        }
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
         $output = Thruk::Utils::decode_any($output);
@@ -559,7 +612,7 @@ sub cmd {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
         $c->log->debug( "running cmd: ". $cmd ) if $c;
-        local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx;
+        local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx; # let the system reap the childs, we don't care
 
         # background process?
         if($cmd =~ m/&\s*$/mx) {
@@ -582,7 +635,8 @@ sub cmd {
     $c->log->debug( "rc:     ". $rc )     if $c;
     $c->log->debug( "output: ". $output ) if $c;
     #&timing_breakpoint('IO::cmd done');
-    return($rc, $output);
+    return($rc, $output) if wantarray;
+    return($output);
 }
 
 ########################################
@@ -598,6 +652,35 @@ sub untaint {
     my($v) = @_;
     if($v && $v =~ /\A(.*)\z/msx) { $v = $1; }
     return($v);
+}
+
+########################################
+
+=head2 realpath
+
+  realpath($file)
+
+return realpath of this file
+
+=cut
+sub realpath {
+    my($file) = @_;
+    return(abs_path($file));
+}
+
+########################################
+
+=head2 touch
+
+  touch($file)
+
+create file if not exists and update timestamp
+
+=cut
+sub touch {
+    my($file) = @_;
+    &write($file, "", time(), 1);
+    return;
 }
 
 ##############################################

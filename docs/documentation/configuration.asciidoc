@@ -243,9 +243,23 @@ ex.:
 {% include new_since.ad version="2.24" %}
 Using api keys can be disabled by setting this to 0.
 
+Note: this value cannot be overriden on a per user/group basis because it is
+used on pre-authentication stage. If you want users to create new keys, use
+`max_api_keys_per_user`.
+
 ex.:
 
   api_keys_enabled = 1
+
+
+=== max_api_keys_per_user
+{% include new_since.ad version="2.32" %}
+Limit amount of keys a user may create.
+Set to 0 to disable creating new keys completly
+
+ex.:
+
+  max_api_keys_per_user = 10
 
 
 === mobile_agent
@@ -413,6 +427,10 @@ multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
 links to the command page.
 If you only want to allow a few commands, use `command_enabled` instead.
 You may use ranges here.
+If you want to disable all commands, you can use `command_disabled = 0-999`
+or set the `authorized_for_read_only` role.
+
+See a list of available commands along with their ids on the link:commands.html[commands page].
 
 ex.:
 
@@ -424,8 +442,10 @@ ex.:
 === command_enabled
 Enable only specific commands. Overrides `command_disabled` setting by only
 allowing a few specific commands and disabling all others. The syntax is the
-same as in `command_disabled`. If you want to disable all commands, you have to
-use `command_disabled = 0-999` or set the `authorized_for_read_only` role.
+same as in `command_disabled`. When using `command_enabled` then all commands
+are disabled and only those from `command_enabled` can be used.
+
+See a list of available commands along with their ids on the link:commands.html[commands page].
 
 ex.:
 
@@ -493,7 +513,7 @@ ex.:
 Disable the possibility for a user to change his password.
 Only works with htpasswd passwords. To make this work
 you have to set a `htpasswd` entry in the
-link:configuration.html#component-thruk-plugin-configtool[Config Tool] section.
+link:configuration.html#component-thrukpluginconfigtool[Config Tool] section.
 
 ex.:
 
@@ -533,6 +553,16 @@ The path to your log4perl configuration file.
 ex.:
 
   log4perl_conf = ./log4perl.conf
+
+
+=== slow_page_log_threshold
+
+If a page takes longer to render than this amount of seonds, a
+profile will be logged. Set to 0 to disable logging completely.
+
+ex.:
+
+  slow_page_log_threshold = 30
 
 
 === plugin_path
@@ -698,6 +728,16 @@ maximum number of allowed search boxes
 ex.:
 
   maximum_search_boxes = 9
+
+
+=== search_long_plugin_output
+Search long_plugin_output in default search, ex. from the side navigation.
+It is enabled by default, but can have significat performance impact in larger
+setups.
+
+ex.:
+
+  search_long_plugin_output = 1
 
 
 === default_service_filter
@@ -1181,10 +1221,19 @@ variables. Use * as wildcard, ex.: _VAR*
 To show a host custom variable for services, prepend
 _HOST, ex.:  _HOSTVAR1. To show all host variables in the service view, use
 wildcards, ex.: _HOST*
+Host variables are only used with HOST*, not by * alone, see examples.
 
 ex.:
 
+  # only match a single variable
   show_custom_vars = _VAR1
+
+  # show all host variables for hosts and all service variables for services
+  show_custom_vars = *
+
+  # show all host variables for hosts and all host and service variables for services
+  show_custom_vars = HOST*
+  show_custom_vars = *
 
 
 === expand_user_macros
@@ -1335,12 +1384,28 @@ ex.:
 
 === lmd_core_config
 Path to additional lmd configuration. The sites will be automatically
-generated.
+generated. Can be used multiple times.
 
 ex.:
 
   lmd_core_config = /etc/thruk/lmd.ini
+  lmd_core_config = /etc/thruk/lmd.ini.d/*.ini
 
+
+=== lmd_options
+Set some extra command line options when starting lmd.
+
+ex.:
+
+    lmd_options = -debug-deadlock 30 -debug-profiler localhost:6060
+
+=== lmd_timeout
+Thruk waits this timeout for lmd to respond, otherwise it gets killed and restarted.
+Set to 0 to turn off automatic restarts (it will still be started if it is not running).
+
+ex.:
+
+  lmd_timeout=5
 
 
 
@@ -1472,40 +1537,13 @@ ex.:
   ssl_verify_hostnames = 1
 
 
-=== use_shadow_naemon
+=== ssl_ca_path
 
-*shadownaemon is deprecated, use lmd instead*
-
-Enable usage of shadownaemon. This is a daemon which shadows a remote
-core via livestatus and therefor removes network latency from accessing
-remote sites. It also reduces network bandwidth usage. Best used together
-with the logcache. Enabled with any true value, disabled when set to '0'.
-Usually the shadownaemon processes are stopped when the last thruk
-process exists, this can be changed by setting this option to 'start_only'.
-
-Default: 0
+Sets path to your certificates.
 
 ex.:
 
-    use_shadow_naemon=1
-
-
-=== shadow_naemon_dir
-Defines the folder where all shadow cores will run in. This
-also defines the path to the local socket, which will be
-'shadow_naemon_dir'/'peer key'/live
-
-ex.:
-
-    shadow_naemon_dir=/omd/sites/<site>/tmp/remotecache
-
-
-=== shadow_naemon_bin
-Defines the path to the shadownaemon binary.
-
-ex.:
-
-    shadow_naemon_bin=/omd/sites/<site>/bin/shadownaemon
+  ssl_ca_path = /etc/ssl/certs
 
 
 == Cookie Authentication Settings
@@ -1529,7 +1567,8 @@ ex.:
 
 
 === cookie_auth_session_timeout
-Specifies the timeout for idle sessions.
+Specifies the timeout for idle sessions. Session will be removed if not used
+within this timeperiod.
 
 ex.:
 
@@ -1593,6 +1632,18 @@ ex.:
   cookie_auth_disable_after_failed_logins = 3
 
 
+=== cookie_auth_verbose
+{% include new_since.ad version="2.32" %}
+Increase logging of cookie authentication related things. This usually
+gets printed to the apache error log.
+
+Default: 0
+
+ex.:
+
+  cookie_auth_verbose = 3
+
+
 
 == Command Settings
 
@@ -1612,6 +1663,8 @@ ex.:
     persistent_ack         = 0  # Persistent Acknowledgement Comments
     ptc                    = 0  # For Child Hosts Too
     use_expire             = 0  # Use expire time ( for cores which support it)
+    childoptions           = 0  # 0 = Do nothing with child hosts, 1 = Triggered downtime for all child hosts, 2 = Non-triggered downtime for all childs
+    hostserviceoptions     = 0  # 0 = Do nothing with services, 1 = Schedule downtime for all services
   </cmd_defaults>
 
 
@@ -2192,6 +2245,7 @@ for details.
      ** `section`       to group backends/sites by different sections, enter a
                         section.
      ** `state_host`    Set 'state_host' explicitly. See See <<check_local_states,check_local_states>> for details.
+     ** `logcache`      Set logcache connection for this specific backend. Set to `0` to disable logcache for this site.
      ** `options`
         *** `peer`            address of this connection.
         *** `resource_file`   resource_file for this peer (used for macro replacement)
@@ -2231,6 +2285,7 @@ for details.
                               (only needed when not using 'core_conf')
 
         *** `git_base_dir`    Override global 'git_base_dir' value.
+        *** `disable`         Set to `1` to disable config tool for this backend (ex.: when detected automatically for http backends)
 
 ex.:
 
@@ -2314,6 +2369,11 @@ ex.:
     #edit_files               = some/extra/files/to.edit # deprecated
     extra_custom_var_host     = _WORKER
     extra_custom_var_service  = _SNMP_COMMUNITY, _OTHER_CUSTOM_VARIABLE
+    obj_readonly              = readonly files regular expression
+    # default_keys_host       = host_name use:generic-host alias address contact_groups:example
+    # default_keys_service    = service_description use host_name check_command contact_groups
+    # default_keys_contact    = contact_name use alias email can_submit_commands
+    # default_keys_...        = ... # set default keys for any type
   </Component>
 
 
@@ -2390,6 +2450,29 @@ Extra custom variable attribute for services which will be available in the drop
 list when editing a service. Can be used multiple time and accepts comma separated
 lists.
 
+=== obj_readonly
+Use `obj_readonly` regular expressions which will be appended to the backend
+specific readonly patterns from the Component Backend peer configtool. Read
+details on the link:/documentation/configuration.html#peer[configtool section].
+
+=== default_keys_host
+
+Space separated list of default attributes when creating a new host. Can contain custom variables
+like `_VAR`. Append default value separated by a `:`. This obviously means you
+cannot use spaces or colons in attributes or default values.
+
+ex.:
+
+    default_keys_host       = host_name use:generic-host alias address contact_groups _WORKER:local
+
+=== default_keys_service
+
+see `default_keys_host`.
+
+=== default_keys_contact
+
+see `default_keys_host`.
+
 
 
 == Component Thruk::Plugin::Panorama
@@ -2400,14 +2483,15 @@ you to build your own panorama views.
 ex.:
 
   <Component Thruk::Plugin::Panorama>
-    default_dashboard      = 1,3,7,4
-    readonly               = 0
-    full_reload_interval   = 10800
-    geo_map_default_center = 13.74,47.77
-    geo_map_default_zoom   = 5
-    extra_fonts            = CompanyFont1, CompanyFont2
-    new_files_start_at     = 1
-    default_state_order    = down, unreachable, ...
+    default_dashboard        = 1,3,7,4
+    readonly                 = 0
+    full_reload_interval     = 10800
+    geo_map_default_center   = 13.74,47.77
+    geo_map_default_zoom     = 5
+    extra_fonts              = CompanyFont1, CompanyFont2
+    new_files_start_at       = 1
+    default_state_order      = down, unreachable, ...
+    default_maintenance_text = "this dashboard is currently in <b>maintenance mode</b>"
   </Component>
 
 
@@ -2436,6 +2520,9 @@ the same folder.
 === default_state_order
 Defines the order to determine the worst state for filter and group icons.
 
+=== default_maintenance_text
+Sets the default text when setting dashboards into maintenance mode. You can use html to format the text.
+
 === geo_map_default_center
 Default coordinates (lon,lat) for new geo maps.
 
@@ -2447,12 +2534,13 @@ WMS provider serve map tile data for geo maps according to
 http://dev.openlayers.org/docs/files/OpenLayers/Layer/WMS-js.html#OpenLayers.Layer.WMS.OpenLayers.Layer.WMS
 Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Servers
 
- ex.:
-
   <Component Thruk::Plugin::Panorama>
     ...
-    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}"]
+    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}", {"properties": "..."}]
   </Component>
+
+Properties can be set according to: http://dev.openlayers.org/docs/files/OpenLayers/Layer-js.html
+Some common properties are: `attribution` or `numZoomLevels`.
 
 === extra_fonts
 Comma separated list of additional fonts which will be listed in the text label

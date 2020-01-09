@@ -91,17 +91,19 @@ sub clean_old_dashboards {
 
     get_dashboard_list($c, $type)
 
-return list of dashboards. Type can be 'public', 'my' or 'all' where 'all' is
-only available for admins.
+return list of dashboards. Type can be 'public', 'my' or 'all'
 
 =cut
 sub get_dashboard_list {
-    my($c, $type) = @_;
+    my($c, $type, $full) = @_;
+
+    set_is_admin($c);
 
     # returns wrong list of public dashboards otherwise
-    my $is_admin;
+    my $orig_is_admin;
     if($type eq 'public') {
-        $is_admin = delete $c->stash->{'is_admin'};
+        $orig_is_admin = $c->stash->{'is_admin'};
+        $c->stash->{'is_admin'} = 0;
     }
 
     my $dashboards = [];
@@ -119,6 +121,10 @@ sub get_dashboard_list {
                 } else {
                     # my
                     next if $d->{'user'} ne $c->stash->{'remote_user'};
+                }
+                if($full) {
+                    push @{$dashboards}, $d;
+                    next;
                 }
                 my $groups_rw = [];
                 my $groups_ro = [];
@@ -150,7 +156,7 @@ sub get_dashboard_list {
 
     # restore admin flag
     if($type eq 'public') {
-        $c->stash->{'is_admin'} = $is_admin;
+        $c->stash->{'is_admin'} = $orig_is_admin;
     }
 
     $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
@@ -168,7 +174,7 @@ return dashboard data.
 =cut
 sub load_dashboard {
     my($c, $nr, $meta_data_only) = @_;
-    $nr       =~ s/^tabpan-tab_//gmx;
+    $nr       =~ s/^pantab_//gmx;
     my $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # only numbers allowed
@@ -178,6 +184,8 @@ sub load_dashboard {
     if($nr == 0 && !-s $file) {
         $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
+
+    set_is_admin($c);
 
     return unless -s $file;
     my $dashboard;
@@ -208,7 +216,7 @@ sub load_dashboard {
     my @stat = stat($file);
     $dashboard->{'ts'}       = $stat[9] unless ($scripted && $dashboard->{'ts'});
     $dashboard->{'nr'}       = $nr;
-    $dashboard->{'id'}       = 'tabpan-tab_'.$nr;
+    $dashboard->{'id'}       = 'pantab_'.$nr;
     $dashboard->{'file'}     = $file;
     $dashboard->{'scripted'} = $scripted;
 
@@ -226,7 +234,7 @@ sub load_dashboard {
             # convert label x/y from old dashboard versions which had them mixed up
             for my $id (keys %{$dashboard}) {
                 my $tab = $dashboard->{$id};
-                if($id =~ m|^tabpan\-tab_|mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
+                if($id =~ m%^tabpan\-tab_%mx and defined $tab->{'xdata'} and defined $tab->{'xdata'}->{'label'} and defined $tab->{'xdata'}->{'label'}->{'offsetx'} and defined $tab->{'xdata'}->{'label'}->{'offsety'}) {
                     my $offsetx = $tab->{'xdata'}->{'label'}->{'offsetx'};
                     my $offsety = $tab->{'xdata'}->{'label'}->{'offsety'};
                     $tab->{'xdata'}->{'label'}->{'offsety'} = $offsetx;
@@ -258,7 +266,21 @@ sub load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
 
-    $dashboard->{'objects'} = scalar grep(/^tabpan-tab_/mx, keys %{$dashboard});
+    for my $key (keys %{$dashboard}) {
+        if($key =~ m/_panlet_(\d+)$/mx) {
+            my $newkey = "panlet_".$1;
+            $dashboard->{$newkey} = delete $dashboard->{$key};
+        }
+    }
+
+    # check for maintenance mode
+    my $maintfile  = Thruk::Utils::Panorama::_get_maint_file($c, $nr);
+    if(-e $maintfile) {
+        my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
+        $dashboard->{'maintenance'} = $maintenance->{'maintenance'};
+    }
+
+    $dashboard->{'objects'} = scalar grep(/^pantab_/mx, keys %{$dashboard});
     return $dashboard;
 }
 
@@ -279,7 +301,7 @@ returns:
 =cut
 sub is_authorized_for_dashboard {
     my($c, $nr, $dashboard) = @_;
-    $nr =~ s/^tabpan-tab_//gmx;
+    $nr =~ s/^pantab_//gmx;
     my $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # super user have permission for all reports
@@ -345,6 +367,30 @@ sub _get_runtime_file {
     return($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.'.$user.'runtime');
 }
 
+##########################################################
+sub _get_maint_file {
+    my($c, $nr) = @_;
+    return($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.maint');
+}
+
+##########################################################
+
+=head2 set_is_admin
+
+    set_is_admin($c)
+
+return nothing
+
+=cut
+sub set_is_admin {
+    my($c) = @_;
+    return if defined $c->stash->{'is_admin'};
+    $c->stash->{'is_admin'} = 0;
+    if($c->check_user_roles('admin')) {
+        $c->stash->{'is_admin'} = 1;
+    }
+    return;
+}
 ##########################################################
 
 1;

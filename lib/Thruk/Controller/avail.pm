@@ -41,6 +41,10 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
+    if($c->req->parameters->{'outages'}) {
+        return(_outages($c));
+    }
+
     # lookup parameters
     my $report_type    = $c->req->parameters->{'report_type'}  || '';
     my $host           = $c->req->parameters->{'host'}         || '';
@@ -170,6 +174,16 @@ sub _show_step_3 {
 sub _create_report {
     my ( $c ) = @_;
     $c->req->parameters->{'include_host_services'} = 1;
+    return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
+}
+
+##########################################################
+sub _outages {
+    my($c) = @_;
+    my($start,$end) = Thruk::Utils::get_start_end_from_date_select_params($c);
+    $c->req->parameters->{'outages'} = 1;
+    $c->req->parameters->{'t1'} = $start;
+    $c->req->parameters->{'t2'} = $end;
     return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
 }
 

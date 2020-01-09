@@ -34,7 +34,7 @@ The cache handles the internal thruk cache.
 use warnings;
 use strict;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
-use Data::Dumper;
+use Cpanel::JSON::XS qw//;
 
 ##############################################
 # no backends required for this command
@@ -53,11 +53,32 @@ sub cmd {
     my($c, $action, $commandoptions, $data) = @_;
     $c->stats->profile(begin => "_cmd_cache($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     # cache actions
     my $command = shift @{$commandoptions} || 'help';
     if($command eq 'dump') {
+        my $cache_data = $c->cache->dump;
+        my $filter = shift @{$commandoptions};
+        if($filter) {
+            $filter =~ s/^\.//gmx;
+            for my $key (split/\./mx, $filter) {
+                if(ref $cache_data eq 'HASH' && defined $cache_data->{$key}) {
+                    $cache_data = $cache_data->{$key};
+                } else {
+                    $data->{'rc'}     = 1;
+                    $data->{'output'} = "";
+                    return $data;
+                }
+            }
+        }
         $data->{'rc'} = 0;
-        $data->{'output'} = Dumper($c->cache->dump);
+        my $json = Cpanel::JSON::XS->new->utf8;
+        $json = $json->pretty;
+        $json = $json->canonical; # keys will be randomly ordered otherwise
+        $data->{'output'} = $json->encode($cache_data);
     }
     elsif($command eq 'clear' || $command eq 'clean' || $command eq 'drop') {
         $data->{'rc'} = 0;
@@ -75,11 +96,15 @@ sub cmd {
 
 =head1 EXAMPLES
 
-Display cache
+Display complete cache
 
   %> thruk cache dump
 
-Drop cache
+Display specific key from cache:
+
+  %> thruk cache dump .users.thrukadmin
+
+Drop cache (you might need to reload apache/thruk afterwards)
 
   %> thruk cache clean
 

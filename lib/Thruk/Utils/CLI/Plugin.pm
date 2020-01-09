@@ -60,6 +60,10 @@ sub cmd {
     my($c, $action, $commandoptions, undef, undef, $globaloptions) = @_;
     $c->stats->profile(begin => "_cmd_plugin($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     require Thruk::Utils::Plugin;
 
     # cache actions
@@ -240,11 +244,11 @@ sub _do_plugin_install {
         my @info = split(/\s+/mx, $line, 6);
         my $path = $info[5];
         if($path =~ m/^\//mx) {
-            `rm -rf $tmpdir`;
+            Thruk::Utils::IO::cmd("rm -rf $tmpdir");
             return("ERROR: tarball must not contain files with leading /: ".$path."\n", 1);
         }
         if($path =~ m/^\./mx && $path !~ m/^\.\//mx) {
-            `rm -rf $tmpdir`;
+            Thruk::Utils::IO::cmd("rm -rf $tmpdir");
             return("ERROR: tarball must not contain files with relative path: ".$path."\n", 1);
         }
         my @path = split(/\//mx, $path);
@@ -255,7 +259,7 @@ sub _do_plugin_install {
         }
     }
     if(scalar keys %{$root} != 1) {
-        `rm -rf $tmpdir`;
+        Thruk::Utils::IO::cmd("rm -rf $tmpdir");
         return("ERROR: tarball must contain exactly one folder\n", 1);
     }
 
@@ -270,21 +274,21 @@ sub _do_plugin_install {
     if(!$globaloptions->{'force'} && -e $plugin_available_dir.'/'.$plugin->{'dir'}) {
         my $existing = Thruk::Utils::Plugin::read_plugin_details($plugin_available_dir.'/'.$plugin->{'dir'});
         if(Thruk::Utils::version_compare($existing->{'version'}, $plugin->{'version'})) {
-            `rm -rf $tmpdir`;
+            Thruk::Utils::IO::cmd("rm -rf $tmpdir");
             return("ERROR: plugin does update existing installed ".$existing->{'dir'}." (".$existing->{'version'}.")"." plugin, use --force to reinstall.\n", 1);
         }
     }
 
     my $target = $plugin_available_dir.'/'.$plugin->{'dir'};
-    `rm -rf $target`;
+    Thruk::Utils::IO::cmd("rm -rf $target");
     if(-e  $target) {
-        `rm -rf $tmpdir`;
+        Thruk::Utils::IO::cmd("rm -rf $tmpdir");
         return("ERROR: could not remove existing folder prior installation: $target\n", 1);
     }
     move($root, $target) or die("cannot move ".$root.' to '.$target.": $!");
 
     # cleanup
-    `rm -rf $tmpdir`;
+    Thruk::Utils::IO::cmd("rm -rf $tmpdir");
 
     return("OK", 0, $plugin);
 }
@@ -318,7 +322,7 @@ sub _plugin_remove {
     }
 
     my $plugin_dir = $plugin_available_dir.'/'.$name;
-    `rm -rf $plugin_dir`;
+    Thruk::Utils::IO::cmd("rm -rf $plugin_dir");
     if(-d $plugin_dir) {
         return("Removing plugin ".$name." failed\n", 1);
     }

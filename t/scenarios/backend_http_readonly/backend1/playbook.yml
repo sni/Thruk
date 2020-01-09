@@ -1,0 +1,31 @@
+---
+- hosts: all
+  tasks:
+  - shell: omd config demo set APACHE_MODE own
+  - copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - name: create api key folder
+    file:
+      path: /omd/sites/demo/var/thruk/api_keys
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: copy api key
+    copy:
+      src: /root/88db079c08a1aa46d4df2e5fb770d66d6572972cde4831ec64b20ccbe66f287b.SHA-256
+      dest: /omd/sites/demo/var/thruk/api_keys/88db079c08a1aa46d4df2e5fb770d66d6572972cde4831ec64b20ccbe66f287b.SHA-256
+      mode: 0600
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

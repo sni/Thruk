@@ -41,7 +41,7 @@ Ext.define('TP.HostStatusIcon', {
                                         +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                         +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
-        details.push([ 'Status Information', this.host.plugin_output]);
+        details.push([ 'Status Information', nl2br(this.host.plugin_output)]);
         details.push([ 'Last Check', this.host.last_check ? TP.date_format(this.host.last_check) : 'never']);
         details.push([ 'Next Check', this.host.next_check ? TP.date_format(this.host.next_check) : 'not planned']);
         details.push([ 'Last Notification', (this.host.last_notification == 0 ? 'N/A' : TP.date_format(this.host.last_notification)) + ' (notification '+this.host.current_notification_number+')']);
@@ -113,7 +113,7 @@ Ext.define('TP.HostgroupStatusIcon', {
                 this.xdata.general.incl_svc = true;
                 this.xdata.general.incl_hst = true;
             }
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             var res = TP.get_group_status({
                 group:          this.hostgroup,
                 incl_ack:       this.xdata.general.incl_ack,
@@ -200,7 +200,7 @@ Ext.define('TP.ServiceStatusIcon', {
                                             +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                             +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
-        details.push([ 'Status Information', this.service.plugin_output]);
+        details.push([ 'Status Information', nl2br(this.service.plugin_output)]);
         details.push([ 'Last Check', this.service.last_check ? TP.date_format(this.service.last_check) : 'never']);
         details.push([ 'Next Check', this.service.next_check ? TP.date_format(this.service.next_check) : 'not planned']);
         details.push([ 'Last Notification', (this.service.last_notification == 0 ? 'N/A' : TP.date_format(this.service.last_notification)) + ' (notification '+this.service.current_notification_number+')']);
@@ -257,7 +257,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
     refreshHandler: function(newStatus) {
         // calculate summarized status
         if(this.servicegroup) {
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             var res = TP.get_group_status({
                 group:          this.servicegroup,
                 incl_ack:       this.xdata.general.incl_ack,
@@ -351,7 +351,7 @@ Ext.define('TP.FilterStatusIcon', {
     refreshHandler: function(newStatus) {
         // calculate summarized status
         if(this.results) {
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             var res = TP.get_group_status({
                 group:          this.results,
                 incl_ack:       this.xdata.general.incl_ack,
@@ -507,7 +507,7 @@ Ext.define('TP.StaticIcon', {
             store:       imagesStore,
             queryMode:      'remote',
             triggerAction:  'all',
-            pageSize:       true,
+            pageSize:       12,
             selectOnFocus:  true,
             typeAhead:      true,
             displayField: 'image',
@@ -566,8 +566,10 @@ var dashboardStore = Ext.create('Ext.data.Store', {
             root: 'data'
         }
     },
-    autoLoad: false,
-    data : []
+    pageSize:   12,
+    remoteSort: true,
+    autoLoad:   false,
+    data :      []
 });
 Ext.define('TP.DashboardStatusIcon', {
     extend: 'TP.IconWidget',
@@ -590,9 +592,11 @@ Ext.define('TP.DashboardStatusIcon', {
                 store:           dashboardStore,
                 queryMode:      'remote',
                 triggerAction:  'all',
-                pageSize:        true,
                 selectOnFocus:   true,
+                selectOnTab:    true,
                 typeAhead:       true,
+                minChars:       0,
+                pageSize:       12,
                 displayField:   'name',
                 valueField:     'nr',
                 listConfig : {
@@ -619,11 +623,11 @@ Ext.define('TP.DashboardStatusIcon', {
         }]);
     },
     getName: function() {
-        var tab = Ext.getCmp('tabpan-tab_'+this.xdata.general.dashboard);
+        var tab = Ext.getCmp(TP.nr2TabId(this.xdata.general.dashboard));
         if(tab) {
-            return(tab.title);
+            return(tab.xdata.title || tab.title);
         }
-        return("");
+        return("dashboard #"+this.xdata.general.dashboard);
     },
     getDetails: function() {
         var details = [];
@@ -632,7 +636,7 @@ Ext.define('TP.DashboardStatusIcon', {
                                         +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
                                         +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
-        var tab = Ext.getCmp('tabpan-tab_'+this.xdata.general.dashboard);
+        var tab = Ext.getCmp('pantab_'+this.xdata.general.dashboard);
         if(tab) {
             /* Totals */
             var group = TP.getTabTotals(tab);
@@ -698,14 +702,14 @@ Ext.define('TP.DashboardStatusIcon', {
     },
     refreshHandler: function(newStatus, skipUpdate) {
         var This   = this;
-        var tab_id = 'tabpan-tab_'+This.xdata.general.dashboard;
+        var tab_id = TP.nr2TabId(This.xdata.general.dashboard);
         var tab    = Ext.getCmp(tab_id);
         if(!tab) {
             if(skipUpdate) {
                 This.callParent([newStatus]);
                 return;
             }
-            TP.add_pantab(tab_id, undefined, true, function(id, success, response) {
+            TP.add_pantab({ id: tab_id, hidden: true, callback: function(id, success, response) {
                 if(success) {
                     This.refreshHandler(newStatus, skipUpdate);
                 } else {
@@ -718,7 +722,7 @@ Ext.define('TP.DashboardStatusIcon', {
                     skipUpdate        = true;
                     This.refreshHandler(newStatus, skipUpdate);
                 }
-            });
+            }});
             return;
         }
         if(tab.rendered) { skipUpdate = true; }

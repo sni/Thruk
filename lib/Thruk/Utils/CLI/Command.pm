@@ -39,6 +39,10 @@ use strict;
 sub cmd {
     my($c, $action, $commandoptions, undef, undef, $global_options) = @_;
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     $c->stats->profile(begin => "_cmd_command($action)");
     my $hostname    = shift @{$commandoptions};
     my $description = shift @{$commandoptions};

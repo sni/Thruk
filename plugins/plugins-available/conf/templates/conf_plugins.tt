@@ -6,7 +6,7 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="plugins">
 <input type="hidden" name="action" value="save">
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 [% IF readonly %]
 <div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
 [% ELSE %]

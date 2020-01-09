@@ -17,6 +17,7 @@
   - shell: "echo 'demo' | passwd --stdin demo"
   - shell: "sudo su - demo -c 'set_admin_password omd'"
   - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set CORE none"
   - shell: "omd config demo set APACHE_MODE own"
   - shell: "omd config demo set GRAFANA on"
   - shell: "omd config demo set INFLUXDB_HTTP_TCP_PORT backend:8086"

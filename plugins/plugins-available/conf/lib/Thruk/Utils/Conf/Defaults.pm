@@ -54,7 +54,7 @@ sub get_thruk_cfg {
                 show_notification_number                => ['BOOL',   '1'],
                 show_backends_in_table                  => ['BOOL',   '0'],
                 show_full_commandline                   => ['LIST',   '', { '0' => 'off', '1' => 'authorized_for_configuration_information only', '2' => 'everyone' } ],
-                resource_file                           => ['STRING', ''],
+                resource_file                           => ['ARRAY', ''],
                 shown_inline_pnp                        => ['BOOL',   '1'],
                 show_modified_attributes                => ['BOOL',   '1'],
                 show_custom_vars                        => ['ARRAY',  []],

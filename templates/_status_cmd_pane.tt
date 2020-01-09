@@ -106,12 +106,36 @@
     <tr id="row_downtime_options">
       <td class="statusOdd" valign="top" width=90>Options:</td>
       <td class="statusOdd">
-        Child Hosts: <select name="childoptions">
-          <option value="0">Do nothing with child hosts</option>
-          <option value="1">Triggered downtime for all child hosts</option>
-          <option value="2">Non-triggered downtime for all childs</option>
-        </select><br>
-        Type: <select name='fixed' onChange="if(this.value==0) {showElement('flexible_options')} else { hideElement('flexible_options') }"><option value="1"> Fixed </option><option value="0"> Flexible </option></select>
+        <table>
+          <tr>
+            <td>Child Hosts:</td>
+            <td>
+              <select name="childoptions" style="width: 100%;">
+                <option value="0"[% IF c.config.cmd_defaults.childoptions == 0 %] selected[% END %]>Do nothing with child hosts</option>
+                <option value="1"[% IF c.config.cmd_defaults.childoptions == 1 %] selected[% END %]>Triggered downtime for all child hosts</option>
+                <option value="2"[% IF c.config.cmd_defaults.childoptions == 2 %] selected[% END %]>Non-triggered downtime for all childs</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Services:</td>
+            <td>
+              <select name="hostserviceoptions" style="width: 100%;">
+                <option value='0'[% IF c.config.cmd_defaults.hostserviceoptions == 0 %] selected[% END %]> Do nothing with services</option>
+                <option value='1'[% IF c.config.cmd_defaults.hostserviceoptions == 1 %] selected[% END %]> Schedule downtime for all services</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Type:</td>
+            <td>
+              <select name='fixed' onChange="if(this.value==0) {showElement('flexible_options')} else { hideElement('flexible_options') }">
+                <option value="1"> Fixed </option>
+                <option value="0"> Flexible </option>
+              </select>
+            </td>
+          </tr>
+        </table>
         <span id="flexible_options" style="display:none"><br>If Flexible, Duration: <input type='text' name='hours' value='2' size= "2" maxlength="2"> Hours <input type='text' name='minutes' value='0' size= "2" maxlength="2"> Minutes</span>
      </td>
     </tr>

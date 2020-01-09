@@ -16,7 +16,7 @@ Ext.define('TP.PanletGridServer', {
 /* toggle backends */
 TP.toggleBackend = function(icon, panel_id, backend) {
     var panel = Ext.getCmp(panel_id);
-    var tab = Ext.getCmp(panel.panel_id);
+    var tab   = panel.tab;
     if(tab.activeBackends == undefined || tab.activeBackends[backend] == undefined) {
         if(tab.activeBackends == undefined) { tab.activeBackends = {} }
         tab.activeBackends[backend] = false;

@@ -9,7 +9,7 @@ body.config TABLE.conftoolobj TEXTAREA {
   width: 100%;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_1 {
-  width: 420px;
+  width: 419px;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_2 {
   width: 450px;
@@ -25,7 +25,7 @@ BODY.bare_tree {
 
 /* input fields with wizards */
 TD.conf_row INPUT[type=text].wizard {
-  width: 420px !important;
+  width: 419px !important;
 }
 
 TABLE.command_line_wzd {
@@ -67,6 +67,8 @@ body.config TD.conf_row {
   border-bottom: 3px solid white;
   margin: 0px;
   vertical-align: middle;
+  white-space: normal;
+  vertical-align: top;
 }
 
 TD#filesystem {
@@ -154,7 +156,7 @@ body.config TABLE.filter {
 }
 
 TABLE.confPanel {
-  min-width: 210px;
+  min-width: 212px;
 }
 
 TD.plugin_description {
@@ -374,4 +376,15 @@ TR.tools_category TD {
 .conftoolrefs TD.dataVal UL {
   padding-left: 20px;
   margin: 0;
+}
+
+FORM.diffoptions input[type=checkbox] {
+  vertical-align: middle;
+}
+
+FORM.diffoptions {
+  border: 1px solid #444444;
+  float: right;
+  margin: 0;
+  padding: 2px 5px;
 }

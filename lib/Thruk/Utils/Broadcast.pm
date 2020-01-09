@@ -156,8 +156,6 @@ sub is_authorized_for_broadcast {
     my $contacts           = [grep(!/^\!/mx, @{$broadcast->{'contacts'}})];
     my $contactgroups      = [grep(!/^\!/mx, @{$broadcast->{'contactgroups'}})];
 
-    return 1 if ($c->user && $c->user->check_user_roles('admin'));
-
     my $groups = {};
     if($c->user_exists) {
         $groups = Thruk::Utils::array2hash($c->user->{'groups'});
@@ -328,8 +326,8 @@ sub update_broadcast_from_param {
     my($c, $broadcast) = @_;
     $broadcast->{'author'}        = $c->stash->{'remote_user'};
     $broadcast->{'authoremail'}   = $c->user ? $c->user->{'email'} : 'none';
-    $broadcast->{'contacts'}      = [split(/\s*,\s*/mx, ($c->req->parameters->{'contacts'}      || ''))];
-    $broadcast->{'contactgroups'} = [split(/\s*,\s*/mx, ($c->req->parameters->{'contactgroups'} || ''))];
+    $broadcast->{'contacts'}      = Thruk::Utils::extract_list($c->req->parameters->{'contacts'}, '/\s*,\s*/mx');
+    $broadcast->{'contactgroups'} = Thruk::Utils::extract_list($c->req->parameters->{'contactgroups'}, '/\s*,\s*/mx');
     $broadcast->{'text'}          = $c->req->parameters->{'text'};
     $broadcast->{'expires'}       = $c->req->parameters->{'expires'} || '';
     $broadcast->{'hide_before'}   = $c->req->parameters->{'hide_before'} || '';

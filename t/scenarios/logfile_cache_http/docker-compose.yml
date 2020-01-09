@@ -8,11 +8,12 @@ services:
         - "127.0.0.3:60443:443"
         - "127.0.0.3:60557:6557"
     volumes:
-        - /etc/localtime:/etc/localtime:ro
         - ../../../:/thruk:ro
   backend:
     build: backend/
     ports: []
+    volumes:
+        - ../../../:/thruk:ro
   db:
      image: mysql:5
      restart: always

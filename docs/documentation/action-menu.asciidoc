@@ -111,10 +111,10 @@ A very simple example:
 {% raw %}
 function js_basic_menu(data) {
     return({
-      "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+      "icon":"../themes/{{theme}}/images/dropdown.png",
       "title": "javascript menu",
       "menu":[{
-          "icon":"/thruk/themes/{{theme}}/images/link.png",
+          "icon":"../themes/{{theme}}/images/link.png",
           "label":"test menu item",
           "action":"http://..."
         }]
@@ -131,16 +131,16 @@ A more advanced example with dynamic submenus. Menu callbacks may return thenabl
 {% raw %}
 function js_adv_menu(cfg) {
     return({
-      "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+      "icon":"../themes/{{theme}}/images/dropdown.png",
       "title": "javascript advanced menu",
       "menu":[
         {
-          "icon":"/thruk/themes/{{theme}}/images/link.png",
+          "icon":"../themes/{{theme}}/images/link.png",
           "label":"test menu item",
           "action":"http://..."
         },
         {
-          "icon":"/thruk/themes/{{theme}}/images/folder.png",
+          "icon":"../themes/{{theme}}/images/folder.png",
           "label":"list all hosts",
           "menu": js_adv_menu_submenu
         }
@@ -237,11 +237,11 @@ menu.
 {% raw %}
 function js_menu(d) {
   return({
-    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "icon":"../themes/{{theme}}/images/dropdown.png",
     "title": "form menu",
     "menu":[
       {
-        "icon":"/thruk/themes/{{theme}}/images/page_white_key.png",
+        "icon":"../themes/{{theme}}/images/page_white_key.png",
         "html":"<b>test</b>"
               +"<input type='text'>"
               +"<button onclick='test_form_handler(this)'>ok</button>"
@@ -263,7 +263,7 @@ function test_form_handler(btn) {
     host:    action_menu_options.host,
     service: action_menu_options.service,
     backend: action_menu_options.backend,
-    token:   user_token
+    token:   CSRFtoken
   }, function(response) {
     // show repsonse
     thruk_message(response.rc, response.msg);
@@ -286,7 +286,7 @@ host menu based on some attributes. It also sends some commands.
 {% raw %}
 function js_menu(d) {
   return({
-    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "icon":"../themes/{{theme}}/images/dropdown.png",
     "title": "confirm menu",
     "menu": js_menu_items
   });

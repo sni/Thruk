@@ -7,7 +7,8 @@ Ext.define('TP.PanletPieChart', {
     initComponent: function() {
         var panel = this;
         this.callParent();
-        this.xdata.showlabel = true;
+        this.xdata.showlabel  = true;
+        this.xdata.showborder = true;
 
         this.pieStore = Ext.create('Ext.data.Store', {
             fields: ['name','value'],
@@ -53,7 +54,7 @@ Ext.define('TP.PanletPieChart', {
                     this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
                     /* rendering pie charts on inactive tabs leads to setAttribute errors */
-                    if(!TP.isThisTheActiveTab(panel)) {
+                    if(!panel.tab.isActiveTab()) {
                         return false;
                     }
                     if(this.chart.isVisible()) {
@@ -85,11 +86,7 @@ Ext.define('TP.PanletPieChart', {
     setGearItems: function() {
         var panel = this;
         this.callParent();
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
-        });
+        TP.addGearBackgroundOptions(panel);
         this.addGearItems({
             fieldLabel: 'Show Label',
             xtype:      'checkbox',

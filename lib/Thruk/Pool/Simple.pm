@@ -114,7 +114,7 @@ Thruk::Pool::Simple - A simple thread-pool implementation
 C<Thruk::Pool::Simple> provides a simple thread-pool implementaion
 without external dependencies outside core modules.
 
-Jobs can be submitted to and handled by multi-threaded `workers'
+Jobs can be submitted to and handled by multi-threaded workers
 managed by the pool.
 
 =cut

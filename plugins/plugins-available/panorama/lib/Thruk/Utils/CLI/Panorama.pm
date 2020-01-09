@@ -47,6 +47,10 @@ sub cmd {
     my($c, $action, $commandoptions, $data, $src, $global_options) = @_;
     $c->stats->profile(begin => "_cmd_panorama($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     if(!$c->config->{'use_feature_panorama'}) {
         return("ERROR - panorama dashboard addon is disabled\n", 1);
     }

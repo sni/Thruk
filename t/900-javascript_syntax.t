@@ -35,7 +35,7 @@ for my $file (@tplfiles) {
 use_ok("Thruk::Config");
 my $config = Thruk::Config::get_config();
 
-my $files = ['root/thruk/startup.html', 'plugins/plugins-available/mobile/templates/mobile.tt'];
+my $files = ['root/thruk/startup.html'];
 for my $file (@{$files}) {
     next if($filter && $file !~ m%$filter%mx);
     my $content = read_file($file);

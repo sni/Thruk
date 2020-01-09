@@ -45,32 +45,31 @@
     </td>
   </tr>
 </table>
-<div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
+<table border="1" class='status hoverable' id="statusTable" style="min-width: 1000px;">
   <tr>
-    <th class="status" nowrap width="200">Name</th>
-    <th class="status" nowrap width="200">Description</th>
-    <th class="status" nowrap width="40">Public</th>
-    <th class="status usercol" nowrap width="60">Owner</th>
-    <th class="status" nowrap width="40">Mail</th>
-    <th class="status" nowrap width="100">Schedule</th>
-    <th class="status" nowrap width="150">Last Time Run</th>
-    <th class="status" nowrap width="163">Duration</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
+    <th class="status" nowrap>Name</th>
+    <th class="status" nowrap>Description</th>
+    <th class="status" nowrap>Public</th>
+    <th class="status usercol" nowrap>Owner</th>
+    <th class="status" nowrap>Mail</th>
+    <th class="status" nowrap>Schedule</th>
+    <th class="status" nowrap>Last Time Run</th>
+    <th class="status" nowrap>Duration</th>
+    <th class="status" nowrap>&nbsp;</th>
+    <th class="status" nowrap>&nbsp;</th>
+    <th class="status" nowrap>&nbsp;</th>
   </tr>
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %]" align="left">[% r.name | html %]</td>
-    <td class="status [% rowclass %]" align="left" style="overflow: hidden;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
+    <td class="status [% rowclass %] mightOverflow50" align="left" nowrap title="[% r.name | html %]">[% r.name | html %]</td>
+    <td class="status [% rowclass %]" align="left" style="overflow: hidden; white-space: nowrap;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
-    <td class="status [% rowclass %] usercol">[% r.user | html %]</td>
+    <td class="status [% rowclass %] usercol" style="white-space: nowrap;">[% r.user | html %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
-    <td class="status [% rowclass %]">
+    <td class="status [% rowclass %]" style="white-space: nowrap;">
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
     </td>
     <td class="status [% rowclass %] report_progessbar">
@@ -139,6 +138,9 @@
         [% END %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16></a>
+        [% IF r.var.exists("json_file") %]
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Download JSON raw data' title='Download JSON raw data' width=16 height=16></a>
+        [% END %]
       [% END %]
     </td>
   </tr>
@@ -158,6 +160,19 @@
     </td>
   </tr>
   [% END %]
+  [% IF r.exists("var") && r.var.exists("opt_errors") %]
+  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+    <td class="status [% rowclass %]"></td>
+    <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
+      Error(s) in report options:
+      <ul>
+      [% FOREACH e = r.var.opt_errors %]
+      <li>[% e | html %]
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+  [% END %]
   [% END %]
   [% IF reports.size == 0 %]
   <tr class="firstrow">
@@ -165,7 +180,6 @@
   </tr>
   [% END %]
 </table>
-</div>
 
 <script type="text/javascript">
 <!--

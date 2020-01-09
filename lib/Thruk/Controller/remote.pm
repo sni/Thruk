@@ -3,6 +3,8 @@ package Thruk::Controller::remote;
 use strict;
 use warnings;
 use Data::Dumper;
+use Cpanel::JSON::XS qw/encode_json/;
+use File::Slurp qw/read_file/;
 use Module::Load qw/load/;
 
 =head1 NAME
@@ -26,9 +28,7 @@ sub index {
     my($c) = @_;
 
     if(!$c->config->{'remote_modules_loaded'}) {
-        load Data::Dumper;
         load Thruk::Utils::CLI;
-        load File::Slurp, qw/read_file/;
         $c->config->{'remote_modules_loaded'} = 1;
     }
     Thruk::Utils::check_pid_file($c);
@@ -37,7 +37,25 @@ sub index {
     $c->stash->{'text'}       = 'OK';
 
     if(defined $c->req->parameters->{'data'}) {
-        $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
+        $c->stash->{'inject_stats'} = 0;
+        my $res = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
+        if(defined $res->{'output'} && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
+            $c->res->body($res->{'output'});
+            $c->{'rendered'} = 1;
+            return;
+        }
+        if(ref $res eq 'HASH') {
+            $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
+            $res->{'branch'}  = $c->config->{'branch'}  unless defined $res->{'branch'};
+        }
+        my $res_json;
+        eval {
+            $res_json = encode_json($res);
+        };
+        if($@) {
+            die("ERROR - unable to encode to json: $@\n".Dumper($res));
+        }
+        $c->stash->{'text'} = $res_json;
     }
 
     # set template after the CLI call above, it might get lost otherwise
@@ -88,6 +106,13 @@ sub index {
         }
         $c->log->error('log request without a file: '.Dumper($c->req));
         return;
+    }
+
+    if($action eq 'lb_ping' or exists $c->req->parameters->{'lb_ping'}) {
+        if($c->cluster->is_clustered() && $c->cluster->maint()) {
+            $c->stash->{'text'} = 'MAINTENANCE';
+            $c->res->code(503); # Service Unavailable
+        }
     }
 
     return;

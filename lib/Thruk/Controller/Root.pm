@@ -107,6 +107,11 @@ sub thruk_index_html {
         return(thruk_main_html($c));
     }
 
+    # if index page is requested, this usually means this is a user $session and no script, unset fake flag to enable csrf protection
+    if($c->{'session'} && $c->{'session'}->{'fake'} && $c->{'session'}->{'file'}) {
+        Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { fake => undef });
+    }
+
     $c->stash->{'title'}           = $c->config->{'name'};
     $c->stash->{'main'}            = '';
     $c->stash->{'target'}          = '';
@@ -298,30 +303,36 @@ sub parts_cgi {
         $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
         $c->stash->{'template'}  = '_parts_comments.tt';
+        return;
     }
-    elsif($part eq '_host_downtimes') {
+
+    if($part eq '_host_downtimes') {
         my $host = $c->req->parameters->{'host'};
         $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
         $c->stash->{'template'}  = '_parts_downtimes.tt';
+        return;
     }
-    elsif($part eq '_service_comments') {
+
+    if($part eq '_service_comments') {
         my $host = $c->req->parameters->{'host'};
         my $svc  = $c->req->parameters->{'service'};
         $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => $svc } ] );
         $c->stash->{'type'}      = 'service';
         $c->stash->{'template'}  = '_parts_comments.tt';
+        return;
     }
-    elsif($part eq '_service_downtimes') {
+
+    if($part eq '_service_downtimes') {
         my $host = $c->req->parameters->{'host'};
         my $svc  = $c->req->parameters->{'service'};
         $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => $svc } ] );
         $c->stash->{'type'}      = 'service';
         $c->stash->{'template'}  = '_parts_downtimes.tt';
-    } else {
-        return $c->detach('/error/index/25') unless $part;
+        return;
     }
-    return;
+
+    return $c->detach('/error/index/25');
 }
 
 ######################################

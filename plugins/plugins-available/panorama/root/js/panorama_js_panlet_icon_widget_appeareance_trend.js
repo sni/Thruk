@@ -36,7 +36,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         if(retry == undefined) { retry = 0; } else { retry++; }
         if(xdata       == undefined) { xdata = panel.xdata; }
         if(xdata.stateHist == undefined) { xdata.stateHist = panel.xdata.stateHist; }
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(!panel.icon) {
             panel.setRenderItem(xdata);
             return;
@@ -227,7 +227,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
                 if(obj) {
                     if(!obj.trend) {
                         /* first run, reschedule label update */
-                        var tab = Ext.getCmp(panel.panel_id);
+                        var tab = panel.tab;
                         tab.scheduleRedrawAllLabels();
                     }
                     obj.trend = labelValues;
@@ -244,7 +244,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
         panel.iconFixSize(xdata);
-        if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
+        if(!panel.tab.isActiveTab()) { panel.hide(); }
     },
 
     getBaseValue: function(func, data, start, end, fixed) {

@@ -60,3 +60,12 @@ This leaves a single required argument with the downtime comment:
 ------
   %> curl -d "comment_data='downtime comment'" http://0:3000/thruk/r/services/<host>/<svc>/cmd/schedule_svc_downtime
 ------
+
+
+=== Grouping
+
+List sessions which had been active within the last 10minutes:
+
+------
+  %> thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
+------

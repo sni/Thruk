@@ -36,8 +36,6 @@ sub index {
 
     my $cookie_path   = $c->stash->{'cookie_path'};
     my $cookie_domain = _get_cookie_domain($c);
-    my $sdir          = $c->config->{'var_path'}.'/sessions';
-    Thruk::Utils::IO::mkdir($sdir);
 
     my $keywords = $c->req->uri->query;
     my $logoutref;
@@ -48,39 +46,6 @@ sub index {
     if($c->req->url =~ m/\/\Q$product_prefix\E\/cgi\-bin\/login\.cgi\?logout(\/.*)/mx) {
         $keywords = 'logout';
         $logoutref = $1;
-    }
-    if(defined $keywords) {
-        if($keywords eq 'logout') {
-            _invalidate_current_session($c, $cookie_path, $sdir);
-            Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
-            return $c->redirect_to($logoutref) if $logoutref;
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
-        }
-
-        if($keywords eq 'nocookie') {
-            my $hint = '';
-            if($cookie_domain) {
-                $hint = ' (cookie domain is set to: '.$cookie_domain.')';
-            }
-            Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies'.$hint );
-        }
-        if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
-            _invalidate_current_session($c, $cookie_path, $sdir);
-            Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
-        }
-        if($keywords =~ /^invalid\&(.*)$/mx or $keywords eq 'invalid') {
-            _invalidate_current_session($c, $cookie_path, $sdir);
-            Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
-        }
-        if($keywords =~ /^problem\&(.*)$/mx or $keywords eq 'problem') {
-            # don't remove all sessions when there is a (temporary) technical problem
-            #_invalidate_current_session($c, $cookie_path, $sdir);
-            Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
-        }
-        if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
-            _invalidate_current_session($c, $cookie_path, $sdir);
-            Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
-        }
     }
 
     my $login   = $c->req->parameters->{'login'}    || '';
@@ -100,6 +65,45 @@ sub index {
     # add trailing slash if referer ends with the product prefix and nothing else
     if($referer =~ m|\Q/$product_prefix\E$|mx) {
         $referer = $referer.'/';
+    }
+
+    if(defined $keywords) {
+        if($keywords eq 'logout') {
+            _invalidate_current_session($c, $cookie_path);
+            Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
+            return $c->redirect_to($logoutref) if $logoutref;
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
+        }
+
+        if($keywords eq 'nocookie') {
+            my $hint = '';
+            if($cookie_domain) {
+                $hint = ' (cookie domain is set to: '.$cookie_domain.')';
+            }
+            Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies'.$hint );
+        }
+        if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
+            _invalidate_current_session($c, $cookie_path);
+            Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
+        }
+        if($keywords =~ /^invalid\&(.*)$/mx or $keywords eq 'invalid') {
+            _invalidate_current_session($c, $cookie_path);
+            Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
+        }
+        if($keywords =~ /^problem\&(.*)$/mx or $keywords eq 'problem') {
+            # don't remove all sessions when there is a (temporary) technical problem
+            #_invalidate_current_session($c, $cookie_path);
+            Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
+        }
+        if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
+            _invalidate_current_session($c, $cookie_path);
+            Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
+        }
+        if($keywords =~ /^setsession\&(.*)$/mx or $keywords eq 'setsession') {
+            $c->authenticate();
+            return $c->redirect_to($referer) if $referer;
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
+        }
     }
 
     # make lowercase username
@@ -130,8 +134,9 @@ sub index {
             elsif($success) {
                 $c->stash->{'remote_user'} = $login;
                 $c->cookie('thruk_auth' => $success, {
-                    path    => $cookie_path,
-                    domain  => $cookie_domain,
+                    path     => $cookie_path,
+                    domain   => $cookie_domain,
+                    httponly => 1,
                 });
 
                 # clean failed logins
@@ -180,10 +185,6 @@ sub index {
             }
         }
     }
-    else {
-        # clean up
-        Thruk::Utils::CookieAuth::clean_session_files($c->config);
-    }
 
     Thruk::Utils::ssi_include($c, 'login');
 
@@ -219,17 +220,18 @@ sub index {
 
 ##########################################################
 sub _invalidate_current_session {
-    my($c, $cookie_path, $sdir) = @_;
+    my($c, $cookie_path) = @_;
     my $cookie = $c->cookie('thruk_auth');
     $c->cookie('thruk_auth' => '', {
-        expires => 0,
-        path    => $cookie_path,
-        domain  => _get_cookie_domain($c),
+        expires  => 0,
+        path     => $cookie_path,
+        domain   => _get_cookie_domain($c),
+        httponly => 1,
     });
     if(defined $cookie and defined $cookie->value) {
-        my $sessionid = $cookie->value;
-        if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
-            unlink($sdir.'/'.$sessionid);
+        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie->value);
+        if($session_data) {
+            unlink($session_data->{'file'});
         }
     }
     return;

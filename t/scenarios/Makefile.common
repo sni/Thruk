@@ -4,43 +4,103 @@ export TEST_AUTHOR=1
 THRUK=cd ../../.. && ./script/thruk
 STARTUPWAIT=300
 EXPECTED_BACKENDS=1
+INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
+ifdef INTERACTIVE
+  DOCKER_COMPOSE_TTY=
+else
+  DOCKER_COMPOSE_TTY=-T
+endif
 
 wait_start:
 	$(THRUK) cache clean
 	for x in $$(seq $(STARTUPWAIT)); do \
 	   if [ $$($(THRUK) -l 2>&1 | grep -v ^Def | grep -v ^- | grep -v ERROR | grep OK | wc -l) -eq $(EXPECTED_BACKENDS) ]; then break; else sleep 1; fi; \
-	   if [ $$x -eq $(STARTUPWAIT) ]; then echo "ERROR: startup failed"; docker ps; $(THRUK) -l; exit 1; fi; \
+	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
 	$(THRUK) -l
 	$(MAKE) extra_wait_start
 
+wait_start_failed:
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	-echo "ERROR: startup failed"
+	-test -e thruk.conf && $(THRUK) -l
+	-docker ps
+	-docker-compose logs --tail=30 --no-color -t | sort
+	$(MAKE) wait_start_failed_extra
+
+wait_start_failed_extra:
+
 test: wait_start
-	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t
-	$(MAKE) extra_test
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t \
+		|| ( cd $(shell pwd) && $(MAKE) failed_test )
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	$(MAKE) extra_test \
+		|| ( cd $(shell pwd) && $(MAKE) failed_test )
+	@echo "### $@: $$(date "+%FT%T.%N")"
 
 test_verbose: wait_start
-	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t
-	$(MAKE) extra_test
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t \
+		|| ( cd $(shell pwd) && $(MAKE) failed_test )
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	$(MAKE) extra_test_verbose \
+		|| ( cd $(shell pwd) && $(MAKE) failed_test )
+	@echo "### $@: $$(date "+%FT%T.%N")"
+
+failed_test:
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	-echo "ERROR: test failed"
+	-docker ps
+	-docker-compose logs --tail=30 --no-color -t | sort
+	for svc in $$(docker-compose config --services | sort); do \
+		for index in $$(seq 1 $$(docker-compose ps -q $$svc | wc -l)); do \
+			echo "*** $${svc}_$${index}"; \
+			if docker-compose exec  --user root --index $$index $$svc test -d /opt/omd/sites/demo; then \
+				echo "*** $${svc}_$${index} - apache/error_log"; \
+				docker-compose exec $(DOCKER_COMPOSE_TTY) --user root --index $$index $$svc tail -20 /opt/omd/sites/demo/var/log/apache/error_log; \
+				echo "*** $${svc}_$${index} - thruk.log"; \
+				docker-compose exec $(DOCKER_COMPOSE_TTY) --user root --index $$index $$svc tail -20 /opt/omd/sites/demo/var/log/thruk.log; \
+			fi; \
+		done; \
+	done
+	-$(MAKE) extra_failed_test
+	exit 1
+
+extra_failed_test:
+	exit 1
 
 server:
+	test -f thruk_local.conf || exit 1
 	cd ../../.. && THRUK_PERFORMANCE_DEBUG=1 ./script/thruk_server.pl -r
 
+web:
+	@python -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
+
 prepare:
+	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker-compose build
 	docker-compose up --remove-orphans -d
 	docker ps
+	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
+	@echo "### $@: $$(date "+%FT%T.%N")"
 
 clean:
+	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker-compose kill
 	docker-compose rm -f
 	-docker network prune -f
 	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
+	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_clean
+	@echo "### $@: $$(date "+%FT%T.%N")"
 
 update:
+	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker-compose pull
 	for IMG in $$(grep FROM */Dockerfile | awk '{ print $$2 }' | sort -u); do docker pull $$IMG; done
+	@echo "### $@: $$(date "+%FT%T.%N")"
 
 extra_wait_start:
 
@@ -49,3 +109,5 @@ extra_clean:
 extra_prepare:
 
 extra_test:
+
+extra_test_verbose:

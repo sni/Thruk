@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 390;
+    plan tests => 464;
 }
 
 BEGIN {
@@ -16,6 +16,7 @@ BEGIN {
 }
 BEGIN { use_ok 'Thruk::Controller::rest_v1' }
 
+TestUtils::set_test_user_token();
 my($host,$service) = TestUtils::get_test_service();
 
 my $list_pages = [
@@ -51,6 +52,8 @@ my $list_pages = [
     '/thruk/reports',
     '/thruk/broadcasts',
     '/thruk/sessions',
+    '/thruk/users',
+    '/thruk/api_keys',
 ];
 
 my $hash_pages = [
@@ -62,6 +65,9 @@ my $hash_pages = [
     '/services/totals',
     '/thruk',
     '/thruk/config',
+    '/thruk/stats',
+    '/thruk/metrics',
+    '/thruk/whoami',
 ];
 
 for my $url (@{$list_pages}) {
@@ -146,7 +152,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/logs?q=***host_name = "test" AND time > 1 AND time < 10***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -158,7 +163,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter II
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/logs?q=***host_name = "test" AND (time > 1 AND time < 10)***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -170,7 +174,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter when the filtered item is not in the columns list
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&state[ne]=5',
         'content_type' => 'application/json;charset=UTF-8',
@@ -182,7 +185,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter when the filtered item is not in the columns list II
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&q=***state >= 0***',
         'content_type' => 'application/json;charset=UTF-8',
@@ -194,7 +196,6 @@ TestUtils::test_page(
 ################################################################################
 # test query filter when the filtered item is not in the columns list III
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&state[gte]=0',
         'content_type' => 'application/json;charset=UTF-8',
@@ -206,7 +207,6 @@ TestUtils::test_page(
 ################################################################################
 # test sorting empty result set
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?q=***(groups>="does not exist")***&sort=_UNKNOWN_CUSTOM_VAR',
         'content_type' => 'application/json;charset=UTF-8',
@@ -218,12 +218,56 @@ TestUtils::test_page(
 ################################################################################
 # test columns when no column given
 {
-    local $ENV{'NO_POST_TOKEN'} = 1;
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?q=***(name != "does not exist")***',
         'content_type' => 'application/json;charset=UTF-8',
         'method'       => 'GET',
         'like'         => ['"state"'],
+    );
+};
+
+################################################################################
+# test count(*) with no matches
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?state=-1&columns=count(*)',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['count\(\*\)', '0'],
+    );
+};
+
+################################################################################
+# test aggregation with renamed labels
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/thruk/sessions?columns=count(*):renamed_label&active=-99',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['"renamed_label" : 0'],
+    );
+};
+
+################################################################################
+# normal query with renamed labels
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name:renamed_label&limit=1',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['"renamed_label"'],
+    );
+};
+
+################################################################################
+# normal query with unknown columns
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name,contacts,UNKNOWN',
+        'content_type' => 'application/json;charset=UTF-8',
+        'method'       => 'GET',
+        'like'         => ['"contacts"', '"UNKNOWN"'],
+        'unlike'       => ['"contacts" : null,'],
     );
 };
 

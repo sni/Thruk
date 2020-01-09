@@ -17,8 +17,8 @@ use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
 use Cpanel::JSON::XS ();
 use Encode qw/decode_utf8/;
-use Digest::MD5 qw(md5_hex);
 use File::Slurp qw/read_file/;
+use Data::Dumper qw//;
 
 ##############################################
 # use faster HTML::Escape if available
@@ -583,9 +583,9 @@ sub json_encode {
     # do not use utf8 here, results in double encoding because object should be utf8 already
     # for example business processes having utf8 characters in the plugin output
     if(scalar @_ > 1) {
-        return Cpanel::JSON::XS->new->encode([@_]);
+        return _escape_tags_js(Cpanel::JSON::XS->new->encode([@_]));
     }
-    return Cpanel::JSON::XS->new->encode($_[0]);
+    return _escape_tags_js(Cpanel::JSON::XS->new->encode($_[0]));
 }
 
 ########################################
@@ -598,8 +598,23 @@ returns json encoded object
 
 =cut
 sub encode_json_obj {
-    return decode_utf8(Cpanel::JSON::XS::encode_json($_[0])) if $_[1];
-    return Cpanel::JSON::XS::encode_json($_[0]);
+    return decode_utf8(_escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]))) if $_[1];
+    return _escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]));
+}
+
+########################################
+
+=head2 _escape_tags_js
+
+  _escape_tags_js($text)
+
+used to escape html tags so it can be used as javascript string
+
+=cut
+sub _escape_tags_js {
+    my($str) = @_;
+    $str =~ s%</(\w+)%<\\/$1%gmx;
+    return $str;
 }
 
 ########################################
@@ -618,7 +633,7 @@ sub escape_js {
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
     $text =~ s/'/&#39;/gmx;
-    return $text;
+    return _escape_tags_js($text);
 }
 
 
@@ -719,13 +734,13 @@ sub uniqnumber {
 
 =head2 get_message
 
-  get_message($c)
+  get_message($c, [$unescaped])
 
 get a message from an cookie, display and delete it
 
 =cut
 sub get_message {
-    my($c) = @_;
+    my($c, $unescaped) = @_;
 
     my $has_details = 0;
 
@@ -741,6 +756,7 @@ sub get_message {
         if(defined $cookie and $cookie->value) {
             my($style,$message) = split(/~~/mx, $cookie->value, 2);
             return '' unless $message;
+            $message = &escape_html($message);
             my @msg = split(/\n/mx, $message);
             if(scalar @msg > 1) {
                 $has_details = 2;
@@ -752,12 +768,13 @@ sub get_message {
     }
     # message from stash
     elsif(defined $c->stash->{'thruk_message'}) {
-        my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
         delete $c->res->{'cookies'}->{'thruk_message'};
         if(defined $c->stash->{'thruk_message_details'}) {
             $has_details = 1;
         }
-        return($style, $message, $has_details);
+        return($c->stash->{'thruk_message_style'}, $c->stash->{'thruk_message_raw'}, $has_details) if $unescaped;
+        my(undef, $thruk_message) = split/~~/mx, $c->stash->{'thruk_message'};
+        return($c->stash->{'thruk_message_style'}, $thruk_message, $has_details);
     }
 
     return '';
@@ -1074,25 +1091,14 @@ returns user token which can be used to validate requests
 =cut
 sub get_user_token {
     my($c) = @_;
-    return $c->stash->{'user_token'} if $c->stash->{'user_token'};
-    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
-        return("");
+    return("") unless $c->{'session'};
+
+    my $sessiondata = $c->{'session'};
+    if(!$sessiondata->{'csrf_token'}) {
+        # session but no token yet
+        (undef, undef,$sessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $sessiondata->{'private_key'}, $sessiondata);
     }
-    my $store  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
-    my $tokens = $store->get('token');
-    my $minage = time() - 7200;
-    for my $usr (keys %{$tokens}) {
-        delete $tokens->{$usr} if $tokens->{$usr}->{'time'} < $minage;
-    }
-    if(!defined $tokens->{$c->stash->{'remote_user'}}) {
-        $tokens->{$c->stash->{'remote_user'}} = {
-            'token' => md5_hex($c->stash->{'remote_user'}.time().rand()),
-        };
-    }
-    $tokens->{$c->stash->{'remote_user'}}->{'time'} = time();
-    $store->set('token', $tokens);
-    $c->stash->{'user_token'} = $tokens->{$c->stash->{'remote_user'}}->{'token'};
-    return $c->stash->{'user_token'};
+    return $sessiondata->{'csrf_token'};
 }
 
 ########################################
@@ -1124,7 +1130,7 @@ sub get_cmd_submit_hash {
     else {
         confess("no such type: $type");
     }
-    return(Cpanel::JSON::XS::encode_json($hash));
+    return(&json_encode($hash));
 }
 
 ########################################
@@ -1172,6 +1178,20 @@ returns lower case string
 sub lc {
     my($text) = @_;
     return(lc($text));
+}
+
+##############################################
+
+=head2 debug
+
+  print anything to stderr
+
+returns empty string
+
+=cut
+sub debug {
+    print STDERR Data::Dumper::Dumper(\@_);
+    return("");
 }
 
 ########################################

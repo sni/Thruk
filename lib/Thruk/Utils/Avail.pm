@@ -117,6 +117,8 @@ sub calculate_availability {
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
+    $c->stash->{t1}         = $c->req->parameters->{'t1'} || $start;
+    $c->stash->{t2}         = $c->req->parameters->{'t2'} || $end;
     if(defined $c->req->parameters->{'timeperiod'}) {
         $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
     } elsif(!defined $c->req->parameters->{'t1'} && !defined $c->req->parameters->{'t2'}) {
@@ -658,6 +660,28 @@ sub calculate_availability {
         unlink($file) if $file;
     }
 
+    if($c->req->parameters->{'outages'}) {
+        $c->stash->{'service'}       = $service // "";
+        $c->stash->{'host'}          = $host;
+        $c->stash->{'withdowntimes'} = $c->req->parameters->{'withdowntimes'} // 0;
+        $c->stash->{'template'} = 'avail_outages.tt';
+        my $only_host_services = undef;
+        my $unavailable_states = {
+            critical             => 1,
+            down                 => 1,
+            unreachable          => 1,
+        };
+        if($c->stash->{'withdowntimes'} == 0) {
+            for my $key (keys %{$unavailable_states}) {
+                $unavailable_states->{$key.'_downtime'} = 1;
+            }
+        }
+        my $logs = $ma->get_full_logs() || [];
+        my $outages = outages($logs, $unavailable_states, $start, $end, $host, $service, $only_host_services);
+        $c->stash->{'outages'} = $outages;
+        return;
+    }
+
     $c->stats->profile(begin => "got logs");
     if($full_log_entries) {
         $c->stash->{'logs'} = $ma->get_full_logs() || [];
@@ -766,7 +790,7 @@ sub fix_and_sort_logs {
             $c->stats->profile(begin => "avail.pm sort logs");
             Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
             my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.'2 '.$tempfile;
-            `$cmd`;
+            Thruk::Utils::IO::cmd($cmd);
             unlink($tempfile);
             $file = $tempfile.'2';
             $c->stats->profile(end   => "avail.pm sort logs");
@@ -774,7 +798,7 @@ sub fix_and_sort_logs {
             # use short file handling if no timeperiods have to be altered
             $c->stats->profile(begin => "avail.pm sort logs");
             my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.' '.join(' ', values %{$logs});
-            `$cmd`;
+            Thruk::Utils::IO::cmd($cmd);
             unlink(values %{$logs});
             $file = $tempfile;
             $c->stats->profile(end   => "avail.pm sort logs");
@@ -913,9 +937,20 @@ sub outages {
             }
         }
 
-        $in_timeperiod = 1 if $l->{'type'} eq 'TIMEPERIOD START';
-        $in_timeperiod = 0 if $l->{'type'} eq 'TIMEPERIOD STOP';
+        if($l->{'type'} eq 'TIMEPERIOD START') {
+            $in_timeperiod = 1;
+        }
+        elsif($l->{'type'} eq 'TIMEPERIOD STOP') {
+            $in_timeperiod = 0;
+            if($current) {
+                $current->{'real_end'} = $l->{'start'};
+                push @reduced_logs, $current if $in_timeperiod;
+                undef $current;
+            }
+            next;
+        }
 
+        # set current state
         $l->{'class'} = lc $l->{'class'};
         if($current_state && $l->{'class'} eq 'indeterminate') {
             if($current_state->{'class'} ne 'indeterminate') {
@@ -927,6 +962,7 @@ sub outages {
             $current_state = $l;
         }
 
+        # are we currently in the middle of an outage
         my $in_outage = 0;
         if($in_timeperiod) {
             if($l->{'in_downtime'}) {
@@ -972,6 +1008,12 @@ sub outages {
         $l->{'start'}    = $start if $start > $l->{'start'};
         $l->{'real_end'} = $end   if $end   < $l->{'real_end'};
         $l->{'duration'} = $l->{'real_end'} - $l->{'start'};
+        if($l->{'real_end'} > $l->{'end'} && $l->{'real_end'} > time()) {
+            $l->{'end'} = ""; # not yet ended
+        } else {
+            $l->{'end'} = $l->{'real_end'};
+        }
+        delete $l->{'real_end'};
         if($l->{'duration'} > 0) {
             push @{$outages}, $l;
         }

@@ -15,7 +15,7 @@
               <td class='linkBox'>
                 <a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a><br>
                 <a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a><br>
-                <a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a>)<br>
+                <a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Outages</a>)<br>
                 [% IF show_impacts_link %]<a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]">View Impacts For This Problem</a><br>[% END %]
                 [% IF show_rootproblems_link %]<a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]">View Root Problem For This Impact</a><br>[% END %]
                 [% IF use_feature_trends %]<a href="trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Trends For This Service</a><br>[% END %]
@@ -54,10 +54,10 @@
             </form>
           </div>
           [% END %]
-          [% IF service.depends_exec.size > 0 %]
-          <div class='data'>Parents:</div>
+          [% IF service.depends.size > 0 %]
+          <div class='data'>Depends On:</div>
           <div class='dataTitle'>
-            [% FOREACH parent IN service.depends_exec.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
+            [% FOREACH parent IN service.depends.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
           </div><br>
           [% END %]
           [% IF service.groups.size > 0 %]
@@ -273,6 +273,9 @@
                                 [% IF first_remaining >= 0 %]
                                   &nbsp;<span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
                                 [% END %]
+                              [% END %]
+                              [% IF service.depends_parents.size > 0 %]
+                              (parents: [% FOREACH parent IN service.depends_parents %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
                               [% END %]
                               [% IF service.depends_notify.size > 0 %]
                               (dependency: [% FOREACH parent IN service.depends_notify %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])

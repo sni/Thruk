@@ -205,19 +205,20 @@ returns search parameter based on request parameters
 
 =cut
 sub get_search_from_param {
-    my( $c, $prefix, $force ) = @_;
+    my($c, $prefix, $force, $params) = @_;
+    $params = $c->req->parameters unless defined $params;
 
-    unless ( $force || exists $c->req->parameters->{$prefix . '_hoststatustypes'} || exists $c->req->parameters->{$prefix . '_type'}) {
+    unless ( $force || exists $params->{$prefix . '_hoststatustypes'} || exists $params->{$prefix . '_type'}) {
         return;
     }
 
     # use the type or prop without prefix as global overide
     # ex.: hoststatustypes set from the totals link should override all filter
     my $search = {
-        'hoststatustypes'    => $c->stash->{'hoststatustypes'}    || $c->req->parameters->{ $prefix . '_hoststatustypes' },
-        'hostprops'          => $c->stash->{'hostprops'}          || $c->req->parameters->{ $prefix . '_hostprops' },
-        'servicestatustypes' => $c->stash->{'servicestatustypes'} || $c->req->parameters->{ $prefix . '_servicestatustypes' },
-        'serviceprops'       => $c->stash->{'serviceprops'}       || $c->req->parameters->{ $prefix . '_serviceprops' },
+        'hoststatustypes'    => $c->stash->{'hoststatustypes'}    || $params->{ $prefix . '_hoststatustypes' },
+        'hostprops'          => $c->stash->{'hostprops'}          || $params->{ $prefix . '_hostprops' },
+        'servicestatustypes' => $c->stash->{'servicestatustypes'} || $params->{ $prefix . '_servicestatustypes' },
+        'serviceprops'       => $c->stash->{'serviceprops'}       || $params->{ $prefix . '_serviceprops' },
     };
 
     # store global searches, these will be added to our search
@@ -228,17 +229,20 @@ sub get_search_from_param {
         'service'      => $c->stash->{'service'},
     };
 
-    if( defined $c->req->parameters->{ $prefix . '_type' } ) {
-        if( ref $c->req->parameters->{ $prefix . '_type' } eq 'ARRAY' ) {
-            for ( my $x = 0; $x < scalar @{ $c->req->parameters->{ $prefix . '_type' } }; $x++ ) {
+    if( defined $params->{ $prefix . '_type' } ) {
+        if( ref $params->{ $prefix . '_type' } eq 'ARRAY' ) {
+            for my $param ($prefix.'_val_pre', $prefix.'_value', $prefix.'_op') {
+                $params->{$param} = Thruk::Utils::list($params->{$param});
+            }
+            for(my $x = 0; $x < scalar @{$params->{$prefix . '_type'}}; $x++) {
                 my $text_filter = {
-                    val_pre => _is_defined($c->req->parameters->{ $prefix . '_val_pre' }->[$x], ''),
-                    type    => _is_defined($c->req->parameters->{ $prefix . '_type' }->[$x],    ''),
-                    value   => _is_defined($c->req->parameters->{ $prefix . '_value' }->[$x],   ''),
-                    op      => _is_defined($c->req->parameters->{ $prefix . '_op' }->[$x],      ''),
+                    val_pre => $params->{$prefix.'_val_pre'}->[$x] // '',
+                    type    => $params->{$prefix.'_type'}->[$x]    // '',
+                    value   => $params->{$prefix.'_value'}->[$x]   // '',
+                    op      => $params->{$prefix.'_op'}->[$x]      // '',
                 };
-                if($text_filter->{'type'} eq 'business impact' and defined $c->req->parameters->{ $prefix . '_value_sel' }->[$x]) {
-                    $text_filter->{'value'} = $c->req->parameters->{ $prefix . '_value_sel' }->[$x];
+                if($text_filter->{'type'} eq 'business impact' and defined $params->{ $prefix . '_value_sel' }->[$x]) {
+                    $text_filter->{'value'} = $params->{ $prefix . '_value_sel' }->[$x];
                 }
                 push @{ $search->{'text_filter'} }, $text_filter;
                 if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
@@ -246,13 +250,13 @@ sub get_search_from_param {
         }
         else {
             my $text_filter = {
-                val_pre => _is_defined($c->req->parameters->{ $prefix . '_val_pre' }, ''),
-                type    => _is_defined($c->req->parameters->{ $prefix . '_type' },    ''),
-                value   => _is_defined($c->req->parameters->{ $prefix . '_value' },   ''),
-                op      => _is_defined($c->req->parameters->{ $prefix . '_op' },      ''),
+                val_pre => $params->{$prefix.'_val_pre'} // '',
+                type    => $params->{$prefix.'_type'}    // '',
+                value   => $params->{$prefix.'_value'}   // '',
+                op      => $params->{$prefix.'_op'}      // '',
             };
-            if(defined $c->req->parameters->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
-                $text_filter->{'value'} = $c->req->parameters->{ $prefix . '_value_sel'};
+            if(defined $params->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
+                $text_filter->{'value'} = $params->{ $prefix . '_value_sel'};
             }
             push @{ $search->{'text_filter'} }, $text_filter;
             if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
@@ -273,11 +277,11 @@ sub get_search_from_param {
     }
 
     # put our default filter into the search box
-    if($c->req->parameters->{'add_default_service_filter'}) {
+    if($params->{'add_default_service_filter'}) {
         my $default_service_text_filter = set_default_filter($c);
         if($default_service_text_filter) {
             # not for service searches
-            if(!defined $c->req->parameters->{'s0_value'} || $c->req->parameters->{'s0_value'} !~ m/^se:/mx) {
+            if(!defined $params->{'s0_value'} || $params->{'s0_value'} !~ m/^se:/mx) {
                 unshift @{ $search->{'text_filter'} }, $default_service_text_filter;
             }
         }
@@ -297,7 +301,8 @@ returns filter from request parameter
 
 =cut
 sub do_filter {
-    my( $c, $prefix ) = @_;
+    my($c, $prefix, $params) = @_;
+    $params = $c->req->parameters unless defined $params;
 
     my $hostfilter;
     my $servicefilter;
@@ -310,30 +315,30 @@ sub do_filter {
 
     $prefix = 'dfl_' unless defined $prefix;
 
-    unless ( exists $c->req->parameters->{$prefix.'s0_hoststatustypes'}
-          or exists $c->req->parameters->{$prefix.'s0_type'}
-          or exists $c->req->parameters->{'s0_hoststatustypes'}
-          or exists $c->req->parameters->{'s0_type'}
-          or exists $c->req->parameters->{'complex'} )
+    unless ( exists $params->{$prefix.'s0_hoststatustypes'}
+          or exists $params->{$prefix.'s0_type'}
+          or exists $params->{'s0_hoststatustypes'}
+          or exists $params->{'s0_type'}
+          or exists $params->{'complex'} )
     {
 
         # classic search
         my $search;
-        ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($c);
+        ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($c, $params);
 
         # convert that into a new search
         push @{$searches}, $search;
     }
     else {
 
-        if(   exists $c->req->parameters->{'s0_hoststatustypes'}
-           or exists $c->req->parameters->{'s0_type'} ) {
+        if(   exists $params->{'s0_hoststatustypes'}
+           or exists $params->{'s0_type'} ) {
             $prefix = '';
         }
 
         # complex filter search?
         push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
-        for my $x (@{_get_search_ids($c->req->parameters, $prefix, $c->config->{'maximum_search_boxes'})}) {
+        for my $x (@{_get_search_ids($c, $params, $prefix, $c->config->{'maximum_search_boxes'})}) {
             next if $x == 0; # already added
             my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
@@ -362,15 +367,16 @@ reset filter from c->request->parameters
 
 =cut
 sub reset_filter {
-    my($c) = @_;
+    my($c, $params) = @_;
+    $params = $c->req->parameters unless defined $params;
     delete $c->stash->{'host'};
     delete $c->stash->{'hostgroup'};
     delete $c->stash->{'servicegroup'};
     delete $c->stash->{'service'};
-    for my $key (keys %{$c->req->parameters}) {
-        delete $c->req->parameters->{$key} if $key =~ m/^dfl_/mx;
-        delete $c->req->parameters->{$key} if $key =~ m/^svc_/mx;
-        delete $c->req->parameters->{$key} if $key =~ m/^hst_/mx;
+    for my $key (keys %{$params}) {
+        delete $params->{$key} if $key =~ m/^dfl_/mx;
+        delete $params->{$key} if $key =~ m/^svc_/mx;
+        delete $params->{$key} if $key =~ m/^hst_/mx;
     }
     return;
 }
@@ -385,14 +391,15 @@ returns filter for old style parameter
 
 =cut
 sub classic_filter {
-    my( $c ) = @_;
+    my($c, $params) = @_;
+    $params = $c->req->parameters unless defined $params;
 
     # classic search
     my $errors       = 0;
-    my $host         = $c->req->parameters->{'host'}         || '';
-    my $hostgroup    = $c->req->parameters->{'hostgroup'}    || '';
-    my $servicegroup = $c->req->parameters->{'servicegroup'} || '';
-    my $contact      = $c->req->parameters->{'contact'}      || '';
+    my $host         = $params->{'host'}         || '';
+    my $hostgroup    = $params->{'hostgroup'}    || '';
+    my $servicegroup = $params->{'servicegroup'} || '';
+    my $contact      = $params->{'contact'}      || '';
 
     $c->stash->{'host'}         = $host         if defined $c->stash;
     $c->stash->{'hostgroup'}    = $hostgroup    if defined $c->stash;
@@ -445,10 +452,10 @@ sub classic_filter {
     }
 
     # then add some more filter based on get parameter
-    my $hoststatustypes    = $c->req->parameters->{'hoststatustypes'};
-    my $hostprops          = $c->req->parameters->{'hostprops'};
-    my $servicestatustypes = $c->req->parameters->{'servicestatustypes'};
-    my $serviceprops       = $c->req->parameters->{'serviceprops'};
+    my $hoststatustypes    = $params->{'hoststatustypes'};
+    my $hostprops          = $params->{'hostprops'};
+    my $servicestatustypes = $params->{'servicestatustypes'};
+    my $serviceprops       = $params->{'serviceprops'};
 
     my( $host_statustype_filtername,  $host_prop_filtername,  $service_statustype_filtername,  $service_prop_filtername );
     my( $host_statustype_filtervalue, $host_prop_filtervalue, $service_statustype_filtervalue, $service_prop_filtervalue );
@@ -525,7 +532,7 @@ sub do_search {
     my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
 
     for my $search ( @{$searches} ) {
-        my( $tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter ) = Thruk::Utils::Status::single_search( $c, $search );
+        my($tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter) = Thruk::Utils::Status::single_search($c, $search);
         push @hostfilter,          $tmp_hostfilter          if defined $tmp_hostfilter;
         push @servicefilter,       $tmp_servicefilter       if defined $tmp_servicefilter;
         push @hostgroupfilter,     $tmp_hostgroupfilter     if defined $tmp_hostgroupfilter;
@@ -625,15 +632,15 @@ sub fill_totals_box {
                 }
                 elsif($service->{'state'} == 1) {
                     $service_stats->{'warning'}++;
-                    $service_stats->{'warning_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                    $service_stats->{'warning_and_unhandled'}++  if _is_service_unhandled($service);
                 }
                 elsif($service->{'state'} == 2) {
                     $service_stats->{'critical'}++;
-                    $service_stats->{'critical_and_unhandled'}++ if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                    $service_stats->{'critical_and_unhandled'}++ if _is_service_unhandled($service);
                 }
                 elsif($service->{'state'} == 3) {
                     $service_stats->{'unknown'}++;
-                    $service_stats->{'unknown_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                    $service_stats->{'unknown_and_unhandled'}++  if _is_service_unhandled($service);
                 }
             }
             next if defined $hosts{$service->{'host_name'}};
@@ -653,7 +660,6 @@ sub fill_totals_box {
                     $host_stats->{'unreachable'}++;
                     $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
                 }
-
             }
         }
     } else {
@@ -669,6 +675,17 @@ sub fill_totals_box {
     return 1;
 }
 
+##############################################
+# return true if service problem is unhandled
+sub _is_service_unhandled {
+    my($service) = @_;
+    return if $service->{'scheduled_downtime_depth'} != 0;
+    return if $service->{'acknowledged'} != 0;
+    return if $service->{'host_scheduled_downtime_depth'} != 0;
+    return if $service->{'host_acknowledged'} != 0;
+    return if $service->{'host_state'} != 0;
+    return 1;
+}
 
 ##############################################
 
@@ -812,6 +829,11 @@ sub single_search {
             }
         }
 
+        if ( $filter->{'type'} eq 'action menu' ) {
+            $filter->{'type'}    = 'custom variable';
+            $filter->{'val_pre'} = "THRUK_ACTION_MENU";
+        }
+
         if ( $filter->{'type'} eq 'search' ) {
             # skip empty searches
             next if $value eq '';
@@ -828,9 +850,11 @@ sub single_search {
                                        { address            => { $op     => $value } },
                                        { groups             => { $listop => $value } },
                                        { plugin_output      => { $op     => $value } },
-                                       { long_plugin_output => { $op     => $value } },
                                        $hfilter,
                                     ];
+            if($c->config->{'search_long_plugin_output'}) {
+                push @{$host_search_filter}, { long_plugin_output => { $op     => $value } };
+            }
             push @hostfilter,       { $joinop => $host_search_filter };
             push @hosttotalsfilter, { $joinop => $host_search_filter };
 
@@ -839,7 +863,6 @@ sub single_search {
                                           { display_name       => { $op     => $value } },
                                           { groups             => { $listop => $value } },
                                           { plugin_output      => { $op     => $value } },
-                                          { long_plugin_output => { $op     => $value } },
                                           { host_name          => { $op     => $value } },
                                           { host_display_name  => { $op     => $value } },
                                           { host_alias         => { $op     => $value } },
@@ -847,6 +870,9 @@ sub single_search {
                                           { host_groups        => { $listop => $value } },
                                           $sfilter,
                                         ];
+            if($c->config->{'search_long_plugin_output'}) {
+                push @{$service_search_filter}, { long_plugin_output => { $op     => $value } },;
+            }
             push @servicefilter,       { $joinop => $service_search_filter };
             push @servicetotalsfilter, { $joinop => $service_search_filter };
         }
@@ -988,6 +1014,19 @@ sub single_search {
             push @hostfilter,    { event_handler => { $op => $value } };
             push @servicefilter, { event_handler => { $op => $value } };
         }
+        elsif ( $filter->{'type'} eq 'command' ) {
+            # convert equal filter to regex, because check_command looks like: check-host-alive!args...
+            if($op eq '=') {
+                $op = '~';
+                $value = '^'.$value.'\!';
+            }
+            elsif($op eq '!=') {
+                $op = '!~';
+                $value = '^'.$value.'\!';
+            }
+            push @hostfilter,    { check_command => { $op => $value } };
+            push @servicefilter, { check_command => { $op => $value } };
+        }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
@@ -1084,6 +1123,11 @@ sub single_search {
                 $errors++;
                 Thruk::Utils::set_message($c, 'fail_message', "unknown filter: ".$filter->{'type'});
             }
+        }
+
+
+        if($filter->{'type'} eq 'custom variable' && $filter->{'val_pre'} eq "THRUK_ACTION_MENU") {
+            $filter->{'type'} = "action menu";
         }
     }
 
@@ -2149,13 +2193,6 @@ sub set_default_filter {
 }
 
 ##############################################
-sub _is_defined {
-    my($a, $b) = @_;
-    return $a if defined $a;
-    return $b;
-}
-
-##############################################
 
 =head2 get_host_columns
 
@@ -2400,7 +2437,7 @@ sub set_comments_and_downtimes {
 
 ##############################################
 sub _get_search_ids {
-    my($params, $prefix, $maximum) = @_;
+    my($c, $params, $prefix, $maximum) = @_;
     my $ids = {};
     my $search = $prefix.'s';
     for my $key (grep /^$prefix/mx, keys %{$params}) {
@@ -2411,9 +2448,11 @@ sub _get_search_ids {
     my @list = sort { $a <=> $b } keys %{$ids};
     if($maximum > 0 && scalar @list > $maximum) {
         splice(@list,$maximum);
+        Thruk::Utils::set_message($c, 'fail_message', sprintf("maximum number of %d search boxes hit, consider raising config option: maximum_search_boxes", $maximum));
     }
     return(\@list);
 }
+
 ##############################################
 
 =head2 parse_lexical_filter
@@ -2500,6 +2539,86 @@ sub parse_lexical_filter {
         }
     }
     return $filter;
+}
+
+##############################################
+
+=head2 get_custom_variable_names
+
+  get_custom_variable_names($c, $type, $exposed_only, $filter)
+
+returns list of available custom variables. $type can be 'host', 'service' or 'all'.
+
+=cut
+sub get_custom_variable_names {
+    my($c, $type, $exposed_only, $filter) = @_;
+
+    my $data = [];
+    my $vars = {};
+    # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
+    # this leads to: Sorry, Operator  for custom variable lists not implemented.
+    my($hosts, $services) = ([],[]);
+    if($type eq 'host' || $type eq 'all') {
+        $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
+    }
+    if($type eq 'service' || $type eq 'all') {
+        $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
+    }
+    for my $obj (@{$hosts}, @{$services}) {
+        next unless ref $obj->{custom_variable_names} eq 'ARRAY';
+        for my $key (@{$obj->{custom_variable_names}}) {
+            $vars->{$key} = 1;
+        }
+    }
+    @{$data} = sort keys %{$vars};
+    @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
+
+    # filter all of them which are not listed by show_custom_vars unless we have extended permissions
+    if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
+        my $newlist = [];
+        my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+        for my $varname (@{$data}) {
+            if(Thruk::Utils::check_custom_var_list($varname, $allowed)) {
+                push @{$newlist}, $varname;
+            }
+        }
+        $data = $newlist;
+    }
+    return($data);
+}
+
+##############################################
+
+=head2 filter_to_param
+
+  filter_to_param($prefix, $filter)
+
+returns url parameters for this filter
+
+=cut
+sub filter_to_param {
+    my($prefix, $filter) = @_;
+    my $params = {};
+
+    $params->{$prefix.'hoststatustypes'}    = $filter->{'hoststatustypes'};
+    $params->{$prefix.'hostprops'}          = $filter->{'hostprops'};
+    $params->{$prefix.'servicestatustypes'} = $filter->{'servicestatustypes'};
+    $params->{$prefix.'serviceprops'}       = $filter->{'serviceprops'};
+
+    $params->{$prefix.'type'}    = [];
+    $params->{$prefix.'val_pre'} = [];
+    $params->{$prefix.'op'}      = [];
+    $params->{$prefix.'value'}   = [];
+    if($filter->{'text_filter'}) {
+        for my $f (@{$filter->{'text_filter'}}) {
+            push @{$params->{$prefix.'type'}}, $f->{'type'};
+            push @{$params->{$prefix.'val_pre'}}, $f->{'val_pre'};
+            push @{$params->{$prefix.'op'}}, $f->{'op'};
+            push @{$params->{$prefix.'value'}}, $f->{'value'};
+        }
+    }
+
+    return($params);
 }
 
 ##############################################

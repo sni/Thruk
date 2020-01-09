@@ -35,7 +35,7 @@ sub index {
     return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
 
     my $type = $c->req->parameters->{'type'};
-    $c->stash->{type}             = $type;
+    $c->stash->{type} = $type;
     return unless defined $type;
 
     # timeperiods
@@ -84,13 +84,13 @@ sub index {
 
     # hostgroups
     elsif($type eq 'hostgroups') {
-        $c->{'db'}->get_hostgroups(sort => 'name', pager => 1);
+        $c->{'db'}->get_hostgroups(sort => 'name', remove_duplicates => 1, pager => 1);
         $c->stash->{template} = 'config_hostgroups.tt';
     }
 
     # servicegroups
     elsif($type eq 'servicegroups') {
-        $c->{'db'}->get_servicegroups(sort => 'name', pager => 1);
+        $c->{'db'}->get_servicegroups(sort => 'name', remove_duplicates => 1, pager => 1);
         $c->stash->{template} = 'config_servicegroups.tt';
     }
 

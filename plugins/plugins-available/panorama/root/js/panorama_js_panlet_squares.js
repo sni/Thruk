@@ -126,29 +126,7 @@ Ext.define('TP.PanletSquares', {
             }]
         });
         TP.addFormFilter(panel, panel.has_search_button);
-
-        panel.addGearItems({
-            fieldLabel:   'Background',
-            xtype:        'fieldcontainer',
-            layout:      { type: 'hbox', align: 'stretch' },
-            items:        [{
-                xtype:        'label',
-                text:         'Border: ',
-                margins:      {top: 3, right: 2, bottom: 0, left: 0}
-            }, {
-                xtype:        'checkbox',
-                name:         'showborder'
-            }, {
-                xtype:        'label',
-                text:         'Color: ',
-                margins:      {top: 3, right: 2, bottom: 0, left: 7}
-            }, {
-                xtype:        'colorcbo',
-                name:         'background',
-                value:        '',
-                flex:          1
-            }]
-        });
+        TP.addGearBackgroundOptions(panel);
 
         panel.addGearItems({
             xtype:        'fieldcontainer',
@@ -316,46 +294,17 @@ Ext.define('TP.PanletSquares', {
                     name = matches[1];
                 }
                 popup_fbar_btn.push({
-                    type: 'button',
-                    text:  name,
-                    icon:  icon,
-                    handler: function(This) {
-                        var btn = This;
-                        // create fake panel context to execute the click command from the menu
-                        panel.fakePanel = Ext.create('Ext.panel.Panel', {
-                            autoShow: false,
-                            floating: true,
-                            x: 100,
-                            y: 100,
-                            autoEl:  'a',
-                            href:    '#',
-                            text:    ' ',
-                            renderTo: Ext.getBody(),
-                            panel_id: panel.panel_id,
-                            xdata: {
-                                link: {
-                                    link: val
-                                },
-                                general: {
-                                    host: panel.tip.item.host_name,
-                                    service: panel.tip.item.description
-                                }
-                            },
-                            listeners: {
-                                afterrender: function(This) {
-                                    var options = {
-                                        alignTo:  btn,
-                                        callback: function() {
-                                            window.setTimeout(function() {
-                                                panel.tip.hide();
-                                            }, 500);
-                                        }
-                                    };
-                                    TP.iconClickHandlerExec(This.id, val, This, undefined, undefined, options);
-                                }
-                            }
-                        });
-                        panel.fakePanel.show();
+                    xtype:      'tp_action_menu_button',
+                    text:        name,
+                    icon:        icon,
+                    panel:       panel,
+                    host:        '',
+                    service:     '',
+                    action_link: val,
+                    afterClickCallback: function() {
+                        window.setTimeout(function() {
+                            panel.tip.hide();
+                        }, 500)
                     }
                 });
             }
@@ -370,7 +319,13 @@ Ext.define('TP.PanletSquares', {
             cls: 'squares_popup',
             minWidth: Ext.Array.max([200, (popup_fbar_btn.length * 110)]),
             buttonAlign: 'left',
-            fbar: popup_fbar_btn,
+            dockedItems: [{
+                xtype:  'toolbar',
+                dock:   'bottom',
+                ui:     'footer',
+                itemId: 'buttons',
+                items:   popup_fbar_btn
+            }],
             listeners: {
                 beforeshow: function updateTipBody(tip, eOpts) {
                     if(!panel.tip.itemUniq || !panel.dataStore[panel.tip.itemUniq]) { return false; }
@@ -398,16 +353,18 @@ Ext.define('TP.PanletSquares', {
                             detailsBtn.setHref(item.link);
                         }
                     }
+                    Ext.Array.each(tip.dockedItems.get("buttons").items.items, function(btn, i) {
+                        if(btn.xtype == 'tp_action_menu_button') {
+                            btn.host    = item.host_name;
+                            btn.service = item.description;
+                        }
+                    })
                     return(true);
                 },
                 beforehide: function(tip, eOpts) {
                     // don't hide if there is still a menu open
                     if(Ext.getCmp('iconActionMenu')) {
                         return(false);
-                    }
-                    if(panel.fakePanel) {
-                        panel.fakePanel.destroy();
-                        delete panel.fakePanel;
                     }
                     return(true);
                 }
@@ -421,7 +378,7 @@ TP.square_item_details_link = function(panel, item) {
         return("#");
     }
     var options = {
-        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id)),
+        backends: TP.getActiveBackendsPanel(panel.tab),
         filter:   panel.xdata.filter,
         task:    'redirect_status'
     };
@@ -473,7 +430,7 @@ TP.square_item_details = function(item) {
 TP.square_update_callback = function(panel, data, retries) {
     if(!panel.el || !panel.el.dom) { return; }
     if(!panel.containerItem || !panel.containerItem.body.el || !panel.containerItem.body.el.dom) { return; }
-    var tab   = Ext.getCmp(panel.panel_id);
+    var tab   = panel.tab;
     var iconsetName = panel.xdata.iconSet;
     if(iconsetName == '' || iconsetName == undefined) {
         if(!tab) { return; }

@@ -213,6 +213,7 @@ sub _get_imported_modules {
     next if $key eq 'Thruk::Utils::Reports::CustomRender'; # optionally implemented
     next if $key eq 'Thruk::Utils::XS'; # optionally
     next if $key eq 'authentication)'; # false positive
+    next if $key eq 'Monitoring::Plugin::Range'; # optionally
     push @mods, $key;
   }
   return \@mods;

@@ -48,12 +48,28 @@ already and will return the results with permissions of the current user.
 === API Key
 
 The web rest api accepts the api key as http header. You can create API keys from
-the user profile page if `api_keys_enabled` is enabled in your thruk config.
+the user profile page if `api_keys_enabled` is enabled in your thruk config or with
+the rest api itself using the `/thruk/api_keys` endpoint.
 
 ------
   %> curl -H 'X-Thruk-Auth-Key: apikey' \
           -gk 'https://localhost/thruk/r/hosts
 ------
+
+=== Superuser API Key
+A superuser API key (previously named system api key) can be created by admins
+and is not bound to a specific user. Instead you can set a username with the
+`X-Thruk-Auth-User` HTTP header. This makes superuser api keys very powerful
+and they should be handled with the same care as the secret key.
+A superuser key can still be restricted to certain roles.
+
+------
+  %> curl -H 'X-Thruk-Auth-Key: apikey' \
+          -H 'X-Thruk-Auth-User: automation' \
+          -d 'comment=test' \
+          -gk 'https://localhost/thruk/r/hosts/localhost/cmd/schedule_host_downtime
+------
+
 
 === Secret Key
 
@@ -66,6 +82,7 @@ when using OMD.
           -H 'X-Thruk-Auth-User: thrukadmin' \
           -gk 'https://localhost/thruk/r/hosts
 ------
+
 
 Since the secretkey gives you superadminpower. You can set the context of the
 result to any user you like with the `X-Thruk-Auth-User` HTTP header.
@@ -144,6 +161,14 @@ Curl requires you to set the `globoff` option:
   %> curl -gk 'https://user:pass@localhost/thruk/r/hosts?name[regex]=^t'
 ------
 
+ex.: numeric filter using the operators `<`, `>`, `>=` or `<=` will be expanded
+like described in link:rest_commands.html#relative-timestamps[relative timestamps].
+
+list session which had been active within the last 10minutes
+
+------
+  %> thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
+------
 
 Possible operators with their alias:
 
@@ -152,8 +177,10 @@ Possible operators with their alias:
 |Operator  |Alias    |Description
 | =        | eq      |Equal match
 | !=       | ne      |Not equal match
-| ~        | regex   |Regular expression match
-| !~       | nregex  |Not regular expression match
+| ~        |         |Regular expression match (case-sensitive)
+| !~       |         |Negated regular expression match (case-sensitive)
+| ~~       | regex   |Regular expression match (case-insensitive)
+| !~       | nregex  |Negated regular expression match (case-insensitive)
 | >        | gt      |Greater than numeric comparisson
 | <        | lt      |Lower than numeric comparisson
 | >=       | gte     |Greater or equal numeric comparisson. `contains` in list context
@@ -168,7 +195,7 @@ You can use the alias name to workaround urlencoding issues.
 Complex filtering logic is possible by using a simple query language which
 supports logical operators. The query can be passed urlencoded with the `q`
 parameter. An alternative to url encoding is using a special quote syntax by
-encapsulating the query in `***`. Everything between `***` will be
+encapsulating the query in `+***+`. Everything between `+***+` will be
 automatically url encoded. (You still need to get quoting right).
 
 ------
@@ -228,6 +255,12 @@ ex.: return name and state for all hosts:
 ------
 
 
+Rename columns by appending `:name` like this:
+------
+  %> thruk r /hosts?columns=name:host_name,state:status
+------
+
+
 == Aggregation Functions
 
 Aggregation functions can be used to get statistical information.
@@ -254,6 +287,12 @@ ex.: list average execution time over all services grouped by state.
   %> thruk r '/services?columns=avg(execution_time),state&sort=avg(execution_time)'
 ------
 
+Rename columns by appending `:name`
+------
+  %> thruk r '/thruk/sessions?columns=count(*):sessions'
+------
+
+
 == Backends / Sites
 
 If you have multiple sites connected to Thruk, you may want to talk only to
@@ -261,19 +300,19 @@ specific sites. There are multiple methods to set the backends for your
 request. You can combine multiple sites with commas.
 
 * Use a path prefix `/sites/<sitename,...>`:
-
++
 ------
   %> thruk r /sites/test,prod/hosts
 ------
-
++
 * Use the `backends` option with the cli client:
-
++
 ------
   %> thruk r -b test,prod /hosts
 ------
-
++
 * Set the `backends` url parameter:
-
++
 ------
   %> thruk r /hosts?backends=test,prod
 ------
@@ -447,6 +486,11 @@ lists host / service check statistics.
 lists livestatus commands.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
 
+=== GET /commands/<name>
+
+lists commands for given name.
+alias for /commands?name=<name>
+
 === GET /commands/<name>/config
 
 Returns configuration for given command.
@@ -469,11 +513,21 @@ Deletes given command from configuration.
 lists livestatus comments.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
 
+=== GET /comments/<id>
+
+lists comments for given id.
+alias for /comments?id=<id>
+
 === POST /config/check
 
 Returns result from config check.
 
 === GET /config/diff
+
+
+Optional arguments:
+
+  * ignore_whitespace
 
 Returns differences between filesystem and stashed config changes.
 
@@ -499,7 +553,7 @@ returns all config files
 |===========================================
 |Attribute                         | Description
 |content                           | raw file content
-|md5                               | md5 checksum
+|hex                               | hex sum for this file
 |mtime                             | unix timestamp of last modification
 |path                              | filesystem path
 |peer_key                          | backend id when having multiple sites connected
@@ -564,15 +618,20 @@ Saves stashed configuration changes to disk.
 lists livestatus contactgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
 
+=== GET /contactgroups/<name>
+
+lists contactgroups for given name.
+alias for /contactgroups?name=<name>
+
 === POST /contactgroups/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-contactgroups-name-cmd-disable_contactgroup_host_notifications[disable_contactgroup_host_notifications]
- - link:rest_commands.html#post-contactgroups-name-cmd-disable_contactgroup_svc_notifications[disable_contactgroup_svc_notifications]
- - link:rest_commands.html#post-contactgroups-name-cmd-enable_contactgroup_host_notifications[enable_contactgroup_host_notifications]
- - link:rest_commands.html#post-contactgroups-name-cmd-enable_contactgroup_svc_notifications[enable_contactgroup_svc_notifications]
+ - link:rest_commands.html#post-contactgroupsnamecmddisable_contactgroup_host_notifications[disable_contactgroup_host_notifications]
+ - link:rest_commands.html#post-contactgroupsnamecmddisable_contactgroup_svc_notifications[disable_contactgroup_svc_notifications]
+ - link:rest_commands.html#post-contactgroupsnamecmdenable_contactgroup_host_notifications[enable_contactgroup_host_notifications]
+ - link:rest_commands.html#post-contactgroupsnamecmdenable_contactgroup_svc_notifications[enable_contactgroup_svc_notifications]
 
 === GET /contactgroups/<name>/config
 
@@ -596,16 +655,21 @@ Deletes given contactgroup from configuration.
 lists livestatus contacts.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
 
+=== GET /contacts/<name>
+
+lists contacts for given name.
+alias for /contacts?name=<name>
+
 === POST /contacts/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-contacts-name-cmd-change_custom_contact_var[change_custom_contact_var]
- - link:rest_commands.html#post-contacts-name-cmd-disable_contact_host_notifications[disable_contact_host_notifications]
- - link:rest_commands.html#post-contacts-name-cmd-disable_contact_svc_notifications[disable_contact_svc_notifications]
- - link:rest_commands.html#post-contacts-name-cmd-enable_contact_host_notifications[enable_contact_host_notifications]
- - link:rest_commands.html#post-contacts-name-cmd-enable_contact_svc_notifications[enable_contact_svc_notifications]
+ - link:rest_commands.html#post-contactsnamecmdchange_custom_contact_var[change_custom_contact_var]
+ - link:rest_commands.html#post-contactsnamecmddisable_contact_host_notifications[disable_contact_host_notifications]
+ - link:rest_commands.html#post-contactsnamecmddisable_contact_svc_notifications[disable_contact_svc_notifications]
+ - link:rest_commands.html#post-contactsnamecmdenable_contact_host_notifications[enable_contact_host_notifications]
+ - link:rest_commands.html#post-contactsnamecmdenable_contact_svc_notifications[enable_contact_svc_notifications]
 
 === GET /contacts/<name>/config
 
@@ -629,30 +693,40 @@ Deletes given contact from configuration.
 lists livestatus downtimes.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
 
+=== GET /downtimes/<id>
+
+lists downtimes for given id.
+alias for /downtimes?id=<id>
+
 === GET /hostgroups
 
 lists livestatus hostgroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+
+=== GET /hostgroups/<name>
+
+lists hostgroups for given name.
+alias for /hostgroups?name=<name>
 
 === POST /hostgroups/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-hostgroups-name-cmd-disable_hostgroup_host_checks[disable_hostgroup_host_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-disable_hostgroup_host_notifications[disable_hostgroup_host_notifications]
- - link:rest_commands.html#post-hostgroups-name-cmd-disable_hostgroup_passive_host_checks[disable_hostgroup_passive_host_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-disable_hostgroup_passive_svc_checks[disable_hostgroup_passive_svc_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-disable_hostgroup_svc_checks[disable_hostgroup_svc_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-disable_hostgroup_svc_notifications[disable_hostgroup_svc_notifications]
- - link:rest_commands.html#post-hostgroups-name-cmd-enable_hostgroup_host_checks[enable_hostgroup_host_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-enable_hostgroup_host_notifications[enable_hostgroup_host_notifications]
- - link:rest_commands.html#post-hostgroups-name-cmd-enable_hostgroup_passive_host_checks[enable_hostgroup_passive_host_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-enable_hostgroup_passive_svc_checks[enable_hostgroup_passive_svc_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-enable_hostgroup_svc_checks[enable_hostgroup_svc_checks]
- - link:rest_commands.html#post-hostgroups-name-cmd-enable_hostgroup_svc_notifications[enable_hostgroup_svc_notifications]
- - link:rest_commands.html#post-hostgroups-name-cmd-schedule_hostgroup_host_downtime[schedule_hostgroup_host_downtime]
- - link:rest_commands.html#post-hostgroups-name-cmd-schedule_hostgroup_svc_downtime[schedule_hostgroup_svc_downtime]
+ - link:rest_commands.html#post-hostgroupsnamecmddisable_hostgroup_host_checks[disable_hostgroup_host_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmddisable_hostgroup_host_notifications[disable_hostgroup_host_notifications]
+ - link:rest_commands.html#post-hostgroupsnamecmddisable_hostgroup_passive_host_checks[disable_hostgroup_passive_host_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmddisable_hostgroup_passive_svc_checks[disable_hostgroup_passive_svc_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmddisable_hostgroup_svc_checks[disable_hostgroup_svc_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmddisable_hostgroup_svc_notifications[disable_hostgroup_svc_notifications]
+ - link:rest_commands.html#post-hostgroupsnamecmdenable_hostgroup_host_checks[enable_hostgroup_host_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmdenable_hostgroup_host_notifications[enable_hostgroup_host_notifications]
+ - link:rest_commands.html#post-hostgroupsnamecmdenable_hostgroup_passive_host_checks[enable_hostgroup_passive_host_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmdenable_hostgroup_passive_svc_checks[enable_hostgroup_passive_svc_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmdenable_hostgroup_svc_checks[enable_hostgroup_svc_checks]
+ - link:rest_commands.html#post-hostgroupsnamecmdenable_hostgroup_svc_notifications[enable_hostgroup_svc_notifications]
+ - link:rest_commands.html#post-hostgroupsnamecmdschedule_hostgroup_host_downtime[schedule_hostgroup_host_downtime]
+ - link:rest_commands.html#post-hostgroupsnamecmdschedule_hostgroup_svc_downtime[schedule_hostgroup_svc_downtime]
 
 === GET /hostgroups/<name>/config
 
@@ -696,51 +770,51 @@ alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-hosts-name-cmd-acknowledge_host_problem[acknowledge_host_problem]
- - link:rest_commands.html#post-hosts-name-cmd-acknowledge_host_problem_expire[acknowledge_host_problem_expire]
- - link:rest_commands.html#post-hosts-name-cmd-add_host_comment[add_host_comment]
- - link:rest_commands.html#post-hosts-name-cmd-change_custom_host_var[change_custom_host_var]
- - link:rest_commands.html#post-hosts-name-cmd-change_host_check_command[change_host_check_command]
- - link:rest_commands.html#post-hosts-name-cmd-change_host_event_handler[change_host_event_handler]
- - link:rest_commands.html#post-hosts-name-cmd-change_host_modattr[change_host_modattr]
- - link:rest_commands.html#post-hosts-name-cmd-change_max_host_check_attempts[change_max_host_check_attempts]
- - link:rest_commands.html#post-hosts-name-cmd-change_normal_host_check_interval[change_normal_host_check_interval]
- - link:rest_commands.html#post-hosts-name-cmd-change_retry_host_check_interval[change_retry_host_check_interval]
- - link:rest_commands.html#post-hosts-name-cmd-del_active_host_downtimes[del_active_host_downtimes]
- - link:rest_commands.html#post-hosts-name-cmd-del_all_host_comments[del_all_host_comments]
- - link:rest_commands.html#post-hosts-name-cmd-delay_host_notification[delay_host_notification]
- - link:rest_commands.html#post-hosts-name-cmd-disable_all_notifications_beyond_host[disable_all_notifications_beyond_host]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_and_child_notifications[disable_host_and_child_notifications]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_check[disable_host_check]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_event_handler[disable_host_event_handler]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_flap_detection[disable_host_flap_detection]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_notifications[disable_host_notifications]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_svc_checks[disable_host_svc_checks]
- - link:rest_commands.html#post-hosts-name-cmd-disable_host_svc_notifications[disable_host_svc_notifications]
- - link:rest_commands.html#post-hosts-name-cmd-disable_passive_host_checks[disable_passive_host_checks]
- - link:rest_commands.html#post-hosts-name-cmd-enable_all_notifications_beyond_host[enable_all_notifications_beyond_host]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_and_child_notifications[enable_host_and_child_notifications]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_check[enable_host_check]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_event_handler[enable_host_event_handler]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_flap_detection[enable_host_flap_detection]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_notifications[enable_host_notifications]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_svc_checks[enable_host_svc_checks]
- - link:rest_commands.html#post-hosts-name-cmd-enable_host_svc_notifications[enable_host_svc_notifications]
- - link:rest_commands.html#post-hosts-name-cmd-enable_passive_host_checks[enable_passive_host_checks]
- - link:rest_commands.html#post-hosts-name-cmd-process_host_check_result[process_host_check_result]
- - link:rest_commands.html#post-hosts-name-cmd-remove_host_acknowledgement[remove_host_acknowledgement]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_and_propagate_host_downtime[schedule_and_propagate_host_downtime]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_and_propagate_triggered_host_downtime[schedule_and_propagate_triggered_host_downtime]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_forced_host_check[schedule_forced_host_check]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_forced_host_svc_checks[schedule_forced_host_svc_checks]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_host_check[schedule_host_check]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_host_downtime[schedule_host_downtime]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_host_svc_checks[schedule_host_svc_checks]
- - link:rest_commands.html#post-hosts-name-cmd-schedule_host_svc_downtime[schedule_host_svc_downtime]
- - link:rest_commands.html#post-hosts-name-cmd-send_custom_host_notification[send_custom_host_notification]
- - link:rest_commands.html#post-hosts-name-cmd-set_host_notification_number[set_host_notification_number]
- - link:rest_commands.html#post-hosts-name-cmd-start_obsessing_over_host[start_obsessing_over_host]
- - link:rest_commands.html#post-hosts-name-cmd-stop_obsessing_over_host[stop_obsessing_over_host]
+ - link:rest_commands.html#post-hostsnamecmdacknowledge_host_problem[acknowledge_host_problem]
+ - link:rest_commands.html#post-hostsnamecmdacknowledge_host_problem_expire[acknowledge_host_problem_expire]
+ - link:rest_commands.html#post-hostsnamecmdadd_host_comment[add_host_comment]
+ - link:rest_commands.html#post-hostsnamecmdchange_custom_host_var[change_custom_host_var]
+ - link:rest_commands.html#post-hostsnamecmdchange_host_check_command[change_host_check_command]
+ - link:rest_commands.html#post-hostsnamecmdchange_host_event_handler[change_host_event_handler]
+ - link:rest_commands.html#post-hostsnamecmdchange_host_modattr[change_host_modattr]
+ - link:rest_commands.html#post-hostsnamecmdchange_max_host_check_attempts[change_max_host_check_attempts]
+ - link:rest_commands.html#post-hostsnamecmdchange_normal_host_check_interval[change_normal_host_check_interval]
+ - link:rest_commands.html#post-hostsnamecmdchange_retry_host_check_interval[change_retry_host_check_interval]
+ - link:rest_commands.html#post-hostsnamecmddel_active_host_downtimes[del_active_host_downtimes]
+ - link:rest_commands.html#post-hostsnamecmddel_all_host_comments[del_all_host_comments]
+ - link:rest_commands.html#post-hostsnamecmddelay_host_notification[delay_host_notification]
+ - link:rest_commands.html#post-hostsnamecmddisable_all_notifications_beyond_host[disable_all_notifications_beyond_host]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_and_child_notifications[disable_host_and_child_notifications]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_check[disable_host_check]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_event_handler[disable_host_event_handler]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_flap_detection[disable_host_flap_detection]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_notifications[disable_host_notifications]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_svc_checks[disable_host_svc_checks]
+ - link:rest_commands.html#post-hostsnamecmddisable_host_svc_notifications[disable_host_svc_notifications]
+ - link:rest_commands.html#post-hostsnamecmddisable_passive_host_checks[disable_passive_host_checks]
+ - link:rest_commands.html#post-hostsnamecmdenable_all_notifications_beyond_host[enable_all_notifications_beyond_host]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_and_child_notifications[enable_host_and_child_notifications]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_check[enable_host_check]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_event_handler[enable_host_event_handler]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_flap_detection[enable_host_flap_detection]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_notifications[enable_host_notifications]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_svc_checks[enable_host_svc_checks]
+ - link:rest_commands.html#post-hostsnamecmdenable_host_svc_notifications[enable_host_svc_notifications]
+ - link:rest_commands.html#post-hostsnamecmdenable_passive_host_checks[enable_passive_host_checks]
+ - link:rest_commands.html#post-hostsnamecmdprocess_host_check_result[process_host_check_result]
+ - link:rest_commands.html#post-hostsnamecmdremove_host_acknowledgement[remove_host_acknowledgement]
+ - link:rest_commands.html#post-hostsnamecmdschedule_and_propagate_host_downtime[schedule_and_propagate_host_downtime]
+ - link:rest_commands.html#post-hostsnamecmdschedule_and_propagate_triggered_host_downtime[schedule_and_propagate_triggered_host_downtime]
+ - link:rest_commands.html#post-hostsnamecmdschedule_forced_host_check[schedule_forced_host_check]
+ - link:rest_commands.html#post-hostsnamecmdschedule_forced_host_svc_checks[schedule_forced_host_svc_checks]
+ - link:rest_commands.html#post-hostsnamecmdschedule_host_check[schedule_host_check]
+ - link:rest_commands.html#post-hostsnamecmdschedule_host_downtime[schedule_host_downtime]
+ - link:rest_commands.html#post-hostsnamecmdschedule_host_svc_checks[schedule_host_svc_checks]
+ - link:rest_commands.html#post-hostsnamecmdschedule_host_svc_downtime[schedule_host_svc_downtime]
+ - link:rest_commands.html#post-hostsnamecmdsend_custom_host_notification[send_custom_host_notification]
+ - link:rest_commands.html#post-hostsnamecmdset_host_notification_number[set_host_notification_number]
+ - link:rest_commands.html#post-hostsnamecmdstart_obsessing_over_host[start_obsessing_over_host]
+ - link:rest_commands.html#post-hostsnamecmdstop_obsessing_over_host[stop_obsessing_over_host]
 
 === GET /hosts/<name>/commandline
 
@@ -915,25 +989,30 @@ see https://www.naemon.org/documentation/usersguide/livestatus.html#status for d
 lists livestatus servicegroups.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
 
+=== GET /servicegroups/<name>
+
+lists servicegroups for given name.
+alias for /servicegroups?name=<name>
+
 === POST /servicegroups/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-servicegroups-name-cmd-disable_servicegroup_host_checks[disable_servicegroup_host_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-disable_servicegroup_host_notifications[disable_servicegroup_host_notifications]
- - link:rest_commands.html#post-servicegroups-name-cmd-disable_servicegroup_passive_host_checks[disable_servicegroup_passive_host_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-disable_servicegroup_passive_svc_checks[disable_servicegroup_passive_svc_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-disable_servicegroup_svc_checks[disable_servicegroup_svc_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-disable_servicegroup_svc_notifications[disable_servicegroup_svc_notifications]
- - link:rest_commands.html#post-servicegroups-name-cmd-enable_servicegroup_host_checks[enable_servicegroup_host_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-enable_servicegroup_host_notifications[enable_servicegroup_host_notifications]
- - link:rest_commands.html#post-servicegroups-name-cmd-enable_servicegroup_passive_host_checks[enable_servicegroup_passive_host_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-enable_servicegroup_passive_svc_checks[enable_servicegroup_passive_svc_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-enable_servicegroup_svc_checks[enable_servicegroup_svc_checks]
- - link:rest_commands.html#post-servicegroups-name-cmd-enable_servicegroup_svc_notifications[enable_servicegroup_svc_notifications]
- - link:rest_commands.html#post-servicegroups-name-cmd-schedule_servicegroup_host_downtime[schedule_servicegroup_host_downtime]
- - link:rest_commands.html#post-servicegroups-name-cmd-schedule_servicegroup_svc_downtime[schedule_servicegroup_svc_downtime]
+ - link:rest_commands.html#post-servicegroupsnamecmddisable_servicegroup_host_checks[disable_servicegroup_host_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmddisable_servicegroup_host_notifications[disable_servicegroup_host_notifications]
+ - link:rest_commands.html#post-servicegroupsnamecmddisable_servicegroup_passive_host_checks[disable_servicegroup_passive_host_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmddisable_servicegroup_passive_svc_checks[disable_servicegroup_passive_svc_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmddisable_servicegroup_svc_checks[disable_servicegroup_svc_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmddisable_servicegroup_svc_notifications[disable_servicegroup_svc_notifications]
+ - link:rest_commands.html#post-servicegroupsnamecmdenable_servicegroup_host_checks[enable_servicegroup_host_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmdenable_servicegroup_host_notifications[enable_servicegroup_host_notifications]
+ - link:rest_commands.html#post-servicegroupsnamecmdenable_servicegroup_passive_host_checks[enable_servicegroup_passive_host_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmdenable_servicegroup_passive_svc_checks[enable_servicegroup_passive_svc_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmdenable_servicegroup_svc_checks[enable_servicegroup_svc_checks]
+ - link:rest_commands.html#post-servicegroupsnamecmdenable_servicegroup_svc_notifications[enable_servicegroup_svc_notifications]
+ - link:rest_commands.html#post-servicegroupsnamecmdschedule_servicegroup_host_downtime[schedule_servicegroup_host_downtime]
+ - link:rest_commands.html#post-servicegroupsnamecmdschedule_servicegroup_svc_downtime[schedule_servicegroup_svc_downtime]
 
 === GET /servicegroups/<name>/config
 
@@ -973,38 +1052,38 @@ alias for /services?host_name=<host_name>&description=<service>
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-services-host-service-cmd-acknowledge_svc_problem[acknowledge_svc_problem]
- - link:rest_commands.html#post-services-host-service-cmd-acknowledge_svc_problem_expire[acknowledge_svc_problem_expire]
- - link:rest_commands.html#post-services-host-service-cmd-add_svc_comment[add_svc_comment]
- - link:rest_commands.html#post-services-host-service-cmd-change_custom_svc_var[change_custom_svc_var]
- - link:rest_commands.html#post-services-host-service-cmd-change_max_svc_check_attempts[change_max_svc_check_attempts]
- - link:rest_commands.html#post-services-host-service-cmd-change_normal_svc_check_interval[change_normal_svc_check_interval]
- - link:rest_commands.html#post-services-host-service-cmd-change_retry_svc_check_interval[change_retry_svc_check_interval]
- - link:rest_commands.html#post-services-host-service-cmd-change_svc_check_command[change_svc_check_command]
- - link:rest_commands.html#post-services-host-service-cmd-change_svc_event_handler[change_svc_event_handler]
- - link:rest_commands.html#post-services-host-service-cmd-change_svc_modattr[change_svc_modattr]
- - link:rest_commands.html#post-services-host-service-cmd-del_active_service_downtimes[del_active_service_downtimes]
- - link:rest_commands.html#post-services-host-service-cmd-del_all_svc_comments[del_all_svc_comments]
- - link:rest_commands.html#post-services-host-service-cmd-delay_svc_notification[delay_svc_notification]
- - link:rest_commands.html#post-services-host-service-cmd-disable_passive_svc_checks[disable_passive_svc_checks]
- - link:rest_commands.html#post-services-host-service-cmd-disable_svc_check[disable_svc_check]
- - link:rest_commands.html#post-services-host-service-cmd-disable_svc_event_handler[disable_svc_event_handler]
- - link:rest_commands.html#post-services-host-service-cmd-disable_svc_flap_detection[disable_svc_flap_detection]
- - link:rest_commands.html#post-services-host-service-cmd-disable_svc_notifications[disable_svc_notifications]
- - link:rest_commands.html#post-services-host-service-cmd-enable_passive_svc_checks[enable_passive_svc_checks]
- - link:rest_commands.html#post-services-host-service-cmd-enable_svc_check[enable_svc_check]
- - link:rest_commands.html#post-services-host-service-cmd-enable_svc_event_handler[enable_svc_event_handler]
- - link:rest_commands.html#post-services-host-service-cmd-enable_svc_flap_detection[enable_svc_flap_detection]
- - link:rest_commands.html#post-services-host-service-cmd-enable_svc_notifications[enable_svc_notifications]
- - link:rest_commands.html#post-services-host-service-cmd-process_service_check_result[process_service_check_result]
- - link:rest_commands.html#post-services-host-service-cmd-remove_svc_acknowledgement[remove_svc_acknowledgement]
- - link:rest_commands.html#post-services-host-service-cmd-schedule_forced_svc_check[schedule_forced_svc_check]
- - link:rest_commands.html#post-services-host-service-cmd-schedule_svc_check[schedule_svc_check]
- - link:rest_commands.html#post-services-host-service-cmd-schedule_svc_downtime[schedule_svc_downtime]
- - link:rest_commands.html#post-services-host-service-cmd-send_custom_svc_notification[send_custom_svc_notification]
- - link:rest_commands.html#post-services-host-service-cmd-set_svc_notification_number[set_svc_notification_number]
- - link:rest_commands.html#post-services-host-service-cmd-start_obsessing_over_svc[start_obsessing_over_svc]
- - link:rest_commands.html#post-services-host-service-cmd-stop_obsessing_over_svc[stop_obsessing_over_svc]
+ - link:rest_commands.html#post-serviceshostservicecmdacknowledge_svc_problem[acknowledge_svc_problem]
+ - link:rest_commands.html#post-serviceshostservicecmdacknowledge_svc_problem_expire[acknowledge_svc_problem_expire]
+ - link:rest_commands.html#post-serviceshostservicecmdadd_svc_comment[add_svc_comment]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_custom_svc_var[change_custom_svc_var]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_max_svc_check_attempts[change_max_svc_check_attempts]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_normal_svc_check_interval[change_normal_svc_check_interval]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_retry_svc_check_interval[change_retry_svc_check_interval]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_svc_check_command[change_svc_check_command]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_svc_event_handler[change_svc_event_handler]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_svc_modattr[change_svc_modattr]
+ - link:rest_commands.html#post-serviceshostservicecmddel_active_service_downtimes[del_active_service_downtimes]
+ - link:rest_commands.html#post-serviceshostservicecmddel_all_svc_comments[del_all_svc_comments]
+ - link:rest_commands.html#post-serviceshostservicecmddelay_svc_notification[delay_svc_notification]
+ - link:rest_commands.html#post-serviceshostservicecmddisable_passive_svc_checks[disable_passive_svc_checks]
+ - link:rest_commands.html#post-serviceshostservicecmddisable_svc_check[disable_svc_check]
+ - link:rest_commands.html#post-serviceshostservicecmddisable_svc_event_handler[disable_svc_event_handler]
+ - link:rest_commands.html#post-serviceshostservicecmddisable_svc_flap_detection[disable_svc_flap_detection]
+ - link:rest_commands.html#post-serviceshostservicecmddisable_svc_notifications[disable_svc_notifications]
+ - link:rest_commands.html#post-serviceshostservicecmdenable_passive_svc_checks[enable_passive_svc_checks]
+ - link:rest_commands.html#post-serviceshostservicecmdenable_svc_check[enable_svc_check]
+ - link:rest_commands.html#post-serviceshostservicecmdenable_svc_event_handler[enable_svc_event_handler]
+ - link:rest_commands.html#post-serviceshostservicecmdenable_svc_flap_detection[enable_svc_flap_detection]
+ - link:rest_commands.html#post-serviceshostservicecmdenable_svc_notifications[enable_svc_notifications]
+ - link:rest_commands.html#post-serviceshostservicecmdprocess_service_check_result[process_service_check_result]
+ - link:rest_commands.html#post-serviceshostservicecmdremove_svc_acknowledgement[remove_svc_acknowledgement]
+ - link:rest_commands.html#post-serviceshostservicecmdschedule_forced_svc_check[schedule_forced_svc_check]
+ - link:rest_commands.html#post-serviceshostservicecmdschedule_svc_check[schedule_svc_check]
+ - link:rest_commands.html#post-serviceshostservicecmdschedule_svc_downtime[schedule_svc_downtime]
+ - link:rest_commands.html#post-serviceshostservicecmdsend_custom_svc_notification[send_custom_svc_notification]
+ - link:rest_commands.html#post-serviceshostservicecmdset_svc_notification_number[set_svc_notification_number]
+ - link:rest_commands.html#post-serviceshostservicecmdstart_obsessing_over_svc[start_obsessing_over_svc]
+ - link:rest_commands.html#post-serviceshostservicecmdstop_obsessing_over_svc[stop_obsessing_over_svc]
 
 === GET /services/<host>/<service>/commandline
 
@@ -1139,44 +1218,44 @@ lists configured backends
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
- - link:rest_commands.html#post-system-cmd-change_global_host_event_handler[change_global_host_event_handler]
- - link:rest_commands.html#post-system-cmd-change_global_svc_event_handler[change_global_svc_event_handler]
- - link:rest_commands.html#post-system-cmd-del_downtime_by_host_name[del_downtime_by_host_name]
- - link:rest_commands.html#post-system-cmd-del_downtime_by_start_time_comment[del_downtime_by_start_time_comment]
- - link:rest_commands.html#post-system-cmd-del_host_comment[del_host_comment]
- - link:rest_commands.html#post-system-cmd-del_host_downtime[del_host_downtime]
- - link:rest_commands.html#post-system-cmd-del_svc_comment[del_svc_comment]
- - link:rest_commands.html#post-system-cmd-del_svc_downtime[del_svc_downtime]
- - link:rest_commands.html#post-system-cmd-disable_event_handlers[disable_event_handlers]
- - link:rest_commands.html#post-system-cmd-disable_flap_detection[disable_flap_detection]
- - link:rest_commands.html#post-system-cmd-disable_host_freshness_checks[disable_host_freshness_checks]
- - link:rest_commands.html#post-system-cmd-disable_notifications[disable_notifications]
- - link:rest_commands.html#post-system-cmd-disable_performance_data[disable_performance_data]
- - link:rest_commands.html#post-system-cmd-disable_service_freshness_checks[disable_service_freshness_checks]
- - link:rest_commands.html#post-system-cmd-enable_event_handlers[enable_event_handlers]
- - link:rest_commands.html#post-system-cmd-enable_flap_detection[enable_flap_detection]
- - link:rest_commands.html#post-system-cmd-enable_host_freshness_checks[enable_host_freshness_checks]
- - link:rest_commands.html#post-system-cmd-enable_notifications[enable_notifications]
- - link:rest_commands.html#post-system-cmd-enable_performance_data[enable_performance_data]
- - link:rest_commands.html#post-system-cmd-enable_service_freshness_checks[enable_service_freshness_checks]
- - link:rest_commands.html#post-system-cmd-read_state_information[read_state_information]
- - link:rest_commands.html#post-system-cmd-restart_process[restart_process]
- - link:rest_commands.html#post-system-cmd-restart_program[restart_program]
- - link:rest_commands.html#post-system-cmd-save_state_information[save_state_information]
- - link:rest_commands.html#post-system-cmd-shutdown_process[shutdown_process]
- - link:rest_commands.html#post-system-cmd-shutdown_program[shutdown_program]
- - link:rest_commands.html#post-system-cmd-start_accepting_passive_host_checks[start_accepting_passive_host_checks]
- - link:rest_commands.html#post-system-cmd-start_accepting_passive_svc_checks[start_accepting_passive_svc_checks]
- - link:rest_commands.html#post-system-cmd-start_executing_host_checks[start_executing_host_checks]
- - link:rest_commands.html#post-system-cmd-start_executing_svc_checks[start_executing_svc_checks]
- - link:rest_commands.html#post-system-cmd-start_obsessing_over_host_checks[start_obsessing_over_host_checks]
- - link:rest_commands.html#post-system-cmd-start_obsessing_over_svc_checks[start_obsessing_over_svc_checks]
- - link:rest_commands.html#post-system-cmd-stop_accepting_passive_host_checks[stop_accepting_passive_host_checks]
- - link:rest_commands.html#post-system-cmd-stop_accepting_passive_svc_checks[stop_accepting_passive_svc_checks]
- - link:rest_commands.html#post-system-cmd-stop_executing_host_checks[stop_executing_host_checks]
- - link:rest_commands.html#post-system-cmd-stop_executing_svc_checks[stop_executing_svc_checks]
- - link:rest_commands.html#post-system-cmd-stop_obsessing_over_host_checks[stop_obsessing_over_host_checks]
- - link:rest_commands.html#post-system-cmd-stop_obsessing_over_svc_checks[stop_obsessing_over_svc_checks]
+ - link:rest_commands.html#post-systemcmdchange_global_host_event_handler[change_global_host_event_handler]
+ - link:rest_commands.html#post-systemcmdchange_global_svc_event_handler[change_global_svc_event_handler]
+ - link:rest_commands.html#post-systemcmddel_downtime_by_host_name[del_downtime_by_host_name]
+ - link:rest_commands.html#post-systemcmddel_downtime_by_start_time_comment[del_downtime_by_start_time_comment]
+ - link:rest_commands.html#post-systemcmddel_host_comment[del_host_comment]
+ - link:rest_commands.html#post-systemcmddel_host_downtime[del_host_downtime]
+ - link:rest_commands.html#post-systemcmddel_svc_comment[del_svc_comment]
+ - link:rest_commands.html#post-systemcmddel_svc_downtime[del_svc_downtime]
+ - link:rest_commands.html#post-systemcmddisable_event_handlers[disable_event_handlers]
+ - link:rest_commands.html#post-systemcmddisable_flap_detection[disable_flap_detection]
+ - link:rest_commands.html#post-systemcmddisable_host_freshness_checks[disable_host_freshness_checks]
+ - link:rest_commands.html#post-systemcmddisable_notifications[disable_notifications]
+ - link:rest_commands.html#post-systemcmddisable_performance_data[disable_performance_data]
+ - link:rest_commands.html#post-systemcmddisable_service_freshness_checks[disable_service_freshness_checks]
+ - link:rest_commands.html#post-systemcmdenable_event_handlers[enable_event_handlers]
+ - link:rest_commands.html#post-systemcmdenable_flap_detection[enable_flap_detection]
+ - link:rest_commands.html#post-systemcmdenable_host_freshness_checks[enable_host_freshness_checks]
+ - link:rest_commands.html#post-systemcmdenable_notifications[enable_notifications]
+ - link:rest_commands.html#post-systemcmdenable_performance_data[enable_performance_data]
+ - link:rest_commands.html#post-systemcmdenable_service_freshness_checks[enable_service_freshness_checks]
+ - link:rest_commands.html#post-systemcmdread_state_information[read_state_information]
+ - link:rest_commands.html#post-systemcmdrestart_process[restart_process]
+ - link:rest_commands.html#post-systemcmdrestart_program[restart_program]
+ - link:rest_commands.html#post-systemcmdsave_state_information[save_state_information]
+ - link:rest_commands.html#post-systemcmdshutdown_process[shutdown_process]
+ - link:rest_commands.html#post-systemcmdshutdown_program[shutdown_program]
+ - link:rest_commands.html#post-systemcmdstart_accepting_passive_host_checks[start_accepting_passive_host_checks]
+ - link:rest_commands.html#post-systemcmdstart_accepting_passive_svc_checks[start_accepting_passive_svc_checks]
+ - link:rest_commands.html#post-systemcmdstart_executing_host_checks[start_executing_host_checks]
+ - link:rest_commands.html#post-systemcmdstart_executing_svc_checks[start_executing_svc_checks]
+ - link:rest_commands.html#post-systemcmdstart_obsessing_over_host_checks[start_obsessing_over_host_checks]
+ - link:rest_commands.html#post-systemcmdstart_obsessing_over_svc_checks[start_obsessing_over_svc_checks]
+ - link:rest_commands.html#post-systemcmdstop_accepting_passive_host_checks[stop_accepting_passive_host_checks]
+ - link:rest_commands.html#post-systemcmdstop_accepting_passive_svc_checks[stop_accepting_passive_svc_checks]
+ - link:rest_commands.html#post-systemcmdstop_executing_host_checks[stop_executing_host_checks]
+ - link:rest_commands.html#post-systemcmdstop_executing_svc_checks[stop_executing_svc_checks]
+ - link:rest_commands.html#post-systemcmdstop_obsessing_over_host_checks[stop_obsessing_over_host_checks]
+ - link:rest_commands.html#post-systemcmdstop_obsessing_over_svc_checks[stop_obsessing_over_svc_checks]
 
 === GET /thruk
 
@@ -1195,6 +1274,45 @@ hash of basic information about this thruk instance
 |var_path                          | variable data folder
 |===========================================
 
+
+=== GET /thruk/api_keys
+
+lists api keys
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|comment                           | comment of this api key
+|created                           | unixtimestamp of when the key was created
+|digest                            | used hash algorithm
+|file                              | path to stored file
+|hashed_key                        | hashed private key
+|last_from                         | ip address of last usage
+|last_used                         | unixtimestamp of last usage
+|roles                             | list of roles this key is limited too
+|superuser                         | flag wether this a global superuser key and not bound to a specific user
+|user                              | username of key owner
+|===========================================
+
+
+=== POST /thruk/api_keys
+
+create new api key.
+
+Optional arguments:
+
+  * comment
+  * superuser (flag to create superuser api key)
+  * username (requires admin privileges)
+  * roles (restrict roles to given list)
+
+=== GET /thruk/api_keys/<id>
+
+alias for /thruk/api_keys?hashed_key=<id>
+
+=== DELETE /thruk/api_keys/<id>
+
+remove key for given id.
 
 === GET /thruk/bp
 
@@ -1296,14 +1414,16 @@ lists cluster nodes
 [options="header"]
 |===========================================
 |Attribute                         | Description
+|branch                            | Branch version of this node
 |hostname                          | host name of the cluster node
 |last_contact                      | timestamp of last successful contact
 |last_error                        | text of last error message
-|last_update                       | timestamp of last update
+|maintenance                       | Flag whether this node is in maintenance mode
 |node_id                           | internal id for this node
 |node_url                          | url to access this node directly
 |pids                              | list of current process ids of this node
 |response_time                     | response time in seconds
+|version                           | version information of this node
 |===========================================
 
 
@@ -1315,11 +1435,15 @@ See `/thruk/cluster/` for the description of the attributes.
 
 === GET /thruk/cluster/heartbeat
 
-redirects to POST method
+should not be used, use POST method instead
 
 === POST /thruk/cluster/heartbeat
 
 send cluster heartbeat to all other nodes
+
+=== POST /thruk/cluster/restart
+
+restarts all cluster nodes sequentially
 
 === GET /thruk/config
 
@@ -1358,6 +1482,10 @@ lists thruk jobs.
 get thruk job status for given id.
 alias for /thruk/jobs?id=<id>
 
+=== GET /thruk/metrics
+
+alias for /thruk/stats
+
 === GET /thruk/panorama
 
 lists all panorama dashboards.
@@ -1368,8 +1496,10 @@ lists all panorama dashboards.
 |file                              | filename of the dashboard
 |file_version                      | version of dashboard format
 |id                                | internal id
+|maintenance                       | maintenance reason (only if in maintenance mode)
 |nr                                | number of the dashboard
 |objects                           | number of objects
+|panlet_<nr>                       | panlet definition
 |readonly                          | flag whether this dashboard is read-only
 |scripted                          | flag whether this is a scripted dashboard
 |tab                               | structure of global dashboard settings
@@ -1383,6 +1513,18 @@ lists all panorama dashboards.
 returns panorama dashboard for given number.
 alias for /thruk/panorama?nr=<nr>
 
+=== POST /thruk/panorama/<nr>/maintenance
+
+Puts given dashboard into maintenance mode.
+
+Required arguments:
+
+  * text
+
+=== DELETE /thruk/panorama/<nr>/maintenance
+
+removes maintenance mode from given dashboard.
+
 === GET /thruk/recurring_downtimes
 
 lists recurring downtimes.
@@ -1393,7 +1535,10 @@ lists recurring downtimes.
 |backends                          | list of backends this downtime is used for
 |childoptions                      | flag used for the downtime command
 |comment                           | comment used for the downtime command
+|created_by                        | username who created this downtime
 |duration                          | duration in minutes
+|edited_by                         | username who last edited this downtime
+|error                             | contains the error message if something got wrong with this downtime
 |file                              | file number
 |fixed                             | flag whether this should create a fixed downtime
 |flex_range                        | range in minutes for flexible downtimes
@@ -1505,8 +1650,10 @@ lists thruk sessions.
 |Attribute                         | Description
 |active                            | timestamp when session was last time used
 |address                           | remote address of user
+|digest                            | used hash algorithm
 |fake                              | flag whether this is a fake session or not
 |file                              | file name the session data file
+|hashed_key                        | hashed session id
 |roles                             | extra session roles
 |username                          | username of this session
 |===========================================
@@ -1517,10 +1664,64 @@ lists thruk sessions.
 get thruk sessions status for given id.
 alias for /thruk/sessions?id=<id>
 
+=== GET /thruk/stats
+
+lists thruk statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|business_process_duration_seconds | business process calculation duration in seconds
+|business_process_last_update      | timestamp of last business process calculation
+|business_process_total            | total number of business processes
+|business_process_worker_total     | total number of worker processes used to calculate business processes
+|sessions_active_5min_total        | total number of active thruk sessions (active during the last 5 minutes)
+|sessions_total                    | total number of thruk sessions
+|sessions_uniq_user_5min_total     | total number of uniq users active during the last 5 minutes
+|sessions_uniq_user_total          | total number of uniq users
+|users_locked_total                | total number of locked thruk users
+|users_total                       | total number of thruk users
+|===========================================
+
+
+=== GET /thruk/users
+
+lists thruk user profiles.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|alias                             | alias name
+|can_submit_commands               | flag wether this account is allowed to submit commands
+|email                             | email address
+|groups                            | list of contactgroups
+|has_thruk_profile                 | flag wether this account has a thruk profile or not
+|id                                | username
+|locked                            | flag wether account is locked or not
+|roles                             | list of roles for this user
+|tz                                | users selected timezone
+|===========================================
+
+
+=== GET /thruk/users/<id>
+
+get thruk profile for given user.
+alias for /thruk/users?id=<id>
+
+=== GET /thruk/whoami
+
+show current profile information.
+alias for /thruk/users?id=<id>
+
 === GET /timeperiods
 
 lists livestatus timeperiods.
 see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+
+=== GET /timeperiods/<name>
+
+lists timeperiods for given name.
+alias for /timeperiods?name=<name>
 
 === GET /timeperiods/<name>/config
 

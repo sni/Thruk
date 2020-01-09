@@ -84,9 +84,9 @@ Ext.define('TP.PanletChartGearman', {
             if(!this.store || !this.store.max || !this.store.max('date')) {
                 return;
             }
-            var tabpan = Ext.getCmp('tabpan');
+            var tabbar = Ext.getCmp('tabbar');
             var refresh = this.xdata.refresh;
-            if(refresh == -1 ) { refresh = tabpan.xdata.refresh; }
+            if(refresh == -1 ) { refresh = tabbar.xdata.refresh; }
             if(refresh == 0)   { refresh = 60; }
             var minutes_to_show = Math.ceil(refresh * this.xdata.nr_dots / 60 * 1.5);
             /* dynamically adjust minimum/maximum and ticks */

@@ -65,6 +65,10 @@ sub cmd {
         return("ERROR - business process addon is disabled\n", 1);
     }
 
+    if(!$c->check_user_roles('authorized_for_business_processes')) {
+        return("ERROR - authorized_for_business_processes role required", 1);
+    }
+
     $c->stats->profile(begin => "_cmd_bp($action)");
     # parse options
     my $opt = {
@@ -202,8 +206,9 @@ sub cmd {
                 eval {
                     $bp->update_status($c);
                 };
-                if($@) {
-                    _error("[$$] bp '".$bp->{'name'}."' failed: $@");
+                my $err = $@ || $bp->{'failed'};
+                if($err) {
+                    _error("[$$] bp '".$bp->{'name'}."' failed: ".$err);
                     $local_rc = 1;
                     $rc = 1;
                 }
@@ -234,6 +239,12 @@ sub cmd {
     alarm(0);
     _debug("all worker finished");
     my $elapsed = tv_interval($t0);
+    if(!defined $id) {
+        $c->metrics->set('business_process_duration_seconds', $elapsed, "business process calculation duration in seconds");
+        $c->metrics->set('business_process_last_update', time(), "timestamp of last business process calculation");
+        $c->metrics->set('business_process_total', $num_bp, "total number of business processes");
+        $c->metrics->set('business_process_worker_total', $worker_num, "total number of worker processes used to calculate business processes");
+    }
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_refresh_cmd'}) {

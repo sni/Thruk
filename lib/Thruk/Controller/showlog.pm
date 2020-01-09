@@ -23,43 +23,11 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
-    my($start,$end);
-    my $filter;
-    my $timeframe = 86400;
-
+    my($start,$end) = Thruk::Utils::get_start_end_from_date_select_params($c);
     my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
-    my $archive     = $c->req->parameters->{'archive'}     || 0;
-    my $param_start = $c->req->parameters->{'start'};
-    my $param_end   = $c->req->parameters->{'end'};
+    my $showsites   = $c->req->parameters->{'showsites'}   || 0;
 
-    # start / end date from formular values?
-    if(defined $param_start and defined $param_end) {
-        # convert to timestamps
-        $start = Thruk::Utils::parse_date($c, $param_start);
-        $end   = Thruk::Utils::parse_date($c, $param_end);
-    }
-    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
-        # start with today 00:00
-        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
-        $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
-        $end   = $start + $timeframe;
-    }
-    if($archive eq '+1') {
-        $start = $start + $timeframe;
-        $end   = $end   + $timeframe;
-    }
-    elsif($archive eq '-1') {
-        $start = $start - $timeframe;
-        $end   = $end   - $timeframe;
-    }
-
-    # swap date if they are mixed up
-    if($start > $end) {
-        my $tmp = $start;
-        $start = $end;
-        $end   = $tmp;
-    }
-
+    my $filter;
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<=' => $end }};
 
@@ -126,7 +94,7 @@ sub index {
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "showlog::updatecache");
-        return if $c->{'db'}->renew_logcache($c);
+        $c->{'db'}->renew_logcache($c);
         $c->stats->profile(end   => "showlog::updatecache");
 
         $c->stats->profile(begin => "showlog::fetch");
@@ -134,12 +102,12 @@ sub index {
         $c->stats->profile(end   => "showlog::fetch");
     }
 
-    $c->stash->{archive}          = $archive;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;
     $c->stash->{pattern}          = $pattern         || '';
     $c->stash->{exclude_pattern}  = $exclude_pattern || '';
     $c->stash->{oldestfirst}      = $oldestfirst;
+    $c->stash->{showsites}        = $showsites;
     $c->stash->{title}            = 'Log File';
     $c->stash->{infoBoxTitle}     = 'Event Log';
     $c->stash->{page}             = 'showlog';

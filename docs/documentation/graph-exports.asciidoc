@@ -1,0 +1,37 @@
+---
+layout: docs
+title: Graph Exporting
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== Grafana Graph Exporting
+
+Thruk offers an interface to export 3rd party performance graphs via a single
+url. It supports Grafana only right now.
+
+The export is possible with the `.../extinfo.cgi?type=grafana&options_see_below...` url.
+
+=== List of Options
+
+ - *`host`*: Hostname to export.
+ - *`service`*: Service description to export. Leave empty for host graphs.
+ - *`format`*: Can be either `png` (default) or `base64`.
+ - *`from`*: Either a unixtimestamp of the start date or relative date like `-2h`.
+ - *`to`*: Either unixtimestamp of the end date or relative date like `now`.
+ - *`width`*: Image width in px.
+ - *`height`*: Image height in px.
+ - *`source`*: If there are multiple graps in a grafana dashboard, the `source` can be used to choose on of them. The index starts at `1`.
+ - *`disablePanelTitle`*: Can be set to `1` to hide the panel title.
+ - *`legend`*: Can be set to `0` to hide the legend.
+ - *`theme`*: Can be either `light` or `dark` and sets the grafana theme.
+ - *`font_color`*: Sets the font color, ex.: `#000000`
+ - *`background_color`*: Sets the background color, can be either `transparent` or a hex colour like `#FFFFFF`
+
+=== Example
+
+Fetch a exported graph via curl:
+
+------
+  %> curl -k https://user:password@your_webserver/thruk/cgi-bin/extinfo.cgi?host=localhost&service=Ping&from=-1d&to=now
+------

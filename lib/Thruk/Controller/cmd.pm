@@ -41,7 +41,7 @@ sub index {
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup/) {
         $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
     }
-    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly/) {
+    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly hostserviceoptions/) {
         $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
     }
     if(!defined $c->req->parameters->{'backend'}) {
@@ -54,6 +54,10 @@ sub index {
     Thruk::Utils::ssi_include($c);
 
     $c->stash->{'cmd_typ'} = $c->req->parameters->{'cmd_typ'} || '';
+    if($c->stash->{'cmd_typ'} && $c->stash->{'cmd_typ'} !~ m/^[a-z0-9]+$/mx) {
+        $c->error('unknown cmd_typ');
+        return $c->detach('/error/index/100');
+    }
 
     # check if authorization is enabled
     if( $c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0 ) {
@@ -231,7 +235,11 @@ sub index {
             else {
                 return $c->detach('/error/index/7');
             }
-            my( $host, $service, $backend ) = split /;/mx, $servicedata;
+            my($host, $service, $backend)   = split /;/mx, $servicedata;
+            if(!defined $service) {
+                $c->error("invalid data, no host or service received");
+                return $c->detach('/error/index/100');
+            }
             my @backends                    = split /\|/mx, $backend;
             $c->stash->{'lasthost'}         = $host;
             $c->stash->{'lastservice'}      = $service;
@@ -256,7 +264,7 @@ sub index {
                     if($c->stash->{'thruk_message'}) {
                         Thruk::Utils::append_message( $c, "\ncommand for $service on host $host failed" );
                     } else {
-                        Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
+                        Thruk::Utils::set_message( $c, 'fail_message', sprintf("command for %s on host %s failed", $service, $host));
                     }
                     Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
                     $c->log->debug("command for $service on host $host failed");
@@ -357,10 +365,21 @@ sub _check_for_commands {
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_' . $cmd_typ . '.tt';
 
+        # check if cmd exists
+        my $found = 0;
+        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+            if(-e $path.'/'.$c->stash->{template}) {
+                $found = 1;
+                last;
+            }
+        }
+        return $c->detach('/error/index/7') unless $found;
+
         # set a valid referer
         my $referer = $c->req->parameters->{'referer'} || $c->req->header('referer') || '';
         $referer =~ s/&amp;/&/gmx;
         $referer =~ s/&/&amp;/gmx;
+        $referer =~ s%^\w+://[^/]+/%/%gmx;
         $c->stash->{referer} = $referer;
     }
 
@@ -978,7 +997,7 @@ sub _get_affected_backends {
 
 =head2 add_remove_comments_commands_from_disabled_commands
 
-    add comment remove commands for comments added from the `require_comments_for_disable_cmds` option.
+    add comment remove commands for comments added from the 'require_comments_for_disable_cmds' option.
 
 =cut
 sub add_remove_comments_commands_from_disabled_commands {

@@ -38,7 +38,7 @@ sub _rest_get_config_files {
             my $f = {
                 peer_key => $peer_key,
                 path     => $file->{'display'},
-                md5      => $file->{'md5'},
+                hex      => $file->{'hex'},
                 mtime    => $file->{'mtime'},
                 readonly => $file->readonly(),
             };
@@ -370,11 +370,17 @@ sub _rest_get_config_objects_update {
 
 ##########################################################
 # REST PATH: GET /config/diff
+#
+# Optional arguments:
+#
+#   * ignore_whitespace
+#
 # Returns differences between filesystem and stashed config changes.
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/diff$%mx, \&_rest_get_config_diff, ["admin"]);
 sub _rest_get_config_diff {
     my($c) = @_;
     my $diff = [];
+    my $ignore_whitespace_changes = $c->req->parameters->{'ignore_whitespace'} // 0;
     my($backends) = $c->{'db'}->select_backends("get_");
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
@@ -382,7 +388,7 @@ sub _rest_get_config_diff {
         for my $file (@{$changed_files}) {
             push @{$diff}, {
                 'peer_key' => $peer_key,
-                'output'   => $file->diff(),
+                'output'   => $file->diff($ignore_whitespace_changes),
                 'file'     => $file->{'path'},
             };
         }
@@ -518,9 +524,14 @@ sub _set_object_model {
     my($c, $peer_key) = @_;
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
+    delete $c->{'obj_db'};
     Thruk::Utils::Conf::set_object_model($c);
     delete $c->req->parameters->{'refreshdata'};
-    return 1 if $c->{'obj_db'};
+    if($c->{'obj_db'}) {
+        return if $c->stash->{'param_backend'} ne $peer_key; # make sure we did not fallback on some default backend
+        die("failed to initialize objects of peer ".$peer_key) if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0);
+        return 1;
+    }
     return;
 }
 ##########################################################

@@ -24,8 +24,12 @@ sub index {
     $c->stash->{'text'}       = 'FAIL';
     $c->stash->{'navigation'} = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
 
-    $c->user_exists || $c->authenticate(1);
-    $c->stash->{'text'} = 'OK: '.$c->user->get('username') if $c->user_exists;
+    $c->authenticate(skip_db_access => 1) unless $c->user_exists;
+    if($c->user_exists) {
+        $c->stash->{'text'} = 'OK: '.$c->user->get('username');
+    } else {
+        $c->stash->{'text'} = 'ERROR: failed to authenticate';
+    }
 
     return 1;
 }

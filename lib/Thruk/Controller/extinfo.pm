@@ -43,6 +43,7 @@ sub index {
     elsif(!Thruk::Backend::Manager::looks_like_number($type) || $type == 0 ) {
         $infoBoxTitle = 'Process Information';
         return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
+        $c->stash->{template} = 'extinfo_type_0.tt';
         _process_process_info_page($c);
     }
     elsif( $type == 1 ) {
@@ -112,6 +113,7 @@ sub _get_comment_sort_option {
         '7' => [ [ 'persistent' ],                         'persistent' ],
         '8' => [ [ 'entry_type' ],                         'entry_type' ],
         '9' => [ [ 'expires' ],                            'expires' ],
+        '10'=> [ [ 'peer_name' ],                          'site' ],
     };
 
     return $sortoptions->{$option};
@@ -134,6 +136,7 @@ sub _get_downtime_sort_option {
         '9' => [ [ 'duration' ],                           'duration' ],
         '10' =>[ [ 'id' ],                                 'id' ],
         '11' =>[ [ 'triggered_by' ],                       'trigger id' ],
+        '12' =>[ [ 'peer_name' ],                          'site' ],
     };
 
     return $sortoptions->{$option};
@@ -278,6 +281,8 @@ sub _process_recurring_downtimes_page {
             'childoptions'  => $c->req->parameters->{'childoptions'}    || 0,
             'fixed'         => exists $c->req->parameters->{'fixed'} ? $c->req->parameters->{'fixed'} : 1,
             'flex_range'    => $c->req->parameters->{'flex_range'}      || 720,
+            'edited_by'     => $c->stash->{'remote_user'},
+            'created_by'    => $c->stash->{'remote_user'},
         };
         for my $t (qw/host hostgroup servicegroup/) {
             $rd->{$t} = [sort {lc $a cmp lc $b} @{$rd->{$t}}];
@@ -314,6 +319,8 @@ sub _process_recurring_downtimes_page {
                 my $old_rd = Thruk::Utils::read_data_file($old_file);
                 if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
                     $failed = 1;
+                } else {
+                    $rd->{'created_by'} = $old_rd->{'created_by'};
                 }
             }
         }
@@ -403,7 +410,7 @@ sub _process_host_page {
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output contacts/] );
 
-    return $c->detach('/error/index/5') unless defined $hosts;
+    return $c->detach('/error/index/5') if(!defined $hosts || !defined $hosts->[0]);
 
     # we only got one host
     $host = $hosts->[0];
@@ -551,7 +558,7 @@ sub _process_service_page {
             extra_columns => [qw/long_plugin_output contacts/],
     );
 
-    return $c->detach('/error/index/15') unless defined $services;
+    return $c->detach('/error/index/15') if(!defined $services || !defined $services->[0]);
 
     # we only got one service
     $service = $services->[0];
@@ -565,8 +572,10 @@ sub _process_service_page {
             }
         }
     }
-    $service->{'depends_exec'}   = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_exec'});
-    $service->{'depends_notify'} = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_notify'});
+    $service->{'depends'}         = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'}, $service->{'depends_exec'}, $service->{'depends_notify'});
+    $service->{'depends_exec'}    = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_exec'});
+    $service->{'depends_notify'}  = Thruk::Utils::merge_service_dependencies($service, $service->{'depends_notify'});
+    $service->{'depends_parents'} = Thruk::Utils::merge_service_dependencies($service, $service->{'parents'});
 
     return $c->detach('/error/index/15') unless defined $service;
 
@@ -705,6 +714,26 @@ sub _process_process_info_page {
     my( $c ) = @_;
 
     return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
+
+    my $list_mode = $c->req->parameters->{'list'};
+    if(scalar @{$c->stash->{'backends'}} > 5) {
+        $list_mode = 'list' unless defined $list_mode;
+        my $backends = [];
+        for my $key (@{$c->stash->{'backends'}}) {
+            push @{$backends}, {
+                peer_key  => $key,
+                peer_name => $c->stash->{'backend_detail'}->{$key}->{'name'},
+                section   => $c->stash->{'backend_detail'}->{$key}->{'section'},
+            };
+        }
+        $backends = Thruk::Backend::Manager::_sort($c, $backends, { 'ASC' => [ 'section', 'peer_name' ] });
+        $c->stash->{'backends'} = [];
+        for my $p (@{$backends}) {
+            push @{$c->stash->{'backends'}}, $p->{'peer_key'};
+        }
+    }
+    $c->stash->{'list_mode'} = $list_mode // 'details';
+
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     if($view_mode eq 'json') {
         my $merged = {};
@@ -782,6 +811,7 @@ sub _process_perf_info_page {
 # create the performance info cluster page
 sub _process_perf_info_cluster_page {
     my( $c ) = @_;
+    $c->cluster->load_statefile();
     $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
     return 1;
 }
@@ -840,15 +870,18 @@ sub _set_backend_selector {
 # get apache status
 sub _apache_status {
     my($c, $name, $url) = @_;
+    local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
+    local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     require Thruk::UserAgent;
     my $ua = Thruk::UserAgent->new($c->config);
     $ua->timeout(10);
     $ua->agent("thruk");
     $ua->ssl_opts('verify_hostname' => 0 );
     $ua->max_redirect(0);
+    $ua->no_proxy('127.0.0.1', 'localhost');
     # pass through authentication
     my $cookie = $c->cookie('thruk_auth');
-    $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value) if $cookie;
+    $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value.'; HttpOnly') if $cookie;
     $ua->default_header('Authorization' => $c->req->header('authorization')) if $c->req->header('authorization');
     my $res = $ua->get($url);
     if($res->code == 200) {

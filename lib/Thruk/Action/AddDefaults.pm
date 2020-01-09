@@ -116,6 +116,7 @@ sub begin {
     $c->stash->{'reload_nav'}         = $c->req->parameters->{'reload_nav'} || '';
     $c->stash->{'show_sounds'}        = 0;
     $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} || 0;
+    $c->stash->{'real_page'}          = '';
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
@@ -162,17 +163,15 @@ sub begin {
         $key =~ s/\ /_/gmx;
         $menu_states->{$key} = $val;
     }
-    if( defined $c->cookie('thruk_side') ) {
+    if($c->cookie('thruk_side') ) {
         for my $state (@{$c->cookies('thruk_side')->{'value'}}) {
             my($k,$v) = split(/=/mx,$state,2);
-            $k = lc $k;
+            $k = lc($k // '');
             $k =~ s/\ /_/gmx;
             $menu_states->{$k} = $v;
         }
     }
-
-    $c->stash->{'menu_states'}      = $menu_states;
-    $c->stash->{'menu_states_json'} = encode_json($menu_states);
+    $c->stash->{'menu_states'} = $menu_states;
 
     my $target = $c->req->parameters->{'target'};
     if( !$c->stash->{'use_frames'} && defined $target && $target eq '_parent' ) {
@@ -204,7 +203,9 @@ sub begin {
 
     ###############################
     # parse cgi.cfg
-    Thruk::Utils::read_cgi_cfg($c);
+    Thruk::Config::read_cgi_cfg($c);
+    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
 
     ###############################
     # Authentication
@@ -214,8 +215,8 @@ sub begin {
         if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
             $c->log->debug($1.".cgi does not require authentication") if Thruk->debug;
         } else {
-            if(!$c->authenticate(1)) {
-                $c->log->debug("user authenticated failed") if Thruk->verbose;
+            if(!$c->authenticate(skip_db_access => 1)) {
+                $c->log->debug("user authentication failed") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }
         }
@@ -271,6 +272,18 @@ sub begin {
 
     # ex.: global bookmarks from var/global_user_data
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
+
+    # set some pager defaults
+    $c->stash->{'entries_per_page'} = 0;
+    $c->stash->{'data'}             = [];
+
+    # do some sanity checks
+    if($c->req->parameters->{'referer'}) {
+        if($c->req->parameters->{'referer'} =~ m/^(\w+:\/\/|\/\/)/mx) {
+            $c->error("unsupported referer");
+            return $c->detach('/error/index/100');
+        }
+    }
 
     $c->stats->profile(end => "Root begin");
     return 1;
@@ -394,6 +407,16 @@ sub end {
         $c->stash->{'no_auto_reload'} = 1;
     }
 
+    if($c->req->parameters->{'bodyCls'}) {
+        $c->stash->{'extrabodyclass'} .= " ".$c->req->parameters->{'bodyCls'};
+    }
+    if($c->req->parameters->{'htmlCls'}) {
+        $c->stash->{'extrahtmlclass'} .= " ".$c->req->parameters->{'htmlCls'};
+    }
+    if($c->stash->{'minimal'}) {
+        $c->stash->{'extrahtmlclass'} .= " minimal";
+    }
+
     $c->stats->profile(end => "Root end");
     return 1;
 }
@@ -453,8 +476,6 @@ sub add_defaults {
     $c->stash->{'user_tz'} = $user_tz;
 
     ###############################
-    $c->stash->{'escape_html_tags'}      = exists $c->config->{'cgi_cfg'}->{'escape_html_tags'}  ? $c->config->{'cgi_cfg'}->{'escape_html_tags'}  : 1;
-    $c->stash->{'show_context_help'}     = exists $c->config->{'cgi_cfg'}->{'show_context_help'} ? $c->config->{'cgi_cfg'}->{'show_context_help'} : 0;
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
@@ -638,6 +659,13 @@ sub add_defaults {
 
     ###############################
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
+
+    ###############################
+    # merge cgi.cfg parameters set in
+    Thruk::Config::merge_cgi_cfg($c->config);
+    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
+
 
     ###############################
     # user / group specific config?
@@ -1127,6 +1155,7 @@ sub _set_enabled_backends {
                     } else {
                         # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
                         #die("got no peer for: ".$b)
+                        $c->log->warn(sprintf("no backend found for: %s", $b));
                     }
                 }
             }
@@ -1148,8 +1177,13 @@ sub _set_enabled_backends {
                 }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
-                die("got no peer for: ".$b) unless defined $peer;
-                $disabled_backends->{$peer->{'key'}} = 0;
+                if($peer) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                } else {
+                    # silently ignore, leads to hen/egg problem when using federation peers
+                    #die("got no peer for: ".$b);
+                    #$c->log->warn(sprintf("no backend found for: %s", $b));
+                }
             }
         }
     }
@@ -1159,9 +1193,12 @@ sub _set_enabled_backends {
     elsif($num_backends > 1 and defined $backend) {
         $c->log->debug('_set_enabled_backends() by param') if Thruk->debug;
         if($backend eq 'ALL') {
+            my @keys;
             for my $peer (@{$c->{'db'}->get_peers()}) {
                 $disabled_backends->{$peer->{'key'}} = 0;
+                push @keys, $peer->{'key'};
             }
+            $c->stash->{'param_backend'} = join(",", @keys);
         } else {
             # reset
             for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -1286,7 +1323,7 @@ sub check_federation_peers {
     return($processinfo, $cached_data) if $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
     my $all_sites_info;
     eval {
-        $all_sites_info = $c->{'db'}->get_sites(backend => ["ALL"]);
+        $all_sites_info = $c->{'db'}->get_sites(backend => ["ALL"], sort => {'ASC' => 'peer_name'});
     };
     if($@) {
         # may fail for older lmd releases which don't have parent or section information
@@ -1311,9 +1348,9 @@ sub check_federation_peers {
             my $subpeerconfig = {
                 name => $row->{'name'},
                 id   => $key,
-                type => $parent->{'config'}->{'type'},
+                type => $parent->{'peer_config'}->{'type'},
                 section => $row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name(),
-                options => $parent->{'config'}->{'type'} eq 'http' ? dclone($parent->{'config'}->{'options'}) : {},
+                options => $parent->{'peer_config'}->{'type'} eq 'http' ? dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};
@@ -1327,6 +1364,10 @@ sub check_federation_peers {
                 addr       => [$parent->{'addr'}, @{Thruk::Utils::list($row->{'federation_addr'})}],
                 type       => [$parent->{'type'}, @{Thruk::Utils::list($row->{'federation_type'})}],
             };
+            # inherit disabled configtool from parent
+            if($parent->{'peer_config'}->{'configtool'}->{'disable'}) {
+                $subpeer->{'peer_config'}->{'configtool'}->{'disable'} = 1;
+            }
             $Thruk::Backend::Pool::peers->{$subpeer->{'key'}} = $subpeer;
             push @{$Thruk::Backend::Pool::peer_order}, $subpeer->{'key'};
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;

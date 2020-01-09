@@ -78,7 +78,7 @@ TP.host_reschedule_menu = function() {
 TP.cmd_form_handler = function() {
     var menu  = this.up('menu');
     var panel = menu.up('panel').up('panel');
-    var tab   = Ext.getCmp(panel.panel_id);
+    var tab   = panel.tab;
     var form  = this.up('menu').down('form').getForm();
     if(form.isValid()) {
         form.submit({
@@ -132,39 +132,34 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'<\/div>');
         panel.getComponent('site').update(d.peer_name);
         /* update acknowledged button */
-        var toolbar = panel.dockedItems.getAt(0);
+        var commands = panel.dockedItems.getAt(0).items.get('commandsMenu').menu.items;
         if(d.acknowledged) {
-            if(toolbar.items.get('ack')) {
-                toolbar.remove(1);
-                toolbar.insert(1, new Ext.button.Button({
-                    itemId: 'noack',
-                    text:   'Remove Ack.',
-                    icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
-                    menu:    this.type == 'host' ? TP.host_ack_remove_menu() : TP.service_ack_remove_menu()
-                }));
-            }
+            commands.get("ack").setVisible(false);
+            commands.get("noack").setVisible(true);
         } else {
-            if(toolbar.items.get('noack')) {
-                toolbar.remove(1);
-                toolbar.insert(1, new Ext.button.Button({
-                    itemId:  'ack',
-                    text:    'Acknowledge',
-                    icon:    url_prefix+'plugins/panorama/images/btn_ack.png',
-                    menu:     this.type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu(),
-                    disabled: d.state == 0 ? true : false
-                }));
-            } else {
-                d.state == 0 ? toolbar.items.get('ack').disable() : toolbar.items.get('ack').enable();
-            }
+            commands.get("ack").setVisible(true);
+            commands.get("noack").setVisible(false);
+            commands.get("ack").setDisabled(d.state == 0);
         }
+        panel.action_menu_link = data.action_menu;
+        var btn = panel.dockedItems.getAt(0).items.get('actionMenuLink');
+        if(panel.action_menu_link) {
+            btn.action_link = 'menu://'+panel.action_menu_link;
+            btn.setVisible(true);
+        } else {
+            btn.setVisible(false);
+        }
+        panel.setVisible(true);
     }
 };
 
-TP.ExtinfoPanel = function(type) {
-    return {
+TP.ExtinfoPanel = function(panel, type) {
+    var extinfo_panel = {
         xtype:     'panel',
+        panel:      panel,
         autoScroll: true,
         border:     false,
+        hidden:     true,
         layout: {
             type:   'table',
             columns: 2,
@@ -207,7 +202,7 @@ TP.ExtinfoPanel = function(type) {
             dock:   'bottom',
             ui:     'footer',
             defaults: {
-                width: 120,
+                width: 110,
                 listeners: {
                     mouseover: function( This, eOpts ) { if(This.menu) { This.menu.letItClose = true  }},
                     mouseout: function(  This, eOpts ) { if(This.menu) { This.menu.letItClose = false }}
@@ -215,26 +210,55 @@ TP.ExtinfoPanel = function(type) {
             },
             buttonAlign: 'center',
             items: [{
-                    /* Add New Downtime */
-                    itemId: 'downtime',
-                    text:   'Add Downtime',
-                    icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
-                    menu:    type == 'host' ? TP.host_downtime_menu() : TP.service_downtime_menu()
+                    text:   'Commands',
+                    icon:   url_prefix+'plugins/panorama/images/bricks.png',
+                    itemId: 'commandsMenu',
+                    menu: [{
+                            /* Add New Downtime */
+                            itemId: 'downtime',
+                            text:   'Add Downtime',
+                            icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
+                            menu:    type == 'host' ? TP.host_downtime_menu() : TP.service_downtime_menu()
+                        }, {
+                            /* Acknowledge */
+                            itemId: 'ack',
+                            text:   'Acknowledge',
+                            icon:   url_prefix+'plugins/panorama/images/btn_ack.png',
+                            menu:    type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu()
+                        }, {
+                            /* Acknowledge remove */
+                            itemId: 'noack',
+                            text:   'Remove Ack.',
+                            icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
+                            menu:    type == 'host' ? TP.host_ack_remove_menu() : TP.service_ack_remove_menu()
+                        }, {
+                            /* Reschedule */
+                            itemId: 'reschedule',
+                            text:   'Reschedule',
+                            icon:   url_prefix+'plugins/panorama/images/btn_delay.png',
+                            menu:    type == 'host' ? TP.host_reschedule_menu() : TP.service_reschedule_menu()
+                        }]
                 }, {
-                    /* Acknowledge */
-                    itemId: 'ack',
-                    text:   'Acknowledge',
-                    icon:   url_prefix+'plugins/panorama/images/btn_ack.png',
-                    menu:    type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu()
-                }, {
-                    /* Reschedule */
-                    itemId: 'reschedule',
-                    text:   'Reschedule',
-                    icon:   url_prefix+'plugins/panorama/images/btn_delay.png',
-                    menu:    type == 'host' ? TP.host_reschedule_menu() : TP.service_reschedule_menu()
+                    itemId:     'details',
+                    text:       'Details',
+                    icon:        url_prefix+'plugins/panorama/images/information.png',
+                    href:        type == 'host' ? 'extinfo.cgi?type=1&host='+encodeURIComponent(panel.xdata.host) : 'extinfo.cgi?type=2&host='+encodeURIComponent(panel.xdata.host)+'&service='+encodeURIComponent(panel.xdata.service),
+                    hrefTarget: '_blank'
+            }, {
+                text:        "Action Menu",
+                xtype:      'tp_action_menu_button',
+                itemId:     'actionMenuLink',
+                hidden:      true,
+                icon:        url_prefix+'plugins/panorama/images/menu-down.gif',
+                panel:       panel,
+                host:        panel.xdata.host,
+                service:     panel.xdata.service,
+                action_link: 'menu://'
             }]
         }]
     }
+
+    return(extinfo_panel);
 };
 
 TP.ExtinfoPanelLoader = function(scope) {
@@ -268,36 +292,37 @@ Ext.define('TP.PanletHost', {
     type:   'host',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.url         = 'panorama.cgi?task=host_detail';
-        if(this.xdata.host    == undefined) { this.xdata.host    = '' }
+        panel.callParent();
+        panel.xdata.url         = 'panorama.cgi?task=host_detail';
+        if(panel.xdata.host    == undefined) { panel.xdata.host    = '' }
 
         /* load host data */
-        this.loader = TP.ExtinfoPanelLoader(this),
-        this.add(TP.ExtinfoPanel('host'));
+        panel.loader = TP.ExtinfoPanelLoader(panel),
+        panel.add(TP.ExtinfoPanel(panel, 'host'));
 
         /* auto load when host is set */
-        this.addListener('afterrender', function() {
-            this.setTitle(this.xdata.host);
-            if(this.xdata.host == '') {
-                this.gearHandler();
+        panel.addListener('afterrender', function() {
+            panel.setTitle(panel.xdata.host);
+            if(panel.xdata.host == '') {
+                panel.gearHandler();
             } else {
                 // update must be delayed, IE8 breaks otherwise
-                TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.manualRefresh, this, []), 500);
+                TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.manualRefresh, panel, []), 500);
             }
         });
 
-        this.formUpdatedCallback = function() {
-            this.setTitle(this.xdata.host);
+        panel.formUpdatedCallback = function() {
+            panel.setTitle(panel.xdata.host);
         }
 
-        /* should be closeable all the time because they can be openend even on readonly dashboards */
-        this.closable  = true;
+        /* should be closeable/moveable all the time because they can be openend even on readonly dashboards */
+        panel.closable  = true;
+        panel.draggable = true;
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems(
+        panel.callParent();
+        panel.addGearItems(
             TP.objectSearchItem(panel, 'host', 'Hostname')
         );
     }
@@ -306,16 +331,16 @@ Ext.define('TP.PanletHost', {
 /* form for sending cmd */
 TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
     if(defaults == undefined) { defaults = {} }
-    fields.push({ xtype: 'hidden', name: 'json',    value: 1 });
-    fields.push({ xtype: 'hidden', name: 'host',    value: '' });
-    fields.push({ xtype: 'hidden', name: 'service', value: '' });
-    fields.push({ xtype: 'hidden', name: 'cmd_typ', value: cmd_typ });
-    fields.push({ xtype: 'hidden', name: 'cmd_mod', value: '2' });
-    fields.push({ xtype: 'hidden', name: 'token',   value: '' });
+    fields.push({ xtype: 'hidden', name: 'json',      value: 1 });
+    fields.push({ xtype: 'hidden', name: 'host',      value: '' });
+    fields.push({ xtype: 'hidden', name: 'service',   value: '' });
+    fields.push({ xtype: 'hidden', name: 'cmd_typ',   value: cmd_typ });
+    fields.push({ xtype: 'hidden', name: 'cmd_mod',   value: '2' });
+    fields.push({ xtype: 'hidden', name: 'CSRFtoken', value: '' });
     /* this is a Ext.menu.Menu */
     return {
         plain:      true,
-        letItClose: false,
+        letItClose: true,
         items: [{
             xtype: 'panel',
             items: [{
@@ -339,7 +364,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
         }],
         listeners: {
             beforehide: function( This, eOpts ) {
-                var panel = This.up('panel').up('panel');
+                var panel = This.up('panel').up('panel').panel;
                 if(This.letItClose) {
                     panel.menusnr = panel.menusnr - 1;
                     return true;
@@ -352,7 +377,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
             },
             beforeshow: function(This, eOpts) {
                 /* don't show more than one menu */
-                var panel = This.up('panel').up('panel');
+                var panel = This.up('panel').up('panel').panel;
                 if(panel.menusnr > 0) {
                     return false;
                 }
@@ -366,7 +391,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
                     sticky_ack:         cmd_sticky_ack,
                     send_notification:  cmd_send_notification,
                     persistent:         cmd_persistent,
-                    token:              user_token
+                    CSRFtoken:          CSRFtoken
                 });
                 panel.menusnr = panel.menusnr + 1;
                 return true;

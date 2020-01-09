@@ -131,7 +131,7 @@ function init_conf_tool_buttons() {
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
-    }).click(function() {
+    }).unbind("click").click(function() {
         check_plugin_exec(this.id);
         return false;
     });
@@ -146,14 +146,14 @@ function init_conf_tool_buttons() {
     });
     jQuery('#attr_opener').button({
         icons: {primary: 'ui-add-button'}
-    }).click(function() {
+    }).unbind("click").click(function() {
         $dialog.dialog('open');
         return false;
     });
 
     jQuery('#finish_button').button({
         icons: {primary: 'ui-ok-button'}
-    }).click(function() {
+    }).unbind("click").click(function() {
         $dialog.dialog('close');
         return false;
     });
@@ -163,7 +163,7 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-wzd-button'},
         text: false,
         label: 'open command line wizard'
-    }).click(function() {
+    }).unbind("click").click(function() {
         init_conf_tool_command_wizard(this.id);
         return false;
     });
@@ -173,7 +173,7 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-wzd-button'},
         text: false,
         label: 'open command line wizard'
-    }).click(function() {
+    }).unbind("click").click(function() {
         init_conf_tool_plugin_wizard(this.id);
         return false;
     });
@@ -183,7 +183,7 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-wzd-button'},
         text: false,
         label: 'set ip based on current hostname'
-    }).click(function() {
+    }).unbind("click").click(function() {
         var host = jQuery('#attr_table').find('.obj_host_name').val();
         if(host == undefined) {
             return false;
@@ -192,10 +192,10 @@ function init_conf_tool_buttons() {
         jQuery.ajax({
             url: 'conf.cgi',
             data: {
-                action: 'json',
-                type:   'dig',
-                host:   host,
-                token:  user_token
+                action:   'json',
+                type:     'dig',
+                host:      host,
+                CSRFtoken: CSRFtoken
             },
             type: 'POST',
             success: function(data) {
@@ -205,7 +205,7 @@ function init_conf_tool_buttons() {
         return false;
     });
 
-    jQuery("#depsopen").on("click", function(ev) {
+    jQuery("#depsopen").unbind("click").on("click", function(ev) {
         var menu = [{
             'text': "Hostdepenendency",
             'href': "conf.cgi?sub=objects&amp;type=hostdependency"
@@ -216,7 +216,7 @@ function init_conf_tool_buttons() {
         show_action_menu(ev.target.parentNode, menu,null, null, null, null, "b-r");
         return false;
     });
-    jQuery("#escopen").on("click", function(ev) {
+    jQuery("#escopen").unbind("click").on("click", function(ev) {
         var menu = [{
             'text': "Hostescalation",
             'href': "conf.cgi?sub=objects&amp;type=hostescalation"
@@ -319,10 +319,10 @@ function update_command_line(id) {
         url: 'conf.cgi',
         type: 'POST',
         data: {
-            action: 'json',
-            type:   'commanddetails',
-            command: cmd_name,
-            token:   user_token
+            action:   'json',
+            type:     'commanddetails',
+            command:   cmd_name,
+            CSRFtoken: CSRFtoken
         },
         success: function(data) {
             updateCommandLine(id, data[0].cmd_line, args);
@@ -515,10 +515,10 @@ function load_plugin_help(id, plugin) {
     jQuery.ajax({
         url: 'conf.cgi',
         data: {
-            action: 'json',
-            type:   'pluginhelp',
-            plugin:  plugin,
-            token:   user_token
+            action:   'json',
+            type:     'pluginhelp',
+            plugin:    plugin,
+            CSRFtoken: CSRFtoken
         },
         type: 'POST',
         success: function(data) {
@@ -555,13 +555,13 @@ function check_plugin_exec(id) {
     jQuery.ajax({
         url: 'conf.cgi',
         data: {
-            action: 'json',
-            type:   'pluginpreview',
-            command: command,
-            host:    host,
-            service: service,
-            args:    args,
-            token:   user_token
+            action:   'json',
+            type:     'pluginpreview',
+            command:   command,
+            host:      host,
+            service:   service,
+            args:      args,
+            CSRFtoken: CSRFtoken
         },
         type: 'POST',
         success: function(data) {
@@ -598,6 +598,9 @@ function on_attr_select() {
     var newid = add_conf_attribute('attr_table', key,true);
     ajax_search.reset();
     if(!newid) { return false; }
+    if(key.substr(0,1) == '_') {
+        return;
+    }
     newid = "#"+(newid.replace(/"/g, ''));
     if(key == "customvariable") {
         newid = newid+"_key";

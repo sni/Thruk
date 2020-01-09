@@ -23,16 +23,43 @@ var TP = {
     num_panels:   0,
     cur_panels:   1,
     logHistory:   [],
-    lastFullIconRefresh: {},
+    allDashboards: {},
 
     /* called once the initialization */
     initComplete: function() {
+        if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
         if(TP.initialized) { return; }
         TP.log('[global] init complete');
         TP.initialized = true;
-        if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+
+        var tabbar = Ext.getCmp("tabbar");
+        var activeTab = tabbar.getActiveTab();
+        if(!activeTab) {
+            activeTab = tabbar.setActiveTab(0);
+        }
+        if(!one_tab_only) {
+            tabbar.startTimeouts();
+        }
+
         /* preload images */
         window.setTimeout(preloader, 2000);
+    },
+
+    // check if init has completed
+    increaseLoadedPanels: function() {
+        if(TP.cur_panels > TP.num_panels) {
+            return;
+        }
+        // update initial panlet counter
+        var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
+        if(tmp.length > 0) {
+            TP.cur_panels++;
+            if(TP.cur_panels > TP.num_panels) {
+                TP.initComplete();
+            } else {
+                tmp[0].innerHTML = "loading panel "+TP.cur_panels+'/'+TP.num_panels+"...";
+            }
+        }
     },
 
     get_snap: function (x, y) {
@@ -44,132 +71,107 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id, replace_id, hidden, callback, extraConf, skipAutoShow) {
-        var tabpan = Ext.getCmp('tabpan');
+    /*
+    add_pantab(options):
+        id                  the id to open
+        replace_id          replace given dashboard
+        hidden              dashboard will be invisible and kept in background
+        callback            run callback after dashboard finished loading function(tab_id, success, response)
+        extraConf           merge config into dashboard data
+        skipAutoShow        do not put dashboard in front
+    */
+    add_pantab: function(opt) {
+        if(!Ext.isObject(opt)) { opt = { id: opt }; }
+        var id = opt.id;
         if(id && Ext.isNumeric(String(id))) {
             id = TP.nr2TabId(id);
         }
+        var tabbar = Ext.getCmp('tabbar');
 
-        /* if previously added as hidden tab, destroy it and add it normal */
-        if(id && Ext.getCmp(id)) {
-            var tab = Ext.getCmp(id);
-            if(!tab.rendered) {
-                tab.destroy();
-            } else {
-                // dont add same dashboard twice
-                debug("attemted to add dashboard twice");
-                return;
-            }
+        if(id == undefined) {
+            id = 'new_or_empty';
         }
-
         if(id == 'new_geo') {
             id = 'new';
-            extraConf = {map: {}};
+            opt.extraConf = {map: {}};
         }
 
-        if(!hidden) {
+        /* if previously added as hidden tab, destroy it and add it normal */
+        var tab = Ext.getCmp(id);
+        if(tab && tab.rendered) {
+            if(!opt.hidden) {
+                // simply activate tab
+                tabbar.setActiveTab(tab);
+            }
+            return;
+        }
+
+
+        if(!opt.hidden) {
             if(TP.dashboardsSettingWindow) {
                 TP.dashboardsSettingWindow.body.mask('loading...');
             }
-
             if(one_tab_only) {
-                if(replace_id && id != replace_id) {
-                    tabpan.getActiveTab().body.mask("loading");
+                if(opt.replace_id && id != opt.replace_id) {
+                    tabbar.getActiveTab().body.mask("loading");
                 }
             }
         }
 
-        if(id == undefined) {
-            TP.initComplete();
-            id = 'new_or_empty';
-        }
-
-        TP.log('[global] add_pantab: id:'+id+(replace_id ? ', replace_id: '+replace_id : ''));
+        TP.log('[global] add_pantab: id:'+id+(opt.replace_id ? ', replace_id: '+opt.replace_id : ''));
 
         /* get tab data from server */
-        var newDashboard = false;
+        opt.newDashboard = false;
         if(id && (id == "new" || id == "new_or_empty")) {
-            newDashboard = true;
+            opt.newDashboard = true;
         }
         if(id && TP.cp.state[id] == undefined) {
             if(!TP.initialized) {
                 // all initial tabs should have a state, if not, do not open that tab
                 return;
             }
-            /* fetch state info and add new tab as callback */
-            Ext.Ajax.request({
-                url: 'panorama.cgi?task=dashboard_data',
-                method: 'POST',
-                params: { nr: id, hidden: hidden },
-                callback: function(options, success, response) {
-                    if(!success) {
-                        if(!hidden) {
-                            if(response.status == 0) {
-                                TP.Msg.msg("fail_message~~adding new dashboard failed");
-                            } else {
-                                TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
-                            }
-                        }
-                        tabpan.saveState();
-                        return;
-                    }
-
-                    var data = TP.getResponse(undefined, response);
-                    data = data.data;
-                    TP.log('['+id+'] dashboard_data: '+Ext.JSON.encode(data));
-                    if(data && data.newid) { id = data.newid; delete data.newid; }
-                    if(extraConf) {
-                        var tmp = Ext.JSON.decode(data[id]);
-                        Ext.apply(tmp.xdata, extraConf);
-                        data[id] = Ext.JSON.encode(tmp);
-                    }
-                    for(var key in data) {
-                        TP.cp.set(key, Ext.JSON.decode(data[key]));
-                    }
-                    if(TP.cp.state[id]) {
-                        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
-                            TP.dashboardsSettingGrid.getView().refresh();
-                        }
-                    } else {
-                        if(!hidden) {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
-                        }
-                        tabpan.saveState();
-                    }
-
-                    if(!hidden) {
-                        TP.initial_active_tab = id; // set inital tab, so panlets will be shown
-                    }
-                    TP.add_pantab(id, replace_id, hidden, callback, extraConf, skipAutoShow);
-
-                    /* disable lock for new dashboard */
-                    if(newDashboard) {
-                        Ext.getCmp(id).locked = false;
-                        Ext.getCmp(id).setLock(false);
-                    }
-                }
-            });
-            return;
+            opt.id = id;
+            if(opt.hidden) {
+                TP.add_pantab_delayed_hidden(id, opt.callback);
+                return;
+            }
+            return(TP.add_pantab_load(opt));
         }
 
         /* add new tab panel */
-        if(hidden) {
-            Ext.create("TP.Pantab", {id: id, hidden: true});
+        if(opt.hidden) {
+            if(tab) {
+                // recreate as hidden tab
+                tab.redraw = true;
+                tab.destroy();
+            }
+            tab = Ext.create("TP.Pantab", {id: id, hidden: true});
         } else {
             if(TP.initial_active_tab == undefined || one_tab_only) {
                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
             }
 
-            var tab = tabpan.add(new TP.Pantab({id: id}));
-            if(!skipAutoShow) {
+            if(tab) {
+                tabbar.add(tab);
+            } else {
+                tab = tabbar.add(new TP.Pantab({id: id}));
+            }
+            if(!opt.skipAutoShow) {
+                tab.showLoadMask();
                 tab.show();
+                tabbar.setActiveTab(tab);
+                if(tab.xdata.hide_tab_header) {
+                    tab.tab.hide();
+                } else {
+                    tab.tab.show();
+                }
             }
 
-            var tabPos, tabbar;
-            if(tabpan.getTabBar) {
-                tabbar = tabpan.getTabBar();
-                for(var x=0; x<tabbar.items.items.length; x++) {
-                    if(tabbar.items.items[x].card && tabbar.items.items[x].card.id == id) {
+            var tabPos, bar;
+            if(tabbar.getTabBar) {
+                bar = tabbar.getTabBar();
+                for(var x=0; x<bar.items.items.length; x++) {
+                    if(bar.items.items[x].card && bar.items.items[x].card.id == id) {
                         tabPos = x;
                         break;
                     }
@@ -179,11 +181,11 @@ var TP = {
             /* move new-tab button at the end */
             if(!one_tab_only) {
                 /* switch added tab with "new tab" */
-                tabbar.move(tabPos-1, tabPos);
+                bar.move(tabPos-1, tabPos);
 
                 /* make tab title editable */
                 if(!readonly && !dashboard_ignore_changes) {
-                    var tabhead = tabpan.getTabBar().items.getAt(tabPos-1);
+                    var tabhead = tabbar.getTabBar().items.getAt(tabPos-1);
                     if(tabhead == undefined) {
                         // do nothing
                     } else if(tabhead.rendered == false) {
@@ -197,12 +199,12 @@ var TP = {
             }
 
             /* replace existing tab with current one */
-            if(replace_id) {
+            if(opt.replace_id) {
                 if(one_tab_only) {
-                    if(id != replace_id) {
-                        Ext.getCmp(replace_id).destroy();
+                    if(id != opt.replace_id) {
+                        Ext.getCmp(opt.replace_id).destroy();
                         if(history.replaceState) {
-                            var tab    = tabpan.getActiveTab();
+                            var tab    = tabbar.getActiveTab();
                             var newloc = new String(window.document.location);
                             newloc     = newloc.replace(/\?map=.*$/g, '');
                             newloc     = newloc + "?map="+tab.xdata.title;
@@ -211,20 +213,19 @@ var TP = {
                     }
                 } else {
                     var replace_nr;
-                    tabpan.getState(); // recalculate open tabs
-                    for(var x=0; x<tabpan.open_tabs.length; x++) {
-                        if(tabpan.open_tabs[x] == replace_id) {
+                    for(var x=0; x<tabbar.open_tabs.length; x++) {
+                        if(tabbar.open_tabs[x] == opt.replace_id) {
                             replace_nr = x+1;
                         }
                     }
                     if(replace_nr != undefined) {
-                        tabpan.getTabBar().move(tabPos-1, replace_nr);
-                        if(id != replace_id) {
-                            Ext.getCmp(replace_id).destroy();
+                        bar.move(tabPos-1, replace_nr);
+                        if(id != opt.replace_id) {
+                            Ext.getCmp(opt.replace_id).destroy();
                         }
                     }
                 }
-                var tab = tabpan.getActiveTab();
+                var tab = tabbar.getActiveTab();
                 tab.adjustTabHeaderOffset();
             }
 
@@ -235,13 +236,143 @@ var TP = {
         }
 
         /* set initial timestamp */
-        Ext.getCmp(id).ts = TP.cp.state[id].ts;
+        tab.ts = TP.cp.state[id].ts;
+
+        /* disable lock for new dashboard */
+        if(opt.newDashboard) {
+            tab.locked = false;
+            tab.setLock(false);
+        }
 
         /* any callbacks? */
-        if(callback) { callback(id); }
+        if(opt.callback) { opt.callback(id, true); }
 
         /* return false to prevent newtab button being activated */
         return false;
+    },
+
+    add_pantab_load: function(opt, callback) {
+        /* fetch state info and add new tab(s) as callback */
+        var alreadyopen = [];
+        for(var key in TP.allDashboards) {
+            var key_id = String(key).replace(/^pantab_/, "");
+            alreadyopen.push(key_id);
+        }
+        Ext.Ajax.request({
+            url: 'panorama.cgi?task=dashboard_data',
+            method: 'POST',
+            params: {
+                nr:        opt.id,
+                hidden:    opt.hidden,
+                recursive: alreadyopen
+            },
+            callback: function(options, success, response) {
+                if(!success) {
+                    if(!opt.hidden) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        }
+                    }
+                    var tabbar = Ext.getCmp('tabbar');
+                    tabbar.saveState();
+                    if(callback) { callback(opt.id, success, response); }
+                    return;
+                }
+
+                var data = TP.getResponse(undefined, response);
+                data = data.data;
+                if(data && data.newid) {
+                    opt.id = data.newid;
+                    delete data.newid;
+                    opt.newDashboard = true;
+                }
+                if(opt.extraConf) {
+                    var tmp = anyDecode(data[opt.id]);
+                    Ext.apply(tmp.xdata, opt.extraConf);
+                    data[opt.id] = Ext.JSON.encode(tmp);
+                }
+                for(var key in data) {
+                    TP.cp.set(key, anyDecode(data[key]));
+                }
+
+                if(Ext.isArray(opt.id)) {
+                    if(callback) { callback(opt.id, success, response); }
+                    return;
+                }
+
+                if(TP.cp.state[opt.id]) {
+                    if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
+                        TP.dashboardsSettingGrid.getView().refresh();
+                    }
+                } else {
+                    if(!opt.hidden) {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                    }
+                    var tabbar = Ext.getCmp('tabbar');
+                    tabbar.saveState();
+                    return;
+                }
+
+                if(!opt.hidden) {
+                    TP.initial_active_tab = TP.nr2TabId(opt.id); // set inital tab, so panlets will be shown
+                }
+
+                TP.add_pantab(opt);
+                if(callback) { callback(opt.id, success, response); }
+
+                // add additionall hidden dashboards required from icons
+                for(var key in data) {
+                    var matches = key.match(/^pantab_\d+$/);
+                    if(matches && matches[0] != opt.id && !Ext.getCmp(matches[0])) {
+                        TP.add_pantab({ id: matches[0], hidden: true });
+                    }
+                }
+            }
+        });
+        return;
+    },
+
+    // adds multiple (hidden) dashboards in bulk mode
+    add_pantab_bulk_hidden: function(ids, callbacks) {
+        TP.add_pantab_load({ id: ids, hidden: true }, function() {
+            for(var x=0; x<ids.length; x++) {
+                var id = ids[x];
+                if(TP.cp.state[id]) {
+                    TP.add_pantab({ id: id, hidden: true, callback: callbacks[x] });
+                } else {
+                    if(callbacks[x]) {
+                        callbacks[x](id, false);
+                    }
+                }
+            }
+        });
+    },
+
+    // collect dashboard ids to open in bulk
+    add_pantab_delayed_hidden: function(id, callback) {
+        if(!TP.load_bulk_ids)       { TP.load_bulk_ids = []; }
+        if(!TP.load_bulk_callbacks) { TP.load_bulk_callbacks = []; }
+
+        // do not add it twice
+        for(var x=0; x<TP.load_bulk_ids.length; x++) {
+            if(TP.load_bulk_ids[x] == id) {
+                return;
+            }
+        }
+
+        TP.load_bulk_ids.push(id);
+        TP.load_bulk_callbacks.push(callback);
+
+        window.clearTimeout(TP.timeouts['timeout_bulk_load']);
+        TP.timeouts['timeout_bulk_load'] = window.setTimeout(function() {
+            var ids       = TP.load_bulk_ids
+            var callbacks = TP.load_bulk_callbacks;
+            TP.load_bulk_ids       = [];
+            TP.load_bulk_callbacks = [];
+            TP.add_pantab_bulk_hidden(ids, callbacks);
+        }, 3000);
     },
 
     /* clone config from given panel which can be used to create a clone */
@@ -262,7 +393,7 @@ var TP = {
         if(config.conf == undefined) {
             config.conf = {};
         }
-        var pan = Ext.getCmp('tabpan');
+        var pan = Ext.getCmp('tabbar');
         var tb;
         if(config.tb) {
             tb                   = config.tb;
@@ -311,8 +442,8 @@ var TP = {
         if(config.state) {
             TP.cp.set(config.conf.id, config.state);
         }
-        config.conf.panel_id = tb.id;
         TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
+        config.conf.tab      = tb;
         var win = Ext.create(config.type, config.conf);
         if(config.conf.autoShow) { win.show(); }
         if(smartPlacement == undefined || smartPlacement == true) {
@@ -327,12 +458,6 @@ var TP = {
             tb.window_ids.push(win.id);
             tb.saveState();
             win.firstRun = false;
-        }
-        // update initial panlet counter
-        var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
-        if(tmp.length > 0) {
-            tmp[0].innerHTML = "loading panel "+TP.cur_panels+'/'+TP.num_panels+"...";
-            TP.cur_panels++;
         }
         return win;
     },
@@ -374,7 +499,7 @@ var TP = {
     /* add panel, but let the user choose position */
     add_panlet_delayed: function(config, offsetX, offsetY) {
         var tb;
-        var pan = Ext.getCmp('tabpan');
+        var pan = Ext.getCmp('tabbar');
         if(config.tb) {
             tb = config.tb;
         } else {
@@ -409,7 +534,7 @@ var TP = {
             panel.hide(); // workaround for not removed labels on text elements
             panel.show();
             panel.firstRun = firstRun;
-            TP.updateAllIcons(Ext.getCmp(panel.panel_id));
+            TP.updateAllIcons(panel.tab);
         }, 50);
     },
 
@@ -559,12 +684,7 @@ var TP = {
     getAllPanel: function(tab) {
         var panels = [];
         if(tab == undefined) {
-            throw new Error("TP.getAllPanel(): no tab! (caller: " + (TP.getAllPanel.caller ? TP.getAllPanel.caller : 'unknown') + ")");
-            var tabpan = Ext.getCmp('tabpan');
-            tab = tabpan.getActiveTab();
-            if(!tab) {
-                tab = tabpan.setActiveTab(0);
-            }
+            throw new Error("TP.getAllPanel(): no tab!");
         }
         if(tab.window_ids) {
             for(var nr=0; nr<tab.window_ids.length; nr++) {
@@ -703,12 +823,12 @@ var TP = {
             baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
             delete baseParams['gridstate']; // not needed
             // add backend settings
-            var tab = Ext.getCmp(panel.panel_id);
+            var tab = panel.tab;
             baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
 
             // update proc info?
             baseParams['update_proc'] = TP.setUpdateProcInfo();
-            baseParams['current_tab'] = panel.panel_id;
+            baseParams['current_tab'] = panel.tab.id;
         }
         TP.log('['+panel.id+'] loading '+url);
         panel.loader.load({url:url, baseParams: baseParams});
@@ -773,9 +893,9 @@ var TP = {
         if(decoded == '') { decoded = {}; }
 
         /* stop everything */
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
 
-        if(decoded.tabpan) {
+        if(decoded.tabbar) {
             /* old export with all tabs*/
             TP.cp.saveChanges(undefined, function() {
                 Ext.Msg.confirm(
@@ -783,7 +903,7 @@ var TP = {
                     'This is a complete import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and can be added again afterwards.',
                     function(button) {
                         if(button === 'yes') {
-                            tabpan.stopTimeouts();
+                            tabbar.stopTimeouts();
                             TP.cp.loadData(decoded, false);
                             TP.cp.saveChanges({replace: 1}, function() {
                                 Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
@@ -797,9 +917,9 @@ var TP = {
         } else {
             /* new single tab export */
             var param = {
-                task:  'update2',
-                nr:    'new',
-                'tabpan-tab_1': Ext.JSON.encode(decoded)
+                task:    'update2',
+                nr:      'new',
+                pantab_1: Ext.JSON.encode(decoded)
             }
             var conn = new Ext.data.Connection();
             conn.request({
@@ -809,8 +929,8 @@ var TP = {
                     /* allow response to contain cookie messages */
                     var resp = TP.getResponse(undefined, response, false);
                     if(resp.newid) {
-                        TP.initial_active_tab = resp.newid;
-                        TP.add_pantab(resp.newid);
+                        TP.initial_active_tab = TP.nr2TabId(resp.newid);
+                        TP.add_pantab({ id: resp.newid });
                     } else {
                         Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                         return(false);
@@ -888,12 +1008,22 @@ var TP = {
                             if(tab.rendered) {
                                 TP.renewDashboard(tab);
                             } else {
-                                TP.add_pantab(tab.id, undefined, true);
+                                TP.add_pantab({ id: tab.id, hidden: true });
                             }
                         }
                     }
                 }
             }
+
+            // response contains maintenance modes
+            if(data && data.maintenance != undefined) {
+                var tab_id = TP.nr2TabId(key);
+                var tab = Ext.getCmp(tab_id);
+                for(var key in data.maintenance) {
+                    tab.setMaintenance(data.maintenance[key], false);
+                }
+            }
+
             /* contains a message? */
             var msg = Ext.util.Cookies.get('thruk_message');
             if(msg) {
@@ -929,19 +1059,19 @@ var TP = {
     },
     /* start tab rotation interval */
     startRotatingTabs: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         this.stopRotatingTabs();
-        if(tabpan.xdata.rotate_tabs > 0) {
-            debug("starting tab rotation every " + tabpan.xdata.rotate_tabs + "seconds");
-            TP.timeouts['interval_global_rotate_tabs'] = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
+        if(tabbar.xdata.rotate_tabs > 0) {
+            debug("starting tab rotation every " + tabbar.xdata.rotate_tabs + "seconds");
+            TP.timeouts['interval_global_rotate_tabs'] = window.setInterval(TP.rotateTabs, tabbar.xdata.rotate_tabs * 1000);
         }
     },
     /* start server time */
     startServerTime: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         this.stopServerTime();
         var label = Ext.getCmp('server_time');
-        if(!tabpan.xdata.server_time) {
+        if(!tabbar.xdata.server_time) {
             label.hide();
             return;
         }
@@ -949,7 +1079,7 @@ var TP = {
         TP.timeouts['interval_global_servertime'] = window.setInterval(TP.updateServerTime, 1000);
     },
     stopServerTime: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         window.clearInterval(TP.timeouts['interval_global_servertime']);
     },
     /* update server time */
@@ -968,17 +1098,17 @@ var TP = {
     },
     /* stop tab rotation interval */
     stopRotatingTabs: function() {
-        var tabpan = Ext.getCmp('tabpan');
+        var tabbar = Ext.getCmp('tabbar');
         window.clearInterval(TP.timeouts['interval_global_rotate_tabs']);
     },
     /* rotate tabs once */
     rotateTabs: function() {
-        var tabpan = Ext.getCmp('tabpan');
-        var at     = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var at     = tabbar.getActiveTab();
         // find next tab
         var found = false;
         var next  = undefined;
-        tabpan.items.each(function(tab) {
+        tabbar.items.each(function(tab) {
             if(found == true) {
                 next = tab.id;
                 return false;
@@ -987,8 +1117,8 @@ var TP = {
                 found = true;
             }
         });
-        if(next == undefined || !tabpan.setActiveTab(next)) {
-            tabpan.setActiveTab(1);
+        if(next == undefined || !tabbar.setActiveTab(next)) {
+            tabbar.setActiveTab(1);
         }
     },
     addTabBarMouseEvents: function(el, tabId) {
@@ -1014,6 +1144,30 @@ var TP = {
             panel:          panel
         });
         panel.addGearItems(panel.obj_filter);
+    },
+    addGearBackgroundOptions: function(panel) {
+        panel.addGearItems({
+            fieldLabel:   'Background',
+            xtype:        'fieldcontainer',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'label',
+                text:         'Border: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 0}
+            }, {
+                xtype:        'checkbox',
+                name:         'showborder'
+            }, {
+                xtype:        'label',
+                text:         'Color: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
+            }, {
+                xtype:        'colorcbo',
+                name:         'background',
+                value:        '',
+                flex:          1
+            }]
+        });
     },
     /* convert number to binary list */
     dec2bin: function(dec) {
@@ -1124,15 +1278,14 @@ var TP = {
             fieldLabel:     name,
             panel:          panel,
             xtype:          'searchCbo',
-            store:          searchStore,
             value:          value
         });
     },
     removeWindowFromPanels: function(win_id) {
         /* remove panel reference */
         var panel = Ext.getCmp(win_id);
-        var tab   = Ext.getCmp(panel.panel_id);
-        if(tab.window_ids) {
+        var tab   = panel.tab;
+        if(tab && tab.window_ids) {
             tab.window_ids = TP.removeFromList(tab.window_ids, win_id);
             tab.saveState();
         }
@@ -1151,6 +1304,9 @@ var TP = {
     updateAllIconsDo: function(tab, id, xdata, reschedule, callback) {
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
+
+        // background tabs are refreshed separately
+        if(!tab.rendered) { return; }
 
         /* Delay update if not all icons are rendered yet.
          * Those icons would be missing from getStatusReq()
@@ -1179,9 +1335,39 @@ var TP = {
             state_type:  tab.xdata.state_type
         };
         TP.iconUpdateRunning[tab.id] = true;
+        var subReqs = {};
         if(!id) {
-            TP.lastFullIconRefresh[tab.id] = new Date();
+            // add dashboard icons status request
+            params.sub = {};
+            var subtabs = tab.getAllSubDashboards(true);
+            for(var x=0; x<subtabs.length; x++) {
+                var subtab_id = subtabs[x];
+                var subtab    = Ext.getCmp(subtab_id);
+                if(!subtab) {
+                    TP.add_pantab({ id: subtabs[x], hidden: true, callback: function(subtab_id) {
+                        var subtab = Ext.getCmp(subtab_id);
+                        if(!subtab) {
+                            TP.log('['+subtab_id+'] failed to load dashboard');
+                        }
+                    }});
+                }
+                if(subtab && !subtab.rendered) {
+                    var subreq = TP.getStatusReq(subtab);
+                    if(subreq) {
+                        TP.iconUpdateRunning[subtab.id] = true;
+                        params.sub[subtab.id] = {
+                            types:       subreq.req,
+                            backends:    TP.getActiveBackendsPanel(subtab),
+                            current_tab: subtab.id,
+                            state_type:  subtab.xdata.state_type
+                        }
+                        subReqs[subtab.id] = { tab: subtab, ref: subreq.ref };
+                    }
+                }
+            }
+            params.sub = Ext.JSON.encode(params.sub);
         }
+
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
@@ -1209,168 +1395,163 @@ var TP = {
                         if(callback) { callback(); }
                         return;
                     }
-                    data = data.data;
-                    /* update custom filter */
-                    if(data.filter) {
-                        for(var key in data.filter) {
-                            for(var x=0; x<ref.filter[key].length; x++) {
-                                ref.filter[key][x].results = data.filter[key];
-                                ref.filter[key][x].refreshHandler();
-                            }
-                            delete ref.filter[key];
-                        }
+                    // first insert sub dashboards if there are some
+                    for(var key in subReqs) {
+                        TP.insertStatusResponseData(subReqs[key].tab, data.data.sub[key], subReqs[key].ref);
                     }
-                    /* update hosts */
-                    if(data.hosts) {
-                        for(var x=0; x<data.hosts.length; x++) {
-                            var name  = data.hosts[x]['name'];
-                            var state = data.hosts[x]['state'];
-                            if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
-                                if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
-                                if(data.hosts[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
-                                for(var y=0; y<ref.hosts[name].length; y++) {
-                                    /* update host object but keep trend values */
-                                    if(ref.hosts[name][y].host) {
-                                        var lastTrend = ref.hosts[name][y].host.trend;
-                                        if(lastTrend) { data.hosts[x].trend = lastTrend; }
-                                    }
-
-                                    delete ref.hosts[name][y]['no_data'];
-                                    ref.hosts[name][y].host = data.hosts[x];
-                                    ref.hosts[name][y].lastState = state;
-                                    ref.hosts[name][y].refreshHandler(state);
-                                }
-                                delete ref.hosts[name];
-                            }
-                        }
-                    }
-                    /* update hostgroups */
-                    if(data.hostgroups) {
-                        for(var x=0; x<data.hostgroups.length; x++) {
-                            var name  = data.hostgroups[x]['name'];
-                            var state = data.hostgroups[x]['state'];
-                            if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
-                                for(var y=0; y<ref.hostgroups[name].length; y++) {
-                                    delete ref.hostgroups[name][y]['no_data'];
-                                    ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
-                                    ref.hostgroups[name][y].refreshHandler();
-                                }
-                                delete ref.hostgroups[name];
-                            }
-                        }
-                    }
-                    /* update servicegroups */
-                    if(data.servicegroups) {
-                        for(var x=0; x<data.servicegroups.length; x++) {
-                            var name  = data.servicegroups[x]['name'];
-                            var state = data.servicegroups[x]['state'];
-                            if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
-                                for(var y=0; y<ref.servicegroups[name].length; y++) {
-                                    delete ref.servicegroups[name][y]['no_data'];
-                                    ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
-                                    ref.servicegroups[name][y].refreshHandler();
-                                }
-                                delete ref.servicegroups[name];
-                            }
-                        }
-                    }
-                    /* update services */
-                    if(data.services) {
-                        for(var x=0; x<data.services.length; x++) {
-                            var hst   = data.services[x]['host_name'];
-                            var svc   = data.services[x]['description'];
-                            var state = data.services[x]['state'];
-                            if(data.services[x]['has_been_checked'] == 0) { state = 4; }
-                            if(data.services[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
-                            if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
-                                for(var y=0; y<ref.services[hst][svc].length; y++) {
-                                    /* update service object but keep trend values */
-                                    if(ref.services[hst][svc][y].service) {
-                                        var lastTrend = ref.services[hst][svc][y].service.trend;
-                                        if(lastTrend) { data.services[x].trend = lastTrend; }
-                                    }
-
-                                    delete ref.services[hst][svc][y]['no_data'];
-                                    ref.services[hst][svc][y].service = data.services[x];
-                                    ref.services[hst][svc][y].lastState = state;
-                                    ref.services[hst][svc][y].refreshHandler(state);
-                                }
-                                delete ref.services[hst][svc];
-                            }
-                        }
-                    }
-                    /* update sites */
-                    if(data.backends) {
-                        for(var key in data.backends) {
-                            var name = data.backends[key].name;
-                            if(ref.sites[name]) {
-                                for(var x=0; x<ref.sites[name].length; x++) {
-                                    delete ref.sites[name][x]['no_data'];
-                                    ref.sites[name][x].site = data.backends[key];
-                                    ref.sites[name][x].refreshHandler();
-                                }
-                            }
-                            delete ref.sites[name];
-                        }
-                    }
-
-                    /* update all dashboard/map icons */
-                    var delay = 1000;
-                    for(var key in ref.dashboards) {
-                        for(var x=0; x<ref.dashboards[key].length; x++) {
-                            var p = ref.dashboards[key][x];
-                            p.refreshHandler(undefined, true);
-                            var tab_id = 'tabpan-tab_'+p.xdata.general.dashboard;
-                            var skipUpdate = false;
-                            if(TP.lastFullIconRefresh[tab_id]) {
-                                var deltaRefresh = ((new Date).getTime() - TP.lastFullIconRefresh[tab_id].getTime())/1000;
-                                if(deltaRefresh < 15) {
-                                    skipUpdate = true;
-                                }
-                            }
-                            if(!skipUpdate) {
-                                window.clearTimeout(TP.timeouts['timeout_' + p.id + '_refresh']);
-                                TP.timeouts['timeout_' + p.id + '_refresh'] = window.setTimeout(Ext.bind(p.refreshHandler, p, []), delay);
-                                delay = delay + 200;
-                            }
-                        }
-                        delete ref.dashboards[key];
-                    }
-
-                    /* mark remaining as unknown */
-                    var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
-                    for(var x=0; x<keys.length; x++) {
-                        var name = keys[x];
-                        for(var key in ref[name]) {
-                            for(var y=0; y<ref[name][key].length; y++) {
-                                ref[name][key][y]['no_data'] = true;
-                                delete ref[name][key][y]['hostgroup'];
-                                delete ref[name][key][y]['host'];
-                                delete ref[name][key][y]['servicegroup'];
-                                delete ref[name][key][y]['site'];
-                                delete ref[name][key][y]['data'];
-                                ref[name][key][y].refreshHandler(3);
-                                delete ref[name][key][y][name];
-                            }
-                        }
-                    }
-                    /* mark unknown services */
-                    for(var key in ref.services) {
-                        for(var key2 in ref.services[key]) {
-                            for(var y=0; y<ref.services[key][key2].length; y++) {
-                                ref.services[key][key2][y]['no_data'] = true;
-                                ref.services[key][key2][y].refreshHandler(3);
-                                delete ref.services[key][key2][y]['service'];
-                            }
-                        }
-                    }
+                    // then calculate own status
+                    TP.insertStatusResponseData(tab, data.data, ref);
                 }
+
                 TP.checkSoundAlerts(tab);
 
                 /* run callback */
                 if(callback) { callback(); }
             }
         });
+    },
+
+    insertStatusResponseData: function(tab, data, ref) {
+        /* update custom filter */
+        if(data.filter) {
+            for(var key in data.filter) {
+                for(var x=0; x<ref.filter[key].length; x++) {
+                    ref.filter[key][x].results = data.filter[key];
+                    ref.filter[key][x].refreshHandler();
+                }
+                delete ref.filter[key];
+            }
+        }
+        /* update hosts */
+        if(data.hosts) {
+            for(var x=0; x<data.hosts.length; x++) {
+                var name  = data.hosts[x]['name'];
+                var state = data.hosts[x]['state'];
+                if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
+                    if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
+                    if(data.hosts[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
+                    for(var y=0; y<ref.hosts[name].length; y++) {
+                        /* update host object but keep trend values */
+                        if(ref.hosts[name][y].host) {
+                            var lastTrend = ref.hosts[name][y].host.trend;
+                            if(lastTrend) { data.hosts[x].trend = lastTrend; }
+                        }
+
+                        delete ref.hosts[name][y]['no_data'];
+                        ref.hosts[name][y].host = data.hosts[x];
+                        ref.hosts[name][y].lastState = state;
+                        ref.hosts[name][y].refreshHandler(state);
+                    }
+                    delete ref.hosts[name];
+                }
+            }
+        }
+        /* update hostgroups */
+        if(data.hostgroups) {
+            for(var x=0; x<data.hostgroups.length; x++) {
+                var name  = data.hostgroups[x]['name'];
+                var state = data.hostgroups[x]['state'];
+                if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
+                    for(var y=0; y<ref.hostgroups[name].length; y++) {
+                        delete ref.hostgroups[name][y]['no_data'];
+                        ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
+                        ref.hostgroups[name][y].refreshHandler();
+                    }
+                    delete ref.hostgroups[name];
+                }
+            }
+        }
+        /* update servicegroups */
+        if(data.servicegroups) {
+            for(var x=0; x<data.servicegroups.length; x++) {
+                var name  = data.servicegroups[x]['name'];
+                var state = data.servicegroups[x]['state'];
+                if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
+                    for(var y=0; y<ref.servicegroups[name].length; y++) {
+                        delete ref.servicegroups[name][y]['no_data'];
+                        ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
+                        ref.servicegroups[name][y].refreshHandler();
+                    }
+                    delete ref.servicegroups[name];
+                }
+            }
+        }
+        /* update services */
+        if(data.services) {
+            for(var x=0; x<data.services.length; x++) {
+                var hst   = data.services[x]['host_name'];
+                var svc   = data.services[x]['description'];
+                var state = data.services[x]['state'];
+                if(data.services[x]['has_been_checked'] == 0) { state = 4; }
+                if(data.services[x]['state_type'] == 0 && tab.xdata.state_type == "hard") { state = 0; }
+                if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
+                    for(var y=0; y<ref.services[hst][svc].length; y++) {
+                        /* update service object but keep trend values */
+                        if(ref.services[hst][svc][y].service) {
+                            var lastTrend = ref.services[hst][svc][y].service.trend;
+                            if(lastTrend) { data.services[x].trend = lastTrend; }
+                        }
+
+                        delete ref.services[hst][svc][y]['no_data'];
+                        ref.services[hst][svc][y].service = data.services[x];
+                        ref.services[hst][svc][y].lastState = state;
+                        ref.services[hst][svc][y].refreshHandler(state);
+                    }
+                    delete ref.services[hst][svc];
+                }
+            }
+        }
+        /* update sites */
+        if(data.backends) {
+            for(var key in data.backends) {
+                var name = data.backends[key].name;
+                if(ref.sites[name]) {
+                    for(var x=0; x<ref.sites[name].length; x++) {
+                        delete ref.sites[name][x]['no_data'];
+                        ref.sites[name][x].site = data.backends[key];
+                        ref.sites[name][x].refreshHandler();
+                    }
+                }
+                delete ref.sites[name];
+            }
+        }
+
+        /* update all dashboard/map icons */
+        for(var key in ref.dashboards) {
+            for(var x=0; x<ref.dashboards[key].length; x++) {
+                var p = ref.dashboards[key][x];
+                p.refreshHandler(undefined, true);
+            }
+            delete ref.dashboards[key];
+        }
+
+        /* mark remaining as unknown */
+        var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
+        for(var x=0; x<keys.length; x++) {
+            var name = keys[x];
+            for(var key in ref[name]) {
+                for(var y=0; y<ref[name][key].length; y++) {
+                    ref[name][key][y]['no_data'] = true;
+                    delete ref[name][key][y]['hostgroup'];
+                    delete ref[name][key][y]['host'];
+                    delete ref[name][key][y]['servicegroup'];
+                    delete ref[name][key][y]['site'];
+                    delete ref[name][key][y]['data'];
+                    ref[name][key][y].refreshHandler(3);
+                    delete ref[name][key][y][name];
+                }
+            }
+        }
+        /* mark unknown services */
+        for(var key in ref.services) {
+            for(var key2 in ref.services[key]) {
+                for(var y=0; y<ref.services[key][key2].length; y++) {
+                    ref.services[key][key2][y]['no_data'] = true;
+                    ref.services[key][key2][y].refreshHandler(3);
+                    delete ref.services[key][key2][y]['service'];
+                }
+            }
+        }
     },
 
     /* do delayed availability update */
@@ -1430,9 +1611,10 @@ var TP = {
 
     /* get request parameters for status requests */
     getStatusReq: function(tab, ids, xdata) {
-        var panels   = TP.getAllPanel(tab);
-        var req      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
-        var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
+        var panels = TP.getAllPanel(tab);
+        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
+        var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
+
         var count  = 0;
         if(ids && typeof(ids) == "string") {
             var id = ids;
@@ -1502,22 +1684,24 @@ var TP = {
                 }
                 /* update dashboards */
                 else if(p.xdata.general.dashboard) {
-                    if(ref.dashboards[p.xdata.general.dashboard] == undefined) { ref.dashboards[p.xdata.general.dashboard] = []; }
-                    ref.dashboards[p.xdata.general.dashboard].push(p);
+                    var tab_id = TP.nr2TabId(p.xdata.general.dashboard);
+                    if(ref.dashboards[tab_id] == undefined) { ref.dashboards[tab_id] = []; }
+                    ref.dashboards[tab_id].push(p);
                     count++;
                 }
             }
             if(ids && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
         };
-        var tabpan = Ext.getCmp('tabpan');
-        if(count == 0 && tab != tabpan.getActiveTab()) { return; }
+        var tabbar = Ext.getCmp('tabbar');
+        if(count == 0 && tab != tabbar.getActiveTab()) { return; }
         return({req: req, ref: ref });
     },
 
     /* let this element flicker and make it a little bit bigger */
-    flickerImg: function(dom_id) {
+    flickerImg: function(dom_id, callback) {
         var el     = Ext.get(dom_id);
         if(!el) { return; }
+
         el.animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
@@ -1527,7 +1711,9 @@ var TP = {
           .animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
-          .animate({ to: { opacity: 100 } })
+          .animate({ to: { opacity: 100 },
+                     callback: function() { if(callback) callback(); }
+                   });
     },
 
     /* toggle or set a dashboard option */
@@ -1580,7 +1766,7 @@ var TP = {
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
                     for(var key in data) {
-                        TP.cp.set(key, Ext.JSON.decode(data[key]));
+                        TP.cp.set(key, anyDecode(data[key]));
                     }
                     if(TP.cp.state[nr]) {
                         tab.applyXdata(TP.cp.state[nr].xdata);
@@ -1750,8 +1936,8 @@ var TP = {
                    || tab.xdata[name+'_repeat'] == 0 // forever
                    || tab.xdata[name+'_repeat'] > TP.alertNumbers[tab_id][name])
                 {
-                    var tabpan = Ext.getCmp('tabpan');
-                    if(tabpan.xdata.sounds_enabled) {
+                    var tabbar = Ext.getCmp('tabbar');
+                    if(tabbar.xdata.sounds_enabled) {
                         TP.playWave(tab.xdata[name+'_sound']);
                         TP.alertNumbers[tab_id][name]++;
                     }
@@ -1770,6 +1956,9 @@ var TP = {
         }
         var group = TP.getTabTotals(tab);
         var res = TP.get_group_status({ group: group, incl_svc: true, incl_hst: true, incl_ack: incl_ack, incl_downtimes: incl_downtimes, order: tab.xdata.state_order});
+        if(tab.isMaintenance()) {
+            res.downtime = true;
+        }
         return(res);
     },
     getTabTotals: function(tab) {
@@ -1880,9 +2069,9 @@ var TP = {
                     /* make sure tab itself is updated first */
                     var mapChanged = false;
                     for(var key in data) {
-                        var cfg = Ext.JSON.decode(data[key]);
+                        var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
-                        if(p && key.search(/tabpan-tab_\d+$/) != -1) {
+                        if(p && key.search(/pantab_\d+$/) != -1) {
                             if((p.xdata.map && !cfg.xdata.map) || (!p.xdata.map && cfg.xdata.map)) { mapChanged = true; }
                             /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
@@ -1900,10 +2089,10 @@ var TP = {
                     }
 
                     for(var key in data) {
-                        var cfg = Ext.JSON.decode(data[key]);
+                        var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
 
-                        if(key.search(/tabpan-tab_\d+$/) != -1) {
+                        if(key.search(/pantab_\d+$/) != -1) {
                             /* tab has been updated already */
                             continue;
                         }
@@ -1942,7 +2131,11 @@ var TP = {
                     for(var x=0; x<old_window_ids.length; x++) {
                         var id = old_window_ids[x];
                         if(data[id] == undefined) {
-                            Ext.getCmp(id).destroy();
+                            var p = Ext.getCmp(id);
+                            // remove unless this is ex. an host/service extinfo detail panel openened by the user
+                            if(!p.userOpened) {
+                                p.destroy();
+                            }
                         }
                     }
                     /* update stateproviders last data to prevent useless updates */
@@ -1989,6 +2182,8 @@ var TP = {
     },
     fullReload: function() {
         TP.log('[global] full reload');
+        // save current dashboards to a cookie, otherwise we would display something else after the reload
+        Ext.getCmp('tabbar').getState();
         reloadPage();
     },
     log: function(str) {
@@ -2022,11 +2217,11 @@ var TP = {
             if(str1.length != str2.length) {
                 return(false);
             }
-            var dec1 = Ext.JSON.decode(str1);
-            var dec2 = Ext.JSON.decode(str2);
+            var dec1 = anyDecode(str1);
+            var dec2 = anyDecode(str2);
             for(var key2 in dec1) {
-                var obj1 = dec1[key2]; if(Ext.isString(dec1[key2]) && dec1[key2].match(/^\{/)) { obj1 = Ext.JSON.decode(dec1[key2]); }
-                var obj2 = dec2[key2]; if(Ext.isString(dec2[key2]) && dec2[key2].match(/^\{/)) { obj2 = Ext.JSON.decode(dec2[key2]); }
+                var obj1 = anyDecode(dec1[key2]);
+                var obj2 = anyDecode(dec2[key2]);
                 if(!Object.my_equals(obj1, obj2)) {
                     return(false);
                 }
@@ -2040,8 +2235,8 @@ var TP = {
     },
     /* convert number to tab id */
     nr2TabId: function(nr) {
-        nr = String(nr).replace(/^tabpan-tab_/, '');
-        nr = "tabpan-tab_"+nr;
+        nr = String(nr).replace(/^pantab_/, '');
+        nr = "pantab_"+nr;
         return(nr);
     },
     reduceDelayEvents: function(scope, callback, delay, timeoutName, skipInitialRun) {
@@ -2080,12 +2275,6 @@ var TP = {
             }
         }, delay);
     },
-    isThisTheActiveTab: function(panel) {
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
-        if(activeTab && panel.panel_id != activeTab.id) { return(false); }
-        return(true);
-    },
     /* return true if there are any masks visible */
     masksVisible: function() {
         var masks = Ext.Element.select('.x-mask');
@@ -2108,8 +2297,8 @@ var TP = {
     },
     getAllUsedColors: function() {
         var colors = {};
-        var tabpan = Ext.getCmp('tabpan');
-        var tab    = tabpan.getActiveTab();
+        var tabbar = Ext.getCmp('tabbar');
+        var tab    = tabbar.getActiveTab();
         if(!tab) { return; }
         for(var nr=0; nr<tab.window_ids.length; nr++) {
             var panel = Ext.getCmp(tab.window_ids[nr]);
@@ -2165,9 +2354,9 @@ var TP = {
                     url: 'broadcast.cgi',
                     method: 'POST',
                     params: {
-                        action:  'dismiss',
-                        panorama: 1,
-                        token:    user_token
+                        action:   'dismiss',
+                        panorama:  1,
+                        CSRFtoken: CSRFtoken
                     }
                 });
                 delete TP.broadcasts[id];
@@ -2191,7 +2380,158 @@ var TP = {
                 history.replaceState({}, "", newUrl);
             } catch(err) { debug(err) }
         }
+    },
+    saveOpenTabsToCookie: function(tab, open_tabs) {
+        var activeTab = tab.getActiveTab();
+        if(!activeTab) {
+            return;
+        }
+        cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^pantab_/, '') : 0);
+        var numbers = [];
+        for(var nr=0; nr<open_tabs.length; nr++) {
+            var num = open_tabs[nr].replace(/^pantab_/, '');
+            if(num > 0) {
+                numbers.push(num);
+            }
+        }
+        cookieSave('thruk_panorama_tabs', numbers.join(':'));
+    },
+    setBaseHTMLScroll: function() {
+        window.clearTimeout(TP.timeouts['timeout_base_scroll']);
+        var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+        htmlRootEl.removeCls('hidescroll');
+        if(htmlRootEl.hasCls('geomap')) {
+            return;
+        }
+        TP.timeouts['timeout_base_scroll'] = window.setTimeout(function() {
+            var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+            if(htmlRootEl.hasCls('geomap')) { return; }
+            htmlRootEl.addCls('hidescroll');
+        }, 3000);
+    },
+    getPosFromLonLat: function(options) {
+        var map    = options.map,
+            lon    = options.lon,
+            lat    = options.lat,
+            center = options.center,
+            size   = options.size,
+            nsize  = options.nsize;
+        var pixel = map.getPixelFromLonLat({lon: lon, lat: lat});
+
+        // calculate center position of icon
+        var x = (pixel.x-size.width/2);
+        var y = (pixel.y-size.height/2)+TP.offset_y;
+
+        if(center && center != "centered") {
+            var c = center.split("-");
+            if(c.length == 2) {
+                var widthOffset = size.width;
+                var heightOffset = size.height;
+                if(nsize) {
+                    widthOffset  = nsize[0];
+                    heightOffset = nsize[1];
+                }
+
+                if(c[0] == "bottom") {
+                    y = y - heightOffset/2;
+                }
+                else if(c[0] == "top") {
+                    y = y + heightOffset/2;
+                }
+
+                if(c[1] == "left") {
+                    x = x + widthOffset/2;
+                }
+                else if(c[1] == "right") {
+                    x = x - widthOffset/2;
+                }
+            }
+        }
+        return({x:Math.floor(x), y:Math.floor(y)});
+    },
+    getRefPixel: function(options) {
+        var x      = options.x,
+            y      = options.y,
+            center = options.center,
+            size   = options.size,
+            nsize  = options.nsize;
+
+        x = x+(size.width/2);
+        y = y+(size.height/2)-TP.offset_y;
+
+        if(center && center != "centered") {
+            var c = center.split("-");
+            if(c.length == 2) {
+                var widthOffset = size.width;
+                var heightOffset = size.height;
+                if(nsize) {
+                    widthOffset  = nsize[0];
+                    heightOffset = nsize[1];
+                }
+
+                if(c[0] == "bottom") {
+                    y = y + heightOffset/2;
+                }
+                else if(c[0] == "top") {
+                    y = y - heightOffset/2;
+                }
+
+                if(c[1] == "left") {
+                    x = x - widthOffset/2;
+                }
+                else if(c[1] == "right") {
+                    x = x + widthOffset/2;
+                }
+            }
+        }
+        return({x:Math.floor(x), y:Math.floor(y)});
+    },
+    showPanletById: function(tab, id) {
+        var panlet = Ext.getCmp(id);
+        if(!tab.destroying && panlet && panlet.show) {
+            panlet.show();
+        }
+    },
+    // remove all hidden dashboards which are no longer in use
+    closeAllHiddenDashboards: function() {
+        if(!TP.initialized) { return; }
+
+        // collect all required dashboards
+        var required = {};
+        for(var key in TP.allDashboards) {
+            var pantab = TP.allDashboards[key];
+            if(!pantab.destroying) {
+                var panels = TP.getAllPanel(pantab);
+                for(var y=0; y<panels.length; y++) {
+                    var p = panels[y];
+                    if(p.xdata.cls == 'TP.DashboardStatusIcon' && p.xdata.general.dashboard) {
+                        required[TP.nr2TabId(p.xdata.general.dashboard)] = true;
+                    }
+                }
+            }
+        }
+
+        // close all not rendered (hidden) dashboards
+        for(var key in TP.allDashboards) {
+            if(!required[key] && !TP.allDashboards[key].rendered) {
+                TP.allDashboards[key].destroy();
+            }
+        }
+        return;
+    },
+    defaultHTTPCallback: function(options, success, response) {
+        if(!success) {
+            if(response.status == 0) {
+                TP.Msg.msg("fail_message~~request failed");
+            } else {
+                TP.Msg.msg("fail_message~~request failed: "+response.status+' - '+response.statusText);
+            }
+            return;
+        }
+        TP.getResponse(undefined, response);
+        return;
     }
+
 }
 TP.log('[global] starting');
 TP.log('[global] '+thruk_version);

@@ -53,7 +53,8 @@ TP.getExportTab = function(options) {
             text:   'Save Active Dashboard',
             iconCls:'save-btn',
             width:   150,
-            href:   'panorama.cgi?task=save_dashboard&nr='+options.tab.id
+            hidden:  options.tab == null,
+            href:   'panorama.cgi?task=save_dashboard&nr='+(options.tab != null ? options.tab.id : '')
         }, {
             xtype:  'button',
             text:   'Load Dashboard',
@@ -183,18 +184,18 @@ TP.tabSettingsWindow = function(nr, closeAfterEdit) {
 }
 
 TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
-    var tabpan = Ext.getCmp('tabpan');
+    var tabbar = Ext.getCmp('tabbar');
     var tab;
     if(nr != undefined) {
         tab = Ext.getCmp(TP.nr2TabId(nr));
         if(tab == undefined) {
-            TP.add_pantab(nr, undefined, true, function() {
+            TP.add_pantab({ id: nr, hidden: true, callback: function() {
                 TP.tabSettingsWindow(nr, true);
-            });
+            }});
             return(false);
         }
     } else {
-        tab = tabpan.getActiveTab();
+        tab = tabbar.getActiveTab();
     }
 
     /* stop rotation */
@@ -220,7 +221,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             minValue:   0,
             nameS:      'rotate_tabs',
             nameL:      'rotate_tabs_txt',
-            value:      tabpan.xdata['rotate_tabs']
+            value:      tabbar.xdata['rotate_tabs']
         }
     }, {
         /* show server time */
@@ -338,8 +339,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             columns:    [
                     { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
                             xtype:            'searchCbo',
-                            panel:            {panel_id: tab.id},
-                            store:             searchStore,
+                            panel:            {tab: tab},
                             storeExtraParams: { wildcards: 1 },
                             lazyRender:        true,
                             allowBlank:        false
@@ -510,6 +510,12 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             name:       'title',
             fieldLabel: 'Title',
             listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
+        }, {
+            /* tab description */
+            xtype:      'textarea',
+            name:       'description',
+            fieldLabel: 'Description',
+            height:      35
         }, {
             /* global refresh rate */
             xtype:      'tp_slider',
@@ -749,11 +755,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             border:      0
         }, {
             /* auto hide panlet header */
-            xtype:      'checkbox',
-            fieldLabel: 'Hide Panlet Header',
-            name:       'autohideheader',
-            boxLabel:   ' (widget header will be displayed on mouse over)'
-        }, {
+            fieldLabel:    'Show Panlet Header',
+            xtype:         'combobox',
+            name:          'autohideheader',
+            value:          tab.xdata.autohideheader,
+            triggerAction: 'all',
+            selectOnTab:    true,
+            lazyRender:     true,
+            editable:       false,
+            store:        [[0, 'Always'], [1, 'Mouseover'], [2, 'Never']]
+        } , {
             fieldLabel:  'State Type',
             xtype:       'fieldcontainer',
             defaultType: 'radiofield',
@@ -1050,22 +1061,22 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         tab.forceSaveState();
 
                         if(oldstate != newstate && !one_tab_only) {
-                            tabpan.startTimeouts();
+                            tabbar.startTimeouts();
                         }
 
                         /* user settings */
-                        var oldstate = Ext.JSON.encode(tabpan.getState());
+                        var oldstate = Ext.JSON.encode(tabbar.getState());
                         var u_form  = Ext.getCmp('usersettingsForm').getForm();
                         if(!u_form.isValid()) { return false; }
                         var values = u_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
-                        Ext.apply(tabpan.xdata, values);
-                        var newstate = Ext.JSON.encode(tabpan.getState());
+                        Ext.apply(tabbar.xdata, values);
+                        var newstate = Ext.JSON.encode(tabbar.getState());
                         /* avoid useless updates */
                         if(oldstate != newstate && !one_tab_only) {
                             TP.log('['+tab.id+'] settings changed: '+newstate);
-                            tabpan.saveState();
-                            tabpan.startTimeouts();
+                            tabbar.saveState();
+                            tabbar.startTimeouts();
                         }
 
                         document.title = tab.xdata.title;
@@ -1109,7 +1120,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('stylesForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
-    Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
+    Ext.getCmp('usersettingsForm').getForm().setValues(tabbar.xdata);
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
     setBackgroundOptionVisibility(tab.xdata);
@@ -1274,7 +1285,7 @@ TP.loadDashboardWindow = function() {
                         success: function(form, action) {
                             /* refresh icon sets, there might be new ones now */
                             TP.iconsetsStore.load({callback: function() {
-                                TP.add_pantab(action.result.newid);
+                                TP.add_pantab({ id: action.result.newid });
                                 TP.Msg.msg("success_message~~dashboard loaded successfully.");
                             }});
                             win.destroy();

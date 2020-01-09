@@ -52,6 +52,10 @@ sub cmd {
     my($c, $action, $commandoptions) = @_;
     $c->stats->profile(begin => "_cmd_cron($action)");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     my $output;
     my $type = shift @{$commandoptions} || 'help';
     if($type eq 'install') {
@@ -75,6 +79,8 @@ sub _install {
 
     $c->cluster->run_cluster("others", "cmd: cron install");
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1; # skip further subsequent cluster calls
+
+    Thruk::Utils::update_cron_file_maintenance($c);
 
     require Thruk::Utils::Cluster;
     Thruk::Utils::Cluster::update_cron_file($c);

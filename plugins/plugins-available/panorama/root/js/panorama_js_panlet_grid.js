@@ -12,6 +12,7 @@ Ext.define('TP.GridLoader', {
             if(panel.loading) {
                 return false;
             }
+            if(panel.adjustBodyStyle) { panel.adjustBodyStyle(); }
             panel.loading = true;
             return true;
         },
@@ -22,6 +23,7 @@ Ext.define('TP.GridLoader', {
             }
         }
     },
+    // called after panlet loader returns with new data
     callback: function(This, success, response, options) {
         var panel     = This.target;
         panel.loading = false;
@@ -29,6 +31,13 @@ Ext.define('TP.GridLoader', {
         if(!data) { return; }
 
         TP.log('['+panel.id+'] loaded');
+
+        // return early if dashboard is not visible (breaks column layout otherwise)
+        var tab = panel.tab;
+        if(tab && tab.isActiveTab && !tab.isActiveTab()) {
+            This.updateData(panel, data);
+            return;
+        }
 
         /* column state is not recognized, so set it here */
         if(panel.xdata && panel.xdata.gridstate) {
@@ -48,10 +57,7 @@ Ext.define('TP.GridLoader', {
 
         // replace data only if columns haven't changed (does not work in IE11, panel will be blank afterwards)
         if(!Ext.isIE && !columnsChanged && panel.gridStore) {
-            panel.gridStore.loadData(data.data);
-            if(panel.pagingToolbar) {
-                panel.pagingToolbar.onLoad();
-            }
+            This.updateData(panel, data);
             return;
         }
 
@@ -125,6 +131,9 @@ Ext.define('TP.GridLoader', {
                         } else {
                             state.columns[x].hidden = true;
                         }
+                        state.columns[x].name = panel.grid.columns[x].text;
+                        state.columns[x].pos  = panel.grid.columns[x].getVisibleIndex();
+                        delete state.columns[x]["id"];
                     }
 
                     panel.saveState();
@@ -183,6 +192,13 @@ Ext.define('TP.GridLoader', {
 
         panel.loading = false;
         return;
+    },
+    updateData: function(panel, data) {
+        if(!panel.gridStore) { return; }
+        panel.gridStore.loadData(data.data);
+        if(panel.pagingToolbar) {
+            TP.setPagingToolbarVisibility(panel, panel.pagingToolbar, data);
+        }
     }
 });
 
@@ -216,7 +232,7 @@ Ext.define('TP.PanletGrid', {
 
         var state = TP.cp.get(panel.id);
         if(state && state.xdata && state.xdata.gridstate) {
-            panel.initialState = Ext.JSON.decode(Ext.JSON.encode(state.xdata.gridstate));
+            panel.initialState = TP.clone(state.xdata.gridstate);
         }
 
         panel.addListener('afterrender', function() {
@@ -231,6 +247,15 @@ Ext.define('TP.PanletGrid', {
             xtype:      'textfield',
             name:       'url'
         });
+    },
+    adjustBodyStyle: function() {
+        var panel = this;
+        if(panel.xdata.background) {
+            panel.setBodyStyle("background: "+panel.xdata.background+";");
+            if(panel.grid) {
+                panel.grid.setBodyStyle("background:transparent");
+            }
+        }
     }
 });
 
@@ -311,13 +336,40 @@ TP.applyColumns = function(columns, state) {
     if(!state || !state.columns) {
         return;
     }
+    var has_names = false;
     for(var x = 0; x < columns.length; x++) {
-        if(state.columns[x] && state.columns[x].width) {
-            columns[x].width = state.columns[x].width;
+        var state_column = undefined;
+        for(var y = 0; y < state.columns.length; y++) {
+            if(state.columns[y].name) {
+                has_names = true;
+            }
+            if(state.columns[y].name == columns[x].header) {
+                state_column = state.columns[y];
+                break;
+            }
         }
-        if(state.columns[x] && state.columns[x].hidden != undefined) {
-            columns[x].hidden = state.columns[x].hidden;
+        if(!has_names) {
+            state_column = state.columns[x];
         }
+        if(state_column == undefined) {
+            continue;
+        }
+        if(state_column.width) {
+            columns[x].width = state_column.width;
+        }
+        if(state_column.hidden != undefined) {
+            columns[x].hidden = state_column.hidden;
+        }
+        if(state_column.pos != undefined) {
+            columns[x].pos = state_column.pos;
+        }
+        if(columns[x].pos == undefined || columns[x].pos === false || columns[x].pos < 0) {
+            columns[x].pos = 9999;
+        }
+    }
+    // sort them in state order
+    if(has_names) {
+        columns = columns.sort(function(a,b) { return(a.pos - b.pos) });
     }
     return;
 };

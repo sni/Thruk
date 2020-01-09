@@ -69,6 +69,7 @@ sub self_check {
     }
 
     # aggregate results
+    $details = "";
     if(scalar @{$results} == 0) {
         $rc  = 3;
         $msg = "UNKNOWN - unknown subcheck type";
@@ -76,7 +77,6 @@ sub self_check {
         # sort by rc
         @{$results} = sort { $b->{rc} <=> $a->{rc} || $a->{sub} cmp $b->{sub} } @{$results};
         $rc = $results->[0]->{rc};
-        $details = "";
         my($ok, $warning, $critical, $unknown) = ([],[],[],[]);
         for my $r (@{$results}) {
             $details .= $r->{'details'}."\n";
@@ -90,7 +90,15 @@ sub self_check {
         $msg = 'CRITICAL - '.join(', ', @{$critical}) if $rc == 2;
         $msg = 'UNKNOWN - '. join(', ', @{$unknown})  if $rc == 3;
     }
-    return($rc, $msg, ($details || ''));
+
+    # append performance data from /thruk/metrics
+    require Thruk::Utils::CLI::Rest;
+    my $res = Thruk::Utils::CLI::Rest::cmd($c, undef, ['-o', ' ', '/thruk/metrics']);
+    if($res->{'rc'} == 0 && $res->{'output'}) {
+        $details .= $res->{'output'};
+    }
+
+    return($rc, $msg, $details);
 }
 
 ##############################################
@@ -146,7 +154,7 @@ sub _logfile_checks  {
         next unless $log;    # may not be set
         next unless -e $log; # may not exist either
         # count errors
-        my @out = `grep 'ERROR' $log`;
+        my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'ERROR' $log"));
         $details .= sprintf("  - %s: ", $log);
         if(scalar @out == 0) {
             $details .= "no errors\n";

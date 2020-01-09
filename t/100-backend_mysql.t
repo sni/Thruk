@@ -1,12 +1,12 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 92;
+use Test::More tests => 69;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
 
-my $m = Thruk::Backend::Provider::Mysql->new({peer => 'mysql://test:test@host:3306/dbname'});
+my $m = Thruk::Backend::Provider::Mysql->new({options => {peer => 'mysql://test:test@host:3306/dbname', peer_key => 'abcd'}});
 isa_ok($m, 'Thruk::Backend::Provider::Mysql');
 
 #####################################################################
@@ -62,7 +62,7 @@ while($x < scalar @{$connection_strings}) {
     my $con = $connection_strings->[$x];
     my $exp = $connection_strings->[$x+1];
     ok($con, $con);
-    my $m   = Thruk::Backend::Provider::Mysql->new({peer => $con});
+    my $m   = Thruk::Backend::Provider::Mysql->new({options => {peer => $con, peer_key => 'abcd'}});
     isa_ok($m, 'Thruk::Backend::Provider::Mysql');
     for my $key (sort keys %{$exp}) {
         is($m->{$key}, $exp->{$key}, $key.' config');
@@ -208,14 +208,6 @@ test_filter(
 
 #####################################################################
 test_filter(
-    'auth hash',
-    [ '-or',   [ { '-and' => [   'current_service_contacts',      { '>=' => 'thrukadmin' },       'service_description', { '!=' => undef } ] },   { 'current_host_contacts' => { '>='    => 'thrukadmin' } } ] ],
-    "",
-    'thrukadmin'
-);
-
-#####################################################################
-test_filter(
     'joined lists',
     { '-or' => [
                  [
@@ -233,70 +225,6 @@ test_filter(
 
 #####################################################################
 test_filter(
-    'joined lists',
-    [
-          [
-            { 'time' => { '>=' => 1361892706 } },
-            { 'time' => { '<=' => 1362497506 } },
-            { 'type' => 'HOST ALERT' }
-          ],
-          '-or',
-          [
-            {
-              '-and' => [
-                          'current_service_contacts', { '>=' => 'test_contact' },
-                          'service_description', { '!=' => undef }
-                        ]
-            },
-            {
-              'current_host_contacts' => { '>=' => 'test_contact' }
-            },
-            {
-              '-and' => [
-                          'service_description', undef,
-                          'host_name', undef
-                        ]
-            }
-          ]
-    ],
-    " WHERE (time >= 1361892706 AND time <= 1362497506 AND type = 'HOST ALERT')",
-    'test_contact'
-);
-#####################################################################
-test_filter(
-    'contact search',
-    [
-          {
-            '-and' => [ { 'time' => { '>=' => 1432677600 } },
-                        { 'time' => { '<=' => 1432764000 } },
-                        { 'message' => { '~~' => 'test pattern' } }
-                      ]
-          },
-          '-or',
-          [
-            {
-              '-and' => [
-                          'current_service_contacts', { '>=' => 'test_contact' },
-                          'service_description', { '!=' => undef }
-                        ]
-            },
-            {
-              'current_host_contacts' => { '>=' => 'test_contact' }
-            },
-            {
-              '-and' => [
-                          'service_description', undef,
-                          'host_name', undef
-                        ]
-            }
-          ]
-    ],
-    'WHERE (time >= 1432677600 AND time <= 1432764000) HAVING (message RLIKE \'test pattern\')',
-    'test_contact'
-);
-
-#####################################################################
-test_filter(
     'time filter',
     [{ '-and' => [
         { 'time' => { '>=' => 1524053699 } },
@@ -307,15 +235,40 @@ test_filter(
 );
 
 #####################################################################
+test_filter(
+    'undef list filter',
+    [undef, [
+        { 'time' => { '>=' => 1524053699 } },
+        { 'time' => { '<' => 1524140099 } }
+      ]
+    ],
+    " WHERE (time >= 1524053699 AND time < 1524140099)",
+);
+
+#####################################################################
+test_filter(
+    'undef hash filter',
+    [undef,
+     { 'time' => { '>=' => 1524053699 } },
+    ],
+    " WHERE time >= 1524053699",
+);
+
+#####################################################################
+test_filter(
+    'all hosts filter',
+    [{ '-and' => [
+        { 'host_name'   => { '~~' => '.*' } },
+        { 'description' => 'http' }
+    ]}],
+    " WHERE (host_name RLIKE '.*' AND description = 'http')",
+);
+
+
+#####################################################################
 # SUBS
 sub test_filter {
-    my($name, $inp, $out, $exp_contact) = @_;
-    my($tst,$contact,$system) = $m->_get_filter($inp);
+    my($name, $inp, $out) = @_;
+    my($tst) = $m->_get_filter($inp);
     is_deeply($tst, $out, 'filter: '.$name) or diag("input:\n".Dumper($inp)."\nexpected:\n".Dumper($out)."\ngot:\n".Dumper($tst));
-    if(defined $exp_contact) {
-        is($contact, $exp_contact, 'filter returns contact: '.$contact);
-    } else {
-        is($contact, undef, 'filter returns no contact');
-
-    }
 }

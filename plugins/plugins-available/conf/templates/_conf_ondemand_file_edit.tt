@@ -15,7 +15,7 @@
                     start_edit: '[% file.path %]'
                 },
                 success: function(data) {
-                    if(data && data.md5 && data.md5 != "[% file.md5 %]") {
+                    if(data && data.hex && data.hex != "[% file.hex %]") {
                         thruk_message(-1, "file has been changed on disk meanwhile, refreshing...");
                         form.needs_reload = true;
                         reloadPage();

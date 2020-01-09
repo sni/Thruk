@@ -123,6 +123,7 @@ local_install: local_patches
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
+	cp -p script/check_thruk_rest  ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_fastcgi.pl  ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk.psgi        ${DESTDIR}${DATADIR}/script/
 	cp -p script/grafana_export.sh ${DESTDIR}${DATADIR}/script/
@@ -157,7 +158,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${LOGDIR}
 	############################################################################
 	# logrotation
-	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk-base && cd ${DESTDIR}${LOGROTATEDIR} && patch -p1 < $(shell pwd)/blib/replace/0006-logrotate.patch; }
+	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk-base && cd ${DESTDIR}${LOGROTATEDIR} && patch -p1 < $(shell pwd)/blib/replace/0005-logrotate.patch; }
 	############################################################################
 	# bash completion
 	[ -z "${BASHCOMPLDIR}" ] || { mkdir -p ${DESTDIR}${BASHCOMPLDIR} && cp -p support/thruk_bash_completion ${DESTDIR}${BASHCOMPLDIR}/thruk-base; }
@@ -174,10 +175,8 @@ local_install: local_patches
 	# some patches
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0001-thruk.conf.patch
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0002-log4perl.conf.patch
-	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/replace/0003-thruk-scripts.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0004-thruk_data_scripts.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0005-thruk_auth.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-fcgish.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0003-thruk_data_scripts.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0004-fcgish.patch
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
@@ -186,6 +185,15 @@ local_install: local_patches
 	# examples
 	cp -p examples/bp_functions.pm ${DESTDIR}${SYSCONFDIR}/bp/
 	cp -p examples/bp_filter.pm    ${DESTDIR}${SYSCONFDIR}/bp/
+	############################################################################
+	# replace paths
+	${SED} -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g' \
+	       -e 's+@DATADIR@+${DATADIR}+g' \
+	       -e 's+@THRUKLIBS@+${THRUKLIBS}+g' \
+	       -e 's+@HTMLURL@+${HTMLURL}+g' \
+	       -i ${DESTDIR}${DATADIR}/script/* \
+	       -i ${DESTDIR}${DATADIR}/thruk_auth \
+	       -i ${DESTDIR}${BINDIR}/*
 
 quicktest:
 	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \

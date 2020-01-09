@@ -138,10 +138,11 @@ sub new {
                 $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf{'name'};
             }
         }
-        if(defined $current_object->{'standard'}) {
-            for my $key (@{$current_object->{'standard'}}) {
+        my $keys = $conf{'standard'} // $current_object->{'standard'};
+        if(defined $keys) {
+            for my $key (@{$keys}) {
                 next if defined $current_object->{'conf'}->{$key};
-                if($current_object->{'default'}->{$key}->{'type'} eq 'LIST') {
+                if($current_object->{'default'}->{$key} && $current_object->{'default'}->{$key}->{'type'} eq 'LIST') {
                     $current_object->{'conf'}->{$key} = [];
                 } else {
                     $current_object->{'conf'}->{$key} = '';

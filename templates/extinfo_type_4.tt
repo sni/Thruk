@@ -18,7 +18,7 @@
                 <td class='linkBox'>
                   <a href='extinfo.cgi?type=4&amp;apache=[% link %]'>Show [% link %] Apache Status</a><br>
                 </td>
-              <tr>
+              </tr>
               [% END %]
             </table>
             [% END %]

@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use POSIX;
+
+if(!$ENV{'OMD_SITE'} || $ENV{'OMD_SITE'} ne "demo") {
+  print "ERROR: this script should be run only in demo OMD sites.\n";
+  exit 3;
+}
+
+my $lines=$ARGV[0];
+my $days=$ARGV[1];
+my $log_folder=$ENV{OMD_ROOT}."/var/naemon/archive";
+if(!$days) {
+  print "Usage: $0 <nr log lines> <nr days>\n";
+  exit 3;
+}
+
+print "creating $days logs with $lines lines per day.\n";
+
+for my $day (1..$days) {
+  my $prev = $day+1;
+  chomp(my $from_ts=`date -d "-$prev days 00:00" +%s`);
+  chomp(my $to_ts=`date -d "-$day days 00:00" +%s`);
+  my $file = sprintf("%s/test-%s.log", $log_folder, POSIX::strftime("%Y-%m-%d", localtime($from_ts)));
+  my $seconds_per_line = ($to_ts - $from_ts) / $lines;
+  print "filling $file ...\n";
+  my $current_ts = $from_ts;
+  open(my $fh, '>', $file) or die("cannot write to $file: $!");
+  for my $nr (1..$lines) {
+    printf($fh "[%d] test: test message %10d to test logfile related things. (100 bytes per line....)\n", int($current_ts), $nr);
+    $current_ts += $seconds_per_line;
+  }
+  close($fh);
+}

@@ -87,17 +87,20 @@ unlink($tmpfilename);
 
 #########################
 # lock store with orphaned lock
-($tfh, $tmpfilename) = tempfile();
-Thruk::Utils::IO::write($tmpfilename.'.lock', '');
-$rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
-is($rc, 1, "json_lock_store succeeded on tmpfile with orphaned lock file");
-unlink($tmpfilename);
+{
+    local $ENV{'TEST_IO_NOWARNINGS'}  = 1;
+    ($tfh, $tmpfilename) = tempfile();
+    Thruk::Utils::IO::write($tmpfilename.'.lock', '');
+    $rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
+    is($rc, 1, "json_lock_store succeeded on tmpfile with orphaned lock file");
+    unlink($tmpfilename);
+};
 
 #########################
 # some tests for full disks
 if(-e '/dev/full') {
     eval {
-        Thruk::Utils::IO::json_store('/dev/full', {'a' => 'b' }, undef, undef, '/dev/full');
+        Thruk::Utils::IO::json_store('/dev/full', {'a' => 'b' }, { tmpfile => '/dev/full' });
     };
     my $err = $@;
     like($err, '/cannot write to/', "json_store failed on full filesystem");

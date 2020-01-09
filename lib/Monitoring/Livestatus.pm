@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use Data::Dumper qw/Dumper/;
 use Carp qw/carp confess/;
-use Digest::MD5 qw(md5_hex);
 use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
 use IO::Select;
@@ -301,7 +300,6 @@ sub selectall_arrayref {
 
     if(!defined $result) {
         $result = &_send($self, $statement, $opt);
-        return $result if $ENV{'THRUK_SELECT'};
 
         if(!defined $result) {
             return unless $self->{'errors_are_fatal'};
@@ -698,14 +696,9 @@ sub peer_name {
 
 returns a uniq key for this peer
 
-when using multiple backends, a list of all keys is returned in list context
-
 =cut
 sub peer_key {
     my($self) = @_;
-
-    if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr.' '.$self->peer_name); }
-
     return $self->{'key'};
 }
 
@@ -825,7 +818,6 @@ sub _send {
         my $send = "$statement\n$header";
         $self->{'logger'}->debug('> '.Dumper($send)) if $self->{'verbose'};
         ($status,$msg,$body) = &_send_socket($self, $send);
-        return([$status, $opt, $keys]) if $ENV{'THRUK_SELECT'};
         if($self->{'verbose'}) {
             #$self->{'logger'}->debug("got:");
             #$self->{'logger'}->debug(Dumper(\@erg));
@@ -1096,16 +1088,15 @@ sub _send_socket {
     my $retries = 0;
     my($status, $msg, $recv, $sock);
 
+    # closing a socket sends SIGPIPE to reader
+    # https://riptutorial.com/posix/example/17424/handle-sigpipe-generated-by-write---in-a-thread-safe-manner
+    local $SIG{PIPE} = 'IGNORE';
+
     # try to avoid connection errors
     eval {
-        local $SIG{PIPE} = sub {
-            die('broken pipe');
-        };
-
         if($self->{'retries_on_connection_error'} <= 0) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;
-            return $sock if $ENV{'THRUK_SELECT'};
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             return($status, $msg, $recv);
         }
@@ -1114,7 +1105,6 @@ sub _send_socket {
             $retries++;
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            return $sock if $ENV{'THRUK_SELECT'};
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             $self->{'logger'}->debug('query status '.$status) if $self->{'verbose'};
             if($status == 491 or $status == 497 or $status == 500) {
@@ -1129,14 +1119,12 @@ sub _send_socket {
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            return $sock if $ENV{'THRUK_SELECT'};
             return(&_read_socket_do($self, $sock, $statement));
         }
         confess($@) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
-    return $sock if $ENV{'THRUK_SELECT'};
     $msg =~ s/^$status:\s+//gmx;
     confess($status.": ".$msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
@@ -1417,6 +1405,7 @@ sub _get_error {
         '403' => 'The request is incomplete.',
         '404' => 'The target of the GET has not been found (e.g. the table).',
         '405' => 'A non-existing column was being referred to',
+        '413' => 'Maximum response size reached',
         '452' => 'internal livestatus error',
         '490' => 'no query',
         '491' => 'failed to connect',

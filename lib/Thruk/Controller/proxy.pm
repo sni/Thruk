@@ -18,7 +18,7 @@ Thruk Controller
 =cut
 
 use HTTP::Request 6.12 ();
-use LWP::UserAgent ();
+use Thruk::UserAgent ();
 
 ##########################################################
 sub index {
@@ -59,6 +59,7 @@ sub index {
     my $passthrough;
     if($peer->{'federation'} && scalar @{$peer->{'fed_info'}->{'type'}} >= 2 && $peer->{'fed_info'}->{'type'}->[1] eq 'http') {
         $request_url = $peer->{'addr'};
+        $request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
         $request_url =~ s|/thruk/?$||gmx;
         $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'};
         $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
@@ -76,7 +77,7 @@ sub index {
     if($passthrough) {
         $req->header('X-Thruk-Passthrough', $passthrough);
     }
-    my $ua = LWP::UserAgent->new;
+    my $ua = Thruk::UserAgent->new({ use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
     $ua->max_redirect(0);
     $ua->ssl_opts('verify_hostname' => 0 ) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
     if(!$c->config->{'ssl_verify_hostnames'}) {
@@ -87,6 +88,7 @@ sub index {
         };
         $ua->ssl_opts('verify_hostname' => 0 );
     }
+    $ua->ssl_opts(SSL_ca_path => ($c->config->{ssl_ca_path} || "/etc/ssl/certs" ));
 
     $req->header('X-Thruk-Proxy', 1);
     _add_cookie($req, 'thruk_auth', $session_id);
@@ -105,7 +107,7 @@ sub index {
 
     # in case we don't have a cookie yet, set the last session_id, so it can be reused
     if(!$c->req->cookies->{'thruk_auth'}) {
-        $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'} };
+        $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'}, 'httponly' => 1 };
     }
 
     _cleanup_response($c, $peer, $url, $res);
@@ -194,7 +196,7 @@ sub _add_cookie {
     my($req, $name, $val) = @_;
     my $cookies = $req->header('cookie');
     if(!$cookies) {
-        $req->header('cookie', $name.'='.$val.';');
+        $req->header('cookie', $name.'='.$val.'; HttpOnly');
         return;
     }
     $cookies =~ s%$name=.*?(;\s*|$)%%gmx;

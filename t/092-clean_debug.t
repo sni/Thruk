@@ -9,6 +9,7 @@ my $cmds = {
   "grep -nr 'use Thruk::Timer' lib/ plugins/plugins-available/ t/"    => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
   "grep -nr 'timing_breakpoint' lib/ plugins/plugins-available/ t/"   => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
   "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"              => { 'skip_comments' => 1, exclude => [qr/\.t:/] },
+  "grep -nr 'dump\(' templates/ plugins/plugins-available/*/templates" => { exclude => [qr/get_variable\.tt/]},
 };
 
 # find all missed debug outputs

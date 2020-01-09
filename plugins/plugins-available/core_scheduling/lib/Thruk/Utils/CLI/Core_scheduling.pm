@@ -45,6 +45,10 @@ use strict;
 sub cmd {
     my($c, $action, $commandoptions, $data, $src, $global_options) = @_;
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     if(!$c->config->{'use_feature_core_scheduling'}) {
         return("ERROR - core_scheduling addon is disabled\n", 1);
     }
@@ -76,7 +80,6 @@ sub cmd {
                 return("filter must be either hg:<hostgroup> or sg:<servicegroup>\n", 1);
             }
         }
-        Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
         Thruk::Controller::core_scheduling::reschedule_everything($c, $hostfilter, $servicefilter);
     }
     else {

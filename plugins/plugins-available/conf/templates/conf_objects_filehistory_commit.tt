@@ -9,7 +9,7 @@
       <a href="conf.cgi?sub=objects&amp;action=history&id=[% previous.id %]&dir=[% dir | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='previous commit' title='previous commit' width="16" height="16" style="vertical-align: middle;"> [% date_format(c, previous.date) %]</a>
       [% END %]
     </th>
-    <th class='data'><b>Commit: [% data.message %]</b></th>
+    <th class='data'><b>Commit: [% data.message | html %]</b></th>
     <th class='data' width="160" align="right" style="font-weight: normal; white-space: nowrap;">
       [% IF next %]
       <a href="conf.cgi?sub=objects&amp;action=history&id=[% next.id %]&dir=[% dir | uri %]">[% date_format(c, next.date) %] <img src='[% url_prefix %]themes/[% theme %]/images/arrow_right.png' border="0" alt='next commit' title='next commit' width="16" height="16" style="vertical-align: middle;"></a>
@@ -18,7 +18,7 @@
   </tr>
   <tr>
     <th align="left">Author:</th>
-    <td align="left" colspan=2>[% data.author_name %] &lt;[% data.author_email %]&gt;</td>
+    <td align="left" colspan=2>[% data.author_name | html %] &lt;[% data.author_email | html %]&gt;</td>
   </tr>
   <tr>
     <th align="left">Date:</th>
@@ -26,7 +26,7 @@
   </tr>
   <tr>
     <th align="left" style="vertical-align: top;">Subject:</th>
-    <td align="left" colspan=2>[% data.message %]<br>[% data.body %]</td>
+    <td align="left" colspan=2>[% data.message | html %]<br>[% data.body | html %]</td>
   </tr>
   <tr>
     <th align="left" style="white-space: nowrap; padding-right: 10px; vertical-align: top;">Changed Files:</th>

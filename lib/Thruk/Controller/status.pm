@@ -175,6 +175,13 @@ sub _process_raw_request {
     if($c->req->parameters->{'query'}) {
         $filter = $c->req->parameters->{'query'};
         $filter =~ s/\s+/\.\*/gmx;
+        if($filter =~ s/^(\w{2}:)//mx) {
+            my $prefix = $1;
+            if($prefix eq 'ho:') { $type = "host"; }
+            if($prefix eq 'se:') { $type = "service"; }
+            if($prefix eq 'hg:') { $type = "hostgroup"; }
+            if($prefix eq 'sg:') { $type = "servicegroup"; }
+        }
     }
 
     my $json;
@@ -183,15 +190,13 @@ sub _process_raw_request {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
-            my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
-            $data = Thruk::Utils::array_uniq_obj($contacts);
+            $data = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
         }
         push @{$json}, { 'name' => "contacts", 'data' => $data };
     }
 
     if($type eq 'host' || $type eq 'hosts' || $type eq 'all') {
         my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
-        $data = Thruk::Utils::array_uniq_obj($data);
         push @{$json}, { 'name' => "hosts", 'data' => $data };
     }
 
@@ -202,7 +207,7 @@ sub _process_raw_request {
         $alias = Thruk::Utils::array2hash($alias, "name");
         for my $group (@{$hostgroups}) {
             my $row = $alias->{$group};
-            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mx);
+            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
             push @{$data}, $row;
         }
         push @{$json}, { 'name' => "hostgroups", 'data' => $data };
@@ -210,12 +215,12 @@ sub _process_raw_request {
 
     if($type eq 'servicegroup' || $type eq 'servicegroups' || $type eq 'all') {
         my $data = [];
-        my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], limit => $limit);
+        my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )]);
         my $alias         = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ], columns => [qw/name alias/] );
         $alias = Thruk::Utils::array2hash($alias, "name");
         for my $group (@{$servicegroups}) {
             my $row = $alias->{$group};
-            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mx);
+            next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
             push @{$data}, $row;
         }
         push @{$json}, { 'name' => "servicegroups", 'data' => $data };
@@ -246,12 +251,11 @@ sub _process_raw_request {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
-            my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'], limit => $limit );
+            my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'] );
             $data = [];
             for my $d (@{$commands}) {
                 push @{$data}, $d->{'name'};
             }
-            $data = Thruk::Utils::array_uniq($data);
         }
         push @{$json}, { 'name' => "commands", 'data' => $data };
     }
@@ -261,31 +265,7 @@ sub _process_raw_request {
         my $data = [];
         my $exposed_only = $c->req->parameters->{'exposed_only'} || 0;
         if($type eq 'custom variable' || !$c->check_user_roles("authorized_for_configuration_information")) {
-            my $vars     = {};
-            # we cannot filter for non-empty lists here, livestatus does not support filter like: custom_variable_names => { '!=' => '' }
-            # this leads to: Sorry, Operator  for custom variable lists not implemented.
-            my $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
-            my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
-            for my $obj (@{$hosts}, @{$services}) {
-                next unless ref $obj->{custom_variable_names} eq 'ARRAY';
-                for my $key (@{$obj->{custom_variable_names}}) {
-                    $vars->{$key} = 1;
-                }
-            }
-            @{$data} = sort keys %{$vars};
-            @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
-
-            # filter all of them which are not listed by show_custom_vars unless we have extended permissions
-            if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
-                my $newlist = [];
-                my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
-                for my $varname (@{$data}) {
-                    if(Thruk::Utils::check_custom_var_list($varname, $allowed)) {
-                        push @{$newlist}, $varname;
-                    }
-                }
-                $data = $newlist;
-            }
+            $data = Thruk::Utils::Status::get_custom_variable_names($c, 'all', $exposed_only, $filter);
         }
         if($type eq 'custom value') {
             my $allowed = $data;
@@ -301,6 +281,12 @@ sub _process_raw_request {
                     @vars{@{$obj->{custom_variable_names}}} = @{$obj->{custom_variable_values}};
                     $uniq->{$vars{$varname}} = 1;
                 }
+                if($varname eq 'THRUK_ACTION_MENU' && $c->config->{'action_menu_items'}) {
+                    # add available action menus
+                    for my $key (keys %{$c->config->{'action_menu_items'}}) {
+                        $uniq->{$key} = 1;
+                    }
+                }
                 @{$data} = sort keys %{$uniq};
                 @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
             }
@@ -313,11 +299,10 @@ sub _process_raw_request {
         if($c->req->parameters->{'wildcards'}) {
             push @{$data}, '*';
         }
-        my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], remove_duplicates => 1, sort => {ASC=> 'name'}, limit => $limit);
+        my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], sort => {ASC=> 'name'}, limit => $limit);
         for my $g (@{$groups}) {
             push @{$data}, $g->{'name'};
         }
-        $data = Thruk::Utils::array_uniq($data);
         push @{$json}, { 'name' => "contactgroups", 'data' => $data };
     }
 
@@ -330,7 +315,6 @@ sub _process_raw_request {
                                                                     {      event_handler => { '~~' => $filter }},
                                                                     ]],
                                                 columns => [qw/host_event_handler event_handler/],
-                                                limit => $limit,
                                             );
             my $eventhandler = {};
             for my $d (@{$data}) {
@@ -362,6 +346,12 @@ sub _process_raw_request {
         @{$data} = sort @{$data};
         @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
         push @{$json}, { 'name' => "navsections", 'data' => $data };
+    }
+
+    # make lists uniq
+    for my $res (@{$json}) {
+        $res->{'total_none_uniq'} = scalar @{$res->{'data'}};
+        $res->{'data'} = Thruk::Backend::Manager::remove_duplicates($res->{'data'});
     }
 
     if($c->req->parameters->{'hash'}) {
@@ -454,7 +444,7 @@ sub _process_details_page {
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     my $sortoptions = {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
@@ -477,7 +467,7 @@ sub _process_details_page {
 
     # reverse order for duration
     my $backend_order = $order;
-    if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+    if($sortoption eq "6") { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state, $keep_state_order);
     if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
@@ -550,6 +540,7 @@ sub _process_details_page {
     $c->stash->{'orderdir'} = $order;
 
     if($c->config->{'show_custom_vars'}
+       and $c->stash->{'data'}
        and defined $c->stash->{'host_stats'}
        and ref($c->stash->{'host_stats'}) eq 'HASH'
        and defined $c->stash->{'host_stats'}->{'up'}
@@ -594,7 +585,7 @@ sub _process_hostdetails_page {
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     my $sortoptions = {
         '1' => [ 'name', 'host name' ],
         '4' => [ [ 'last_check',              'name' ], 'last check time' ],
@@ -615,7 +606,7 @@ sub _process_hostdetails_page {
 
     # reverse order for duration
     my $backend_order = $order;
-    if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+    if($sortoption eq "6") { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state);
     if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
@@ -1052,7 +1043,7 @@ sub _process_combined_page {
     my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
     my $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     my $sortoptions = {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
@@ -1088,14 +1079,14 @@ sub _process_combined_page {
                                                         extra_columns => $extra_columns,
                                                       );
     $c->stash->{'services'} = $services;
-    if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
+    if( $sortoption eq "6" and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
 
 
     # hosts
     $sorttype   = $c->req->parameters->{'sorttype_hst'}   || 1;
     $sortoption = $c->req->parameters->{'sortoption_hst'} || 7;
     $order      = "ASC";
-    $order = "DESC" if $sorttype == 2;
+    $order = "DESC" if $sorttype eq "2";
     $sortoptions = {
         '1' => [ 'name', 'host name' ],
         '4' => [ [ 'last_check',              'name' ], 'last check time' ],
@@ -1324,6 +1315,7 @@ sub _process_bookmarks {
         for my $bookmark (@{Thruk::Utils::list($bookmarks)}) {
             next unless defined $bookmark;
             my($section, $name) = split(/::/mx, $bookmark ,2);
+            next unless defined $name;
             $keep->{$section}->{$name} = 1;
         }
 

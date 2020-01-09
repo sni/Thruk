@@ -31,12 +31,12 @@ use Thruk::Utils::CookieAuth ();
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters = [qw/limit offset sort columns backend backends q/];
+my $reserved_query_parameters = [qw/limit offset sort columns backend backends q CSRFtoken/];
 my $op_translation_words      = {
     'eq'     => '=',
     'ne'     => '!=',
-    'regex'  => '~',
-    'nregex' => '!~',
+    'regex'  => '~~',
+    'nregex' => '!~~',
     'gt'     => '>',
     'gte'    => '>=',
     'lt'     => '<',
@@ -46,6 +46,9 @@ my $op_translation_words      = {
 use constant {
     PRE_STATS    =>  1,
     POST_STATS   =>  2,
+
+    NAME         =>  1,
+    RAW          =>  2,
 };
 
 ##########################################################
@@ -99,6 +102,11 @@ sub index {
         Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
     }
 
+    # refresh dynamic roles and groups
+    if($c->user && (!$c->user->{'timestamp'} || $c->user->{'timestamp'} < (time() - 600))) {
+        $c->user->set_dynamic_attributes($c);
+    }
+
     my $data;
     if($c->config->{'rest_api_enabled'} == 0) {
         $data = {
@@ -118,6 +126,12 @@ sub index {
         $data = {
             'message'     => 'the rest api is disabled from web access.',
             'description' => 'the rest api has been configured to be only allowed from the command line.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+         };
+    } elsif($c->user->{'readonly'} && $c->req->method ne 'GET') {
+        $data = {
+            'message'     => 'only GET requests allowed for readonly api keys.',
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
          };
@@ -173,7 +187,7 @@ sub _process_rest_request {
     if(ref $data eq 'HASH') {
         $c->res->code($data->{'code'}) if $data->{'code'};
         if($data->{'code'} && $data->{'code'} ne 200) {
-            my($style, $message) = Thruk::Utils::Filter::get_message($c);
+            my($style, $message) = Thruk::Utils::Filter::get_message($c, 1);
             if($message && $style eq 'fail_message') {
                 $data->{'description'} .= $message;
             }
@@ -215,7 +229,7 @@ sub _format_csv_output {
 
     my $output;
     if(ref $data eq 'ARRAY') {
-        my $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        my $columns = $hash_columns || get_request_columns($c, NAME) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         $output = "";
         for my $d (@{$data}) {
             my $x = 0;
@@ -267,7 +281,7 @@ sub _format_xls_output {
 
     my $columns = [];
     if(ref $data eq 'ARRAY') {
-        $columns = $hash_columns || get_request_columns($c) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $columns = $hash_columns || get_request_columns($c, NAME) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
                 $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
@@ -303,8 +317,9 @@ sub _fetch {
             eval {
                 load $pkg_name;
             };
-            if($@) {
-                $c->log->error($@);
+            my $err = $@;
+            if($err) {
+                $c->log->error($err);
                 return({ 'message' => 'error loading '.$pkg_name.' rest submodule', code => 500, 'description' => $@ });
             }
 
@@ -328,6 +343,16 @@ sub _fetch {
                 push @{$protos}, $proto;
                 next;
             }
+            if($request_method ne 'GET' && !Thruk::Utils::check_csrf($c, 1)) {
+                # make csrf protection mandatory for anything other than GET requests
+                return({
+                    'message'     => 'invalid or no csfr token',
+                    'code'        => 403,
+                    'failed'      => Cpanel::JSON::XS::true,
+                });
+            }
+            delete $c->req->parameters->{'CSRFtoken'};
+            delete $c->req->body_parameters->{'CSRFtoken'};
             @matches = map { uri_unescape($_) } @matches;
             $c->stats->profile(comment => $path);
             my $sub_name = Thruk->verbose ? Thruk::Utils::code2name($function) : '';
@@ -444,6 +469,13 @@ sub _get_filter {
         }
         $op = $op_translation_words->{$op} if $op_translation_words->{$op};
         for my $val (@vals) {
+            # expand relative time filter for some operators
+            if($val =~ m/^\-?\d+\w{1}$/mxo && $op =~ m%^(>|<|>=|<=)$%mx) {
+                my $duration = Thruk::Utils::expand_duration($val);
+                if($duration ne $val) {
+                    $val = time() + $duration;
+                }
+            }
             push @{$filter}, { $key => { $op =>  $val }};
         }
     }
@@ -506,7 +538,7 @@ sub _apply_stats {
     my $group_columns = [];
     for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
         for my $col (split(/\s*,\s*/mx, $col)) {
-            if($col =~ m/^(.*)\(([^\)]+)\)$/mx) {
+            if($col =~ m/^(.*)\(([^\)]+)\):?([^:]*)$/mx) {
                 push @{$stats_columns}, { op => $1, col => $2 };
                 push @{$new_columns}, $col;
             } else {
@@ -520,6 +552,22 @@ sub _apply_stats {
 
     my $result = {};
     my $num_stats = scalar @{$stats_columns};
+    # initialize result
+    if(scalar @{$group_columns} == 0) {
+        my $key = "";
+        my $entry = {
+            count   => 0,
+            columns => [],
+        };
+        for my $col (@{$stats_columns}) {
+            if($col->{'op'} eq 'sum') {
+                push @{$entry->{'columns'}}, 0;
+            } else {
+                push @{$entry->{'columns'}}, undef;
+            }
+        }
+        $result->{$key} = $entry;
+    }
     for my $d (@{$data}) {
         my $key = "";
         for my $col (@{$group_columns}) {
@@ -600,13 +648,13 @@ sub _apply_stats {
 
 =head2 get_request_columns
 
-    get_request_columns($c)
+    get_request_columns($c, $type)
 
 returns list of requested columns or undef
 
 =cut
 sub get_request_columns {
-    my($c) = @_;
+    my($c, $type) = @_;
 
     return unless $c->req->parameters->{'columns'};
 
@@ -615,6 +663,11 @@ sub get_request_columns {
         push @{$columns}, split(/\s*,\s*/mx, $col);
     }
     $columns = Thruk::Utils::array_uniq($columns);
+    if($type == NAME) {
+        for(@{$columns}) {
+            $_ =~ s/^[^:]+:.*?$//gmx;
+        }
+    }
     return($columns);
 }
 
@@ -683,7 +736,7 @@ sub column_required {
     }
 
     # from ?columns=...
-    my $req_col = get_request_columns($c);
+    my $req_col = get_request_columns($c, NAME);
     if(defined $req_col && scalar @{$req_col} >= 0 && grep(/^$col$/mx, @{$req_col})) {
         return 1;
     }
@@ -708,13 +761,22 @@ sub _apply_columns {
     my($c, $data) = @_;
 
     return $data unless $c->req->parameters->{'columns'};
-    my $columns = get_request_columns($c);
+    my $columns = [];
+    for my $c (@{get_request_columns($c, RAW)}) {
+        my $name = $c;
+        my $alias = $c;
+        if($c =~ m/^(.+):(.*?)$/gmx) {
+            $name  = $1;
+            $alias = $2;
+        }
+        push @{$columns}, [$name, $alias];
+    }
 
     my $res = [];
     for my $d (@{$data}) {
         my $row = {};
         for my $c (@{$columns}) {
-            $row->{$c} = $d->{$c};
+            $row->{$c->[1]} = $d->{$c->[0]};
         }
         push @{$res}, $row;
     }
@@ -789,7 +851,7 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = get_request_columns($c) || [];
+        my $columns = get_request_columns($c, NAME) || [];
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
             $columns = Thruk::Utils::array_uniq($columns);
@@ -821,7 +883,7 @@ sub _livestatus_options {
             }
         }
 
-        if(!$c->req->parameters->{'columns'}) {
+        if(!$options->{'columns'}) {
             if($type eq 'hosts') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_host_columns;
             }
@@ -927,10 +989,10 @@ sub _expand_perfdata_and_custom_vars {
 
     # check wether user is allowed to see all custom variables
     my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
-    my $allowed_list = Thruk::Utils::list($c->config->{'show_custom_vars'});
+    my $allowed_list = $c->config->{'show_custom_vars'};
 
     # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
-    my $columns = get_request_columns($c) || [];
+    my $columns = get_request_columns($c, NAME) || [];
     push @{$columns}, @{get_filter_columns($c)};
     if($columns && scalar @{$columns} > 0) {
         my $ref_columns;
@@ -1265,14 +1327,28 @@ sub _rest_get_thruk_sessions {
     }
 
     my $data = [];
-    for my $session (sort glob($c->config->{'var_path'}."/sessions/*")) {
-        my $file = $session;
-        $file   =~ s%^.*/%%gmx;
-        next if $id && $id ne $file;
-        my $session_data = Thruk::Utils::CookieAuth::retrieve_session($c->config->{'var_path'}.'/sessions/'.$file);
+    my $total_number = 0;
+    my $total_5min   = 0;
+    my $min5 = time() - (5*60);
+    my $uniq = {};
+    my $uniq5min = {};
+    for my $file (sort glob($c->config->{'var_path'}."/sessions/*")) {
+        $total_number++;
+        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file);
         next unless $session_data;
-        next unless $is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'};
-        delete $session_data->{'hash'};
+        if($session_data->{'active'} > $min5) {
+            $total_5min++;
+            $uniq->{$session_data->{'username'}} = 1;
+        }
+        $uniq->{$session_data->{'username'}} = 1;
+
+        next unless($is_admin || $session_data->{'username'} eq $c->stash->{'remote_user'});
+        if($id) {
+            next unless($session_data->{'hashed_key'} eq $id);
+        }
+        delete $session_data->{'hash'};       # basic auth token is never public
+        delete $session_data->{'csrf_token'}; # also not public
+        delete $session_data->{'current_roles'}; # for internal use
         push @{$data}, $session_data;
     }
     if($id) {
@@ -1280,7 +1356,12 @@ sub _rest_get_thruk_sessions {
             return({ 'message' => 'no such session', code => 404 });
         }
         $data = $data->[0];
+        return($data);
     }
+    $c->metrics->set('sessions_total', $total_number, "total number of thruk sessions");
+    $c->metrics->set('sessions_uniq_user_total', scalar keys %{$uniq}, "total number of uniq users");
+    $c->metrics->set('sessions_active_5min_total', $total_5min, "total number of active thruk sessions (active during the last 5 minutes)");
+    $c->metrics->set('sessions_uniq_user_5min_total', scalar keys %{$uniq5min}, "total number of uniq users active during the last 5 minutes");
     return($data);
 }
 
@@ -1289,6 +1370,128 @@ sub _rest_get_thruk_sessions {
 # get thruk sessions status for given id.
 # alias for /thruk/sessions?id=<id>
 register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk_sessions);
+
+##########################################################
+# REST PATH: GET /thruk/users
+# lists thruk user profiles.
+register_rest_path_v1('GET', qr%^/thruk/users?$%mx, \&_rest_get_thruk_users);
+sub _rest_get_thruk_users {
+    my($c, undef, $id) = @_;
+    my $is_admin = 0;
+    if($c->check_user_roles('admin')) {
+        $is_admin = 1;
+    }
+
+    if(!defined $id) {
+        # prefill contacts / groups cache
+        $c->{'db'}->fill_get_can_submit_commands_cache();
+        $c->{'db'}->fill_get_contactgroups_by_contact_cache();
+    }
+
+    my $total_number = 0;
+    my $total_locked = 0;
+    my $users = Thruk::Utils::Conf::get_cgi_user_list($c);
+    delete $users->{'*'};
+    $users = [sort keys %{$users}];
+    my $data = [];
+    for my $name (@{$users}) {
+        next unless($is_admin || $name eq $c->stash->{"remote_user"});
+        next if(defined $id && $id ne $name);
+        my $userdata = _get_userdata($c, $name);
+        $total_locked++ if $userdata->{'locked'} == Cpanel::JSON::XS::true;
+        push @{$data}, $userdata;
+    }
+    if($id) {
+        if(!$data->[0]) {
+            return({ 'message' => 'no such user', code => 404 });
+        }
+        $data = $data->[0];
+        return($data);
+    }
+
+    $c->metrics->set('users_total', $total_number, "total number of thruk users");
+    $c->metrics->set('users_locked_total', $total_locked, "total number of locked thruk users");
+
+    return($data);
+}
+
+##########################################################
+sub _get_userdata {
+    my($c, $name) = @_;
+    my $profile;
+    if($name) {
+        $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+    } else {
+        $profile = $c->user;
+        $name    = $c->user->{'username'};
+    }
+    my $userdata = {
+        'id'                => $name,
+        'tz'                => undef,
+        'has_thruk_profile' => Cpanel::JSON::XS::false,
+        'locked'            => Cpanel::JSON::XS::false,
+    };
+    if($profile) {
+        if($profile->{'settings'} && scalar keys %{$profile->{'settings'}} > 0) {
+            $userdata->{'has_thruk_profile'} = Cpanel::JSON::XS::true;
+            for my $key (qw/tz/) {
+                $userdata->{$key} = $profile->{'settings'}->{$key};
+            }
+            $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
+        }
+        for my $key (qw/groups roles email alias can_submit_commands/) {
+            $userdata->{$key} = $profile->{$key};
+        }
+    }
+    return($userdata);
+}
+
+##########################################################
+# REST PATH: GET /thruk/users/<id>
+# get thruk profile for given user.
+# alias for /thruk/users?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)$%mx, \&_rest_get_thruk_users);
+
+##########################################################
+# REST PATH: GET /thruk/stats
+# lists thruk statistics.
+register_rest_path_v1('GET', qr%^/thruk/stats$%mx, \&_rest_get_thruk_stats, ['authorized_for_system_information']);
+sub _rest_get_thruk_stats {
+    my($c, undef) = @_;
+
+    my $cache = $c->cache->get("global");
+    if(!$cache->{'last_metrics_update'} || $cache->{'last_metrics_update'} < time() -30) {
+        $cache->{'last_metrics_update'} = time();
+        $c->cache->set("global", $cache);
+
+        # gather session metrics
+        &_rest_get_thruk_sessions($c);
+
+        # gather user metrics
+        &_rest_get_thruk_users($c);
+    }
+
+    my $data = $c->metrics->get_all();
+    return($data);
+}
+
+##########################################################
+# REST PATH: GET /thruk/metrics
+# alias for /thruk/stats
+register_rest_path_v1('GET', qr%^/thruk/metrics$%mx, \&_rest_get_thruk_stats, ['authorized_for_system_information']);
+
+##########################################################
+# REST PATH: GET /thruk/whoami
+# show current profile information.
+# alias for /thruk/users?id=<id>
+register_rest_path_v1('GET', qr%^/thruk/whoami$%mx, \&_rest_get_thruk_whoami);
+sub _rest_get_thruk_whoami {
+    my($c) = @_;
+    my $profile = _get_userdata($c);
+    $profile->{'auth_src'}          = $c->user->{'auth_src'}          if $c->user->{'auth_src'};
+    $profile->{'original_username'} = $c->user->{'original_username'} if $c->user->{'original_username'};
+    return($profile);
+}
 
 ##########################################################
 # REST PATH: GET /sites
@@ -1415,6 +1618,17 @@ sub _rest_get_livestatus_hostgroups {
 }
 
 ##########################################################
+# REST PATH: GET /hostgroups/<name>
+# lists hostgroups for given name.
+# alias for /hostgroups?name=<name>
+register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)$%mx, \&_rest_get_livestatus_hostgroups_by_name);
+sub _rest_get_livestatus_hostgroups_by_name {
+    my($c, undef, $hostgroup) = @_;
+    my $data = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), { "name" => $hostgroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /hostgroups/<name>/stats
 # hash of livestatus hostgroup statistics.
 # alias for /hosts/stats?groups[gte]=<name>
@@ -1470,7 +1684,6 @@ sub _rest_get_livestatus_services_commandline {
             'service_description' => $svc->{'description'},
             'peer_key'            => $svc->{'peer_key'},
         };
-        push @{$data}, $command;
     }
     return($data);
 }
@@ -1505,6 +1718,17 @@ sub _rest_get_livestatus_servicegroups {
 }
 
 ##########################################################
+# REST PATH: GET /servicegroups/<name>
+# lists servicegroups for given name.
+# alias for /servicegroups?name=<name>
+register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)$%mx, \&_rest_get_livestatus_servicegroups_by_name);
+sub _rest_get_livestatus_servicegroups_by_name {
+    my($c, undef, $servicegroup) = @_;
+    my $data = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), { "name" => $servicegroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /servicegroups/<name>/stats
 # hash of livestatus servicegroup statistics.
 # alias for /services/stats?service_groups[gte]=<name>
@@ -1527,6 +1751,17 @@ sub _rest_get_livestatus_contacts {
 }
 
 ##########################################################
+# REST PATH: GET /contacts/<name>
+# lists contacts for given name.
+# alias for /contacts?name=<name>
+register_rest_path_v1('GET', qr%^/contacts?/([^/]+)$%mx, \&_rest_get_livestatus_contacts_by_name);
+sub _rest_get_livestatus_contacts_by_name {
+    my($c, undef, $contact) = @_;
+    my $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contacts'), { "name" => $contact }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /contactgroups
 # lists livestatus contactgroups.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
@@ -1534,6 +1769,17 @@ register_rest_path_v1('GET', qr%^/contactgroups?$%mx, \&_rest_get_livestatus_con
 sub _rest_get_livestatus_contactgroups {
     my($c) = @_;
     return($c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /contactgroups/<name>
+# lists contactgroups for given name.
+# alias for /contactgroups?name=<name>
+register_rest_path_v1('GET', qr%^/contactgroups?/([^/]+)$%mx, \&_rest_get_livestatus_contactgroups_by_name);
+sub _rest_get_livestatus_contactgroups_by_name {
+    my($c, undef, $contactgroup) = @_;
+    my $data = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), { "name" => $contactgroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
 }
 
 ##########################################################
@@ -1547,6 +1793,17 @@ sub _rest_get_livestatus_timeperiods {
 }
 
 ##########################################################
+# REST PATH: GET /timeperiods/<name>
+# lists timeperiods for given name.
+# alias for /timeperiods?name=<name>
+register_rest_path_v1('GET', qr%^/timeperiods?/([^/]+)$%mx, \&_rest_get_livestatus_timeperiods_by_name);
+sub _rest_get_livestatus_timeperiods_by_name {
+    my($c, undef, $timeperiod) = @_;
+    my $data = $c->{'db'}->get_timeperiods(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods'), { "name" => $timeperiod }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /commands
 # lists livestatus commands.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
@@ -1554,6 +1811,17 @@ register_rest_path_v1('GET', qr%^/commands?$%mx, \&_rest_get_livestatus_commands
 sub _rest_get_livestatus_commands {
     my($c) = @_;
     return($c->{'db'}->get_commands(filter => [_livestatus_filter($c)], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /commands/<name>
+# lists commands for given name.
+# alias for /commands?name=<name>
+register_rest_path_v1('GET', qr%^/commands?/([^/]+)$%mx, \&_rest_get_livestatus_commands_by_name);
+sub _rest_get_livestatus_commands_by_name {
+    my($c, undef, $command) = @_;
+    my $data = $c->{'db'}->get_commands(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'commands'), { "name" => $command }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
 }
 
 ##########################################################
@@ -1567,6 +1835,17 @@ sub _rest_get_livestatus_comments {
 }
 
 ##########################################################
+# REST PATH: GET /comments/<id>
+# lists comments for given id.
+# alias for /comments?id=<id>
+register_rest_path_v1('GET', qr%^/comments?/([^/]+)$%mx, \&_rest_get_livestatus_comments_by_id);
+sub _rest_get_livestatus_comments_by_id {
+    my($c, undef, $id) = @_;
+    my $data = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
+}
+
+##########################################################
 # REST PATH: GET /downtimes
 # lists livestatus downtimes.
 # see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
@@ -1574,6 +1853,17 @@ register_rest_path_v1('GET', qr%^/downtimes?$%mx, \&_rest_get_livestatus_downtim
 sub _rest_get_livestatus_downtimes {
     my($c) = @_;
     return($c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+}
+
+##########################################################
+# REST PATH: GET /downtimes/<id>
+# lists downtimes for given id.
+# alias for /downtimes?id=<id>
+register_rest_path_v1('GET', qr%^/downtimes?/([^/]+)$%mx, \&_rest_get_livestatus_downtimes_by_id);
+sub _rest_get_livestatus_downtimes_by_id {
+    my($c, undef, $id) = @_;
+    my $data = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    return($data);
 }
 
 ##########################################################
@@ -1733,7 +2023,26 @@ sub _compare {
         return 1 if lc($data) ne lc($val);
         return;
     }
-    elsif($op eq '~' || $op eq '~~') {
+    elsif($op eq '~') {
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                ## no critic
+                if($v =~ m/$val/) {
+                    $found = 1;
+                    last;
+                }
+                ## use critic
+            }
+            return $found;
+        } else {
+            ## no critic
+            return 1 if $data =~ m/$val/;
+            ## use critic
+        }
+        return;
+    }
+    elsif($op eq '~~') {
         if(ref $data eq 'ARRAY') {
             my $found;
             for my $v (@{$data}) {
@@ -1752,7 +2061,26 @@ sub _compare {
         }
         return;
     }
-    elsif($op eq '!~' || $op eq '!~~') {
+    elsif($op eq '!~') {
+        if(ref $data eq 'ARRAY') {
+            my $found;
+            for my $v (@{$data}) {
+                ## no critic
+                if($v =~ m/$val/) {
+                    $found = 1;
+                    last;
+                }
+                ## use critic
+            }
+            return !$found;
+        } else {
+            ## no critic
+            return 1 if $data !~ m/$val/;
+            ## use critic
+            return;
+        }
+    }
+    elsif($op eq '!~~') {
         if(ref $data eq 'ARRAY') {
             my $found;
             for my $v (@{$data}) {

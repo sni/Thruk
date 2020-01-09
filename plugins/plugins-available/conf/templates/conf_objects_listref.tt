@@ -11,7 +11,7 @@
   <tr>
     <td class='dataVar' style="text-align:center" colspan=2>
       <br>
-      [% link = "conf.cgi?sub=objects&action=delete&force=1&data.id=" _ object.get_id() _ "&token=" _ get_user_token(c) %]
+      [% link = "conf.cgi?sub=objects&action=delete&force=1&data.id=" _ object.get_id() _ "&CSRFtoken=" _ get_user_token(c) %]
       [% text = object.get_type() | ucfirst %]
       [% text = "Delete this " _ text _ " and remove it from the selected references" %]
       [% button(link, text, 'conf_delete_button', '', '', '', 1) %]

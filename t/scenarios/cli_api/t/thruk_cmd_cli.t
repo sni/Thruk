@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 139;
+plan tests => 159;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -64,7 +64,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk -A omdadmin url "status.cgi?host=all&servicestatustypes=1&style=detail"',
     like    => ['/Current Network Status/'],
-    waitfor => '(0|1)\ Matching\ Service\ Entries',
+    waitfor => '(0|1|2)\ Matching\ Service\ Entries',
 });
 
 ###########################################################
@@ -86,7 +86,7 @@ TestUtils::test_command({
     cmd     => '/usr/bin/env thruk r -d "comment_data=test" -d "triggered_by=test" /hosts/localhost/cmd/schedule_host_downtime',
     like    => ['/"error"/', '/parse ulong argument trigger_id/', '/No digits found in ulong/', '/COMMAND/', '/SCHEDULE_HOST_DOWNTIME/'],
     unlike  => ['/successfully submitted/'],
-    exit    => 1,
+    exit    => 3,
 });
 
 ###########################################################
@@ -173,5 +173,32 @@ TestUtils::test_command({
     like => ['/Command request successfully submitted/'],
     errlike => ['/SCHEDULE_HOST_CHECK/'],
 });
+
+###########################################################
+# thruk cli reports
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk 'avail.cgi?hostgroup=all&timeperiod=last24hours&view_mode=csv'",
+    like => ['/^HOST_NAME/'],
+    unlike => ['/ERROR/'],
+});
+
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk --local 'avail.cgi?hostgroup=all&timeperiod=last24hours&view_mode=csv'",
+    like => ['/^HOST_NAME/'],
+    unlike => ['/ERROR/'],
+});
+
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk 'avail.cgi?hostgroup=all&timeperiod=last24hours'",
+    like => ['/Availability report completed/'],
+    unlike => ['/ERROR/'],
+});
+
+TestUtils::test_command({
+    cmd  => "/usr/bin/env thruk --local 'avail.cgi?hostgroup=all&timeperiod=last24hours'",
+    like => ['/Availability report completed/'],
+    unlike => ['/ERROR/'],
+});
+
 
 ###########################################################

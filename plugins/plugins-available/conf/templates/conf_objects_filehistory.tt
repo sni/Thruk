@@ -24,11 +24,11 @@
     <td align="right" width=100 valign="top" style="padding-right: 6px; cursor: pointer;" nowrap>[% date_format(c, l.date) %]</td>
     <td align="left" valign="top" style="cursor: pointer;">
       <a href="[% link %]">
-      <b>[% l.message %]</b>
+      <b>[% l.message | html %]</b>
       <img width="16" height="16" border="0" style="vertical-align: middle; float: right; margin-right: 5px;" title="details" alt="details" src="[% url_prefix %]themes/[% theme %]/images/arrow_right.png">
       </a>
       <br>
-      [% l.author_name %] &lt;[% l.author_email %]&gt;
+      [% l.author_name | html %] &lt;[% l.author_email | html %]&gt;
     </td>
   </tr>
 [% END %]

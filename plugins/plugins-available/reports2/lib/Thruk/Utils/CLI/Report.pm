@@ -43,6 +43,10 @@ sub cmd {
     my($c, $action, $commandoptions, $data, $src, $global_options) = @_;
     $c->stats->profile(begin => "_cmd_report()");
 
+    if(!$c->check_user_roles('authorized_for_admin')) {
+        return("ERROR - authorized_for_admin role required", 1);
+    }
+
     my $mail = 0;
     if(scalar @{$commandoptions} >= 1 && $commandoptions->[0] eq 'mail') {
         $mail = 1;
@@ -117,7 +121,6 @@ sub _cmd_report {
     if(!$ENV{'THRUK_JOB_ID'}) {
         my($id,$dir) = Thruk::Utils::External::_init_external($c);
         ## no critic
-        $SIG{CHLD} = 'DEFAULT';
         Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
         $ENV{'THRUK_JOB_ID'}       = $id;
         $ENV{'THRUK_JOB_DIR'}      = $dir;

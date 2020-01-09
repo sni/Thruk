@@ -1,7 +1,11 @@
 include ../Makefile.common
 
 test:
-	docker-compose exec -T --user root omd sudo -iu demo /test/t/test.sh 0
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/test.sh 0 \
+		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 
 test_verbose:
-	docker-compose exec -T --user root omd sudo -iu demo /test/t/test.sh 1
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/test.sh 1 \
+		|| ( cd $(shell pwd) && $(MAKE) failed_test )

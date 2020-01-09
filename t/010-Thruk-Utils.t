@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 91;
+    plan tests => 107;
 
     use lib('t');
     require TestUtils;
@@ -19,7 +19,6 @@ use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
-use_ok('Thruk::Utils::CookieAuth');
 
 #########################
 # sort
@@ -312,30 +311,56 @@ is('a+',        Thruk::Utils::convert_wildcards_to_regex('a+'), 'normal regex 1'
 is('^a(b|c)d*', Thruk::Utils::convert_wildcards_to_regex('^a(b|c)d*'), 'normal regex 2');
 
 #########################
-# test timezone detection
-my $tz = $c->app->_detect_timezone();
-ok($tz, "got a timezone: ".($tz || '<none>'));
-my $ts     = time();
-my $parsed = Thruk::Utils::_parse_date($c, "now");
-ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for 'now'");
-
-#########################
-$ts     = time() + 3600;
-$parsed = Thruk::Utils::_parse_date($c, "+60m");
-ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '+60m'");
-#########################
-$ts     = time() - 3600;
-$parsed = Thruk::Utils::_parse_date($c, "-60m");
-ok(abs($parsed - $ts) < 5, "_parse_date returns correct timestamp for '-60m'");
-
-#########################
 my $absolute_urls = [
     [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/thruk/cgi-bin/extinfo.cgi', 'https://127.0.0.1:60443/demo/thruk/cgi-bin/extinfo.cgi'],
     [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/pnp4nagios/index.php/popup', 'https://127.0.0.1:60443/demo/pnp4nagios/index.php/popup' ],
 ];
 for my $urls (@{$absolute_urls}) {
-  my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
-  is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
+    my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
+    is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
 }
 
 #########################
+# test custom variables
+{
+    my $show_custom_vars = ["A*"];
+    is(Thruk::Utils::check_custom_var_list("_ABC", $show_custom_vars),     1, "check_custom_var_list I");
+    is(Thruk::Utils::check_custom_var_list("_DEF", $show_custom_vars), undef, "check_custom_var_list II");
+    is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), undef, "check_custom_var_list III");
+    is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), undef, "check_custom_var_list III");
+};
+
+{
+    my $show_custom_vars = ["*"];
+    is(Thruk::Utils::check_custom_var_list("_ABC", $show_custom_vars),     1, "check_custom_var_list IV");
+    is(Thruk::Utils::check_custom_var_list("_DEF", $show_custom_vars),     1, "check_custom_var_list V");
+    is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), undef, "check_custom_var_list VI");
+    is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), undef, "check_custom_var_list VII");
+};
+
+{
+    my $show_custom_vars = ["A*", "HOST*"];
+    is(Thruk::Utils::check_custom_var_list("_ABC", $show_custom_vars),     1, "check_custom_var_list VIII");
+    is(Thruk::Utils::check_custom_var_list("_DEF", $show_custom_vars),undef , "check_custom_var_list IIX");
+    is(Thruk::Utils::check_custom_var_list("_HOSTABD", $show_custom_vars), 1, "check_custom_var_list IX");
+    is(Thruk::Utils::check_custom_var_list("_HOSTDEF", $show_custom_vars), 1, "check_custom_var_list X");
+};
+
+#########################
+# test array functions
+my $chunks = Thruk::Utils::array_chunk([1..100], 5);
+is(scalar @{$chunks}, 5, "array_chunk returns 5 chunks");
+is(scalar @{$chunks->[0]}, 20, "array_chunk returns evenly sized chunks");
+
+$chunks = Thruk::Utils::array_chunk([1..100], 150);
+is(scalar @{$chunks}, 100, "array_chunk returns 100 chunks");
+is(scalar @{$chunks->[0]}, 1, "array_chunk returns evenly sized chunks");
+
+$chunks = Thruk::Utils::array_chunk_fixed_size([1..100], 50);
+is(scalar @{$chunks}, 2, "array_chunk_fixed_size returns 2 chunks");
+is(scalar @{$chunks->[0]}, 50, "array_chunk_fixed_size returns fixed sized chunks");
+
+$chunks = Thruk::Utils::array_chunk_fixed_size([1..100], 3);
+is(scalar @{$chunks}, 34, "array_chunk_fixed_size returns 34 chunks");
+is(scalar @{$chunks->[0]}, 3, "array_chunk_fixed_size returns fixed sized chunks");
+is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunks");

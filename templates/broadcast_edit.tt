@@ -22,7 +22,7 @@
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="id" value="[% broadcast.id %]">
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 <table border="1" class='data' width=1000>
   <tr>
     <th class='data' style="width:125px;"><a href='broadcast.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
@@ -42,7 +42,8 @@
              value="[% IF broadcast.hide_before %][% format_date(broadcast.hide_before_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
              id="hide_before"
              name="hide_before"
-             onkeyup="if(this.value != '') { verify_time(this.id) }"
+             onkeyup="verify_time(this.id)"
+             onchange="verify_time(this.id)"
       >
       </td>
   </tr>
@@ -54,7 +55,8 @@
              value="[% IF broadcast.expires %][% format_date(broadcast.expires_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
              id="expires"
              name="expires"
-             onkeyup="if(this.value != '') { verify_time(this.id) }"
+             onkeyup="verify_time(this.id)"
+             onchange="verify_time(this.id)"
       >
       </td>
   </tr>
@@ -121,7 +123,7 @@ then use later like: {{variable}} and {{another}}</pre>
              style="width: 97%;"
              value="[% broadcast.contacts.join(', ') | html %]"
              onfocus="this.click()"
-             onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+             onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
       >
     </td>
   </tr>
@@ -135,7 +137,7 @@ then use later like: {{variable}} and {{another}}</pre>
              style="width: 97%;"
              value="[% broadcast.contactgroups.join(', ') | html %]"
              onfocus="this.click()"
-             onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list:'[ ,!\+]',button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+             onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
       >
     </td>
   </tr>

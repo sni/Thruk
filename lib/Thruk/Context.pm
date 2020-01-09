@@ -17,6 +17,7 @@ use Thruk::Request::Cookie;
 use Thruk::Stats;
 use Thruk::Utils::IO;
 use Thruk::Utils::CookieAuth;
+use Thruk::Utils::APIKeys;
 
 =head1 NAME
 
@@ -50,7 +51,7 @@ sub new {
     }
 
     # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
-    my $path_info         = translate_request_path($env->{'PATH_INFO'} || $env->{'REQUEST_URI'}, $app->config, $env);
+    my $path_info         = translate_request_path($env->{'REQUEST_URI'} || $env->{'PATH_INFO'}, $app->config, $env);
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
 
@@ -100,7 +101,7 @@ sub new {
     # parse json body parameters
     if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
         my $raw = $self->req->raw_body;
-        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mx) {
+        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mxs) {
             my $data;
             my $json = Cpanel::JSON::XS->new->utf8;
             $json->relaxed();
@@ -166,6 +167,14 @@ sub cluster {
     return($_[0]->app->cluster);
 }
 
+=head2 metrics
+
+return metrics object
+
+=cut
+sub metrics {
+    return($_[0]->app->metrics());
+}
 
 =head2 detach
 
@@ -180,9 +189,30 @@ sub detach {
     # itself throws an error, just bail out in that case
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($c, $1);
-        return;
+        $c->{'detached'} = 1;
+        die("prevent further page processing");
     }
     confess("detach: ".$url." at ".$c->req->url);
+}
+
+=head2 detach_error
+
+detach_error to other controller
+
+=cut
+sub detach_error {
+    my($c, $data) = @_;
+    $c->stash->{'error_data'} = $data;
+    my($package, $filename, $line) = caller;
+    $c->stats->profile(comment => 'detach_eror from '.$package.':'.$line);
+    # errored flag is set in error controller to avoid recursion if error controller
+    # itself throws an error, just bail out in that case
+    if(!$c->{'errored'}) {
+        Thruk::Controller::error::index($c, 99);
+        $c->{'detached'} = 1;
+        die("prevent further page processing");
+    }
+    confess("detach_error at ".$c->req->url);
 }
 
 =head2 render
@@ -222,43 +252,74 @@ sub render_gd {
 
 =head2 authenticate
 
+  $c->authenticate(%options)
+
 authenticate current request user
+
+options are: {
+    username       => force this username
+    skip_db_access => do not access the livestatus to fetch roles
+    apikey         => use api key to authenticate
+    superuser      => flag wether this user should be a superuser
+    internal       => flag wether this user is an internal technical user
+    roles          => limit roles to this set
+}
 
 =cut
 sub authenticate {
-    my($c, $skip_db_access, $username) = @_;
+    my($c, %options) = @_;
     $c->log->debug("checking authenticaton") if Thruk->verbose;
+    confess("authenticate called multiple times, use change_user instead.") if $c->user_exists;
     delete $c->stash->{'remote_user'};
     delete $c->{'user'};
     delete $c->{'session'};
-    $username = request_username($c) unless defined $username;
+    my $username  = $options{'username'};
+    my $superuser = $options{'superuser'};
+    my $internal  = $options{'internal'};
+    my $auth_src  = $options{'auth_src'};
+    my($original_username, $roles);
+    my($sessionid, $sessiondata);
+    if(defined $username) {
+        confess("auth_src required") unless defined $auth_src;
+        $original_username = $username;
+        $roles = $options{'roles'};
+    } else {
+        if($c->app->{'TRANSFER_USER'}) {
+            # internal request setting $c->app->{'TRANSFER_USER'} to $c->user
+            my $user = delete $c->app->{'TRANSFER_USER'};
+            _set_stash_user($c, $user, $auth_src);
+            return($user);
+        }
+        ($username, $auth_src, $roles, $superuser,$internal, $sessionid, $sessiondata) = _request_username($c, $options{'apikey'});
+
+        # transform username upper/lower case?
+        $original_username = $username;
+        $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
+    }
     return unless $username;
-    my $sessionid = $c->req->cookies->{'thruk_auth'};
-    my $sessiondata;
     if($sessionid) {
-        $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $sessionid);
         $sessiondata = undef if(!$sessiondata || $sessiondata->{'username'} ne $username);
+        $sessiondata->{'private_key'} = $sessionid if $sessiondata;
     }
-    my $user = Thruk::Authentication::User->new($c, $username, $sessiondata);
+    my $user = Thruk::Authentication::User->new($c, $username, $sessiondata, $superuser, $internal);
     return unless $user;
-    if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
-        $c->error("account is locked, please contact an administrator");
-        return;
+    if(!$internal) {
+        if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
+            $c->log->debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk->verbose;
+            $c->error("account is locked, please contact an administrator");
+            return;
+        }
     }
-    if(!$sessiondata && $username !~ m/^\(.*\)$/mx) {
-        # set session id for all requests
+    _set_stash_user($c, $user, $auth_src);
+    $c->{'user'}->{'original_username'} = $original_username;
+    $user->set_dynamic_attributes($c, $options{'skip_db_access'},$roles);
+    $c->log->debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk->verbose;
+
+    # set session id for all requests
+    if(!$sessiondata && !$internal) {
         if(defined $ENV{'THRUK_SRC'} && ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
-            if($sessionid && !Thruk::Utils::check_for_nasty_filename($sessionid)) {
-                my $sdir = $c->config->{'var_path'}.'/sessions';
-                my $sessionfile = $sdir.'/'.$sessionid;
-                if(!-e $sessionfile) {
-                    Thruk::Utils::get_fake_session($c, $sessionid, $username, undef, $c->req->address);
-                }
-            } else {
-                $sessionid = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
-                $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'} };
-            }
-            $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $sessionid);
+            ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
+            $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
         }
     }
     if($sessiondata) {
@@ -266,93 +327,118 @@ sub authenticate {
         utime($now, $now, $sessiondata->{'file'});
         $c->{'session'} = $sessiondata;
     }
-    $c->{'user'} = $user;
-    $c->stash->{'remote_user'} = $user->{'username'};
-    $c->stash->{'user_data'}   = $user->{'settings'};
-    $user->set_dynamic_attributes($c, $skip_db_access);
-    if(Thruk->verbose) {
-        $c->log->debug("authenticated as ".$user->{'username'});
+
+    # save current roles in session file so it can be used from external tools
+    if(!$internal && $sessiondata && !$sessiondata->{'current_roles'}) {
+        $sessiondata->{'current_roles'} = $c->{'user'}->{'roles'} || [];
+        my $data = Thruk::Utils::IO::json_lock_patch($sessiondata->{'file'}, { current_roles => $sessiondata->{'current_roles'} });
     }
     return($user);
 }
 
-=head2 request_username
+sub _set_stash_user {
+    my($c, $user, $auth_src) = @_;
+    $c->{'user'} = $user;
+    $c->{'user'}->{'auth_src'} = $auth_src;
+    $c->stash->{'remote_user'} = $user->{'username'};
+    $c->stash->{'user_data'}   = $user->{'settings'};
+    return;
+}
 
-return username from env
+=head2 _request_username
+
+get username from env
+
+returns $username, $src, $original_username, $roles, $superuser, $internal
 
 =cut
-sub request_username {
-    my($c) = @_;
+sub _request_username {
+    my($c, $apikey) = @_;
 
-    my $env    = $c->env;
-    my $apikey = $c->req->header('X-Thruk-Auth-Key');
-    my $username;
+    my($username, $auth_src, $superuser, $internal, $roles, $sessiondata);
+    my $env       = $c->env;
+    $apikey       = $c->req->header('X-Thruk-Auth-Key') unless defined $apikey;
+    my $sessionid = $c->req->cookies->{'thruk_auth'};
+    $sessiondata  = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid) if $sessionid;
 
     # authenticate by secret.key from http header
     if($apikey) {
-        my $apipath = $c->config->{'var_path'}."/api_keys";
+        # ensure secret key is fresh
         my $secret_file = $c->config->{'var_path'}.'/secret.key';
         $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
         chomp($c->config->{'secret_key'});
-        if($apikey !~ m/^[a-zA-Z0-9]+$/mx) {
-            $c->error("wrong authentication key");
-            return;
+        $apikey =~ s/^\s+//mx;
+        $apikey =~ s/\s+$//mx;
+        if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
+            return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
-        elsif($c->config->{'api_keys_enabled'} && -e $apipath.'/'.$apikey) {
-            my $data = Thruk::Utils::IO::json_lock_retrieve($apipath.'/'.$apikey);
-            my $addr = $c->req->address;
-            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
-            Thruk::Utils::IO::json_lock_patch($apipath.'/'.$apikey, { last_used => time(), last_from => $addr }, 1);
-            $username = $data->{'user'};
-        }
-        elsif($c->req->header('X-Thruk-Auth-Key') eq $c->config->{'secret_key'}) {
+        elsif($apikey eq $c->config->{'secret_key'} && $c->config->{'secret_key'} ne '') {
             $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
             if(!$username) {
-                $c->error("authentication by key requires username, please specify one either by cli -A parameter or X-Thruk-Auth-User HTTP header");
-                return;
+                $username  = '(api)';
+                $internal  = 1;
             }
-        } else {
-            $c->error("wrong authentication key");
-            return;
+            $auth_src  = "secret_key";
+            $superuser = 1;
         }
+        elsif($c->config->{'api_keys_enabled'}) {
+            my $data = Thruk::Utils::APIKeys::get_key_by_private_key($c->config, $apikey);
+            if(!$data) {
+                return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
+            }
+            my $addr = $c->req->address;
+            $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
+            Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, { pretty => 1 });
+            $username = $data->{'user'};
+            if($data->{'superuser'}) {
+                $superuser = 1;
+                $username  = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+                if(!$username) {
+                    $username  = '(api)';
+                    $internal  = 1;
+                }
+            }
+            $roles    = $data->{'roles'};
+            $auth_src = "api_key";
+        } else {
+            return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
+        }
+    }
+    elsif($sessiondata) {
+        $username = $sessiondata->{'username'};
+        $auth_src = "cookie";
+        $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
     }
     elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
         $username = $env->{'SSL_CLIENT_S_DN_CN'};
-        confess("username $username is reserved.") if $username =~ m%^\(.*\)$%mx;
+        $auth_src = "ssl_authentication";
     }
     # basic authentication
-    elsif(defined $env->{'REMOTE_USER'} and $env->{'REMOTE_USER'} ne '' ) {
+    elsif(defined $env->{'REMOTE_USER'} && $env->{'REMOTE_USER'} ne '' ) {
         $username = $env->{'REMOTE_USER'};
-        confess("username $username is reserved.") if $username =~ m%^\(.*\)$%mx;
+        $auth_src = "basic auth";
     }
-    elsif(defined $ENV{'REMOTE_USER'}and $ENV{'REMOTE_USER'} ne '' ) {
+    elsif(defined $ENV{'REMOTE_USER'} && $ENV{'REMOTE_USER'} ne '' ) {
         $username = $ENV{'REMOTE_USER'};
-    }
-
-    elsif($c->req->cookies->{'thruk_auth'}) {
-        # verify ip address
-        my $sessiondata = Thruk::Utils::CookieAuth::retrieve_session($c, $c->req->cookies->{'thruk_auth'});
-        if($sessiondata && (($sessiondata->{'address'} eq $c->req->address) || ($c->env->{'HTTP_X_FORWARDED_FOR'} && $c->env->{'HTTP_X_FORWARDED_FOR'} eq $sessiondata->{'address'}))) {
-            $username = $sessiondata->{'username'};
-        }
+        $auth_src = "basic auth";
     }
 
     # default_user_name?
     if(!defined $username && defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
         $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
+        $auth_src = "default_user_name";
     }
 
     elsif(!defined $username && defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
         $username = $c->config->{'default_cli_user_name'};
+        $auth_src = "cli";
     }
 
     if(!defined $username || $username eq '') {
         return;
     }
 
-    # transform username upper/lower case?
-    $username = Thruk::Authentication::User::transform_username($c->config, $username, $c);
-    return($username);
+    return($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata);
 }
 
 =head2 user_exists
@@ -372,9 +458,10 @@ return/set errors
 
 =cut
 sub error {
-    my($c) = @_;
-    return($c->{'errors'}) unless $_[1];
-    push @{$c->{'errors'}}, $_[1];
+    my($c, $error) = @_;
+    return($c->{'errors'}) unless $error;
+    push @{$c->{'errors'}}, $error;
+    $c->log->debug($error);
     return;
 }
 
@@ -427,7 +514,15 @@ sub cache {
 
 =head2 cookie
 
-$c->cookie()
+$c->cookie($name, [$value], [$options])
+
+retrieves a cookie_path
+
+sets a cookie if value is defined
+
+options are available as descrbed here: L<Plack::Response/cookies>
+
+basically: domain, expires, path, httponly, secure, max-age
 
 =cut
 sub cookie {
@@ -493,6 +588,9 @@ regardless of the deployment path.
 =cut
 sub translate_request_path {
     my($path_info, $config, $env) = @_;
+
+    # strip off get parameter
+    $path_info =~ s/\?.*$//gmx;
 
     if($path_info =~ m%^/?$%mx && $env->{'SCRIPT_NAME'} && $env->{'SCRIPT_NAME'} =~ m%/thruk/cgi\-bin/remote\.cgi(/r/.*)$%mx) {
         $path_info = '/thruk'.$1;
@@ -592,10 +690,13 @@ sub want_json_response {
     if($c->req->header('accept') && $c->req->header('accept') =~ m/application\/json/mx) {
         return 1;
     }
-    if($c->req->header('X-Thruk-Auth-Key')) {
+    if($c->req->path_info =~ m%^/thruk/r/%mx) {
         return 1;
     }
-    if($c->req->path_info =~ m%^/thruk/r/%mx) {
+    if($c->req->parameters->{'view_mode'} && $c->req->parameters->{'view_mode'} eq 'json') {
+        return 1;
+    }
+    if($c->req->parameters->{'json'}) {
         return 1;
     }
     return;

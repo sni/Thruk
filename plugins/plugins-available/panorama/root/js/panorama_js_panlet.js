@@ -28,7 +28,7 @@ Ext.define('TP.Panlet', {
         this.xdata.cls      = this.$className;
         this.xdata.backends = [];
 
-        var tab     = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         if(tab == undefined) {
             var err = new Error;
             TP.logError(this.id, "noTabException", err);
@@ -52,18 +52,32 @@ Ext.define('TP.Panlet', {
             this.closable  = false;
             this.draggable = false;
         } else {
-            this.resizable = new Ext.Panel({   // make resize snap to grid
+            // make resize snap to grid
+            this.resizable = new Ext.panel.Panel({
                 widthIncrement:  TP.snap_x,
-                heightIncrement: TP.snap_y
+                heightIncrement: TP.snap_y,
+                listeners: {
+                    // add mask to prevent mouseinteraction with panel content which prevents resizing sometimes
+                    beforeresize: function() {
+                        panel.mask();
+                        document.onmouseup = function() {
+                            document.onmouseup = undefined;
+                            panel.unmask();
+                        }
+                    },
+                    resize: function(This, width, height, e, eOpts) {
+                        if(!e.type || e.type != "mouseup") { return; }
+                        document.onmouseup = undefined;
+                        panel.unmask();
+                    }
+                }
             });
         }
 
 
         this.gearHandler = TP.panletGearHandler;
-        if(this.locked) {
-            this.tools = [];
-        } else {
-            this.tools = [];
+        this.tools = this.extra_tools || [];
+        if(!this.locked) {
             if(this.has_search_button != undefined) {
                 var This = this;
                 this.tools.push({
@@ -114,7 +128,7 @@ Ext.define('TP.Panlet', {
         TP.log('['+this.id+'] startTimeouts');
         var refresh = this.xdata.refresh;
         if(this.xdata.refresh == -1) {
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             refresh = tab.xdata.refresh;
         }
         if(refresh > 0) {
@@ -127,6 +141,7 @@ Ext.define('TP.Panlet', {
     },
     dd_overriden: false,
     getState: function() {
+        if(!this.el) { return; }
         var state = this.callParent(arguments);
         state.title = this.title;
         state.xdata = this.xdata;
@@ -181,7 +196,7 @@ Ext.define('TP.Panlet', {
             var shadow = Ext.get(This.id + '_shadow');
             if(shadow != undefined) { shadow.hide(); }
         },
-        destroy: function( This, eOpts ) {
+        destroy: function(This, eOpts) {
             TP.log('['+This.id+'] destroy');
 
             /* remove shadow */
@@ -192,14 +207,22 @@ Ext.define('TP.Panlet', {
 
             if(!This.redraw) {
                 /* remove window from panels window ids */
-                TP.removeWindowFromPanels(this.id);
+                TP.removeWindowFromPanels(This.id);
 
                 // make sure timer is not started again
-                this.xdata.refresh = 0;
+                This.xdata.refresh = 0;
+                This.tab = null;
 
                 /* clear state information */
                 TP.cp.clear(This.id);
             }
+        },
+        beforeshow: function(This, eOpts) {
+            if(!This.tab) {
+                // may be closed already
+                return false;
+            }
+            return true;
         },
         show: function(This, eOpts) {
             // make move show snap shadow
@@ -225,6 +248,7 @@ Ext.define('TP.Panlet', {
                 };
                 This.dd_overriden = true;
             }
+            TP.increaseLoadedPanels();
         },
         render: function(This, eOpts) {
             /* make title editable */
@@ -241,9 +265,11 @@ Ext.define('TP.Panlet', {
             }
             /* make header show on mouseover only */
             var div    = This.getEl();
-            var global = Ext.getCmp(This.panel_id);
-            div.on("mouseout", function()  { This.hideHeader(global); });
-            div.on("mouseover", function() { This.showHeader(global); });
+            var tab = This.tab;
+            div.on("mouseout", function()  { This.hideHeader(tab); });
+            if(tab.xdata.autohideheader === 1 || !this.locked) {
+                div.on("mouseover", function() { This.showHeader(tab); });
+            }
         },
         afterrender: function(This, eOpts) {
             Ext.fly('iconContainer').appendChild(Ext.get(This.id));
@@ -252,6 +278,11 @@ Ext.define('TP.Panlet', {
             this.startTimeouts();
             this.syncShadowTimeout();
             this.applyBorderAndBackground();
+            if(this.xdata.showborder == false) {
+                window.setTimeout(function() {
+                    This.hideHeader();
+                }, 500);
+            }
         },
         beforestatesave: function( This, state, eOpts ) {
             if(This.locked) {
@@ -292,8 +323,8 @@ Ext.define('TP.Panlet', {
         return null;
     },
     showHeader: function(global) {
-        if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if(global.xdata.autohideheader || this.xdata.showborder == false) {
+        if(global == undefined) { global = this.tab; }
+        if(global.xdata.autohideheader === 1 || this.xdata.showborder == false) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
                 // not yet rendered
@@ -321,8 +352,9 @@ Ext.define('TP.Panlet', {
         }
     },
     hideHeader: function(global) {
-        if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if((global.xdata.autohideheader || this.xdata.showborder == false) && this.gearitem == undefined) {
+        if(global == undefined) { global = this.tab; }
+        if(!global) { return; } // maybe closed already
+        if((global.xdata.autohideheader === 1 || this.xdata.showborder == false) && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';
@@ -337,11 +369,24 @@ Ext.define('TP.Panlet', {
             this.adjustBodyStyle();
         }
     },
-    applyBorderAndBackground: function() {
-        this.overCls = 'autohideheaderover';
+    applyBorderAndBackground: function(backgroundColor) {
+        var panel = this;
+        var global = this.tab;
+        var panelCls = "";
+        if(backgroundColor == undefined) {
+            backgroundColor = panel.xdata.background;
+        }
+        if(backgroundColor == undefined || backgroundColor == "") {
+            backgroundColor = 'auto';
+        } else {
+            panelCls = "transparent";
+        }
+        if(global.xdata.autohideheader === 1 || (!global.locked && global.xdata.autohideheader === 2)) {
+            this.overCls = 'autohideheaderover';
+        }
         if(this.xdata.showborder == false && this.gearitem == undefined) {
-            this.cls     = 'autohideheader';
-            this.bodyCls = 'autohideheader';
+            this.cls     = 'autohideheader'+panelCls;
+            this.bodyCls = 'autohideheader ';
             this.shadow  = false;
             if(this.rendered) {
                 this.addCls('autohideheader');
@@ -349,9 +394,9 @@ Ext.define('TP.Panlet', {
                 if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.addCls('hidden');
                 }
-                this.getEl().setStyle('background-color', 'transparent');
+                this.getEl().setStyle('background-color', backgroundColor == "auto" ? 'transparent' : backgroundColor);
                 if(this.chart && this.chart.getEl()) {
-                    this.chart.getEl().setStyle('background-color', 'transparent');
+                    this.chart.getEl().setStyle('background-color', backgroundColor == "auto" ? 'transparent' : backgroundColor);
                 }
                 if(this.autohideHeaderOffset != undefined) {
                     this.getEl().setStyle('overflow', 'visible');
@@ -359,7 +404,7 @@ Ext.define('TP.Panlet', {
                 }
             }
         } else {
-            this.cls     = '';
+            this.cls     = panelCls;
             this.bodyCls = '';
             this.shadow = 'sides';
             if(this.rendered) {
@@ -368,9 +413,9 @@ Ext.define('TP.Panlet', {
                 if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.removeCls('hidden');
                 }
-                this.getEl().setStyle('background-color', '');
+                this.getEl().setStyle('background-color', backgroundColor == "auto" ? '' : backgroundColor);
                 if(this.chart && this.chart.getEl()) {
-                    this.chart.getEl().setStyle('background-color', '#FFFFFF');
+                    this.chart.getEl().setStyle('background-color', backgroundColor == "auto" ? '#FFFFFF' : backgroundColor);
                 }
                 if(this.autohideHeaderOffset != undefined) {
                     this.getEl().setStyle('overflow', '');
@@ -378,14 +423,14 @@ Ext.define('TP.Panlet', {
             }
         }
         if(!this.header) { return; }
-        var global = Ext.getCmp(this.panel_id);
-        if(global.xdata.autohideheader || this.xdata.showborder == false) {
+        var global = this.tab;
+        if(global.xdata.autohideheader === 1 || this.xdata.showborder == false) {
             this.header.hide();
         }
-        if(this.xdata.showborder == true && global.xdata.autohideheader == false) {
+        if(this.xdata.showborder == true && global.xdata.autohideheader === 0) {
             this.header.show();
         }
-        if(this.xdata.showborder == true && global.xdata.autohideheader == true) {
+        if(this.xdata.showborder == true && global.xdata.autohideheader === 1) {
             var panel = this;
             window.setTimeout(Ext.bind(function() {
                 if(panel.header) { panel.header.hide(); }
@@ -415,7 +460,7 @@ Ext.define('TP.Panlet', {
         if(delay == undefined) { delay = 100; }
         if(win.xdata.showborder == false) {
             TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                if(win.getEl().shadow && win.getEl().shadow.el) {
+                if(win && win.getEl() && win.getEl().shadow && win.getEl().shadow.el) {
                     win.getEl().shadow.el.addCls('hidden');
                 }
             }, win, []), delay);
@@ -429,7 +474,7 @@ Ext.define('TP.Panlet', {
     },
     /* destroys and redraws everything */
     redrawPanlet: function() {
-        var tab = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         this.saveState();
         this.redraw = true;
         this.destroy();
@@ -446,9 +491,9 @@ Ext.define('TP.PanletGearItem', {
     listeners: {
         afterrender: function(This, eOpts) {
             var panel = this.up('window');
-            var tab   = Ext.getCmp(panel.panel_id);
+            var tab   = panel.tab;
             // settings panel is somehow hidden below header
-            if(tab.xdata.autohideheader || panel.xdata.showborder == false) {
+            if(tab.xdata.autohideheader === 1 || panel.xdata.showborder == false) {
                 This.body.dom.style.marginTop = '17px';
             } else {
                 This.body.dom.style.marginTop = '';
@@ -471,7 +516,8 @@ Ext.define('TP.PanletGearItem', {
             items: [{
                 fieldLabel: 'Title',
                 xtype:      'textfield',
-                name:       'title'
+                name:       'title',
+                id:         'title_textfield'
             }, {
                 xtype:      'tp_slider',
                 fieldLabel: 'Refresh Rate',
@@ -534,14 +580,12 @@ Ext.define('TP.PanletGearItem', {
 TP.panletGearHandler = function(panel) {
     if(panel == undefined) { panel = this; }
     if(panel.locked) { return; }
-    var tab = Ext.getCmp(panel.panel_id);
+    var tab = panel.tab;
     if(panel.gearitem == undefined) {
         // show settings
         panel.add(Ext.create('TP.PanletGearItem', {}));
         panel.gearitem = panel.items.getAt(panel.items.length-1);
-        if(!panel.gearItemsExtra) {
-            panel.setGearItems();
-        }
+        panel.setGearItems();
         if(panel.gearItemsExtra) {
             panel.gearitem.down('form').add(panel.gearItemsExtra);
         }

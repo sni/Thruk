@@ -3,15 +3,16 @@
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
-use Cpanel::JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
 
 use Thruk::Utils::CLI;
 use Thruk::Controller::rest_v1;
+use Thruk::Utils::IO;
 
 ################################################################################
 my $c = Thruk::Utils::CLI->new()->get_c();
-Thruk::Utils::set_user($c, '(cli)');
+Thruk::Utils::set_user($c, username => '(cli)', auth_src => "scripts", internal => 1, superuser => 1);
 $c->stash->{'is_admin'} = 1;
 $c->config->{'cluster_enabled'} = 1; # fake cluster
 $c->app->cluster->register($c);
@@ -23,9 +24,10 @@ my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' 
 my $host_name = $test_svc->{'host_name'};
 my $service_description = $test_svc->{'description'};
 
-_update_cmds($c);
+my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
 _update_docs($c, "docs/documentation/rest_commands.asciidoc");
+_update_cmds_list($c, "docs/documentation/commands.html", $cmds);
 unlink('var/cluster/nodes');
 $c->sub_request('/r/config/revert', 'POST', {});
 exit 0;
@@ -273,6 +275,8 @@ sub _update_cmds {
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;
     close($fh);
+
+    return($cmds);
 }
 
 ################################################################################
@@ -280,12 +284,19 @@ sub _update_docs {
     my($c, $output_file) = @_;
 
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-    Thruk::Utils::get_fake_session($c, undef, undef, ["authorized_for_read_only"]);
     `mkdir -p bp;            cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
     `mkdir -p panorama;      cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
     `mkdir -p var/broadcast; cp t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
     `mkdir -p var/downtimes; cp t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
     `mkdir -p var/reports;   cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    my $system_api_key = decode_json(`./script/thruk r -d "comment=test" -d "system=1" -d "roles=admin" /thruk/api_keys`);
+    my $api_key = decode_json(`./script/thruk r -d "comment=test" -d "username=restapidocs" /thruk/api_keys`);
+    # fake usage
+    Thruk::Utils::IO::json_lock_patch($api_key->{'file'}, { last_used => time(), last_from => "127.0.0.1" });
+    # fake error message
+    Thruk::Utils::IO::json_lock_patch('var/downtimes/9999.tsk', { error => "test" });
+    # fake panorama maintmode
+    Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
 
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);
@@ -310,8 +321,9 @@ sub _update_docs {
             my $name = $cmd;
             $name =~ s%.*/cmd/%%gmx;
             my $link = $cmd;
+            $link =~ s%[/<>]+%%gmx;
             $link =~ s%[^a-z_]+%-%gmx;
-            push @{$doc}, " - link:rest_commands.html#post".$link."[".$name."]";
+            push @{$doc}, " - link:rest_commands.html#post-".$link."[".$name."]";
         }
         $docs->{$url.'/...'}->{'POST'} = $doc;
         $paths->{$url.'/...'}->{'POST'} = 1;
@@ -346,6 +358,10 @@ sub _update_docs {
                     if(!$desc && $doc->[0] eq 'peer_key') {
                         $desc = "backend id when having multiple sites connected";
                     }
+                    if($url eq '/thruk/stats') {
+                        my $help = Thruk::Utils::IO::json_lock_retrieve($c->{'config'}->{'var_path'}.'/thruk.stats.help');
+                        $desc = $help->{$doc->[0]};
+                    }
                     printf(STDERR "WARNING: no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
                     $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
                 }
@@ -367,7 +383,37 @@ sub _update_docs {
     unlink('var/broadcast/broadcast.json');
     unlink('var/downtimes/9999.tsk');
     unlink('var/reports/9999.rpt');
-    unlink($c->stash->{'fake_session_file'});
+    unlink($api_key->{'file'});
+    unlink($system_api_key->{'file'});
+}
+
+################################################################################
+sub _update_cmds_list {
+    my($c, $file, $cmds) = @_;
+    my $content = read_file($file);
+    $content =~ s/^<\!\-\-DATA\-\->\n.*$/<!--DATA-->\n/gsmx;
+
+    $content .= "<tbody>\n";
+    for my $cat (qw/hosts services hostgroups servicegroups contacts contactgroups system/) {
+        for my $name (sort keys %{$cmds->{$cat}}) {
+            my $cmd = $cmds->{$cat}->{$name};
+            next if !$cmd->{'nr'};
+            next if $cmd->{'nr'} == -1;
+            $content .= "<tr>";
+            $content .= sprintf("<td>%s</td>", $cmd->{'nr'});
+            $content .= sprintf("<td>%s</td>", $cat);
+            $content .= sprintf("<td>%s</td>", $name);
+            $content .= sprintf("<td><a href=\"http://www.naemon.org/documentation/developer/externalcommands/%s.html\" target=\"_blank\">details</a></td>", $name);
+            $content .= "</tr>\n";
+        }
+    }
+    $content .= "</tbody>\n";
+    $content .= "</table>\n";
+
+    $file = $file.'.tst' if $ENV{'TEST_MODE'};
+    open(my $fh, '>', $file) or die("cannot write to ".$file.': '.$@);
+    print $fh $content;
+    close($fh);
 }
 
 ################################################################################
@@ -383,9 +429,8 @@ sub _fetch_keys {
     return if($url eq '/lmd/sites' && !$ENV{'THRUK_USE_LMD'});
     return if $doc =~ m/see\ /mxi;
 
-    my $keys = [];
+    my $keys = {};
     $c->{'rendered'} = 0;
-    $c->req->parameters->{'limit'} = 1;
     delete $c->req->parameters->{'sort'};
     print STDERR "fetching keys for ".$url."\n";
     my $tst_url = $url;
@@ -401,21 +446,28 @@ sub _fetch_keys {
     Thruk::Action::AddDefaults::_set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
-        for my $k (sort keys %{$data->[0]}) {
-            next if $k =~ m/^tabpan/mx;
-            push @{$keys}, [$k, ""];
+        # combine keys from all results
+        for my $d (@{$data}) {
+            for my $k (sort keys %{$d}) {
+                $k =~ s/^panlet_\d+/panlet_<nr>/mx;
+                $keys->{$k} = 1;
+            }
         }
     }
     elsif($data && ref($data) eq 'HASH' && !$data->{'code'}) {
         for my $k (sort keys %{$data}) {
-            push @{$keys}, [$k, ""];
+            $keys->{$k} = 1;
         }
     }
     else {
         print STDERR "ERROR: got no usable data in url ".$tst_url."\n".Dumper($data);
         return;
     }
-    return $keys;
+    my $list = [];
+    for my $k (sort keys %{$keys}) {
+        push @{$list}, [$k, ""];
+    }
+    return $list;
 }
 
 ################################################################################

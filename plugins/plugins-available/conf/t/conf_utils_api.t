@@ -22,23 +22,26 @@ BEGIN {
 }
 
 ###########################################################
-my $testport;
-BEGIN {
-    my $start = 50000;
+my $testport = 50000;
+{
+    my $socket;
     for my $x (0..99) {
-        $testport = $start + $x;
-        my $socket = IO::Socket::INET->new(Listen    => 5,
-                                           LocalAddr => '127.0.0.1',
-                                           LocalPort => $testport,
-                                           Proto     => 'tcp');
+        eval {
+            $socket = IO::Socket::INET->new(Listen    => 5,
+                                            LocalAddr => '127.0.0.1',
+                                            LocalPort => $testport,
+                                            Proto     => 'tcp');
+        };
         last if($socket);
+        diag("port $testport is in use, trying next one");
+        $testport++;
     }
-    BAIL_OUT('got no testport') unless $testport;
+    BAIL_OUT('failed to get free port') unless $socket;
 }
 
 ###########################################################
 my($http_dir, $local_dir, $input_dir,$test_name);
-BEGIN {
+{
     if($ENV{THRUK_LEAK_CHECK}) {
         $input_dir = 'core.d';
         $test_name = 'testname';
@@ -83,29 +86,31 @@ BEGIN {
 
 ###########################################################
 # start test server
-my $cmd     = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
-ok($cmd, $cmd);
-$SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
-my $httppid = fork();
-if(!$httppid) {
-    exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
-    exit 1;
-}
-ok($httppid, "http server started with pid: ".$httppid);
+my $httppid;
 my $now = time();
-my $connected;
-for my $x (1..15) {
-    my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
-    $connected = 1 if($socket and $socket->connected());
-    last if $connected;
-    last unless -d "/proc/$httppid";
-    sleep(1);
-}
-bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
-ok($httppid, 'test server started: '.$httppid);
-$SIG{CHLD} = 'DEFAULT';
-sleep(2);
-alarm(30);
+{
+    my $cmd = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+    ok($cmd, $cmd);
+    local $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
+    $httppid = fork();
+    if(!$httppid) {
+        exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
+        exit 1;
+    }
+    ok($httppid, "http server started with pid: ".$httppid);
+    my $connected;
+    for my $x (1..15) {
+        my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
+        $connected = 1 if($socket and $socket->connected());
+        last if $connected;
+        last unless -d "/proc/$httppid";
+        sleep(1);
+    }
+    bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
+    ok($httppid, 'test server started: '.$httppid);
+    sleep(2);
+    alarm(30);
+};
 
 ###########################################################
 # start fake live socket
@@ -261,4 +266,3 @@ sub bail_out_with_kill {
     stop_clean_all();
     BAIL_OUT($msg.' (in '.$0.')');
 }
-

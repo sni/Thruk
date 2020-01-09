@@ -41,6 +41,8 @@ sub index {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
+    $c->stash->{'inject_stats'} = $c->req->parameters->{'minimal'} ? 0 : 1;
+
     $c->stash->{title}                 = 'Business Process';
     $c->stash->{page}                  = 'status';
     $c->stash->{template}              = 'bp.tt';
@@ -70,6 +72,8 @@ sub index {
 
     $c->stash->{show_top_pane} = 1;
     $c->stash->{hidetop} = 1 if $c->stash->{hidetop} eq '';
+
+    Thruk::Utils::ssi_include($c);
 
     # check roles
     my $allowed_for_edit = 0;
@@ -222,6 +226,25 @@ sub index {
             my $json = { rc => 0, 'message' => 'OK' };
             return $c->render(json => $json);
         }
+        elsif($action eq 'clone_node' and $nodeid) {
+            my $node = $bp->get_node($nodeid); # node from the 'node' parameter
+            if(!$node) {
+                my $json = { rc => 1, 'message' => 'ERROR: no such node' };
+                return $c->render(json => $json);
+            }
+            my $data  = $node->TO_JSON();
+            $data->{'id'} = undef;
+            my $clone = Thruk::BP::Components::Node->new($data);
+            $bp->add_node($clone);
+            for my $id (@{$node->{'parents'}}) {
+                my $parent = $bp->get_node($id);
+                $parent->append_child($clone);
+            }
+            $bp->save($c);
+            $bp->update_status($c, 1);
+            my $json = { rc => 0, 'message' => 'OK' };
+            return $c->render(json => $json);
+        }
         elsif($action eq 'edit_node' and $nodeid) {
             my $type = lc($c->req->parameters->{'bp_function'} || '');
             my $node = $bp->get_node($nodeid); # node from the 'node' parameter
@@ -234,7 +257,11 @@ sub index {
             for my $x (1..10) {
                 $arg[$x-1] = $c->req->parameters->{'bp_arg'.$x.'_'.$type} if defined $c->req->parameters->{'bp_arg'.$x.'_'.$type};
             }
-            my $function = sprintf("%s(%s)", $type, Thruk::BP::Utils::join_args(\@arg));
+            my $function_args = \@arg;
+            if($type eq 'statusfilter') {
+                my $filter          = Thruk::Utils::Status::get_search_from_param($c, 'dfl_s0', 1);
+                $function_args->[2] = [$filter]; # make it a list, maybe we support multiple filter somewhere in the future
+            }
 
             # check create first
             my $new = 0;
@@ -243,7 +270,7 @@ sub index {
                 my $parent = $node;
                 $node = Thruk::BP::Components::Node->new({
                                     'label'    => Thruk::BP::Utils::clean_nasty($c->req->parameters->{'bp_label_'.$type}),
-                                    'function' => $function,
+                                    'function' => $type,
                                     'depends'  => [],
                 });
                 die('could not create node: '.Data::Dumper($c->req->parameters)) unless $node;
@@ -290,7 +317,7 @@ sub index {
             }
             $node->{'label'} = $label;
 
-            $node->_set_function({'function' => $function});
+            $node->_set_function({'function' => $type, 'function_args' => $function_args});
 
             # bp options
             for my $key (qw/rankDir state_type/) {
@@ -371,6 +398,16 @@ sub index {
                 my $json = { $bp->{'id'} => $bp->TO_JSON() };
                 return $c->render(json => $json);
             }
+            $c->stash->{'outgoing_refs'}  = $bp->get_outgoing_refs($c);
+            my $bps = Thruk::BP::Utils::load_bp_data($c);
+            $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c, $bps);
+
+            my($search) = Thruk::Utils::Status::classic_filter($c, { 'host' => 'all' });
+            $c->stash->{'search'}         = $search;
+            $c->stash->{'substyle'}       = 'service';
+            $c->stash->{'paneprefix'}     = 'dfl_';
+            $c->stash->{'prefix'}         = 's0';
+
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
             return 1;
@@ -394,6 +431,11 @@ sub index {
             return 1;
         }
         if($action eq 'list_objects') {
+            # save request parameters
+            my $saved_req_params = {};
+            for my $key (keys %{$c->req->parameters}) {
+                $saved_req_params->{$key} = $c->req->parameters->{$key};
+            }
             my $params = {};
             my $hst = 0;
             my $svc = 0;
@@ -416,15 +458,25 @@ sub index {
             }
 
             for my $key (keys %{$c->req->parameters}) {
-                if($key !~ m/^(hoststatustypes|servicestatustypes)/mx) {
+                if($key !~ m/^(hoststatustypes|servicestatustypes|page|previous|next|entries|first|last|total_pages)/mx) {
                     delete $c->req->parameters->{$key};
                 }
             }
             for my $key (keys %{$params}) {
                 $c->req->parameters->{$key} = $params->{$key};
             }
+            local $c->config->{'maximum_search_boxes'} = 9999;
             require Thruk::Controller::status;
-            return(Thruk::Controller::status::index($c));
+            Thruk::Controller::status::index($c);
+
+            # cleanup request parameters again
+            for my $key (keys %{$c->req->parameters}) {
+                delete $c->req->parameters->{$key};
+            }
+            for my $key (keys %{$saved_req_params}) {
+                $c->req->parameters->{$key} = $saved_req_params->{$key};
+            }
+            return(1);
         }
     }
 
@@ -443,33 +495,19 @@ sub _bp_start_page {
 
     my $type = $c->req->parameters->{'type'} // 'local';
     $c->stash->{'type'} = $type;
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     # load business processes
     my $drafts_too = $c->stash->{allowed_for_edit} ? 1 : 0;
     if($c->req->parameters->{'no_drafts'}) {
         $drafts_too = 0;
     }
+    my $local_bps = [];
+    $local_bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
+
     my $bps = [];
     if($type eq 'local' || $type eq 'all') {
-        $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
-    }
-
-    if($c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'json') {
-        my $json;
-        if($c->req->parameters->{'format'} and $c->req->parameters->{'format'} eq 'search') {
-            my $data = [];
-            for my $bp (@{$bps}) {
-                push @{$data}, $bp->{'name'};
-            }
-            $json = [ { 'name' => "business processs", 'data' => $data } ];
-        } else {
-            my $data = {};
-            for my $bp (@{$bps}) {
-                $data->{$bp->{'id'}} = $bp->TO_JSON();
-            }
-            $json = $data;
-        }
-        return $c->render(json => $json);
+        $bps = $local_bps;
     }
 
     # add remote business processes
@@ -477,11 +515,19 @@ sub _bp_start_page {
     if(scalar @{$c->{'db'}->get_http_peers()} > 0) {
         $c->stash->{'has_remote_bps'} = 1;
         if($type eq 'remote' || $type eq 'all') {
-            $bps = _add_remote_bps($c, $bps);
+            $bps = _add_remote_bps($c, $bps, $local_bps);
         }
     }
 
     if($c->req->parameters->{'format'} && $c->req->parameters->{'format'} eq 'search') {
+        if($view_mode eq 'json') {
+            my $data = [];
+            for my $bp (@{$bps}) {
+                push @{$data}, $bp->{'name'};
+            }
+            my $json = [ { 'name' => "business processs", 'data' => $data } ];
+            return $c->render(json => $json);
+        }
         my $data = [];
         for my $bp (@{$bps}) {
             push @{$data}, $bp->{'name'};
@@ -492,12 +538,31 @@ sub _bp_start_page {
     my $filter = $c->req->parameters->{'filter'} // '';
     if($filter) {
         my $new_bps = [];
+        ## no critic
+        my $regex = qr/$filter/i;
+        ## use critic
         for my $bp (@{$bps}) {
-            push @{$new_bps}, $bp if $bp->{'name'} =~ m/$filter/mxi;
+            push @{$new_bps}, $bp if $bp->{'name'} =~ $regex;
         }
         $bps = $new_bps;
     }
     $c->stash->{'filter'} = $filter;
+
+    $c->stash->{'excel_columns'} = ['Name', 'Status', 'Last Check', 'Duration', 'Status Information'];
+    if($view_mode eq 'json') {
+        my $data = {};
+        for my $bp (@{$bps}) {
+            $data->{$bp->{'id'}} = $bp->TO_JSON();
+        }
+        return $c->render(json => $data);
+    }
+    elsif($view_mode eq 'xls') {
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'bp', $c->stash->{'excel_columns'});
+        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="bp.xls"' );
+        $c->stash->{'data'}     = $bps;
+        $c->stash->{'template'} = 'excel/bp.tt';
+        return $c->render_excel();
+    }
 
     Thruk::Backend::Manager::page_data($c, $bps);
 
@@ -508,7 +573,7 @@ sub _bp_start_page {
 
 ##########################################################
 sub _add_remote_bps {
-    my($c, $bps) = @_;
+    my($c, $bps, $local_bps) = @_;
 
     my $site_names = {};
     for my $p (@{$c->{'db'}->get_peers(1)}) {
@@ -516,11 +581,11 @@ sub _add_remote_bps {
     }
 
     my $uniq = {};
-    for my $bp (@{$bps}) {
+    for my $bp (@{$local_bps}) {
         $uniq->{$bp->{'id'}.':'.$bp->{'name'}} = 1;
         $bp->{'site'} = '';
         next unless $bp->{'bp_backend'};
-        $bp->{'site'} = $site_names->{$bp->{'bp_backend'}};
+        $bp->{'site'} = $site_names->{$bp->{'bp_backend'}} // '';
     }
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ] );
     for my $svc (@{$services}) {
@@ -557,15 +622,8 @@ sub _bp_list_add_objects {
         if(lc $n->{'function'} eq 'status') {
             if($n->{'host'} and $n->{'service'}) {
                 my $service = $n->{'service'};
-                my $svc_op  = '=';
-                if(Thruk::BP::Utils::looks_like_regex($service)) {
-                    $service =~ s/^(b|w)://gmx;
-                    $service = Thruk::Utils::convert_wildcards_to_regex($service);
-                    $svc_op  = '~';
-                }
-                if($n->{'function_args'} && ref $n->{'function_args'} eq 'ARRAY' && $n->{'function_args'}->[2]) {
-                    $svc_op  = $n->{'function_args'}->[2];
-                }
+                $service =~ s/^(b|w)://gmx;
+                my $svc_op  = $n->{'function_args'}->[2];
                 $params->{'svc_s'.$svc.'_type'}   = ['host', 'service'];
                 $params->{'svc_s'.$svc.'_op'}     = ['=', $svc_op];
                 $params->{'svc_s'.$svc.'_value'}  = [$n->{'host'}, $service];
@@ -596,6 +654,22 @@ sub _bp_list_add_objects {
                 $params->{'svc_s'.$svc.'_value'}  = $n->{'servicegroup'};
                 $svc++;
             }
+        }
+        elsif(lc $n->{'function'} eq 'statusfilter') {
+            $c->stash->{'minimal'} = 1; # do not fill totals boxes
+            my $type   = $n->{'function_args'}->[1];
+            my $filter = $n->{'function_args'}->[2];
+            my $p;
+            for my $f (@{$filter}) {
+                if($type eq 'hosts') {
+                    $p = Thruk::Utils::Status::filter_to_param('hst_s'.$hst.'_', $f);
+                    $hst++;
+                } else {
+                    $p = Thruk::Utils::Status::filter_to_param('svc_s'.$svc.'_', $f);
+                    $svc++;
+                }
+            }
+            $params = {%{$params}, %{$p}};
         }
     }
 

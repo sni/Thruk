@@ -12,5 +12,5 @@
 <script type="text/javascript" src="[% url_prefix %][% j %]"></script>
 [% END %]
 [% IF show_sitepanel == 'tree' %]
-<script type="text/javascript" src="[% url_prefix %]vendor/jstree-3.3.7/jstree.min.js"></script>
+<script type="text/javascript" src="[% url_prefix %]vendor/jstree-3.3.8/jstree.min.js"></script>
 [% END %]

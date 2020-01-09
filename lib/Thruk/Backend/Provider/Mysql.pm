@@ -4,7 +4,6 @@ use strict;
 use warnings;
 #use Thruk::Timer qw/timing_breakpoint/;
 use Data::Dumper qw/Dumper/;
-use Digest::MD5 qw/md5_hex/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
 use Thruk::Utils qw//;
@@ -65,17 +64,17 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my($class, $peer_config) = @_;
 
-    die('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    my $options = $peer_config->{'options'};
+    confess('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
-    $peer_config->{'name'} = 'mysql' unless defined $peer_config->{'name'};
-    if(!defined $peer_config->{'peer_key'}) {
-        my $key = md5_hex($peer_config->{'name'}.$peer_config->{'peer'});
-        $peer_config->{'peer_key'} = $key;
+    $options->{'name'} = 'mysql' unless defined $options->{'name'};
+    if(!defined $options->{'peer_key'}) {
+        confess('please provide peer_key');
     }
     my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
-    if($peer_config->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
+    if($options->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
         $dbuser = $1;
         $dbpass = $2;
         $dbhost = $3;
@@ -98,8 +97,7 @@ sub new {
         'dbuser'      => $dbuser,
         'dbpass'      => $dbpass,
         'dbsock'      => $dbsock,
-        'config'      => $config,
-        'peer_config' => $peer_config,
+        'peer_config' => $options,
         'verbose'     => 0,
     };
     bless $self, $class;
@@ -380,8 +378,12 @@ sub get_logs {
         $orderby = ' ORDER BY l.time ASC';
         $sorted  = 1;
     }
+    my $limit = '';
+    if(defined $options{'options'} && $options{'options'}->{'limit'}) {
+        $limit = ' LIMIT '.$options{'options'}->{'limit'};
+    }
 
-    my($where,$contact,$system,$strict) = $self->_get_filter($options{'filter'});
+    my($where,$auth_data) = $self->_get_filter($options{'filter'});
 
     my $prefix = $options{'collection'};
     $prefix    =~ s/^logs_//gmx;
@@ -416,6 +418,7 @@ sub get_logs {
             LEFT JOIN `'.$prefix.'_contact` c ON l.contact_id = c.contact_id
         '.$where.'
         '.$orderby.'
+        '.$limit.'
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
 
@@ -428,7 +431,8 @@ sub get_logs {
 
     # querys with authorization
     my $data;
-    if($contact) {
+    if($auth_data->{'username'}) {
+        my($contact,$strict,$authorized_for_all_services,$authorized_for_all_hosts,$authorized_for_system_information) = ($auth_data->{'username'},$auth_data->{'strict'},$auth_data->{'authorized_for_all_services'},$auth_data->{'authorized_for_all_hosts'},$auth_data->{'authorized_for_system_information'});
         my $sth = $dbh->prepare($sql);
         $sth->execute;
 
@@ -437,17 +441,22 @@ sub get_logs {
 
         while(my $r = $sth->fetchrow_hashref()) {
             if($r->{'service_description'}) {
-                if($strict) {
+                if($authorized_for_all_services) {
+                }
+                elsif($strict) {
                     next if(!defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 } else {
                     next if(!defined $hosts_lookup->{$r->{'host_name'}} && !defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 }
             }
             elsif($r->{'host_name'}) {
-                next if !defined $hosts_lookup->{$r->{'host_name'}};
+                if($authorized_for_all_hosts) {
+                } else {
+                    next if !defined $hosts_lookup->{$r->{'host_name'}};
+                }
             }
             else {
-                next if !$system;
+                next if !$authorized_for_system_information;
             }
             if($fh) {
                 print $fh encode_utf8($r->{'message'}),"\n";
@@ -647,36 +656,20 @@ return Mysql filter
 =cut
 sub _get_filter {
     my($self, $inp) = @_;
+    my $auth_data = {};
+    if($inp && ref $inp eq 'ARRAY') {
+        for my $f (@{$inp}) {
+            if(ref $f eq 'HASH' && $f->{'auth_filter'}) {
+                $auth_data = $f->{'auth_filter'};
+                $f = undef;
+            }
+        }
+    }
     my $filter = $self->_get_subfilter($inp);
     if($filter and ref $filter) {
         $filter = '('.join(' AND ', @{$filter}).')';
     }
     $filter = " WHERE ".$filter if $filter;
-
-    # authentication filter hack
-    # hosts, services and system_information
-    # ((current_service_contacts IN ('test_contact') AND service_description != '') OR current_host_contacts IN ('test_contact') OR (service_description = '' AND host_name = ''))
-    my($contact,$system,$strict);
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ current_host_contacts\ IN\ \('(.*?)'\)\ OR\ \(service_description\ =\ ''\ AND\ host_name\ =\ ''\)\)//mx) {
-        $contact = $1;
-        $system  = 1;
-    }
-    # hosts, services and system_information and strict host auth on
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ \(current_host_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ =\ ''\)\ OR\ \(service_description\ =\ ''\ AND\ host_name\ =\ ''\)\)//mx) {
-        $contact = $1;
-        $system  = 1;
-        $strict  = 1;
-    }
-    # hosts and services and strict host auth on
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ \(current_host_contacts\ IN\ \('.*?'\)\ AND\ service_description\ =\ ''\)\)//mx) {
-        $contact = $1;
-        $strict  = 1;
-    }
-    # hosts and services
-    # ((current_service_contacts IN ('test_contact') AND service_description != '') OR current_host_contacts IN ('test_contact'))
-    if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ current_host_contacts\ IN\ \('.*?'\)\)//mx) {
-        $contact = $1;
-    }
 
     # message filter have to go into a having clause
     $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
@@ -702,7 +695,7 @@ sub _get_filter {
     $filter =~ s/AND\s+AND/AND/gmx;
     $filter = '' if $filter eq ' WHERE ';
 
-    return($filter, $contact, $system, $strict);
+    return($filter, $auth_data);
 }
 
 ##########################################################
@@ -734,6 +727,10 @@ sub _get_subfilter {
             if(exists $inp->[$x+1] and ref $inp->[$x] eq '' and ref $inp->[$x+1] eq 'HASH') {
                 my $key = $inp->[$x];
                 my $val = $inp->[$x+1];
+                if(!defined $key) {
+                    $x=$x+1;
+                    next;
+                }
                 push @{$filter}, $self->_get_subfilter({$key => $val});
                 $x=$x+2;
                 next;
@@ -742,6 +739,10 @@ sub _get_subfilter {
             if(exists $inp->[$x+1] and ref $inp->[$x] eq '' and ref $inp->[$x+1] eq 'ARRAY') {
                 my $key = $inp->[$x];
                 my $val = $inp->[$x+1];
+                if(!defined $key) {
+                    $x=$x+1;
+                    next;
+                }
                 push @{$filter}, $self->_get_subfilter({$key => $val});
                 $x=$x+2;
                 next;
@@ -891,8 +892,9 @@ sub _get_logs_start_end {
     my($start, $end);
     my $prefix = $options{'collection'} || $self->{'peer_config'}->{'peer_key'};
     $prefix    =~ s/^logs_//gmx;
-    my($where) = $self->_get_filter($options{'filter'});
     my $dbh  = $self->_dbh();
+    return([$start, $end]) unless _tables_exist($dbh, $prefix);
+    my($where) = $self->_get_filter($options{'filter'});
     my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM `'.$prefix.'_log` '.$where.' LIMIT 1', { Slice => {} })};
     $start   = $data[0]->{'mi'} if defined $data[0];
     $end     = $data[0]->{'ma'} if defined $data[0];
@@ -910,15 +912,18 @@ gather log statistics
 =cut
 
 sub _log_stats {
-    my($self, $c) = @_;
+    my($self, $c, $backends) = @_;
 
     $c->stats->profile(begin => "Mysql::_log_stats");
 
-    Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
+    $backends  = Thruk::Utils::list($backends);
+
     my $output = sprintf("%-20s %-15s %-13s %7s\n", 'Backend', 'Index Size', 'Data Size', 'Items');
     my @result;
-    for my $key (@{$c->stash->{'backends'}}) {
+    for my $key (@{$backends}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
+        next unless $peer->{'logcache'};
         $peer->logcache->reconnect();
         my $dbh  = $peer->logcache->_dbh();
         my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
@@ -1045,6 +1050,7 @@ sub _import_logs {
         my $prefix = $key;
         my $peer   = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'enabled'};
+        next unless $peer->{'logcache'};
         $c->stats->profile(begin => "$key");
         $backend_count++;
         $peer->logcache->reconnect();
@@ -1081,6 +1087,11 @@ sub _import_logs {
             print "ERROR: ", $@,"\n" if $verbose;
             push @{$errors}, $@;
         }
+
+        # cleanup connection
+        eval {
+            $peer->logcache->_disconnect();
+        };
 
         $c->stats->profile(end => "$key");
     }
@@ -1166,15 +1177,25 @@ sub _finish_update {
 }
 
 ##########################################################
-# returns 1 if tables have been newly created or 0 if already exists
+# returns 1 if tables have been newly created or undef if already exist
 sub _create_tables_if_not_exist {
     my($dbh, $prefix, $verbose) = @_;
 
+    return if _tables_exist($dbh, $prefix);
+
+    print "creating logcache tables\n" if $verbose > 1;
+    _create_tables($dbh, $prefix);
+    return 1;
+}
+
+##########################################################
+# returns 1 if logcache tables exist, undef if not
+sub _tables_exist {
+    my($dbh, $prefix) = @_;
+
     # check if our tables exist
-    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'%"')};
-    if(scalar @tables == 0) {
-        print "creating logcache tables\n" if $verbose > 1;
-        _create_tables($dbh, $prefix);
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'\_%"')};
+    if(scalar @tables >= 1) {
         return 1;
     }
 
@@ -1288,7 +1309,7 @@ sub _update_logcache_clean {
 
         # sort all used ids
         my $sortcmd = 'sort -nu -o '.$tempfile.'2 '.$tempfile.' && mv '.$tempfile.'2 '.$tempfile;
-        `$sortcmd`;
+        Thruk::Utils::IO::cmd($sortcmd);
         confess("sorting ids failed") if $? != 0;
         print "sorted used ids\n" if $verbose > 1;
 
@@ -1407,6 +1428,11 @@ sub _update_logcache_optimize {
     print "$@\n" if($@ && $verbose);
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
+        # remove temp files from previously repair attempt if filesystem was full
+        if($ENV{'OMD_ROOT'}) {
+            my $root = $ENV{'OMD_ROOT'};
+            Thruk::Utils::IO::cmd("rm -f $root/var/mysql/thruk_log_cache/*.TMD");
+        }
         # repair / optimize tables
         print "optimizing / repairing tables\n" if $verbose > 1;
         for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
@@ -1439,8 +1465,10 @@ sub _get_host_lookup {
         push @values, '('.$dbh->quote($h->{'name'}).')';
     }
     if(scalar @values > 0) {
-        $dbh->do($stm.join(',', @values));
-        $sth->execute;
+        for my $chunk (@{Thruk::Utils::array_chunk_fixed_size(\@values, 50)}) {
+            $dbh->do($stm.join(',', @{$chunk}));
+            $sth->execute;
+        }
         for my $r (@{$sth->fetchall_arrayref()}) { $hosts_lookup->{$r->[1]} = $r->[0]; }
     }
     return $hosts_lookup;
@@ -1466,8 +1494,10 @@ sub _get_service_lookup {
         push @values, '('.$host_id.','.$dbh->quote($s->{'description'}).')';
     }
     if(scalar @values > 0) {
-        $dbh->do($stm.join(',', @values));
-        $sth->execute;
+        for my $chunk (@{Thruk::Utils::array_chunk_fixed_size(\@values, 50)}) {
+            $dbh->do($stm.join(',', @{$chunk}));
+            $sth->execute;
+        }
         for my $r (@{$sth->fetchall_arrayref()}) { $services_lookup->{$r->[1]}->{$r->[2]} = $r->[0]; }
     }
     return $services_lookup;
@@ -1491,8 +1521,10 @@ sub _get_contact_lookup {
         push @values, '('.$dbh->quote($c->{'name'}).')';
     }
     if(scalar @values > 0) {
-        $dbh->do($stm.join(',', @values));
-        $sth->execute;
+        for my $chunk (@{Thruk::Utils::array_chunk_fixed_size(\@values, 50)}) {
+            $dbh->do($stm.join(',', @{$chunk}));
+            $sth->execute;
+        }
         for my $r (@{$sth->fetchall_arrayref()}) { $contact_lookup->{$r->[1]} = $r->[0]; }
     }
     return $contact_lookup;

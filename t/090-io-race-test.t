@@ -10,6 +10,7 @@ plan skip_all => 'Race condition test. Set $ENV{TEST_RACE} to a true value to ru
 BEGIN {
     use lib('t');
     $ENV{'THRUK_NO_TOUCH_PERM'} = 1;
+    $ENV{'TEST_IO_NOWARNINGS'}  = 1;
     require TestUtils;
     import TestUtils;
 }
@@ -50,7 +51,7 @@ for my $x (1..$max_proc) {
     }
     exit;
 }
-for(1..$max_proc) { wait; }
+for(1..$max_proc) { wait(); }
 
 my $data = Thruk::Utils::IO::json_lock_retrieve($filename);
 is($data->{'test'}, $max_proc * $test_runs * 0.5, 'file containts correct number');

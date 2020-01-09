@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan tests => 105;
+    plan tests => 137;
 
     use lib('t');
     require TestUtils;
@@ -22,7 +22,16 @@ BEGIN {
         'url'    => '/thruk/cgi-bin/user.cgi',
         'like'   => ['Logged in as.*omdadmin', 'authorized_for_admin', 'from cgi.cfg'],
     );
-
+    TestUtils::test_page(
+        'url'    => '/thruk/r/thruk/whoami',
+        'like'   => ['omdadmin', 'authorized_for_admin'],
+    );
+    TestUtils::set_test_user_token();
+    TestUtils::test_page(
+        'url'    => '/thruk/r/services/test/Ping/cmd/schedule_forced_svc_check',
+        'post'   => {},
+        'like'   => ['Command successfully submitted'],
+    );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
         'like'   => ['logout successful'],
@@ -42,7 +51,10 @@ BEGIN {
         'url'    => '/thruk/cgi-bin/user.cgi',
         'like'   => ['Logged in as.*admin', 'authorized_for_admin', 'from group: admins'],
     );
-
+    TestUtils::test_page(
+        'url'    => '/thruk/r/thruk/whoami',
+        'like'   => ['admin', 'authorized_for_admin'],
+    );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
         'like'   => ['logout successful'],
@@ -62,9 +74,12 @@ BEGIN {
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
         'like'   => ['Logged in as.*test', 'none'],
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/r/thruk/whoami',
+        'like'   => ['test'],
         'unlike' => ['authorized_for_admin'],
     );
-
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
         'like'   => ['logout successful'],

@@ -1,6 +1,6 @@
 ﻿[% PROCESS _header.tt overlib=1
-                      css=["plugins/conf/conf.css","vendor/linedtextarea-e619e09/jquery-linedtextarea.css", "vendor/jstree-3.3.7/themes/default/style.min.css"]
-                      js=["plugins/conf/conf.js", "vendor/jstree-3.3.7/jstree.min.js"]
+                      css=["plugins/conf/conf.css","vendor/linedtextarea-e619e09/jquery-linedtextarea.css", "vendor/jstree-3.3.8/themes/default/style.min.css"]
+                      js=["plugins/conf/conf.js", "vendor/jstree-3.3.8/jstree.min.js"]
 %]
 [% PROCESS _message.tt %]
 [% PROCESS _overdiv.tt %]
@@ -50,7 +50,7 @@
                   </form>
                   <div style="position: relative; top: 5px; height: 10px;">
                   [% IF last_changed || needs_commit || show_save_reload %]
-                    [% link = 'conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes&amp;token=' _ get_user_token(c); button(link, 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(this, \'' _ show_save_reload _ '\')') %]
+                    [% link = 'conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes&amp;CSRFtoken=' _ get_user_token(c); button(link, 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(this, \'' _ show_save_reload _ '\')') %]
                   [% END %]
                   </div>
                 </td>

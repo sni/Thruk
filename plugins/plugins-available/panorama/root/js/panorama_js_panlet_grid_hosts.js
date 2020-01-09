@@ -18,13 +18,9 @@ Ext.define('TP.PanletGridHosts', {
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        TP.addFormFilter(this, this.has_search_button);
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
-        });
+        panel.callParent();
+        TP.addFormFilter(panel, panel.has_search_button);
+        TP.addGearBackgroundOptions(panel);
     }
 });
 

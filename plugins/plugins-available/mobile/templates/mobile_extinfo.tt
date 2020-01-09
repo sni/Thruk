@@ -11,6 +11,7 @@
       <input type="hidden" name="quick_command" value="1">
       <input type="hidden" name="selected_[% type | html %]s" class="selected_[% type | html %]s" value="">
       <input type="hidden" name="force_check" value="1">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <button type="submit" data-icon="refresh">Reschedule Now</button>
     </form>
     <a href="#" class="[% type | html %]_ack_form"><button>Acknowledge</button></a>

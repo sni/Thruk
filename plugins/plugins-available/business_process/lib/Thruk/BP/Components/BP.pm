@@ -43,6 +43,7 @@ sub new {
         'id'                => undef,
         'editmode'          => $editmode,
         'name'              => undef,
+        'site'              => '',
         'template'          => $bpdata->{'template'} || '',
         'filter'            => [],
         'nodes'             => [],
@@ -470,7 +471,7 @@ sub commit {
         local $ENV{'THRUK_BP_STAGE'} = 'pre';
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'});
         if($rc != 0) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$rc.': '.$out );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'pre save hook failed: '.$rc.': '.$out, escape => 0 });
             return;
         }
     }
@@ -487,7 +488,7 @@ sub commit {
         local $ENV{'THRUK_BP_STAGE'} = 'post';
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'});
         if($rc != 0) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$rc.': '.$out );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'post save hook failed: '.$rc.': '.$out, escape => 0 });
             return;
         }
     }
@@ -519,7 +520,7 @@ sub save {
         push @{$obj->{'nodes'}}, $n->get_save_obj();
     }
 
-    Thruk::Utils::IO::json_lock_store($self->{'editfile'}, $obj, 1);
+    Thruk::Utils::IO::json_lock_store($self->{'editfile'}, $obj, { pretty => 1 });
     $self->{'need_save'} = 0;
 
     return 1;
@@ -672,12 +673,8 @@ sub bulk_fetch_live_data {
         for my $hostname (keys %{$servicefilter}) {
             for my $description (keys %{$servicefilter->{$hostname}}) {
                 my $op = $servicefilter->{$hostname}->{$description} || '=';
-                if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
-                    $op = '~';
-                }
                 if($op ne '=') {
                     $description =~ s/^(b|w)://gmx;
-                    $description = Thruk::Utils::convert_wildcards_to_regex($description);
                     my $full_op = {
                             '=' =>  '=',
                            '!=' => '!=',
@@ -955,6 +952,57 @@ sub FROM_JSON {
     }
 
     return $self;
+}
+
+##########################################################
+
+=head2 get_outgoing_refs
+
+    get_outgoing_refs()
+
+return list of outgoing bp references
+
+=cut
+sub get_outgoing_refs {
+    my($self, $c) = @_;
+    $c->stats->profile(begin => "get_outgoing_refs");
+
+    my $refs = [];
+    for my $n (@{$self->{'nodes'}}) {
+        if($n->{'bp_ref'}) {
+            my $bps = Thruk::BP::Utils::load_bp_data($c, $n->{'bp_ref'}, undef, undef, $n->{'bp_ref_peer'});
+            push @{$refs}, $bps->[0] if $bps->[0];
+        }
+    }
+
+    $c->stats->profile(end => "get_outgoing_refs");
+    return $refs;
+}
+
+##########################################################
+
+=head2 get_incoming_refs
+
+    get_incoming_refs()
+
+return list of incoming bp references
+
+=cut
+sub get_incoming_refs {
+    my($self, $c, $bps) = @_;
+    $c->stats->profile(begin => "get_incoming_refs");
+
+    my $refs = [];
+    for my $bp (@{$bps}) {
+        for my $n (@{$bp->{'nodes'}}) {
+            if($n->{'bp_ref'} && $n->{'bp_ref'} == $self->{'id'}) {
+                push @{$refs}, $bp;
+            }
+        }
+    }
+
+    $c->stats->profile(end => "get_incoming_refs");
+    return $refs;
 }
 
 ##########################################################

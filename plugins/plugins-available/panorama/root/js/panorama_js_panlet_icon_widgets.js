@@ -29,7 +29,7 @@ Ext.define('TP.SmallWidget', {
         } else {
             this.xdata = TP.clone(this.xdata);
         }
-        var tab     = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         if(!tab) { return(false); } /* tab may be closed already */
         this.locked = tab.xdata.locked;
         if(readonly) {
@@ -41,7 +41,7 @@ Ext.define('TP.SmallWidget', {
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
         this.xdata.general    = {};
-        this.xdata.layout     = { rotation: 0 };
+        this.xdata.layout     = { rotation: 0, center: 'centered' };
         if(this.xdata.appearance == undefined) {
             this.xdata.appearance = { type: 'icon' };
         }
@@ -74,7 +74,7 @@ Ext.define('TP.SmallWidget', {
             var state      = {
                 xdata: TP.clone(this.xdata)
             };
-            var tab = Ext.getCmp(this.panel_id);
+            var tab = this.tab;
             if(state.xdata.map || tab.map) {
                 delete state.xdata.layout.x;
                 delete state.xdata.layout.y;
@@ -185,6 +185,7 @@ Ext.define('TP.SmallWidget', {
             /* update label */
             This.setIconLabel();
             if(This.labelEl) { This.labelEl.show(); }
+            TP.increaseLoadedPanels();
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
@@ -245,7 +246,7 @@ Ext.define('TP.SmallWidget', {
             }
 
             // save coordinates when created first time
-            var tab = Ext.getCmp(This.panel_id);
+            var tab = This.tab;
             if(tab.map && (This.xdata.layout.lon == undefined || This.xdata.layout.lon == "")) {
                 This.updateMapLonLat();
             }
@@ -284,7 +285,8 @@ Ext.define('TP.SmallWidget', {
 
         /* restore position */
         if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
-            panel.moveToMapLonLat(undefined, false, xdata);
+            if(!panel.xdata.layout.center) { panel.xdata.layout.center = "centered"; }
+            panel.moveToMapLonLat(false, xdata);
         } else {
             xdata.layout.x = Number(xdata.layout.x);
             xdata.layout.y = Number(xdata.layout.y);
@@ -302,7 +304,7 @@ Ext.define('TP.SmallWidget', {
             this.applyRotation(0, xdata);
         }
         if(xdata.layout.zindex) {
-            this.applyZindex(Number(xdata.layout.zindex));
+            this.applyZindex(xdata.layout.zindex);
         } else {
             this.applyZindex(0);
         }
@@ -338,7 +340,7 @@ Ext.define('TP.SmallWidget', {
         layout.x = x;
         layout.y = y;
         if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
-            panel.moveToMapLonLat(undefined, false);
+            panel.moveToMapLonLat(false);
             return;
         }
         if(panel.shrinked) {
@@ -352,9 +354,16 @@ Ext.define('TP.SmallWidget', {
     },
     /* apply z-index */
     applyZindex: function(value) {
-        value = Number(value);
         var This = this;
-        This.style['z-index'] = 30+(value+10)*2;
+        if(!This.el || !This.el.dom) { return; }
+        if(!Ext.isNumeric(String(value))) { return; }
+        value  = Number(value);
+        value = 30+(value+10)*2;
+        // adjust zindex by current state and raise issues a bit
+        if(This.xdata && Ext.isNumeric(This.xdata.state) && This.xdata.state > 0) {
+            value += TP.get_state_position(default_state_order, This.xdata.state, This.hostProblem, This.acknowledged, This.downtime);
+        }
+        This.style['z-index'] = value;
         if(This.el && This.el.dom) {
             This.el.dom.style.zIndex = This.style['z-index'];
         }
@@ -384,7 +393,7 @@ Ext.define('TP.SmallWidget', {
     /* enable / disable editing of this panlet */
     setLock: function(val) {
         var panel = this;
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(panel.locked != val) {
             panel.saveState();
             TP.redraw_panlet(panel, tab);
@@ -393,12 +402,12 @@ Ext.define('TP.SmallWidget', {
 
     addClickEventhandler: function(el) {
         var This = this;
-        var tab  = Ext.getCmp(This.panel_id);
+        var tab  = This.tab;
 
         el.on("click", function(evt) {
             if(!readonly) {
                 if(evt.ctrlKey || is_shift_pressed(evt)) {
-                    var tab = Ext.getCmp(This.panel_id);
+                    var tab = This.tab;
                     if(This.locked) { return; }
                     if(TP.moveIcons == undefined) {
                         TP.moveIcons = [];
@@ -459,7 +468,7 @@ Ext.define('TP.SmallWidget', {
                     text:   'Refresh',
                     icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                     handler: function() {
-                        TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id, undefined, el)
+                        TP.updateAllIcons(This.tab, This.id, undefined, el)
                         el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
                     },
                     hidden:  This.xdata.state == undefined ? true : false
@@ -540,7 +549,7 @@ Ext.define('TP.SmallWidget', {
                     }, {
                         text:   'Unlock Dashboard',
                         icon:   url_prefix+'plugins/panorama/images/lock_open.png',
-                        handler: function() { var tab = Ext.getCmp(This.panel_id); TP.createRestorePoint(tab, "a"); tab.setLock(false); },
+                        handler: function() { var tab = This.tab; TP.createRestorePoint(tab, "a"); tab.setLock(false); },
                         hidden: !This.locked      // only show when locked
                     }
                 ]);
@@ -569,7 +578,7 @@ Ext.define('TP.SmallWidget', {
     },
     addDDListener: function(el) {
         var panel = this;
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(el.dd && !el.dd_listener_added) {
             el.dd.addListener('dragstart', function(This, evt) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
@@ -637,7 +646,7 @@ Ext.define('TP.SmallWidget', {
     updateMapLonLat: function(xdata, key) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(tab == undefined || tab.map == undefined || tab.map.map == undefined) { return; }
         var s;
         if(xdata.size || !panel.el) {
@@ -645,8 +654,9 @@ Ext.define('TP.SmallWidget', {
         } else {
             s     = panel.getSize();
         }
-        var p = panel.getPosition();
-        var lonLat = tab.map.map.getLonLatFromPixel({x: (p[0]+s.width/2), y: (p[1]+s.height/2)-TP.offset_y});
+        var p   = panel.getPosition();
+        var ref = TP.getRefPixel({x: p[0], y: p[1], size: s, center: xdata.layout.center, nsize: xdata.nsize});
+        var lonLat = tab.map.map.getLonLatFromPixel({x: ref.x, y: ref.y});
         if(key == undefined || key == "center") {
             xdata.layout.lon  = lonLat.lon;
             xdata.layout.lat  = lonLat.lat;
@@ -687,9 +697,9 @@ Ext.define('TP.SmallWidget', {
         panel.saveState();
     },
     // moves panel to position accoring to lat/lon
-    moveToMapLonLat: function(maxSize, movedOnly, xdata) {
+    moveToMapLonLat: function(movedOnly, xdata) {
         var panel = this;
-        var tab   = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
         if(xdata.layout == undefined) { xdata.layout = {}; }
@@ -707,7 +717,6 @@ Ext.define('TP.SmallWidget', {
                 panel.updateRender(xdata);
             }
         } else {
-            var pixel = tab.map.map.getPixelFromLonLat({lon: Number(xdata.layout.lon), lat: Number(xdata.layout.lat)});
             var s;
             if(xdata.size || !panel.el) {
                 s     = {width: xdata.size, height: xdata.size};
@@ -717,16 +726,23 @@ Ext.define('TP.SmallWidget', {
             if(s.width == undefined) {
                 s     = {width: 16, height: 16};
             }
-            var x     = (pixel.x-s.width/2);
-            var y     = (pixel.y-s.height/2)+TP.offset_y;
-            xdata.layout.x = Math.floor(x);
-            xdata.layout.y = Math.floor(y);
+            var pos = TP.getPosFromLonLat({
+                        map:    tab.map.map,
+                        lon:    Number(xdata.layout.lon),
+                        lat:    Number(xdata.layout.lat),
+                        size:   s,
+                        nsize:  xdata.nsize,
+                        center: xdata.layout.center
+            });
+            xdata.layout.x = pos.x;
+            xdata.layout.y = pos.y;
             panel.setRawPosition(xdata.layout.x, xdata.layout.y);
-            if(panel.el && TP.isThisTheActiveTab(panel)) {
+            if(panel.el && panel.tab.isActiveTab()) {
                 if(xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
                 } else {
-                    if(maxSize != undefined && (x < 0 || y < 0 || x > maxSize.width || y > maxSize.height)) {
+                    var maxSize = panel.tab.size;
+                    if(pos.x < 0 || pos.y < 0 || pos.x > maxSize.width || pos.y > maxSize.height) {
                         if(!panel.isHidden()) { panel.hide(); }
                     } else {
                         if(panel.isHidden()) { panel.show(); }
@@ -739,6 +755,24 @@ Ext.define('TP.SmallWidget', {
         if(!panel.isHidden() && panel.el) {
             panel.setIconLabel();
         }
+    },
+    // return Openlayer.Bounds for this icon
+    getMapBounds: function() {
+        var panel = this;
+        var bounds = new OpenLayers.Bounds();
+        if(panel.xdata.layout.lon) {
+            var b = new OpenLayers.LonLat(Number(panel.xdata.layout.lon),Number(panel.xdata.layout.lat));
+            bounds.extend(b);
+        }
+        if(panel.xdata.layout.lon1) {
+            var b = new OpenLayers.LonLat(Number(panel.xdata.layout.lon1),Number(panel.xdata.layout.lat1));
+            bounds.extend(b);
+        }
+        if(panel.xdata.layout.lon2) {
+            var b = new OpenLayers.LonLat(Number(panel.xdata.layout.lon2),Number(panel.xdata.layout.lat2));
+            bounds.extend(b);
+        }
+        return(bounds);
     },
     setRawPosition: function(x, y) {
         var panel = this;
@@ -823,9 +857,9 @@ Ext.define('TP.IconWidget', {
         this.applyZindex(this.xdata.layout.zindex);
     },
     refreshHandler: function(newStatus) {
-        var tab   = Ext.getCmp(this.panel_id);
-        if(!tab) { return; } // maybe just closed
         var panel = this;
+        var tab   = panel.tab;
+        if(!tab) { return; } // maybe just closed
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
         var oldState = {
             state        : panel.xdata.state,
@@ -843,7 +877,7 @@ Ext.define('TP.IconWidget', {
             }
         }
         if(tab.map) {
-            panel.moveToMapLonLat(undefined, false);
+            panel.moveToMapLonLat(false);
         }
         panel.setIconLabel();
 
@@ -855,7 +889,7 @@ Ext.define('TP.IconWidget', {
 
     /* save state of icons back to servers runtime file */
     saveIconsStates: function() {
-        var tab = Ext.getCmp(this.panel_id);
+        var tab = this.tab;
         if(tab) { /* may be closed already*/
             tab.saveIconsStates();
         }
@@ -927,7 +961,7 @@ Ext.define('TP.IconWidget', {
         /* static icons must be refreshed, even when inactive, because they won't be updated later on */
         if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata); }
         /* no need for changes if we are not the active tab */
-        if(!TP.isThisTheActiveTab(panel)) { return; }
+        if(!panel.tab.isActiveTab()) { return; }
         if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
         if(panel.el) { panel.size = panel.getSize(); }
     },
@@ -935,7 +969,7 @@ Ext.define('TP.IconWidget', {
     redraw: function() {
         var panel = this;
         var key = panel.id;
-        var tab = Ext.getCmp(panel.panel_id);
+        var tab = panel.tab;
         panel.redrawOnly = true;
         panel.destroy();
         TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
@@ -950,7 +984,7 @@ Ext.define('TP.IconWidget', {
     /* set main render item*/
     setRenderItem: function(xdata, forceRecreate, forceColor) {
         var panel = this;
-        var tab = Ext.getCmp(panel.panel_id);
+        var tab   = panel.tab;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(panel.itemRendering && !forceRecreate) { return; }
 
@@ -1212,7 +1246,7 @@ Ext.define('TP.IconWidget', {
         var src = panel.src || xdata.general.src;
         if(!panel.el) { return; }
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(TP.isThisTheActiveTab(panel) && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
+        if(panel.tab.isActiveTab() && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
             panel.el.dom.style.minHeight = 20;

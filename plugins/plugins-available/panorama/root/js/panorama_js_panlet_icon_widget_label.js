@@ -89,7 +89,7 @@ Ext.define('TP.IconLabel', {
 
     setIconLabelDynamicText: function(txt) {
         var panel = this;
-        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
+        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability', 'nl2br'];
         if(TP.availabilities == undefined) { TP.availabilities = {}; }
         if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
         var matches = txt.match(/(\{\{.*?\}\})/g);
@@ -246,7 +246,7 @@ Ext.define('TP.IconLabel', {
     /* creates the label element */
     createLabelEl: function() {
         var panel = this;
-        if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
+        if(!panel.tab.isActiveTab()) { return; } /* no need for a label on inactive tab */
         this.labelEl = Ext.create("Ext.Component", {
             'html':     ' ',
             panel:       panel,
@@ -342,3 +342,9 @@ Ext.define('TP.IconLabel', {
         panel.applyRotation(panel.xdata.layout.rotation);    /* add dbl click and context menu events */
     }
 });
+
+function nl2br(text) {
+    text = text.replace(/\n/g, "<br>");
+    text = text.replace(/\\n/g, "<br>");
+    return(text);
+}

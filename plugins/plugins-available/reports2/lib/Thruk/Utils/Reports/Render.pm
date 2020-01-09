@@ -21,7 +21,6 @@ use File::Slurp;
 use File::Copy qw/move/;
 use MIME::Base64;
 use Encode qw/encode_utf8/;
-use Digest::MD5 qw(md5_hex);
 use Thruk::Utils;
 use Thruk::Utils::Avail;
 
@@ -112,7 +111,15 @@ sub outages {
     my $service            = $c->req->parameters->{'service'};
     my $only_host_services = $c->req->parameters->{'only_host_services'};
 
-    return(Thruk::Utils::Avail::outages($logs, $u, $start, $end, $host, $service, $only_host_services));
+    my $outages = Thruk::Utils::Avail::outages($logs, $u, $start, $end, $host, $service, $only_host_services);
+    if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
+        if($service eq '') {
+            $c->stash->{'last_outages'}->{'hosts'}->{$host} = $outages;
+        } else {
+            $c->stash->{'last_outages'}->{'services'}->{$host}->{$service} = $outages;
+        }
+    }
+    return($outages);
 }
 
 ##########################################################
@@ -292,7 +299,7 @@ sub get_url {
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
         local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid;
-        `$cmd`;
+        Thruk::Utils::IO::cmd($cmd);
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';
@@ -418,7 +425,16 @@ sub get_availability_percents {
     my $avail_data         = $c->stash->{'avail_data'};
     my $unavailable_states = $c->stash->{'unavailable_states'};
     confess("No host in parameters:\n".    Dumper($c->req->parameters)) unless defined $host;
-    return(Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service));
+
+    my $availability = Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service);
+    if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
+        if($service eq '') {
+            $c->stash->{'last_availability'}->{'hosts'}->{$host} = $availability;
+        } else {
+            $c->stash->{'last_availability'}->{'services'}->{$host}->{$service} = $availability;
+        }
+    }
+    return($availability);
 }
 
 

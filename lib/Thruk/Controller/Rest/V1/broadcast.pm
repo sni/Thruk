@@ -27,7 +27,7 @@ sub _rest_get_thruk_broadcast {
     my @files  = glob($c->config->{'var_path'}.'/broadcast/'.$file.'.json');
     my $broadcasts = Thruk::Controller::rest_v1::load_json_files($c, {
             files                  => \@files,
-            authorization_callback => \&Thruk::Utils::Broadcast::is_authorized_for_broadcast,
+            authorization_callback => $c->user->check_user_roles('authorized_for_broadcasts') ? undef : \&Thruk::Utils::Broadcast::is_authorized_for_broadcast,
     });
 
     for my $b (@{$broadcasts}) {
@@ -48,7 +48,7 @@ sub _rest_get_thruk_broadcast {
     my $method = $c->req->method();
     if($method eq 'PATCH') {
         Thruk::Utils::IO::merge_deep($broadcasts->[0], $c->req->parameters);
-        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], 1, 1);
+        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], { pretty => 1, changed_only => 1 });
         return({
             'message' => 'successfully saved 1 broadcast.',
             'count'   => 1,
@@ -57,7 +57,7 @@ sub _rest_get_thruk_broadcast {
     elsif($method eq 'POST') {
         $broadcasts->[0] = \%{$c->req->parameters};
         Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
-        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], 1, 1);
+        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcasts->[0], { pretty => 1, changed_only => 1 });
         return({
             'message' => 'successfully saved 1 broadcast.',
             'count'   => 1,
@@ -94,12 +94,12 @@ Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/broadcasts?/
 
 # REST PATH: DELETE /thruk/broadcasts/<file>
 # remove broadcast for given file.
-Thruk::Controller::rest_v1::register_rest_path_v1(['POST', 'PATCH', 'DELETE'], qr%^/thruk/broadcasts?/([^/\.]+)$%mx, \&_rest_get_thruk_broadcast, ["admin"]);
+Thruk::Controller::rest_v1::register_rest_path_v1(['POST', 'PATCH', 'DELETE'], qr%^/thruk/broadcasts?/([^/\.]+)$%mx, \&_rest_get_thruk_broadcast, ["authorized_for_broadcasts"]);
 
 ##########################################################
 # REST PATH: POST /thruk/broadcasts
 # create new broadcast.
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/broadcasts?$%mx, \&_rest_get_thruk_broadcast_new, ["admin"]);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/broadcasts?$%mx, \&_rest_get_thruk_broadcast_new, ["authorized_for_broadcasts"]);
 sub _rest_get_thruk_broadcast_new {
     my($c) = @_;
 
@@ -123,7 +123,7 @@ sub _rest_get_thruk_broadcast_new {
         });
     }
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
-    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file.'.json', $broadcast, 1, 1);
+    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/broadcast/'.$file, $broadcast, { pretty => 1, changed_only => 1 });
     return({
         'message' => 'successfully created broadcast.',
         'file'    => $file,

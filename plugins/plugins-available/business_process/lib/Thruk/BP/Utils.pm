@@ -2,7 +2,6 @@ package Thruk::BP::Utils;
 
 use strict;
 use warnings;
-use Digest::MD5 qw(md5_hex);
 use File::Temp qw/tempfile/;
 use File::Copy qw/move/;
 use File::Slurp qw/read_file/;
@@ -221,8 +220,8 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = md5_hex(scalar read_file($filename));
-    my $old_hex = -f $file ? md5_hex(scalar read_file($file)) : '';
+    my $new_hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
+    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
 
     # check if something changed
     if($new_hex ne $old_hex) {
@@ -554,6 +553,25 @@ sub state2text {
 
 ##########################################################
 
+=head2 hoststate2text
+
+    hoststatus2text($state)
+
+return string of given host state
+
+=cut
+sub hoststate2text {
+    my($nr) = @_;
+    if($nr == 0) { return 'UP'; }
+    if($nr == 1) { return 'DOWN'; }
+    if($nr == 2) { return 'UNREACHABLE'; }
+    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 4) { return 'PENDING'; }
+    return;
+}
+
+##########################################################
+
 =head2 merge_obj_hash
 
     merge_obj_hash($hash, $data)
@@ -610,23 +628,6 @@ return base folder of business process files
 sub bp_base_folder {
     my($c) = @_;
     return(Thruk::Utils::base_folder($c).'/bp');
-}
-
-##########################################################
-
-=head2 looks_like_regex
-
-    looks_like_regex($str)
-
-returns true if $string looks like a regular expression
-
-=cut
-sub looks_like_regex {
-    my($str) = @_;
-    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
-        return(1);
-    }
-    return;
 }
 
 ##########################################################

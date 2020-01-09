@@ -15,6 +15,7 @@ use warnings;
 use Carp qw/confess/;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
+use Encode qw(decode_utf8);
 
 ##############################################
 =head1 METHODS
@@ -32,7 +33,7 @@ sub load_dashboard {
     $c->stats->profile(begin => "Utils::Panorama::Scripted::load_dashboard($file)");
 
     my $dashboard = {};
-    my($code, $data) = split(/__DATA__/mx, join("", read_file($file)), 2);
+    my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", read_file($file)), 2));
 
     # set meta data
     my $meta = { nr => $nr, groups => '[]', title => 'Dashboard', user => '' };
@@ -85,7 +86,7 @@ sub _cleanup_dashboard {
     if($dashboard && ref $dashboard eq 'HASH') {
         for my $key (keys %{$dashboard}) {
             if($key =~ m/^panlet_(\d+)$/mx) {
-                my $newkey = "tabpan-tab_".$nr."_panlet_".$1;
+                my $newkey = "pantab_".$nr."_panlet_".$1;
                 $dashboard->{$newkey} = delete $dashboard->{$key};
             }
         }

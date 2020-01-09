@@ -148,7 +148,7 @@ __DATA__
             "y" : 60,
          },
          "link" : {
-            "link" : "javascript:TP.add_pantab('new')"
+            "link" : "javascript:TP.add_pantab({ id: 'new' })"
          },
         "nsize" : [ 64, 64 ],
         "size" : 64
@@ -178,7 +178,7 @@ __DATA__
             "y" : 60,
          },
          "link" : {
-            "link" : "javascript:TP.add_pantab('new_geo')"
+            "link" : "javascript:TP.add_pantab({ id: 'new_geo' })"
          },
         "nsize" : [ 64, 64 ],
         "size" : 64

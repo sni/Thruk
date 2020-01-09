@@ -9,6 +9,7 @@
       <format bold='1' bg_color='silver' align='center'>
         [% FOREACH col = columns %]
         [% IF    col == "Time"                %]<cell width='18'>Timestamp</cell>
+        [% ELSIF col == "Site"                %]<cell width='23'>Site</cell>
         [% ELSIF col == "Event"               %]<cell width='23'>Event</cell>
         [% ELSIF col == "Event Detail"        %]<cell width='23'>Event Detail</cell>
         [% ELSIF col == "Hostname"            %]<cell width='25'>Host Name</cell>
@@ -37,8 +38,9 @@
     [% END %]
     <row>
         [% FOREACH col = columns %]
-        [% IF    col == "Time"          %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(l.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
-        [% ELSIF col == "Event"         %]<cell>[% IF has_type == 1 %][% l.type %][% ELSE %][% type %][% END %]</cell>
+        [% IF    col == "Time"                %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(l.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
+        [% ELSIF col == "Site"                %]<cell>[% escape_xml(l.peer_name) %]</cell>
+        [% ELSIF col == "Event"               %]<cell>[% IF has_type == 1 %][% l.type %][% ELSE %][% type %][% END %]</cell>
         [% ELSIF col == "Event Detail"        %]<cell>[% desc %]</cell>
         [% ELSIF col == "Hostname"            %]<cell>[% escape_xml(l.host_name) %]</cell>
         [% ELSIF col == "Service Description" %]<cell>[% escape_xml(l.service_description) %]</cell>

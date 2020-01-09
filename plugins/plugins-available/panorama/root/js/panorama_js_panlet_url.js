@@ -62,7 +62,7 @@ Ext.define('TP.PanletUrl', {
                 /* replace iframe content */
                 var iframe;
                 try {
-                    iframe = panel.items.getAt(0).getEl().dom;
+                    iframe = panel.iframe.getEl().dom;
                 } catch(err) {
                     TP.logError(This.id, "iframeNotFoundException", err);
                 }
@@ -113,10 +113,9 @@ Ext.define('TP.PanletUrl', {
                 window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_refresh']);
                 TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.refreshHandler, panel, []), 3000);
             }
-            var iframeObj = panel.items.getAt(0).getEl();
             if(!TP.isSameOrigin(window.location, TP.getLocationObject(panel.xdata.url))) {
                 /* set external url as src */
-                var iframeObj = panel.items.getAt(panel.items.length-1).getEl();
+                var iframeObj = panel.iframe.getEl();
                 if(iframeObj && iframeObj.dom) {
                     iframeObj.dom.onerror = panel.iframeErrorHandler;
                     iframeObj.dom.src     = Ext.urlAppend(panel.xdata.url, '_dc='+Ext.Date.now())
@@ -136,7 +135,7 @@ Ext.define('TP.PanletUrl', {
             if(panel.gearitem) { return; }
             panel.removeAll(true);
             /* url content should be in an iframe */
-            panel.add({
+            panel.iframe = panel.add({
                 xtype : 'component',
                 autoEl : {
                     tag : 'iframe',

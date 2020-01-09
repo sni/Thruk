@@ -1,7 +1,11 @@
 ﻿[% USE date %]
 <div style="position: absolute; height: 1px; width: 100%;">
   <a href="#" onclick="bp_zoom_rel(0.05)" class="bp_container_zoom plus" style="z-index: 5;">+</a>
+  <a href="#" onclick="bp_zoom_reset()" class="bp_container_zoom equal" style="z-index: 5;" id='zoom_val_[% bp.id %]'>=</a>
   <a href="#" onclick="bp_zoom_rel(-0.05)" class="bp_container_zoom minus" style="z-index: 5;">-</a>
+</div>
+<div class="bp_back_link" style="display: none; z-index: 5; position: absolute; top: 12px; left: 3px;">
+  <a href="" onclick="return(bp_details_link_clicked(event, this))"><span class="ui-icon ui-icon-home" style="transform: scale(1.2);">&nbsp;</span></a>
 </div>
 <div style="position: relative; height: 100%; width: 100%; overflow: auto; z-index: 1;">
 <div id='zoom[% bp.id %]'>
@@ -18,17 +22,29 @@
     [% END %]
     [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
     [% IF n.testmode %][% short_desc = 'testmode' %][% END %]
-    [% IF no_menu && n.create_obj %]
-    <a href="extinfo.cgi?type=2&amp;host=[% bp.name | uri %]&service=[% n.label | uri %]&backend=[% bp_backend | uri %]" target="_blank">
+    [% has_details_link = 0 %]
+    [% IF no_menu && (n.create_obj || n.defined('bp_ref') || n.host || n.hostgroup || n.servicegroup) %]
+      [% has_details_link = 1 %]
     [% END %]
-    <div id='[% n.id %]' class='bp_node [% UNLESS no_menu %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %][% IF highlight_node == n.id %] bp_node_active[% END %]' [% UNLESS no_menu %]onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);"[% END %][% IF editmode %] ondblclick="bp_show_edit_node('current');return false;"[% END %]>
+    <div id='[% n.id %]'
+         class='bp_node [% IF !no_menu || has_details_link %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %][% IF highlight_node == n.id %] bp_node_active[% END %]'
+         [% UNLESS no_menu %]onmousedown="bp_context_menu_open(event, this)"[% END %]
+         onmouseover="bp_mouse_over_node(event, this);"
+         onmouseout="bp_mouse_out_node(event, this);"
+         [% IF editmode %] ondblclick="bp_show_edit_node('current');return false;"[% END %]
+         [% IF has_details_link %]
+         onclick="return(bp_details_link_click(event, this))"
+         data-href=""
+         data-target=""
+         [% END %]
+    >
         <div class="bp_label" [% IF n.label.length > 20 %]style="font-size: 9px; line-height: 8px;"[% END %]><span class="bp_label">[% n.label | html %]</span></div>
-        <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc | html %]</div>
+        <div class="bp_sublabel" title="[% nl2br(escape_html(short_desc)).replace('<br>', '&#013;') %]">[% short_desc | html %]</div>
         [% UNLESS no_menu %]
         <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
+        [% END %]
         <a href="#" class="bp_node_bp_ref_icon" style="visibility: hidden;"><span class="ui-icon ui-icon-shuffle">&nbsp;</span></a>
         <a href="#" class="bp_node_link_icon" style="visibility: hidden;"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span></a>
-        [% END %]
         <div class="bp_node_icons">
           [% IF n.testmode %]
             <img src="[% url_prefix %]plugins/business_process/images/lock.png" alt="Status has been locked by testmode" title="Status has been locked by testmode" height="12" width="12">
@@ -45,10 +61,12 @@
             <img src="[% url_prefix %]themes/[% theme %]/images/link.png" alt="This node is linked to a host or service object" title="This node is linked to a host or service object" border="0" height="14" width="14">
         </div>
         [% END %]
+        [% IF editmode  %]
+        <div class="bp_node_add_icon">
+            <img src="[% url_prefix %]themes/[% theme %]/images/add.png" alt="add new node" title="add new node" class="clickable" border="0" height="14" width="14" onclick="bp_add_new_node()">
+        </div>
+        [% END %]
     </div>
-    [% IF no_menu && n.create_obj %]
-    </a>
-    [% END +%]
     [%+ END %]
   </div>
 </div>
@@ -70,10 +88,14 @@
     ];
 
     var bp_id       = [% bp.id %];
+    var bp_name     = "[% escape_js(bp.name) %]";
     var bp_template = '[% bp.template %]';
     var editmode    = [% editmode %];
     var testmode    = [% testmode %];
     var bp_no_menu  = [% no_menu %];
+    var bp_iframed  = [% iframed %];
+    var htmlCls     = "[% extrahtmlclass | html %]";
+    var bp_backend  = '[% bp_backend %]';
     var testmodes   = [% json_encode(testmodes) %];
     var cust_func   = [% json_encode(bp_custom_functions) %];
     var bp_filter   = [% json_encode(bp.filter) %];
@@ -85,5 +107,9 @@
         'bp_edgeSep': 10,
         'bp_rankSep': 30
     };
+
+    jQuery(document).ready(function() {
+      bp_loaded();
+    })
 </script>
 </div>

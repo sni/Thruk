@@ -1,6 +1,119 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - renamed system api keys to superuser api keys
+          - show sites name in comments/downtimes, logs and notifications
+          - add outages overview for hosts and services
+          - add action menu and command search filter
+          - add timeout handling to action_wrapper example
+          - add option to exclude long_plugin_output from default search
+          - Panorama:
+            - raise icons zindex if its in a none-ok state
+            - add new role panorama_view_media_manager to allow uploading images (#944)
+            - allow changing background images if user has write access to dashboard
+            - add maintenance mode for dashboards
+          - Cluster:
+            - add 'thruk cluster maint/unmaint' commands
+          - internals:
+            - update jstree 3.3.8
+            - update fancytree 2.34.0
+
+2.32-2   Fri Oct 25 17:05:54 CEST 2019
+          - add thruk restart cli command
+          - add thruk cluster restart cli command
+          - fix creating broadcasts from api
+          - fix config tool plugin preview
+
+2.32     Thu Oct 17 11:27:22 CEST 2019
+          - show all host columns only once in service details
+          - add list view process info when connecting more than 5 sites
+          - add option to limit api keys to certain roles
+          - add option to put all services into downtime
+          - store last editor username along with recurring downtimes
+          - improve storing session credentials
+          - allow basic time arithmetics when setting start and end dates
+          - allow cgi.cfg options to be set from the thruk config
+          - show_custom_vars host variables must be prefixed with HOST when displayed for services
+          - fix keyboard control of datepicker (#946)
+          - Broadcasts:
+            - use authorized_for_broadcasts role everywhere
+          - Config Tool:
+            - set default attributes for new objects
+            - add git blame page for config objects
+            - support limited regex matching
+            - add button to create new templates
+            - fix command preview with OMD 3.x path changes
+          - REST:
+            - add max_api_keys_per_user option to limit api keys per user
+            - fix fetching roles when contact has groups
+          - Panorama:
+            - add search bar
+            - add details button to host/service extinfo panel
+            - improve saving column layout in grid panel (#811)
+            - add custom variables to grid panel (#849)
+            - add alias names to label (#941)
+            - hide scrollbars after 3 seconds
+            - add background colour option for hosts and service lists
+            - toggle geomap navigation with space key
+            - improve dashboard menu filter performance
+            - allow changing icon center position on geo maps
+            - add pins status icon set
+            - add comments / downtimes / acknowledgements list widget
+            - fix changing open dashboards on reloads
+          - Business Process:
+            - add node clone menu entry to node context menu
+            - add navigation to link incoming/outgoing business processes
+            - add flexible filter aggregation function
+          - internals:
+            - update daterangepicker 3.0.5
+
+2.30-3   Tue Jun 11 15:39:40 CEST 2019
+          - fix quicksearch when using many backends
+          - reports:
+            - fix sending json attachment
+          - Config Tool:
+            - fix using asterix
+          - Panorama:
+            - fix grafana graph combobox
+
+2.30-2   Tue May 14 11:56:16 CEST 2019
+          - fix quicksearch when using many backends
+          - Panorama:
+            - improve selecting hosts and services from drop downs
+            - fix shapecolor for acknowleged items
+            - fix sending commands from dashboards
+
+2.30     Thu May  9 11:51:28 CEST 2019
+          - session cookies: change to sha256 and double hashing
+          - api keys: change to sha256 and double hashing
+          - add check_thruk_rest monitoring plugin to check things from the rest api
+          - fix page reload when changing backends
+          - security:
+            - validate referer
+            - make auth cookie httponly
+          - REST:
+            - manage api keys via rest api
+            - use downtime_max_duration if set
+            - support relative timestamps in numeric filter
+            - support renaming columns by appending :name to column
+          - mobile:
+            - fix compatibility issue with jquery 3.x
+          - Business Process:
+            - fix filtering containing spaces
+            - allow drill down when integrated in panorama dashboards
+          - Panorama:
+            - add option to always hide widget border
+            - increase max zoom level for default geo map
+            - add option to set bp panel background color
+          - Config Tool:
+            - add disable option to disable config tool for specific backends
+            - add global obj_readonly option
+          - Logcache:
+            - disable delta updates by default
+          - internals:
+            - update jquery to 3.4.1
+
+2.28     Fri Mar 29 17:27:48 CET 2019
           - rename graph_proxy option into http_backend_reverse_proxy
           - add `tree` sitepanel for very large setups with many sites
           - add parents to selectable columns
@@ -33,6 +146,8 @@ next:
             - add color selector to grafana images
             - add axis color option to speedometer
             - fix saving permissions when list is empty
+          - Reporting:
+            - add switch to attach raw json data
           - internals:
             - move libraries to vendor folder
             - update jquery to 3.3.1

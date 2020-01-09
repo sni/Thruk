@@ -3,6 +3,7 @@ package Thruk::Controller::error;
 use strict;
 use warnings;
 use Carp qw/cluck confess longmess/;
+use Time::HiRes qw/tv_interval/;
 
 =head1 NAME
 
@@ -84,6 +85,11 @@ sub index {
         '99'  => {
             'mess' => '',
             'dscr' => '',
+        },
+        '100'  => {
+            'mess' => 'bad request',
+            'dscr' => 'It appears as you send a bad request.',
+            'code' => 400, # bad request
         },
         '0'  => {
             'mess' => 'unknown error: '.$arg1,
@@ -197,9 +203,10 @@ sub index {
             'code' => 500, # internal server error
         },
         '24'  => {
-            'mess' => 'Security Alert',
-            'dscr' => 'This request is not allowed, details can be found in the thruk.log.',
-            'code' => 403, # forbidden
+            'mess'    => 'CSFR Security Alert',
+            'dscr'    => 'Using this formular requires a POST with a valid CSFR token or an API key.',
+            'code'    => 403, # forbidden
+            'log_req' => 1,
         },
         '25'  => {
             'mess' => 'This page does not exist...',
@@ -211,6 +218,11 @@ sub index {
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
             'code' => 403, # forbidden
         },
+        '27'  => {
+            'mess'    => 'Wrong Authentication Key',
+            'dscr'    => 'It seems like you are using an non-existing or invalid API key.',
+            'code'    => 403, # forbidden
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
@@ -221,15 +233,27 @@ sub index {
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
-    my $errorDetails = join('<br>', @{$c->error});
+    my $errorDetails = join("\n", @{$c->error});
+
+    # redirected from $c->detach_error()
+    my $log_req;
+    if($c->stash->{'error_data'}) {
+        $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
+        $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
+        $code                           = $c->stash->{'error_data'}->{'code'}  // 500;
+        $log_req                        = $c->stash->{'error_data'}->{'log'} if defined $c->stash->{'error_data'}->{'log'};
+    }
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
-        if($code >= 500) {
+        if($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
             $c->log->error("***************************");
-            $c->log->error(sprintf("page:   %s\n", $c->req->url)) if defined $c->req->url;
-            $c->log->error(sprintf("params: %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
-            $c->log->error(sprintf("user:   %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
-            $c->log->error($errors->{$arg1}->{'mess'});
+            $c->log->error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
+            $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+            $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+            $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+            $c->log->error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
+            $c->log->error($c->stash->{errorMessage}) if $c->stash->{errorMessage};
+            $c->log->error($c->stash->{errorDescription}) if $c->stash->{errorDescription};
             if($c->stash->{errorDetails}) {
                 for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
                     $c->log->error($row);
@@ -270,12 +294,19 @@ sub index {
 
     $c->stash->{'title'}        = "Error"  unless defined $c->stash->{'title'} and $c->stash->{'title'} ne '';
     $c->stash->{'page'}         = "status" unless defined $c->stash->{'page'};
+    $c->stash->{'real_page'}    = 'error';
     $c->stash->{'infoBoxTitle'} = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
 
     $c->stash->{'navigation'}  = "";
     if($c->config->{'use_frames'} == 0) {
         Thruk::Utils::Menu::read_navigation($c);
     }
+
+    # do not cache errors
+    $c->res->code($code);
+    $c->res->headers->last_modified(time);
+    $c->res->headers->expires(time - 3600);
+    $c->res->headers->header(cache_control => "public, max-age=0");
 
     # return errer as json for rest api calls
     if($c->want_json_response()) {
@@ -301,20 +332,12 @@ sub index {
         }
     }
 
-    $c->stash->{errorDetails} = Thruk::Utils::Filter::escape_html($c->stash->{errorDetails}) if $c->stash->{errorDetails};
-
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');
     $c->res->headers->content_type('');
-
-    # do not cache errors
-    $c->res->code($code);
-    $c->res->headers->last_modified(time);
-    $c->res->headers->expires(time - 3600);
-    $c->res->headers->header(cache_control => "public, max-age=0");
 
     $c->{'rendered'} = 0; # force rerendering
     return 1;

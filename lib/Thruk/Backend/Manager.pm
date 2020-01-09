@@ -3,7 +3,6 @@ package Thruk::Backend::Manager;
 use strict;
 use warnings;
 use Carp qw/confess croak/;
-use Digest::MD5 qw(md5_hex);
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -590,6 +589,9 @@ returns a list of contactgroups by contact
 sub get_contactgroups_by_contact {
     my($self, $username) = @_;
     confess("no user") if(!defined $username || ref $username ne "");
+    if($self->{'get_contactgroups_by_contact_cache'}) {
+        return($self->{'get_contactgroups_by_contact_cache'}->{$username} // {});
+    }
     my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ], undef, $self->get_default_backends());
     my $contactgroups = {};
     for my $group (@{$data}) {
@@ -610,14 +612,18 @@ respect permissions
 =cut
 
 sub get_hostgroup_names_from_hosts {
-    my($self, @args) = @_;
-    if(scalar @args == 0) { return $self->get_hostgroup_names(); }
-    my $hosts = $self->get_hosts( @args, 'columns', ['groups'] );
+    my($self, %args) = @_;
+    # clean args if possible
+    if(defined $args{'filter'} && scalar @{$args{'filter'}} == 0) {
+        delete $args{'filter'};
+    }
+    if(scalar keys %args == 0) { return $self->get_hostgroup_names(); }
+    $args{'filter'} = [] unless $args{'filter'};
+    push @{$args{'filter'}}, { 'groups' => { '!=' => '' }};
+    my $hosts = $self->get_hosts( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $host (@{$hosts}) {
-        for my $group (@{$host->{'groups'}}) {
-            $groups->{$group} = 1;
-        }
+        map { $groups->{$_} = 1; } @{$host->{'groups'}};
     }
     my @sorted = sort keys %{$groups};
     return \@sorted;
@@ -635,14 +641,18 @@ respect permissions
 =cut
 
 sub get_servicegroup_names_from_services {
-    my($self, @args) = @_;
-    if(scalar @args == 0) { return $self->get_servicegroup_names(); }
-    my $services = $self->get_services( @args, 'columns', ['groups'] );
+    my($self, %args) = @_;
+    # clean args if possible
+    if(defined $args{'filter'} && scalar @{$args{'filter'}} == 0) {
+        delete $args{'filter'};
+    }
+    if(scalar keys %args == 0) { return $self->get_servicegroup_names(); }
+    $args{'filter'} = [] unless $args{'filter'};
+    push @{$args{'filter'}}, { 'groups' => { '!=' => '' }};
+    my $services = $self->get_services( %args, 'columns', ['groups'] );
     my $groups = {};
     for my $service (@{$services}) {
-        for my $group (@{$service->{'groups'}}) {
-            $groups->{$group} = 1;
-        }
+        map { $groups->{$_} = 1; } @{$service->{'groups'}};
     }
     my @sorted = sort keys %{$groups};
     return \@sorted;
@@ -893,25 +903,59 @@ sub logcache_stats {
 
 ########################################
 
+=head2 get_logs
+
+  get_logs(@args)
+
+retrieve logfiles
+
+=cut
+
+sub get_logs {
+    my($self, @args) = @_;
+    my $c = $Thruk::Request::c;
+    my $data;
+    eval {
+        $data = $self->_do_on_peers( 'get_logs', \@args);
+    };
+    my $err = $@;
+    if($err && !$data && $err =~ m/Table.*doesn't\s*exist/mx) {
+        $err =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
+        $c->stash->{errorMessage}     = "Logfilecache Unavailable";
+        $c->stash->{errorDescription} = "logcache tables do not exist, please setup logcache update first.\n"
+                                       ."See <b><a href='https://thruk.org/documentation/logfile-cache.html'>the documentation</a></b> for details or try to <b><a href='".Thruk::Utils::Filter::uri_with($c, {logcache_update => 1})."'>run import manually</a></b>.\n"
+                                       .$err;
+        return($c->detach('/error/index/99'));
+    } elsif($err) {
+        die($err);
+    }
+    return($data);
+}
+
+########################################
+
 =head2 renew_logcache
 
   renew_logcache($c, [$noforks])
 
-update the logcache
+update the logcache, returns 1 on success or undef otherwise
 
 =cut
 
 sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
-    return unless defined $c->config->{'logcache'};
-    return if !$c->config->{'logcache_delta_updates'};
+    return 1 unless defined $c->config->{'logcache'};
+    # set to import only to get faster initial results
+    local $c->config->{'logcache_delta_updates'} = 2 unless $c->config->{'logcache_delta_updates'};
+    return 1 if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
     my $rc;
     eval {
         $rc = $self->_renew_logcache($c, $noforks);
     };
-    if($@) {
-        $c->log->error($@);
+    my $err = $@;
+    if($err) {
+        $c->log->error($err);
         $c->stash->{errorMessage}     = "Logfilecache Unavailable";
         $c->stash->{errorDescription} = $@;
         $c->stash->{errorDescription} =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
@@ -970,49 +1014,54 @@ sub _renew_logcache {
             $check = 1;
         }
     }
+    return 1 unless $check;
 
-    if($check) {
-        $c->stash->{'backends'} = $get_results_for;
-        my $stats = $self->logcache_stats($c);
-        my $backends2import = [];
-        for my $key (@{$get_results_for}) {
-            push @{$backends2import}, $key unless defined $stats->{$key};
-        }
-
-        if($c->config->{'logcache_import_command'}) {
-            local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
-            local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
-            if(scalar @{$backends2import} > 0) {
-                local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
-                local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
-                return Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
-                                                        message   => 'please stand by while your initial logfile cache will be created...',
-                                                        forward   => $c->req->url,
-                                                        nofork    => $noforks,
-                                                        });
-            } else {
-                local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
-                my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
-                if($rc != 0) {
-                    Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
-                }
-            }
-        } else {
-            my $type = '';
-            $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
-            if(scalar @{$backends2import} > 0) {
-                return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
-                                                        message   => 'please stand by while your initial logfile cache will be created...',
-                                                        forward   => $c->req->url,
-                                                        backends  => $backends2import,
-                                                        nofork    => $noforks,
-                                                        });
-            }
-
-            $self->_do_on_peers( 'renew_logcache', \@args, 1);
-        }
+    $c->stash->{'backends'} = $get_results_for;
+    my $stats = $self->logcache_stats($c);
+    my $backends2import = [];
+    for my $key (@{$get_results_for}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        next unless($peer && $peer->{'logcache'});
+        push @{$backends2import}, $key unless defined $stats->{$key};
     }
-    return;
+
+    if($c->config->{'logcache_import_command'}) {
+        local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
+        local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
+        if(scalar @{$backends2import} > 0) {
+            local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
+            local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
+            Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
+                                              message   => 'please stand by while your initial logfile cache will be created...',
+                                              forward   => $c->req->url,
+                                              nofork    => $noforks,
+                                            });
+            return 1;
+        } else {
+            return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
+            local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
+            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
+            }
+        }
+    } else {
+        my $type = '';
+        $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+        if(scalar @{$backends2import} > 0) {
+            Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                               message   => 'please stand by while your initial logfile cache will be created...',
+                                               forward   => $c->req->url,
+                                               backends  => $backends2import,
+                                               nofork    => $noforks,
+                                            });
+            return 1;
+        }
+
+        return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
+        $self->_do_on_peers( 'renew_logcache', \@args, 1);
+    }
+    return 1;
 }
 
 ########################################
@@ -1057,7 +1106,7 @@ sub get_logs_start_end_no_filter {
 
     # fetching logs without any filter is a terrible bad idea
     # try to determine start date, simply requesting min/max without filter parses all logfiles
-    # so we try a very early date, since requests with an non-existing timerange a super fast
+    # so we try a very early date, since requests with an non-existing timerange are super fast
     # (livestatus has an index on all files with start and end timestamp and only parses the file if it matches)
 
     $time = time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
@@ -1535,7 +1584,7 @@ sub _do_on_peers {
             # multiple backends and all fail
             # die with a small error for know, usually an empty result means that
             # none of our backends were reachable
-            die('undefined result');
+            die('undefined result, all backends down?');
             #local $Data::Dumper::Deepcopy = 1;
             #my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
             #for my $b (@{$get_results_for}) {
@@ -1562,6 +1611,7 @@ sub _do_on_peers {
             }
             if($res && $res->{'configtool'}) {
                 my $peer = $self->get_peer_by_key($key);
+                next if $peer->{'configtool'}->{'disable'};
                 # do not overwrite local configuration with remote configtool settings
                 # only use remote if the local one is empty
                 next if(scalar keys %{$peer->{'configtool'}} != 0 && !$peer->{'configtool'}->{'remote'});
@@ -1610,9 +1660,8 @@ sub _do_on_peers {
     # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
         if( $arg{'remove_duplicates'} ) {
-            $data = $self->_remove_duplicates($data);
+            $data = remove_duplicates($data);
             $totalsize = scalar @{$data} unless $ENV{'THRUK_USE_LMD'};
-            $must_resort = 1;
         }
 
         if(!$ENV{'THRUK_USE_LMD'} || $must_resort) {
@@ -1717,7 +1766,7 @@ sub select_backends {
         my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
         if($view_mode ne 'html') {
             delete $arg{'pager'};
-            delete $c->stash->{'use_pager'};
+            $c->stash->{'use_pager'} = 0;
         }
 
         if(   $function eq 'get_hosts'
@@ -1839,18 +1888,26 @@ sub _get_result_lmd {
             die("did not get a valid response for at least any site");
         }
     }
-    # REMOVE AFTER: 01.01.2020
-    if($meta && $meta->{'total'}) {
-        $totalsize = $meta->{'total'};
-    }
-    # </REMOVE AFTER>
+
     if($meta && $meta->{'total_count'}) {
         $totalsize = $meta->{'total_count'};
     }
 
     if($function eq 'get_hostgroups' || $function eq 'get_servicegroups' || ($type && (lc($type) eq 'file' || lc($type) eq 'stats'))) {
-        my $key = @{$self->get_peers()}[0]->{'key'};
-        $result = { $key => $result };
+        # sort result by peer_key
+        if(ref $result eq 'ARRAY' && $result->[0] && ref $result->[0] eq 'HASH' && $result->[0]->{'peer_key'}) {
+            my $sorted_result = {};
+            for my $r (@{$result}) {
+                my $key = $r->{'peer_key'};
+                $sorted_result->{$key} = [] unless $sorted_result->{$key};
+                push @{$sorted_result->{$key}}, $r;
+            }
+            $result = $sorted_result;
+        } else {
+            # if no peer_key is available, simply use the first one
+            my $key = @{$self->get_peers()}[0]->{'key'};
+            $result = { $key => $result };
+        }
     }
 
     if($function eq 'send_command') {
@@ -1956,57 +2013,31 @@ sub _get_result_parallel {
 
 ########################################
 
-=head2 _remove_duplicates
+=head2 remove_duplicates
 
-  _remove_duplicates($data)
+  remove_duplicates($data)
 
 removes duplicate entries from a array of hashes
 
 =cut
 
-sub _remove_duplicates {
-    my $self = shift;
-    my $data = shift;
-    my $c    = $Thruk::Request::c;
+sub remove_duplicates {
+    my($data) = @_;
+    my $c = $Thruk::Request::c;
 
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
-    # calculate md5 sums
-    my $uniq = {};
-    for my $dat ( @{$data} ) {
-        my $peer_key = delete $dat->{'peer_key'};
-        my $peer_name = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_name'};
-        my $str       = join( ';', grep(defined, sort values %{$dat}));
-        utf8::encode($str);
-        my $md5       = md5_hex($str);
-        if( !defined $uniq->{$md5} ) {
-            $dat->{'peer_key'}  = $peer_key;
-            $dat->{'peer_name'} = $peer_name;
-
-            $uniq->{$md5} = {
-                'data'      => $dat,
-                'peer_key'  => [$peer_key],
-                'peer_name' => [$peer_name],
-            };
-        }
-        else {
-            push @{ $uniq->{$md5}->{'peer_key'} },  $peer_key;
-            push @{ $uniq->{$md5}->{'peer_name'} }, $peer_name;
-        }
+    if($data && $data->[0] && ref($data->[0]) eq 'HASH') {
+        $data = Thruk::Utils::array_uniq_obj($data);
     }
-
-    my $return = [];
-    for my $data ( values %{$uniq} ) {
-        $data->{'data'}->{'backend'} = {
-            'peer_key'  => $data->{'peer_key'},
-            'peer_name' => $data->{'peer_name'},
-        };
-        push @{$return}, $data->{'data'};
-
+    elsif($data && $data->[0] && ref($data->[0]) eq 'ARRAY') {
+        $data = Thruk::Utils::array_uniq_list($data);
+    } else {
+        $data = Thruk::Utils::array_uniq($data);
     }
 
     $c->stats->profile( end => "Utils::remove_duplicates()" );
-    return ($return);
+    return($data);
 }
 
 ########################################
@@ -2057,6 +2088,7 @@ sub _page_data {
     return $data unless $view_mode eq 'html';
     my $entries = $c->req->parameters->{'entries'} || $default_result_size;
     return $data unless defined $entries;
+    return $data unless $entries =~ m/^(\d+|all)$/mx;
     $c->stash->{'entries_per_page'} = $entries;
 
     # we dont use paging at all?
@@ -2301,9 +2333,8 @@ sub _merge_hostgroup_answer {
 
     # set backends used
     for my $group ( values %{$groups} ) {
-        $group->{'backend'} = [];
-        @{ $group->{'backend'} }  = sort values %{ $group->{'backends_hash'} };
-        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
+        $group->{'peer_name'} = [sort values %{ $group->{'backends_hash'}}];
+        $group->{'peer_key'}  = [sort keys %{ $group->{'backends_hash'}}];
         delete $group->{'backends_hash'};
     }
     my @return = values %{$groups};
@@ -2344,9 +2375,8 @@ sub _merge_servicegroup_answer {
 
     # set backends used
     for my $group ( values %{$groups} ) {
-        $group->{'backend'} = [];
-        @{ $group->{'backend'} } = sort values %{ $group->{'backends_hash'} };
-        @{ $group->{'peer_key'} } = sort keys %{ $group->{'backends_hash'} } unless defined $group->{'peer_key'};
+        $group->{'peer_name'} = [sort values %{ $group->{'backends_hash'}}];
+        $group->{'peer_key'}  = [sort keys %{ $group->{'backends_hash'}}];
         delete $group->{'backends_hash'};
     }
 
@@ -2816,6 +2846,69 @@ sub _set_result_defaults {
         }
     }
     return $data;
+}
+
+########################################
+
+=head2 fill_get_can_submit_commands_cache
+
+  fill_get_can_submit_commands_cache($c)
+
+fills cached used by get_can_submit_commands
+
+=cut
+
+sub fill_get_can_submit_commands_cache {
+    my($self) = @_;
+    my $data = $self->get_contacts(columns => [qw/name email alias can_submit_commands/]);
+    my $hashed = {};
+    for my $d (@{$data}) {
+        $hashed->{$d->{'name'}} = [] unless defined $hashed->{$d->{'name'}};
+        push @{$hashed->{$d->{'name'}}}, $d;
+    }
+    $self->{'get_can_submit_commands_cache'} = $hashed;
+    return;
+}
+
+########################################
+
+=head2 get_can_submit_commands
+
+  get_can_submit_commands
+
+wrapper around get_can_submit_commands
+
+=cut
+
+sub get_can_submit_commands {
+    my($self, @args) = @_;
+    if($self->{'get_can_submit_commands_cache'} && scalar @args == 1) {
+        return($self->{'get_can_submit_commands_cache'}->{$args[0]} // []);
+    }
+    return $self->_do_on_peers('get_can_submit_commands', \@args );
+}
+
+########################################
+
+=head2 fill_get_contactgroups_by_contact_cache
+
+  fill_get_contactgroups_by_contact_cache($c)
+
+fills cached used by get_contactgroups_by_contact
+
+=cut
+
+sub fill_get_contactgroups_by_contact_cache {
+    my($self) = @_;
+    my $contactgroups = $self->get_contactgroups(columns => [qw/name members/]);
+    my $groups = {};
+    for my $group (@{$contactgroups}) {
+        for my $member (@{$group->{'members'}}) {
+            $groups->{$member}->{$group->{'name'}} = 1;
+        }
+    }
+    $self->{'get_contactgroups_by_contact_cache'} = $groups;
+    return;
 }
 
 ########################################

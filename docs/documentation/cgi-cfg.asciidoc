@@ -7,7 +7,12 @@ breadcrumb: [ "configuration.html", "Configuration" ]
 == cgi.cfg
 
 The cgi.cfg is mainly the same as in Nagios or Icinga but not all
-values are used.
+values are used. Find a list of used parameters in the following list.
+
+
+{% include new_since.ad version="2.32" %}
+All config values here, except the roles and authentication related can be
+set in the thruk_local.conf as well.
 
 
 == show_context_help

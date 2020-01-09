@@ -31,25 +31,14 @@ sub status {
 
     confess("no status data supplied") unless defined $livedata;
 
-    if($hostname and $description) {
+    if($hostname && $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
-
-        # operator is new and optional
-        $op = "=" unless $op;
-
-        # description may contain regular expressions, return worst/best function in that case
-        if(Thruk::BP::Utils::looks_like_regex($description) && $op eq '=') {
-            $op = "~";
-        }
         if($op ne '=') {
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
                 if($1 eq 'b') { $function = 'best' }
                 $description = $2;
             }
-            $description = Thruk::Utils::convert_wildcards_to_regex($description);
-
-            if($op eq '!=') { $op = '!~'; }
 
             # create hash which can be used by internal calculation function
             my $depends = [];
@@ -378,6 +367,227 @@ sub random {
     my($c, $bp, $n) = @_;
     my $state = int(rand(4));
     return($state, 'random', Thruk::BP::Utils::state2text($state).' - Random state is '.Thruk::BP::Utils::state2text($state));
+}
+
+##########################################################
+
+=head2 statusfilter
+
+    statusfilter($c, $bp, $n)
+
+returns state based on livestatus filter
+
+=cut
+sub statusfilter {
+    my($c, $bp, $n, $args) = @_;
+    my($aggregation, $type, $filter, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
+
+    $c->stash->{'minimal'} = 1; # do not fill totals boxes
+    my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '');
+
+    my $node_filter = Thruk::Utils::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
+    my($ack_filter, $downtime_filter, $unknown_filter) = (0,0,0);
+    for my $f (@{$node_filter}) {
+        $ack_filter      = 1 if $f eq 'acknowledged_filter';
+        $downtime_filter = 1 if $f eq 'downtime_filter';
+        $unknown_filter  = 1 if $f eq 'unknown_filter';
+    }
+
+    my($worst_host, $total_hosts, $good_hosts, $down_hosts) = (0,0,0,0);
+    my $best_host = -1;
+    if($type eq 'hosts' || $type eq 'both') {
+        my $data = $c->{'db'}->get_host_stats( filter => [ $hostfilter ]);
+        $data    = _statusfilter_apply_filter("host", $data, $ack_filter, $downtime_filter, $unknown_filter);
+        $total_hosts = $data->{'total'};
+        $good_hosts  = $data->{'up'} + $data->{'pending'};
+        $down_hosts  = $data->{'down'} + $data->{'unreachable'};
+        if(   $data->{'unreachable'}) { ($best_host, $worst_host) = _set_best_worst(2, $best_host, $worst_host); }
+        elsif($data->{'down'})        { ($best_host, $worst_host) = _set_best_worst(1, $best_host, $worst_host); }
+        elsif($data->{'up'})          { ($best_host, $worst_host) = _set_best_worst(0, $best_host, $worst_host); }
+    }
+
+    my $best_service = -1;
+    my($worst_service, $total_services, $good_services, $down_services) = (0,0,0,0);
+    if($type eq 'services' || $type eq 'both') {
+        my $data = $c->{'db'}->get_service_stats( filter => [ $servicefilter ]);
+        $data    = _statusfilter_apply_filter("service", $data, $ack_filter, $downtime_filter, $unknown_filter);
+        $total_services = $data->{'total'};
+        $good_services  = $data->{'ok'}   + $data->{'pending'} + $data->{'warning'};
+        $down_services  = $data->{'critical'} + $data->{'unknown'};
+        if(   $data->{'unknown'})  { ($best_service, $worst_service) = _set_best_worst(3, $best_service, $worst_service); }
+        elsif($data->{'critical'}) { ($best_service, $worst_service) = _set_best_worst(2, $best_service, $worst_service); }
+        elsif($data->{'warning'})  { ($best_service, $worst_service) = _set_best_worst(1, $best_service, $worst_service); }
+        elsif($data->{'ok'})       { ($best_service, $worst_service) = _set_best_worst(0, $best_service, $worst_service); }
+    }
+
+    my $status = 0;
+    my $output = "";
+    if($type eq 'hosts' || $type eq 'both') {
+        if(defined $hostwarn and $hostwarn ne '') {
+            if($hostwarn =~ m/^(\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
+            if($hostwarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host warning threshold must be numeric"; }
+            if($down_hosts >= $hostwarn) {
+                $status = 1;
+            }
+        }
+        if(defined $hostcrit and $hostcrit ne '') {
+            if($hostcrit =~ m/^(\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
+            if($hostcrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host critical threshold must be numeric"; }
+            if($down_hosts >= $hostcrit) {
+                $status = 2;
+            }
+        }
+    }
+    if($type eq 'services' || $type eq 'both') {
+        if(defined $servicewarn and $servicewarn ne '') {
+            if($servicewarn =~ m/^(\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
+            if($servicewarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service warning threshold must be numeric"; }
+            if($down_services >= $servicewarn) {
+                $status = 1 unless $status > 1;
+            }
+        }
+        if(defined $servicecrit and $servicecrit ne '') {
+            if($servicecrit =~ m/^(\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
+            if($servicecrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service critical threshold must be numeric"; }
+            if($down_services >= $servicecrit) {
+                $status = 2;
+            }
+        }
+    }
+    if($aggregation eq 'worst') {
+        $status = $worst_service;
+        # map host state to service state
+        if($worst_host) { $status = 2; }
+    }
+    elsif($aggregation eq 'best') {
+        $status = $best_host;
+        $status = $best_service if $best_service < $best_host;
+    }
+
+    my $perfdata   = '';
+    my $thresholdoutput = [];
+    if($type eq 'hosts' || $type eq 'both') {
+        push @{$thresholdoutput}, sprintf("%d/%d hosts up", $good_hosts, $total_hosts);
+        $perfdata .= 'hosts_up='.$good_hosts.' hosts_down='.$down_hosts;
+    }
+    if($type eq 'services' || $type eq 'both') {
+        push @{$thresholdoutput}, sprintf("%d/%d services up", $good_services, $total_services);
+        $perfdata .= 'services_up='.$good_services.' services_down='.$down_services;
+    }
+
+    $output = sprintf("%s - %s|%s",
+                            Thruk::BP::Utils::state2text($status),
+                            join(', ', @{$thresholdoutput}),
+                            $perfdata) unless $output;
+
+    my $shortname = "";
+    for my $search (@{$searches}) {
+        for my $f (@{$search->{'text_filter'}}) {
+            $shortname .= " & " if $shortname;
+            $shortname .= $f->{'type'}.$f->{'op'}.$f->{'value'};
+        }
+    }
+    $shortname = "filer" unless $shortname;
+
+    # append issues to output
+    if($status > 0) {
+        my $maximum_output = 10;
+        my $num = 0;
+        if($worst_host > 0) {
+            my $data = $c->{'db'}->get_hosts( filter => [ $hostfilter, { state => { '>' => 0 }} ], columns => [qw/name state plugin_output scheduled_downtime_depth acknowledged/]);
+            for my $h (@{$data}) {
+                next if($ack_filter      && $h->{'acknowledged'});
+                next if($downtime_filter && $h->{'scheduled_downtime_depth'} > 0);
+                $output .= sprintf("\n[%s] %s - %s", Thruk::BP::Utils::hoststate2text($h->{'state'}), $h->{'name'}, substr($h->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
+                $num++;
+            }
+        }
+        if($worst_service > 0) {
+            my $data = $c->{'db'}->get_services( filter => [ $servicefilter, { state => { '>' => 0 }} ], columns => [qw/host_name description state plugin_output scheduled_downtime_depth acknowledged/]);
+            for my $s (@{$data}) {
+                next if($ack_filter      && $s->{'acknowledged'});
+                next if($downtime_filter && $s->{'scheduled_downtime_depth'} > 0);
+                next if($unknown_filter  && $s->{'state'} == 3);
+                $output .= sprintf("\n[%s] %s - %s - %s", Thruk::BP::Utils::state2text($s->{'state'}), $s->{'host_name'}, $s->{'description'}, substr($s->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
+                $num++;
+            }
+        }
+        if($num > $maximum_output) {
+            $output .= sprintf("\nfound %d more issues...", $num - $maximum_output);
+        }
+    }
+
+    return($status, $shortname, $output);
+}
+
+sub _set_best_worst {
+    my($state, $best, $worst) = @_;
+    if($best == -1 || $state < $best) {
+        $best = $state;
+    }
+    if($state > $worst) {
+        $worst = $state;
+    }
+    return($best, $worst);
+}
+
+# kind of a hack, but there is no easy way to apply filter to any filter
+# so we just assume the function from the name of the filter which is ok,
+# since these are shiped filters, so we know what they do and try to
+# rebuild their functionality here
+sub _statusfilter_apply_filter {
+    my($type, $data, $ack_filter, $downtime_filter, $unknown_filter) = @_;
+
+    # if both filter (ack and downtime) should be applied, we substract plain_down from down which
+    # because that is the number of downs which are not in downtime or acknowledged
+    if($ack_filter && $downtime_filter) {
+        if($type eq 'host') {
+            for my $state (qw/down unreachable/) {
+                $data->{'up'}  += ($data->{$state} - $data->{'plain_'.$state});
+                $data->{$state} = $data->{'plain_'.$state};
+            }
+        }
+        if($type eq 'service') {
+            for my $state (qw/warning critical unknown/) {
+                $data->{'ok'}  += ($data->{$state} - $data->{'plain_'.$state});
+                $data->{$state} = $data->{'plain_'.$state};
+            }
+        }
+    }
+    elsif($ack_filter) {
+        if($type eq 'host') {
+            for my $state (qw/down unreachable/) {
+                $data->{'up'}   += $data->{$state.'_and_ack'};
+                $data->{$state} -= $data->{$state.'_and_ack'};
+            }
+        }
+        if($type eq 'service') {
+            for my $state (qw/warning critical unknown/) {
+                $data->{'ok'}   += $data->{$state.'_and_ack'};
+                $data->{$state} -= $data->{$state.'_and_ack'};
+            }
+        }
+    }
+    elsif($downtime_filter) {
+        if($type eq 'host') {
+            for my $state (qw/down unreachable/) {
+                $data->{'up'}   += $data->{$state.'_and_scheduled'};
+                $data->{$state} -= $data->{$state.'_and_scheduled'};
+            }
+        }
+        if($type eq 'service') {
+            for my $state (qw/warning critical unknown/) {
+                $data->{'ok'}   += $data->{$state.'_and_scheduled'};
+                $data->{$state} -= $data->{$state.'_and_scheduled'};
+            }
+        }
+    }
+
+    if($unknown_filter && $type eq 'service') {
+        $data->{'ok'}     += $data->{'unknown'};
+        $data->{'unknown'} = 0;
+    }
+    return($data);
 }
 
 ##########################################################

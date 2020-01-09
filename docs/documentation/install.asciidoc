@@ -136,7 +136,7 @@ Shinken has livestatus support built-in and does not require additional
 modules.
 =======
 
-Refer to http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus
+Refer to https://checkmk.com/cms_livestatus.html
 on how to install livestatus onto your monitoring box. The
 <<labs-consol-repository,Lab Consol Repository>> has livestatus rpm
 packages. For debian based Linux systems just use the provided

@@ -120,7 +120,7 @@ Then simply model your business process from the web gui.
 
 == Configuration
 Configuration settings are covered by the
-link:configuration.html#component-thruk-plugin-bp[configuration sections].
+link:configuration.html#component-thrukpluginbp[configuration sections].
 
 
 

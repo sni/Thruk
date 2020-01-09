@@ -27,6 +27,7 @@ sub index {
     $c->stash->{'page'}            = 'conf';
     $c->stash->{'title'}           = 'User Profile';
     $c->stash->{'infoBoxTitle'}    = 'User Profile';
+    $c->stash->{'new_private_key'} = '';
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
@@ -36,17 +37,34 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
                 return $c->redirect_to('user.cgi');
             }
-            Thruk::Utils::APIKeys::create_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'comment'});
-            Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
-            return $c->redirect_to('user.cgi');
+            if($c->config->{'max_api_keys_per_user'} <= 0 || $c->check_user_roles("authorized_for_read_only")) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to create API keys.' );
+                return $c->redirect_to('user.cgi');
+            }
+            my $keys = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
+            if(scalar @{$keys} >= $c->config->{'max_api_keys_per_user'}) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'Maximum number of API keys ('.$c->config->{'max_api_keys_per_user'}.') for this user reached.' );
+                return $c->redirect_to('user.cgi');
+            }
+            my($private_key, undef, undef) = Thruk::Utils::APIKeys::create_key_from_req_params($c);
+            if($private_key) {
+                Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
+                $c->stash->{'new_private_key'} = $private_key;
+            }
+            return(user_page($c));
         }
         if($action eq 'remove_key') {
-            Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'key'});
+            if($c->check_user_roles("authorized_for_read_only")) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to delete API keys.' );
+                return $c->redirect_to('user.cgi');
+            }
+            Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'file'});
             Thruk::Utils::set_message( $c, 'success_message', 'API key removed' );
             return $c->redirect_to('user.cgi');
         }
         if($action eq 'save') {
             my $data = Thruk::Utils::get_user_data($c);
+            return unless Thruk::Utils::check_csrf($c);
             $data->{'tz'} = $c->req->parameters->{'timezone'};
             if(Thruk::Utils::store_user_data($c, $data)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Settings saved' );
@@ -117,9 +135,11 @@ sub user_page {
 
     Thruk::Utils::ssi_include($c, 'user');
 
-    $c->stash->{'profile_user'} = $c->user;
-    $c->stash->{api_keys} = Thruk::Utils::APIKeys::get_keys($c, $c->stash->{'remote_user'});
-    $c->stash->{template} = 'user_profile.tt';
+    $c->stash->{profile_user}    = $c->user;
+    $c->stash->{api_keys}        = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
+    $c->stash->{superuser_keys}  = $c->check_user_roles('admin') ? Thruk::Utils::APIKeys::get_superuser_keys($c) : [];
+    $c->stash->{available_roles} = $Thruk::Authentication::User::possible_roles;
+    $c->stash->{template}        = 'user_profile.tt';
 
     return 1;
 }

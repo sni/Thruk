@@ -45,7 +45,7 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
     in_check_period in_notification_period
 /];
 $Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
-    contacts contact_groups long_plugin_output
+    contacts contact_groups long_plugin_output services
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
@@ -93,16 +93,16 @@ create new manager
 
 =cut
 sub new {
-    my($class, $peer_config, $config, undef, undef, $thruk_config) = @_;
+    my($class, $peer_config, $thruk_config) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    my $options = $peer_config->{'options'};
+    confess("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
-        'live'                 => Monitoring::Livestatus::Class::Lite->new($peer_config),
-        'config'               => $config,
+        'live'                 => Monitoring::Livestatus::Class::Lite->new($options),
         'naemon_optimizations' => 0,
         'lmd_optimizations'    => 0,
-        'fetch_command'        => $config->{'logcache_fetchlogs_command'} || $thruk_config->{'logcache_fetchlogs_command'},
+        'fetch_command'        => $peer_config->{'logcache_fetchlogs_command'} || $thruk_config->{'logcache_fetchlogs_command'},
     };
     bless $self, $class;
 
@@ -173,6 +173,11 @@ send a raw query to the backend
 =cut
 sub _raw_query {
     my($self, $query) = @_;
+
+    # closing a socket sends SIGPIPE to reader
+    # https://riptutorial.com/posix/example/17424/handle-sigpipe-generated-by-write---in-a-thread-safe-manner
+    local $SIG{PIPE} = 'IGNORE';
+
     my($socket, $msg, undef) = $self->{'live'}->{'backend_obj'}->_send_socket_do($query);
     die($msg) if $msg;
     shutdown($socket, 1) if $query =~ m/^COMMAND/mx;
@@ -248,7 +253,6 @@ sub get_processinfo {
                      ->columns(@{$options{'columns'}})
                      ->options($options{'options'}))
                      ->hashref_pk('peer_key');
-        return $data if $ENV{'THRUK_SELECT'};
         return $data if $self->{'lmd_optimizations'};
     }
 
@@ -400,7 +404,6 @@ sub get_hosts {
 
     # get result
     my $data = $self->_get_table('hosts', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
 
     # set total size
     if(!$size && $self->{'optimized'}) {
@@ -437,7 +440,6 @@ sub get_hosts_by_servicequery {
     }
 
     my $data = $self->_get_table('services', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_hosts_by_servicequery() should not be called in scalar context");
     }
@@ -463,7 +465,6 @@ sub get_host_names{
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hosts', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -515,7 +516,6 @@ sub get_hostgroup_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -602,7 +602,6 @@ sub get_services {
 
     # get result
     my $data = $self->_get_table('services', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
 
     # set total size
     if(!$size && $self->{'optimized'}) {
@@ -634,7 +633,6 @@ sub get_service_names {
     }
     $options{'columns'} = [qw/description/];
     my $data = $self->_get_hash_table('services', 'description', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_service_names() should not be called in scalar context");
@@ -684,7 +682,6 @@ sub get_servicegroup_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_servicegroup_names() should not be called in scalar context");
@@ -781,10 +778,18 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
+    # replace auth filter with real filter
+    if(defined $options{'filter'}) {
+        for my $f (@{$options{'filter'}}) {
+            if(ref $f eq 'HASH' && $f->{'auth_filter'}) {
+                $f = $f->{'auth_filter'}->{'filter'};
+            }
+        }
+    }
     # try to reduce the amount of transfered data
     my($size, $limit);
     if(!$self->{'optimized'} && defined $options{'pager'} && !$options{'file'} && !defined $options{'options'}->{'limit'}) {
-        ($size, $limit) = $self->_get_query_size('log', \%options, 'time', 'time');
+        ($size, $limit) = $self->_get_query_size('log', \%options, 'time', 'DESC', 'time');
         if(defined $size) {
             # then set the limit for the real query
             $options{'options'}->{'limit'} = $limit;
@@ -865,7 +870,6 @@ sub get_timeperiod_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('timeperiods', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_timeperiods_names() should not be called in scalar context");
@@ -936,7 +940,6 @@ sub get_contact_names {
     }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('contacts', 'name', \%options);
-    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -964,7 +967,6 @@ sub get_host_stats {
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststats')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_host_stats() should not be called in scalar context");
         }
@@ -1030,7 +1032,6 @@ sub get_host_totals_stats {
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststatstotals')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_host_totals_stats() should not be called in scalar context");
         }
@@ -1070,7 +1071,6 @@ sub get_service_stats {
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestats')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_service_stats() should not be called in scalar context");
         }
@@ -1090,30 +1090,30 @@ sub get_service_stats {
         'ok_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
         'ok_and_disabled_active'            => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]}},
         'ok_and_disabled_passive'           => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]}},
-        'warning'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
-        'plain_warning'                     => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'warning_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+        'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
         'warning_and_disabled_active'       => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]}},
         'warning_and_disabled_passive'      => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]}},
-        'warning_and_ack'                   => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
-        'warning_on_down_host'              => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
-        'warning_and_unhandled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'critical'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
-        'plain_critical'                    => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'critical_and_scheduled'            => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'critical_and_disabled_active'      => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]}},
-        'critical_and_disabled_passive'     => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]}},
-        'critical_and_ack'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
-        'critical_on_down_host'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
-        'critical_and_unhandled'            => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'unknown'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3 ]}},
-        'plain_unknown'                     => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unknown_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unknown_and_disabled_active'       => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'state' => 3, 'active_checks_enabled' => 0 ]}},
-        'unknown_and_disabled_passive'      => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'state' => 3, 'active_checks_enabled' => 0 ]}},
-        'unknown_and_ack'                   => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'acknowledged' => 1 ]}},
-        'unknown_on_down_host'              => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
-        'unknown_and_unhandled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+        'warning_and_ack'                   => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
+        'warning_on_down_host'              => { -isa => { -and => [ 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
+        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+        'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'critical_and_disabled_active'      => { -isa => { -and => [ 'check_type' => 0, 'state' => 2, 'active_checks_enabled' => 0 ]}},
+        'critical_and_disabled_passive'     => { -isa => { -and => [ 'check_type' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]}},
+        'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+        'critical_on_down_host'             => { -isa => { -and => [ 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
+        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+        'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unknown_and_disabled_active'       => { -isa => { -and => [ 'check_type' => 0, 'state' => 3, 'active_checks_enabled' => 0 ]}},
+        'unknown_and_disabled_passive'      => { -isa => { -and => [ 'check_type' => 1, 'state' => 3, 'active_checks_enabled' => 0 ]}},
+        'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
+        'unknown_on_down_host'              => { -isa => { -and => [ 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
+        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
         'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
         'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
         'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
@@ -1145,7 +1145,6 @@ sub get_service_totals_stats {
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestatstotals')) {
         my $rows = $class->hashref_array();
-        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_service_totals_stats() should not be called in scalar context");
         }
@@ -1157,12 +1156,12 @@ sub get_service_totals_stats {
         'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
         'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
         'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
-        'warning'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1 ]}},
-        'warning_and_unhandled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'critical'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2 ]}},
-        'critical_and_unhandled'            => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'unknown'                           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3 ]}},
-        'unknown_and_unhandled'             => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
     ];
     $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
     return($self->get_service_totals_stats(%options));
@@ -1194,7 +1193,6 @@ sub get_performance_stats {
     my $minall = $options{'last_program_starts'}->{$self->peer_key()} || 0;
 
     my $data = {};
-    my $selects = [];
     for my $type (qw{hosts services}) {
         my $stats = [
             $type.'_active_sum'      => { -isa => { -and => [ 'check_type' => 0 ]}},
@@ -1214,11 +1212,7 @@ sub get_performance_stats {
         $options{'filter'} = $options{$type.'_filter'};
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
-        if($ENV{'THRUK_SELECT'}) {
-            push @{$selects}, $rows;
-        } else {
-            $data = { %{$data}, %{$rows->[0]} }
-        }
+        $data = { %{$data}, %{$rows->[0]} };
 
         # add stats for active checks
         $stats = [
@@ -1238,11 +1232,7 @@ sub get_performance_stats {
         $rows = $class
                     ->filter([ check_type => 0, has_been_checked => 1 ])
                     ->stats($stats)->hashref_array();
-        if($ENV{'THRUK_SELECT'}) {
-            push @{$selects}, $rows;
-        } else {
-            $data = { %{$data}, %{$rows->[0]} } if $rows->[0];
-        }
+        $data = { %{$data}, %{$rows->[0]} } if $rows->[0];
 
         # add stats for passive checks
         $stats = [
@@ -1253,14 +1243,9 @@ sub get_performance_stats {
         $class = $self->_get_class($type, \%options);
         $rows  = $class->filter([ check_type => 1, has_been_checked => 1 ])
                        ->stats($stats)->hashref_array();
-        if($ENV{'THRUK_SELECT'}) {
-            push @{$selects}, $rows;
-        } else {
-            $data  = { %{$data}, %{$rows->[0]} } if $rows->[0];
-        }
+        $data  = { %{$data}, %{$rows->[0]} } if $rows->[0];
     }
 
-    return $selects if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_performance_stats() should not be called in scalar context");
     }
@@ -1292,7 +1277,6 @@ sub get_extra_perf_stats {
                         log_messages log_messages_rate forks forks_rate
                   /)
                   ->hashref_array();
-    return $data if $ENV{'THRUK_SELECT'};
 
     if(defined $data) {
         $data = shift @{$data};

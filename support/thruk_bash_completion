@@ -64,7 +64,7 @@ _thruk()
         opts="-V -A -b -l --list-backends --local -y --yes -f --force -v -vv -vvv "$(_thruk_sub_commands)
 
     # thruk plugin ...
-    elif [[ $subcmd =~ plugin ]]; then
+    elif [[ $subcmd =~ ^plugin ]]; then
         # thruk plugin ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
             opts="$(_thruk_cmd_options $subcmd)"
@@ -83,7 +83,7 @@ _thruk()
         fi
 
     # thruk command ...
-    elif [[ $subcmd =~ command ]]; then
+    elif [[ $subcmd =~ ^command ]]; then
 
         # thruk command ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
@@ -95,7 +95,7 @@ _thruk()
         fi
 
     # thruk service ...
-    elif [[ $subcmd =~ service ]]; then
+    elif [[ $subcmd =~ ^service ]]; then
 
         # thruk service ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
@@ -103,7 +103,7 @@ _thruk()
         fi
 
     # thruk find ...
-    elif [[ $subcmd =~ find ]]; then
+    elif [[ $subcmd =~ ^find ]]; then
 
         # thruk find ...
         if [ ${#subcmdargs[@]} -eq 0 ]; then
@@ -134,7 +134,7 @@ _thruk()
         fi
 
     # thruk r|rest ...
-    elif [[ $subcmd =~ r|rest ]]; then
+    elif [[ $subcmd =~ ^r|rest ]]; then
         export COMP_WORD_JOINED="${COMP_WORDS[*]}";
         export COMP_CWORD;
         export COMP_LINE;
@@ -154,6 +154,7 @@ _thruk()
             opts="$(_thruk_cmd_options $subcmd)"
         fi
     fi
+
 
     if [ "x$opts" != "x" ]; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )

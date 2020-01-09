@@ -6,6 +6,7 @@
       <format bold='1' bg_color='silver' align='center'>
         [% FOREACH col = columns %]
         [% IF    col == "Hostname"   %]<cell width='30'>Hostname</cell>
+        [% ELSIF col == "Site"       %]<cell width='16'>Site</cell>
         [% ELSIF col == "Entry Time" %]<cell width='20'>Entry Time</cell>
         [% ELSIF col == "Author"     %]<cell width='16'>Author</cell>
         [% ELSIF col == "Comment"    %]<cell width='40'>Comment</cell>
@@ -21,6 +22,7 @@
       <row>
         [% FOREACH col = columns %]
         [% IF    col == "Hostname"   %]<cell>[% escape_xml(d.host_name) %]</cell>
+        [% ELSIF col == "Site"       %]<cell>[% escape_xml(d.peer_name) %]</cell>
         [% ELSIF col == "Entry Time" %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
         [% ELSIF col == "Author"     %]<cell>[% escape_xml(d.author) %]</cell>
         [% ELSIF col == "Comment"    %]<cell>[% escape_xml(d.comment) %]</cell>

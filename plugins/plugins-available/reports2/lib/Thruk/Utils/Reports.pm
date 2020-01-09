@@ -28,7 +28,6 @@ use Encode qw(encode_utf8 decode_utf8 encode);
 use Storable qw/dclone/;
 use File::Temp qw/tempfile/;
 use Cwd ();
-use Digest::MD5 qw(md5_hex);
 use Time::HiRes qw/sleep/;
 use POSIX ();
 
@@ -196,9 +195,6 @@ sub report_send {
     $report->{'desc'} = $desc if $to;
     $c->stash->{'r'} = $report;
 
-    local $SIG{CHLD} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
-
     my $attachment;
     if($skip_generate) {
         $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
@@ -314,6 +310,15 @@ sub report_send {
         );
     }
 
+    if($report->{'var'}->{'json_file'} && -e $report->{'var'}->{'json_file'}) {
+        $msg->attach(Type    => 'text/json',
+                 Path        => $report->{'var'}->{'json_file'},
+                 Filename    => encode_utf8(Thruk::Utils::basename($report->{'var'}->{'json_file'})),
+                 Disposition => 'attachment',
+                 Encoding    => 'base64',
+        );
+    }
+
     if($ENV{'THRUK_MAIL_TEST'}) {
         $msg->send_by_testfile($ENV{'THRUK_MAIL_TEST'});
         return 1;
@@ -378,7 +383,7 @@ sub report_remove {
     clean_report_tmp_files($c, $nr);
 
     my $index_file = $c->config->{'var_path'}.'/reports/.index';
-    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, 1, 1);
+    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
 
     # remove cron entries
     update_cron_file($c);
@@ -450,9 +455,14 @@ sub generate_report {
 
     $c->req->parameters->{'debug'} = 1 if $ENV{'THRUK_REPORT_DEBUG'};
 
-    Thruk::Utils::set_user($c, $options->{'user'});
-    local $ENV{'REMOTE_USER'} = $options->{'user'};
-    $c->stash->{'remote_user'} = $options->{'user'};
+    # report should always run in the report owner context
+    if(!$c->user_exists || ($options->{'user'} ne $c->user->{'username'})) {
+        Thruk::Utils::set_user($c,
+            username => $options->{'user'},
+            auth_src => "report",
+            force    => 1,
+        );
+    }
 
     $c->stash->{'refresh_rate'}   = 0;
     $c->stash->{'no_auto_reload'} = 1;
@@ -464,6 +474,10 @@ sub generate_report {
     if($options->{'var'}->{'debug_file'}) {
         unlink($options->{'var'}->{'debug_file'});
         undef($options->{'var'}->{'debug_file'});
+    }
+    if($options->{'var'}->{'json_file'}) {
+        unlink($options->{'var'}->{'json_file'});
+        undef($options->{'var'}->{'json_file'});
     }
 
     # empty logfile
@@ -551,7 +565,7 @@ sub generate_report {
     my $orig_stat_ttl = $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'};
     $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = 0;
 
-    # prepage stage, functions here could still change stash
+    # prepare stage, functions here could still change stash
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 5, 'preparing') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'prepare';
@@ -611,6 +625,15 @@ sub generate_report {
         }
     }
 
+    if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
+        my $json_attachment = $c->config->{'var_path'}.'/reports/'.$nr.'.json';
+        my $json = {};
+        $json->{'outages'}      = $c->stash->{'last_outages'} if $c->stash->{'last_outages'};
+        $json->{'availability'} = $c->stash->{'last_availability'} if $c->stash->{'last_availability'};
+        Thruk::Utils::IO::json_lock_store($json_attachment, $json);
+        Thruk::Utils::IO::json_lock_patch($report_file, { var => { json_file => $json_attachment } }, { pretty => 1 });
+    }
+
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 95, 'clean up') if $ENV{'THRUK_JOB_DIR'};
 
     # clean up tmp files
@@ -623,7 +646,7 @@ sub generate_report {
         if($debug_file) {
             my $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
             if(-s $debug_file > 1000000) {
-                `gzip $debug_file >/dev/null 2>&1`;
+                Thruk::Utils::IO::cmd("gzip $debug_file >/dev/null 2>&1");
                 if(!-s $debug_file && -s $debug_file.'.gz') {
                     $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg.gz';
                     move($debug_file.'.gz', $rpt_debug_file);
@@ -632,7 +655,7 @@ sub generate_report {
                 move($debug_file, $rpt_debug_file);
             }
             my $patch = {};
-            Thruk::Utils::IO::json_lock_patch($report_file, { var => { debug_file => $rpt_debug_file } }, 1);
+            Thruk::Utils::IO::json_lock_patch($report_file, { var => { debug_file => $rpt_debug_file } }, { pretty => 1 });
         }
     }
 
@@ -647,13 +670,13 @@ sub generate_report {
         if($c->stash->{'param'}->{'mail_max_level_count'} > 0) {
             $send_mail_threshold_reached = 1;
         }
-        Thruk::Utils::IO::json_lock_patch($report_file, { var => { send_mail_threshold_reached => $send_mail_threshold_reached } }, 1);
+        Thruk::Utils::IO::json_lock_patch($report_file, { var => { send_mail_threshold_reached => $send_mail_threshold_reached } }, { pretty => 1 });
     }
 
     if($options->{'var'}->{'send_mails_next_time'} && $send_mail_threshold_reached) {
         report_send($c, $nr, 1);
     }
-    Thruk::Utils::IO::json_lock_patch($report_file, { var => { send_mails_next_time => undef } }, 1);
+    Thruk::Utils::IO::json_lock_patch($report_file, { var => { send_mails_next_time => undef } }, { pretty => 1 });
 
 
     # update report runtime data
@@ -745,8 +768,13 @@ sub generate_report_background {
 
     $report = _read_report_file($c, $report_nr) unless $report;
 
-    if(!defined $c->stash->{'remote_user'}) {
-        Thruk::Utils::set_user($c, $report->{'user'});
+    # report should always run in the report owner context
+    if(!$c->user_exists || ($report->{'user'} ne $c->user->{'username'})) {
+        Thruk::Utils::set_user($c,
+            username => $report->{'user'},
+            auth_src => "report",
+            force    => 1,
+        );
     }
 
     set_running($c, $report_nr, $$, time());
@@ -807,6 +835,9 @@ sub get_report_data_from_param {
             $p->{$1} = -1;
         }
     }
+    for my $key (qw/t1 t2/) {
+        $p->{$key} = $params->{$key} if defined $params->{$key};
+    }
 
     # only save backends if checkbox checked
     if(!$params->{'backends_toggle'} && !$params->{'report_backends_toggle'}) {
@@ -852,6 +883,7 @@ sub update_cron_file {
         next unless scalar @{$r->{'send_types'}} > 0;
         for my $st (@{$r->{'send_types'}}) {
             my $time = Thruk::Utils::get_cron_time_entry($st);
+            next unless defined $time;
             $combined_entries->{$time} = [] unless $combined_entries->{$time};
             push @{$combined_entries->{$time}}, $r->{'nr'};
         }
@@ -861,10 +893,6 @@ sub update_cron_file {
         my $cmd = _get_report_cmd($c, $combined_entries->{$time});
         push @{$cron_entries}, [$time, $cmd];
     }
-
-    # REMOVE AFTER: 01.01.2020
-    unlink(glob($c->config->{'var_path'}.'/reports/report*.sh'));
-    # </REMOVE AFTER>
 
     Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);
     return 1;
@@ -892,14 +920,14 @@ sub set_running {
         $update->{'var'}->{'is_running'} = $val;
         if($val == 0) {
             $update->{'var'}->{'running_node'} = undef;
-            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, 1, 1);
+            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
         } else {
             $update->{'var'}->{'running_node'} = $Thruk::NODE_ID;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => {
                                         is_running   => $val,
                                         running_node => $Thruk::NODE_ID,
                                         is_waiting   => undef,
-                                    }}, 1, 1);
+                                    }}, { pretty => 1 });
         }
     }
     $update->{'var'}->{'start_time'} = $start if defined $start;
@@ -911,7 +939,7 @@ sub set_running {
     $update->{'var'}->{'ctype'}      = $Thruk::Utils::PDF::ctype      if $Thruk::Utils::PDF::ctype;
 
     my $report_file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
-    Thruk::Utils::IO::json_lock_patch($report_file, $update, 1);
+    Thruk::Utils::IO::json_lock_patch($report_file, $update, { pretty => 1 });
     return;
 }
 
@@ -930,12 +958,12 @@ sub set_waiting {
 
     my $update = {};
     $update->{'var'}->{'is_waiting'} = ($waiting || undef);
-    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_waiting => ($waiting||undef) }}, 1, 1) if defined $waiting;
+    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_waiting => ($waiting||undef) }}, { pretty => 1 }) if defined $waiting;
     if(defined $with_mails) {
         $update->{'var'}->{'send_mails_next_time'} = $with_mails ? 1 : undef;
     }
     my $report_file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
-    Thruk::Utils::IO::json_lock_patch($report_file, $update, 1);
+    Thruk::Utils::IO::json_lock_patch($report_file, $update, { pretty => 1 });
     return;
 }
 
@@ -1150,7 +1178,12 @@ sub _report_save {
         confess("tried to save empty report");
     }
 
-    Thruk::Utils::IO::json_store($file, $report, 1);
+    if($report->{'params'}->{'timeperiod'} && $report->{'params'}->{'timeperiod'} ne 'custom') {
+        delete $report->{'params'}->{'t1'};
+        delete $report->{'params'}->{'t2'};
+    }
+
+    Thruk::Utils::IO::json_store($file, $report, { pretty => 1 });
 
     $report->{'backends_hash'} = $report->{'backends'};
 
@@ -1233,18 +1266,18 @@ sub _read_report_file {
     # check if its really running
     if($report->{'var'}->{'is_running'} == -1 && $report->{'var'}->{'start_time'} < time() - 10) {
         $report->{'var'}->{'is_running'} = 0;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, 1, 1);
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
         $needs_save = 1;
     }
     if($report->{'var'}->{'is_running'} > 0 && $c->cluster->kill($c, $report->{'var'}->{'running_node'}, 0, $report->{'var'}->{'is_running'}) != 1) {
         $report->{'var'}->{'is_running'} = 0;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, 1, 1);
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
         $needs_save = 1;
     }
     if($ENV{'THRUK_REPORT_PARENT'} && $report->{'var'}->{'is_running'} == $ENV{'THRUK_REPORT_PARENT'}) {
         $report->{'var'}->{'is_running'} = $$;
         $report->{'var'}->{'running_node'} = $Thruk::NODE_ID;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::NODE_ID, is_waiting => undef }}, 1, 1);
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::NODE_ID, is_waiting => undef }}, { pretty => 1 });
         $needs_save = 1;
     }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
@@ -1269,6 +1302,10 @@ sub _read_report_file {
         delete $report->{'var'}->{'debug_file'};
         $needs_save = 1;
     }
+    if($report->{'var'}->{'json_file'} && !-e $report->{'var'}->{'json_file'}) {
+        delete $report->{'var'}->{'json_file'};
+        $needs_save = 1;
+    }
 
     # failed?
     $report->{'failed'} = 0;
@@ -1280,7 +1317,7 @@ sub _read_report_file {
         if($report->{'error'} =~ m%\S+%mx) {
             $report->{'failed'} = 1;
             $report->{'var'}->{'is_running'} = 0;
-            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, 1, 1);
+            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
         }
 
         # nice error message
@@ -1298,7 +1335,6 @@ sub _read_report_file {
         if(!$report->{'long_error'} && $report->{'error'} =~ m/\n/mx) {
             ($report->{'error'}, $report->{'long_error'}) = split(/\n/mx, $report->{'error'}, 2);
         }
-        $needs_save = 1 if $report->{'error'};
     }
 
     # preset values from data
@@ -1433,7 +1469,7 @@ sub _convert_to_pdf {
     Thruk::Utils::IO::close($fh, $htmlfile);
 
     if($htmlonly) {
-        `touch $attachment`;
+        Thruk::Utils::IO::touch($attachment);
         return;
     }
 
@@ -1445,14 +1481,14 @@ sub _convert_to_pdf {
 
     local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
-    my $out = `$cmd 2>&1`;
+    my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
     # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
         my $error = read_file($logfile);
         if($error eq "") { $error = $out; }
         if($error =~ m/QPainter::begin/mx) {
-            `$cmd`;
+            $out = Thruk::Utils::IO::cmd($cmd);
         }
         if($error eq "") {
             $error = "failed to produce a pdf file without any error message.\npwd: ".Cwd::getcwd()."\ncmdline:\n$cmd";

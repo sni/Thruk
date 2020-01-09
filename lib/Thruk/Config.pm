@@ -9,6 +9,7 @@ use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::Broadcast ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -28,7 +29,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.26';
+our $VERSION = '2.32';
 
 my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '2';
@@ -46,7 +47,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'December 18, 2018',
+              'released'               => 'October 25, 2019',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -99,6 +100,8 @@ our %config = ('name'                   => 'Thruk',
                                           'uniqnumber'          => \&Thruk::Utils::Filter::uniqnumber,
                                           'replace_macros'      => \&Thruk::Utils::Filter::replace_macros,
                                           'set_time_locale'     => \&Thruk::Utils::Filter::set_time_locale,
+                                          'debug'               => \&Thruk::Utils::Filter::debug,
+                                          'dump'                => \&Thruk::Utils::Filter::debug,
                                           'calculate_first_notification_delay_remaining' => \&Thruk::Utils::Filter::calculate_first_notification_delay_remaining,
                                           'has_business_process' => \&Thruk::Utils::Filter::has_business_process,
                                           'set_favicon_counter' => \&Thruk::Utils::Status::set_favicon_counter,
@@ -118,6 +121,7 @@ our %config = ('name'                   => 'Thruk',
                                           'command_disabled'    => \&Thruk::Utils::command_disabled,
                                           'proxifiy_url'        => \&Thruk::Utils::proxifiy_url,
                                           'get_remote_thruk_url'=> \&Thruk::Utils::get_remote_thruk_url,
+                                          'basename'            => \&Thruk::Utils::basename,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
@@ -135,6 +139,7 @@ our %config = ('name'                   => 'Thruk',
                                           'auto_reload_fn' => '',
                                           'page'           => '',
                                           'title'          => '',
+                                          'extrahtmlclass' => '',
                                           'extrabodyclass' => '',
                                           'remote_user'    => '?',
                                           'infoBoxTitle'   => '',
@@ -168,9 +173,8 @@ our %config = ('name'                   => 'Thruk',
                                           'default_user_timezone' => 'Server Setting',
                                           'play_sounds'    => 0,
                                           'fav_counter'    => 0,
-                                          'menu_states'      => {},
-                                          'menu_states_json' => "{}",
-                                          'cookie_auth'      => 0,
+                                          'menu_states'    => {},
+                                          'cookie_auth'    => 0,
                                           'space'          => ' ',
                                           'debug_info'     => '',
                                           'bodyonload'     => 1,
@@ -187,10 +191,10 @@ our %config = ('name'                   => 'Thruk',
                                           },
                                           'physical_logo_path' => [],
                                           'all_in_one_javascript' => [
-                                              'vendor/jquery-3.3.1.min.js',
+                                              'vendor/jquery-3.4.1.min.js',
                                               'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
-                                              'vendor/daterangepicker-3.0.3/moment.min.js',
-                                              'vendor/daterangepicker-3.0.3/daterangepicker.js',
+                                              'vendor/daterangepicker-3.0.5/moment.min.js',
+                                              'vendor/daterangepicker-3.0.5/daterangepicker.js',
                                               'vendor/overlib-4.21.js',
                                               'vendor/strftime-min-1.3.js',
                                           ],
@@ -218,13 +222,14 @@ our %config = ('name'                   => 'Thruk',
                                           },
                                           'jquery_ui' => '1.12.1',
                                           'all_in_one_javascript_panorama' => [
-                                              'vendor/jquery-3.3.1.min.js',
+                                              'vendor/jquery-3.4.1.min.js',
                                               'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'vendor/extjs_ux/form/MultiSelect.js',
                                               'vendor/extjs_ux/form/ItemSelector.js',
                                               'vendor/extjs_ux/chart/series/KPIGauge.js',
                                               'vendor/sprintf-ef8258f.js',
                                               'vendor/bigscreen-2.0.4.js',
+                                              'vendor/overlib-4.21.js',
                                               'vendor/strftime-min-1.3.js',
                                               'vendor/openlayer-2.13.1/OpenLayers-2.13.1.js',
                                               'vendor/geoext2-2.0.2/src/GeoExt/Version.js',
@@ -306,7 +311,7 @@ sub get_config {
                     if($ext ne 'conf' && $ext ne 'cfg') {
                         # only read if the extension matches the hostname
                         our $hostname;
-                        if(!$hostname) { $hostname = `hostname`; chomp($hostname); }
+                        chomp($hostname = Thruk::Utils::IO::cmd("hostname")) unless $hostname;
                         if($tmpfile !~ m/\Q$hostname\E$/mx) {
                             if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
                                 print STDERR "skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'\n";
@@ -424,12 +429,14 @@ sub set_default_config {
         cluster_node_stale_timeout      => 120,
         rest_api_enabled                => 1,
         api_keys_enabled                => 1,
+        max_api_keys_per_user           => 10,
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,
         connection_pool_size            => undef,
         product_prefix                  => 'thruk',
         maximum_search_boxes            => 9,
+        search_long_plugin_output       => 1,
         shown_inline_pnp                => 1,
         use_feature_trends              => 1,
         use_wait_feature                => 1,
@@ -477,7 +484,7 @@ sub set_default_config {
         use_bookmark_titles             => 0,
         use_dynamic_titles              => 1,
         use_new_command_box             => 1,
-        all_problems_link               => $config->{'url_prefix'}."cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
+        all_problems_link               => $config->{'url_prefix'}."cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems",
         show_long_plugin_output         => 'popup',
         info_popup_event_type           => 'onclick',
         info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
@@ -504,6 +511,8 @@ sub set_default_config {
                     persistent_ack         => 0,
                     ptc                    => 0,
                     use_expire             => 0,
+                    childoptions           => 0,
+                    hostserviceoptions     => 0,
         },
         command_disabled                    => {},
         command_enabled                     => {},
@@ -565,7 +574,9 @@ sub set_default_config {
         'grafana_default_panelId'           => 1,
         'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
         'http_backend_reverse_proxy'        => 1,
-        'logcache_delta_updates'            => 1,
+        'logcache_delta_updates'            => 0,
+        'slow_page_log_threshold'           => 15,
+        'resource_file'                     => [],
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -692,13 +703,12 @@ sub get_git_name {
     my $project_root = $INC{'Thruk/Config.pm'};
     $project_root =~ s/\/Config\.pm$//gmx;
     return '' unless -d $project_root.'/../../.git';
-    my($tag, $hash, $branch);
+    my($hash);
     my $dir = Cwd::getcwd;
     chdir($project_root.'/../../');
 
     # directly on git tag?
-    $tag = `git describe --tag --exact-match 2>&1`;
-    my $rc = $?;
+    my($rc, $tag) = Thruk::Utils::IO::cmd("git describe --tag --exact-match 2>&1");
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
@@ -706,10 +716,10 @@ sub get_git_name {
         return '';
     }
 
-    chomp($branch = `git branch --no-color 2>/dev/null`);
+    my $branch = Thruk::Utils::IO::cmd("git branch --no-color 2>/dev/null");
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$hash) {
-        chomp($hash = `git log -1 --no-color --pretty=format:%h 2> /dev/null`);
+        $hash = Thruk::Utils::IO::cmd("git log -1 --no-color --pretty=format:%h 2> /dev/null");
     }
     chdir($dir);
     if($branch eq 'master') {
@@ -993,7 +1003,7 @@ sub _do_finalize_config {
 
     # make this setting available in env
     ## no critic
-    $ENV{'THRUK_CURL'} = $config->{'use_curl'} ? 1 : 0;
+    $ENV{'THRUK_CURL'} = $ENV{'THRUK_CURL'} || $config->{'use_curl'} || 0;
     ## use critic
 
     if($config->{'action_menu_apply'}) {
@@ -1041,8 +1051,9 @@ sub _do_finalize_config {
     if($ENV{'OMD_ROOT'}) {
         my $site = $ENV{'OMD_SITE'};
         my $root = $ENV{'OMD_ROOT'};
-        my($siteport) = (`grep CONFIG_APACHE_TCP_PORT $root/etc/omd/site.conf` =~ m/(\d+)/mx);
-        my($ssl)      = (`grep CONFIG_APACHE_MODE     $root/etc/omd/site.conf` =~ m/'(\w+)'/mx);
+        my $site_config = _parse_omd_site_config($root."/etc/omd/site.conf");
+        my $siteport    = $site_config->{'CONFIG_APACHE_TCP_PORT'};
+        my $ssl         = $site_config->{'CONFIG_APACHE_MODE'};
         my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
         $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
         # bypass system reverse proxy for restricted cgi for permormance and locking reasons
@@ -1239,7 +1250,10 @@ sub _parse_rows {
             }
         }
         if(substr($v,0,1) eq '"') {
-            $v =~ s|^"([^"]*)"$|$1|gmxo;
+            $v =~ s|^"(.*)"$|$1|gmxo;
+        }
+        elsif(substr($v,0,1) eq "'") {
+            $v =~ s|^'(.*)'$|$1|gmxo;
         }
         if(!defined $conf->{$k}) {
             $conf->{$k} = $v;
@@ -1320,5 +1334,104 @@ sub load_any {
 }
 
 ########################################
+
+=head2 read_cgi_cfg
+
+  read_cgi_cfg($c, $config);
+
+parse the cgi.cfg and put it into $c->config
+
+=cut
+sub read_cgi_cfg {
+    my($c, $config) = @_;
+    $config = $c->config unless defined $config;
+
+    $c->stats->profile(begin => "Config::read_cgi_cfg()") if defined $c;
+
+    # read only if its changed
+    my $file = $config->{'cgi.cfg'};
+    if(!defined $file || $file eq '') {
+        $config->{'cgi_cfg'} = 'undef';
+        if(defined $c) {
+            $c->log->error("cgi.cfg not set");
+            $c->error("cgi.cfg not set");
+            return $c->detach('/error/index/4');
+        }
+        print STDERR "cgi.cfg option must be set in thruk.conf or thruk_local.conf\n\n";
+        return;
+    }
+    elsif( -r $file ) {
+        # perfect, file exists and is readable
+    }
+    elsif(-r $config->{'project_root'}.'/'.$file) {
+        $file = $config->{'project_root'}.'/'.$file;
+    }
+    else {
+        if(defined $c) {
+            $c->log->error("cgi.cfg not readable: ".$!);
+            $c->error("cgi.cfg not readable: ".$!);
+            return $c->detach('/error/index/4');
+        }
+        print STDERR "$file not readable: ".$!."\n\n";
+        return;
+    }
+
+    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
+    my @cgi_cfg_stat = stat($file);
+
+    my $last_stat = $config->{'cgi_cfg_stat'};
+    if(!defined $last_stat
+       || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
+       || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
+      ) {
+        $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
+        $c->log->debug("reading $file") if defined $c;
+        $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
+        $config->{'cgi.cfg_effective'} = $file;
+        $config->{'cgi_cfg_orig'}      = Thruk::Config::read_config_file($file);
+        $config->{'cgi_cfg'}           = $config->{'cgi_cfg_orig'};
+    }
+
+    $c->stats->profile(end => "Config::read_cgi_cfg()") if defined $c;
+
+    return 1;
+}
+
+########################################
+
+=head2 merge_cgi_cfg
+
+  merge_cgi_cfg($config)
+
+merge entries from $config into $config->{'cgi_cfg'}
+
+=cut
+sub merge_cgi_cfg {
+    my($config) = @_;
+
+    $config->{'cgi_cfg'} = $config->{'cgi_cfg_orig'};
+    my @keys = qw/show_context_help refresh_rate escape_html_tags
+                  action_url_target notes_url_target lock_author_names
+                  host_unreachable_sound host_down_sound
+                  service_critical_sound service_warning_sound service_unknown_sound
+                /;
+    for my $key (@keys) {
+        $config->{'cgi_cfg'}->{$key} = $config->{$key} if defined $config->{$key};
+    }
+    return;
+}
+
+########################################
+# parses omd sites key/value config file
+sub _parse_omd_site_config {
+    my($file) = @_;
+    my $site_config = {};
+    for my $line (read_file($file)) {
+        if($line =~ m/^(CONFIG_.*?)='([^']*)'$/mx) {
+            $site_config->{$1} = $2;
+        }
+    }
+    return($site_config);
+}
 
 1;

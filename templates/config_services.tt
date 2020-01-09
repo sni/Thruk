@@ -71,15 +71,15 @@
   </tr>
 
   [% FOREACH d = data %]
-  [% SET pd = d.peer_key %]
+  [% SET pd = d.peer_key.list.0 %]
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.host_name _ "_" _ d.description %]
   <tr class='[% class %]' id="[% name2id(d.host_name _ "_" _ d.description, 'service') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
-        [% IF d.backend.peer_name.size < backends.size %]
-          [% d.backend.peer_name.join(', ') %]
+        [% IF d.peer_key.size < backends.size %]
+          [% d.peer_name.join(', ') %]
         [% ELSE %]
         <i>all</i>
         [% END %]

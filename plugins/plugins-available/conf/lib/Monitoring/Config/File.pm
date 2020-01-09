@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
-use File::Slurp;
+use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8 decode);
 use Thruk::Utils;
 use Thruk::Utils::Conf;
@@ -41,11 +41,13 @@ sub new {
         'display'      => $remotepath || $file,
         'backup'       => '',
         'mtime'        => undef,
-        'md5'          => undef,
+        'hex'          => undef,
         'inode'        => 0,
         'parsed'       => 0,
         'changed'      => 0,
         'readonly'     => 0,
+        'readonly_from_pattern' => 0,
+        'readonly_from_file'    => 0,
         'lines'        => 0,
         'is_new_file'  => 0,
         'deleted'      => 0,
@@ -101,7 +103,7 @@ sub update_objects {
     my ( $self ) = @_;
 
     return unless $self->{'parsed'} == 0;
-    return unless defined $self->{'md5'};
+    return unless defined $self->{'hex'};
 
     my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
     $self->update_objects_from_text($text);
@@ -134,6 +136,7 @@ sub update_objects_from_text {
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
     $self->{'comments'}     = [];
+    $self->{'readonly_from_file'} = 0;
 
     my $linenr = 0;
     my $buffer = '';
@@ -163,7 +166,7 @@ sub update_objects_from_text {
 
         if($linenr < 10) {
             if($line =~ m/^\#\s*thruk:\s*readonly/mxo) {
-                $self->{'readonly'} = 1;
+                $self->{'readonly_from_file'} = 1;
             }
         }
 
@@ -195,14 +198,14 @@ sub update_objects_from_text {
         # old object finished
         if($first_char eq '}' || ($in_disabled_object && $line =~ m/^(;|\#)\s*}$/mxo)) {
             unless(defined $current_object) {
-                push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 next;
             }
             $current_object->{'comments'}     = $comments;
             $current_object->{'inl_comments'} = $inl_comments;
             $current_object->{'line2'}        = $linenr;
             my $parse_errors = $current_object->parse();
-            if(scalar @{$parse_errors} > 0) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
+            if(scalar @{$parse_errors} > 0 && !$in_disabled_object) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
             $current_object->{'id'} = $current_object->_make_id();
             push @{$self->{'objects'}}, $current_object;
             undef $current_object;
@@ -218,7 +221,7 @@ sub update_objects_from_text {
             $in_disabled_object = $1 ? 1 : 0;
             $current_object = Monitoring::Config::Object->new(type => $2, file => $self, line => $linenr, 'coretype' => $self->{'coretype'}, disabled => $in_disabled_object);
             unless(defined $current_object) {
-                push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 $in_unknown_object  = 1;
             }
             next;
@@ -250,19 +253,19 @@ sub update_objects_from_text {
                 }
                 if(defined $timedef) {
                     if(defined $current_object->{'conf'}->{$timedef} and $current_object->{'conf'}->{$timedef} ne $timeranges) {
-                        push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                        push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                     }
                     $current_object->{'conf'}->{$timedef} = $timeranges;
                     if(defined $inl_comments->{$key} and $key ne $timedef) {
                         $inl_comments->{$timedef} = delete $inl_comments->{$key};
                     }
                 } else {
-                    push @{$self->{'parse_errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 }
             }
             else {
                 if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value and substr($key, 0, 1) ne '#') {
-                    push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 }
                 $current_object->{'conf'}->{$key} = $value;
 
@@ -283,11 +286,11 @@ sub update_objects_from_text {
                 } elsif($key =~ /^[a-z0-9_]+$/mx) {
                     # Ignore cfg_dir, cfg_file, ...
                 } else {
-                    push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
                 }
             # something totally unknown
             } else {
-                push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr) unless $in_disabled_object;
             }
             next;
         }
@@ -296,7 +299,7 @@ sub update_objects_from_text {
     $self->{'lines'} = $linenr; # set line counter
 
     if(defined $current_object or $in_unknown_object) {
-        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$linenr;
+        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$linenr unless $in_disabled_object;
     }
 
     # add trailing comments to last object
@@ -311,6 +314,7 @@ sub update_objects_from_text {
 
     $self->{'parsed'}  = 1;
     $self->{'changed'} = 1;
+    $self->{'readonly'} = $self->{'readonly_from_pattern'} || $self->{'readonly_from_file'} || 0;
 
     # return object for given line
     if(defined $lastline) {
@@ -365,14 +369,16 @@ updates the readonly status for this file
 =cut
 sub update_readonly_status {
     my($self, $readonlypattern) = @_;
+    $self->{'readonly_from_pattern'} = 0;
     if(defined $readonlypattern) {
         for my $p ( ref $readonlypattern eq 'ARRAY' ? @{$readonlypattern} : ($readonlypattern) ) {
             if($self->{'path'} =~ m|$p|mx) {
-                $self->{'readonly'} = 1;
+                $self->{'readonly_from_pattern'} = 1;
                 last;
             }
         }
     }
+    $self->{'readonly'} = $self->{'readonly_from_pattern'} || $self->{'readonly_from_file'} || 0;
     return $self->{'readonly'};
 }
 
@@ -390,7 +396,7 @@ sub get_meta_data {
     my $meta = {
         'mtime' => undef,
         'inode' => undef,
-        'md5'   => undef,
+        'hex'   => undef,
     };
     if($self->{'is_new_file'}) {
         return $meta;
@@ -400,12 +406,8 @@ sub get_meta_data {
         return $meta;
     }
 
-    # md5 hex
-    my $ctx = Digest::MD5->new;
-    open(my $fh, '<', $self->{'path'});
-    $ctx->addfile($fh);
-    $meta->{'md5'} = $ctx->hexdigest;
-    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
+    # hex digest
+    $meta->{'hex'} = Thruk::Utils::Crypt::hexdigest(scalar read_file($self->{'path'}));
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -480,15 +482,19 @@ get diff of changes
 
 =cut
 sub diff {
-    my ( $self ) = @_;
+    my($self, $ignore_whitespace) = @_;
 
     my ($fh, $filename) = tempfile();
     my $content         = $self->get_new_file_content();
     print $fh $content;
     CORE::close($fh);
 
+    my $options = "-Nu";
+    if($ignore_whitespace) {
+        $options = $options."w";
+    }
+    my $cmd = 'diff '.$options.' "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
     my $diff = "";
-    my $cmd = 'diff -wuN "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
     open(my $ph, '-|', $cmd);
     while(<$ph>) {
         my $line = $_;
@@ -508,7 +514,7 @@ sub diff {
 sub _update_meta_data {
     my ( $self ) = @_;
     my $meta = $self->get_meta_data();
-    $self->{'md5'}   = $meta->{'md5'};
+    $self->{'hex'}   = $meta->{'hex'};
     $self->{'mtime'} = $meta->{'mtime'};
     $self->{'inode'} = $meta->{'inode'};
     return $meta;

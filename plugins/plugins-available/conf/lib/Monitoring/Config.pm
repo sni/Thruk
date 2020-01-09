@@ -63,6 +63,8 @@ $Monitoring::Config::save_options = {
 };
 $Monitoring::Config::key_sort = undef;
 
+$Monitoring::Config::plugin_pathspec = '(/plugins/|/libexec/|/monitoring\-plugins/)';
+
 ##########################################################
 
 =head2 new
@@ -71,7 +73,7 @@ $Monitoring::Config::key_sort = undef;
         core_conf           => path to core config
         obj_file            => path to core config file
         obj_dir             => path to core config path
-        obj_resource_file   => path to resource.cfg file
+        obj_resource_file   => paths to resource.cfg file
         obj_readonly        => readonly pattern
         obj_exclude         => exclude pattern
         git_base_dir        => git history base folder
@@ -135,7 +137,7 @@ sub init {
     if(defined $remotepeer and lc($remotepeer->{'type'}) eq 'http') {
         $self->{'remotepeer'} = $remotepeer;
     }
-    $self->{'stats'}      = $stats if defined $stats;
+    $self->{'stats'} = $stats if defined $stats;
 
     # some keys might have been changed in the thruk_local.conf, so update them
     for my $key (qw/git_base_dir/) {
@@ -143,10 +145,8 @@ sub init {
     }
 
     # update readonly config
-    my $readonly_changed = 0;
     if($self->_array_diff($self->_list($self->{'config'}->{'obj_readonly'}), $self->_list($config->{'obj_readonly'}))) {
         $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
-        $readonly_changed = 1;
 
         # update all readonly file settings
         for my $file (@{$self->{'files'}}) {
@@ -198,6 +198,7 @@ Forget all changes made so far and not yet saved to disk
 =cut
 sub discard_changes {
     my($self) = @_;
+    $self->{'logs'} = []; # clear audit log stash
     $self->check_files_changed(1);
     return;
 }
@@ -231,7 +232,7 @@ sub commit {
         $c->log->debug("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('pre save hook out: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre_obj_save_cmd hook!\n".$out );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "Save canceled by pre_obj_save_cmd hook!\n".$out, escape => 0 });
             return;
         }
         $c->log->debug('pre save hook out: '.$out);
@@ -308,12 +309,13 @@ sub commit {
         $c->log->debug("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             $c->log->info('post save hook out: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', "post_obj_save_cmd hook failed!\n".$out );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "post_obj_save_cmd hook failed!\n".$out, escape => 0 });
             return;
         }
         $c->log->debug('post save hook out: '.$out);
     }
 
+    $self->_rebuild_index(); # also checks files again for errors
     return $rc;
 }
 
@@ -1310,6 +1312,7 @@ sub gather_references {
                     $r2 =~ s/^\+//gmx;
                     $r2 =~ s/^\!//gmx;
                 }
+                next if $r2 eq '';
                 $outgoing->{$type}->{$r2} = '';
                 $count++;
             }
@@ -1336,6 +1339,7 @@ return all references for this object
 sub get_references {
     my($self, $obj, $name) = @_;
     $name = $obj->get_name() unless defined $name;
+    $name = '' unless defined $name;
 
     my $type = $obj->get_type();
     my $list = {};
@@ -1519,7 +1523,7 @@ sub _set_config {
     if($self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_file'}          = [];
         $self->{'config'}->{'obj_dir'}           = [];
-        $self->{'config'}->{'obj_resource_file'} = undef;
+        $self->{'config'}->{'obj_resource_file'} = [];
 
         my $core_conf = $self->{'config'}->{'core_conf'};
         if(defined $ENV{'OMD_ROOT'}
@@ -1611,7 +1615,7 @@ sub _update_core_conf {
             push @{$self->{'config'}->{'obj_dir'}}, $self->_resolve_relative_path($value, $basedir);
         }
         if($key eq 'resource_file') {
-            $self->{'config'}->{'obj_resource_file'} = $self->_resolve_relative_path($value, $basedir);
+            push @{$self->{'config'}->{'obj_resource_file'}}, $self->_resolve_relative_path($value, $basedir);
         }
     }
     CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
@@ -1903,7 +1907,7 @@ sub _check_files_changed {
 # returns:
 #   0 if file did not change
 #   1 if file is new / created
-#   2 if md5 sum changed
+#   2 if hexdigest sum changed
 sub _check_file_changed {
     my($self, $file) = @_;
 
@@ -1922,9 +1926,9 @@ sub _check_file_changed {
         if($file->{'inode'} ne $ino or $file->{'mtime'} ne $mtime) {
             $file->{'inode'} = $ino;
             $file->{'mtime'} = $mtime;
-            # get md5
+            # get hexdigest
             my $meta = $file->get_meta_data();
-            if($meta->{'md5'} ne $file->{'md5'}) {
+            if($meta->{'hex'} ne $file->{'hex'}) {
                 return 2;
             }
         }
@@ -2144,7 +2148,7 @@ sub _check_references {
                 }
             }
         }
-        elsif(!defined $objects_by_name->{$link}->{$val}) {
+        else {
             # 'null' is a special value used to cancel inheritance
             return if $val eq 'null';
 
@@ -2153,12 +2157,23 @@ sub _check_references {
             # host are allowed to have a register 0
             return if ($link eq 'host' and defined $templates_by_name->{$link}->{$val});
 
-            # service parents cannot be checked right now
-            return if $link eq 'service_description';
-
             # shinken defines this command by itself
             return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');
             return if ($self->{'coretype'} eq 'shinken' and $link eq 'command' and $val eq '_internal_host_up');
+
+            if($link eq 'service_description') { $link = 'service'; }
+
+            if(defined $objects_by_name->{$link}->{$val}) {
+                return;
+            } elsif(Thruk::Utils::looks_like_regex($val)) {
+                # expand wildcards and regex
+                my $newval = Thruk::Utils::convert_wildcards_to_regex($val);
+                for my $tst (keys %{$objects_by_name->{$link}}) {
+                    ## no critic
+                    return if $tst =~ m/$newval/;
+                    ## use critic
+                }
+            }
 
             if($options{'hash'}) {
                 push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
@@ -2346,7 +2361,7 @@ sub _array_diff {
 sub _list {
     $_[1] = [] unless defined $_[1];
     if(ref $_[1] ne 'ARRAY') { $_[1] = [$_[1]]; }
-    return;
+    return $_[1];
 }
 
 ##########################################################
@@ -2357,10 +2372,12 @@ sub _remote_do {
     eval {
         $res = $self->{'remotepeer'}
                     ->{'class'}
-                    ->_req('configtool', {
-                            auth     => $c->stash->{'remote_user'},
-                            sub      => $sub,
-                            args     => $args,
+                    ->request('configtool', {
+                        sub      => $sub,
+                        args     => $args,
+                    }, {
+                        auth     => $c->stash->{'remote_user'},
+                        keep_su  => 1,
                     });
     };
     if($@) {
@@ -2369,12 +2386,11 @@ sub _remote_do {
         $c->log->error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
         my @text = split(/\n/mx, $msg);
-        Thruk::Utils::set_message( $c, 'fail_message', $text[0] );
+        Thruk::Utils::set_message( $c, 'fail_message', $sub." failed: ".$text[0] );
         return;
-    } else {
-        die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
-        return $res->[2];
     }
+    die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
+    return $res->[2];
 }
 
 ##########################################################
@@ -2383,12 +2399,14 @@ sub _remote_do_bg {
     my($self, $c, $sub, $args) = @_;
     my $res = $self->{'remotepeer'}
                    ->{'class'}
-                   ->_req('configtool', {
-                            auth     => $c->stash->{'remote_user'},
-                            sub      => $sub,
-                            args     => $args,
-                            wait     => 1,
-                    });
+                   ->request('configtool', {
+                        sub      => $sub,
+                        args     => $args,
+                   }, {
+                        auth     => $c->stash->{'remote_user'},
+                        keep_su  => 1,
+                        wait     => 1,
+                   });
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
     return $res->[2];
 }
@@ -2425,11 +2443,13 @@ sub remote_file_sync {
         next unless -f $f->{'path'};
         $files->{$f->{'display'}} = {
             'mtime'        => $f->{'mtime'},
-            'md5'          => $f->{'md5'},
+            'hex'          => $f->{'hex'},
         };
     }
     my $remotefiles = $self->_remote_do($c, 'syncfiles', { files => $files });
-    return unless $remotefiles;
+    if(!$remotefiles) {
+        return $c->detach_error({msg => "syncing remote configuration files failed", code => 500, log => 1});
+    }
 
     my $localdir = $c->config->{'tmp_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
     $self->{'config'}->{'localdir'} = $localdir;
@@ -2637,12 +2657,13 @@ sub get_plugins {
     }
 
     my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
-    my $objects         = {};
+    my $objects     = {};
+    my $pathspec    = $Monitoring::Config::plugin_pathspec;
     for my $macro (keys %{$user_macros}) {
         my $dir = $user_macros->{$macro};
         $dir = $dir.'/.';
         next unless -d $dir;
-        if($dir =~ m|/plugins/|mx or $dir =~ m|/libexec/|mx) {
+        if($dir =~ m%$pathspec%mx) {
             $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
         }
     }
@@ -2676,7 +2697,7 @@ return plugin help
 sub get_plugin_help {
     my($self, $c, $name) = @_;
     my $help = 'help is only available for plugins!';
-    return $help unless defined $name;
+    return "got no command name" unless defined $name;
 
     if($self->is_remote()) {
         return $self->remote_get_pluginhelp($c, $name);
@@ -2685,26 +2706,33 @@ sub get_plugin_help {
     my $cmd;
     my $plugins         = $self->get_plugins($c);
     my $objects         = $self->get_objects_by_name('command', $name);
-    if(defined $objects->[0]) {
-        my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-        my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
-        ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
-        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
-            $cmd = $file;
-        }
+    if(!defined $objects->[0]) {
+        return(sprintf("did not find a command with name: %s", $name));
     }
+    my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+    my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
+    ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+    if(!-x $file) {
+        return(sprintf("%s is not executable", $file));
+    }
+    my $pathspec = $Monitoring::Config::plugin_pathspec;
+    if($file !~ m%$pathspec%mx) {
+        return(sprintf("%s does not match path spec: %s", $file, $pathspec));
+    }
+    $cmd = $file;
     if(defined $plugins->{$name}) {
         $cmd = $plugins->{$name};
     }
-    if(defined $cmd) {
-        eval {
-            local $SIG{ALRM} = sub { die('alarm'); };
-            alarm(5);
-            $cmd = $cmd." -h 2>/dev/null";
-            $help = `$cmd`;
-            alarm(0);
-        };
+    if(!defined $cmd) {
+        return $help;
     }
+    eval {
+        local $SIG{ALRM} = sub { die('alarm'); };
+        alarm(5);
+        $cmd = $cmd." -h 2>/dev/null";
+        $help = `$cmd`;
+        alarm(0);
+    };
     return $help;
 }
 
@@ -2723,7 +2751,7 @@ sub get_plugin_preview {
     }
 
     my $output = 'plugin preview is only available for plugins!';
-    return $output unless defined $args;
+    return("command has no arguments") unless defined $args;
 
     my $cfg = $Monitoring::Config::save_options;
     $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
@@ -2745,24 +2773,33 @@ sub get_plugin_preview {
         }
     }
 
-    my $cmd;
-    my $objects         = $self->get_objects_by_name('command', $command);
-    if(defined $objects->[0]) {
-        my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-        ($file)    = $c->{'db'}->_get_replaced_string($file, $macros);
-        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
-            ($cmd) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
-        }
+    my $objects = $self->get_objects_by_name('command', $command);
+    if(!defined $objects->[0]) {
+        return(sprintf("did not find a command with name: %s", $command));
     }
-    if(defined $cmd) {
-        eval {
-            local $SIG{ALRM} = sub { die('alarm'); };
-            alarm(45);
-            $cmd = $cmd." 2>/dev/null";
-            $output = `$cmd`;
-            alarm(0);
-        };
+
+    my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+    ($file) = $c->{'db'}->_get_replaced_string($file, $macros);
+    if(!-x $file) {
+        return(sprintf("%s is not executable", $file));
     }
+    my $pathspec = $Monitoring::Config::plugin_pathspec;
+    if($file !~ m%$pathspec%mx) {
+        return(sprintf("%s does not match path spec: %s", $file, $pathspec));
+    }
+    my($cmd, $rc) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
+
+    if(!defined $cmd || !$rc) {
+        return(sprintf("could not replace all macros in: %s", $file));
+    }
+
+    eval {
+        local $SIG{ALRM} = sub { die('alarm'); };
+        alarm(45);
+        $cmd = $cmd." 2>/dev/null";
+        $output = `$cmd`;
+        alarm(0);
+    };
     return $output;
 }
 

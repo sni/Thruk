@@ -29,7 +29,7 @@
 <input type="hidden" name="clone_ref" value="[% value | html %]">
 [% END %]
 <input type="hidden" name="referer" value="[% referer | html %]">
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj' style="table-layout: fixed;"[% IF bare %] width="100%"[% END %]>
     <tr>
       <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
@@ -158,7 +158,7 @@
     [% IF has_auth_section %]
     <tr style="[% IF subcat != 'auth' %]display:none[% END %]" class="sub_4">
       <td class='dataVal' colspan=3 style="text-align: center;">
-        <input type="hidden" name="md5" value="[% md5 %]">
+        <input type="hidden" name="hex" value="[% hex %]">
         <table>
           <tr>
             <td colspan=2 class='dataVar dataUserVar'>Roles (cgi.cfg)</td>
@@ -198,8 +198,6 @@
   if(window.location.hash == '#templates') { set_sub(2); }
   if(window.location.hash == '#comp')      { set_sub(3); }
   if(window.location.hash == '#auth')      { set_sub(4); }
-
-  init_conf_tool_buttons();
 
   jQuery('input,select').each(function() {
     var $input = jQuery(this);

@@ -391,7 +391,7 @@ body.cmd img {
 .cal_icon {
   vertical-align:text-bottom;
 }
-.date_input {
+.navBoxDate .date_input {
   border: none;
   font-weight: bold;
   font-size: 8pt;
@@ -516,6 +516,7 @@ div.thruk_message table {
   color: #b94a48;
   background-color: #f2dede;
   border-color: #eed3d7;
+  position: relative;
 }
 
 .smallalert {
@@ -525,6 +526,10 @@ div.thruk_message table {
 }
 
 .alerttext {
+  color: #b94a48;
+}
+
+DIV.alert HR {
   color: #b94a48;
 }
 
@@ -1464,6 +1469,10 @@ BUTTON.small, INPUT.small {
   background-size: 16px 16px;
 }
 
+BUTTON.thruk_btn.small {
+  background-repeat: no-repeat;
+}
+
 .text_ellipsis {
   overflow: hidden;
   white-space: nowrap;
@@ -1559,6 +1568,10 @@ SPAN.btn_sitesplus {
   border: 2px solid rgb(255, 122, 122) !important;
 }
 
+.daterangepicker .drp-buttons .drp-selected {
+  display: none;
+}
+
 .site_panel_bookmark_placeholder {
   display: inline-block;
   border: 1px dashed grey;
@@ -1600,4 +1613,32 @@ SPAN.btn_sitesplus {
 #site_panel_sections span.fancytree-focused span.fancytree-title {
   background-color: #c6ecff;
   border-color: #70c0e7;
+}
+
+#site_panel_sections .fancytree-exp-n.has_sub span.fancytree-expander {
+  background-image: url(../../../images/expand.png);
+}
+
+th.sticky-header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+TABLE.condensed DIV.checksENABLED, TABLE.condensed DIV.checksDISABLED,
+TABLE.condensed DIV.notificationsENABLED, TABLE.condensed DIV.notificationsDISABLED {
+  width: 60px;
+}
+TABLE.condensed TD.dataVar {
+  text-align: center;
+}
+
+LABEL.disabled {
+  filter: alpha(opacity=50);
+  opacity: 0.5;
+}
+
+TR.api_keys TD {
+  vertical-align: top;
 }

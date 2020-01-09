@@ -3,8 +3,8 @@
 <form action="conf.cgi" method="POST" onsubmit="multi_select_all(this)">
 <input type="hidden" name="sub" value="[% sub | html %]">
 <input type="hidden" name="action" value="store">
-<input type="hidden" name="md5" value="[% md5 %]">
-<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<input type="hidden" name="hex" value="[% hex %]">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 <div align="center">
 [% IF readonly %]
 <br><div class="alert"><b>Readonly!</b> Make sure the config file is writable</div>
@@ -55,7 +55,7 @@
                       [% END %]
                       [% FOREACH opt = d.2 %]
                         [% NEXT IF test.exists(opt.key) %]
-                        <option value="[% opt.key | html %]">[% opt.value %]</option>
+                        <option value="[% opt.key | html %]">[% opt.value | html %]</option>
                       [% END %]
                   </select>
                 </td>

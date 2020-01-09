@@ -14,7 +14,7 @@ TP.iconTypesStore = Ext.create('Ext.data.Store', {
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
-    var tab      = Ext.getCmp(panel.panel_id);
+    var tab      = panel.tab;
     var lastType = panel.xdata.appearance.type;
     TP.iconShowEditDialogPanel = panel;
 
@@ -215,8 +215,9 @@ TP.iconShowEditDialog = function(panel) {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
-                                        var lon = Number(This.up('panel').getValues().lon);
-                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: lon, lat: newValue}, appearance:{}});
+                                        var lon    = Number(This.up('panel').getValues().lon);
+                                        var center = This.up('panel').getValues().center;
+                                        panel.moveToMapLonLat(false, {layout:{lon: lon, lat: newValue, center: center}, appearance:{}, nsize: panel.xdata.nsize});
                                         panel.noMoreMoves = false;
                                     }
                                 }
@@ -227,12 +228,31 @@ TP.iconShowEditDialog = function(panel) {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
-                                        var lat = Number(This.up('panel').getValues().lat);
-                                        panel.moveToMapLonLat(undefined, false, {layout:{lon: newValue, lat: lat}, appearance:{}});
+                                        var lat    = Number(This.up('panel').getValues().lat);
+                                        var center = This.up('panel').getValues().center;
+                                        panel.moveToMapLonLat(false, {layout:{lon: newValue, lat: lat, center: center}, appearance:{}, nsize: panel.xdata.nsize});
                                         panel.noMoreMoves = false;
                                     }
                                 }
-                            }},
+                            }}, {
+                                name:         'center',
+                                xtype:        'combobox',
+                                store:        ['centered', 'bottom-center', 'bottom-left', 'bottom-right', 'top-center', 'top-left', 'top-right', 'center-left', 'center-right'],
+                                editable:      false,
+                                hidden:       !tab.map || panel.xdata.appearance.type == "connector",
+                                width:        100,
+                                listeners: {
+                                    change: function(This, newValue, oldValue, eOpts) {
+                                        if(!panel.noMoreMoves) {
+                                            panel.noMoreMoves = true;
+                                            var lat = Number(This.up('panel').getValues().lat);
+                                            var lon = Number(This.up('panel').getValues().lon);
+                                            panel.moveToMapLonLat(false, {layout:{lon: lon, lat: lat, center: newValue}, appearance:{}, nsize: panel.xdata.nsize});
+                                            panel.noMoreMoves = false;
+                                        }
+                                    }
+                                }
+                            },
 
                             { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint', hidden: !!tab.map }
                     ]
@@ -514,8 +534,8 @@ TP.iconShowEditDialog = function(panel) {
                             }],
                             listeners: {
                                 afterrender: function(This, eOpts) {
-                                    TP.load_dashboard_menu_items(This.items.get(0).menu, 'panorama.cgi?task=dashboard_list&list=my',     function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
-                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
+                                    TP.load_dashboard_menu_items(This.items.get(0).menu, 'panorama.cgi?task=dashboard_list&list=my',     function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^pantab_/, '')})});
+                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^pantab_/, '')})});
                                 }
                             }
                         }
@@ -919,7 +939,6 @@ TP.iconShowEditDialog = function(panel) {
                     { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
                             xtype:            'searchCbo',
                             panel:             panel,
-                            store:             searchStore,
                             storeExtraParams: { wildcards: 1 },
                             lazyRender:        true,
                             allowBlank:        false
@@ -1118,7 +1137,7 @@ TP.iconShowEditDialog = function(panel) {
                     settingsWindow.destroy();
                     panel.firstRun = false;
                     panel.applyXdata();
-                    var tab = Ext.getCmp(panel.panel_id);
+                    var tab = panel.tab;
                     TP.updateAllIcons(tab, panel.id);
                     TP.updateAllLabelAvailability(tab, panel.id);
                  }
@@ -1166,7 +1185,7 @@ TP.iconShowEditDialog = function(panel) {
                 if(panel.dragEl1 && panel.dragEl1.el) { panel.dragEl1.el.dom.style.outline = ""; }
                 if(panel.dragEl2 && panel.dragEl2.el) { panel.dragEl2.el.dom.style.outline = ""; }
                 if(panel.labelEl && panel.labelEl.el) { panel.labelEl.el.dom.style.outline = ""; }
-                TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
+                TP.updateAllIcons(panel.tab); // workaround to put labels in front
 
                 if(panel.labelEl && panel.xdata.label.display && panel.xdata.label.display == 'mouseover') { panel.labelEl.hide(); }
             },
@@ -1188,7 +1207,7 @@ TP.iconShowEditDialog = function(panel) {
     };
     TP.iconSettingsGlobals.stateUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
-        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata, undefined, function() {
+        TP.updateAllIcons(panel.tab, panel.id, xdata, undefined, function() {
             if(!TP.iconSettingsWindow) { return; } // closed meanwhile
             panel.refreshHandler(panel.lastState); // recalculate state
             TP.iconSettingsGlobals.renderUpdate();
@@ -1437,16 +1456,19 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                     +'Ex.: <i>{{ if(acknowledged) {...} else {...} }}<\/i><\/p>'
 
                     +'<p>There are different variables available depending on the type of icon/widget:<br>'
-                    +'<table><tr><th>Groups/Filters:<\/th><td><i>totals.services.ok<\/i><\/td><td>totals number of ok services<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
+                    +'<table><tr><th>Groups/Filters:<\/th><td><i>name<\/i><\/td><td>Groupname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>alias<\/i><\/td><td>Group alias<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.ok<\/i><\/td><td>total number of ok services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>total number of warning services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>total number of critical services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>total number of unknown services<\/td><\/tr>'
 
-                    +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>total number of up hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>total number of down hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>total number of unreachable hosts<\/td><\/tr>'
 
                     +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>alias<\/i><\/td><td>Host alias<\/td><\/tr>'
                     +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
                     +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
                     +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'

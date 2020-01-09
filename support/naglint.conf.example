@@ -10,7 +10,7 @@ indent_object_value     = 30
 indent_object_comments  = 68
 
 # should list attributes be joined with space or not
-list_join_string        = ','
+list_join_string        = ","
 
 # should long arguments be broken into multiple lines
 break_long_arguments    = 1

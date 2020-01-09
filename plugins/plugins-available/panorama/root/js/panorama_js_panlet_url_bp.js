@@ -1,13 +1,19 @@
 Ext.define('TP.PanletBP', {
     extend: 'TP.PanletUrl',
 
-    title: 'Business Process',
+    title: '',
     height: 300,
     width:  600,
     hideSettingsForm: ['url', 'backends', 'selector', 'keepcss'],
 
     initComponent: function() {
         var panel = this;
+        panel.extra_tools = [{
+            type: 'prev',
+            tooltip: 'switch to home business process',
+            handler: function() { panel.current_bp = undefined; panel.manualRefresh(); },
+            hidden: true
+        }];
         panel.callParent();
         panel.xdata.url           = '';
         panel.xdata.selector      = '';
@@ -16,6 +22,7 @@ Ext.define('TP.PanletBP', {
         panel.reloadOnSiteChanges = false;
         panel.last_url            = '';
         panel.xdata.showborder    = true;
+        panel.current_bp          = null;
 
         panel.loader = {};
 
@@ -49,6 +56,9 @@ Ext.define('TP.PanletBP', {
 
         panel.gearInitCallback = function(This) {
             panel.updateGraphs();
+            // title is set automatically
+            Ext.getCmp("title_textfield").hide();
+            panel.current_bp = undefined;
         };
 
         panel.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
@@ -56,8 +66,13 @@ Ext.define('TP.PanletBP', {
         });
 
         panel.refreshHandler = function() {
+            if(panel.gearitem) { return; }
             if(panel.xdata.graph) {
-                var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&_='+Ext.Date.now();
+                var bp_id  = panel.current_bp ? panel.current_bp : panel.xdata.graph;
+                var newUrl = 'bp.cgi?action=details&bp='+bp_id+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&_='+Ext.Date.now();
+                if(panel.xdata.background != undefined && panel.xdata.background != "") {
+                    newUrl = newUrl + '&htmlCls=transparent';
+                }
                 if(!panel.xdata.graph) {
                     newUrl = 'about:blank';
                 }
@@ -68,9 +83,29 @@ Ext.define('TP.PanletBP', {
                         panel.saveState();
                     }
                 }
-                var iframeObj = panel.items.getAt(0).getEl();
+                var iframeObj = panel.iframe.getEl();
                 if(iframeObj && iframeObj.dom && panel.last_url != panel.xdata.url) {
                     iframeObj.dom.src = panel.xdata.url;
+                    iframeObj.dom.loadingCallback = function(args) {
+                        if(args["link"] && !args["link"].match(/\#/)) {
+                            panel.mask("Loading...");
+                            // manual click, reset refresh timer
+                            panel.startTimeouts();
+                        }
+                    }
+                    iframeObj.dom.loadedCallback = function(args) {
+                        if(args["bp_name"]) {
+                            panel.setTitle(args["bp_name"]);
+                        }
+                        if(args["bp_id"]) {
+                            panel.current_bp = args["bp_id"];
+                        }
+                        if(panel.current_bp != panel.xdata.graph) {
+                            panel.tools[0].show();
+                        } else {
+                            panel.tools[0].hide();
+                        }
+                    }
                     panel.last_url = panel.xdata.url;
                 }
             } else {
@@ -79,12 +114,17 @@ Ext.define('TP.PanletBP', {
         };
         /* manual refresh update business process */
         panel.manualRefresh = function() {
+            if(panel.gearitem) { return; }
             panel.last_url = '';
-            var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&update=1';
+            var bp_id  = panel.current_bp ? panel.current_bp : panel.xdata.graph;
+            var newUrl = 'bp.cgi?action=details&bp='+bp_id+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&update=1';
+            if(panel.xdata.background != undefined && panel.xdata.background != "") {
+                newUrl = newUrl + '&htmlCls=transparent';
+            }
             if(!panel.xdata.graph) {
                 newUrl = 'about:blank';
             }
-            var iframeObj = panel.items.getAt(0).getEl();
+            var iframeObj = panel.iframe.getEl();
             if(iframeObj && iframeObj.dom) {
                 if(newUrl != "about:blank") {
                     panel.body.mask('Loading...');
@@ -99,6 +139,13 @@ Ext.define('TP.PanletBP', {
         var panel = this;
         this.callParent();
         this.addGearItems({
+            xtype:          'colorcbo',
+            fieldLabel:     'Background',
+            name:           'background',
+            mouseover:     function(color) { panel.applyBorderAndBackground(color); },
+            mouseout:      function(color) { panel.applyBorderAndBackground(); }
+        });
+        this.addGearItems({
             xtype:          'combobox',
             fieldLabel:     'Graph',
             name:           'graph',
@@ -107,11 +154,6 @@ Ext.define('TP.PanletBP', {
             displayField:   'name',
             store:           { fields: ['name', 'id'], data: [] },
             emptyText:      'select business process to display'
-        });
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
         });
     }
 });

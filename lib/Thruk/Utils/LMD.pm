@@ -46,7 +46,7 @@ sub check_proc {
     }
 
     # only start it once
-    my $startlock = $lmd_dir.'startup';
+    my $startlock = $lmd_dir.'/startup';
     my($fh, $lock);
     eval {
         ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock, 'ex');
@@ -58,7 +58,10 @@ sub check_proc {
 
     # now that we have the lock, check pid again, it might have been restarted meanwhile
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-        Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
+        if($fh) {
+            Thruk::Utils::IO::file_unlock($startlock, $fh, $lock);
+            unlink($startlock);
+        }
         return;
     }
 
@@ -70,6 +73,9 @@ sub check_proc {
               .' -config '.$lmd_dir.'/lmd.ini';
     for my $cfg (@{Thruk::Utils::array_uniq(Thruk::Utils::list($config->{'lmd_core_config'}))}) {
         $cmd .= ' -config '.$cfg;
+    }
+    if($config->{'lmd_options'}) {
+        $cmd .= ' '.$config->{'lmd_options'}.' ';
     }
     $cmd .= ' >/dev/null 2>&1 &';
 
@@ -207,22 +213,14 @@ sub check_initial_start {
     if($background) {
         ## no critic
         $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
-        $SIG{CHLD} = 'IGNORE';
         ## use critic
-        my $pid = fork();
-        if(!$pid) {
-            Thruk::Utils::External::_do_child_stuff();
-            ## no critic
-            $SIG{CHLD} = 'DEFAULT';
-            ## use critic
-            check_proc($config, $c, 0);
-            _check_changed_lmd_config($config);
-            exit;
-        }
-    } else {
-        check_proc($config, $c, 0);
-        _check_changed_lmd_config($config);
+
+        Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::check_initial_start($c, $c->config, 0)', background => 1 });
+        return;
     }
+
+    check_proc($config, $c, 0);
+    _check_changed_lmd_config($config);
 
     #&timing_breakpoint("lmd check_initial_start done");
 
@@ -295,26 +293,33 @@ send test query and kill hard if it does not respond
 sub kill_if_not_responding {
     my($c, $config) = @_;
 
+    my $lmd_timeout = $config->{'lmd_timeout'} // 5;
+    return if $lmd_timeout <= 0;
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
     my $pid_file = $lmd_dir.'/pid';
     my $lmd_pid  = check_pid($pid_file);
     return unless $lmd_pid;
+
+    # do not restart too soon, check if pidfile is older than 2 minutes
+    my $ctime = (stat($pid_file))[10];
+    return if($ctime > time() - 120);
+
     my $data;
-    local $SIG{CHLD} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
     my $pid = fork();
     if($pid == -1) { die("fork failed: $!"); }
 
     if(!$pid) {
         Thruk::Utils::External::_do_child_stuff($c, 0, 0);
-        alarm(3);
+        alarm($lmd_timeout);
         eval {
             $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites\n");
         };
+        my $err = $@;
         alarm(0);
-        if($@) {
-            $c->log->warn("lmd not responding, killing with force: err - ".$@);
+        if($err) {
+            $c->log->warn("lmd not responding, killing with force: err - ".$err);
             kill('USR1', $lmd_pid);
+            sleep(1);
             kill(2, $lmd_pid);
             sleep(1);
             kill(9, $lmd_pid);
@@ -324,7 +329,7 @@ sub kill_if_not_responding {
 
     my $waited = 0;
     my $rc = -1;
-    while($waited++ < 2 && $rc != 0) {
+    while($waited++ <= $lmd_timeout && $rc != 0) {
         POSIX::waitpid($pid, POSIX::WNOHANG);
         $rc = $?;
         sleep(1);
@@ -333,10 +338,13 @@ sub kill_if_not_responding {
         $c->log->warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
         kill('USR1', $lmd_pid);
         kill(2, $pid);
+        sleep(1);
         kill(2, $lmd_pid);
         sleep(1);
         kill(9, $lmd_pid);
         kill(9, $pid);
+        sleep(1);
+        POSIX::waitpid(-1, POSIX::WNOHANG);
     }
 
     return;
@@ -411,17 +419,17 @@ sub _write_lmd_config {
             $site_config .= "section = '".$peer->{'section'}."'\n";
         }
         if($peer->{'type'} eq 'http') {
-            $site_config .= "auth = '".$peer->{'config'}->{'options'}->{'auth'}."'\n";
-            $site_config .= "remote_name = '".$peer->{'config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'config'}->{'options'}->{'remote_name'};
+            $site_config .= "auth = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n";
+            $site_config .= "remote_name = '".$peer->{'peer_config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'peer_config'}->{'options'}->{'remote_name'};
         }
-        $site_config .= "tlsCertificate = '".$peer->{'config'}->{'options'}->{'cert'}."'\n"    if $peer->{'config'}->{'options'}->{'cert'};
-        $site_config .= "tlsKey         = '".$peer->{'config'}->{'options'}->{'key'}."'\n"     if $peer->{'config'}->{'options'}->{'key'};
-        $site_config .= "tlsCA          = '".$peer->{'config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'config'}->{'options'}->{'ca_file'};
-        $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'config'}->{'options'}->{'verify'} && $peer->{'config'}->{'options'}->{'verify'} == 0);
-        $site_config .= "proxy          = '".$peer->{'config'}->{'options'}->{'proxy'}."'\n"   if $peer->{'config'}->{'options'}->{'proxy'};
-        if($peer->{'config'}->{'lmd_options'}) {
-            for my $key (sort keys %{$peer->{'config'}->{'lmd_options'}}) {
-                $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'config'}->{'lmd_options'}->{$key});
+        $site_config .= "tlsCertificate = '".$peer->{'peer_config'}->{'options'}->{'cert'}."'\n"    if $peer->{'peer_config'}->{'options'}->{'cert'};
+        $site_config .= "tlsKey         = '".$peer->{'peer_config'}->{'options'}->{'key'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'key'};
+        $site_config .= "tlsCA          = '".$peer->{'peer_config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'peer_config'}->{'options'}->{'ca_file'};
+        $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'peer_config'}->{'options'}->{'verify'} && $peer->{'peer_config'}->{'options'}->{'verify'} == 0);
+        $site_config .= "proxy          = '".$peer->{'peer_config'}->{'options'}->{'proxy'}."'\n"   if $peer->{'peer_config'}->{'options'}->{'proxy'};
+        if($peer->{'peer_config'}->{'lmd_options'}) {
+            for my $key (sort keys %{$peer->{'peer_config'}->{'lmd_options'}}) {
+                $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'peer_config'}->{'lmd_options'}->{$key});
             }
         }
         $site_config .= "\n";
@@ -466,5 +474,7 @@ sub get_lmd_version {
 
     return;
 }
+
+##########################################################
 
 1;

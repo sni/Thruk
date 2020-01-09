@@ -26,7 +26,7 @@ use LWP::UserAgent;
 use File::Temp qw/tempfile/;
 use Carp qw/confess/;
 use Plack::Test;
-use Cpanel::JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -35,6 +35,7 @@ our @EXPORT_OK = qw(request ctx_request);
 
 my $use_html_lint;
 my $lint;
+my $test_token = "";
 
 use Thruk;
 use Thruk::Config;
@@ -111,15 +112,31 @@ sub get_test_user {
     our $remote_user_cache;
     return $remote_user_cache if $remote_user_cache;
     my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
-    ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_user() needs a proper status page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $user;
     if($page =~ m/Logged\ in\ as\ <i>(.*?)<\/i>/mxo) {
         $user = $1;
     }
-    isnt($user, undef, "got a user from config.cgi") or bail_out_req('got no test user, cannot test.', $request);
+    isnt($user, undef, "got a user from status.cgi") or bail_out_req('got no test user, cannot test.', $request);
     $remote_user_cache = $user;
     return($user);
+}
+
+#########################
+sub get_current_user_token {
+    our $remote_user_token;
+    return $remote_user_token if $remote_user_token;
+    my $request = _request('/thruk/cgi-bin/user.cgi');
+    ok( $request->is_success, 'get_current_user_token() needs a proper user profile page' ) or diag(Dumper($request));
+    my $page = $request->content;
+    my $token;
+    if($page =~ m/name="CSRFtoken"\s+value="([^"]+)"/mxo) {
+        $token = $1;
+    }
+    isnt($token, undef, "got a token from user.cgi") or bail_out_req('got no token, cannot test.', $request);
+    $remote_user_token = $token;
+    return($token);
 }
 
 #########################
@@ -265,10 +282,10 @@ sub test_page {
         ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request);
     }
 
-    if(!defined $opts->{'fail_message_ok'}) {
-        if($request->content =~ m/<span\ class="fail_message">([^<]+)<\/span>/mxo) {
-            fail('Request '.$opts->{'url'}.' had error message: '.$1);
-        }
+    if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
+        my $msg = $1;
+        fail('Request '.$opts->{'url'}.' had error message: '.$msg) unless $opts->{'fail_message_ok'};
+        fail('Request '.$opts->{'url'}.' error message contains escaped html: '.$msg) if $msg =~ m/&lt;.*&gt;/mx;
     }
 
     # wait for something?
@@ -432,6 +449,13 @@ sub test_page {
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
             is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
             $lint->clear_errors();
+            my $html_only_content = $return->{'content'};
+            $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
+            my $matches = get_matches_with_meta($html_only_content, qr/^(.*\&amp;amp.*)$/mx);
+            for my $m (@{$matches}) {
+                next if $m->{'match'} =~ m/abbr=/mx;
+                fail(sprintf("page contains double html escaped amps in line %d: %s", $m->{'line'}, $m->{'match'}));
+            }
         }
     }
 
@@ -614,6 +638,27 @@ sub wait_for_job {
     my($job) = @_;
     my $start  = time();
     my $config = Thruk::Config::get_config();
+
+    if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+        local $SIG{ALRM} = sub { die("timeout while waiting for external job: ".$job) };
+        alarm(300);
+        my $data;
+        eval {
+            while(1) {
+                my $r = _request('/thruk/r/thruk/jobs/'.$job);
+                eval {
+                    $data = decode_json($r->decoded_content);
+                };
+                last if($data && $data->{'end'} > 0 && $data->{'is_running'} == 0);
+                sleep(0.1);
+            }
+        };
+        my $end  = time();
+        is($data->{'is_running'}, 0, 'job '.$job.' is finished in '.($end-$start).' seconds');
+        alarm(0);
+        return;
+    }
+
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
     if(!-e $jobdir) {
         fail("job folder ".$jobdir.": ".$!);
@@ -621,6 +666,7 @@ sub wait_for_job {
     }
     local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
     require Thruk::Utils::External;
+
     alarm(300);
     eval {
         while(Thruk::Utils::External::_is_running(undef, $jobdir)) {
@@ -834,7 +880,7 @@ sub _request {
     if($post) {
         $method = 'POST' unless $method;
         $method = uc($method);
-        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $post->{'CSRFtoken'} = $test_token if $test_token;
         $request = POST($url, {});
         $request->method(uc($method));
         $request->header('Content-Type' => 'application/json; charset=utf-8');
@@ -862,7 +908,7 @@ sub _external_request {
 
     if($url !~ m/^http/) {
         $url =~ s#//#/#gmx;
-        $url =~ s#/demo##gmx;
+        $url =~ s#^/demo##gmx;
         if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
             $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
         }
@@ -884,7 +930,8 @@ sub _external_request {
     }
     my $req;
     if($post || ($method && $method ne 'GET')) {
-        $post->{'token'} = 'test' unless $ENV{'NO_POST_TOKEN'};
+        $post = {} unless defined $post;
+        $post->{'CSRFtoken'} = $test_token if $test_token;
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));
@@ -975,27 +1022,10 @@ sub bail_out_req {
 }
 
 #########################
-my $test_token_set = 0;
 sub set_test_user_token {
-    my($remove) = @_;
-    require Thruk::Config;
-    require Thruk::Utils::Cache;
-    my $config = Thruk::Config::get_config();
-    my $store  = Thruk::Utils::Cache->new($config->{'var_path'}.'/token');
-    my $tokens = $store->get('token');
-    if($remove) {
-        delete $tokens->{get_test_user()};
-    } else {
-        $tokens->{get_test_user()} = { token => 'test', time => time() };
-    }
-    $store->set('token', $tokens);
+    return if $test_token;
+    $test_token = TestUtils::get_current_user_token();
     return;
-}
-END {
-    # remove test token again
-    if($test_token_set) {
-        set_test_user_token(1);
-    }
 }
 
 #########################
@@ -1064,6 +1094,11 @@ sub _replace_with_marker {
     @matches = grep {!/^\s*$/} @matches;
     $errors    += scalar @matches;
 
+    # jQuery().attr('selected', true) must be .prop now
+    @matches = $_[0]  =~ s/(\.attr\s*\(.*selected)/JS_ERROR_MARKER4:$1/gmxi;
+    @matches = grep {!/^\s*$/} @matches;
+    $errors    += scalar @matches;
+
     $errors_js += $errors;
     return $errors;
 }
@@ -1083,7 +1118,7 @@ sub _check_marker {
             fail('found trailing comma in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
-        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+(peer_key|key|section)/) {
+        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+(peer_key|key|section|id)/) {
             my $orig = $line;
             $orig =~ s/JS_ERROR_MARKER2://gmx;
             fail('found insecure for loop in '.($file || 'content').' line: '.$x);
@@ -1096,6 +1131,13 @@ sub _check_marker {
             fail('found jQuery.attr(checked) instead of .prop() in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
+        if($line =~ m/JS_ERROR_MARKER4:/mx) {
+            my $orig = $line;
+            $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
+            $orig =~ s/JS_ERROR_MARKER4://gmx;
+            fail('found jQuery.attr(selected) instead of .prop() in '.($file || 'content').' line: '.$x);
+            diag($orig);
+        }
     }
     $errors_js = 0;
 }
@@ -1104,6 +1146,21 @@ sub _check_marker {
 sub _caller_info {
     my @caller = caller(1);
     return(sprintf("%s() in %s:%i", $caller[0], $caller[1], $caller[2]));
+}
+
+#################################################
+sub get_matches_with_meta {
+    my($string, $regex) = @_;
+    my @matches;
+    while($string =~ /$regex/g) {
+        my $match = substr($string, $-[0], $+[0]-$-[0]);
+        my $linenr = 1 + substr($string,0,$-[0]) =~ y/\n//;
+        push @matches, {
+            match => $match,
+            line  => $linenr,
+        };
+    }
+    return(\@matches);
 }
 
 #################################################

@@ -34,6 +34,7 @@ sub index {
         load Carp, qw/confess carp/;
         load Thruk::Utils::Reports;
         load Thruk::Utils::Avail;
+        load URI::Escape;
         $c->config->{'reports2_modules_loaded'} = 1;
     }
 
@@ -84,7 +85,10 @@ sub index {
             for my $str (split/&/mx, $c->req->parameters->{'param'}) {
                 my($key,$val) = split(/=/mx, $str, 2);
                 if($key =~ s/^params\.//mx) {
-                    $c->req->parameters->{$key} = $val unless exists $c->req->parameters->{$key};
+                    $c->req->parameters->{$key} = URI::Escape::uri_unescape($val) unless exists $c->req->parameters->{$key};
+                }
+                elsif($key =~ m/^t\d+/mx) {
+                    $c->req->parameters->{$key} = URI::Escape::uri_unescape($val) unless exists $c->req->parameters->{$key};
                 }
             }
         }
@@ -141,6 +145,9 @@ sub index {
         }
         elsif($action eq 'download_debug') {
             return report_download_debug($c, $report_nr);
+        }
+        elsif($action eq 'download_json') {
+            return report_download_json($c, $report_nr);
         }
         elsif($action eq 'list') {
             $c->stash->{'filtered'} = 1;
@@ -267,7 +274,7 @@ sub report_save {
     if($report = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
             if(defined $report->{'var'}->{'opt_errors'}) {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "Error in Report Options:<br>".join("<br>", @{$report->{'var'}->{'opt_errors'}}) });
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg   => "Error in Report Options" });
             } else {
                 Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
             }
@@ -380,7 +387,7 @@ sub report_profile {
 =head2 report_download_debug
 
 =cut
-sub report_download_debug{
+sub report_download_debug {
     my($c, $report_nr) = @_;
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
@@ -401,6 +408,35 @@ sub report_download_debug{
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+}
+
+##########################################################
+
+=head2 report_download_json
+
+=cut
+sub report_download_json {
+    my($c, $report_nr) = @_;
+
+    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if(!$report) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    }
+    if(!$report->{'var'}->{'json_file'}) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no json data for this report', code => 404 });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    }
+
+    my $name = $report->{'var'}->{'json_file'};
+    $name =~ s|^.*/||gmx;
+    $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
+    $c->res->headers->content_type('text/json');
+    open(my $fh, '<', $report->{'var'}->{'json_file'});
+    binmode $fh;
+    $c->res->body($fh);
+    $c->{'rendered'} = 1;
+    return 1;
 }
 
 ##########################################################
@@ -460,8 +496,14 @@ sub report_email {
 sub _set_report_data {
     my($c, $r) = @_;
 
-    $c->stash->{'t1'} = $r->{'params'}->{'t1'} || time() - 86400;
-    $c->stash->{'t2'} = $r->{'params'}->{'t2'} || time();
+    $c->stash->{'t1'} = time() - 86400;
+    $c->stash->{'t2'} = time();
+    if($r->{'params'}->{'t1'} && $r->{'params'}->{'t2'}) {
+        $c->stash->{'t1'} = Thruk::Utils::parse_date($c, $r->{'params'}->{'t1'}) // $c->stash->{'t1'};
+        $c->stash->{'t2'} = Thruk::Utils::parse_date($c, $r->{'params'}->{'t2'}) // $c->stash->{'t2'};
+    }
+
+    # round to full minute
     $c->stash->{'t1'} = $c->stash->{'t1'} - $c->stash->{'t1'}%60;
     $c->stash->{'t2'} = $c->stash->{'t2'} - $c->stash->{'t2'}%60;
 

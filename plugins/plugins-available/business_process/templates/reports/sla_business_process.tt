@@ -21,6 +21,7 @@
         { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '-1', 'cancel mail if no object breaks this sla', 0, 100] },
         { 'max_worst_pages'              => [ 'Worst Outages',              'int_box',          '1'          ,'max. # pages', 1, 1 ] },
         { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '-1'          ,'max. # pages', 1, 1 ] },
+        { 'attach_json'                  => [ 'Attach Json',                'yes_no',           'no', 'attach json raw data'  ] },
     ];
   %]
 [% END %]

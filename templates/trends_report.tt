@@ -112,8 +112,6 @@
     </td>
     <td align="right" valign="bottom" width="33%">
       <form method="get" action="trends.cgi">
-        <input type='hidden' name='t1' value="[% start %]">
-        <input type='hidden' name='t2' value="[% end %]">
         <input type='hidden' name='host' value="[% host | html %]">
         [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
         <input type='hidden' name='assumeinitialstates' value="[% assumeinitialstates | html %]">
@@ -164,10 +162,7 @@
           </tr>
           <tr>
             <td class='optBoxItem' valign="top" align="left">
-              <select name='timeperiod'>
-                <option value="current"[% IF      timeperiod == 'current'      %] selected[% END %]>[ Current time range ]</option>
-                [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod %]
-              </select>
+              [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 %]
             </td>
             <td class='optBoxItem' valign="top" align="left">
               <select name='zoom'>

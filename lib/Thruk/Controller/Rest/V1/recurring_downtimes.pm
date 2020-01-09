@@ -45,7 +45,8 @@ sub _rest_get_thruk_downtimes {
         if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
             return({ 'message' => 'permission denied', code => 403 });
         }
-        Thruk::Utils::IO::json_lock_store($file, $rd, 1, 1);
+        $rd->{'edited_by'}  = $c->stash->{'remote_user'};
+        Thruk::Utils::IO::json_lock_store($file, $rd, { pretty => 1, changed_only => 1 });
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
         return({
             'message' => 'successfully saved 1 downtime.',
@@ -57,8 +58,9 @@ sub _rest_get_thruk_downtimes {
         if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
             return({ 'message' => 'permission denied', code => 403 });
         }
+        $rd->{'edited_by'}  = $c->stash->{'remote_user'};
         Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
-        Thruk::Utils::IO::json_lock_store($file, $rd, 1, 1);
+        Thruk::Utils::IO::json_lock_store($file, $rd, { pretty => 1, changed_only => 1 });
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
         return({
             'message' => 'successfully saved 1 downtime.',
@@ -109,11 +111,13 @@ sub _rest_get_thruk_downtime_new {
     if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
         return({ 'message' => 'permission denied', code => 403 });
     }
+    $rd->{'created_by'} = $c->stash->{'remote_user'};
+    $rd->{'edited_by'}  = $c->stash->{'remote_user'};
     my $file = Thruk::Utils::RecurringDowntimes::get_data_file_name($c, $c->req->parameters->{'file'});
     my $nr   = 0;
     if($file =~ m/\/(\d+)\.tsk$/mx) { $nr = $1; }
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
-    Thruk::Utils::IO::json_lock_store($file, $rd, 1, 1);
+    Thruk::Utils::IO::json_lock_store($file, $rd, { pretty => 1, changed_only => 1 });
     Thruk::Utils::RecurringDowntimes::update_cron_file($c);
     return({
         'message' => 'successfully created downtime.',

@@ -3,6 +3,7 @@ package Thruk::Backend::Provider::HTTP;
 use strict;
 use warnings;
 use Data::Dumper;
+use Carp qw/confess/;
 use Module::Load qw/load/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 use parent 'Thruk::Backend::Provider::Base';
@@ -26,17 +27,17 @@ create new manager
 
 =cut
 sub new {
-    my($class, $options, $peerconfig, $config, $product_prefix, $thruk_config) = @_;
+    my($class, $peer_config, $thruk_config) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
+    my $options = $peer_config->{'options'};
+    confess("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
         'fast_query_timeout'   => 10,
         'timeout'              => 100,
         'logs_timeout'         => 300,
-        'config'               => $config,
-        'peerconfig'           => $peerconfig,
-        'product_prefix'       => $product_prefix,
+        'peer_config'          => $peer_config,
+        'thruk_config'         => $thruk_config,
         'key'                  => '',
         'name'                 => $options->{'name'},
         'addr'                 => $options->{'peer'},
@@ -45,7 +46,6 @@ sub new {
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
         'min_backend_version'  => 1.63,
-        'verify_hostname'      => $thruk_config->{'ssl_verify_hostnames'},
     };
     bless $self, $class;
 
@@ -124,8 +124,7 @@ recreate lwp object
 sub reconnect {
     my($self) = @_;
 
-    my $verify_hostname = 1;
-    $verify_hostname = $self->{'verify_hostname'} if defined $self->{'verify_hostname'};
+    my $verify_hostname = $self->{'thruk_config'}->{'verify_hostname'} // 1;
     if(!$self->{'modules_loaded'}) {
         if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
             if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $self->{'addr'} =~ m/^https:/mx) {
@@ -145,7 +144,7 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} =~ s|cgi-bin$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    my $pp = $self->{'product_prefix'} || 'thruk';
+    my $pp = $self->{'thruk_config'}->{'product_prefix'} || 'thruk';
     $self->{'addr'} =~ s|\Q$pp\E$||mx;
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
@@ -154,7 +153,11 @@ sub reconnect {
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');
-    $self->{'ua'}->ssl_opts(verify_hostname => $verify_hostname);
+    $self->{'ua'}->max_redirect(0);
+    $self->{'ua'}->ssl_opts(
+      verify_hostname => $verify_hostname,
+      SSL_ca_path     => ($self->{'thruk_config'}->{ssl_ca_path} || "/etc/ssl/certs"),
+    );
     if($self->{'proxy'}) {
         # http just works
         $self->{'ua'}->proxy('http', $self->{'proxy'});
@@ -175,7 +178,6 @@ sub reconnect {
             #$self->{'ua'}->env_proxy();
         }
     }
-    push @{ $self->{'ua'}->requests_redirectable }, 'POST';
     return($self->{'ua'});
 }
 
@@ -516,6 +518,14 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
+    # replace auth filter with real filter
+    if(defined $options{'filter'}) {
+        for my $f (@{$options{'filter'}}) {
+            if(ref $f eq 'HASH' && $f->{'auth_filter'}) {
+                $f = $f->{'auth_filter'}->{'filter'};
+            }
+        }
+    }
 
     # just because we don't cache, doesn't mean our remote site is not allowed to cache
     delete $options{'nocache'};
@@ -766,7 +776,8 @@ propagate local session to remote site
 sub propagate_session_file {
     my($self, $c) = @_;
     my $session_id = $c->req->cookies->{'thruk_auth'};
-    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id, undef, $c->user->{'roles'}], undef, $c->stash->{'remote_user'});
+    confess("no user") unless $c->user_exists();
+    my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id, $c->stash->{'remote_user'}, $c->user->{'roles'}], { auth => $c->stash->{'remote_user'}, keep_su => 1 } );
     $session_id = $r->[0] if $r && ref($r) eq 'ARRAY';
     return $session_id;
 }
@@ -784,8 +795,32 @@ sub rpc {
     my($self, $c, $function, $args) = @_;
     if(ref $args ne 'ARRAY') { confess("arguments must be an array"); }
     $args = Thruk::Utils::encode_arg_refs($args);
-    my @res = @{$self->_req($function, $args, undef, $c->stash->{'remote_user'})};
+    my @res = @{$self->_req($function, $args, { auth => $c->stash->{'remote_user'} })};
     return($res[0]);
+}
+
+##########################################################
+
+=head2 request
+
+    request($sub, $args, $options)
+
+returns result for given request
+
+    $sub is answered in Thruk::Utils::CLI::_cmd_raw
+    $args are arguments for _cmd_raw
+    $options are request / transport related options like:
+    {
+        auth      => username set on remoteside
+        keep_su   => change username on remotesite, but keep superuser permissions
+        want_data => return raw data result
+        wait      => wait for remote job to complete
+    }
+
+=cut
+sub request {
+    my($self, $sub, $args, $options) = @_;
+    return($self->_req($sub, $args, $options));
 }
 
 ##########################################################
@@ -798,22 +833,17 @@ returns result for given request
 
 =cut
 sub _req {
-    my($self, $sub, $args, $redirects, $auth) = @_;
+    my($self, $sub, $args, $options, $redirects) = @_;
     $redirects = 0 unless defined $redirects;
+    my $c = $Thruk::Request::c;
 
     # clean code refs
     _clean_code_refs($args);
 
-    my $options = {
-        'action'        => 'raw',
-        'sub'           => $sub,
-        'remote_name'   => $self->{'remote_name'},
-        'args'          => $args,
-    };
-    if(defined $args and ref $args eq 'HASH') {
-        $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
-    }
-    $options->{'auth'} = $auth if $auth;
+    $options->{'action'}      = 'raw';
+    $options->{'sub'}         = $sub;
+    $options->{'remote_name'} = $self->{'remote_name'};
+    $options->{'args'}        = $args;
 
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
@@ -832,7 +862,7 @@ sub _req {
         $self->_wait_for_remote_job($2);
         $redirects++;
         die("too many redirects") if $redirects > 2;
-        return $self->_req($sub, $args, $redirects);
+        return $self->_req($sub, $args, $options, $redirects);
     }
 
     if($response->is_success) {
@@ -865,13 +895,17 @@ sub _req {
             }
             $self->_replace_peer_key($data->{'output'}->[2]);
 
-            if(defined $args and ref $args eq 'HASH' and $args->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
+            if($options->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
                 return $self->_wait_for_remote_job($1);
             }
 
+            return $data if $options->{'want_data'};
             return $data->{'output'};
         }
         die("not an array ref, got ".ref($data->{'output'}));
+    }
+    if($c && Thruk->debug) {
+      $c->log->debug(Dumper($response));
     }
     die(_format_response_error($response));
 }
@@ -887,7 +921,12 @@ return http response but ensure timeout on request.
 =cut
 
 sub _ua_post_with_timeout {
-    my($ua, $url, $data) = @_;
+    my($ua, $url, $data, $redirects) = @_;
+    my $c = $Thruk::Request::c;
+    $redirects = 0 unless $redirects;
+    if($redirects >= 7) {
+      die("too many redirects on url: ".$url);
+    }
     my $timeout_for_client = $ua->timeout();
     $ua->ssl_opts(timeout => $timeout_for_client, Timeout => $timeout_for_client);
 
@@ -896,6 +935,16 @@ sub _ua_post_with_timeout {
 
     if($res->is_error && $res->code == 408) { # HTTP::Status::HTTP_REQUEST_TIMEOUT
         die("hit ".$timeout_for_client."s timeout on ".$url);
+    }
+
+    # manually handle redirects so we can better handle special cases in OMD
+    if(my $location = $res->{'_headers'}->{'location'}) {
+        if($location =~ m|/login.cgi\?[^/]+?/omd/error.py.*?code=(\d+)$|mx && $c) {
+            $c->log->debug(Dumper($res));
+            $c->detach_error({msg => "remote backend returned an error: ".$1, code => 502, log => 1});
+            return;
+        }
+        return _ua_post_with_timeout($ua, $location, $data, $redirects+1);
     }
 
     return $res;

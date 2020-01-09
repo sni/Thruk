@@ -5,7 +5,7 @@ use Test::More;
 use File::Temp qw/tempfile/;
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-plan tests => 5;
+plan tests => 7;
 
 use_ok('Thruk::Utils::IO');
 
@@ -27,3 +27,10 @@ my $readdata = Thruk::Utils::IO::json_lock_retrieve($file);
 is_deeply($testdata, $readdata, 'data is the same');
 
 ok(unlink($file), 'remove tempfile');
+
+my $hostname = `hostname`;
+my(undef, $hostname2) = Thruk::Utils::IO::cmd("hostname");
+is($hostname2, $hostname, "hostnames are equal");
+
+my $hostname3 = Thruk::Utils::IO::cmd("hostname");
+is($hostname3, $hostname, "hostnames are equal");

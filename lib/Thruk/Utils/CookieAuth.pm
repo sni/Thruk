@@ -17,25 +17,16 @@ use Thruk::UserAgent;
 use Thruk::Authentication::User;
 use Thruk::Utils;
 use Thruk::Utils::IO;
+use Thruk::Utils::Crypt;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
-use Digest::MD5 qw(md5_hex);
 use File::Slurp qw/read_file/;
+use Carp qw/confess/;
+use File::Copy qw/move/;
 
 ##############################################
-BEGIN {
-    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-        ## no critic
-        $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
-        ## use critic
-        eval {
-            # required for new IO::Socket::SSL versions
-            require IO::Socket::SSL;
-            IO::Socket::SSL->import();
-            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-        };
-    }
-}
+my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
+my $session_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
 ##############################################
 
@@ -60,13 +51,13 @@ sub external_authentication {
     my $sdir     = $config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
-    my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
-    my $ua       = get_user_agent($config);
+    my $netloc = Thruk::Utils::CookieAuth::get_netloc($authurl);
+    my $ua     = get_user_agent($config);
     # unset proxy which eventually has been set from https backends
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     # bypass ssl host verfication on localhost
-    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
+    $ua->ssl_opts('verify_hostname' => 0) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
     $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
@@ -100,20 +91,20 @@ sub external_authentication {
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
                     $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
-                    my $sessionid = store_session($config, undef, {
-                        hash     => $hash,
-                        address  => $address,
-                        username => $login,
+                    my($sessionid) = store_session($config, undef, {
+                        hash       => $hash,
+                        address    => $address,
+                        username   => $login,
                     });
                     return $sessionid;
                 }
             } else {
-                $login = '(unknown)' if ref $login eq 'HASH';
-                print STDERR 'authorization failed for user ', $login,' got rc ', $res->code;
+                $login = '(by basic auth hash)' if ref $login eq 'HASH';
+                print STDERR 'authorization failed for user ', $login,' got rc ', $res->code, "\n";
                 return 0;
             }
         } else {
-            print STDERR 'auth: realm does not match, got ', $realm;
+            print STDERR 'auth: realm does not match, got ', $realm, "\n";
         }
     } else {
         print STDERR 'auth: expected code 401, got ', $res->code, "\n", Dumper($res);
@@ -184,6 +175,8 @@ sub get_user_agent {
     my $ua = Thruk::UserAgent->new($config);
     $ua->timeout(30);
     $ua->agent("thruk_auth");
+    $ua->no_proxy('127.0.0.1', 'localhost');
+    $ua->ssl_opts('SSL_ca_path' => $config->{ssl_ca_path} || "/etc/ssl/certs");
     return $ua;
 }
 
@@ -191,32 +184,65 @@ sub get_user_agent {
 
 =head2 clean_session_files
 
-    clean_session_files($url)
+    clean_session_files($c)
 
 clean up session files
 
 =cut
 sub clean_session_files {
-    my($config) = @_;
-    die("no config") unless $config;
-    my $sdir    = $config->{'var_path'}.'/sessions';
-    my $cookie_auth_session_timeout = $config->{'cookie_auth_session_timeout'};
+    my($c) = @_;
+    die("no config") unless $c;
+    my $sdir    = $c->config->{'var_path'}.'/sessions';
+    my $cookie_auth_session_timeout = $c->config->{'cookie_auth_session_timeout'};
     if($cookie_auth_session_timeout <= 0) {
         # clean old unused sessions after one year, even if they don't expire
         $cookie_auth_session_timeout = 365 * 86400;
     }
     my $timeout = time() - $cookie_auth_session_timeout;
+    my $fake_session_timeout = time() - 600;
     Thruk::Utils::IO::mkdir($sdir);
+    my $sessions_by_user = {};
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';
         my $file = $sdir.'/'.$entry;
         my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
-        if($mtime && $mtime < $timeout) {
-            unlink($file);
+        if($mtime) {
+            if($mtime < $timeout) {
+                unlink($file);
+            }
+            elsif($mtime < $fake_session_timeout) {
+                eval {
+                    my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                    if($data && $data->{'fake'}) {
+                        unlink($file);
+                    } else {
+                        $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
+                    }
+                };
+            }
         }
     }
+
+    # limit sessions to 500 per user
+    my $max_sessions_per_user = 500;
+    for my $user (sort keys %{$sessions_by_user}) {
+        my $user_sessions = $sessions_by_user->{$user};
+        my $num = scalar keys %{$user_sessions};
+        if($num > $max_sessions_per_user) {
+            $c->log->warn(sprintf("user %s has %d open sessions (max. %d) cleaning up.", $user, $num, $max_sessions_per_user));
+            for my $file (reverse sort { $user_sessions->{$b} <=> $user_sessions->{$a} } keys %{$user_sessions}) {
+                if($num > $max_sessions_per_user) {
+                    unlink($file);
+                    $num--;
+                } else {
+                    last;
+                }
+            }
+        }
+    }
+
     return;
 }
 
@@ -258,28 +284,56 @@ store session data
 
 sub store_session {
     my($config, $sessionid, $data) = @_;
-    $sessionid      = md5_hex(rand(1000).time()) unless $sessionid;
-    chomp($sessionid);
-    my $sdir        = $config->{'var_path'}.'/sessions';
-    die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9]+$/mx;
-    my $sessionfile = $sdir.'/'.$sessionid;
+
+    # store session key hashed
+    my($hashed_key, $digest_name);
+    ($sessionid,$hashed_key,$digest_name) = generate_sessionid($sessionid);
+
+    $data->{'csrf_token'} = Thruk::Utils::Crypt::random_uuid([$sessionid]) unless $data->{'csrf_token'};
+    delete $data->{'private_key'};
+    delete $data->{'file'};
+    my $hash_raw  = delete $data->{'hash_raw'};
+    my $hash_orig;
+
+    confess("no username") unless $data->{'username'};
+
+    # store basic auth hash crypted with the private session id
+    if($data->{'hash'} && $data->{'hash'} ne 'none') {
+        $hash_orig = $data->{'hash'};
+        if($hash_raw) {
+            # no need to recrypt every time
+            $data->{'hash'} = $hash_raw;
+        } else {
+            $data->{'hash'} = Thruk::Utils::Crypt::encrypt($sessionid, $data->{'hash'});
+        }
+    }
+
+    my $sdir = $config->{'var_path'}.'/sessions';
+    die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9_]+$/mx;
+    my $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
     Thruk::Utils::IO::mkdir_r($sdir);
     Thruk::Utils::IO::json_lock_store($sessionfile, $data);
-    return($sessionid, $sessionfile) if wantarray;
-    return($sessionid);
+
+    # restore some keys which should not be stored
+    $data->{'private_key'} = $sessionid;
+    $data->{'hash_raw'} = $hash_raw if $hash_raw;
+    $data->{'hash'}     = $hash_orig if $hash_orig;
+    $data->{'file'}     = $sessionfile;
+
+    return($sessionid, $sessionfile, $data);
 }
 
 ##############################################
 
 =head2 retrieve_session
 
-  retrieve_session($sessionfile)
-  retrieve_session($c, $sessionid)
+  retrieve_session(file => $sessionfile, config => $config)
+  retrieve_session(id   => $sessionid,   config => $config)
 
 returns session data as hash
 
     {
-        id       => session id,
+        id       => session id (if known),
         file     => session data file name,
         username => login name,
         active   => timestamp of last activity
@@ -291,21 +345,63 @@ returns session data as hash
 =cut
 
 sub retrieve_session {
-    my($c, $id) = @_;
+    my(%args) = @_;
     my($sessionfile, $sessionid);
-    if(ref $c eq '') {
-        $sessionfile = $c;
+    my $config = $args{'config'} or confess("missing config");
+    my($digest_name, $hashed_key);
+    if($args{'file'}) {
+        $sessionfile = Thruk::Utils::basename($args{'file'});
+        # REMOVE AFTER: 01.01.2022
+        if($sessionfile =~ $hashed_key_file_regex) {
+            $hashed_key  = $1;
+            $digest_name = substr($2, 1) if $2;
+        } else {
+            return;
+        }
+        if(!$digest_name && length($hashed_key) < 64) {
+            my($new_hashed_key, $newfile);
+            ($new_hashed_key, $newfile, undef, $digest_name) = _upgrade_session_file($config, $hashed_key);
+            if($newfile) {
+                $sessionfile = Thruk::Utils::basename($newfile);
+                $hashed_key  = $new_hashed_key;
+            }
+        }
     } else {
-        $sessionid = $id;
-        my $sdir     = $c->config->{'var_path'}.'/sessions';
-        $sessionfile = $sdir.'/'.$sessionid;
+        my $digest_nr;
+        $sessionid = $args{'id'};
+        if($sessionid =~ $session_key_regex) {
+            $digest_nr = substr($2, 1) if $2;
+        } else {
+            return;
+        }
+        if(!$digest_nr) {
+            # REMOVE AFTER: 01.01.2022
+            if(length($sessionid) < 64) {
+                (undef, undef, $digest_nr, $digest_name) = _upgrade_session_file($config, $sessionid);
+            }
+            # /REMOVE AFTER
+            else {
+                return;
+            }
+        }
+        $digest_name = Thruk::Utils::Crypt::digest_name($digest_nr) unless $digest_name;
     }
+    return unless $digest_name;
+
+    if(!$hashed_key) {
+        $hashed_key = Thruk::Utils::Crypt::hexdigest($sessionid, $digest_name);
+    }
+    my $sdir = $config->{'var_path'}.'/sessions';
+    $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
+
     my $data;
     return unless -e $sessionfile;
     my @stat = stat(_);
     eval {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };
+    # REMOVE AFTER: 01.01.2022
+    my $needs_save;
     if(!$data) {
         my $raw = scalar read_file($sessionfile);
         chomp($raw);
@@ -318,15 +414,60 @@ sub retrieve_session {
             hash     => $auth,
             roles    => \@roles,
         };
+        $needs_save = 1;
     }
+    # /REMOVE
+
     return unless defined $data;
-    $data->{id}     = $sessionid if $sessionid;
-    $data->{file}   = $sessionfile;
-    $data->{active} = $stat[9];
-    $data->{roles}  = [] unless $data->{roles};
+
+    if($sessionid && $data->{hash}) {
+        # try to decrypt from private key (can be skipped for old sessions)
+        my $decrypted = Thruk::Utils::Crypt::decrypt($sessionid, $data->{'hash'});
+        $data->{'hash'} = $decrypted if $decrypted;
+    }
+    $data->{file}        = $sessionfile;
+    $data->{hashed_key}  = $hashed_key;
+    $data->{digest}      = $digest_name;
+    $data->{active}      = $stat[9];
+    $data->{roles}       = [] unless $data->{roles};
+    $data->{private_key} = $sessionid if $sessionid;
+
+    # REMOVE AFTER: 01.01.2022
+    store_session($config, $sessionid, $data) if($needs_save && $sessionid);
+    # /REMOVE
     return($data);
 }
 
 ##############################################
+# migrate session from old md5hex to current format
+# REMOVE AFTER: 01.01.2022
+sub _upgrade_session_file {
+    my($config, $sessionid) = @_;
+    my $folder = $config->{'var_path'}.'/sessions';
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
+    my $newfile = $folder.'/'.$hashed_key.'.'.$digest_name;
+    return($hashed_key, $newfile, $digest_nr, $digest_name) unless -e $folder.'/'.$sessionid;
+    move($folder.'/'.$sessionid, $newfile);
+    return($hashed_key, $newfile, $digest_nr, $digest_name);
+}
+
+##############################################
+
+=head2 generate_sessionid
+
+  generate_sessionid([$sessionid])
+
+returns random sessionid along with the hashed key and the hash type
+
+  returns $sessionid, $hashed_key
+
+=cut
+
+sub generate_sessionid {
+    my($sessionid) = @_;
+    $sessionid = Thruk::Utils::Crypt::random_uuid() unless $sessionid;
+    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
+    return($sessionid, $hashed_key, $digest_name);
+}
 
 1;

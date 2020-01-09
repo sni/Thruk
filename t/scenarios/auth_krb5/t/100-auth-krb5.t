@@ -9,13 +9,11 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 106;
-
 $ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
 ###############################################################################
 TestUtils::test_page(
-    'url'    => '/thruk/r/sites?status=0&columns=count(*)',
-    'like'   => [ '"count\(\*\)" : 2' ],
+    'url'     => '/thruk/r/sites?status=0&columns=count(*)',
+    'waitfor' => '"count\(\*\)"\ :\ 2',
 );
 
 ###############################################################################
@@ -63,3 +61,5 @@ for my $site (qw/local/) {
     );
   }
 }
+
+done_testing();

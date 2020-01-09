@@ -9,9 +9,9 @@
 %endif
 
 Name:          thruk
-Version:       2.26
+Version:       2.32
 Release: 2
-License:       GPLv2+
+License:       GPL-2.0-or-later
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
@@ -30,7 +30,7 @@ Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
-BuildRequires: libthruk >= 2.26
+BuildRequires: libthruk >= 2.32
 Requires:      thruk-base = %{version}-%{release}
 Requires:      thruk-plugin-reporting = %{version}-%{release}
 %if 0%{?suse_version} < 1315
@@ -56,7 +56,7 @@ large installations.
 %package base
 Summary:     Thruk Gui Base Files
 Group:       Applications/System
-Requires:    libthruk >= 2.26
+Requires:    libthruk >= 2.32
 Requires(preun): libthruk
 Requires(post): libthruk
 Requires:    perl logrotate gd wget
@@ -75,7 +75,7 @@ Requires:    apache2 apache2-mod_fcgid cron
 %endif
 
 # >=rhel7 and fedora
-%if 0%{?el7}%{?fedora}
+%if 0%{?el7}%{?el8}%{?fedora}
 BuildRequires: perl(ExtUtils::Install) httpd
 Requires: httpd mod_fcgid cronie
 %endif
@@ -437,6 +437,7 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/convert_old_datafile
+%attr(0755,root,root) %{_datadir}/thruk/script/check_thruk_rest
 %{_datadir}/thruk/support
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates

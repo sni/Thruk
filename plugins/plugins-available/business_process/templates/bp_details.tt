@@ -8,10 +8,13 @@
   <table border="0" class="optBox bp" style="position: absolute; right: 30px; top: 55px;">
     <tr>
       <td>
-        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button', 'return bp_on_save_click(this)') %]
+        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;CSRFtoken=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button', 'return bp_on_save_click(this)') %]
       </td>
     </tr>
   </table>
+[% END %]
+[% IF minimal %]
+<div class="bp_status_extinfo_link" style="display: none;"></div>
 [% END %]
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 5px;"[% IF minimal %]class="minimal"[% END %]>
@@ -174,7 +177,7 @@
                   <form action='bp.cgi' method='POST' style="display: inline;">
                     <input type='hidden' name='action' value='remove'>
                     <input type="hidden" name="bp" value="[% bp.id %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href='bp.cgi' onClick="confirm('A removed business process cannot be restored. Really remove?') && jQuery(this).closest('FORM').submit(); return false;">Delete this Business Process</a>
                   </form>
                 </td>
@@ -185,7 +188,7 @@
                   <form action='bp.cgi' method='POST' style="display: inline;">
                     <input type='hidden' name='action' value='revert'>
                     <input type="hidden" name="bp" value="[% bp.id %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href='bp.cgi' onClick="confirm('Really discard all changes?') && jQuery(this).closest('FORM').submit(); return false;">Discard Changes</a>
                   </form>
                 </td>
@@ -196,7 +199,7 @@
                   <form action='bp.cgi' method='POST' style="display: inline;">
                     <input type='hidden' name='action' value='commit'>
                     <input type="hidden" name="bp" value="[% bp.id %]">
-                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                     <a href='bp.cgi' onClick="jQuery(this).closest('FORM').submit(); return false;">Save Changes</a>
                   </form>
                 </td>
@@ -209,54 +212,43 @@
   </tr>
   [% END %]
 
-  [% IF debug %]
+  [% IF outgoing_refs.size > 0 || incoming_refs.size > 0 %]
   <tr>
     <td style="height: 20px;"></td>
   </tr>
 
   <tr>
     <td align="center" valign="top" class='commandPanel'>
-      <div class='dataTitle'>Graph Options</div>
-      <form id="bp_graph_option_form" action="#" onsubmit="return false;">
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+      <div class='dataTitle'>Navigation</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel" style="width:100%">
         <tr>
-          <td>
-            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
+          <td width="100%">
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info" width="100%">
+              [% FOREACH r = incoming_refs %]
               <tr class='data'>
-                <td>Direction</td>
-                <td>
-                  <select onchange="bp_redraw_changed('bp_rankDir', this.value)" id="bp_rankDir" name="bp_rankDir">
-                    <option value="TB">Top-Bottom</option>
-                    <option value="LR">Left Right</option>
-                  </select>
-                </td>
+                <td width=16><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='Incoming business process' title='Incoming business process' width="16" height="16" style="vertical-align: top;"></td>
+                <td class="command mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% r.fullid %]"><b>[% r.name | html %]</b></a></td>
               </tr>
+              [% END %]
+              [% IF incoming_refs.size > 0 %]
+              <tr class='data'><td colspan=2><hr></td></tr>
+              [% END %]
+              [% FOREACH r = outgoing_refs %]
               <tr class='data'>
-                <td>Node Seperation</td>
-                <td>
-                  <input type="text" value="20" name="bp_nodeSep" onkeyup="bp_redraw_changed('bp_nodeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_nodeSep">
-                </td>
+                <td width=16><img src='[% url_prefix %]themes/[% theme %]/images/arrow_right.png' border="0" alt='Outgoing business process' title='Outgoing business process' width="16" height="16" style="vertical-align: top;"></td>
+                <td class="command mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% r.fullid %]"><b>[% r.name | html %]</b></a></td>
               </tr>
-              <tr class='data'>
-                <td>Edge Seperation</td>
-                <td>
-                  <input type="text" value="10" name="bp_edgeSep" onkeyup="bp_redraw_changed('bp_edgeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_edgeSep">
-                </td>
-              </tr>
-              <tr class='data'>
-                <td>Rank Seperation</td>
-                <td>
-                  <input type="text" value="30" name="bp_rankSep" onkeyup="bp_redraw_changed('bp_rankSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_rankSep">
-                </td>
-              </tr>
+              [% END %]
             </table>
           </td>
         </tr>
       </table>
-      </form>
     </td>
   </tr>
   [% END %]
+
+
+
 </table>
 
 

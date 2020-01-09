@@ -1,6 +1,7 @@
 /* render date */
 TP.render_date = function(v, td, item) {
-    if(v == 0) { return 'never'; }
+    if(v == 0)  { return 'never'; }
+    if(v == -1) { return ''; }
     return TP.date_format(v);
 }
 
@@ -33,7 +34,7 @@ TP.render_icon_site = function(v, td, item, row, col, store, view) {
         title="title=\""+item.data.version+"\"";
     };
     var panel = view.up().up();
-    var tab   = Ext.getCmp(panel.panel_id);
+    var tab   = panel.tab;
     if(tab.activeBackends != undefined && tab.activeBackends[item.data.id] == false) {
         v = 'sport_golf.png';
     }
@@ -244,6 +245,7 @@ TP.render_host_service_icons = function(v, td, item, row, col, store, view) {
         return '';
     }
     var data = {
+        name:                     d.host_name,
         notifications_enabled:    d.host_notifications_enabled,
         check_type:               d.host_check_type,
         active_checks_enabled:    d.host_active_checks_enabled,
@@ -257,7 +259,8 @@ TP.render_host_service_icons = function(v, td, item, row, col, store, view) {
         icon_image_expanded:      d.host_icon_image_expanded,
         icon_image_alt:           d.host_icon_image_alt,
         custom_variable_names:    d.host_custom_variable_names,
-        custom_variable_values:   d.host_custom_variable_values
+        custom_variable_values:   d.host_custom_variable_values,
+        THRUK_ACTION_MENU:        item.raw.HOSTTHRUK_ACTION_MENU
     };
     return TP.render_host_icons(v, td, item, row, col, store, view, data);
 }
@@ -285,11 +288,15 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
 
     if(d.is_flapping)                  { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/flapping.gif" alt="This host is flapping between states" border="0" height="20" width="20">'; }
     if(d.acknowledged)                 { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/ack.gif" alt="This host problem has been acknowledged" border="0" height="20" width="20">'; }
-    if(d.comments.length > 0)          { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/comment.gif" alt="This host has '+d.comments.length+' comments associated with it" border="0" height="20" width="20">'; }
-    if(d.scheduled_downtime_depth > 0) { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" border="0" height="20" width="20">'; }
+    if(d.comments.length > 0)          { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/comment.gif" alt="This host has '+d.comments.length+' comments associated with it" border="0" height="20" width="20" class="clickable" onclick="return(host_comments_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
+    if(d.scheduled_downtime_depth > 0) { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" border="0" height="20" width="20" class="clickable" onclick="return(host_downtimes_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
     if(d.action_url_expanded )         { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, host_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Host Actions' title='Perform Extra Host Actions'><\/a>"; }
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Host Notes' title='View Extra Host Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
+    var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
+    if(action_menu) {
+        icons += TP.addActionIconsFromMenu(action_menu, d.name);
+    }
     return icons;
 }
 
@@ -316,11 +323,15 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
 
     if(d.is_flapping)                  { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/flapping.gif" alt="This service is flapping between states" border="0" height="20" width="20">'; }
     if(d.acknowledged)                 { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/ack.gif" alt="This service problem has been acknowledged" border="0" height="20" width="20">'; }
-    if(d.comments.length > 0)          { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/comment.gif" alt="This service has '+d.comments.length+' comments associated with it" border="0" height="20" width="20">'; }
-    if(d.scheduled_downtime_depth > 0) { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" border="0" height="20" width="20">'; }
+    if(d.comments.length > 0)          { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/comment.gif" alt="This service has '+d.comments.length+' comments associated with it" border="0" height="20" width="20" class="clickable" onclick="return(service_comments_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
+    if(d.scheduled_downtime_depth > 0) { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" border="0" height="20" width="20" class="clickable" onclick="return(service_downtimes_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
     if(d.action_url_expanded )         { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, service_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>"; }
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Service Notes' title='View Extra Service Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
+    var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
+    if(action_menu) {
+        icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description);
+    }
     return icons;
 }
 
@@ -329,7 +340,7 @@ TP.render_clickable_host = function(v, td, item, row, col, store, view) {
     td.tdCls += ' clickable';
     var host  = item.data.host_name ? item.data.host_name : item.data.name;
     host      = host.replace(/\\/g, '\\\\');
-    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
+    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { userOpened: true, xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
 }
 
 /* make host clickable */
@@ -344,7 +355,7 @@ TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
     }
     for(var nr=0; nr<v.length; nr++) {
         host = v[nr];
-        msg += "<span class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+host+"<\/span>";
+        msg += "<span class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { userOpened: true, xdata: { host: '"+host+"'}}})\">"+host+"<\/span>";
         if(nr+1 < v.length) {
             msg += ", ";
         }
@@ -355,9 +366,10 @@ TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
 /* make service description clickable */
 TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     td.tdCls = 'clickable';
-    var description = item.data.description.replace(/\\/g, '\\\\');
+    var description = item.data.service_description || item.data.description || '';
+    description = description.replace(/\\/g, '\\\\');
     var host_name   = item.data.host_name.replace(/\\/g, '\\\\');
-    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
+    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { userOpened: true, xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
 }
 
 /* render action url */
@@ -432,6 +444,15 @@ TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {
 /* render direct link */
 TP.render_directlink = function(v, td, item, row, col, store, view) {
     return "<a target='_blank' href='panorama.cgi?map="+item.data.name+"'><img src='"+url_prefix+"plugins/panorama/images/application_put.png' border='0' width='16' height='16' alt='direct url' title='open this dashboard only (new window)'><\/a>";
+}
+
+/* render enabled / disabled switch */
+TP.render_entry_type = function(v, td, item) {
+    if(v==1) { return "User Comment"; };
+    if(v==2) { return "Scheduled Downtime"; };
+    if(v==3) { return "Flap Detection"; };
+    if(v==4) { return "Acknowledgement"; };
+    return "?";
 }
 
 /* format timestamp */
@@ -520,4 +541,54 @@ function action_icon(o, action_icon) {
         }
     }
     return action_icon;
+}
+
+TP.addActionIconsFromMenu = function(action_menu_name, host, service) {
+    var icons = "";
+    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', '', '', {}, true);
+    if(Ext.isArray(menuData)) {
+        Ext.Array.forEach(menuData, function(icon, i) {
+            icons += TP.addActionIcon(icon, action_menu_name, host, service);
+        });
+    } else {
+        icons += TP.addActionIcon(menuData, action_menu_name, host, service);
+    }
+    return(icons);
+}
+
+TP.addActionIcon = function(icon, menuName, host, service) {
+    var href = "";
+    if(icon.action) {
+        href = icon.action;
+    }
+    else {
+        href = "menu://"+menuName;
+    }
+    var icon = '<a href="'+href+'" target="'+(icon.target || '')+'" onclick="return(TP.checkActionLink(this))" data-host="'+encodeURIComponent(host||'')+'" data-service="'+encodeURIComponent(service||'')+'">'
+              +'<img src="'+replace_macros(icon.icon)+'" alt="'+replace_macros(icon.title||icon.label)+'" border="0" height="20" width="20">'
+              +'</a>';
+    return(icon);
+}
+
+TP.checkActionLink = function(a) {
+    var panel = undefined;
+
+    // find panel by iterating all parents
+    var p = a;
+    var panel;
+    while(p.parentNode) {
+        p = p.parentNode;
+        if(p.id) {
+            panel = Ext.getCmp(p.id);
+            if(panel && panel.tab && panel.tab.id) {
+                break;
+            }
+            panel = null;
+        }
+    }
+    if(!panel) {
+        return(false);
+    }
+    openActionUrlWithFakePanel(a, panel, a.href, decodeURIComponent(a.dataset.host || ''), decodeURIComponent(a.dataset.service || ''), a.target);
+    return(false);
 }

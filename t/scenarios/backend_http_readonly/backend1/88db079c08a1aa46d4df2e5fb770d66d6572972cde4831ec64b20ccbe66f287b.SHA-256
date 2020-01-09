@@ -1,0 +1,12 @@
+{
+   "comment" : "read_only_key",
+   "created" : 1571412941,
+   "roles" : [
+      "authorized_for_all_hosts",
+      "authorized_for_all_services",
+      "authorized_for_configuration_information",
+      "authorized_for_system_information",
+      "authorized_for_read_only"
+   ],
+   "superuser" : 1
+}

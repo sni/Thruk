@@ -6,14 +6,16 @@ BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'local tests only'  if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 12;
+    plan tests => 18;
 }
 
 $ENV{'TEST_MODE'} = 1;
 my $cmds = [
+    './script/thruk bp all >/dev/null',
     './script/thruk_update_docs_rest.pl',
     'diff -Bbwu docs/documentation/rest.asciidoc docs/documentation/rest.asciidoc.tst',
     'diff -Bbwu docs/documentation/rest_commands.asciidoc docs/documentation/rest_commands.asciidoc.tst',
+    'diff -Bbwu docs/documentation/commands.html docs/documentation/commands.html.tst',
     'diff -Bbwu lib/Thruk/Controller/Rest/V1/cmd.pm cmd.pm.tst',
 ];
 for my $cmd (@{$cmds}) {
@@ -37,5 +39,6 @@ for my $cmd (@{$cmds}) {
 END {
     unlink('docs/documentation/rest.asciidoc.tst');
     unlink('docs/documentation/rest_commands.asciidoc.tst');
+    unlink('docs/documentation/commands.html.tst');
     unlink('cmd.pm.tst');
 };
