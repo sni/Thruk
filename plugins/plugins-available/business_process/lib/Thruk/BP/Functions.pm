@@ -232,9 +232,14 @@ sub worst {
         return(3, 'no dependent nodes');
     }
     my @sorted = reverse sort keys %{$states};
-    my $state = $sorted[0];
+    my $state  = $sorted[0];
+    my $extra  = _get_nodes_extra($states->{$state}, "worst");
     $state = 0 if $state == -1;
-    return($state, 'worst of', Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state));
+    return($state,
+           'worst of',
+            Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state),
+           $extra,
+    );
 }
 
 ##########################################################
@@ -253,9 +258,14 @@ sub best {
         return(3, 'no dependent nodes');
     }
     my @sorted = sort keys %{$states};
-    my $state = $sorted[0];
+    my $state  = $sorted[0];
+    my $extra  = _get_nodes_extra($states->{$state}, "worst");
     $state = 0 if $state == -1;
-    return($state, 'best of', Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state));
+    return($state,
+           'best of',
+            Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state),
+           $extra,
+    );
 }
 
 ##########################################################
@@ -690,6 +700,34 @@ sub _count_good_bad {
         }
     }
     return($good, $bad);
+}
+
+##########################################################
+# get extra attributes from nodes list
+sub _get_nodes_extra {
+    my($nodes, $aggregation) = @_;
+    my $extra = {
+        'acknowledged'             => undef,
+        'scheduled_downtime_depth' => undef,
+    };
+    for my $node (@{$nodes}) {
+        for my $key (qw/acknowledged scheduled_downtime_depth/) {
+            if(!defined $extra->{$key}) {
+                $extra->{$key} = $node->{$key};
+            }
+            elsif($aggregation eq 'worst') {
+                if(!$node->{$key}) {
+                    $extra->{$key} = 0;
+                }
+            }
+            elsif($aggregation eq 'best') {
+                if($node->{$key}) {
+                    $extra->{$key} = 1;
+                }
+            }
+        }
+    }
+    return($extra);
 }
 
 ##########################################################
