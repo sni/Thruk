@@ -377,6 +377,26 @@ is in short:
 | DELETE  | remove existing ressource, ex.: `DELETE /thruk/reports/1` to remove the report entirely.
 |===========================================
 
+== Object configuration notes
+
+To create brand new object configurations (e.g hosts), you MUST use POST /config/objects as documented further down.
+
+POST /*/<name>/config is only used for overwriting existing objects.
+
+After object configuration changes, use the following sequence of steps (similar to the GUI object config tool):
+
+1) GET /config/diff
+
+   a) At this point you can revert the changes by using POST /config/revert
+   
+2) POST /config/save
+
+3) POST /config/check
+
+4) POST /config/reload
+
+Make sure to check the output of each step
+
 == Endpoints
 
 You can find lots of examples on the link:rest_examples.html[REST API examples page].
