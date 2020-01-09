@@ -850,7 +850,6 @@ DIV.x-mask.maintenance {
 }
 DIV.maintenance .x-mask-msg-text {
   font-size: 14px;
-	background-image: url("images/btn_downtime.png");
 }
 
 DIV.maintenance .show {
