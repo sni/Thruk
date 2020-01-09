@@ -337,7 +337,9 @@ set status of node
 sub set_status {
     my($self, $state, $text, $bp, $extra) = @_;
 
-    my $last_state = $self->{'status'} // 4;
+    my $last_state    = $self->{'status'}                   // 4;
+    my $last_ack      = $self->{'acknowledged'}             // 0;
+    my $last_downtime = $self->{'scheduled_downtime_depth'} // 0;
 
     # update last check time
     my $now = time();
@@ -345,16 +347,6 @@ sub set_status {
 
     $self->{'status'}      = $state;
     $self->{'status_text'} = $text;
-
-    if($last_state != $state) {
-        $self->{'last_state_change'} = $now;
-        # put parents on update list
-        if($bp) {
-            for my $p (@{$self->parents($bp)}) {
-                $bp->{'need_update'}->{$p->{'id'}} = 1;
-            }
-        }
-    }
 
     # update some extra attributes
     my %custom_vars;
@@ -367,6 +359,16 @@ sub set_status {
     }
     for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged testmode/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
+    }
+
+    if($last_state != $state || $last_ack != $self->{'acknowledged'} || $last_downtime != $self->{'scheduled_downtime_depth'}) {
+        $self->{'last_state_change'} = $now;
+        # put parents on update list
+        if($bp) {
+            for my $p (@{$self->parents($bp)}) {
+                $bp->{'need_update'}->{$p->{'id'}} = 1;
+            }
+        }
     }
 
     # if this node has no parents, use this state for the complete bp
