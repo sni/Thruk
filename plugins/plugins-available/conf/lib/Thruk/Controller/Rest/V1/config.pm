@@ -271,7 +271,14 @@ sub _rest_get_config_objects {
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/objects?$%mx, \&_rest_get_config_objects_new, ["admin"]);
 sub _rest_get_config_objects_new {
     my($c) = @_;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my $backends;
+    if ($c->req->parameters->{':PEER_KEY'}) {
+        $backends->[0] = $c->req->parameters->{':PEER_KEY'};
+        delete $c->req->parameters->{':PEER_KEY'};
+    }
+    else {
+        ($backends) = $c->{'db'}->select_backends("get_");
+    }
     my $type      = delete $c->req->parameters->{':TYPE'};
     my $new_file  = delete $c->req->parameters->{':FILE'};
     my $created   = 0;
