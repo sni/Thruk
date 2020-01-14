@@ -48,7 +48,13 @@ sub status {
                    || ($op eq '!=' && $sname ne $description)) {
                     my $s = $livedata->{'services'}->{$hostname}->{$sname};
                     next if($bp->{'state_type'} eq 'hard' and $s->{'state_type'} != 1);
-                    push @{$depends}, { label => $sname, status => $s->{'state'}, status_text => $s->{'plugin_output'} };
+                    push @{$depends}, {
+                        label                    => $sname,
+                        status                   => $s->{'state'},
+                        status_text              => $s->{'plugin_output'},
+                        acknowledged             => $s->{'acknowledged'},
+                        scheduled_downtime_depth => $s->{'scheduled_downtime_depth'},
+                    };
                 }
             }
 
