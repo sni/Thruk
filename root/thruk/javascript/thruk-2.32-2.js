@@ -155,6 +155,7 @@ function getBrowserTimezone() {
     return(timezone);
 }
 
+var error_count = 0;
 function thruk_onerror(msg, url, line, col, error) {
   if(error_count > 5) {
     debug("too many errors, not logging any more...");
@@ -2311,7 +2312,8 @@ function getErrorText(details, error) {
     text = text + "Version:    " + version_info+"\n";
     text = text + "Release:    " + released+"\n";
     text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
-    text = text + "Browser:    " + navigator.userAgent + "\n";
+    text = text + "Browser:    " + platform.description + "\n";
+    text = text + "UserAgent:  " + navigator.userAgent + "\n";
     text = text + "Backends:   ";
     var first = 1;
     for(var nr=0; nr<initial_backends.length; nr++) {
