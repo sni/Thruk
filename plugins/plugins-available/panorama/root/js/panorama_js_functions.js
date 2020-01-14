@@ -2092,7 +2092,7 @@ var TP = {
                         var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
 
-                        if(key.search(/pantab_\d+$/) != -1) {
+                        if(key.search(/pantab_\d+$/) != -1 || key == "tabbar") {
                             /* tab has been updated already */
                             continue;
                         }
