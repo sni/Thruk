@@ -1341,10 +1341,10 @@ var TP = {
             params.sub = {};
             var subtabs = tab.getAllSubDashboards(true);
             for(var x=0; x<subtabs.length; x++) {
-                var subtab_id = subtabs[x];
+                var subtab_id = TP.nr2TabId(subtabs[x]);
                 var subtab    = Ext.getCmp(subtab_id);
                 if(!subtab) {
-                    TP.add_pantab({ id: subtabs[x], hidden: true, callback: function(subtab_id) {
+                    TP.add_pantab({ id: subtab_id, hidden: true, callback: function(subtab_id) {
                         var subtab = Ext.getCmp(subtab_id);
                         if(!subtab) {
                             TP.log('['+subtab_id+'] failed to load dashboard');
