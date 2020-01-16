@@ -225,18 +225,10 @@ ex.:
 
 
 === rest_api_enabled
-{% include new_since.ad version="2.24" %}
-The link:rest.html[rest api] is enabled by default, but you can disable or restrict it.
 
-Valid options are:
-  - 0: rest api disabled
-  - 1: rest api enabled for everyone
-  - 2: rest api enabled for admins only
-  - 3: rest api enabled from command line only
+**DEPRECATED:** setting this has no effect with Thruk 2.34 or later.
 
-ex.:
-
-  rest_api_enabled = 3
+The link:rest.html[rest api] is enabled by default, disabling it would break Thruk operation.
 
 
 === api_keys_enabled

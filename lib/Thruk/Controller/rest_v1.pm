@@ -108,28 +108,7 @@ sub index {
     }
 
     my $data;
-    if($c->config->{'rest_api_enabled'} == 0) {
-        $data = {
-            'message'     => 'the rest api is disabled with rest_api_enabled=0.',
-            'description' => 'you have to enable the rest api in order to use it.',
-            'code'        => 400,
-            'failed'      => Cpanel::JSON::XS::true,
-         };
-    } elsif($c->config->{'rest_api_enabled'} == 2 && !$c->check_user_roles('admin')) {
-        $data = {
-            'message'     => 'the rest api is disabled for non-admin users.',
-            'description' => 'you need admin privileges to use the rest api.',
-            'code'        => 400,
-            'failed'      => Cpanel::JSON::XS::true,
-         };
-    } elsif($c->config->{'rest_api_enabled'} == 3 && ($ENV{'THRUK_CLI_SRC'}//'') ne 'CLI' ) {
-        $data = {
-            'message'     => 'the rest api is disabled from web access.',
-            'description' => 'the rest api has been configured to be only allowed from the command line.',
-            'code'        => 400,
-            'failed'      => Cpanel::JSON::XS::true,
-         };
-    } elsif($c->user->{'readonly'} && $c->req->method ne 'GET') {
+    if($c->user->{'readonly'} && $c->req->method ne 'GET') {
         $data = {
             'message'     => 'only GET requests allowed for readonly api keys.',
             'code'        => 400,
