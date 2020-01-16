@@ -66,6 +66,7 @@ sub index {
                 $broadcast->{'authoremail'} = $c->user ? $c->user->{'email'} : 'none';
                 $broadcast->{'template'} = 0;
                 delete $broadcast->{'basefile'};
+                Thruk::Utils::Broadcast::process_broadcast($c, $broadcast);
             }
             $broadcast->{'id'} = $broadcast->{'basefile'} || 'new';
             $c->stash->{template}  = 'broadcast_edit.tt';
