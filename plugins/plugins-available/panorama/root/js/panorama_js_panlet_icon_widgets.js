@@ -408,6 +408,7 @@ Ext.define('TP.SmallWidget', {
             if(!readonly) {
                 if(evt.ctrlKey || is_shift_pressed(evt)) {
                     var tab = This.tab;
+                    if(This.preventNextSelect) { delete This.preventNextSelect; return; }
                     if(This.locked) { return; }
                     if(TP.moveIcons == undefined) {
                         TP.moveIcons = [];
@@ -632,6 +633,9 @@ Ext.define('TP.SmallWidget', {
                     panel.setRawPosition(snap);
                     panel.noMoreMoves = false;
                     panel.fireEvent("move", panel, undefined, undefined);
+
+                    // unset selected icons, otherwise dd with shift ends up with icon beeing selected
+                    panel.preventNextSelect = true;
                 }
                 TP.isShift = false;
                 if(panel.ddShadow) { panel.ddShadow.dom.style.display = 'none'; }
