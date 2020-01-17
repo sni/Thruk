@@ -1505,6 +1505,8 @@ TP.restoreDashboard = function(tab, timestamp, mode) {
                         }
                     } else {
                         TP.getResponse(undefined, response);
+                        // force status update to trigger reloading the dashboard
+                        TP.refreshAllSitePanel(Ext.getCmp(TP.nr2TabId(tab)));
                         TP.Msg.msg("success_message~~restoring dashboard successful to "+strftime("%a %b %e %Y, %H:%M:%S", timestamp));
                     }
                 }
