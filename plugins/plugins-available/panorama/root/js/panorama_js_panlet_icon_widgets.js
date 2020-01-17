@@ -611,6 +611,12 @@ Ext.define('TP.SmallWidget', {
                     /* dragging by label does not fire the move event, so fire move manually */
                     panel.fireEvent("move", panel, undefined, undefined);
                 }
+                if(TP.isShift) {
+                    var pos = panel.getPosition();
+                    panel.noMoreMoves = true;
+                    panel.setRawPosition(TP.get_snap(pos[0], pos[1]));
+                    panel.noMoreMoves = false;
+                }
             });
             el.dd.addListener('dragend', function(This, evt) {
                 if(panel.dragHint) {
@@ -619,12 +625,13 @@ Ext.define('TP.SmallWidget', {
                 }
                 tab.enableMapControlsTemp();
                 TP.isShift = is_shift_pressed(evt);
-                /* prevents opening link after draging */
                 if(TP.isShift) {
                     var pos = panel.getPosition();
                     panel.noMoreMoves = true;
-                    panel.setRawPosition(TP.get_snap(pos[0], pos[1]));
+                    var snap = TP.get_snap(pos[0], pos[1]);
+                    panel.setRawPosition(snap);
                     panel.noMoreMoves = false;
+                    panel.fireEvent("move", panel, undefined, undefined);
                 }
                 TP.isShift = false;
                 if(panel.ddShadow) { panel.ddShadow.dom.style.display = 'none'; }
