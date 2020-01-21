@@ -82,6 +82,10 @@ prepare:
 	docker-compose build
 	docker-compose up --remove-orphans -d
 	docker ps
+	@docker-compose logs -f | while read LOGLINE; do \
+		echo "$${LOGLINE}"; \
+		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ docker-compose && exit 0; \
+	done
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
