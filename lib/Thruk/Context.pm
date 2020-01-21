@@ -88,10 +88,11 @@ sub new {
 
     # extract non-url encoded q= param from raw body parameters
     $self->req->parameters();
-    if($self->req->raw_body && $self->req->raw_body =~ m/(^|\?|\&)q=(.{3})/mx) {
+    my $raw_body = $self->req->raw_body;
+    if($raw_body && $raw_body =~ m/(^|\?|\&)q=(.{3})/mx) {
         my $separator = $2;
         if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
-            if($self->req->raw_body =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
+            if($raw_body =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
                 $self->req->body_parameters->{'q'} = $1;
                 $self->req->parameters->{'q'} = $1;
             }
@@ -99,14 +100,13 @@ sub new {
     }
 
     # parse json body parameters
-    if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
-        my $raw = $self->req->raw_body;
-        if(ref $raw eq '' && $raw =~ m/^\{.*\}$/mxs) {
+    if(ref $raw_body eq '' && $raw_body =~ m/^\{.*\}$/mxs) {
+        if($self->req->content_type && $self->req->content_type =~ m%^application/json%mx) {
             my $data;
             my $json = Cpanel::JSON::XS->new->utf8;
             $json->relaxed();
             eval {
-                $data = $json->decode($raw);
+                $data = $json->decode($raw_body);
             };
             if($@) {
                 confess("failed to parse json data argument: ".$@);
