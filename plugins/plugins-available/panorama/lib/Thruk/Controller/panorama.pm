@@ -582,10 +582,13 @@ sub _task_status {
         $data->{'servicegroups'} = [values %{_summarize_servicegroup_query($c, $types->{'servicegroups'}, $state_type)}];
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
+        my $columns = [qw/name alias state state_type has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output
+                          last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
+                         /];
+        push @{$columns}, "long_plugin_output" if $types->{'has_long_plugin_output'};
         $data->{'hosts'} = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
-                                                 columns => [qw/name alias state state_type has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output
-                                                                last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
-                                                               /]);
+                                                 columns => $columns,
+                                                );
         if($c->config->{'shown_inline_pnp'}) {
             for my $hst (@{$data->{'hosts'}}) {
                 $hst->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $hst);
@@ -593,10 +596,13 @@ sub _task_status {
         }
     }
     if(scalar keys %{$types->{'services'}} > 0) {
+        my $columns = [qw/host_name host_alias description state state_type has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check
+                          plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
+                         /];
+        push @{$columns}, "long_plugin_output" if $types->{'has_long_plugin_output'};
         $data->{'services'} = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
-                                                       columns => [qw/host_name host_alias description state state_type has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check
-                                                                      plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
-                                                                     /]);
+                                                       columns => $columns,
+                                                      );
         if($c->config->{'shown_inline_pnp'}) {
             for my $svc (@{$data->{'services'}}) {
                 $svc->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $svc);

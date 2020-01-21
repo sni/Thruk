@@ -1612,7 +1612,7 @@ var TP = {
     /* get request parameters for status requests */
     getStatusReq: function(tab, ids, xdata) {
         var panels = TP.getAllPanel(tab);
-        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
+        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, has_long_plugin_output: false };
         var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}, dashboards: {} };
 
         var count  = 0;
@@ -1648,6 +1648,9 @@ var TP = {
                     if(req.services[p.xdata.general.host][p.xdata.general.service] == undefined) {
                         req.services[p.xdata.general.host][p.xdata.general.service] = [];
                     }
+                    if(p.xdata.label && p.xdata.label.labeltext && p.xdata.label.labeltext.match("long_plugin_output")) {
+                        req.has_long_plugin_output = true;
+                    }
                     req.services[p.xdata.general.host][p.xdata.general.service].push(p.id);
                     ref.services[p.xdata.general.host][p.xdata.general.service].push(p);
                     count++;
@@ -1656,6 +1659,9 @@ var TP = {
                 else if(p.xdata.general.host) {
                     if(ref.hosts[p.xdata.general.host] == undefined) { ref.hosts[p.xdata.general.host] = []; }
                     if(req.hosts[p.xdata.general.host] == undefined) { req.hosts[p.xdata.general.host] = []; }
+                    if(p.xdata.label && p.xdata.label.labeltext && p.xdata.label.labeltext.match("long_plugin_output")) {
+                        req.has_long_plugin_output = true;
+                    }
                     req.hosts[p.xdata.general.host].push(p.id);
                     ref.hosts[p.xdata.general.host].push(p);
                     count++;

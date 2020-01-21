@@ -1478,6 +1478,7 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                     +'<tr><td><\/td><td><i>last_state_change<\/i><\/td><td>Timestamp of last state change<\/td><\/tr>'
                     +'<tr><td><\/td><td><i>last_notification<\/i><\/td><td>Timestamp of last notification<\/td><\/tr>'
                     +'<tr><td><\/td><td><i>plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
+                    +'<tr><td><\/td><td><i>long_plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
 
                     +'<tr><th>Services:<\/th><td><i>host_name<\/i><\/td><td>Hostname<\/td><\/tr>'
                     +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
@@ -1513,6 +1514,7 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                             el.onclick   = function(i) {
                                 var cur = Ext.getCmp(textarea_id).getValue();
                                 var val = Ext.htmlDecode(el.innerHTML);
+                                if(val == "long_plugin_output") { val = "{{ nl2br(long_plugin_output) }}"; }
                                 if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^trend\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                 if(val.match(/<br>/)) { val += "\n"; }
                                 var pos = getCaret(Ext.get(textarea_id+'-inputEl').dom);

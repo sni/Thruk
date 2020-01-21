@@ -13,6 +13,7 @@ next:
             - add new role panorama_view_media_manager to allow uploading images (#944)
             - allow changing background images if user has write access to dashboard
             - add maintenance mode for dashboards
+            - add long_plugin_output to label macros
           - Cluster:
             - add 'thruk cluster maint/unmaint' commands
           - internals:
