@@ -506,7 +506,7 @@ sub _bp_start_page {
     $local_bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
 
     my $bps = [];
-    if($type eq 'local' || $type eq 'all') {
+    if($type eq 'local' || $type eq 'all' || $type eq 'business process') {
         $bps = $local_bps;
     }
 
