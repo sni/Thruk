@@ -1,0 +1,64 @@
+# Scenarios
+
+These various scenarios are used for unit testing and for simulating different
+use cases.
+
+All scenarios are docker/docker-compose based and start one or more container
+usually based on [OMD-Labs](https://labs.consol.de/omd/).
+
+## Usage
+
+    %> cd $SCENARIO
+    %> make clean prepare
+
+    # unit tests can be started with:
+    %> make test
+
+    # test development server can be started with
+    %> make server
+
+    # shutdown container and cleanup
+    %> make clean
+
+### Provisioning
+Provisioning is done automatically with Ansible after starting the container.
+If you are interested in the details, have a look at the `playbook.yml` of
+the subfolders in each scenario.
+
+## Scenarios
+
+Some interesting and useful scenarios are:
+
+### Authentication
+
+  - [auth_krb5](auth_krb5/): Kerberos Single Sign On (SSO). Comes with a VNC/browser
+    container because the browser must be in the same domain as the rest of the setup.
+
+  - [auth_ssl_client_cert](auth_ssl_client_cert/): SSL client certificate
+    authorization in combination with basic auth.
+
+  - [cookie_auth_ldap_e2e](cookie_auth_ldap_e2e/): Thruks cookie authorization
+    based an LDAP users.
+
+### Clustering
+
+  - [cluster_e2e](cluster_e2e/): Cluster end-to-end scenario with dynamically
+    scaled amount of nodes.
+
+  - [cluster_fixed_e2e](cluster_fixed_e2e/): Cluster end-to-end scenario with
+    fixed amount of nodes.
+
+### Federation
+
+  - [lmd_federation_e2e](lmd_federation_e2e/): 3 tier Thruk federation setup
+    using LMD.
+
+  - [lmd_federation_multitier_e2e](lmd_federation_multitier_e2e/): 4 tier Thruk
+    federation setup using LMD.
+
+### Logcache
+
+  - [logfile_cache_http](logfile_cache_http/): Logcache with a http (Thruk) backend.
+
+  - [logfile_cache_icinga2_ido_e2e](logfile_cache_icinga2_ido_e2e/): Logcache with
+    a Icinga 2 backend and manual import from a IDO PostgreSQL databases.
