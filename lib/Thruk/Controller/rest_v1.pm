@@ -149,15 +149,24 @@ sub _process_rest_request {
     my($c, $path_info) = @_;
 
     my $data;
-    eval {
-        $data = _fetch($c, $path_info);
+    my $raw_body = $c->req->raw_body;
+    if(ref $raw_body eq '' && $raw_body =~ m/^\{.*\}$/mxs) {
+        if(!$c->req->content_type || $c->req->content_type !~ m%^application/json%mx) {
+            $data = { 'message' => sprintf("got json request data but content type is not application/json"), code => 400 };
+        }
+    }
 
-        # generic post processing
-        $data = _post_processing($c, $data);
-    };
-    if($@) {
-        $data = { 'message' => 'error during request', description => $@, code => 500 };
-        $c->log->error($@);
+    if(!$data) {
+        eval {
+            $data = _fetch($c, $path_info);
+
+            # generic post processing
+            $data = _post_processing($c, $data);
+        };
+        if($@) {
+            $data = { 'message' => 'error during request', description => $@, code => 500 };
+            $c->log->error($@);
+        }
     }
 
     if(!$data) {
