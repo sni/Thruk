@@ -1,0 +1,63 @@
+---
+- hosts: all
+  tasks:
+  - shell: "sudo su - demo -c 'set_admin_password omd'"
+  - shell: "omd config demo set TMPFS off"
+  - shell: "omd config demo set GRAFANA on"
+  - yum:
+      name:
+      - perl-Test-Harness
+      state: present
+  - copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/root/objects.cfg"
+      dest: "/omd/sites/demo/etc/naemon/conf.d/objects.cfg"
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/root/cgi.cfg"
+      dest: "/omd/sites/demo/etc/thruk/cgi.cfg"
+      owner: "demo"
+      group: "demo"
+  # create ssl CA
+  - name: Create CA folder
+    file:
+      path: /omd/sites/demo/etc/certs
+      state: directory
+      mode: '0750'
+      owner: 'demo'
+      group: 'demo'
+  - shell: sudo su - demo -c "openssl genrsa -out etc/certs/ca-key.pem"
+  - shell: sudo su - demo -c "openssl req -x509 -new -subj '/C=DE/L=Munich/O=thruk/CN=cacert' -nodes -extensions v3_ca -key etc/certs/ca-key.pem -days 1024 -out etc/certs/ca-root.pem -sha512"
+  # create ssl client cert
+  - shell: sudo su - demo -c "openssl genrsa -out etc/certs/client-key.pem"
+  - shell: sudo su - demo -c "openssl req -new -subj '/C=DE/L=Munich/O=thruk/CN=test@localhost' -key etc/certs/client-key.pem -out etc/certs/client.csr"
+  - shell: sudo su - demo -c "openssl x509 -req -days 3650 -in etc/certs/client.csr -CA etc/certs/ca-root.pem -CAkey etc/certs/ca-key.pem -CAcreateserial -out etc/certs/client.pem"
+  - shell: sudo su - demo -c "openssl pkcs12 -export -in etc/certs/client.pem -inkey etc/certs/client-key.pem -certfile etc/certs/ca-root.pem -name testuser@localhost -out etc/certs/client.p12 -password pass:secret"
+#  - lineinfile:
+#      path: /omd/sites/demo/etc/apache/conf.d/auth.conf
+#      regexp: '^SSLVerifyClient'
+#      insertafter: '^\s*require valid'
+#      line: 'SSLVerifyClient optional'
+#  - lineinfile:
+#      path: /omd/sites/demo/etc/apache/conf.d/auth.conf
+#      regexp: '^SSLCACertificateFile'
+#      line: "SSLCACertificateFile etc/certs/ca-root.pem\nSSLOptions +ExportCertData"
+  - copy:
+      src: "/root/system_apache.conf"
+      dest: "/omd/sites/demo/etc/apache/system.d/system_apache.conf"
+      owner: "demo"
+      group: "demo"
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
+  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
+  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

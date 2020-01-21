@@ -1834,6 +1834,7 @@ t/400-recurring_downtime.t
 t/600-scenarios.t
 t/610-scenario-auth.t
 t/610-scenario-auth_krb5.t
+t/610-scenario-auth_ssl_client_cert.t
 t/610-scenario-backend_http.t
 t/610-scenario-backend_http_readonly.t
 t/610-scenario-backend_icinga.t
@@ -1951,6 +1952,18 @@ t/scenarios/auth_krb5/vnc/Dockerfile
 t/scenarios/auth_krb5/vnc/kinit.sh
 t/scenarios/auth_krb5/vnc/krb5.conf
 t/scenarios/auth_krb5/vnc/user.js
+t/scenarios/auth_ssl_client_cert/docker-compose.yml
+t/scenarios/auth_ssl_client_cert/Makefile
+t/scenarios/auth_ssl_client_cert/omd/cgi.cfg
+t/scenarios/auth_ssl_client_cert/omd/Dockerfile
+t/scenarios/auth_ssl_client_cert/omd/objects.cfg
+t/scenarios/auth_ssl_client_cert/omd/playbook.yml
+t/scenarios/auth_ssl_client_cert/omd/system_apache.conf
+t/scenarios/auth_ssl_client_cert/omd/thruk_local.conf
+t/scenarios/auth_ssl_client_cert/README
+t/scenarios/auth_ssl_client_cert/t/100-auth.t
+t/scenarios/auth_ssl_client_cert/t/local/010-client_certs.t
+t/scenarios/auth_ssl_client_cert/t/local_test.sh
 t/scenarios/backend_http/docker-compose.yml
 t/scenarios/backend_http/Makefile
 t/scenarios/backend_http/omd/Dockerfile

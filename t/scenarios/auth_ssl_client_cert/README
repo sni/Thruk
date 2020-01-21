@@ -1,0 +1,15 @@
+= SSL Client Certificate Authorization
+
+This scenario creates a CA along with a client certificate and uses this to
+authenticate. The main challenge is the Apache Reverse Proxy which terminates
+ssl and therefor the client authentication. So we terminate and authenticate
+the user at system apache level and forward the username with a superuser
+api key.
+
+
+  SSL Client +----------+   Superuser   +-----------+
+  Certificate|  Apache  |   API Key     |OMD        |
+  +--------> |  Reverse |  +-------->   |Site Apache|
+             |  Proxy   |               |           |
+             +----------+               +-----------+
+
