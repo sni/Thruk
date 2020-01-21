@@ -105,4 +105,4 @@
 
 # start all sites
   - shell: "omd start {{item}}"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
+    with_items: ['demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
