@@ -280,7 +280,7 @@ sub load_dashboard {
         $dashboard->{'maintenance'} = $maintenance->{'maintenance'};
     }
 
-    $dashboard->{'objects'} = scalar grep(/^pantab_/mx, keys %{$dashboard});
+    $dashboard->{'objects'} = scalar grep(/^panlet_/mx, keys %{$dashboard});
     return $dashboard;
 }
 
