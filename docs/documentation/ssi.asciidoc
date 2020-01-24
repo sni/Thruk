@@ -11,8 +11,8 @@ You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
 end of the body.
 
-IMPORTANT: This has *nothing to do* with the Apache module 'mod_include'
-and just implements the nagios way of SSIs.
+IMPORTANT: This has *nothing to do* with the Apache module `mod_include`,
+it just implements Thruks way of SSIs.
 
 === Common Includes
 
@@ -47,6 +47,11 @@ Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used
 as content.
 
+=== Template Toolkit Syntax
+
+{% include new_since.ad version="2.34" %}
+Starting with Thruk 2.34 you can use http://template-toolkit.org/docs/manual/Syntax.html[template toolkit syntax] in your ssi files.
+
 
 === Examples
 
@@ -66,4 +71,18 @@ To change the logo of the login page and add some help text, you could create a 
   });
 -->
 </script>
+------
+
+
+Hide images in plugin output of extinfo page if user is not in Admins contact group:
+
+.extinfo-header.ssi:
+------
+[% IF !c.user_exists || !c.user.has_group("Admins") %]
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery("TD.detail_plugin_output IMG").hide().after("<div>Image removed</div>");
+});
+</script>
+[% END %]
 ------

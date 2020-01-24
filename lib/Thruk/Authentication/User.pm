@@ -530,4 +530,27 @@ sub grant {
     return;
 }
 
+=head2 has_group
+
+ has_group(<$group>)
+
+ returns 1 if user has all given groups.
+
+ for example:
+  $c->user->has_group('Admin')
+  $c->user->has_group(['Admin', 'Location XY'])
+
+=cut
+
+sub has_group {
+    my($self, $groups) = @_;
+    my $groups_hash = Thruk::Utils::array2hash($self->{'groups'});
+    $groups = Thruk::Utils::list($groups);
+    for my $g (@{$groups}) {
+        return(0) unless defined $groups_hash->{$g};
+    }
+    return(1);
+}
+
+
 1;

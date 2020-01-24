@@ -8,6 +8,7 @@ next:
           - add action menu and command search filter
           - add timeout handling to action_wrapper example
           - add option to exclude long_plugin_output from default search
+          - support template toolkit syntax in ssi files
           - Panorama:
             - raise icons zindex if its in a none-ok state
             - add new role panorama_view_media_manager to allow uploading images (#944)

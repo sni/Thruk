@@ -5,6 +5,6 @@
          Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
          Copyright (c) 1999-2009 Ethan Galstad.
     -->
-  [% ssi_footer %]
+  [% IF ssi_footer; ssi_footer | evaltt; END %]
   </body>
 </html>

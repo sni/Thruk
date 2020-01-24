@@ -16,7 +16,7 @@
 
   <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class="[% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
-  [% ssi_header %]
+  [% IF ssi_header; ssi_header | evaltt; END %]
   <div style="display:none;" id="search-results"></div>
 
   <div class="pref_pane" id="pref_pane" style="display:none;"></div>

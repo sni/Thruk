@@ -264,10 +264,7 @@ sub has_group {
     if(defined $tmp) { $group = $tmp; }  # keep backwards compatible with the old call has_group($c, $group)
 
     if($c->user_exists) {
-        my $contactgroups = Thruk::Utils::array2hash($c->user->{'groups'});
-        if($contactgroups->{$group}) {
-            return 1;
-        }
+        return($c->user->has_group($group));
     }
     return 0;
 }

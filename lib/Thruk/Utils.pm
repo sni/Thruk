@@ -545,10 +545,10 @@ sub ssi_include {
     my($c, $page) = @_;
     $page = $c->stash->{'page'} unless defined $page;
 
-    $c->stash->{ssi_header}  = Thruk::Utils::read_ssi($c, 'common', 'header');
-    $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $page, 'header');
-    $c->stash->{ssi_footer}  = Thruk::Utils::read_ssi($c, 'common', 'footer');
-    $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $page, 'footer');
+    $c->stash->{ssi_header}  = read_ssi($c, 'common', 'header');
+    $c->stash->{ssi_header} .= read_ssi($c, $page, 'header');
+    $c->stash->{ssi_footer}  = read_ssi($c, 'common', 'footer');
+    $c->stash->{ssi_footer} .= read_ssi($c, $page, 'footer');
 
     $c->stash->{real_page} = "";
     if($c->stash->{controller} =~ m/Thruk::Controller::([^:]*)::.*?$/gmx) {
@@ -567,26 +567,24 @@ sub ssi_include {
 
 finds all ssi files for a page of the specified type and returns the ssi content.
 Executable ssi files are executed and the output is appended to the ssi content.
-Otherwise the content of the ssi file is appende to the ssi content.
+Otherwise the content of the ssi file is append to the ssi content.
 
 =cut
 sub read_ssi {
-    my $c    = shift;
-    my $page = shift;
-    my $type = shift;
+    my($c, $page, $type) = @_;
     my $dir  = $c->config->{ssi_path};
     my @files = sort grep { /\A${page}-${type}(-.*)?.ssi\z/mx } keys %{ $c->config->{ssi_includes} };
     my $output = "";
     for my $inc (@files) {
         $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk->verbose;
-        if ( -x "$dir/$inc" ) {
+        if( -x "$dir/$inc" ) {
           if(open(my $ph, '-|', "$dir/$inc 2>&1")) {
             while(defined(my $line = <$ph>)) { $output .= $line; }
             CORE::close($ph);
           } else {
             carp("cannot execute ssi $dir/$inc: $!");
           }
-        } elsif ( -r "$dir/$inc" ) {
+        } elsif( -r "$dir/$inc" ) {
             my $content = read_file("$dir/$inc");
             unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
             $output .= $content;
