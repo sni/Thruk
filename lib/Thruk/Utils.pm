@@ -586,6 +586,7 @@ sub read_ssi {
           }
         } elsif( -r "$dir/$inc" ) {
             my $content = read_file("$dir/$inc");
+            $content = Thruk::Utils::decode_any($content);
             unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
             $output .= $content;
         } else {
