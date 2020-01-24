@@ -3322,6 +3322,19 @@ function splitN(str, separator, limit) {
     return str;
 }
 
+// checks if user has given group
+function hasContactGroup(name) {
+    if(!remote_groups) {
+        return(false);
+    }
+    for(var x=0; x<remote_groups.length; x++) {
+        if(remote_groups[x] == name) {
+            return(true);
+        }
+    }
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

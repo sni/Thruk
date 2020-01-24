@@ -29,7 +29,10 @@
   var thruk_debug_js      = [% IF thruk_debug %]1[% ELSE %]0[% END %];
   var minimal             = [% IF minimal %]true[% ELSE %]false[% END %];
   var CSRFtoken           = '[% get_user_token(c) %]';
+[% IF c.user_exists %]
   var remote_user         = '[% remote_user %]';
+  var remote_groups       = [% json_encode(c.user.groups) %];
+[% END %]
   var omd_site            = '[% omd_site %]';
   var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';
   var full_uri            = '[% escape_html(full_uri(c)).replace('&amp;', '&').replace('&amp;', '&') %]';
