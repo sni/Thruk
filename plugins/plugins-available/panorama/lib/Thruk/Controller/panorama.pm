@@ -782,7 +782,7 @@ sub _task_save_dashboard {
         version     => Thruk::Utils::Filter::fullversion($c),
     };
     for my $key (keys %{$d}) {
-        if($key =~ m/^tab/mx) {
+        if($key =~ m/^(tab|panlet)/mx) {
             $data->{$key} = $d->{$key};
         }
     }
