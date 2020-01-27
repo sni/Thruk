@@ -46,9 +46,9 @@ sub index {
     if(exists $c->req->parameters->{'createimage'}) {
         if(exists $c->req->parameters->{'job_id'}) {
             my $dir = $c->config->{'var_path'}."/jobs/".$c->req->parameters->{'job_id'};
-            $c->stash->{gd_image} = Thruk::Utils::Trends::_get_image($dir."/graph.png");
+            $c->stash->{gd_image} = Thruk::Utils::Trends::get_image($dir."/graph.png");
         } else {
-            $c->stash->{gd_image} = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
+            $c->stash->{gd_image} = Thruk::Utils::Trends::create_image($c, IMAGE_MODE);
         }
         return($c->render_gd());
     }

@@ -159,7 +159,7 @@ sub get_dashboard_list {
         $c->stash->{'is_admin'} = $orig_is_admin;
     }
 
-    $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
+    $dashboards = Thruk::Backend::Manager::sort_result({}, $dashboards, 'name');
     return $dashboards;
 }
 
@@ -274,7 +274,7 @@ sub load_dashboard {
     }
 
     # check for maintenance mode
-    my $maintfile  = Thruk::Utils::Panorama::_get_maint_file($c, $nr);
+    my $maintfile  = get_maint_file($c, $nr);
     if(-e $maintfile) {
         my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
         $dashboard->{'maintenance'} = $maintenance->{'maintenance'};
@@ -376,7 +376,15 @@ sub get_runtime_file {
 }
 
 ##########################################################
-sub _get_maint_file {
+
+=head2 get_maint_file
+
+    get_maint_file($c, $nr)
+
+return maintenance filename for given dashboard number
+
+=cut
+sub get_maint_file {
     my($c, $nr) = @_;
     return($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.maint');
 }

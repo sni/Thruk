@@ -181,7 +181,7 @@ sub report_edit {
     my $r;
     $c->stash->{'params'} = {};
     if($report_nr eq 'new') {
-        $r = Thruk::Utils::Reports::_get_new_report($c);
+        $r = Thruk::Utils::Reports::get_new_report($c);
         # set currently enabled backends
         $r->{'backends'} = [];
         for my $b (keys %{$c->stash->{'backend_detail'}}) {
@@ -208,7 +208,7 @@ sub report_edit {
             $r->{'params'}->{'url'} = $uri;
         }
     } else {
-        $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+        $r = Thruk::Utils::Reports::read_report_file($c, $report_nr);
         if(!defined $r || $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
@@ -233,9 +233,9 @@ sub report_edit_step2 {
 
     my $r;
     if($report_nr eq 'new') {
-        $r = Thruk::Utils::Reports::_get_new_report($c);
+        $r = Thruk::Utils::Reports::get_new_report($c);
     } else {
-        $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+        $r = Thruk::Utils::Reports::read_report_file($c, $report_nr);
         if(!defined $r || $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
@@ -294,7 +294,7 @@ sub report_update {
     my($c, $report_nr) = @_;
 
     my $debug = $c->req->parameters->{'debug'};
-    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    my $report = Thruk::Utils::Reports::read_report_file($c, $report_nr);
     if($report) {
         Thruk::Utils::Reports::generate_report_background($c, $report_nr, undef, $report, undef, $debug);
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
@@ -339,7 +339,7 @@ sub report_remove {
 sub report_cancel {
     my($c, $report_nr, $skip_redirect) = @_;
 
-    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    my $report = Thruk::Utils::Reports::read_report_file($c, $report_nr);
     if($report) {
         if($report->{'var'}->{'is_waiting'}) {
             Thruk::Utils::Reports::set_running($c, $report_nr, 0);
@@ -368,7 +368,7 @@ sub report_profile {
     my($c, $report_nr) = @_;
 
     my $data = '';
-    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    my $report = Thruk::Utils::Reports::read_report_file($c, $report_nr);
     if($report) {
         if($report->{'var'}->{'profile'}) {
             $data = $report->{'var'}->{'profile'};
@@ -390,7 +390,7 @@ sub report_profile {
 sub report_download_debug {
     my($c, $report_nr) = @_;
 
-    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    my $report = Thruk::Utils::Reports::read_report_file($c, $report_nr);
     if($report) {
         if($report->{'var'}->{'debug_file'}) {
             my $name = $report->{'var'}->{'debug_file'};
@@ -418,7 +418,7 @@ sub report_download_debug {
 sub report_download_json {
     my($c, $report_nr) = @_;
 
-    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    my $report = Thruk::Utils::Reports::read_report_file($c, $report_nr);
     if(!$report) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
@@ -447,7 +447,7 @@ sub report_download_json {
 sub report_email {
     my($c, $report_nr) = @_;
 
-    my $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    my $r = Thruk::Utils::Reports::read_report_file($c, $report_nr);
     if(!defined $r) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'report does not exist' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
@@ -463,7 +463,7 @@ sub report_email {
         # remove threshold flag, mail sent forced manually
         if(defined $r->{'var'}->{'send_mail_threshold_reached'}) {
             delete $r->{'var'}->{'send_mail_threshold_reached'};
-            Thruk::Utils::Reports::_report_save($c, $report_nr, $r);
+            Thruk::Utils::Reports::store_report_data($c, $report_nr, $r);
         }
 
         if($to) {

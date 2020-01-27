@@ -797,7 +797,7 @@ sub _process_overview_page {
         }
     }
 
-    my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
+    my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
     Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
@@ -871,7 +871,7 @@ sub _process_grid_page {
         }
     }
 
-    my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
+    my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_grid'});
     Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
@@ -991,7 +991,7 @@ sub _process_summary_page {
         }
     }
 
-    my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %{$all_groups})], { 'ASC' => 'name'});
+    my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %{$all_groups})], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_summary'});
     Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
@@ -1232,11 +1232,11 @@ sub _process_perfmap_page {
 
     # sort things?
     if(defined $keys->{$sortoption}) {
-        $data = Thruk::Backend::Manager::_sort($c, $data, { $order => $sortoption.'_sort'});
+        $data = Thruk::Backend::Manager::sort_result($c, $data, { $order => $sortoption.'_sort'});
     } elsif($sortoption eq "1") {
         $c->stash->{'sortoption'}  = '';
     } elsif($sortoption eq "2") {
-        $data = Thruk::Backend::Manager::_sort($c, $data, { $order => ['description', 'host_name']});
+        $data = Thruk::Backend::Manager::sort_result($c, $data, { $order => ['description', 'host_name']});
         $c->stash->{'sortoption'}  = '';
     }
 
@@ -1381,11 +1381,11 @@ sub _process_verify_time {
     my $time = $c->req->parameters->{'time'};
     my $start;
     if(defined $time) {
-        eval {
-            if($start = Thruk::Utils::_parse_date($c, $time)) {
-                $verified = 1;
-            }
-        };
+        undef $@;
+        $start = Thruk::Utils::parse_date($c, $time);
+        if($start) {
+            $verified = 1;
+        }
         if($@) {
             $error = $@;
             chomp($error);
@@ -1398,11 +1398,11 @@ sub _process_verify_time {
     my $end;
     if($verified && $duration) {
         undef $verified;
-        eval {
-            if($end = Thruk::Utils::_parse_date($c, $duration)) {
-                $verified = 1;
-            }
-        };
+        undef $@;
+        $end = Thruk::Utils::parse_date($c, $duration);
+        if($end) {
+            $verified = 1;
+        }
         if($@) {
             $error = $@;
             chomp($error);

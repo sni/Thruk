@@ -88,18 +88,18 @@ sub index {
         }
     }
     if(scalar @{$backends} > 0) {
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $backends);
     }
     elsif($c->req->parameters->{'backend'}) {
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backend'});
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $c->req->parameters->{'backend'});
         delete $c->req->parameters->{'backend'};
     }
     elsif($c->req->parameters->{'backends'}) {
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $c->req->parameters->{'backends'});
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $c->req->parameters->{'backends'});
         delete $c->req->parameters->{'backends'};
     } else {
-        my($disabled_backends) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
-        Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+        my($disabled_backends) = Thruk::Action::AddDefaults::set_enabled_backends($c);
+        Thruk::Action::AddDefaults::set_possible_backends($c, $disabled_backends);
     }
 
     # refresh dynamic roles and groups
@@ -1492,7 +1492,7 @@ sub _rest_get_sites {
     eval {
         $c->{'db'}->get_processinfo();
     };
-    Thruk::Action::AddDefaults::_set_possible_backends($c, {});
+    Thruk::Action::AddDefaults::set_possible_backends($c, {});
     for my $key (@{$c->stash->{'backends'}}) {
         my $addr  = $c->stash->{'backend_detail'}->{$key}->{'addr'};
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';

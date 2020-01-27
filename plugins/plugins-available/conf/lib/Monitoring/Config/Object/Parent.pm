@@ -74,7 +74,7 @@ sub parse {
                 if($self->{'disabled'}) {
                     push @{$self->{'comments'}}, $attr.' '.$value;
                 } else {
-                    push @{$parse_errors}, "unknown attribute: $attr for object type ".$self->{'type'}." in ".Thruk::Utils::Conf::_link_obj($self);
+                    push @{$parse_errors}, "unknown attribute: $attr for object type ".$self->{'type'}." in ".Thruk::Utils::Conf::link_obj($self);
                 }
             }
         }
@@ -390,12 +390,12 @@ sub get_sorted_keys {
 
 ##########################################################
 
-=head2 _sort_by_object_keys
+=head2 sort_by_object_keys
 
 sort function for object keys
 
 =cut
-sub _sort_by_object_keys {
+sub sort_by_object_keys {
     my($attr_keys, $cust_var_keys) = @_;
 
     my $order_cache = {};
@@ -938,7 +938,13 @@ sub _break_long_command {
 }
 
 ##########################################################
-sub _business_impact_keys {
+
+=head2 business_impact_keys
+
+    return names of business impact keys
+
+=cut
+sub business_impact_keys {
     return [
         "Business Critical",     # 5
         "Top Production",        # 4

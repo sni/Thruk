@@ -60,16 +60,16 @@ sub cmd {
         return _finished_job_page($c, $c->stash, undef, $out);
     }
 
-    my($id,$dir) = _init_external($c);
+    my($id,$dir) = init_external($c);
     return unless $id;
 
     my $pid = fork();
     die "fork() failed: $!" unless defined $pid;
 
     if($pid) {
-        return _do_parent_stuff($c, $dir, $pid, $id, $conf);
+        return do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
-        _do_child_stuff($c, $dir, $id);
+        do_child_stuff($c, $dir, $id);
 
         POSIX::close(0);
         POSIX::close(1);
@@ -123,14 +123,14 @@ sub perl {
         return $rc;
     }
 
-    my ($id,$dir) = _init_external($c);
+    my ($id,$dir) = init_external($c);
     return unless $id;
 
     my $pid = fork();
     die "fork() failed: $!" unless defined $pid;
 
     if($pid) {
-        return _do_parent_stuff($c, $dir, $pid, $id, $conf);
+        return do_parent_stuff($c, $dir, $pid, $id, $conf);
     }
 
     if(defined $conf->{'backends'}) {
@@ -139,7 +139,7 @@ sub perl {
     }
     eval {
         $c->stats->profile(begin => 'External::perl');
-        _do_child_stuff($c, $dir, $id);
+        do_child_stuff($c, $dir, $id);
 
         do {
             # some db drivers need reconnect after forking
@@ -622,7 +622,15 @@ sub save_profile {
 }
 
 ##############################################
-sub _do_child_stuff {
+
+=head2 do_child_stuff
+
+  do_child_stuff($c, $dir, $id)
+
+do all child things after a fork
+
+=cut
+sub do_child_stuff {
     my($c, $dir, $id) = @_;
 
     POSIX::setsid() or die "Can't start a new session: $!";
@@ -673,7 +681,15 @@ sub _do_child_stuff {
 
 
 ##############################################
-sub _do_parent_stuff {
+
+=head2 do_parent_stuff
+
+  do_parent_stuff($c, $dir, $pid, $id, $conf)
+
+do all parent things after a fork
+
+=cut
+sub do_parent_stuff {
     my($c, $dir, $pid, $id, $conf) = @_;
 
     confess("got no id") unless $id;
@@ -732,7 +748,15 @@ sub _do_parent_stuff {
 
 
 ##############################################
-sub _init_external {
+
+=head2 init_external
+
+  init_external($c)
+
+create job folder and return id
+
+=cut
+sub init_external {
     my($c) = @_;
 
     my $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, 5);

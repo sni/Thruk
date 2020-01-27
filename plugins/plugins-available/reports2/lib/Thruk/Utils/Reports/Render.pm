@@ -588,7 +588,7 @@ sub html_all_inclusive {
     $page =~ s/<\!\-\-.*?\-\->//gsmxi;
 
     my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
-    $page = _replace_css_and_images($page, $url, $report_base_url);
+    $page = replace_css_and_images($page, $url, $report_base_url);
     $page = _replace_links($page, $url, $report_base_url);
 
     if(!$include_js) {
@@ -658,9 +658,15 @@ sub round_decimals {
 }
 
 ##########################################################
-# INTERNAL SUBS
-##########################################################
-sub _replace_css_and_images {
+
+=head2 replace_css_and_images
+
+  replace_css_and_images($text, $url, $report_base_url)
+
+Replace css and images in given text
+
+=cut
+sub replace_css_and_images {
     my($text, $url, $report_base_url) = @_;
     my $c = $Thruk::Request::c or die("not initialized!");
     # replace images for already existing css
@@ -688,6 +694,8 @@ sub _replace_css_and_images {
     return $text;
 }
 
+##########################################################
+# INTERNAL SUBS
 ##########################################################
 sub _replace_links {
     my($text, $url, $baseurl) = @_;

@@ -22,7 +22,7 @@ $Monitoring::Config::Object::Businessimpactmodulation::Defaults = {
     'register'                        => { type => 'BOOL', cat => 'Extended' },
 
     'business_impact_modulation_name' => { type => 'STRING', cat => 'Basic' },
-    'business_impact'                 => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::_business_impact_keys(), cat => 'Basic' },
+    'business_impact'                 => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::business_impact_keys(), cat => 'Basic' },
     'modulation_period'               => { type => 'STRING', 'link' => 'timeperiod', cat => 'Basic' },
 };
 

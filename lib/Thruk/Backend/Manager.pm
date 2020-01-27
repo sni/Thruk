@@ -458,7 +458,7 @@ sub get_scheduling_queue {
     if(defined $hosts) {
         push @{$queue}, @{$hosts};
     }
-    $queue = $self->_sort( $queue, $options{'sort'} ) if defined $options{'sort'};
+    $queue = $self->sort_result( $queue, $options{'sort'} ) if defined $options{'sort'};
     $self->_page_data( $c, $queue ) if defined $options{'pager'};
     return $queue;
 }
@@ -1667,7 +1667,7 @@ sub _do_on_peers {
         if(!$ENV{'THRUK_USE_LMD'} || $must_resort) {
             if( $arg{'sort'} ) {
                 if($type ne 'sorted' or scalar keys %{$result} > 1) {
-                    $data = $self->_sort( $data, $arg{'sort'} );
+                    $data = $self->sort_result( $data, $arg{'sort'} );
                 }
             }
 
@@ -2490,9 +2490,9 @@ sub _sum_answer {
 
 ########################################
 
-=head2 _sort
+=head2 sort_result
 
-  _sort($data, $sortby)
+  sort_result($data, $sortby)
 
 sort a array of hashes by hash keys
 
@@ -2510,12 +2510,12 @@ sort a array of hashes by hash keys
 
 =cut
 
-sub _sort {
+sub sort_result {
     my($self, $data, $sortby) = @_;
     my $c = $Thruk::Request::c;
     my( @sorted, $key, $order );
 
-    $c->stats->profile( begin => "_sort()" ) if $c;
+    $c->stats->profile( begin => "sort_result()" ) if $c;
 
     $key = $sortby;
     if( ref $sortby eq 'HASH' ) {
@@ -2537,7 +2537,7 @@ sub _sort {
 
     if(ref $data ne 'ARRAY') { confess("Not an ARRAY reference: ".Dumper($data)); }
     if(!defined $data || scalar @{$data} == 0) {
-        $c->stats->profile( end => "_sort()" ) if $c;
+        $c->stats->profile( end => "sort_result()" ) if $c;
         return \@sorted;
     }
 
@@ -2590,10 +2590,13 @@ sub _sort {
         confess($@);
     }
 
-    $c->stats->profile( end => "_sort()" ) if $c;
+    $c->stats->profile( end => "sort_result()" ) if $c;
 
     return ( \@sorted );
 }
+
+# keep alias for backwards compatibility
+*_sort = \&sorted_result;
 
 ########################################
 

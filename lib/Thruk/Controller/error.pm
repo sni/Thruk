@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp qw/cluck confess longmess/;
 use Time::HiRes qw/tv_interval/;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 =head1 NAME
 
@@ -323,10 +324,10 @@ sub index {
     }
 
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-        Thruk::Utils::CLI::_error($c->stash->{errorMessage});
-        Thruk::Utils::CLI::_error($c->stash->{errorDescription});
-        Thruk::Utils::CLI::_error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
-        Thruk::Utils::CLI::_error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
+        _error($c->stash->{errorMessage});
+        _error($c->stash->{errorDescription});
+        _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
+        _error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
         if($Thruk::Utils::CLI::verbose) {
             cluck($c->stash->{errorMessage});
         }

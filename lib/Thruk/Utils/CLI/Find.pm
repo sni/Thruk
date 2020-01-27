@@ -61,7 +61,7 @@ sub cmd {
         $c->{'db'}->get_processinfo();
     };
     _debug($@) if $@;
-    Thruk::Action::AddDefaults::_set_possible_backends($c, {});
+    Thruk::Action::AddDefaults::set_possible_backends($c, {});
 
     # collect backends with object configuration
     my $config_backends = {};
@@ -80,7 +80,7 @@ sub cmd {
     my $selected_backends;
     if($options->{'backends'} && scalar @{$options->{'backends'}} > 0) {
         $selected_backends = {};
-        my($disabled_backends) = Thruk::Action::AddDefaults::_set_enabled_backends($c, $options->{'backends'});
+        my($disabled_backends) = Thruk::Action::AddDefaults::set_enabled_backends($c, $options->{'backends'});
         for my $key (sort keys %{$disabled_backends} ) {
             $selected_backends->{$key} = 1 if $disabled_backends->{$key} == 0;
         }

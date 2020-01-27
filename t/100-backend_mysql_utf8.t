@@ -33,7 +33,7 @@ my $blocksize   = undef;
 
 #####################################################################
 # create tables
-Thruk::Action::AddDefaults::_set_possible_backends($c, {});
+Thruk::Action::AddDefaults::set_possible_backends($c, {});
 my $backends = $c->stash->{'backends'};
 $backends    = Thruk::Utils::list($backends);
 my $prefix   = $backends->[0];

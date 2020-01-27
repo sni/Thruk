@@ -870,7 +870,15 @@ sub _compare_configs {
 }
 
 ##########################################################
-sub _link_obj {
+
+=head2 link_obj
+
+    link_obj($obj, [$line]);
+
+returns html link to given object
+
+=cut
+sub link_obj {
     my($obj,$line) = @_;
     my($path, $link);
     if(defined $line) {

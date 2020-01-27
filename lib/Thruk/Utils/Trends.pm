@@ -128,11 +128,11 @@ sub _do_report {
     Thruk::Utils::Avail::calculate_availability($c);
 
     # create the image map
-    my $image_map = Thruk::Utils::Trends::_create_image($c, IMAGE_MAP_MODE);
+    my $image_map = create_image($c, IMAGE_MAP_MODE);
 
     if(defined $c->stash->{job_id}) {
         # store resulting image in file, forked reports cannot handle detaches
-        my $gd_image = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
+        my $gd_image = create_image($c, IMAGE_MODE);
         my $dir = $c->config->{'var_path'}."/jobs/".$c->stash->{job_id};
         open(my $fh, '>', $dir."/graph.png");
         binmode($fh);
@@ -163,8 +163,16 @@ sub _do_report {
 
 
 ##########################################################
-sub _create_image {
-    my ( $c, $mode ) = @_;
+
+=head2 create_image
+
+    create_image($c, $mode)
+
+create and return trend image
+
+=cut
+sub create_image {
+    my($c, $mode) = @_;
 
     my $smallimage = 0;
     $smallimage = 1 if exists $c->req->parameters->{'smallimage'};
@@ -612,9 +620,17 @@ sub _get_time_breakdown_string {
 }
 
 ##########################################################
-sub _get_image {
-    my $file = shift;
-    my $im   = GD::Image->new($file);
+
+=head2 get_image
+
+    get_image($filename)
+
+return gd image from file
+
+=cut
+sub get_image {
+    my($file) = @_;
+    my $im = GD::Image->new($file);
     return $im;
 }
 

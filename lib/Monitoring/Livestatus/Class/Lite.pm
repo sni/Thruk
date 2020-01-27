@@ -352,10 +352,10 @@ sub statement {
 
     # filtering
     if( $self->{'_filter'} ) {
-        push @statements, @{$self->_apply_filter($self->{'_filter'})};
+        push @statements, @{filter_statement($self->{'_filter'})};
     }
     if( $self->{'_statsfilter'} ) {
-        push @statements, @{$self->_apply_filter($self->{'_statsfilter'}, 'Stats')};
+        push @statements, @{filter_statement($self->{'_statsfilter'}, 'Stats')};
     }
     if( $self->{'_extra_stm'} ) {
         push @statements, @{$self->{'_extra_stm'}};
@@ -372,6 +372,24 @@ sub statement {
 }
 
 ################################################################################
+
+=head2 filter_statement
+
+    filter_statement($filter, [$mode])
+
+return statements for given filter
+
+=cut
+sub filter_statement {
+    my($filter, $mode) = @_;
+
+    $filter_mode = $mode || 'Filter';
+    #my( $combining_count, @statements)...
+    my( undef, @statements) = &_recurse_cond($filter);
+    return wantarray ? @statements: \@statements;
+}
+
+################################################################################
 # INTERNAL SUBs
 ################################################################################
 sub _execute {
@@ -383,17 +401,6 @@ sub _execute {
     my $return = $self->{'_class'}->selectall_arrayref($statement, $options);
 
     return wantarray ? @{ $return } : $return;
-}
-
-################################################################################
-sub _apply_filter {
-    my($self, $filter, $mode) = @_;
-
-    $compining_prefix = $mode || '';
-    $filter_mode      = $mode || 'Filter';
-    #my( $combining_count, @statements)...
-    my( undef, @statements) = &_recurse_cond($filter);
-    return wantarray ? @statements: \@statements;
 }
 
 ################################################################################

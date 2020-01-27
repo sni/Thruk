@@ -64,7 +64,7 @@ sub _rest_get_thruk_panorama_maint {
     my $name   = $dashboard->{'tab'}->{'xdata'}->{'title'} // 'no name';
     my $method = $c->req->method;
     if($method eq 'DELETE') {
-        unlink(Thruk::Utils::Panorama::_get_maint_file($c, $dashboard->{'nr'}));
+        unlink(Thruk::Utils::Panorama::get_maint_file($c, $dashboard->{'nr'}));
         return({ 'message' => 'maintenance mode removed from dashboard '.$name });
     }
     if($method eq 'POST') {
@@ -73,7 +73,7 @@ sub _rest_get_thruk_panorama_maint {
             return({ 'message' => 'missing argument: text', 'description' => 'text is a required argument', code => 400 });
         }
         Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/panorama');
-        Thruk::Utils::IO::json_lock_store(Thruk::Utils::Panorama::_get_maint_file($c, $dashboard->{'nr'}), { 'maintenance' => $text }, { 'pretty' => 1 });
+        Thruk::Utils::IO::json_lock_store(Thruk::Utils::Panorama::get_maint_file($c, $dashboard->{'nr'}), { 'maintenance' => $text }, { 'pretty' => 1 });
         return({ 'message' => 'dashboard '.$name.' put into maintenance mode' });
     }
 }

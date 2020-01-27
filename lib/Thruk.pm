@@ -628,7 +628,7 @@ sub _check_exit_reason {
     my $now    = time();
 
     ## no critic
-    if($reason =~ m|Thruk::Utils::CLI::_from_local|mx && -t 0) {
+    if($reason =~ m|Thruk::Utils::CLI::from_local|mx && -t 0) {
     ## use critic
         # this means someone hit ctrl+c, no need for a stracktrace then
         print STDERR "\nbailing out\n";

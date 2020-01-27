@@ -119,9 +119,9 @@ sub _cmd_report {
 
     # create fake job when run from cron to save profile
     if(!$ENV{'THRUK_JOB_ID'}) {
-        my($id,$dir) = Thruk::Utils::External::_init_external($c);
+        my($id,$dir) = Thruk::Utils::External::init_external($c);
         ## no critic
-        Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
+        Thruk::Utils::External::do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
         $ENV{'THRUK_JOB_ID'}       = $id;
         $ENV{'THRUK_JOB_DIR'}      = $dir;
         ## use critic

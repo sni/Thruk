@@ -406,7 +406,7 @@ sub _run {
             ## use critic
         }
 
-        $result = $self->_from_local($c, $self->{'opt'});
+        $result = $self->from_local($c, $self->{'opt'});
 
         # remove print capture
         ## no critic
@@ -527,9 +527,17 @@ sub _internal_request {
 }
 
 ##############################################
-sub _from_local {
+
+=head2 from_local
+
+    $self->from_local($c, $options)
+
+main entry point for cli commands from the terminal
+
+=cut
+sub from_local {
     my($self, $c, $options) = @_;
-    _debug("_from_local()") if $Thruk::Utils::CLI::verbose >= 2;
+    _debug("from_local()") if $Thruk::Utils::CLI::verbose >= 2;
     ## no critic
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     ## use critic
@@ -559,7 +567,15 @@ sub _from_local {
 }
 
 ##############################################
-sub _from_fcgi {
+
+=head2 from_fcgi
+
+    from_fcgi($c, $string)
+
+main entry point for cli commands over http(s).
+
+=cut
+sub from_fcgi {
     my($c, $data_str) = @_;
     confess('no data?') unless defined $data_str;
     $data_str = encode_utf8($data_str);
@@ -757,7 +773,7 @@ sub _run_command_action {
 
             # set backends from options
             if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
-                Thruk::Action::AddDefaults::_set_enabled_backends($c, $opt->{'backends'});
+                Thruk::Action::AddDefaults::set_enabled_backends($c, $opt->{'backends'});
             }
         }
 
@@ -1241,7 +1257,7 @@ sub _authorize_raw_query {
                 next;
             }
             require Monitoring::Livestatus::Class::Lite;
-            @filter = Monitoring::Livestatus::Class::Lite::_apply_filter(undef, \@filter);
+            @filter = Monitoring::Livestatus::Class::Lite::filter_statement(undef, \@filter);
             $q .= join("\n", @filter)."\n";
             next;
         }

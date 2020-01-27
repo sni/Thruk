@@ -58,7 +58,7 @@ sub index {
     }
 
     # sort by severity
-    my $sortedoutages = Thruk::Backend::Manager::_sort($c, $outages, { 'DESC' => 'severity' });
+    my $sortedoutages = Thruk::Backend::Manager::sort_result($c, $outages, { 'DESC' => 'severity' });
 
     $c->stash->{outages}        = $sortedoutages;
     $c->stash->{title}          = 'Network Outages';

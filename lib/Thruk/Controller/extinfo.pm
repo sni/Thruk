@@ -726,7 +726,7 @@ sub _process_process_info_page {
                 section   => $c->stash->{'backend_detail'}->{$key}->{'section'},
             };
         }
-        $backends = Thruk::Backend::Manager::_sort($c, $backends, { 'ASC' => [ 'section', 'peer_name' ] });
+        $backends = Thruk::Backend::Manager::sort_result($c, $backends, { 'ASC' => [ 'section', 'peer_name' ] });
         $c->stash->{'backends'} = [];
         for my $p (@{$backends}) {
             push @{$c->stash->{'backends'}}, $p->{'peer_key'};

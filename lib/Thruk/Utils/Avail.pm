@@ -632,8 +632,8 @@ sub calculate_availability {
         'assumestateretention'         => $assumestateretention,
         'assumestatesduringnotrunning' => $assumestatesduringnotrunning,
         'includesoftstates'            => $includesoftstates,
-        'initialassumedhoststate'      => Thruk::Utils::_initialassumedhoststate_to_state($initialassumedhoststate),
-        'initialassumedservicestate'   => Thruk::Utils::_initialassumedservicestate_to_state($initialassumedservicestate),
+        'initialassumedhoststate'      => _initialassumedhoststate_to_state($initialassumedhoststate),
+        'initialassumedservicestate'   => _initialassumedservicestate_to_state($initialassumedservicestate),
         'backtrack'                    => $backtrack,
         'breakdown'                    => $breakdown,
     };
@@ -1057,6 +1057,47 @@ sub _sum_availability {
         $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
     }
     return($percent, $time);
+}
+
+##############################################
+
+=head2 _initialassumedhoststate_to_state
+
+  _initialassumedhoststate_to_state($state)
+
+translate initial assumed host state to text
+
+=cut
+sub _initialassumedhoststate_to_state {
+    my($initialassumedhoststate) = @_;
+
+    return 'unspecified' if $initialassumedhoststate ==  0; # Unspecified
+    return 'current'     if $initialassumedhoststate == -1; # Current State
+    return 'up'          if $initialassumedhoststate ==  3; # Host Up
+    return 'down'        if $initialassumedhoststate ==  4; # Host Down
+    return 'unreachable' if $initialassumedhoststate ==  5; # Host Unreachable
+    croak('unknown state: '.$initialassumedhoststate);
+}
+
+##############################################
+
+=head2 _initialassumedservicestate_to_state
+
+  _initialassumedservicestate_to_state($state)
+
+translate initial assumed service state to text
+
+=cut
+sub _initialassumedservicestate_to_state {
+    my($initialassumedservicestate) = @_;
+
+    return 'unspecified' if $initialassumedservicestate ==  0; # Unspecified
+    return 'current'     if $initialassumedservicestate == -1; # Current State
+    return 'ok'          if $initialassumedservicestate ==  6; # Service Ok
+    return 'warning'     if $initialassumedservicestate ==  8; # Service Warning
+    return 'unknown'     if $initialassumedservicestate ==  7; # Service Unknown
+    return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
+    croak('unknown state: '.$initialassumedservicestate);
 }
 
 ##############################################

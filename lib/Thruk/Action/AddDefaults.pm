@@ -536,7 +536,7 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
-    my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe, $cached_data);
+    my($disabled_backends,$has_groups) = set_enabled_backends($c, undef, $safe, $cached_data);
 
     ###############################
     # add program status
@@ -564,7 +564,7 @@ sub add_defaults {
         }
         if($@) {
             # side.html and some other pages should not be redirect to the error page on backend errors
-            _set_possible_backends($c, $disabled_backends);
+            set_possible_backends($c, $disabled_backends);
             print STDERR $@ if $c->config->{'thruk_debug'};
             return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
             $c->log->debug("data source error: $@");
@@ -577,7 +577,7 @@ sub add_defaults {
         if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
             $disabled_backends = _disable_backends_by_group($c, $disabled_backends);
         }
-        _set_possible_backends($c, $disabled_backends);
+        set_possible_backends($c, $disabled_backends);
         $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
 
@@ -795,9 +795,9 @@ sub set_configs_stash {
 
 ########################################
 
-=head2 _set_possible_backends
+=head2 set_possible_backends
 
-  _set_possible_backends($c, $disabled_backends)
+  set_possible_backends($c, $disabled_backends)
 
   possible values are:
     0 = reachable                           REACHABLE
@@ -815,7 +815,7 @@ sub set_configs_stash {
     8 = disabled (overide by lmd)           HIDDEN_LMD_PARENT
 
 =cut
-sub _set_possible_backends {
+sub set_possible_backends {
     my ($c,$disabled_backends) = @_;
 
     my @possible_backends;
@@ -874,7 +874,7 @@ sub update_site_panel_hashes {
     my($c, $selected_backends) = @_;
 
     if($selected_backends) {
-        _set_enabled_backends($c, $selected_backends);
+        set_enabled_backends($c, $selected_backends);
     }
 
     my $initial_backends = {};
@@ -1116,7 +1116,15 @@ sub set_processinfo {
 }
 
 ########################################
-sub _set_enabled_backends {
+
+=head2 set_enabled_backends
+
+  set_enabled_backends($c, [$backends, $safe, $cached_data])
+
+set enabled backends from environment or given list
+
+=cut
+sub set_enabled_backends {
     my($c, $backends, $safe, $cached_data) = @_;
 
     # first all backends are enabled
@@ -1136,7 +1144,7 @@ sub _set_enabled_backends {
     ###############################
     # by args
     if(defined $backends) {
-        $c->log->debug('_set_enabled_backends() by args') if Thruk->debug;
+        $c->log->debug('set_enabled_backends() by args') if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1164,7 +1172,7 @@ sub _set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
+        $c->log->debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1191,7 +1199,7 @@ sub _set_enabled_backends {
     ###############################
     # by param
     elsif($num_backends > 1 and defined $backend) {
-        $c->log->debug('_set_enabled_backends() by param') if Thruk->debug;
+        $c->log->debug('set_enabled_backends() by param') if Thruk->debug;
         if($backend eq 'ALL') {
             my @keys;
             for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -1213,7 +1221,7 @@ sub _set_enabled_backends {
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
-        $c->log->debug('_set_enabled_backends() by cookie') if Thruk->debug;
+        $c->log->debug('set_enabled_backends() by cookie') if Thruk->debug;
         for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -1221,7 +1229,7 @@ sub _set_enabled_backends {
         }
     }
     elsif(defined $c->{'db'}) {
-        $c->log->debug('_set_enabled_backends() using defaults') if Thruk->debug;
+        $c->log->debug('set_enabled_backends() using defaults') if Thruk->debug;
         my $display_too = 0;
         if(defined $c->req->header('user-agent') and $c->req->header('user-agent') !~ m/thruk/mxi) {
             $display_too = 1;
@@ -1250,7 +1258,7 @@ sub _set_enabled_backends {
 
     # when set by args, update
     if(defined $backends) {
-        _set_possible_backends($c, $disabled_backends);
+        set_possible_backends($c, $disabled_backends);
     }
     $c->log->debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
     return($disabled_backends, $has_groups);

@@ -135,8 +135,8 @@ sub _process_outagespbimp {
     }
 
     # sort by criticity
-    my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
-    my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
+    my $sortedhst_pbs = Thruk::Backend::Manager::sort_result($c, $hst_pbs, { 'DESC' => 'criticity' });
+    my $sortedsrv_pbs = Thruk::Backend::Manager::sort_result($c, $srv_pbs, { 'DESC' => 'criticity' });
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
@@ -323,8 +323,8 @@ sub businessview_index {
     }
 
     # sort by criticity
-    my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
-    my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
+    my $sortedhst_pbs = Thruk::Backend::Manager::sort_result($c, $hst_pbs, { 'DESC' => 'criticity' });
+    my $sortedsrv_pbs = Thruk::Backend::Manager::sort_result($c, $srv_pbs, { 'DESC' => 'criticity' });
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;

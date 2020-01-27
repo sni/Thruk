@@ -38,7 +38,7 @@ sub index {
 
     if(defined $c->req->parameters->{'data'}) {
         $c->stash->{'inject_stats'} = 0;
-        my $res = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
+        my $res = Thruk::Utils::CLI::from_fcgi($c, $c->req->parameters->{'data'});
         if(defined $res->{'output'} && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
             $c->res->body($res->{'output'});
             $c->{'rendered'} = 1;

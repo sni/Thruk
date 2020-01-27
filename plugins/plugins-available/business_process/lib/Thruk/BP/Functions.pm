@@ -737,53 +737,5 @@ sub _get_nodes_extra {
 }
 
 ##########################################################
-# runs filter function
-sub _filter {
-    my($c, $fname, $args) = @_;
-
-    $c->stash->{'bp_custom_filter'} = Thruk::BP::Utils::get_custom_filter($c) unless defined $c->stash->{'bp_custom_filter'};
-    my $f;
-    for my $tmp (@{$c->stash->{'bp_custom_filter'}}) {
-        if($tmp->{'function'} eq $fname) {
-            $f = $tmp;
-            last;
-        }
-    }
-    if(!$f) {
-        $c->log->info("custom filter $fname not found");
-        return;
-    }
-    eval {
-        do($f->{'file'});
-        if($@) {
-            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
-        }
-        ## no critic
-        eval($fname.'($c, $args);');
-        ## use critic
-        if($@) {
-            $c->log->info("internal error in custom filter $fname: $@");
-        }
-    };
-    if($@) {
-        $c->log->info("internal error in custom filter $fname: $@");
-    }
-
-    return;
-}
-
-##########################################################
-# deep clones any object
-sub _dclone {
-    my($obj) = @_;
-
-    # use faster Clone module if available
-    return(Clone::clone($obj)) if $INC{'Clone.pm'};
-
-    # else use Storable
-    return(Storable::dclone($obj));
-}
-
-##########################################################
 
 1;

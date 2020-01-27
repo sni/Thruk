@@ -177,7 +177,7 @@ sub index {
                 $c->req->parameters->{'com_id'}  = $id;
             }
             _set_host_service_from_down_com_ids($c);
-            if( _do_send_command($c) ) {
+            if( do_send_command($c) ) {
                 $c->log->debug("command succeeded");
             }
             else {
@@ -210,7 +210,7 @@ sub index {
                 }
             }
             else {
-                if( _do_send_command($c) ) {
+                if( do_send_command($c) ) {
                     $c->log->debug("command for host $host succeeded");
                 }
                 else {
@@ -256,7 +256,7 @@ sub index {
                 }
             }
             else {
-                if( _do_send_command($c) ) {
+                if( do_send_command($c) ) {
                     $c->log->debug("command for $service on host $host succeeded");
                 }
                 else {
@@ -275,7 +275,7 @@ sub index {
 
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
         delete $c->req->parameters->{'backend'};
-        _redirect_or_success( $c, -1 );
+        redirect_or_success( $c, -1 );
     }
 
     # normal page call
@@ -317,7 +317,7 @@ sub _remove_all_downtimes {
     my @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
     for my $id ( @ids ) {
         $c->req->parameters->{'down_id'} = $id;
-        if( _do_send_command($c) ) {
+        if( do_send_command($c) ) {
             $c->log->debug("removing downtime $id succeeded");
             Thruk::Utils::set_message( $c, 'success_message', "removing downtime $id succeeded" );
         }
@@ -346,9 +346,9 @@ sub _check_for_commands {
 
     # command commited?
     $c->stash->{'use_csrf'} = 1;
-    if( $cmd_mod == 2 and _do_send_command($c) ) {
+    if( $cmd_mod == 2 and do_send_command($c) ) {
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
-        _redirect_or_success( $c, -2 );
+        redirect_or_success( $c, -2 );
     }
     else {
         # no command submited, view commands page (can be nonnumerical)
@@ -387,9 +387,15 @@ sub _check_for_commands {
 }
 
 ######################################
-# view our success page or redirect to referer
-sub _redirect_or_success {
-    my( $c, $how_far_back, $just_return ) = @_;
+=head2 redirect_or_success
+
+    redirect_or_success($c, $how_far_back, $just_return)
+
+view our success page or redirect to referer
+
+=cut
+sub redirect_or_success {
+    my($c, $how_far_back, $just_return) = @_;
 
     my $wait = defined $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 0;
     if(bulk_send($c, $c->stash->{'commands2send'})) {
@@ -537,9 +543,16 @@ sub _redirect_or_success {
 }
 
 ######################################
-# sending commands
-sub _do_send_command {
-    my( $c ) = @_;
+
+=head2 do_send_command
+
+    do_send_command($c)
+
+send commands based on request parameters
+
+=cut
+sub do_send_command {
+    my($c) = @_;
 
     if($c->stash->{'use_csrf'}) {
         return unless Thruk::Utils::check_csrf($c);
@@ -717,7 +730,7 @@ sub _do_send_command {
         # send the command only to those backends which actually have that object.
         # this prevents ugly log entries when naemon core cannot find the corresponding object
         if(scalar @{$backends_list} > 1) {
-            $backends_list = _get_affected_backends($c, $required_fields, $backends_list);
+            $backends_list = get_affected_backends($c, $required_fields, $backends_list);
             if(scalar @{$backends_list} == 0) {
                 Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty." );
                 return;
@@ -950,8 +963,13 @@ sub _set_host_service_from_down_com_ids {
 }
 
 ######################################
-# return list of backends which have the requested objects
-sub _get_affected_backends {
+
+=head2 get_affected_backends
+
+    return list of backends which have the requested objects
+
+=cut
+sub get_affected_backends {
     my($c, $required_fields, $backends) = @_;
 
     my $data;

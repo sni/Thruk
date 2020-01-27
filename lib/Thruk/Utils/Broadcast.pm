@@ -110,13 +110,13 @@ sub process_broadcast {
     # date / time filter
     $broadcast->{'expires_ts'} = 0;
     if($broadcast->{'expires'}) {
-        my $expires_ts = Thruk::Utils::_parse_date($c, $broadcast->{'expires'});
+        my $expires_ts = Thruk::Utils::parse_date($c, $broadcast->{'expires'});
         $broadcast->{'expires_ts'} = $expires_ts;
     }
 
     $broadcast->{'hide_before_ts'} = 0;
     if($broadcast->{'hide_before'}) {
-        my $hide_before_ts = Thruk::Utils::_parse_date($c, $broadcast->{'hide_before'});
+        my $hide_before_ts = Thruk::Utils::parse_date($c, $broadcast->{'hide_before'});
         $broadcast->{'hide_before_ts'} = $hide_before_ts;
     }
 

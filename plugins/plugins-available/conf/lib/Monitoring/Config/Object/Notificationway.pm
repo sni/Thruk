@@ -30,7 +30,7 @@ $Monitoring::Config::Object::Notificationway::Defaults = {
     'service_notification_options'    => { type => 'ENUM', values => ['w','u','c','r','f','s','n'], keys => [ 'Warning', 'Unknown', 'Critical', 'Recovery', 'Flapping', 'Downtime', 'None' ], cat => 'Notifications' },
     'host_notification_commands'      => { type => 'LIST', 'link' => 'command', cat => 'Notifications' },
     'service_notification_commands'   => { type => 'LIST', 'link' => 'command', cat => 'Notifications' },
-    'min_business_impact'             => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::_business_impact_keys(), cat => 'Extended' },
+    'min_business_impact'             => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::business_impact_keys(), cat => 'Extended' },
 };
 
 ##########################################################

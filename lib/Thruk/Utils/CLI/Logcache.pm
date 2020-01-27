@@ -111,7 +111,7 @@ sub cmd {
         return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
-    Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+    Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
     my $backends = $c->stash->{'backends'};
 
     if($mode eq 'import' && !$global_options->{'yes'}) {

@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use Thruk::Utils::IO ();
 use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 use Carp qw/confess croak longmess/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Add_Delta_Days Normalize_DHMS/;
@@ -424,10 +425,10 @@ sub get_start_end_from_date_select_params {
     my $param_end   = $c->req->parameters->{'end'};
 
     # start / end date from formular values?
-    if(defined $param_start and defined $param_end) {
+    if(defined $param_start && defined $param_end) {
         # convert to timestamps
-        $start = Thruk::Utils::parse_date($c, $param_start);
-        $end   = Thruk::Utils::parse_date($c, $param_end);
+        $start = parse_date($c, $param_start);
+        $end   = parse_date($c, $param_end);
     }
     if(!defined $start || $start == 0 || !defined $end || $end == 0) {
         # start with today 00:00
@@ -986,19 +987,6 @@ sub normal_mktime {
     $timestamp += $add_time;
     return $timestamp;
 }
-
-########################################
-sub _initialassumedhoststate_to_state {
-    my $initialassumedhoststate = shift;
-
-    return 'unspecified' if $initialassumedhoststate ==  0; # Unspecified
-    return 'current'     if $initialassumedhoststate == -1; # Current State
-    return 'up'          if $initialassumedhoststate ==  3; # Host Up
-    return 'down'        if $initialassumedhoststate ==  4; # Host Down
-    return 'unreachable' if $initialassumedhoststate ==  5; # Host Unreachable
-    croak('unknown state: '.$initialassumedhoststate);
-}
-
 
 ########################################
 
@@ -2727,7 +2715,7 @@ sub get_template_variable {
     };
     if($@) {
         return "" if $noerror;
-        Thruk::Utils::CLI::_error($@);
+        _error($@);
         return $c->detach('/error/index/13');
     }
     POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
@@ -3117,20 +3105,6 @@ sub backends_hash_to_list {
     }
     return($backends);
 }
-
-########################################
-sub _initialassumedservicestate_to_state {
-    my $initialassumedservicestate = shift;
-
-    return 'unspecified' if $initialassumedservicestate ==  0; # Unspecified
-    return 'current'     if $initialassumedservicestate == -1; # Current State
-    return 'ok'          if $initialassumedservicestate ==  6; # Service Ok
-    return 'warning'     if $initialassumedservicestate ==  8; # Service Warning
-    return 'unknown'     if $initialassumedservicestate ==  7; # Service Unknown
-    return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
-    croak('unknown state: '.$initialassumedservicestate);
-}
-
 
 ##############################################
 sub _parse_date {
@@ -3594,6 +3568,24 @@ sub looks_like_regex {
         return(1);
     }
     return;
+}
+
+##############################################
+=head2 dclone
+
+    dclone($obj)
+
+deep clones any object
+
+=cut
+sub dclone {
+    my($obj) = @_;
+
+    # use faster Clone module if available
+    return(Clone::clone($obj)) if $INC{'Clone.pm'};
+
+    # else use Storable
+    return(Storable::dclone($obj));
 }
 
 ##############################################

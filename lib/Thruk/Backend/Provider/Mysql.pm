@@ -1029,7 +1029,7 @@ sub _import_logs {
     my $log_count     = 0;
 
     if(!defined $backends) {
-        Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+        Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
         $backends = $c->stash->{'backends'};
     }
     $backends = Thruk::Utils::list($backends);

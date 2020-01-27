@@ -22,6 +22,7 @@ use Thruk::Utils::Reports::Render;
 use Thruk::Views::ToolkitRenderer;
 use Thruk::Utils::External;
 use Thruk::Action::AddDefaults;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 use MIME::Lite;
 use File::Copy;
 use Encode qw(encode_utf8 decode_utf8 encode);
@@ -50,7 +51,7 @@ sub get_report_list {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
             my $nr = $1;
             next if $number_filter && $nr != $number_filter;
-            my $r  = _read_report_file($c, $nr, undef, $noauth, 1);
+            my $r  = read_report_file($c, $nr, undef, $noauth, 1);
             next unless $r;
             if($r->{'var'} and $r->{'var'}->{'job'}) {
                 my($is_running,$time,$percent,$message,$forward) = Thruk::Utils::External::get_status($c, $r->{'var'}->{'job'});
@@ -101,7 +102,7 @@ generate and show the report
 sub report_show {
     my($c, $nr, $refresh) = @_;
 
-    my $report = _read_report_file($c, $nr);
+    my $report = read_report_file($c, $nr);
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
         return $c->redirect_to('reports2.cgi');
@@ -186,7 +187,7 @@ sub report_send {
         return $c->redirect_to('reports2.cgi');
     }
 
-    my $report = _read_report_file($c, $nr);
+    my $report = read_report_file($c, $nr);
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
         return $c->redirect_to('reports2.cgi');
@@ -205,7 +206,7 @@ sub report_send {
     } else {
         $attachment = generate_report($c, $nr);
     }
-    $report = _read_report_file($c, $nr); # update report data, attachment would be wrong otherwise
+    $report = read_report_file($c, $nr); # update report data, attachment would be wrong otherwise
     _initialize_report_templates($c, $report);
     if(!defined $attachment) {
         Thruk::Utils::set_message( $c, 'fail_message', 'failed to send report' );
@@ -227,7 +228,7 @@ sub report_send {
         Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$report->{'template'}, undef, \$mailtext);
     };
     if($@) {
-        Thruk::Utils::CLI::_error($@);
+        _error($@);
         return $c->detach('/error/index/13');
     }
 
@@ -345,10 +346,10 @@ sub report_save {
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
     if($nr ne 'new' and -f $file) {
-        $old_report = _read_report_file($c, $nr);
+        $old_report = read_report_file($c, $nr);
         return unless defined $old_report;
     }
-    my $report        = _get_new_report($c, $data);
+    my $report        = get_new_report($c, $data);
     $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
     $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
     my $fields = _get_required_fields($c, $report);
@@ -358,7 +359,7 @@ sub report_save {
         return;
     }
     _verify_fields($c, $fields, $report);
-    return _report_save($c, $nr, $report);
+    return store_report_data($c, $nr, $report);
 }
 
 ##########################################################
@@ -373,7 +374,7 @@ remove report
 sub report_remove {
     my($c, $nr) = @_;
 
-    my $report = _read_report_file($c, $nr);
+    my $report = read_report_file($c, $nr);
     return unless defined $report;
     return unless defined $report->{'readonly'};
     return if $report->{'var'}->{'is_running'};
@@ -413,7 +414,7 @@ sub generate_report {
 
     # set waiting flag on queued reports
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
-    my $options = _read_report_file($c, $nr);
+    my $options = read_report_file($c, $nr);
     unless(defined $options) {
         $Thruk::Utils::Reports::error = 'got no report options';
         return;
@@ -441,7 +442,7 @@ sub generate_report {
         while($options->{'var'}->{'is_running'}) {
             sleep 1;
             return unless -f $report_file; # report may have been deleted meanwhile
-            $options = _read_report_file($c, $nr);
+            $options = read_report_file($c, $nr);
         }
         if(-e $attachment) {
             return $attachment;
@@ -511,8 +512,8 @@ sub generate_report {
     # need to update defaults backends
     my($disabled_backends,$has_groups);
     eval {
-        ($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
-        Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+        ($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::set_enabled_backends($c);
+        Thruk::Action::AddDefaults::set_possible_backends($c, $disabled_backends);
     };
     if($@) {
         return(_report_die($c, $nr, $@, $logfile));
@@ -608,7 +609,7 @@ sub generate_report {
     if(!-f $attachment && !$Thruk::Utils::Reports::error) {
         $Thruk::Utils::Reports::error = read_file($logfile);
     }
-    Thruk::Utils::CLI::_error($Thruk::Utils::Reports::error);
+    _error($Thruk::Utils::Reports::error);
 
     # check backend errors from during report generation
     if($options->{'backends'}) {
@@ -700,7 +701,7 @@ returns true if report got queued.
 sub queue_report {
     my($c, $nr, $with_mails) = @_;
 
-    my $options = _read_report_file($c, $nr);
+    my $options = read_report_file($c, $nr);
     if(!$c->stash->{'remote_user'}) {
         $c->stash->{'remote_user'} = $options->{'user'};
     }
@@ -732,7 +733,7 @@ Returns 1 if queue is used or undef if there are free slots.
 sub queue_report_if_busy {
     my($c, $nr, $with_mails) = @_;
 
-    my $options = _read_report_file($c, $nr);
+    my $options = read_report_file($c, $nr);
     return   if $options->{'var'}->{'is_running'} == $$;
     return 1 if $options->{'var'}->{'is_running'};
 
@@ -766,7 +767,7 @@ sub generate_report_background {
         return;
     }
 
-    $report = _read_report_file($c, $report_nr) unless $report;
+    $report = read_report_file($c, $report_nr) unless $report;
 
     # report should always run in the report owner context
     if(!$c->user_exists || ($report->{'user'} ne $c->user->{'username'})) {
@@ -1117,7 +1118,15 @@ sub _get_locale_name {
 }
 
 ##########################################################
-sub _get_new_report {
+
+=head2 get_new_report
+
+  get_new_report($c, [$data])
+
+returns default report data
+
+=cut
+sub get_new_report {
     my($c, $data) = @_;
     $data = {} unless defined $data;
     my $r = {
@@ -1142,7 +1151,15 @@ sub _get_new_report {
 }
 
 ##########################################################
-sub _report_save {
+
+=head2 store_report_data
+
+  store_report_data($c, $nr, $data)
+
+writes report to disk
+
+=cut
+sub store_report_data {
     my($c, $nr, $r) = @_;
     my $report = dclone($r);
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
@@ -1192,19 +1209,27 @@ sub _report_save {
 }
 
 ##########################################################
-sub _read_report_file {
+
+=head2 read_report_file
+
+  read_report_file($c, $nr, [$rdata, $noauth, $simple])
+
+returns report
+
+=cut
+sub read_report_file {
     my($c, $nr, $rdata, $noauth, $simple) = @_;
 
     my $index_file = $c->config->{'var_path'}.'/reports/.index';
     if(!defined $nr || $nr !~ m/^\d+$/mx) {
-        Thruk::Utils::CLI::_error("not a valid report number");
+        _error("not a valid report number");
         $c->stash->{errorMessage}       = "report does not exist";
         $c->stash->{errorDescription}   = "not a valid report number.";
         return $c->detach('/error/index/99');
     }
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     unless(-f $file) {
-        Thruk::Utils::CLI::_error("report does not exist: $!\n");
+        _error("report does not exist: $!\n");
         $c->stash->{errorMessage}       = "report does not exist";
         $c->stash->{errorDescription}   = "please make sure this report exists.";
         return $c->detach('/error/index/99');
@@ -1213,7 +1238,7 @@ sub _read_report_file {
     my($report_fh, $lock_fh) = Thruk::Utils::IO::file_lock($file, 'ex');
     my $report = Thruk::Utils::IO::json_retrieve($file, $report_fh);
     $report->{'nr'} = $nr;
-    $report = _get_new_report($c, $report);
+    $report = get_new_report($c, $report);
 
     my $needs_save = 0;
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
@@ -1348,7 +1373,7 @@ sub _read_report_file {
         delete $report->{'var'}->{'running_node'};
     }
 
-    _report_save($c, $nr, $report) if $needs_save;
+    store_report_data($c, $nr, $report) if $needs_save;
 
     $report->{'backends_hash'} = $report->{'backends'};
     $report->{'backends'}      = Thruk::Utils::backends_hash_to_list($c, $report->{'backends'});
@@ -1377,7 +1402,7 @@ sub _is_authorized_for_report {
     if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
         return 2;
     }
-    Thruk::Utils::CLI::_debug("user: ".(defined $c->stash->{'remote_user'} ? $c->stash->{'remote_user'} : '?')." is not authorized for report: ".$report->{'nr'});
+    _debug("user: ".(defined $c->stash->{'remote_user'} ? $c->stash->{'remote_user'} : '?')." is not authorized for report: ".$report->{'nr'});
     return;
 }
 
@@ -1459,7 +1484,7 @@ sub _convert_to_pdf {
 
     unless($htmlonly) {
         $c->stash->{'param'}->{'js'} = 1;
-        $reportdata = Thruk::Utils::Reports::Render::_replace_css_and_images($reportdata);
+        $reportdata = Thruk::Utils::Reports::Render::replace_css_and_images($reportdata);
     }
 
     # write out result
@@ -1586,7 +1611,7 @@ sub check_for_waiting_reports {
 ##########################################################
 sub _report_die {
     my($c, $nr, $err, $logfile) = @_;
-    Thruk::Utils::CLI::_error($err);
+    _error($err);
     Thruk::Utils::IO::write($logfile, $err, undef, 1);
     $Thruk::Utils::Reports::error = $err;
     set_running($c, $nr, 0, undef, time()) if $nr;

@@ -1992,7 +1992,7 @@ sub _rebuild_index {
                 }
             } else {
                 if($obj->must_have_name()) {
-                    push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::_link_obj($obj);
+                    push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::link_obj($obj);
                 }
             }
         }
@@ -2032,9 +2032,9 @@ sub _update_obj_in_index {
         if(defined $existing_id and $existing_id eq $obj->{'id'}) {
             my $orig = $self->get_object_by_id($existing_id);
             if(defined $orig) {
-                push @{$self->{'parse_errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
+                push @{$self->{'parse_errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::link_obj($orig);
             } else {
-                push @{$self->{'parse_errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj);
+                push @{$self->{'parse_errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::link_obj($obj);
             }
         }
         $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname} = $obj->{'id'};
@@ -2074,10 +2074,10 @@ sub _update_obj_in_index {
             my $orig = $self->get_object_by_id($existing_id);
             if(!defined $orig) {
                 push @{$self->{'parse_errors'}},
-                    "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::_link_obj($obj);
+                    "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::link_obj($obj);
             } else {
                 push @{$self->{'parse_errors'}},
-                    "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
+                    "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::link_obj($orig);
             }
         }
         $objects->{'byname'}->{$obj->{'type'}}->{$pname} = $obj->{'id'};
@@ -2144,7 +2144,7 @@ sub _check_references {
                                           cleanable => 0,
                                         };
                 } else {
-                    push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                    push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::link_obj($obj);
                 }
             }
         }
@@ -2185,7 +2185,7 @@ sub _check_references {
                                       cleanable => 0,
                                     };
             } else {
-                push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::link_obj($obj);
             }
         }
     });
@@ -2628,7 +2628,7 @@ sub set_save_config {
     my($self, $settings) = @_;
 
     my $cfg = $Monitoring::Config::save_options;
-    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
     _set_output_format($cfg);
     return $cfg unless defined $settings;
 
@@ -2636,7 +2636,7 @@ sub set_save_config {
         $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
     }
 
-    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
     _set_output_format($cfg);
 
     return $cfg;
@@ -2754,7 +2754,7 @@ sub get_plugin_preview {
     return("command has no arguments") unless defined $args;
 
     my $cfg = $Monitoring::Config::save_options;
-    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::_sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
 
     my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
     $macros    = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'}, $macros);

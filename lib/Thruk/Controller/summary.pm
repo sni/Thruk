@@ -199,7 +199,7 @@ sub _display_recent_alerts {
     my ( $c, $alerts ) = @_;
     $c->stats->profile(begin => "_display_recent_alerts()");
 
-    my $sortedtotals = Thruk::Backend::Manager::_sort($c, $alerts, { 'DESC' => 'time'});
+    my $sortedtotals = Thruk::Backend::Manager::sort_result($c, $alerts, { 'DESC' => 'time'});
     Thruk::Backend::Manager::page_data($c, $sortedtotals, $c->req->parameters->{'limit'});
 
     $c->stats->profile(end => "_display_recent_alerts()");
@@ -228,7 +228,7 @@ sub _display_top_alerts {
     }
 
     my @totals = values %{$totals};
-    my $sortedtotals = Thruk::Backend::Manager::_sort($c, \@totals, { 'DESC' => 'alerts'});
+    my $sortedtotals = Thruk::Backend::Manager::sort_result($c, \@totals, { 'DESC' => 'alerts'});
     Thruk::Backend::Manager::page_data($c, $sortedtotals, $c->req->parameters->{'limit'});
 
     $c->stats->profile(end => "_display_top_alerts()");

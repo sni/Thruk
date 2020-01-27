@@ -273,16 +273,16 @@ sub update_status {
         };
         if(scalar @{$bp->filter()} > 0 || scalar @{$self->{'filter'}} > 0) {
             my $need_update = delete $bp->{'need_update'};
-            $filter_args = Thruk::BP::Functions::_dclone($filter_args);
+            $filter_args = Thruk::Utils::dclone($filter_args);
             $bp->{'need_update'} = $need_update;
             $filter_args->{'bp'}->{'need_update'} = $need_update;
             for my $f (sort @{$bp->filter()}) {
                 $filter_args->{'scope'} = 'global';
-                Thruk::BP::Functions::_filter($c, $f, $filter_args);
+                _filter($c, $f, $filter_args);
             }
             for my $f (sort @{$self->{'filter'}}) {
                 $filter_args->{'scope'} = 'node';
-                Thruk::BP::Functions::_filter($c, $f, $filter_args);
+                _filter($c, $f, $filter_args);
             }
             $filter_args->{'bp'}->recalculate_group_statistics($filter_args->{'livedata'}, 1);
         }
@@ -301,11 +301,11 @@ sub update_status {
         $filter_args->{'extra'}         = $extra;
         for my $f (sort @{$bp->filter()}) {
             $filter_args->{'scope'} = 'global';
-            Thruk::BP::Functions::_filter($c, $f, $filter_args);
+            _filter($c, $f, $filter_args);
         }
         for my $f (sort @{$self->{'filter'}}) {
             $filter_args->{'scope'} = 'node';
-            Thruk::BP::Functions::_filter($c, $f, $filter_args);
+            _filter($c, $f, $filter_args);
         }
         $self->set_status($filter_args->{'status'}, ($filter_args->{'status_text'} || $filter_args->{'short_desc'}), $bp, $filter_args->{'extra'});
         $self->{'short_desc'} = $filter_args->{'short_desc'};
@@ -614,6 +614,42 @@ sub parents {
         push @{$parents}, $bp->{'nodes_by_id'}->{$p} if $bp->{'nodes_by_id'}->{$p};
     }
     return($parents);
+}
+
+##########################################################
+# runs filter function
+sub _filter {
+    my($c, $fname, $args) = @_;
+
+    $c->stash->{'bp_custom_filter'} = Thruk::BP::Utils::get_custom_filter($c) unless defined $c->stash->{'bp_custom_filter'};
+    my $f;
+    for my $tmp (@{$c->stash->{'bp_custom_filter'}}) {
+        if($tmp->{'function'} eq $fname) {
+            $f = $tmp;
+            last;
+        }
+    }
+    if(!$f) {
+        $c->log->info("custom filter $fname not found");
+        return;
+    }
+    eval {
+        do($f->{'file'});
+        if($@) {
+            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+        }
+        ## no critic
+        eval($fname.'($c, $args);');
+        ## use critic
+        if($@) {
+            $c->log->info("internal error in custom filter $fname: $@");
+        }
+    };
+    if($@) {
+        $c->log->info("internal error in custom filter $fname: $@");
+    }
+
+    return;
 }
 
 ##########################################################

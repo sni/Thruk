@@ -309,7 +309,7 @@ sub kill_if_not_responding {
     if($pid == -1) { die("fork failed: $!"); }
 
     if(!$pid) {
-        Thruk::Utils::External::_do_child_stuff($c, 0, 0);
+        Thruk::Utils::External::do_child_stuff($c, 0, 0);
         alarm($lmd_timeout);
         eval {
             $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites\n");

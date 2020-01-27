@@ -516,7 +516,7 @@ sub _task_status {
     }
 
     if($params->{'reschedule'}) {
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $tab_backends);
         # works only for a single host or service
         $c->stash->{'now'}                   = time();
         $c->req->parameters->{'cmd_mod'}     = 2;
@@ -550,9 +550,9 @@ sub _task_status {
         $c->stash->{'use_csrf'} = 0;
         if($params->{'cmd_typ'}) {
             require Thruk::Controller::cmd;
-            if(Thruk::Controller::cmd::_do_send_command($c)) {
+            if(Thruk::Controller::cmd::do_send_command($c)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
-                Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
+                Thruk::Controller::cmd::redirect_or_success($c, -2, 1);
             }
         }
     }
@@ -565,15 +565,15 @@ sub _task_status {
             delete $c->req->parameters->{'backend'};
             delete $c->req->parameters->{'backends'};
             if($backends && scalar @{$backends} > 0 && (scalar @{$backends} != 1 || $backends->[0] ne '')) {
-                Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
+                Thruk::Action::AddDefaults::set_enabled_backends($c, $backends);
             } else {
-                Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+                Thruk::Action::AddDefaults::set_enabled_backends($c, $tab_backends);
             }
             $c->req->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter ) = _do_filter($c);
             $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter, $state_type, $has_service_filter);
         }
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $tab_backends);
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
         $data->{'hostgroups'} = [values %{_summarize_hostgroup_query($c, $types->{'hostgroups'}, $state_type)}];
@@ -1086,28 +1086,36 @@ sub _task_availability {
     $c->stash->{'cache_groups_filter'} = {};
 
     if($c->req->parameters->{'force'}) {
-        return(_avail_update($c));
+        return(avail_update($c));
     }
 
     $c->stats->profile(begin => "_task_avail");
     if($c->req->parameters->{'force'}) {
-        Thruk::Controller::panorama::_avail_update($c);
+        avail_update($c);
     } else {
-        Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_avail_update($c)',
+        Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::avail_update($c)',
                                            message    => 'availability is being calculated',
                                            background => 1,
                                         });
     }
-    my $res = _avail_update($c, 1);
+    my $res = avail_update($c, 1);
     $c->stats->profile(end => "_task_avail");
     return($res);
 }
 
 ##########################################################
-sub _avail_update {
+
+=head2 avail_update
+
+  avail_update($c, [$cached_only])
+
+returns calculated availability data in json format
+
+=cut
+sub avail_update {
     my($c, $cached_only) = @_;
 
-    $c->stats->profile(begin => "_avail_update");
+    $c->stats->profile(begin => "avail_update");
     my $in    = {};
     my $types = {};
 
@@ -1136,7 +1144,7 @@ sub _avail_update {
 
     my $data = {};
     my $now  = time();
-    Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+    Thruk::Action::AddDefaults::set_enabled_backends($c, $tab_backends);
     if(scalar keys %{$types->{'filter'}} > 0) {
         for my $f (keys %{$types->{'filter'}}) {
             # check if this filter is used in availabilities at all
@@ -1152,9 +1160,9 @@ sub _avail_update {
             delete $c->req->parameters->{'backend'};
             delete $c->req->parameters->{'backends'};
             if((ref $backends eq "" and $backends) || (ref $backends eq 'ARRAY' && scalar @{$backends} > 0)) {
-                Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
+                Thruk::Action::AddDefaults::set_enabled_backends($c, $backends);
             } else {
-                Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+                Thruk::Action::AddDefaults::set_enabled_backends($c, $tab_backends);
             }
             $c->req->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
@@ -1184,7 +1192,7 @@ sub _avail_update {
                 }
             }
         }
-        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $tab_backends);
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
         for my $group (keys %{$types->{'hostgroups'}}) {
@@ -1260,7 +1268,7 @@ sub _avail_update {
 
     my $json = { data => $data };
 
-    $c->stats->profile(end => "_avail_update");
+    $c->stats->profile(end => "avail_update");
     return $c->render(json => $json);
 }
 
@@ -1992,7 +2000,7 @@ sub _task_squares_data {
 
     # need to sort by host/service again
     if($source eq 'both') {
-        $data = Thruk::Backend::Manager::_sort({}, $data, 'uniq');
+        $data = Thruk::Backend::Manager::sort_result({}, $data, 'uniq');
     }
 
     # apply group by
@@ -2431,7 +2439,7 @@ sub _task_pnp_graphs {
             };
         }
     }
-    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
+    $graphs = Thruk::Backend::Manager::sort_result({}, $graphs, 'text');
     Thruk::Backend::Manager::page_data($c, $graphs);
 
     my $json = {
@@ -2497,7 +2505,7 @@ sub _task_grafana_graphs {
             };
         }
     }
-    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
+    $graphs = Thruk::Backend::Manager::sort_result({}, $graphs, 'text');
     Thruk::Backend::Manager::page_data($c, $graphs);
 
     # make sure current graph is always part of the result
@@ -2533,7 +2541,7 @@ sub _task_userdata_backgroundimages {
     }
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
-    $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
+    $images = Thruk::Backend::Manager::sort_result({}, $images, 'path');
     if(!$query) {
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif',  image => 'none'};
@@ -2568,7 +2576,7 @@ sub _task_userdata_images {
     }
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
-    $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
+    $images = Thruk::Backend::Manager::sort_result({}, $images, 'path');
     if(!$query) {
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
     }
@@ -2602,7 +2610,7 @@ sub _task_userdata_iconsets {
         $fileset->{'ok'} = '' unless $fileset->{'ok'};
         push @{$folders}, { name => $name, 'sample' => "../usercontent/images/status/".$name."/".$fileset->{'ok'}, value => $name, fileset => $fileset };
     }
-    $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
+    $folders = Thruk::Backend::Manager::sort_result({}, $folders, 'name');
     if($c->req->parameters->{'withempty'}) {
         unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' };
     }
@@ -2631,7 +2639,7 @@ sub _task_userdata_trendiconsets {
         $fileset->{'good'} = '' unless $fileset->{'good'};
         push @{$folders}, { name => $name, 'sample' => "../usercontent/images/trend/".$name."/".$fileset->{'good'}, value => $name, fileset => $fileset };
     }
-    $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
+    $folders = Thruk::Backend::Manager::sort_result({}, $folders, 'name');
     return $folders if $return_only;
     my $json = { data => $folders };
     return $c->render(json => $json);
@@ -2652,7 +2660,7 @@ sub _task_userdata_sounds {
             name  => $name,
         };
     }
-    $sounds = Thruk::Backend::Manager::_sort({}, $sounds, 'name');
+    $sounds = Thruk::Backend::Manager::sort_result({}, $sounds, 'name');
     unshift @{$sounds}, { path => '', name => 'none'};
     my $json = { data => $sounds };
     return $c->render(json => $json);
@@ -2673,7 +2681,7 @@ sub _task_userdata_shapes {
             data  => scalar read_file($file),
         };
     }
-    $shapes = Thruk::Backend::Manager::_sort({}, $shapes, 'name');
+    $shapes = Thruk::Backend::Manager::sort_result({}, $shapes, 'name');
     return $shapes if $return_only;
     my $json = { data => $shapes };
     return $c->render(json => $json);
@@ -2689,7 +2697,7 @@ sub _task_host_list {
         push @{$data}, { name => $hst->{'name'} };
     }
 
-    $data = Thruk::Backend::Manager::_sort({}, $data, 'name');
+    $data = Thruk::Backend::Manager::sort_result({}, $data, 'name');
     my $json = { data => $data };
     return $c->render(json => $json);
 }
@@ -2727,7 +2735,7 @@ sub _task_service_list {
         push @{$data}, { description => $svc->{'description'} };
     }
 
-    $data = Thruk::Backend::Manager::_sort({}, $data, 'description');
+    $data = Thruk::Backend::Manager::sort_result({}, $data, 'description');
     my $json = { data => $data };
     return $c->render(json => $json);
 }
@@ -3593,7 +3601,7 @@ sub _add_json_dashboard_timestamps {
         } else {
             $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
         }
-        my $maintfile  = Thruk::Utils::Panorama::_get_maint_file($c, $nr);
+        my $maintfile  = Thruk::Utils::Panorama::get_maint_file($c, $nr);
         if(-e $maintfile) {
             my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
             $json->{'maintenance'}->{$tab} = $maintenance->{'maintenance'};

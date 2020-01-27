@@ -146,7 +146,7 @@ sub init_backend_thread_pool {
             require Thruk::Pool::Simple;
             $pool = Thruk::Pool::Simple->new(
                 size    => $pool_size,
-                handler => \&Thruk::Backend::Pool::_do_thread,
+                handler => \&_do_thread,
             );
             #printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {

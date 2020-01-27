@@ -50,7 +50,7 @@ sub cmd {
         $c->{'db'}->get_processinfo();
     };
     _debug($@) if $@;
-    Thruk::Action::AddDefaults::_set_possible_backends($c, {});
+    Thruk::Action::AddDefaults::set_possible_backends($c, {});
     my $output = '';
     $output .= sprintf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
     $output .= sprintf("-------------------------------------------------\n");

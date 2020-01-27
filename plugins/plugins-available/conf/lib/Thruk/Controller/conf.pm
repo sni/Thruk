@@ -74,7 +74,7 @@ sub index {
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{'has_refs'}            = 0;
-    $c->stash->{'link_obj'}            = \&Thruk::Utils::Conf::_link_obj;
+    $c->stash->{'link_obj'}            = \&Thruk::Utils::Conf::link_obj;
     $c->stash->{no_tt_trim}            = 1;
     $c->stash->{post_obj_save_cmd}     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}   // '';
     $c->stash->{show_summary_prompt}   = $c->config->{'Thruk::Plugin::ConfigTool'}->{'show_summary_prompt'} // 1;
