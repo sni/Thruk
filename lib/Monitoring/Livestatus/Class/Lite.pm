@@ -383,7 +383,8 @@ return statements for given filter
 sub filter_statement {
     my($filter, $mode) = @_;
 
-    $filter_mode = $mode || 'Filter';
+    $compining_prefix = $mode || '';
+    $filter_mode      = $mode || 'Filter';
     #my( $combining_count, @statements)...
     my( undef, @statements) = &_recurse_cond($filter);
     return wantarray ? @statements: \@statements;
