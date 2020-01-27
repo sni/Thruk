@@ -378,7 +378,7 @@ sub set_status {
         if(scalar @{$self->{'depends'}} > 0 and $self->{'function'} ne 'custom') {
             # try a lucky guess on our child nodes and search for those which have our status
             my $nodes = [];
-            for my $n (@{$self->{'depends'}}) {
+            for my $n (@{$self->depends($bp)}) {
                 if($n->{'status'} == $self->{'status'} && $n->{'acknowledged'} == $self->{'acknowledged'} && $n->{'scheduled_downtime_depth'} == $self->{'scheduled_downtime_depth'}) {
                     push @{$nodes}, $n;
                 }
