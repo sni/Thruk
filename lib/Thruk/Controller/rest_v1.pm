@@ -131,7 +131,7 @@ sub index {
         $c->stash->{'inject_stats'} = 0;
         return;
     } else {
-        $data = _process_rest_request($c, $path_info);
+        $data = process_rest_request($c, $path_info);
     }
     return $data if $c->{'rendered'};
 
@@ -145,7 +145,15 @@ sub index {
 }
 
 ##########################################################
-sub _process_rest_request {
+
+=head2 process_rest_request
+
+  process_rest_request($c, $path_info)
+
+returns json response
+
+=cut
+sub process_rest_request {
     my($c, $path_info) = @_;
 
     my $data;
