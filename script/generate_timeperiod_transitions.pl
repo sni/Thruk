@@ -151,7 +151,7 @@ sub parse_date {
     if($string =~ m/^\d+\-\d+\-\d+$/mx) { $string .= " 00:00"; }
     my $timestamp;
     eval {
-        $timestamp = Thruk::Utils::_parse_date(undef, $string);
+        $timestamp = Thruk::Utils::parse_date(undef, $string);
     };
     print STDERR $@ if $options->{'verbose'};
     return $timestamp;

@@ -443,8 +443,8 @@ sub _fetch_keys {
         # column would be optimized away otherwise
         $c->req->parameters->{'sort'} = "content";
     }
-    Thruk::Action::AddDefaults::_set_enabled_backends($c);
-    my $data = Thruk::Controller::rest_v1::_process_rest_request($c, $tst_url);
+    Thruk::Action::AddDefaults::set_enabled_backends($c);
+    my $data = Thruk::Controller::rest_v1::process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
         # combine keys from all results
         for my $d (@{$data}) {
