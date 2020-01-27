@@ -160,10 +160,12 @@ var TP = {
                 tab.showLoadMask();
                 tab.show();
                 tabbar.setActiveTab(tab);
-                if(tab.xdata.hide_tab_header) {
-                    tab.tab.hide();
-                } else {
-                    tab.tab.show();
+                if(tab.tab) {
+                    if(tab.xdata.hide_tab_header) {
+                        tab.tab.hide();
+                    } else {
+                        tab.tab.show();
+                    }
                 }
             }
 
