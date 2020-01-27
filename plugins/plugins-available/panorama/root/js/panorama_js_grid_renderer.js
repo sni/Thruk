@@ -1,15 +1,22 @@
-/* render date */
+/* render date and time */
 TP.render_date = function(v, td, item) {
     if(v == 0)  { return 'never'; }
     if(v == -1) { return ''; }
     return TP.date_format(v);
 }
 
-/* render real date */
+/* render real date and time */
 TP.render_real_date = function(v, td, item) {
     if(v == null) { return 'never'; }
     // convert to timestamp first
     return "<div title='"+v+"'>"+TP.date_format(v.getTime() / 1000)+"<\/div>";
+}
+
+/* render date only */
+TP.render_date_only = function(v, td, item) {
+    if(v == 0)  { return 'never'; }
+    if(v == -1) { return ''; }
+    return TP.date_format(v, "Y-m-d");
 }
 
 /* just add title */

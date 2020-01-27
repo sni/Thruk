@@ -248,9 +248,9 @@ sub load_dashboard {
 
     # merge runtime data
     my $runtime      = {};
-    my $runtimefile  = Thruk::Utils::Panorama::_get_runtime_file($c, $nr);
-    if(-e $runtimefile) {
-       $runtime = Thruk::Utils::read_data_file($runtimefile, $c);
+    my $runtimefile  = get_runtime_file($c, $nr);
+    if(-s $runtimefile) {
+        $runtime = Thruk::Utils::read_data_file($runtimefile, $c);
     }
     for my $tab (keys %{$runtime}) {
         next if !defined $dashboard->{$tab};
@@ -355,7 +355,15 @@ sub delete_dashboard {
 }
 
 ##########################################################
-sub _get_runtime_file {
+
+=head2 get_runtime_file
+
+    get_runtime_file($c, $nr)
+
+return runtime filename for given dashboard number and current user
+
+=cut
+sub get_runtime_file {
     my($c, $nr) = @_;
     my $user = '';
     if(!$c->stash->{'is_admin'}) {

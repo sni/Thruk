@@ -2776,7 +2776,9 @@ sub _task_dashboard_save_states {
             $runtime->{$id}->{$key} = $states->{$id}->{$key} if defined $states->{$id}->{$key};
         }
     }
-    Thruk::Utils::write_data_file(Thruk::Utils::Panorama::_get_runtime_file($c, $nr), $runtime, 1);
+    my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $nr);
+    Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
+    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for `last_used`
 
     my $json = { 'status' => 'ok' };
     _add_misc_details($c, undef, $json);
@@ -2837,7 +2839,7 @@ sub _task_dashboard_data {
         $json = { 'status' => 'failed' };
     } else {
         my $data = {};
-        _merge_dashboard_into_hash($dashboard, $data);
+        _merge_dashboard_into_hash($c, $dashboard, $data);
         _add_recursive_dashboards($c, $dashboard, $data, undef, $open_tabs_hash);
         if($nr eq 'new' || $new_override) {
             $data->{'newid'} = $dashboard->{'id'};
@@ -2875,19 +2877,20 @@ sub _task_dashboard_list {
 
     my $columns = [
         { 'header' => 'Id',                        dataIndex => 'id',                              hidden => Cpanel::JSON::XS::true },
-        { 'header' => 'Nr',                        dataIndex => 'nr',                              hidden => Cpanel::JSON::XS::true },
+        { 'header' => 'Nr',          width => 20,  dataIndex => 'nr', align => 'left' },
         { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
-        { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
+        { 'header' => 'Name',        width => 130, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
         { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
-        { 'header' => 'Owner',        width => 120, dataIndex => 'user',        align => 'center',
+        { 'header' => 'Owner',        width => 130, dataIndex => 'user',        align => 'center',
                                         editor => $c->stash->{'is_admin'} ? {} : undef,
                                         hidden => $type eq 'my' ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
                                         tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
         },
-        { 'header' => 'Read-Write Groups',  width => 120, dataIndex => 'groups_rw',    align => 'left' },
-        { 'header' => 'Read-Only Groups',   width => 120, dataIndex => 'groups_ro',    align => 'left' },
+        { 'header' => 'Read-Write Groups',  width => 130, dataIndex => 'groups_rw',    align => 'left' },
+        { 'header' => 'Read-Only Groups',   width => 130, dataIndex => 'groups_ro',    align => 'left' },
         { 'header' => 'Direct Link',        width =>  65, dataIndex => 'link',         align => 'center', renderer => 'TP.render_directlink' },
-        { 'header' => 'Objects',     width => 50,  dataIndex => 'objects',      align => 'center' },
+        { 'header' => 'Objects',     width => 60,  dataIndex => 'objects',      align => 'center' },
+        { 'header' => 'Last Time Used',     width => 130,  dataIndex => 'last_used',   align => 'center', renderer => 'TP.render_date_only' },
         { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
         { 'header' => 'Actions',     width => 60,
                     xtype => 'actioncolumn',
@@ -2913,6 +2916,16 @@ sub _task_dashboard_list {
         }
         $dashboards = $filtered;
     }
+
+    # add last_used data
+    for my $d (@{$dashboards}) {
+        $d->{'last_used'} = 0;
+        for my $file (glob($c->config->{'var_path'}.'/panorama/'.$d->{'nr'}.'.tab.*runtime')) {
+            my @stat = stat($file);
+            $d->{'last_used'} = $stat[9] if $d->{'last_used'} < $stat[9];
+        }
+    }
+
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} // 'all';
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     Thruk::Backend::Manager::page_data($c, $dashboards);
@@ -3456,10 +3469,12 @@ sub _save_dashboard {
     }
 
     # save runtime data in extra file
-    my $runtime = _extract_runtime_data($dashboard);
+    my $runtime      = _extract_runtime_data($dashboard);
+    my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $nr);
 
     Thruk::Utils::write_data_file($file, $dashboard, 1);
-    Thruk::Utils::write_data_file(Thruk::Utils::Panorama::_get_runtime_file($c, $nr), $runtime, 1);
+    Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
+    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for `last_used`
     Thruk::Utils::backup_data_file($c->{'panorama_etc'}.'/'.$nr.'.tab', $c->{'panorama_var'}.'/'.$nr.'.tab', 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'pantab_'.$nr;
@@ -3469,7 +3484,7 @@ sub _save_dashboard {
 
 ##########################################################
 sub _merge_dashboard_into_hash {
-    my($dashboard, $data) = @_;
+    my($c, $dashboard, $data) = @_;
     return $data unless $dashboard;
 
     my $id = $dashboard->{'id'};
@@ -3483,6 +3498,10 @@ sub _merge_dashboard_into_hash {
                 $dashboard->{'tab'}->{$k} = $dashboard->{$k} if defined $dashboard->{$k};
             }
             $data->{$id} = $dashboard->{'tab'};
+
+            # touch runtime file, since thats what we use to reflect last_used date
+            my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $dashboard->{'nr'});
+            Thruk::Utils::IO::touch($runtime_file);
         }
     }
     return $data;
@@ -3498,7 +3517,7 @@ sub _add_initial_dashboard {
         @{$data->{'tabbar'}->{'open_tabs'}} = grep !/^\Q$nr\E$/mx, @{$data->{'tabbar'}->{'open_tabs'}};
         return;
     }
-    _merge_dashboard_into_hash($dashboard, $data);
+    _merge_dashboard_into_hash($c, $dashboard, $data);
     _add_recursive_dashboards($c, $dashboard, $data, $shapes, $open_tabs);
     return;
 }

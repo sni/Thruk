@@ -3,7 +3,7 @@ Ext.define('TP.DashboardManagementWindow', {
     extend:      'Ext.window.Window',
     autoShow:     true,
     modal:        true,
-    width:        800,
+    width:        1000,
     resizable:    false,
     title:       'Dashboard Management',
     closeAction: 'destroy',
