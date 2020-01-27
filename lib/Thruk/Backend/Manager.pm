@@ -2596,7 +2596,7 @@ sub sort_result {
 }
 
 # keep alias for backwards compatibility
-*_sort = \&sorted_result;
+*_sort = \&sort_result;
 
 ########################################
 
