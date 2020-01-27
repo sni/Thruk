@@ -387,6 +387,7 @@ sub _check_for_commands {
 }
 
 ######################################
+
 =head2 redirect_or_success
 
     redirect_or_success($c, $how_far_back, $just_return)
