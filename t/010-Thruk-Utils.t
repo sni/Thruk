@@ -86,23 +86,23 @@ my $app = $c->app;
 };
 
 #########################
-my $sorted_by_a = $b->_sort($befor, { 'ASC' => 'a' });
+my $sorted_by_a = $b->sort_result($befor, { 'ASC' => 'a' });
 is_deeply($sorted_by_a, $sorted_by_a_exp, 'sort by colum a');
 
-my $sorted_by_b = $b->_sort($befor, { 'ASC' => 'b'});
+my $sorted_by_b = $b->sort_result($befor, { 'ASC' => 'b'});
 is_deeply($sorted_by_b, $sorted_by_b_exp, 'sort by colum b');
 
-my $sorted_by_c = $b->_sort($befor, { 'ASC' => 'c'});
+my $sorted_by_c = $b->sort_result($befor, { 'ASC' => 'c'});
 is_deeply($sorted_by_c, $sorted_by_c_exp, 'sort by colum c');
 
-my $sorted_by_ba = $b->_sort($befor, { 'ASC' => ['b', 'a'] });
+my $sorted_by_ba = $b->sort_result($befor, { 'ASC' => ['b', 'a'] });
 is_deeply($sorted_by_ba, $sorted_by_ba_exp, 'sort by colum b,a');
 
-my $sorted_by_ba_reverse = $b->_sort($befor, { 'DESC' => ['b', 'a'] });
+my $sorted_by_ba_reverse = $b->sort_result($befor, { 'DESC' => ['b', 'a'] });
 my @sorted_by_ba_exp_reverse = reverse @{$sorted_by_ba_exp};
 is_deeply($sorted_by_ba_reverse, \@sorted_by_ba_exp_reverse, 'sort by colum b,a reverse');
 
-my $sorted_by_abc = $b->_sort($befor, { 'ASC' => ['a','b','c'] });
+my $sorted_by_abc = $b->sort_result($befor, { 'ASC' => ['a','b','c'] });
 is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
 
 #########################
@@ -112,7 +112,7 @@ my $befor_case = [
   {a => 'aaAY', b => 1},
   {a => 'aaaX', b => 1},
 ];
-my $sorted_case = $b->_sort($befor_case, { 'ASC' => ['a','b'] });
+my $sorted_case = $b->sort_result($befor_case, { 'ASC' => ['a','b'] });
 is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
 
 #########################

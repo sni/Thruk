@@ -46,8 +46,8 @@ my $timepattern = [
 
 for(my $i = 0; $i < scalar @{$timepattern}; $i += 2) {
     my($pattern,$ts) = ($timepattern->[$i], $timepattern->[$i+1]);
-    my $parsed = Thruk::Utils::_parse_date($c, $pattern);
+    my $parsed = Thruk::Utils::parse_date(undef, $pattern);
     # round to 10 seconds to avoid failed tests on slow ci vms
-    ok(abs($parsed - $ts) < 10, sprintf("_parse_date returns correct timestamp for '%s' -> %s vs. %s", $pattern, $ts, ($parsed//"undef")))
-        || diag(sprintf("_parse_date returned:\n%s (expected)\n%s (got)\n", $ts, ($parsed//"undef")));
+    ok(abs($parsed - $ts) < 10, sprintf("parse_date returns correct timestamp for '%s' -> %s vs. %s", $pattern, $ts, ($parsed//"undef")))
+        || diag(sprintf("parse_date returned:\n%s (expected)\n%s (got)\n", $ts, ($parsed//"undef")));
 }
