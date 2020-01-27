@@ -2786,7 +2786,7 @@ sub _task_dashboard_save_states {
     }
     my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $nr);
     Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
-    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for `last_used`
+    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for last_used
 
     my $json = { 'status' => 'ok' };
     _add_misc_details($c, undef, $json);
@@ -3482,7 +3482,7 @@ sub _save_dashboard {
 
     Thruk::Utils::write_data_file($file, $dashboard, 1);
     Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
-    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for `last_used`
+    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for last_used
     Thruk::Utils::backup_data_file($c->{'panorama_etc'}.'/'.$nr.'.tab', $c->{'panorama_var'}.'/'.$nr.'.tab', 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'pantab_'.$nr;
