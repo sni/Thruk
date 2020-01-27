@@ -578,6 +578,13 @@ sub set_default_config {
         'logcache_delta_updates'            => 0,
         'slow_page_log_threshold'           => 15,
         'resource_file'                     => [],
+        'default_state_order'               => 'down, unreachable,'
+                                              .'unknown, critical, warning,'
+                                              .'acknowledged_down, acknowledged_unreachable,'
+                                              .'acknowledged_unknown, acknowledged_critical, acknowledged_warning,'
+                                              .'downtime_down, downtime_unreachable,'
+                                              .'downtime_unknown, downtime_critical, downtime_warning, downtime_up, downtime_ok,'
+                                              .'up, ok, downtime_pending, pending',
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};

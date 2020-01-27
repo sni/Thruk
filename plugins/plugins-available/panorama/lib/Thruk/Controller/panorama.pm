@@ -363,7 +363,7 @@ sub _js {
 
     $c->stash->{default_maintenance_text} = $c->config->{'Thruk::Plugin::Panorama'}->{'default_maintenance_text'} || '';
 
-    my $default_state_order = $c->config->{'Thruk::Plugin::Panorama'}->{'default_state_order'};
+    my $default_state_order = $c->config->{'Thruk::Plugin::Panorama'}->{'default_state_order'} // $c->config->{'default_state_order'};
     $c->stash->{default_state_order} = [split(/\s*,\s*/mx, $default_state_order)];
 
     unless($only_data) {

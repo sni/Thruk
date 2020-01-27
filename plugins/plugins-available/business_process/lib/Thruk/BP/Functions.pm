@@ -52,7 +52,7 @@ sub status {
                         status                   => ($bp->{'state_type'} eq 'hard' && $s->{'state_type'} != 1) ? $s->{'last_hard_state'} : $s->{'state'},
                         status_text              => $s->{'plugin_output'},
                         acknowledged             => $s->{'acknowledged'},
-                        scheduled_downtime_depth => $s->{'scheduled_downtime_depth'},
+                        scheduled_downtime_depth => $s->{'scheduled_downtime_depth'} ? 1 : 0,
                         last_state_change        => ($bp->{'state_type'} eq 'hard' && $s->{'state_type'} != 1) ? $s->{'last_hard_state_change'} : $s->{'last_state_change'},
                     };
                 }
@@ -233,17 +233,13 @@ returns worst state of all dependent nodes
 =cut
 sub worst {
     my($c, $bp, $n) = @_;
-    my $states = _get_nodes_grouped_by_state($n, $bp);
-    if(scalar keys %{$states} == 0) {
+    my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($n->depends($bp), $bp, "worst");
+    if(!$nodes) {
         return(3, 'no dependent nodes');
     }
-    my @sorted = reverse sort keys %{$states};
-    my $state  = $sorted[0];
-    my $extra  = _get_nodes_extra($states->{$state}, "worst");
-    $state = 0 if $state == -1;
     return($state,
            'worst of',
-            Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state),
+            Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
            $extra,
     );
 }
@@ -259,17 +255,13 @@ returns best state of all dependent nodes
 =cut
 sub best {
     my($c, $bp, $n) = @_;
-    my $states = _get_nodes_grouped_by_state($n, $bp);
-    if(scalar keys %{$states} == 0) {
+    my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($n->depends($bp), $bp, "best");
+    if(!$nodes) {
         return(3, 'no dependent nodes');
     }
-    my @sorted = sort keys %{$states};
-    my $state  = $sorted[0];
-    my $extra  = _get_nodes_extra($states->{$state}, "worst");
-    $state = 0 if $state == -1;
     return($state,
            'best of',
-            Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}, $state),
+            Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
            $extra,
     );
 }
@@ -681,20 +673,6 @@ sub custom {
 }
 
 ##########################################################
-sub _get_nodes_grouped_by_state {
-    my($n, $bp) = @_;
-    my $states  = {};
-    my $depends = ref $n eq 'HASH' ? $n->{'depends'} : $n->depends($bp);
-    for my $d (@{$depends}) {
-        my $state = defined $d->{'status'} ? $d->{'status'} : 4;
-        $state = -1 if $state == 4; # make sorting easier
-        $states->{$state} = [] unless defined $states->{$state};
-        push @{$states->{$state}}, $d;
-    }
-    return($states);
-}
-
-##########################################################
 sub _count_good_bad {
     my($depends) = @_;
     my($good, $bad) = (0,0);
@@ -732,6 +710,9 @@ sub _get_nodes_extra {
                 }
             }
         }
+    }
+    if($extra->{'scheduled_downtime_depth'}) {
+        $extra->{'scheduled_downtime_depth'} = 1;
     }
     return($extra);
 }

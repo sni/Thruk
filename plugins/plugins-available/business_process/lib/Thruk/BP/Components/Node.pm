@@ -339,7 +339,7 @@ sub set_status {
 
     my $last_state    = $self->{'status'}                   // 4;
     my $last_ack      = $self->{'acknowledged'}             // 0;
-    my $last_downtime = $self->{'scheduled_downtime_depth'} // 0;
+    my $last_downtime = $self->{'scheduled_downtime_depth'} ? 1 : 0;
 
     # update last check time
     my $now = time();
@@ -360,6 +360,7 @@ sub set_status {
     for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged testmode/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
     }
+    $self->{'scheduled_downtime_depth'} = $self->{'scheduled_downtime_depth'} ? 1 : 0; # should be 0/1 only
 
     if($last_state != $state || $last_ack != $self->{'acknowledged'} || $last_downtime != $self->{'scheduled_downtime_depth'}) {
         $self->{'last_state_change'} = $now;
@@ -375,18 +376,20 @@ sub set_status {
     if($bp and scalar @{$self->{'parents'}} == 0) {
         my $text = $self->{'status_text'};
         if(scalar @{$self->{'depends'}} > 0 and $self->{'function'} ne 'custom') {
-            my $sum = Thruk::BP::Functions::_get_nodes_grouped_by_state($self, $bp);
-            if($sum->{'3'} && $self->{'status'} == 3) {
-                $text = Thruk::BP::Utils::join_labels($sum->{'3'}).' unknown';
+            # try a lucky guess on our child nodes and search for those which have our status
+            my $nodes = [];
+            for my $n (@{$self->{'depends'}}) {
+                if($n->{'status'} == $self->{'status'} && $n->{'acknowledged'} == $self->{'acknowledged'} && $n->{'scheduled_downtime_depth'} == $self->{'scheduled_downtime_depth'}) {
+                    push @{$nodes}, $n;
+                }
             }
-            elsif($sum->{'2'} && $self->{'status'} == 2) {
-                $text = Thruk::BP::Utils::join_labels($sum->{'2'}).' failed';
-            }
-            elsif($sum->{'1'} && $self->{'status'} == 1) {
-                $text = Thruk::BP::Utils::join_labels($sum->{'1'}).' warning';
-            }
-            elsif($sum->{'0'} && $self->{'status'} == 0) {
+            # found some
+            if($self->{'status'} == 0) {
                 $text = 'everything is fine';
+            }
+            elsif(scalar @{$nodes} > 0) {
+                my $first = $nodes->[0];
+                $text = Thruk::BP::Utils::join_labels($nodes).' '.lc(Thruk::BP::Utils::state2text($first->{'status'}));
             }
             $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
         }

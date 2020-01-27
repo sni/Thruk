@@ -105,6 +105,13 @@ sub new {
 
     confess("status_text cannot be empty") unless defined $self->{'status_text'};
 
+    our $default_state_order;
+    if(!$default_state_order) {
+        $default_state_order = $c->config->{'Thruk::Plugin::BP'}->{'default_state_order'} // $c->config->{'default_state_order'};
+        $default_state_order = [split(/\s*,\s*/mx, $default_state_order)];
+    }
+    $self->{'default_state_order'} = $default_state_order;
+
     return $self;
 }
 

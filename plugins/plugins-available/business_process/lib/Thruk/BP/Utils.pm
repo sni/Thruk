@@ -731,4 +731,51 @@ sub _get_sorted_keys {
 
 ##########################################################
 
+=head2 get_nodes_grouped_by_state
+
+    get_nodes_grouped_by_state($nodes, $bp)
+
+return nodes grouped by state, downtime and acknowledged
+
+=cut
+sub get_nodes_grouped_by_state {
+    my($nodes, $bp, $aggregation) = @_;
+
+    my $groups = {};
+    for my $n (@{$nodes}) {
+        my $key = lc(state2text($n->{'status'}));
+        if($n->{'acknowledged'}) {
+            $key = 'acknowledged_'.$key;
+        }
+        elsif($n->{'scheduled_downtime_depth'}) {
+            $key = 'downtime_'.$key;
+        }
+        $groups->{$key} = [] unless defined $groups->{$key};
+        push @{$groups->{$key}}, $n;
+    }
+
+    my $order;
+    if($aggregation eq 'worst') {
+        $order = $bp->{'default_state_order'};
+    } elsif($aggregation eq 'best') {
+        $order = [reverse @{$bp->{'default_state_order'}}];
+    } else {
+        die("unknown aggregation: ".$aggregation);
+    }
+
+    for my $state (@{$order}) {
+        if($groups->{$state}) {
+            my $first = $groups->{$state}->[0];
+            my $extra = {
+                'acknowledged'             => $first->{'acknowledged'} // 0,
+                'scheduled_downtime_depth' => $first->{'scheduled_downtime_depth'} // 0,
+            };
+            return($first->{'status'}, $groups->{$state}, $extra);
+        }
+    }
+
+    # nothing found
+    return(3, [], {});
+}
+
 1;

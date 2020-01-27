@@ -961,8 +961,6 @@ ex.:
 
   default_service_columns = host_name,description,state,last_check,duration,current_attempt,plugin_output
 
-
-
 === show_backends_in_table
 Display the backend/site name in the status table.
 This is useful if you have same hosts or services on different
@@ -1118,6 +1116,21 @@ ex.:
 === useragentcompat
 If set, a Internet Explorer (IE) compatibility header will be added to the html
 header.
+
+
+=== default_state_order
+Defines the order to determine the worst/best states. Used in business processes
+and the panorama dashboard. Can be overriden in those plugins.
+
+ex.:
+
+  default_state_order = down, unreachable, \
+                        unknown, critical, warning, \
+                        acknowledged_down, acknowledged_unreachable, \
+                        acknowledged_unknown, acknowledged_critical, acknowledged_warning, \
+                        downtime_down, downtime_unreachable, \
+                        downtime_unknown, downtime_critical, downtime_warning, downtime_up, downtime_ok, \
+                        up, ok, downtime_pending, pending
 
 
 === shown_inline_pnp
@@ -2510,7 +2523,8 @@ situations when more than one Thruk installation has to create dashboards in
 the same folder.
 
 === default_state_order
-Defines the order to determine the worst state for filter and group icons.
+Defines the order to determine the worst state for filter and group icons. Use
+this to override the global `default_state_order`.
 
 === default_maintenance_text
 Sets the default text when setting dashboards into maintenance mode. You can use html to format the text.
@@ -2680,6 +2694,7 @@ Configuration Example:
     #favorite_custom_function = echo ; echo_function
     #worker                = 5
     #default_filter        = add_recursive_output_filter
+    #default_state_order   = down, unreachable, ...
     read_only              = 0
   </Component>
 
@@ -2742,6 +2757,10 @@ Automatic bp calculations will be disabled if set to zero.
 
 === default_filter
 Add global filter to all business processes, can be set multiple times.
+
+=== default_state_order
+Defines the order to determine the worst state for worst/best aggregations. Use
+this to override the global `default_state_order`.
 
 === read_only
 Make all bp related pages readonly.
