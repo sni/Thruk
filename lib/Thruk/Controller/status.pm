@@ -954,7 +954,7 @@ sub _process_summary_page {
     # create a hash of all services
     my $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                                  columns => [ qw/description state host_name acknowledged has_been_checked
-                                                                 host_state host_has_been_checked host_acknowledged host_scheduled_downtime_depth host_checks_enabled host_groups
+                                                                 host_state host_has_been_checked host_acknowledged host_scheduled_downtime_depth host_checks_enabled host_groups host_check_type
                                                                  checks_enabled check_type scheduled_downtime_depth groups/ ],
                                                 );
 
