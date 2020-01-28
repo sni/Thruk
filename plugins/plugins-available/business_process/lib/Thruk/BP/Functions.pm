@@ -233,7 +233,8 @@ returns worst state of all dependent nodes
 =cut
 sub worst {
     my($c, $bp, $n) = @_;
-    my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($n->depends($bp), $bp, "worst");
+    my $depends = ref $n eq 'HASH' ? $n->{'depends'} : $n->depends($bp);
+    my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($depends, $bp, "worst");
     if(!$nodes) {
         return(3, 'no dependent nodes');
     }
@@ -255,7 +256,8 @@ returns best state of all dependent nodes
 =cut
 sub best {
     my($c, $bp, $n) = @_;
-    my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($n->depends($bp), $bp, "best");
+    my $depends = ref $n eq 'HASH' ? $n->{'depends'} : $n->depends($bp);
+    my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($depends, $bp, "best");
     if(!$nodes) {
         return(3, 'no dependent nodes');
     }
