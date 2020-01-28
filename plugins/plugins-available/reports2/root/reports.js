@@ -82,21 +82,21 @@ function reports_view(typ) {
 
     // show owner column?
     if(typ == 'all' || typ == 'public') {
-        jQuery('#reports_table .usercol').each(function(nr, el) {
+        jQuery('#statusTable .usercol').each(function(nr, el) {
             showElement(el);
         });
     } else {
-        jQuery('#reports_table .usercol').each(function(nr, el) {
+        jQuery('#statusTable .usercol').each(function(nr, el) {
             hideElement(el);
         });
     }
 
     if(typ == 'all') {
-        jQuery('#reports_table TR').each(function(nr, el) {
+        jQuery('#statusTable TR').each(function(nr, el) {
             jQuery(el).removeClass('tab_hidden');
         });
     } else {
-        jQuery('#reports_table TR').each(function(nr, el) {
+        jQuery('#statusTable TR').each(function(nr, el) {
             if(nr > 0) {
                 if(jQuery(el).hasClass(typ)) {
                     jQuery(el).removeClass('tab_hidden');
