@@ -388,7 +388,7 @@ After object configuration changes, use the following sequence of steps (similar
 1) GET /config/diff
 
    a) At this point you can revert the changes by using POST /config/revert
-   
+
 2) POST /config/save
 
 3) POST /config/check
