@@ -18,7 +18,10 @@ done_testing();
 sub check_private_subs {
     my($file) = @_;
     my $now = time();
+
     return if $file =~ m|/lib/Monitoring/|mx;
+    return if $file =~ m|script/phantomjs|mx;
+
     ok($file, $file);
     my $content = read_file($file);
     $content =~ s/^=head.*?^=cut//smgx;
