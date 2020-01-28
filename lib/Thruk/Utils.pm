@@ -3572,6 +3572,7 @@ sub looks_like_regex {
 }
 
 ##############################################
+
 =head2 dclone
 
     dclone($obj)
