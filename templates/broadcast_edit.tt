@@ -85,17 +85,21 @@
   </tr>
   [% IF broadcast.frontmatter.keys.size > 0 %]
   <tr class="frontmatter_edit">
-    <td class="dataEven" align="center">
+    <td class="dataEven" align="center" valign="top">
       <b>Variables</b>
       <br>
       <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', ''); jQuery('TR.frontmatter_edit').css('display', 'none')"; return(false); value="raw edit">
     </td>
     <td class="dataOdd" align="left" style="position: relative;">
-      <table style="width: 97%; border-spacing: 0;">
+      <table style="width: 97%; border-spacing: 0;" class="frontmatterlist">
+      <tr style="display: none;" class="firstrow frontmatter_row">
+        <td style="width: 0;" align="right" nowrap><b></b></td>
+        <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="" value="" style="width: 100%;"></td>
+      </tr>
       [% FOREACH f = broadcast.frontmatter.keys.sort %]
-      <tr>
-      <td style="width: 0;" align="right" nowrap><b>[% f %]:</b></td>
-      <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="frontmatter.[% f %]" value="[% broadcast.frontmatter.$f | html %]" style="width: 100%;"></td>
+      <tr class="frontmatter_row" data-name="[% f | html %]">
+        <td style="width: 0;" align="right" nowrap><b>[% f | html %]:</b></td>
+        <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="frontmatter.[% f | html %]" value="[% broadcast.frontmatter.$f | html %]" style="width: 100%;"></td>
       </tr>
       [% END %]
       </table>
@@ -103,11 +107,11 @@
   </tr>
   [% END %]
   <tr class="raw"[% IF broadcast.frontmatter.keys.size > 0 %] style="display: none;"[% END %]>
-    <td class="dataEven" align="center">
+    <td class="dataEven" align="center" valign="top">
       <b>Text</b><span class="required">*</span>
       [% IF broadcast.frontmatter.keys.size > 0 %]
       <br>
-      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', 'none'); jQuery('TR.frontmatter_edit').css('display', '')"; return(false); value="edit variables">
+      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', 'none'); jQuery('TR.frontmatter_edit').css('display', ''); updateVariables(); return(false);" value="edit variables">
       [% END %]
     </td>
     <td class="dataOdd" align="left" style="position: relative;">
@@ -244,6 +248,28 @@ then use later like: {{variable}} and {{another}}</pre>
     }
     text = matches.join("---\n")
     return([text, macros]);
+  }
+
+  function updateVariables() {
+    var val    = jQuery('TEXTAREA[name=text]').val();
+    var macros = extract_frontmatter(val)[1];
+    // remove exceeding variables
+    jQuery("TR.frontmatter_row").each(function(i, e) {
+      var name = e.dataset["name"];
+      if(name != undefined && !macros.hasOwnProperty(name)) {
+        jQuery(e).remove();
+      }
+      delete macros[name];
+    });
+    // add missing
+    for(var key in macros) {
+      // clone first row
+      var first = jQuery("TABLE.frontmatterlist TR.firstrow")[0];
+      var copy  = jQuery(first).clone().css({"display": ""}).data("name", key).attr("data-name", key).removeClass("firstrow");
+      jQuery(copy).find("TD").first().find("B").text(key+":");
+      jQuery(copy).find("INPUT").first().val(macros[key]).attr("name", "frontmatter."+key);
+      jQuery('TABLE.frontmatterlist tr:last').after(copy);
+    }
   }
 
   function chooseTemplate(val) {
