@@ -69,8 +69,9 @@ sub index {
                 Thruk::Utils::Broadcast::process_broadcast($c, $broadcast);
             }
             $broadcast->{'id'} = $broadcast->{'basefile'} || 'new';
-            $c->stash->{template}  = 'broadcast_edit.tt';
-            $c->stash->{broadcast} = $broadcast;
+            $c->stash->{template}     = 'broadcast_edit.tt';
+            $c->stash->{bc_templates} = Thruk::Utils::Broadcast::get_broadcasts($c, 1, undef, undef, 1);
+            $c->stash->{broadcast}    = $broadcast;
             return 1;
         }
         if($action eq 'delete') {

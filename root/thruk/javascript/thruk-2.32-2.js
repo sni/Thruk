@@ -781,6 +781,9 @@ function reloadNav() {
  * Uncaught TypeError: Illegal invocation
  * otherwise. (At least in chrome)
  */
+function redirect_url(url) {
+    return(window_location_replace(url));
+}
 function window_location_replace(url) {
     window.location.replace(url);
 }

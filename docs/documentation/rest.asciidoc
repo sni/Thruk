@@ -1400,6 +1400,7 @@ lists broadcasts
 |hide_before_ts                    | hide_before as unix timestamp
 |loginpage                         | flag wether broadcast should be displayed on the loginpage as well
 |macros                            | hash list of macros
+|name                              | name of this broadcast, mostly used for templates
 |panorama                          | flag wether broadcast should be displayed on panorama dashboards
 |raw_text                          | raw broadcast text
 |template                          | flag wether this broadcast is a template

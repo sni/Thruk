@@ -19,13 +19,13 @@ use warnings;
 
 =head2 get_broadcasts
 
-  get_broadcasts($c, [$unfiltered], [$file], [$panorama_only])
+  get_broadcasts($c, [$unfiltered], [$file], [$panorama_only], [$templates_only])
 
 return list of broadcasts for this contact
 
 =cut
 sub get_broadcasts {
-    my($c, $unfiltered, $filefilter, $panorama_only) = @_;
+    my($c, $unfiltered, $filefilter, $panorama_only, $templates_only) = @_;
     my $list = [];
 
     my $now    = time();
@@ -77,6 +77,7 @@ sub get_broadcasts {
 
         next if($panorama_only && !$broadcast->{'panorama'});
         next if(!$unfiltered && $broadcast->{'template'});
+        next if($templates_only && !$broadcast->{'template'});
 
         $broadcast->{'new'} = 0;
         if(!$unfiltered && !defined $already_read->{$basename}) {
@@ -120,6 +121,7 @@ sub process_broadcast {
         $broadcast->{'hide_before_ts'} = $hide_before_ts;
     }
 
+    $broadcast->{'name'}        = $broadcast->{'name'}          // '';
     $broadcast->{'text'}        = $broadcast->{'text'}          // '';
     $broadcast->{'author'}      = $broadcast->{'author'}        // 'none';
     $broadcast->{'authoremail'} = $broadcast->{'authoremail'}   // 'none';
@@ -137,6 +139,9 @@ sub process_broadcast {
     };
     _set_macros($c, $broadcast);
     _extract_front_matter_macros($broadcast);
+
+    # merge frontmatter intro macros
+    $broadcast->{'macros'} = {%{$broadcast->{'macros'}}, %{$broadcast->{'frontmatter'}}};
 
     return;
 }
@@ -255,6 +260,7 @@ sub get_default_broadcast {
     my $broadcast = {
         author          => $c->stash->{'remote_user'},
         id              => 'new',
+        name            => '',
         text            => '',
         raw_text        => '',
         expires         => '',
@@ -284,6 +290,8 @@ sub _set_macros {
         contact      => $b->{'author'},
         contactemail => $b->{'authoremail'},
         theme        => $c->stash->{'theme'},
+        name         => $b->{'name'},
+        title        => $b->{'name'},
     };
     return;
 }
@@ -324,6 +332,7 @@ return broadcast with updated fields from parameters
 =cut
 sub update_broadcast_from_param {
     my($c, $broadcast) = @_;
+    $broadcast->{'name'}          = $c->req->parameters->{'name'};
     $broadcast->{'author'}        = $c->stash->{'remote_user'};
     $broadcast->{'authoremail'}   = $c->user ? $c->user->{'email'} : 'none';
     $broadcast->{'contacts'}      = Thruk::Utils::extract_list($c->req->parameters->{'contacts'}, '/\s*,\s*/mx');
