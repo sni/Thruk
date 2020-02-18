@@ -292,7 +292,7 @@ sub _set_macros {
 sub _extract_front_matter_macros {
     my($b) = @_;
     $b->{'raw_text'}    = $b->{'text'};
-    $b->{'frontmatter'} = {};
+    $b->{'frontmatter'} = {} unless $b->{'frontmatter'};
     my($tmp, $frontmatter, $text) = split(/^\s*\-\-\-\s*$/mx, $b->{'text'}, 3);
     if($tmp || !$frontmatter) {
         return;
