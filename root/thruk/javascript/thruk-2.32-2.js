@@ -5495,7 +5495,8 @@ function add_new_filter(search_prefix, table) {
   if(lastops.length > 0) {
       jQuery('#'+pane_prefix + search_prefix + nr + '_to')[0].selectedIndex    = jQuery('#'+pane_prefix + search_prefix + lastnr + '_to')[0].selectedIndex;
       jQuery('#'+pane_prefix + search_prefix + nr + '_ts')[0].selectedIndex    = jQuery('#'+pane_prefix + search_prefix + lastnr + '_ts')[0].selectedIndex;
-      jQuery('#'+pane_prefix + search_prefix + nr + '_value')[0].value         = jQuery('#'+pane_prefix + search_prefix + lastnr + '_value')[0].value;
+      // skip setting value, searching for the same thing twice makes no sense so the value is usually replaced anyway
+      //jQuery('#'+pane_prefix + search_prefix + nr + '_value')[0].value         = jQuery('#'+pane_prefix + search_prefix + lastnr + '_value')[0].value;
       jQuery('#'+pane_prefix + search_prefix + nr + '_val_pre')[0].value       = jQuery('#'+pane_prefix + search_prefix + lastnr + '_val_pre')[0].value;
   }
   verify_op(pane_prefix + search_prefix + nr + '_ts');
@@ -6516,6 +6517,26 @@ var ajax_search = {
                 if(!search_url.match(/type=/)) {
                     search_url = search_url + "&type=" + ajax_search.search_type;
                 }
+            }
+        }
+
+        // append host value if there is a host input field in the same form
+        if(search_type == "service" && !append_value_of) {
+            var host;
+            var data = jQuery(input).parents('FORM').serializeArray();
+            for(var i=0; i<data.length; i++){
+                if(data[i].name.match(/_type$/) && data[i].value == "host") {
+                    var valueName = data[i].name.replace(/_type$/, "_value");
+                    for(var j=0; j<data.length; j++){
+                        if(data[j].name == valueName) {
+                            host = data[j].value;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(host != undefined) {
+                search_url = search_url + "&host=" + encodeURIComponent(host);
             }
         }
 

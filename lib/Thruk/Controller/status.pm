@@ -233,7 +233,11 @@ sub _process_raw_request {
         my @hostfilter;
         if(defined $host and $host ne '') {
             for my $h (split(/\s*,\s*/mx, $host)) {
-                push @hostfilter, { 'host_name' => $h };
+                my $op = "=";
+                if(Thruk::Utils::looks_like_regex($h)) {
+                    $op = "~";
+                }
+                push @hostfilter, { 'host_name' => { $op => $h }};
             }
             $additional_filter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
