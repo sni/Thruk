@@ -37,8 +37,8 @@ with the fastcgi version.
 
 === All dates and times are displayed with the wrong timezone
 
-Try to set the use_timezone configuration option in your
-thruk_local.conf
+Set the 'server_timezone' configuration option in your thruk_local.conf.
+See the link:configuration.html#server_timezone[configuration page] for details.
 
 
 
