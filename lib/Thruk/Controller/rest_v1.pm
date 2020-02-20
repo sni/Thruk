@@ -951,6 +951,7 @@ sub _fixup_livestatus_filter {
                         $val = $f.' '.$val;
                         if($f =~ m/^host/mxi) {
                             $f = 'host_custom_variables';
+                            $val =~ s/^HOST//mxi;
                         } else {
                             $f = 'custom_variables';
                         }
