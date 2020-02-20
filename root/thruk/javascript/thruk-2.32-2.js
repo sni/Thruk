@@ -768,7 +768,9 @@ function reloadPage() {
      * and give the browser some time to update refresh buttons
      * and icons
      */
-    window.setTimeout("window_location_replace('"+newUrl+"')", 100);
+    window.setTimeout(function() {
+        window_location_replace(newUrl)
+    }, 100);
 }
 
 function reloadNav() {
