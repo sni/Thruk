@@ -633,6 +633,7 @@ sub escape_js {
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
     $text =~ s/'/&#39;/gmx;
+    $text =~ s/\\/&#92;/gmx;
     return _escape_tags_js($text);
 }
 

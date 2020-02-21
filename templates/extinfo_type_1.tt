@@ -130,9 +130,9 @@
                     [% menu.data %]
                     [% action_menus_inserted.item(menu.data) = 1 %]
                     [% END %]
-                    print_action_menu([% menu.function %], '[% host.peer_key %]', '[% escape_js(host.name) %]', undefined, 'b-l', true);
+                    print_action_menu([% menu.function %], [% json_encode({"backend" => host.peer_key, "host" => host.name, "orientation" => "b-l", "show_title" => true}) %]);
                   [% ELSE %]
-                    print_action_menu([% menu.data %], '[% host.peer_key %]', '[% escape_js(host.name) %]', undefined, 'b-l', true);
+                    print_action_menu([% menu.data %], [% json_encode({"backend" => host.peer_key, "host" => host.name, "orientation" => "b-l", "show_title" => true}) %]);
                   [% END %]
                   </script>
                 [% END %]

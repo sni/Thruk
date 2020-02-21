@@ -3353,7 +3353,12 @@ function hasContactGroup(name) {
 
 /* print the action menu icons and action icons */
 var menu_nr = 0;
-function print_action_menu(src, backend, host, service, orientation, show_title) {
+function print_action_menu(src, options) {
+    var backend     = options.backend;
+    var host        = options.host;
+    var service     = options.service;
+    var orientation = options.orientation;
+    var show_title  = options.show_title;
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
         if(typeof src === "function") {

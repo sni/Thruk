@@ -59,9 +59,9 @@
       [% menu.data %]
       [% action_menus_inserted.item(menu.data) = 1 %]
       [% END %]
-      print_action_menu([% menu.function %], '[% host.peer_key %]', '[% escape_js(host.$host_name) %]', undefined);
+      print_action_menu([% menu.function %], [% json_encode({"backend" => host.peer_key, "host" => host.$host_name}) %]);
     [% ELSE %]
-      print_action_menu([% menu.data %], '[% host.peer_key %]', '[% escape_js(host.$host_name) %]', undefined);
+      print_action_menu([% menu.data %], [% json_encode({"backend" => host.peer_key, "host" => host.$host_name}) %]);
     [% END %]
     </script>
   [% END %]
@@ -123,9 +123,9 @@
         [% menu.data %]
         [% action_menus_inserted.item(menu.data) = 1 %]
         [% END %]
-        print_action_menu([% menu.function %], '[% service.peer_key %]', '[% escape_js(service.host_name) %]', '[% escape_js(service.description) %]');
+        print_action_menu([% menu.function %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "service" => service.description}) %]);
       [% ELSE %]
-        print_action_menu([% menu.data %], '[% service.peer_key %]', '[% escape_js(service.host_name) %]', '[% escape_js(service.description) %]');
+        print_action_menu([% menu.data %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "service" => service.description}) %]);
       [% END %]
       </script>
     [% END %]
