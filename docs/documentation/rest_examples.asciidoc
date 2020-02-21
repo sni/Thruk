@@ -61,6 +61,19 @@ This leaves a single required argument with the downtime comment:
   %> curl -d "comment_data='downtime comment'" http://0:3000/thruk/r/services/<host>/<svc>/cmd/schedule_svc_downtime
 ------
 
+==== Send Any Command
+
+To avoid escaping issues, there is a generic command endpoint `/cmd` which can be used
+to send any command.
+
+------
+    %> curl -H "X-Thruk-Auth-Key: ****" \
+            -d "cmd=acknowledge_svc_problem" \
+            -d "host=hostname" \
+            -d "service=servicedescription" \
+            -d "comment_data=test" \
+          'http://localhost/thruk/r/cmd'
+------
 
 === Grouping
 

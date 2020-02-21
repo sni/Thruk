@@ -22,6 +22,22 @@ Thruk Controller
 =cut
 
 ##########################################################
+# REST PATH: POST /cmd
+# Sends any command.
+#
+# Required arguments:
+#
+#   * cmd
+#
+# Optional arguments:
+#
+#   * host
+#   * hostgroup
+#   * service
+#   * servicegroup
+#   * contact
+#   * contactgroup
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/cmd$%mx, \&_rest_get_external_command);
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(hosts?|hostgroups?|servicegroups?|contacts?|contactgroups?)/([^/]+)/cmd/([^/]+)%mx, \&_rest_get_external_command);
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(services?)/([^/]+)/([^/]+)/cmd/([^/]+)%mx, \&_rest_get_external_command);
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(system|core|)/cmd/([^/]+)%mx,              \&_rest_get_external_command);
@@ -29,6 +45,29 @@ sub _rest_get_external_command {
     my($c, undef, $type, @args) = @_;
     my $cmd_data = get_rest_external_command_data();
     my($cmd, $cmd_name, $name, $description, @cmd_args);
+
+    # support generic commands from /cmd
+    if(!$type) {
+        $cmd_name = $c->req->parameters->{'cmd'};
+        if(!$cmd_name) {
+            return({ 'message' => 'missing argument: cmd', 'description' => 'cmd is a required argument', code => 400 });
+        }
+        unshift(@args, $cmd_name);
+        $type = "system";
+        for my $t (qw/host hostgroup servicegroup contact contactgroup service/) {
+            if($c->req->parameters->{$t}) {
+                $type = $t;
+            }
+        }
+        if(!$c->req->parameters->{$type}) {
+            return({ 'message' => 'missing argument: '.$type, 'description' => $type.' is a required argument', code => 400 });
+        }
+        unshift(@args, $c->req->parameters->{$type});
+        if($type eq 'service') {
+            unshift(@args, $c->req->parameters->{'host'} // '');
+        }
+    }
+
     my $required_fields = {};
     $type =~ s/s$//gmx;
     if($type eq 'core') { $type = 'system'; }

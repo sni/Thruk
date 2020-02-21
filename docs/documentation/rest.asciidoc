@@ -501,6 +501,23 @@ lists host / service check statistics.
 |===========================================
 
 
+=== POST /cmd
+
+Sends any command.
+
+Required arguments:
+
+  * cmd
+
+Optional arguments:
+
+  * host
+  * hostgroup
+  * service
+  * servicegroup
+  * contact
+  * contactgroup
+
 === GET /commands
 
 lists livestatus commands.

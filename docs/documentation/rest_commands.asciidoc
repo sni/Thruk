@@ -56,7 +56,7 @@ Some of the arguments have default values:
   - `end_time`:       defaults to now + downtime_duration from the thruk.conf
 
 
-=== Relative timestamps
+== Relative timestamps
 
 Timestamps, like start_date and end_date can be relative to get more reusable commands.
 
@@ -74,6 +74,20 @@ This will create a 1hour downtime. Other suffixes are:
 
 More time definition examples can be found on the link:timedefinitions.html[time definitions page].
 
+
+== Generic Command Endpoint
+{% include new_since.ad version="2.34" %}
+To avoid escaping issues, there is a generic command endpoint `/cmd` which can be used
+to send any command.
+
+------
+    %> curl -H "X-Thruk-Auth-Key: ****" \
+            -d "cmd=acknowledge_svc_problem" \
+            -d "host=hostname" \
+            -d "service=servicedescription" \
+            -d "comment_data=test" \
+          'http://localhost/thruk/r/cmd'
+------
 
 
 == Example Usage
