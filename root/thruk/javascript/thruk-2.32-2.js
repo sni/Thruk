@@ -3401,7 +3401,7 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
             var scriptTag = document.scripts[document.scripts.length - 1];
             scriptTag.parentNode.appendChild(item);
             if(show_title && el.title) {
-                var title = document.createTextNode(icon.title);
+                var title = document.createTextNode(replace_macros(icon.title));
                 scriptTag.parentNode.appendChild(title);
             }
         });
@@ -3558,7 +3558,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
         span.className = 'icon';
         var img        = document.createElement('img');
         img.src        = replace_macros(el.icon);
-        img.title      = el.title ? el.title : '';
+        img.title      = replace_macros(el.title ? el.title : '');
         span.appendChild(img);
         link.appendChild(span);
     }
@@ -3569,7 +3569,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
         label.innerHTML = el.html;
     } else {
         label = document.createElement('span');
-        label.innerHTML = el.label;
+        label.innerHTML = replace_macros(el.label);
     }
     link.appendChild(label);
 

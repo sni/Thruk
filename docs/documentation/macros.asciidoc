@@ -15,21 +15,26 @@ Host related Macros:
 [options="header"]
 |===========================================================================================================
 | Macro                 | Example                  | Description
-| $HOSTADDRESS$         | 94.185.90.75             | Adress from the host configuration
 | $HOSTNAME$            | www.thruk.org            | Name from the host configuration
 | $HOSTALIAS$           | thruk.org                | Alias from the host configuration
-| $HOSTSTATEID$         | 0                        | Number of the current state. 0 UP, 1 Down, 2 Unreachable
-| $HOSTLATENCY$         | 0.12                     | Latency of last check in seconds
-| $HOSTOUTPUT$          | HTTP - 200 OK...         | Output of last check
-| $HOSTPERFDATA$        | size=100B;200;300;;;     | Performance data from the last check
+| $HOSTADDRESS$         | 94.185.90.75             | Adress from the host configuration
 | $HOSTATTEMPT$         | 1                        | Number of current check attempt
-| $HOSTCHECKCOMMAND$    | check_http!www.thruk.org | Checkcommand used for this host
-| $HOSTSTATE$           | UP                       | State of last check in human readable form
+| $MAXHOSTATTEMPTS$     | 5                        | the configured max_check_attempts value for this host
+| $HOSTBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this host
 | $HOSTBACKENDID$       | abcd                     | Internal id for the backend of this host
 | $HOSTBACKENDNAME$     | Cental-Monitor           | Given name for the backend of this host
-| $HOSTBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this host
-| $HOSTNOTESURL$        | http://example.org       | Notes URL
+| $HOSTCHECKCOMMAND$    | check_http!www.thruk.org | Checkcommand used for this host
+| $HOSTDOWNTIME$        | 1                        | Scheduled downtime level, 0 if no downtime, >= 1 if in downtime
 | $HOSTDURATION$        | 1337                     | Time in seconds since last state change
+| $HOSTLATENCY$         | 0.12                     | Latency of last check in seconds
+| $HOSTNOTES$           | notes text               | contains the configrured notes value for this host
+| $HOSTNOTESURL$        | http://example.org       | Notes URL
+| $HOSTOUTPUT$          | HTTP - 200 OK...         | Output of last check
+| $HOSTPERFDATA$        | size=100B;200;300;;;     | Performance data from the last check
+| $HOSTSTATE$           | UP                       | State of last check in human readable form
+| $HOSTSTATEID$         | 0                        | Number of the current state. 0 UP, 1 Down, 2 Unreachable
+| $HOSTSTATETYPE$       | HARD                     | Either HARD or SOFT
+| $_HOST{CUSTVARS}$     | anything                 | Custom variable value
 |===========================================================================================================
 
 
@@ -41,17 +46,21 @@ Service related Macros:
 |===========================================================================================================
 | Macro                    | Example                  | Description
 | $SERVICEDESC$            | Check Website            | Description from the service configuration
-| $SERVICESTATE$           | 0                        | Number of the current state. 0 OK, 1 WARNING, 2 CRITICAL, 3 UNKNOWN
-| $SERVICELATENCY$         | 0.12                     | Latency of last check in seconds
-| $SERVICEOUTPUT$          | HTTP - 200 OK...         | Output of last check
-| $SERVICEPERFDATA$        | size=100B;200;300;;;     | Performance data from the last check
 | $SERVICEATTEMPT$         | 1                        | Number of current check attempt
-| $SERVICECHECKCOMMAND$    | check_http!www.thruk.org | Checkcommand used for this host
+| $MAXSERVICEATTEMPTS$     | 5                        | the configured max_check_attempts value for this service
+| $SERVICEBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this service
 | $SERVICEBACKENDID$       | abcd                     | Internal id for the backend of this service
 | $SERVICEBACKENDNAME$     | Cental-Monitor           | Given name for the backend of this service
-| $SERVICEBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this service
-| $SERVICENOTESURL$        | http://example.org       | Notes URL
+| $SERVICECHECKCOMMAND$    | check_http!www.thruk.org | Checkcommand used for this host
 | $SERVICEDURATION$        | 1337                     | Time in seconds since last state change
+| $SERVICELATENCY$         | 0.12                     | Latency of last check in seconds
+| $SERVICENOTESURL$        | http://example.org       | Notes URL
+| $SERVICEOUTPUT$          | HTTP - 200 OK...         | Output of last check
+| $SERVICEPERFDATA$        | size=100B;200;300;;;     | Performance data from the last check
+| $SERVICESTATE$           | OK                       | State of last check in human readable form
+| $SERVICESTATEID$         | 0                        | Number of the current state. 0 UP, 1 Down, 2 Unreachable
+| $SERVICESTATETYPE$       | HARD                     | Either HARD or SOFT
+| $_SERVICE{CUSTVARS}$     | anything                 | Custom variable value
 |===========================================================================================================
 
 

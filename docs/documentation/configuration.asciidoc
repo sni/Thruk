@@ -1965,12 +1965,22 @@ The menu item can have the following attributes:
 
 ==== action menu macros
 
-The following macros can be used in the icon url and the link url:
+The following macros can be used in the icon, action, title and label attribute.
 
      ** `{% raw %}{{theme}}{% endraw %}`        contains the current selected user theme
      ** `{% raw %}{{remote_user}}{% endraw %}`  contains the user name itself. (Do not rely on this value, a user can change the url by himself)
      ** `{% raw %}{{prefix}}{% endraw %}`       the url path prefix, ex.: /thruk
      ** `{% raw %}{{site}}{% endraw %}`         the OMD site name.
+
+==== action menu variables
+
+The following variables can be used in the action attribute when specifing a server action or a http(s) url.
+
+     ** `{% raw %}$HOSTNAME${% endraw %}`        contains the host name
+     ** `{% raw %}$HOSTADDRESS${% endraw %}`     contains the host address
+     ** `{% raw %}...{% endraw %}`
+
+and many more. You'll find a complete list of macros on the link:macros.html[macros page].
 
 
 Sample icons with two action icons:

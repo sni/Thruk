@@ -1394,7 +1394,6 @@ sub _set_host_macros {
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
     $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}} : 0;
-    $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
     $macros->{'$HOSTSTATETYPE'}       = (defined $macros->{'$HOSTSTATETYPE'})        ? $macros->{'$HOSTSTATETYPE'} == 1 ? 'HARD' : 'SOFT' : '';
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
