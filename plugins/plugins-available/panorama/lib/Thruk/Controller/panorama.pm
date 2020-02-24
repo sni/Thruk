@@ -2885,7 +2885,7 @@ sub _task_dashboard_list {
 
     my $columns = [
         { 'header' => 'Id',                        dataIndex => 'id',                              hidden => Cpanel::JSON::XS::true },
-        { 'header' => 'Nr',          width => 20,  dataIndex => 'nr', align => 'left' },
+        { 'header' => 'Nr',          width => 60,  dataIndex => 'nr', align => 'left' },
         { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
         { 'header' => 'Name',        width => 130, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
         { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
