@@ -1,15 +1,16 @@
 ---
 - hosts: all
+  roles:
+    - role: common
+    - role: local_tests
+    - role: thruk_developer
   tasks:
   - yum:
       name:
         - mod_auth_kerb
         - krb5-workstation
-        - perl-Test-Harness
       state: present
-  - shell: "sudo su - demo -c 'set_admin_password omd'"
   - shell: "omd config demo set APACHE_MODE own"
-  - shell: "omd config demo set TMPFS off"
   - shell: "omd config demo set THRUK_COOKIE_AUTH sso-support"
   - shell: "omd config demo set GRAFANA on"
   - shell: "omd config demo set INFLUXDB on"
@@ -64,9 +65,6 @@
       group: demo
       mode: 0770
   - shell: "echo '{\"fake\":1,\"hash\":\"none\",\"username\":\"omdadmin\"}' > /omd/sites/demo/var/thruk/sessions/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb; chown demo: /omd/sites/demo/var/thruk/sessions/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
   - name: create krb folder
     file:
       path: /omd/sites/demo/etc/krb

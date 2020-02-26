@@ -1,4 +1,4 @@
-include ../Makefile.common
+include ../_common/Makefile.common
 
 export PLACK_TEST_EXTERNALSERVER_URI = https://127.0.0.3:60443/demo/
 

@@ -1916,6 +1916,12 @@ t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
 t/helper/create_test_logs
 t/perlcriticrc
+t/scenarios/_common/ansible/roles/common/tasks/main.yml
+t/scenarios/_common/ansible/roles/common/vars/main.yml
+t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
+t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml
+t/scenarios/_common/ansible/roles/thruk_developer/vars/main.yml
+t/scenarios/_common/Makefile.common
 t/scenarios/auth/docker-compose.yml
 t/scenarios/auth/Makefile
 t/scenarios/auth/omd/cgi.cfg
@@ -2224,7 +2230,6 @@ t/scenarios/logfile_cache_icinga2_ido_e2e/t/400-postgres.t
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk.conf
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk_local.conf
 t/scenarios/Makefile
-t/scenarios/Makefile.common
 t/scenarios/pentest_arachni/arachni/Dockerfile
 t/scenarios/pentest_arachni/docker-compose.yml
 t/scenarios/pentest_arachni/Makefile

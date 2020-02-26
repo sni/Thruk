@@ -1,5 +1,8 @@
 ---
 - hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
   tasks:
   - shell: omd config demo set APACHE_MODE own
   - copy:
@@ -26,6 +29,3 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
-  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

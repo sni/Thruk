@@ -27,6 +27,7 @@ my $scenarios = [map($_ =~ s/\/\.$//gmx && $_, split/\n/mx, `ls -1d t/scenarios/
 
 for my $dir (@{$scenarios}) {
     next if $filter && $filter ne $dir;
+    next if $dir =~ m/\/_/mx;
     chdir($dir);
     _run($dir, "clean");
     chdir($pwd);
@@ -54,6 +55,8 @@ for my $dir (@{$scenarios}) {
             ok(1, "test case for $dirname exists");
         } elsif($dirname =~ m/^pentest_/mx) {
             ok(1, "no test case for pentests required");
+        } elsif($dirname =~ m/^_/mx) {
+            ok(1, "no test case for common folder required");
         } else {
             fail("missing test case file: ".$filename);
         }

@@ -1,7 +1,9 @@
 ---
 - hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
   tasks:
-  - shell: sudo su - demo -c "set_admin_password omd"
   - shell: omd config demo set APACHE_MODE own
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
   - shell: ln -s /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
@@ -18,6 +20,3 @@
       dest: /omd/sites/demo/etc/thruk/thruk_local.d/
       owner: demo
       group: demo
-  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

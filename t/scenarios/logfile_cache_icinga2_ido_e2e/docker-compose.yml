@@ -8,6 +8,8 @@ services:
         - "127.0.0.3:60443:443"
         - "127.0.0.3:60557:6557"
         - "127.0.0.3:60306:3306"
+    volumes:
+        - ../../../:/thruk:ro
   mysqldb:
      image: mysql:5
      restart: always

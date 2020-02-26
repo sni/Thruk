@@ -1,7 +1,8 @@
 ---
 - hosts: all
+  roles:
+    - role: common
   tasks:
-  - shell: sudo su - demo -c "set_admin_password omd"
   - yum:
       name:
       - postgresql

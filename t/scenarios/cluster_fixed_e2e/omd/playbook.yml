@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  roles:
+    - role: common
   tasks:
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set PNP4NAGIOS off

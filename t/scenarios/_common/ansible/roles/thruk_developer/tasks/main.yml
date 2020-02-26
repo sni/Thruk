@@ -1,0 +1,11 @@
+- yum:
+    name:
+      - perl-ExtUtils-Manifest
+      - perl-ExtUtils-Install
+      - git-core
+    state: present
+- shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"
+- shell: "sudo su - {{ site }} -c 'cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git'"
+  args:
+    creates: "/omd/sites/{{ site }}/local/share/omd_utils"
+- shell: "sudo su - {{ site }} -c 'yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk'"

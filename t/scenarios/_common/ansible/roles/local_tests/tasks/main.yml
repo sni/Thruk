@@ -1,0 +1,6 @@
+- yum:
+    name:
+      - perl-Test-Harness
+      - perl-ExtUtils-Manifest
+      - perl-ExtUtils-Install
+    state: present

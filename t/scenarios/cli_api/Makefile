@@ -1,4 +1,4 @@
-include ../Makefile.common
+include ../_common/Makefile.common
 
 test:
 	@echo "### $@: $$(date "+%FT%T.%N")"

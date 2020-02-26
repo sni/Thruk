@@ -1,4 +1,4 @@
-include ../Makefile.common
+include ../_common/Makefile.common
 
 extra_wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \

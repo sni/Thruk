@@ -1,6 +1,6 @@
 export TEST_MYSQL=mysql://thruk:thruk@127.0.0.3:63306/thruk
 
-include ../Makefile.common
+include ../_common/Makefile.common
 
 extra_wait_start:
 	for x in $$(seq 120); do \

@@ -1,4 +1,4 @@
-include ../Makefile.common
+include ../_common/Makefile.common
 
 export THRUK_TEST_AUTH               = omdadmin:omd
 export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/

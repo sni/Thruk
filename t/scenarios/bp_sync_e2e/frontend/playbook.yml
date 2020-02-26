@@ -1,5 +1,8 @@
 ---
 - hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
   tasks:
   - shell: "/usr/sbin/sshd-keygen"
   - shell: "/usr/sbin/sshd"
@@ -15,8 +18,6 @@
   - shell: "cp -p /omd/sites/demo/.ssh/config /mnt/shared/.ssh"
   - shell: "chown -R demo: /mnt/shared/"
   - shell: "echo 'demo' | passwd --stdin demo"
-  - shell: "sudo su - demo -c 'set_admin_password omd'"
-  - shell: "omd config demo set TMPFS off"
   - shell: "omd config demo set CORE none"
   - shell: "omd config demo set APACHE_MODE own"
   - shell: "omd config demo set GRAFANA on"
@@ -38,7 +39,4 @@
       mode: 0600
       owner: demo
       group: demo
-  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
   - shell: sudo su - demo -c "sed -e 's/^#use_/use_/' -i etc/thruk/thruk_local.d/lmd.conf"

@@ -1,7 +1,9 @@
 ---
 - hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
   tasks:
-  - shell: sudo su - demo -c "set_admin_password omd"
   - yum:
       name:
         - mod_ldap
@@ -55,6 +57,3 @@
      state: present
      regexp: '^cookie_auth_login_hook'
      line: 'cookie_auth_login_hook = date >> /omd/sites/demo/tmp/hook.log'
-  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"

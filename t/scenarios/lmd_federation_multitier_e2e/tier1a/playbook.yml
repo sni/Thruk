@@ -1,12 +1,10 @@
 ---
 - hosts: all
+  roles:
+    - role: common
+    - role: local_tests
+    - role: thruk_developer
   tasks:
-  - yum:
-      name:
-        - perl-Test-Harness
-      state: present
-  - shell: "sudo su - demo -c 'set_admin_password omd'"
-  - shell: "omd config demo set TMPFS off"
   - shell: "omd config demo set MYSQL on"
   - shell: "omd config demo set THRUK_LOGCACHE on"
   - copy:
@@ -26,9 +24,6 @@
       mode: 0600
       owner: demo
       group: demo
-  - shell: sudo su - demo -c "cpanm -n File::ChangeNotify"
-  - shell: sudo su - demo -c "cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git"
-  - shell: sudo su - demo -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
   - copy:
       src: "/root/1.tbp"
       dest: "/omd/sites/demo/etc/thruk/bp/1.tbp"

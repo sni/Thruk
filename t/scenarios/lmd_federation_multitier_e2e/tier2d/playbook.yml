@@ -1,8 +1,8 @@
 ---
 - hosts: all
+  roles:
+    - role: common
   tasks:
-  - shell: "sudo su - demo -c 'set_admin_password omd'"
-  - shell: "omd config demo set TMPFS off"
   - shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - copy:
       src: "/root/thruk_local.conf"

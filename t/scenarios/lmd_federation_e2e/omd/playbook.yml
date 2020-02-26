@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  roles:
+    - role: common
   tasks:
 # demo site, directly connected
   - shell: "omd config demo set LIVESTATUS_TCP on"
@@ -9,12 +11,14 @@
     with_items: ['demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
     args:
       creates: "/omd/sites/{{item}}"
-  - shell: "sudo su - {{item}} -c 'set_admin_password omd'"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
+  - name: apply common role for site
+    include_role:
+      name: common
+    vars:
+      site: "{{ item }}"
+    with_items: ['demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
   - shell: "omd stop {{item}}"
     with_items: ['demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
-  - shell: "omd config {{item}} set TMPFS off"
-    with_items: ['demo', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7']
   - copy:
       src: "/omd/sites/{{item}}/share/doc/naemon/example.cfg"
       dest: "/omd/sites/{{item}}/etc/naemon/conf.d/example.cfg"
@@ -34,7 +38,6 @@
       dest: "/omd/sites/demo2/etc/thruk/thruk_local.conf"
       owner: "demo2"
       group: "demo2"
-  #- shell: sed -e "s/id\ *=\s*/id    = {{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo2/etc/thruk/thruk_local.conf
   - lineinfile:
      path: "/omd/sites/demo2/etc/thruk/lmd.ini"
      state: present
@@ -46,9 +49,6 @@
       mode: 0600
       owner: demo2
       group: demo2
-#  - shell: sudo su - demo2 -c "cpanm -n File::ChangeNotify"
-#  - shell: sudo su - demo2 -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
-#  - shell: sudo su - demo2 -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
 
 # demo 3 site
   - shell: "omd config demo3 set LIVESTATUS_TCP on"
@@ -77,10 +77,6 @@
       mode: 0600
       owner: demo5
       group: demo5
-  #- shell: sudo su - demo5 -c "cpanm -n File::ChangeNotify"
-  #- shell: sudo su - demo5 -c "cd ~/local/share && git clone git://github.com/sni/omd_utils.git"
-  #- shell: sudo su - demo5 -c "yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk"
-
 
 # demo 6 site
   - shell: "omd config demo6 set LIVESTATUS_TCP on"

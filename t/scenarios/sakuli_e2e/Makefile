@@ -1,4 +1,4 @@
-include ../Makefile.common
+include ../_common/Makefile.common
 
 wait_start:
 	-mkdir -p _run

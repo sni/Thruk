@@ -1,7 +1,13 @@
 ---
 - hosts: all
+  roles:
+    - role: common
   tasks:
-  - shell: sudo su - demo -c "set_admin_password omd"
+  - yum:
+      name:
+        - boost-atomic
+        - boost-chrono
+      state: present
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga2
   - shell: omd config demo set LIVESTATUS_TCP on

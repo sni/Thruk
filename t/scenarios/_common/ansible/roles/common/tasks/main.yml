@@ -1,0 +1,2 @@
+- shell: "sudo su - {{ site }} -c 'set_admin_password omd'"
+- shell: "omd config {{ site }} set TMPFS off"
