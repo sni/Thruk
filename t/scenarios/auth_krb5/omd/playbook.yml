@@ -7,7 +7,7 @@
   tasks:
   - yum:
       name:
-        - mod_auth_kerb
+        - mod_auth_gssapi
         - krb5-workstation
       state: present
   - shell: "omd config demo set APACHE_MODE own"
