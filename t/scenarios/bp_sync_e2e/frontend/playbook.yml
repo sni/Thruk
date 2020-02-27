@@ -3,9 +3,8 @@
   roles:
     - role: common
     - role: thruk_developer
+    - role: service_sshd
   tasks:
-  - shell: "/usr/sbin/sshd-keygen"
-  - shell: "/usr/sbin/sshd"
   - shell: "chown demo: /mnt/shared/"
   - shell: sudo su - demo -c "mkdir .ssh && chmod 700 .ssh && ssh-keygen -t rsa -f .ssh/id_rsa -N '' && cp .ssh/id_rsa.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys && cp -rp .ssh /mnt/shared/"
   - name: Copy commit ref to file

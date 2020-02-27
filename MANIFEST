@@ -1919,6 +1919,7 @@ t/perlcriticrc
 t/scenarios/_common/ansible/roles/common/tasks/main.yml
 t/scenarios/_common/ansible/roles/common/vars/main.yml
 t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
+t/scenarios/_common/ansible/roles/service_sshd/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/vars/main.yml
 t/scenarios/_common/Makefile.common
