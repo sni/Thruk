@@ -466,12 +466,7 @@ sub _get_filter {
         $op = $op_translation_words->{$op} if $op_translation_words->{$op};
         for my $val (@vals) {
             # expand relative time filter for some operators
-            if($val =~ m/^\-?\d+\w{1}$/mxo && $op =~ m%^(>|<|>=|<=)$%mx) {
-                my $duration = Thruk::Utils::expand_duration($val);
-                if($duration ne $val) {
-                    $val = time() + $duration;
-                }
-            }
+            $val = Thruk::Utils::expand_relative_timefilter($key, $op, $val);
             push @{$filter}, { $key => { $op =>  $val }};
         }
     }

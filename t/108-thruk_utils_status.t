@@ -3,8 +3,9 @@ use warnings;
 use utf8;
 use Test::More;
 
-plan tests => 19;
+plan tests => 23;
 
+use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Status');
 use_ok('Monitoring::Livestatus::Class::Lite');
 
@@ -26,6 +27,9 @@ _test_filter("host_name = \"test\" or host_name = \"localhost\" and status = 0",
 _test_filter(' name ~~  "test"  ', 'Filter: name ~~ test');
 _test_filter('host = "localhost" AND time > 1 AND time < 10', "Filter: host = localhost\nFilter: time > 1\nFilter: time < 10\nAnd: 3");
 _test_filter('host = "localhost" AND (time > 1 AND time < 10)', "Filter: host = localhost\nFilter: time > 1\nFilter: time < 10\nAnd: 2");
+_test_filter('last_check <= "-7d"', 'Filter: last_check <= '.(time() - 86400*7));
+_test_filter('last_check <= "now + 2h"', 'Filter: last_check <= '.(time() + 7200));
+_test_filter('last_check <= "lastyear"', 'Filter: last_check <= '.Thruk::Utils::_expand_timestring("lastyear"));
 
 sub _test_filter {
     my($filter, $expect) = @_;

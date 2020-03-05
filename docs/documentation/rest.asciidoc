@@ -220,6 +220,15 @@ If you need `***` in the query itself, any other three characters will do as wel
   %> thruk r '/notifications?q=///message = "test" or name = "other"///
 ------
 
+Lexical filter can use the same time expands as normal filter:
+
+------
+  %> thruk r '/services?q=***last_check <= "-7d"***'
+------
+
+This will translate to a filter, selecting all services having a `last_check` date
+lower than `now - 7 days`. Note the quotes around the value.
+
 
 == Sorting
 
@@ -1777,4 +1786,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

@@ -3255,6 +3255,31 @@ sub _expand_timestring {
 
 ########################################
 
+=head2 expand_relative_timefilter
+
+    expand_relative_timefilter($string)
+
+returns expanded timefilter value
+
+=cut
+sub expand_relative_timefilter {
+    my($key, $op, $val) = @_;
+    # expand relative time filter for some operators
+    if($op =~ m%^(>|<|>=|<=)$%mx) {
+        if($val =~ m/^\-?\d+\w{1}$/mxo) {
+            my $duration = expand_duration($val);
+            if($duration ne $val) {
+                $val = time() + $duration;
+            }
+        } elsif($val =~ m/(today|now|yesterday)/mxo || $val =~ m/(this|last|next)(week|day|month|year)/mxo) {
+            $val = _parse_date($val);
+        }
+    }
+    return($val);
+}
+
+########################################
+
 =head2 convert_wildcards_to_regex
 
     convert_wildcards_to_regex($string)

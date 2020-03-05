@@ -12,6 +12,7 @@ Status Utilities Collection for Thruk
 
 use strict;
 use warnings;
+use Thruk::Utils;
 use Carp qw/confess/;
 use URI::Escape qw/uri_unescape/;
 
@@ -2517,6 +2518,8 @@ sub parse_lexical_filter {
                 $val = $token;
                 if(substr($val, 0, 1) eq '"') { $val = substr($val, 1, -1); }
                 if(substr($val, 0, 1) eq "'") { $val = substr($val, 1, -1); }
+                # expand relative time filter for some operators
+                $val = Thruk::Utils::expand_relative_timefilter($key, $op, $val);
                 push @{$filter}, { $key => { $op => $val } };
                 undef $key;
                 undef $op;
