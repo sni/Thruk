@@ -31,6 +31,7 @@ services:
         - PREFIX=tier1b
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
     networks:
       test.local:
         aliases:
@@ -47,6 +48,7 @@ services:
         - PREFIX=tier1c
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
     networks:
       test.local:
         aliases:
@@ -92,6 +94,7 @@ services:
         - PREFIX=tier2b
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
     networks:
       test.local:
         aliases:
@@ -119,6 +122,7 @@ services:
         - PREFIX=tier2d
     volumes:
         - .:/scenario:ro
+        - ../../../:/thruk:ro
     networks:
       test.local:
         aliases:
