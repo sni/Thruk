@@ -176,7 +176,11 @@ sub index {
                     if($userdata->{'login'}->{'failed'} >= $c->config->{cookie_auth_disable_after_failed_logins}) {
                         $userdata->{'login'}->{'locked'} = 1;
                     }
-                    Thruk::Utils::store_user_data($c, $userdata, $login);
+
+                    # only update user data if already exist, otherwise we would end up with a new file for each failed login
+                    my $file = $c->config->{'var_path'}."/users/".$login;
+                    Thruk::Utils::store_user_data($c, $userdata, $login) if -s $file;
+
                     if($userdata->{'login'}->{'locked'}) {
                         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
                     }
