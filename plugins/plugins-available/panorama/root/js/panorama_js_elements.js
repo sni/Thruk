@@ -588,11 +588,12 @@ Ext.define('Ext.ux.SearchStore', {
                 query:   operation.params ? operation.params.query : '',
                 pre_val: store.pre_val
             };
-            if(store.count() > 0 && Object.my_equals(store.lastParam, param) && store.lastLoaded.getTime() > now.getTime() - 120000) {
+            if(store.count() > 0 && Object.my_equals(store.lastParam, param) && Object.my_equals(store.lastExtraParams, store.proxy.extraParams) && store.lastLoaded.getTime() > now.getTime() - 120000) {
                 return false;
             }
             store.lastParam  = param;
             store.lastLoaded = now;
+            store.lastExtraParams = store.proxy.extraParams;
             return true;
         },
         load: function(store, operation, eOpts) {
@@ -662,6 +663,7 @@ Ext.define('Ext.ux.SearchCombobox', {
                 proxy.addParams.host = this.up('form').getForm().getFieldValues().host;
                 if(me.store.lastHost != proxy.addParams.host) {
                     me.store.lastHost = proxy.addParams.host;
+                    doReload = true;
                 }
             }
             if(me.store.search_type != type) {
