@@ -16,6 +16,7 @@ services:
     environment:
         - TZ=Europe/Berlin
     volumes:
+        - ../../../:/thruk:ro
         - shared_var:/mnt/var
   thruk:
     build: thruk/
