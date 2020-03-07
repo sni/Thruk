@@ -32,6 +32,7 @@ services:
         - EXCLUDE_PORTS=22,443,4730,5666
         - OPTION=httpchk HEAD /demo/thruk/cgi-bin/remote.cgi?lb_ping
     volumes:
+        - ../../../:/thruk:ro
         - shared_var:/mnt/var
     networks:
       test.local:
