@@ -7,6 +7,7 @@ use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
 use Thruk::Utils qw//;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 use Carp qw/confess/;
 
 =head1 NAME
@@ -430,6 +431,8 @@ sub get_logs {
         ($fh, $filename) = tempfile();
         open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     }
+
+    _trace($sql) if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 3);
 
     # querys with authorization
     my $data;
