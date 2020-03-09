@@ -56,6 +56,8 @@ use constant {
     MODE_UPDATE         => 2,
 };
 
+@Thruk::Backend::Provider::Mysql::tables = (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/);
+
 ##########################################################
 
 =head2 new
@@ -1435,10 +1437,11 @@ sub _update_logcache_optimize {
         }
         # repair / optimize tables
         print "optimizing / repairing tables\n" if $verbose > 1;
-        for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
+        for my $table (@Thruk::Backend::Provider::Mysql::tables) {
             print $table.'...' if $verbose > 1;
             $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
             $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
+            $dbh->do("ANALYSE TABLE `".$prefix."_".$table.'`');
             print "OK\n" if $verbose > 1;
         }
     }
@@ -2146,7 +2149,7 @@ sub _create_tables {
 ##########################################################
 sub _drop_tables {
     my($dbh, $prefix) = @_;
-    for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
+    for my $table (@Thruk::Backend::Provider::Mysql::tables) {
         $dbh->do("DROP TABLE IF EXISTS `".$prefix."_".$table.'`');
     }
     $dbh->commit or die $dbh->errstr;
