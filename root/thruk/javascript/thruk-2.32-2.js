@@ -176,7 +176,7 @@ function thruk_onerror(msg, url, line, col, error) {
     }
     if(skip) { return; }
     error_count++;
-    var text = getErrorText(thruk_debug_details, error);
+    var text = getErrorText(thruk_debug_details.join("\n"), error);
     if(show_error_reports == "server" || show_error_reports == "both") {
         sendJSError(url_prefix+"cgi-bin/remote.cgi?log", text);
     }
@@ -2321,12 +2321,12 @@ function getErrorText(details, error) {
     text = text + "UserAgent:  " + navigator.userAgent + "\n";
     text = text + "Backends:   ";
     var first = 1;
-    for(var nr=0; nr<initial_backends.length; nr++) {
+    for(var key in initial_backends) {
         if(!first) { text = text + '            '; }
-        text = text + initial_backends[nr].state + ' / ' + initial_backends[nr].version + ' / ' + initial_backends[nr].data_src_version + "\n";
+        text = text + initial_backends[key].state + ' / ' + initial_backends[key].version + ' / ' + initial_backends[key].data_src_version + "\n";
         first = 0;
     }
-    text = text + details;
+    text = text + details + "\n";
     text = text + "Error List:\n";
     for(var nr=0; nr<thruk_errors.length; nr++) {
         text = text + thruk_errors[nr]+"\n";
@@ -2383,23 +2383,6 @@ function getErrorText(details, error) {
         }
     } catch(err) {}
 
-    /* this only works in panorama view */
-    /*
-     *removed... doesn't help much and just fills the logfile
-    try {
-        if(TP.logHistory) {
-            text += "\n";
-            text += "Panorama Log:\n";
-            var formatLogEntry = function(entry) {
-                var date = Ext.Date.format(entry[0], "Y-m-d H:i:s.u");
-                return('['+date+'] '+entry[1]+"\n");
-            }
-            for(var i=TP.logHistory.length-1; i > 0; i--) {
-                text += formatLogEntry(TP.logHistory[i]);
-            }
-        }
-    } catch(err) {}
-    */
     text += "\n";
     return(text);
 }
