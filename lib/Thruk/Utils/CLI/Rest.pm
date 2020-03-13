@@ -67,8 +67,25 @@ sub cmd {
 ##############################################
 sub _fetch_results {
     my($c, $opts) = @_;
+
     for my $opt (@{$opts}) {
         my $url = $opt->{'url'};
+
+        # Support local files and remote urls as well.
+        # But for security reasons only from the command line
+        if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
+            if($url =~ m/^https?:/mx) {
+                my($code, $result) = Thruk::Utils::CLI::request_url($c, $url);
+                $opt->{'result'} = $result->{'result'};
+                $opt->{'rc'}     = $code == 200 ? 0 : 3;
+                next;
+            } elsif(-r $url) {
+                $opt->{'result'} = Thruk::Utils::IO::read($url);
+                $opt->{'rc'}     = 0;
+                next;
+            }
+        }
+
         $url =~ s|^/||gmx;
 
         $c->stats->profile(begin => "_cmd_rest($url)");
