@@ -533,7 +533,7 @@ sub get_action_menu {
         if($sourcefile && $sourcefile =~ m/\.js$/mx) {
             # js file
             $c->stash->{'checked_action_menus'}->{$menu}->{'type'} = 'js';
-            if($c->stash->{'checked_action_menus'}->{$menu}->{'data'} =~ m/function\s+([^\(\s]+)\(/mx) {
+            if($c->stash->{'checked_action_menus'}->{$menu}->{'data'} =~ m/function\s+([^\(\s]+)\s*\(/mx) {
                 $c->stash->{'checked_action_menus'}->{$menu}->{'function'} = $1;
             }
         } else {
