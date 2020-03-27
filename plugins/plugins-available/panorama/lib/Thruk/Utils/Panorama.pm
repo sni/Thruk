@@ -126,23 +126,50 @@ sub get_dashboard_list {
                     push @{$dashboards}, $d;
                     next;
                 }
-                my $groups_rw = [];
-                my $groups_ro = [];
+                my $perm_grw = [];
+                my $perm_gro = [];
                 for my $group (@{$d->{'tab'}->{'xdata'}->{'groups'}}) {
                     my $name = (keys %{$group})[0];
                     if($group->{$name} eq 'read-write') {
-                        push(@{$groups_rw}, $name);
+                        push(@{$perm_grw}, $name);
                     } else {
-                        push(@{$groups_ro}, $name);
+                        push(@{$perm_gro}, $name);
                     }
+                }
+                my $perm_rw = "";
+                my $perm_ro = "";
+                if(scalar @{$perm_grw} > 0) {
+                    $perm_rw .= "groups: ".join(", ", @{$perm_grw});
+                }
+                if(scalar @{$perm_gro} > 0) {
+                    $perm_ro .= "groups: ".join(", ", @{$perm_gro});
+                }
+
+                my $perm_urw = [];
+                my $perm_uro = [];
+                for my $usr (@{$d->{'tab'}->{'xdata'}->{'users'}}) {
+                    my $name = (keys %{$usr})[0];
+                    if($usr->{$name} eq 'read-write') {
+                        push(@{$perm_urw}, $name);
+                    } else {
+                        push(@{$perm_uro}, $name);
+                    }
+                }
+                if(scalar @{$perm_urw} > 0) {
+                    $perm_rw .= " - " if $perm_rw;
+                    $perm_rw .= "users: ".join(", ", @{$perm_urw});
+                }
+                if(scalar @{$perm_uro} > 0) {
+                    $perm_ro .= " - " if $perm_ro;
+                    $perm_ro .= "users: ".join(", ", @{$perm_uro});
                 }
                 push @{$dashboards}, {
                     id          => $d->{'id'},
                     nr          => $d->{'nr'},
                     name        => $d->{'tab'}->{'xdata'}->{'title'},
                     user        => $d->{'user'},
-                    groups_rw   => join(', ', @{$groups_rw}),
-                    groups_ro   => join(', ', @{$groups_ro}),
+                    perm_rw     => $perm_rw,
+                    perm_ro     => $perm_ro,
                     readonly    => $d->{'readonly'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
                     description => $d->{'description'} || '',
                     objects     => $d->{'objects'},
@@ -316,6 +343,7 @@ sub is_authorized_for_dashboard {
         }
         # access from contactgroups
         my $access = ACCESS_NONE;
+        my $contactgroups = $c->user->{'groups'} || [];
         $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
         for my $group (@{$dashboard->{'tab'}->{'xdata'}->{'groups'}}) {
             my $name = (keys %{$group})[0];
@@ -324,11 +352,20 @@ sub is_authorized_for_dashboard {
                 $access = $lvl if $lvl > $access;
                 next;
             }
-            for my $test (@{$c->user->{'groups'}}) {
+            for my $test (@{$contactgroups}) {
                 if($name eq $test) {
                     $access = $lvl if $lvl > $access;
                 }
             }
+        }
+        my $username = $c->user->{'username'};
+        $dashboard->{'tab'}->{'xdata'}->{'users'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'users'};
+        for my $user (@{$dashboard->{'tab'}->{'xdata'}->{'users'}}) {
+            my $name = (keys %{$user})[0];
+            next unless $name eq $username;
+            my $lvl  = $user->{$name} eq 'read-write' ? ACCESS_READWRITE : ACCESS_READONLY;
+            $access = $lvl;
+            last;
         }
         return $access;
     }
