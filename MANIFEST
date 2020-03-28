@@ -13,6 +13,7 @@ debian/thruk-base.postrm
 debian/thruk-base.preinst
 debian/thruk-base.prerm
 debian/thruk-plugin-reporting.install
+debian/thruk-plugin-reporting.lintian-overrides
 debian/thruk-plugin-reporting.postinst
 debian/thruk-plugin-reporting.prerm
 debian/thruk.dsc
