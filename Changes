@@ -573,7 +573,6 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - fix initial text label position (#506)
             - fix corrupted tab export (#507)
 
-
 2.00     Mon Jul 13 22:49:52 CEST 2015
           - add local settings config drop dir support via thruk_local.d/
           - changed internal storage format to json everywhere
@@ -593,7 +592,6 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - fix using backslashes in business process object names (#485)
           - Reporting:
             - add new options to better use indexes and skip updating logcache (#464, Zirafarafa)
-
           Incompatible Changes:
           - custom thruk plugins have to be adopted to thruk 2, see migration
             help document: http://thruk.org/documentation/thruk_2_0_migration_guide.html
