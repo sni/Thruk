@@ -239,18 +239,16 @@ sub report_send {
     ## fill some configured mail headers from config file into here
     my $configured_mailheaders = $c->config->{'Thruk::Plugin::Reports2'}->{'default_mail_headers'} || '';
     if ( $configured_mailheaders and ref($configured_mailheaders) eq 'HASH' ) {
-        #just discard unless hass format
+        #just discard unless hash format from config
         $mailheader = { map { lc($_) => $configured_mailheaders->{$_} } keys %$configured_mailheaders };
     }
     for my $line (split/\n/mx, $mailtext) {
         #header lines consist of printable ascii chars (no ':') followed by ':' (RFC5322)
-        #if($line !~ m/^$/mx and $line !~ m/^[A-Z]+:/mx) {
         if($line !~ m/^$/mx and $line !~ m/^[[:graph:]]+?:/mx) {
             $bodystarted = 1;
         }
         if($bodystarted) {
             $mailbody .= $line."\n";
-        #} elsif($line =~ m/^([A-Z]+):\s*(.*)$/mx) {
         } elsif($line =~ m/^([[:graph:]]+?):\s*(.*)$/mx) {
             $mailheader->{lc($1)} = $2;
         }
@@ -337,7 +335,6 @@ sub report_send {
         $msg->send_by_testfile($ENV{'THRUK_MAIL_TEST'});
         return 1;
     } else {
-        #return 1 if $msg->send;
         my @send_args = ();
         my $send_type = $c->config->{'Thruk::Plugin::Reports2'}->{mail_type} || '';
         if ( $send_type ) {
