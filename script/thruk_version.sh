@@ -3,6 +3,7 @@
 set -x
 VERSION=`grep ^VERSION Makefile | head -n 1 | awk '{ print $3 }'`;
 BRANCH=`grep branch script/thruk | grep ^my | awk -F"'" '{ print $2 }'`
+export LC_TIME=C
 
 if [ "x${BRANCH}" = "x" ]; then
   BRANCH=1

@@ -35,8 +35,7 @@ override_dh_auto_install: local_auto_install $(FIXPHANTOMJS)
 local_auto_install:
 	dh_auto_install
 	# enable su logrotate, available since ubuntu 13.04 and debian 6
-	sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
-	echo "debian/thruk-plugin-reporting.lintian-overrides" >> MANIFEST
+	sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base
 
 fix_phantomjs_location:
 	# fix location of phantomjs
@@ -45,7 +44,7 @@ fix_phantomjs_location:
 	sed -e 's|/usr/share/thruk/script/phantomjs|/usr/lib/'$(DEB_HOST_MULTIARCH)'/thruk/phantomjs|' \
 		-i debian/tmp/etc/thruk/thruk.conf
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs" >> debian/thruk-plugin-reporting.install
-	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: sqlite"   > debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: sqlite"  >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libpng"  >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: zlib"    >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libjpeg" >> debian/thruk-plugin-reporting.lintian-overrides

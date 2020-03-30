@@ -35,5 +35,15 @@ sub _test_filter {
     my($filter, $expect) = @_;
     my $f = Thruk::Utils::Status::parse_lexical_filter($filter);
     my $s = Monitoring::Livestatus::Class::Lite->new('test.sock')->table('hosts')->filter($f)->statement(1);
-    is(join("\n", @{$s}), $expect, 'got correct statement');
+    $s    = join("\n", @{$s});
+    $s      =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
+    $expect =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
+    is($s, $expect, 'got correct statement');
+}
+
+# round timestamp by 5 seconds to avoid test errors on slow machines
+sub _round_timestamps {
+    my($x) = @_;
+    $x = int($x / 5) * 5;
+    return($x);
 }

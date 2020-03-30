@@ -315,10 +315,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.Array.each(tab.xdata.groups, function(item, idx, len) {
         var group = Ext.Object.getKeys(item)[0];
         var perm  = item[group];
-        access.push({ contactgroup: group, permission: perm });
+        access.push({ type: "group", value: group, permission: perm });
+    });
+    if(tab.xdata.users == undefined) { tab.xdata.users = []; }
+    Ext.Array.each(tab.xdata.users, function(item, idx, len) {
+        var user = Ext.Object.getKeys(item)[0];
+        var perm  = item[user];
+        access.push({ type: "user", value: user, permission: perm });
     });
     var permissionsStore = Ext.create('Ext.data.Store', {
-        fields: ['contactgroup', 'permission'],
+        fields: ['type', 'value', 'permission'],
         data: access
     });
     var permissionsItems = [{
@@ -337,7 +343,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             name:       'permissions',
             id:         'permissionsGrid',
             columns:    [
-                    { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
+                    { header: 'Type', width: 60, dataIndex: 'type',  align: 'left', tdCls: 'editable', editor: {
+                            xtype:            'combobox',
+                            triggerAction:    'all',
+                            selectOnTab:       true,
+                            lazyRender:        true,
+                            editable:          false,
+                            store:           ['group', 'user']
+                        }
+                    },
+                    { header: 'Contact/Group', flex: 1, dataIndex: 'value',  align: 'left', tdCls: 'editable', editor: {
                             xtype:            'searchCbo',
                             panel:            {tab: tab},
                             storeExtraParams: { wildcards: 1 },
@@ -345,7 +360,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             allowBlank:        false
                         }
                     },
-                    { header: 'Permissions', width: 140,  dataIndex: 'permission', align: 'left', tdCls: 'editable', editor: {
+                    { header: 'Permissions', width: 120,  dataIndex: 'permission', align: 'left', tdCls: 'editable', editor: {
                             xtype:         'combobox',
                             triggerAction: 'all',
                             selectOnTab:    true,
@@ -373,11 +388,20 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             width:  300,
             fbar: [{
                 type: 'button',
+                text: 'Add Contact',
+                iconCls: 'user-tab',
+                handler: function(btn, eOpts) {
+                    var store = btn.up('gridpanel').store;
+                    store.add({type: 'user', value:'*', permission:'read-only'})
+                    btn.up('gridpanel').plugins[0].startEdit(store.last(), 0);
+                }
+            },{
+                type: 'button',
                 text: 'Add Contactgroup',
                 iconCls: 'user-tab',
                 handler: function(btn, eOpts) {
                     var store = btn.up('gridpanel').store;
-                    store.add({contactgroup:'*', permission:'read-only'})
+                    store.add({type: 'group', value:'*', permission:'read-only'})
                     btn.up('gridpanel').plugins[0].startEdit(store.last(), 0);
                 }
             }]
@@ -1050,10 +1074,15 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
 
                         /* dashboard permissions */
                         tab.xdata.groups = [];
+                        tab.xdata.users  = [];
                         permissionsStore.each(function(rec) {
                             var row = {};
-                            row[rec.data.contactgroup] = rec.data.permission;
-                            tab.xdata.groups.push(row);
+                            row[rec.data.value] = rec.data.permission;
+                            if(rec.data.type == "group") {
+                                tab.xdata.groups.push(row);
+                            } else {
+                                tab.xdata.users.push(row);
+                            }
                         });
 
                         tab.applyXdata(undefined, false);

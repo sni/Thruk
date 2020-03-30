@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.34     Sat Mar 28 09:53:19 CET 2020
           - renamed system api keys to superuser api keys
           - removed `rest_api_enabled` setting, disabling rest api breaks thruk
           - show sites name in comments/downtimes, logs and notifications
@@ -15,6 +15,7 @@ next:
             - allow changing background images if user has write access to dashboard
             - add maintenance mode for dashboards
             - add long_plugin_output to label macros
+            - allow contacts in dashboard permissions
           - Cluster:
             - add 'thruk cluster maint/unmaint' commands
           - internals:
@@ -572,7 +573,6 @@ next:
             - fix initial text label position (#506)
             - fix corrupted tab export (#507)
 
-
 2.00     Mon Jul 13 22:49:52 CEST 2015
           - add local settings config drop dir support via thruk_local.d/
           - changed internal storage format to json everywhere
@@ -592,7 +592,6 @@ next:
             - fix using backslashes in business process object names (#485)
           - Reporting:
             - add new options to better use indexes and skip updating logcache (#464, Zirafarafa)
-
           Incompatible Changes:
           - custom thruk plugins have to be adopted to thruk 2, see migration
             help document: http://thruk.org/documentation/thruk_2_0_migration_guide.html

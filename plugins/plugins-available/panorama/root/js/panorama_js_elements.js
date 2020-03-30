@@ -553,6 +553,12 @@ Ext.define('Ext.ux.SearchStore', {
             if(type == 'parent') {
                 type = 'host';
             }
+            if(type == 'group') {
+                type = 'contactgroup';
+            }
+            if(type == 'user') {
+                type = 'contact';
+            }
             if(type == 'action menu') {
                 type = 'custom value';
                 store.pre_val = "THRUK_ACTION_MENU";
@@ -563,6 +569,7 @@ Ext.define('Ext.ux.SearchStore', {
               || type == 'servicegroup'
               || type == 'timeperiod'
               || type == 'site'
+              || type == 'contact'
               || type == 'contactgroup'
               || type == 'eventhandler'
               || type == 'command'
