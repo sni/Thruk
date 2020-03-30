@@ -236,13 +236,22 @@ sub report_send {
     my $mailbody    = "";
     my $bodystarted = 0;
     my $mailheader  = {};
+    ## fill some configured mail headers from config file into here
+    my $configured_mailheaders = $c->config->{'Thruk::Plugin::Reports2'}->{'default_mail_headers'} || '';
+    if ( $configured_mailheaders and ref($configured_mailheaders) eq 'HASH' ) {
+        #just discard unless hass format
+        $mailheader = { map { lc($_) => $configured_mailheaders->{$_} } keys %$configured_mailheaders };
+    }
     for my $line (split/\n/mx, $mailtext) {
-        if($line !~ m/^$/mx and $line !~ m/^[A-Z]+:/mx) {
+        #header lines consist of printable ascii chars (no ':') followed by ':' (RFC5322)
+        #if($line !~ m/^$/mx and $line !~ m/^[A-Z]+:/mx) {
+        if($line !~ m/^$/mx and $line !~ m/^[[:graph:]]+?:/mx) {
             $bodystarted = 1;
         }
         if($bodystarted) {
             $mailbody .= $line."\n";
-        } elsif($line =~ m/^([A-Z]+):\s*(.*)$/mx) {
+        #} elsif($line =~ m/^([A-Z]+):\s*(.*)$/mx) {
+        } elsif($line =~ m/^([[:graph:]]+?):\s*(.*)$/mx) {
             $mailheader->{lc($1)} = $2;
         }
         if($line =~ m/^$/mx) {
@@ -256,6 +265,10 @@ sub report_send {
         $cc      = $report->{'cc'}      || $mailheader->{'cc'};
         $bcc     = $report->{'bcc'}     || $mailheader->{'bcc'};
         $subject = $report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report';
+    }
+    my $subj_prepend = $c->config->{'Thruk::Plugin::Reports2'}->{'report_subject_prepend'} || '';
+    if ( $subj_prepend and $subject !~ /^\s*$subj_prepend/ ) {
+        $subject = $subj_prepend . $subject;
     }
     my $msg = MIME::Lite->new();
     $msg->build(
@@ -324,7 +337,31 @@ sub report_send {
         $msg->send_by_testfile($ENV{'THRUK_MAIL_TEST'});
         return 1;
     } else {
-        return 1 if $msg->send;
+        #return 1 if $msg->send;
+        my @send_args = ();
+        my $send_type = $c->config->{'Thruk::Plugin::Reports2'}->{mail_type} || '';
+        if ( $send_type ) {
+            @send_args = ( $send_type );
+            my $send_scalar_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_args} || '';
+            if ( $send_scalar_args ) {
+                $send_scalar_args = [ $send_scalar_args] unless ref($send_scalar_args) eq 'ARRAY';
+                push @send_args, @{$send_scalar_args};
+            }
+            my $send_named_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_named_args} || '';
+            if ( $send_named_args ) {
+                if ( ref($send_named_args) eq 'HASH' ) {
+                    push @send_args, %{$send_named_args};
+                }
+                elsif ( ref $send_named_args ) {
+                    # what to do?
+                    die 'cant handle mail arg of ref ' . ref($send_named_args);
+                }
+                else {
+                    push @send_args, $send_named_args;
+                }
+            }
+        }
+        return 1 if $msg->send( @send_args );
     }
     $c->stats->profile(end => "Utils::Reports::report_send()");
     return 0;
