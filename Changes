@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Reporting:
+            - add more mail sending options
+
 2.34     Sat Mar 28 09:53:19 CET 2020
           - renamed system api keys to superuser api keys
           - removed `rest_api_enabled` setting, disabling rest api breaks thruk
