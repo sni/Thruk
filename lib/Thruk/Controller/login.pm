@@ -32,6 +32,7 @@ sub index {
     $c->stash->{'page'}           = 'splashpage';
     $c->stash->{'loginurl'}       = $c->stash->{'url_prefix'}."cgi-bin/login.cgi";
     $c->stash->{'template'}       = 'login.tt';
+    $c->stash->{'title'}          = 'Login';
     my $product_prefix            = $c->config->{'product_prefix'};
 
     my $cookie_path   = $c->stash->{'cookie_path'};

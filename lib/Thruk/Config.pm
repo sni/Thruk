@@ -595,6 +595,21 @@ sub set_default_config {
     $defaults->{'cookie_path'} = $defaults->{'cookie_path'}.'/'; # seems like the above comment is not valid anymore and chrome now requires the trailing slash
     $defaults->{'cookie_path'} = '' if $defaults->{'cookie_path'} eq '/';
 
+    if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
+        my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
+        $omdlink    =~ s/.*?\///gmx;
+        $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
+        $defaults->{'extra_version'}      = 'OMD '.$omdlink;
+        $defaults->{'extra_version_link'} = 'http://www.omdistro.org';
+    }
+    elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
+        $defaults->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
+        $defaults->{'extra_version_link'} = 'http://www.naemon.org';
+        chomp($defaults->{'extra_version'});
+    }
+    $defaults->{'extra_version'}      = '' unless defined $defaults->{'extra_version'};
+    $defaults->{'extra_version_link'} = '' unless defined $defaults->{'extra_version_link'};
+
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
 
@@ -623,21 +638,6 @@ sub set_default_config {
     # don't disable for CLI, breaks config reload over http somehow
     if(defined $ENV{'NO_EXTERNAL_JOBS'} or $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
         $config->{'no_external_job_forks'} = 1;
-    }
-
-    $config->{'extra_version'}      = '' unless defined $config->{'extra_version'};
-    $config->{'extra_version_link'} = '' unless defined $config->{'extra_version_link'};
-    if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
-        my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
-        $omdlink    =~ s/.*?\///gmx;
-        $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
-        $config->{'extra_version'}      = 'OMD '.$omdlink;
-        $config->{'extra_version_link'} = 'http://www.omdistro.org';
-    }
-    elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
-        $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
-        $config->{'extra_version_link'} = 'http://www.naemon.org';
-        chomp($config->{'extra_version'});
     }
 
     # additional user template paths?
