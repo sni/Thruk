@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - role: common
+    - role: thruk_developer
   tasks:
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE naemon

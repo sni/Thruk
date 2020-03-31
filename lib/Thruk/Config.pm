@@ -444,6 +444,7 @@ sub set_default_config {
         wait_timeout                    => 10,
         use_curl                        => $ENV{'THRUK_CURL'} ? 1 : 0,
         use_frames                      => 1,
+        navframesize                    => 172,
         use_strict_host_authorization   => 0,
         make_auth_user_lowercase        => 0,
         make_auth_user_uppercase        => 0,

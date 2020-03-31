@@ -855,6 +855,14 @@ ex.:
 
   use_frames = 0
 
+=== navframesize
+{% include new_since.ad version="2.36" %}
+Width of the navigation frame in px.
+
+ex.:
+
+  navframesize = 172
+
 === use_new_command_box
 Show the new split command box on the host / service details page.
 
