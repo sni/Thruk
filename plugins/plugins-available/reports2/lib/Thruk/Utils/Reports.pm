@@ -240,7 +240,7 @@ sub report_send {
     my $configured_mailheaders = $c->config->{'Thruk::Plugin::Reports2'}->{'default_mail_headers'};
     if($configured_mailheaders && ref($configured_mailheaders) eq 'HASH') {
         # just discard unless hash format from config
-        $mailheader = { map { lc($_) => $configured_mailheaders->{$_} } keys %$configured_mailheaders };
+        $mailheader = { map { lc($_) => $configured_mailheaders->{$_} } keys %{$configured_mailheaders} };
     }
     for my $line (split/\n/mx, $mailtext) {
         # header lines consist of printable ascii chars (no ':') followed by ':' (RFC5322)
