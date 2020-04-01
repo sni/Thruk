@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - quick commands can create recurring downtimes
           - Reporting:
             - add more mail sending options
 

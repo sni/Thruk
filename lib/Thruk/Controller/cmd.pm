@@ -157,6 +157,27 @@ sub index {
             $c->req->parameters->{'persistent'} = 0;
         }
 
+        # redirect to create a recurring downtime
+        if($quick_command == 2 && $c->req->parameters->{'recurring'}) {
+            my @hosts    = ();
+            my @services = ();
+            my @backends = ();
+            for my $s (@servicedata) {
+                my($host, $service, $backend)   = split /;/mx, $s;
+                push @hosts, $host;
+                push @services, $service;
+                push @backends, $backend;
+            }
+            $c->req->parameters->{'recurring'} = "add";
+            $c->req->parameters->{'type'}      = "6";
+            $c->req->parameters->{'host'}      = join(",", @{Thruk::Utils::array_uniq(\@hosts)});
+            $c->req->parameters->{'service'}   = join(",", @{Thruk::Utils::array_uniq(\@services)});
+            $c->req->parameters->{'comment'}   = $c->req->parameters->{'com_data'};
+            $c->req->parameters->{'backend'}   = join(",", @{Thruk::Utils::array_uniq(\@backends)});
+            require Thruk::Controller::extinfo;
+            return(Thruk::Controller::extinfo::index($c));
+        }
+
         # comments / downtimes quick commands
         for my $id (@idsdata) {
             my($typ, $id, $backend) = split(/_/m,$id, 3);

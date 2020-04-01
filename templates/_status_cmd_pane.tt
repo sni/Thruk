@@ -135,6 +135,14 @@
               </select>
             </td>
           </tr>
+          [% IF use_feature_recurring_downtime %]
+          <tr>
+            <td>Recurring:</td>
+            <td>
+              <input type="checkbox" id="recurring" name="recurring"> <label for="recurring">create recurring downtime</label>
+            </td>
+          </tr>
+          [% END %]
         </table>
         <span id="flexible_options" style="display:none"><br>If Flexible, Duration: <input type='text' name='hours' value='2' size= "2" maxlength="2"> Hours <input type='text' name='minutes' value='0' size= "2" maxlength="2"> Minutes</span>
      </td>

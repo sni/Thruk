@@ -389,7 +389,7 @@ sub get_default_recurring_downtime {
             backends     => [],
             schedule     => [],
             duration     => 120,
-            comment      => 'automatic downtime',
+            comment      => $c->req->parameters->{'comment'} || 'automatic downtime',
             childoptions => 0,
             fixed        => 1,
             flex_range   => 720,
