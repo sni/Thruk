@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 107;
+    plan tests => 108;
 
     use lib('t');
     require TestUtils;
@@ -312,10 +312,13 @@ is('^a(b|c)d*', Thruk::Utils::convert_wildcards_to_regex('^a(b|c)d*'), 'normal r
 
 #########################
 my $absolute_urls = [
-    [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/thruk/cgi-bin/extinfo.cgi', 'https://127.0.0.1:60443/demo/thruk/cgi-bin/extinfo.cgi'],
+    [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/thruk/cgi-bin/extinfo.cgi',  'https://127.0.0.1:60443/demo/thruk/cgi-bin/extinfo.cgi'],
     [ 'https://127.0.0.1:60443/demo/thruk/', '/demo/pnp4nagios/index.php/popup', 'https://127.0.0.1:60443/demo/pnp4nagios/index.php/popup' ],
+    [ '/thruk/cgi-bin/status.cgi?host=all',  '/demo/logos/linux40.png',          '/demo/logos/linux40.png' ],
 ];
 for my $urls (@{$absolute_urls}) {
+    local $ENV{'OMD_ROOT'} = '/omd/sites/demo';
+    local $ENV{'OMD_SITE'} = 'demo';
     my $got = Thruk::Utils::absolute_url($urls->[0], $urls->[1],1);
     is($got, $urls-> [2], "absolute_url from ".$urls->[0]." and ".$urls->[1])
 }

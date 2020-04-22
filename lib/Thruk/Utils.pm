@@ -1745,7 +1745,14 @@ sub absolute_url {
         }
     }
 
-    confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
+    if($ENV{'OMD_SITE'}) {
+        my $site = $ENV{'OMD_SITE'};
+        if($link =~ m/^\/\Q$site\E\/logos\/([^\.]*\.\w+)$/mx) {
+            return($link);
+        }
+    }
+
+    confess("unknown url scheme in absolute_url('".$baseurl."', '".$link."')");
 }
 
 ##############################################
