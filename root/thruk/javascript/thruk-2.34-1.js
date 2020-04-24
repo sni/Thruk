@@ -2772,10 +2772,11 @@ function generic_downtimes_popup(title, url) {
 }
 
 function show_plugin_output_popup(target, host, service, backend, escape_html, overlib_options) {
-    var caption = host;
+    var caption = decodeURIComponent(host);
     if(service != '') {
-        caption += " - "+service;
+        caption += " - "+decodeURIComponent(service);
     }
+    caption = escapeHTML(caption);
     overlib.apply(null, ["<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>",CAPTION, caption].concat(overlib_options));
     jQuery('#overDiv .plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
 
