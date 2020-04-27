@@ -2538,8 +2538,17 @@ var TP = {
         }
         TP.getResponse(undefined, response);
         return;
+    },
+    create_host_object_from_service: function(o) {
+        var host = {};
+        for(var key in o) {
+            var m = key.match(/^host_(.*)$/);
+            if(m && m[1]) {
+                host[m[1]] = o[key];
+            }
+        }
+        return(host);
     }
-
 }
 TP.log('[global] starting');
 TP.log('[global] '+thruk_version);

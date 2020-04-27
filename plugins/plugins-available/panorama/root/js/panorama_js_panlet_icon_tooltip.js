@@ -403,8 +403,9 @@ TP.renderTipDetails = function(data) {
             if(host_details.length > 10) { skipped++; continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
-            var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
-            var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
+            var host_object = TP.create_host_object_from_service(d);
+            var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, host_object);
+            var statename = TP.render_host_status(d[prefix+'state'], {}, {data:host_object});
             var detail  = '<tr>';
             detail += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
             detail += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';

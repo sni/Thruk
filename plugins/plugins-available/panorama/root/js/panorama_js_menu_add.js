@@ -30,6 +30,10 @@ TP.addPanletsMenu = function(options) {
                         icon:   url_prefix+'plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.HostStatusIcon'}, -8, -8) }
                     }, {
+                        text:   'Host with Services',
+                        icon:   url_prefix+'plugins/panorama/images/server.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.HostServicesStatusIcon'}, -8, -8) }
+                    }, {
                         text:   'Hostgroup Status',
                         icon:   url_prefix+'plugins/panorama/images/server_link.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.HostgroupStatusIcon'}, -8, -8) }

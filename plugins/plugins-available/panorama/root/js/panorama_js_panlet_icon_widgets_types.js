@@ -398,6 +398,57 @@ Ext.define('TP.FilterStatusIcon', {
     }
 });
 
+/* Host incl. Services Icon, based on the filter icon */
+Ext.define('TP.HostServicesStatusIcon', {
+    extend: 'TP.FilterStatusIcon',
+
+    initComponent: function() {
+        var panel = this;
+        this.callParent();
+        this.xdata.general.incl_hst       = true;
+        this.xdata.general.incl_svc       = true;
+        this.xdata.general.incl_downtimes = false;
+        this.xdata.general.incl_ack       = false;
+    },
+    getGeneralItems: function() {
+        var panel = this;
+        return([
+            TP.objectSearchItem(panel, 'host', 'Hostname', panel.xdata.general.host),
+            {
+                fieldLabel: 'Include Downtimes',
+                xtype:      'checkbox',
+                name:       'incl_downtimes',
+                boxLabel:   '(alert during downtimes too)'
+            }, {
+                fieldLabel: 'Include Acknowledged',
+                xtype:      'checkbox',
+                name:       'incl_ack',
+                boxLabel:   '(alert for acknowledged problems too)'
+            }
+        ]);
+    },
+    getName: function() {
+        return(this.xdata.general.host);
+    },
+    applyXdata: function(xdata) {
+        this.callParent([xdata]);
+        this.xdata.general.incl_hst = true;
+        this.xdata.general.incl_svc = true;
+        this.setFilter();
+    },
+    setFilter: function() {
+        this.xdata.general.filter = JSON.stringify([{
+            hoststatustypes:    15,
+            hostprops:          0,
+            servicestatustypes: 31,
+            serviceprops:       0,
+            type:              "Host",
+            op:                "=",
+            value:              this.xdata.general.host
+        }]);
+    }
+});
+
 /* Sitestatus Icon */
 Ext.define('TP.SiteStatusIcon', {
     extend: 'TP.IconWidget',
