@@ -27,6 +27,9 @@ define service {
 }
 ------
 
+The value is inserted verbatim into an +<a href=\'action_url\'>+, so the strange quoting is a trick
+to add extra parameters in HTML.
+
 [TIP]
 .templates
 =======
