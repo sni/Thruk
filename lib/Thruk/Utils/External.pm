@@ -98,6 +98,7 @@ sub cmd {
             backends     => "list of selected backends (keys)"
             nofork       => "don't fork"
             background   => "return $jobid if set, or redirect otherwise"
+            clean        => "remove job after displaying it if true"
         }
     )
 
@@ -122,6 +123,8 @@ sub perl {
         _finished_job_page($c, $c->stash);
         return $rc;
     }
+
+    $c->stash->{job_conf} = $conf;
 
     my ($id,$dir) = init_external($c);
     return unless $id;
@@ -197,6 +200,32 @@ sub perl {
     exit(0);
 }
 
+##############################################
+
+=head2 render_page_in_background
+
+  render_page_in_background($c)
+
+return true if page will be rendered in background.
+will return false if page should continue to render normally
+
+=cut
+sub render_page_in_background {
+    my($c) = @_;
+
+    # render page if running as a background job
+    return if $ENV{'THRUK_JOB_DIR'};
+
+    # render page if not running inside a webserver
+    return if(!$ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
+
+    my @caller = caller(1);
+    return(
+        Thruk::Utils::External::perl($c, { expr    => $caller[3].'($c)',
+                                           message => 'please stand by while page is beeing rendered...',
+                                           clean   => 1,
+    }));
+}
 
 ##############################################
 
@@ -793,7 +822,7 @@ sub init_external {
 
   remove_job_dir($c, $dir)
 
-return true if process is still running
+remove job folder and all files
 
 =cut
 sub remove_job_dir {
@@ -858,6 +887,7 @@ show page for finished jobs
 sub _finished_job_page {
     my($c, $stash, $forward, $out) = @_;
     if(defined $stash and keys %{$stash} > 0) {
+        my $cleanup = $stash->{'job_conf'}->{'clean'} ? 1 : 0;
         $c->res->headers->header( @{$stash->{'res_header'}} ) if defined $stash->{'res_header'};
         $c->res->headers->content_type($stash->{'res_ctype'}) if defined $stash->{'res_ctype'};
         if(defined $stash->{'file_name'}) {
@@ -870,6 +900,7 @@ sub _finished_job_page {
             Thruk::Utils::IO::close($fh, $file);
             unlink($file) if defined $c->stash->{cleanfile};
             $c->{'rendered'} = 1;
+            remove_job_dir($stash->{job_dir}) if $cleanup;
             return;
         }
         # merge stash
@@ -891,13 +922,16 @@ sub _finished_job_page {
 
         if(defined $forward) {
             $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
+            remove_job_dir($stash->{job_dir}) if $cleanup;
             return $c->redirect_to($forward);
         }
 
         if(defined $c->stash->{json}) {
+            remove_job_dir($stash->{job_dir}) if $cleanup;
             return $c->render(json => $c->stash->{json});
         }
 
+        remove_job_dir($stash->{job_dir}) if $cleanup;
         return;
     }
 

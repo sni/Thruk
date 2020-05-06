@@ -68,8 +68,7 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
-    if(exists $c->req->parameters->{'report'}
-       and _create_report($c)) {
+    if(exists $c->req->parameters->{'report'} && _create_report($c)) {
         # report created
     }
     else {
@@ -97,6 +96,9 @@ sub _show_step_1 {
 ##########################################################
 sub _create_report {
     my ( $c ) = @_;
+
+    return if Thruk::Utils::External::render_page_in_background($c);
+
     $c->stats->profile(begin => "_create_report()");
 
     my($displaytype, $alerttypes, $hoststates, $servicestates);
