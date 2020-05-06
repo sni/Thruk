@@ -2880,11 +2880,45 @@ sub check_memory_usage {
     my $mem = $c->stash->{'memory_end'} || Thruk::Backend::Pool::get_memory_usage();
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
-        my $msg = "[$$] Thruk exiting process due to memory usage: ".$mem.'mb (limit: '.$c->config->{'max_process_memory'}.'mb)';
-        $c->log->debug($msg);
+        my $inc = "";
+        if($c->app->{'previous_reqest_memory'}) {
+            $inc = sprintf(" (+%dmb)", $mem - $c->app->{'previous_reqest_memory'});
+        }
+        my $msg = sprintf("Thruk exiting process due to memory usage: %dmb%s (limit: %dmb, pid: %d)", $mem, $inc, $c->config->{'max_process_memory'}, $$);
+        log_error_with_details($c, $msg);
         print STDERR $msg,"\n";
         $c->app->graceful_stop($c);
     }
+    $c->app->{'previous_reqest_memory'} = $mem;
+    return;
+}
+
+##########################################################
+
+=head2 log_error_with_details
+
+  log_error_with_details($c, $message, $errorDetails)
+
+log error along with details about url and logged in user
+
+=cut
+
+sub log_error_with_details {
+    my($c, @errorDetails) = @_;
+    $c->log->error("***************************");
+    $c->log->error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
+    $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+    $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+    $c->log->error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
+    for my $details (@errorDetails) {
+        for my $line (@{list($details)}) {
+            for my $splitted (split(/\n|<br>/mx, $line)) {
+                $c->log->error($splitted);
+            }
+        }
+    }
+    $c->log->error("***************************");
     return;
 }
 

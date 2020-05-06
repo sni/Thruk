@@ -1139,7 +1139,7 @@ sub _finalize_request {
 
     # does this process need a restart?
     if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        if($c->config->{'max_process_memory'} && ($Thruk::COUNT && $Thruk::COUNT%10 == 0 || $elapsed > 5)) {
+        if($c->config->{'max_process_memory'}) {
             Thruk::Utils::check_memory_usage($c);
         }
     }

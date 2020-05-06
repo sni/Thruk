@@ -247,25 +247,7 @@ sub index {
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
-            $c->log->error("***************************");
-            $c->log->error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
-            $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
-            $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
-            $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
-            $c->log->error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
-            $c->log->error($c->stash->{errorMessage}) if $c->stash->{errorMessage};
-            $c->log->error($c->stash->{errorDescription}) if $c->stash->{errorDescription};
-            if($c->stash->{errorDetails}) {
-                for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
-                    $c->log->error($row);
-                }
-            }
-            if($errorDetails) {
-                for my $row (split(/\n|<br>/mx, $errorDetails)) {
-                    $c->log->error($row);
-                }
-            }
-            $c->log->error("***************************");
+            Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails);
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
         }
