@@ -54,6 +54,7 @@ sub cmd {
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}
        or exists $c->req->parameters->{'noexternalforks'}
+       or ($c->stash->{job_id} && !$conf->{'background'}) # do not cascade jobs unless they should be forked to background
     ) {
         # $rc, $out
         my(undef, $out) = Thruk::Utils::IO::cmd($c, $cmd);
@@ -111,6 +112,7 @@ sub perl {
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}
        or exists $c->req->parameters->{'noexternalforks'}
+       or ($c->stash->{job_id} && !$conf->{'background'}) # do not cascade jobs unless they should be forked to background
     ) {
         if(defined $conf->{'backends'}) {
             $c->{'db'}->disable_backends();
@@ -120,7 +122,7 @@ sub perl {
         my $rc = eval($conf->{'expr'});
         ## use critic
         die($@) if $@;
-        _finished_job_page($c, $c->stash);
+        _finished_job_page($c, $c->stash) if !$c->stash->{job_id}; # breaks cascading jobs, ex.: xls export on showlog
         return $rc;
     }
 
@@ -812,6 +814,7 @@ sub init_external {
     $c->stash->{job_id}       = $id;
     $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
     $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c);
+    $c->stash->{original_uri} = $c->req->uri->as_string();
 
     return($id, $dir);
 }

@@ -274,7 +274,7 @@ ex.: /thruk/cgi-bin/status.cgi?params...
 sub uri {
     my($c) = @_;
     carp("no c") unless defined $c;
-    my $uri = $c->req->url();
+    my $uri = $c->stash->{original_uri} ? $c->stash->{original_uri} : $c->req->uri->as_string();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
     $uri    = &escape_html($uri);
     return $uri;
@@ -358,7 +358,8 @@ ex.:
 =cut
 sub uri_with {
     my($c, $data, $keep_absolute) = @_;
-    my $uri = $c->req->uri;
+    my $uri = $c->stash->{original_uri} ? URI->new($c->stash->{original_uri}) : $c->req->uri;
+
     my @old_param = $uri->query_form();
     my @new_param;
     while(my $k = shift @old_param) {

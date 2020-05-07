@@ -91,8 +91,8 @@ sub index {
         $c->stash->{'template'}    = 'excel/logs.tt';
         $c->stash->{'file_name'}   = 'logs.xls';
         $c->stash->{'log_filter'}  = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
-                                      sort => {$order => 'time'},
-                                    };
+                                       sort   => {$order => 'time'},
+                                     };
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "showlog::updatecache");
