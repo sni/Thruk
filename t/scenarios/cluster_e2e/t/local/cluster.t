@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 54;
+plan tests => 76;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -44,6 +44,27 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk cluster maint',
     like => ['/OK/', '/set\ into\ maintenance\ mode/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk cluster status',
+    like => ['/OK/', '/nodes online/', '/MAINT/'],
+});
+TestUtils::test_command({
+    cmd     => '/usr/bin/env omd stop',
+    like    => ['/Stopping.*OK/'],
+    errlike => ['/.*/'],
+});
+TestUtils::test_command({
+    cmd    => '/usr/bin/env omd umount',
+    like   => ['/Cleaning\ up\ temp\ filesystem/'],
+});
+TestUtils::test_command({
+    cmd    => '/usr/bin/env omd start',
+    like   => ['/Preparing\ tmp\ directory/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk cluster ping',
+    like => ['/heartbeat send/'],
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk cluster status',

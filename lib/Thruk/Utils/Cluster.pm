@@ -70,9 +70,10 @@ sub load_statefile {
     $self->{'nodes_by_id'}  = {};
 
     # dynamic clusters
+    my $registered;
     if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
         # use registered urls from registerfile file
-        my $registered = Thruk::Utils::IO::json_lock_retrieve($self->{'registerfile'}) || {};
+        $registered = Thruk::Utils::IO::json_lock_retrieve($self->{'registerfile'}) || {};
         for my $key (sort keys %{$registered}) {
             my $n = $state->{$key} || {};
             $n->{'node_url'} = $registered->{$key}->{'node_url'};
@@ -109,11 +110,29 @@ sub load_statefile {
         }
     }
 
+    # add node to store
+    for my $key (sort keys %{$nodes}) {
+        my $n = $nodes->{$key};
+        $n->{'node_id'}       = $key;
+        push @{$self->{'nodes'}}, $n;
+        $self->{'nodes_by_id'}->{$key} = $n;
+        $self->{'nodes_by_url'}->{$n->{'node_url'}} = $n;
+    }
+
+    $self->{'node'} = $self->_find_my_node();
+    $self->{'node'}->{'node_id'}     = $Thruk::NODE_ID;
+    $self->{'node'}->{'hostname'}    = $Thruk::HOSTNAME;
+    $self->{'node'}->{'pids'}->{$$}  = $now;
+    if(!defined $self->{'node'}->{'maintenance'}) {
+        # get status from registerfile
+        $registered = Thruk::Utils::IO::json_lock_retrieve($self->{'registerfile'}) unless defined $registered;
+        $self->{'node'}->{'maintenance'} = $registered->{$Thruk::NODE_ID}->{'maintenance'} // 0;
+    }
+
     # set defaults
     for my $key (sort keys %{$nodes}) {
         my $n = $nodes->{$key};
         # set some defaults
-        $n->{'node_id'}       = $key;
         $n->{'hostname'}      = '' unless defined $n->{'hostname'};
         $n->{'last_contact'}  =  0 unless $n->{'last_contact'};
         $n->{'last_error'}    = '' unless $n->{'last_error'};
@@ -121,16 +140,7 @@ sub load_statefile {
         $n->{'version'}       = '' unless defined $n->{'version'};
         $n->{'branch'}        = '' unless defined $n->{'branch'};
         $n->{'maintenance'}   = 0  unless defined $n->{'maintenance'};
-
-        # add node to store
-        push @{$self->{'nodes'}}, $n;
-        $self->{'nodes_by_id'}->{$key} = $n;
-        $self->{'nodes_by_url'}->{$n->{'node_url'}} = $n;
     }
-
-    $self->{'node'} = $self->{'nodes_by_id'}->{$Thruk::NODE_ID};
-    $self->{'node'}->{'hostname'}    = $Thruk::HOSTNAME;
-    $self->{'node'}->{'pids'}->{$$}  = $now;
 
     $self->check_stale_pids();
 
@@ -459,11 +469,15 @@ sub maint {
     $node = $c->cluster->{'node'} unless defined $node;
     my $old = $node->{'maintenance'} ? 1 : 0;
     if(defined $val) {
-        Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
-            $node->{'node_id'} => {
-                maintenance => $val,
-            },
-        }, { pretty => 1 });
+        confess("cluster not ready") unless($node && $node->{'node_id'});
+        # save to both files, otherwise information would be lost after an omd update where the tmp fs might be remountet
+        for my $file ($self->{'registerfile'}, $self->{'localstate'}) {
+            Thruk::Utils::IO::json_lock_patch($file, {
+                $node->{'node_id'} => {
+                    maintenance => $val,
+                },
+            }, { pretty => 1 });
+        }
         $node->{'maintenance'} = $val;
         # update others
         $self->run_cluster('others', "Thruk::Utils::Cluster::heartbeat", [$self, $node->{'node_id'}]);
@@ -542,6 +556,21 @@ sub _cleanup_jobs_folder {
         }
     }
     return;
+}
+
+##########################################################
+sub _find_my_node {
+    my($self) = @_;
+    my $node = $self->{'nodes_by_id'}->{$Thruk::NODE_ID};
+    return $node if $node;
+    my $my_url = $self->_build_node_url() || '';
+    return({}) unless $my_url;
+    for my $n (@{$self->{'nodes'}}) {
+        if($n->{'node_url'} eq $my_url) {
+            return($n);
+        }
+    }
+    return({});
 }
 
 ##########################################################
