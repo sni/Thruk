@@ -810,8 +810,24 @@ sub _process_perf_info_page {
 ##########################################################
 # create the performance info cluster page
 sub _process_perf_info_cluster_page {
-    my( $c ) = @_;
+    my($c) = @_;
     $c->cluster->load_statefile();
+    if(defined $c->req->parameters->{'maint'}) {
+        return unless Thruk::Utils::check_csrf($c);
+        my $node = $c->cluster->{'nodes_by_id'}->{$c->req->parameters->{'node'}};
+        if(!$node) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such cluster node', code => 404 });
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4&cluster=1");
+        }
+        if($c->req->parameters->{'maint'}) {
+            $c->cluster->maint($node, 1);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => sprintf('cluster node %s put into maintenance mode', $node->{'hostname'}) });
+        } else {
+            $c->cluster->maint($node, 0);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => sprintf('maintenance mode for cluster node %s removed', $node->{'hostname'}) });
+        }
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4&cluster=1");
+    }
     $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
     return 1;
 }

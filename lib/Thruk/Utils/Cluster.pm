@@ -331,6 +331,7 @@ sub run_cluster {
         my $err = $@;
         my $elapsed = tv_interval($t1);
         if($err) {
+            $err =~ s/^(OMD:.*?)\ at\ \/.*$/$1/gmx;
             if(!$node->{'last_error'} && !$node->{'maintenance'}) {
                 $c->log->error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
             } else {
@@ -470,17 +471,23 @@ sub maint {
     my $old = $node->{'maintenance'} ? 1 : 0;
     if(defined $val) {
         confess("cluster not ready") unless($node && $node->{'node_id'});
-        # save to both files, otherwise information would be lost after an omd update where the tmp fs might be remountet
-        for my $file ($self->{'registerfile'}, $self->{'localstate'}) {
-            Thruk::Utils::IO::json_lock_patch($file, {
-                $node->{'node_id'} => {
-                    maintenance => $val,
-                },
-            }, { pretty => 1 });
+        # is that us?
+        if($self->is_it_me($node)) {
+            # save to both files, otherwise information would be lost after an omd update where the tmp fs might be remountet
+            for my $file ($self->{'registerfile'}, $self->{'localstate'}) {
+                Thruk::Utils::IO::json_lock_patch($file, {
+                    $node->{'node_id'} => {
+                        maintenance => $val,
+                    },
+                }, { pretty => 1 });
+            }
+            $node->{'maintenance'} = $val;
+            # update others
+            $self->run_cluster('others', "Thruk::Utils::Cluster::heartbeat", [$self, $node->{'node_id'}]);
+        } else {
+            $self->run_cluster($node, "Thruk::Utils::Cluster::maint", [$self, undef, $val]);
+            $self->run_cluster('all', "Thruk::Utils::Cluster::heartbeat", [$self]);
         }
-        $node->{'maintenance'} = $val;
-        # update others
-        $self->run_cluster('others', "Thruk::Utils::Cluster::heartbeat", [$self, $node->{'node_id'}]);
     }
     return $old;
 }

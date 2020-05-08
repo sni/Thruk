@@ -1,4 +1,5 @@
 ﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
@@ -34,6 +35,7 @@
                         <th class='data'>Response Time</th>
                         <th class='data'>Last Contact</th>
                         <th class='data'>Version</th>
+                        <th class='data'>Actions</th>
                       </tr>
                       [% my_version = version _ "_" _ branch %]
                       [% FOREACH n = c.cluster.nodes %]
@@ -46,27 +48,29 @@
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSIF n.last_contact == 0 %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" width="16" height="16" alt="starting">
+                          [% ELSIF n.last_error != "" %]
+                            <img src="[% url_prefix %]themes/[% theme %]/images/disabled.gif" width="16" height="16" alt="[% n.last_error | html %]" title="[% n.last_error | html %]">
                           [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/accept.png" width="16" height="16" alt="ok">
                           [% ELSE %]
-                            <img src="[% url_prefix %]themes/[% theme %]/images/error.png" width="16" height="16" alt="error">
+                            <img src="[% url_prefix %]themes/[% theme %]/images/disabled.gif" width="16" height="16" alt="error">
                           [% END %]
                         </td>
                         [% IF n.last_error != "" %]
                         <td class='dataVal' style="text-align: left;" colspan="4">
-                          [% n.last_error %]
+                          [% n.last_error | html %]
                         </td>
                         [% ELSE %]
                         <td class='dataVal' style="text-align: center;">
                           [% IF c.cluster.is_it_me(n) %]
-                           -
+                            0.000s
                           [% ELSE %]
                           [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
                           [% END %]
                         </td>
                         <td class='dataVal' style="text-align: center;">
                           [% IF c.cluster.is_it_me(n) %]
-                           -
+                            0s ago
                           [% ELSE %]
                             [% IF n.last_contact > 0 %]
                               [% IF date.now - n.last_contact < 120 %]
@@ -85,9 +89,30 @@
                           [% ELSE %]
                           [% n.version %][% IF n.branch %]-[% n.branch %][% END %]
                           [% cmp_version = n.version _ "_" _ n.branch %]
-                          [% IF cmp_version != my_version %]
-                            <img src="[% url_prefix %]themes/[% theme %]/images/warning.png" width="16" height="16" alt="version mismatch" style="vertical-align: sub;">
+                          [% IF cmp_version != "_" && cmp_version != my_version %]
+                            <img src="[% url_prefix %]themes/[% theme %]/images/warning.png" width="16" height="16" alt="version mismatch" title="version mismatch" style="vertical-align: sub;">
                           [% END %]
+                          [% END %]
+                        </td>
+                        <td class='dataVal'>
+                          [% IF c.cluster.maint(n) %]
+                            <form action='extinfo.cgi' method='POST'>
+                              <input type='hidden' name='type' value='4'>
+                              <input type='hidden' name='cluster' value='1'>
+                              <input type='hidden' name='maint' value='0'>
+                              <input type='hidden' name='node' value="[% n.node_id | html %]">
+                              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                              <a href="extinfo.cgi?type=4&cluster=1" onClick="jQuery(this).closest('FORM').submit(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt="Remove downtime for this node" title="Remove downtime for this node" width="16" height="16"></a>
+                            </form>
+                          [% ELSE %]
+                            <form action='extinfo.cgi' method='POST'>
+                              <input type='hidden' name='type' value='4'>
+                              <input type='hidden' name='cluster' value='1'>
+                              <input type='hidden' name='maint' value='1'>
+                              <input type='hidden' name='node' value="[% n.node_id | html %]">
+                              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                              <a href="extinfo.cgi?type=4&cluster=1" onClick="jQuery(this).closest('FORM').submit(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="Put this node into downtime" title="Put this node into downtime" width="16" height="16"></a>
+                            </form>
                           [% END %]
                         </td>
                         [% END %]
