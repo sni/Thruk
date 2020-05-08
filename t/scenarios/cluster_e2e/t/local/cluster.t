@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 76;
+plan tests => 80;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -61,6 +61,10 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd    => '/usr/bin/env omd start',
     like   => ['/Preparing\ tmp\ directory/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env curl -s "http://localhost/demo/thruk/cgi-bin/remote.cgi?lb_ping"',
+    like => ['/MAINTENANCE/'],
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk cluster ping',
