@@ -51,7 +51,7 @@
         jQuery("#cancel_[% pb_options.id %]").children()[0].src = "[% url_prefix %]themes/[% theme %]/images/loading-icon.gif";
         jQuery("#[% pb_options.id %] DIV.job_time").html("killing...");
 
-        /* send kill request and reload afterwards */
+        /* send kill request and reload/go back afterwards */
         var datestr = Math.round((new Date()).getTime()/1000);
         jQuery.ajax({
             url: "job.cgi?job=[% pb_options.job_id %]&cancel=1&_"+datestr,
@@ -60,10 +60,18 @@
             success: function(data, status, jqXHR) {
                 jQuery("#[% pb_options.id %] DIV.job_time").html("killed");
                 jQuery("#cancel_[% pb_options.id %]").hide();
+                [% IF c.req.uri.match("job.cgi") %]
+                window.history.go(-1);
+                [% ELSE %]
                 reloadPage();
+                [% END %]
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                [% IF c.req.uri.match("job.cgi") %]
+                window.history.go(-1);
+                [% ELSE %]
                 reloadPage();
+                [% END %]
             }
         });
         return;
