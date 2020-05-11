@@ -6,6 +6,8 @@ next:
             - add more mail sending options
           - Panorama:
             - add host icon which includes service states
+          - internals:
+            - update jquery to 3.5.1
 
 2.34     Sat Mar 28 09:53:19 CET 2020
           - renamed system api keys to superuser api keys
