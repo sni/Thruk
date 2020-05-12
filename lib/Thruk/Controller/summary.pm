@@ -68,13 +68,13 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
-    if(exists $c->req->parameters->{'report'} && _create_report($c)) {
-        # report created
+    if(exists $c->req->parameters->{'report'}) {
+        return if Thruk::Utils::External::render_page_in_background($c);
+        return if _create_report($c);
     }
-    else {
-        # Step 1 - select report type
-        _show_step_1($c);
-    }
+
+    # Step 1 - select report type
+    _show_step_1($c);
 
     return 1;
 }
@@ -96,8 +96,6 @@ sub _show_step_1 {
 ##########################################################
 sub _create_report {
     my ( $c ) = @_;
-
-    return if Thruk::Utils::External::render_page_in_background($c);
 
     $c->stats->profile(begin => "_create_report()");
 
