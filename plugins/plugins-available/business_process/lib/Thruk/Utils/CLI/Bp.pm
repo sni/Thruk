@@ -185,7 +185,11 @@ sub cmd {
     if($worker_num <= 0) {
         $worker_num = 1;
     }
-    _debug("calculating business process with ".$worker_num." workers");
+    alarm(0);
+    if($worker_num > 0) {
+        alarm($timeout);
+    }
+    _debug("calculating business process with ".$worker_num." workers") if $worker_num > 1;
     my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
 
     my $rc = 0;
@@ -220,9 +224,9 @@ sub cmd {
             push @child_pids, $child_pid;
         }
     }
-    alarm($timeout);
-    _debug("waiting ".$timeout." seconds for workers to finish");
     if($worker_num > 1) {
+        alarm($timeout);
+        _debug("waiting ".$timeout." seconds for workers to finish");
         while(1) {
             my $pid = wait();
             last if $pid == -1;
@@ -235,9 +239,9 @@ sub cmd {
             @child_pids = grep(!/^$pid$/mx, @child_pids);
             Time::HiRes::sleep(0.1);
         }
+        alarm(0);
+        _debug("all worker finished");
     }
-    alarm(0);
-    _debug("all worker finished");
     my $elapsed = tv_interval($t0);
     if(!defined $id) {
         $c->metrics->set('business_process_duration_seconds', $elapsed, "business process calculation duration in seconds");
