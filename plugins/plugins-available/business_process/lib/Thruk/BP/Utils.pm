@@ -744,7 +744,7 @@ sub get_nodes_grouped_by_state {
     my $groups = {};
     for my $n (@{$nodes}) {
         my $key = lc(state2text($n->{'status'}));
-        if($n->{'acknowledged'}) {
+        if($n->{'acknowledged'} && $n->{'status'} != 0) {
             $key = 'acknowledged_'.$key;
         }
         elsif($n->{'scheduled_downtime_depth'}) {

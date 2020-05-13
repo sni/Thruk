@@ -235,7 +235,7 @@ sub worst {
     my($c, $bp, $n) = @_;
     my $depends = ref $n eq 'HASH' ? $n->{'depends'} : $n->depends($bp);
     my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($depends, $bp, "worst");
-    if(!$nodes) {
+    if(!$nodes || scalar @{$nodes} == 0) {
         return(3, 'no dependent nodes');
     }
     return($state,
@@ -258,7 +258,7 @@ sub best {
     my($c, $bp, $n) = @_;
     my $depends = ref $n eq 'HASH' ? $n->{'depends'} : $n->depends($bp);
     my($state, $nodes, $extra) = Thruk::BP::Utils::get_nodes_grouped_by_state($depends, $bp, "best");
-    if(!$nodes) {
+    if(!$nodes || scalar @{$nodes} == 0) {
         return(3, 'no dependent nodes');
     }
     return($state,
