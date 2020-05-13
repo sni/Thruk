@@ -415,11 +415,13 @@ sub statusfilter {
         elsif($data->{'down'})        { ($best_host, $worst_host) = _set_best_worst(1, $best_host, $worst_host); }
         elsif($data->{'up'})          { ($best_host, $worst_host) = _set_best_worst(0, $best_host, $worst_host); }
         $extra->{acknowledged} = 0;
-        if($down_hosts <= $data->{'down_and_ack'} + $data->{'unreachable_and_ack'}) {
+        my $acknowledged = $data->{'down_and_ack'} + $data->{'unreachable_and_ack'};
+        if($down_hosts <= $acknowledged && $acknowledged > 0) {
             $extra->{acknowledged} = 1;
         }
         $extra->{scheduled_downtime_depth} = 0;
-        if($down_hosts <= $data->{'down_and_scheduled'} + $data->{'unreachable_and_scheduled'}) {
+        my $scheduled = $data->{'down_and_scheduled'} + $data->{'unreachable_and_scheduled'};
+        if($down_hosts <= $scheduled && $scheduled > 0) {
             $extra->{scheduled_downtime_depth} = 1;
         }
     }
@@ -438,13 +440,15 @@ sub statusfilter {
         elsif($data->{'ok'})       { ($best_service, $worst_service) = _set_best_worst(0, $best_service, $worst_service); }
         if($type eq 'services' || $extra->{acknowledged} == 1) {
             $extra->{acknowledged} = 0;
-            if($down_services <= $data->{'critical_and_ack'} + $data->{'unknown_and_ack'}) {
+            my $acknowledged = $data->{'critical_and_ack'} + $data->{'unknown_and_ack'};
+            if($down_services <= $acknowledged && $acknowledged > 0) {
                 $extra->{acknowledged} = 1;
             }
         }
         if($type eq 'services' || $extra->{scheduled_downtime_depth} == 1) {
             $extra->{scheduled_downtime_depth} = 0;
-            if($down_services <= $data->{'critical_and_scheduled'} + $data->{'unknown_and_scheduled'}) {
+            my $scheduled = $data->{'critical_and_scheduled'} + $data->{'unknown_and_scheduled'};
+            if($down_services <= $scheduled && $scheduled > 0) {
                 $extra->{scheduled_downtime_depth} = 1;
             }
         }
