@@ -3351,7 +3351,7 @@ function print_action_menu(src, options) {
         src = is_array(src) ? src : [src];
         jQuery(src).each(function(i, el) {
             var icon       = document.createElement('img');
-            var icon_url   = replace_macros(el.icon);
+            var icon_url   = replace_macros(el.icon, undefined, options);
             icon.src       = icon_url;
             try {
                 // use data url in reports
@@ -3372,7 +3372,7 @@ function print_action_menu(src, options) {
 
             if(el.action) {
                 var link = document.createElement('a');
-                link.href = replace_macros(el.action);
+                link.href = replace_macros(el.action, undefined, options);
                 if(el.target) { link.target = el.target; }
                 link.appendChild(icon);
                 item = link;
@@ -3390,7 +3390,7 @@ function print_action_menu(src, options) {
             var scriptTag = document.scripts[document.scripts.length - 1];
             scriptTag.parentNode.appendChild(item);
             if(show_title && el.title) {
-                var title = document.createTextNode(replace_macros(icon.title));
+                var title = document.createTextNode(replace_macros(icon.title, undefined, options));
                 scriptTag.parentNode.appendChild(title);
             }
         });
@@ -3528,6 +3528,7 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
 }
 
 function actionGetMenuItem(el, id, backend, host, service) {
+    var options = { host: host, service: service, backend: backend};
     var item = document.createElement('li');
     if(el == "-") {
         var hr = document.createElement('hr');
@@ -3546,8 +3547,8 @@ function actionGetMenuItem(el, id, backend, host, service) {
         var span       = document.createElement('span');
         span.className = 'icon';
         var img        = document.createElement('img');
-        img.src        = replace_macros(el.icon);
-        img.title      = replace_macros(el.title ? el.title : '');
+        img.src        = replace_macros(el.icon, undefined, options);
+        img.title      = replace_macros(el.title ? el.title : '', undefined, options);
         span.appendChild(img);
         link.appendChild(span);
     }
@@ -3558,7 +3559,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
         label.innerHTML = el.html;
     } else {
         label = document.createElement('span');
-        label.innerHTML = replace_macros(el.label);
+        label.innerHTML = replace_macros(el.label, undefined, options);
     }
     link.appendChild(label);
 
@@ -3566,7 +3567,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
         if(typeof el.action === "function") {
             jQuery(link).bind("click", {backend: backend, host: host, service: service}, el.action);
         } else {
-            link.href = replace_macros(el.action);
+            link.href = replace_macros(el.action, undefined, options);
         }
     }
     if(el.menu) {
@@ -3803,7 +3804,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
 }
 
 /* replace common macros */
-function replace_macros(input, macros) {
+function replace_macros(input, macros, core_macros) {
     var out = input;
     if(out == undefined) {
         return(out);
@@ -3814,6 +3815,12 @@ function replace_macros(input, macros) {
             out = out.replace(regex, macros[key]);
         }
         return(out);
+    }
+
+    // replace some known naemon like macros
+    if(core_macros) {
+        if(core_macros.host)    { out = out.replace(/\$HOSTNAME\$/g,    core_macros.host); }
+        if(core_macros.service) { out = out.replace(/\$SERVICEDESC\$/g, core_macros.service); }
     }
 
     out = out.replace(/\{\{\s*theme\s*\}\}/g, theme);
