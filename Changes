@@ -6,6 +6,8 @@ next:
             - add more mail sending options
           - Panorama:
             - add host icon which includes service states
+          - Business Process:
+            - fix setting downtime/ack state
           - internals:
             - update jquery to 3.5.1
 
