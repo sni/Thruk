@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.34-2   Wed May 20 17:01:57 CEST 2020
           - quick commands can create recurring downtimes
           - Reporting:
             - add more mail sending options
