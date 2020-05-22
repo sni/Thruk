@@ -45,7 +45,7 @@ setup_apache2() {
 
   # activate cookie in existing default virtual hosts
   set +e
-  find /etc/apache2/sites-available/ -iname '*default*' -print -quit | \
+  find /etc/apache2/sites-available/ -iname '*default*' -print | \
   while read file; do
       if ! grep thruk_cookie_auth.include $file >/dev/null 2>&1; then
           sed -i -e 's|</VirtualHost>|\n    Include /usr/share/thruk/thruk_cookie_auth.include\n</VirtualHost>|g' $file

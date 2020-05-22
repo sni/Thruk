@@ -20,7 +20,7 @@ set -e
 
 # deactivate cookie in existing default virtual hosts
 cleanup_apache() {
-  find /etc/apache2/sites-available/ -iname '*default*' -print -quit | \
+  find /etc/apache2/sites-available/ -iname '*default*' -print | \
     while read file; do
       sed -i -e '/Include \/usr\/share\/thruk\/thruk_cookie_auth.include/d' $file
     done
