@@ -1050,6 +1050,10 @@ sub _finalize_request {
     my($c, $res) = @_;
     $c->stats->profile(begin => "_finalize_request");
 
+    if($c->stash->{'extra_headers'}) {
+        push @{$res->[1]}, @{$c->stash->{'extra_headers'}};
+    }
+
     # restore timezone setting
     $thruk->set_timezone($c->config->{'_server_timezone'});
 

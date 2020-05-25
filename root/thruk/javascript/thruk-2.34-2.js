@@ -497,15 +497,40 @@ function cookieSave(name, value, expires, domain) {
     cookieStr += ";domain="+domain;
   }
 
+  // cleanup befor we set new cookie
+  cookieRemoveAll(name);
+
   document.cookie = cookieStr;
 }
 
 /* remove existing cookie */
-function cookieRemove(name, path) {
-    if(path == undefined) {
-        path = cookie_path;
-    }
-    document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+function cookieRemove(name) {
+    cookieRemoveAll(name);
+}
+
+/* remove existing cookie for all sub/domains */
+function cookieRemoveAll(name) {
+    var path_info = document.location.pathname;
+    path_info = path_info.replace("/^\/", ""); // strip off leading slash
+    path_info = path_info.replace("/\/[^\/]+$/", "/"); // strip off file part
+    var paths = ["/"];
+    var path  = "";
+    jQuery.each(path_info.split("/"), function(key, part) {
+        path = path+"/"+part;
+        paths.push(path+"/");
+    });
+
+    var domain = "";
+    jQuery.each(document.location.hostname.split(".").reverse(), function(key, hostpart) {
+        if(domain == "") {
+            domain = hostpart;
+        } else {
+            domain = hostpart+"."+domain;
+        }
+        jQuery.each(document.location.hostname.split(".").reverse(), function(key2, path) {
+            document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+        });
+    });
 }
 
 /* return cookie value */

@@ -227,18 +227,57 @@ sub index {
 sub _invalidate_current_session {
     my($c, $cookie_path) = @_;
     my $cookie = $c->cookie('thruk_auth');
-    $c->cookie('thruk_auth' => '', {
-        expires  => 0,
-        path     => $cookie_path,
-        domain   => _get_cookie_domain($c),
-        httponly => 1,
-    });
     if(defined $cookie and defined $cookie->value) {
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie->value);
         if($session_data) {
             unlink($session_data->{'file'});
         }
     }
+
+    $c->cookie('thruk_auth' => '', {
+        expires  => 0,
+        path     => $cookie_path,
+        domain   => _get_cookie_domain($c),
+        httponly => 1,
+    });
+
+    # remove session cookie for all path and domain variations
+    my $domains = [];
+    my $domain;
+    my $http_host = $c->req->env->{'HTTP_HOST'};
+    $http_host =~ s/:\d+$//gmx;
+    for my $part (reverse split/\./mx, $http_host) {
+        if(!$domain) {
+            $domain = $part;
+        } else {
+            $domain = $part.".".$domain;
+        }
+        push @{$domains}, $domain;
+    }
+
+    my $path_info = $c->req->env->{'REQUEST_URI_ORIG'};
+    $path_info =~ s/\?.*$//gmx; # strip off get parameter
+    $path_info =~ s/^\///gmx; # strip off leading slash
+    $path_info =~ s/\/[^\/]+$/\//gmx; # strip off file part
+    my $paths = ["/"];
+    my $path  = "";
+    for my $part (split/\//mx, $path_info) {
+        $path = $path."/".$part;
+        push @{$paths}, $path."/";
+    }
+
+    for my $path (@{$paths}) {
+        # without domain
+        my $cookie = sprintf("thruk_auth=; path=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly", $path);
+        push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
+
+        # for all sub domains
+        for my $domain (@{$domains}) {
+            my $cookie = sprintf("thruk_auth=; path=%s;domain=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly", $path, $domain);
+            push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
+        }
+    }
+
     return;
 }
 

@@ -74,6 +74,7 @@
     }
 
     function onLogin() {
+        cleanSessionCookies();
         // set test cookie again, it may be removed already when logged into in another tab
         cookieSave('thruk_test', '****', 0, '[% cookie_domain %]');
         jQuery('body').addClass('submitting');
@@ -97,9 +98,16 @@
         return;
     }
 
+    // remove session cookies which interfere with current set cookie domain
+    function cleanSessionCookies() {
+      cookieRemoveAll("thruk_auth");
+    }
+
     try {
         breakFrame();
     } catch(e) { console.log(e); }
+
+    cleanSessionCookies();
   -->
   </script>
   [% IF ssi_footer; ssi_footer | evaltt; END %]

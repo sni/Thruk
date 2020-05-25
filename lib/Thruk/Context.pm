@@ -51,6 +51,7 @@ sub new {
     }
 
     # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
+    $env->{'REQUEST_URI_ORIG'} = $env->{'REQUEST_URI'} || $env->{'PATH_INFO'};
     my $path_info         = translate_request_path($env->{'REQUEST_URI'} || $env->{'PATH_INFO'}, $app->config, $env);
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
