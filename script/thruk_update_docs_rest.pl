@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
+use URI::Escape qw/uri_escape/;
 use Data::Dumper;
 
 use Thruk::Utils::CLI;
@@ -429,6 +430,9 @@ sub _fetch_keys {
     return if($url eq '/lmd/sites' && !$ENV{'THRUK_USE_LMD'});
     return if $doc =~ m/see\ /mxi;
 
+    my $host    = uri_escape($host_name);
+    my $service = uri_escape($service_description);
+
     my $keys = {};
     $c->{'rendered'} = 0;
     delete $c->req->parameters->{'sort'};
@@ -436,9 +440,9 @@ sub _fetch_keys {
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
     $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
-    $tst_url =~ s|<name>|$host_name|gmx;
-    $tst_url =~ s|<host>|$host_name|gmx;
-    $tst_url =~ s|<service>|$service_description|gmx;
+    $tst_url =~ s|<name>|$host|gmx;
+    $tst_url =~ s|<host>|$host|gmx;
+    $tst_url =~ s|<service>|$service|gmx;
     if($tst_url eq "/config/files") {
         # column would be optimized away otherwise
         $c->req->parameters->{'sort'} = "content";
