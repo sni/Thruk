@@ -1979,6 +1979,8 @@ The following macros can be used in the icon, action, title and label attribute.
      ** `{% raw %}{{remote_user}}{% endraw %}`  contains the user name itself. (Do not rely on this value, a user can change the url by himself)
      ** `{% raw %}{{prefix}}{% endraw %}`       the url path prefix, ex.: /thruk
      ** `{% raw %}{{site}}{% endraw %}`         the OMD site name.
+     ** `{% raw %}$HOSTNAME${% endraw %}`       contains the host name.
+     ** `{% raw %}$SERVICEDESC${% endraw %}`    contains the service description.
 
 ==== action menu variables
 
