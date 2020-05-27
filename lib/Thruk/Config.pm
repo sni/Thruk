@@ -1174,27 +1174,27 @@ return parsed config file
 sub read_config_file {
     my($files) = @_;
     $files = list($files);
-    my @config_lines;
+    my $conf = {};
     for my $f (@{$files}) {
         if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
             print STDERR "reading config file: ".$f."\n";
         }
         # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
         open my $fh, '<:encoding(UTF-8)', $f or die "Can't open '$f' for reading: $!";
-        my @rows = grep(!/^\s*\#/mxo, <$fh>);
-        push @config_lines, @rows;
+        my @rows = <$fh>;
         CORE::close($fh);
+        _parse_rows($f, \@rows, $conf);
     }
-    my $conf = {};
-    _parse_rows($files, \@config_lines, $conf);
     return($conf);
 }
 
 ######################################
 sub _parse_rows {
-    my($files, $rows, $conf, $until) = @_;
+    my($file, $rows, $conf, $cur_line, $until, $until_source) = @_;
     my $lastline = '';
+    $cur_line = 0 unless defined $cur_line;
     while(my $line = shift @{$rows}) {
+        $cur_line++;
         $line =~ s|(?<!\\)\#.*$||gmxo;
         $line =~ s|^\s+||gmxo;
         $line =~ s|\s+$||gmxo;
@@ -1218,7 +1218,7 @@ sub _parse_rows {
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
-                _parse_rows($files, $rows, $next, '</'.lc($k).'>');
+                _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
                 if(!defined $conf->{$k}->{$v}) {
                     $conf->{$k}->{$v} = $next;
                 } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
@@ -1232,7 +1232,7 @@ sub _parse_rows {
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
-                _parse_rows($files, $rows, $next, '</'.lc($k).'>');
+                _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
                 if(!defined $conf->{$k}) {
                     $conf->{$k} = $next;
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
@@ -1255,7 +1255,7 @@ sub _parse_rows {
             # try split by space
             ($k,$v) = split(/\s+/mxo, $line, 2);
             if(!defined $v) {
-                confess("unknow config entry: ".$line." in ".join(",", @{$files}));
+                die("unknow config entry: ".$line." in ".$file.":".$cur_line);
             }
         }
         if(substr($v,0,1) eq '"') {
@@ -1271,6 +1271,9 @@ sub _parse_rows {
         } else {
             $conf->{$k} = [$conf->{$k}, $v];
         }
+    }
+    if($until) {
+        die("unclosed block starting in: ".$until_source);
     }
     return;
 }

@@ -1862,6 +1862,8 @@ t/700-naemon.t
 t/800-plugins.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
+t/data/broken_config/a.conf
+t/data/broken_config/b.conf
 t/data/javascript_tests.js
 t/data/javascript_tests_login_tt.js
 t/data/log4perl.conf

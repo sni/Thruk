@@ -83,4 +83,13 @@ if(!$@) {
     is_deeply($config->{'cookie_auth_domain'}, 'test.local', "parsing cookie domain from thruk_local.d");
 };
 
+####################################################
+{
+    eval {
+        my $conf = Thruk::Config::read_config_file([sort glob('t/data/broken_config/*.conf')]);
+    };
+    my $err = $@;
+    like($err, "/\Qunclosed block starting\E/", "broken config returns error");
+};
+
 done_testing();
