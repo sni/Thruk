@@ -2344,6 +2344,7 @@ function getErrorText(details, error) {
     text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
     text = text + "Browser:    " + platform.description + "\n";
     text = text + "UserAgent:  " + navigator.userAgent + "\n";
+    text = text + "User:       " + remote_user+ "\n";
     text = text + "Backends:   ";
     var first = 1;
     for(var key in initial_backends) {
