@@ -565,9 +565,12 @@ sub add_defaults {
         if($@) {
             # side.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
-            print STDERR $@ if $c->config->{'thruk_debug'};
+            if($c->config->{'thruk_debug'}) {
+                $c->log->warn("data source error: $@");
+            } else {
+                $c->log->debug("data source error: $@");
+            }
             return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
-            $c->log->debug("data source error: $@");
             return $c->detach('/error/index/9');
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
