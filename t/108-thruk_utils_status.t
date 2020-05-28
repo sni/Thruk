@@ -41,9 +41,9 @@ sub _test_filter {
     is($s, $expect, 'got correct statement');
 }
 
-# round timestamp by 5 seconds to avoid test errors on slow machines
+# round timestamp by 30 seconds to avoid test errors on slow machines
 sub _round_timestamps {
     my($x) = @_;
-    $x = int($x / 5) * 5;
+    $x = int($x / 30) * 30;
     return($x);
 }
