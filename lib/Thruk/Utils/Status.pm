@@ -2367,12 +2367,14 @@ sub sort_table_columns {
 
     my $hashed = {};
     for my $col (@{$columns}) {
+        $col->{'field'} =~ s/^cust__/cust_/gmx;
         $hashed->{$col->{'field'}} = $col;
     }
 
     my $sorted = [];
     for my $param (split/,/mx, $params) {
         my($key,$title) = split(/:/mx, $param, 2);
+        $key =~ s/^cust__/cust_/gmx;
         if($hashed->{$key}) {
             $hashed->{$key}->{'checked'} = 1;
             if(defined $title) {
