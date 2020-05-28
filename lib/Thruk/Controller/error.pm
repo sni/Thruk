@@ -141,7 +141,7 @@ sub index {
             'mess'    => 'No Backend available',
             'dscr'    => 'None of the configured Backends could be reached, please have a look at the logfile for detailed information and make sure the core is up and running.',
             'details' => _get_connection_details($c),
-            'code'    => 500, # internal server error
+            'code'    => 503, # Service Unavailable
         },
         '10' => {
             'mess' => 'You are not authorized.',
@@ -246,7 +246,11 @@ sub index {
     }
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
-        if($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
+        if($code == 503 && $c->stash->{errorDetails} =~ m/connecting\./mx) {
+            # check if all backends are in connecting state
+            $c->log->info("cannot process request, all backends are in state 'connecting'.");
+        }
+        elsif($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
             Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails);
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
@@ -327,7 +331,7 @@ sub index {
 }
 
 sub _get_connection_details {
-    my $c      = shift;
+    my($c) = @_;
     my $detail = '';
 
     if($c->stash->{'lmd_error'}) {
