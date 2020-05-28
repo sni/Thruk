@@ -247,9 +247,9 @@ sub index {
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code == 503 && $c->stash->{errorDetails} =~ m/connecting\./mx) {
-            # check if all backends are in connecting state
+            # check if all lmd backends are in connecting state
             $c->log->warn("cannot process request, all backends are in state 'connecting'.");
-            $c->stash->{errorDescription} .= "\nplease try again in a second";
+            $c->stash->{errorDescription} .= "\nplease try again in a  few seconds.";
         }
         elsif($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
             Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails);
