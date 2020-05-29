@@ -543,7 +543,7 @@ optional detached will run the command detached in the background
 =cut
 
 sub cmd {
-    my($c, $cmd, $stdin, $print_prefix, $detached) = @_;
+    my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode) = @_;
     if(defined $c && !defined $cmd) {
         $cmd = $c;
         $c = undef;
@@ -605,7 +605,7 @@ sub cmd {
         $rc = $?;
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
-        $output = Thruk::Utils::decode_any($output);
+        $output = Thruk::Utils::decode_any($output) unless $no_decode;
         # restore original array
         unshift @{$cmd}, $prog;
     } else {
@@ -622,7 +622,7 @@ sub cmd {
         }
 
         $output = `$cmd`;
-        $output = Thruk::Utils::decode_any($output);
+        $output = Thruk::Utils::decode_any($output) unless $no_decode;
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if($rc == -1 && $SIG{CHLD} eq 'IGNORE');

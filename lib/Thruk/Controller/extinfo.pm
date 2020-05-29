@@ -889,7 +889,7 @@ sub _apache_status {
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     require Thruk::UserAgent;
-    my $ua = Thruk::UserAgent->new($c->config);
+    my $ua = Thruk::UserAgent->new({}, $c->config);
     $ua->timeout(10);
     $ua->agent("thruk");
     $ua->ssl_opts('verify_hostname' => 0 );

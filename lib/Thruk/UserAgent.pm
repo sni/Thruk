@@ -27,11 +27,11 @@ returns new UserAgent object
 
 =cut
 sub new {
-    my($class, $config) = @_;
+    my($class, $config, $thruk_config) = @_;
     confess("no config") unless $config;
-    if(!$config->{'use_curl'}) {
+    if(!$thruk_config || !$thruk_config->{'use_curl'}) {
         require LWP::UserAgent;
-        my $ua = LWP::UserAgent->new;
+        my $ua = LWP::UserAgent->new(%{$config});
         return $ua;
     }
     my $self = {
@@ -39,10 +39,14 @@ sub new {
         'agent'                 => 'thruk',
         'ssl_opts'              => {},
         'default_header'        => {},
+        'header'                => {},
         'max_redirect'          => 7,
         'protocols_allowed'     => ['http', 'https'],
         'requests_redirectable' => [ 'GET' ],           # not used
     };
+    for my $key (sort keys %{$config}) {
+        $self->{$key} = $config->{$key};
+    }
     bless($self, $class);
     return $self;
 }
@@ -79,6 +83,7 @@ sub post {
     for my $key (keys %{$data}) {
         push @{$cmd}, '-d', $key.'='.$data->{$key};
     }
+    push @{$cmd}, '--request', 'POST';
     push @{$cmd}, $url;
     my $res = $self->_request($url, $cmd);
     return $res;
@@ -173,6 +178,23 @@ sub default_header {
 
 ##############################################
 
+=head2 header
+
+  header()
+
+get/set header
+
+=cut
+sub header {
+    my($self, %header) = @_;
+    for my $key (keys %header) {
+        $self->{'header'}->{$key} = $header{$key};
+    }
+    return $self->{'header'};
+}
+
+##############################################
+
 =head2 max_redirect
 
   max_redirect()
@@ -223,6 +245,67 @@ sub requests_redirectable {
 }
 
 ##############################################
+
+=head2 env_proxy
+
+  env_proxy()
+
+set proxy from env
+
+=cut
+sub env_proxy {
+    my($self) = @_;
+    # no to do, env proxy is automatically honored
+    return;
+}
+
+##############################################
+
+=head2 cookie_jar
+
+  cookie_jar()
+
+get/set cookie_jar
+
+=cut
+sub cookie_jar {
+    my($self, $jar) = @_;
+    if($jar) {
+        if(ref $jar) {
+            $self->{'cookie_jar'} = $jar->{'file'};
+        } else {
+            $self->{'cookie_jar'} = $jar;
+        }
+    }
+    return($self->{'cookie_jar'});
+}
+
+##############################################
+
+=head2 request
+
+  request()
+
+request from given HTTP::Request
+
+=cut
+sub request {
+    my($self, $req) = @_;
+    for my $key (sort keys %{$req->{'_headers'}}) {
+        $self->header($key, $req->{'_headers'}->{$key});
+    }
+    my $cmd = $self->_get_cmd_line();
+    push @{$cmd}, '--request', $req->method();
+    my $content = $req->content();
+    if($content ne "") {
+        push @{$cmd}, '--data-raw', $content;
+    }
+    my $url = "".$req->uri();
+    push @{$cmd}, $url;
+    return($self->_request($url, $cmd));
+}
+
+##############################################
 sub _get_cmd_line {
     my($self) = @_;
     my $cmd = [
@@ -239,8 +322,15 @@ sub _get_cmd_line {
     if($self->{'credentials'}) {
         push @{$cmd}, '--user', $self->{'credentials'}->[2].':'.$self->{'credentials'}->[3];
     }
+    if($self->{'cookie_jar'}) {
+        push @{$cmd}, '--cookie-jar', $self->{'cookie_jar'};
+        push @{$cmd}, '--cookie',     $self->{'cookie_jar'};
+    }
     for my $key (keys %{$self->{'default_header'}}) {
         push @{$cmd}, '--header', $key.': '.$self->{'default_header'}->{$key};
+    }
+    for my $key (keys %{$self->{'header'}}) {
+        push @{$cmd}, '--header', $key.': '.$self->{'header'}->{$key};
     }
     if(defined $self->{'ssl_opts'}->{'verify_hostname'} and $self->{'ssl_opts'}->{'verify_hostname'} == 0) {
         push @{$cmd}, '--insecure';
@@ -251,7 +341,7 @@ sub _get_cmd_line {
 ##############################################
 sub _request {
     my($self, $url, $cmd) = @_;
-    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
     if($rc != 0 || $output !~ m|^HTTP/|mx) {
         die($output);
     }

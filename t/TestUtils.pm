@@ -22,7 +22,7 @@ use URI::Escape qw/uri_unescape/;
 use File::Slurp qw/read_file/;
 use HTTP::Request::Common 6.12 qw/GET POST/;
 use HTTP::Cookies::Netscape;
-use LWP::UserAgent;
+use Thruk::UserAgent;
 use File::Temp qw/tempfile/;
 use Carp qw/confess/;
 use Plack::Test;
@@ -36,6 +36,8 @@ our @EXPORT_OK = qw(request ctx_request);
 my $use_html_lint;
 my $lint;
 my $test_token = "";
+
+my $has_curl = has_util("curl");
 
 use Thruk;
 use Thruk::Config;
@@ -916,12 +918,14 @@ sub _external_request {
     }
 
     our($cookie_jar, $cookie_file);
-    my $ua = LWP::UserAgent->new(
+    my $ua = Thruk::UserAgent->new({
         keep_alive   => 1,
         max_redirect => 0,
-        timeout      => 30,
+        timeout      => 60,
         requests_redirectable => [],
-    );
+    }, {
+        use_curl     => $has_curl,
+    });
     $ua->env_proxy;
     $ua->cookie_jar($cookie_jar);
     $ua->agent( $agent ) if $agent;

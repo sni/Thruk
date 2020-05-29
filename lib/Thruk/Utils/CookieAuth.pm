@@ -172,7 +172,7 @@ returns user agent used for external requests
 =cut
 sub get_user_agent {
     my($config) = @_;
-    my $ua = Thruk::UserAgent->new($config);
+    my $ua = Thruk::UserAgent->new({}, $config);
     $ua->timeout(30);
     $ua->agent("thruk_auth");
     $ua->no_proxy('127.0.0.1', 'localhost');

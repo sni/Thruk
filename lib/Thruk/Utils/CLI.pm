@@ -1145,7 +1145,7 @@ sub _cmd_ext_job {
 ##############################################
 sub _get_user_agent {
     my $config = { 'use_curl' => $ENV{'THRUK_CURL'} };
-    my $ua = Thruk::UserAgent->new($config);
+    my $ua = Thruk::UserAgent->new({}, $config);
     $ua->agent("thruk_cli");
     return $ua;
 }

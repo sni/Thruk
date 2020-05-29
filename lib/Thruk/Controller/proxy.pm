@@ -77,7 +77,7 @@ sub index {
     if($passthrough) {
         $req->header('X-Thruk-Passthrough', $passthrough);
     }
-    my $ua = Thruk::UserAgent->new({ use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
+    my $ua = Thruk::UserAgent->new({}, { use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
     $ua->max_redirect(0);
     $ua->ssl_opts('verify_hostname' => 0 ) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
     if(!$c->config->{'ssl_verify_hostnames'}) {
