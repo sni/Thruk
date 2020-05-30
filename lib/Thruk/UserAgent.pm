@@ -13,6 +13,7 @@ UserAgent wrapper for Thruk
 use strict;
 use warnings;
 use Carp qw/confess/;
+use File::Temp qw/tempfile/;
 use HTTP::Response ();
 use Thruk::Utils::IO ();
 
@@ -291,18 +292,30 @@ request from given HTTP::Request
 =cut
 sub request {
     my($self, $req) = @_;
-    for my $key (sort keys %{$req->{'_headers'}}) {
-        $self->header($key, $req->{'_headers'}->{$key});
+    my %headers = $req->headers()->flatten();
+    for my $key (sort keys %headers) {
+        $self->header($key, $headers{$key});
     }
     my $cmd = $self->_get_cmd_line();
     push @{$cmd}, '--request', $req->method();
     my $content = $req->content();
+    my $tempfile;
     if($content ne "") {
-        push @{$cmd}, '--data-raw', $content;
+        if(length($content) > 100) {
+            (undef, $tempfile) = tempfile(TEMPLATE => 'postdataXXXXX', UNLINK => 1);
+            Thruk::Utils::IO::write($tempfile, $content);
+            push @{$cmd}, '--data-binary', '@'.$tempfile;
+        } else {
+            push @{$cmd}, '--data-binary', $content;
+        }
+        # disable 100-continue header logic
+        push @{$cmd}, '-H', "Expect:";
     }
     my $url = "".$req->uri();
     push @{$cmd}, $url;
-    return($self->_request($url, $cmd));
+    my $res = ($self->_request($url, $cmd));
+    unlink($tempfile) if $tempfile;
+    return($res);
 }
 
 ##############################################
@@ -332,7 +345,9 @@ sub _get_cmd_line {
     for my $key (keys %{$self->{'header'}}) {
         push @{$cmd}, '--header', $key.': '.$self->{'header'}->{$key};
     }
-    if(defined $self->{'ssl_opts'}->{'verify_hostname'} and $self->{'ssl_opts'}->{'verify_hostname'} == 0) {
+    if(   (defined $self->{'ssl_opts'}->{'verify_hostname'} && $self->{'ssl_opts'}->{'verify_hostname'} == 0)
+       || (defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} && !$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'})
+    ) {
         push @{$cmd}, '--insecure';
     }
     return $cmd;
