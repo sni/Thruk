@@ -365,7 +365,6 @@ sub _renew_navigation {
                         name => $item->[0],
                         href => $href,
                     };
-                    $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
                     push @{$user_items}, [ $section, $item ];
                 }
             }
