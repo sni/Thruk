@@ -101,7 +101,7 @@ if(!$@) {
         a    => 1,
         b    => 1,
     };
-    is_deeply($config->{'Thruk::Plugin::test'}, $expected, "parsing cookie domain from thruk_local.d");
+    is_deeply($config->{'Thruk::Plugin::test'}, $expected, "parsing multiple plugin sections");
 };
 
 done_testing();
