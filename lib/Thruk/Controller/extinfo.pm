@@ -219,11 +219,9 @@ sub _process_downtimes_page {
 
     $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ],
                                                                  sort   => { $hst_order => _get_downtime_sort_option($hst_sortoption)->[0] },
-                                                                 extra_columns => ['peer_name', 'peer_addr'],
                                                                );
     $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ],
                                                                  sort   => { $svc_order => _get_downtime_sort_option($svc_sortoption)->[0] },
-                                                                 extra_columns => ['peer_name', 'peer_addr'],
                                                                );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
