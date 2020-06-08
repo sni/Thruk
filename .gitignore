@@ -9,9 +9,8 @@ local-lib
 logs/debug.log
 logs/error.log
 logs/access.log
-thruk_local.conf
-thruk_local.conf*
-^menu_local.conf
+/thruk_local.conf*
+/menu_local.conf
 inc
 docs/images
 htpasswd.users
