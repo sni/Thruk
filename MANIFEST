@@ -1914,6 +1914,10 @@ t/data/separated_hashes/thruk.conf
 t/data/separated_hashes/thruk_local.conf
 t/data/separated_hashes/thruk_local.d/a.conf
 t/data/separated_hashes/thruk_local.d/b.conf
+t/data/split_plugins/thruk.conf
+t/data/split_plugins/thruk_local.conf
+t/data/split_plugins/thruk_local.d/a.conf
+t/data/split_plugins/thruk_local.d/b.conf
 t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
 t/data/test_spaces.conf

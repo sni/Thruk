@@ -92,4 +92,16 @@ if(!$@) {
     like($err, "/\Qunclosed block starting\E/", "broken config returns error");
 };
 
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/split_plugins';
+    my $config = Thruk::Config::get_config();
+    my $expected = {
+        test => 2,
+        a    => 1,
+        b    => 1,
+    };
+    is_deeply($config->{'Thruk::Plugin::test'}, $expected, "parsing cookie domain from thruk_local.d");
+};
+
 done_testing();

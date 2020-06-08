@@ -334,6 +334,9 @@ sub get_config {
     my $first_backend_from_thruk_locals = 0;
     for my $file (@files, 'thruk_local.conf') {
         for my $key (keys %{$configs{$file}}) {
+            if($key =~ '^Thruk::Plugin::' && !defined $config{$key}) {
+                $config{$key} = {};
+            }
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
                 if($key eq 'Thruk::Backend') {
                     # merge all backends from thruk_locals
