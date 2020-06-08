@@ -18,7 +18,7 @@
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.peer_key.size < backends.size %]
-          [% d.peer_name.join(', ') %]
+          [% peer_name(d).join(', ') %]
         [% ELSE %]
         <i>all</i>
         [% END %]

@@ -1196,6 +1196,39 @@ sub debug {
     return("");
 }
 
+##############################################
+
+=head2 peer_name
+
+  get peer_name from dataset
+
+returns peer_name
+
+=cut
+sub peer_name {
+    my($row) = @_;
+    return($row->{'peer_name'}) if $row->{'peer_name'};
+
+    my $c = $Thruk::Request::c;
+    if($row->{'peer_key'}) {
+        if(ref $row->{'peer_key'} eq 'ARRAY') {
+            my $names = [];
+            for my $key (@{$row->{'peer_key'}}) {
+                if($c->stash->{'backend_detail'}->{$key}) {
+                    push @{$names}, $c->stash->{'backend_detail'}->{$key}->{'name'};
+                }
+            }
+            return($names);
+        } else {
+            my $key = $row->{'peer_key'};
+            if($c->stash->{'backend_detail'}->{$key}) {
+                return($c->stash->{'backend_detail'}->{$key}->{'name'});
+            }
+        }
+    }
+    return("");
+}
+
 ########################################
 
 1;
