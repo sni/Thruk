@@ -37,7 +37,7 @@ my $use_html_lint;
 my $lint;
 my $test_token = "";
 
-my $has_curl = has_util("curl");
+my $has_curl = 0; # does require newer curl, disabling for now (2020-06-09) # has_util("curl");
 
 use Thruk;
 use Thruk::Config;
