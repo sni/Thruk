@@ -63,10 +63,8 @@ do a get request
 =cut
 sub get {
     my($self, $url) = @_;
-    my $cmd = $self->_get_cmd_line();
-    push @{$cmd}, $url;
-    my $res = $self->_request($url, $cmd);
-    return $res;
+    my $request = GET($url);
+    return($self->request($request));
 }
 
 ##############################################
@@ -80,14 +78,8 @@ do a post request
 =cut
 sub post {
     my($self, $url, $data) = @_;
-    my $cmd = $self->_get_cmd_line();
-    for my $key (keys %{$data}) {
-        push @{$cmd}, '-d', $key.'='.$data->{$key};
-    }
-    push @{$cmd}, '--request', 'POST';
-    push @{$cmd}, $url;
-    my $res = $self->_request($url, $cmd);
-    return $res;
+    my $request = POST($url, $data);
+    return($self->request($request));
 }
 
 ##############################################
@@ -313,7 +305,8 @@ sub request {
     }
     my $url = "".$req->uri();
     push @{$cmd}, $url;
-    my $res = ($self->_request($url, $cmd));
+    my $res = $self->_get_response($cmd);
+    $res->request($req); # set request object in our result
     unlink($tempfile) if $tempfile;
     return($res);
 }
@@ -354,15 +347,13 @@ sub _get_cmd_line {
 }
 
 ##############################################
-sub _request {
-    my($self, $url, $cmd) = @_;
+sub _get_response {
+    my($self, $cmd) = @_;
     my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
     if($rc != 0 || $output !~ m|^HTTP/|mx) {
         die($output);
     }
-    my $r = HTTP::Response->parse($output);
-    $r->{'_request'}->{'_uri'} = $url;
-    return($r);
+    return(HTTP::Response->parse($output));
 }
 
 ##############################################
