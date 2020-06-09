@@ -160,6 +160,7 @@ sub _dbh {
         $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};
         $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1});
         $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
+        $self->{'mysql'}->do("SET myisam_stats_method=nulls_ignored");
         #&timing_breakpoint('connected');
     }
     return $self->{'mysql'};
@@ -1444,7 +1445,8 @@ sub _update_logcache_optimize {
             print $table.'...' if $verbose > 1;
             $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
             $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
-            $dbh->do("ANALYSE TABLE `".$prefix."_".$table.'`');
+            $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
+            $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
             print "OK\n" if $verbose > 1;
         }
     }
@@ -1923,6 +1925,11 @@ sub _import_peer_logfiles {
 
     if($mode eq 'import') {
         $dbh->do('SET foreign_key_checks = 1');
+    }
+    # update index statistics
+    for my $table (@Thruk::Backend::Provider::Mysql::tables) {
+        $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
+        $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
     }
 
     return $log_count;
