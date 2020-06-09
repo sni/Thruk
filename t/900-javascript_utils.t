@@ -54,6 +54,7 @@ for my $f (@functions) {
 js_ok("var top = { location: '' };", "defined top fake object");
 js_ok("var location = '';"         , "defined location fake object");
 js_ok("window.location = '';"      , "defined window.location fake object");
+js_ok("function cookieRemoveAll() {};" , "override cookie function");
 _eval_extracted_js('templates/login.tt');
 @functions = read_file('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/data/javascript_tests_login_tt.js');
