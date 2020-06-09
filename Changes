@@ -1,5 +1,16 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix reloading page from bookmarks
+          - improve session cookie handling
+          - improve config file parser
+            - complain about unclosed blocks
+          - Panorama:
+            - fix js error TypeError: d.comments is undefined
+          - Logcache:
+            - fix updating host_id index
+            - fix setting blocksize for initial import
+
 2.34-2   Wed May 20 17:01:57 CEST 2020
           - quick commands can create recurring downtimes
           - Reporting:
