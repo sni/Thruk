@@ -304,6 +304,7 @@ sub request {
         push @{$cmd}, '-H', "Expect:";
     }
     my $url = "".$req->uri();
+    $url =~ s/\#.*$//gmx; # hash must not be send to server
     push @{$cmd}, $url;
     my $res = $self->_get_response($cmd);
     $res->request($req); # set request object in our result
