@@ -7,7 +7,8 @@
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set MYSQL on
   - shell: omd config demo set THRUK_LOGCACHE on
-  - shell: omd config demo set CORE off
+  - shell: omd config demo set CORE none
+  - shell: omd config demo set PNP4NAGIOS off
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
