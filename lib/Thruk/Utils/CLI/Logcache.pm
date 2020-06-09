@@ -24,16 +24,19 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
 
     Available commands are:
 
-        - import[=blocksize]    initially import all logfiles, optionally supply
-                                duration (--start) to only import given range.
-                                Importing blocksize at a time which defaults to 1d.
-        - update                delta update all logfiles since last import/update
-        - stats                 display logcache statistics
-        - authupdate            update authentication data
-        - optimize              run table optimize
-        - clean[=duration]      clean cache and keep everything within given duration
-        - removeunused          remove unused tables for no longer existing backends
-        - drop                  remove all tables and data
+        - import                    Initially import all logfiles
+                 [--blocksize=...]  sets the amount of logfiles fetched in one
+                                    import block. Default: 1d
+                 [--start=... ]     Set the relative start point to import from.
+                                    No default, will import all available logfiles
+                                    if not set. Ex.: --start=1y
+        - update                    Delta update all logfiles since last import/update.
+        - stats                     Display logcache statistics.
+        - authupdate                Update authentication data.
+        - optimize                  Run table optimize.
+        - clean [duration]          Clean cache and keep everything within given duration (in days). Default: 1y
+        - removeunused              Remove unused tables for no longer existing backends.
+        - drop                      Remove all tables and data.
 
 =back
 
@@ -41,6 +44,7 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
 
 use warnings;
 use strict;
+use Thruk::Utils qw//;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Getopt::Long qw//;
@@ -70,6 +74,10 @@ sub cmd {
 
     return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless $mode;
 
+    ## no critic
+    my $terminal_attached = -t 0 ? 1 : 0;
+    ## use critic
+
     # parse options
     my $opt = {};
     Getopt::Long::Configure('no_ignore_case');
@@ -77,13 +85,19 @@ sub cmd {
     Getopt::Long::Configure('pass_through');
     Getopt::Long::GetOptionsFromArray($commandoptions,
        "s|start=s"          => \$opt->{'start'},
+       "blocksize=s"        => \$opt->{'blocksize'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
     my $blocksize;
-    if($mode eq 'import' || $mode eq 'clean') {
-        $blocksize = shift @{$commandoptions};
+    if($mode eq 'import') {
+        $blocksize = Thruk::Utils::expand_duration($opt->{'blocksize'}) if $opt->{'blocksize'};
+    } elsif($mode eq 'clean') {
+        $blocksize = $opt->{'start'} || shift @{$commandoptions};
+        if(defined $blocksize && $blocksize =~ m/^\d+\w{1}/mx) {
+            $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
+        }
     }
 
     $opt->{'force'} = $global_options->{'force'};
@@ -127,8 +141,8 @@ sub cmd {
 
         if($exist) {
             local $|=1;
-            print "import removes current cache and imports new logfile data.\n";
-            print "use logcacheupdate to update cache. Continue? [n]: ";
+            print "Import removes current cache and imports new logfile data.\n";
+            print "Use 'thruk logcache update' to delta update the cache.\nContinue? [n]: ";
             my $buf;
             sysread STDIN, $buf, 1;
             if($buf !~ m/^(y|j)/mxi) {
@@ -139,7 +153,18 @@ sub cmd {
 
     if($mode eq 'drop' && !$global_options->{'yes'}) {
         local $|=1;
-        print "Do you really want to drop all data and remove the logcache? Continue? [n]: ";
+        print "Do you really want to drop all data and remove the logcache?\nContinue? [n]: ";
+        my $buf;
+        sysread STDIN, $buf, 1;
+        if($buf !~ m/^(y|j)/mxi) {
+            return("canceled\n", 1);
+        }
+    }
+
+    if($mode eq 'clean' && !$global_options->{'yes'} && $terminal_attached) {
+        local $|=1;
+        my $start = time() - (($blocksize // 365) * 86400);
+        printf("Do you really want to drop all data older than %s?\nContinue? [n]: ", scalar localtime($start));
         my $buf;
         sysread STDIN, $buf, 1;
         if($buf !~ m/^(y|j)/mxi) {
@@ -218,15 +243,15 @@ Initial import
 
   %> thruk logcache import --local
 
-Initial import, but only import last 3 weeks
+Initial import, but only import last 3 weeks and fetch 12 hours per import block
 
-  %> thruk logcache import --local --start=3w
+  %> thruk logcache import --local --start=3w --blocksize=12h
 
 Run delta update with logfiles retrieved by livestatus
 
   %> thruk logcache update
 
-Run update from given files
+Run update from given files. (Also possible for initial import)
 
   %> thruk logcache update /var/log/naemon/archive/2017-07-*.log
 
