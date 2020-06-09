@@ -251,7 +251,7 @@ sub check_pid {
         }
         elsif(-r '/proc/'.$pid.'/cmdline') {
             my $cmd = read_file('/proc/'.$pid.'/cmdline');
-            if($cmd =~ m/lmd/mxi) {
+            if($cmd && $cmd =~ m/lmd/mxi) {
                 return $pid;
             }
         }
