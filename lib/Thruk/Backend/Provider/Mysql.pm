@@ -1927,10 +1927,12 @@ sub _import_peer_logfiles {
         $dbh->do('SET foreign_key_checks = 1');
     }
     # update index statistics
+    $c->stats->profile(begin => "update index statistics");
     for my $table (@Thruk::Backend::Provider::Mysql::tables) {
         $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
         $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
     }
+    $c->stats->profile(end => "update index statistics");
 
     return $log_count;
 }
