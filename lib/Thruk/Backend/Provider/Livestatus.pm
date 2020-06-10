@@ -1429,7 +1429,7 @@ sub _get_query_size {
     return if $entries !~ m/^\d+$/mx;
 
     my $stats = [
-        'total' => { -isa => [ $key => { '!=' => undef } ]},
+        'total' => { -isa => [ $key => { '!=' => ($key eq 'time' ? '-1' : undef) } ]},
     ];
     my $oldcolumns = delete $options->{'columns'};
     my $class = $self->_get_class($table, $options);
