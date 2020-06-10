@@ -1727,8 +1727,8 @@ support/convert_old_datafile.pl
 support/fcgid_env.sh
 support/htpasswd
 support/icinga2_ido_fetchlogs.sh
-support/icinga2_log_entries.mysql
-support/icinga2_log_entries.postgres
+support/icinga2_log_entries.mysql.sql
+support/icinga2_log_entries.postgres.sql
 support/makecert.sh
 support/menu_local.conf
 support/naglint.conf.example
