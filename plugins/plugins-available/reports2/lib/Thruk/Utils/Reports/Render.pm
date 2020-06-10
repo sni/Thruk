@@ -43,8 +43,7 @@ sub sort_by_key {
 
     my @sorted = sort { $a->{$sort_field} <=> $b->{$sort_field} } @{$list};
     return \@sorted;
-  }
-
+}
 
 ##########################################################
 
@@ -290,11 +289,11 @@ sub get_url {
     my $url            = $c->stash->{'param'}->{'url'};
 
     # create fake session
-    my $sessionid = Thruk::Utils::get_fake_session($c);
+    my($sessionid) = Thruk::Utils::get_fake_session($c);
     push @{$c->stash->{'report_tmp_files_to_delete'}}, $c->stash->{'fake_session_file'};
 
     # directly convert external urls
-    if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'}) {
+    if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'} && $c->stash->{'param'}->{'pdf'} eq 'yes') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
         my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$phantomjs.'"';
@@ -325,8 +324,12 @@ sub get_url {
     local $ENV{THRUK_REPORT} = $url;
     my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
-    if(defined $result and defined $result->{'headers'}) {
-        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'content-type'};
+    if(!defined $result || $result->{'code'} != 200) {
+        my $err = $res[2] || 'code '.($result->{'code'} // 'unknown');
+        die(sprintf("url report from url %s failed: %s\n", $url, $err));
+    }
+    if(defined $result && $result->{'code'} == 200 && defined $result->{'headers'}) {
+        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'content-type'} // $result->{'headers'}->{'Content-Type'};
         $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
         if(defined $result->{'headers'}->{'content-disposition'}) {
             my $file = $result->{'headers'}->{'content-disposition'};
