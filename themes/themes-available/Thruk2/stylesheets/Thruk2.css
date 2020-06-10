@@ -57,6 +57,10 @@ html.minimal body.extinfo, body.status, body.tac, body.showlog {
   margin-bottom: 0;
 }
 
+html.minimal body {
+  background:#f1f1f1;
+}
+
 @media print {
   body {
     background:#f1f1f1;
