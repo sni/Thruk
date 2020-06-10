@@ -761,7 +761,11 @@ sub _replace_img {
 
     our $image_cache;
     $image_cache = {} unless defined $image_cache;
-    return $image_cache->{$url} if defined $image_cache->{$url};
+    return $a.$b.$image_cache->{$url}.$d.$e if defined $image_cache->{$url};
+
+    if($url =~ m/^data:/mx) {
+        return($a.$b.$url.$d.$e);
+    }
 
     # dynamic images
     if($url =~ m/^\w+\.cgi/mx) {
@@ -771,15 +775,19 @@ sub _replace_img {
         my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $c->stash->{'fake_session_id'} });
         my $result = $res[1];
         my $text = "data:image/png;base64,".encode_base64($result->{'result'}, '');
-        $image_cache->{$url} = $a.$b.$text.$d.$e;
-        return $image_cache->{$url};
+        $image_cache->{$url} = $text;
+        return $a.$b.$text.$d.$e;
     }
     # static images
-    elsif($url =~ m/\.(\w+)$/mx) {
+    else {
         my @res      = _read_static_content_file($baseurl, $report_base_url, $url);
         return('') if $res[0] != 200;
+        my $suffix;
+        if($url =~ m/\.(\w+)$/mx) {
+            $suffix = $1;
+        }
         my $data     = $res[1]->{'result'};
-        my $datatype = $res[1]->{'headers'}->{'content-type'} || _get_datatype($1);
+        my $datatype = $res[1]->{'headers'}->{'content-type'} || $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($suffix);
         confess("no datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) unless $datatype;
         confess("wrong datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;
@@ -789,12 +797,8 @@ sub _replace_img {
         if($@) {
             $text = 'data:'.$datatype.";base64,".encode_base64(encode_utf8($data), '');
         }
-        $image_cache->{$url} = $a.$b.$text.$d.$e;
-        return $image_cache->{$url};
-    }
-    elsif($url =~ m/^data:/mx) {
-        $image_cache->{$url} = $a.$b.$url.$d.$e;
-        return $image_cache->{$url};
+        $image_cache->{$url} = $text;
+        return $a.$b.$text.$d.$e;
     }
 
     #croak("unknown image url: ".$a.$b.$url.$d.$e);
@@ -855,7 +859,7 @@ sub _replace_css_img {
         my @res      = _read_static_content_file($css, $report_base_url, $file);
         return($pre.$post) if $res[0] != 200;
         my $data     = $res[1]->{'result'};
-        my $datatype = $res[1]->{'headers'}->{'content-type'} || _get_datatype($1);
+        my $datatype = $res[1]->{'headers'}->{'content-type'} || $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
         confess("no datatype in ".$css." - ".$file." - ".Dumper(\@res)) unless $datatype;
         confess("wrong datatype in ".$css." - ".$file." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;
@@ -988,6 +992,7 @@ sub _absolutize_url {
 ##############################################
 sub _get_datatype {
     my($suffix) = @_;
+    return unless $suffix;
     my $datatype = "image/".$suffix;
     if($suffix eq 'eot') {
         $datatype = "font/eot";

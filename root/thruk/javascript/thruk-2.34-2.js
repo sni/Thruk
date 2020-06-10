@@ -7404,10 +7404,12 @@ function set_png_img(start, end, id, source) {
     pnp_end   = end;
 
     jQuery('#pnpwaitimg').css('display', 'block');
+    jQuery('#pnpimg').css('visibility', 'hidden');
 
     jQuery('#pnpimg').one("load", function() {
       jQuery('#pnpimg').css('display' , 'block');
       jQuery('#pnperr').css('display' , 'none');
+      jQuery('#pnpimg').css('visibility', '');
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
     })
     .one("error", function(err) {
