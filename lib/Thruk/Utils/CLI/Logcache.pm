@@ -92,7 +92,13 @@ sub cmd {
 
     my $blocksize;
     if($mode eq 'import') {
-        $blocksize = Thruk::Utils::expand_duration($opt->{'blocksize'}) if $opt->{'blocksize'};
+        if($opt->{'blocksize'}) {
+            $blocksize = Thruk::Utils::expand_duration($opt->{'blocksize'});
+        } else {
+            if(defined $commandoptions->[0] && $commandoptions->[0] =~ m/^\d+$/mx) {
+                $blocksize = Thruk::Utils::expand_duration(shift @{$commandoptions});
+            }
+        }
     } elsif($mode eq 'clean') {
         $blocksize = $opt->{'start'} || shift @{$commandoptions};
         if(defined $blocksize && $blocksize =~ m/^\d+\w{1}/mx) {
