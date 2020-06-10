@@ -1649,6 +1649,9 @@ sub _report_die {
     $Thruk::Utils::Reports::error = $err;
     set_running($c, $nr, 0, undef, time()) if $nr;
     check_for_waiting_reports($c);
+    if($ENV{'THRUK_CRON'} || ($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI')) {
+        return;
+    }
     return $c->detach('/error/index/13');
 }
 
