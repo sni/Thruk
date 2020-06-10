@@ -594,6 +594,8 @@ sub html_all_inclusive {
     if(!$include_js) {
         $page =~ s/<script[^>]*>.*?<\/script>//gsmxi;
     }
+    # allow pages js to know wether this is an export ot not
+    $page =~ s/\Qvar thruk_static_export = false;\E/var thruk_static_export = true;/gsmxi;
     return($page);
 }
 
