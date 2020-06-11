@@ -13,7 +13,7 @@ if [ "$THRUK_LOGCACHE_LIMIT" ]; then
     LIMIT="LIMIT $THRUK_LOGCACHE_LIMIT"
 fi
 
-if [ "x$1" = "x" ] || ! test -f $(dirname $0)/icinga2_log_entries.$1; then
+if [ "x$1" = "x" ] || ! test -f $(dirname $0)/icinga2_log_entries.$1.sql; then
   echo "usage: $0 <db type>"
   echo "db type can be mysql or postgres"
   exit 3
