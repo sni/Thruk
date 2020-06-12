@@ -67,7 +67,7 @@
   if(window.parent.frames && !String(window.parent.location.href).match(/\/panorama\.cgi/)) {
     try {
       window.parent.document.title = '[% escape_quotes(title_prefix) %][% escape_quotes(title) %]';
-    } catch(e) { debug(e) }
+    } catch(err) { console.log(err) }
   }
   [% END %]
 
@@ -84,7 +84,7 @@
           top.frames['side'].load_errors  = 0;
       }
   }
-  catch(e) { debug(e); }
+  catch(err) { console.log(err); }
   /* favicon counter */
   [%+ IF fav_counter +%]
   [% totals = set_favicon_counter(c) %]
