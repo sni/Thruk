@@ -1035,12 +1035,14 @@ sub _renew_logcache {
         if(scalar @{$backends2import} > 0) {
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
             local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
-            Thruk::Utils::External::cmd($c, { cmd      => $c->config->{'logcache_import_command'},
-                                              message   => 'please stand by while your initial logfile cache will be created...',
-                                              forward   => $c->req->url,
-                                              nofork    => $noforks,
+            my $job = Thruk::Utils::External::cmd($c,
+                                            { cmd        => $c->config->{'logcache_import_command'},
+                                              message    => 'please stand by while your initial logfile cache will be created...',
+                                              forward    => $c->req->url,
+                                              nofork     => $noforks,
+                                              background => 1,
                                             });
-            return 1;
+            return $c->redirect_to_detached($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$job);
         } else {
             return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
@@ -1053,13 +1055,15 @@ sub _renew_logcache {
         my $type = '';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         if(scalar @{$backends2import} > 0) {
-            Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
-                                               message   => 'please stand by while your initial logfile cache will be created...',
-                                               forward   => $c->req->url,
-                                               backends  => $backends2import,
-                                               nofork    => $noforks,
+            my $job = Thruk::Utils::External::perl($c,
+                                             { expr       => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                               message    => 'please stand by while your initial logfile cache will be created...',
+                                               forward    => $c->req->url,
+                                               backends   => $backends2import,
+                                               nofork     => $noforks,
+                                               background => 1,
                                             });
-            return 1;
+            return $c->redirect_to_detached($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$job);
         }
 
         return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode

@@ -564,6 +564,17 @@ sub redirect_to {
     $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
+    return(1);
+}
+
+=head2 redirect_to_detached
+
+$c->redirect_to_detached(<url>)
+
+=cut
+sub redirect_to_detached {
+    my($c, @args) = @_;
+    $c->redirect_to(@args);
     $c->{'detached'} = 1;
     die("prevent further page processing");
 }
