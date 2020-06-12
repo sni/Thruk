@@ -239,6 +239,9 @@ case "$*" in
       chkconfig --add thruk
     %endif
 
+    rm -rf /var/cache/thruk/*
+    /usr/bin/thruk -a clearcache,installcron --local > /dev/null
+
     echo "Thruk have been configured for http://$(hostname)/thruk/."
     echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
   ;;
