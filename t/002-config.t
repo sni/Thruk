@@ -89,7 +89,16 @@ if(!$@) {
         my $conf = Thruk::Config::read_config_file([sort glob('t/data/broken_config/*.conf')]);
     };
     my $err = $@;
-    like($err, "/\Qunclosed block starting\E/", "broken config returns error");
+    like($err, "/\Qunclosed '<component>' block, started in: t/data/broken_config/a.conf:2\E/", "broken config returns error");
+};
+
+####################################################
+{
+    eval {
+        my $conf = Thruk::Config::read_config_file([sort glob('t/data/broken_config2/*.conf')]);
+    };
+    my $err = $@;
+    like($err, "/\Qunexpected closing block found: '</peer>' in: t/data/broken_config2/a.conf:5\E/", "broken config returns error");
 };
 
 ####################################################

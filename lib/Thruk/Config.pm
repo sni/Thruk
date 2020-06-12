@@ -1214,15 +1214,18 @@ sub _parse_rows {
             $lastline = '';
         }
         next unless $line;
-        return if $until && lc($line) eq $until;
+        return($cur_line) if $until && lc($line) eq $until;
 
         # nested structures
         if(substr($line,0,1) eq '<') {
+            if(substr($line,1,1) eq '/') {
+                die(sprintf("unexpected closing block found: '%s' in: %s:%d", $line, $file, $cur_line));
+            }
             # named hashes: <item name>
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
-                _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
+                $cur_line = _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
                 if(!defined $conf->{$k}->{$v}) {
                     $conf->{$k}->{$v} = $next;
                 } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
@@ -1236,7 +1239,7 @@ sub _parse_rows {
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
-                _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
+                $cur_line = _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
                 if(!defined $conf->{$k}) {
                     $conf->{$k} = $next;
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
@@ -1277,9 +1280,12 @@ sub _parse_rows {
         }
     }
     if($until) {
-        die("unclosed block starting in: ".$until_source);
+        my $block = $until;
+        $block =~ s/>$//gmx;
+        $block =~ s/<\///gmx;
+        die(sprintf("unclosed '<%s>' block, started in: %s", $block, $until_source));
     }
-    return;
+    return($cur_line);
 }
 
 ######################################
