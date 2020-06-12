@@ -435,7 +435,7 @@ sub get_json_status {
     return unless $job;
 
     my $json = {};
-    for my $key (qw/is_running time percent message forward remaining/) {
+    for my $key (qw/is_running time percent message forward remaining start end/) {
         $json->{$key} = $job->{$key};
     }
 
@@ -866,6 +866,7 @@ sub _is_running {
 
     my $pid = read_file($dir."/pid");
     $pid = Thruk::Utils::IO::untaint($pid);
+    waitpid($pid, WNOHANG);
     if(kill(0, $pid) > 0) {
         return 1;
     }

@@ -312,10 +312,24 @@ sub test_page {
                 $found = 1;
                 last;
             }
-            sleep(0.3);
-            $now = time();
-            $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
-            $return->{'content'} = $request->content;
+
+            if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+                # is it a background job page?
+                my $location = $request->{'_headers'}->{'location'};
+                wait_for_job($location);
+                $request = _request($location, undef, undef, $opts->{'agent'});
+                $return->{'content'} = $request->content;
+                if($request->is_error) {
+                    fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
+                    bail_out_req('request failed', $request);
+                }
+                $return->{'content'} = $request->content;
+            } else {
+                sleep(0.3);
+                $now = time();
+                $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
+                $return->{'content'} = $request->content;
+            }
         }
 
         if(!$found) {
@@ -332,10 +346,10 @@ sub test_page {
         return $return;
     }
 
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+    if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         # is it a background job page?
-        wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
+        wait_for_job($location);
         $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
@@ -359,9 +373,9 @@ sub test_page {
             }
         }
     }
-    elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+    elsif(defined $return->{'content'} && $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         # is it a background job page?
-        wait_for_job($1);
+        wait_for_job($return->{'content'});
         my $location = "/thruk/cgi-bin/job.cgi?job=".$1;
         $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
@@ -639,21 +653,33 @@ sub get_user {
 
 #########################
 sub wait_for_job {
-    my($job) = @_;
+    my($url) = @_;
+    my($job, $joburl);
+    if($url =~ m/^\w+$/mx) {
+        $job = $url;
+    }
+    elsif($url =~ m/proxy\.cgi\/([^\/]+)\/.*cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+        $job = $1;
+        $joburl = $url.'&json=1';
+    }
+    elsif($url =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+        $job = $1;
+    }
     my $start  = time();
     my $config = Thruk::Config::get_config();
 
-    if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+    if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $joburl) {
+        $joburl = '/thruk/r/thruk/jobs/'.$job unless $joburl;
         local $SIG{ALRM} = sub { die("timeout while waiting for external job: ".$job) };
         alarm(300);
         my $data;
         eval {
             while(1) {
-                my $r = _request('/thruk/r/thruk/jobs/'.$job);
+                my $r = _request($joburl);
                 eval {
                     $data = decode_json($r->decoded_content);
                 };
-                last if($data && $data->{'end'} > 0 && $data->{'is_running'} == 0);
+                last if($data && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
                 sleep(0.1);
             }
         };
