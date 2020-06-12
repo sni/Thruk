@@ -72,14 +72,6 @@ sub cmd {
     } else {
         do_child_stuff($c, $dir, $id);
 
-        POSIX::close(0);
-        POSIX::close(1);
-        open STDERR, '>', $dir."/stderr";
-        open STDOUT, '>', $dir."/stdout";
-
-        # some db drivers need reconnect after forking
-        _reconnect($c);
-
         $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
 
         exec($cmd) or exit(1); # just to be sure
@@ -147,13 +139,7 @@ sub perl {
         do_child_stuff($c, $dir, $id);
 
         do {
-            # some db drivers need reconnect after forking
-            _reconnect($c);
-
             ## no critic
-            open STDERR, '>', $dir."/stderr";
-            open STDOUT, '>', $dir."/stdout";
-
             my $rc = eval($conf->{'expr'});
             ## use critic
 
@@ -689,23 +675,33 @@ sub do_child_stuff {
 
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
-    # close open standard filehandles
-    for my $fd (0..3) { # 3 is the fcgid communication socket when running as fcgid process
-        POSIX::close($fd);
-    }
+
+    # connect stdin to dev/null
+    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
+
+    # 3 is the fcgid communication socket when running as fcgid process
+    POSIX::close(3);
+
+    # some db drivers need reconnect after forking
+    _reconnect($c);
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     my $fallback_log = '/dev/null';
     $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if ($c && $c->config->{'log4perl_logfile_in_use'});
     $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
-    open(STDOUT, '>>', $fallback_log);
-    open(STDERR, '>>', $fallback_log);
+    $fallback_log    = $dir."/stderr" if $dir;
+    open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
+    $fallback_log    = $dir."/stdout" if $dir;
+    open(*STDOUT, ">>", $fallback_log) || die "can't reopen stdout to $fallback_log: $!";
 
     # logging must be reset after closing the filehandles
     $c && $c->app->reset_logging();
 
     $c && $c->stats->enable(1);
     $c->config->{'slow_page_log_threshold'} = 0 if $c;
+
+    # some db drivers need reconnect after forking
+    _reconnect($c);
 
     return;
 }
