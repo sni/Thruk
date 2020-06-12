@@ -955,6 +955,10 @@ sub renew_logcache {
     };
     my $err = $@;
     if($err) {
+        # initial import redirects to job page
+        if($err =~ m/\Qprevent further page processing\E/mx) {
+            die($err);
+        }
         $c->log->error($err);
         $c->stash->{errorMessage}     = "Logfilecache Unavailable";
         $c->stash->{errorDescription} = $@;

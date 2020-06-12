@@ -564,7 +564,8 @@ sub redirect_to {
     $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
-    return 1;
+    $c->{'detached'} = 1;
+    die("prevent further page processing");
 }
 
 =head2 url_with
