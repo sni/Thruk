@@ -536,7 +536,7 @@ Ext.define('Ext.ux.SearchModel', {
 Ext.define('Ext.ux.SearchStore', {
     extend: 'Ext.data.Store',
 
-    pageSize: 15,
+    pageSize: 12,
     model: 'Ext.ux.SearchModel',
     remoteSort: true,
     remoteFilter: true,
@@ -629,7 +629,8 @@ Ext.define('Ext.ux.SearchCombobox', {
     selectOnTab:    true,
     typeAhead:      true,
     minChars:       0,
-    pageSize:       15,
+    pageSize:       12, // combobox will not show more than 12 anyway without scrolling
+    remoteFilter:   true,
     initComponent: function() {
         var me = this;
         me.valueField   = 'value';

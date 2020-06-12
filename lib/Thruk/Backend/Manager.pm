@@ -1711,6 +1711,7 @@ sub _do_on_peers {
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
+    return($data, $totalsize) if wantarray;
     return $data;
 }
 

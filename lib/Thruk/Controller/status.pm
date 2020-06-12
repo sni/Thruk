@@ -170,6 +170,9 @@ sub _process_raw_request {
 
     my $limit = $c->req->parameters->{'limit'};
     my $type  = $c->req->parameters->{'type'}  || 'all';
+    if($c->req->parameters->{'page'}) {
+        $limit = $c->req->parameters->{'page'} * $limit;
+    }
 
     my $filter;
     if($c->req->parameters->{'query'}) {
@@ -187,17 +190,18 @@ sub _process_raw_request {
     my $json;
     if($type eq 'contact' || $type eq 'contacts') {
         my $data = [];
+        my $size = 1;
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
-            $data = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
+            ($data, $size) = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
         }
-        push @{$json}, { 'name' => "contacts", 'data' => $data };
+        push @{$json}, { 'name' => "contacts", 'data' => $data, 'total' => $size };
     }
 
     if($type eq 'host' || $type eq 'hosts' || $type eq 'all') {
-        my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
-        push @{$json}, { 'name' => "hosts", 'data' => $data };
+        my($data, $size) = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
+        push @{$json}, { 'name' => "hosts", 'data' => $data, 'total' => $size };
     }
 
     if($type eq 'hostgroup' || $type eq 'hostgroups' || $type eq 'all') {
@@ -227,7 +231,6 @@ sub _process_raw_request {
     }
 
     if($type eq 'service' || $type eq 'services' || $type eq 'all') {
-        my $data = [];
         my $host = $c->req->parameters->{'host'};
         my $additional_filter;
         my @hostfilter;
@@ -241,13 +244,13 @@ sub _process_raw_request {
             }
             $additional_filter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
-        $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ], limit => $limit );
-        push @{$json}, { 'name' => "services", 'data' => $data };
+        my($data, $size) = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ], limit => $limit );
+        push @{$json}, { 'name' => "services", 'data' => $data, 'total' => $size };
     }
 
     if($type eq 'timeperiod' or $type eq 'timeperiods') {
-        my $data = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ], limit => $limit );
-        push @{$json}, { 'name' => "timeperiods", 'data' => $data };
+        my($data, $size) = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ], limit => $limit );
+        push @{$json}, { 'name' => "timeperiods", 'data' => $data, 'total' => $size };
     }
 
     if($type eq 'command' or $type eq 'commands') {
@@ -303,11 +306,11 @@ sub _process_raw_request {
         if($c->req->parameters->{'wildcards'}) {
             push @{$data}, '*';
         }
-        my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], sort => {ASC=> 'name'}, limit => $limit);
+        my($groups, $size) = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], sort => {ASC=> 'name'}, limit => $limit);
         for my $g (@{$groups}) {
             push @{$data}, $g->{'name'};
         }
-        push @{$json}, { 'name' => "contactgroups", 'data' => $data };
+        push @{$json}, { 'name' => "contactgroups", 'data' => $data, 'total' => $size };
     }
 
     if($type eq 'event handler') {
@@ -360,8 +363,8 @@ sub _process_raw_request {
 
     if($c->req->parameters->{'hash'}) {
         my $data  = $json->[0]->{'data'};
-        my $total = scalar @{$data};
-        Thruk::Backend::Manager::page_data($c, $data);
+        my $total = $json->[0]->{'total'} || scalar @{$data};
+        Thruk::Backend::Manager::page_data($c, $data, $c->req->parameters->{'limit'}, $total);
         my $list = [];
         if(scalar @{$c->stash->{'data'}} > 0 && ref $c->stash->{'data'}->[0] eq 'HASH') {
             for my $d (@{$c->stash->{'data'}}) {
