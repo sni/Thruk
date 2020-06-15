@@ -124,6 +124,7 @@ sub set_object_model {
         $c->stats->profile(end => "checking objects");
     }
 
+    $c->{'obj_db'}->{'errors'} = Thruk::Utils::array_uniq(Thruk::Utils::list($c->{'obj_db'}->{'errors'}));
     my $errnum = scalar @{$c->{'obj_db'}->{'errors'}};
     if($errnum > 0) {
         my $error = $c->{'obj_db'}->{'errors'}->[0];
@@ -136,7 +137,7 @@ sub set_object_model {
         Thruk::Utils::set_message( $c,
                                   'fail_message',
                                   $error,
-                                  ($errnum == 1 && !$c->{'obj_db'}->{'needs_update'}) ? undef : $c->{'obj_db'}->{'errors'},
+                                  ($errnum == 1 && !$c->{'obj_db'}->{'needs_update'}) ? undef : join("\n", @{$c->{'obj_db'}->{'errors'}}),
                                 );
     } elsif($refresh) {
         Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
