@@ -33,6 +33,9 @@ var window = {
 };
 var document = window.document;
 thruk_debug_js = 1;
+function jQuery() { return({
+  focus: function() {}
+})};
 ", 'set window object') or BAIL_OUT("$0: failed to create window object");
 
 #################################################
