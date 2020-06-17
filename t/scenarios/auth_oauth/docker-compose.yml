@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"     # apache
+        - "127.0.0.3:60557:6557"   # livestatus
+        - "127.0.0.3:8003:8003"    # grafana
+        - "127.0.0.3:4444:4444"    # oauth server
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/scenario:ro

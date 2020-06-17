@@ -1,0 +1,16 @@
+port: 4444
+logger: Console
+engines:
+  logger:
+    Console:
+      log_level: debug
+plugins:
+  "OAuth2::Server":
+    state_required: 1
+    clients:
+      client1:
+        client_secret: secret
+        scopes:
+          openid: 1
+          profile: "profile"
+          email: "email"
