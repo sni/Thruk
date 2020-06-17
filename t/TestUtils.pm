@@ -900,7 +900,8 @@ sub _request {
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
 
-    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+    $url =~ s|^\Qhttp://localhost.local/\E|/|gmx;
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $url =~ m/^https?:\/\//mx) {
         return(_external_request(@_));
     }
     # add pseudo domain, otherwise cookies from set_cookie() won't work
