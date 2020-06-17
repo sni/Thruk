@@ -1353,6 +1353,9 @@ BUTTON.bugs {
 BUTTON.bugs::before {
   content: "bug_report";
 }
+BUTTON.home::before {
+  content: "home";
+}
 button.refreshing, button.thruk_btn.top_refresh_button.refreshing {
   background-image: url('../images/waiting.gif');
   background-size: auto;

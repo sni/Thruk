@@ -107,88 +107,18 @@ sub index {
         }
     }
 
-    # make lowercase username
-    $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
+    if($c->req->parameters->{'state'} || (defined $c->req->parameters->{'oauth'} && $c->req->parameters->{'oauth'} ne "")) {
+        require Thruk::Utils::OAuth;
+        return(Thruk::Utils::OAuth::handle_oauth_login($c, $referer, $cookie_path, $cookie_domain));
+    }
 
-    if($submit ne '' || $login ne '') {
-        my $testcookie = $c->cookie('thruk_test');
-        $c->cookie('thruk_test' => '', {
-            expires => 0,
-            path    => $cookie_path,
-            domain  => $cookie_domain,
-        });
-        if(   (!defined $testcookie || !$testcookie->value)
-           && (!defined $c->req->header('user-agent') || $c->req->header('user-agent') !~ m/wget/mix)) {
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
-        } else {
-            my $userdata = Thruk::Utils::get_user_data($c, $login);
-            if($userdata->{'login'}->{'locked'}) {
-                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
-            }
+    if($submit ne '' && $login eq '') {
+        Thruk::Utils::set_message( $c, 'fail_message', 'missing parameter: username' );
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
+    }
 
-            $c->stats->profile(begin => "login::external_authentication");
-            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
-            $c->stats->profile(end => "login::external_authentication");
-            if($success eq '-1') {
-                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
-            }
-            elsif($success) {
-                $c->stash->{'remote_user'} = $login;
-                $c->cookie('thruk_auth' => $success, {
-                    path     => $cookie_path,
-                    domain   => $cookie_domain,
-                    httponly => 1,
-                });
-
-                # clean failed logins
-                my $userdata = Thruk::Utils::get_user_data($c, $login);
-                if($userdata->{'login'}) {
-                    if($userdata->{'login'}->{'failed'}) {
-                        Thruk::Utils::set_message( $c, 'warn_message',
-                            sprintf("There had been %d failed login attempts. (Date: %s - IP: %s%s)",
-                                        $userdata->{'login'}->{'failed'},
-                                        Thruk::Utils::Filter::date_format($c, $userdata->{'login'}->{'last_failed'}->{'time'}),
-                                        $userdata->{'login'}->{'last_failed'}->{'ip'},
-                                        $userdata->{'login'}->{'last_failed'}->{'forwarded_for'} ? ' ('.$userdata->{'login'}->{'last_failed'}->{'forwarded_for'} : '',
-                        ));
-                    }
-                    delete $userdata->{'login'};
-                    Thruk::Utils::store_user_data($c, $userdata, $login);
-                }
-
-                # call a script hook after successful login?
-                if($c->config->{'cookie_auth_login_hook'}) {
-                    Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
-                }
-                return $c->redirect_to($referer);
-            } else {
-                $c->log->info(sprintf("login failed for %s on %s from %s%s",
-                                        $login,
-                                        $referer,
-                                        $c->req->address,
-                                       ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
-                              ));
-                Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
-                if($c->config->{cookie_auth_disable_after_failed_logins}) {
-                    # increase failed login counter and disable account if it exceeds
-                    my $userdata = Thruk::Utils::get_user_data($c, $login);
-                    $userdata->{'login'}->{'failed'}++;
-                    $userdata->{'login'}->{'last_failed'} = { time => time(), ip => $c->req->address, forwarded_for => $c->env->{'HTTP_X_FORWARDED_FOR'} };
-                    if($userdata->{'login'}->{'failed'} >= $c->config->{cookie_auth_disable_after_failed_logins}) {
-                        $userdata->{'login'}->{'locked'} = 1;
-                    }
-
-                    # only update user data if already exist, otherwise we would end up with a new file for each failed login
-                    my $file = $c->config->{'var_path'}."/users/".$login;
-                    Thruk::Utils::store_user_data($c, $userdata, $login) if -s $file;
-
-                    if($userdata->{'login'}->{'locked'}) {
-                        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
-                    }
-                }
-                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
-            }
-        }
+    if($login ne '') {
+        return(_handle_basic_login($c, $login, $pass, $referer, $cookie_path, $cookie_domain));
     }
 
     Thruk::Utils::ssi_include($c, 'login');
@@ -221,6 +151,107 @@ sub index {
     }
 
     return 1;
+}
+
+##########################################################
+sub _handle_basic_login {
+    my($c, $login, $pass, $referer, $cookie_path, $cookie_domain) = @_;
+
+    # make lowercase username
+    $login = lc($login) if $c->config->{'make_auth_user_lowercase'};
+
+    my $testcookie = $c->cookie('thruk_test');
+    $c->cookie('thruk_test' => '', {
+        expires => 0,
+        path    => $cookie_path,
+        domain  => $cookie_domain,
+    });
+    if(   (!defined $testcookie || !$testcookie->value)
+        && (!defined $c->req->header('user-agent') || $c->req->header('user-agent') !~ m/wget/mix)) {
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
+    }
+
+    my $userdata = Thruk::Utils::get_user_data($c, $login);
+    if($userdata->{'login'}->{'locked'}) {
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
+    }
+
+    $c->stats->profile(begin => "login::external_authentication");
+    my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
+    $c->stats->profile(end => "login::external_authentication");
+    if($success eq '-1') {
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
+    }
+    elsif($success) {
+        # call a script hook after successful login?
+        if($c->config->{'cookie_auth_login_hook'}) {
+            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
+        }
+        return(login_successful($c, $login, $success, $referer, $cookie_path, $cookie_domain));
+    }
+
+    $c->log->info(sprintf("login failed for %s on %s from %s%s",
+                            $login,
+                            $referer,
+                            $c->req->address,
+                            ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
+                    ));
+    Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
+    if($c->config->{cookie_auth_disable_after_failed_logins}) {
+        # increase failed login counter and disable account if it exceeds
+        my $userdata = Thruk::Utils::get_user_data($c, $login);
+        $userdata->{'login'}->{'failed'}++;
+        $userdata->{'login'}->{'last_failed'} = { time => time(), ip => $c->req->address, forwarded_for => $c->env->{'HTTP_X_FORWARDED_FOR'} };
+        if($userdata->{'login'}->{'failed'} >= $c->config->{cookie_auth_disable_after_failed_logins}) {
+            $userdata->{'login'}->{'locked'} = 1;
+        }
+
+        # only update user data if already exist, otherwise we would end up with a new file for each failed login
+        my $file = $c->config->{'var_path'}."/users/".$login;
+        Thruk::Utils::store_user_data($c, $userdata, $login) if -s $file;
+
+        if($userdata->{'login'}->{'locked'}) {
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
+        }
+    }
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
+}
+
+##########################################################
+
+=head2 login_successful
+
+    login_successful($c, $login, $sessionid, $referer, $cookie_path, $cookie_domain)
+
+redirects to $referer and sets sessions cookie
+
+=cut
+sub login_successful {
+    my($c, $login, $sessionid, $referer, $cookie_path, $cookie_domain) = @_;
+
+    $c->stash->{'remote_user'} = $login;
+    $c->cookie('thruk_auth' => $sessionid, {
+        path     => $cookie_path,
+        domain   => $cookie_domain,
+        httponly => 1,
+    });
+
+    # clean failed logins
+    my $userdata = Thruk::Utils::get_user_data($c, $login);
+    if($userdata->{'login'}) {
+        if($userdata->{'login'}->{'failed'}) {
+            Thruk::Utils::set_message( $c, 'warn_message',
+                sprintf("There had been %d failed login attempts. (Date: %s - IP: %s%s)",
+                            $userdata->{'login'}->{'failed'},
+                            Thruk::Utils::Filter::date_format($c, $userdata->{'login'}->{'last_failed'}->{'time'}),
+                            $userdata->{'login'}->{'last_failed'}->{'ip'},
+                            $userdata->{'login'}->{'last_failed'}->{'forwarded_for'} ? ' ('.$userdata->{'login'}->{'last_failed'}->{'forwarded_for'} : '',
+            ));
+        }
+        delete $userdata->{'login'};
+        Thruk::Utils::store_user_data($c, $userdata, $login);
+    }
+    return $c->redirect_to($referer);
 }
 
 ##########################################################

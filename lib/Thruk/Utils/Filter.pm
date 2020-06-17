@@ -345,7 +345,7 @@ sub short_uri {
 
 =head2 uri_with
 
-  uri_with($c, $data, $keep_absolute)
+  uri_with($c, $data, [$keep_absolute], [$baseurl], [$skip_escape])
 
 returns a relative uri to current page
 
@@ -357,8 +357,13 @@ ex.:
 
 =cut
 sub uri_with {
-    my($c, $data, $keep_absolute) = @_;
-    my $uri = $c->stash->{original_uri} ? URI->new($c->stash->{original_uri}) : $c->req->uri;
+    my($c, $data, $keep_absolute, $baseurl, $skip_escape) = @_;
+    my $uri;
+    if($baseurl) {
+        $uri = URI->new($baseurl);
+    } else {
+        $uri = $c->stash->{original_uri} ? URI->new($c->stash->{original_uri}) : $c->req->uri;
+    }
 
     my @old_param = $uri->query_form();
     my @new_param;
@@ -384,6 +389,7 @@ sub uri_with {
         # make relative url
         $uri =~ s|^/[^?]+/||mx;
     }
+    return($uri) if $skip_escape;
     return(&escape_html($uri));
 }
 

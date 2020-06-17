@@ -179,6 +179,7 @@ our %config = ('name'                   => 'Thruk',
                                           'space'          => ' ',
                                           'debug_info'     => '',
                                           'bodyonload'     => 1,
+                                          'show_home_button' => "",
                                           'has_jquery_ui'  => 0,
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
@@ -590,6 +591,10 @@ sub set_default_config {
                                               .'downtime_down, downtime_unreachable,'
                                               .'downtime_unknown, downtime_critical, downtime_warning, downtime_up, downtime_ok,'
                                               .'up, ok, downtime_pending, pending',
+        'basic_auth_enabled'                => 1,
+        'auth_oauth'                        => {
+            'provider'                              => [],
+        },
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
@@ -1057,6 +1062,19 @@ sub _do_finalize_config {
                 my $basename = $1;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }
+        }
+    }
+
+    # normalize oauth provider
+    if(ref $config->{'auth_oauth'}->{'provider'} eq 'HASH') { $config->{'auth_oauth'}->{'provider'} = [$config->{'auth_oauth'}->{'provider'}]}
+    for my $p (@{$config->{'auth_oauth'}->{'provider'}}) {
+        # named provider
+        if(scalar keys %{$p} == 1) {
+            my $name = (keys %{$p})[0];
+            $p = $p->{$name};
+            $p->{'id'} = $name;
+        } else {
+            $p->{'id'} = "oauth";
         }
     }
 

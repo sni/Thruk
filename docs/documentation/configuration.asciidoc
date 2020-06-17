@@ -524,6 +524,15 @@ ex.:
   user_password_min_length = 5
 
 
+=== basic_auth_enabled
+
+Show the basic auth user / password formular. Enabled when using cookie auth.
+You may want to disable this if you only use oauth authentication.
+
+ex.:
+
+  basic_auth_enabled = 1
+
 
 
 
@@ -1656,6 +1665,26 @@ ex.:
 
   cookie_auth_verbose = 3
 
+
+== OAuth Authentication Settings
+
+=== auth_oauth
+Set oauth authentication provider
+
+ex.:
+
+  <auth_oauth>
+    <provider name>
+      login         = "Login with OAuth"      # Value of the login button.
+      client_id     = <required>              # Client_id as set from the oauth provider.
+      client_secret = <required>              # Secret key from the oauth provider
+      scopes        = openid profile email    # Scopes required to access user information
+      auth_url      = https://oauthserver/oauth2/v1/authorize     # Initial authenticator redirect url
+      token_url     = https://oauthserver/oauth2/v1/token         # URL to exchange code into token
+      api_url       = https://oauthserver/oauth2/v1/userinfo      # API endpoint to retrieve user information from
+      login_field   = login                                       # Hash key from userinfo to get the actual username from. If not set, Thruk will try 'login', then 'email'
+    </provider>
+  </auth_oauth>
 
 
 == Command Settings

@@ -8,7 +8,7 @@
     [% PROCESS _common_js_files.tt %]
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
-  <body class='[% page %] loginpage' id='[% page %]' onload="javascript:document.getElementById('loginuser').focus();">
+  <body class='[% page %] loginpage' id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
   <!-- Produced by Thruk (http://www.thruk.org).
@@ -28,7 +28,8 @@
           <table class="infoBox">
             <tr><td class="infoBox">
               <div class="infoBoxTitle" align="center">Thruk Monitoring Webinterface</div>
-              <table>
+              <table width="100%">
+                [% IF c.config.basic_auth_enabled %]
                 <tr>
                   <th>Username</th>
                   <td><input type="text" name="login" class="logininput" id='loginuser'></td>
@@ -37,10 +38,34 @@
                   <th>Password</th>
                   <td><input type="password" name="password" class="logininput"></td>
                 </tr>
+                [% END %]
+                [% IF c.config.auth_oauth.provider.size > 0 %]
                 <tr>
                   <td>&nbsp;</td>
-                  <td align="center"><input type="submit" name="submit" value="Login" class="loginbutton"></td>
+                  <td align="center">
+                    [% IF c.config.basic_auth_enabled %]
+                    <input type="submit" name="submit" value="Login" class="loginbutton">
+                    [% END %]
+                    [% FOREACH auth = c.config.auth_oauth.provider %]
+                    <br>
+                    <table>
+                      [% IF c.config.basic_auth_enabled || !loop.first %]
+                      <tr>
+                        <td width="40%"><hr></td>
+                        <td align="center">or</td>
+                        <td width="40%"><hr></td>
+                      </tr>
+                      [% END %]
+                      <tr>
+                        <td colspan="3">
+                          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
+                        </td>
+                      </tr>
+                    </table>
+                    [% END %]
+                  </td>
                 </tr>
+                [% END %]
               </table>
             </td></tr>
           </table>
@@ -108,6 +133,8 @@
     } catch(err) { console.log(err); }
 
     cleanSessionCookies();
+
+    jQuery('#loginuser').focus();
   -->
   </script>
   [% IF ssi_footer; ssi_footer | evaltt; END %]

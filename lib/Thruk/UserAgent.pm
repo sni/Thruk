@@ -160,11 +160,9 @@ get/set default_header
 
 =cut
 sub default_header {
-    my($self, $default_header) = @_;
-    if(defined $default_header) {
-        for my $key (keys %{$default_header}) {
-            $self->{'default_header'}->{$key} = $default_header->{$key};
-        }
+    my($self, %default_header) = @_;
+    for my $key (keys %default_header) {
+        $self->{'default_header'}->{$key} = $default_header{$key};
     }
     return $self->{'default_header'};
 }

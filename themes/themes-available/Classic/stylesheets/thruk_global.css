@@ -1052,7 +1052,7 @@ INPUT.logininput {
     width: 200px;
 }
 
-INPUT.loginbutton {
+INPUT.loginbutton, BUTTON.loginbutton {
     width: 160px;
 }
 

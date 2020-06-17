@@ -143,6 +143,7 @@ lib/Thruk/Utils/IO.pm
 lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
+lib/Thruk/Utils/OAuth.pm
 lib/Thruk/Utils/Plugin.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
 lib/Thruk/Utils/References.pm

@@ -3,6 +3,7 @@ package Thruk::Controller::error;
 use strict;
 use warnings;
 use Carp qw/cluck confess longmess/;
+use Data::Dumper;
 use Time::HiRes qw/tv_interval/;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
@@ -243,6 +244,7 @@ sub index {
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
         $code                           = $c->stash->{'error_data'}->{'code'}  // 500;
         $log_req                        = $c->stash->{'error_data'}->{'log'} if defined $c->stash->{'error_data'}->{'log'};
+        $c->stash->{errorDebugInfo}     = Dumper($c->stash->{'error_data'}->{'debug_information'}) if $c->stash->{'error_data'}->{'debug_information'};
     }
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
@@ -252,7 +254,7 @@ sub index {
             $c->stash->{errorDescription} .= "\nplease try again in a  few seconds.";
         }
         elsif($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
-            Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails);
+            Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails, $c->stash->{errorDebugInfo});
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
         }
@@ -322,6 +324,9 @@ sub index {
 
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
+
+    $c->stash->{'show_home_button'}      = $c->user_exists ? $c->stash->{'url_prefix'} : $c->stash->{'url_prefix'}."cgi-bin/login.cgi";
+    $c->stash->{'hide_backends_chooser'} = 1;
 
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');

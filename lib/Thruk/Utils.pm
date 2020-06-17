@@ -3508,7 +3508,7 @@ sub code2name {
 
 =head2 check_for_nasty_filename
 
-    check_for_nasty_filenameode2($filename)
+    check_for_nasty_filename($filename)
 
 returns true if nasty characters have been found and the filename is NOT safe for use
 

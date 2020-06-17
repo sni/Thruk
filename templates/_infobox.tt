@@ -5,6 +5,7 @@
       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
       Last Update: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]<br />
       <a href='http://www.thruk.org' target='_blank' class='homepageURL'>Thruk [% version %][% IF branch %]-[% branch %][% END %]</a>[% IF c.config.extra_version %]<span class="infoboxlinks"> - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a></span>[% END %]<br />
+      [% IF c.user_exists %]
       Logged in as <i>[% remote_user %]</i><br />
       [% IF has_proc_info %]
       [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
@@ -13,6 +14,7 @@
       [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partially disabled </div>[% END %]
       [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='infoBoxBadProcStatus'> - Host checks are disabled </div>[% END %]
       [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partially disabled </div>[% END %]
+      [% END %]
       [% END %]
     </td>
   </tr>
