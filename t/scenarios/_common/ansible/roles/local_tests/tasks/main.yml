@@ -4,3 +4,7 @@
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
     state: present
+- lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LANG='
+    line: 'LANG=C.utf8'
