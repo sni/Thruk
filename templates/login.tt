@@ -39,7 +39,7 @@
                   <td><input type="password" name="password" class="logininput"></td>
                 </tr>
                 [% END %]
-                [% IF c.config.auth_oauth.provider.size > 0 %]
+                [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
                 <tr>
                   <td>&nbsp;</td>
                   <td align="center">
