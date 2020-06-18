@@ -3,6 +3,7 @@
       - perl-Test-Harness
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
+      - diffutils
     state: present
 - lineinfile:
     path: /etc/locale.conf
