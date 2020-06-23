@@ -12,7 +12,7 @@ BEGIN {
 
 # ensure that all naemon commands exist
 my $src   = "https://raw.githubusercontent.com/naemon/naemon-core/master/src/naemon/commands.c";
-my $cache = "/var/tmp/naemon_commands.c";
+my $cache = $ENV{"THRUK_TEST_NAEMON_COMMANDS_SRC"} || "/var/tmp/naemon_commands.c";
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Internet required. Unset $ENV{TEST_SKIP_INTERNET} to run this test.' if $ENV{TEST_SKIP_INTERNET};
