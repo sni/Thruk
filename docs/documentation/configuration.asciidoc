@@ -525,7 +525,7 @@ ex.:
 
 
 === basic_auth_enabled
-
+{% include new_since.ad version="2.36" %}
 Show the basic auth user / password formular. Enabled when using cookie auth.
 You may want to disable this if you only use oauth authentication.
 
@@ -1667,6 +1667,7 @@ ex.:
 
 
 == OAuth Authentication Settings
+{% include new_since.ad version="2.36" %}
 
 === auth_oauth
 Set oauth authentication provider
