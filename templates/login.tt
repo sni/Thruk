@@ -41,13 +41,14 @@
                 [% END %]
                 [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
                 <tr>
+                  [% IF c.config.basic_auth_enabled %]
                   <td>&nbsp;</td>
+                  [% END %]
                   <td align="center">
                     [% IF c.config.basic_auth_enabled %]
                     <input type="submit" name="submit" value="Login" class="loginbutton">
                     [% END %]
                     [% FOREACH auth = c.config.auth_oauth.provider %]
-                    <br>
                     <table>
                       [% IF c.config.basic_auth_enabled || !loop.first %]
                       <tr>
