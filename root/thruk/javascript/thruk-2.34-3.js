@@ -3437,7 +3437,7 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
         }
 
         var attr = data[key];
-        if(String(attr).match(/\$/)) {
+        if(String(attr).match(/(\$|%24)/)) {
             toReplace[key] = attr;
             continue;
         }
@@ -3756,12 +3756,12 @@ function check_server_action(id, link, backend, host, service, server_action_url
     }
     // normal urls
     else {
-        if(!link.href.match(/\$/)) {
+        if(!link.href.match(/(\$|%24)/)) {
             // no macros, no problems
             return;
         }
         jQuery(link).bind("mouseover", function() {
-            if(!link.href.match(/\$/)) {
+            if(!link.href.match(/(\$|%24)/)) {
                 // no macros, no problems
                 return(true);
             }
@@ -3788,7 +3788,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
             return(true);
         });
         jQuery(link).bind("click", function() {
-            if(!link.href.match(/\$/)) {
+            if(!link.href.match(/(\$|%24)/)) {
                 // no macros, no problems
                 return(true);
             }
