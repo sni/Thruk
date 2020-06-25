@@ -688,6 +688,9 @@ sub bulk_fetch_live_data {
                             '~' => '~~',
                            '!~' => '!~',
                         }->{$op} || '~~';
+                    if($op eq '~' || $op eq '!~') {
+                        $description = Thruk::Utils::convert_wildcards_to_regex($description);
+                    }
                     push @filter, { '-and' => { host_name => $hostname, description => { $full_op => $description }}};
                 } else {
                     push @filter, { '-and' => { host_name => $hostname, description => $description }};

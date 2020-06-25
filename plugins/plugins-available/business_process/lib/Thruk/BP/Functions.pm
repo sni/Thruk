@@ -39,6 +39,9 @@ sub status {
                 if($1 eq 'b') { $function = 'best' }
                 $description = $2;
             }
+            if($op eq '~' || $op eq '!~') {
+                $description = Thruk::Utils::convert_wildcards_to_regex($description);
+            }
 
             # create hash which can be used by internal calculation function
             my $depends = [];
