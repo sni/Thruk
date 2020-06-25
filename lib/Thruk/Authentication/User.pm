@@ -117,6 +117,9 @@ sub set_dynamic_attributes {
     if($skip_db_access) {
         $c->log->debug("using cached user data") if Thruk->verbose;
         $data = $c->cache->get->{'users'}->{$username} || {};
+        if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
+            $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
+        }
     } else {
         $c->log->debug("fetching user data from livestatus") if Thruk->verbose;
         $data = $self->get_dynamic_roles($c);
