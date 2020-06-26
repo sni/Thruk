@@ -48,6 +48,10 @@ The graph command exports pnp/grafana graphs
 
     End timestamp used when collecting performance data. Defaults to now.
 
+=item B<source>
+
+    Grafana panelId. Defaults to 1.
+
 =back
 
 =cut
@@ -88,6 +92,7 @@ sub cmd {
          "service=s"        => \$opt->{'service'},
          "width=i"          => \$opt->{'width'},
          "height=i"         => \$opt->{'height'},
+         "source=i"         => \$opt->{'source'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
