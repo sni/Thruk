@@ -716,7 +716,7 @@ sub _process_process_info_page {
     return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
 
     my $list_mode = $c->req->parameters->{'list'};
-    if(scalar @{$c->stash->{'backends'}} > 5) {
+    if($c->stash->{'backends'} && scalar @{$c->stash->{'backends'}} > 5) {
         $list_mode = 'list' unless defined $list_mode;
         my $backends = [];
         for my $key (@{$c->stash->{'backends'}}) {

@@ -81,8 +81,9 @@ my $app = $c->app;
 
     my $res3 = $c->sub_request('/r/hosts?limit=1&columns=name');
     is(ref $res3, 'ARRAY', 'got array from sub_request');
-    is(scalar @{$res3}, 1, 'sending url parameters worked');
-    is(scalar keys %{$res3->[0]}, 1, 'sending url parameters worked');
+    my $expect = -s 'thruk_local.conf' ? 1 : 0;
+    is(scalar @{$res3}, $expect, 'sending url parameters worked');
+    is(scalar keys %{$res3->[0]}, $expect, 'sending url parameters worked');
 };
 
 #########################
