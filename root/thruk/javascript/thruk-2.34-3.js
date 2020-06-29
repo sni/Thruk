@@ -6883,7 +6883,7 @@ var ajax_search = {
                       }
                   });
                 }
-                if(ajax_search.initialized_q && !orig_search_pattern.match(ajax_search.initialized_q)) {
+                if(ajax_search.initialized_q && !orig_search_pattern.match(ajax_search.initialized_q) && orig_search_pattern != ajax_search.initialized_q) {
                     // filter does not match our data base
                     needs_refresh = true;
                 }
