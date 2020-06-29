@@ -152,6 +152,10 @@ td.top_nav_pref button {
   width: 80px;
 }
 
+DIV.backend INPUT {
+  padding: 0px;
+}
+
 DIV#site_panel {
  position: fixed;
  z-index: 5000;
