@@ -1175,7 +1175,7 @@ var TP = {
     dec2bin: function(dec) {
         var potencies = new Array();
         var binary = [];
-        for (var i = 0; i > -1; i++) {
+        for (var i = 0; i < 100; i++) {
             var potency = Math.pow(2, i);
             if (potency > dec) { break; }
             potencies[i] = potency;
