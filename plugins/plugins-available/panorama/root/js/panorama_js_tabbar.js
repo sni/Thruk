@@ -330,7 +330,7 @@ Ext.define('TP.TabBar', {
         TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
         TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
         if(state) {
-            this.xdata = state || {};
+            this.xdata = state;
             Ext.apply(this, state);
         }
     },

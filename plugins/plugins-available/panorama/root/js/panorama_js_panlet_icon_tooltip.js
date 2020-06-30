@@ -254,7 +254,7 @@ Ext.onReady(function() {
                 curBlock[0] = '';
                 curBlock[1] = img.setIconLabelDynamicText(line)+'<br>';
             }
-            if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
+            if(curBlock[0] != undefined) { d.push(curBlock); }
         }
 
         TP.iconTip.panel = undefined;

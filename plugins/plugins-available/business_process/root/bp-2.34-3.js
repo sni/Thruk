@@ -660,7 +660,7 @@ function bp_show_edit_node(id, refreshType) {
     jQuery('#bp_node_id').val(current_edit_node);
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
-        autoOpen: false, modal: true,
+        autoOpen: false,
         width: 570, height: 400,
         draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
         modal: true,
@@ -858,7 +858,6 @@ jQuery.fn.overflown=function(){
 
 /* set status data */
 function bp_update_status(evt, node) {
-    evt = (evt) ? evt : ((window.event) ? event : null);
     if(node == null) {
         return false;
     }
@@ -1132,7 +1131,6 @@ function bp_mouse_over_node(evt, node) {
 
 /* fired if mouse leaves a node */
 function bp_mouse_out_node(evt, node) {
-    evt = (evt) ? evt : ((window.event) ? event : null);
 }
 
 /* return template type of current node */
@@ -1365,10 +1363,6 @@ function bp_no_more_events(evt) {
 /* redraw nodes and stuff */
 var maxX = 0, maxY = 0, minY = -1, graphW = 0, graphH = 0;
 function bp_redraw(evt) {
-    var containerId;
-    try {
-        containerId = 'container'+bp_id;
-    } catch(e) { return false; }
     if(!bp_graph_layout) { return false; }
 
     maxX = 0;

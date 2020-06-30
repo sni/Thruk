@@ -61,7 +61,7 @@ jQuery(document).ready(function(e){
         document.cookie = "thruk_mtheme=" + thruk_theme + "; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
 
         refresh_host_status(true, true);
-        refresh_service_status(true, true);
+        refresh_service_status(true);
     });
 
     /* initialize numbers */

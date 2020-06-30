@@ -65,8 +65,8 @@ function add_conf_attribute(table, key, rt) {
         var inp     = newObj.cells[2].innerHTML;
         var matches = inp.match(/id=([^\s]+?)\s/);
         if(matches != null) {
-            var id = matches[1].replace('"', '');
-            return matches[1];
+            var id = matches[1].replace(/"/g, '');
+            return(id);
         }
     }
     return false;

@@ -404,11 +404,11 @@ Ext.define('TP.HostServicesStatusIcon', {
 
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.general.incl_hst       = true;
-        this.xdata.general.incl_svc       = true;
-        this.xdata.general.incl_downtimes = false;
-        this.xdata.general.incl_ack       = false;
+        panel.callParent();
+        panel.xdata.general.incl_hst       = true;
+        panel.xdata.general.incl_svc       = true;
+        panel.xdata.general.incl_downtimes = false;
+        panel.xdata.general.incl_ack       = false;
     },
     getGeneralItems: function() {
         var panel = this;

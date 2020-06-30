@@ -35,7 +35,7 @@ var TP = {
         var tabbar = Ext.getCmp("tabbar");
         var activeTab = tabbar.getActiveTab();
         if(!activeTab) {
-            activeTab = tabbar.setActiveTab(0);
+            tabbar.setActiveTab(0);
         }
         if(!one_tab_only) {
             tabbar.startTimeouts();
@@ -2394,7 +2394,7 @@ var TP = {
         if(!activeTab) {
             return;
         }
-        cookieSave('thruk_panorama_active', (activeTab && activeTab.getStateId()) ? activeTab.getStateId().replace(/^pantab_/, '') : 0);
+        cookieSave('thruk_panorama_active', activeTab.getStateId() ? activeTab.getStateId().replace(/^pantab_/, '') : 0);
         var numbers = [];
         for(var nr=0; nr<open_tabs.length; nr++) {
             var num = open_tabs[nr].replace(/^pantab_/, '');
