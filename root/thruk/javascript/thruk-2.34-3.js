@@ -3838,7 +3838,7 @@ function replace_macros(input, macros, core_macros) {
     }
     if(macros != undefined) {
         for(var key in macros) {
-            var regex  = new RegExp('\{\{'+key+'\}\}', 'g');
+            var regex  = new RegExp('{{'+key+'}}', 'g');
             out = out.replace(regex, macros[key]);
         }
         return(out);
