@@ -46,7 +46,7 @@ jQuery(document).ready(function(e){
     jQuery('#options_save').bind('vclick', function(event){
         var serialized = "";
         for(var key in current_backend_states){
-            state = 2;
+            var state = 2;
             if(jQuery("#backend_"+key).prop("checked")) {
                 state = 0;
             }
@@ -316,7 +316,7 @@ function refresh_service_status(force) {
 /* refresh backends from global variable */
 function refresh_backends() {
     if(current_backend_states != undefined) {
-        number=0;
+        var number=0;
         for(var key in current_backend_states) {
             number++;
             if(current_backend_states[key].state == 0 || current_backend_states[key].state == 1) {
@@ -338,8 +338,8 @@ function refresh_backends() {
 
 /* set concetion status from data connection */
 function extract_data(data) {
-    current_backend_states = data.connection_status;
-    program_starts         = data.program_starts;
+    var current_backend_states = data.connection_status;
+    program_starts            = data.program_starts;
 
     if(current_backend_states != undefined) {
         failed_backends=0;
@@ -612,7 +612,7 @@ function get_params(params) {
     str        = str.replace(/#+.*\?/, '');
     jQuery(str.split('&')).each(function(x, s) {
         if(s != "") {
-            p = s.split('=');
+            var p = s.split('=');
             if(p.length > 1) {
                 params[p[0]] = decoder(p[1]);
             }

@@ -53,7 +53,7 @@ function showTip(e, node) {
 
   var target = e.target ? e.target : e.srcElement;
 
-  tip = document.getElementById('tooltip');
+  var tip = document.getElementById('tooltip');
 
   //Add mousemove event handler
   addEvent(target, 'mousemove', function(e, win){
@@ -95,7 +95,7 @@ function showTip(e, node) {
 /* create and show a treemap */
 function show_tree_map(id_to_show) {
 
-    levelsToShow = 1 + detail;
+    var levelsToShow = 1 + detail;
     if(groupby == 'address') {
         levelsToShow = levelsToShow + 1;
     }
@@ -125,7 +125,7 @@ function show_tree_map(id_to_show) {
           enable: true,
             'onClick': function(node) {
                 // hide tip
-                tip = document.getElementById('tooltip');
+                var tip = document.getElementById('tooltip');
                 tip.style.display = 'none';
 
                 additionalParams['host'] = node.id;
@@ -134,7 +134,7 @@ function show_tree_map(id_to_show) {
             },
             'onRightClick': function() {
                 // hide tip
-                tip = document.getElementById('tooltip');
+                var tip = document.getElementById('tooltip');
                 tip.style.display = 'none';
 
                 var tree = json;

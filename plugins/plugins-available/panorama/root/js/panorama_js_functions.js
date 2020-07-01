@@ -63,8 +63,8 @@ var TP = {
     },
 
     get_snap: function (x, y) {
-        newx = Math.round(x/TP.snap_x) * TP.snap_x;
-        newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
+        var newx = Math.round(x/TP.snap_x) * TP.snap_x;
+        var newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
         if(newx < 0) { newx = 0; }
         if(newy < 0) { newy = 0; }
         if(newy < TP.offset_y) { newy = TP.offset_y; }
@@ -467,7 +467,7 @@ var TP = {
     /* choose position handler */
     add_panlet_handler: function(evt, element, args) {
         var tb = args[0], config = args[1], offsetX = args[2], offsetY = args[3], pos = args[4], el = args[5];
-        if(el == undefined) { el = tb.getEl() }
+        if(el == undefined) { el = tb.getEl(); }
         el.un('click', TP.add_panlet_handler, this, args); // remove event handler again
         tb.enableMapControlsTemp();
         if(config.conf == undefined) { config.conf = {}; }
@@ -565,7 +565,7 @@ var TP = {
 
     /* show about window */
     aboutWindow: function() {
-        var win = new Ext.window.Window({
+        new Ext.window.Window({
             autoShow:   true,
             modal:      true,
             title:      'About Thruks Panorama',
@@ -752,7 +752,7 @@ var TP = {
                 var result = {};
                 var checked = f.getChecked();
                 for(var nr=0; nr<checked.length; nr++) {
-                    c = checked[nr];
+                    var c = checked[nr];
                     if(result[c.name] == undefined) {
                         result[c.name] = [];
                     }
@@ -910,7 +910,7 @@ var TP = {
                             TP.cp.saveChanges({replace: 1}, function() {
                                 Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
                                 TP.initialized = false; // prevents onUnload saving over our imported tabs
-                                TP.timeouts['timeout_window_reload'] = window.setTimeout("window.location.reload()", 1000);
+                                TP.timeouts['timeout_window_reload'] = window.setTimeout(function() { window.location.reload(); }, 1000);
                             });
                         }
                     }
@@ -922,7 +922,7 @@ var TP = {
                 task:    'update2',
                 nr:      'new',
                 pantab_1: Ext.JSON.encode(decoded)
-            }
+            };
             var conn = new Ext.data.Connection();
             conn.request({
                 url:    'panorama.cgi?state',
@@ -956,11 +956,11 @@ var TP = {
             try {
                 data = eval("("+response.responseText+")");
             } catch(err) {
-                if(refresh.setType) { refresh.setType('broken') }
+                if(refresh.setType) { refresh.setType('broken'); }
                 TP.logError(panlet ? panlet.id : '??', "responseEvalException", err);
                 return data;
             }
-            if(refresh.setType) { refresh.setType('refresh') }
+            if(refresh.setType) { refresh.setType('refresh'); }
             /* extract pi details */
             if(data && data.pi_detail != undefined) {
                 for(var key in data.pi_detail) {
@@ -1046,7 +1046,7 @@ var TP = {
         }
         debug("ERROR: " + response.status + ' (' + response.request.options.url + ')');
         debug(response);
-        if(refresh.setType) { refresh.setType('broken') }
+        if(refresh.setType) { refresh.setType('broken'); }
         return false;
     },
     /* sets text for refresh slider */
@@ -1081,7 +1081,6 @@ var TP = {
         TP.timeouts['interval_global_servertime'] = window.setInterval(TP.updateServerTime, 1000);
     },
     stopServerTime: function() {
-        var tabbar = Ext.getCmp('tabbar');
         window.clearInterval(TP.timeouts['interval_global_servertime']);
     },
     /* update server time */
@@ -1100,7 +1099,6 @@ var TP = {
     },
     /* stop tab rotation interval */
     stopRotatingTabs: function() {
-        var tabbar = Ext.getCmp('tabbar');
         window.clearInterval(TP.timeouts['interval_global_rotate_tabs']);
     },
     /* rotate tabs once */
@@ -1362,7 +1360,7 @@ var TP = {
                             backends:    TP.getActiveBackendsPanel(subtab),
                             current_tab: subtab.id,
                             state_type:  subtab.xdata.state_type
-                        }
+                        };
                         subReqs[subtab.id] = { tab: subtab, ref: subreq.ref };
                     }
                 }
@@ -1452,7 +1450,6 @@ var TP = {
         if(data.hostgroups) {
             for(var x=0; x<data.hostgroups.length; x++) {
                 var name  = data.hostgroups[x]['name'];
-                var state = data.hostgroups[x]['state'];
                 if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
                     for(var y=0; y<ref.hostgroups[name].length; y++) {
                         delete ref.hostgroups[name][y]['no_data'];
@@ -1467,7 +1464,6 @@ var TP = {
         if(data.servicegroups) {
             for(var x=0; x<data.servicegroups.length; x++) {
                 var name  = data.servicegroups[x]['name'];
-                var state = data.servicegroups[x]['state'];
                 if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
                     for(var y=0; y<ref.servicegroups[name].length; y++) {
                         delete ref.servicegroups[name][y]['no_data'];
@@ -1575,8 +1571,7 @@ var TP = {
         if(TP.availabilityUpdateRunning[tab.id]) { return; }
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) { return; }
-        var req = statusReq.req,
-            ref = statusReq.ref;
+        var req = statusReq.req;
 
         var params = {
             types:       Ext.JSON.encode(req),
@@ -2346,7 +2341,7 @@ var TP = {
         for(var x = 0; x < broadcasts.length; x++) {
             var b   = broadcasts[x];
             var id  = "broadcast_"+b.basefile.replace(/[^0-9a-z]/g, "");
-            var text = replace_macros(replace_macros(b.text, b.frontmatter), b.macros)
+            var text = replace_macros(replace_macros(b.text, b.frontmatter), b.macros);
             if(b.annotation) {
                 text = '<img src="'+url_prefix+'themes/'+theme+'/images/'+b.annotation+'.png" border="0" alt="warning" title="'+b.annotation+'" width="16" height="16" style="vertical-align: text-bottom; margin-right: 5px;">'+text;
             }

@@ -83,7 +83,7 @@ TP.iconShowEditDialog = function(panel) {
         // update trend icon source store
         var cbo = Ext.getCmp('trendsourceStore');
         TP.updateArrayStoreKV(cbo.store, dataPerf);
-    }
+    };
 
     /* General Settings Tab */
     var generalItems = panel.getGeneralItems();
@@ -358,7 +358,7 @@ TP.iconShowEditDialog = function(panel) {
 
         labelUpdate();
         updateDisabledFields(xdata);
-    }
+    };
 
     var appearanceItems = [{
         /* appearance type */
@@ -797,7 +797,7 @@ TP.iconShowEditDialog = function(panel) {
                             editable:        false,
                             listeners:     {
                                 change: function(This, newValue, oldValue, eOpts) {
-                                    var defaults = TP.getPanelDetailsHeader(panel, true);
+                                    TP.getPanelDetailsHeader(panel, true);
                                     if(newValue == 'automatic') {
                                         Ext.getCmp('popup_x').setDisabled(true);
                                         Ext.getCmp('popup_y').setDisabled(true);
@@ -1216,7 +1216,7 @@ TP.iconShowEditDialog = function(panel) {
             // update performance data stores
             TP.iconSettingsGlobals.perfDataUpdate();
         });
-    }
+    };
 
     TP.iconSettingsGlobals.popupPreviewUpdate = function() {
         window.clearTimeout(TP.timeouts['timeout_popup_preview']);
@@ -1236,7 +1236,7 @@ TP.iconShowEditDialog = function(panel) {
 
             TP.iconTip.alignToSettingsWindow();
         }, 100);
-    }
+    };
 
     // new mouseover tips while settings are open
     TP.iconTip.hide();
@@ -1284,14 +1284,14 @@ TP.get_icon_form_xdata = function(settingsWindow) {
         link:       Ext.getCmp('linkForm').getForm().getValues(),
         label:      Ext.getCmp('labelForm').getForm().getValues(),
         popup:      Ext.getCmp('popupForm') && Ext.getCmp('popupForm').getForm().getValues()
-    }
+    };
     xdata.groups = [];
     TP.iconSettingsWindow.permissionsStore.each(function(rec) {
         var row = {};
         row[rec.data.contactgroup] = rec.data.permission;
         xdata.groups.push(row);
     });
-    if(xdata.groups.length == 0) { delete xdata.groups }
+    if(xdata.groups.length == 0) { delete xdata.groups; }
 
     // clean up
     if(xdata.label.labeltext == '')   { delete xdata.label; }
@@ -1337,7 +1337,7 @@ TP.get_icon_form_xdata = function(settingsWindow) {
 
 TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
-    var labelEditorWindow = new Ext.Window({
+    new Ext.Window({
         height:  500,
         width:   650,
         title:  'Label Editor',

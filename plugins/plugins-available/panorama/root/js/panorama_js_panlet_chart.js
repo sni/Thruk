@@ -20,14 +20,14 @@ Ext.define('TP.chart.TimeAxis', {
         this.callParent([config]);
         this._calcEnds = this.calcEnds;
         this.calcEnds = function() {
-            var me = this;
-            range = me.getRange(),
-            min   = range.min,
-            max   = range.max,
-            steps = me.majorTickSteps + 1;
+            var me    = this;
+            var range = me.getRange();
+            var min   = range.min;
+            var max   = range.max;
+            var steps = me.majorTickSteps + 1;
             if(min.getTime) { min = min.getTime(); }
             var step  = (max-min)/steps;
-            out = {from:min, to:max, step:step, steps:steps};
+            var out = {from:min, to:max, step:step, steps:steps};
             return(out);
         }
         this.type = 'Numeric';

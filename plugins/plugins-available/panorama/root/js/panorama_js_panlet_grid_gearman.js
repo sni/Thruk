@@ -12,8 +12,8 @@ Ext.define('TP.PanletGridGearmanMetrics', {
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems({
+        panel.callParent();
+        panel.addGearItems({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',
             name:       'server'
@@ -116,7 +116,7 @@ Ext.define('TP.PanletChartGearman', {
             }
             axis.minimum = mindate;
             axis.maximum = mindate + minutes_to_show * 60000;
-        }
+        };
 
         /* add graph */
         this.chart = new Ext.chart.Chart({

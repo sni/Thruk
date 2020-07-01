@@ -98,7 +98,7 @@ Ext.define('TP.Pantab', {
             }
 
             /* close tooltip */
-            if(TP.iconTip) { TP.iconTip.hide() }
+            if(TP.iconTip) { TP.iconTip.hide(); }
 
             TP.resetMoveIcons();
             var delay = 0;
@@ -120,7 +120,7 @@ Ext.define('TP.Pantab', {
                         TP.logError(panlet.id, "panelActivateException", err);
                     }
                 }
-                else { missingPanlets++ }
+                else { missingPanlets++; }
             }
             var tabbar = Ext.getCmp('tabbar');
             if(delay > 0) {
@@ -505,7 +505,7 @@ Ext.define('TP.Pantab', {
         }
 
         var header = This.getDockedItems()[0];
-        if(header) { header.hide() }
+        if(header) { header.hide(); }
 
         if(This.xdata.hide_tab_header && This.tab) {
             This.tab.hide();
@@ -575,7 +575,7 @@ Ext.define('TP.Pantab', {
                     delay = delay + Math.round(interval*1000);
                 }
                 if(p.header) {
-                    if(tab.xdata.autohideheader === 1) { p.header.hide() }
+                    if(tab.xdata.autohideheader === 1) { p.header.hide(); }
                 }
             }
         }
@@ -672,7 +672,7 @@ Ext.define('TP.Pantab', {
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
-            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom})
+            var zoomControl = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomDiv.dom});
             map.addControl(zoomControl);
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
@@ -968,7 +968,6 @@ Ext.define('TP.Pantab', {
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
         var tab = this;
-        var mask;
         var panels = TP.getAllPanel(tab);
         if(tab.locked != val && panels.length > 0) {
             tab.mask = Ext.getBody().mask((val ? "" : "un")+"locking dashboard...");
@@ -1006,7 +1005,6 @@ Ext.define('TP.Pantab', {
         TP.resetMoveIcons();
         tab.disableMapControlsTemp();
         var pos = [evt.getX(), evt.getY()];
-        var nr = tab.nr();
 
         var menu_items = [];
         if(tab.xdata.locked) { hidePasteAndNew = true; }
@@ -1264,7 +1262,7 @@ Ext.define('TP.Pantab', {
     // returns all dashboard ids from dashboard icons
     getAllSubDashboards: function(recursive, dashboards) {
         var tab = this;
-        if(dashboards == undefined) { dashboards = {} };
+        if(dashboards == undefined) { dashboards = {}; };
         var panels = TP.getAllPanel(tab);
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
@@ -1551,7 +1549,7 @@ TP.setRestorePointsMenuItems = function(tab) {
                 }
             } else {
                 var data = TP.getResponse(undefined, response);
-                if(!data || !data.data) { return }
+                if(!data || !data.data) { return; }
                 data = data.data;
                 var autosavemenu  = Ext.getCmp("autosavemenu");
                 if(autosavemenu == undefined || autosavemenu.menu == undefined) { return; } /* menu has been closed already */

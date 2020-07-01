@@ -77,7 +77,7 @@ Ext.onReady(function() {
             show: function(This) {
                 if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.doLayout(); }
                 var size = This.getSize();
-                if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150} }
+                if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150}; }
 
                 var position = "automatic";
                 if(TP.iconTipTarget && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.popup_position != "" && TP.iconTipTarget.xdata.popup.popup_position != "automatic") {
@@ -162,7 +162,7 @@ Ext.onReady(function() {
         var img = Ext.getCmp(el.id);
         if(!img || !img.el || !img.el.dom) { delete TP.iconTipTarget; return; }
         try {
-            if(img.panel) { img = img.panel; el = img.el.dom }
+            if(img.panel) { img = img.panel; el = img.el.dom; }
         } catch(e) { delete TP.iconTipTarget; return;} // errors with img.el not defined sometimes
 
         var xdata = img.xdata;
@@ -289,7 +289,7 @@ Ext.onReady(function() {
         TP.iconTip.update(details);
         var size;
         if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
-        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150} }
+        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150}; }
         TP.suppressIconTipForce = false;
         if(xdata.popup && xdata.popup.popup_position == "relative position") {
             TP.iconTip.setFixedOffsetPosition(img, xdata.popup.popup_x, xdata.popup.popup_y);
@@ -479,7 +479,7 @@ TP.renderTipDetails = function(data) {
     }
     else if(!TP.iconSettingsWindow) {
         var size      = TP.iconTip.getSize();
-        if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150} }
+        if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150}; }
         var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
         TP.iconTip.showAt(showAtPos);
     } else {

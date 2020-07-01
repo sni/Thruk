@@ -118,7 +118,7 @@ Ext.define('TP.PanletUrl', {
                 var iframeObj = panel.iframe.getEl();
                 if(iframeObj && iframeObj.dom) {
                     iframeObj.dom.onerror = panel.iframeErrorHandler;
-                    iframeObj.dom.src     = Ext.urlAppend(panel.xdata.url, '_dc='+Ext.Date.now())
+                    iframeObj.dom.src     = Ext.urlAppend(panel.xdata.url, '_dc='+Ext.Date.now());
                     TP.log('['+panel.id+'] refreshHandler: set iframe url '+iframeObj.dom.src);
                 }
             } else {
@@ -163,7 +163,7 @@ Ext.define('TP.PanletUrl', {
                     }
                 }
             });
-        }
+        };
         panel.addIframe();
 
         /* auto load when url is set */

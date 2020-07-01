@@ -84,7 +84,7 @@ Ext.define('TP.PanletSquares', {
                     delete panel.dataStore[key].label;
                 }
             }
-        }
+        };
     },
     adjustBodyStyle: function() {
         var panel = this;
@@ -404,7 +404,7 @@ TP.square_item_details = function(item) {
             if(item.state != 0 && (d.state == 0 || d.state == 4)) { continue; }
             detailCount++;
             if(detailCount == 11) {
-                details += '<tr><td colspan=4>...<\/td><\/tr>'
+                details += '<tr><td colspan=4>...<\/td><\/tr>';
                 break;
             }
             var dState = TP.text_status(d.state, d.isHost);
@@ -436,8 +436,7 @@ TP.square_update_callback = function(panel, data, retries) {
         if(!tab) { return; }
         iconsetName = tab.xdata.defaulticonset || 'default';
     }
-    var rec    = TP.iconsetsStore.findRecord('value', iconsetName);
-    var imgSrc = Ext.BLANK_IMAGE_URL;
+    var imgSrc;
     var leftStart  = 3;
     var topStart   = 3;
     var padding    = panel.xdata.iconPadding;
@@ -473,7 +472,7 @@ TP.square_update_callback = function(panel, data, retries) {
     var rec = TP.iconsetsStore.findRecord('value', iconsetName);
     if(!iconWidth || !iconHeight) {
         if(rec != null) {
-            var imgSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset["ok"];
+            imgSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset["ok"];
             var naturalSize = TP.getNatural(imgSrc);
             iconWidth  = naturalSize.width;
             iconHeight = naturalSize.height;
@@ -492,13 +491,13 @@ TP.square_update_callback = function(panel, data, retries) {
 
     for(var nr=0; nr<data.length; nr++) {
         var item   = data[nr];
-        var newSrc = "ok";
+        var newSrc;
         if(item.isHost) {
             newSrc = TP.hostState2Src(item.state, item.acknowledged, item.downtime);
         } else {
             newSrc = TP.serviceState2Src(item.state, item.acknowledged, item.downtime);
         }
-        var imgSrc = ''
+        imgSrc = '';
         if(rec != null && rec.data.fileset[newSrc]) {
             imgSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset[newSrc];
         }

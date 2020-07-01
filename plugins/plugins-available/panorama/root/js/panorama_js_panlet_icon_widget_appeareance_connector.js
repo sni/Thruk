@@ -10,7 +10,6 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
     },
 
     setRenderItem: function(xdata) {
-        var panel = this.panel;
     },
 
     /* update render item on active tab only */
@@ -22,7 +21,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
     connectorRender: function(xdata, forceColor, panel) {
         if(panel == undefined) { panel = this.panel; }
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'connector') { return }
+        if(xdata.appearance.type != 'connector') { return; }
 
         if(!panel.surface) {
             panel.setRenderItem(xdata);
@@ -42,7 +41,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
             return;
         }
 
-        if(!panel.surface.el) { return };
+        if(!panel.surface.el) { return; };
 
         if(fromX > toX) {
             fromX = xdata.appearance.connectortox;
@@ -67,7 +66,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
                 if(xdata.appearance.connectormax != undefined) { max = xdata.appearance.connectormax; }
                 if(min == undefined) { min = 0; }
                 percent = ((shapeColor.value-min) / (max-min)) * 100;
-                if(percent > 100) { percent = 100 }
+                if(percent > 100) { percent = 100; }
             }
             else if(state == 0) { percent =   0; }
             else if(state == 1) { percent =  50; }
@@ -133,7 +132,7 @@ Ext.define('TP.IconWidgetAppearanceConnector', {
         }
 
         panel.surface.removeAll();
-        sprite = panel.surface.add({
+        var sprite = panel.surface.add({
             type: "path",
             path: TP.pointsToPath(points),
             fill: shapeColor.color

@@ -136,7 +136,7 @@ Ext.define('TP.TabBarSearch', {
         var This  = this;
 
         var label    = "<span class='searchname'>"+data.name+"<\/span>";
-        var hints    = {}
+        var hints    = {};
         var subitems = [];
 
         var detailedHints = {};

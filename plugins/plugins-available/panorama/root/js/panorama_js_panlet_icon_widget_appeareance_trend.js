@@ -36,7 +36,6 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
         if(retry == undefined) { retry = 0; } else { retry++; }
         if(xdata       == undefined) { xdata = panel.xdata; }
         if(xdata.stateHist == undefined) { xdata.stateHist = panel.xdata.stateHist; }
-        var tab   = panel.tab;
         if(!panel.icon) {
             panel.setRenderItem(xdata);
             return;
@@ -94,7 +93,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
 
                 if(macros.perfdata[key]) {
                     var p = macros.perfdata[key];
-                    var r = TP.getPerfDataMinMax(p, 100);
+                    TP.getPerfDataMinMax(p, 100);
                     unit = p.unit;
                     if(xdata.stateHist[key] == undefined) { xdata.stateHist[key] = []; }
                     if(xdata.stateHist[key].length == 0 || xdata.stateHist[key][xdata.stateHist[key].length-1][0] != obj.last_check) {
@@ -275,7 +274,7 @@ Ext.define('TP.IconWidgetAppearanceTrend', {
             for(var nr=0; nr<data.length; nr++) {
                 if(data[nr][0] > start && data[nr][0] < end) {
                     count++;
-                    raw.push(data[nr][1])
+                    raw.push(data[nr][1]);
                 }
             }
             base = TP.median(raw);

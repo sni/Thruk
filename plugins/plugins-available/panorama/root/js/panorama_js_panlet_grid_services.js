@@ -38,7 +38,6 @@ Ext.define('TP.PanletGridServiceTotals', {
         this.xdata.url = 'panorama.cgi?task=servicetotals';
     },
     setGearItems: function() {
-        var panel = this;
         this.callParent();
         TP.addFormFilter(this, this.has_search_button);
     }
@@ -66,7 +65,6 @@ Ext.define('TP.PanletGridServiceMineMap', {
         this.xdata.url = 'panorama.cgi?task=servicesminemap';
     },
     setGearItems: function() {
-        var panel = this;
         this.callParent();
         TP.addFormFilter(this, this.has_search_button);
         this.addGearItems({

@@ -26,7 +26,7 @@ Ext.define('TP.PanletNagvis', {
                 graph_combo_error_label = TP.getFormField(panel.gearitem.down('form'), 'grapherror');
             }
             if(success) {
-                var data  = TP.getResponse(panel, response, true);
+                TP.getResponse(panel, response, true);
                 var matches = response.responseText.match(/<a href="[^"]*?mod=Map&act=view&show=[^"]*?".*?>([^<]+)<\/a>/g);
                 if(matches && matches.length > 0) {
                     panel.graphs_loaded = 1;
@@ -72,7 +72,7 @@ Ext.define('TP.PanletNagvis', {
                     }
                 }
             }
-        }
+        };
 
         /* available graphs loader */
         panel.updateGraphs = function() {

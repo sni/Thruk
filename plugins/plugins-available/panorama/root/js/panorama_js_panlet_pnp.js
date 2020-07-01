@@ -192,7 +192,7 @@ Ext.define('TP.PanletPNP', {
                     panel.adjusting = 0;
                 }
             }
-        }
+        };
     },
     setGearItems: function() {
         var panel = this;

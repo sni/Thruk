@@ -29,7 +29,7 @@ var $case = function() {
 
     // add label
     click(_link('Label'));
-    isVisible(_textbox("labeltext"))
+    isVisible(_textbox("labeltext"));
     _setValue(_textbox("labeltext"), "London: ");
     click(_span("/x-btn-icon-el/", _rightOf(_textbox('labeltext'))));
     click(_italic("perfdata.rta.val"));

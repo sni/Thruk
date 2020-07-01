@@ -31,9 +31,9 @@ TP.get_group_status = function(options) {
         incl_hst       = options.incl_hst,
         incl_ack       = options.incl_ack, // alert acks as well, basically means acks are threated as unacked
         incl_downtimes = options.incl_downtimes; // assume no downtime
-    if(!order) { order = default_state_order }
-    if(group.hosts    == undefined) { group.hosts    = {} }
-    if(group.services == undefined) { group.services = {} }
+    if(!order) { order = default_state_order; }
+    if(group.hosts    == undefined) { group.hosts    = {}; }
+    if(group.services == undefined) { group.services = {}; }
 
     var totals = { services: {}, hosts: {} };
     if(incl_svc) {
@@ -334,7 +334,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         }
         else if(special[1] == 'refresh') {
             var el = panel.getEl();
-            TP.updateAllIcons(panel.tab, panel.id, undefined, el)
+            TP.updateAllIcons(panel.tab, panel.id, undefined, el);
             el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
         } else {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
@@ -455,7 +455,7 @@ TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
         cls: autoOpen ? 'hidden' : ''
     }).showBy(extraOptions.alignTo || panel);
     if(autoOpen) {
-        link = menu.items.get(0);
+        var link = menu.items.get(0);
         link.fireEvent("click");
         menu.hide();
     }
@@ -733,7 +733,7 @@ TP.getNatural = function(src) {
     if(TP.imageSizes[src] != undefined) {
         return {width: TP.imageSizes[src][0], height: TP.imageSizes[src][1]};
     }
-    img = new Image();
+    var img = new Image();
     img.src = src;
     if(img.width > 0 && img.height > 0) {
         TP.imageSizes[src] = [img.width, img.height];
@@ -886,7 +886,7 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     // host panels use warnings color for unreachable, just the label got changed in the settings menu
     // all other panels must be mapped to service states because they can only define service colors
     if(panel.iconType != 'host' && panel.hostProblem) {
-        if(state == 1) { state = 2 }
+        if(state == 1) { state = 2; }
     }
 
     if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }

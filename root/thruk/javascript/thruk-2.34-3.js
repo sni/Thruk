@@ -432,7 +432,7 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
     if(!inside) {
         try {
           close_and_remove_event();
-        } catch(err) { console.log(err) };
+        } catch(err) { console.log(err); };
     }
     return false;
   }
@@ -1264,7 +1264,7 @@ function site_panel_search() {
         var site = initial_backends[key];
         var name = site.section+'/'+site.name;
         var show = true;
-        jQuery(searches).each(function(i, v) {
+        jQuery.find(searches).each(function(i, v) {
             if(v == "") { return true; }
             if(!name.match(v)) {
                 show = false;
@@ -2091,7 +2091,7 @@ var sort_by = function(field, reverse, primer) {
        var A = key(a), B = key(b);
        return (A < B ? -1 : (A > B ? 1 : 0)) * [1,-1][+!!reverse];
    };
-}
+};
 
 /* numeric comparison function */
 function compareNumeric(a, b) {
@@ -2907,7 +2907,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
                     currentHeader[col] = row;
                 }
             });
-            jQuery(oldIndexes).each(function(i, el) {
+            jQuery.find(oldIndexes).each(function(i, el) {
                 table.appendChild(currentHeader[el]);
             });
             updateStatusColumns(pane_prefix, false);
@@ -4097,10 +4097,10 @@ function perf_reduce(value, unit) {
 /* round value to human readable */
 function perf_round(value) {
     if((value - parseInt(value)) == 0) { return(value); }
-    if(value >= 100) { return(value.toFixed(0)); }
-    if(value <  10)  { return(value.toFixed(2)); }
-    if(value < 100)  { return(value.toFixed(1)); }
-    return(value);
+    var abs = Math.abs(value);
+    if(abs >= 100) { return(value.toFixed(0)); }
+    if(abs <  10)  { return(value.toFixed(2)); }
+    return(value.toFixed(1));
 }
 
 /*******************************************************************************
@@ -7410,6 +7410,7 @@ function set_png_img(start, end, id, source) {
     // set style of buttons
     if(id) {
         id=id.replace(/^#/g, '');
+        var obj;
         for(var x=1;x<=5;x++) {
             obj = document.getElementById("pnp_th"+x);
             styleElements(obj, "original", 1);
@@ -7474,6 +7475,7 @@ function set_histou_img(start, end, id, source) {
     // set style of buttons
     if(id) {
         id=id.replace(/^#/g, '');
+        var obj;
         for(var x=1;x<=5;x++) {
             obj = document.getElementById("histou_th"+x);
             styleElements(obj, "original", 1);

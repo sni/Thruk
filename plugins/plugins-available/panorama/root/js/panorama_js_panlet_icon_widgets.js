@@ -57,7 +57,7 @@ Ext.define('TP.SmallWidget', {
                                 fontitalic:  '',
                                 fontbold:    ''
                             };
-        if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
+        if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = ''; };
         this.autoEl = {
             tag:     'a',
             href:    '',
@@ -281,7 +281,7 @@ Ext.define('TP.SmallWidget', {
         Ext.Array.each(['general', 'layout', 'appearance', 'link', 'label'], function(name, idx) {
             if(xdata[name] == undefined) { xdata[name] = {} };
         });
-        if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
+        if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon'; };
 
         /* restore position */
         if(panel.xdata.layout.lon != undefined && panel.xdata.layout.lon != "") {
@@ -329,7 +329,7 @@ Ext.define('TP.SmallWidget', {
             if(panel.animations == 0) { panel.stateful = true; }
         }, panel, []), delay);
 
-        layout = panel.xdata.layout;
+        var layout = panel.xdata.layout;
         if(layout.rotation) {
             // animations with rotated elements results in wrong position,
             // ex.: rotated shapes return wrong position on getPosition()
@@ -407,7 +407,6 @@ Ext.define('TP.SmallWidget', {
         el.on("click", function(evt) {
             if(!readonly) {
                 if(evt.ctrlKey || is_shift_pressed(evt)) {
-                    var tab = This.tab;
                     if(This.preventNextSelect) { delete This.preventNextSelect; return; }
                     if(This.locked) { return; }
                     if(TP.moveIcons == undefined) {
@@ -804,7 +803,6 @@ Ext.define('TP.SmallWidget', {
             return(true);
         }
         // first hit wins
-        var perm = "show";
         for(var x = 0; x < panel.xdata.groups.length; x++) {
             var group = panel.xdata.groups[x];
             var g = Ext.Object.getKeys(group)[0];
@@ -1195,7 +1193,7 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(!panel.icon)    { return; }
         if(!panel.icon.el) { return; }
-        if(TP.imageSizes == undefined) { TP.imageSizes = {} }
+        if(TP.imageSizes == undefined) { TP.imageSizes = {}; }
         var src = panel.icon.el.dom.href.baseVal || panel.src;
         var hasFixedSize = false;
         if(xdata.layout && xdata.layout.size_x != undefined && xdata.layout.size_x > 0 && xdata.layout.size_y != undefined && xdata.layout.size_y > 0) {

@@ -34,12 +34,13 @@ Ext.define('TP.PanletGridHostTotals', {
     hideSettingsForm: ['url'],
     reloadOnSiteChanges: true,
     initComponent: function() {
-        this.callParent();
-        this.xdata.url = 'panorama.cgi?task=hosttotals';
+        var panel = this;
+        panel.callParent();
+        panel.xdata.url = 'panorama.cgi?task=hosttotals';
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        TP.addFormFilter(this, this.has_search_button);
+        panel.callParent();
+        TP.addFormFilter(panel, panel.has_search_button);
     }
 });

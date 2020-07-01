@@ -18,7 +18,7 @@ TP.toggleBackend = function(icon, panel_id, backend) {
     var panel = Ext.getCmp(panel_id);
     var tab   = panel.tab;
     if(tab.activeBackends == undefined || tab.activeBackends[backend] == undefined) {
-        if(tab.activeBackends == undefined) { tab.activeBackends = {} }
+        if(tab.activeBackends == undefined) { tab.activeBackends = {}; }
         tab.activeBackends[backend] = false;
         icon.style.backgroundImage  = 'url(../plugins/panorama/images/sport_golf.png)';
     } else {
@@ -61,7 +61,6 @@ Ext.define('TP.PanletGridServerStats', {
         this.xdata.memory = true;
     },
     setGearItems: function() {
-        var panel = this;
         this.callParent();
         this.addGearItems([{
             fieldLabel: 'CPU',

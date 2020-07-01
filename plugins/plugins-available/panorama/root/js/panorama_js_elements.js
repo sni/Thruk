@@ -233,7 +233,7 @@ Ext.define('TP.PagingToolbar', {
         var me = this,
             displayItem = me.child('#displayItem'),
             pageData = me.getPageData(),
-            count, msg;
+            msg;
         if (displayItem) {
             msg = Ext.String.format(
                 me.displayMsg,
@@ -335,13 +335,12 @@ TP.Msg = function() {
             m.show();
             m.hide();
             m.slideIn('t');
+            var delay = 5000;
             if(p[0] == 'fail_message' || p[0] == 'info_message') {
                 debug(title + ': ' + p[1]);
                 var err = new Error;
                 TP.logError("global", "fail_message", err);
                 delay = 30000;
-            } else {
-                delay = 5000;
             }
             if(close_timeout != undefined) {
                 if(close_timeout == 0) {
@@ -649,7 +648,7 @@ Ext.define('Ext.ux.SearchCombobox', {
                 var index = me.up().items.findIndex("name", "type");
                 if(index >= 0) {
                     var typeInput = me.up().items.getAt(index);
-                    type = typeInput.getValue().toLowerCase()
+                    type = typeInput.getValue().toLowerCase();
                 }
                 if(type == "custom variable") { type = "custom value"; }
 

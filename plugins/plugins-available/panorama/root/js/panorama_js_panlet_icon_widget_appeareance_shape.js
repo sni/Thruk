@@ -31,14 +31,14 @@ Ext.define('TP.IconWidgetAppearanceShape', {
     shapeRender: function(xdata, forceColor, panel) {
         if(panel == undefined) { panel = this.panel; }
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'shape') { return }
+        if(xdata.appearance.type != 'shape') { return; }
 
         if(xdata.appearance.shapename == undefined) { return; }
         if(!panel.surface) {
             panel.setRenderItem(xdata, undefined, forceColor);
             return;
         }
-        if(!panel.surface.el) { return };
+        if(!panel.surface.el) { return; };
         var shapeData;
         TP.shapesStore.findBy(function(rec, id) {
             if(rec.data.name == xdata.appearance.shapename) {
@@ -66,7 +66,7 @@ Ext.define('TP.IconWidgetAppearanceShape', {
             return;
         }
         panel.surface.removeAll();
-        sprite = panel.surface.add(spriteData);
+        var sprite = panel.surface.add(spriteData);
         var box = sprite.getBBox();
         var xScale = xdata.appearance.shapewidth/box.width;
         var yScale = xdata.appearance.shapeheight/box.height;

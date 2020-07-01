@@ -64,7 +64,7 @@ Ext.define('TP.DashboardManagementWindow', {
             reconfigure: function(This) {
                 win.unmask();
             }
-        }
+        };
         /* My Dasboards */
         win.grid_my = Ext.create('Ext.grid.Panel', {
             tabConfig: {

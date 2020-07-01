@@ -33,7 +33,7 @@ Ext.define('TP.IconWidgetAppearancePerfBar', {
     perfbarRender: function(xdata, forceColor) {
         var panel = this.panel;
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'perfbar') { return }
+        if(xdata.appearance.type != 'perfbar') { return; }
         panel.setSize(75, 20);
         if(!panel.items.getAt(0)) {
             panel.setRenderItem(xdata);

@@ -39,7 +39,7 @@ Ext.define('TP.IconWidgetAppearancePie', {
     pieRender: function(xdata, forceColor) {
         var panel = this.panel;
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'pie') { return }
+        if(xdata.appearance.type != 'pie') { return; }
         if(!panel.chart) {
             panel.setRenderItem(xdata);
             return;
@@ -61,7 +61,7 @@ Ext.define('TP.IconWidgetAppearancePie', {
         };
         var totals   = panel.getTotals(xdata, colors);
         var colorSet = [];
-        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
+        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {}; }
         Ext.Array.each(totals, function(t,i) {
             var color = t.color;
             if(forceColor) { color = forceColor; }

@@ -511,7 +511,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         TP.reduceDelayEvents(tab, function() {
             applyBackground();
         }, 100, 'timeout_tab_background_change', true);
-    }
+    };
 
     var map_choose = "static";
     if(tab.xdata.background_color != undefined && tab.xdata.background_color != "") {
@@ -1008,7 +1008,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         /* unlock form, otherwise values cannot be retrieved */
                         TP.tabSettingsWindowLocked(tab, false);
 
-                        var win     = this.up('window');
                         var oldautohideheader = tab.xdata.autohideheader;
 
                         var oldstate = Ext.JSON.encode(tab.getState());

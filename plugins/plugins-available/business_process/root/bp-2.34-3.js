@@ -53,7 +53,6 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
     }
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
-    var old_nodes = nodes;
     is_refreshing = true;
     var url = 'bp.cgi?_='+ts+'&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1)+"&testmode="+testmode+"&no_menu="+bp_no_menu;
     jQuery('#bp'+bp_id).load(url, testmodes, function(responseText, textStatus, XMLHttpRequest) {
@@ -76,7 +75,7 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
             }
             if(node_id == 'node1') {
                 // first nodes name is linked to the bp name itself
-                var n = bp_get_node(node.id)
+                var n = bp_get_node(node.id);
                 jQuery('#subtitle').html(n.label);
             }
         }
@@ -642,7 +641,7 @@ function bp_groupstatus_check_changed() {
     jQuery('#bp_arg2_groupstatus').attr('placeholder', val);
 }
 /* show add node dialog */
-var $edit_dialog;
+var edit_dialog;
 function bp_show_edit_node(id, refreshType) {
     if(refreshType == undefined) { refreshType = true; }
     hideElement('bp_menu');
@@ -672,21 +671,22 @@ function bp_show_edit_node(id, refreshType) {
         }],
         create: function() { // turn tabs into dialogs
             // define the elements we're dealing with
-            $tabs = jQuery(this).find('.ui-tabs-nav'); $dlg = jQuery(this).parent();
-            $edit_dialog = $dlg;
+            var tabs = jQuery(this).find('.ui-tabs-nav');
+            var dlg  = jQuery(this).parent();
+            edit_dialog = dlg;
             // clone close button from dialog title and put it in the tabs area
-            $dlg.find('.ui-dialog-titlebar-close').appendTo($tabs);
+            dlg.find('.ui-dialog-titlebar-close').appendTo(tabs);
             // make the tabs draggable, give it a class that gracefully adds the move cursor and remove the dialog's original titlebar completely
-            $dlg.draggable({handle: ".ui-tabs-nav"})
+            dlg.draggable({handle: ".ui-tabs-nav"})
                 .addClass('ui-draggable')
                 .find('.ui-dialog-titlebar').remove();
             // give dialog styles to the tabs (would like to do this without adding CSS, but couldn't)
-            $dlg.find('.ui-tabs').css('padding', '0px');
+            dlg.find('.ui-tabs').css('padding', '0px');
             // turn off the highlighting of tabs in chrome, add titlebar style to tabs to give close button correct styling
-            $tabs.addClass('ui-dialog-titlebar')
+            tabs.addClass('ui-dialog-titlebar')
                 .find('li, a').css('outline', 'none').mousedown(function(e){ e.stopPropagation(); });
         }
-    })
+    });
     jQuery('.bp_type_box').button();
     jQuery("#edit_dialog_"+bp_id).dialog("open");
 
@@ -722,7 +722,7 @@ function bp_show_edit_node(id, refreshType) {
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
-        if(node && node.create_obj) { checkbox.checked = node.create_obj }
+        if(node && node.create_obj) { checkbox.checked = node.create_obj; }
         else { checkbox.checked = false; }
 
         if(!node || node.create_obj_ok) {
@@ -751,8 +751,8 @@ function bp_show_edit_node(id, refreshType) {
     bp_initialize_filter_tab(node);
 
     // make dragable again
-    if($edit_dialog) {
-        $edit_dialog.draggable({handle: ".ui-tabs-nav"}).addClass('ui-draggable');
+    if(edit_dialog) {
+        edit_dialog.draggable({handle: ".ui-tabs-nav"}).addClass('ui-draggable');
     }
 }
 
@@ -854,7 +854,7 @@ jQuery.fn.overflown=function(){
     var e=this[0];
     if(e == undefined) { return; }
     return e.scrollHeight>e.clientHeight || e.scrollWidth>e.clientWidth;
-}
+};
 
 /* set status data */
 function bp_update_status(evt, node) {
@@ -1214,7 +1214,7 @@ function bp_zoom_reset() {
 function bp_zoom(zoom) {
     // round to 0.05
     zoom = Math.floor((zoom * 20) + 0.05) / 20;
-    if(zoom < 0.1) { zoom = 0.1 }
+    if(zoom < 0.1) { zoom = 0.1; }
     last_zoom = zoom;
 
     // determine the zoom attribute, otherwise chrome uses two and doubles the zoom factor

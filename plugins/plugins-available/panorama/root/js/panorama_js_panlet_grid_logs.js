@@ -24,19 +24,19 @@ Ext.define('TP.PanletGridLogs', {
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems({
+        panel.callParent();
+        panel.addGearItems({
             fieldLabel: 'Time',
             xtype:      'textfield',
             name:       'time'
         });
-        this.addGearItems({
+        panel.addGearItems({
             fieldLabel: 'Include Pattern',
             xtype:      'textfield',
             name:       'pattern',
             emptyText:  'regular search expression'
         });
-        this.addGearItems({
+        panel.addGearItems({
             fieldLabel: 'Exclude Pattern',
             xtype:      'textfield',
             name:       'exclude',

@@ -43,7 +43,7 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
     speedoRender: function(xdata, forceColor) {
         var panel = this.panel;
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type != 'speedometer') { return }
+        if(xdata.appearance.type != 'speedometer') { return; }
         if(!panel.chart) {
             panel.setRenderItem(xdata);
             return;
@@ -141,7 +141,7 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
             if(state == 2) { color_fg = colors['warning'];  }
         }
 
-        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
+        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {}; }
 
         /* warning / critical thresholds */
         panel.chart.series.getAt(0).ranges = [];
@@ -151,10 +151,10 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
         var color_bg = this.speedoGetColor(colors, 0, forceColor, 'bg');
         if(!!xdata.appearance.speedoneedle) {
             if(xdata.appearance.speedo_thresholds == 'hide') {
-                color_bg = this.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor)
+                color_bg = this.speedoGetColor(color_fg, xdata.appearance.speedogradient, forceColor);
             }
             else if(xdata.appearance.speedo_thresholds == 'filled') {
-                color_bg = this.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok')
+                color_bg = this.speedoGetColor(colors, xdata.appearance.speedogradient, forceColor, 'ok');
             }
         }
         panel.chart.series.getAt(0).ranges.push({

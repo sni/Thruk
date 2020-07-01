@@ -414,7 +414,7 @@ Ext.define('TP.TabBar', {
             };
         }
 
-        var t = This.setActiveTab(TP.nr2TabId(TP.initial_active_tab));
+        This.setActiveTab(TP.nr2TabId(TP.initial_active_tab));
         if(!This.getActiveTab()) {
             TP.initComplete();
             This.recalculateOpenTabs();
@@ -581,7 +581,7 @@ TP.getLogTab = function() {
                         logtextarea.lastFilter = filter;
                         var text = "";
                         var pattern;
-                        if(filter) { pattern = new RegExp(filter, 'i') }
+                        if(filter) { pattern = new RegExp(filter, 'i'); }
                         for(var i = 0; i < TP.logHistory.length; i++) {
                             if(!pattern || TP.logHistory[i][1].match(pattern)) {
                                 text += formatLogEntry(TP.logHistory[i]);

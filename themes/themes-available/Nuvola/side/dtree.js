@@ -59,7 +59,6 @@ function Node(id, pid, name, url, title, target, icon, iconOpen, open, css, more
 	this._ls = false;
 	this._hc = false;
 	this._ai = 0;
-	this._p;
 	if (css) this.css = css; else this.css = "dTreeNode";
 	this._more_links = more_links;
 };

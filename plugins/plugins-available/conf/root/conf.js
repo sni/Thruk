@@ -16,8 +16,8 @@ function add_conf_attribute(table, key, rt) {
     }
 
     // add new row
-    tbl = document.getElementById(table);
-    var tblBody        = tbl.tBodies[0];
+    var tbl     = document.getElementById(table);
+    var tblBody = tbl.tBodies[0];
 
     var newObj   = tblBody.rows[0].cloneNode(true);
     newObj.id                 = "el_" + running_number;
@@ -77,8 +77,8 @@ function remove_conf_attribute(key, nr) {
 
     jQuery('#new_' + key + '_btn').css('display', '');
 
-    row   = document.getElementById(nr).parentNode.parentNode;
-    table = row.parentNode.parentNode;
+    var row   = document.getElementById(nr).parentNode.parentNode;
+    var table = row.parentNode.parentNode;
 
     var field = fields[key];
     if(field) {
@@ -349,7 +349,7 @@ function updateCommandLine(id, cmd_line, args, disabled) {
     }
 
     cmd_line = cmd_line.replace(/(\ |\n)\-/g, "<\/td><\/tr><\/table><table class='command_line_wzd'><tr><td>-");
-    cmd_line = "<table class='command_line_wzd first'><tr><td>"+cmd_line+"<\/td><\/tr><\/table>"
+    cmd_line = "<table class='command_line_wzd first'><tr><td>"+cmd_line+"<\/td><\/tr><\/table>";
     cmd_line = cmd_line.replace(/<td>\s*<\/td>/g, "");
     document.getElementById(id + 'command_line').innerHTML = cmd_line;
 
@@ -545,7 +545,7 @@ function init_plugin_exec(id) {
 
 function check_plugin_exec(id) {
     id          = id.replace(/preview$/, '');
-    args        = collect_args(id);
+    var args    = collect_args(id);
     var host    = jQuery('#'+id+'inp_preview_host').val();
     var service = jQuery('#'+id+'inp_preview_service').val();
     var command = jQuery('#'+id + "inp_command").val();
@@ -747,11 +747,10 @@ function conf_tool_cleanup(btn, link, hide) {
     jQuery(btn).button({
         icons: {primary: 'ui-waiting-button'},
         disabled: true
-    })
+    });
     if(hide) {
         /* ensure table width is fixed */
-        var table       = jQuery(btn).parents('table')[0];
-        var table_width = table.offsetWidth;
+        var table = jQuery(btn).parents('table')[0];
         if(!table.style.width) {
             jQuery(table).find('TH').each(function(_, header) {
                 header.style.width = jQuery(header).width()+'px';

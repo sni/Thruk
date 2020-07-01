@@ -1,6 +1,5 @@
 var page = require('webpage').create(),
     system = require('system'),
-    version = phantom.version.major,
     input, output, width, height;
 
 page.settings.resourceTimeout = 5000;

@@ -6,9 +6,9 @@ Ext.define('TP.HostStatusIcon', {
     iconName: 'Hostname',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.general.incl_downtimes = false;
-        this.xdata.general.incl_ack       = false;
+        panel.callParent();
+        panel.xdata.general.incl_downtimes = false;
+        panel.xdata.general.incl_ack       = false;
     },
     getGeneralItems: function() {
         var panel = this;
@@ -73,11 +73,11 @@ Ext.define('TP.HostgroupStatusIcon', {
     iconName: 'Hostgroupname',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.general.incl_hst       = true;
-        this.xdata.general.incl_svc       = true;
-        this.xdata.general.incl_downtimes = false;
-        this.xdata.general.incl_ack       = false;
+        panel.callParent();
+        panel.xdata.general.incl_hst       = true;
+        panel.xdata.general.incl_svc       = true;
+        panel.xdata.general.incl_downtimes = false;
+        panel.xdata.general.incl_ack       = false;
     },
 
     getGeneralItems: function() {
@@ -163,9 +163,9 @@ Ext.define('TP.ServiceStatusIcon', {
     iconName: 'Servicename',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.general.incl_downtimes = false;
-        this.xdata.general.incl_ack       = false;
+        panel.callParent();
+        panel.xdata.general.incl_downtimes = false;
+        panel.xdata.general.incl_ack       = false;
     },
 
     getGeneralItems: function() {
@@ -232,9 +232,9 @@ Ext.define('TP.ServicegroupStatusIcon', {
     iconName: 'Servicegroupname',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.general.incl_downtimes = false;
-        this.xdata.general.incl_ack       = false;
+        panel.callParent();
+        panel.xdata.general.incl_downtimes = false;
+        panel.xdata.general.incl_ack       = false;
     },
 
     getGeneralItems: function() {
@@ -301,12 +301,12 @@ Ext.define('TP.FilterStatusIcon', {
     iconType: 'filter',
     initComponent: function() {
         var panel = this;
-        this.callParent();
-        this.xdata.general.name           = '';
-        this.xdata.general.incl_hst       = true;
-        this.xdata.general.incl_svc       = true;
-        this.xdata.general.incl_downtimes = false;
-        this.xdata.general.incl_ack       = false;
+        panel.callParent();
+        panel.xdata.general.name           = '';
+        panel.xdata.general.incl_hst       = true;
+        panel.xdata.general.incl_svc       = true;
+        panel.xdata.general.incl_downtimes = false;
+        panel.xdata.general.incl_ack       = false;
     },
 
     getGeneralItems: function() {
@@ -546,10 +546,9 @@ Ext.define('TP.StaticIcon', {
     hasScale:          true,
     initComponent: function() {
         var panel = this;
-        this.callParent();
+        panel.callParent();
     },
     getGeneralItems: function() {
-        var panel = this;
         imagesStore.load();
         return([{
             xtype:      'combobox',
@@ -629,13 +628,12 @@ Ext.define('TP.DashboardStatusIcon', {
     iconName: 'Dashboard',
     initComponent: function() {
         var panel = this;
-        this.xdata.general.hide_downtimes = false;
-        this.xdata.general.hide_ack       = false;
-        this.callParent();
+        panel.xdata.general.hide_downtimes = false;
+        panel.xdata.general.hide_ack       = false;
+        panel.callParent();
     },
     getGeneralItems: function() {
         dashboardStore.load();
-        var panel = this;
         return([{
                 xtype:          'combobox',
                 name:           'dashboard',
