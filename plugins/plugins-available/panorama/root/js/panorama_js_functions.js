@@ -73,7 +73,7 @@ var TP = {
 
     /*
     add_pantab(options):
-        id                  the id to open
+        id                  the id to open, or 'new'
         replace_id          replace given dashboard
         hidden              dashboard will be invisible and kept in background
         callback            run callback after dashboard finished loading function(tab_id, success, response)
@@ -121,7 +121,6 @@ var TP = {
         TP.log('[global] add_pantab: id:'+id+(opt.replace_id ? ', replace_id: '+opt.replace_id : ''));
 
         /* get tab data from server */
-        opt.newDashboard = false;
         if(id && (id == "new" || id == "new_or_empty")) {
             opt.newDashboard = true;
         }
@@ -244,6 +243,7 @@ var TP = {
         if(opt.newDashboard) {
             tab.locked = false;
             tab.setLock(false);
+            opt.newDashboard = false;
         }
 
         /* any callbacks? */
