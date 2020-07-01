@@ -39,6 +39,11 @@ function openDebugConsole() {
     env.sleep(99999);
 }
 
+// open chrome/firefox dev tools
+function openDevTools() {
+    env.type("I", Key.CTRL, Key.SHIFT);
+}
+
 function mouseMoveXY($x, $y) {
     var region = new RegionRectangle($x-10,$y-10,$x+10,$y+10);
     region.mouseMove();
