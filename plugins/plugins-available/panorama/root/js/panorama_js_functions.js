@@ -2059,6 +2059,9 @@ var TP = {
         }
         TP.log('['+tab.id+'] renewDashboardDo');
         var duration = 1000;
+        if(tab.isActiveTab()) {
+            tab.mask = Ext.getBody().mask("updating dashboard");
+        }
         tab.renewInProgress = true;
         Ext.Ajax.request({
             url: 'panorama.cgi?task=dashboard_data',
@@ -2214,17 +2217,21 @@ var TP = {
             }
         } catch(er) {}
     },
-    JSONequals: function(str1, str2) {
-        if(!str1) {
+    JSONequals: function(any1, any2) {
+        if(!any1) {
             return(false);
         }
-        if(str2 != str1) {
-            if(str1.length != str2.length) {
+        if(any2 != any1) {
+            if(any1.length != any2.length) {
                 return(false);
             }
-            var dec1 = anyDecode(str1);
-            var dec2 = anyDecode(str2);
-            for(var key2 in dec1) {
+            var dec1 = anyDecode(any1);
+            var dec2 = anyDecode(any2);
+            var keys = {};
+            Ext.Array.forEach(Ext.Object.getKeys(dec1).concat(Ext.Object.getKeys(dec2)), function(n, i) {
+                keys[n] = true;
+            });
+            for(var key2 in keys) {
                 var obj1 = anyDecode(dec1[key2]);
                 var obj2 = anyDecode(dec2[key2]);
                 if(!Object.my_equals(obj1, obj2)) {
