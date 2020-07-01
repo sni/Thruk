@@ -6404,9 +6404,9 @@ var ajax_search = {
             ajax_search.regex_matching = options.regex_matching;
         }
 
-        var search_url = ajax_search.url;
+        ajax_search.cur_search_url = ajax_search.url;
         if(options.url != undefined) {
-            search_url = options.url;
+            ajax_search.cur_search_url = options.url;
         }
 
         if(type != undefined) {
@@ -6415,8 +6415,8 @@ var ajax_search = {
                 type = type();
             }
             ajax_search.search_type = type;
-            if(!search_url.match(/type=/)) {
-                search_url = search_url + "&type=" + type;
+            if(!ajax_search.cur_search_url.match(/type=/)) {
+                ajax_search.cur_search_url = ajax_search.cur_search_url + "&type=" + type;
             }
         } else {
             type = 'all';
@@ -6426,10 +6426,10 @@ var ajax_search = {
         if(append_value_of) {
             var el = document.getElementById(append_value_of);
             if(el) {
-                search_url     = search_url + el.value;
+                ajax_search.cur_search_url = ajax_search.cur_search_url + el.value;
                 appended_value = el.value;
             } else {
-                search_url     = ajax_search.url;
+                ajax_search.cur_search_url = ajax_search.url;
                 appended_value = '';
             }
         }
@@ -6441,7 +6441,7 @@ var ajax_search = {
                 if(backends != undefined) {
                     if(typeof(backends) == 'string') { backends = [backends]; }
                     jQuery.each(backends, function(i, val) {
-                        search_url = search_url + '&backend=' + val;
+                        ajax_search.cur_search_url = ajax_search.cur_search_url + '&backend=' + val;
                     });
                 }
             }
@@ -6513,7 +6513,7 @@ var ajax_search = {
             var varField   = document.getElementById(varFieldId);
             if(varField) {
                 ajax_search.search_type = "custom value";
-                search_url = search_url + "&type=custom value&var=" + varField.value;
+                ajax_search.cur_search_url = ajax_search.cur_search_url + "&type=custom value&var=" + varField.value;
             }
         }
         if(ajax_search.search_type == 'hosts')         { ajax_search.search_type = 'host'; }
@@ -6531,8 +6531,8 @@ var ajax_search = {
                || ajax_search.search_type == 'action menu'
                || ajax_search.search_type == 'timeperiod'
             ) {
-                if(!search_url.match(/type=/)) {
-                    search_url = search_url + "&type=" + ajax_search.search_type;
+                if(!ajax_search.cur_search_url.match(/type=/)) {
+                    ajax_search.cur_search_url = ajax_search.cur_search_url + "&type=" + ajax_search.search_type;
                 }
             }
         }
@@ -6553,7 +6553,7 @@ var ajax_search = {
                 }
             }
             if(host != undefined) {
-                search_url = search_url + "&host=" + encodeURIComponent(host);
+                ajax_search.cur_search_url = ajax_search.cur_search_url + "&host=" + encodeURIComponent(host);
             }
         }
 
@@ -6565,7 +6565,7 @@ var ajax_search = {
            && (    append_value_of == undefined && ajax_search.initialized_t == type
                || (append_value_of != undefined && ajax_search.initialized_a == appended_value )
               )
-           && ajax_search.initialized_u == search_url
+           && ajax_search.initialized_u == ajax_search.cur_search_url
         ) {
             ajax_search.suggest();
             return false;
@@ -6578,7 +6578,7 @@ var ajax_search = {
         if(append_value_of) {
             ajax_search.initialized_a = appended_value;
         }
-        ajax_search.initialized_u = search_url;
+        ajax_search.initialized_u = ajax_search.cur_search_url;
 
         // disable autocomplete
         var tmpElem = input;
@@ -6626,7 +6626,7 @@ var ajax_search = {
 
         // fill data store
         jQuery.ajax({
-            url: search_url,
+            url: ajax_search.cur_search_url,
             data: {
                 limit: ajax_search.limit,
                 query: ajax_search.initialized_q
@@ -6743,7 +6743,7 @@ var ajax_search = {
         else if(ajax_search.cur_select == -1) {
             ajax_search.hideTimer = window.setTimeout(function() {
                 if(ajax_search.dont_hide==false) {
-                    fade('"+ajax_search.result_pan+"', 300);
+                    fade(ajax_search.result_pan, 300);
                 }
             }, 150);
         }
