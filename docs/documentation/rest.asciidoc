@@ -31,14 +31,9 @@ http://your_webserver/thruk/r/v1/.
 
 === Basic Auth
 
-Using the web api, you can simply pass username and password as http basic
-authentication like:
-
-------
-  %> curl -k https://user:password@your_webserver/thruk/r/
-------
-
-Data is collected with the permissions of the given user.
+Basic authentication is not possible with the rest API. Use API keys instead.
+This is a limitation of the apache configuration which cannot set the remote user
+if supplied, but pass through the request if not.
 
 === Cookie Auth
 
