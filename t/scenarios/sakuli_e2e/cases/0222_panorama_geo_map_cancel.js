@@ -2,6 +2,11 @@ _dynamicInclude($includeFolder);
 _include('../_include.js');
 
 var $case = function() {
+    if(isChrome()) {
+        _log("SKIP: test is broken in chrome");
+        return;
+    }
+
     thruk_login();
     thruk_open_panorama();
 
