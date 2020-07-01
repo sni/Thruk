@@ -1139,7 +1139,7 @@ Ext.define('TP.Pantab', {
                 }, {
                     text:   'Dashboard Settings',
                     icon:   url_prefix+'plugins/panorama/images/cog.png',
-                    handler: function() { TP.tabSettingsWindow() },
+                    handler: function() { TP.tabSettingsWindow(); }
                 }, {
                     text:   'Restore',
                     icon:   url_prefix+'plugins/panorama/images/book_previous.png',
@@ -1147,7 +1147,7 @@ Ext.define('TP.Pantab', {
                     menu: [{
                         text:    'Create Restorepoint',
                         icon:    url_prefix+'plugins/panorama/images/disk.png',
-                        handler: function() { TP.createRestorePoint(tab, "m") }
+                        handler: function() { TP.createRestorePoint(tab, "m"); }
                     }, '-', {
                         text:       'Autosave',
                         hideOnClick: false,
