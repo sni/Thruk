@@ -29,8 +29,8 @@ var $case = function() {
     click(_link("Export Active Tab as Text"));
 
     _log("get export string");
-    isVisible(_textarea(0));
-    var $exportTab = _getValue(_textarea(0));
+    isVisible(_textarea(1));
+    var $exportTab = _getValue(_textarea(1));
     click(_link("OK"));
 
     _log("remove dashboard");
@@ -41,7 +41,7 @@ var $case = function() {
     click(_span("Dashboard Management"));
     click(_link("Import/Export"));
     click(_link("Import Tab(s) from Text"));
-    _setValue(_textarea(0), $exportTab);
+    _setValue(_textarea(1), $exportTab);
     click(_link("OK"));
 
     isVisible(_div("demo"));
