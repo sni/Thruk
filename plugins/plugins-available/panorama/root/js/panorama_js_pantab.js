@@ -1140,7 +1140,6 @@ Ext.define('TP.Pantab', {
                     text:   'Dashboard Settings',
                     icon:   url_prefix+'plugins/panorama/images/cog.png',
                     handler: function() { TP.tabSettingsWindow() },
-                    hidden:  tab.xdata.locked       // only show when not locked
                 }, {
                     text:   'Restore',
                     icon:   url_prefix+'plugins/panorama/images/book_previous.png',
