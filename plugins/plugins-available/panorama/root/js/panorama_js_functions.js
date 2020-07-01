@@ -1019,10 +1019,12 @@ var TP = {
 
             // response contains maintenance modes
             if(data && data.maintenance != undefined) {
-                var tab_id = TP.nr2TabId(key);
-                var tab = Ext.getCmp(tab_id);
                 for(var key in data.maintenance) {
-                    tab.setMaintenance(data.maintenance[key], false);
+                    var tab_id = TP.nr2TabId(key);
+                    var tab = Ext.getCmp(tab_id);
+                    if(tab) {
+                        tab.setMaintenance(data.maintenance[key], false);
+                    }
                 }
             }
 
