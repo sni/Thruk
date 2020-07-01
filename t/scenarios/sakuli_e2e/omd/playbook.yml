@@ -20,3 +20,7 @@
       dest: /omd/sites/demo/etc/thruk/thruk_local.d/
       owner: demo
       group: demo
+  - name: remove Apache Content-Security-Policy
+    lineinfile: dest=/omd/sites/demo/etc/thruk/apache.conf
+                state=absent
+                regexp='Content-Security-Policy'
