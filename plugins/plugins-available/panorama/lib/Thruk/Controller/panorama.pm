@@ -2671,7 +2671,7 @@ sub _task_userdata_shapes {
     my($c, $return_only) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/shapes/';
     my $shapes = [];
-    for my $file (glob("$folder/*.js $folder/*/*.js")) {
+    for my $file (glob("$folder/*.js $folder/*/*.js $folder/*.shape $folder/*/*.shape")) {
         my $name = $file;
         $name    =~ s/^\Q$folder\E//gmx;
         $name    =~ s/^.*\///gmx;
