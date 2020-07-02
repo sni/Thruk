@@ -196,6 +196,10 @@ Ext.define('TP.Pantab', {
                 This.contextmenu(evt);
             });
             This.el.on("click", This.tabBodyClick);
+            if(one_tab_only) {
+                var header = This.getDockedItems()[0];
+                if(header) { header.hide(); }
+            }
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -503,9 +507,6 @@ Ext.define('TP.Pantab', {
                 TP.timeouts['timeout_' + This.id + '_starttimeouts'] = window.setTimeout(Ext.bind(This.startTimeouts, This, []), 30000);
             }
         }
-
-        var header = This.getDockedItems()[0];
-        if(header) { header.hide(); }
 
         if(This.xdata.hide_tab_header && This.tab) {
             This.tab.hide();
