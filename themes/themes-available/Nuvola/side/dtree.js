@@ -309,10 +309,10 @@ dTree.prototype.s = function(id) {
 	if (cn._hc && !this.config.folderLinks) return;
 	if (this.selectedNode != id) {
 		if (this.selectedNode || this.selectedNode==0) {
-			eOld = document.getElementById("s" + this.obj + this.selectedNode);
+			var eOld = document.getElementById("s" + this.obj + this.selectedNode);
 			eOld.className = "node";
 		}
-		eNew = document.getElementById("s" + this.obj + id);
+		var eNew = document.getElementById("s" + this.obj + id);
 		eNew.className = "nodeSel";
 		this.selectedNode = id;
 		if (this.config.useCookies) this.setCookie('cs' + this.obj, cn.id);
@@ -383,10 +383,10 @@ dTree.prototype.closeAllChildren = function(node) {
 
 // Change the status of a node(open or closed)
 dTree.prototype.nodeStatus = function(status, id, bottom) {
-	eDiv	= document.getElementById('d' + this.obj + id);
-	eJoin	= document.getElementById('j' + this.obj + id);
+	var eDiv	= document.getElementById('d' + this.obj + id);
+	var eJoin	= document.getElementById('j' + this.obj + id);
 	if (this.config.useIcons) {
-		eIcon	= document.getElementById('i' + this.obj + id);
+		var eIcon	= document.getElementById('i' + this.obj + id);
 		eIcon.src = (status) ? this.aNodes[id].iconOpen : this.aNodes[id].icon;
 	}
 	eJoin.src = (this.config.useLines)?
@@ -458,7 +458,7 @@ if (!Array.prototype.push) {
 };
 if (!Array.prototype.pop) {
 	Array.prototype.pop = function array_pop() {
-		lastElement = this[this.length-1];
+		var lastElement = this[this.length-1];
 		this.length = Math.max(this.length-1,0);
 		return lastElement;
 	}

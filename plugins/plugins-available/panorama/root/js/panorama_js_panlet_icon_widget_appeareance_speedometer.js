@@ -48,7 +48,6 @@ Ext.define('TP.IconWidgetAppearanceSpeedometer', {
             panel.setRenderItem(xdata);
             return;
         }
-        var extraSpace = 0;
         if(!panel.items.getAt || !panel.items.getAt(0)) { return; }
         panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
         panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
