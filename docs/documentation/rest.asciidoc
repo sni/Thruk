@@ -48,7 +48,7 @@ the rest api itself using the `/thruk/api_keys` endpoint.
 
 ------
   %> curl -H 'X-Thruk-Auth-Key: apikey' \
-          -gk 'https://localhost/thruk/r/hosts
+          -gk 'https://localhost/thruk/r/hosts'
 ------
 
 === Superuser API Key
@@ -62,7 +62,7 @@ A superuser key can still be restricted to certain roles.
   %> curl -H 'X-Thruk-Auth-Key: apikey' \
           -H 'X-Thruk-Auth-User: automation' \
           -d 'comment=test' \
-          -gk 'https://localhost/thruk/r/hosts/localhost/cmd/schedule_host_downtime
+          -gk 'https://localhost/thruk/r/hosts/localhost/cmd/schedule_host_downtime'
 ------
 
 
@@ -75,7 +75,7 @@ when using OMD.
 ------
   %> curl -H 'X-Thruk-Auth-Key: secretkey' \
           -H 'X-Thruk-Auth-User: thrukadmin' \
-          -gk 'https://localhost/thruk/r/hosts
+          -gk 'https://localhost/thruk/r/hosts'
 ------
 
 
