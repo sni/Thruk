@@ -2141,7 +2141,7 @@ var TP = {
                         if(data[id] == undefined) {
                             var p = Ext.getCmp(id);
                             // remove unless this is ex. an host/service extinfo detail panel openened by the user
-                            if(!p.userOpened) {
+                            if(p && !p.userOpened) {
                                 p.destroy();
                             }
                         }
