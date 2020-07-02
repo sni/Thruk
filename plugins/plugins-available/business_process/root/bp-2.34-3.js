@@ -73,7 +73,7 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
             else if(node_id) {
                 jQuery('#'+node_id).effect('highlight', {}, 1500);
             }
-            if(node_id == 'node1') {
+            if(node_id == 'node1' && node) {
                 // first nodes name is linked to the bp name itself
                 var n = bp_get_node(node.id);
                 jQuery('#subtitle').html(n.label);
@@ -81,13 +81,13 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
         }
         if(callback) { callback(textStatus == 'success' ? true : false); }
         if(textStatus != 'success') {
-            // remove current message
-            jQuery('#thruk_message').remove();
-            window.clearInterval(thruk_message_fade_timer);
-
-            // responseText contains error?
-            var msg = jQuery("SPAN.fail_message", responseText).text();
-            thruk_message(1, 'refreshing failed: ' + msg);
+            var msg = readCookie('thruk_message');
+            if(msg) {
+                cookieRemove('thruk_message');
+                thruk_message(1, 'refreshing failed: ' + msg);
+            } else {
+                thruk_message(1, 'refreshing failed: ' + textStatus);
+            }
         }
     });
     return true;
