@@ -448,13 +448,9 @@ var TP = {
         config.conf.tab      = tb;
         var win = Ext.create(config.type, config.conf);
         if(config.conf.autoShow) { win.show(); }
-        if(smartPlacement == undefined || smartPlacement == true) {
+        if((smartPlacement == undefined || smartPlacement == true) && !(config.conf.pos)) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
-            if(config.conf.pos) {
-                win.setRawPosition(config.conf.pos[0], config.conf.pos[1]);
-            } else {
-                TP.fitWindowPlacement(tb, win);
-            }
+            TP.fitWindowPlacement(tb, win);
         }
         if(!config.skip_state) {
             tb.window_ids.push(win.id);
@@ -486,15 +482,6 @@ var TP = {
             TP.updateAllIcons(tb, panel.id);
         } else {
             panel.refreshHandler();
-        }
-        /* ensure the panel gets where it should be, breaks connector, so make an exception */
-        if(!config.conf.xdata || !config.conf.xdata.appearance || config.conf.xdata.appearance.type != "connector") {
-            window.setTimeout(function() {
-                panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
-                if(panel.xdata.layout) {
-                    TP.iconMoveHandler(panel, config.conf.pos[0], config.conf.pos[1]);
-                }
-            }, 200);
         }
     },
 

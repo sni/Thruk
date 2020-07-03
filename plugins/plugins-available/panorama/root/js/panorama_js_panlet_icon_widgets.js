@@ -96,23 +96,6 @@ Ext.define('TP.SmallWidget', {
         this.origApplyState = this.applyState;
         this.applyState = function(state) {
             Ext.apply(this.xdata, state.xdata);
-
-            // convert old location of map data
-            if(this.xdata.map) {
-                this.xdata.layout.lon = this.xdata.map.lon;
-                this.xdata.layout.lat = this.xdata.map.lat;
-                if(this.xdata.map.lat1) {
-                    this.xdata.layout.lon1 = this.xdata.map.lon1;
-                    this.xdata.layout.lat1 = this.xdata.map.lat1;
-                }
-                if(this.xdata.map.lat2) {
-                    this.xdata.layout.lon2 = this.xdata.map.lon2;
-                    this.xdata.layout.lat2 = this.xdata.map.lat2;
-                }
-                delete this.xdata.map;
-            }
-
-            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             this.origApplyState(state);
             this.moveToMapLonLat(); /* recalculate x/y from coordinates */
             if(state) {
@@ -165,6 +148,12 @@ Ext.define('TP.SmallWidget', {
                 });
             }
             This.setIconLabel();
+
+            // set position during very first initial placement
+            if(this.pos) {
+                this.setPosition(this.pos[0], this.pos[1]);
+                delete this.pos;
+            }
         },
         beforeshow: function( This, eOpts ) {
             // check view permissions
@@ -223,11 +212,6 @@ Ext.define('TP.SmallWidget', {
             var pos = This.getPosition();
             if(x != undefined && !isNaN(x)) { x = Math.floor(x); } else { x = pos[0]; }
             if(y != undefined && !isNaN(y)) { y = Math.floor(y); } else { y = pos[1]; }
-
-            // not moved at all, would break initial connector placement on geo maps
-            if(x == pos[0] && y == pos[1] && This.xdata.appearance.type == "connector") {
-                return;
-            }
 
             // snap to roaster when shift key is hold
             if(TP.isShift) {
@@ -788,10 +772,6 @@ Ext.define('TP.SmallWidget', {
         var panel = this;
         panel.suspendEvents();
         panel.setPosition(x, y);
-        if(panel.xdata.layout.lon != undefined && panel.el && panel.el.dom) {
-            // connectors on maps in single tab mode are rendered wrong otherwise
-            panel.setPagePosition(x, y);
-        }
         panel.resumeEvents();
         panel.setIconLabelPosition();
         return(panel);
