@@ -132,7 +132,7 @@ function reports_update_affected_sla_objects(input) {
             });
         }
     } catch(e) {
-        debug(e);
+        console.log(e);
     }
     jQuery.ajax({
         url:  'reports2.cgi',
