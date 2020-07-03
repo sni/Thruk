@@ -731,7 +731,7 @@ function conf_tool_cleanup(btn, link, hide) {
         if(fix_buttons.length > 0) {
             continue_cb = function() {
                 conf_tool_cleanup(btn, "fix_all_serial", hide);
-            }
+            };
             fix_buttons[0].click();
         }
         if(fix_buttons.length == 0) {

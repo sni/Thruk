@@ -78,6 +78,7 @@ Ext.state.HttpProvider = function(config){
     this.state = this.readValues();
 };
 
+var ExtState;
 Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     set: function(name, value) {
         if(typeof value == "undefined" || value === null) {

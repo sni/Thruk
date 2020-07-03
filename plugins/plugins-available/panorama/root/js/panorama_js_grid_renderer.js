@@ -233,7 +233,7 @@ TP.render_plugin_output = function(v, td, item) {
         }
     }
     if(item.data.long_plugin_output) {
-        var long_plugin_output = item.data.long_plugin_output
+        var long_plugin_output = item.data.long_plugin_output;
         long_plugin_output     = long_plugin_output.replace(/&/g, "&amp;");
         long_plugin_output     = long_plugin_output.replace(/"/g, "&quot;");
         long_plugin_output     = long_plugin_output.replace(/'/g, "");
