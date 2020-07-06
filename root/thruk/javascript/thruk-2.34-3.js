@@ -3772,7 +3772,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                 host:           host,
                 service:        service,
                 backend:        backend,
-                data:           href
+                data:           decodeURIComponent(href)
             };
             link.setAttribute('href', url_prefix + 'cgi-bin/status.cgi?'+toQueryString(urlArgs));
             return(true);
@@ -3798,7 +3798,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     host:      host,
                     service:   service,
                     backend:   backend,
-                    data:      href,
+                    data:      decodeURIComponent(href),
                     CSRFtoken: CSRFtoken
                 },
                 type: 'POST',
