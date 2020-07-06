@@ -3393,8 +3393,7 @@ function print_action_menu(src, options) {
 
             if(el.action) {
                 var link = document.createElement('a');
-                link.href = replace_macros(el.action, undefined, options);
-                if(el.target) { link.target = el.target; }
+                set_action_menu_link_action(link, el, options);
                 link.appendChild(icon);
                 item = link;
             }
@@ -3419,6 +3418,14 @@ function print_action_menu(src, options) {
     catch(err) {
         document.write('<img src="'+ url_prefix +'themes/'+ theme +'/images/error.png" title="'+err+'">');
     }
+}
+
+/* create link item */
+function set_action_menu_link_action(link, menu_entry, options) {
+    var href            = replace_macros(menu_entry.action, undefined, options);
+    link.href           = href;
+    link.dataset["url"] = href; // href is normalized for ex. in chrome which lowercases and urlescapes the link
+    if(menu_entry.target) { link.target = menu_entry.target; }
 }
 
 /* set a single attribute for given item/link */
@@ -3584,7 +3591,7 @@ function actionGetMenuItem(el, id, backend, host, service) {
         if(typeof el.action === "function") {
             jQuery(link).bind("click", {backend: backend, host: host, service: service}, el.action);
         } else {
-            link.href = replace_macros(el.action, undefined, options);
+            set_action_menu_link_action(link, el, options);
         }
     }
     if(el.menu) {
@@ -3702,8 +3709,9 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
 
 /* set onclick handler for server actions */
 function check_server_action(id, link, backend, host, service, server_action_url, extra_param, callback, config) {
+    var href = link.dataset["url"] || link.href;
     // server action urls
-    if(link.href.match(/^server:\/\//)) {
+    if(href.match(/^server:\/\//)) {
         if(server_action_url == undefined) {
             server_action_url = url_prefix + 'cgi-bin/status.cgi?serveraction=1';
         }
@@ -3711,7 +3719,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
             host:      host,
             service:   service,
             backend:   backend,
-            link:      link.href,
+            link:      href,
             CSRFtoken: CSRFtoken
         };
         if(extra_param) {
@@ -3746,25 +3754,18 @@ function check_server_action(id, link, backend, host, service, server_action_url
     }
     // normal urls
     else {
-        if(!link.href.match(/(\$|%24)/)) {
+        if(!href.match(/\$/)) {
             // no macros, no problems
             return;
         }
         jQuery(link).bind("mouseover", function() {
-            if(!link.href.match(/(\$|%24)/)) {
+            if(!href.match(/\$/)) {
                 // no macros, no problems
                 return(true);
             }
-            if(link.href.match(/^javascript:/)) {
+            if(href.match(/^javascript:/)) {
                 // skip javascript links, they will be replace on click
                 return(true);
-            }
-            var href;
-            if(link.hasAttribute('orighref')) {
-                href = link.getAttribute('orighref');
-            } else {
-                link.setAttribute('orighref', ""+link.href);
-                href = link.getAttribute('href');
             }
             var urlArgs = {
                 forward:        1,
@@ -3772,25 +3773,18 @@ function check_server_action(id, link, backend, host, service, server_action_url
                 host:           host,
                 service:        service,
                 backend:        backend,
-                data:           decodeURIComponent(href)
+                data:           href
             };
             link.setAttribute('href', url_prefix + 'cgi-bin/status.cgi?'+toQueryString(urlArgs));
             return(true);
         });
         jQuery(link).bind("click", function() {
-            if(!link.href.match(/(\$|%24)/)) {
+            if(!href.match(/\$/)) {
                 // no macros, no problems
                 return(true);
             }
-            if(!link.href.match(/^javascript:/)) {
+            if(!href.match(/^javascript:/)) {
                 return(true);
-            }
-            var href;
-            if(link.hasAttribute('orighref')) {
-                href = link.getAttribute('orighref');
-            } else {
-                link.setAttribute('orighref', ""+link.href);
-                href = link.getAttribute('href');
             }
             jQuery.ajax({
                 url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
@@ -3798,7 +3792,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     host:      host,
                     service:   service,
                     backend:   backend,
-                    data:      decodeURIComponent(href),
+                    data:      href,
                     CSRFtoken: CSRFtoken
                 },
                 type: 'POST',
@@ -3808,7 +3802,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     } else {
                         link.href = data.data
                         link.click();
-                        link.href = link.getAttribute('orighref');
+                        link.href = href;
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
