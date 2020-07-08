@@ -2341,6 +2341,9 @@ for details.
 
         *** `git_base_dir`    Override global 'git_base_dir' value.
         *** `disable`         Set to `1` to disable config tool for this backend (ex.: when detected automatically for http backends)
+     ** `lmd_options`
+        *** `flags`           flags to passthrough to lmd
+        *** `...`             any attribute will be just passed into the connection seciont of the lmd.ini, see example below.
 
 ex.:
 
@@ -2366,6 +2369,9 @@ ex.:
         <options>
             peer   = 172.16.0.2:9999
        </options>
+       <lmd_options>
+            flags = ['Icinga2']
+       </lmd_options>
     </peer>
     <peer>
         name   = External Shinken
