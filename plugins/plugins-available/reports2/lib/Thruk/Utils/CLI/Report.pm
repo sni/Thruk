@@ -29,6 +29,7 @@ use strict;
 use File::Slurp qw/read_file/;
 use Thruk::Utils::IO;
 use Thruk::Utils::External;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 ##############################################
 
@@ -107,6 +108,8 @@ sub cmd {
 sub _cmd_report {
     my($c, $nr, $mail) = @_;
 
+    _debug("creating report with number: ".$nr);
+
     my $report = Thruk::Utils::Reports::get_report($c, $nr, 1);
     if($ENV{'THRUK_CRON'}) {
         if(defined $report->{'is_running'} && $report->{'is_running'} > 0) {
@@ -130,6 +133,7 @@ sub _cmd_report {
 
     if(!$ENV{'THRUK_CRON'} && $mail) {
         my $sent = Thruk::Utils::Reports::report_send($c, $nr);
+        _debug("finished sending report by email, exit code ".$sent);
         if($sent && $sent eq "-2") {
             return("report is running on another node already\n", 0);
         } elsif($sent && $sent eq "2") {
@@ -141,6 +145,7 @@ sub _cmd_report {
     }
 
     my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+    _debug("finished creating report");
     if(defined $report_file and $report_file eq '-2') {
         return("report is running on another node already\n", 0);
     } elsif(defined $report_file and -f $report_file) {

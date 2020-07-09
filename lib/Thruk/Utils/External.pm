@@ -18,6 +18,7 @@ use Time::HiRes ();
 use File::Slurp qw/read_file/;
 use Storable qw/store retrieve/;
 use POSIX ":sys_wait_h";
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 ##############################################
 
@@ -610,8 +611,10 @@ sub update_status {
     my($dir, $percent, $status, $remaining_seconds) = @_;
     $remaining_seconds = -1 unless defined $remaining_seconds;
     my $statusfile = $dir."/status";
+    my $text = $percent." ".$remaining_seconds." ".$status;
+    _debug("update_status: ".$text);
     open(my $fh, '>', $statusfile) or die("cannot write status $statusfile: $!");
-    print $fh $percent, " ", $remaining_seconds, " ", $status, "\n";
+    print $fh $text, "\n";
     Thruk::Utils::IO::close($fh, $statusfile);
     return;
 }

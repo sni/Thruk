@@ -365,7 +365,9 @@ sub _run {
     my($c, $result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
+        _debug("_run(): fetching from ".$self->{'opt'}->{'remoteurl'});
         ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+        _debug("_run(): fetching done");
         if(!defined $result && $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: "._format_response_error($response));
             _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
@@ -395,6 +397,8 @@ sub _run {
             $c->app->{'_log'} = 'screen';
         }
 
+        _debug("_run(): building local response");
+
         # catch prints when not attached to a terminal and redirect them to our logger
         local $| = 1;
         if(!$terminal_attached && $log_timestamps) {
@@ -413,6 +417,7 @@ sub _run {
         select *STDOUT;
         ## use critic
 
+        _debug("_run(): building local response done, exit code ".$result->{'rc'});
         $response = $c->res;
     }
 
