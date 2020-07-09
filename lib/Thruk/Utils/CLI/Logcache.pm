@@ -101,8 +101,11 @@ sub cmd {
         }
     } elsif($mode eq 'clean') {
         $blocksize = $opt->{'start'} || shift @{$commandoptions};
-        if(defined $blocksize && $blocksize =~ m/^\d+\w{1}/mx) {
-            $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
+        # blocksize is given in days unless specified
+        if(defined $blocksize) {
+            if($blocksize !~ m/^\d+$/mx) {
+                $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
+            }
         }
     }
 
