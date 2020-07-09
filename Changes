@@ -2,6 +2,12 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add oauth login provider
+          - fix sending server actions from action menu twice
+          - fix endless refresh in js search
+          - Panorama:
+            - fix showing header in single tab mode
+          - Logcache:
+            - fix setting duration on cleanup
 
 2.34-3   Fri Jun 12 18:44:27 CEST 2020
           - fix reloading page from bookmarks
