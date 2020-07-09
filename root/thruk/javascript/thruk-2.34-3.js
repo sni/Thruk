@@ -3437,8 +3437,9 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
             continue;
         }
 
-        var attr = data[key];
-        if(String(attr).match(/(\$|%24)/)) {
+        var attr = String(data[key]);
+        attr = replace_macros(attr, undefined, {host: host, service: service});
+        if(attr.match(/(\$|%24)/)) {
             toReplace[key] = attr;
             continue;
         }
@@ -3710,6 +3711,7 @@ function check_position_and_show_action_menu(id, icon, container, orientation) {
 /* set onclick handler for server actions */
 function check_server_action(id, link, backend, host, service, server_action_url, extra_param, callback, config) {
     var href = link.dataset["url"] || link.href;
+    href = replace_macros(href, undefined, {host: host, service: service});
     // server action urls
     if(href.match(/^server:\/\//)) {
         if(server_action_url == undefined) {
@@ -3727,30 +3729,33 @@ function check_server_action(id, link, backend, host, service, server_action_url
                 data[key] = extra_param[key];
             }
         }
-        jQuery(link).bind("click", function() {
-            var oldSrc = jQuery(link).find('IMG').attr('src');
-            jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
-            if(config == undefined) { config = {}; }
-            jQuery.ajax({
-                url: server_action_url,
-                data: data,
-                type: 'POST',
-                success: function(data) {
-                    thruk_message(data.rc, data.msg, config.close_timeout);
-                    if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
-                    reset_action_menu_icons();
-                    jQuery(link).find('IMG').attr('src', oldSrc);
-                    if(callback) { callback(data); }
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    thruk_message(1, 'server action failed: '+ textStatus, config.close_timeout);
-                    if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
-                    reset_action_menu_icons();
-                    jQuery(link).find('IMG').attr('src', oldSrc);
-                }
+        if(!link.serverActionClickHandlerAdded) {
+            link.serverActionClickHandlerAdded = true;
+            jQuery(link).bind("click", function() {
+                var oldSrc = jQuery(link).find('IMG').attr('src');
+                jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
+                if(config == undefined) { config = {}; }
+                jQuery.ajax({
+                    url: server_action_url,
+                    data: data,
+                    type: 'POST',
+                    success: function(data) {
+                        thruk_message(data.rc, data.msg, config.close_timeout);
+                        if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
+                        reset_action_menu_icons();
+                        jQuery(link).find('IMG').attr('src', oldSrc);
+                        if(callback) { callback(data); }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        thruk_message(1, 'server action failed: '+ textStatus, config.close_timeout);
+                        if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
+                        reset_action_menu_icons();
+                        jQuery(link).find('IMG').attr('src', oldSrc);
+                    }
+                });
+                return(false);
             });
-            return(false);
-        });
+        }
     }
     // normal urls
     else {
