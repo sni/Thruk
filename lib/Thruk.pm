@@ -18,7 +18,7 @@ use Thruk::Utils::IO ();
 
 use 5.008000;
 
-our $VERSION = '2.34';
+our $VERSION = '2.36';
 
 ###################################################
 # create connection pool
