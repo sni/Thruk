@@ -564,6 +564,7 @@ sub redirect_to {
     $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
+    $c->stash->{'last_redirect_to'} = $url;
     return(1);
 }
 
@@ -576,7 +577,7 @@ sub redirect_to_detached {
     my($c, @args) = @_;
     $c->redirect_to(@args);
     $c->{'detached'} = 1;
-    die("prevent further page processing");
+    die("prevent further page processing, redirecting to ".($args[0] // 'unknown'));
 }
 
 =head2 url_with

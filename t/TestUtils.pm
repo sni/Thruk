@@ -655,6 +655,8 @@ sub get_user {
 sub wait_for_job {
     my($url) = @_;
     my($job, $joburl);
+    my $maxwait = 300;
+    my $maxend  = time() + $maxwait;
     if($url =~ m/^\w+$/mx) {
         $job = $url;
     }
@@ -671,16 +673,16 @@ sub wait_for_job {
     if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $joburl) {
         $joburl = '/thruk/r/thruk/jobs/'.$job unless $joburl;
         local $SIG{ALRM} = sub { die("timeout while waiting for external job: ".$job) };
-        alarm(300);
+        alarm($maxwait);
         my $data;
         eval {
-            while(1) {
+            while(time() < $maxend) {
                 my $r = _request($joburl);
                 eval {
                     $data = decode_json($r->decoded_content);
                 };
                 last if($data && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
-                sleep(0.1);
+                sleep(3.1);
             }
         };
         my $end  = time();
@@ -697,9 +699,9 @@ sub wait_for_job {
     local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
     require Thruk::Utils::External;
 
-    alarm(300);
+    alarm($maxwait);
     eval {
-        while(Thruk::Utils::External::_is_running(undef, $jobdir)) {
+        while(Thruk::Utils::External::_is_running(undef, $jobdir) && time() < $maxend) {
             sleep(0.1);
         }
     };

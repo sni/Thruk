@@ -135,6 +135,8 @@ sub perl {
         $c->{'db'}->disable_backends();
         $c->{'db'}->enable_backends($conf->{'backends'});
     }
+
+    my $err;
     eval {
         $c->stats->profile(begin => 'External::perl');
         do_child_stuff($c, $dir, $id);
@@ -144,13 +146,18 @@ sub perl {
             my $rc = eval($conf->{'expr'});
             ## use critic
 
-            if($@) {
-                print STDERR "ERROR: perl eval failed:";
-                print STDERR $@;
-                exit(1);
+            $err = $@;
+            if($err) {
+                if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
+                    open(my $fh, '>', $dir."/forward");
+                    print $fh $c->stash->{'last_redirect_to'},"\n";
+                    Thruk::Utils::IO::close($fh, $dir."/forward");
+                } else {
+                    $rc = 1;
+                }
             }
 
-            open(my $fh, '>>', $dir."/rc");
+            open(my $fh, '>', $dir."/rc");
             # invert rc to match exit code style
             print $fh ($rc ? 0 : 1);
             Thruk::Utils::IO::close($fh, $dir."/rc");
@@ -172,14 +179,15 @@ sub perl {
             print $fh Dumper($c->stash);
             CORE::close($fh);
         }
+        die($err) if $err; # die again after cleanup
     };
-    my $err = $@;
+    $err = $@ unless $err;
     $c->stats->profile(end => 'External::perl');
     save_profile($c, $dir);
     if($err) {
         eval {
             open(my $fh, '>>', $dir."/stderr");
-            print $fh "ERROR: perl eval failed:";
+            print $fh "ERROR: perl eval failed:\n";
             print $fh $err;
             Thruk::Utils::IO::close($fh, $dir."/stderr");
         };
