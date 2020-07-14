@@ -6589,8 +6589,10 @@ var ajax_search = {
             }
         }
 
+        ajax_search.local_data = false;
         if(options.data != undefined) {
             ajax_search.base = options.data;
+            ajax_search.local_data = true;
             ajax_search.suggest();
         } else {
             ajax_search.refresh_data();
@@ -6615,6 +6617,7 @@ var ajax_search = {
     },
     refresh_data_do: function() {
         window.clearTimeout(ajax_search.refresh_timer);
+        if(ajax_search.local_data) { return; }
         ajax_search.updating = true;
         ajax_search.error    = false;
 
@@ -6898,7 +6901,7 @@ var ajax_search = {
                 }
             });
 
-            if(needs_refresh) {
+            if(needs_refresh && !ajax_search.local_data) {
                 ajax_search.updating = true;
                 ajax_search.show_results([]); // show loading icon
                 ajax_search.refresh_data();
@@ -6945,7 +6948,7 @@ var ajax_search = {
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
             if(type.results.length == 1) { name = name.substring(0, name.length -1); }
             name = name.replace(/ss$/, 's');
-            if(type.results.length >= ajax_search.limit) {
+            if(type.results.length >= ajax_search.limit && !ajax_search.local_data) {
                 resultHTML += '<li><b><i>over ' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
                 limit_hit = true;
             } else {

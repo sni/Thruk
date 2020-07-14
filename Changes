@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Config Tool:
+            - fix file dropdown when having many files
+
 2.36     Thu Jul  9 18:07:33 CEST 2020
           - add oauth login provider
           - fix sending server actions from action menu twice
