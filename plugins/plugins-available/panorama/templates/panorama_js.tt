@@ -2,24 +2,23 @@
 
 Ext.namespace("TP");
 Ext.BLANK_IMAGE_URL     = url_prefix+'plugins/panorama/images/s.gif';
-var ExtState            = [% json_encode(extstate) %];
 var default_dashboard   = [% json_encode(default_dashboard) %];
 var initial_shapes      = [% json_encode(shapes) %];
 var default_state_order = [% json_encode(default_state_order) %];
 
 /* create state provider */
 TP.cp = new Ext.state.HttpProvider({
-    url: 'panorama.cgi?state'
+    url: 'panorama.cgi?state',
 });
+TP.cp.loadData([% json_encode(extstate) %], false);
 Ext.state.Manager.setProvider(TP.cp);
 
 TP.unloading = false;
-var state = TP.cp.readValues();
 if(TP.initial_active_tab == undefined && get_hash(1)) {
     TP.initial_active_tab = TP.nr2TabId(get_hash(1));
 }
-if(state['tabbar'].activeTab && TP.initial_active_tab == undefined) {
-    TP.initial_active_tab = TP.nr2TabId(state['tabbar'].activeTab);
+if(TP.cp.get('tabbar').activeTab && TP.initial_active_tab == undefined) {
+    TP.initial_active_tab = TP.nr2TabId(TP.cp.get('tabbar').activeTab);
 }
 if(TP.initial_active_tab == undefined) {
     TP.initial_active_tab = TP.nr2TabId("0");

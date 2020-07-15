@@ -981,7 +981,7 @@ var TP = {
                 }
             }
 
-            if(data && data.dashboard_ts != undefined) {
+            if(data && data.dashboard_ts != undefined && !TP.cp.isSaving) {
                 for(var key in data.dashboard_ts) {
                     var tab_id = TP.nr2TabId(key);
                     var tab = Ext.getCmp(tab_id);
@@ -2100,13 +2100,13 @@ var TP = {
                         }
 
                         /* panel does not yet exist */
-                        if(ExtState[key] == undefined) {
+                        if(TP.cp.get(key) == undefined) {
                             TP.cp.set(key, cfg);
                             TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
                             tab.saveState();
                             panlet_added_ids[key] = true;
                         }
-                        else if(p && !TP.JSONequals(ExtState[key], data[key])) {
+                        else if(p && !TP.JSONequals(TP.cp.get(key), data[key])) {
                             /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             TP.cp.set(key, cfg);
@@ -2134,7 +2134,7 @@ var TP = {
                         }
                     }
                     /* update stateproviders last data to prevent useless updates */
-                    TP.cp.lastdata = setStateByTab(ExtState);
+                    TP.cp.lastdata = setStateByTab(TP.cp.state);
                     tab.renewInProgress = false;
 
                     if(panlet_added_ids.length > 0) {

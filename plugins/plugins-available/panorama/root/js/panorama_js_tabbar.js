@@ -422,7 +422,7 @@ Ext.define('TP.TabBar', {
         }
 
         // add additionall hidden dashboards required from icons
-        for(var key in ExtState) {
+        for(var key in TP.cp.state) {
             var matches = key.match(/^pantab_\d+$/);
             if(matches && !Ext.getCmp(matches[0])) {
                 TP.add_pantab({ id: matches[0], hidden: true });

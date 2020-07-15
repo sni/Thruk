@@ -20,9 +20,9 @@ Ext.define('TP.Pantab', {
         TP.allDashboards[this.id] = this;
         // defaults are set in panorama.pm
 
-        // fetch window ids from ExtState
+        // fetch window ids from state
         this.window_ids = [];
-        for(var key in ExtState) {
+        for(var key in TP.cp.state) {
             var matches = key.match(/^(pantab_\d+)_panlet_(\d+)$/);
             if(matches && matches[1] == this.id) {
                 this.window_ids.push(key);

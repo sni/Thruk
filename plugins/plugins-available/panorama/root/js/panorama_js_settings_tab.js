@@ -1087,19 +1087,18 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         tab.applyXdata(undefined, false);
                         var newstate = Ext.JSON.encode(tab.getState());
                         tab.forceSaveState();
-
                         if(oldstate != newstate && !one_tab_only) {
                             tabbar.startTimeouts();
                         }
 
                         /* user settings */
-                        var oldstate = Ext.JSON.encode(tabbar.getState());
+                        oldstate = Ext.JSON.encode(tabbar.getState());
                         var u_form  = Ext.getCmp('usersettingsForm').getForm();
                         if(!u_form.isValid()) { return false; }
                         var values = u_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabbar.xdata, values);
-                        var newstate = Ext.JSON.encode(tabbar.getState());
+                        newstate = Ext.JSON.encode(tabbar.getState());
                         /* avoid useless updates */
                         if(oldstate != newstate && !one_tab_only) {
                             TP.log('['+tab.id+'] settings changed: '+newstate);

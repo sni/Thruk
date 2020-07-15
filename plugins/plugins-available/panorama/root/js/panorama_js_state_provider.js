@@ -39,6 +39,8 @@ function setStateByTab(state) {
     var data = {};
     for(var key in state) {
         if(key == 'tabbar') { data.tabbar = anyDecode(state[key]); }
+
+        // dashboard main data
         if(key.search(/pantab_\d+$/) != -1) {
             if(data[key] == undefined) { data[key] = {}; }
             data[key].tab = state[key];
@@ -51,12 +53,14 @@ function setStateByTab(state) {
                     data[key][win_id] = state[win_id];
                     delete state[win_id];
                 }
+                // remove keys not required to be saved
                 delete tmp['window_ids'];
                 data[key].id  = 'new';
                 data[key].tab = Ext.JSON.encode(tmp);
             }
-
         }
+
+        // panels data
         var matches = key.match(/(pantab_\d+)_(.*)$/);
         if(matches) {
             var tab_id = matches[1];
@@ -70,15 +74,14 @@ function setStateByTab(state) {
 /* extends state provider by saving states via http */
 Ext.state.HttpProvider = function(config){
     Ext.state.HttpProvider.superclass.constructor.call(this);
-    this.url       = '';
-    this.saveDelay = 500;
-    this.isSaving = false;
+    this.url             = '';
+    this.saveDelay       = 500;
+    this.isSaving        = false;
     this.isSavingCounter = 0;
+    this.state           = {};
     Ext.apply(this, config);
-    this.state = this.readValues();
 };
 
-var ExtState;
 Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     set: function(name, value) {
         if(typeof value == "undefined" || value === null) {
@@ -94,55 +97,30 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         Ext.state.HttpProvider.superclass.clear.call(this, name);
     },
 
-    /* read initial states */
-    readValues: function() {
-        var state = {};
-        for (var key in ExtState) {
-            if(key!='remove') {
-                // new is json already
-                if(Ext.isObject(ExtState[key])) {
-                        state[key] = ExtState[key];
-                } else {
-                    try {
-                        state[key] = anyDecode(ExtState[key]);
-                    } catch(err) {
-                        TP.Msg.msg("fail_message~~decode failed: "+err);
-                    }
-                }
-            }
-        }
-
-        this.queueChanges();
-        return state;
-    },
-
     /* sets value by name */
     setValue: function(name, value) {
-        ExtState[name] = value;
+        this.state[name] = value;
         this.queueChanges();
     },
 
     /* removes value by name */
     clearValue: function(name) {
-        delete ExtState[name];
+        delete this.state[name];
         this.queueChanges();
     },
 
     /* clear all values */
     clearAll: function() {
-        for(var key in ExtState) {
-            this.clear(key);
-        }
+        this.state = {};
         this.saveChanges();
     },
 
     /* set state from object */
     loadData: function(data, save) {
         if(save == undefined) { save = true; }
-        ExtState = {};
+        this.state = {};
         for(var key in data) {
             this.set(key, data[key]);
-            ExtState[key] = data[key];
         }
         if(save) {
             this.saveChanges();
@@ -162,12 +140,13 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(!TP.initialized) { cp.queueChanges(); return; }
 
         /* seperate state by dashboards */
-        var data = setStateByTab(ExtState);
+        var data = setStateByTab(this.state);
         if(!cp.lastdata) {
             /* set initial data which we can later check against to reduce number of update querys */
             cp.lastdata = data;
             return;
         }
+
         var params  = {};
         var changed = 0;
         for(var key in data) {
