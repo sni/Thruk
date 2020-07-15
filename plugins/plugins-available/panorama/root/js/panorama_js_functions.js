@@ -41,6 +41,8 @@ var TP = {
             tabbar.startTimeouts();
         }
 
+        TP.cp.queueChanges();
+
         /* preload images */
         window.setTimeout(preloader, 2000);
     },
@@ -124,7 +126,7 @@ var TP = {
         if(id && (id == "new" || id == "new_or_empty")) {
             opt.newDashboard = true;
         }
-        if(id && TP.cp.state[id] == undefined) {
+        if(id && TP.cp.get(id) == undefined) {
             if(!TP.initialized) {
                 // all initial tabs should have a state, if not, do not open that tab
                 return;
@@ -235,9 +237,6 @@ var TP = {
                 TP.cleanPanoramUrl();
             }
         }
-
-        /* set initial timestamp */
-        tab.ts = TP.cp.state[id].ts;
 
         /* disable lock for new dashboard */
         if(opt.newDashboard) {
@@ -893,7 +892,7 @@ var TP = {
                     function(button) {
                         if(button === 'yes') {
                             tabbar.stopTimeouts();
-                            TP.cp.loadData(decoded, false);
+                            TP.cp.loadData(decoded);
                             TP.cp.saveChanges({replace: 1}, function() {
                                 Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
                                 TP.initialized = false; // prevents onUnload saving over our imported tabs
@@ -2039,14 +2038,14 @@ var TP = {
     },
 
     /* renew dashboards on the fly */
-    renewDashboardDo: function(tab) {
+    renewDashboardDo: function(tab, callback) {
         // reschedule if state provider is saving right now, this might result in race conditions
         if(TP.cp.isSaving) {
             return TP.renewDashboard(tab);
         }
         TP.log('['+tab.id+'] renewDashboardDo');
         var duration = 1000;
-        if(tab.isActiveTab()) {
+        if(tab.isActiveTab() && !tab.mask) {
             tab.mask = Ext.getBody().mask("updating dashboard");
         }
         tab.renewInProgress = true;
@@ -2070,12 +2069,8 @@ var TP = {
                             if((p.xdata.map && !cfg.xdata.map) || (!p.xdata.map && cfg.xdata.map)) { mapChanged = true; }
                             /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
-                            delete cfg['readonly'];
-                            delete cfg['user'];
-                            delete cfg['ts'];
-                            delete cfg['public'];
                             p.applyXdata();
-                            TP.cp.set(key, cfg);
+                            p.forceSaveState();
                         }
                     }
 
@@ -2142,6 +2137,9 @@ var TP = {
                     }
                 } else {
                     tab.renewInProgress = false;
+                }
+                if(callback) {
+                    callback(success);
                 }
             }
         });

@@ -28,7 +28,10 @@ BEGIN {
 }
 
 ##########################################################
-my @runtime_keys = qw/state stateHist stateDetails/;
+my @runtime_keys = qw/state stateHist stateDetails
+                      currentPage pageSize totalCount
+                      speedoaxis_min speedoaxis_max
+                    /;
 
 ##########################################################
 

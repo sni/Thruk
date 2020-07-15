@@ -83,47 +83,41 @@ Ext.state.HttpProvider = function(config){
 };
 
 Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
-    set: function(name, value) {
+    /* retrieve value by name with optional fallback value */
+    get: function(name, defaultValue) {
+        var val = this.state[name];
+        if(val == undefined) {
+            return(defaultValue);
+        }
+        return(TP.clone(val));
+    },
+
+    /* set value by name */
+    set: function(name, value, save) {
         if(typeof value == "undefined" || value === null) {
             this.clear(name);
             return;
         }
-        this.setValue(name, value);
+        this.state[name] = TP.clone(value); // clone to preserve value from being changed by reference
         Ext.state.HttpProvider.superclass.set.call(this, name, value);
-    },
-
-    clear: function(name) {
-        this.clearValue(name);
-        Ext.state.HttpProvider.superclass.clear.call(this, name);
-    },
-
-    /* sets value by name */
-    setValue: function(name, value) {
-        this.state[name] = value;
-        this.queueChanges();
+        if(save == undefined || save) {
+            this.queueChanges();
+        }
     },
 
     /* removes value by name */
-    clearValue: function(name) {
+    clear: function(name) {
         delete this.state[name];
         this.queueChanges();
-    },
-
-    /* clear all values */
-    clearAll: function() {
-        this.state = {};
-        this.saveChanges();
+        Ext.state.HttpProvider.superclass.clear.call(this, name);
     },
 
     /* set state from object */
-    loadData: function(data, save) {
-        if(save == undefined) { save = true; }
-        this.state = {};
+    loadData: function(data) {
+        var cp = this;
+        cp.state = {};
         for(var key in data) {
-            this.set(key, data[key]);
-        }
-        if(save) {
-            this.saveChanges();
+            cp.set(key, data[key], false);
         }
     },
 
@@ -140,7 +134,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(!TP.initialized) { cp.queueChanges(); return; }
 
         /* seperate state by dashboards */
-        var data = setStateByTab(this.state);
+        var data = setStateByTab(cp.state);
         if(!cp.lastdata) {
             /* set initial data which we can later check against to reduce number of update querys */
             cp.lastdata = data;

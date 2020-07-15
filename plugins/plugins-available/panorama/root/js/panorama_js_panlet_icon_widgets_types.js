@@ -437,7 +437,7 @@ Ext.define('TP.HostServicesStatusIcon', {
         this.setFilter();
     },
     setFilter: function() {
-        this.xdata.general.filter = JSON.stringify([{
+        this.xdata.general.filter = Ext.JSON.encode([{
             hoststatustypes:    15,
             hostprops:          0,
             servicestatustypes: 31,

@@ -391,11 +391,12 @@ Ext.define('TP.Pantab', {
         this.callParent(arguments);
         this.applyXdata();
         if(state) {
-            //TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             /* create panlets */
-            Ext.apply(this.xdata, state.xdata);
+            Ext.apply(this, state);
             this.createInitialPanlets();
         }
+        // save normalized state, ex.: without scripted, ts, etc...
+        TP.cp.set(this.id, this.getState());
     },
     createInitialPanlets: function(retries, autoshow) {
         var tab = this;
@@ -970,7 +971,7 @@ Ext.define('TP.Pantab', {
     setLock: function(val) {
         var tab = this;
         var panels = TP.getAllPanel(tab);
-        if(tab.locked != val && panels.length > 0) {
+        if(tab.locked != val && panels.length > 0 && !tab.mask) {
             tab.mask = Ext.getBody().mask((val ? "" : "un")+"locking dashboard...");
         }
         var changed = (tab.xdata.locked != val);

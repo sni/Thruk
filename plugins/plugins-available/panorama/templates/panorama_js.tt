@@ -8,9 +8,9 @@ var default_state_order = [% json_encode(default_state_order) %];
 
 /* create state provider */
 TP.cp = new Ext.state.HttpProvider({
-    url: 'panorama.cgi?state',
+    url: 'panorama.cgi?state'
 });
-TP.cp.loadData([% json_encode(extstate) %], false);
+TP.cp.loadData([% json_encode(extstate) %]);
 Ext.state.Manager.setProvider(TP.cp);
 
 TP.unloading = false;

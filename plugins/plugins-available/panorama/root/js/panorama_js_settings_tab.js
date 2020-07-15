@@ -1085,11 +1085,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         });
 
                         tab.applyXdata(undefined, false);
-                        var newstate = Ext.JSON.encode(tab.getState());
-                        tab.forceSaveState();
-                        if(oldstate != newstate && !one_tab_only) {
-                            tabbar.startTimeouts();
-                        }
 
                         /* user settings */
                         oldstate = Ext.JSON.encode(tabbar.getState());
@@ -1098,17 +1093,11 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var values = u_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabbar.xdata, values);
-                        newstate = Ext.JSON.encode(tabbar.getState());
-                        /* avoid useless updates */
-                        if(oldstate != newstate && !one_tab_only) {
-                            TP.log('['+tab.id+'] settings changed: '+newstate);
-                            tabbar.saveState();
-                            tabbar.startTimeouts();
-                        }
 
                         document.title = tab.xdata.title;
 
-                        TP.refreshAllSitePanel(tab);
+                        // some forms do use empty names, do not store them
+                        delete tab.xdata[""];
 
                         /* border setting may have changed, so redraw all panlets with some small delay */
                         if(oldautohideheader != tab.xdata.autohideheader) {
@@ -1123,17 +1112,21 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             }
                         }
 
-                        tab_win_settings.destroy();
+                        tab.forceSaveState();
+
                         if(closeAfterEdit) {
                             tab.destroy();
-                        } else {
-                            /* permissions might have changed */
-                            tab.setLock(locked);
-                            window.setTimeout(function() {
-                                TP.renewDashboard(tab);
-                            }, 2000);
+                            return true;
                         }
-                        return true;
+
+                        /* reload, permissions might have changed */
+                        tab.mask = Ext.getBody().mask("reloading dashboard...");
+                        window.setTimeout(function() {
+                            TP.renewDashboardDo(tab, function() {
+                                tab_win_settings.destroy();
+                                tab.setLock(locked);
+                            });
+                        }, 1000);
                     }
                }
         ]
