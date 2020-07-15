@@ -139,7 +139,7 @@ Ext.define('TP.GridLoader', {
                     panel.saveState();
                     return false;
                 },
-                resize: function(This, adjWidth, adjHeight, eOpts) {
+                afterlayout: function(This) {
                     This.adjustPageSize();
                 },
                 beforeselect: function(This, record, index, eOpts) {
@@ -149,15 +149,17 @@ Ext.define('TP.GridLoader', {
             },
             adjustPageSize: function() {
                 var panletBody  = Ext.get(panel.id + '_gridpanel-body');
-                if(panletBody) {
-                    var bodySize    = panletBody.getSize();
-                    if(bodySize.height > 2) {
-                        panel.xdata.pageSize = Math.floor(bodySize.height / 22);
-                        if(panel.xdata.pageSize <= 0) { panel.xdata.pageSize = 1; }
-                    }
+                if(!panletBody) {
+                    return;
                 }
-                if(panel.refreshHandler) {
-                    panel.refreshHandler();
+                var bodySize = panletBody.getSize();
+                if(bodySize.height > 2) {
+                    panel.xdata.pageSize = Math.floor(bodySize.height / 22);
+                    if(panel.xdata.pageSize <= 0) { panel.xdata.pageSize = 1; }
+                } else {
+                    if(panel.refreshHandler) {
+                        panel.refreshHandler();
+                    }
                 }
             },
             columns: data.columns,
