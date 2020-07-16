@@ -225,7 +225,7 @@ TP.iconShowEditDialog = function(panel) {
                             }},
 
                             { xtype: 'label', text:  'lon:', style: 'margin-left: 10px; margin-right: 2px;', hidden: !tab.map },
-                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: panel.xdata.label.lon, hidden: !tab.map, listeners: {
+                            { xtype: 'numberfield', name:  'lon', width: 140, decimalPrecision: 14, value: panel.xdata.layout.lon, hidden: !tab.map, listeners: {
                                 change: function(This, newValue, oldValue, eOpts) {
                                     if(!panel.noMoreMoves) {
                                         panel.noMoreMoves = true;
@@ -552,6 +552,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
+    if(panel.xdata.label == undefined) { panel.xdata.label = {}; }
     var labelUpdate = Ext.emptyFn;
     var labelTab = {
         title: 'Label',
