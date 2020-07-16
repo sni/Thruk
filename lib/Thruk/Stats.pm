@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Data::Dumper;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Carp qw/longmess/;
+use Carp qw/confess longmess/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
@@ -83,7 +83,7 @@ sub _result {
             } else {
                 # found no start
                 print STDERR "no start found for: ".$entry->{'name'}."\n";
-                die("no start found for: ".Dumper($entry)) if Thruk->debug;
+                confess("no start found for: ".Dumper($entry)) if Thruk->debug;
             }
         }
         elsif($key eq 'comment') {
@@ -225,7 +225,7 @@ sub _row_elapsed {
     if(defined $end) {
         return(sprintf("~%.5fs", tv_interval($row->{start}, $end)));
     }
-    return("");
+    return(sprintf("%.5fs", tv_interval($row->{start}, [gettimeofday])));
 }
 
 1;

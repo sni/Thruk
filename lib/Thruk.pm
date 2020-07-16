@@ -1088,8 +1088,8 @@ sub _finalize_request {
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
         # inject stats into html page
-        push @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
-        push @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
+        unshift @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
+        unshift @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
         my $stats = "";
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
         $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';

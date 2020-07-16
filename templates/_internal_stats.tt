@@ -60,5 +60,17 @@
     if(height <  600) { height =  600; }
     if(height > 1000) { height = 1000; }
     jQuery("DIV.profiles").css("height", height+"px");
+    jQuery(document).on('keyup', function(evt) {
+      if(evt.keyCode == 39) { // right
+        if(jQuery("#stats_details").css("display") != "none") {
+          show_list(1, 'DIV.profiles');
+        }
+      }
+      if(evt.keyCode == 37) { // left
+        if(jQuery("#stats_details").css("display") != "none") {
+          show_list(-1, 'DIV.profiles');
+        }
+      }
+    });
   });
 </script>

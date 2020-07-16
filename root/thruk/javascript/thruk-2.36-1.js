@@ -3307,6 +3307,10 @@ function show_list(incr, selector) {
         }
     });
     var newIdx = curIdx+incr;
+    if(elements[newIdx] == undefined) {
+        jQuery(elements[curIdx]).show();
+        return;
+    }
     jQuery(elements[newIdx]).show();
     jQuery("DIV.controls BUTTON.next").css('visibility', '');
     jQuery("DIV.controls BUTTON.previous").css('visibility', '');

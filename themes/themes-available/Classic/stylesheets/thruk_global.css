@@ -1539,6 +1539,10 @@ input[type=text], input[type=password] {
   text-align: left;
 }
 
+.thruk_dev_panel DIV.profiles TR:hover {
+  background: #cecece;
+}
+
 .thruk_dev_panel button.previous {
   border: 0;
   background: url('../images/resultset_previous.png') no-repeat;

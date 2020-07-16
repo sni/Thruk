@@ -138,8 +138,8 @@ sub perl {
 
     my $err;
     eval {
-        $c->stats->profile(begin => 'External::perl');
         do_child_stuff($c, $dir, $id);
+        $c->stats->profile(begin => 'External::perl');
 
         do {
             ## no critic
@@ -526,11 +526,21 @@ sub get_result {
         chomp($perl_res);
     }
 
-    my $profile;
-    $profile = read_file($dir."/profile.log") if -f $dir."/profile.log";
-    chomp($profile) if defined $profile;
+    my $profiles = [];
+    for my $p (glob($dir."/profile.log*")) {
+        my $text = read_file($p);
+        chomp($text);
+        my $htmlfile = $p;
+        $htmlfile =~ s/\.log\./.html./gmx;
+        if(-e $htmlfile) {
+            my $html = read_file($htmlfile);
+            push @{$profiles}, [$html, $text];
+        } else {
+            push @{$profiles}, $text;
+        }
+    }
 
-    return($out,$err,$time,$dir,$stash,$rc,$profile,$start[9],$end[9],$perl_res);
+    return($out,$err,$time,$dir,$stash,$rc,$profiles,$start[9],$end[9],$perl_res);
 }
 
 ##############################################
@@ -563,13 +573,13 @@ sub job_page {
     }
 
     # try to directly serve the request if it takes less than 3 seconds
-    $c->stats->profile(begin => "job_page waiting for finish");
+    $c->stats->profile(begin => "job_page waiting for job: ".$job);
     while($is_running and $time < 3) {
         Time::HiRes::sleep(0.1) if $time <  1;
         Time::HiRes::sleep(0.3) if $time >= 1;
         ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
     }
-    $c->stats->profile(end => "job_page waiting for finish");
+    $c->stats->profile(end => "job_page waiting for job: ".$job);
 
     # job still running?
     if($is_running) {
@@ -584,14 +594,9 @@ sub job_page {
         $c->stash->{template}             = 'waiting_for_job.tt';
     } else {
         # job finished, display result
-        #my($out,$err,$time,$dir,$stash,$rc,$profile)...
-        my($out,$err,undef,$dir,$stash,$rc,$profile) = get_result($c, $job);
+        my($out,$err,$time,$dir,$stash,$rc,$profiles) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
-        if($profile) {
-            for my $p (split(/Profile:/mx, $profile)) {
-                push @{$c->stash->{'profile'}}, "Profile:".$p if $p;
-            }
-        }
+        push @{$c->stash->{'profile'}}, @{$profiles} if $profiles;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
         if((defined $err && $err ne '') && (!defined $rc || $rc != 0)) {
             $c->error($err);
@@ -633,19 +638,37 @@ sub update_status {
 
   save_profile($c, $dir)
 
-save profile to profile.log of this job
+save profile to profile.log.<nr> of this job
 
 =cut
 sub save_profile {
     my($c, $dir) = @_;
 
-    my $file = $dir.'/profile.log';
+    my $nr   = 0;
+    my $base = $dir.'/profile.log';
+    while(-e $base.".".$nr) {
+        $nr++;
+    }
+
+    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
+    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
+
+    my $file = $dir.'/profile.log.'.$nr;
     open(my $fh, '>>', $file) or die("cannot write $file: $!");
     eval {
         print $fh $c->stats->report(),"\n";
     };
     print $fh $@,"\n" if $@;
     CORE::close($fh);
+
+    $file = $dir.'/profile.html.'.$nr;
+    open($fh, '>>', $file) or die("cannot write $file: $!");
+    eval {
+        print $fh $c->stats->report_html();
+    };
+    print $fh $@,"\n" if $@;
+    CORE::close($fh);
+
     return;
 }
 
@@ -660,6 +683,12 @@ do all child things after a fork
 =cut
 sub do_child_stuff {
     my($c, $dir, $id) = @_;
+
+    $c->stats->clear();
+    $c->stash->{'total_backend_waited'} = 0;
+    $c->stash->{'total_render_waited'}  = 0;
+    $c->stats->profile(begin => 'External Job: '.$id);
+    $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s', (scalar localtime), $c->config->{'hostname'}, $$));
 
     POSIX::setsid() or die "Can't start a new session: $!";
 
