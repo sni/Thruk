@@ -25,6 +25,7 @@ while(my $line = <STDIN>) {
     elsif($line =~ m%^(WARN|INFO).*\]\s+\-\s*$%mx) {}
     elsif($line =~ m%^(USER_ID|nss_wrapper|JVM_HEAP_XMX|set|umask)%mx) {}
     elsif($line =~ m/^[\-\s]*$/mx) {}
+    elsif($line =~ m/^\s*$/mx) {}
     elsif($line =~ m/^\-+.*_JAVA_OPTIONS/mx) {}
     elsif($line =~ m/(_sahi\.setServerVar|for\ sahi\ refresh|sahi\-proxy\-timer|loaded\ image)/mx) {}
     elsif($line =~ m|SAKULI_RETURN_VAL:\s+(\d+)|mx) {
@@ -116,7 +117,7 @@ while(my $line = <STDIN>) {
             print ".";
         }
     } else {
-        if(!$in_results || $print_result) {
+        if(!$in_results || $print_result || $line =~ m/\[ERROR\]/mx) {
             print $line;
         }
     }
@@ -133,9 +134,8 @@ sub _print_end_case {
     my $elapsed = tv_interval($case_start);
     print "OK" unless $errored;
     printf(" (took %.1fs)", $elapsed);
-    print "\n";
+    print "\n\r";
     if($errored) {
-        exit($exitcode) if $exitcode;
-        exit(1);
+        $exitcode = 1 unless $exitcode;
     }
 }
