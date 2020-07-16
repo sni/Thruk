@@ -255,10 +255,16 @@ sub get_dynamic_roles {
     elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
         $can_submit_commands = 1;
     }
+    elsif(grep /authorized_for_read_only/mx, @{$roles}) {
+        # read_only role already supplied via cgi.cfg, enforce
+        $can_submit_commands = 0;
+    }
 
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
-        push @{$roles}, 'authorized_for_read_only';
+        if(!grep /authorized_for_read_only/mx, @{$roles}) {
+            push @{$roles}, 'authorized_for_read_only';
+        }
     }
 
     return({
