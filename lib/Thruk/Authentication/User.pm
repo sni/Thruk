@@ -222,8 +222,22 @@ sub get_dynamic_roles {
     }
 
     if(!defined $can_submit_commands) {
-        $can_submit_commands = $c->config->{'can_submit_commands'} || 0;
+	if (defined $c->config->{'can_submit_commands'}) {
+		# honor global Thruk configuration
+	        $can_submit_commands = $c->config->{'can_submit_commands'};
+	} else {
+		# stay secure by default
+	        $can_submit_commands = 0;
+	};
     }
+
+    if (defined $c->config->{'User'}->{$c->user->{'username'}}->{'can_submit_commands'}) {
+	# per user Thruk configuration overwrites all previous settings
+	$can_submit_commands = $c->config->{'User'}->{$c->user->{'username'}}->{'can_submit_commands'};
+    } elsif (defined $c->config->{'User'}->{'*'}->{'can_submit_commands'}) {
+	# per all user Thruk configuration overwrites all previous settings
+	$can_submit_commands = $c->config->{'User'}->{'*'}->{'can_submit_commands'};
+    };
 
     # add roles from groups in cgi.cfg
     my $roles  = [];
@@ -255,10 +269,16 @@ sub get_dynamic_roles {
     elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
         $can_submit_commands = 1;
     }
+    elsif(grep /authorized_for_read_only/mx, @{$roles}) {
+        # read_only role already supplied via cgi.cfg, enforce
+        $can_submit_commands = 0;
+    }
 
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
-        push @{$roles}, 'authorized_for_read_only';
+        if(!grep /authorized_for_read_only/mx, @{$roles}) {
+	    push @{$roles}, 'authorized_for_read_only';
+	}
     }
 
     return({
