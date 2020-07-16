@@ -818,10 +818,11 @@ sub init_external {
         }
     }
 
-    $c->stash->{job_id}       = $id;
-    $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
-    $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c);
-    $c->stash->{original_uri} = $c->req->uri->as_string();
+    $c->stash->{job_id}         = $id;
+    $c->stash->{job_dir}        = $c->config->{'var_path'}."/jobs/".$id."/";
+    $c->stash->{original_url}   = Thruk::Utils::Filter::full_uri($c);
+    $c->stash->{original_uri}   = $c->req->uri->as_string();
+    $c->stash->{original_param} = $c->req->parameters;
 
     return($id, $dir);
 }
@@ -930,6 +931,9 @@ sub _finished_job_page {
                 confess("model not implemented: ".$c->stash->{model_init});
             }
         }
+
+        # set request parameters
+        $c->req->parameters($stash->{original_param}) if $stash->{original_param};
 
         if(defined $forward) {
             $forward =~ s/^(http|https):\/\/.*?\//\//gmx;

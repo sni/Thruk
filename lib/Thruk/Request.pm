@@ -25,7 +25,11 @@ sub query_parameters {
 }
 
 sub parameters {
-    my $self = shift;
+    my($self, $val) = @_;
+    if(defined $val) {
+        $self->env->{KEY_BASE_NAME.'.merged'} = $val;
+        return($val);
+    }
     return($self->env->{KEY_BASE_NAME.'.merged'} ||= do {
         my $query = Hash::MultiValue->from_mixed($self->query_parameters);
         my $body  = Hash::MultiValue->from_mixed($self->body_parameters);
