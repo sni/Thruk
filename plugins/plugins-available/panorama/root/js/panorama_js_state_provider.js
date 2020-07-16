@@ -195,14 +195,14 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
                 if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                     TP.dashboardsSettingGrid.loader.load();
                 }
-                if(callback) { callback(refresh, opts); }
+                if(callback) { callback(response, opts); }
             },
             failure: function(response, opts) {
                 cp.isSavingCounter--;
                 cp.isSaving = (cp.isSavingCounter > 0);
                 TP.log('[global] state provider failed to save changes to server');
                 TP.Msg.msg("fail_message~~saving changes failed: "+response.status+' - '+response.statusText+'<br>please have a look at the server logfile.');
-                if(callback) { callback(refresh, opts); }
+                if(callback) { callback(response, opts); }
             }
         });
     }
