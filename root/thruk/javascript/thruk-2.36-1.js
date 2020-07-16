@@ -2907,7 +2907,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
                     currentHeader[col] = row;
                 }
             });
-            jQuery.find(oldIndexes).each(function(i, el) {
+            oldIndexes.forEach(function(el, i) {
                 table.appendChild(currentHeader[el]);
             });
             updateStatusColumns(pane_prefix, false);
