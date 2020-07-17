@@ -378,18 +378,22 @@ sub report_save {
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
-    if($nr ne 'new' and -f $file) {
+    if($nr ne 'new' && -f $file) {
         $old_report = read_report_file($c, $nr);
         return unless defined $old_report;
+        return if $old_report->{'readonly'};
     }
     my $report        = get_new_report($c, $data);
     $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
-    $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
     my $fields = _get_required_fields($c, $report);
     if(!$fields) {
         Thruk::Utils::set_message( $c, 'fail_message', 'invalid report template');
         $report->{'var'}->{'opt_errors'} = ['invalid report template'];
         return;
+    }
+    $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
+    if($c->check_user_roles('authorized_for_admin') && $data->{'user'}) {
+        $report->{'user'} = $data->{'user'};
     }
     _verify_fields($c, $fields, $report);
     return store_report_data($c, $nr, $report);
@@ -878,18 +882,40 @@ sub get_report_data_from_param {
         $params->{'report_backends'} = [];
     }
 
+    # extract permission
+    my $permissions = [];
+    for my $key (sort keys %{$params}) {
+        if($key =~ m/^p_(\d+)_perm$/mx) {
+            my $nr = $1;
+            my $type = $params->{'p_'.$nr.'_ts'} // "";
+            if($type eq 'contact')         { $type = "user";  }
+            elsif($type eq 'contactgroup') { $type = "group"; }
+            else { confess("invalid type"); }
+            my $perm = $params->{'p_'.$nr.'_perm'} // "";
+            if($perm ne 'ro' && $perm ne 'rw') { confess("invalid permission"); }
+            my $names = [split(/\s*,\s*/mx, $params->{'p_'.$nr.'_value'} // "")];
+            if(scalar @{$names} == 0) { next; }
+            push @{$permissions}, {
+                'type' => $type,
+                'name' => $names,
+                'perm' => $perm,
+            };
+        }
+    }
+
     my $send_types = Thruk::Utils::get_cron_entries_from_param($params);
     my $data = {
         'name'            => $params->{'name'}            || 'New Report',
         'desc'            => $params->{'desc'}            || '',
         'template'        => $params->{'template'}        || 'sla.tt',
-        'is_public'       => $params->{'is_public'}       || 0,
         'to'              => $params->{'to'}              || '',
         'cc'              => $params->{'cc'}              || '',
         'backends'        => $params->{'report_backends'} || [],
         'failed_backends' => $params->{'failed_backends'} || 'cancel',
+        'permissions'     => $permissions,
         'params'          => $p,
         'send_types'      => $send_types,
+        'user'            => $params->{'owner'},
     };
 
     return($data);
@@ -1173,6 +1199,7 @@ sub get_new_report {
         'cc'              => '',
         'is_public'       => 0,
         'user'            => $c->stash->{'remote_user'},
+        'permissions'     => [],
         'backends'        => [],
         'send_types'      => [],
         'failed_backends' => 'cancel',
@@ -1319,7 +1346,24 @@ sub read_report_file {
     $report->{'desc'}       = '' unless defined $report->{'desc'};
     $report->{'to'}         = '' unless defined $report->{'to'};
     $report->{'cc'}         = '' unless defined $report->{'cc'};
-    $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
+    $report->{'permissions'} = [] unless defined $report->{'permissions'};
+    if($report->{'is_public'}) {
+        unshift @{$report->{'permissions'}}, {
+            'type' => 'user',
+            'name' => ['*'],
+            'perm' => 'ro',
+        };
+    }
+    # set is_public flag for backwards compatibility
+    PERM: for my $p (@{$report->{'permissions'}}) {
+        for my $n (@{$p->{'name'}}) {
+            if($n eq '*') {
+                $report->{'is_public'} = 1;
+                last PERM;
+            }
+        }
+    }
+    $report->{'is_public'} = 0 unless defined $report->{'is_public'};
 
     # check if its really running
     if($report->{'var'}->{'is_running'} == -1 && $report->{'var'}->{'start_time'} < time() - 10) {
@@ -1429,9 +1473,42 @@ sub _is_authorized_for_report {
     }
 
     return 1 if defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI';
-    if(defined $report->{'user'} and defined $c->stash->{'remote_user'} and $report->{'user'} eq $c->stash->{'remote_user'}) {
-        return 1;
+
+    if(defined $c->stash->{'remote_user'}) {
+        if(defined $report->{'user'} && $report->{'user'} eq $c->stash->{'remote_user'}) {
+            return 1;
+        }
+
+        my $perm;
+        for my $p (@{$report->{'permissions'}}) {
+            if($p->{'type'} eq 'user') {
+                for my $n (@{$p->{'name'}}) {
+                    if($n eq '*' || $c->stash->{'remote_user'} eq $n) {
+                        if($p->{'perm'} eq 'rw') {
+                            return(1);
+                        }
+                        if($p->{'perm'} eq 'ro') {
+                            $perm = 2;
+                        }
+                    }
+                }
+            }
+            if($p->{'type'} eq 'group') {
+                for my $n (@{$p->{'name'}}) {
+                    if($n eq '*' || $c->user->has_group($n)) {
+                        if($p->{'perm'} eq 'rw') {
+                            return(1);
+                        }
+                        if($p->{'perm'} eq 'ro') {
+                            $perm = 2;
+                        }
+                    }
+                }
+            }
+        }
+        return($perm) if $perm;
     }
+
     if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
         return 2;
     }

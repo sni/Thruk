@@ -41,9 +41,36 @@
     <td class="dataEven" align="center" valign="top"><b>Description</b></td>
     <td class="dataOdd" align="left" colspan=2><textarea name="desc" wrap="hard" cols=74>[% r.desc %]</textarea></td>
   </tr>
+  [% IF c.check_user_roles('admin') %]
   <tr>
-    <td class="dataEven" align="center"><b>Public</b></td>
-    <td class="dataOdd" align="left" colspan=2><input type="radio" name="is_public" value="1"[% IF r.is_public %] checked[% END %]> yes  <input type="radio" name="is_public" value="0"[% IF !r.is_public %] checked[% END %]> no</td>
+    <td class="dataEven" align="center" valign="top"><b>Owner</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type='text' id="owner" name="owner" value="[% r.user | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search', autosubmit:false, striped: true })" style="width: 515px;">
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Permissions</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <table id="permissions">
+        <tr[% IF r.permissions.size == 0 %] style="display: none;"[% END %]>
+          <th>Type</th>
+          <th>Contact/Group</th>
+          <th>Permissions</th>
+          <th></th>
+        </tr>
+        [% PROCESS _permission_edit.tt nr=0 p={type => "user", name="", perm => "ro"} %]
+        [% FOREACH p = r.permissions %]
+          [% PROCESS _permission_edit.tt nr=loop.index + 1 p=p %]
+        [% END %]
+        <tr>
+          <td colspan=4 class='newfilter' onclick="permission_add_row('permissions'); return false;" style="min-width:100px;" nowrap>
+              <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
+              add permission
+          </td>
+        </tr>
+      </table>
+    </td>
   </tr>
   [% IF backends.size > 10 %]
   <tr>

@@ -196,6 +196,10 @@ sub _process_raw_request {
         } else {
             ($data, $size) = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
         }
+        if($c->req->parameters->{'wildcards'}) {
+            unshift @{$data}, '*';
+            $size++;
+        }
         push @{$json}, { 'name' => "contacts", 'data' => $data, 'total' => $size };
     }
 

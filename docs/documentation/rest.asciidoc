@@ -1628,6 +1628,7 @@ list of reports.
 |name                              | name of the report
 |nr                                | number of the report
 |params                            | reporting parameters
+|permissions                       | user/group permission
 |readonly                          | flag wheter the report is read-only
 |send_types                        | list of cron entries
 |template                          | template of the report
@@ -1655,6 +1656,7 @@ report for given number.
 |name                              | name of the report.
 |nr                                | primary id.
 |params                            | report parameters.
+|permissions                       | user/group permission
 |readonly                          | readonly flag.
 |send_types                        | list of crontab entries.
 |template                          | report template.
@@ -1781,3 +1783,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

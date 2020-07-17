@@ -5,6 +5,8 @@ next:
           - fix paging on log pages
           - Config Tool:
             - fix file dropdown when having many files
+          - Reporting:
+            - add user/group based permissions
 
 2.36     Thu Jul  9 18:07:33 CEST 2020
           - add oauth login provider

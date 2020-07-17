@@ -2478,6 +2478,7 @@ templates/_pager.tt
 templates/_parts_comments.tt
 templates/_parts_downtimes.tt
 templates/_perfdata_human.tt
+templates/_permission_edit.tt
 templates/_pnp_graph.tt
 templates/_progressbar.tt
 templates/_proxy_header.tt

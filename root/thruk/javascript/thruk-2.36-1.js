@@ -2162,6 +2162,59 @@ function add_cron_row(tbl_id) {
     tblBody.insertBefore(newRow, currentLastRow);
 }
 
+
+function permission_add_row(tbl_id) {
+    var tbl            = document.getElementById(tbl_id);
+    var tblBody        = tbl.tBodies[0];
+
+    // show header
+    tblBody.rows[0].style.display = "";
+
+    /* get second table row */
+    var row = tblBody.rows[1];
+    var newRow = row.cloneNode(true);
+
+    /* get highest number */
+    var new_nr = 1;
+    jQuery.each(tblBody.rows, function(i, r) {
+        if(r.id) {
+            var nr = r.id.match(/_(\d+)$/)[1];
+            if(nr >= new_nr) {
+                new_nr = parseInt(nr) + 1;
+            }
+        }
+    });
+
+    /* replace ids / names */
+    replace_ids_and_names(newRow, new_nr);
+    var all = newRow.getElementsByTagName('*');
+    for (var i = -1, l = all.length; ++i < l;) {
+        var elem = all[i];
+        replace_ids_and_names(elem, new_nr);
+    }
+
+    newRow.style.display = "";
+
+    var lastRowNr      = tblBody.rows.length - 1;
+    var currentLastRow = tblBody.rows[lastRowNr];
+    tblBody.insertBefore(newRow, currentLastRow);
+}
+
+function permission_del_row(el) {
+    var row = el;
+    /* find first table row */
+    while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
+    var tbody = row.parentNode;
+    row.parentNode.deleteRow(row.rowIndex);
+
+    // show header
+    if(tbody.rows.length <= 3) { // header, template row and add button row
+        tbody.rows[0].style.display = "none";
+    }
+
+    return false;
+}
+
 /* filter table content by search field */
 var table_search_input_id, table_search_table_ids, table_search_timer;
 var table_search_cb = {};
@@ -5650,11 +5703,11 @@ function replaceIdAndNames(elems, new_prefix) {
 /* replace id and name of a object */
 function replace_ids_and_names(elem, new_nr) {
     if(elem.id) {
-        var new_id = elem.id.replace(/_\d+$/, '_'+new_nr);
+        var new_id = elem.id.replace(/_\d+$/, '_'+new_nr).replace(/_\d+_/, '_'+new_nr+'_');
         elem.setAttribute('id', new_id);
     }
     if(elem.name) {
-        var new_name = elem.name.replace(/_\d+$/, '_'+new_nr);
+        var new_name = elem.name.replace(/_\d+$/, '_'+new_nr).replace(/_\d+_/, '_'+new_nr+'_');
         elem.setAttribute('name', new_name);
     }
     return elem
@@ -6471,6 +6524,7 @@ var ajax_search = {
                || search_type == 'priority'
                || search_type == 'custom variable'
                || search_type == 'contact'
+               || search_type == 'contactgroup'
                || search_type == 'event handler'
                || search_type == 'command'
             ) {
@@ -6530,6 +6584,7 @@ var ajax_search = {
         } else {
             if(   ajax_search.search_type == 'event handler'
                || ajax_search.search_type == 'contact'
+               || ajax_search.search_type == 'contactgroup'
                || ajax_search.search_type == 'command'
                || ajax_search.search_type == 'action menu'
                || ajax_search.search_type == 'timeperiod'
