@@ -391,6 +391,7 @@ sub report_save {
         $report->{'var'}->{'opt_errors'} = ['invalid report template'];
         return;
     }
+    $report->{'user'} = $c->stash->{'remote_user'};
     $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
     if($c->check_user_roles('authorized_for_admin') && $data->{'user'}) {
         $report->{'user'} = $data->{'user'};
