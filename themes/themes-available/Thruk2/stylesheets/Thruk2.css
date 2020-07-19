@@ -958,10 +958,16 @@ table.overDivTable > tbody > tr > td {
   margin:0;
 }
 
-table.overDivTable a {
+table.overDivHead a {
   font-size:12px;
   font-family: 'Roboto-Bold';
   color:#f1f1f1;
+}
+
+table.overDivContent a {
+  font-size:12px;
+  font-family: 'Roboto-Bold';
+  color:#5f6268;
 }
 
 td.filter {
