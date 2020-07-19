@@ -242,7 +242,7 @@ sub do_on_peer {
                 if($@) {
                     require Data::Dumper;
                     Data::Dumper->import();
-                    die("eval failed:".Dumper(getcwd(), $arg, $@));
+                    die("eval failed:".Dumper(Cwd::getcwd(), $arg, $@));
                 }
                 pop @INC if $inc;
             }
