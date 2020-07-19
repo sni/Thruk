@@ -8,7 +8,9 @@ my $cmds = [
   "grep -nr '\$c->'\"{'stash'}\"  lib/ plugins/plugins-available/*/lib/ menu.conf | grep -v 'backwards compatibility'",
   "grep -nr '\$c->'\"{stash}\"    lib/ plugins/plugins-available/*/lib/ menu.conf",
   "grep -nr '\$c->{\"stash\"}'    lib/ plugins/plugins-available/*/lib/ menu.conf",
-  "grep -nr '\$c->'\"{'config'}\" lib/ plugins/plugins-available/*/lib/",
+  "grep -nr '\$c->'\"{'config'}\" lib/ plugins/plugins-available/*/lib/ | grep -v Context.pm",
+  "grep -nr '\$c->'\"{config}\"   lib/ plugins/plugins-available/*/lib/",
+  "grep -nr '\$c->{\"config\"}'   lib/ plugins/plugins-available/*/lib/",
 ];
 
 # find all missed debug outputs

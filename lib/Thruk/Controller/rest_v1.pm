@@ -301,8 +301,8 @@ sub _fetch {
     $c->stats->profile(begin => "_fetch");
 
     # load plugin paths
-    if(!$c->{config}->{'_rest_paths_loaded'}) {
-        $c->{config}->{'_rest_paths_loaded'} = 1;
+    if(!$c->config->{'_rest_paths_loaded'}) {
+        $c->config->{'_rest_paths_loaded'} = 1;
         my $input_files = [glob(join(" ", (
                             $c->config->{'plugin_path'}."/plugins-enabled/*/lib/Thruk/Controller/Rest/V1/*.pm",
                             $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/*.pm",
