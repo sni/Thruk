@@ -19,7 +19,7 @@ use_ok('Thruk::Utils::Crypt');
 TestUtils::set_test_user_token();
 my($host,$service)  = TestUtils::get_test_service();
 my($c)              = TestUtils::get_c();
-my $default_user    = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+my $default_user    = $c->config->{'default_user_name'};
 my $other_user      = 'test_user';
 my $default_user_id = Thruk::Utils::Crypt::hexdigest($default_user);
 my $other_user_id   = Thruk::Utils::Crypt::hexdigest($other_user);
@@ -81,7 +81,7 @@ TestUtils::test_page(
 
 ###########################################################
 # change user
-Thruk->config->{'cgi_cfg'}->{'default_user_name'} = $other_user;
+$c->app->{'cgi_cfg'}->{'default_user_name'} = $other_user;
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/login.cgi?logout',
     'code'    => 401,
@@ -131,7 +131,7 @@ TestUtils::test_page(
 
 ###########################################################
 # change back user to default
-Thruk->config->{'cgi_cfg'}->{'default_user_name'} = $default_user;
+$c->app->{'cgi_cfg'}->{'default_user_name'} = $default_user;
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/login.cgi?logout',
     'code'    => 401,

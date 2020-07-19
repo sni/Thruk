@@ -23,13 +23,11 @@ my $b = Thruk::Backend::Manager->new();
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();
-$b->init( 'c' => $c );
+$b->init();
 
 Log::Log4perl->easy_init($INFO);
 my $logger = Log::Log4perl->get_logger();
-$b->init(
-  'config'  => Thruk->config,
-);
+$b->init();
 
 is($b->{'initialized'}, 1, 'Backend Manager Initialized') or BAIL_OUT("$0: no need to run further tests without valid connection");
 
@@ -86,11 +84,11 @@ is_deeply($res, $expected_resource, 'reading resource file');
 
 ################################################################################
 # set resource file
-$b->{'config'}->{'expand_user_macros'} = [];
-$b->{'config'}->{'resource_file'} = 't/data/resource.cfg';
+$c->{'config'}->{'expand_user_macros'} = [];
+$c->{'config'}->{'resource_file'} = 't/data/resource.cfg';
 for my $backend ( @{$b->{'backends'}} ) {
     if(defined $backend->{'resource_file'}) {
-        $backend->{'resource_file'} = $b->{'config'}->{'resource_file'};
+        $backend->{'resource_file'} = $c->{'config'}->{'resource_file'};
     }
 }
 $cmd = $b->expand_command(
@@ -133,7 +131,7 @@ is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["NONE"];
+$c->{'config'}->{'expand_user_macros'} = ["NONE"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -146,7 +144,7 @@ is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"];
+$c->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -159,7 +157,7 @@ is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR", "USER*"];
+$c->{'config'}->{'expand_user_macros'} = ["PLUGINDIR", "USER*"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -173,8 +171,8 @@ is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["USER1-2"];
-Thruk::Config::_do_finalize_config($b->{'config'});
+$c->{'config'}->{'expand_user_macros'} = ["USER1-2"];
+Thruk::Config::set_default_config($c->{'config'});
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -186,8 +184,7 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p tes
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["ALL"];
-Thruk::Config::_do_finalize_config($b->{'config'});
+$c->{'config'}->{'expand_user_macros'} = ["ALL"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -199,8 +196,7 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p tes
 
 ################################################################################
 # test obfuscation (from host macro)
-$b->{'config'}->{'expand_user_macros'} = ["ALL"];
-Thruk::Config::_do_finalize_config($b->{'config'});
+$c->{'config'}->{'expand_user_macros'} = ["ALL"];
 $cmd = $b->expand_command(
     'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_ME'], 'custom_variable_values' => ['password']))},
     'command' => {
@@ -212,9 +208,8 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "**
 
 ################################################################################
 # test obfuscation (from global config)
-$b->{'config'}->{'expand_user_macros'}            = ["ALL"];
-$b->{'config'}->{'commandline_obfuscate_pattern'} = ['/(\-\-password=")[^"]*(")/$1***$2/'];
-Thruk::Config::_do_finalize_config($b->{'config'});
+$c->{'config'}->{'expand_user_macros'}            = ["ALL"];
+$c->{'config'}->{'commandline_obfuscate_pattern'} = ['/(\-\-password=")[^"]*(")/$1***$2/'];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {

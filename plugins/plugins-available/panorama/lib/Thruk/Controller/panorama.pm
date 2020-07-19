@@ -65,7 +65,7 @@ sub index {
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
-    $c->stash->{'panorama_debug'} = $c->config->{'panorama_debug'};
+    $c->stash->{'panorama_debug'} = $c->config->{'panorama_debug'} // 0;
     $c->stash->{'panorama_debug'} = 1 if $c->req->parameters->{'debug'};
 
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
@@ -3569,7 +3569,7 @@ sub _get_default_tab_xdata {
     my($c) = @_;
     return({
         title           => $c->req->parameters->{'title'} || 'Dashboard',
-        refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
+        refresh         => $c->config->{'refresh_rate'} || 60,
         select_backends => 0,
         backends        => [],
         background      => 'none',

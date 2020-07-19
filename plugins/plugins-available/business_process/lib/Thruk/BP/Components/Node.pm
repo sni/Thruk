@@ -5,6 +5,7 @@ use warnings;
 use Thruk::Utils;
 use Thruk::BP::Functions;
 use Thruk::BP::Utils;
+use Thruk::Utils::Filter;
 
 =head1 NAME
 
@@ -389,9 +390,9 @@ sub set_status {
             }
             elsif(scalar @{$nodes} > 0) {
                 my $first = $nodes->[0];
-                $text = Thruk::BP::Utils::join_labels($nodes).' '.lc(Thruk::BP::Utils::state2text($first->{'status'}));
+                $text = Thruk::BP::Utils::join_labels($nodes).' '.lc(Thruk::Utils::Filter::state2text($first->{'status'}));
             }
-            $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
+            $text = Thruk::Utils::Filter::state2text($self->{'status'}).' - '.$text;
         }
         $text  = $extra->{'output'} if $extra->{'output'};
         $text .= "\n".$extra->{'long_output'} if $extra->{'long_output'};

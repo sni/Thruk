@@ -8,15 +8,15 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $filter = $ARGV[0];
 my $whitelist_vars = Thruk::Utils::array2hash([qw/
-    theme url_prefix logo_path_prefix filebranch version branch extjs_version jquery_ui
+    theme url_prefix logo_path_prefix filebranch version branch extjs_version
     date.now pd referer cs j js jsfiles page class statusclass statusClass rowclass hostclass serviceclass
     loopclass body_class param.breakdown url defaults.$key.link
-    c.config.useragentcompat c.stash.last_graph_type c.config.cgi_cfg.notes_url_target
-    c.config.cgi_cfg.action_url_target avgClass log.class rowclasses show_sitepanel extrabodyclass b.cls
-    remote_thruk_url bug_email_rcpt start_page main target prio pnp_url c.config.extra_version_link
+    c.config.useragentcompat c.stash.last_graph_type c.config.notes_url_target
+    c.config.action_url_target avgClass log.class rowclasses show_sitepanel extrabodyclass b.cls
+    remote_thruk_url bug_email_rcpt main target prio pnp_url c.config.extra_version_link
     histou_frame_url histou_url c.stash.help_topic n.annotation peer_key passive_icon svcbg
     get_user_token(c) object.get_id() object.get_id object.get_type() svc.get_id()
-    obj_id start end servicelink l.url plugin.url r.link link action_url home_link n.node_url
+    obj_id start end servicelink l.url plugin.url r.link link action_url n.node_url
     c.config.use_feature_core_scheduling prefix paneprefix style counter service_comment_count
     sites.up sites.disabled sites.down pb_options.lineheight par desc refresh_rate imgsize
     h.current_notification_number s.current_notification_number how_far_back audiofile
@@ -28,6 +28,7 @@ my $whitelist_vars = Thruk::Utils::array2hash([qw/
     a.t1 a.t2 nr id first_remaining
     s_status f d i j x key size head_height image_width state status image_height
     div_id graph_url loop_index c.config.navframesize show_home_button
+    c.config.jquery_ui c.config.start_page c.config.home_link
 /]);
 my $whitelist_regex = [
     qr/^\w+\.(id|nr)$/,

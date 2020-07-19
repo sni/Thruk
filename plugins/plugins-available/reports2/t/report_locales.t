@@ -24,7 +24,7 @@ ok(scalar keys %{$languages} > 0, 'got some languages');
 
 # get required locale patterns
 my $local_patterns = {};
-for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+for my $path (@{$c->get_tt_template_paths()}) {
     for my $file (glob($path.'/reports/*.tt')) {
         my $cont = read_file($file);
         my @pattern = $cont =~ m/loc\(['|"](.*?)['|"]\)/gmx;

@@ -25,7 +25,8 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 =cut
 sub register {
     my($app, $settings) = @_;
-    $app->{'tt'} = Template->new($settings->{'config'});
+    $app->{'tt'} = Template->new($settings);
+    $app->{'config'}->{'strict_tt'} = $settings->{'STRICT'};
     return;
 }
 
@@ -61,13 +62,7 @@ sub render {
     confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
 
-    if($c->stash->{'additional_template_paths'}) {
-        $tt->context->{'LOAD_TEMPLATES'}->[0]->{'INCLUDE_PATH'} =
-            [ @{$c->stash->{'additional_template_paths'}},
-                $c->config->{'View::TT'}->{'INCLUDE_PATH'},
-            ];
-    }
-
+    $tt->context->{'LOAD_TEMPLATES'}->[0]->{'INCLUDE_PATH'} = $c->get_tt_template_paths();
     $tt->process(
         $template,
         ($stash || $c->stash),

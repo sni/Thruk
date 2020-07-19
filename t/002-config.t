@@ -6,11 +6,11 @@ use Test::More;
 use_ok("Thruk");
 use_ok("Thruk::Config");
 
-my $config = Thruk::Config::get_config();
+my $config = Thruk::Config::set_config_env();
 is(ref Thruk->config, 'HASH', "got a config");
 ok(defined Thruk->config->{'version'}, "got a version");
 
-$config = Thruk::Config::get_config('t/data/test_c_style.conf');
+$config = Thruk::Config::set_config_env('t/data/test_c_style.conf');
 is($config->{'Thruk::Backend'}->{'peer'}->{'configtool'}->{'obj_readonly'}, '^(?!.*/test)', 'parsing c style comments');
 
 eval "use Config::General";
@@ -30,7 +30,7 @@ if(!$@) {
 ####################################################
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/nested_config';
-    my $config = Thruk::Config::get_config();
+    my $config = Thruk::Config::set_config_env();
     my $expected_backends = {
         'peer' => [{ 'name' => 'local1' },
                     { 'name' => 'local2' },
@@ -55,7 +55,7 @@ if(!$@) {
 ####################################################
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/separated_hashes';
-    my $config = Thruk::Config::get_config();
+    my $config = Thruk::Config::set_config_env();
     my $expected_actions = {
         "a" => 1,
         "b" => 2,
@@ -67,7 +67,7 @@ if(!$@) {
 
 ####################################################
 {
-    my $config = Thruk::Config::get_config('t/data/test_spaces.conf');
+    my $config = Thruk::Config::set_config_env('t/data/test_spaces.conf');
     my $expected_user = {
         'Test User' => {
             'show_full_commandline' => '2'
@@ -79,7 +79,7 @@ if(!$@) {
 ####################################################
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/scalar_values';
-    my $config = Thruk::Config::get_config();
+    my $config = Thruk::Config::set_config_env();
     is_deeply($config->{'cookie_auth_domain'}, 'test.local', "parsing cookie domain from thruk_local.d");
 };
 
@@ -104,7 +104,7 @@ if(!$@) {
 ####################################################
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/split_plugins';
-    my $config = Thruk::Config::get_config();
+    my $config = Thruk::Config::set_config_env();
     my $expected = {
         test => 2,
         a    => 1,

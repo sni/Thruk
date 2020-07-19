@@ -26,7 +26,7 @@ use Storable qw/dclone/;
 use URI::Escape qw/uri_escape/;
 use Thruk::Utils::Filter ();
 
-our @stash_config_keys = qw/
+my @stash_config_keys = qw/
     url_prefix product_prefix title_prefix use_pager start_page documentation_link
     use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
     datetime_format datetime_format_today datetime_format_long datetime_format_log
@@ -35,7 +35,7 @@ our @stash_config_keys = qw/
     priorities show_modified_attributes downtime_duration expire_ack_duration show_contacts
     show_backends_in_table host_action_icon service_action_icon cookie_path
     use_feature_trends show_error_reports skip_js_errors perf_bar_mode
-    bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
+    bug_email_rcpt first_day_of_week sitepanel perf_bar_pnp_popup
     status_color_background show_logout_button use_feature_recurring_downtime
     use_service_description force_sticky_ack force_send_notification force_persistent_ack
     force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
@@ -90,7 +90,7 @@ sub begin {
         $c->stats->enable(1);
     }
 
-    Thruk::Action::AddDefaults::set_configs_stash($c);
+    set_configs_stash($c);
     $c->stash->{'root_begin'} = 1;
 
     $c->stash->{'c'} = $c;
@@ -116,7 +116,6 @@ sub begin {
     $c->stash->{'reload_nav'}         = $c->req->parameters->{'reload_nav'} || '';
     $c->stash->{'show_sounds'}        = 0;
     $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} || 0;
-    $c->stash->{'real_page'}          = '';
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
@@ -131,16 +130,10 @@ sub begin {
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
-    my $available_themes = Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'});
+    my $available_themes = Thruk::Utils::array2hash($c->config->{'themes'});
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
-    if( defined $c->config->{templates_paths} ) {
-        # themes have to override plugins templates
-        $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates', @{ $c->config->{templates_paths} } ];
-    }
-    else {
-        $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
-    }
+
     $c->stash->{all_in_one_css} = 0;
     if($theme eq 'Thruk' || $theme eq 'Thruk2') {
         $c->stash->{all_in_one_css} = 1;
@@ -184,8 +177,7 @@ sub begin {
     $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
 
     # icon image path
-    $c->config->{'logo_path_prefix'} = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/logos/';
-    $c->stash->{'logo_path_prefix'}  = $c->config->{'logo_path_prefix'};
+    $c->stash->{'logo_path_prefix'}  = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/logos/';
 
     # make private _ hash keys available
     $Template::Stash::PRIVATE = undef;
@@ -203,9 +195,13 @@ sub begin {
 
     ###############################
     # parse cgi.cfg
-    Thruk::Config::read_cgi_cfg($c);
-    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
-    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
+    Thruk::Config::merge_cgi_cfg($c);
+    $c->stash->{'escape_html_tags'}  = $c->config->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'show_context_help'} // 0;
+    $c->stash->{'escape_html_tags'}  = $c->config->{'escape_html_tags'}  // 1;
+    $c->stash->{'show_context_help'} = $c->config->{'show_context_help'} // 0;
+
+
 
     ###############################
     # Authentication
@@ -243,6 +239,7 @@ sub begin {
     }
 
     # favicon cookie set?
+    $c->stash->{'fav_counter'} = 0;
     if(defined $c->cookie('thruk_favicon')) {
         my $favicon_cookie = $c->cookie('thruk_favicon');
         if(defined $favicon_cookie->value and $favicon_cookie->value eq 'off') {
@@ -399,8 +396,8 @@ sub end {
         }
     }
 
-    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} && (!defined $c->stash->{'no_auto_reload'} || $c->stash->{'no_auto_reload'} == 0)) {
-        $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
+    if(defined $c->config->{'refresh_rate'} && (!defined $c->stash->{'no_auto_reload'} || $c->stash->{'no_auto_reload'} == 0)) {
+        $c->stash->{'refresh_rate'} = $c->config->{'refresh_rate'};
     }
     $c->stash->{'refresh_rate'} = $c->req->parameters->{'refresh'} if(defined $c->req->parameters->{'refresh'} and $c->req->parameters->{'refresh'} =~ m/^\d+$/mx);
     if(defined $c->stash->{'refresh_rate'} and $c->stash->{'refresh_rate'} == 0) {
@@ -654,7 +651,7 @@ sub add_defaults {
     $c->stash->{'has_cgi_sounds'} = 0;
     $c->stash->{'show_sounds'}    = 1;
     for my $key (qw/host_unreachable host_down service_critical service_warning service_unknown normal/) {
-        if(defined $c->config->{'cgi_cfg'}->{$key."_sound"}) {
+        if(defined $c->config->{$key."_sound"}) {
             $c->stash->{'has_cgi_sounds'} = 1;
             last;
         }
@@ -662,13 +659,6 @@ sub add_defaults {
 
     ###############################
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
-
-    ###############################
-    # merge cgi.cfg parameters set in
-    Thruk::Config::merge_cgi_cfg($c->config);
-    $c->stash->{'escape_html_tags'}  = $c->config->{'cgi_cfg'}->{'escape_html_tags'}  // 1;
-    $c->stash->{'show_context_help'} = $c->config->{'cgi_cfg'}->{'show_context_help'} // 0;
-
 
     ###############################
     # user / group specific config?
@@ -913,12 +903,12 @@ sub update_site_panel_hashes {
     _calculate_section_totals($c, $c->{'db'}->{'sections'}, $backend_detail, $initial_backends);
 
     my $show_sitepanel = 'list';
-       if($c->stash->{'sitepanel'} eq 'list')      { $show_sitepanel = 'list'; }
-    elsif($c->stash->{'sitepanel'} eq 'compact')   { $show_sitepanel = 'panel'; }
-    elsif($c->stash->{'sitepanel'} eq 'collapsed') { $show_sitepanel = 'collapsed'; }
-    elsif($c->stash->{'sitepanel'} eq 'tree')      { $show_sitepanel = 'tree'; }
-    elsif($c->stash->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
-    elsif($c->stash->{'sitepanel'} eq 'auto') {
+       if($c->config->{'sitepanel'} eq 'list')      { $show_sitepanel = 'list'; }
+    elsif($c->config->{'sitepanel'} eq 'compact')   { $show_sitepanel = 'panel'; }
+    elsif($c->config->{'sitepanel'} eq 'collapsed') { $show_sitepanel = 'collapsed'; }
+    elsif($c->config->{'sitepanel'} eq 'tree')      { $show_sitepanel = 'tree'; }
+    elsif($c->config->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
+    elsif($c->config->{'sitepanel'} eq 'auto') {
         if($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 100)   { $show_sitepanel = 'tree'; }
         elsif($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
         elsif($c->{'db'}->{'sections'}->{'sub'} || scalar @{$backends} >= 10)  { $show_sitepanel = 'panel'; }

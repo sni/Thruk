@@ -15,7 +15,7 @@ BEGIN {
     import TestUtils;
 }
 
-my $config = Thruk::Config::get_config();
+my $config = Thruk::Config::set_config_env();
 plan skip_all => 'no livecache configured' if !$config->{'use_lmd_core'};
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';

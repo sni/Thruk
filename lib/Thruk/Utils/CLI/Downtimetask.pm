@@ -248,10 +248,10 @@ sub set_downtime {
                       (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
                      );
     local $ENV{'THRUK_SRC'} = 'CLI';
-    my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
-    $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
+    my $old = $c->config->{'lock_author_names'};
+    $c->config->{'lock_author_names'} = 0;
     my @res = Thruk::Utils::CLI::request_url($c, $url);
-    $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
+    $c->config->{'lock_author_names'} = $old;
     return 0 if $res[0] != 200; # error is already printed
     return 1;
 }

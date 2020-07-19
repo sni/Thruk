@@ -7,6 +7,7 @@ use File::Copy qw/move/;
 use File::Slurp qw/read_file/;
 use Carp;
 
+use Thruk::Utils::Filter;
 use Thruk::BP::Components::BP;
 
 =head1 NAME
@@ -490,7 +491,7 @@ sub join_labels {
     my $long = "";
     if($state) {
         for my $n (@{$nodes}) {
-            my $firstline = "[".$n->{'label'}."] ".Thruk::BP::Utils::state2text($state);
+            my $firstline = "[".$n->{'label'}."] ".Thruk::Utils::Filter::state2text($state);
             $firstline   .= " - ".(split(/\n/mx, $n->{'status_text'}))[0] if $n->{'status_text'};
             $long .= "\n- ".$firstline;
         }
@@ -536,38 +537,26 @@ sub join_args {
 
 =head2 state2text
 
-    status2text($state)
+    state2text($state)
 
 return string of given state
 
 =cut
 sub state2text {
-    my($nr) = @_;
-    if($nr == 0) { return 'OK'; }
-    if($nr == 1) { return 'WARNING'; }
-    if($nr == 2) { return 'CRITICAL'; }
-    if($nr == 3) { return 'UNKOWN'; }
-    if($nr == 4) { return 'PENDING'; }
-    return;
+    return(Thruk::Utils::Filter::state2text(@_));
 }
 
 ##########################################################
 
 =head2 hoststate2text
 
-    hoststatus2text($state)
+    hoststate2text($state)
 
 return string of given host state
 
 =cut
 sub hoststate2text {
-    my($nr) = @_;
-    if($nr == 0) { return 'UP'; }
-    if($nr == 1) { return 'DOWN'; }
-    if($nr == 2) { return 'UNREACHABLE'; }
-    if($nr == 3) { return 'UNKOWN'; }
-    if($nr == 4) { return 'PENDING'; }
-    return;
+    return(Thruk::Utils::Filter::hoststate2text(@_));
 }
 
 ##########################################################
@@ -743,7 +732,7 @@ sub get_nodes_grouped_by_state {
 
     my $groups = {};
     for my $n (@{$nodes}) {
-        my $key = lc(state2text($n->{'status'}));
+        my $key = lc(Thruk::Utils::Filter::state2text($n->{'status'}));
         if($n->{'acknowledged'} && $n->{'status'} != 0) {
             $key = 'acknowledged_'.$key;
         }

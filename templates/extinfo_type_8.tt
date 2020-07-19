@@ -27,7 +27,7 @@
           [% IF servicegroup.action_url %]
             <tr>
               <td align='right'>
-                <a href="[% servicegroup.action_url %]" target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Servicegroup' title='Perform Additional Actions On This Servicegroup' width="40" height="40"></a><br clear="all">
+                <a href="[% servicegroup.action_url %]" target='[% c.config.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Servicegroup' title='Perform Additional Actions On This Servicegroup' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Extra Actions</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -36,7 +36,7 @@
           [% IF servicegroup.notes_url %]
             <tr>
               <td align='right'>
-                <a href="[% servicegroup.notes_url %]" target='[% c.config.cgi_cfg.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Servicegroup' title='View Additional Notes For This Servicegroup' width="40" height="40"></a><br clear="all">
+                <a href="[% servicegroup.notes_url %]" target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Servicegroup' title='View Additional Notes For This Servicegroup' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Extra Notes</i></font><br clear="all">
                 <br clear="all">
               </td>

@@ -51,7 +51,7 @@ TestUtils::test_page(
 
 ###########################################################
 # test connection check
-my $config = Thruk::Config::get_config();
+my $config = Thruk::Config::set_config_env();
 my $firstbackend;
 if(ref $config->{'Thruk::Backend'}->{'peer'} eq 'HASH') { $config->{'Thruk::Backend'}->{'peer'} = [$config->{'Thruk::Backend'}->{'peer'}]; }
 for my $p (@{$config->{'Thruk::Backend'}->{'peer'}}) {
@@ -71,7 +71,7 @@ SKIP: {
     skip 'external tests', 52 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     my $c = TestUtils::get_c();
-    delete $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+    delete $c->app->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
     my $page = TestUtils::test_page(
         'url'               => '/thruk/cgi-bin/conf.cgi?action=user_password&referer=/thruk/cgi-bin/tac.cgi',
         'like'              => ['Changing passwords is disabled', 'Tactical Monitoring Overview'],
@@ -80,7 +80,7 @@ SKIP: {
     );
 
     my($fh, $tmp_htpasswd) = tempfile();
-    $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'} = $tmp_htpasswd;
+    $c->app->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'} = $tmp_htpasswd;
 
     $page = TestUtils::test_page(
         'url'               => '/thruk/cgi-bin/conf.cgi?action=user_password&referer=/thruk/cgi-bin/tac.cgi',

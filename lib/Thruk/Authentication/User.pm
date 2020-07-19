@@ -63,8 +63,8 @@ sub new {
 
     # add roles from cgi_conf
     for my $role (@{$possible_roles}) {
-        if(defined $c->config->{'cgi_cfg'}->{$role}) {
-            my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
+        if(defined $c->config->{$role}) {
+            my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{$role};
             push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
         }
     }
@@ -233,8 +233,8 @@ sub get_dynamic_roles {
     for my $key (@{$possible_roles}) {
         my $role = $key;
         $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
-        if(defined $c->config->{'cgi_cfg'}->{$role}) {
-            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
+        if(defined $c->config->{$role}) {
+            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{$role};
             for my $contactgroup (keys %contactgroups) {
                 if(defined $groups_hash->{$contactgroup} or $contactgroup eq '*' ) {
                     $roles_by_group->{$key} = [] unless defined $roles_by_group->{$key};

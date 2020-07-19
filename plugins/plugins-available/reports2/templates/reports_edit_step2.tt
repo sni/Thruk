@@ -192,7 +192,7 @@
         </table>
       [% ELSIF type == 'themes' %]
         <select name='params.[% key %]'>
-          [% FOR t = themes %]
+          [% FOR t = c.config.themes %]
           <option value="[% t | html %]"[% IF t == value %] selected[% END %]>[% t | html %]</option>
           [% END %]
         </select>

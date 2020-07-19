@@ -60,7 +60,7 @@ sub index {
     }
 
     # check if authorization is enabled
-    if( $c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0 ) {
+    if( $c->config->{'use_authentication'} == 0 and $c->config->{'use_ssl_authentication'} == 0 ) {
         return $c->detach('/error/index/3');
     }
 
@@ -388,7 +388,7 @@ sub _check_for_commands {
 
         # check if cmd exists
         my $found = 0;
-        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+        for my $path (@{$c->get_tt_template_paths()}) {
             if(-e $path.'/'.$c->stash->{template}) {
                 $found = 1;
                 last;
@@ -584,7 +584,7 @@ sub do_send_command {
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
     # locked author names?
-    if( $c->config->{'cgi_cfg'}->{'lock_author_names'} || !defined $c->req->parameters->{'com_author'} ) {
+    if( $c->config->{'lock_author_names'} || !defined $c->req->parameters->{'com_author'} ) {
         my $author = $c->user->get('username');
         $author = $c->user->get('alias') if $c->user->get('alias');
         $c->req->parameters->{'com_author'} = $author;

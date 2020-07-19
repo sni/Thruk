@@ -7,6 +7,8 @@ use Cwd ();
 use File::Slurp qw/read_file/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
+use Storable ();
+use Class::Inspector ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::Broadcast ();
 use Thruk::Utils::IO ();
@@ -44,263 +46,760 @@ confess('got no project_root') unless $project_root;
 ## no critic
 $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 ## use critic
-our %config = ('name'                   => 'Thruk',
-              'version'                => $VERSION,
-              'branch'                 => $branch,
-              'released'               => 'July 09, 2020',
-              'compression_format'     => 'gzip',
-              'ENCODING'               => 'utf-8',
-              'image_path'             => $project_root.'/root/thruk/images',
-              'project_root'           => $project_root,
-              'home'                   => $project_root,
-              'default_view'           => 'TT',
-              'View::TT'               => {
-                  TEMPLATE_EXTENSION => '.tt',
-                  ENCODING           => 'utf-8',
-                  INCLUDE_PATH       => $project_root.'/templates',
-                  RECURSION          => 1,
-                  FILTERS            => {
-                                          'duration'            => \&Thruk::Utils::Filter::duration,
-                                          'nl2br'               => \&Thruk::Utils::Filter::nl2br,
-                                          'strip_command_args'  => \&Thruk::Utils::Filter::strip_command_args,
-                                          'escape_html'         => \&Thruk::Utils::Filter::escape_html,
-                                          'lc'                  => \&Thruk::Utils::Filter::lc,
-                                      },
-                  PRE_DEFINE         => {
-                                          'sprintf'             => \&Thruk::Utils::Filter::sprintf,
-                                          'duration'            => \&Thruk::Utils::Filter::duration,
-                                          'name2id'             => \&Thruk::Utils::Filter::name2id,
-                                          'as_url_arg'          => \&Thruk::Utils::Filter::as_url_arg,
-                                          'uri'                 => \&Thruk::Utils::Filter::uri,
-                                          'full_uri'            => \&Thruk::Utils::Filter::full_uri,
-                                          'short_uri'           => \&Thruk::Utils::Filter::short_uri,
-                                          'uri_with'            => \&Thruk::Utils::Filter::uri_with,
-                                          'escape_html'         => \&Thruk::Utils::Filter::escape_html,
-                                          'escape_xml'          => \&Thruk::Utils::Filter::escape_xml,
-                                          'escape_js'           => \&Thruk::Utils::Filter::escape_js,
-                                          'escape_quotes'       => \&Thruk::Utils::Filter::escape_quotes,
-                                          'escape_ampersand'    => \&Thruk::Utils::Filter::escape_ampersand,
-                                          'escape_bslash'       => \&Thruk::Utils::Filter::escape_bslash,
-                                          'escape_regex'        => \&Thruk::Utils::Filter::escape_regex,
-                                          'get_message'         => \&Thruk::Utils::Filter::get_message,
-                                          'throw'               => \&Thruk::Utils::Filter::throw,
-                                          'contains'            => \&Thruk::Utils::Filter::contains,
-                                          'date_format'         => \&Thruk::Utils::Filter::date_format,
-                                          'last_check'          => \&Thruk::Utils::Filter::last_check,
-                                          'remove_html_comments' => \&Thruk::Utils::Filter::remove_html_comments,
-                                          'format_date'         => \&Thruk::Utils::format_date,
-                                          'format_cronentry'    => \&Thruk::Utils::format_cronentry,
-                                          'format_number'       => \&Thruk::Utils::format_number,
-                                          'nl2br'               => \&Thruk::Utils::Filter::nl2br,
-                                          'action_icon'         => \&Thruk::Utils::Filter::action_icon,
-                                          'logline_icon'        => \&Thruk::Utils::Filter::logline_icon,
-                                          'json_encode'         => \&Thruk::Utils::Filter::json_encode,
-                                          'encode_json_obj'     => \&Thruk::Utils::Filter::encode_json_obj,
-                                          'get_user_token'      => \&Thruk::Utils::Filter::get_user_token,
-                                          'uniqnumber'          => \&Thruk::Utils::Filter::uniqnumber,
-                                          'replace_macros'      => \&Thruk::Utils::Filter::replace_macros,
-                                          'set_time_locale'     => \&Thruk::Utils::Filter::set_time_locale,
-                                          'debug'               => \&Thruk::Utils::Filter::debug,
-                                          'dump'                => \&Thruk::Utils::Filter::debug,
-                                          'peer_name'           => \&Thruk::Utils::Filter::peer_name,
-                                          'calculate_first_notification_delay_remaining' => \&Thruk::Utils::Filter::calculate_first_notification_delay_remaining,
-                                          'has_business_process' => \&Thruk::Utils::Filter::has_business_process,
-                                          'set_favicon_counter' => \&Thruk::Utils::Status::set_favicon_counter,
-                                          'get_pnp_url'         => \&Thruk::Utils::get_pnp_url,
-                                          'get_graph_url'       => \&Thruk::Utils::get_graph_url,
-                                          'get_action_url'       => \&Thruk::Utils::get_action_url,
-                                          'make_test_mode'      => $ENV{'THRUK_SRC'} eq 'TEST' ? 1 : 0,
-                                          'button'              => \&Thruk::Utils::Filter::button,
-                                          'fullversion'         => \&Thruk::Utils::Filter::fullversion,
-                                          'reduce_number'       => \&Thruk::Utils::reduce_number,
-                                          'split_perfdata'      => \&Thruk::Utils::Filter::split_perfdata,
-                                          'get_custom_vars'     => \&Thruk::Utils::get_custom_vars,
-                                          'validate_json'       => \&Thruk::Utils::Filter::validate_json,
-                                          'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
-                                          'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
-                                          'get_broadcasts'      => \&Thruk::Utils::Broadcast::get_broadcasts,
-                                          'command_disabled'    => \&Thruk::Utils::command_disabled,
-                                          'proxifiy_url'        => \&Thruk::Utils::proxifiy_url,
-                                          'get_remote_thruk_url'=> \&Thruk::Utils::get_remote_thruk_url,
-                                          'basename'            => \&Thruk::Utils::basename,
 
-                                          'version'        => $VERSION,
-                                          'branch'         => $branch,
-                                          'filebranch'     => $filebranch,
-                                          'starttime'      => time(),
-                                          'debug_details'  => get_debug_details(),
-                                          'omd_site'       => $ENV{'OMD_SITE'} || '',
-                                          'stacktrace'     => '',
-                                          'backends'       => [],
-                                          'backend_detail' => {},
-                                          'pi_detail'      => {},
-                                          'param_backend'  => '',
-                                          'initial_backends' => {},
-                                          'refresh_rate'   => '',
-                                          'auto_reload_fn' => '',
-                                          'page'           => '',
-                                          'title'          => '',
-                                          'extrahtmlclass' => '',
-                                          'extrabodyclass' => '',
-                                          'remote_user'    => '?',
-                                          'infoBoxTitle'   => '',
-                                          'has_proc_info'  => 0,
-                                          'has_expire_acks'=> 0,
-                                          'no_auto_reload' => 0,
-                                          'die_on_errors'  => 0,        # used in cmd.cgi
-                                          'errorMessage'   => 0,        # used in errors
-                                          'errorDetails'   => '',       # used in errors
-                                          'js'             => [],       # used in _header.tt
-                                          'css'            => [],       # used in _header.tt
-                                          'extra_header'   => '',       # used in _header.tt
-                                          'ssi_header'     => '',       # used in _header.tt
-                                          'ssi_footer'     => '',       # used in _header.tt
-                                          'original_url'   => '',       # used in _header.tt
-                                          'paneprefix'     => 'dfl_',   # used in _status_filter.tt
-                                          'sortprefix'     => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
-                                          'show_form'      => '1',      # used in _status_filter.tt
-                                          'show_top_pane'  => 0,        # used in _header.tt on status pages
-                                          'body_class'     => '',       # used in _conf_bare.tt on config pages
-                                          'thruk_debug'    => 0,
-                                          'panorama_debug' => 0,
-                                          'all_in_one_css' => 0,
-                                          'hide_backends_chooser' => 0,
-                                          'show_sitepanel' => 'off',
-                                          'sites'          => [],
-                                          'backend_chooser'         => 'select',
-                                          'enable_shinken_features' => 0,
-                                          'disable_backspace'       => 0,
-                                          'server_timezone'       => '',
-                                          'default_user_timezone' => 'Server Setting',
-                                          'play_sounds'    => 0,
-                                          'fav_counter'    => 0,
-                                          'menu_states'    => {},
-                                          'cookie_auth'    => 0,
-                                          'space'          => ' ',
-                                          'debug_info'     => '',
-                                          'bodyonload'     => 1,
-                                          'show_home_button' => "",
-                                          'has_jquery_ui'  => 0,
-                                          'uri_filter'     => {
-                                                'bookmark'      => undef,
-                                                'referer'       => undef,
-                                                'reload_nav'    => undef,
-                                                'update.y'      => undef,
-                                                'update.x'      => undef,
-                                                'scrollTo'      => undef,
-                                                'autoShow'      => undef,
-                                                '_'             => undef,
-                                          },
-                                          'physical_logo_path' => [],
-                                          'all_in_one_javascript' => [
-                                              'vendor/jquery-3.5.1.min.js',
-                                              'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
-                                              'vendor/daterangepicker-3.0.5/moment.min.js',
-                                              'vendor/daterangepicker-3.0.5/daterangepicker.js',
-                                              'vendor/overlib-4.21.js',
-                                              'vendor/strftime-min-1.3.js',
-                                              'vendor/bestiejs-1.3.5/platform.js',
-                                          ],
-                                          'all_in_one_css_frames' => {
-                                                'Thruk' => [
-                                                   'thruk_global.css',
-                                                   'Thruk.css',
-                                                ],
-                                                'Thruk2' => [
-                                                    'thruk_global.css',
-                                                    'Thruk2.css',
-                                                ],
-                                          },
-                                          'all_in_one_css_noframes' => {
-                                                'Thruk' => [
-                                                    'thruk_global.css',
-                                                    'thruk_noframes.css',
-                                                    'Thruk.css',
-                                                ],
-                                                'Thruk2' => [
-                                                    'thruk_global.css',
-                                                    'thruk_noframes.css',
-                                                    'Thruk2.css',
-                                                ],
-                                          },
-                                          'jquery_ui' => '1.12.1',
-                                          'all_in_one_javascript_panorama' => [
-                                              'vendor/jquery-3.5.1.min.js',
-                                              'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
-                                              'vendor/extjs_ux/form/MultiSelect.js',
-                                              'vendor/extjs_ux/form/ItemSelector.js',
-                                              'vendor/extjs_ux/chart/series/KPIGauge.js',
-                                              'vendor/sprintf-ef8258f.js',
-                                              'vendor/bigscreen-2.0.4.js',
-                                              'vendor/overlib-4.21.js',
-                                              'vendor/strftime-min-1.3.js',
-                                              'vendor/bestiejs-1.3.5/platform.js',
-                                              'vendor/openlayer-2.13.1/OpenLayers-2.13.1.js',
-                                              'vendor/geoext2-2.0.2/src/GeoExt/Version.js',
-                                              'vendor/geoext2-2.0.2/src/GeoExt/data/LayerModel.js',
-                                              'vendor/geoext2-2.0.2/src/GeoExt/data/LayerStore.js',
-                                              'vendor/geoext2-2.0.2/src/GeoExt/panel/Map.js',
-                                          ],
-                                      },
-                  PRE_CHOMP          => 0,
-                  POST_CHOMP         => 0,
-                  TRIM               => 0,
-                  COMPILE_EXT        => '.ttc',
-                  STAT_TTL           => 604800, # templates do not change in production
-                  STRICT             => 0,
-                  render_die         => 1,
-                  EVAL_PERL          => 1,
-              },
-              nagios => {
-                  service_state_by_number => {
-                                    0 => 'OK',
-                                    1 => 'WARNING',
-                                    2 => 'CRITICAL',
-                                    3 => 'UNKNOWN',
-                                    4 => 'PENDING',
-                                },
-                  host_state_by_number => {
-                                    0 => 'UP',
-                                    1 => 'DOWN',
-                                    2 => 'UNREACHABLE',
-                                },
-              },
-);
-# set TT strict mode only for authors
-$config{'thruk_debug'}  = 0;
-$config{'thruk_author'} = 0;
-$config{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
-if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
-    $config{'View::TT'}->{'STRICT'}     = 1;
-    $config{'View::TT'}->{'CACHE_SIZE'} = 0 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
-    $config{'View::TT'}->{'STAT_TTL'}   = 5 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
-    $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
-    $config{'thruk_debug'}  = 1;
-    $config{'thruk_author'} = 1;
+my $base_defaults = {
+    'name'                                  => 'Thruk',
+    'version'                               => $VERSION,
+    'branch'                                => $branch,
+    'released'                              => 'July 09, 2020',
+    'compression_format'                    => 'gzip',
+    'ENCODING'                              => 'utf-8',
+    'image_path'                            => $project_root.'/root/thruk/images',
+    'project_root'                          => $project_root,
+    'home'                                  => $project_root,
+    'filebranch'                            => $filebranch,
+    'default_view'                          => 'TT',
+    'base_templates_dir'                    => $project_root.'/templates',
+    'cgi.cfg'                               => 'cgi.cfg',
+    'bug_email_rcpt'                        => 'bugs@thruk.org',
+    'home_link'                             => 'http://www.thruk.org',
+    'plugin_registry_url'                   => ['https://api.thruk.org/v1/plugin/list'],
+    'cluster_nodes'                         => ['$proto$://$hostname$/$url_prefix$/'],
+    'cluster_heartbeat_interval'            => 15,
+    'cluster_node_stale_timeout'            => 120,
+    'api_keys_enabled'                      => 1,
+    'max_api_keys_per_user'                 => 10,
+    'mode_file'                             => '0660',
+    'mode_dir'                              => '0770',
+    'backend_debug'                         => 0,
+    'connection_pool_size'                  => undef,
+    'product_prefix'                        => 'thruk',
+    'maximum_search_boxes'                  => 9,
+    'search_long_plugin_output'             => 1,
+    'shown_inline_pnp'                      => 1,
+    'use_feature_trends'                    => 1,
+    'use_wait_feature'                      => 1,
+    'wait_timeout'                          => 10,
+    'use_curl'                              => $ENV{'THRUK_CURL'} ? 1 : 0,
+    'use_frames'                            => 1,
+    'navframesize'                          => 172,
+    'use_strict_host_authorization'         => 0,
+    'make_auth_user_lowercase'              => 0,
+    'make_auth_user_uppercase'              => 0,
+    'csrf_allowed_hosts'                    => ['127.0.0.1', '::1'],
+    'can_submit_commands'                   => 1,
+    'group_paging_overview'                 => '*3, 10, 100, all',
+    'group_paging_grid'                     => '*5, 10, 50, all',
+    'group_paging_summary'                  => '*10, 50, 100, all',
+    'default_theme'                         => 'Thruk2',
+    'datetime_format'                           => '%Y-%m-%d  %H:%M:%S',
+    'datetime_format_long'                  => '%a %b %e %H:%M:%S %Z %Y',
+    'datetime_format_today'                 => '%H:%M:%S',
+    'datetime_format_log'                   => '%B %d, %Y  %H',
+    'datetime_format_trends'                => '%a %b %e %H:%M:%S %Y',
+    'title_prefix'                          => '',
+    'use_pager'                             => 1,
+    'useragentcompat'                       => '',
+    'show_notification_number'              => 1,
+    'strict_passive_mode'                   => 1,
+    'hide_passive_icon'                     => 0,
+    'show_full_commandline'                 => 1,
+    'show_modified_attributes'              => 1,
+    'show_contacts'                         => 1,
+    'show_config_edit_buttons'              => 0,
+    'show_backends_in_table'                => 0,
+    'show_logout_button'                    => 0,
+    'commandline_obfuscate_pattern'         => [],
+    'backends_with_obj_config'              => {},
+    'use_feature_statusmap'                 => 0,
+    'use_feature_statuswrl'                 => 0,
+    'use_feature_histogram'                 => 0,
+    'use_feature_configtool'                => 0,
+    'use_feature_recurring_downtime'        => 1,
+    'use_feature_bp'                        => 0,
+    'use_feature_core_scheduling'           => 0,
+    'use_service_description'               => 0,
+    'use_bookmark_titles'                   => 0,
+    'use_dynamic_titles'                    => 1,
+    'use_new_command_box'                   => 1,
+    'show_long_plugin_output'               => 'popup',
+    'info_popup_event_type'                 => 'onclick',
+    'info_popup_options'                    => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
+    'cmd_quick_status'                      => {
+                'default'                       => 'reschedule next check',
+                'reschedule'                    => 1,
+                'downtime'                      => 1,
+                'comment'                       => 1,
+                'acknowledgement'               => 1,
+                'active_checks'                 => 1,
+                'notifications'                 => 1,
+                'eventhandler'                  => 1,
+                'submit_result'                 => 1,
+                'reset_attributes'              => 1,
+    },
+    'cmd_defaults'                          => {
+                'ahas'                          => 0,
+                'broadcast_notification'        => 0,
+                'force_check'                   => 0,
+                'force_notification'            => 0,
+                'send_notification'             => 1,
+                'sticky_ack'                    => 1,
+                'persistent_comments'           => 1,
+                'persistent_ack'                => 0,
+                'ptc'                           => 0,
+                'use_expire'                    => 0,
+                'childoptions'                  => 0,
+                'hostserviceoptions'            => 0,
+    },
+    'command_disabled'                      => {},
+    'command_enabled'                       => {},
+    'force_sticky_ack'                      => 0,
+    'force_send_notification'               => 0,
+    'force_persistent_ack'                  => 0,
+    'force_persistent_comments'             => 0,
+    'downtime_duration'                     => 7200,
+    'expire_ack_duration'                   => 86400,
+    'show_custom_vars'                      => [],
+    'expand_user_macros'                    => ['ALL'],
+    'themes_path'                           => './themes',
+    'priorities'                            => {
+                '5'                             => 'Business Critical',
+                '4'                             => 'Top Production',
+                '3'                             => 'Production',
+                '2'                             => 'Standard',
+                '1'                             => 'Testing',
+                '0'                             => 'Development',
+    },
+    'no_external_job_forks'                 => 0,
+    'host_action_icon'                      => 'action.gif',
+    'service_action_icon'                   => 'action.gif',
+    'thruk_bin'                             => -f 'script/thruk' ? 'script/thruk' : '/usr/bin/thruk',
+    'thruk_init'                            => '/etc/init.d/thruk',
+    'thruk_shell'                           => '/bin/bash -l -c',
+    'first_day_of_week'                     => 0,
+    'weekdays'                              => {
+                '0'                             => 'Sunday',
+                '1'                             => 'Monday',
+                '2'                             => 'Tuesday',
+                '3'                             => 'Wednesday',
+                '4'                             => 'Thursday',
+                '5'                             => 'Friday',
+                '6'                             => 'Saturday',
+                '7'                             => 'Sunday',
+    },
+    'mobile_agent'                          => 'iPhone,Android,IEMobile',
+    'show_error_reports'                    => 'both',
+    'skip_js_errors'                        => [ 'cluetip is not a function', 'sprite._defaults is undefined' ],
+    'cookie_auth_restricted_url'            => 'http://localhost/thruk/cgi-bin/restricted.cgi',
+    'cookie_auth_session_timeout'           => 86400,
+    'cookie_auth_session_cache_timeout'     => 5,
+    'cookie_auth_domain'                    => '',
+    'perf_bar_mode'                         => 'match',
+    'sitepanel'                             => 'auto',
+    'ssl_verify_hostnames'                  => 1,
+    'plugin_templates_paths'                => [],
+    'precompile_templates'                  => 0,
+    'report_use_temp_files'                 => 14,
+    'report_max_objects'                    => 1000,
+    'report_include_class2'                 => 1,
+    'report_update_logcache'                => 1,
+    'perf_bar_pnp_popup'                    => 1,
+    'status_color_background'               => 0,
+    'apache_status'                         => {},
+    'disable_user_password_change'          => 0,
+    'user_password_min_length'              => 5,
+    'grafana_default_panelId'               => 1,
+    'graph_replace'                         => ['s/[^\w\-]/_/gmx'],
+    'http_backend_reverse_proxy'            => 1,
+    'logcache_delta_updates'                => 0,
+    'slow_page_log_threshold'               => 15,
+    'resource_file'                         => [],
+    'default_state_order'                   => 'down, unreachable,'
+                                              .'unknown, critical, warning,'
+                                              .'acknowledged_down, acknowledged_unreachable,'
+                                              .'acknowledged_unknown, acknowledged_critical, acknowledged_warning,'
+                                              .'downtime_down, downtime_unreachable,'
+                                              .'downtime_unknown, downtime_critical, downtime_warning, downtime_up, downtime_ok,'
+                                              .'up, ok, downtime_pending, pending',
+    'basic_auth_enabled'                    => 1,
+    'auth_oauth'                            => {
+                'provider'                      => [],
+    },
+    'uri_filter'     => {
+                'bookmark'                      => undef,
+                'referer'                       => undef,
+                'reload_nav'                    => undef,
+                'update.y'                      => undef,
+                'update.x'                      => undef,
+                'scrollTo'                      => undef,
+                'autoShow'                      => undef,
+                '_'                             => undef,
+    },
+    'physical_logo_path'                    => [],
+    'all_in_one_javascript'                 => [
+                'vendor/jquery-3.5.1.min.js',
+                'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
+                'vendor/daterangepicker-3.0.5/moment.min.js',
+                'vendor/daterangepicker-3.0.5/daterangepicker.js',
+                'vendor/overlib-4.21.js',
+                'vendor/strftime-min-1.3.js',
+                'vendor/bestiejs-1.3.5/platform.js',
+    ],
+    'all_in_one_css_frames'                 => {
+                'Thruk' => [
+                    'thruk_global.css',
+                    'Thruk.css',
+                ],
+                'Thruk2' => [
+                    'thruk_global.css',
+                    'Thruk2.css',
+                ],
+    },
+    'all_in_one_css_noframes'               => {
+                'Thruk' => [
+                    'thruk_global.css',
+                    'thruk_noframes.css',
+                    'Thruk.css',
+                ],
+                'Thruk2' => [
+                    'thruk_global.css',
+                    'thruk_noframes.css',
+                    'Thruk2.css',
+                ],
+    },
+    'jquery_ui'                             => '1.12.1',
+    'all_in_one_javascript_panorama'        => [
+                'vendor/jquery-3.5.1.min.js',
+                'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
+                'vendor/extjs_ux/form/MultiSelect.js',
+                'vendor/extjs_ux/form/ItemSelector.js',
+                'vendor/extjs_ux/chart/series/KPIGauge.js',
+                'vendor/sprintf-ef8258f.js',
+                'vendor/bigscreen-2.0.4.js',
+                'vendor/overlib-4.21.js',
+                'vendor/strftime-min-1.3.js',
+                'vendor/bestiejs-1.3.5/platform.js',
+                'vendor/openlayer-2.13.1/OpenLayers-2.13.1.js',
+                'vendor/geoext2-2.0.2/src/GeoExt/Version.js',
+                'vendor/geoext2-2.0.2/src/GeoExt/data/LayerModel.js',
+                'vendor/geoext2-2.0.2/src/GeoExt/data/LayerStore.js',
+                'vendor/geoext2-2.0.2/src/GeoExt/panel/Map.js',
+    ],
+};
+
+# settings used for the template toolkit renderer
+my $view_tt_settings = {
+    'TEMPLATE_EXTENSION'                    => '.tt',
+    'ENCODING'                              => 'utf-8',
+    'INCLUDE_PATH'                          => $project_root.'/templates', # will be overwritten during render
+    'RECURSION'                             => 1,
+    'PRE_CHOMP'                             => 0,
+    'POST_CHOMP'                            => 0,
+    'TRIM'                                  => 0,
+    'COMPILE_EXT'                           => '.ttc',
+    'STAT_TTL'                              => 604800, # templates do not change in production
+    'STRICT'                                => 0,
+    'EVAL_PERL'                             => 1,
+    'FILTERS'                               => {
+                'duration'                      => \&Thruk::Utils::Filter::duration,
+                'nl2br'                         => \&Thruk::Utils::Filter::nl2br,
+                'strip_command_args'            => \&Thruk::Utils::Filter::strip_command_args,
+                'escape_html'                   => \&Thruk::Utils::Filter::escape_html,
+                'lc'                            => \&Thruk::Utils::Filter::lc,
+    },
+    'PRE_DEFINE'                            => {
+                # subs from Thruk::Utils::Filter will be added automatically
+                'dump'                          => \&Thruk::Utils::Filter::debug,
+                'get_broadcasts'                => \&Thruk::Utils::Broadcast::get_broadcasts,
+                'command_disabled'              => \&Thruk::Utils::command_disabled,
+                'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
+                'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
+                'basename'                      => \&Thruk::Utils::basename,
+                'debug_details'                 => \&Thruk::Config::get_debug_details(),
+                'format_date'                   => \&Thruk::Utils::format_date,
+                'format_cronentry'              => \&Thruk::Utils::format_cronentry,
+                'format_number'                 => \&Thruk::Utils::format_number,
+                'set_favicon_counter'           => \&Thruk::Utils::Status::set_favicon_counter,
+                'get_pnp_url'                   => \&Thruk::Utils::get_pnp_url,
+                'get_graph_url'                 => \&Thruk::Utils::get_graph_url,
+                'get_action_url'                => \&Thruk::Utils::get_action_url,
+                'reduce_number'                 => \&Thruk::Utils::reduce_number,
+                'get_custom_vars'               => \&Thruk::Utils::get_custom_vars,
+    },
+};
+
+# export filter functions
+for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
+    $view_tt_settings->{'PRE_DEFINE'}->{$s} = \&{'Thruk::Utils::Filter::'.$s};
 }
-$config{'View::TT'}->{'PRE_DEFINE'}->{'released'} = $config{released};
+
+# set TT strict mode only for authors
+$base_defaults->{'thruk_debug'}  = 0;
+$base_defaults->{'thruk_author'} = 0;
+$base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
+if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
+    $view_tt_settings->{'STRICT'}     = 1;
+    $view_tt_settings->{'CACHE_SIZE'} = 0 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
+    $view_tt_settings->{'STAT_TTL'}   = 5 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
+    $view_tt_settings->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
+    $base_defaults->{'thruk_debug'}  = 1;
+    $base_defaults->{'thruk_author'} = 1;
+}
 
 ######################################
 
 =head1 METHODS
 
+=head2 get_default_stash
+
+    return default stash
+
 =cut
+sub get_default_stash {
+    my($c, $pre) = @_;
+    my $stash = {
+        'total_backend_waited'      => 0,
+        'total_render_waited'       => 0,
+        'inject_stats'              => 1,
+        'user_profiling'            => 0,
+        'real_page'                 => '',
+        'make_test_mode'            => $ENV{'THRUK_SRC'} eq 'TEST' ? 1 : 0,
+        'version'                   => $VERSION,
+        'branch'                    => $branch,
+        'filebranch'                => $filebranch,
+        'starttime'                 => time(),
+        'debug_details'             => get_debug_details(),
+        'omd_site'                  => $ENV{'OMD_SITE'} || '',
+        'stacktrace'                => '',
+        'backends'                  => [],
+        'backend_detail'            => {},
+        'pi_detail'                 => {},
+        'param_backend'             => '',
+        'initial_backends'          => {},
+        'refresh_rate'              => 0,
+        'auto_reload_fn'            => '',
+        'page'                      => '',
+        'title'                     => '',
+        'extrahtmlclass'            => '',
+        'extrabodyclass'            => '',
+        'remote_user'               => '?',
+        'infoBoxTitle'              => '',
+        'has_proc_info'             => 0,
+        'has_expire_acks'           => 0,
+        'no_auto_reload'            => 0,
+        'die_on_errors'             => 0,        # used in cmd.cgi
+        'errorMessage'              => 0,        # used in errors
+        'errorDetails'              => '',       # used in errors
+        'js'                        => [],       # used in _header.tt
+        'css'                       => [],       # used in _header.tt
+        'extra_header'              => '',       # used in _header.tt
+        'ssi_header'                => '',       # used in _header.tt
+        'ssi_footer'                => '',       # used in _header.tt
+        'original_url'              => '',       # used in _header.tt
+        'paneprefix'                => 'dfl_',   # used in _status_filter.tt
+        'sortprefix'                => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
+        'show_form'                 => '1',      # used in _status_filter.tt
+        'show_top_pane'             => 0,        # used in _header.tt on status pages
+        'body_class'                => '',       # used in _conf_bare.tt on config pages
+        'thruk_debug'               => $base_defaults->{'thruk_debug'},
+        'all_in_one_css'            => 0,
+        'hide_backends_chooser'     => 0,
+        'show_sitepanel'            => 'off',
+        'sites'                     => [],
+        'backend_chooser'           => 'select',
+        'enable_shinken_features'   => 0,
+        'disable_backspace'         => 0,
+        'server_timezone'           => '',
+        'default_user_timezone'     => 'Server Setting',
+        'play_sounds'               => 0,
+        'menu_states'               => {},
+        'cookie_auth'               => 0,
+        'space'                     => ' ',
+        'debug_info'                => '',
+        'bodyonload'                => 1,
+        'show_home_button'          => "",
+        'has_jquery_ui'             => 0,
+        'physical_logo_path'        => [],
+        'fav_counter'               => 0,
+    };
+    $stash = {%{$pre}, %{$stash}};
+    return($stash);
+}
 
 ######################################
 
-=head2 get_config
+=head2 set_config_env
 
-make config available without loading complete dependencies
+return basic config hash and sets environment
 
 =cut
-
-sub get_config {
+sub set_config_env {
     my @files = @_;
+
+    my $configs = _load_config_files(\@files);
+    my $config  = Storable::dclone($base_defaults);
+
+    ###################################################
+    # merge files into defaults
+    my $first_backend_from_thruk_locals = 0;
+    for my $file (@files, 'thruk_local.conf') {
+        for my $key (keys %{$configs->{$file}}) {
+            if($key =~ '^Thruk::Plugin::' && !defined $config->{$key}) {
+                $config->{$key} = {};
+            }
+            if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
+                if($key eq 'Thruk::Backend') {
+                    # merge all backends from thruk_locals
+                    if(!$first_backend_from_thruk_locals && $file =~ m|thruk_local\.|mx) {
+                        $config->{$key}->{'peer'} = [];
+                        $first_backend_from_thruk_locals = 1;
+                    }
+                    for my $peer (@{list($configs->{$file}->{$key})}) {
+                        $config->{$key}->{'peer'} = [ @{list($config->{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
+                    }
+                }
+                elsif($key =~ '^Thruk::Plugin::') {
+                    if(ref $configs->{$file}->{$key} eq 'ARRAY') {
+                        my $hash = {};
+                        while(my $add = shift @{$configs->{$file}->{$key}}) {
+                            $hash = { %{$hash}, %{$add} };
+                        }
+                        $configs->{$file}->{$key} = $hash;
+                    }
+                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs->{$file}->{$key})); }
+                    $config->{$key} = { %{$config->{$key}}, %{$configs->{$file}->{$key}} };
+                } else {
+                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs->{$file}->{$key})); }
+                    $config->{$key} = { %{$config->{$key}}, %{$configs->{$file}->{$key}} };
+                }
+            } else {
+                $config->{$key} = $configs->{$file}->{$key};
+            }
+        }
+    }
+
+    ###################################################
+    # merge users and groups
+    for my $type (qw/Group User/) {
+        if($config->{$type}) {
+            for my $name (keys %{$config->{$type}}) {
+                # if its a list of hashes, merge into one hash
+                if(ref $config->{$type}->{$name} eq 'ARRAY') {
+                    my $data = {};
+                    for my $d (@{$config->{$type}->{$name}}) {
+                        for my $key (keys %{$d}) {
+                            if(!defined $data->{$key}) {
+                                $data->{$key} = $d->{$key};
+                            }
+                            else {
+                                if(ref $data->{$key} eq 'ARRAY') {
+                                    push @{$data->{$key}}, $d->{$key};
+                                } else {
+                                    $data->{$key} = [$data->{$key}, $d->{$key}];
+                                }
+                            }
+                        }
+                    }
+                    $config->{$type}->{$name} = $data;
+                }
+            }
+        }
+    }
+    return(set_default_config($config));
+}
+
+######################################
+
+=head2 set_default_config
+
+return basic config hash and sets environment, but does not read config again
+
+=cut
+sub set_default_config {
+    my($config) = @_;
+
+    ###################################################
+    # normalize lists / scalars and set defaults
+    for my $key (keys %{$base_defaults}) {
+        $config->{$key} = $base_defaults->{$key} unless exists $config->{$key};
+
+        # convert lists to scalars if the default is a scalar value
+        if(ref $base_defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
+            my $l = scalar (@{$config->{$key}});
+            $config->{$key} = $config->{$key}->[$l-1];
+        }
+
+        # convert scalars to lists if the default is a list
+        if(ref $base_defaults->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
+            $config->{$key} = [$config->{$key}];
+        }
+    }
+
+    # ensure comma separated lists
+    for my $key (qw/csrf_allowed_hosts show_custom_vars/) {
+        $config->{$key} = _comma_separated_list($config->{$key});
+    }
+
+    ###################################################
+    # set var dir
+    $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
+    $config->{'var_path'} =~ s|/$||mx;
+
+    if(!defined $config->{'etc_path'}) {
+        if($ENV{'THRUK_CONFIG'}) {
+            $config->{'etc_path'} = $ENV{'THRUK_CONFIG'};
+        } else {
+            $config->{'etc_path'} = $config->{'home'};
+        }
+    }
+    $config->{'etc_path'} =~ s|/$||mx;
+
+    ###################################################
+    # switch user when running as root
+    my $var_path = $config->{'var_path'} or die("no var path!");
+    if($> != 0 && !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
+    die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
+    my ($uid, $groups) = get_user($var_path);
+    ## no critic
+    $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
+    $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
+
+    if($ENV{'THRUK_USER_ID'} !~ m/^\d+$/mx) {
+        $ENV{'THRUK_USER_ID'}  = (getpwnam($ENV{'THRUK_USER_ID'}))[2]  || die("cannot convert '".$ENV{'THRUK_USER_ID'}."' into numerical uid. Does this user really exist?");
+    }
+    if($ENV{'THRUK_GROUP_ID'} !~ m/^\d+$/mx) {
+        $ENV{'THRUK_GROUP_ID'} = (getgrnam($ENV{'THRUK_GROUP_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_GROUP_ID'}."' into numerical uid. Does this group really exist?");
+    }
+
+    $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
+    ## use critic
+
+    if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
+        if(defined $uid and $> == 0) {
+            switch_user($uid, $groups);
+        }
+    }
+
+    # must only be done once
+    unless($config->{'url_prefix_fixed'}) {
+        $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '';
+        $config->{'url_prefix'} =~ s|/+$||mx;
+        $config->{'url_prefix'} =~ s|^/+||mx;
+        $config->{'product_prefix'} = $config->{'product_prefix'} || 'thruk';
+        $config->{'product_prefix'} =~ s|^/+||mx;
+        $config->{'product_prefix'} =~ s|/+$||mx;
+        $config->{'url_prefix'} = '/'.$config->{'url_prefix'}.'/'.$config->{'product_prefix'}.'/';
+        $config->{'url_prefix'} =~ s|/+|/|gmx;
+        $config->{'url_prefix_fixed'} = 1;
+    }
+
+    $config->{'start_page'}            = $config->{'url_prefix'}.'main.html' unless defined $config->{'start_page'};
+    $config->{'documentation_link'}    = $config->{'url_prefix'}.'docs/index.html' unless defined $config->{'documentation_link'};
+    $config->{'all_problems_link'}     = $config->{'url_prefix'}.'cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems' unless defined $config->{'all_problems_link'};
+    $config->{'cookie_auth_login_url'} = $config->{'url_prefix'}.'cgi-bin/login.cgi' unless defined $config->{'cookie_auth_login_url'};
+
+    $config->{'cookie_path'} = $config->{'url_prefix'};
+    my $product_prefix       = $config->{'product_prefix'};
+    $config->{'cookie_path'} =~ s/\/\Q$product_prefix\E\/*$//mx;
+    $config->{'cookie_path'} = '/'.$product_prefix if $config->{'cookie_path'} eq '';
+    $config->{'cookie_path'} =~ s|/*$||mx; # remove trailing slash, chrome doesn't seem to like them
+    $config->{'cookie_path'} = $config->{'cookie_path'}.'/'; # seems like the above comment is not valid anymore and chrome now requires the trailing slash
+    $config->{'cookie_path'} = '' if $config->{'cookie_path'} eq '/';
+
+    if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
+        my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
+        $omdlink    =~ s/.*?\///gmx;
+        $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
+        $config->{'extra_version'}      = 'OMD '.$omdlink;
+        $config->{'extra_version_link'} = 'http://www.omdistro.org';
+    }
+    elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
+        $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
+        $config->{'extra_version_link'} = 'http://www.naemon.org';
+        chomp($config->{'extra_version'});
+    }
+    $config->{'extra_version'}      = '' unless defined $config->{'extra_version'};
+    $config->{'extra_version_link'} = '' unless defined $config->{'extra_version_link'};
+
+    ## no critic
+    $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
+    ## use critic
+    # external jobs can be disabled by env
+    # don't disable for CLI, breaks config reload over http somehow
+    if(defined $ENV{'NO_EXTERNAL_JOBS'} or $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
+        $config->{'no_external_job_forks'} = 1;
+    }
+
+    ## no critic
+    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
+    ## use critic
+
+    ###################################################
+    # get installed plugins
+    $config->{'plugin_path'} = $config->{home}.'/plugins' unless defined $config->{'plugin_path'};
+    my $plugin_dir = $config->{'plugin_path'};
+    $plugin_dir = $plugin_dir.'/plugins-enabled/*/';
+
+    print STDERR "using plugins: ".$plugin_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+
+    for my $addon (glob($plugin_dir)) {
+
+        my $addon_name = $addon;
+        $addon_name =~ s/\/+$//gmx;
+        $addon_name =~ s/^.*\///gmx;
+
+        # does the plugin directory exist? (only when running as normal user)
+        if($> != 0 && ! -d $config->{home}.'/root/thruk/plugins/' && -w $config->{home}.'/root/thruk' ) {
+            CORE::mkdir($config->{home}.'/root/thruk/plugins');
+        }
+
+        print STDERR "loading plugin: ".$addon_name."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+
+        # lib directory included?
+        if(-d $addon.'lib') {
+            print STDERR " -> lib\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+            unshift(@INC, $addon.'lib');
+        }
+
+        # template directory included?
+        if(-d $addon.'templates') {
+            print STDERR " -> templates\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+            push @{$config->{plugin_templates_paths}}, $addon.'templates';
+        }
+    }
+
+    ###################################################
+    # get installed / enabled themes
+    my $themes_dir = $config->{'themes_path'} || $config->{home}."/themes";
+    $themes_dir = $themes_dir.'/themes-enabled/*/';
+
+    my @themes;
+    for my $theme (sort glob($themes_dir)) {
+        $theme =~ s/\/$//gmx;
+        $theme =~ s/^.*\///gmx;
+        print STDERR "theme -> $theme\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+        push @themes, $theme;
+    }
+
+    print STDERR "using themes: ".$themes_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+
+    $config->{'themes'} = \@themes;
+
+    ###################################################
+    # use uid to make tmp dir more uniq
+    $config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $config->{'tmp_path'};
+    $config->{'tmp_path'} =~ s|/$||mx;
+    $view_tt_settings->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
+
+    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
+
+    ###################################################
+    # make a nice path
+    for my $key (qw/tmp_path var_path etc_path ssi_path/) {
+        $config->{$key} =~ s/\/$//mx if $config->{$key};
+    }
+
+    ###################################################
+    # when using lmd, some settings don't make sense
+    if($config->{'use_lmd_core'}) {
+        $config->{'connection_pool_size'} = 1; # no pool required when using caching
+        $config->{'check_local_states'}   = 0; # local state checking not required
+    }
+
+    # make this setting available in env
+    ## no critic
+    $ENV{'THRUK_CURL'} = $ENV{'THRUK_CURL'} || $config->{'use_curl'} || 0;
+    ## use critic
+
+    if($config->{'action_menu_apply'}) {
+        for my $menu (keys %{$config->{'action_menu_apply'}}) {
+            for my $pattern (ref $config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$config->{'action_menu_apply'}->{$menu}} : ($config->{'action_menu_apply'}->{$menu})) {
+                if($pattern !~ m/;/mx) {
+                    $pattern .= '.*;$';
+                }
+            }
+        }
+    }
+
+    ###################################################
+    # expand expand_user_macros
+    my $new_expand_user_macros = [];
+    if(defined $config->{'expand_user_macros'}) {
+        for my $item (ref $config->{'expand_user_macros'} eq 'ARRAY' ? @{$config->{'expand_user_macros'}} : ($config->{'expand_user_macros'})) {
+            next unless $item;
+            if($item =~ m/^USER([\d\-]+$)/mx) {
+                my $list = expand_numeric_list($1);
+                for my $nr (@{$list}) {
+                    push @{$new_expand_user_macros}, 'USER'.$nr;
+                }
+            } else {
+                push @{$new_expand_user_macros}, $item;
+            }
+        }
+        $config->{'expand_user_macros'} = $new_expand_user_macros;
+    }
+
+    # expand action_menu_items_folder
+    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
+    for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
+        next unless -d $folder.'/.';
+        my @files = glob($folder.'/*');
+        for my $file (@files) {
+            if($file =~ m%([^/]+)\.(json|js)$%mx) {
+                my $basename = $1;
+                $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
+            }
+        }
+    }
+
+    # normalize oauth provider
+    if(ref $config->{'auth_oauth'}->{'provider'} eq 'HASH') { $config->{'auth_oauth'}->{'provider'} = [$config->{'auth_oauth'}->{'provider'}]}
+    for my $p (@{$config->{'auth_oauth'}->{'provider'}}) {
+        # named provider
+        if(scalar keys %{$p} == 1) {
+            my $name = (keys %{$p})[0];
+            $p = $p->{$name};
+            $p->{'id'} = $name;
+        } else {
+            $p->{'id'} = "oauth";
+        }
+    }
+
+    # enable OMD tweaks
+    if($ENV{'OMD_ROOT'}) {
+        my $site = $ENV{'OMD_SITE'};
+        my $root = $ENV{'OMD_ROOT'};
+        my $site_config = _parse_omd_site_config($root."/etc/omd/site.conf");
+        my $siteport    = $site_config->{'CONFIG_APACHE_TCP_PORT'};
+        my $ssl         = $site_config->{'CONFIG_APACHE_MODE'};
+        my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
+        $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
+        # bypass system reverse proxy for restricted cgi for permormance and locking reasons
+        if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi\-bin/restricted\.cgi$|mx) {
+            $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
+        }
+        if(scalar keys %{$config->{'apache_status'}} == 0) {
+            $config->{'apache_status'} = {
+                'Site'   => $proto.'://127.0.0.1:'.$siteport.'/server-status',
+                'System' => $proto.'://127.0.0.1/server-status',
+            };
+        }
+        $config->{'omd_apache_proto'} = $proto;
+    }
+
+    return $config;
+}
+
+######################################
+sub _load_config_files {
+    my($files) = @_;
+
+    # read/load config files
     my @local_files;
-    if(scalar @files == 0) {
+    if(scalar @{$files} == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
-            push @files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
+            push @{$files}, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
                 my @tmpfiles = sort glob($path.'/thruk_local.d/*');
                 for my $tmpfile (@tmpfiles) {
@@ -327,365 +826,36 @@ sub get_config {
                 }
             }
             push @local_files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
-            last if scalar @files > 0;
+            last if scalar @{$files} > 0;
         }
     }
 
-    my %configs = %{_load_any([@files, { 'thruk_local.conf' => \@local_files}])};
-    my %config  = %Thruk::Config::config;
-    my $first_backend_from_thruk_locals = 0;
-    for my $file (@files, 'thruk_local.conf') {
-        for my $key (keys %{$configs{$file}}) {
-            if($key =~ '^Thruk::Plugin::' && !defined $config{$key}) {
-                $config{$key} = {};
-            }
-            if(defined $config{$key} and ref $config{$key} eq 'HASH') {
-                if($key eq 'Thruk::Backend') {
-                    # merge all backends from thruk_locals
-                    if(!$first_backend_from_thruk_locals && $file =~ m|thruk_local\.|mx) {
-                        $config{$key}->{'peer'} = [];
-                        $first_backend_from_thruk_locals = 1;
-                    }
-                    for my $peer (@{list($configs{$file}->{$key})}) {
-                        $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
-                    }
-                }
-                elsif($key =~ '^Thruk::Plugin::') {
-                    if(ref $configs{$file}->{$key} eq 'ARRAY') {
-                        my $hash = {};
-                        while(my $add = shift @{$configs{$file}->{$key}}) {
-                            $hash = { %{$hash}, %{$add} };
-                        }
-                        $configs{$file}->{$key} = $hash;
-                    }
-                    if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
-                    $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
-                } else {
-                    if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
-                    $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
-                }
-            } else {
-                $config{$key} = $configs{$file}->{$key};
-            }
-        }
-    }
-
-    # merge users and groups
-    for my $type (qw/Group User/) {
-        if($config{$type}) {
-            for my $name (keys %{$config{$type}}) {
-                # if its a list of hashes, merge into one hash
-                if(ref $config{$type}->{$name} eq 'ARRAY') {
-                    my $data = {};
-                    for my $d (@{$config{$type}->{$name}}) {
-                        for my $key (keys %{$d}) {
-                            if(!defined $data->{$key}) {
-                                $data->{$key} = $d->{$key};
-                            }
-                            else {
-                                if(ref $data->{$key} eq 'ARRAY') {
-                                    push @{$data->{$key}}, $d->{$key};
-                                } else {
-                                    $data->{$key} = [$data->{$key}, $d->{$key}];
-                                }
-                            }
-                        }
-                    }
-                    $config{$type}->{$name} = $data;
-                }
-            }
-        }
-    }
-
-    _do_finalize_config(\%config);
-    return \%config;
+    my $cfg = load_any({
+        files       => [@{$files}, { 'thruk_local.conf' => \@local_files}],
+        filter      => \&_fix_syntax,
+    });
+    return $cfg;
 }
-
 ######################################
 
-=head2 set_default_config
+=head2 get_base_config
 
-return config with defaults added
+return base config
 
 =cut
-
-sub set_default_config {
-    my( $config ) = @_;
-
-    #&timing_breakpoint('set_default_config');
-
-    # defaults
-    unless($config->{'url_prefix_fixed'}) {
-        $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '';
-        $config->{'url_prefix'} =~ s|/+$||mx;
-        $config->{'url_prefix'} =~ s|^/+||mx;
-        $config->{'product_prefix'} = $config->{'product_prefix'} || 'thruk';
-        $config->{'product_prefix'} =~ s|^/+||mx;
-        $config->{'product_prefix'} =~ s|/+$||mx;
-        $config->{'url_prefix'} = '/'.$config->{'url_prefix'}.'/'.$config->{'product_prefix'}.'/';
-        $config->{'url_prefix'} =~ s|/+|/|gmx;
-        $config->{'url_prefix_fixed'} = 1;
-    }
-    my $defaults = {
-        'cgi.cfg'                       => 'cgi.cfg',
-        bug_email_rcpt                  => 'bugs@thruk.org',
-        home_link                       => 'http://www.thruk.org',
-        plugin_registry_url             => ['https://api.thruk.org/v1/plugin/list'],
-        cluster_nodes                   => ['$proto$://$hostname$/$url_prefix$/'],
-        cluster_heartbeat_interval      => 15,
-        cluster_node_stale_timeout      => 120,
-        api_keys_enabled                => 1,
-        max_api_keys_per_user           => 10,
-        mode_file                       => '0660',
-        mode_dir                        => '0770',
-        backend_debug                   => 0,
-        connection_pool_size            => undef,
-        product_prefix                  => 'thruk',
-        maximum_search_boxes            => 9,
-        search_long_plugin_output       => 1,
-        shown_inline_pnp                => 1,
-        use_feature_trends              => 1,
-        use_wait_feature                => 1,
-        wait_timeout                    => 10,
-        use_curl                        => $ENV{'THRUK_CURL'} ? 1 : 0,
-        use_frames                      => 1,
-        navframesize                    => 172,
-        use_strict_host_authorization   => 0,
-        make_auth_user_lowercase        => 0,
-        make_auth_user_uppercase        => 0,
-        csrf_allowed_hosts              => ['127.0.0.1', '::1'],
-        can_submit_commands             => 1,
-        group_paging_overview           => '*3, 10, 100, all',
-        group_paging_grid               => '*5, 10, 50, all',
-        group_paging_summary            => '*10, 50, 100, all',
-        default_theme                   => 'Thruk2',
-        datetime_format                 => '%Y-%m-%d  %H:%M:%S',
-        datetime_format_long            => '%a %b %e %H:%M:%S %Z %Y',
-        datetime_format_today           => '%H:%M:%S',
-        datetime_format_log             => '%B %d, %Y  %H',
-        datetime_format_trends          => '%a %b %e %H:%M:%S %Y',
-        title_prefix                    => '',
-        use_pager                       => 1,
-        start_page                      => $config->{'url_prefix'}.'main.html',
-        documentation_link              => $config->{'url_prefix'}.'docs/index.html',
-        useragentcompat                 => '',
-        show_notification_number        => 1,
-        strict_passive_mode             => 1,
-        hide_passive_icon               => 0,
-        show_full_commandline           => 1,
-        show_modified_attributes        => 1,
-        show_contacts                   => 1,
-        show_config_edit_buttons        => 0,
-        show_backends_in_table          => 0,
-        show_logout_button              => 0,
-        commandline_obfuscate_pattern   => [],
-        backends_with_obj_config        => {},
-        use_feature_statusmap           => 0,
-        use_feature_statuswrl           => 0,
-        use_feature_histogram           => 0,
-        use_feature_configtool          => 0,
-        use_feature_recurring_downtime  => 1,
-        use_feature_bp                  => 0,
-        use_feature_core_scheduling     => 0,
-        use_service_description         => 0,
-        use_bookmark_titles             => 0,
-        use_dynamic_titles              => 1,
-        use_new_command_box             => 1,
-        all_problems_link               => $config->{'url_prefix'}."cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems",
-        show_long_plugin_output         => 'popup',
-        info_popup_event_type           => 'onclick',
-        info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
-        cmd_quick_status                => {
-                    default                => 'reschedule next check',
-                    reschedule             => 1,
-                    downtime               => 1,
-                    comment                => 1,
-                    acknowledgement        => 1,
-                    active_checks          => 1,
-                    notifications          => 1,
-                    eventhandler           => 1,
-                    submit_result          => 1,
-                    reset_attributes       => 1,
-        },
-        cmd_defaults                    => {
-                    ahas                   => 0,
-                    broadcast_notification => 0,
-                    force_check            => 0,
-                    force_notification     => 0,
-                    send_notification      => 1,
-                    sticky_ack             => 1,
-                    persistent_comments    => 1,
-                    persistent_ack         => 0,
-                    ptc                    => 0,
-                    use_expire             => 0,
-                    childoptions           => 0,
-                    hostserviceoptions     => 0,
-        },
-        command_disabled                    => {},
-        command_enabled                     => {},
-        force_sticky_ack                    => 0,
-        force_send_notification             => 0,
-        force_persistent_ack                => 0,
-        force_persistent_comments           => 0,
-        downtime_duration                   => 7200,
-        expire_ack_duration                 => 86400,
-        show_custom_vars                    => [],
-        expand_user_macros                  => ['ALL'],
-        themes_path                         => './themes',
-        priorities                      => {
-                    5                       => 'Business Critical',
-                    4                       => 'Top Production',
-                    3                       => 'Production',
-                    2                       => 'Standard',
-                    1                       => 'Testing',
-                    0                       => 'Development',
-        },
-        no_external_job_forks               => 0,
-        host_action_icon                    => 'action.gif',
-        service_action_icon                 => 'action.gif',
-        thruk_bin                           => '/usr/bin/thruk',
-        thruk_init                          => '/etc/init.d/thruk',
-        thruk_shell                         => '/bin/bash -l -c',
-        first_day_of_week                   => 0,
-        weekdays                        => {
-                    '0'                     => 'Sunday',
-                    '1'                     => 'Monday',
-                    '2'                     => 'Tuesday',
-                    '3'                     => 'Wednesday',
-                    '4'                     => 'Thursday',
-                    '5'                     => 'Friday',
-                    '6'                     => 'Saturday',
-                    '7'                     => 'Sunday',
-                                           },
-        'mobile_agent'                  => 'iPhone,Android,IEMobile',
-        'show_error_reports'            => 'both',
-        'skip_js_errors'                => [ 'cluetip is not a function', 'sprite._defaults is undefined' ],
-        'cookie_auth_login_url'             => 'thruk/cgi-bin/login.cgi',
-        'cookie_auth_restricted_url'        => 'http://localhost/thruk/cgi-bin/restricted.cgi',
-        'cookie_auth_session_timeout'       => 86400,
-        'cookie_auth_session_cache_timeout' => 5,
-        'cookie_auth_domain'                => '',
-        'perf_bar_mode'                     => 'match',
-        'sitepanel'                         => 'auto',
-        'ssl_verify_hostnames'              => 1,
-        'precompile_templates'              => 0,
-        'report_use_temp_files'             => 14,
-        'report_max_objects'                => 1000,
-        'report_include_class2'             => 1,
-        'report_update_logcache'            => 1,
-        'perf_bar_pnp_popup'                => 1,
-        'status_color_background'           => 0,
-        'apache_status'                     => {},
-        'disable_user_password_change'      => 0,
-        'user_password_min_length'          => 5,
-        'grafana_default_panelId'           => 1,
-        'graph_replace'                     => ['s/[^\w\-]/_/gmx'],
-        'http_backend_reverse_proxy'        => 1,
-        'logcache_delta_updates'            => 0,
-        'slow_page_log_threshold'           => 15,
-        'resource_file'                     => [],
-        'default_state_order'               => 'down, unreachable,'
-                                              .'unknown, critical, warning,'
-                                              .'acknowledged_down, acknowledged_unreachable,'
-                                              .'acknowledged_unknown, acknowledged_critical, acknowledged_warning,'
-                                              .'downtime_down, downtime_unreachable,'
-                                              .'downtime_unknown, downtime_critical, downtime_warning, downtime_up, downtime_ok,'
-                                              .'up, ok, downtime_pending, pending',
-        'basic_auth_enabled'                => 1,
-        'auth_oauth'                        => {
-            'provider'                              => [],
-        },
-    };
-    $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
-    $defaults->{'cookie_path'} = $config->{'url_prefix'};
-    my $product_prefix = $config->{'product_prefix'};
-    $defaults->{'cookie_path'} =~ s/\/\Q$product_prefix\E\/*$//mx;
-    $defaults->{'cookie_path'} = '/'.$product_prefix if $defaults->{'cookie_path'} eq '';
-    $defaults->{'cookie_path'} =~ s|/*$||mx; # remove trailing slash, chrome doesn't seem to like them
-    $defaults->{'cookie_path'} = $defaults->{'cookie_path'}.'/'; # seems like the above comment is not valid anymore and chrome now requires the trailing slash
-    $defaults->{'cookie_path'} = '' if $defaults->{'cookie_path'} eq '/';
-
-    if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
-        my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
-        $omdlink    =~ s/.*?\///gmx;
-        $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
-        $defaults->{'extra_version'}      = 'OMD '.$omdlink;
-        $defaults->{'extra_version_link'} = 'http://www.omdistro.org';
-    }
-    elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
-        $defaults->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
-        $defaults->{'extra_version_link'} = 'http://www.naemon.org';
-        chomp($defaults->{'extra_version'});
-    }
-    $defaults->{'extra_version'}      = '' unless defined $defaults->{'extra_version'};
-    $defaults->{'extra_version_link'} = '' unless defined $defaults->{'extra_version_link'};
-
-    for my $key (keys %{$defaults}) {
-        $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
-
-        # convert lists to scalars if the default is a scalar value
-        if(ref $defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
-            my $l = scalar (@{$config->{$key}});
-            $config->{$key} = $config->{$key}->[$l-1];
-        }
-    }
-
-    # make a nice path
-    for my $key (qw/tmp_path var_path etc_path/) {
-        $config->{$key} =~ s/\/$//mx if $config->{$key};
-    }
-
-    # merge hashes
-    for my $key (qw/cmd_quick_status cmd_defaults/) {
-        die(sprintf("%s should be a hash, got %s: %s", $key, ref $config->{$key}, Dumper($config->{$key}))) unless ref $config->{$key} eq 'HASH';
-        $config->{$key} = { %{$defaults->{$key}}, %{ $config->{$key}} };
-    }
-
-    ## no critic
-    $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
-    ## use critic
-    # external jobs can be disabled by env
-    # don't disable for CLI, breaks config reload over http somehow
-    if(defined $ENV{'NO_EXTERNAL_JOBS'} or $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
-        $config->{'no_external_job_forks'} = 1;
-    }
-
-    # additional user template paths?
-    if(defined $config->{'user_template_path'} and defined $config->{templates_paths}) {
-        if(scalar @{$config->{templates_paths}} == 0 || $config->{templates_paths}->[0] ne $config->{'user_template_path'}) {
-            unshift @{$config->{templates_paths}}, $config->{'user_template_path'};
-        }
-    }
-
-    # ensure csrf hosts is a list
-    $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
-
-    # make show_custom_vars a list
-    $config->{'show_custom_vars'} = array_uniq([split(/\s*,\s*/mx, join(",", @{list($config->{'show_custom_vars'})}))]);
-
-    # make some settings a list
-    for my $key (qw/graph_replace commandline_obfuscate_pattern/) {
-        $config->{$key} = [@{list($config->{$key})}];
-    }
-
-    ## no critic
-    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
-    ## use critic
-
-    #&timing_breakpoint('set_default_config done');
-    return;
+sub get_base_config {
+    return($base_defaults);
 }
 
 ######################################
-sub _load_any {
-    my($files) = @_;
-    my $cfg    = load_any({
-            files       => $files,
-            filter      => \&_fix_syntax,
-        },
-    );
 
-    return $cfg;
+=head2 get_toolkit_config
+
+return template toolkit config
+
+=cut
+sub get_toolkit_config {
+    return($view_tt_settings);
 }
 
 ##############################################
@@ -893,7 +1063,6 @@ sub finalize {
         delete $c->stash->{'config_adjustments_extra'};
     }
 
-
     if($Thruk::deprecations_log) {
         if(    $ENV{'THRUK_SRC'} ne 'TEST'
            and $ENV{'THRUK_SRC'} ne 'CLI'
@@ -905,203 +1074,6 @@ sub finalize {
         }
         undef $Thruk::deprecations_log;
     }
-
-    return;
-}
-
-########################################
-sub _do_finalize_config {
-    my($config) = @_;
-
-    ###################################################
-    # set var dir
-    $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
-    $config->{'var_path'} =~ s|/$||mx;
-
-    if(!defined $config->{'etc_path'}) {
-        if($ENV{'THRUK_CONFIG'}) {
-            $config->{'etc_path'} = $ENV{'THRUK_CONFIG'};
-        } else {
-            $config->{'etc_path'} = $config->{'home'};
-        }
-    }
-    $config->{'etc_path'} =~ s|/$||mx;
-
-    ###################################################
-    # switch user when running as root
-    my $var_path = $config->{'var_path'} or die("no var path!");
-    if($> != 0 && !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
-    die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
-    my ($uid, $groups) = get_user($var_path);
-    ## no critic
-    $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
-    $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
-
-    if($ENV{'THRUK_USER_ID'} !~ m/^\d+$/mx) {
-        $ENV{'THRUK_USER_ID'}  = (getpwnam($ENV{'THRUK_USER_ID'}))[2]  || die("cannot convert '".$ENV{'THRUK_USER_ID'}."' into numerical uid. Does this user really exist?");
-    }
-    if($ENV{'THRUK_GROUP_ID'} !~ m/^\d+$/mx) {
-        $ENV{'THRUK_GROUP_ID'} = (getgrnam($ENV{'THRUK_GROUP_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_GROUP_ID'}."' into numerical uid. Does this group really exist?");
-    }
-
-    $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
-    ## use critic
-
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-        if(defined $uid and $> == 0) {
-            switch_user($uid, $groups);
-        }
-    }
-
-    ###################################################
-    # get installed plugins
-    $config->{'plugin_path'} = $config->{home}.'/plugins' unless defined $config->{'plugin_path'};
-    my $plugin_dir = $config->{'plugin_path'};
-    $plugin_dir = $plugin_dir.'/plugins-enabled/*/';
-
-    print STDERR "using plugins: ".$plugin_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-
-    for my $addon (glob($plugin_dir)) {
-
-        my $addon_name = $addon;
-        $addon_name =~ s/\/+$//gmx;
-        $addon_name =~ s/^.*\///gmx;
-
-        # does the plugin directory exist? (only when running as normal user)
-        if($> != 0 && ! -d $config->{home}.'/root/thruk/plugins/' && -w $config->{home}.'/root/thruk' ) {
-            CORE::mkdir($config->{home}.'/root/thruk/plugins');
-        }
-
-        print STDERR "loading plugin: ".$addon_name."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-
-        # lib directory included?
-        if(-d $addon.'lib') {
-            print STDERR " -> lib\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            unshift(@INC, $addon.'lib');
-        }
-
-        # template directory included?
-        if(-d $addon.'templates') {
-            print STDERR " -> templates\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            unshift @{$config->{templates_paths}}, $addon.'templates';
-        }
-    }
-
-    ###################################################
-    # get installed / enabled themes
-    my $themes_dir = $config->{'themes_path'} || $config->{home}."/themes";
-    $themes_dir = $themes_dir.'/themes-enabled/*/';
-
-    my @themes;
-    for my $theme (sort glob($themes_dir)) {
-        $theme =~ s/\/$//gmx;
-        $theme =~ s/^.*\///gmx;
-        print STDERR "theme -> $theme\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-        push @themes, $theme;
-    }
-
-    print STDERR "using themes: ".$themes_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-
-    $config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
-
-    ###################################################
-    # use uid to make tmp dir more uniq
-    $config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $config->{'tmp_path'};
-    $config->{'tmp_path'} =~ s|/$||mx;
-    $config->{'View::TT'}->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
-
-    $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
-
-    ###################################################
-    # when using lmd, some settings don't make sense
-    if($config->{'use_lmd_core'}) {
-        $config->{'connection_pool_size'} = 1; # no pool required when using caching
-        $config->{'check_local_states'}   = 0; # local state checking not required
-    }
-
-    # make this setting available in env
-    ## no critic
-    $ENV{'THRUK_CURL'} = $ENV{'THRUK_CURL'} || $config->{'use_curl'} || 0;
-    ## use critic
-
-    if($config->{'action_menu_apply'}) {
-        for my $menu (keys %{$config->{'action_menu_apply'}}) {
-            for my $pattern (ref $config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$config->{'action_menu_apply'}->{$menu}} : ($config->{'action_menu_apply'}->{$menu})) {
-                if($pattern !~ m/;/mx) {
-                    $pattern .= '.*;$';
-                }
-            }
-        }
-    }
-
-    ###################################################
-    # expand expand_user_macros
-    my $new_expand_user_macros = [];
-    if(defined $config->{'expand_user_macros'}) {
-        for my $item (ref $config->{'expand_user_macros'} eq 'ARRAY' ? @{$config->{'expand_user_macros'}} : ($config->{'expand_user_macros'})) {
-            next unless $item;
-            if($item =~ m/^USER([\d\-]+$)/mx) {
-                my $list = expand_numeric_list($1);
-                for my $nr (@{$list}) {
-                    push @{$new_expand_user_macros}, 'USER'.$nr;
-                }
-            } else {
-                push @{$new_expand_user_macros}, $item;
-            }
-        }
-        $config->{'expand_user_macros'} = $new_expand_user_macros;
-    }
-
-    # expand action_menu_items_folder
-    my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
-    for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
-        next unless -d $folder.'/.';
-        my @files = glob($folder.'/*');
-        for my $file (@files) {
-            if($file =~ m%([^/]+)\.(json|js)$%mx) {
-                my $basename = $1;
-                $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
-            }
-        }
-    }
-
-    # normalize oauth provider
-    if(ref $config->{'auth_oauth'}->{'provider'} eq 'HASH') { $config->{'auth_oauth'}->{'provider'} = [$config->{'auth_oauth'}->{'provider'}]}
-    for my $p (@{$config->{'auth_oauth'}->{'provider'}}) {
-        # named provider
-        if(scalar keys %{$p} == 1) {
-            my $name = (keys %{$p})[0];
-            $p = $p->{$name};
-            $p->{'id'} = $name;
-        } else {
-            $p->{'id'} = "oauth";
-        }
-    }
-
-    # enable OMD tweaks
-    if($ENV{'OMD_ROOT'}) {
-        my $site = $ENV{'OMD_SITE'};
-        my $root = $ENV{'OMD_ROOT'};
-        my $site_config = _parse_omd_site_config($root."/etc/omd/site.conf");
-        my $siteport    = $site_config->{'CONFIG_APACHE_TCP_PORT'};
-        my $ssl         = $site_config->{'CONFIG_APACHE_MODE'};
-        my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
-        $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
-        # bypass system reverse proxy for restricted cgi for permormance and locking reasons
-        if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi\-bin/restricted\.cgi$|mx) {
-            $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
-        }
-        if(scalar keys %{$config->{'apache_status'}} == 0) {
-            $config->{'apache_status'} = {
-                'Site'   => $proto.'://127.0.0.1:'.$siteport.'/server-status',
-                'System' => $proto.'://127.0.0.1/server-status',
-            };
-        }
-        $config->{'omd_apache_proto'} = $proto;
-    }
-
-    # set default config
-    set_default_config($config);
 
     return;
 }
@@ -1175,12 +1147,20 @@ return uniq elements of array
 =cut
 
 sub array_uniq {
-    my $array = shift;
+    my($array) = @_;
 
     my %seen = ();
     my @unique = grep { ! $seen{ $_ }++ } @{$array};
 
     return \@unique;
+}
+
+########################################
+# splits lists of comma separated values into list
+sub _comma_separated_list {
+    my($val) = @_;
+    $val = [split(/\s*,\s*/mx, join(",", @{list($val)}))];
+    return(array_uniq($val));
 }
 
 ########################################
@@ -1377,27 +1357,20 @@ sub load_any {
 
 =head2 read_cgi_cfg
 
-  read_cgi_cfg($c, $config);
+  read_cgi_cfg($app, $config);
 
-parse the cgi.cfg and put it into $c->config
+parse the cgi.cfg and returns config hash
 
 =cut
 sub read_cgi_cfg {
-    my($c, $config) = @_;
-    $config = $c->config unless defined $config;
-
-    $c->stats->profile(begin => "Config::read_cgi_cfg()") if defined $c;
+    my($app, $config) = @_;
+    $config = $app->config unless defined $config;
 
     # read only if its changed
     my $file = $config->{'cgi.cfg'};
     if(!defined $file || $file eq '') {
-        $config->{'cgi_cfg'} = 'undef';
-        if(defined $c) {
-            $c->log->error("cgi.cfg not set");
-            $c->error("cgi.cfg not set");
-            return $c->detach('/error/index/4');
-        }
-        print STDERR "cgi.cfg option must be set in thruk.conf or thruk_local.conf\n\n";
+        $app->{'cgi_cfg'} = 'undef';
+        $app->log->debug("no cgi.cfg found");
         return;
     }
     elsif( -r $file ) {
@@ -1407,34 +1380,25 @@ sub read_cgi_cfg {
         $file = $config->{'project_root'}.'/'.$file;
     }
     else {
-        if(defined $c) {
-            $c->log->error("cgi.cfg not readable: ".$!);
-            $c->error("cgi.cfg not readable: ".$!);
-            return $c->detach('/error/index/4');
-        }
-        print STDERR "$file not readable: ".$!."\n\n";
+        $app->log->error("cgi.cfg not readable: ".$!);
         return;
     }
 
     # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
     my @cgi_cfg_stat = stat($file);
 
-    my $last_stat = $config->{'cgi_cfg_stat'};
+    my $last_stat = $app->{'cgi_cfg_stat'};
     if(!defined $last_stat
        || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
        || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
       ) {
-        $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
-        $c->log->debug("reading $file") if defined $c;
-        $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
-        $config->{'cgi.cfg_effective'} = $file;
-        $config->{'cgi_cfg_orig'}      = Thruk::Config::read_config_file($file);
-        $config->{'cgi_cfg'}           = $config->{'cgi_cfg_orig'};
+        $app->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
+        $app->log->debug("reading $file");
+        $app->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
+        $app->{'cgi.cfg_effective'} = $file;
+        $app->{'cgi_cfg'}           = Thruk::Config::read_config_file($file);
     }
-
-    $c->stats->profile(end => "Config::read_cgi_cfg()") if defined $c;
-
-    return 1;
+    return($app->{'cgi_cfg'});
 }
 
 ########################################
@@ -1443,20 +1407,14 @@ sub read_cgi_cfg {
 
   merge_cgi_cfg($config)
 
-merge entries from $config into $config->{'cgi_cfg'}
+merge entries from cgi.cfg into $c->config
 
 =cut
 sub merge_cgi_cfg {
-    my($config) = @_;
-
-    $config->{'cgi_cfg'} = $config->{'cgi_cfg_orig'};
-    my @keys = qw/show_context_help refresh_rate escape_html_tags
-                  action_url_target notes_url_target lock_author_names
-                  host_unreachable_sound host_down_sound
-                  service_critical_sound service_warning_sound service_unknown_sound
-                /;
-    for my $key (@keys) {
-        $config->{'cgi_cfg'}->{$key} = $config->{$key} if defined $config->{$key};
+    my($c) = @_;
+    my $cfg = read_cgi_cfg($c->app);
+    for my $key (sort keys %{$cfg}) {
+        $c->config->{$key} = $cfg->{$key};
     }
     return;
 }

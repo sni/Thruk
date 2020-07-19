@@ -29,7 +29,7 @@
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value="[% c.request.parameters.hostgroup | html %]"></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value="[% comment_author | html %]"[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value="[% comment_author | html %]"[% IF c.config.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' id="start_time" value="[% start_time | html %]" class="cal_popup_range"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_popup for_start_time"></b></td></tr>
 <tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' id="end_time" value="[% end_time | html %]" class="cal_popup_range"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_popup for_end_time"></b></td></tr>

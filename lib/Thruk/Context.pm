@@ -15,6 +15,7 @@ use Thruk::Controller::error;
 use Thruk::Request;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
+use Thruk::Utils;
 use Thruk::Utils::IO;
 use Thruk::Utils::CookieAuth;
 use Thruk::Utils::APIKeys;
@@ -63,26 +64,21 @@ sub new {
             $env->{'QUERY_STRING'} =~ s/\Q$separator\E(.*?)\Q$separator\E/&_url_encode($1)/gemx;
         }
     }
-
     my $req = Thruk::Request->new($env);
     my $self = {
         app    => $app,
         env    => $env,
-        config => $app->{'config'},
-        stash  => {
-            time_begin           => $time_begin,
-            memory_begin         => $memory_begin,
-            total_backend_waited => 0,
-            total_render_waited  => 0,
-            inject_stats         => 1,
-            user_profiling       => 0,
-        },
+        config => Thruk::Utils::dclone($app->{'config'}),
         req    => $req,
         res    => $req->new_response(200),
         stats  => $Thruk::Request::c ? $Thruk::Request::c->stats : Thruk::Stats->new(),
         user   => undef,
         errors => [],
     };
+    $self->{'stash'} = Thruk::Config::get_default_stash($self, {
+            'time_begin'    => $time_begin,
+            'memory_begin'  => $memory_begin,
+    });
     bless($self, $class);
     weaken($self->{'app'}) unless $ENV{'THRUK_SRC'} eq 'CLI';
     $self->stats->enable();
@@ -214,6 +210,25 @@ sub detach_error {
         die("prevent further page processing");
     }
     confess("detach_error at ".$c->req->url);
+}
+
+=head2 get_tt_template_paths
+
+return list of template include paths
+
+=cut
+sub get_tt_template_paths {
+    my($c) = @_;
+    my $list = [];
+    if($c->config->{'user_template_path'}) {
+        push @{$list}, $c->config->{'user_template_path'};
+    }
+    push(@{$list},
+          $c->config->{'themes_path'}.'/themes-enabled/'.$c->stash->{'theme'}.'/templates',
+        @{$c->config->{'plugin_templates_paths'}},
+          $c->config->{'base_templates_dir'},
+    );
+    return(Thruk::Utils::array_uniq($list));
 }
 
 =head2 render
@@ -374,7 +389,7 @@ sub _request_username {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
         elsif($apikey eq $c->config->{'secret_key'} && $c->config->{'secret_key'} ne '') {
-            $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+            $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'default_user_name'};
             if(!$username) {
                 $username  = '(api)';
                 $internal  = 1;
@@ -393,7 +408,7 @@ sub _request_username {
             $username = $data->{'user'};
             if($data->{'superuser'}) {
                 $superuser = 1;
-                $username  = $c->req->header('X-Thruk-Auth-User') || $c->config->{'cgi_cfg'}->{'default_user_name'};
+                $username  = $c->req->header('X-Thruk-Auth-User') || $c->config->{'default_user_name'};
                 if(!$username) {
                     $username  = '(api)';
                     $internal  = 1;
@@ -410,7 +425,7 @@ sub _request_username {
         $auth_src = "cookie";
         $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
     }
-    elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
+    elsif(defined $c->config->{'use_ssl_authentication'} and $c->config->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
         $username = $env->{'SSL_CLIENT_S_DN_CN'};
         $auth_src = "ssl_authentication";
     }
@@ -425,8 +440,8 @@ sub _request_username {
     }
 
     # default_user_name?
-    if(!defined $username && defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
-        $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
+    if(!defined $username && defined $c->config->{'default_user_name'}) {
+        $username = $c->config->{'default_user_name'};
         $auth_src = "default_user_name";
     }
 

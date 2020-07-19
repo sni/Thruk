@@ -300,7 +300,7 @@ sub full_uri {
     my($c, $full) = @_;
     $full = 0 unless $full;
     confess("no c") unless defined $c;
-    my $uri = ''.uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}, 1);
+    my $uri = ''.uri_with($c, $c->config->{'uri_filter'}, 1);
 
     # uri always contains /thruk/, so replace it with our product prefix
     my $url_prefix = $c->stash->{'url_prefix'} || $c->config->{'url_prefix'};
@@ -328,7 +328,7 @@ ex.: status.cgi?params...
 sub short_uri {
     my($c, $data) = @_;
     my $filter = {};
-    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
+    my %uri_filter = %{$c->config->{'uri_filter'}};
     for my $key (sort keys %uri_filter) {
         $filter->{$key} = $uri_filter{$key};
     }
@@ -1283,7 +1283,7 @@ sub state2text {
     if($nr == 0) { return 'OK'; }
     if($nr == 1) { return 'WARNING'; }
     if($nr == 2) { return 'CRITICAL'; }
-    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 3) { return 'UNKNOWN'; }
     if($nr == 4) { return 'PENDING'; }
     return;
 }
@@ -1302,7 +1302,7 @@ sub hoststate2text {
     if($nr == 0) { return 'UP'; }
     if($nr == 1) { return 'DOWN'; }
     if($nr == 2) { return 'UNREACHABLE'; }
-    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 3) { return 'UNKNOWN'; }
     if($nr == 4) { return 'PENDING'; }
     return;
 }
@@ -1322,7 +1322,7 @@ sub text2state {
     if($txt eq 'OK')       { return(0); }
     if($txt eq 'WARNING')  { return(1); }
     if($txt eq 'CRITICAL') { return(2); }
-    if($txt eq 'UNKOWN')   { return(3); }
+    if($txt eq 'UNKNOWN')  { return(3); }
     if($txt eq 'PENDING')  { return(4); }
     return;
 }
@@ -1342,7 +1342,7 @@ sub text2hoststate {
     if($txt eq 'UP')          { return(0); }
     if($txt eq 'DOWN')        { return(1); }
     if($txt eq 'UNREACHABLE') { return(2); }
-    if($txt eq 'UNKOWN')      { return(3); }
+    if($txt eq 'UNKNOWN')     { return(3); }
     if($txt eq 'PENDING')     { return(4); }
     return;
 }

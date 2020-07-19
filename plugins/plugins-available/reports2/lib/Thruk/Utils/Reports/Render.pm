@@ -912,7 +912,7 @@ sub _read_static_content_file {
     }
     my $file;
 
-    my $logo_path_prefix = $c->config->{'logo_path_prefix'};
+    my $logo_path_prefix = $c->stash->{'logo_path_prefix'};
     my $logo_url         = $url;
     $logo_url            =~ s/^$logo_path_prefix//gmx;
 

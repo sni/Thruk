@@ -1907,14 +1907,14 @@ sub set_audio_file {
     # pages with host/service totals
     if(defined $c->stash->{'host_stats'} and defined $c->stash->{'service_stats'}) {
         for my $s (qw/unreachable down/) {
-            if($c->stash->{'host_stats'}->{$s.'_and_unhandled'} > 0 and defined $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'}) {
-                $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'};
+            if($c->stash->{'host_stats'}->{$s.'_and_unhandled'} > 0 and defined $c->config->{'host_'.$s.'_sound'}) {
+                $c->stash->{'audiofile'} = $c->config->{'host_'.$s.'_sound'};
                 return;
             }
         }
         for my $s (qw/critical warning unknown/) {
-            if($c->stash->{'service_stats'}->{$s.'_and_unhandled'} > 0 and defined $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'}) {
-                $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'};
+            if($c->stash->{'service_stats'}->{$s.'_and_unhandled'} > 0 and defined $c->config->{'service_'.$s.'_sound'}) {
+                $c->stash->{'audiofile'} = $c->config->{'service_'.$s.'_sound'};
                 return;
             }
         }
@@ -1930,12 +1930,12 @@ sub set_audio_file {
             $worst_host = $h->{'state'} if $worst_host < $h->{'state'};
             last if $worst_host >= 2;
         }
-        if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'host_unreachable_sound'}) {
-            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_unreachable_sound'};
+        if($worst_host == 2 and defined $c->config->{'host_unreachable_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'host_unreachable_sound'};
             return;
         }
-        if($worst_host == 1 and defined $c->config->{'cgi_cfg'}->{'host_down_sound'}) {
-            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_down_sound'};
+        if($worst_host == 1 and defined $c->config->{'host_down_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'host_down_sound'};
             return;
         }
 
@@ -1948,22 +1948,22 @@ sub set_audio_file {
             $worst_service = $s->{'state'} if $worst_service < $s->{'state'};
             last if $worst_service == 3;
         }
-        if($worst_service == 1 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
-            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_warning_sound'};
+        if($worst_service == 1 and defined $c->config->{'service_warning_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'service_warning_sound'};
             return;
         }
-        if($worst_service == 2 and defined $c->config->{'cgi_cfg'}->{'service_critical_sound'}) {
-            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_critical_sound'};
+        if($worst_service == 2 and defined $c->config->{'service_critical_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'service_critical_sound'};
             return;
         }
-        if($worst_service == 3 and defined $c->config->{'cgi_cfg'}->{'service_unknown_sound'}) {
-            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_unknown_sound'};
+        if($worst_service == 3 and defined $c->config->{'service_unknown_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'service_unknown_sound'};
             return;
         }
     }
 
-    if($c->stash->{'audiofile'} eq '' and defined $c->config->{'cgi_cfg'}->{'normal_sound'}) {
-        $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'normal_sound'};
+    if($c->stash->{'audiofile'} eq '' and defined $c->config->{'normal_sound'}) {
+        $c->stash->{'audiofile'} = $c->config->{'normal_sound'};
         return;
     }
 

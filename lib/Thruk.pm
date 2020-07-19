@@ -143,7 +143,7 @@ sub _build_app {
     $config = $Thruk::Utils::IO::config;
     if(!$config) {
         require Thruk::Config;
-        $config = Thruk::Config::get_config();
+        $config = Thruk::Config::set_config_env();
     }
     $self->{'config'} = $config;
     $Thruk::Utils::IO::config = $config;
@@ -156,8 +156,8 @@ sub _build_app {
 
     ###################################################
     # load and parse cgi.cfg into $c->config
-    unless(Thruk::Config::read_cgi_cfg(undef, $self->{'config'})) {
-        die("\n\n*****\nfailed to load cgi config: ".$self->{'config'}->{'cgi.cfg'}."\n*****\n\n");
+    unless(Thruk::Config::read_cgi_cfg($self, $self->{'config'})) {
+        die("\n\n*****\nfailed to load cgi config: ".($self->{'config'}->{'cgi.cfg'} // 'none')."\n*****\n\n");
     }
     $self->_add_additional_roles();
     #&timing_breakpoint('startup() cgi.cfg parsed');
@@ -270,7 +270,7 @@ sub _build_app {
     }
     #&timing_breakpoint('startup() plugins loaded');
 
-    Thruk::Views::ToolkitRenderer::register($self, {config => $self->{'config'}->{'View::TT'}});
+    Thruk::Views::ToolkitRenderer::register($self, Thruk::Config::get_toolkit_config());
 
     ###################################################
     my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
@@ -444,7 +444,7 @@ sub find_route_match {
 sub config {
     unless($config) {
         require Thruk::Config;
-        $config = Thruk::Config::get_config();
+        $config = Thruk::Config::set_config_env();
     }
     return($config);
 }
@@ -1229,7 +1229,7 @@ sub _load_plugin_class {
 sub _add_additional_roles {
     my($self) = @_;
     my $roles = $Thruk::Authentication::User::possible_roles;
-    for my $role (sort keys %{$self->config->{'cgi_cfg'}}) {
+    for my $role (sort keys %{$self->config}) {
         next unless $role =~ m/authorized_(contactgroup_|)for_/mx;
         $role =~ s/authorized_contactgroup_for_/authorized_for_/mx;
         push @{$roles}, $role;

@@ -161,12 +161,12 @@ sub get_contact_matches {
     # get contact from panorama dashboards
     _add_panorama_matches($c, $peer_key, 'contact', $res, $name);
 
-    for my $key (sort keys %{$c->config->{'cgi_cfg'}}) {
-        my $list = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$key} || '']));
+    for my $key (sort keys %{$c->config}) {
+        my $list = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $c->config->{$key} || '']));
         if($list->{$name}) {
-            _add_res($res, $peer_key, 'cgi.cfg', {
+            _add_res($res, $peer_key, 'thruk_local.conf/cgi.cfg', {
                 name    => $key,
-                details => sprintf('contact is listed as %s in the cgi.cfg', $key),
+                details => sprintf('contact is listed as %s in the cgi.cfg or thruk_local.conf', $key),
                 link    => 'conf.cgi?sub=users&action=change&data.username='.$name,
             });
         }

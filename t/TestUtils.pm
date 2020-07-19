@@ -41,7 +41,7 @@ my $has_curl = 0; # does require newer curl, disabling for now (2020-06-09) # ha
 
 use Thruk;
 use Thruk::Config;
-Thruk::Config::get_config(); # adds plugins to INC which is required for many tests
+Thruk::Config::set_config_env(); # adds plugins to INC which is required for many tests
 our $placktest;
 
 #########################
@@ -63,7 +63,7 @@ sub request {
 
     my($req, $res);
     if(!$placktest) {
-        $placktest = Plack::Test->create(Thruk->startup)
+        $placktest = Plack::Test->create(Thruk->startup);
     }
     if(ref $url eq "") {
         $res = $placktest->request(GET $url);
@@ -186,7 +186,7 @@ sub get_test_host_cli {
     my($binary) = @_;
     my $auth = '';
     if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
-        my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+        my $user = Thruk->config->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
     my $test = { cmd  => $binary.' -a listhosts'.$auth };
@@ -201,7 +201,7 @@ sub get_test_hostgroup_cli {
     my($binary) = @_;
     my $auth = '';
     if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
-        my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+        my $user = Thruk->config->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
     my $test = { cmd  => $binary.' -a listhostgroups'.$auth };
@@ -563,7 +563,7 @@ sub set_cookie {
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
-    my $config      = Thruk::Config::get_config();
+    my $config      = Thruk::Config::set_config_env();
     my $cookie_path = $config->{'cookie_path'};
     $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
     $cookie_jar->save();
@@ -629,7 +629,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
 
 #########################
 sub get_themes {
-    my @themes = @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}};
+    my @themes = @{Thruk->config->{'themes'}};
     return @themes;
 }
 
@@ -668,7 +668,7 @@ sub wait_for_job {
         $job = $1;
     }
     my $start  = time();
-    my $config = Thruk::Config::get_config();
+    my $config = Thruk::Config::set_config_env();
 
     if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $joburl) {
         $joburl = '/thruk/r/thruk/jobs/'.$job unless $joburl;

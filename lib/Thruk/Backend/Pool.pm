@@ -60,7 +60,7 @@ sub init_backend_thread_pool {
     $peer_order  = [];
     $peers       = {};
 
-    my $config       = Thruk::Config::get_config();
+    my $config       = Thruk::Config::set_config_env();
     $Thruk::Utils::IO::config = $config;
     my $peer_configs = $config->{'Component'}->{'Thruk::Backend'}->{'peer'} || $config->{'Thruk::Backend'}->{'peer'};
     $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;

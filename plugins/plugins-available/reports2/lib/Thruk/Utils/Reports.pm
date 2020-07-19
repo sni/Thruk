@@ -1058,7 +1058,7 @@ return available report templates
 sub get_report_templates {
     my($c) = @_;
     my $templates = {};
-    for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+    for my $path (@{$c->get_tt_template_paths()}) {
         for my $file (glob($path.'/reports/*.tt')) {
             my $name;
             ($file, $name) = _get_report_tt_name($file);
@@ -1094,7 +1094,7 @@ return available report languages
 sub get_report_languages {
     my($c) = @_;
     my $languages = {};
-    for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+    for my $path (@{$c->get_tt_template_paths()}) {
         for my $file (glob($path.'/reports/locale/*.tt')) {
             $file    =~ s/^.*\/(.*)$/$1/mx;
             next if $file =~ m/_custom\.tt/mx;
@@ -1679,7 +1679,7 @@ sub _initialize_report_templates {
         $c->stash->{'loc'} = $c->stash->{'_locale'};
         $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
         my $overrides = {};
-        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+        for my $path (@{$c->get_tt_template_paths()}) {
             if(-e $path.'/reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt') {
                 $overrides = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt', 'translations_overrides');
                 last;

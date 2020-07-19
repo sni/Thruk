@@ -38,7 +38,7 @@ sub get_thruk_cfg {
                 documentation_link                      => ['STRING', ''],
                 all_problems_link                       => ['STRING', ''],
                 allowed_frame_links                     => ['STRING', ''],
-                default_theme                           => ['LIST',   'Thruk', Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}) ],
+                default_theme                           => ['LIST',   'Thruk', Thruk::Utils::array2hash($c->config->{'themes'}) ],
                 tmp_path                                => ['STRING', ''],
                 ssi_path                                => ['STRING', ''],
                 plugin_path                             => ['STRING', ''],

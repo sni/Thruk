@@ -2750,11 +2750,8 @@ sub precompile_templates {
     my($c) = @_;
     return if $c->config->{'precompile_templates'} == 2;
     my $t0 = [gettimeofday];
-    my @includes;
-    push @includes, @{$c->config->{templates_paths}} if $c->config->{templates_paths};
-    push @includes, $c->config->{'View::TT'}->{'INCLUDE_PATH'} if $c->config->{'View::TT'}->{'INCLUDE_PATH'};
     my $uniq     = {};
-    for my $path (@includes) {
+    for my $path (@{$c->get_tt_template_paths()}) {
         next unless -d $path;
         my $files = find_files($path, '\.tt$');
         for my $file (@{$files}) {

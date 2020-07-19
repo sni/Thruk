@@ -14,10 +14,9 @@ sub new {
 sub config {
     my $this = shift;
 
-    return {
-        cgi_cfg  => { map({ $_ => $this->{user} } @{$this->{roles}}) },
-        var_path => ".",
-    };
+    my $config = { map({ $_ => $this->{user} } @{$this->{roles}}) };
+    $config->{var_path} = ".";
+    return($config);
 }
 
 sub env {

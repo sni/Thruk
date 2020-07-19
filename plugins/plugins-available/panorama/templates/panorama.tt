@@ -19,7 +19,7 @@
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all.js"></script>
     [% END %]
     [% IF thruk_debug || panorama_debug %]
-      [% FOREACH js = all_in_one_javascript_panorama %]
+      [% FOREACH js = c.config.all_in_one_javascript_panorama %]
         <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]
       [% FOREACH js = get_static_panorama_files(c.config) %]

@@ -24,9 +24,9 @@ for my $p (reverse split/:/, $ENV{'PATH'}) {
 
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
-my $config   = \%Thruk::Config::config;
-my $branch   = $config->{'View::TT'}->{'PRE_DEFINE'}->{'filebranch'} ;
-die('no config') unless $config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'};
+my $config   = Thruk::Config::get_base_config();
+my $branch   = $config->{'filebranch'} ;
+die('no config') unless $config->{'all_in_one_javascript'};
 die('no config') unless $Thruk::Config::VERSION;
 die('no config') unless $branch;
 my $version = $Thruk::Config::VERSION.'-'.$branch;
@@ -35,7 +35,7 @@ my @themes  = qw/Thruk Thruk2/;
 #################################################
 # check if update is required
 my $newest = 0;
-for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}) {
+for my $file (@{$config->{'all_in_one_javascript'}}) {
     my @s   = stat('root/thruk/'.$file) or die('root/thruk/'.$file.": ".$@);
     $newest = $s[9] if $newest < $s[9];
 }
@@ -49,7 +49,7 @@ if(-e 'root/thruk/cache/thruk-'.$version.'.js') {
 
 $newest = 0;
 for my $theme (@themes) {
-    for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}->{$theme}}) {
+    for my $file (@{$config->{'all_in_one_css_frames'}->{$theme}}) {
         my @s   = stat('themes/themes-available/'.$theme.'/stylesheets/'.$file);
         $newest = $s[9] if $newest < $s[9];
     }
@@ -69,7 +69,7 @@ for my $theme (@themes) {
 my @panorama_files;
 $newest = 0;
 require Thruk::Utils::Panorama;
-for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}, @{Thruk::Utils::Panorama::get_static_panorama_files({plugin_path => 'plugins/'})}) {
+for my $file (@{$config->{'all_in_one_javascript_panorama'}}, @{Thruk::Utils::Panorama::get_static_panorama_files({plugin_path => 'plugins/'})}) {
     my @s;
     if($file =~ m/^plugins\//mx) {
         my $tmp = $file;
@@ -100,14 +100,14 @@ mkdir('root/thruk/cache');
 
 #################################################
 my $cmds = [
-    'cd root/thruk/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > cache/thruk-'.$version.'.js',
+    'cd root/thruk/ && cat '.join(' ', @{$config->{'all_in_one_javascript'}}).' > cache/thruk-'.$version.'.js',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
 ];
 for my $theme (@themes) {
     push @{$cmds},
-        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-noframes-'.$version.'.css';
+        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'all_in_one_css_noframes'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-noframes-'.$version.'.css';
     push @{$cmds},
-        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-'.$version.'.css';
+        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'all_in_one_css_frames'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-'.$version.'.css';
     push @{$cmds},
         'sed -e "s/\((\'\?\"\?\)\.\.\/\(images\|fonts\)\//\1..\/themes\/'.$theme.'\/\2\//g"'
           .' -e "s/\((\'\?\"\?\)\.\.\/\.\.\/\.\.\/images\//\1..\/images\//g"'

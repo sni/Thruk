@@ -1269,7 +1269,6 @@ sub _rest_get_thruk_config {
     my($c) = @_;
     my $data = {};
     for my $key (keys %{$c->config}) {
-        next if $key eq 'View::TT';
         next if $key eq 'secret_key';
         $data->{$key} = $c->config->{$key};
     }

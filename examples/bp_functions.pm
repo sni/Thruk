@@ -82,7 +82,7 @@ sub weighted_state_function {
                            );
     my $short = sprintf("%d%% available", (($available / $total)*100));
     $output = sprintf("%s - %s|%s",
-                            Thruk::BP::Utils::state2text($status),
+                            Thruk::Utils::Filter::state2text($status),
                             $short,
                             $perfdata);
 

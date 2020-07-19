@@ -33,13 +33,13 @@ for my $file (@tplfiles) {
 }
 
 use_ok("Thruk::Config");
-my $config = Thruk::Config::get_config();
+my $config = Thruk::Config::set_config_env();
 
 my $files = ['root/thruk/startup.html'];
 for my $file (@{$files}) {
     next if($filter && $file !~ m%$filter%mx);
     my $content = read_file($file);
-    my @jquery = grep/jquery-\d+.*\.js$/, @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}};
+    my @jquery = grep/jquery-\d+.*\.js$/, @{$config->{'all_in_one_javascript'}};
     is(scalar @jquery, 1, 'found jquery in config');
     like($content, qr/$jquery[0]/, 'found jquery in '.$file);
 }

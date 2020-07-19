@@ -192,7 +192,7 @@ sub groupstatus {
     }
 
     $output = sprintf("%s - %s%d/%d services up|%s",
-                            Thruk::BP::Utils::state2text($status),
+                            Thruk::Utils::Filter::state2text($status),
                             $hostoutput,
                             $good_services, $total_services,
                             $perfdata) unless $output;
@@ -243,7 +243,7 @@ sub worst {
     }
     return($state,
            'worst of',
-            Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
+            Thruk::Utils::Filter::state2text($state).' - Worst state is '.Thruk::Utils::Filter::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
            $extra,
     );
 }
@@ -266,7 +266,7 @@ sub best {
     }
     return($state,
            'best of',
-            Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
+            Thruk::Utils::Filter::state2text($state).' - Best state is '.Thruk::Utils::Filter::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
            $extra,
     );
 }
@@ -303,7 +303,7 @@ sub at_least {
     if($warning == $critical) {
         $desc = '>= '.$critical;
     }
-    return($state, $desc, Thruk::BP::Utils::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
+    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -338,7 +338,7 @@ sub not_more {
     if($warning == $critical) {
         $desc = '<= '.$critical;
     }
-    return($state, $desc, Thruk::BP::Utils::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
+    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -364,7 +364,7 @@ sub equals {
     if($good == $number) {
         $state = 0;
     }
-    return($state, '= '.$number, Thruk::BP::Utils::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
+    return($state, '= '.$number, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -379,7 +379,7 @@ returns random state
 sub random {
     my($c, $bp, $n) = @_;
     my $state = int(rand(4));
-    return($state, 'random', Thruk::BP::Utils::state2text($state).' - Random state is '.Thruk::BP::Utils::state2text($state));
+    return($state, 'random', Thruk::Utils::Filter::state2text($state).' - Random state is '.Thruk::Utils::Filter::state2text($state));
 }
 
 ##########################################################
@@ -513,7 +513,7 @@ sub statusfilter {
     }
 
     $output = sprintf("%s - %s|%s",
-                            Thruk::BP::Utils::state2text($status),
+                            Thruk::Utils::Filter::state2text($status),
                             join(', ', @{$thresholdoutput}),
                             $perfdata) unless $output;
 
@@ -535,7 +535,7 @@ sub statusfilter {
             for my $h (@{$data}) {
                 next if($ack_filter      && $h->{'acknowledged'});
                 next if($downtime_filter && $h->{'scheduled_downtime_depth'} > 0);
-                $output .= sprintf("\n[%s] %s - %s", Thruk::BP::Utils::hoststate2text($h->{'state'}), $h->{'name'}, substr($h->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
+                $output .= sprintf("\n[%s] %s - %s", Thruk::Utils::Filter::hoststate2text($h->{'state'}), $h->{'name'}, substr($h->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
                 $num++;
             }
         }
@@ -545,7 +545,7 @@ sub statusfilter {
                 next if($ack_filter      && $s->{'acknowledged'});
                 next if($downtime_filter && $s->{'scheduled_downtime_depth'} > 0);
                 next if($unknown_filter  && $s->{'state'} == 3);
-                $output .= sprintf("\n[%s] %s - %s - %s", Thruk::BP::Utils::state2text($s->{'state'}), $s->{'host_name'}, $s->{'description'}, substr($s->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
+                $output .= sprintf("\n[%s] %s - %s - %s", Thruk::Utils::Filter::state2text($s->{'state'}), $s->{'host_name'}, $s->{'description'}, substr($s->{'plugin_output'}, 0, 50)) if $num < $maximum_output;
                 $num++;
             }
         }

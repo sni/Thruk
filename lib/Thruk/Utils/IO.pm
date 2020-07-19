@@ -148,7 +148,7 @@ sub ensure_permissions {
 
     if(!$Thruk::Utils::IO::config) {
         require Thruk::Backend::Pool;
-        $Thruk::Utils::IO::config = Thruk::Config::get_config();
+        $Thruk::Utils::IO::config = Thruk::Config::set_config_env();
     }
     my $config = $Thruk::Utils::IO::config;
     # set modes

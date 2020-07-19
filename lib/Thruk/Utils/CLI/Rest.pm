@@ -24,6 +24,7 @@ use warnings;
 use strict;
 use Getopt::Long ();
 use Cpanel::JSON::XS qw/decode_json/;
+use Thruk::Utils::Filter ();
 
 ##############################################
 
@@ -289,7 +290,7 @@ sub _create_output {
     $totals = _calculate_data_totals($result, $totals);
     unshift(@{$result}, $totals);
     my $macros = {
-        STATUS => $c->config->{'nagios'}->{'service_state_by_number'}->{$rc} // 'UNKNOWN',
+        STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
     };
     $output = $totals->{'output'};
     $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;

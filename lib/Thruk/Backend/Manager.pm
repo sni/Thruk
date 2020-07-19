@@ -8,6 +8,7 @@ use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk ();
 use Thruk::Utils ();
+use Thruk::Utils::Filter ();
 #use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;
@@ -1274,7 +1275,6 @@ sub _replace_macros {
 
     my $string  = $args->{'string'};
     my $macros  = $self->_get_macros($args);
-
     return $self->_get_replaced_string($string, $macros);
 }
 
@@ -1382,7 +1382,6 @@ set host macros
 
 sub _set_host_macros {
     my( $self, $host, $macros ) = @_;
-    my $c = $Thruk::Request::c;
 
     # normal host macros
     $macros->{'$HOSTADDRESS$'}        = (defined $host->{'host_address'})            ? $host->{'host_address'}            : $host->{'address'};
@@ -1401,7 +1400,7 @@ sub _set_host_macros {
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
-    $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}} : 0;
+    $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? Thruk::Utils::Filter::text2hoststate($macros->{'$HOSTSTATEID$'}) : 0;
     $macros->{'$HOSTSTATETYPE'}       = (defined $macros->{'$HOSTSTATETYPE'})        ? $macros->{'$HOSTSTATETYPE'} == 1 ? 'HARD' : 'SOFT' : '';
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
@@ -1437,12 +1436,11 @@ sets service macros
 
 sub _set_service_macros {
     my( $self, $service, $macros ) = @_;
-    my $c = $Thruk::Request::c;
 
     # normal service macros
     $macros->{'$SERVICEDESC$'}           = $service->{'description'};
     $macros->{'$SERVICESTATEID$'}        = $service->{'state'};
-    $macros->{'$SERVICESTATE$'}          = $c->config->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
+    $macros->{'$SERVICESTATE$'}          = Thruk::Utils::Filter::text2state($service->{'state'});
     $macros->{'$SERVICESTATETYPE$'}      = $service->{'state_type'} ? 'HARD' : 'SOFT';
     $macros->{'$SERVICELATENCY$'}        = $service->{'latency'};
     $macros->{'$SERVICEOUTPUT$'}         = $service->{'plugin_output'};
@@ -1690,7 +1688,7 @@ sub _do_on_peers {
     }
 
     # strict templates require icinga2 undef values to be replaced
-    if($c->config->{'View::TT'}->{'STRICT'}) {
+    if($c->config->{'strict_tt'}) {
         my $replace = 0;
         for my $key (@{$get_results_for}) {
             if($c->stash->{'pi_detail'}->{$key}->{'data_source_version'} && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'} =~ m/Livestatus\ r2\./mx) {
@@ -2719,7 +2717,7 @@ sub _set_user_macros {
     my $self   = shift;
     my $args   = shift;
     my $macros = shift || {};
-    my $c      = $Thruk::Request::c;
+    my $c      = $Thruk::Request::c or confess("Thruk::Request::c undefined");
 
     my $search = $args->{'search'} || 'expand_user_macros';
     my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 1;
