@@ -68,7 +68,7 @@ sub new {
     my $self = {
         app    => $app,
         env    => $env,
-        config => Thruk::Utils::dclone($app->{'config'}),
+        config => $app->{'config'},
         req    => $req,
         res    => $req->new_response(200),
         stats  => $Thruk::Request::c ? $Thruk::Request::c->stats : Thruk::Stats->new(),
@@ -728,6 +728,20 @@ sub want_json_response {
     if($c->req->parameters->{'json'}) {
         return 1;
     }
+    return;
+}
+
+=head2 clone_user_config
+
+$c->clone_user_config()
+
+replace $c->config with a deepcopy of it
+
+=cut
+sub clone_user_config {
+    my($c) = @_;
+    $c->{'config'} = Thruk::Utils::dclone($c->{'config'});
+    $c->{'config'}->{'cloned'} = 1;
     return;
 }
 
