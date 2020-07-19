@@ -2477,6 +2477,7 @@ templates/_overdiv.tt
 templates/_pager.tt
 templates/_parts_comments.tt
 templates/_parts_downtimes.tt
+templates/_parts_service_info_popup.tt
 templates/_perfdata_human.tt
 templates/_permission_edit.tt
 templates/_pnp_graph.tt

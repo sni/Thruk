@@ -1235,6 +1235,118 @@ sub peer_name {
     return("");
 }
 
+##############################################
+
+=head2 servicestatetext
+
+    servicestatetext($svc)
+
+return string for given service
+
+=cut
+sub servicestatetext {
+    my($svc) = @_;
+    if(!$svc->{'has_been_checked'}) {
+        return("PENDING");
+    }
+    return(state2text($svc->{'state'}));
+}
+
+##############################################
+
+=head2 hoststatetext
+
+    hoststatetext($hst)
+
+return string for given host
+
+=cut
+sub hoststatetext {
+    my($hst) = @_;
+    if(!$hst->{'has_been_checked'}) {
+        return("PENDING");
+    }
+    return(hoststate2text($hst->{'state'}));
+}
+
+##############################################
+
+=head2 state2text
+
+    state2text($state)
+
+return string for given numerical state
+
+=cut
+sub state2text {
+    my($nr) = @_;
+    if($nr == 0) { return 'OK'; }
+    if($nr == 1) { return 'WARNING'; }
+    if($nr == 2) { return 'CRITICAL'; }
+    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 4) { return 'PENDING'; }
+    return;
+}
+
+##############################################
+
+=head2 hoststate2text
+
+    hoststate2text($state)
+
+return string for given numerical host state
+
+=cut
+sub hoststate2text {
+    my($nr) = @_;
+    if($nr == 0) { return 'UP'; }
+    if($nr == 1) { return 'DOWN'; }
+    if($nr == 2) { return 'UNREACHABLE'; }
+    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 4) { return 'PENDING'; }
+    return;
+}
+
+##############################################
+
+=head2 text2state
+
+    text2state($state)
+
+return numerical state for given text state
+
+=cut
+sub text2state {
+    my($txt) = @_;
+    $txt = uc($txt);
+    if($txt eq 'OK')       { return(0); }
+    if($txt eq 'WARNING')  { return(1); }
+    if($txt eq 'CRITICAL') { return(2); }
+    if($txt eq 'UNKOWN')   { return(3); }
+    if($txt eq 'PENDING')  { return(4); }
+    return;
+}
+
+##############################################
+
+=head2 text2hoststate
+
+    text2hoststate($state)
+
+return numerical state for given text host state
+
+=cut
+sub text2hoststate {
+    my($txt) = @_;
+    $txt = uc($txt);
+    if($txt eq 'UP')          { return(0); }
+    if($txt eq 'DOWN')        { return(1); }
+    if($txt eq 'UNREACHABLE') { return(2); }
+    if($txt eq 'UNKOWN')      { return(3); }
+    if($txt eq 'PENDING')     { return(4); }
+    return;
+}
+
 ########################################
 
 1;

@@ -1,5 +1,4 @@
-﻿[% USE date %]
-[% PROCESS _header.tt %]
+﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
 [% PROCESS _blocks.tt %]
@@ -80,84 +79,31 @@
   [% FOREACH svcname = services.keys.sort %]
     [% svcbg = loopclass %]
     [% IF matrix.exists(hstname) && matrix.$hstname.exists(svcname) %]
-        [% SET s = matrix.$hstname.$svcname %]
-        [% SET size = 6 %]
-        [% SET icon_bg_class = loopclass %]
-        [% IF s.has_been_checked == 0 %]
-            [% serviceclass = 'servicePENDING' %]
-            [% state = 'PENDING' %]
-        [% ELSIF s.state == 0 %]
-            [% serviceclass = 'serviceOK' %]
-            [% state = 'OK' %]
-        [% ELSIF s.state == 1 %]
-            [% serviceclass = 'serviceWARNING' %]
-            [% state = 'WARNING' %]
-            [% icon_bg_class = 'statusBGWARNING' %]
+        [% s = matrix.$hstname.$svcname %]
+        [% size = 6 %]
+        [% icon_bg_class = loopclass %]
+        [% state         = servicestatetext(s) %]
+        [% serviceclass  = 'service' _ state %]
+        [% peer_key      = s.peer_key %]
+        [% IF s.state == 1 %]
+            [% icon_bg_class = 'statusBG' _ state %]
             [% size = 8 %]
-        [% ELSIF s.state == 2 %]
-            [% serviceclass = 'serviceCRITICAL' %]
-            [% state = 'CRITICAL' %]
+        [% ELSIF s.state == 2 || s.state == 3 %]
             [% size = 10 %]
-            [% icon_bg_class = 'statusBGCRITICAL' %]
-        [% ELSIF s.state == 3 %]
-            [% serviceclass = 'serviceUNKNOWN' %]
-            [% state = 'UNKNOWN' %]
-            [% size = 10 %]
-            [% icon_bg_class = 'statusBGUNKNOWN' %]
+            [% icon_bg_class = 'statusBG' _ state %]
         [% END %]
-        [% SET comment_count = s.comments.size %]
-        [% SET peer_key      = s.peer_key %]
-        [% SET program_start = pi_detail.$peer_key.program_start %]
 
-[% info = BLOCK %]
-  <a href="extinfo.cgi?type=2&host=[% s.host_name | uri %]&service=[% s.description | uri %]">View Full Service Details</a>
-  <table border=0 class="extdetails">
-  <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
-  [% IF s.state != 0 %]
-  <tr><th class="dataVar">Current Attempt:</th><td class="dataVal">[% s.current_attempt %]/[% s.max_check_attempts %]&nbsp;&nbsp;([% IF s.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td></tr>
-  <tr><th class="dataVar">Last Check Time:</th><td class="dataVal">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td></tr>
-  <tr><th class="dataVar">Next Scheduled Check:</th><td class="dataVal">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]N/A[% END %][% IF s.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]</td></tr>
-  <tr><th class="dataVar">In Scheduled Downtime?</th><td class="dataVal">[% IF s.scheduled_downtime_depth > 0 %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
-  <tr><th class="dataVar">Acknowledged?</th><td class="dataVal">[% IF s.acknowledged %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
-  [% END %]
-  <tr><th class="dataVar" nowrap valign="top">Plugin Output:<br></th><td class="dataVal">
-  [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
-  [% IF escape_html_tags %]
-      [% nl2br(escape_html(s.plugin_output)) %]<br>
-  [% ELSE %]
-    [% nl2br(s.plugin_output) %]<br>
-  [% END %]
-  [% on_demand_long_plugin_output = 0 %]
-  [% IF s.defined("has_long_plugin_output") %]
-    [% on_demand_long_plugin_output = 1 %]
-  [% END %]
-  [% IF on_demand_long_plugin_output %]
-      [% IF s.has_long_plugin_output %]
-      <span class='long_plugin_output'></span>
+    <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib('<div class=&quot;service_popup_content&quot;><\/div>',CAPTION,'[% escape_js(s.host_name) %] - [% escape_js(s.description) %]',WIDTH,600,[% c.config.info_popup_options %]) || fetch_svc_info_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]'));">
+      [% IF s.acknowledged %]
+        <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="acknowledged" height="15" width="15">
+        [% svcbg = icon_bg_class %]
+      [% ELSIF s.scheduled_downtime_depth > 0 %]
+        <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
+        [% svcbg = icon_bg_class %]
+      [% ELSE %]
+      <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
       [% END %]
-  [% ELSE %]
-    [% IF escape_html_tags %]
-        [% nl2br(escape_html(s.long_plugin_output)) %]
-    [% ELSE %]
-      [% nl2br(s.long_plugin_output) %]
-    [% END %]
-  [% END %]
-  </td></tr>
-  </table>
-[% END %]
-
-[% content = BLOCK %]
-  [% IF s.acknowledged %]
-    <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="acknowledged" height="15" width="15">
-    [% svcbg = icon_bg_class %]
-  [% ELSIF s.scheduled_downtime_depth > 0 %]
-    <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
-    [% svcbg = icon_bg_class %]
-  [% ELSE %]
-  <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
-  [% END %]
-[% END %]
-        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(s.host_name) %] - [% escape_js(s.description) %]',WIDTH,600,[% c.config.info_popup_options %])[% IF on_demand_long_plugin_output %] || fetch_long_plugin_output(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %])[% END %]);" abbr="[% escape_quotes(escape_html(info)) %]">[% content %]</td>
+    </td>
     [% ELSE %]
     <td class='[% svcbg %]' align="center">-</td>
     [% END %]

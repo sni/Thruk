@@ -332,6 +332,16 @@ sub parts_cgi {
         return;
     }
 
+    if($part eq '_service_info_popup') {
+        my $host     = $c->req->parameters->{'host'};
+        my $svc      = $c->req->parameters->{'service'};
+        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $svc } ], extra_columns => [qw/long_plugin_output/] );
+        return $c->detach('/error/index/18') unless $services->[0];
+        $c->stash->{'s'}         = $services->[0];
+        $c->stash->{'template'}  = '_parts_service_info_popup.tt';
+        return;
+    }
+
     return $c->detach('/error/index/25');
 }
 
