@@ -1351,6 +1351,8 @@ sub _process_tools_page {
     my $ignores              = -s $ignore_file ? Thruk::Utils::IO::json_lock_retrieve($ignore_file) : {};
     $c->stash->{'tool'}      = $tool;
 
+    $c->stats->profile(begin => "tool: ".$tool);
+
     if($tool eq 'start') {
     }
     elsif($tool eq 'reset_ignores') {
@@ -1360,6 +1362,7 @@ sub _process_tools_page {
             Thruk::Utils::IO::json_lock_store($ignore_file, $ignores);
             Thruk::Utils::set_message( $c, 'success_message', "successfully reset ignores" );
         }
+        $c->stats->profile(end => "tool: ".$tool);
         return $c->redirect_to('conf.cgi?sub=objects&tools='.$tool);
     }
     elsif(defined $tools->{$tool}) {
@@ -1367,19 +1370,30 @@ sub _process_tools_page {
             $ignores->{$tool}->{$c->req->parameters->{'ident'}} = 1;
             Thruk::Utils::IO::json_lock_store($ignore_file, $ignores);
             my $json = {'ok' => 1};
+            $c->stats->profile(end => "tool: ".$tool);
             return $c->render(json => $json);
         }
+        # this might take a while
+        $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
+        return if Thruk::Utils::External::render_page_in_background($c);
+
         $c->stash->{'toolobj'} = $tools->{$tool};
         if($c->req->parameters->{'cleanup'} && $c->req->parameters->{'ident'}) {
+            $c->stats->profile(begin => "tool cleanup");
             $tools->{$tool}->cleanup($c, $c->req->parameters->{'ident'}, $ignores->{$tool});
+            $c->stats->profile(end => "tool cleanup");
             $c->stash->{'obj_model_changed'} = 1;
             if($c->req->parameters->{'ident'} eq 'all') {
+                $c->stats->profile(end => "tool: ".$tool);
                 return $c->redirect_to('conf.cgi?sub=objects&tools='.$tool);
             }
             my $json = {'ok' => 1};
+            $c->stats->profile(end => "tool: ".$tool);
             return $c->render(json => $json);
         } else {
+            $c->stats->profile(begin => "tool get_list");
             my($hidden, $results) = $tools->{$tool}->get_list($c, $ignores->{$tool});
+            $c->stats->profile(end => "tool get_list");
             @{$results} = sort { $a->{'type'} cmp $b->{'type'} || $a->{'name'} cmp $b->{'name'} } @{$results};
             $c->stash->{'results'} = $results;
             $c->stash->{'hidden'}  = $hidden;
@@ -1396,6 +1410,7 @@ sub _process_tools_page {
     }
     $c->stash->{'tools_by_category'} = $tools_by_category;
 
+    $c->stats->profile(end => "tool: ".$tool);
     return;
 }
 

@@ -47,8 +47,12 @@ sub get_list {
     my($self, $c, $ignores) = @_;
 
     my $result     = [];
+    $c->stats->profile(begin => "naglint pre");
     my $files_root = $c->{'obj_db'}->get_files_root();
-    for my $file (@{$c->{'obj_db'}->get_files()}) {
+    my $files      = $c->{'obj_db'}->get_files();
+    $c->stats->profile(end => "naglint pre");
+    $c->stats->profile(begin => "naglint");
+    for my $file (@{$files}) {
         next if $file->{'readonly'}; # keep them untouched
         next if $file->{'changed'};  # will be linted anyway
         next if !-e $file->{'path'};
@@ -70,6 +74,7 @@ sub get_list {
             };
         }
     }
+    $c->stats->profile(end => "naglint");
     return(Thruk::Utils::Conf::clean_from_tool_ignores($result, $ignores));
 }
 

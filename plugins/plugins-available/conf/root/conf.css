@@ -352,6 +352,9 @@ LI.file_node I.jstree-icon {
 .width_80 {
   width: 80px;
 }
+.width_100 {
+  width: 100px;
+}
 
 .left_pad_5 {
   padding-left: 5px;
