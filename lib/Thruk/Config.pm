@@ -626,7 +626,7 @@ sub set_default_config {
     ## use critic
     # external jobs can be disabled by env
     # don't disable for CLI, breaks config reload over http somehow
-    if(defined $ENV{'NO_EXTERNAL_JOBS'} or $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
+    if(defined $ENV{'NO_EXTERNAL_JOBS'} || $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
         $config->{'no_external_job_forks'} = 1;
     }
 

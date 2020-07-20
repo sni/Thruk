@@ -684,13 +684,13 @@ do all child things after a fork
 sub do_child_stuff {
     my($c, $dir, $id) = @_;
 
+    POSIX::setsid() or die "Can't start a new session: $!";
+
     $c->stats->clear();
     $c->stash->{'total_backend_waited'} = 0;
     $c->stash->{'total_render_waited'}  = 0;
     $c->stats->profile(begin => 'External Job: '.$id);
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s', (scalar localtime), $c->config->{'hostname'}, $$));
-
-    POSIX::setsid() or die "Can't start a new session: $!";
 
     delete $ENV{'THRUK_SRC'};
     delete $ENV{'THRUK_VERBOSE'};
@@ -719,8 +719,13 @@ sub do_child_stuff {
     # connect stdin to dev/null
     open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
 
-    # 3 is the fcgid communication socket when running as fcgid process
-    POSIX::close(3);
+    # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
+    for my $fd (3..10) {
+        my $io = IO::Handle->new_from_fd($fd,"r");
+        if(defined $io && -S $io) {
+            POSIX::close($fd);
+        }
+    }
 
     # some db drivers need reconnect after forking
     _reconnect($c);
