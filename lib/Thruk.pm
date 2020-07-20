@@ -1134,6 +1134,7 @@ sub _finalize_request {
                     ));
     }
     $c->log->debug($c->stats->report()) if Thruk->debug;
+    $c->stats->clear();
 
     # save metrics to disk
     $c->app->{_metrics}->store() if $c->app->{_metrics};
