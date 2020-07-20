@@ -685,6 +685,7 @@ sub get_model_retention {
     }
 
     if(! -f $file) {
+        $c->stats->profile(end => "get_model_retention($backend)");
         return 1 if $model->cache_exists($backend);
         return;
     }
@@ -696,10 +697,14 @@ sub get_model_retention {
         and $stat[9] <= $c->config->{'conf_retention'}->[9]
         and $c->config->{'conf_retention_file'} eq $file
     ) {
-        return 1 unless $c->cluster->is_clustered();
+        if(!$c->cluster->is_clustered()) {
+            $c->stats->profile(end => "get_model_retention($backend)");
+            return 1;
+        }
         # cannot trust file timestamp in cluster mode since clocks might not be synchronous
         my $hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($file));
         if($c->config->{'conf_retention_hex'} eq $hex) {
+            $c->stats->profile(end => "get_model_retention($backend)");
             return 1;
         }
     }
@@ -731,6 +736,7 @@ sub get_model_retention {
     if($@) {
         unlink($file);
         $c->log->error($@);
+        $c->stats->profile(end => "get_model_retention($backend)");
         return;
     }
 
