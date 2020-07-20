@@ -171,7 +171,7 @@ sub perl {
             CORE::close(STDOUT);
         };
 
-        if($conf->{'render'}) {
+        if($conf->{'render'} && $c->stash->{'template'}) {
             local $c->stash->{'job_conf'}->{'clean'} = undef;
             _finished_job_page($c, $c->stash);
             my $output = "";
