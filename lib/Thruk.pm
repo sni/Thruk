@@ -1134,7 +1134,7 @@ sub _finalize_request {
                     ));
     }
     $c->log->debug($c->stats->report()) if Thruk->debug;
-    $c->stats->clear();
+    $c->stats->clear() unless $ENV{'THRUK_KEEP_CONTEXT'};
 
     # save metrics to disk
     $c->app->{_metrics}->store() if $c->app->{_metrics};
