@@ -93,6 +93,7 @@ sub cmd {
             nofork       => "don't fork"
             background   => "return $jobid if set, or redirect otherwise"
             clean        => "remove job after displaying it if true"
+            render       => "set to a true value to render page immediatly"
         }
     )
 
@@ -170,6 +171,15 @@ sub perl {
             CORE::close(STDOUT);
         };
 
+        if($conf->{'render'}) {
+            local $c->stash->{'job_conf'}->{'clean'} = undef;
+            _finished_job_page($c, $c->stash);
+            my $output = "";
+            Thruk::Views::ToolkitRenderer::render($c, $c->stash->{'template'}, $c->stash, \$output);
+            Thruk::Utils::IO::write($dir."/result.html", $output);
+            $c->stash->{'file_name'} = "result.html";
+        }
+
         # save stash
         _clean_unstorable_refs($c->stash);
         store(\%{$c->stash}, $dir."/stash");
@@ -221,6 +231,7 @@ sub render_page_in_background {
         Thruk::Utils::External::perl($c, { expr    => $caller[3].'($c)',
                                            message => 'please stand by while page is beeing rendered...',
                                            clean   => 1,
+                                           render  => 1,
     }));
 }
 
