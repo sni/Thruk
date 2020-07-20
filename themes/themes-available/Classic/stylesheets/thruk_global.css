@@ -1559,6 +1559,11 @@ input[type=text], input[type=password] {
   cursor: pointer;
 }
 
+.thruk_dev_panel .stats_elapsed {
+  text-align: right;
+  padding-right: 10px;;
+}
+
 .report_permalink {
   width: 500px;
   text-overflow: ellipsis;

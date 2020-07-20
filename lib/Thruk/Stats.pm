@@ -158,7 +158,7 @@ sub _format_html_row {
         $clickable = " class='clickable' onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")' ";
     }
     $output .= "<td".$clickable.">".$name."</td>\n";
-    $output .= "<td>".$elapsed."</td>\n";
+    $output .= "<td class='stats_elapsed'>".$elapsed."</td>\n";
     if($self->{'total_time'}) {
         if($elapsed && $row->{'level'} > 1) {
             $elapsed =~ s/s$//gmx;
