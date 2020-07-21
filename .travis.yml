@@ -61,6 +61,8 @@ addons:
     - libextutils-installpaths-perl
     - libtest-requires-perl
     - libhttp-message-perl
+    - libplack-perl
+    - libcrypt-rijndael-perl
 before_install:
   - sudo sh -c "echo 'deb http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main' >> /etc/apt/sources.list"
   - wget -q "http://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | sudo apt-key add -
@@ -72,7 +74,7 @@ before_install:
   - cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
   # newer version are broken when using symlinks
   - cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
-  - sed -i '/Test::JavaScript/d' ./Makefile.PL
+  - ./t/install_javascript_spidermonkey.sh
   - cpanm -q -f --installdeps --notest --no-man-pages .
   # required for plugins test
   - cpanm -q -f --notest --no-man-pages Spreadsheet/ParseExcel.pm

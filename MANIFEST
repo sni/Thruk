@@ -1925,6 +1925,7 @@ t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
 t/helper/create_test_logs
+t/install_javascript_spidermonkey.sh
 t/perlcriticrc
 t/scenarios/_common/ansible/roles/common/tasks/main.yml
 t/scenarios/_common/ansible/roles/common/vars/main.yml
