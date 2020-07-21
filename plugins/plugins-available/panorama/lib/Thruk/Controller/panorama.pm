@@ -2679,6 +2679,7 @@ sub _task_userdata_shapes {
         $name    =~ s/^\Q$folder\E//gmx;
         $name    =~ s/^.*\///gmx;
         $name    =~ s/\.js$//gmx;
+        $name    =~ s/\.shape$//gmx;
         push @{$shapes}, {
             name  => $name,
             data  => scalar read_file($file),
