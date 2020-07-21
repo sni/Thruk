@@ -682,7 +682,7 @@ sub wait_for_job {
                     $data = decode_json($r->decoded_content);
                 };
                 last if($data && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
-                sleep(3.1);
+                sleep(0.1);
             }
         };
         my $end  = time();
