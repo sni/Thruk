@@ -186,13 +186,13 @@ sub update_bp_status {
 
 =head2 save_bp_objects
 
-    save_bp_objects($c, $bps)
+    save_bp_objects($c, $bps, [$skip_reload])
 
 save business processes objects to object file
 
 =cut
 sub save_bp_objects {
-    my($c, $bps) = @_;
+    my($c, $bps, $skip_reload) = @_;
 
     my $file   = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'};
     my $format = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_format'} || 'nagios';
@@ -233,6 +233,10 @@ sub save_bp_objects {
         if(!$result_backend && $Thruk::Backend::Pool::peer_order && scalar @{$Thruk::Backend::Pool::peer_order}) {
             my $peer_key = $Thruk::Backend::Pool::peer_order->[0];
             $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
+        }
+
+        if($skip_reload) {
+            return(0, "bp objects written, reload skipped.");
         }
 
         # and reload

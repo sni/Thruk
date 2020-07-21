@@ -10,7 +10,9 @@ The bp command provides all business process related cli commands.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] bp [commit|all|<nr>] [--worker=<nr>]
+  Usage: thruk [globaloptions] bp all [-w|--worker=<nr>]
+                                  <nr>
+                                  commit [--no-reload-core]
 
 =head1 OPTIONS
 
@@ -25,19 +27,23 @@ The bp command provides all business process related cli commands.
     write out all host/services objects for all business processes and update
     related cronjobs.
 
+=item B<--no-reload-core>
+
+    skip reloading core after writing files
+
 =item B<all>
 
     recalculate/update all business processes
 
-=item B<nr>
-
-    recalculate/update specific business process
-
-=item B<--worker>
+=item B<-w|--worker>
 
     use this number of worker processes to calculate all processes.
 
     Defaults to 'auto' which trys to find a suitable number automatically.
+
+=item B<nr>
+
+    recalculate/update specific business process
 
 =back
 
@@ -72,13 +78,15 @@ sub cmd {
     $c->stats->profile(begin => "_cmd_bp($action)");
     # parse options
     my $opt = {
-      'worker' => 'auto',
+      'worker'         => 'auto',
+      'no-reload-core' => undef,
     };
     Getopt::Long::Configure('no_ignore_case');
     Getopt::Long::Configure('bundling');
     Getopt::Long::Configure('pass_through');
     Getopt::Long::GetOptionsFromArray($commandoptions,
-       "w|worker=i" => \$opt->{'worker'},
+       "w|worker=i"     => \$opt->{'worker'},
+       "no-reload-core" => \$opt->{'no-reload-core'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -109,7 +117,7 @@ sub cmd {
         return if $c->cluster->run_cluster("all", "cmd: bp commit");
 
         my $bps = Thruk::BP::Utils::load_bp_data($c);
-        my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
+        my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps, ($opt->{'no-reload-core'} ? 1 : 0));
         if($rc != 0) {
             $c->stats->profile(end => "_cmd_bp($action)");
             return($msg, $rc);
