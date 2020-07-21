@@ -1364,6 +1364,7 @@ lists business processes.
 |Attribute                         | Description
 |affected_peers                    | list of backend ids used for the last calculation
 |bp_backend                        | id of backend which hosts the business process
+|create_host_object                | 0 - do no create a host object, 1 - create naemon host object
 |draft                             | flag wether this is a draft only
 |filter                            | list of enabled filters
 |id                                | primary id

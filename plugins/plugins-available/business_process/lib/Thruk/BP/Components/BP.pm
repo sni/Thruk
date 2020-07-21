@@ -26,7 +26,7 @@ Business Process
 
 my @extra_json_keys = qw/id draft/;
 my @stateful_keys   = qw/status status_text last_check last_state_change time affected_peers bp_backend/;
-my @saved_keys      = qw/name template rankDir state_type filter/;
+my @saved_keys      = qw/name template rankDir state_type filter create_host_object/;
 
 ##########################################################
 
@@ -40,32 +40,33 @@ sub new {
     my($class, $c, $file, $bpdata, $editmode) = @_;
 
     my $self = {
-        'id'                => undef,
-        'editmode'          => $editmode,
-        'name'              => undef,
-        'site'              => '',
-        'template'          => $bpdata->{'template'} || '',
-        'filter'            => [],
-        'nodes'             => [],
-        'nodes_by_id'       => {},
-        'nodes_by_name'     => {},
-        'need_update'       => {},
-        'need_save'         => 0,
-        'file'              => undef,
-        'datafile'          => undef,
-        'editfile'          => undef,
+        'id'                 => undef,
+        'editmode'           => $editmode,
+        'name'               => undef,
+        'site'               => '',
+        'template'           => $bpdata->{'template'} || '',
+        'filter'             => [],
+        'nodes'              => [],
+        'nodes_by_id'        => {},
+        'nodes_by_name'      => {},
+        'need_update'        => {},
+        'need_save'          => 0,
+        'file'               => undef,
+        'datafile'           => undef,
+        'editfile'           => undef,
 
-        'time'              => 0,
-        'status'            => 4,
-        'status_text'       => 'not yet checked',
-        'last_check'        => 0,
-        'last_state_change' => 0,
-        'rankDir'           => 'TB',
-        'state_type'        => 'both',
+        'time'               => 0,
+        'status'             => 4,
+        'status_text'        => 'not yet checked',
+        'last_check'         => 0,
+        'last_state_change'  => 0,
+        'rankDir'            => 'TB',
+        'state_type'         => 'both',
 
-        'exported_nodes'    => {},
-        'testmode'          => 0,
-        'draft'             => 0,
+        'exported_nodes'     => {},
+        'testmode'           => 0,
+        'draft'              => 0,
+        'create_host_object' => 1,      # 0 - do no create a host object, 1 - create naemon host object
     };
     bless $self, $class;
     $self->set_file($c, $file);

@@ -192,7 +192,7 @@ sub get_objects_conf {
 
     # first node always creates a host too
     my $obj = {};
-    if($self->{'id'} eq 'node1') {
+    if($self->{'id'} eq 'node1' && $bp->{'create_host_object'}) {
         $obj->{'hosts'}->{$bp->{'name'}} = {
             'host_name'      => $bp->{'name'},
             'alias'          => 'Business Process: '.$self->{'label'},
