@@ -388,7 +388,7 @@ sub _dispatcher {
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$url);
 
-    _finalize_request($c, $res);
+    finalize_request($c, $res);
 
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
@@ -933,7 +933,6 @@ sub init_logging {
 register callback to update cron jobs
 
 =cut
-
 sub register_cron_entries {
     my($self, $function) = @_;
     $self->{'_cron_callbacks'} = {} unless defined $self->{'_cron_callbacks'};
@@ -1046,9 +1045,17 @@ sub _set_content_length {
 }
 
 ###################################################
-sub _finalize_request {
+
+=head2 finalize_request
+
+    register_cron_entries($c, $res)
+
+finalize request data by adding profile and headers
+
+=cut
+sub finalize_request {
     my($c, $res) = @_;
-    $c->stats->profile(begin => "_finalize_request");
+    $c->stats->profile(begin => "finalize_request");
 
     if($c->stash->{'extra_headers'}) {
         push @{$res->[1]}, @{$c->stash->{'extra_headers'}};
@@ -1080,7 +1087,7 @@ sub _finalize_request {
     }
 
     my $elapsed = tv_interval($c->stash->{'time_begin'});
-    $c->stats->profile(end => "_finalize_request");
+    $c->stats->profile(end => "finalize_request");
     $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
     $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
     $c->stash->{'time_total'} = $elapsed;

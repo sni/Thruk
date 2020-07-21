@@ -171,13 +171,19 @@ sub perl {
             CORE::close(STDOUT);
         };
 
-        if($conf->{'render'} && $c->stash->{'template'}) {
+        if($conf->{'render'} && $c->stash->{'template'} && !$c->{'rendered'}) {
             local $c->stash->{'job_conf'}->{'clean'} = undef;
             _finished_job_page($c, $c->stash);
-            my $output = "";
-            Thruk::Views::ToolkitRenderer::render($c, $c->stash->{'template'}, $c->stash, \$output);
-            Thruk::Utils::IO::write($dir."/result.html", $output);
-            $c->stash->{'file_name'} = "result.html";
+            Thruk::Action::AddDefaults::end($c);
+            Thruk::Views::ToolkitRenderer::render_tt($c);
+            my $res = $c->res->finalize;
+            Thruk::finalize_request($c, $res);
+            Thruk::Utils::IO::write($dir."/result.dat", $res->[2]->[0]);
+            $c->stash->{'file_name'} = "result.dat";
+            $c->stash->{'file_name_meta'} = {
+                code    => $res->[0],
+                headers => $res->[1],
+            };
         }
 
         # save stash
@@ -957,6 +963,8 @@ sub _finished_job_page {
             Thruk::Utils::IO::close($fh, $file);
             unlink($file) if defined $c->stash->{cleanfile};
             $c->{'rendered'} = 1;
+            $c->res->code($stash->{'file_name_meta'}->{'code'}) if defined $stash->{'file_name_meta'}->{'code'};
+            push @{$c->stash->{'extra_headers'}}, @{$stash->{'file_name_meta'}->{'headers'}} if defined $stash->{'file_name_meta'}->{'headers'};
             remove_job_dir($stash->{job_dir}) if $cleanup;
             return;
         }
