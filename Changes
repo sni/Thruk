@@ -9,6 +9,7 @@ next:
             - add user/group based permissions
           - Business Process:
             - added option --no-reload-core to thruk cp commit
+            - added option --no-reload-cron to thruk cp commit
 
 2.36     Thu Jul  9 18:07:33 CEST 2020
           - add oauth login provider

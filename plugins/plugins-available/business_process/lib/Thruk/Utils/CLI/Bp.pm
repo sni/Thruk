@@ -12,7 +12,7 @@ The bp command provides all business process related cli commands.
 
   Usage: thruk [globaloptions] bp all [-w|--worker=<nr>]
                                   <nr>
-                                  commit [--no-reload-core]
+                                  commit [--no-reload-core] [--no-reload-cron]
 
 =head1 OPTIONS
 
@@ -30,6 +30,10 @@ The bp command provides all business process related cli commands.
 =item B<--no-reload-core>
 
     skip reloading core after writing files
+
+=item B<--no-reload-cron>
+
+    skip reloading cron after writing files
 
 =item B<all>
 
@@ -80,6 +84,7 @@ sub cmd {
     my $opt = {
       'worker'         => 'auto',
       'no-reload-core' => undef,
+      'no-reload-cron' => undef,
     };
     Getopt::Long::Configure('no_ignore_case');
     Getopt::Long::Configure('bundling');
@@ -87,6 +92,7 @@ sub cmd {
     Getopt::Long::GetOptionsFromArray($commandoptions,
        "w|worker=i"     => \$opt->{'worker'},
        "no-reload-core" => \$opt->{'no-reload-core'},
+       "no-reload-cron" => \$opt->{'no-reload-cron'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -122,7 +128,9 @@ sub cmd {
             $c->stats->profile(end => "_cmd_bp($action)");
             return($msg, $rc);
         }
-        Thruk::BP::Utils::update_cron_file($c); # check cronjob
+        if(!$opt->{'no-reload-cron'}) {
+            Thruk::BP::Utils::update_cron_file($c); # check cronjob
+        }
         $c->stats->profile(end => "_cmd_bp($action)");
         return('OK - wrote '.(scalar @{$bps})." business process(es)\n", 0);
     }
