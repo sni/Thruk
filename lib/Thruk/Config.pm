@@ -151,8 +151,8 @@ my $base_defaults = {
                 'childoptions'                  => 0,
                 'hostserviceoptions'            => 0,
     },
-    'command_disabled'                      => {},
-    'command_enabled'                       => {},
+    'command_disabled'                      => [],
+    'command_enabled'                       => [],
     'force_sticky_ack'                      => 0,
     'force_send_notification'               => 0,
     'force_persistent_ack'                  => 0,
@@ -465,10 +465,10 @@ sub set_config_env {
                         }
                         $configs->{$file}->{$key} = $hash;
                     }
-                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs->{$file}->{$key})); }
+                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({file => $file, key => $key, from_file => $configs->{$file}->{$key}, base => $config->{$key}})); }
                     $config->{$key} = { %{$config->{$key}}, %{$configs->{$file}->{$key}} };
                 } else {
-                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs->{$file}->{$key})); }
+                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({file => $file, key => $key, from_file => $configs->{$file}->{$key}, base => $config->{$key}})); }
                     $config->{$key} = { %{$config->{$key}}, %{$configs->{$file}->{$key}} };
                 }
             } else {
@@ -982,12 +982,11 @@ ex.: converts '3,7-9,15' -> [3,7,8,9,15]
 =cut
 
 sub expand_numeric_list {
-    my $txt  = shift;
-    my $c    = shift;
+    my($txt, $c) = @_;
     my $list = {};
     return [] unless defined $txt;
 
-    for my $item (ref $txt eq 'ARRAY' ? @{$txt} : $txt) {
+    for my $item (@{list($txt)}) {
         for my $block (split/\s*,\s*/mx, $item) {
             if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
                 for my $nr ($1..$2) {
