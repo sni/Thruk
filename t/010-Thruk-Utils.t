@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 108;
+    plan tests => 111;
 
     use lib('t');
     require TestUtils;
@@ -368,3 +368,14 @@ $chunks = Thruk::Utils::array_chunk_fixed_size([1..100], 3);
 is(scalar @{$chunks}, 34, "array_chunk_fixed_size returns 34 chunks");
 is(scalar @{$chunks->[0]}, 3, "array_chunk_fixed_size returns fixed sized chunks");
 is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunks");
+
+#########################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/number_lists';
+    my $config = Thruk::Config::set_config_env();
+    $app->{config} = $config;
+    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
+    is(Thruk::Utils::command_disabled($c, 0), 1, "0 is disabled");
+    is(Thruk::Utils::command_disabled($c, 3), 1, "3 is disabled");
+    is(Thruk::Utils::command_disabled($c, 5), 0, "5 is enabled");
+};

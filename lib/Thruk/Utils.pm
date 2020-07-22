@@ -3480,7 +3480,7 @@ sub command_disabled {
             }
         }
     }
-    return 1 if $c->stash->{'_command_disabled'}->{$nr};
+    return 1 if defined $c->stash->{'_command_disabled'}->{$nr};
     return 0;
 }
 

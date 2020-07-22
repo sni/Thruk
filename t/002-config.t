@@ -113,4 +113,12 @@ if(!$@) {
     is_deeply($config->{'Thruk::Plugin::test'}, $expected, "parsing multiple plugin sections");
 };
 
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/number_lists';
+    my $config = Thruk::Config::set_config_env();
+    my $exp = [ '3', '0-4,11-12' ];
+    is_deeply($config->{'command_disabled'}, $exp, "parsing cookie domain from thruk_local.d");
+};
+
 done_testing();
