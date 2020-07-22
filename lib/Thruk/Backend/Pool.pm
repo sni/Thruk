@@ -37,9 +37,9 @@ init thread connection pool
 =cut
 
 sub init_backend_thread_pool {
-    my($extra_backends) = @_;
+    my($backends) = @_;
     our($peer_order, $peers, $pool, $pool_size, $xs, $lmd_peer);
-    return if(defined $peers && !$extra_backends);
+    return if(defined $peers && !$backends);
     #&timing_breakpoint('creating pool');
 
     $xs = 0;
@@ -62,10 +62,7 @@ sub init_backend_thread_pool {
 
     my $config       = Thruk::Config::set_config_env();
     $Thruk::Utils::IO::config = $config;
-    my $peer_configs = $config->{'Component'}->{'Thruk::Backend'}->{'peer'} || $config->{'Thruk::Backend'}->{'peer'};
-    $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
-    $peer_configs    = [] unless defined $peer_configs;
-    push @{$peer_configs}, @{$extra_backends} if $extra_backends;
+    my $peer_configs = Thruk::Config::list($backends || $config->{'Thruk::Backend'}->{'peer'});
     my $num_peers    = scalar @{$peer_configs};
     if(defined $config->{'connection_pool_size'}) {
         $pool_size   = $config->{'connection_pool_size'};

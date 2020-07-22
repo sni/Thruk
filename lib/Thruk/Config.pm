@@ -439,71 +439,18 @@ sub set_config_env {
     my $config  = Storable::dclone($base_defaults);
 
     ###################################################
-    # merge files into defaults
-    my $first_backend_from_thruk_locals = 0;
-    for my $file (@files, 'thruk_local.conf') {
-        for my $key (keys %{$configs->{$file}}) {
-            if($key =~ '^Thruk::Plugin::' && !defined $config->{$key}) {
-                $config->{$key} = {};
-            }
-            if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
-                if($key eq 'Thruk::Backend') {
-                    # merge all backends from thruk_locals
-                    if(!$first_backend_from_thruk_locals && $file =~ m|thruk_local\.|mx) {
-                        $config->{$key}->{'peer'} = [];
-                        $first_backend_from_thruk_locals = 1;
-                    }
-                    for my $peer (@{list($configs->{$file}->{$key})}) {
-                        $config->{$key}->{'peer'} = [ @{list($config->{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
-                    }
-                }
-                elsif($key =~ '^Thruk::Plugin::') {
-                    if(ref $configs->{$file}->{$key} eq 'ARRAY') {
-                        my $hash = {};
-                        while(my $add = shift @{$configs->{$file}->{$key}}) {
-                            $hash = { %{$hash}, %{$add} };
-                        }
-                        $configs->{$file}->{$key} = $hash;
-                    }
-                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({file => $file, key => $key, from_file => $configs->{$file}->{$key}, base => $config->{$key}})); }
-                    $config->{$key} = { %{$config->{$key}}, %{$configs->{$file}->{$key}} };
-                } else {
-                    if(ref $configs->{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({file => $file, key => $key, from_file => $configs->{$file}->{$key}, base => $config->{$key}})); }
-                    $config->{$key} = { %{$config->{$key}}, %{$configs->{$file}->{$key}} };
-                }
-            } else {
-                $config->{$key} = $configs->{$file}->{$key};
-            }
+    # merge files into defaults, use backends from base config unless specified in local configs
+    my $base_backends;
+    for my $cfg (@{$configs}) {
+        my $file = $cfg->[0];
+        merge_sub_config($config, $cfg->[1]);
+        if($file =~ m/\Qthruk.conf\E$/mx) {
+            $base_backends = delete $config->{'Thruk::Backend'};
+            $config->{'Thruk::Backend'} = {};
         }
     }
+    $config->{'Thruk::Backend'} = $base_backends unless($config->{'Thruk::Backend'} && scalar keys %{$config->{'Thruk::Backend'}} > 0);
 
-    ###################################################
-    # merge users and groups
-    for my $type (qw/Group User/) {
-        if($config->{$type}) {
-            for my $name (keys %{$config->{$type}}) {
-                # if its a list of hashes, merge into one hash
-                if(ref $config->{$type}->{$name} eq 'ARRAY') {
-                    my $data = {};
-                    for my $d (@{$config->{$type}->{$name}}) {
-                        for my $key (keys %{$d}) {
-                            if(!defined $data->{$key}) {
-                                $data->{$key} = $d->{$key};
-                            }
-                            else {
-                                if(ref $data->{$key} eq 'ARRAY') {
-                                    push @{$data->{$key}}, $d->{$key};
-                                } else {
-                                    $data->{$key} = [$data->{$key}, $d->{$key}];
-                                }
-                            }
-                        }
-                    }
-                    $config->{$type}->{$name} = $data;
-                }
-            }
-        }
-    }
     return(set_default_config($config));
 }
 
@@ -795,10 +742,11 @@ sub _load_config_files {
 
     # read/load config files
     my @local_files;
+    my @base_files;
     if(scalar @{$files} == 0) {
         for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
-            push @{$files}, $path.'/thruk.conf' if -f $path.'/thruk.conf';
+            push @base_files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
                 my @tmpfiles = sort glob($path.'/thruk_local.d/*');
                 for my $tmpfile (@tmpfiles) {
@@ -825,16 +773,19 @@ sub _load_config_files {
                 }
             }
             push @local_files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
-            last if scalar @{$files} > 0;
+            last if scalar @base_files > 0;
         }
     }
 
-    my $cfg = load_any({
-        files       => [@{$files}, { 'thruk_local.conf' => \@local_files}],
-        filter      => \&_fix_syntax,
-    });
+    my $cfg = [];
+    for my $f (@{$files}, @base_files) {
+        push @{$cfg}, [$f, _fixup_config(read_config_file($f))];
+    }
+    push @{$cfg}, ['thruk_local.conf', _fixup_config(read_config_file(\@local_files))];
+
     return $cfg;
 }
+
 ######################################
 
 =head2 get_base_config
@@ -1292,52 +1243,6 @@ sub switch_user {
     return;
 }
 
-######################################
-sub _fix_syntax {
-    my($config) = @_;
-    my @components = (
-        map +{
-            prefix => $_ eq 'Component' ? '' : $_ . '::',
-            values => delete $config->{ lc $_ } || delete $config->{ $_ },
-        },
-        grep { ref $config->{ lc $_ } || ref $config->{ $_ } } qw( Component Model M View V Controller C Plugin ),
-    );
-
-    foreach my $comp ( @components ) {
-        my $prefix = $comp->{ prefix };
-        foreach my $element ( keys %{ $comp->{ values } } ) {
-            $config->{ "$prefix$element" } = $comp->{ values }->{ $element };
-        }
-    }
-    return;
-}
-
-########################################
-
-=head2 load_any( $options )
-
-replacement function for Config::Any->load_files
-
-=cut
-
-sub load_any {
-    my($options) = @_;
-    my $result = {};
-    for my $f (@{$options->{'files'}}) {
-        my $name  = $f;
-        my $files = $f;
-        if(ref $f eq 'HASH') {
-            my @keys = keys %{$f};
-            $name = $keys[0];
-            $files = $f->{$name};
-        }
-        my $config = read_config_file($files);
-        &{$options->{'filter'}}($config);
-        $result->{$name} = $config;
-    }
-    return($result);
-}
-
 ########################################
 
 =head2 read_cgi_cfg
@@ -1381,7 +1286,7 @@ sub read_cgi_cfg {
         $app->log->debug("reading $file");
         $app->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
         $app->{'cgi.cfg_effective'} = $file;
-        $app->{'cgi_cfg'}           = Thruk::Config::read_config_file($file);
+        $app->{'cgi_cfg'}           = read_config_file($file);
     }
     return($app->{'cgi_cfg'});
 }
@@ -1415,6 +1320,92 @@ sub _parse_omd_site_config {
         }
     }
     return($site_config);
+}
+
+########################################
+
+=head2 merge_sub_config
+
+  merge_sub_config($base_config, $sub_config)
+
+merge entries from $sub_config into $base_config.
+
+base config will not be cloned are therefore changed.
+
+=cut
+sub merge_sub_config {
+    my($base, $add) = @_;
+    my $config = $base;
+
+    for my $key (keys %{$add}) {
+        if($key =~ '^Thruk::Plugin::' && !defined $config->{$key}) {
+            $config->{$key} = {};
+        }
+        if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
+            if($key eq 'Thruk::Backend') {
+                # merge all backends
+                for my $peer (@{list($add->{$key})}) {
+                    $config->{$key}->{'peer'} = [ @{list($config->{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
+                }
+            }
+            elsif($key =~ '^Thruk::Plugin::') {
+                if(ref $add->{$key} eq 'ARRAY') {
+                    my $hash = {};
+                    while(my $add = shift @{$add->{$key}}) {
+                        $hash = { %{$hash}, %{$add} };
+                    }
+                    $add->{$key} = $hash;
+                }
+                if(ref $add->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}})); }
+                $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
+            } else {
+                if(ref $add->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}})); }
+                $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
+            }
+        } else {
+            $config->{$key} = $add->{$key};
+        }
+    }
+
+    return;
+}
+
+########################################
+# move Component one level up and merge Users/Groups
+sub _fixup_config {
+    my($config) = @_;
+    for my $key (sort keys %{$config->{'Component'}}) {
+        $config->{$key} = delete $config->{'Component'}->{$key};
+    }
+    delete $config->{'Component'};
+
+    for my $type (qw/Group User/) {
+        if($config->{$type}) {
+            for my $name (keys %{$config->{$type}}) {
+                # if its a list of hashes, merge into one hash
+                if(ref $config->{$type}->{$name} eq 'ARRAY') {
+                    my $data = {};
+                    for my $d (@{$config->{$type}->{$name}}) {
+                        for my $key (keys %{$d}) {
+                            if(!defined $data->{$key}) {
+                                $data->{$key} = $d->{$key};
+                            }
+                            else {
+                                if(ref $data->{$key} eq 'ARRAY') {
+                                    push @{$data->{$key}}, $d->{$key};
+                                } else {
+                                    $data->{$key} = [$data->{$key}, $d->{$key}];
+                                }
+                            }
+                        }
+                    }
+                    $config->{$type}->{$name} = $data;
+                }
+            }
+        }
+    }
+
+    return($config);
 }
 
 1;

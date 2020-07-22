@@ -441,50 +441,26 @@ sub add_defaults {
     ###############################
     # user / group specific config?
     if(!$no_config_adjustments && $c->user_exists) {
-        $c->stash->{'config_adjustments'} = {};
+        $c->stash->{'usr_config_adjustments'} = [];
         for my $group (@{$c->user->{'groups'}}) {
-            if(defined $c->config->{'Group'}->{$group}) {
-                $c->clone_user_config() unless $c->config->{'cloned'};
-                # move components one level up
-                if($c->config->{'Group'}->{$group}->{'Component'}) {
-                    for my $key (keys %{$c->config->{'Group'}->{$group}->{'Component'}}) {
-                        if($key eq 'Thruk::Backend' and defined $c->config->{'Group'}->{$group}->{'Component'}->{$key}->{'peer'}) {
-                            my $peers = $c->config->{'Group'}->{$group}->{'Component'}->{$key}->{'peer'};
-                            $peers = ref $peers eq 'HASH' ? [$peers] : $peers;
-                            push @{$c->stash->{'config_adjustments'}->{'extra_backends'}}, @{$peers};
-                        }
-                        $c->config->{'Group'}->{$group}->{$key} = $c->config->{'Group'}->{$group}->{'Component'}->{$key};
-                    }
-                }
-                for my $key (keys %{$c->config->{'Group'}->{$group}}) {
-                    $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
-                    $c->config->{$key} = $c->config->{'Group'}->{$group}->{$key};
-                }
+            if($c->config->{'Group'}->{$group}) {
+                push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Group'}->{$group};
             }
         }
         if(defined $c->config->{'User'}->{$c->stash->{'remote_user'}}) {
-            $c->clone_user_config() unless $c->config->{'cloned'};
-            if($c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}) {
-                for my $key (keys %{$c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}}) {
-                    if($key eq 'Thruk::Backend' and defined $c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}->{$key}->{'peer'}) {
-                        my $peers = $c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}->{$key}->{'peer'};
-                        $peers = ref $peers eq 'HASH' ? [$peers] : $peers;
-                        push @{$c->stash->{'config_adjustments'}->{'extra_backends'}}, @{$peers};
-                    }
-                    $c->config->{'User'}->{$c->stash->{'remote_user'}}->{$key} = $c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}->{$key};
-                }
-            }
-            for my $key (keys %{$c->config->{'User'}->{$c->stash->{'remote_user'}}}) {
-                $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
-                $c->config->{$key} = $c->config->{'User'}->{$c->stash->{'remote_user'}}->{$key};
-            }
+            push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'User'}->{$c->stash->{'remote_user'}};
         }
 
-        # reapply config defaults and config conversions
-        if(scalar keys %{$c->stash->{'config_adjustments'}} > 0) {
+        if(scalar @{$c->stash->{'usr_config_adjustments'}} > 0) {
+            $c->clone_user_config() unless $c->config->{'cloned'};
+            my $backends_changed;
+            for my $add (@{$c->stash->{'usr_config_adjustments'}}) {
+                $backends_changed = 1 if $add->{'Thruk::Backend'};
+                Thruk::Config::merge_sub_config($c->config, $add);
+            }
             Thruk::Config::set_default_config($c->config);
             set_configs_stash($c);
-            if($c->stash->{'config_adjustments'}->{'extra_backends'}) {
+            if($backends_changed) {
                 $c->app->{'config_adjustments_extra'} = {
                     peer_order  => $Thruk::Backend::Pool::peer_order,
                     peers       => $Thruk::Backend::Pool::peers,
@@ -492,7 +468,7 @@ sub add_defaults {
                     pool_size   => $Thruk::Backend::Pool::pool_size,
                     xs          => $Thruk::Backend::Pool::xs,
                 };
-                Thruk::Backend::Pool::init_backend_thread_pool($c->stash->{'config_adjustments'}->{'extra_backends'});
+                Thruk::Backend::Pool::init_backend_thread_pool($c->config->{'Thruk::Backend'}->{'peer'});
                 $c->{'db'} = Thruk::Backend::Manager->new();
                 $c->{'db'}->init();
             }
