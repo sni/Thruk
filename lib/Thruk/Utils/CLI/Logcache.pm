@@ -204,8 +204,8 @@ sub cmd {
             $log_count        = $log_count->[0];
         }
         my $action = "imported";
-        $action    = "updated" if $mode eq 'authupdate';
-        $action    = "removed" if $mode eq 'clean';
+        $action    = "updated"   if $mode eq 'authupdate';
+        $action    = "removed"   if $mode eq 'clean';
         Thruk::Backend::Manager::close_logcache_connections($c);
         return("\n", 1) if $log_count == -1;
         my($rc, $msg) = (0, 'OK');
@@ -222,6 +222,15 @@ sub cmd {
         }
         if($mode eq 'drop') {
             return(sprintf("%s - droped logcache for %i site%s in %.2fs\n%s",
+                           $msg,
+                           $backend_count,
+                           ($backend_count == 1 ? '' : 's'),
+                           ($elapsed),
+                           $details,
+                           ), $rc);
+        }
+        if($mode eq 'optimize') {
+            return(sprintf("%s - optimized logcache for %i site%s in %.2fs\n%s",
                            $msg,
                            $backend_count,
                            ($backend_count == 1 ? '' : 's'),

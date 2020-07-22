@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add logcache to thruk selfcheck
           - fix reordering columns on status page
           - fix paging on log pages
           - Config Tool:

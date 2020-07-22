@@ -67,6 +67,9 @@ sub self_check {
     if($type eq 'all' or $type eq 'lmd') {
         push @{$results}, _lmd_checks($c);
     }
+    if($type eq 'all' or $type eq 'logcache') {
+        push @{$results}, _logcache_checks($c);
+    }
 
     # aggregate results
     $details = "";
@@ -92,10 +95,12 @@ sub self_check {
     }
 
     # append performance data from /thruk/metrics
-    require Thruk::Utils::CLI::Rest;
-    my $res = Thruk::Utils::CLI::Rest::cmd($c, undef, ['-o', ' ', '/thruk/metrics']);
-    if($res->{'rc'} == 0 && $res->{'output'}) {
-        $details .= $res->{'output'};
+    if($type eq 'all') {
+        require Thruk::Utils::CLI::Rest;
+        my $res = Thruk::Utils::CLI::Rest::cmd($c, undef, ['-o', ' ', '/thruk/metrics']);
+        if($res->{'rc'} == 0 && $res->{'output'}) {
+            $details .= $res->{'output'};
+        }
     }
 
     return($rc, $msg, $details);
@@ -361,6 +366,66 @@ sub _lmd_checks  {
     return({sub => 'lmd', rc => 0, msg => "LMD OK", details => $details });
 }
 
+##############################################
+
+=head2 _logcache_checks
+
+    _logcache_checks($c)
+
+verify errors in logcache
+
+=cut
+sub _logcache_checks  {
+    my($c) = @_;
+    my $details = "Logcache:\n";
+
+    return unless defined $c->config->{'logcache'};
+
+    require Thruk::Backend::Provider::Mysql;
+    Thruk::Backend::Provider::Mysql->import;
+
+    my $rc      = 0;
+    my $errors  = 0;
+    my @stats     = Thruk::Backend::Provider::Mysql->_log_stats($c);
+    my $to_remove = Thruk::Backend::Provider::Mysql->_log_removeunused($c, 1);
+
+    for my $s (@stats) {
+        if($s->{'cache_version'} != $Thruk::Backend::Provider::Mysql::cache_version) {
+            $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, $s->{'cache_version'}, $Thruk::Backend::Provider::Mysql::cache_version);
+            $errors++;
+        }
+        if($s->{'last_update'} < time() - 1800) {
+            $details .= sprintf("  - [logcache %s] last update too old: %s (hint: check logcache update cronjob)\n", $s->{'name'}, scalar localtime $s->{'last_update'});
+            $errors++;
+        }
+        if($s->{'last_reorder'} eq '') {
+            $details .= sprintf('  - [logcache %s] tables have never been optimized (hint: run `thruk logcache optimize` once a week)'."\n", $s->{'name'});
+            $errors++;
+        }
+        elsif($s->{'last_reorder'} < time() - (31*86400)) {
+            $details .= sprintf('  - [logcache %s] last optimize run too old: %s (hint: run `thruk logcache optimize` once a week)'."\n", $s->{'name'}, scalar localtime $s->{'last_reorder'});
+            $errors++;
+        }
+    }
+
+    if(scalar keys %{$to_remove} == 0) {
+        $details .= sprintf("  - no old tables found in logcache\n");
+    } else {
+        for my $key (sort keys %{$to_remove}) {
+            $details .= sprintf('  - old logcache table %s could be removed. (hint: run `thruk logcache removeunused`)'."\n", $key);
+            $errors++;
+        }
+    }
+
+    if($errors == 0) {
+        $details .= "  - no errors in ".(scalar @stats)." logcaches\n";
+    } else {
+        $rc = 2;
+    }
+
+    my $msg = sprintf('Logcache %s', $rc_codes->{$rc});
+    return({sub => 'logcache', rc => $rc, msg => $msg, details => $details});
+}
 ##############################################
 
 1;

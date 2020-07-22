@@ -939,12 +939,16 @@ sub _log_stats {
         my($val1,$unit1) = Thruk::Utils::reduce_number($index_size, 'B', 1024);
         my($val2,$unit2) = Thruk::Utils::reduce_number($data_size, 'B', 1024);
         $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %7d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $res->{$key.'_log'}->{'Rows'});
+        my $status  = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
         push @result, {
-            key         => $key,
-            name        => $c->stash->{'backend_detail'}->{$key}->{'name'},
-            index_size  => $index_size,
-            data_size   => $data_size,
-            items       => $res->{$key.'_log'}->{'Rows'},
+            key             => $key,
+            name            => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            index_size      => $index_size,
+            data_size       => $data_size,
+            items           => $res->{$key.'_log'}->{'Rows'},
+            cache_version   => $status->{'cache_version'}->{'value'},
+            last_update     => $status->{'last_update'}->{'value'},
+            last_reorder    => $status->{'last_reorder'}->{'value'},
         };
     }
 
@@ -964,7 +968,7 @@ remove logcache tables from backends which do no longer exist
 =cut
 
 sub _log_removeunused {
-    my($self, $c) = @_;
+    my($self, $c, $print_only) = @_;
     $c->stats->profile(begin => "Mysql::_log_removeunused");
 
     # use first peers logcache
@@ -991,6 +995,7 @@ sub _log_removeunused {
     for my $key (@{$c->stash->{'backends'}}) {
         delete $backends->{$key};
     }
+    return($backends) if $print_only;
 
     my $removed = 0;
     my $tables  = 0;
@@ -1879,6 +1884,7 @@ sub _import_peer_logfiles {
     }
 
     my @columns = qw/class time type state host_name service_description plugin_output message state_type contact_name/;
+    my $reordered = 0;
     while($time <= $end) {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
@@ -1918,6 +1924,7 @@ sub _import_peer_logfiles {
             $log_count += $self->_import_logcache_from_file($mode,$dbh,[$file],$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$c);
         } else {
             $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c);
+            $reordered = 1;
         }
 
         $c->stats->profile(end => $stime);
@@ -1925,6 +1932,9 @@ sub _import_peer_logfiles {
 
     if($mode eq 'import') {
         $dbh->do('SET foreign_key_checks = 1');
+        if($reordered) {
+            $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+        }
     }
     # update index statistics
     $c->stats->profile(begin => "update index statistics");
