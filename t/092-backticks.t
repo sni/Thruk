@@ -13,22 +13,20 @@ my $cmds = [
 for my $cmd (@{$cmds}) {
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
   ok($ph, 'cmd started');
-  while(<$ph>) {
-    my $line = $_;
+  while(my $line = <$ph>) {
     chomp($line);
-    next if $line =~ m/Thruk\/Utils\/IO\.pm:/mx;
-    next if $line =~ m/\.pm:\d+:\s*\#/mx;
+    $line =~ s/'.*?'//gmx;
+    $line =~ s/\#.*$//gmx;
+    next if $line =~ m%\QThruk/Utils/IO.pm:\E%mx;
     next if $line =~ m/(CREATE|ALTER|TRUNCATE|OPTIMIZE|DROP|LOCK)\ TABLE/mx;
     next if $line =~ m/LEFT\ JOIN/mx;
     next if $line =~ m/INSERT\ INTO/mx;
-    next if $line =~ m/SELECT\ /mx;
-    next if $line =~ m/UPDATE\ /mx;
-    next if $line =~ m/DELETE\ FROM/mx;
     next if $line =~ m/CREATE\ INDEX/mx;
-    next if $line =~ m/\$prefix\.('|")_/mx;
-    next if $line =~ m/Thruk\/BP\/Utils\.pm:\d+:\s*\$str\ =/mx;
-    next if $line =~ m/lib\/Monitoring\/Availability\.pm/mx;
-    next if $line =~ m/lib\/Monitoring\/Config\.pm/mx;
+    next if $line =~ m/\$(prefix|key)\.('|")_/mx;
+    next if $line =~ m%\Qlib/Monitoring/Availability.pm:\E%mx;
+    next if $line =~ m%\Qconf/lib/Monitoring/Config.pm:\E%mx;
+    next if $line =~ m%\Q`_log`\E%mx;
+    next unless $line =~ m/`/gmx;
     fail($line);
   }
   close($ph);
