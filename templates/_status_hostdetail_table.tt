@@ -164,7 +164,7 @@
               [% IF on_demand_long_plugin_output %]
                 [% info_popup_event_type %]="return(show_plugin_output_popup(this, '[% h.name | html %]', '', '[% h.peer_key | html %]', escape_html_tags, [WIDTH,600,[% c.config.info_popup_options %]]));"
               [% ELSE %]
-                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% h.display_name | uri %]',WIDTH,600,[% c.config.info_popup_options %]));"
+                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(h.display_name) %]',WIDTH,600,[% c.config.info_popup_options %]));"
                 abbr="[% escape_html(plugin_output) %]<br>[% escape_html(nl2br(long_plugin_output)) %]"
               [% END %]
             [% END %]
