@@ -91,6 +91,9 @@ Ext.define('TP.SmallWidget', {
                 delete state.xdata.layout.lat3;
             }
             delete state.xdata.map;
+            // do not save runtime keys to dashboard file
+            delete state.xdata.appearance.speedoaxis_min;
+            delete state.xdata.appearance.speedoaxis_max;
             return state;
         };
         this.origApplyState = this.applyState;
