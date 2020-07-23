@@ -85,8 +85,8 @@
       }
   }
   catch(err) { console.log(err); }
-  /* favicon counter */
   [%+ IF fav_counter +%]
+  /* favicon counter */
   [% totals = set_favicon_counter(c) %]
     [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
       updateFaviconCounter([% totals.red %], '#FF5B33');

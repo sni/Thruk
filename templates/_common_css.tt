@@ -9,12 +9,6 @@
   [% IF !all_in_one_css || thruk_debug %]
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes.css' />
   [%+ END %]
-  <!--[if IE 5]>
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
-  <![endif]-->
-  <!--[if IE 6]>
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
-  <![endif]-->
 [% END %]
 [% IF !all_in_one_css || thruk_debug %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
@@ -34,10 +28,3 @@
 [% IF show_sitepanel == 'tree' %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jstree-3.3.8/themes/default/style.min.css' />
 [% END %]
-<!--[if IE 8]>
-<style type="text/css">
-.vertical {
-  filter: flipv() fliph(); writing-mode: tb-rl; /* required for IE < 9 */
-}
-</style>
-<![endif]-->

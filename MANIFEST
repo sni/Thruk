@@ -2851,7 +2851,6 @@ themes/themes-available/Classic/stylesheets/summary.css
 themes/themes-available/Classic/stylesheets/tac.css
 themes/themes-available/Classic/stylesheets/thruk_global.css
 themes/themes-available/Classic/stylesheets/thruk_noframes.css
-themes/themes-available/Classic/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Classic/stylesheets/trends.css
 themes/themes-available/Exfoliation/images/accept.png
 themes/themes-available/Exfoliation/images/ack.gif
@@ -3018,7 +3017,6 @@ themes/themes-available/Exfoliation/stylesheets/summary.css
 themes/themes-available/Exfoliation/stylesheets/tac.css
 themes/themes-available/Exfoliation/stylesheets/thruk_global.css
 themes/themes-available/Exfoliation/stylesheets/thruk_noframes.css
-themes/themes-available/Exfoliation/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Exfoliation/stylesheets/trends.css
 themes/themes-available/Neat/images
 themes/themes-available/Neat/stylesheets/avail.css
@@ -3063,7 +3061,6 @@ themes/themes-available/Neat/stylesheets/summary.css
 themes/themes-available/Neat/stylesheets/tac.css
 themes/themes-available/Neat/stylesheets/thruk_global.css
 themes/themes-available/Neat/stylesheets/thruk_noframes.css
-themes/themes-available/Neat/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Neat/stylesheets/trends.css
 themes/themes-available/Nuvola/changelog.txt
 themes/themes-available/Nuvola/images/accept.png
@@ -3269,7 +3266,6 @@ themes/themes-available/Nuvola/stylesheets/summary.css
 themes/themes-available/Nuvola/stylesheets/tac.css
 themes/themes-available/Nuvola/stylesheets/thruk_global.css
 themes/themes-available/Nuvola/stylesheets/thruk_noframes.css
-themes/themes-available/Nuvola/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Nuvola/stylesheets/trends.css
 themes/themes-available/Nuvola/templates/extra_headers.tt
 themes/themes-available/Nuvola/templates/side.tt
@@ -3423,7 +3419,6 @@ themes/themes-available/Thruk/images/yellow.gif
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css
-themes/themes-available/Thruk/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Thruk2/fonts/MaterialIcons-Regular.eot
 themes/themes-available/Thruk2/fonts/MaterialIcons-Regular.ttf
 themes/themes-available/Thruk2/fonts/MaterialIcons-Regular.woff
@@ -3590,7 +3585,6 @@ themes/themes-available/Thruk2/images/yellow.gif
 themes/themes-available/Thruk2/stylesheets/Thruk2.css
 themes/themes-available/Thruk2/stylesheets/thruk_global.css
 themes/themes-available/Thruk2/stylesheets/thruk_noframes.css
-themes/themes-available/Thruk2/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Vautour/images/accept.png
 themes/themes-available/Vautour/images/ack.gif
 themes/themes-available/Vautour/images/action.gif
@@ -3759,7 +3753,6 @@ themes/themes-available/Vautour/stylesheets/summary.css
 themes/themes-available/Vautour/stylesheets/tac.css
 themes/themes-available/Vautour/stylesheets/thruk_global.css
 themes/themes-available/Vautour/stylesheets/thruk_noframes.css
-themes/themes-available/Vautour/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Vautour/stylesheets/trends.css
 themes/themes-available/Vautour/stylesheets/Vautour.css
 themes/themes-available/Vautour/templates/extra_headers.tt
@@ -4011,7 +4004,6 @@ themes/themes-available/Wakizashi/stylesheets/summary.css
 themes/themes-available/Wakizashi/stylesheets/tac.css
 themes/themes-available/Wakizashi/stylesheets/thruk_global.css
 themes/themes-available/Wakizashi/stylesheets/thruk_noframes.css
-themes/themes-available/Wakizashi/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Wakizashi/stylesheets/trends.css
 themes/themes-available/Wakizashi/stylesheets/Wakizashi.css
 themes/themes-enabled/Classic
