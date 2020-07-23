@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - rewrite config reading, cgi.cfg will now simply be merged
           - add logcache to thruk selfcheck
           - add dynamic columns for status overview page
           - add dynamic columns for status grid page
