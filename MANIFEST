@@ -2013,6 +2013,7 @@ t/scenarios/backend_http_readonly/Makefile
 t/scenarios/backend_http_readonly/omd/Dockerfile
 t/scenarios/backend_http_readonly/omd/playbook.yml
 t/scenarios/backend_http_readonly/omd/thruk_local.conf
+t/scenarios/backend_http_readonly/t/100-wait-for-backends.t
 t/scenarios/backend_http_readonly/t/300-controller_extinfo.t
 t/scenarios/backend_http_readonly/t/300-controller_showlog.t
 t/scenarios/backend_http_readonly/t/300-controller_status.t
