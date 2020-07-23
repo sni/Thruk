@@ -81,7 +81,7 @@ my $logoptions = {
 };
 $logoptions->{'nocache'} = 1 if $opt->{'nocache'};
 my $logs = $db->get_logs(%{$logoptions});
-_info(sprintf("fetched %i log entries", scalar @{$logs})) if $opt->{'verbose'};
+_info(sprintf("fetched %i matching log entries", scalar @{$logs})) if $opt->{'verbose'};
 
 # fetch global eventhandler status
 my $status = $db->get_processinfo();
@@ -164,12 +164,13 @@ This script collects logs
     -n|--nocache            bypass logcache (if enabled)
     -f|--foreground         do not run eventhandler in background
     -t|--testmode           do not actially run eventhandler command, just print it
+    -v|--verbose            print additional debug information
 
 =head1 EXAMPLE
 
     run eventhandler for all services which downtimes stopped in the last 60 seconds
 
-trigger_eventhandler_at_downtime_end --lockback=60
+trigger_eventhandler_at_downtime_end --lookback=60
 
 =head1 AUTHOR
 
