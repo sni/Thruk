@@ -2396,6 +2396,47 @@ sub get_overview_columns {
 
 ##############################################
 
+=head2 get_grid_columns
+
+  get_grid_columns($c)
+
+returns list of grid columns
+
+=cut
+sub get_grid_columns {
+    my($c) = @_;
+
+    my $columns = [
+        { title => "Host",                 "field" => "name",                 "checked" => 1 },
+        { title => "Status",               "field" => "state",                "checked" => 1 },
+        { title => "Actions",              "field" => "actions",              "checked" => 1 },
+        { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
+        { title => "Host Address",         "field" => "address",              "checked" => 0 },
+        { title => "Host Alias",           "field" => "alias",                "checked" => 0 },
+    ];
+
+    if($c->config->{'show_custom_vars'}) {
+        for my $var (@{$c->config->{'show_custom_vars'}}) {
+            if($var !~ m/\*/mx) { # does not work with wildcards
+                push @{$columns},
+                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
+            }
+        }
+    }
+
+    my @selected;
+    for my $col (@{$columns}) {
+        if($col->{'checked'}) {
+            push @selected, $col->{'field'};
+        }
+    }
+    $c->stash->{'default_grid_columns'} = $c->config->{'default_grid_columns'} || join(",", @selected);
+    $c->stash->{'default_grid_columns'} =~ s/\s+//gmx;
+    return($columns);
+}
+
+##############################################
+
 =head2 sort_table_columns
 
   sort_table_columns($columns, $params)

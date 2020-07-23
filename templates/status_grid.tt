@@ -75,18 +75,29 @@
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <div align="center">
-
-      [% FOR g IN data %]
+      <table border="0" cellpadding="10">
+          [% FOR g IN data %]
+        <tr>
+          <td valign="top" align="center">
       [% IF substyle == 'host' %]
       <div class='status'><a href="status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %]</a> (<a href="extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]">[% g.name | html %]</a>)</div>
       [% ELSIF substyle == 'service' %]
       <div class='status'><a href="status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %]</a> (<a href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]">[% g.name | html %]</a>)</div>
       [% END %]
-      <table border="1" class='status statusgroups' align="center">
-        <tr>
-          <th class='status'>Host</th>
-          <th class='status'>Services</th>
-          <th class='status'>Actions</th>
+      [% IF loop.first %]
+      [% PROCESS _status_column_select.tt colprefix="grd" columns_name="grid" %]
+      [% END %]
+      [% start_with = 3 %]
+      <table border="1" class='status statusgroups [% paneprefix %]_table statusTable' [% IF has_columns %] style="visibility: hidden;"[% END %]>
+        <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
+          <th class='status col_name' nowrap>Host</th>
+          <th class='status col_state' nowrap>Status</th>
+          <th class='status col_actions' nowrap>Actions</th>
+          [% FOREACH col = default_columns.$paneprefix %]
+            [% IF loop.index >= start_with %]
+            <th class="status col_[% col.field | html %]" style="display: none;" nowrap>[% col.title | html %]</th>
+            [% END %]
+          [% END %]
         </tr>
         [% FOR hostname IN g.hosts.keys.sort %]
         [% SET h = g.hosts.$hostname %]
@@ -98,7 +109,7 @@
           [% hostclass = 'statusHOSTUNREACHABLE' %]
         [% END %]
         <tr class='[% hostclass %][% IF loop.first %] firstrow[% END %]'>
-          <td class='[% hostclass %]'>
+          <td class='[% hostclass %] name'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
               <tr>
                 <td align="left">
@@ -122,7 +133,7 @@
               </tr>
             </table>
           </td>
-          <td class='[% hostclass %]'>
+          <td class='[% hostclass %] state'>
             [% FOR servicename IN h.services.keys.sort %]
             [% SET s = h.services.$servicename %]
             [% IF s.has_been_checked == 0 %]
@@ -140,7 +151,7 @@
             [% IF loop.index > 0 && loop.index % 7 == 0 %]<br>[% END %]
             [% END %]
           </td>
-          <td class='[% hostclass %]'>
+          <td class='[% hostclass %] actions'>
             <a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
             [% IF h.notes_url_expanded %]
             <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
@@ -154,12 +165,33 @@
             <a href="statusmap.cgi?host=[% h.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map' width="20" height="20"></a>
             [% END %]
           </td>
+          <td class='[% hostclass %] address' style="display: none;" nowrap align="left">[% h.address | html %]</td>
+          <td class='[% hostclass %] alias' style="display: none;" nowrap align="left">[% h.alias | html %]</td>
+          <td class='[% hostclass %] peer_name' style="display: none;" nowrap align="left">[% h.peer_name | html %]</td>
         </tr>
         [% END %]
       </table>
+    </td></tr>
       [% END %]
+    </table>
     </div>
 
     <div align="center">[% PROCESS _pager.tt %]</div>
+
+    <script type="text/javascript">
+    <!--
+      if(!window.default_columns) { default_columns = {}; }
+      default_columns["[% paneprefix %]"] = "[% default_grid_columns %]";
+      jQuery(document).ready(function() {
+        [% IF has_columns %]
+        updateStatusColumns("[% paneprefix %]", false);
+        [% END %]
+        [% IF c.req.parameters.defined("autoShow") %]
+        initStatusTableColumnSorting('[% paneprefix %]', 'statusTable');
+        toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
+        [% END %]
+      });
+    -->
+    </script>
 
 [% PROCESS _footer.tt %]

@@ -3242,7 +3242,7 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
             additionalParams[id+'columns'] = newVal;
             delete removeParams[id+'columns'];
 
-            if(reloadRequired && table.rows[1] && table.rows[1].cells.length < 6) {
+            if(reloadRequired && table.rows[1] && table.rows[1].cells.length < 3) {
                 additionalParams["autoShow"] = id+"_columns_select";
                 delete removeParams['autoShow'];
                 jQuery('#'+id+"_columns_select").find("DIV.shadowcontent").append("<div class='overlay'></div>").append("<div class='overlay-text'><img class='overlay' src='"+url_prefix + 'themes/' +  theme + "/images/loading-icon.gif'><br>fetching table...</div>");

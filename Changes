@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - add logcache to thruk selfcheck
           - add dynamic columns for status overview page
+          - add dynamic columns for status grid page
           - fix reordering columns on status page
           - fix paging on log pages
           - Config Tool:

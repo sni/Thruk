@@ -831,8 +831,10 @@ sub _process_grid_page {
 
     die("no substyle!") unless defined $c->stash->{substyle};
 
+    $c->stash->{'paneprefix'} = 'grd_';
+
     # which host to display?
-    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
+    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c, "grd_");
     return 1 if $c->stash->{'has_error'};
 
     my($host_data, $services_data) = _fill_host_services_hashes($c,
@@ -927,6 +929,14 @@ sub _process_grid_page {
             }
         }
     }
+
+    $c->stash->{'show_column_select'} = 1;
+    my $user_data = Thruk::Utils::get_user_data($c);
+    $c->stash->{'default_columns'}->{'grd_'} = Thruk::Utils::Status::get_grid_columns($c);
+    my $selected_columns = $c->req->parameters->{'grd_columns'} || $user_data->{'columns'}->{'grd'} || $c->config->{'default_overview_columns'};
+    $c->stash->{'table_columns'}->{'grd_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'grd_'}, $selected_columns);
+    $c->stash->{'has_columns'} = $selected_columns ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'grd_'} = $user_data->{'columns'}->{'grd'} ? 1 : 0;
 
     return 1;
 }
@@ -1468,7 +1478,7 @@ sub _process_set_default_columns {
 
     my $val  = $c->req->parameters->{'value'} || '';
     my $type = $c->req->parameters->{'type'}  || '';
-    if($type ne 'svc' && $type ne 'hst' && $type ne 'ovr') {
+    if($type ne 'svc' && $type ne 'hst' && $type ne 'ovr' && $type ne 'grd') {
         return(1, 'unknown type');
     }
 
@@ -1532,7 +1542,7 @@ sub _fill_host_services_hashes {
     my($c, $hostfilter, $servicefilter, $all_columns) = @_;
 
     my $host_data;
-    my $tmp_host_data = $c->{'db'}->get_hosts( filter => $hostfilter, columns => $all_columns ? [qw/name state alias display_name icon_image_expanded icon_image_alt notes_url_expanded action_url_expanded/] : [qw/name/] );
+    my $tmp_host_data = $c->{'db'}->get_hosts( filter => $hostfilter, columns => $all_columns ? [qw/name state alias address display_name icon_image_expanded icon_image_alt notes_url_expanded action_url_expanded/] : [qw/name/] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
