@@ -103,6 +103,15 @@ Available columns for services are:
     - notification_period
     - percent_state_change
 
+Available columns for overview are:
+
+    - name
+    - alias
+    - address
+    - state
+    - services
+    - actions
+
 == Adding custom variables
 It is possible to display custom variables into their own column. Thruk will
 automatically add all custom variables which are listed in the `show_custom_vars`

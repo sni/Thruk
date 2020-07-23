@@ -680,10 +680,11 @@ sub _process_hostdetails_page {
 sub _process_overview_page {
     my( $c ) = @_;
 
+    $c->stash->{'paneprefix'} = 'ovr_';
     $c->stash->{'columns'} = $c->req->parameters->{'columns'} || 3;
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
+    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c, 'ovr_');
     return 1 if $c->stash->{'has_error'};
 
     die("no substyle!") unless defined $c->stash->{substyle};
@@ -691,7 +692,7 @@ sub _process_overview_page {
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
-    my $tmp_host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name state num_services_pending num_services_ok num_services_warn num_services_unknown num_services_crit display_name custom_variable_names custom_variable_values/ ] );
+    my $tmp_host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address alias has_been_checked name state num_services_pending num_services_ok num_services_warn num_services_unknown num_services_crit display_name custom_variable_names custom_variable_values/ ] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
@@ -807,6 +808,14 @@ sub _process_overview_page {
             delete $joined_groups{$name};
         }
     }
+
+    $c->stash->{'show_column_select'} = 1;
+    my $user_data = Thruk::Utils::get_user_data($c);
+    $c->stash->{'default_columns'}->{'ovr_'} = Thruk::Utils::Status::get_overview_columns($c);
+    my $selected_columns = $c->req->parameters->{'ovr_columns'} || $user_data->{'columns'}->{'ovr'} || $c->config->{'default_overview_columns'};
+    $c->stash->{'table_columns'}->{'ovr_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'ovr_'}, $selected_columns);
+    $c->stash->{'has_columns'} = $selected_columns ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'ovr_'} = $user_data->{'columns'}->{'ovr'} ? 1 : 0;
 
     my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
@@ -1459,7 +1468,7 @@ sub _process_set_default_columns {
 
     my $val  = $c->req->parameters->{'value'} || '';
     my $type = $c->req->parameters->{'type'}  || '';
-    if($type ne 'svc' && $type ne 'hst') {
+    if($type ne 'svc' && $type ne 'hst' && $type ne 'ovr') {
         return(1, 'unknown type');
     }
 

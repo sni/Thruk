@@ -75,7 +75,6 @@
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <div align="center">
-
       <table border="0" cellpadding="10">
         <tr>
           [% FOR g IN data %]
@@ -86,12 +85,21 @@
             <div class='status'><a href="status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %]</a> (<a href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]">[% g.name | html %]</a>)</div>
             [% END %]
             <div class='status'>
-              <table border="1" class='status statusgroups'>
-                <tr>
-                  <th class='status'>Host</th>
-                  <th class='status'>Status</th>
-                  <th class='status'>Services</th>
-                  <th class='status'>Actions</th>
+              [% IF loop.first %]
+              [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
+              [% END %]
+              [% start_with = 4 %]
+              <table border="1" class='status statusgroups [% paneprefix %]_table statusTable' [% IF has_columns %] style="visibility: hidden;"[% END %]>
+                <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
+                  <th class='status col_name' nowrap>Host</th>
+                  <th class='status col_state' nowrap>Status</th>
+                  <th class='status col_services' nowrap>Services</th>
+                  <th class='status col_actions' nowrap>Actions</th>
+                  [% FOREACH col = default_columns.$paneprefix %]
+                  [% IF loop.index >= start_with %]
+                  <th class="status col_[% col.field | html %]" style="display: none;" nowrap>[% col.title | html %]</th>
+                  [% END %]
+                [% END %]
                 </tr>
                 [% FOR hostname IN g.hosts.keys.sort %]
                 [% SET h = g.hosts.$hostname %]
@@ -104,7 +112,7 @@
                   [% hostclass = 'statusHOSTUNREACHABLE' %]
                 [% END %]
                 <tr class='[% hostclass %][% IF loop.first %] firstrow[% END %]'>
-                  <td class='[% hostclass %]'>
+                  <td class='[% hostclass %] name'>
                     <table border="0" width="100%" cellpadding="0" cellspacing="0">
                       <tr class='[% hostclass %]'>
                         <td class='[% hostclass %]'><a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% h.display_name | html %]</a></td>
@@ -118,15 +126,15 @@
                     </table>
                   </td>
                   [% IF h.has_been_checked == 0 %]
-                  <td class='statusHOSTPENDING'>PENDING</td>
+                  <td class='statusHOSTPENDING state'>PENDING</td>
                   [% ELSIF h.state == 0 %]
-                  <td class='statusHOSTUP'>UP</td>
+                  <td class='statusHOSTUP state'>UP</td>
                   [% ELSIF h.state == 1 %]
-                  <td class='statusHOSTDOWN'>DOWN</td>
+                  <td class='statusHOSTDOWN state'>DOWN</td>
                   [% ELSIF h.state == 2 %]
-                  <td class='statusHOSTUNREACHABLE'>UNREACHABLE</td>
+                  <td class='statusHOSTUNREACHABLE state'>UNREACHABLE</td>
                   [% END %]
-                  <td class='[% hostclass %]'>
+                  <td class='[% hostclass %] services'>
                     <table border="0" width="100%">
                       [% grouplink = substyle _ 'group' %]
                       [% IF h.ok       %]<tr><td class='miniStatusOK'><a href='[%       uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '2',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.ok %] OK</a></td></tr>[% END %]
@@ -139,7 +147,7 @@
                     No matching services
                     [% END %]
                   </td>
-                  <td class='[% hostclass %]'>
+                  <td class='[% hostclass %] actions'>
                     <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
                     [% IF h.notes_url_expanded %]
                     <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
@@ -153,6 +161,9 @@
                     <a href="statusmap.cgi?host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
                     [% END %]
                   </td>
+                  <td class='[% hostclass %] address' style="display: none;" nowrap align="left">[% h.address | html %]</td>
+                  <td class='[% hostclass %] alias' style="display: none;" nowrap align="left">[% h.alias | html %]</td>
+                  <td class='[% hostclass %] peer_name' style="display: none;" nowrap align="left">[% h.peer_name | html %]</td>
                 </tr>
                 [% END %]
               </table>
@@ -170,5 +181,21 @@
     </div>
 
     <div align="center">[% PROCESS _pager.tt %]</div>
+
+    <script type="text/javascript">
+      <!--
+        if(!window.default_columns) { default_columns = {}; }
+        default_columns["[% paneprefix %]"] = "[% default_overview_columns %]";
+        jQuery(document).ready(function() {
+          [% IF has_columns %]
+          updateStatusColumns("[% paneprefix %]", false);
+          [% END %]
+          [% IF c.req.parameters.defined("autoShow") %]
+          initStatusTableColumnSorting('[% paneprefix %]', 'statusTable');
+          toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
+          [% END %]
+        });
+      -->
+      </script>
 
 [% PROCESS _footer.tt %]

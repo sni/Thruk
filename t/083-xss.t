@@ -22,7 +22,7 @@ my $whitelist_vars = Thruk::Utils::array2hash([qw/
     h.current_notification_number s.current_notification_number how_far_back audiofile
     host.$host_icon_image_alt host_comment_count param_name state_color last_col
     crit.text crit.value icon pic pnpdata onchange
-    day monthday hour hours min key helpkey
+    day monthday hour hours min key helpkey colprefix columns_name
     has_bp bp.fullid r.fullid hex rd.file b.basefile
     host_health_pic service_health_pic health_perc service_perc
     a.t1 a.t2 nr id first_remaining

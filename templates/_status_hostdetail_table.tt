@@ -1,49 +1,9 @@
 ﻿[% PROCESS _blocks.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
-
-    [% IF show_form %]<form action="#" method="POST">[% END %]
-    <button class="thruk_btn primary small wrench" style="display: none; position: absolute;" name="columns" id="[% paneprefix %]_btn_columns_hover" onclick="initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()"></button>
-    <div class="filter_pane" style="visibility:hidden; left: 50px;" id="[% paneprefix %]_columns_select">
-    <div class="shadow"><div class="shadowcontent">
-    <table border="1" class='filter' cellspacing="0" cellpadding="0">
-      <tr>
-        <td class='filter' style="width: 140px;">
-          <table border="0" cellspacing="2" cellpadding="0">
-            <tr>
-              <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Edit Columns:</td>
-              <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %]_accept_columns" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" alt="accept"></td>
-            </tr>
-          </table>
-          <table border=0 cellspacing=2 cellpadding=0 width="100%" id="[% paneprefix %]_columns_table">
-            <thead>
-              <tr>
-                <th colspan=2 class="drag_hint">reorder columns with drag/drop<br>rename with double click</th>
-              </tr>
-              <tr>
-                <th colspan=2 class="drag_hint"><input type="button" value="use as my default host columns" onclick='setDefaultColumns("hst", "[% paneprefix %]")'></th>
-              </tr>
-              <tr>
-                <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default host columns" onclick='setDefaultColumns("hst", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
-              </tr>
-            </thead>
-            <tbody>
-            [% FOREACH col = table_columns.$paneprefix %]
-            <tr>
-              <td valign="top" align="right" class="filterName clickable col_[% col.field | html %]" id="[% paneprefix %]_col_[% col.field | html %]n" width="90%">[% col.title | html %]</td>
-              <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; escape_html(col.title); END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field | html %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
-            </tr>
-            [% END %]
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </table>
-    </div></div>
-    </div>
-    [% IF show_form %]</form>[% END %]
+[% PROCESS _status_column_select.tt colprefix="hst" columns_name="host" %]
 
       [% start_with = 5 %]
-      <table border="0" class='status [% paneprefix %]_table' width="100%" id="hoststatusTable" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %]>
+      <table border="0" class='status [% paneprefix %]_table hoststatusTable' width="100%" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %]>
         <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
           [% IF show_backends_in_table == 2 %]
           <th class='status col_peer_name' nowrap>Site&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by site (ascending)' title='Sort by site (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by site (descending)' title='Sort by site (descending)'></a></th>[% start_with = start_with + 1 %]

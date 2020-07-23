@@ -2492,6 +2492,7 @@ templates/_show_link.tt
 templates/_side_js.tt
 templates/_sounds.tt
 templates/_status_cmd_pane.tt
+templates/_status_column_select.tt
 templates/_status_detail_table.tt
 templates/_status_filter.tt
 templates/_status_filter_single.tt

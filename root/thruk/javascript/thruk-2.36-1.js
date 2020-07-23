@@ -2931,10 +2931,10 @@ function initExcelExportSorting() {
 
 // make the columns sortable
 var already_sortable = {};
-function initStatusTableColumnSorting(pane_prefix, table_id) {
+function initStatusTableColumnSorting(pane_prefix, table_class) {
     if(!has_jquery_ui) {
         load_jquery_ui(function() {
-            initStatusTableColumnSorting(pane_prefix, table_id);
+            initStatusTableColumnSorting(pane_prefix, table_class);
         });
         return;
     }
@@ -2943,48 +2943,50 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
     }
     already_sortable[pane_prefix] = true;
 
-    jQuery('#'+table_id+' > tbody > tr:first-child').sortable({
-        items                : '> th',
-        helper               : 'clone',
-        tolerance            : 'pointer',
-        update               : function( event, ui ) {
-            var oldIndexes = [];
-            var rowsToSort = {};
-            var table;
-            // remove all current rows from the column selector, they will be later readded in the right order
-            jQuery('#'+pane_prefix+'_columns_table > tbody > tr').each(function(i, el) {
-                table = el.parentNode;
-                var row = el.parentNode.removeChild(el);
-                var field = jQuery(row).find("input").val();
-                rowsToSort[field] = row;
-                oldIndexes.push(field);
-            });
-            // fetch the target column order based on the current status table header
-            var target = [];
-            jQuery('#'+table_id+' > tbody > tr:first-child > th').each(function(i, el) {
-                var col = get_column_from_classname(el);
-                if(col) {
-                    target.push(col);
-                }
-            });
-            jQuery(target).each(function(i, el) {
-                table.appendChild(rowsToSort[el]);
-            });
-            // remove the current column header and readd them in original order, so later ordering wont skip headers
-            var currentHeader = {};
-            jQuery('#'+table_id+' > tbody > tr:first-child > th').each(function(i, el) {
-                table = el.parentNode;
-                var row = el.parentNode.removeChild(el);
-                var col = get_column_from_classname(el);
-                if(col) {
-                    currentHeader[col] = row;
-                }
-            });
-            oldIndexes.forEach(function(el, i) {
-                table.appendChild(currentHeader[el]);
-            });
-            updateStatusColumns(pane_prefix, false);
-        }
+    jQuery('TABLE.'+table_class).each(function(j, table) {
+        jQuery(table).find('tbody > tr:first-child').sortable({
+            items                : '> th',
+            helper               : 'clone',
+            tolerance            : 'pointer',
+            update               : function( event, ui ) {
+                var oldIndexes = [];
+                var rowsToSort = {};
+                var base_table;
+                // remove all current rows from the column selector, they will be later readded in the right order
+                jQuery('#'+pane_prefix+'_columns_table > tbody > tr').each(function(i, el) {
+                    base_table = el.parentNode;
+                    var row = el.parentNode.removeChild(el);
+                    var field = jQuery(row).find("input").val();
+                    rowsToSort[field] = row;
+                    oldIndexes.push(field);
+                });
+                // fetch the target column order based on the current status table header
+                var target = [];
+                jQuery(table).find('tbody > tr:first-child > th').each(function(i, el) {
+                    var col = get_column_from_classname(el);
+                    if(col) {
+                        target.push(col);
+                    }
+                });
+                jQuery(target).each(function(i, el) {
+                    base_table.appendChild(rowsToSort[el]);
+                });
+                // remove the current column header and readd them in original order, so later ordering wont skip headers
+                var currentHeader = {};
+                jQuery(table).find('tbody > tr:first-child > th').each(function(i, el) {
+                    base_table = el.parentNode;
+                    var row = el.parentNode.removeChild(el);
+                    var col = get_column_from_classname(el);
+                    if(col) {
+                        currentHeader[col] = row;
+                    }
+                });
+                oldIndexes.forEach(function(el, i) {
+                    base_table.appendChild(currentHeader[el]);
+                });
+                updateStatusColumns(pane_prefix, false);
+            }
+        })
     });
     jQuery('#'+pane_prefix+'_columns_table tbody').sortable({
         items                : '> tr',
@@ -2998,7 +3000,7 @@ function initStatusTableColumnSorting(pane_prefix, table_id) {
         }
     });
     /* enable changing columns header name */
-    jQuery('#'+table_id+' > tbody > tr:first-child > th').dblclick(function(evt) {
+    jQuery('TABLE.'+table_class+' > tbody > tr:first-child > th').dblclick(function(evt) {
         var th = evt.target;
         var text   = (th.innerText || '').replace(/\s*$/, '');
         var childs = removeChilds(th);
@@ -3133,13 +3135,20 @@ function get_column_from_classname(el) {
 // apply status table columns
 function updateStatusColumns(id, reloadRequired) {
     resetRefresh();
-    var table = jQuery('.'+id+'_table')[0];
-    if(!table) {
+    var tables = jQuery('.'+id+'_table');
+    if(!tables || tables.length == 0) {
         if(thruk_debug_js) { alert("ERROR: no table found in updateStatusColumns(): " + id); }
     }
+    jQuery.each(tables, function(i, table) {
+        table.style.visibility = "hidden";
+        updateStatusColumnsTable(id, table, reloadRequired);
+        table.style.visibility = "visible";
+    });
+}
+
+function updateStatusColumnsTable(id, table, reloadRequired) {
     var changed = false;
     if(reloadRequired == undefined) { reloadRequired = true; }
-    table.style.visibility = "hidden";
 
     removeParams['autoShow'] = true;
 
@@ -3197,7 +3206,6 @@ function updateStatusColumns(id, reloadRequired) {
         var newHeadEl = document.getElementById(el.id+'n');
         if(!newHeadEl) {
             if(thruk_debug_js) { alert("ERROR: header element not found in updateStatusColumns(): " + el.id+'n'); }
-            table.style.visibility = "visible";
             return;
         }
         var newHead = newHeadEl.innerHTML.trim();
@@ -3234,11 +3242,10 @@ function updateStatusColumns(id, reloadRequired) {
             additionalParams[id+'columns'] = newVal;
             delete removeParams[id+'columns'];
 
-            if(reloadRequired && table.rows[1] && table.rows[1].cells.length < 10) {
+            if(reloadRequired && table.rows[1] && table.rows[1].cells.length < 6) {
                 additionalParams["autoShow"] = id+"_columns_select";
                 delete removeParams['autoShow'];
                 jQuery('#'+id+"_columns_select").find("DIV.shadowcontent").append("<div class='overlay'></div>").append("<div class='overlay-text'><img class='overlay' src='"+url_prefix + 'themes/' +  theme + "/images/loading-icon.gif'><br>fetching table...</div>");
-                table.style.visibility = "visible";
                 reloadPage();
                 return;
             }
@@ -3249,7 +3256,6 @@ function updateStatusColumns(id, reloadRequired) {
         }
         updateUrl();
     }
-    table.style.visibility = "visible";
 }
 
 /* reload page with with sorting parameters set */
