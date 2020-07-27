@@ -137,9 +137,9 @@
             <td align="left" class='[% serviceclass %] plugin_output mightOverflow'
             [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
               [% IF on_demand_long_plugin_output %]
-                [% info_popup_event_type %]="return(show_plugin_output_popup(this, '[% s.host_name | uri %]', '[% s.description | uri %]', '[% s.peer_key | uri %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], [WIDTH,600,[% c.config.info_popup_options %]]));"
+                [% info_popup_event_type %]="return(show_plugin_output_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% escape_js(s.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], [WIDTH,600,[% c.config.info_popup_options %]]));"
               [% ELSE %]
-                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(s.host_display_name) %] - [% escape_js(s.display_name) %]',WIDTH,600,[% c.config.info_popup_options %]));"
+                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_html(escape_js(s.host_display_name)) %] - [% escape_html(escape_js(s.display_name)) %]',WIDTH,600,[% c.config.info_popup_options %]));"
                 abbr="[% escape_html(plugin_output) %]<br>[% escape_html(nl2br(long_plugin_output)) %]"
               [% END %]
             [% END %]

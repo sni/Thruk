@@ -122,9 +122,9 @@
             <td align="left" class='[% class %] plugin_output mightOverflow'
             [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
               [% IF on_demand_long_plugin_output %]
-                [% info_popup_event_type %]="return(show_plugin_output_popup(this, '[% h.name | html %]', '', '[% h.peer_key | html %]', escape_html_tags, [WIDTH,600,[% c.config.info_popup_options %]]));"
+                [% info_popup_event_type %]="return(show_plugin_output_popup(this, '[% escape_html(escape_js(h.name)) %]', '', '[% escape_html(escape_js(h.peer_key)) %]', escape_html_tags, [WIDTH,600,[% c.config.info_popup_options %]]));"
               [% ELSE %]
-                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_js(h.display_name) %]',WIDTH,600,[% c.config.info_popup_options %]));"
+                [% info_popup_event_type %]="return(overlib(this.abbr,CAPTION,'[% escape_html(escape_js(h.display_name)) %]',WIDTH,600,[% c.config.info_popup_options %]));"
                 abbr="[% escape_html(plugin_output) %]<br>[% escape_html(nl2br(long_plugin_output)) %]"
               [% END %]
             [% END %]
