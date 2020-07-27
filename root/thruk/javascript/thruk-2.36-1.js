@@ -210,8 +210,10 @@ function bodyOnLoad(refresh) {
     if(refresh) {
         if(window.parent && window.parent.location && String(window.parent.location.href).match(/\/panorama\.cgi/)) {
             stopRefresh();
+            jQuery("#refresh_label").html("");
         } else if(String(window.location.href).match(/\/panorama\.cgi/)) {
             stopRefresh();
+            jQuery("#refresh_label").html("");
         } else {
             setRefreshRate(refresh);
             jQuery(window).bind("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
@@ -608,6 +610,7 @@ function resetRefresh() {
 /* stops the reload interval */
 function stopRefresh() {
   refreshPage = 0;
+  jQuery("#refresh_label").html(" (stopped)").addClass("alerttext");
   setRefreshRate(0);
 }
 
