@@ -26,7 +26,7 @@
   <br>
   <div class='errorDescription' style="text-align: left">
   Details:<br>
-  [% errorDetails | html | nl2br %]
+  [% nice_stacktrace(escape_html(errorDetails)) %]
   </div><br>
   [% END %]
 
@@ -46,7 +46,7 @@
 [% END %]
   </div>
   [% IF thruk_debug %]
-  <pre style="margin-top: 50px;">[% stacktrace | html %]</pre>
+  <pre style="margin-top: 50px;">[% escape_html(stacktrace) %]</pre>
   [% END %]
   [% END %]
 [% IF make_test_mode || thruk_debug %]

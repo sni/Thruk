@@ -1571,6 +1571,23 @@ input[type=text], input[type=password] {
   white-space: nowrap;
 }
 
+table.stacktrace {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-collapse: collapse;
+}
+table.stacktrace td {
+  border: 1px solid gray;
+}
+table.stacktrace th {
+  border: 1px solid gray;
+  text-align: center;
+}
+table.stacktrace TR:hover {
+  background: #cecece;
+}
+
 SPAN.btn_sitesplus {
   position: relative;
   left: -10px;

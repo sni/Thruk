@@ -3431,6 +3431,15 @@ function hasContactGroup(name) {
     return(false);
 }
 
+// show stacktrace controls on error page
+function nice_stacktrace_init() {
+    jQuery(".external").hide();
+}
+
+function nice_stacktrace_expand() {
+    jQuery(".external").toggle();
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

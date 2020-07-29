@@ -1349,4 +1349,61 @@ sub text2hoststate {
 
 ########################################
 
+=head2 nice_stacktrace
+
+    nice_stacktrace($text)
+
+return nice stacktrace with external deps collapsed
+
+=cut
+sub nice_stacktrace {
+    my($txt) = @_;
+    my $nice = [];
+    my $has_stack = 0;
+    my $in_stack  = 0;
+    for my $line (split(/\n/mx, $txt)) {
+        # only fixup stracktrace lines
+        if($line =~ m/^(.*)\ at\ (.*)\ line\ (\d+)\.?$/mx) {
+            $in_stack++;
+            my($msg, $file, $nr) = ($1, $2, $3);
+            if($in_stack == 1) {
+                push @{$nice}, "<b>Stacktrace:</b><br>";
+                push @{$nice}, "<table class=\"stacktrace\">\n";
+                push @{$nice}, CORE::sprintf("<tr class='action clickable' onclick='nice_stacktrace_expand();'><th>Message</th><th>Location</th></tr>\n");
+            }
+            my $class = "external";
+            my $original = $file;
+            if($file =~ m%(lib/Thruk|/script/|/Thruk/plugins/)%mxi) {
+                $class = "internal";
+                $file =~ s%.*/Thruk/%Thruk/%gmx;
+                $file =~ s%^lib/%Thruk/lib%gmx;
+                $file =~ s%^\./%Thruk/%gmx;
+                $file =~ s%^Thruk/%../%gmx;
+            }
+            $msg =~ s/\ called$//gmx;
+            if($in_stack == 1) {
+                $class = "internal";
+            }
+            chomp($line);
+            push @{$nice}, CORE::sprintf("<tr class='%s'><td>%s</td><td title='%s'>%s:%d</td></tr>\n", $class, $msg, $original, $file, $nr);
+            $has_stack = 1;
+        } else {
+            if($in_stack) {
+                $in_stack = 0;
+                push @{$nice}, "</table>";
+            }
+            push @{$nice}, $line."<br>";
+        }
+    }
+    if($in_stack) {
+        push @{$nice}, "</table>\n";
+    }
+    if($has_stack) {
+        push @{$nice}, "<script type=\"text/javascript\"><!--\nnice_stacktrace_init();\n--></script>";
+    }
+    return(join("", @{$nice}));
+}
+
+########################################
+
 1;
