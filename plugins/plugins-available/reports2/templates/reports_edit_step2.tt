@@ -43,7 +43,7 @@
       <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
       <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
     </select>
-    [% ELSIF type == 'option' %]
+  [% ELSIF type == 'select' %]
     <select name="params.[% key %]">
       [% FOREACH o = fh.options %]
       [% o = o.list; v = o.0; IF o.size > 1; k = o.1; ELSE; k = o.0; END %]
@@ -51,8 +51,9 @@
       [% END %]
     </select>
   [% ELSIF type == 'hosts' OR type == 'hostgroups' OR type == 'servicegroups' %]
-    [% IF type == 'hosts'; last_host_id = "params." _ key _ counter; counter = counter + 1; END %]
-    <input type="text" id="[% last_host_id | html %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'status.cgi?format=search&amp;type=[% type | html %]', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
+    [% inputid = "params." _ key _ counter; counter = counter + 1 %]
+    [% IF type == 'hosts'; last_host_id = inputid; END %]
+    <input type="text" id="[% inputid | html %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'status.cgi?format=search&amp;type=[% type | html %]', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
   [% ELSIF type == 'services' %]
     <input type="text" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: '[% last_host_id | html %]', backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
   [% ELSIF type == 'affected_sla_objects' %]
@@ -275,7 +276,7 @@
       <tr>
         [% FOREACH ch = parent.childs %]
         <td>
-          [% subkey = ch.name; origname = ch.origname; r.params.$subkey = chv.$origname %]
+          [% subkey = ch.name; origname = ch.origname; IF chv.exists(origname); r.params.$subkey = chv.$origname; END %]
           [% PROCESS field_form fh=ch %]
         </td>
         [% END %]

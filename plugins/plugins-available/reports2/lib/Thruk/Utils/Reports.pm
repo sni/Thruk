@@ -1626,9 +1626,11 @@ sub _set_required_field_defaults {
     $f->{'desc'}     = $f->{'desc'}     // '';
     $f->{'details'}  = $f->{'details'}  // '';
     $f->{'required'} = $f->{'required'} // 0;
-    $f->{'default'}  = $f->{'default'}  // '';
+    $f->{'default'}  = $f->{'default'}  // ($f->{'type'} eq 'formlist' ? {} : '');
     $f->{'extra'}    = $f->{'extra'}    // '';
     $f->{'multiple'} = $f->{'multiple'} // 0;
+
+    $f->{'default'}  = [$f->{'default'}] if($f->{'multiple'} && ref $f->{'default'} ne 'ARRAY');
     return;
 }
 
