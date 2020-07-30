@@ -106,7 +106,7 @@ sub startup {
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, $class->config);
                                           return unless $p =~ m%^/thruk/plugins/%mx;
-                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot)$/mx;
+                                          return unless $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|map)$/mx;
                                           $_ =~ s%^/thruk/plugins/([^/]+)/%$1/root/%mx;
                                           return 1;
                                         },
@@ -117,7 +117,7 @@ sub startup {
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, $class->config);
                                           return if $p =~ m%^/thruk/cgi\-bin/proxy\.cgi%mx;
-                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot)$/mx;
+                                          $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|map)$/mx;
                                         },
                     root         => './root/',
                     pass_through => 1,
