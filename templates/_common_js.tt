@@ -104,6 +104,6 @@
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
 
 [% IF show_sitepanel == 'tree' %]
-<link href="[% url_prefix %]vendor/fancytree-2.34.0/skin-win8/ui.fancytree.min.css" rel="stylesheet">
-<script src="[% url_prefix %]vendor/fancytree-2.34.0/jquery.fancytree-all-deps.min.js"></script>
+<link href="[% url_prefix %]vendor/fancytree-2.36.1/skin-win8/ui.fancytree.min.css" rel="stylesheet">
+<script src="[% url_prefix %]vendor/fancytree-2.36.1/jquery.fancytree-all-deps.min.js"></script>
 [% END %]
