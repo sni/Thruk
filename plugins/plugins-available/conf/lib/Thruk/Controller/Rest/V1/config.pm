@@ -194,6 +194,8 @@ sub _rest_get_config {
     for my $l (@{$live}) {
         for my $peer_key (@{Thruk::Utils::list($l->{'peer_key'})}) {
             $c->stash->{'param_backend'} = $peer_key;
+            my $peer = $c->{'db'}->get_peer_by_key($peer_key);
+            my $peer_name = $peer->peer_name();
             _set_object_model($c, $peer_key) || next;
             my $objs;
             if($type eq 'service') {
@@ -209,7 +211,7 @@ sub _rest_get_config {
                     $obj_model_changed = 1;
                     next;
                 }
-                push @{$data}, _add_object($o, $peer_key);
+                push @{$data}, _add_object($o, $peer_key, $peer_name);
             }
             if($obj_model_changed) {
                 Thruk::Utils::Conf::store_model_retention($c, $peer_key);
@@ -255,9 +257,11 @@ sub _rest_get_config_objects {
     my $data = [];
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
+        my $peer = $c->{'db'}->get_peer_by_key($peer_key);
+        my $peer_name = $peer->peer_name();
         my $objs = $c->{'obj_db'}->get_objects();
         for my $o (@{$objs}) {
-            push @{$data}, _add_object($o, $peer_key);
+            push @{$data}, _add_object($o, $peer_key, $peer_name);
         }
     }
     $c->req->parameters->{'sort'} = '.TYPE,.ID' unless $c->req->parameters->{'sort'};
@@ -290,6 +294,8 @@ sub _rest_get_config_objects_new {
     my $objs = [];
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
+        my $peer = $c->{'db'}->get_peer_by_key($peer_key);
+        my $peer_name = $peer->peer_name();
         my $obj = Monitoring::Config::Object->new( type     => $type,
                                                    coretype => $c->{'obj_db'}->{'coretype'},
                                               );
@@ -300,7 +306,7 @@ sub _rest_get_config_objects_new {
         if($c->{'obj_db'}->update_object($obj, \%{$c->req->parameters}, "", 1)) {
             $created++;
             Thruk::Utils::Conf::store_model_retention($c, $peer_key);
-            push @{$objs}, _add_object($obj, $peer_key);
+            push @{$objs}, _add_object($obj, $peer_key, $peer_name);
         }
     }
     return({
@@ -536,13 +542,14 @@ sub _set_object_model {
 }
 ##########################################################
 sub _add_object {
-    my($o, $peer_key) = @_;
+    my($o, $peer_key, $peer_name) = @_;
     my $conf = dclone($o->{'conf'});
-    $conf->{':ID'}       = $o->{'id'};
-    $conf->{':TYPE'}     = $o->{'type'};
-    $conf->{':FILE'}     = $o->{'file'}->{'path'}.':'.$o->{'line'};
-    $conf->{':READONLY'} = $o->{'file'}->readonly() ? 1 : 0;
-    $conf->{':PEER_KEY'} = $peer_key;
+    $conf->{':ID'}        = $o->{'id'};
+    $conf->{':TYPE'}      = $o->{'type'};
+    $conf->{':FILE'}      = $o->{'file'}->{'path'}.':'.$o->{'line'};
+    $conf->{':READONLY'}  = $o->{'file'}->readonly() ? 1 : 0;
+    $conf->{':PEER_KEY'}  = $peer_key;
+    $conf->{':PEER_NAME'} = $peer_name;
     return($conf);
 }
 
