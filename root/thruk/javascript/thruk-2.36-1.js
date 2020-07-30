@@ -2218,6 +2218,51 @@ function permission_del_row(el) {
     return false;
 }
 
+/* remove a row */
+function delete_form_row(el) {
+    var row = el;
+    /* find first table row */
+    while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
+    row.parentNode.deleteRow(row.rowIndex);
+    return false;
+}
+
+/* add a row */
+function add_form_row(el, row_num_to_clone) {
+    var tbl            = el;
+    while(tbl.parentNode != undefined && tbl.tagName != 'TABLE') { tbl = tbl.parentNode; }
+    var tblBody        = tbl.tBodies[0];
+
+    /* get first table row */
+    var row = tblBody.rows[row_num_to_clone];
+    var newRow = row.cloneNode(true);
+
+    /* get highest number */
+    var new_nr = 1;
+    jQuery.each(tblBody.rows, function(i, r) {
+        if(r.id) {
+            var nr = r.id.match(/_(\d+)$/)[1];
+            if(nr >= new_nr) {
+                new_nr = parseInt(nr) + 1;
+            }
+        }
+    });
+
+    /* replace ids / names */
+    replace_ids_and_names(newRow, new_nr);
+    var all = newRow.getElementsByTagName('*');
+    for (var i = -1, l = all.length; ++i < l;) {
+        var elem = all[i];
+        replace_ids_and_names(elem, new_nr);
+    }
+
+    newRow.style.display = "";
+
+    var lastRowNr      = tblBody.rows.length - 1;
+    var currentLastRow = tblBody.rows[lastRowNr];
+    tblBody.insertBefore(newRow, currentLastRow);
+}
+
 /* filter table content by search field */
 var table_search_input_id, table_search_table_ids, table_search_timer;
 var table_search_cb = {};
@@ -6367,8 +6412,13 @@ var ajax_search = {
         } else if(this.id) {
           elem = this;
         } else {
-          if(thruk_debug_js) { alert("ERROR: got no element id in ajax_search.init(): " + elem); }
-          return false;
+          if(!elem.id) {
+              // create uniq id for this field
+              var nr = 0;
+              if(!type) { type = "all"; }
+              while(document.getElementById(type+nr)) { nr++; }
+              elem.setAttribute("id", type+nr);
+          }
         }
 
         if(options == undefined) { options = {}; };

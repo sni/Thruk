@@ -1,6 +1,6 @@
 ﻿[% current_page = current_page() %]
-<div class="page content_page">
-  <table class="page">
+<div class="page content_page standard">
+  <table class="page standard">
     <tr>
       <td class="header">
         <div class="title">

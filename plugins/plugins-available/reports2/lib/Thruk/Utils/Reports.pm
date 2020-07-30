@@ -13,6 +13,7 @@ Utilities Collection for Reporting
 use warnings;
 use strict;
 use Carp;
+use Data::Dumper;
 use Class::Inspector;
 use File::Slurp;
 use Thruk::Utils;
@@ -122,6 +123,7 @@ sub report_show {
             }
             my $report_text = decode_utf8(read_file($html_file));
             $report_text    =~ s/^<body>/<body class="preview">/mx;
+            $report_text    =~ s/^<html>/<html class="preview">/mx;
             $c->stash->{'text'} = $report_text;
         }
         elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
@@ -858,7 +860,31 @@ return report data for given params
 sub get_report_data_from_param {
     my($params) = @_;
     my $p = {};
+
+    # nested variables
+    my $nested_keys = {};
     for my $key (keys %{$params}) {
+        next unless $key =~ m/^params\.([\w]+)\.([\w]+)$/mx;
+        $p->{$1}->{$2} = Thruk::Utils::list($params->{$key});
+        $nested_keys->{$1} = 1;
+    }
+    for my $key (sort keys %{$nested_keys}) {
+        my $raw      = $p->{$key};
+        my $sorted   = [];
+        my $firstkey = (keys %{$raw})[0];
+        for my $nr (1..scalar @{$raw->{$firstkey}}-1) {
+            my $entry   = {};
+            for my $name (sort keys %{$raw}) {
+                $entry->{$name} = $raw->{$name}->[$nr] // '';
+            }
+            push @{$sorted}, $entry;
+        }
+        $p->{$key} = $sorted;
+    }
+
+    # normal variables
+    for my $key (keys %{$params}) {
+        next if $key =~ m/^params\.([\w]+)\.([\w]+)$/mx;
         next unless $key =~ m/^params\.([\w\.]+)$/mx;
         if(ref $params->{$key} eq 'ARRAY') {
             # remove empty elements
@@ -868,6 +894,7 @@ sub get_report_data_from_param {
         $p->{$1} = $params->{$key};
     }
 
+    # optional variables
     for my $key (keys %{$params}) {
         next unless $key =~ m/^optional\.([\w\.]+)$/mx;
         if(!$params->{'enabled.'.$1}) {
@@ -1123,22 +1150,21 @@ add report defaults
 sub add_report_defaults {
     my($c, $fields, $report) = @_;
     $fields = _get_required_fields($c, $report) unless defined $fields;
-    for my $d (@{$fields}) {
-        my $key = (keys %{$d})[0];
-        my $f   = $d->{$key};
-
+    for my $f (@{$fields}) {
+        $f = normalize_required_field($f);
+        my $key = $f->{'name'};
         # fill in default
-        if(defined $f->[4] && $f->[2] ne '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ /^\s*$/mx)) {
-            $report->{'params'}->{$key} = $f->[2];
+        if($f->{'required'} && $f->{'default'} ne '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ /^\s*$/mx)) {
+            $report->{'params'}->{$key} = $f->{'default'};
         }
 
         # unavailable states may be empty when switching from hosts to services templates
-        if($f->[1] eq 'hst_unavailable' or $f->[1] eq 'svc_unavailable') {
-            my %default = map {$_ => 1} @{$f->[2]};
+        if($f->{'type'} eq 'hst_unavailable' or $f->{'type'} eq 'svc_unavailable') {
+            my %default = map {$_ => 1} @{$f->{'default'}};
             $report->{'params'}->{$key} = [$report->{'params'}->{$key}] unless ref $report->{'params'}->{$key} eq 'ARRAY';
             my @used    = grep {$default{$_}} @{$report->{'params'}->{$key}};
             if(scalar @used == 0) {
-                push @{$report->{'params'}->{$key}}, @{$f->[2]};
+                push @{$report->{'params'}->{$key}}, @{$f->{'default'}};
             }
         }
     }
@@ -1545,8 +1571,65 @@ sub _get_required_fields {
     my($c, $report) = @_;
     return unless $report->{'template'};
     my $fields = Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' }, 1);
-    return unless(defined $fields and ref $fields eq 'ARRAY');
+    return unless(defined $fields && ref $fields eq 'ARRAY');
+    # normalize fields
+    for my $f (@{$fields}) {
+        normalize_required_field($f);
+    }
     return $fields;
+}
+
+##########################################################
+
+=head2 normalize_required_field
+
+  normalize_required_field($field)
+
+returns normalized field structure, convert old array list into hash structure
+
+=cut
+sub normalize_required_field {
+    my($f) = @_;
+    if(ref $f eq 'HASH' && $f->{'name'} && $f->{'type'}) {
+        # already normalized hash form
+        if($f->{'childs'}) {
+            for my $c (@{$f->{'childs'}}) {
+                normalize_required_field($c);
+            }
+        }
+        _set_required_field_defaults($f);
+        return($f);
+    }
+    if(ref $f eq 'HASH' && scalar keys %{$f} == 1) {
+        my $name = (keys %{$f})[0];
+        confess("no name in required field: ".Dumper($f)) unless $name;
+        my($desc, $type, $default, $details, $required, $extra) = @{$f->{$name}};
+        confess("no type in required field: ".Dumper($f)) unless $type;
+        $f = {
+            name     => $name,
+            type     => $type,
+            desc     => $desc,
+            details  => $details,
+            default  => $default,
+            required => $required,
+            extra    => $extra,
+        };
+        _set_required_field_defaults($f);
+        return($f);
+    }
+    confess("unknown form of required field: ".Dumper($f));
+}
+
+##########################################################
+sub _set_required_field_defaults {
+    my($f) = @_;
+    $f->{'desc'}     = $f->{'desc'}     // '';
+    $f->{'details'}  = $f->{'details'}  // '';
+    $f->{'required'} = $f->{'required'} // 0;
+    $f->{'default'}  = $f->{'default'}  // '';
+    $f->{'extra'}    = $f->{'extra'}    // '';
+    $f->{'multiple'} = $f->{'multiple'} // 0;
+    return;
 }
 
 ##########################################################
@@ -1561,17 +1644,17 @@ sub _verify_fields {
     add_report_defaults($c, $fields, $report);
 
     for my $d (@{$fields}) {
-        my $key = (keys %{$d})[0];
-        my $f   = $d->{$key};
+        my $f = normalize_required_field($d);
+        my $key = $f->{'name'};
 
         # required fields
-        if(defined $f->[4] && $f->[2] eq '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
-            push @errors, $f->[0].': required field';
+        if($f->{'required'} && $f->{'default'} eq '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
+            push @errors, $f->{'desc'}.': required field';
         }
 
         # regular expressions
-        if($f->[1] eq 'pattern' && !Thruk::Utils::is_valid_regular_expression($c, $report->{'params'}->{$key})) {
-            push @errors, $f->[0].': invalid regular expression';
+        if($f->{'type'} eq 'pattern' && !Thruk::Utils::is_valid_regular_expression($c, $report->{'params'}->{$key})) {
+            push @errors, $f->{'desc'}.': invalid regular expression';
         }
     }
     if(scalar @errors > 0) {

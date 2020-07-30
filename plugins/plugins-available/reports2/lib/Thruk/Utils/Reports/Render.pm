@@ -94,6 +94,62 @@ sub calculate_availability {
 
 ##########################################################
 
+=head2 get_service_filter
+
+  get_service_filter($service_param)
+
+convert services into a s_filter usable by Avail.pm
+
+=cut
+sub get_service_filter {
+    my($param) = @_;
+    my $s_filter = [];
+    for my $f (@{$param}) {
+        my @servicefilter;
+        my @hostfilter;
+        my @hosts    = split/\s*,\s*/mx, $f->{'host'};
+        my @services = split/\s*,\s*/mx, $f->{'service'};
+        for my $h (@hosts) {
+            push @hostfilter, { 'host_name' => $h };
+        }
+        for my $s (@services) {
+            push @servicefilter, { 'description' => $s };
+        }
+
+        push @{$s_filter}, Thruk::Utils::combine_filter('-and', [
+            Thruk::Utils::combine_filter('-or', \@hostfilter),
+            Thruk::Utils::combine_filter('-or', \@servicefilter),
+        ]);
+    }
+    return(Thruk::Utils::combine_filter('-or', $s_filter));
+}
+
+##########################################################
+
+=head2 expand_service_slas
+
+  expand_service_slas($service_param)
+
+expand services sla levels
+
+=cut
+sub expand_service_slas {
+    my($param) = @_;
+    my $slas = {};
+    for my $f (@{$param}) {
+        my @hosts    = split/\s*,\s*/mx, $f->{'host'};
+        my @services = split/\s*,\s*/mx, $f->{'service'};
+        for my $h (@hosts) {
+            for my $s (@services) {
+                $slas->{$h}->{$s} = $f->{'sla'};
+            }
+        }
+    }
+    return($slas);
+}
+
+##########################################################
+
 =head2 outages
 
   outages($logs, $start, $end)
@@ -427,7 +483,7 @@ sub get_availability_percents {
     my $service            = $c->req->parameters->{'service'};
     my $avail_data         = $c->stash->{'avail_data'};
     my $unavailable_states = $c->stash->{'unavailable_states'};
-    confess("No host in parameters:\n".    Dumper($c->req->parameters)) unless defined $host;
+    confess("No host in parameters:\n".Dumper($c->req->parameters)) unless defined $host;
 
     my $availability = Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service);
     if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {

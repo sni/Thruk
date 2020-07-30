@@ -1,0 +1,10 @@
+﻿[% current_page = current_page() %]
+<div class="page content_page blank">
+  <table class="page blank">
+    <tr>
+      <td>
+        <div class="content">[% content %]</div>
+      </td>
+    </tr>
+  </table>
+</div>

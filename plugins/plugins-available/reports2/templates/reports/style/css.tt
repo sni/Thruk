@@ -22,7 +22,7 @@ DIV.footer {
   text-align: center;
   font-size: 12px;
 }
-DIV.content {
+DIV.standard DIV.content {
   padding-top: 15px;
 }
 DIV.page.content_page TD.header DIV.title {

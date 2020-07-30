@@ -19,6 +19,9 @@ body.status TABLE.reports TEXTAREA {
   width: 520px;
   height: 80px;
 }
+body.status TABLE.reports TABLE.formlist INPUT[type=text] {
+  width: 180px;
+}
 body.status TABLE.reports TR.report_type_affected_sla_objects TD {
   padding-top: 0px;
   padding-bottom: 0px;

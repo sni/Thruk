@@ -180,6 +180,7 @@ sub report_edit {
 
     my $r;
     $c->stash->{'params'} = {};
+    $c->stash->{'normalize_required_field'} = \&Thruk::Utils::Reports::normalize_required_field;
     if($report_nr eq 'new') {
         $r = Thruk::Utils::Reports::get_new_report($c);
         # set currently enabled backends
@@ -248,6 +249,7 @@ sub report_edit_step2 {
     _set_report_data($c, $r);
 
     $c->stash->{template} = 'reports_edit_step2.tt';
+    $c->stash->{'normalize_required_field'} = \&Thruk::Utils::Reports::normalize_required_field;
     return;
 }
 
