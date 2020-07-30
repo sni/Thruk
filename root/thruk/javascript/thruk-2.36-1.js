@@ -208,15 +208,19 @@ function bodyOnLoad(refresh) {
         scrollToPos = 0;
     }
     if(refresh) {
-        if(window.parent && window.parent.location && String(window.parent.location.href).match(/\/panorama\.cgi/)) {
-            stopRefresh();
-            jQuery("#refresh_label").html("");
-        } else if(String(window.location.href).match(/\/panorama\.cgi/)) {
-            stopRefresh();
-            jQuery("#refresh_label").html("");
-        } else {
-            setRefreshRate(refresh);
-            jQuery(window).bind("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
+        try {
+            if(window.parent && window.parent.location && String(window.parent.location.href).match(/\/panorama\.cgi/)) {
+                stopRefresh();
+                jQuery("#refresh_label").html("");
+            } else if(String(window.location.href).match(/\/panorama\.cgi/)) {
+                stopRefresh();
+                jQuery("#refresh_label").html("");
+            } else {
+                setRefreshRate(refresh);
+                jQuery(window).bind("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
+            }
+        } catch(err) {
+            console.log(err);
         }
     }
 
@@ -761,6 +765,7 @@ function updateUrl() {
 
 /* reloads the current page and adds some parameter from a hash */
 function reloadPage() {
+    stopRefresh();
     window.clearTimeout(refreshTimer);
     var obj = document.getElementById('refresh_rate');
     if(obj) {
@@ -774,13 +779,13 @@ function reloadPage() {
     }
 
     /* set reload mark in side frame */
-    if(window.parent.frames && top.frames && top.frames['side']) {
-        try {
+    try {
+        if(window.parent.frames && top.frames && top.frames['side']) {
             top.frames['side'].is_reloading = newUrl;
         }
-        catch(err) {
-            console.log(err);
-        }
+    }
+    catch(err) {
+        console.log(err);
     }
 
     /*
@@ -796,8 +801,13 @@ function reloadPage() {
 }
 
 function reloadNav() {
-    if(parent.frames[0] != null) {
-        parent.frames[0].location.reload();
+    try {
+        if(parent.frames[0] != null) {
+            parent.frames[0].location.reload();
+        }
+    }
+    catch(err) {
+        console.log(err);
     }
 }
 
