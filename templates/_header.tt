@@ -24,9 +24,11 @@
       [% IF reload_nav %]
       <script type="text/javascript">
       <!--
-      if(parent.frames[0] != null) {
-        parent.frames[0].location.reload();
-      }
+        try {
+          if(parent.frames["side"] != null && parent.frames["side"] != window) {
+            parent.frames["side"].location.reload();
+          }
+        } catch(err) { console.log(err) }
       -->
       </script>
       [% END %]

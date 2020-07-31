@@ -549,7 +549,7 @@ function readCookie(name,c,C,i){
 /* page refresh rate */
 var remainingRefresh;
 function setRefreshRate(rate) {
-  if(thruk_static_export) { return; }
+  if(typeof thruk_static_export !== 'undefined' && thruk_static_export) { return; }
   if(rate >= 0 && rate < 20) {
       // check lastUserInteraction date to not refresh while user is interacting with the page
       if(lastUserInteraction > ((new Date).getTime() - 20000)) {
