@@ -100,6 +100,7 @@ mkdir('root/thruk/cache');
 
 #################################################
 my $cmds = [
+    'rm -f cache/*',
     'cd root/thruk/ && cat '.join(' ', @{$config->{'all_in_one_javascript'}}).' > cache/thruk-'.$version.'.js',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
 ];
