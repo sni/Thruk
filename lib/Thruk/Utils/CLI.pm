@@ -89,7 +89,13 @@ sub new {
             $options->{'remoteurl'} = $ENV{'REMOTEURL'};
         }
         elsif(defined $ENV{'OMD_SITE'}) {
-            $options->{'remoteurl'} = 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi';
+            require Thruk::Config;
+            my $config = Thruk::Config::set_default_config();
+            if($config->{'omd_local_site_url'}) {
+                $options->{'remoteurl'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/remote.cgi';
+            } else {
+                $options->{'remoteurl'} = 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi';
+            }
         }
         else {
             $options->{'remoteurl'} = 'http://localhost/thruk/cgi-bin/remote.cgi';
@@ -452,6 +458,9 @@ sub _request {
     my($credential, $url, $options) = @_;
     _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
     my $ua       = _get_user_agent();
+    if($url =~ m%^https?://(localhost|127\.0\.0\..)(/|:)%mx || $options->{'insecure'}) {
+        $ua->ssl_opts(verify_hostname => 0);
+    }
     my $response = $ua->post($url, {
         data => encode_json({
             credential => $credential,
@@ -1151,6 +1160,7 @@ sub _cmd_ext_job {
 sub _get_user_agent {
     my $config = { 'use_curl' => $ENV{'THRUK_CURL'} };
     my $ua = Thruk::UserAgent->new({}, $config);
+    $ua->requests_redirectable(['GET', 'POST', 'HEAD']);
     $ua->agent("thruk_cli");
     return $ua;
 }

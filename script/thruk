@@ -53,6 +53,7 @@ Getopt::Long::GetOptions (
    "q|quiet"            => \$options->{'quiet'},
    "V|version"          => \$options->{'version'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
+   "k|insecure"         => \$options->{'insecure'},
      "local"            => \$options->{'local'},
    "c|credential=s"     => \$options->{'credential'},
    "b|backend=s"        =>  $options->{'backends'},
@@ -140,6 +141,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                   Thruk installations specified by the
                                   remote-url.
     -r, --remote-url=<url>        URL to remote installation.
+    -k, --insecure                skip ssl certificate verification when accessing remote url.
         --local                   Don't try to connect fastcgi daemon first.
 
     -y, --yes                     answer yes to all given questions.
@@ -233,6 +235,10 @@ script has the following arguments
     Defaults to http://localhost/thruk/cgi-bin/remote.cgi.
     Retrieving information from the fcgi daemon saves time to
     startup and allows to connect to remote located sites.
+
+=item B<-k>, B<--insecure>
+
+    Skip ssl certificate verification when accessing remote url.
 
 =item B<--local>
 
