@@ -1047,6 +1047,7 @@ sub get_user {
     # Otherwise we fall back on getgrent which will loop all groups in an intrusive way
     else {
         my($name,$gid) = (getpwuid($uid))[0, 3];
+        confess("getpwuid failed for uid: $uid: $!") unless $name;
         @groups = ( $gid );
         while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
             $users =~ /\b$name\b/mx and push @groups, $gid;
