@@ -6,6 +6,7 @@ debian/compat
 debian/control
 debian/copyright
 debian/rules
+debian/source/format
 debian/thruk-base.install
 debian/thruk-base.manpages
 debian/thruk-base.postinst
