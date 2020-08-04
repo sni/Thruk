@@ -79,30 +79,11 @@ sub new {
     $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
     $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
     ## use critic
+
     $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
         $options->{'remoteurl_specified'} = 0;
-        if(defined $ENV{'STARTURL'}) {
-            $options->{'remoteurl'} = $ENV{'STARTURL'};
-        }
-        elsif(defined $ENV{'REMOTEURL'}) {
-            $options->{'remoteurl'} = $ENV{'REMOTEURL'};
-        }
-        elsif(defined $ENV{'OMD_SITE'}) {
-            require Thruk::Config;
-            my $config = Thruk::Config::set_default_config();
-            if($config->{'omd_local_site_url'}) {
-                $options->{'remoteurl'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/remote.cgi';
-            } else {
-                $options->{'remoteurl'} = 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi';
-            }
-        }
-        else {
-            $options->{'remoteurl'} = 'http://localhost/thruk/cgi-bin/remote.cgi';
-        }
     }
-    $options->{'remoteurl'} =~ s|/thruk/*$||mx;
-    $options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/mx;
 
     # try to read secret file
     $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};
@@ -122,10 +103,9 @@ return L<Thruk::Context> context object
 sub get_c {
     my($self) = @_;
     return $Thruk::Request::c if defined $Thruk::Request::c;
-    #my($c, $failed)
     my($c, undef, undef) = _dummy_c();
     confess("internal request failed") unless $c;
-    $c->stats->enable(1) if $c;
+    $c->stats->enable(1);
     return $c;
 }
 
@@ -368,14 +348,16 @@ sub _run {
         $self->{'opt'}->{'local'} = 1;
     }
 
-    my($c, $result, $response);
+    my $c = $self->get_c();
+    my($result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
-        _debug("_run(): fetching from ".$self->{'opt'}->{'remoteurl'});
-        ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+        my $remoteurl = _get_remote_url($c, $self->{'opt'}->{'remoteurl'});
+        _debug("_run(): fetching from ".$remoteurl);
+        ($result,$response) = _request($self->{'opt'}->{'credential'}, $remoteurl, $self->{'opt'});
         _debug("_run(): fetching done");
         if(!defined $result && $self->{'opt'}->{'remoteurl_specified'}) {
-            _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: "._format_response_error($response));
+            _error("requesting result from ".$remoteurl." failed: "._format_response_error($response));
             _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
             return 1;
         }
@@ -392,7 +374,6 @@ sub _run {
             Thruk::Backend::Pool::init_backend_thread_pool();
         }
 
-        $c = $self->get_c();
         if(!defined $c) {
             print STDERR "command failed";
             return 1;
@@ -1375,6 +1356,33 @@ sub _authorize_command {
         }
     }
     return;
+}
+
+##############################################
+sub _get_remote_url {
+    my($c, $remoteurl) = @_;
+
+    unless(defined $remoteurl) {
+        if(defined $ENV{'STARTURL'}) {
+            $remoteurl = $ENV{'STARTURL'};
+        }
+        elsif(defined $ENV{'REMOTEURL'}) {
+            $remoteurl = $ENV{'REMOTEURL'};
+        }
+        elsif(defined $ENV{'OMD_SITE'}) {
+            if($c->config->{'omd_local_site_url'}) {
+                $remoteurl = $c->config->{'omd_local_site_url'}.'/thruk/cgi-bin/remote.cgi';
+            } else {
+                $remoteurl = 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi';
+            }
+        }
+        else {
+            $remoteurl = 'http://localhost/thruk/cgi-bin/remote.cgi';
+        }
+    }
+    $remoteurl =~ s|/thruk/*$||mx;
+    $remoteurl = $remoteurl.'/thruk/cgi-bin/remote.cgi' if $remoteurl !~ m/remote\.cgi$/mx;
+    return($remoteurl);
 }
 
 ##############################################
