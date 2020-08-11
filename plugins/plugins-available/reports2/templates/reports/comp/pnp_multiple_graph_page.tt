@@ -18,7 +18,7 @@
           <img src="[% pnpdata %]" class="[% c.stash.last_graph_type %]image" alt="[% c.stash.last_graph_type %] graph">
         </div>
         [% source = source + 1 %]
-        [% IF source == param.max_pnp_sources %]
+        [% IF source >= param.max_pnp_sources %]
           [% nb_graph = 3 %]
         [% END %]
         [% WHILE nb_graph < 3 %]
@@ -30,7 +30,7 @@
             </div>
           [% END %]
           [% source = source + 1 %]
-          [% IF source == param.max_pnp_sources %]
+          [% IF source >= param.max_pnp_sources %]
             [% nb_graph = 3 %]
           [% END %]
         [% END %]
