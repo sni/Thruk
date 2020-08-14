@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 111;
+    plan tests => 112;
 
     use lib('t');
     require TestUtils;
@@ -379,3 +379,8 @@ is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunk
     is(Thruk::Utils::command_disabled($c, 3), 1, "3 is disabled");
     is(Thruk::Utils::command_disabled($c, 5), 0, "5 is enabled");
 };
+
+#########################
+my $testparams = { 'credential' => 'secret', "options" => { 'credential' => 'secret' }, 'CSRFtoken' => "secret", "test" => { 'credential' => 'secret' } };
+my $dump       = Thruk::Utils::dump_params($testparams);
+unlike($dump, "/secret/", "dump contains no secrets");

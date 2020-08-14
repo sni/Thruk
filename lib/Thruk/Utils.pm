@@ -3576,12 +3576,17 @@ returns stringified parameters
 =cut
 sub dump_params {
     my($params) = @_;
-    delete $params->{'credential'};
-    delete $params->{'options'}->{'credential'} if $params->{'options'};
+    $params = dclone($params);
     local $Data::Dumper::Indent = 0;
     my $dump = Dumper($params);
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
-    $dump    =~ s%"credential":"[^"]+",?%%gmx;
+    for my $key (qw/credential credentials CSRFtoken/) {
+        $dump    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx;  # remove from json encoded data
+        $dump    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx;  # same, but with single quotes
+
+        $dump    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
+        $dump    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
+    }
     $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
     return($dump);
 }
