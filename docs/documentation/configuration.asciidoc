@@ -2774,6 +2774,7 @@ Configuration Example:
     #worker                = 5
     #default_filter        = add_recursive_output_filter
     #default_state_order   = down, unreachable, ...
+    #sync_downtime_ack_state = 0
     read_only              = 0
   </Component>
 
@@ -2821,11 +2822,9 @@ will be recalculated and refreshed. (in minutes).
 
 Automatic bp calculations will be disabled if set to zero.
 
-
 === favorite_custom_function
 Favorite custom function will be displayed on the 'Type' tab
 so you don't have to select custom first. Syntax is <name>;<function>
-
 
 === worker
 Set the number of parallel business process calculations. Setting it
@@ -2840,6 +2839,16 @@ Add global filter to all business processes, can be set multiple times.
 === default_state_order
 Defines the order to determine the worst state for worst/best aggregations. Use
 this to override the global `default_state_order`.
+
+=== sync_downtime_ack_state
+Set downtime/acknowledgement for business process if all child nodes are in downtime/acknowledged.
+Valid values are:
+
+    * `0` - disabled
+    * `1` - display only (default)
+    * `2` - set downtime/acknowledgement by external command
+
+(does not work in combination with spool_dir)
 
 === read_only
 Make all bp related pages readonly.

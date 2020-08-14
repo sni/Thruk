@@ -222,6 +222,8 @@ sub update_status {
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
 
+    $results = Thruk::Utils::array_uniq($results);
+
     # update last check time
     my $now = time();
     $self->{'last_check'} = $now;
@@ -240,6 +242,11 @@ sub update_status {
     $c->stats->profile(begin => "_submit_results_to_core");
     $self->_submit_results_to_core($c, $results);
     $c->stats->profile(end => "_submit_results_to_core");
+
+    # sync ack/downtime status
+    $c->stats->profile(begin => "_sync_ack_downtime_status");
+    $self->_sync_ack_downtime_status($c, $results);
+    $c->stats->profile(end => "_sync_ack_downtime_status");
 
     # save runtime
     $self->{'time'} = tv_interval($t0);
@@ -896,6 +903,123 @@ sub _submit_results_to_core_spool {
         sysopen my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY
             or croak("Can't create $file : $!");
         Thruk::Utils::IO::close($t, $file);
+    }
+
+    return;
+}
+
+##########################################################
+sub _sync_ack_downtime_status {
+    my($self, $c, $results) = @_;
+    return unless scalar @{$results} > 0;
+
+    # disabled by configuration?
+    if(!defined $c->config->{'Thruk::Plugin::BP'}->{'sync_downtime_ack_state'} || $c->config->{'Thruk::Plugin::BP'}->{'sync_downtime_ack_state'} < 2) {
+        return;
+    }
+
+    my $peer;
+    if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
+        my $b = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
+        $peer = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
+    }
+    else {
+        # if there is only on backend, use that
+        my $peers = $c->{'db'}->get_peers();
+        if(scalar @{$peers} == 1) {
+            $peer = $peers->[0];
+        }
+    }
+    # log a warning that there is nothing to send result too
+    if(!$c->{'no_result_warned'} && !$peer) {
+        $c->log->warn("no result_backend set, cannot sync acknowledgement / downtime status to core.");
+        $c->{'no_result_warned'} = 1;
+        return;
+    }
+    my $pkey   = $peer->peer_key();
+    my $author = "(thruk)";
+
+    # get all downtimes for this bp
+    my $downtimes = $c->db->get_downtimes(filter => [{ 'host_custom_variables' => { '=' => 'THRUK_BP_ID '.$self->{'id'}}}, 'author' => $author ], backend => $pkey);
+    $downtimes = Thruk::Utils::array2hash($downtimes, "host_name", "service_description");
+
+    my $acks = $c->db->get_comments(filter => [{ 'host_custom_variables' => { '=' => 'THRUK_BP_ID '.$self->{'id'}}}, 'author' => $author ], backend => $pkey);
+    $acks = Thruk::Utils::array2hash($acks, "host_name", "service_description");
+
+    my $cmds = [];
+    for my $id (@{$results}) {
+        my $node = $self->{'nodes_by_id'}->{$id};
+        if($node->{'scheduled_downtime_depth'}) {
+            my $current_downtime = $downtimes->{$self->{'name'}}->{$node->{'label'}};
+            if($current_downtime) {
+                # if current downtime expires within the next 30 minutes, renew it
+                if($current_downtime->{'end_time'} < time() + (30*60)) {
+                    my $cmd = sprintf("[%d] DEL_SVC_DOWNTIME;%d",
+                                                time(),
+                                                $downtimes->{$self->{'name'}}->{$node->{'label'}}->{'id'},
+                                    );
+                    push @{$cmds}, $cmd;
+                } else {
+                    next;
+                }
+            }
+            my $comment = "automatic downtime, all child nodes are in downtime.";
+            my $start   = time();
+            my $end     = $start + 86400;
+            my $cmd = sprintf("[%d] SCHEDULE_SVC_DOWNTIME;%s;%s;%d;%d;1;0;%d;%s;%s",
+                                        time(),
+                                        $self->{'name'},
+                                        $node->{'label'},
+                                        $start,
+                                        $end,
+                                        $end - $start,
+                                        $author,
+                                        $comment,
+                            );
+            push @{$cmds}, $cmd;
+        } else {
+            if($downtimes->{$self->{'name'}}->{$node->{'label'}}) {
+                # remove exceeding downtime
+                my $cmd = sprintf("[%d] DEL_SVC_DOWNTIME;%d",
+                                            time(),
+                                            $downtimes->{$self->{'name'}}->{$node->{'label'}}->{'id'},
+                                );
+                push @{$cmds}, $cmd;
+            }
+        }
+
+        if($node->{'acknowledged'}) {
+            if($acks->{$self->{'name'}}->{$node->{'label'}}) {
+                next;
+            }
+            my $comment = "automatic acknowledgment, all child nodes are acknowledged.";
+            my $cmd = sprintf("[%d] ACKNOWLEDGE_SVC_PROBLEM;%s;%s;1;1;0;%s;%s",
+                                        time(),
+                                        $self->{'name'},
+                                        $node->{'label'},
+                                        $author,
+                                        $comment,
+                            );
+            push @{$cmds}, $cmd;
+        } else {
+            if($acks->{$self->{'name'}}->{$node->{'label'}}) {
+                # remove exceeding acknowledgement
+                my $cmd = sprintf("[%d] REMOVE_SVC_ACKNOWLEDGEMENT;%s;%s",
+                                            time(),
+                                            $self->{'name'},
+                                            $node->{'label'},
+                                );
+                push @{$cmds}, $cmd;
+            }
+        }
+    }
+
+    if(scalar @{$cmds} > 0) {
+        my $options = {
+            'command' => 'COMMAND '.join("\n\nCOMMAND ", @{$cmds}),
+            'backend' => [ $pkey ],
+        };
+        $c->{'db'}->send_command( %{$options} );
     }
 
     return;

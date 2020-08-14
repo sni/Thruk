@@ -14,6 +14,7 @@ next:
           - Business Process:
             - added option --no-reload-core to thruk cp commit
             - added option --no-reload-cron to thruk cp commit
+            - added configuration option sync_downtime_ack_state
           - internals:
             - update fancytree 2.36.1
 

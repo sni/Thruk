@@ -726,13 +726,13 @@ sub _get_sorted_keys {
 
 =head2 get_nodes_grouped_by_state
 
-    get_nodes_grouped_by_state($nodes, $bp)
+    get_nodes_grouped_by_state($c, $nodes, $bp, $aggregation)
 
 return nodes grouped by state, downtime and acknowledged
 
 =cut
 sub get_nodes_grouped_by_state {
-    my($nodes, $bp, $aggregation) = @_;
+    my($c, $nodes, $bp, $aggregation) = @_;
 
     my $groups = {};
     for my $n (@{$nodes}) {
@@ -759,10 +759,13 @@ sub get_nodes_grouped_by_state {
     for my $state (@{$order}) {
         if($groups->{$state}) {
             my $first = $groups->{$state}->[0];
-            my $extra = {
-                'acknowledged'             => $first->{'acknowledged'} // 0,
-                'scheduled_downtime_depth' => $first->{'scheduled_downtime_depth'} // 0,
-            };
+            my $extra = {};
+            if(!defined $c->config->{'Thruk::Plugin::BP'}->{'sync_downtime_ack_state'} || $c->config->{'Thruk::Plugin::BP'}->{'sync_downtime_ack_state'} >= 1) {
+                $extra = {
+                    'acknowledged'             => $first->{'acknowledged'} // 0,
+                    'scheduled_downtime_depth' => $first->{'scheduled_downtime_depth'} // 0,
+                };
+            }
             return($first->{'status'}, $groups->{$state}, $extra);
         }
     }
