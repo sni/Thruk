@@ -625,7 +625,7 @@ sub cmd {
         $output = Thruk::Utils::decode_any($output) unless $no_decode;
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
-        $rc = 0 if($rc == -1 && $SIG{CHLD} eq 'IGNORE');
+        $rc = 0 if($rc == -1 && defined $SIG{CHLD} && $SIG{CHLD} eq 'IGNORE');
     }
     if($rc == -1) {
         $output .= "[".$!."]";
