@@ -53,11 +53,7 @@ sub cmd {
         return("ERROR - core_scheduling addon is disabled\n", 1);
     }
 
-    eval {
-        require Thruk::Controller::core_scheduling;
-    };
-    if($@) {
-        _debug($@);
+    if(!Thruk::Utils::CLI::load_module("Thruk::Controller::core_scheduling")) {
         return("core_scheduling plugin is disabled.\n", 1);
     }
 

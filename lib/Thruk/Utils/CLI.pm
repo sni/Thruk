@@ -282,6 +282,32 @@ sub request_url {
 }
 
 ##############################################
+
+=head2 load_module
+
+    load_module($module)
+
+load given module and returns true on success
+
+=cut
+sub load_module {
+    my($module) = @_;
+    ## no critic
+    eval "require $module";
+    ## use critic
+    my $err = $@;
+    if($err) {
+        if($err =~ m/\QCompilation failed in require\E/mx) {
+            _error($err);
+        } else {
+            _debug($err) if $Thruk::Utils::CLI::verbose >= 1;
+        }
+        return;
+    }
+    return 1;
+}
+
+##############################################
 # INTERNAL SUBS
 ##############################################
 sub _read_secret {

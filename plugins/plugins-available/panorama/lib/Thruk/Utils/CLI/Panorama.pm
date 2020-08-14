@@ -55,11 +55,7 @@ sub cmd {
         return("ERROR - panorama dashboard addon is disabled\n", 1);
     }
 
-    eval {
-        require Thruk::Utils::Panorama;
-    };
-    if($@) {
-        _debug($@);
+    if(!Thruk::Utils::CLI::load_module("Thruk::Utils::Panorama")) {
         return("panorama plugin is disabled.\n", 1);
     }
 

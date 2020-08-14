@@ -97,11 +97,7 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
-    eval {
-        require Thruk::BP::Utils;
-    };
-    if($@) {
-        _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
+    if(!Thruk::Utils::CLI::load_module("Thruk::BP::Utils")) {
         return("business process plugin is disabled.\n", 1);
     }
 
