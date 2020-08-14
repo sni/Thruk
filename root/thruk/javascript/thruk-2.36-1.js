@@ -2912,7 +2912,7 @@ function show_plugin_output_popup(target, host, service, backend, escape_html, o
     overlib.apply(null, ["<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>",CAPTION, caption].concat(overlib_options));
     jQuery('#overDiv .plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
 
-    var url = url_prefix+'r/sites/'+backend+'/services/'+host+"/"+service+"?columns=plugin_output,long_plugin_output"
+    var url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/services/'+encodeURIComponent(host)+"/"+encodeURIComponent(service)+"?columns=plugin_output,long_plugin_output"
     jQuery.get(url, {}, function(data, status, req) {
         jQuery('#overDiv .plugin_output').html("");
         if(!data || !data[0]) {
