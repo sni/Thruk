@@ -754,7 +754,7 @@ sub expand_command {
     }
 
     # unescape $$
-    $expanded =~ s{\$\$}{\$}g;
+    $expanded =~ s{\$\$}{\$}gmx;
 
     my $return = {
         'line'          => $command_name,
