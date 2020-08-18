@@ -1499,8 +1499,6 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
-
     # send query to selected backends
     my $num_selected_backends = scalar @{$get_results_for};
     if($function ne 'send_command' && $function ne 'get_processinfo') {
@@ -1513,6 +1511,8 @@ sub _do_on_peers {
        && ($function =~ m/^get_/mx || $function eq 'send_command')
        && ($function ne 'get_logs' || !$c->config->{'logcache'})
        ) {
+        $c->log->debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
+
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
         };
@@ -1557,6 +1557,7 @@ sub _do_on_peers {
         }
     } else {
         $skip_lmd = 1;
+        $c->log->debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
         ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
