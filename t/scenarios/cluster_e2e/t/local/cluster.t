@@ -19,6 +19,7 @@ TestUtils::test_command({
 
 ###########################################################
 # thruk cluster commands
+TestUtils::test_command({ cmd  => '/bin/mv .thruk .thruk.off' });
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk r -m POST /thruk/cluster/heartbeat',
     like => ['/heartbeat send/'],
@@ -29,7 +30,6 @@ TestUtils::test_command({
 });
 
 ###########################################################
-TestUtils::test_command({ cmd  => '/bin/mv .thruk .thruk.off' });
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk cluster status',
     like => ['/OK/', '/nodes online/'],
