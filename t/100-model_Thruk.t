@@ -6,7 +6,7 @@ use Log::Log4perl qw(:easy);
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 40;
+    plan tests => 41;
 }
 
 BEGIN {
@@ -218,6 +218,18 @@ $cmd = $b->expand_command(
     },
 );
 is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' --password="***"', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# unescape shell variables
+$c->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"];
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$ -x $$USER'
+    },
+);
+is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$ -x $USER', 'expanded command: '.$cmd->{'line_expanded'});
 
 ################################################################################
 my $res1 = Thruk::Utils::read_resource_file('t/data/resource.cfg');

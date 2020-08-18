@@ -753,6 +753,9 @@ sub expand_command {
         $note = "could not expand all macros!";
     }
 
+    # unescape $$
+    $expanded =~ s{\$\$}{\$}g;
+
     my $return = {
         'line'          => $command_name,
         'line_expanded' => $expanded,
