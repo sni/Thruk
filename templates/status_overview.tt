@@ -163,7 +163,7 @@
                   </td>
                   <td class='[% hostclass %] address' style="display: none;" nowrap align="left">[% h.address | html %]</td>
                   <td class='[% hostclass %] alias' style="display: none;" nowrap align="left">[% h.alias | html %]</td>
-                  <td class='[% hostclass %] peer_name' style="display: none;" nowrap align="left">[% h.peer_name | html %]</td>
+                  <td class='[% hostclass %] peer_name' style="display: none;" nowrap align="left">[% peer_name(h) | html %]</td>
                 </tr>
                 [% END %]
               </table>

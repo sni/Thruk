@@ -2369,9 +2369,10 @@ sub get_overview_columns {
         { title => "Status",               "field" => "state",                "checked" => 1 },
         { title => "Services",             "field" => "services",             "checked" => 1 },
         { title => "Actions",              "field" => "actions",              "checked" => 1 },
-        { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
+        # column order must match status_overview.tt
         { title => "Host Address",         "field" => "address",              "checked" => 0 },
         { title => "Host Alias",           "field" => "alias",                "checked" => 0 },
+        { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
     ];
 
     if($c->config->{'show_custom_vars'}) {
@@ -2410,9 +2411,10 @@ sub get_grid_columns {
         { title => "Host",                 "field" => "name",                 "checked" => 1 },
         { title => "Status",               "field" => "state",                "checked" => 1 },
         { title => "Actions",              "field" => "actions",              "checked" => 1 },
-        { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
+        # column order must match status_grid.tt
         { title => "Host Address",         "field" => "address",              "checked" => 0 },
         { title => "Host Alias",           "field" => "alias",                "checked" => 0 },
+        { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
     ];
 
     if($c->config->{'show_custom_vars'}) {
