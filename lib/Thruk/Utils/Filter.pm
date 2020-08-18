@@ -1373,7 +1373,7 @@ sub nice_stacktrace {
             }
             my $class = "external";
             my $original = $file;
-            if($file =~ m%(lib/Thruk|/script/|/Thruk/plugins/)%mxi) {
+            if($file =~ m%(lib/Thruk|/script/|/Thruk/plugins/|/templates/)%mxi) {
                 $class = "internal";
                 $file =~ s%.*/Thruk/%Thruk/%gmx;
                 $file =~ s%^lib/%Thruk/lib%gmx;
