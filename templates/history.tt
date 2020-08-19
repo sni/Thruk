@@ -1,15 +1,6 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 
-[% link = '' %]
-[% IF service    != '' %][% link = link _ '&amp;' _ 'service='    _ service    %][% END %]
-[% IF host       != '' %][% link = link _ '&amp;' _ 'host='       _ host       %][% END %]
-[% IF noflapping != '' %][% link = link _ '&amp;' _ 'noflapping=' _ noflapping %][% END %]
-[% IF nodowntime != '' %][% link = link _ '&amp;' _ 'nodowntime=' _ nodowntime %][% END %]
-[% IF nosystem   != '' %][% link = link _ '&amp;' _ 'nosystem='   _ nosystem   %][% END %]
-[% IF type       != '' %][% link = link _ '&amp;' _ 'type='       _ type       %][% END %]
-[% IF statetype  != '' %][% link = link _ '&amp;' _ 'statetype='  _ statetype  %][% END %]
-
     <form method="get" action="history.cgi" id="date_form">
     <input type="hidden" name="entries" value="[% entries_per_page | html %]">
     <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
@@ -22,7 +13,7 @@
                 [% IF service != '' and host != 'all' %]
                 <a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a><br>
                 [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a><br>[% END %]
-                <a href="history.cgi?host=[% host | uri %]">View History For This Host</a>
+                <a href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a>
                 [% ELSIF host != 'all' %]
                 <a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a><br>
                 <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>

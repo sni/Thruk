@@ -26,11 +26,11 @@
                 <a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid">View Service Status Grid For This Service Group</a><br>
                 <a href="status.cgi?servicegroup=all&amp;style=detail">View Service Status Detail For All Service Groups</a><br>
                 [% ELSIF host == 'all' %]
-                <a href="history.cgi?host=all">View History For all hosts</a><br>
+                <a href="history.cgi?host=all&amp;nosystem=1">View History For all hosts</a><br>
                 <a href="notifications.cgi?host=all">View Notifications For All Hosts</a><br>
                 <a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Hosts</a>
                 [% ELSIF host != '' %]
-                <a href="history.cgi?host=[% host | uri %]">View History For This Host</a><br>
+                <a href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a><br>
                 <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>
                 <a href="status.cgi?host=all">View Service Status Detail For All Hosts</a>
                 [% ELSE %]
