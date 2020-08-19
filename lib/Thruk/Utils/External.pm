@@ -703,10 +703,11 @@ sub do_child_stuff {
 
     POSIX::setsid() or die "Can't start a new session: $!";
 
+    confess("no c") unless $c;
     $c->stats->clear();
     $c->stash->{'total_backend_waited'} = 0;
     $c->stash->{'total_render_waited'}  = 0;
-    $c->stats->profile(begin => 'External Job: '.$id);
+    $c->stats->profile(begin => 'External Job: '.$id) if $id;
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s', (scalar localtime), $c->config->{'hostname'}, $$));
 
     delete $ENV{'THRUK_SRC'};
@@ -722,7 +723,7 @@ sub do_child_stuff {
     $ENV{'THRUK_JOB_DIR'}            = $dir; # make job id available
 
     # make remote user available
-    if($c && $c->user_exists) {
+    if($c->user_exists) {
         $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         $ENV{REMOTE_USER_GROUPS} = join(';', @{$c->user->{'groups'}});
     }
@@ -744,12 +745,9 @@ sub do_child_stuff {
         }
     }
 
-    # some db drivers need reconnect after forking
-    _reconnect($c);
-
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     my $fallback_log = '/dev/null';
-    $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if ($c && $c->config->{'log4perl_logfile_in_use'});
+    $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if $c->config->{'log4perl_logfile_in_use'};
     $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
     $fallback_log    = $dir."/stderr" if $dir;
     open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
@@ -757,10 +755,10 @@ sub do_child_stuff {
     open(*STDOUT, ">>", $fallback_log) || die "can't reopen stdout to $fallback_log: $!";
 
     # logging must be reset after closing the filehandles
-    $c && $c->app->reset_logging();
+    $c->app->reset_logging();
 
-    $c && $c->stats->enable(1);
-    $c->config->{'slow_page_log_threshold'} = 0 if $c;
+    $c->stats->enable(1);
+    $c->config->{'slow_page_log_threshold'} = 0;
 
     # some db drivers need reconnect after forking
     _reconnect($c);

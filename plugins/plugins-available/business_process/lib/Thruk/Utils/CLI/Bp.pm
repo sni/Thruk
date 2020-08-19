@@ -213,7 +213,7 @@ sub cmd {
         }
         if(!$child_pid) {
             if($worker_num > 1) {
-                Thruk::Utils::External::do_child_stuff();
+                Thruk::Utils::External::do_child_stuff($c);
             }
             my $local_rc = 0;
             for my $bp (@{$chunk}) {
