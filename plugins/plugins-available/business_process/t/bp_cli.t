@@ -24,4 +24,9 @@ TestUtils::test_command({
     like => ['/OK - \d+ business processes updated in/'],
 });
 
+TestUtils::test_command({
+    cmd  => $BIN.' bp all --worker=4',
+    like => ['/OK - \d+ business processes updated in/'],
+});
+
 done_testing();
