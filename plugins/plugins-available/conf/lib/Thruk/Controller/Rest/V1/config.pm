@@ -211,7 +211,7 @@ sub _rest_get_config {
                     $obj_model_changed = 1;
                     next;
                 }
-                push @{$data}, _add_object($o, $peer_key, $peer_name);
+                push @{$data}, _add_object($c, $o, $peer_key, $peer_name);
             }
             if($obj_model_changed) {
                 Thruk::Utils::Conf::store_model_retention($c, $peer_key);
@@ -249,10 +249,18 @@ Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH', 'POST
 
 ##########################################################
 # REST PATH: GET /config/objects
-# Returns list of all objects.
+# Returns list of all objects with their raw config.
+# Use /config/fullobjects to get the full expanded config.
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/objects?$%mx, \&_rest_get_config_objects, ["admin"]);
+
+##########################################################
+# REST PATH: GET /config/fullobjects
+# Returns list of all objects with templates expanded.
+# Used templates are saved to the :TEMPLATES attribute
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/fullobjects?$%mx, \&_rest_get_config_objects, ["admin"]);
 sub _rest_get_config_objects {
-    my($c) = @_;
+    my($c, $path_info) = @_;
+    my $expand = $path_info =~ m/fullobjects/mx ? 1 : 0;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $data = [];
     for my $peer_key (@{$backends}) {
@@ -261,7 +269,7 @@ sub _rest_get_config_objects {
         my $peer_name = $peer->peer_name();
         my $objs = $c->{'obj_db'}->get_objects();
         for my $o (@{$objs}) {
-            push @{$data}, _add_object($o, $peer_key, $peer_name);
+            push @{$data}, _add_object($c, $o, $peer_key, $peer_name, $expand);
         }
     }
     $c->req->parameters->{'sort'} = '.TYPE,.ID' unless $c->req->parameters->{'sort'};
@@ -306,7 +314,7 @@ sub _rest_get_config_objects_new {
         if($c->{'obj_db'}->update_object($obj, \%{$c->req->parameters}, "", 1)) {
             $created++;
             Thruk::Utils::Conf::store_model_retention($c, $peer_key);
-            push @{$objs}, _add_object($obj, $peer_key, $peer_name);
+            push @{$objs}, _add_object($c, $obj, $peer_key, $peer_name);
         }
     }
     return({
@@ -542,8 +550,18 @@ sub _set_object_model {
 }
 ##########################################################
 sub _add_object {
-    my($o, $peer_key, $peer_name) = @_;
-    my $conf = dclone($o->{'conf'});
+    my($c, $o, $peer_key, $peer_name, $expand) = @_;
+    my $conf;
+    # expand used templates
+    if($expand) {
+        $o->get_computed_config($c->{'obj_db'});
+        my($conf_keys, $config) = $o->get_computed_config($c->{'obj_db'});
+        my $templates = $o->get_used_templates($c->{'obj_db'});
+        $conf = $config;
+        $conf->{':TEMPLATES'} = Thruk::Utils::array_uniq($templates);
+    } else {
+        $conf = dclone($o->{'conf'});
+    }
     $conf->{':ID'}        = $o->{'id'};
     $conf->{':TYPE'}      = $o->{'type'};
     $conf->{':FILE'}      = $o->{'file'}->{'path'}.':'.$o->{'line'};

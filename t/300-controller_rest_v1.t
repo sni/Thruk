@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 464;
+    plan tests => 472;
 }
 
 BEGIN {
@@ -27,6 +27,7 @@ my $list_pages = [
     '/config/diff',
     '/config/files',
     '/config/objects',
+    '/config/fullobjects',
     '/commands',
     '/comments',
     '/contactgroups',

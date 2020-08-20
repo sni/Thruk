@@ -7,6 +7,8 @@ next:
           - add dynamic columns for status grid page
           - fix reordering columns on status page
           - fix paging on log pages
+          - REST:
+            - add /config/fullobjects endpoint for expanded objects
           - Config Tool:
             - fix file dropdown when having many files
           - Reporting:

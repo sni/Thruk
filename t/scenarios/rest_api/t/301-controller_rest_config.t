@@ -117,6 +117,9 @@ my $pages = [{
         url     => 'GET /config/objects',
         like    => ['/etc/naemon/conf.d/thruk_bp_generated.cfg', '/etc/naemon/conf.d/test.cfg'],
     }, {
+        url     => 'GET /config/fullobjects',
+        like    => ['/etc/naemon/conf.d/thruk_bp_generated.cfg', '/etc/naemon/conf.d/test.cfg', ':TEMPLATES'],
+    }, {
 # create new host
         url     => 'POST /config/objects',
         post    => {':TYPE' => 'host', ':FILE' => '301-test.cfg', 'name' => '301-test'},
