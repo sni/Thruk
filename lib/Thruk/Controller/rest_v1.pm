@@ -2007,10 +2007,18 @@ sub _compare {
     ## use critic
     my @filtered;
     if($op eq '=') {
+        if(ref $data eq 'ARRAY') {
+            return 1 if(scalar @{$data} == 1 && lc($data->[0]) eq lc($val));
+            return;
+        }
         return 1 if lc($data) eq lc($val);
         return;
     }
     elsif($op eq '!=') {
+        if(ref $data eq 'ARRAY') {
+            return 1 if(scalar @{$data} != 1 || lc($data->[0]) ne lc($val));
+            return;
+        }
         return 1 if lc($data) ne lc($val);
         return;
     }
@@ -2091,10 +2099,16 @@ sub _compare {
         }
     }
     elsif($op eq '>') {
+        if(ref $data eq 'ARRAY') {
+            die("operator '>' not implemented for lists, use '>=' to match list items.");
+        }
         return 1 if $data > $val;
         return;
     }
     elsif($op eq '<') {
+        if(ref $data eq 'ARRAY') {
+            die("operator '>' not implemented for lists, use '>=' to match list items.");
+        }
         return 1 if $data < $val;
     }
     elsif($op eq '>=') {
