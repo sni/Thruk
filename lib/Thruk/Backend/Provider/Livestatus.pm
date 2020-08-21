@@ -47,6 +47,11 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
 $Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
     contacts contact_groups long_plugin_output services
 /];
+$Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns = [qw/
+    num_services
+    num_services_hard_crit num_services_hard_ok num_services_hard_unknown num_services_hard_warn
+    num_services_crit num_services_ok num_services_pending num_services_unknown num_services_warn worst_service_state
+/];
 
 $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     accept_passive_checks acknowledged action_url action_url_expanded
@@ -75,6 +80,11 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
 /];
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
     contacts contact_groups long_plugin_output
+/];
+$Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns = [qw/
+    num_services
+    num_services_hard_crit num_services_hard_ok num_services_hard_unknown num_services_hard_warn
+    num_services_crit num_services_ok num_services_pending num_services_unknown num_services_warn worst_service_state
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/

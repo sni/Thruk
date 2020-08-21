@@ -878,8 +878,14 @@ sub _livestatus_options {
             if($type eq 'hosts') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_host_columns;
             }
+            elsif($type eq 'hostgroups') {
+                $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns;
+            }
             elsif($type eq 'services') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_service_columns;
+            }
+            elsif($type eq 'servicegroups') {
+                $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns;
             }
         }
     }
@@ -1605,7 +1611,7 @@ sub _rest_get_livestatus_hosts_by_name {
 register_rest_path_v1('GET', qr%^/hostgroups?$%mx, \&_rest_get_livestatus_hostgroups);
 sub _rest_get_livestatus_hostgroups {
     my($c) = @_;
-    return($c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), _livestatus_filter($c)  ], %{_livestatus_options($c)}));
+    return($c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), _livestatus_filter($c)  ], %{_livestatus_options($c, "hostgroups")}));
 }
 
 ##########################################################
@@ -1615,7 +1621,7 @@ sub _rest_get_livestatus_hostgroups {
 register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)$%mx, \&_rest_get_livestatus_hostgroups_by_name);
 sub _rest_get_livestatus_hostgroups_by_name {
     my($c, undef, $hostgroup) = @_;
-    my $data = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), { "name" => $hostgroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), { "name" => $hostgroup }, _livestatus_filter($c) ], %{_livestatus_options($c, "hostgroups")});
     return($data);
 }
 
@@ -1705,7 +1711,7 @@ sub _rest_get_livestatus_services_totals {
 register_rest_path_v1('GET', qr%^/servicegroups?$%mx, \&_rest_get_livestatus_servicegroups);
 sub _rest_get_livestatus_servicegroups {
     my($c) = @_;
-    return($c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), _livestatus_filter($c)  ], %{_livestatus_options($c)}));
+    return($c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), _livestatus_filter($c)  ], %{_livestatus_options($c, "servicegroups")}));
 }
 
 ##########################################################
@@ -1715,7 +1721,7 @@ sub _rest_get_livestatus_servicegroups {
 register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)$%mx, \&_rest_get_livestatus_servicegroups_by_name);
 sub _rest_get_livestatus_servicegroups_by_name {
     my($c, undef, $servicegroup) = @_;
-    my $data = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), { "name" => $servicegroup }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    my $data = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), { "name" => $servicegroup }, _livestatus_filter($c) ], %{_livestatus_options($c, "servicegroups")});
     return($data);
 }
 
