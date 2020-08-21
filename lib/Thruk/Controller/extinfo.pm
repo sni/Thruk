@@ -344,7 +344,7 @@ sub _process_recurring_downtimes_page {
             $numbers = [map({
                 my $name = $_;
                 $name =~ s/^recurring_//mx;
-                return($name);
+                $name;
             } split(/\s*,\s*/mx, $c->req->parameters->{'selected_ids'}))];
         } else {
             $numbers = [$nr];
