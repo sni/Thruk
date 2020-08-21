@@ -1,6 +1,6 @@
 ﻿<script type="text/javascript">
 <!--
-  [%+ IF downtimes %]
+  [%+ IF cmd_type == "downtimes" || cmd_type == "recurring" %]
   type = "downtime";
   [% ELSE %]
   type = "comment";
@@ -15,7 +15,13 @@
 </script>
 <div class="cmd_pane" id="cmd_pane">
 <div class="shadow"><div class="shadowcontent">
+[% IF cmd_type == "recurring" %]
+<form action="extinfo.cgi" method="POST" id="quick_cmd_form">
+  <input type="hidden" name="type" value="6">
+  <input type="hidden" name="recurring" value="remove">
+[% ELSE %]
 <form action="cmd.cgi" method="POST" id="quick_cmd_form">
+[% END %]
   <input type="hidden" name="referer" value="[% short_uri(c, {referer => 'undef'}) %]">
   <input type="hidden" name="selected_ids" id="selected_ids" value="">
   <table class="cmd_pane" border=1 style="width: 400px">
@@ -28,10 +34,13 @@
       <td class="statusOdd">Command:</td>
       <td class="statusOdd">
         <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" style="margin-top: 4px;">
-          [% IF c.config.cmd_quick_status.downtime && downtimes %]
+          [% IF c.config.cmd_quick_status.downtime && cmd_type == "recurring" %]
+          <option value="5" style="background-image:url([% url_prefix %]themes/[% theme %]/images/delete.gif); }">remove recurring downtimes</option>
+          [% END %]
+          [% IF c.config.cmd_quick_status.downtime && cmd_type == "downtimes" %]
           <option value="5" style="background-image:url([% url_prefix %]themes/[% theme %]/images/delete.gif); }">remove downtimes</option>
           [% END %]
-          [% IF c.config.cmd_quick_status.comment && comments %]
+          [% IF c.config.cmd_quick_status.comment && cmd_type == "comments" %]
           <option value="13" style="background-image:url([% url_prefix %]themes/[% theme %]/images/delete.gif); }">remove comments</option>
           [% END %]
         </select>

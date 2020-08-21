@@ -339,17 +339,29 @@ sub _process_recurring_downtimes_page {
         return if _process_recurring_downtimes_page_edit($c, $nr, $default_rd);
     }
     elsif($task eq 'remove') {
-        my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
-        if(-s $file) {
-            my $old_rd = Thruk::Utils::read_data_file($file);
-            if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'no such downtime!' });
-            } else {
-                unlink($file);
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
-            }
+        my $numbers = [];
+        if($c->req->parameters->{'selected_ids'}) {
+            $numbers = [map({
+                my $name = $_;
+                $name =~ s/^recurring_//mx;
+                return($name);
+            } split(/\s*,\s*/mx, $c->req->parameters->{'selected_ids'}))];
         } else {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such downtime!' });
+            $numbers = [$nr];
+        }
+        for my $nr (@{$numbers}) {
+            my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
+            if(-s $file) {
+                my $old_rd = Thruk::Utils::read_data_file($file);
+                if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
+                    Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'no such downtime!' });
+                } else {
+                    unlink($file);
+                    Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
+                }
+            } else {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such downtime!' });
+            }
         }
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");

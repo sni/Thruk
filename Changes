@@ -5,6 +5,7 @@ next:
           - add logcache to thruk selfcheck
           - add dynamic columns for status overview page
           - add dynamic columns for status grid page
+          - add multiselect removal for recurring downtimes
           - fix reordering columns on status page
           - fix paging on log pages
           - REST:

@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='downtime' style="min-width: 700px;" id="recurring_downtimes_table_[% type | html %]">
+  <table border="0" class='downtime[% IF names %] hoverable[% END %]' style="min-width: 700px;" id="recurring_downtimes_table_[% type | html %]">
     <tr class='downtime'>
       <th class='downtime'>Type</th>
       <th class='downtime' colspan=2>Name</th>
@@ -15,7 +15,7 @@
     [% count = count + 1 %]
     [% SET class = 'downtimeOdd' IF loop.even %]
     [% SET class = 'downtimeEven'  IF loop.odd %]
-    <tr class='[% class %][% IF count == 1 %] firstrow[% END %]'>
+    <tr class='[% class %][% IF count == 1 %] firstrow[% END %][% IF names %] clickable[% END %]' id="recurring_[% d.file | html %]">
       <td class='[% class %]'>[% d.target | ucfirst %]</td>
       <td class='[% class %]'[% IF d.target != 'service' %] colspan=2[% END %]>
         [% IF d.target == 'host' %]

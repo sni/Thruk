@@ -538,7 +538,7 @@
             [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
               <br>
               <div class='commentTitle'>Recurring Service Downtime</div>
-              [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' %]
+              [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' names=0 %]
             [% END %]
           </td>
         </tr>
