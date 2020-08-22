@@ -42,10 +42,10 @@ fi
 date=`date "+%B %d, %Y"`
 debversion="$newversion"
 if [ "$branch" != "" ]; then
-    debversion="$newversion~$branch-$release"
+    debversion=$(echo "${newversion}~${branch}+${release}" | tr -d '-')
     rpmrelease=`echo $branch | tr -d '-'`
 else
-    debversion="$newversion-$release"
+    debversion="${newversion}_${release}"
     rpmrelease=$release
 fi
 if [ $rpmrelease -gt 1 ]; then branch=$rpmrelease; fi
