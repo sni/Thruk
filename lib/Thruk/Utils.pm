@@ -14,10 +14,11 @@ use strict;
 use warnings;
 use Thruk::Utils::IO ();
 use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::DateTime ();
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 use Carp qw/confess croak longmess/;
 use Data::Dumper qw/Dumper/;
-use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Add_Delta_Days Normalize_DHMS/;
+use Date::Calc qw/Localtime Monday_of_Week Week_of_Year Today Add_Delta_Days/;
 use File::Slurp qw/read_file/;
 use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move copy/;
@@ -275,7 +276,7 @@ sub get_start_end_for_timeperiod {
     $timeperiod = 'custom' unless defined $timeperiod;
     my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
     if($timeperiod eq 'today') {
-        $start = Mktime($year,$month,$day,  0,0,0);
+        $start = Thruk::Utils::DateTime::mktime($year,$month,$day,  0,0,0);
         $end   = time();
     }
     elsif($timeperiod eq 'last24hours') {
@@ -283,7 +284,7 @@ sub get_start_end_for_timeperiod {
         $start = $end - 86400;
     }
     elsif($timeperiod eq 'yesterday') {
-        $start = Mktime($year,$month,$day,  0,0,0) - 86400;
+        $start = Thruk::Utils::DateTime::mktime($year,$month,$day,  0,0,0) - 86400;
         $end   = $start + 86400;
     }
     elsif($timeperiod eq 'thisweek') {
@@ -291,9 +292,9 @@ sub get_start_end_for_timeperiod {
         my @today  = Today();
         my @monday = Monday_of_Week(Week_of_Year(@today));
         if($c->config->{'first_day_of_week'} == 1) {
-            $start = Mktime(@monday,  0,0,0);
+            $start = Thruk::Utils::DateTime::mktime(@monday,  0,0,0);
         } else {
-            $start = Mktime(@monday,  0,0,0) - 86400;
+            $start = Thruk::Utils::DateTime::mktime(@monday,  0,0,0) - 86400;
         }
         $end       = time();
     }
@@ -306,15 +307,15 @@ sub get_start_end_for_timeperiod {
         my @today  = Today();
         my @monday = Monday_of_Week(Week_of_Year(@today));
         if($c->config->{'first_day_of_week'} == 1) {
-            $end   = Mktime(@monday,  0,0,0);
+            $end   = Thruk::Utils::DateTime::mktime(@monday,  0,0,0);
         } else {
-            $end   = Mktime(@monday,  0,0,0) - 86400;
+            $end   = Thruk::Utils::DateTime::mktime(@monday,  0,0,0) - 86400;
         }
         $start     = $end - 7*86400;
     }
     elsif($timeperiod eq 'thismonth') {
         # start on first till now
-        $start = Mktime($year,$month,1,  0,0,0);
+        $start = Thruk::Utils::DateTime::mktime($year,$month,1,  0,0,0);
         $end   = time();
     }
     elsif($timeperiod eq 'last31days') {
@@ -322,37 +323,37 @@ sub get_start_end_for_timeperiod {
         $start = $end - 31 * 86400;
     }
     elsif($timeperiod eq 'lastmonth') {
-        $end   = Mktime($year,$month,1,  0,0,0);
+        $end   = Thruk::Utils::DateTime::mktime($year,$month,1,  0,0,0);
         my $lastmonth = $month - 1;
         if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
-        $start = Mktime($year,$lastmonth,1,  0,0,0);
+        $start = Thruk::Utils::DateTime::mktime($year,$lastmonth,1,  0,0,0);
     }
     elsif($timeperiod =~ /last(\d+)months?/mx) {
         my $months = $1;
-        $end   = Mktime($year,$month,1,  0,0,0);
+        $end   = Thruk::Utils::DateTime::mktime($year,$month,1,  0,0,0);
         my $lastmonth = $month - $months;
         while($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
-        $start = Mktime($year,$lastmonth,1,  0,0,0);
+        $start = Thruk::Utils::DateTime::mktime($year,$lastmonth,1,  0,0,0);
     }
     elsif($timeperiod eq 'thisyear') {
-        $start = Mktime($year,1,1,  0,0,0);
+        $start = Thruk::Utils::DateTime::mktime($year,1,1,  0,0,0);
         $end   = time();
     }
     elsif($timeperiod eq 'lastyear') {
-        $start = Mktime($year-1,1,1,  0,0,0);
-        $end   = Mktime($year,1,1,  0,0,0);
+        $start = Thruk::Utils::DateTime::mktime($year-1,1,1,  0,0,0);
+        $end   = Thruk::Utils::DateTime::mktime($year,1,1,  0,0,0);
     }
     else {
         if(defined $t1) {
             $start = _parse_date($t1);
         } else {
-            $start = normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
+            $start = Thruk::Utils::DateTime::normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
         }
 
         if(defined $t2) {
             $end = _parse_date($t2);
         } else {
-            $end   = normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
+            $end   = Thruk::Utils::DateTime::normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
         }
     }
 
@@ -433,20 +434,20 @@ sub get_start_end_from_date_select_params {
     }
     if(!defined $start || $start == 0 || !defined $end || $end == 0) {
         # start with today 00:00
-        $start = Mktime(Today(), 0,0,0);
-        $end   = Mktime(Add_Delta_Days(Today(), 1), 0,0,0);
+        $start = Thruk::Utils::DateTime::mktime(Today(), 0,0,0);
+        $end   = Thruk::Utils::DateTime::mktime(Add_Delta_Days(Today(), 1), 0,0,0);
     }
     if($archive eq '+1') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
-        $start = Mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+        $start = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
         ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
-        $end = Mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+        $end = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
     }
     elsif($archive eq '-1') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
-        $start = Mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+        $start = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
         ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
-        $end = Mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+        $end = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
     }
 
     # swap date if they are mixed up
@@ -961,32 +962,6 @@ sub check_custom_var_list {
         }
     }
     return;
-}
-
-########################################
-
-=head2 normal_mktime
-
-  normal_mktime($year,$mon,$day,$hour,$min,$sec)
-
-returns normalized timestamp for given date
-
-=cut
-sub normal_mktime {
-    my($year,$mon,$day,$hour,$min,$sec) = @_;
-
-    # calculate borrow
-    my $add_time = 0;
-    if($hour == 24) {
-        $add_time = 86400;
-        $hour = 0;
-    }
-
-    confess("undefined value") unless defined $sec;
-    ($day, $hour, $min, $sec) = Normalize_DHMS($day, $hour, $min, $sec);
-    my $timestamp = Mktime($year,$mon,$day, $hour,$min,$sec);
-    $timestamp += $add_time;
-    return $timestamp;
 }
 
 ########################################
@@ -3205,19 +3180,19 @@ sub _expand_timestring {
 
     # real date (YYYY-MM-DD HH:MM:SS)
     if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
-        my $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+        my $timestamp = Thruk::Utils::DateTime::mktime($1,$2,$3, $4,$5,$6);
         return($timestamp);
     }
 
     # real date without seconds (YYYY-MM-DD HH:MM)
     if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
-        my $timestamp = Mktime($1,$2,$3, $4,$5,0);
+        my $timestamp = Thruk::Utils::DateTime::mktime($1,$2,$3, $4,$5,0);
         return($timestamp);
     }
 
     # US date format (MM-DD-YYYY HH:MM:SS)
     if($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
-        my $timestamp = Mktime($3,$1,$2, $4,$5,$6);
+        my $timestamp = Thruk::Utils::DateTime::mktime($3,$1,$2, $4,$5,$6);
         return($timestamp);
     }
 
@@ -3235,52 +3210,52 @@ sub _expand_timestring {
     if($string eq 'lastmonday' || $string eq 'thisweek') {
         my @today  = Today();
         my @monday = Monday_of_Week(Week_of_Year(@today));
-        my $ts = Mktime(@monday, 0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime(@monday, 0,0,0);
         return($ts);
     }
     elsif($string eq 'lastweek') {
         my @lastmonday = Monday_of_Week(Week_of_Year(Add_Delta_Days(Today(), -7)));
-        my $ts = Mktime(@lastmonday, 0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime(@lastmonday, 0,0,0);
         return($ts);
     }
     elsif($string eq 'nextweek') {
         my @lastmonday = Monday_of_Week(Week_of_Year(Add_Delta_Days(Today(), 7)));
-        my $ts = Mktime(@lastmonday, 0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime(@lastmonday, 0,0,0);
         return($ts);
     }
     elsif($string eq 'thismonth') {
         # start on month
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-        my $ts = Mktime($year,$month,1,  0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime($year,$month,1,  0,0,0);
         return($ts);
     }
     elsif($string eq 'lastmonth') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         my $lastmonth = $month - 1;
         if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
-        my $ts = Mktime($year,$lastmonth,1,  0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime($year,$lastmonth,1,  0,0,0);
         return($ts);
     }
     elsif($string eq 'nextmonth') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         my $nextmonth = $month + 1;
         if($nextmonth > 12) { $nextmonth = $nextmonth - 12; $year++; }
-        my $ts = Mktime($year,$nextmonth,1,  0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime($year,$nextmonth,1,  0,0,0);
         return($ts);
     }
     elsif($string eq 'thisyear') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-        my $ts = Mktime($year,1,1,  0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime($year,1,1,  0,0,0);
         return($ts);
     }
     elsif($string eq 'lastyear') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-        my $ts = Mktime($year-1,1,1,  0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime($year-1,1,1,  0,0,0);
         return($ts);
     }
     elsif($string eq 'nextyear') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-        my $ts = Mktime($year+1,1,1,  0,0,0);
+        my $ts = Thruk::Utils::DateTime::mktime($year+1,1,1,  0,0,0);
         return($ts);
     }
 

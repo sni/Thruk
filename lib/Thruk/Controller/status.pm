@@ -1420,7 +1420,6 @@ sub _process_verify_time {
             $error = $@;
             chomp($error);
             $error =~ s/\ at .*?\.pm\ line\ \d+//gmx;
-            $error =~ s/^Date::Calc::Mktime\(\):\ //gmx;
         }
     }
 
@@ -1437,7 +1436,6 @@ sub _process_verify_time {
             $error = $@;
             chomp($error);
             $error =~ s/\ at .*?\.pm\ line\ \d+//gmx;
-            $error =~ s/^Date::Calc::Mktime\(\):\ //gmx;
         }
     }
 
