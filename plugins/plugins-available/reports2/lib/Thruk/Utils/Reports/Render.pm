@@ -141,7 +141,7 @@ sub expand_service_slas {
         my @services = split/\s*,\s*/mx, $f->{'service'};
         for my $h (@hosts) {
             for my $s (@services) {
-                $slas->{$h}->{$s} = $f->{'sla'};
+                $slas->{$h}->{$s} = $f;
             }
         }
     }

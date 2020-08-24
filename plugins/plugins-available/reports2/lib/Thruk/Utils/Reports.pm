@@ -1590,7 +1590,7 @@ returns normalized field structure, convert old array list into hash structure
 =cut
 sub normalize_required_field {
     my($f) = @_;
-    if(ref $f eq 'HASH' && $f->{'name'} && $f->{'type'}) {
+    if(ref $f eq 'HASH' && $f->{'type'}) {
         # already normalized hash form
         if($f->{'childs'}) {
             for my $c (@{$f->{'childs'}}) {
@@ -1623,12 +1623,13 @@ sub normalize_required_field {
 ##########################################################
 sub _set_required_field_defaults {
     my($f) = @_;
-    $f->{'desc'}     = $f->{'desc'}     // '';
-    $f->{'details'}  = $f->{'details'}  // '';
-    $f->{'required'} = $f->{'required'} // 0;
-    $f->{'default'}  = $f->{'default'}  // ($f->{'type'} eq 'formlist' ? {} : '');
-    $f->{'extra'}    = $f->{'extra'}    // '';
-    $f->{'multiple'} = $f->{'multiple'} // 0;
+    $f->{'desc'}      = $f->{'desc'}      // '';
+    $f->{'details'}   = $f->{'details'}   // '';
+    $f->{'required'}  = $f->{'required'}  // 0;
+    $f->{'default'}   = $f->{'default'}   // ($f->{'type'} eq 'formlist' ? {} : '');
+    $f->{'extra'}     = $f->{'extra'}     // '';
+    $f->{'multiple'}  = $f->{'multiple'}  // 0;
+    $f->{'draggable'} = $f->{'draggable'} // 0;
 
     $f->{'default'}  = [$f->{'default'}] if($f->{'multiple'} && ref $f->{'default'} ne 'ARRAY');
     return;

@@ -2965,6 +2965,27 @@ function fetch_svc_info_popup(el, host, svc, peer_key) {
     });
 }
 
+function initTableRowSorting(tblId) {
+    if(!has_jquery_ui) {
+        load_jquery_ui(function() {
+            initTableRowSorting(tblId);
+        });
+        return;
+    }
+    if(already_sortable["table_"+tblId]) {
+        return;
+    }
+    already_sortable["table_"+tblId] = true;
+
+    jQuery('#'+tblId).sortable({
+        items                : 'TR.sortable',
+        helper               : 'clone',
+        tolerance            : 'pointer',
+        update               : function( event, ui ) {
+        }
+    });
+}
+
 function initExcelExportSorting() {
     if(!has_jquery_ui) {
         load_jquery_ui(function() {

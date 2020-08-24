@@ -249,10 +249,12 @@
     </select>
     [% cust_value = ""; cust_key = key _ '_cust'; IF r.params.exists(cust_key) %][% cust_value = r.params.$cust_key %][% END %]
     <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*' })" style="width: 150px; [% IF value != 'servicecustom' %]display: none;[% END %]">
+  [% ELSIF type == 'label' %]
+    [% fh.label %]
   [% ELSIF type == 'formlist' %]
     [% parent = fh %]
     [% parentvalue = value %]
-    <table class="formlist">
+    <table class="formlist[% IF parent.draggable %] hoverable" id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
       <tr>
         [% FOREACH ch = parent.childs %]
         <th>[% ch.desc %]</th>
@@ -262,7 +264,7 @@
         [% END %]
       </tr>
       [% IF parent.multiple %]
-      <tr style="display: none;">
+      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" style="display: none;">
         [% FOREACH ch = parent.childs; ch.origname = ch.name; ch.name = parent.name _ "." _ ch.name %]
         <td>
           [% PROCESS field_form fh=ch %]
@@ -273,7 +275,7 @@
       [% END %]
 
       [% FOREACH chv = parentvalue.list %]
-      <tr>
+      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]">
         [% FOREACH ch = parent.childs %]
         <td>
           [% subkey = ch.name; origname = ch.origname; IF chv.exists(origname); r.params.$subkey = chv.$origname; END %]

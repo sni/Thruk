@@ -1406,4 +1406,17 @@ sub nice_stacktrace {
 
 ########################################
 
+=head2 random_id
+
+    random_id([$max_length])
+
+return random id
+
+=cut
+sub random_id {
+    return(rand(1000000000));
+}
+
+########################################
+
 1;
