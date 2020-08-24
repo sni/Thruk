@@ -153,6 +153,8 @@ sub perl {
                     open(my $fh, '>', $dir."/forward");
                     print $fh $c->stash->{'last_redirect_to'},"\n";
                     Thruk::Utils::IO::close($fh, $dir."/forward");
+                    $err = undef;
+                    $rc  = 0;
                 } else {
                     $rc = 1;
                 }
