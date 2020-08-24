@@ -557,7 +557,7 @@ sub _add_object {
         $o->get_computed_config($c->{'obj_db'});
         my($conf_keys, $config) = $o->get_computed_config($c->{'obj_db'});
         my $templates = $o->get_used_templates($c->{'obj_db'});
-        $conf = $config;
+        $conf = dclone($config);
         $conf->{':TEMPLATES'} = Thruk::Utils::array_uniq($templates);
     } else {
         $conf = dclone($o->{'conf'});
