@@ -51,6 +51,7 @@ requires 'Crypt::Rijndael'                        => 0;     # required by Thruk:
 feature     ('plugin_reports2',
   -default                                        => 0,
   'MIME::Lite'                                    => 0,
+  'Tie::IxHash'                                   => 0,
 );
 
 # https backends support

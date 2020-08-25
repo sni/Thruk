@@ -136,10 +136,20 @@ expand services sla levels
 sub expand_service_slas {
     my($param) = @_;
     my $slas = {};
+    require Tie::IxHash;
+    ## no critic
+    tie %{$slas}, "Tie::IxHash";
+    ## use critic
     for my $f (@{$param}) {
         my @hosts    = split/\s*,\s*/mx, $f->{'host'};
         my @services = split/\s*,\s*/mx, $f->{'service'};
         for my $h (@hosts) {
+            if(!defined $slas->{$h}) {
+                $slas->{$h} = {};
+                ## no critic
+                tie %{$slas->{$h}}, "Tie::IxHash";
+                ## use critic
+            }
             for my $s (@services) {
                 $slas->{$h}->{$s} = $f;
             }
