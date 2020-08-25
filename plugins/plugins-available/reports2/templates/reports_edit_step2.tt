@@ -254,7 +254,7 @@
   [% ELSIF type == 'formlist' %]
     [% parent = fh %]
     [% parentvalue = value %]
-    <table class="formlist[% IF parent.draggable %] hoverable" id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
+    <table class="formlist"[% IF parent.draggable %] id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
       <tr>
         [% FOREACH ch = parent.childs %]
         <th>[% ch.desc %]</th>
