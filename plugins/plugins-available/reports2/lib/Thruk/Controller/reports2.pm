@@ -53,8 +53,7 @@ sub index {
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';
     my $highlight = $c->req->parameters->{'highlight'} || '';
-    my $refresh   = 0;
-    $refresh = $c->req->parameters->{'refresh'} if exists $c->req->parameters->{'refresh'};
+    my $refresh = $c->req->parameters->{'refreshreport'} // 0;
 
     if(ref $action eq 'ARRAY') { $action = pop @{$action}; }
 

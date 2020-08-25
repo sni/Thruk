@@ -1675,7 +1675,7 @@ sub _convert_to_pdf {
     my $htmlonly = 0;
 
     # skip pdf creator for ondemand html preview
-    if($c->req->parameters->{'html'} and $c->req->parameters->{'refresh'}) {
+    if($c->req->parameters->{'html'} and $c->req->parameters->{'refreshreport'}) {
         $htmlonly = 1;
     }
 

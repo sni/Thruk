@@ -49,7 +49,7 @@
     <td class="dataEven" align="center" valign="top"><b>Attachments</b></td>
     <td class="dataOdd" align="left">
       [% PROCESS _reports_icon.tt r=r %]
-      <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='' title='' width=16 height=16 style="vertical-align: top;"> [% attach %] ([% n = reduce_number(size, 'B', 1000); sprintf("%.1f %s", n.0, n.1) %])</a>
+      <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='' title='' width=16 height=16 style="vertical-align: top;"> [% attach %] ([% n = reduce_number(size, 'B', 1000); sprintf("%.1f %s", n.0, n.1) %])</a>
     </td>
   </tr>
   <tr>
