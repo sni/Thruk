@@ -66,6 +66,7 @@ function split_table(table, max_height) {
 
     // remove things which should stay on the last page only
     page.find('.split_pages_lastpage_only').remove();
+    cloned.find('.split_pages_firstpage_only').remove();
 
     // find rows till max height and remove all rows below
     var num_removed;
