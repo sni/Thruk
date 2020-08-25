@@ -1414,7 +1414,7 @@ return random id
 
 =cut
 sub random_id {
-    return(rand(1000000000));
+    return(int(rand(1000000000)));
 }
 
 ########################################
