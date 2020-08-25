@@ -36,7 +36,7 @@ our $VERSION = '2.36';
 my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
-my $filebranch   = $branch || 1;
+my $filebranch  = $branch || 1;
 if($branch) {
     $branch = $branch.'~'.$gitbranch if $gitbranch ne '';
 } else {
@@ -1408,6 +1408,19 @@ sub _fixup_config {
     }
 
     return($config);
+}
+
+########################################
+
+=head2 version
+
+  version()
+
+return version string
+
+=cut
+sub version {
+    return(sprintf("%s-%s", $VERSION, $filebranch));
 }
 
 1;

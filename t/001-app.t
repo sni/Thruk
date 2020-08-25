@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 BEGIN {
     use lib('t');
@@ -21,3 +21,7 @@ SKIP: {
 $request = request('/thruk/themes/Thruk/images/ack.gif');
 ok($request->headers('last-modified'), "static content request has last-modified header");
 ok($request->headers('content-length'), "static content request has content-length header");
+
+use_ok("Thruk::Config");
+use Config;
+diag(sprintf("Thruk: %s - Perl: %s - Arch: %s", Thruk::Config::version(), $^V, $Config{'archname'}));
