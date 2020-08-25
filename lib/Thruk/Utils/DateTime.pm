@@ -28,9 +28,9 @@ return timestamp for given date
 =cut
 sub mktime {
     my($year,$month,$day, $hour,$min,$sec) = @_;
-    $month = $month - 1;    # POSIX::mktime month starts at 0
-    $year  = $year  - 1900; # POSIX::mktime year starts at 1900
-    my $ts = POSIX::mktime($sec, $min, $hour, $day, $month, $year);
+    my $m = $month - 1;    # POSIX::mktime month starts at 0
+    my $y = $year  - 1900; # POSIX::mktime year starts at 1900
+    my $ts = POSIX::mktime($sec, $min, $hour, $day, $m, $y);
     confess(sprintf("invalid date: %s-%s-%s %s:%s:%s", $day, $month, $year, $hour,$min,$sec));
     return $ts;
 }
