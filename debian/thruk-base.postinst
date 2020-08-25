@@ -22,25 +22,16 @@ setup_apache2() {
   echo "Configuring apache2 vhost ..."
 
   # enable modules we need
-  a2enmod alias
-  a2enmod fcgid
-  a2enmod auth_basic
-  a2enmod rewrite
+  if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+      . /usr/share/apache2/apache2-maintscript-helper
+      apache2_invoke enmod alias      || exit $?
+      apache2_invoke enmod fcgid      || exit $?
+      apache2_invoke enmod auth_basic || exit $?
+      apache2_invoke enmod rewrite    || exit $?
 
-  # enable thruk itself
-  if [ -x '/usr/sbin/a2enconf' ]; then
-      # clean up old conf.d mess
-      set +e
-      if [ -e /etc/apache2/conf.d/thruk.conf -a -e /etc/apache2/conf-available/thruk.conf.dpkg-new -a -h /etc/apache2/conf-available/thruk.conf ]; then
-          diff /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf.dpkg-new >/dev/null && {
-              rm -f /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf
-              rmdir /etc/apache2/conf.d 2>/dev/null
-              mv /etc/apache2/conf-available/thruk.conf.dpkg-new /etc/apache2/conf-available/thruk.conf
-          }
-      fi
-      set -e
-      [ -f /etc/apache2/conf-enabled/thruk.conf ] || /usr/sbin/a2enconf thruk
-      [ -f /etc/apache2/conf-enabled/thruk_cookie_auth_vhost.conf ] || /usr/sbin/a2enconf thruk_cookie_auth_vhost
+      # enable thruk itself
+      [ -f /etc/apache2/conf-enabled/thruk.conf ]                   || apache2_invoke enconf thruk
+      [ -f /etc/apache2/conf-enabled/thruk_cookie_auth_vhost.conf ] || apache2_invoke enconf thruk_cookie_auth_vhost
   fi
 
   # activate cookie in existing default virtual hosts
@@ -54,11 +45,7 @@ setup_apache2() {
   set -e
 
   # reload new apache config
-  if which invoke-rc.d >/dev/null 2>&1; then
-      invoke-rc.d apache2 reload || true
-  else
-      /etc/init.d/apache2 reload || true
-  fi
+  deb-systemd-invoke condreload apache2 || true
 
   echo "Thruk have been configured for http://$(hostname)/thruk/."
   echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
@@ -107,17 +94,17 @@ case "$1" in
 
         # Depending on which webserver is installed, set up the basics
         # (so far only supports apache2)
-        [ -x /usr/sbin/apache2 ] && setup_apache2
+        [ -x /usr/sbin/apache2 ] && setup_apache2 $@
 
         # create empty crontab
-        /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
+        crontab -l -u www-data 2>/dev/null | crontab -u www-data -
 
         # cleanup tmp files
-        /usr/bin/thruk -a livecachestop --local >/dev/null 2>&1 || :
+        thruk -a livecachestop --local >/dev/null 2>&1 || :
         rm -rf /var/cache/thruk/*
 
         # update cron entries
-        /usr/bin/thruk -a clearcache,installcron --local > /dev/null
+        thruk -a clearcache,installcron --local > /dev/null
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
