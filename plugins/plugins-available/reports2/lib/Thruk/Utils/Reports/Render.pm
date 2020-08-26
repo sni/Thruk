@@ -920,7 +920,10 @@ sub _replace_css_img {
 
     $file =~ s/^('|")//gmx;
     $file =~ s/('|")$//gmx;
-    if($file =~ m/\.(\w+)$/mx) {
+    if($file =~ m/^data:/mx) {
+        return "$pre$aa$file$bb$post";
+    }
+    elsif($file =~ m/\.(\w+)$/mx) {
         $css         = _absolutize_url($baseurl, $css);
         my @res      = _read_static_content_file($css, $report_base_url, $file);
         return($pre.$post) if $res[0] != 200;
