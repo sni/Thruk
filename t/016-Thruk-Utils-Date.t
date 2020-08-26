@@ -16,6 +16,7 @@ use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::DateTime');
 use Date::Calc qw/Localtime/;
+use Config;
 
 my $c = TestUtils::get_c();
 
@@ -47,11 +48,17 @@ my $timepattern = [
 ];
 
 for(my $i = 0; $i < scalar @{$timepattern}; $i += 2) {
-    my($pattern,$ts) = ($timepattern->[$i], $timepattern->[$i+1]);
-    my $parsed = Thruk::Utils::parse_date(undef, $pattern);
-    # round to 10 seconds to avoid failed tests on slow ci vms
-    ok(abs($parsed - $ts) < 10, sprintf("parse_date returns correct timestamp for '%s' -> %s vs. %s", $pattern, $ts, ($parsed//"undef")))
-        || diag(sprintf("parse_date returned:\n%s (expected)\n%s (got)\n", $ts, ($parsed//"undef")));
+    SKIP: {
+        my($pattern,$ts) = ($timepattern->[$i], $timepattern->[$i+1]);
+        skip('64bit perl required', 1) if($pattern =~ m/2100/mx && $Config{'archname'} !~ m/x86_64/mx);
+        # hack for ubuntu18.04 perl v5.26.1 which is off by one hour for 64bit timestamps
+        skip('check broken on perl '.$^V, 1) if($pattern =~ m/^2100/mx && $^V eq 'v5.26.1');
+
+        my $parsed = Thruk::Utils::parse_date(undef, $pattern);
+        # round to 10 seconds to avoid failed tests on slow ci vms
+        ok(abs($parsed - $ts) < 10, sprintf("parse_date returns correct timestamp for '%s' -> %s vs. %s", $pattern, $ts, ($parsed//"undef")))
+            || diag(sprintf("parse_date returned:\n%s (expected)\n%s (got)\n", $ts, ($parsed//"undef")));
+    };
 }
 
 #########################
@@ -65,11 +72,15 @@ my $compare = [
     { date => [2150,  1, 1,  0, 0, 0], ts =>  5680278000, skip_dc => 1 },
 ];
 for my $comp (@{$compare}) {
-    my $ts1 = Thruk::Utils::DateTime::mktime(@{$comp->{'date'}});
-    is($ts1, $comp->{'ts'}, "Thruk::Utils::DateTime::mktime(".join(",", @{$comp->{'date'}}).")");
+    SKIP: {
+        skip '64bit perl required', 1 if(($comp->{'date'}->[0] > 2038 || $comp->{'date'}->[0] < 1970) && $Config{'archname'} !~ m/x86_64/mx);
 
-    unless($comp->{'skip_dc'}) {
-        my $ts2 = Date::Calc::Mktime(@{$comp->{'date'}});
-        is($ts1, $comp->{'ts'}, "Date::Calc::Mktime(".join(",", @{$comp->{'date'}}).")");
-    }
+        my $ts1 = Thruk::Utils::DateTime::mktime(@{$comp->{'date'}});
+        is($ts1, $comp->{'ts'}, "Thruk::Utils::DateTime::mktime(".join(",", @{$comp->{'date'}}).")");
+
+        unless($comp->{'skip_dc'}) {
+            my $ts2 = Date::Calc::Mktime(@{$comp->{'date'}});
+            is($ts1, $comp->{'ts'}, "Date::Calc::Mktime(".join(",", @{$comp->{'date'}}).")");
+        }
+    };
 }
