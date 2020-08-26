@@ -5,7 +5,7 @@
 # in order to make this work, you have to initialize a git repository in your object
 # configuration folder:
 # 
-# %> cd etc/nagios/conf.d && git init
+# %> cd etc/core/conf.d && git init
 #
 # then set this script as 'pre_obj_save_cmd' and 'post_obj_save_cmd'
 # in the '<Component Thruk::Plugin::ConfigTool>' section of your thruk_local.conf.
@@ -23,7 +23,7 @@ echo "[$(date)] $0 $1 start"
 set -x
 
 ACTION=$1
-cd $OMD_ROOT/etc/nagios/conf.d/
+cd $OMD_ROOT/etc/core/conf.d/
 
 git add -A .
 
