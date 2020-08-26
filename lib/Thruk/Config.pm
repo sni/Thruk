@@ -505,7 +505,7 @@ sub set_default_config {
     my $var_path = $config->{'var_path'} or die("no var path!");
     if($> != 0 && !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
-    my ($uid, $groups) = get_user($var_path);
+    my($uid, $groups) = get_user($var_path);
     ## no critic
     $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
     $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
@@ -1027,8 +1027,9 @@ sub get_user {
     # Discover which user we want to be
     my($from_folder) = @_;
     confess($from_folder." ".$!) unless -d $from_folder;
+    my @stat = stat $from_folder;
     # This is the user we want to be
-    my $uid = (stat $from_folder)[4];
+    my $uid = $stat[4];
     # This is the current user
     my $cuid = (getpwuid($<))[2];
     # For now just initialize the array
@@ -1053,6 +1054,10 @@ sub get_user {
                 $users =~ /\b$name\b/mx and push @groups, $gid;
             }
         }
+    }
+    # make sure we have at least one group id
+    if(scalar @groups == 0) {
+        push @groups, $stat[5];
     }
     return($uid, \@groups);
 }
