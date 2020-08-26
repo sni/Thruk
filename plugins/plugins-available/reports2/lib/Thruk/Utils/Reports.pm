@@ -1088,10 +1088,12 @@ sub get_report_templates {
     for my $path (@{$c->get_tt_template_paths()}) {
         for my $file (glob($path.'/reports/*.tt')) {
             my $name;
+            my $path = $file;
             ($file, $name) = _get_report_tt_name($file);
             $templates->{$file} = {
                 file => $file,
                 name => $name,
+                path => $path,
             };
         }
     }
