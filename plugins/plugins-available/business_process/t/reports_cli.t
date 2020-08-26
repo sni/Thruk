@@ -107,7 +107,7 @@ for my $report (@{$test_pdf_reports}) {
 
     TestUtils::test_page(
         url     => '/thruk/cgi-bin/reports2.cgi',
-        waitfor => 'reports2.cgi\?report=9999\&amp;refresh=0',
+        waitfor => 'reports2.cgi\?report=9999\&amp;refreshreport=0',
         unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'',
     );
 
