@@ -543,6 +543,9 @@ TP.calculate_first_notification_delay_remaining = function(obj) {
 
 /* return action info icon */
 function action_icon(o, action_icon) {
+    if(!o || !o.custom_variable_names) {
+        return action_icon;
+    }
     for(var nr=0; nr<o.custom_variable_names.length; nr++) {
         if(o.custom_variable_names[nr] == 'ACTION_ICON') {
             return o.custom_variable_values[nr];
