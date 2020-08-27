@@ -404,8 +404,12 @@ sub _calculate_data_totals {
 ##############################################
 sub _replace_output {
     my($var, $result, $macros) = @_;
-    my $format;
-    if($var =~ m/^(.*)(%[^%]+?)$/gmx) {
+    my($format, $strftime);
+    if($var =~ m/^(.*)%strftime:(.*)$/gmx) {
+        $strftime = $2; # overwriting $var first breaks on <= perl 5.16
+        $var      = $1;
+    }
+    elsif($var =~ m/^(.*)(%[^%]+?)$/gmx) {
         $format = $2; # overwriting $var first breaks on <= perl 5.16
         $var    = $1;
     }
@@ -433,7 +437,7 @@ sub _replace_output {
             if(!defined $val) {
                 # traverse into hashes
                 my @parts = split(/\.|::/mx, $v);
-                if(ref $result->[$nr]->{'data'}->{$parts[0]} eq 'HASH') {
+                if(scalar @parts > 0 && ref $result->[$nr]->{'data'}->{$parts[0]} eq 'HASH') {
                     $val = $result->[$nr]->{'data'};
                     for my $k (@parts) {
                         $val = $val->{$k};
@@ -448,8 +452,9 @@ sub _replace_output {
     }
     my $value = "";
     if($error) {
-        $value  = '{'.$error.'}';
-        $format = "";
+        $value    = '{'.$error.'}';
+        $format   = "";
+        $strftime = "";
     }
     elsif(scalar @processed == 1) {
         $value = $processed[0] // '(null)';
@@ -464,6 +469,9 @@ sub _replace_output {
 
     if($format) {
         return(sprintf($format, $value));
+    }
+    if($strftime) {
+        return(POSIX::strftime($strftime, localtime($value)));
     }
     return($value);
 }

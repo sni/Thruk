@@ -255,6 +255,12 @@ thruk returns 0 on success and >= 1 otherwise
         --rename=total:total_hosts
         "/hosts/stats"
 
+    - external url with timestamp:
+      check_thruk_rest \
+        -o "{STATUS} - iss position lat:{iss_position::latitude} lon:{iss_position::longitude} (last update {timestamp%strftime:%m/%d/%y %H:%M:%S})" \
+        http://api.open-notify.org/iss-now.json
+
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-2019, <sven@nierlein.org>
