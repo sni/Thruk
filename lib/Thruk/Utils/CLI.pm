@@ -177,19 +177,18 @@ sub store_objects {
 
 =head2 request_url
 
-    request_url($c, $url, [$cookies], [$method], [$postdata])
+    request_url($c, $url, [$cookies], [$method], [$postdata], [$headers])
 
 returns requested url as string. In list context returns ($code, $result)
 
 =cut
 sub request_url {
-    my($c, $url, $cookies, $method, $postdata) = @_;
+    my($c, $url, $cookies, $method, $postdata, $headers) = @_;
     $method = 'GET' unless $method;
 
     # external url?
     if($url =~ m/^https?:/mx) {
-        confess("only GET supported right now") if $method ne 'GET';
-        my($response) = _external_request($url, $cookies);
+        my($response) = _external_request($url, $cookies, $method, $postdata, $headers);
         my $result = {
             code    => $response->code(),
             result  => $response->decoded_content || $response->content,
@@ -200,7 +199,7 @@ sub request_url {
         for my $field ($response->header_field_names()) {
             $result->{'headers'}->{$field} = $response->header($field);
         }
-        return($result->{'code'}, $result) if wantarray;
+        return($result->{'code'}, $result, $response) if wantarray;
         return $result->{'result'};
     }
 
@@ -496,8 +495,11 @@ sub _request {
 
 ##############################################
 sub _external_request {
-    my($url, $cookies) = @_;
-    _debug("_external_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
+    my($url, $cookies, $method, $postdata, $headers) = @_;
+    if(!defined $method) {
+        $method = $postdata ? "POST" : "GET";
+    }
+    _debug(sprintf("_external_request(%s, %s)", $url, $method)) if $Thruk::Utils::CLI::verbose >= 2;
     my $ua = _get_user_agent();
     if($cookies) {
         my $cookie_string = "";
@@ -507,12 +509,28 @@ sub _external_request {
         $ua->default_header(Cookie => $cookie_string);
     }
 
-    my $response = $ua->get($url);
+    my $request = HTTP::Request->new($method, $url);
+    $request->method(uc($method));
+    if($postdata) {
+        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content(Cpanel::JSON::XS->new->encode($postdata)); # using ->utf8 here would end in double encoding
+        $request->header('Content-Length' => undef);
+    }
+    for my $head (@{$headers}) {
+        if(!ref $head) {
+            my($key, $val) = split(/:/mx, $head, 2);
+            $request->header($key, $val // '');
+        } else {
+            $request->header($head);
+        }
+    }
+
+    my $response = $ua->request($request);
     if($response->is_success) {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
         return($response);
     }
-    _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
+    _debug(" -> failed:\n".$response->as_string()) if $Thruk::Utils::CLI::verbose >= 2;
     return($response);
 }
 
@@ -788,6 +806,9 @@ sub _run_command_action {
             no strict 'refs';
             ## use critic
             $skip_backends = ${"Thruk::Utils::CLI::".ucfirst($action)."::skip_backends"};
+            if(ref $skip_backends eq 'CODE') {
+                $skip_backends = &{$skip_backends}($c, $opt);
+            }
         }
         if(!defined $c->stash->{'defaults_added'} && !$skip_backends) {
             Thruk::Action::AddDefaults::add_defaults($c, 2);

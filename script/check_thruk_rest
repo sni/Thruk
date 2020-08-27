@@ -54,6 +54,8 @@ Getopt::Long::GetOptions (
    "v|verbose"          => sub { $options->{'verbose'}++ },
    "V|version"          => \$options->{'version'},
    "b|backend=s"        =>  $options->{'backends'},
+   "k|insecure"         => \$options->{'insecure'},
+     "local"            => \$options->{'local'},
 ) or do {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
     exit 3;
@@ -95,12 +97,18 @@ check_thruk_rest - Monitoring Plugin to check things from the Thruk REST API
     -o, --output=<template>       Define output text template. Format see below.
         --perfunit=<label>:<unit> Set performance data unit for given label.
 
+  HTTP options:
+    -k, --insecure                Skip ssl certificate verification when requesting https urls.
+    -H, --header                  Set extra http headers for http requests.
+    -d, --data                    Send post data to remote url.
+    -m, --method                  Set http method.
+
   Plugin options:
     -w, --warning=<threshold>     Apply warning threshold. Format see below.
     -c, --critical=<threshold>    Apply critical threshold. Format see below.
         --rename=<label:newname>  Rename/relable attributes.
     <rest url>                    Rest url to query. When used multiple times, plugin options
-                                  are reset for each url. See example.
+                                  are reset for each url. See examples.
 
 
 =head1 DESCRIPTION
@@ -124,6 +132,20 @@ script has the following arguments
 =item B<-V> , B<--version>
 
     print version and exit
+
+=item B<-k>, B<--insecure>
+
+    Skip ssl certificate verification when accessing https urls.
+
+=item B<-H> I<headerstring>, B<--header>=I<headerstring>
+
+    specify extra headers which will be used when accessing remote urls.
+
+    ex.: --header="X-Request-Type: monitoring"
+
+=item B<-m> I<method>, B<--method>=I<method>
+
+    set http request method.
 
 =item B<-b> I<backend>, B<--backend>=I<backend>
 

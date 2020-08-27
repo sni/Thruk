@@ -42,6 +42,7 @@ my $branch       = '';
 my $options = {
     'verbose'        => 1,
     'backends'       => [],
+    'headers'        => [],
     'commandoptions' => [],
 };
 Getopt::Long::Configure('no_ignore_case');
@@ -54,6 +55,7 @@ Getopt::Long::GetOptions (
    "V|version"          => \$options->{'version'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
    "k|insecure"         => \$options->{'insecure'},
+   "H|header=s"         =>  $options->{'headers'},
      "local"            => \$options->{'local'},
    "c|credential=s"     => \$options->{'credential'},
    "b|backend=s"        =>  $options->{'backends'},

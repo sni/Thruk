@@ -26,6 +26,8 @@ use Getopt::Long ();
 use Cpanel::JSON::XS qw/decode_json/;
 use Thruk::Utils::Filter ();
 
+our $skip_backends = \&_skip_backends;
+
 ##############################################
 
 =head1 METHODS
@@ -36,11 +38,11 @@ use Thruk::Utils::Filter ();
 
 =cut
 sub cmd {
-    my($c, undef, $commandoptions) = @_;
+    my($c, undef, $commandoptions, undef, undef, $opt) = @_;
 
     # split args by url, then parse leading options. In case there is only one
     # url, all options belong to this url.
-    my $opts = _parse_args($commandoptions);
+    my $opts = $opt->{'_parsed_args'} // _parse_args($commandoptions);
     if(ref $opts eq "") {
         return({output => $opts, rc => 2});
     }
@@ -76,9 +78,17 @@ sub _fetch_results {
         # But for security reasons only from the command line
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
             if($url =~ m/^https?:/mx) {
-                my($code, $result) = Thruk::Utils::CLI::request_url($c, $url);
+                my($code, $result, $req) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'});
                 $opt->{'result'} = $result->{'result'};
                 $opt->{'rc'}     = $code == 200 ? 0 : 3;
+                if(!$opt->{'result'} && $opt->{'rc'} != 0) {
+                    $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({
+                        'message' => $req->message(),
+                        'code'    => $req->code(),
+                        'request' => $req->as_string(),
+                        'failed'  => Cpanel::JSON::XS::true,
+                    })."\n";
+                }
                 next;
             } elsif(-r $url) {
                 $opt->{'result'} = Thruk::Utils::IO::read($url);
@@ -139,8 +149,11 @@ sub _parse_args {
             'critical'  => [],
             'perfunit'  => [],
             'rename'    => [],
+            'headers'   => [],
         };
         Getopt::Long::GetOptionsFromArray($s,
+            "k|insecure"    => \$opt->{'insecure'},
+            "H|header=s"    =>  $opt->{'headers'},
             "m|method=s"    => \$opt->{'method'},
             "d|data=s"      =>  $opt->{'postdata'},
             "o|output=s"    => \$opt->{'output'},
@@ -149,8 +162,10 @@ sub _parse_args {
               "perfunit=s"  =>  $opt->{'perfunit'},
               "rename=s"    =>  $opt->{'rename'},
         );
-        if(scalar @{$s} == 1) {
-            $opt->{'url'} = $s->[0];
+
+        # last option of parameter set is the url
+        if(scalar @{$s} >= 1) {
+            $opt->{'url'} = pop(@{$s});
         }
 
         if($opt->{'postdata'} && scalar @{$opt->{'postdata'}} > 0 && !$opt->{'method'}) {
@@ -158,7 +173,7 @@ sub _parse_args {
         }
         $opt->{'method'} = 'GET' unless $opt->{'method'};
 
-        my $postdata = {};
+        my $postdata;
         for my $d (@{$opt->{'postdata'}}) {
             if(ref $d eq '' && $d =~ m/^\{.*\}$/mx) {
                 my $data;
@@ -423,6 +438,21 @@ sub _replace_output {
         return(sprintf($format, $value));
     }
     return($value);
+}
+
+##############################################
+# determines if command requires backends or not
+sub _skip_backends {
+    my($c, $opts) = @_;
+    return unless $opts->{'commandoptions'};
+    my $cmds = _parse_args($opts->{'commandoptions'});
+    $opts->{'_parsed_args'} = $cmds;
+    for my $cmd (@{$cmds}) {
+        if(!$cmd->{'url'} || $cmd->{'url'} !~ m/^https?:\/\//mx) {
+            return;
+        }
+    }
+    return(1);
 }
 
 ##############################################
