@@ -77,18 +77,9 @@ sub index {
     if($passthrough) {
         $req->header('X-Thruk-Passthrough', $passthrough);
     }
-    my $ua = Thruk::UserAgent->new({}, { use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
+    my $ua = Thruk::UserAgent->new({}, $c->config);
     $ua->max_redirect(0);
-    $ua->ssl_opts('verify_hostname' => 0 ) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
-    if(!$c->config->{'ssl_verify_hostnames'}) {
-        eval {
-            # required for new IO::Socket::SSL versions
-            require IO::Socket::SSL;
-            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-        };
-        $ua->ssl_opts('verify_hostname' => 0 );
-    }
-    $ua->ssl_opts(SSL_ca_path => ($c->config->{ssl_ca_path} || "/etc/ssl/certs" ));
+    $ua->ssl_opts('verify_hostname' => 0) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
 
     $req->header('X-Thruk-Proxy', 1);
     _add_cookie($req, 'thruk_auth', $session_id);

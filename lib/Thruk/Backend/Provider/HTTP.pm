@@ -19,6 +19,9 @@ connection provider for http connections
 =head1 METHODS
 
 =cut
+
+use Thruk::UserAgent ();
+
 ##########################################################
 
 =head2 new
@@ -124,21 +127,6 @@ recreate lwp object
 sub reconnect {
     my($self) = @_;
 
-    my $verify_hostname = $self->{'thruk_config'}->{'verify_hostname'} // 1;
-    if(!$self->{'modules_loaded'}) {
-        if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-            if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $self->{'addr'} =~ m/^https:/mx) {
-                $verify_hostname = 0;
-                eval {
-                    # required for new IO::Socket::SSL versions
-                    load IO::Socket::SSL;
-                    IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-                };
-            }
-        }
-        load Thruk::UserAgent;
-    }
-
     # correct address
     $self->{'addr'} =~ s|remote\.cgi$||mx;
     $self->{'addr'} =~ s|/$||mx;
@@ -149,34 +137,22 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
 
-    $self->{'ua'} = Thruk::UserAgent->new({}, { use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
+    $self->{'ua'} = Thruk::UserAgent->new({}, $self->{'thruk_config'});
     $self->{'ua'}->timeout($self->{'timeout'});
-    $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
-    $self->{'ua'}->agent('Thruk');
     $self->{'ua'}->max_redirect(0);
-    $self->{'ua'}->ssl_opts(
-      verify_hostname => $verify_hostname,
-      SSL_ca_path     => ($self->{'thruk_config'}->{ssl_ca_path} || "/etc/ssl/certs"),
-    );
     if($self->{'proxy'}) {
         # http just works
         $self->{'ua'}->proxy('http', $self->{'proxy'});
         # ssl depends on which class we have
-        if($INC{'IO/Socket/SSL.pm'}) {
-            ## no critic
-            $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
-            ## use critic
-            my $con_proxy = $self->{'proxy'};
-            $con_proxy =~ s#^(http|https)://#connect://#mx;
-            $self->{'ua'}->proxy('https', $con_proxy);
-        } else {
-            # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
-            ## no critic
-            $ENV{'HTTPS_PROXY'} = $self->{'proxy'};
-            ## use critic
-            # env proxy breaks the ssl proxy above
-            #$self->{'ua'}->env_proxy();
+        if(!$INC{'IO/Socket/SSL.pm'}) {
+            confess("IO::Socket::SSL required for proxy connections");
         }
+        ## no critic
+        $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
+        ## use critic
+        my $con_proxy = $self->{'proxy'};
+        $con_proxy =~ s#^(http|https)://#connect://#mx;
+        $self->{'ua'}->proxy('https', $con_proxy);
     }
     return($self->{'ua'});
 }
@@ -870,7 +846,7 @@ sub _req {
         eval {
             $data = decode_json($response->decoded_content);
         };
-        die($@."\nrequest:\n".Dumper($response)) if $@;
+        die($@."\nrequest:\n".$response->as_string()) if $@;
         die($@."\n") if $@;
         my $remote_version = $data->{'version'};
         $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
@@ -905,7 +881,7 @@ sub _req {
         die("not an array ref, got ".ref($data->{'output'}));
     }
     if($c && Thruk->debug) {
-      $c->log->debug(Dumper($response));
+      $c->log->debug($response->as_string());
     }
     die(_format_response_error($response));
 }
@@ -940,7 +916,7 @@ sub _ua_post_with_timeout {
     # manually handle redirects so we can better handle special cases in OMD
     if(my $location = $res->{'_headers'}->{'location'}) {
         if($location =~ m|/login.cgi\?[^/]+?/omd/error.py.*?code=(\d+)$|mx && $c) {
-            $c->log->debug(Dumper($res));
+            $c->log->debug($res->as_string());
             $c->detach_error({msg => "remote backend returned an error: ".$1, code => 502, log => 1});
             return;
         }
@@ -1034,7 +1010,7 @@ sub _format_response_error {
     if(defined $response) {
         return $response->code().': '.$response->message().$message;
     } else {
-        return Dumper($response);
+        return($response->as_string());
     }
 }
 

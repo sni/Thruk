@@ -490,7 +490,7 @@ sub _request {
         return($data, $response);
     }
 
-    _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
+    _debug(" -> request failed: ".$response->as_string()) if $Thruk::Utils::CLI::verbose >= 2;
     return(undef, $response);
 }
 

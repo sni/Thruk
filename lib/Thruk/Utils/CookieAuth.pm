@@ -175,8 +175,6 @@ sub get_user_agent {
     my $ua = Thruk::UserAgent->new({}, $config);
     $ua->timeout(30);
     $ua->agent("thruk_auth");
-    $ua->no_proxy('127.0.0.1', 'localhost');
-    $ua->ssl_opts('SSL_ca_path' => $config->{ssl_ca_path} || "/etc/ssl/certs");
     return $ua;
 }
 

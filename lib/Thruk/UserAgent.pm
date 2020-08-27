@@ -30,15 +30,13 @@ returns new UserAgent object
 sub new {
     my($class, $config, $thruk_config) = @_;
     confess("no config") unless $config;
-    if(!$thruk_config || !$thruk_config->{'use_curl'}) {
-        require LWP::UserAgent;
-        my $ua = LWP::UserAgent->new(%{$config});
-        return $ua;
-    }
     my $self = {
         'timeout'               => 180,
         'agent'                 => 'thruk',
-        'ssl_opts'              => {},
+        'ssl_opts'              => {
+                'verify_hostname'   => $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'} // 1,
+                'SSL_ca_path'       => $thruk_config->{ssl_ca_path} || "/etc/ssl/certs",
+        },
         'default_header'        => {},
         'header'                => {},
         'max_redirect'          => 7,
@@ -47,6 +45,12 @@ sub new {
     };
     for my $key (sort keys %{$config}) {
         $self->{$key} = $config->{$key};
+    }
+    if(!$thruk_config || !$thruk_config->{'use_curl'}) {
+        require LWP::UserAgent;
+        my $ua = LWP::UserAgent->new(%{$self});
+        $ua->no_proxy('127.0.0.1', 'localhost');
+        return $ua;
     }
     bless($self, $class);
     return $self;
