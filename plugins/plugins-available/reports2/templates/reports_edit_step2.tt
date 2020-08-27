@@ -51,7 +51,7 @@
       [% END %]
     </select>
   [% ELSIF type == 'hosts' OR type == 'hostgroups' OR type == 'servicegroups' %]
-    [% inputid = "params." _ key _ counter; counter = counter + 1 %]
+    [% inputid = "params." _ key _ "_" _ counter; counter = counter + 1 %]
     [% IF type == 'hosts'; last_host_id = inputid; END %]
     <input type="text" id="[% inputid | html %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'status.cgi?format=search&amp;type=[% type | html %]', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
   [% ELSIF type == 'services' %]
@@ -264,7 +264,7 @@
         [% END %]
       </tr>
       [% IF parent.multiple %]
-      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" style="display: none;">
+      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" style="display: none;" id="formlist_row_0">
         [% FOREACH ch = parent.childs; ch.origname = ch.name; ch.name = parent.name _ "." _ ch.name %]
         <td>
           [% PROCESS field_form fh=ch %]
@@ -275,7 +275,7 @@
       [% END %]
 
       [% FOREACH chv = parentvalue.list %]
-      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]">
+      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" id="formlist_row_[% loop.count %]">
         [% FOREACH ch = parent.childs %]
         <td>
           [% subkey = ch.name; origname = ch.origname; IF chv.exists(origname); r.params.$subkey = chv.$origname; END %]
