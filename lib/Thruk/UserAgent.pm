@@ -37,8 +37,6 @@ sub new {
                 'verify_hostname'   => $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'} // 1,
                 'SSL_ca_path'       => $thruk_config->{ssl_ca_path} || "/etc/ssl/certs",
         },
-        'default_header'        => {},
-        'header'                => {},
         'max_redirect'          => 7,
         'protocols_allowed'     => ['http', 'https'],
         'requests_redirectable' => [ 'GET' ],           # not used

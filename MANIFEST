@@ -1760,6 +1760,7 @@ t/013-Thruk-Utils-CookieAuth.t
 t/014-Thruk-Utils-Crypt.t
 t/015-Thruk-Utils-APIKeys.t
 t/016-Thruk-Utils-Date.t
+t/017-Thruk-Utils-UserAgent.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
 t/082-cmd_coverage.t
