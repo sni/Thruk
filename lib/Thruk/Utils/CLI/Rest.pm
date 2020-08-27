@@ -322,41 +322,59 @@ sub _append_performance_data {
     my @perf_data;
     my $totals = $result->[0];
     for my $key (sort keys %{$totals->{'data'}}) {
-        my($min,$max,$warn,$crit) = ("", "", "", "");
-        if($totals->{'range'}->{$key}->{'warning'}) {
-            $warn = $totals->{'range'}->{$key}->{'warning'};
-        } elsif($totals->{'warning'}->{$key}) {
-            $warn = $totals->{'warning'}->{$key};
-        }
-        if($totals->{'range'}->{$key}->{'critical'}) {
-            $crit = $totals->{'range'}->{$key}->{'critical'};
-        } elsif($totals->{'critical'}->{$key}) {
-            $crit = $totals->{'critical'}->{$key};
-        }
-        my $unit = "";
-        for my $p (sort keys %{$totals->{perfunits}}) {
-            if($p eq $key) {
-                $unit = $totals->{perfunits}->{$p};
-                last;
-            }
-            ## no critic
-            if($key =~ m/^$p$/) {
-            ## use critic
-                $unit = $totals->{perfunits}->{$p};
-                last;
-            }
-        }
-        push @perf_data, sprintf("'%s'=%s%s;%s;%s;%s;%s",
-                $key,
-                $totals->{'data'}->{$key} // 'U',
-                $unit,
-                $warn,
-                $crit,
-                $min,
-                $max,
-        );
+        my $perfdata = _append_performance_data_string($key, $totals->{'data'}->{$key}, $totals);
+        push @perf_data, @{$perfdata} if $perfdata;
     }
     return("|".join(" ", @perf_data));
+}
+
+##############################################
+sub _append_performance_data_string {
+    my($key, $data, $totals) = @_;
+    if(ref $data eq 'HASH') {
+        my @res;
+        for my $k (sort keys %{$data}) {
+            my $r = _append_performance_data_string($key."::".$k, $data->{$k}, $totals);
+            push @res, @{$r} if $r;
+        }
+        return \@res;
+    }
+    if(defined $data && !Thruk::Backend::Manager::looks_like_number($data)) {
+        return;
+    }
+    my($min,$max,$warn,$crit) = ("", "", "", "");
+    if($totals->{'range'}->{$key}->{'warning'}) {
+        $warn = $totals->{'range'}->{$key}->{'warning'};
+    } elsif($totals->{'warning'}->{$key}) {
+        $warn = $totals->{'warning'}->{$key};
+    }
+    if($totals->{'range'}->{$key}->{'critical'}) {
+        $crit = $totals->{'range'}->{$key}->{'critical'};
+    } elsif($totals->{'critical'}->{$key}) {
+        $crit = $totals->{'critical'}->{$key};
+    }
+    my $unit = "";
+    for my $p (sort keys %{$totals->{perfunits}}) {
+        if($p eq $key) {
+            $unit = $totals->{perfunits}->{$p};
+            last;
+        }
+        ## no critic
+        if($key =~ m/^$p$/) {
+        ## use critic
+            $unit = $totals->{perfunits}->{$p};
+            last;
+        }
+    }
+    return([sprintf("'%s'=%s%s;%s;%s;%s;%s",
+            $key,
+            $data // 'U',
+            $unit,
+            $warn,
+            $crit,
+            $min,
+            $max,
+    )]);
 }
 
 ##############################################
@@ -413,7 +431,17 @@ sub _replace_output {
         } else {
             $val = $result->[$nr]->{'data'}->{$v} // $macros->{$v};
             if(!defined $val) {
-                $error = "error:$v does not exist";
+                # traverse into hashes
+                my @parts = split(/\.|::/mx, $v);
+                if(ref $result->[$nr]->{'data'}->{$parts[0]} eq 'HASH') {
+                    $val = $result->[$nr]->{'data'};
+                    for my $k (@parts) {
+                        $val = $val->{$k};
+                    }
+                }
+                if(!defined $val) {
+                    $error = "error:$v does not exist";
+                }
             }
         }
         push @processed, $val;
