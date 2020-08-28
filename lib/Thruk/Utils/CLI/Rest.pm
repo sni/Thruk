@@ -64,7 +64,7 @@ sub cmd {
         return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, all_stdout => 1});
     }
 
-    my($output, $rc) = _create_output($c, $result);
+    my($output, $rc) = _create_output($c, $opts, $result);
     return({output => $output, rc => $rc, all_stdout => 1 });
 }
 
@@ -156,24 +156,26 @@ sub _parse_args {
     Getopt::Long::Configure('pass_through');
     for my $s (@{$split_args}) {
         my $opt = {
-            'method'    => undef,
-            'postdata'  => [],
-            'warning'   => [],
-            'critical'  => [],
-            'perfunit'  => [],
-            'rename'    => [],
-            'headers'   => [],
+            'method'     => undef,
+            'postdata'   => [],
+            'warning'    => [],
+            'critical'   => [],
+            'perfunit'   => [],
+            'rename'     => [],
+            'headers'    => [],
+            'perffilter' => [],
         };
         Getopt::Long::GetOptionsFromArray($s,
-            "k|insecure"    => \$opt->{'insecure'},
-            "H|header=s"    =>  $opt->{'headers'},
-            "m|method=s"    => \$opt->{'method'},
-            "d|data=s"      =>  $opt->{'postdata'},
-            "o|output=s"    => \$opt->{'output'},
-            "w|warning=s"   =>  $opt->{'warning'},
-            "c|critical=s"  =>  $opt->{'critical'},
-              "perfunit=s"  =>  $opt->{'perfunit'},
-              "rename=s"    =>  $opt->{'rename'},
+            "k|insecure"      => \$opt->{'insecure'},
+            "H|header=s"      =>  $opt->{'headers'},
+            "m|method=s"      => \$opt->{'method'},
+            "d|data=s"        =>  $opt->{'postdata'},
+            "o|output=s"      => \$opt->{'output'},
+            "w|warning=s"     =>  $opt->{'warning'},
+            "c|critical=s"    =>  $opt->{'critical'},
+              "perfunit=s"    =>  $opt->{'perfunit'},
+              "perffilter=s"  =>  $opt->{'perffilter'},
+              "rename=s"      =>  $opt->{'rename'},
         );
 
         # last option of parameter set is the url
@@ -273,7 +275,7 @@ sub _set_rc {
 
 ##############################################
 sub _create_output {
-    my($c, $result) = @_;
+    my($c, $opt, $result) = @_;
     my($output, $rc) = ("", 0);
 
     # if there are output formats, use them
@@ -324,14 +326,14 @@ sub _create_output {
     $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;
 
     chomp($output);
-    $output .= _append_performance_data($result);
+    $output .= _append_performance_data($opt, $result);
     $output .= "\n";
     return($output, $rc);
 }
 
 ##############################################
 sub _append_performance_data {
-    my($result) = @_;
+    my($opt, $result) = @_;
     my @perf_data;
     my $totals = $result->[0];
     for my $key (sort keys %{$totals->{'data'}}) {
@@ -344,6 +346,7 @@ sub _append_performance_data {
 ##############################################
 sub _append_performance_data_string {
     my($key, $data, $totals) = @_;
+    return unless _perffilter($totals->{'perffilter'}, $key);
     if(ref $data eq 'HASH') {
         my @res;
         for my $k (sort keys %{$data}) {
@@ -401,10 +404,24 @@ sub _append_performance_data_string {
 }
 
 ##############################################
+# return true if $key passes given filter or filter list is empty
+sub _perffilter {
+    my($perffilter, $key) = @_;
+    return 1 if !$perffilter;
+    return 1 if scalar @{$perffilter} == 0;
+    for my $f (@{$perffilter}) {
+        my $regex = qr/$f/mx;
+        return 1 if $key =~ m/$regex/mx;
+    }
+    return(0);
+}
+
+##############################################
 sub _calculate_data_totals {
     my($result, $totals) = @_;
     $totals->{data} = {};
     my $perfunits   = [];
+    my $perffilter  = [];
     for my $r (@{$result}) {
         $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
         for my $key (sort keys %{$r->{'data'}}) {
@@ -414,13 +431,15 @@ sub _calculate_data_totals {
                 $totals->{'data'}->{$key} += $r->{'data'}->{$key};
             }
         }
-        push @{$perfunits}, @{$r->{'perfunit'}} if $r->{'perfunit'};
+        push @{$perfunits}, @{$r->{'perfunit'}}    if $r->{'perfunit'};
+        push @{$perffilter}, @{$r->{'perffilter'}} if $r->{'perffilter'};
     }
     $totals->{perfunits} = {};
     for my $p (@{$perfunits}) {
         my($label, $unit) = split(/:/mx, $p, 2);
         $totals->{perfunits}->{$label} = $unit;
     }
+    $totals->{perffilter} = $perffilter;
     return($totals);
 }
 
@@ -495,9 +514,9 @@ sub _replace_output {
 }
 
 ##############################################
+# return $val, $ok. $ok is true if a value was found
 sub _get_value {
     my($data, $key) = @_;
-    my($val, $ok) = (undef, 0);
     if(exists $data->{$key}) {
         return($data->{$key}, 1);
     }
@@ -507,7 +526,7 @@ sub _get_value {
         return(undef, 0);
     }
 
-    $val = $data;
+    my $val = $data;
     for my $k (@parts) {
         if(ref $val eq 'HASH' && exists $val->{$k}) {
             $val = $val->{$k};
