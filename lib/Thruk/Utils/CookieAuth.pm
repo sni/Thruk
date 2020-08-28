@@ -57,7 +57,7 @@ sub external_authentication {
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     # bypass ssl host verfication on localhost
-    $ua->ssl_opts('verify_hostname' => 0) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
+    Thruk::UserAgent::disable_verify_hostname_by_url($ua, $authurl);
     $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
     $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
@@ -136,7 +136,7 @@ sub verify_basic_auth {
     my $ua = get_user_agent($config);
     $ua->timeout($timeout) if $timeout;
     # bypass ssl host verfication on localhost
-    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
+    Thruk::UserAgent::disable_verify_hostname_by_url($ua, $authurl);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
     printf(STDERR "thruk_auth: basic auth request for %s to %s\n", $login, $authurl) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
     my $res = $ua->post($authurl);

@@ -463,10 +463,10 @@ sub _run {
 sub _request {
     my($credential, $url, $options) = @_;
     _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
-    my $ua       = _get_user_agent();
-    if($url =~ m%^https?://(localhost|127\.0\.0\..)(/|:)%mx || $options->{'insecure'}) {
-        $ua->ssl_opts(verify_hostname => 0);
-    }
+
+    my $ua = _get_user_agent();
+    Thruk::UserAgent::disable_verify_hostname_by_url($ua, $url);
+
     my $response = $ua->post($url, {
         data => encode_json({
             credential => $credential,

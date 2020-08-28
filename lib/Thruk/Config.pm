@@ -576,10 +576,6 @@ sub set_default_config {
         $config->{'no_external_job_forks'} = 1;
     }
 
-    ## no critic
-    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
-    ## use critic
-
     ###################################################
     # get installed plugins
     $config->{'plugin_path'} = $config->{home}.'/plugins' unless defined $config->{'plugin_path'};

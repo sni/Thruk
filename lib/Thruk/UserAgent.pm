@@ -15,6 +15,7 @@ use warnings;
 use Carp qw/confess/;
 use File::Temp qw/tempfile/;
 use HTTP::Response ();
+use IO::Socket::SSL;
 use Thruk::Utils::IO ();
 
 ##############################################
@@ -30,17 +31,21 @@ returns new UserAgent object
 sub new {
     my($class, $config, $thruk_config) = @_;
     confess("no config") unless $config;
+    my $verify_hostnames = $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'};
     my $self = {
         'timeout'               => 180,
         'agent'                 => 'thruk',
         'ssl_opts'              => {
-                'verify_hostname'   => $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'} // 1,
                 'SSL_ca_path'       => $thruk_config->{ssl_ca_path} || "/etc/ssl/certs",
         },
         'max_redirect'          => 7,
         'protocols_allowed'     => ['http', 'https'],
         'requests_redirectable' => [ 'GET' ],           # not used
     };
+    if(defined $verify_hostnames && !$verify_hostnames) {
+        $self->{'ssl_opts'}->{'verify_hostname'} = 0;
+        $self->{'ssl_opts'}->{'SSL_verify_mode'} = SSL_VERIFY_NONE;
+    }
     for my $key (sort keys %{$config}) {
         $self->{$key} = $config->{$key};
     }
@@ -358,5 +363,38 @@ sub _get_response {
 }
 
 ##############################################
+
+=head2 disable_verify_hostname
+
+  disable_verify_hostname($ua)
+
+disable ssl checks for this user agent
+
+=cut
+sub disable_verify_hostname {
+    my($ua) = @_;
+    $ua->ssl_opts(
+        verify_hostname => 0,
+        SSL_verify_mode => SSL_VERIFY_NONE,
+    );
+    return;
+}
+
+##############################################
+
+=head2 disable_verify_hostname_by_url
+
+  disable_verify_hostname_by_url($ua, $url)
+
+disable ssl checks for this user agent if url matches localhost pattern
+
+=cut
+sub disable_verify_hostname_by_url {
+    my($ua, $url) = @_;
+    if($url =~ m%^https?://(localhost|127\.0)%mx) {
+        disable_verify_hostname($ua);
+    }
+    return;
+}
 
 1;

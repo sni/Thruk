@@ -79,7 +79,7 @@ sub index {
     }
     my $ua = Thruk::UserAgent->new({}, $c->config);
     $ua->max_redirect(0);
-    $ua->ssl_opts('verify_hostname' => 0) if($request_url =~ m/^(http|https):\/\/localhost/mx || $request_url =~ m/^(http|https):\/\/127\./mx);
+    Thruk::UserAgent::disable_verify_hostname_by_url($ua, $request_url);
 
     $req->header('X-Thruk-Proxy', 1);
     _add_cookie($req, 'thruk_auth', $session_id);

@@ -904,7 +904,7 @@ sub _apache_status {
     local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     my $ua = Thruk::UserAgent->new({}, $c->config);
     $ua->timeout(10);
-    $ua->ssl_opts('verify_hostname' => 0 );
+    Thruk::UserAgent::disable_verify_hostname($ua);
     $ua->max_redirect(0);
     # pass through authentication
     my $cookie = $c->cookie('thruk_auth');
