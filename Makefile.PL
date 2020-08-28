@@ -31,6 +31,7 @@ requires 'URI::Escape'                            => 0;     # required by Thruk:
 requires 'HTML::Entities'                         => 0;     # required by Thruk::Utils::Filter
 requires 'Socket'                                 => 0;     # required by Monitoring::Livestatus
 requires 'IO::Socket::IP'                         => 0;     # required by Monitoring::Livestatus
+requires 'IO::Socket::SSL'                        => 0;     # required by Thruk::UserAgent
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
 requires 'Date::Calc'                             => 6.3;   # required by Thruk::Utils
