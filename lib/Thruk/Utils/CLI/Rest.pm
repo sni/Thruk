@@ -25,6 +25,7 @@ use strict;
 use Getopt::Long ();
 use Cpanel::JSON::XS qw/decode_json/;
 use Thruk::Utils::Filter ();
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 our $skip_backends = \&_skip_backends;
 
@@ -79,6 +80,12 @@ sub _fetch_results {
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
             if($url =~ m/^https?:/mx) {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'});
+                if($Thruk::Utils::CLI::verbose >= 2) {
+                    _debug("request:");
+                    _debug($res->request->as_string());
+                    _debug("response:");
+                    _debug($res->as_string());
+                }
                 $opt->{'result'} = $result->{'result'};
                 $opt->{'rc'}     = $code == 200 ? 0 : 3;
                 if(!$opt->{'result'} && $opt->{'rc'} != 0) {
@@ -92,8 +99,11 @@ sub _fetch_results {
                 }
                 next;
             } elsif(-r $url) {
+                _debug("loading local file: ".$url);
                 $opt->{'result'} = Thruk::Utils::IO::read($url);
                 $opt->{'rc'}     = 0;
+                _debug("json data:");
+                _debug($opt->{'result'});
                 next;
             }
         }
@@ -106,6 +116,8 @@ sub _fetch_results {
 
         $opt->{'result'} = $sub_c->res->body;
         $opt->{'rc'}     = ($sub_c->res->code == 200 ? 0 : 3);
+        _debug("json data:");
+        _debug($opt->{'result'});
     }
     return($opts);
 }
@@ -216,8 +228,8 @@ sub _apply_threshold {
 
     for my $t (@{$data->{$threshold}}) {
         my($attr,$val1, $val2) = split(/:/mx, $t, 3);
-        my $value = $data->{'data'}->{$attr} // 0;
-        if(!exists $data->{'data'}->{$attr}) {
+        my($value, $ok) = _get_value($data->{'data'}, $attr);
+        if(!$ok) {
             _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold=key:value\n");
             return;
         }
@@ -340,6 +352,16 @@ sub _append_performance_data_string {
         }
         return \@res;
     }
+    if(ref $data eq 'ARRAY') {
+        my @res;
+        my $index = 0;
+        for my $v (@{$data}) {
+            my $r = _append_performance_data_string($key."::".$index, $v, $totals);
+            push @res, @{$r} if $r;
+            $index++;
+        }
+        return \@res;
+    }
     if(defined $data && !Thruk::Backend::Manager::looks_like_number($data)) {
         return;
     }
@@ -434,19 +456,14 @@ sub _replace_output {
         if($nr == 0 && $v =~ m/^\d\.?\d*$/mx && !defined $result->[$nr]->{'data'}->{$v}) {
             $val = $v;
         } else {
-            $val = $result->[$nr]->{'data'}->{$v} // $macros->{$v};
-            if(!defined $val) {
-                # traverse into hashes
-                my @parts = split(/\.|::/mx, $v);
-                if(scalar @parts > 0 && ref $result->[$nr]->{'data'}->{$parts[0]} eq 'HASH') {
-                    $val = $result->[$nr]->{'data'};
-                    for my $k (@parts) {
-                        $val = $val->{$k};
-                    }
-                }
-                if(!defined $val) {
-                    $error = "error:$v does not exist";
-                }
+            my($ok);
+            ($val, $ok) = _get_value($result->[$nr]->{'data'}, $v);
+            if(!$ok && defined $macros->{$v}) {
+                $val = $macros->{$v};
+                $ok = 1;
+            }
+            if(!$ok) {
+                $error = "error:$v does not exist";
             }
         }
         push @processed, $val;
@@ -475,6 +492,34 @@ sub _replace_output {
         return(POSIX::strftime($strftime, localtime($value)));
     }
     return($value);
+}
+
+##############################################
+sub _get_value {
+    my($data, $key) = @_;
+    my($val, $ok) = (undef, 0);
+    if(exists $data->{$key}) {
+        return($data->{$key}, 1);
+    }
+    # traverse into nested hashes and lists
+    my @parts = split(/\.|::/mx, $key);
+    if(scalar @parts <= 1) {
+        return(undef, 0);
+    }
+
+    $val = $data;
+    for my $k (@parts) {
+        if(ref $val eq 'HASH' && exists $val->{$k}) {
+            $val = $val->{$k};
+        }
+        elsif(ref $val eq 'ARRAY' && $k =~ m/^\d+$/mx && exists $val->[$k]) {
+            $val = $val->[$k];
+        } else{
+            return(undef, 0);
+        }
+    }
+
+    return($val, 1);
 }
 
 ##############################################

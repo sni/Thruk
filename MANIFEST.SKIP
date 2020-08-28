@@ -85,8 +85,8 @@ t/docker/cases/.*/.sakuli-steps-cache
 t/docker/cases/testsuite.suite
 t/docker/cases/.*/.*.js
 .gem/
-.*\.json
 .idea/
+^action_menus/*
 ^lmd.ini$
 plugins/plugins-available/editor
 plugins/plugins-enabled/editor

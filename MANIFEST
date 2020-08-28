@@ -1793,6 +1793,7 @@ t/100-backend_icinga.t
 t/100-backend_mysql.t
 t/100-backend_mysql_utf8.t
 t/100-backend_shinken.t
+t/100-cli-check_thruk_rest.t
 t/100-cli-examples-dups.t
 t/100-cli-examples.t
 t/100-cli-livecache.t
@@ -1872,6 +1873,7 @@ t/900-javascript_utils.t
 t/data/broken_config/a.conf
 t/data/broken_config/b.conf
 t/data/broken_config2/a.conf
+t/data/check_thruk_rest/nested.json
 t/data/javascript_tests.js
 t/data/javascript_tests_login_tt.js
 t/data/log4perl.conf
@@ -2269,6 +2271,7 @@ t/scenarios/pentest_arachni/omd/1.rpt
 t/scenarios/pentest_arachni/omd/1.tab
 t/scenarios/pentest_arachni/omd/1.tbp
 t/scenarios/pentest_arachni/omd/1.tsk
+t/scenarios/pentest_arachni/omd/broadcast.json
 t/scenarios/pentest_arachni/omd/Dockerfile
 t/scenarios/pentest_arachni/omd/playbook.yml
 t/scenarios/pentest_arachni/omd/test.cfg
@@ -2289,6 +2292,7 @@ t/scenarios/rest_api/omd/1.rpt
 t/scenarios/rest_api/omd/1.tab
 t/scenarios/rest_api/omd/1.tbp
 t/scenarios/rest_api/omd/1.tsk
+t/scenarios/rest_api/omd/broadcast.json
 t/scenarios/rest_api/omd/Dockerfile
 t/scenarios/rest_api/omd/playbook.yml
 t/scenarios/rest_api/omd/test.cfg
