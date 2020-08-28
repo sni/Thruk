@@ -1025,8 +1025,8 @@ sub _set_test_page_defaults {
 
 #########################
 sub bail_out_req {
-    my($msg, $req) = @_;
-    my $page    = $req->content;
+    my($msg, $res) = @_;
+    my $page    = $res->content;
     my $error   = "";
     if($page =~ m/<!--error:(.*?):error-->/smx) {
         $error = $1;
@@ -1036,12 +1036,12 @@ sub bail_out_req {
             require HTML::Entities;
             HTML::Entities::decode_entities($error);
         };
-        BAIL_OUT($0.': '.$req->code.' '.$msg."\n".$error);
+        BAIL_OUT($0.': '.$res->code.' '.$msg."\n".$error);
     }
     if($page =~ m/<pre\s+id="error">(.*)$/mx) {
         $error = $1;
         $error =~ s|</pre>$||gmx;
-        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+        BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
         $error = $1;
@@ -1050,10 +1050,18 @@ sub bail_out_req {
             $error = URI::Escape::uri_unescape($error);
         };
         diag($error);
-        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+        BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
-    diag(Dumper($msg));
-    diag(Dumper($req));
+    diag("\n######################################################\n");
+    diag("bail_out_req:\n");
+    diag(ref $msg ? Dumper($msg) : $msg);
+    diag("request:\n");
+    diag($res->request->as_string());
+    diag("\n\nresponse:\n");
+    diag($res->as_string());
+    diag("\n\norigin:\n");
+    diag(Carp::longmess);
+    diag("\n######################################################\n");
     BAIL_OUT($0.': '.$msg);
     return;
 }

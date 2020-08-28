@@ -489,7 +489,12 @@ sub _request {
         return($data, $response);
     }
 
-    _debug(" -> request failed: ".$response->as_string()) if $Thruk::Utils::CLI::verbose >= 2;
+    if($Thruk::Utils::CLI::verbose >= 2) {
+        _debug(" -> request failed:");
+        _debug($response->request->as_string());
+        _debug(" -> response:");
+        _debug($response->as_string());
+    }
     return(undef, $response);
 }
 
@@ -530,7 +535,12 @@ sub _external_request {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
         return($response);
     }
-    _debug(" -> failed:\n".$response->as_string()) if $Thruk::Utils::CLI::verbose >= 2;
+    if($Thruk::Utils::CLI::verbose >= 2) {
+        _debug(" -> external request failed:");
+        _debug($response->request->as_string());
+        _debug(" -> response:");
+        _debug($response->as_string());
+    }
     return($response);
 }
 

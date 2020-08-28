@@ -846,7 +846,7 @@ sub _req {
         eval {
             $data = decode_json($response->decoded_content);
         };
-        die($@."\nrequest:\n".$response->as_string()) if $@;
+        die(sprintf("decode_json failed: %s\nrequest:\n%s\n\nresponse:\n%s\n", $@, $response->request->as_string(), $response->as_string())) if $@;
         die($@."\n") if $@;
         my $remote_version = $data->{'version'};
         $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
@@ -881,6 +881,9 @@ sub _req {
         die("not an array ref, got ".ref($data->{'output'}));
     }
     if($c && Thruk->debug) {
+      $c->log->debug("request:");
+      $c->log->debug($response->request->as_string());
+      $c->log->debug("response:");
       $c->log->debug($response->as_string());
     }
     die(_format_response_error($response));
@@ -916,6 +919,9 @@ sub _ua_post_with_timeout {
     # manually handle redirects so we can better handle special cases in OMD
     if(my $location = $res->{'_headers'}->{'location'}) {
         if($location =~ m|/login.cgi\?[^/]+?/omd/error.py.*?code=(\d+)$|mx && $c) {
+            $c->log->debug("request:");
+            $c->log->debug($res->request->as_string());
+            $c->log->debug("response:");
             $c->log->debug($res->as_string());
             $c->detach_error({msg => "remote backend returned an error: ".$1, code => 502, log => 1});
             return;
@@ -1010,7 +1016,7 @@ sub _format_response_error {
     if(defined $response) {
         return $response->code().': '.$response->message().$message;
     } else {
-        return($response->as_string());
+        return(sprintf("request failed: %d - %s\nrequest:\n%s\n\nresponse:\n%s\n", $response->code(), $response->message(), $response->request->as_string(), $response->as_string()));
     }
 }
 

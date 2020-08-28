@@ -78,15 +78,16 @@ sub _fetch_results {
         # But for security reasons only from the command line
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
             if($url =~ m/^https?:/mx) {
-                my($code, $result, $req) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'});
+                my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'});
                 $opt->{'result'} = $result->{'result'};
                 $opt->{'rc'}     = $code == 200 ? 0 : 3;
                 if(!$opt->{'result'} && $opt->{'rc'} != 0) {
                     $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({
-                        'message' => $req->message(),
-                        'code'    => $req->code(),
-                        'request' => $req->as_string(),
-                        'failed'  => Cpanel::JSON::XS::true,
+                        'message'  => $res->message(),
+                        'code'     => $res->code(),
+                        'request'  => $res->request->as_string(),
+                        'response' => $res->as_string(),
+                        'failed'   => Cpanel::JSON::XS::true,
                     })."\n";
                 }
                 next;
