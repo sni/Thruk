@@ -235,6 +235,10 @@ sub _apply_threshold {
             _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold=key:value\n");
             return;
         }
+        if(!defined $value) {
+            _set_rc($data, 3, "variable $attr is null, cannot check threshold\n");
+            return;
+        }
         if(defined $val2) {
             eval {
                 require Monitoring::Plugin::Range;
