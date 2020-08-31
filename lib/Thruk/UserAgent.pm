@@ -15,8 +15,9 @@ use warnings;
 use Carp qw/confess/;
 use File::Temp qw/tempfile/;
 use HTTP::Response ();
-use IO::Socket::SSL;
 use Thruk::Utils::IO ();
+
+use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
 
 ##############################################
 =head1 METHODS
@@ -44,7 +45,7 @@ sub new {
     };
     if(defined $verify_hostnames && !$verify_hostnames) {
         $self->{'ssl_opts'}->{'verify_hostname'} = 0;
-        $self->{'ssl_opts'}->{'SSL_verify_mode'} = SSL_VERIFY_NONE;
+        $self->{'ssl_opts'}->{'SSL_verify_mode'} = SSL_verify_mode_NONE;
     }
     for my $key (sort keys %{$config}) {
         $self->{$key} = $config->{$key};
@@ -375,7 +376,7 @@ sub disable_verify_hostname {
     my($ua) = @_;
     $ua->ssl_opts(
         verify_hostname => 0,
-        SSL_verify_mode => SSL_VERIFY_NONE,
+        SSL_verify_mode => SSL_verify_mode_NONE,
     );
     return;
 }
