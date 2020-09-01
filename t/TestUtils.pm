@@ -605,7 +605,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/<IMG\ SRC="[^"]*\.cgi[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/<IMG\ SRC="data:image[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "data\-[\w\-]+"\ for\ tag/imxo;
         next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <textarea>/imxo;
