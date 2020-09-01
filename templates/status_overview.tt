@@ -89,7 +89,7 @@
               [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
               [% END %]
               [% start_with = 4 %]
-              <table border="1" class='status statusgroups [% paneprefix %]_table statusTable' [% IF has_columns %] style="visibility: hidden;"[% END %]>
+              <table border="1" class='status statusgroups [% paneprefix %]_table statusTable' [% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
                 <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
                   <th class='status col_name' nowrap>Host</th>
                   <th class='status col_state' nowrap>Status</th>

@@ -25,7 +25,7 @@ my $whitelist_vars = Thruk::Utils::array2hash([qw/
     day monthday hour hours min key helpkey colprefix columns_name
     has_bp bp.fullid r.fullid hex rd.file b.basefile
     host_health_pic service_health_pic health_perc service_perc
-    a.t1 a.t2 nr id first_remaining tblID
+    a.t1 a.t2 nr id first_remaining tblID start_with
     s_status f d i j x key size head_height image_width state status image_height
     div_id graph_url loop_index c.config.navframesize show_home_button
     c.config.jquery_ui c.config.start_page c.config.home_link
