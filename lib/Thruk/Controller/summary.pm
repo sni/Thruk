@@ -70,7 +70,7 @@ sub index {
 
     if(exists $c->req->parameters->{'report'}) {
         return if Thruk::Utils::External::render_page_in_background($c);
-        return if _create_report($c);
+        return 1 if _create_report($c);
     }
 
     # Step 1 - select report type

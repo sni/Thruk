@@ -502,6 +502,8 @@ sub get_result {
 
     # remove known harmless errors
     $err =~ s|Warning:.*?during\ global\ destruction\.\n||gmx;
+    $err =~ s|^.*DEBUG.*$||gmx;
+    $err =~ s|^\s*\n||gmx;
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir.'/start');
