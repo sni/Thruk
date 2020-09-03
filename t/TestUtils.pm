@@ -346,18 +346,28 @@ sub test_page {
         return $return;
     }
 
+    my $job_id;
+    # job redirect
     if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-        # is it a background job page?
-        my $location = $request->{'_headers'}->{'location'};
-        wait_for_job($location);
-        $request = _request($location, undef, undef, $opts->{'agent'});
+        $job_id = $1;
+    }
+    # job page?
+    if(defined $return->{'content'} && $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+        $job_id = $1;
+    }
+    # follow job
+    if($job_id) {
+        my $job_location = "/thruk/cgi-bin/job.cgi?job=".$1;
+        wait_for_job($job_id);
+        $request = _request($job_location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
-            fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
+            fail('Request '.$job_location.' should succeed. Original url: '.$opts->{'url'});
             bail_out_req('request failed', $request);
         }
     }
-    elsif(defined $opts->{'code'}) {
+
+    if(defined $opts->{'code'}) {
         is($request->code, $opts->{'code'}, 'Request '.$opts->{'url'}.' returns code: '.$opts->{'code'} );
     }
     elsif(defined $opts->{'fail'}) {
@@ -373,24 +383,15 @@ sub test_page {
             }
         }
     }
-    elsif(defined $return->{'content'} && $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-        # is it a background job page?
-        wait_for_job($return->{'content'});
-        my $location = "/thruk/cgi-bin/job.cgi?job=".$1;
-        $request = _request($location, undef, undef, $opts->{'agent'});
-        $return->{'content'} = $request->content;
-        if($request->is_error) {
-            fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
-            bail_out_req('request failed', $request);
-        }
-    } else {
+    else {
         ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or bail_out_req('request failed', $request);
     }
 
     # text that should appear
     if(defined $opts->{'like'}) {
         for my $like (@{_list($opts->{'like'})}) {
-            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
+            use Carp;
+            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or BAIL_OUT("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
         }
     }
 
