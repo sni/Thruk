@@ -878,7 +878,7 @@ sub _process_backends_page {
                                                  type    => $type,
                                                  name    => 'test connection',
                                                  options => { peer => $peer, auth => $auth, proxy => $proxy, remote_name => $remote_name },
-                                                });
+                                                }, $c->config);
             @test   = $con->{'class'}->get_processinfo();
         };
         my $json;
