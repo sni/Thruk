@@ -862,12 +862,19 @@ sub init_external {
     }
 
     # cleanup old jobs
-    my $max_age = time() - 3600; # keep them for one hour
+    my $max_age      = time() - 3600;      # keep them for one hour
+    my $max_age_dead = time() - (86400*3); # clean broken jobs after 3 days
     for my $olddir (glob($c->config->{'var_path'}."/jobs/*")) {
-        next unless -f $olddir.'/stdout';
-        my @stat = stat($olddir.'/stdout');
-        if($stat[9] < $max_age) {
-            remove_job_dir($olddir);
+        if(-f $olddir.'/rc') {
+            my @stat = stat($olddir.'/rc');
+            if($stat[9] < $max_age) {
+                remove_job_dir($olddir);
+            }
+        } elsif(-f $olddir.'/start') {
+            my @stat = stat($olddir.'/start');
+            if($stat[9] < $max_age_dead) {
+                remove_job_dir($olddir);
+            }
         }
     }
 
