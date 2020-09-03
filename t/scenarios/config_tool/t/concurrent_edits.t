@@ -2,8 +2,6 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 295;
-
 BEGIN {
     delete $ENV{PLACK_TEST_EXTERNALSERVER_URI};
     $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
@@ -195,3 +193,5 @@ TestUtils::test_page(
     'follow'  => 1,
     'like'    => [ $default_user, 'config reloaded successfully', 'Reloading naemon configuration', 'obj_retention.test.dat' ],
 );
+
+done_testing();
