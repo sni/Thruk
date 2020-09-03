@@ -93,6 +93,7 @@ sub new {
         'errors'             => [],
         'parse_errors'       => [],
         'files'              => [],
+        'files_index'        => {},
         'initialized'        => 0,
         'cached'             => 0,
         'needs_update'       => 0,
@@ -273,9 +274,12 @@ sub commit {
 
     # remove deleted files from files
     my @new_files;
+    my %new_index;
     for my $f (@{$self->{'files'}}) {
         if(!$f->{'deleted'} || -f $f->{'path'}) {
             push @new_files, $f;
+            $new_index{$f->{'display'}} = $f;
+            $new_index{$f->{'path'}}    = $f;
         } else {
             if($c && $f->{'deleted'}) {
                 $c->audit_log(sprintf("[config][%s][%s] deleted file '%s'",
@@ -287,7 +291,8 @@ sub commit {
             push @{$files->{'deleted'}}, $f->{'display'};
         }
     }
-    $self->{'files'} = \@new_files;
+    $self->{'files'}       = \@new_files;
+    $self->{'files_index'} = \%new_index;
     if($rc == 1) {
         $self->{'needs_commit'} = 0;
         $self->{'last_changed'} = time() if scalar @{$changed_files} > 0;
@@ -369,10 +374,15 @@ Get file by path. Returns L<Monitoring::Config::File|Monitoring::Config::File> o
 
 =cut
 sub get_file_by_path {
-    my $self = shift;
-    my $path = shift;
+    my($self, $path) = @_;
+    my $file = $self->{'files_index'}->{$path};
+    return($file) if $file;
     for my $file (@{$self->{'files'}}) {
-        return $file if($file->{'path'} eq $path or $file->{'display'} eq $path);
+        if($file->{'path'} eq $path or $file->{'display'} eq $path) {
+            $self->{'files_index'}->{$file->{display}} = $file;
+            $self->{'files_index'}->{$file->{path}}    = $file;
+            return $file;
+        }
     }
     return;
 }
@@ -606,8 +616,8 @@ sub get_objects_by_path {
     my($self, $path) = @_;
 
     my $objects = [];
-    for my $file (@{$self->{'files'}}) {
-        next unless($file->{'path'} =~ m/^\Q$path\E/mx or $file->{'display'} =~ m/^\Q$path\E/mx);
+    my $file    = $self->get_file_by_path($path);
+    if($file) {
         for my $obj (@{$file->{'objects'}}) {
             push @{$objects}, $obj;
         }
@@ -673,8 +683,8 @@ Get single object by path and line number. Returns L<Monitoring::Config::Object|
 sub get_object_by_location {
     my($self, $path, $line) = @_;
 
-    for my $file (@{$self->{'files'}}) {
-        next unless($file->{'path'} eq $path or $file->{'display'} eq $path);
+    my $file = $self->get_file_by_path($path);
+    if($file) {
         for my $obj (@{$file->{'objects'}}) {
             if(defined $obj->{'line'} and defined $obj->{'line2'}
                and $obj->{'line'} ne '' and $obj->{'line2'} ne ''
@@ -1087,11 +1097,11 @@ add new file to config
 
 =cut
 sub file_add {
-    my $self    = shift;
-    my $file    = shift;
-    my $rebuild = shift;
-    $rebuild    = 1 unless defined $rebuild;
+    my($self, $file, $rebuild) = @_;
+    $rebuild = 1 unless defined $rebuild;
     push @{$self->{'files'}}, $file;
+    $self->{'files_index'}->{$file->{display}} = $file;
+    $self->{'files_index'}->{$file->{path}}    = $file;
     $self->_rebuild_index() if $rebuild;
     return;
 }
@@ -1746,7 +1756,9 @@ sub _get_files_for_folder {
 ##########################################################
 sub _set_files {
     my($self, $discard_changes) = @_;
-    $self->{'files'} = $self->_get_files($discard_changes);
+    my($files, $index)     = $self->_get_files($discard_changes);
+    $self->{'files'}       = $files;
+    $self->{'files_index'} = $index;
     return;
 }
 
@@ -1756,6 +1768,7 @@ sub _get_files {
     my ($self, $discard_changes) = @_;
 
     my @files;
+    my %index;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
         my $file = $self->get_file_by_path($filename);
@@ -1770,12 +1783,13 @@ sub _get_files {
         }
         if(defined $file) {
             push @files, $file;
+            $index{$file->{'display'}} = $file;
         } else {
             warn('got no valid file for: '.$filename);
         }
     }
 
-    return \@files;
+    return(\@files, \%index);
 }
 
 
@@ -1978,6 +1992,8 @@ sub _rebuild_index {
                 $macros->{$type}->{$macro} = 1;
             }
         }
+        $self->{'files_index'}->{$file->{'display'}} = $file;
+        $self->{'files_index'}->{$file->{'path'}}    = $file;
     }
 
     if(scalar @{$objects_without_primary} > 0) {
