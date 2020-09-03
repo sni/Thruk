@@ -10,9 +10,6 @@ use Thruk::Utils::IO;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    my $tests = 1383;
-    $tests    = $tests - 11 if $ENV{'THRUK_TEST_NO_RELOADS'};
-    plan tests => $tests;
 }
 
 BEGIN {
@@ -281,3 +278,5 @@ TestUtils::test_page(
     'like'    => [ 'There are no pending changes to commit'],
     'follow'  => 1,
 );
+
+done_testing();

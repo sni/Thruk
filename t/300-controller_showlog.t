@@ -4,7 +4,6 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 124;
 }
 
 BEGIN {
@@ -48,3 +47,5 @@ for my $url (@{$pages}) {
         'content_type' => 'application/x-msexcel',
     );
 }
+
+done_testing();
