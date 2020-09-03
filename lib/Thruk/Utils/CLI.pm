@@ -85,9 +85,6 @@ sub new {
         $options->{'remoteurl_specified'} = 0;
     }
 
-    # try to read secret file
-    $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};
-
     return $self;
 }
 
@@ -375,7 +372,11 @@ sub _run {
 
     my $c = $self->get_c();
     my($result, $response);
-    _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
+
+    # try to read secret file
+    $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};
+
+    _debug(sprintf("_run(%s)",Thruk::Utils::dump_params($self->{'opt'}))) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         my $remoteurl = _get_remote_url($c, $self->{'opt'}->{'remoteurl'});
         _debug("_run(): fetching from ".$remoteurl);
@@ -546,6 +547,7 @@ sub _external_request {
 
 ##############################################
 sub _dummy_c {
+    _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
     my($c) = _internal_request('/thruk/cgi-bin/remote.cgi');
     return($c);
 }
@@ -555,7 +557,7 @@ sub _internal_request {
     my($url, $method, $postdata, $user) = @_;
     $method = 'GET' unless $method;
 
-    _debug("_internal_request()") if $Thruk::Utils::CLI::verbose >= 2;
+    _debug(sprintf("_internal_request('%s', '%s')", $url, $method)) if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     our $app;
     if(!$app) {

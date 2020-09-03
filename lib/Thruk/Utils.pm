@@ -3563,6 +3563,7 @@ sub dump_params {
         $dump    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
     }
     $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
+    $dump    =~ s%;$%%gmx;
     return($dump);
 }
 

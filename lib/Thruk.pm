@@ -312,8 +312,8 @@ sub _dispatcher {
     $c->cluster->refresh() if $config->{'cluster_enabled'};
 
     if(Thruk->verbose) {
-        $c->log->debug($url);
-        $c->log->debug(Dumper($c->req->parameters));
+        $c->log->debug(sprintf("_dispatcher: %s\n", $url));
+        $c->log->debug(sprintf("params:      %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
     }
 
     ###############################################
@@ -914,8 +914,20 @@ sub init_logging {
         $self->{'_log_type'} = 'file';
     } else {
         my $format = '[%d{ABSOLUTE}][%p] %m{chomp}%n';
-        if($ENV{'TEST_AUTHOR'} || $self->config->{'thruk_author'}) {
-            $format = '[%d{ABSOLUTE}][%p][%F:%L] %m{chomp}%n';
+        if($ENV{'TEST_AUTHOR'} || $self->config->{'thruk_author'} || $self->debug) {
+            $format = '[%d{ABSOLUTE}][%p][%-30Z] %m{chomp}%n';
+            my $cwd = Cwd::getcwd;
+            Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', sub {
+                my($layout, $message, $category, $priority, $caller_level) = @_;
+                my @caller = caller($caller_level);
+                while($caller[0] =~ m/Thruk::Utils::Log/mx) {
+                    $caller_level++;
+                    @caller = caller($caller_level);
+                }
+                my $path = abs_path($caller[1]);
+                $path =~ s%^$cwd/%./%gmx;
+                return(sprintf("%s:%d", $path, $caller[2]));
+            });
         }
         my $log_conf = "
         log4perl.logger                    = DEBUG, Screen

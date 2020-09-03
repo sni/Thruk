@@ -47,10 +47,10 @@ sub _debug {
     }
     my $time = scalar localtime();
     for my $line (split/\n/mx, $data) {
-        if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+        my $c = $Thruk::Request::c;
+        if((defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') && (!$c || !$c->app->{'_log_type'} || $c->app->{'_log_type'} ne 'screen')) {
             print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
         } else {
-            my $c = $Thruk::Request::c;
             confess('no c') unless defined $c;
             if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
             if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
