@@ -2438,6 +2438,7 @@ syncronize files from remote
 sub remote_file_sync {
     my($self, $c) = @_;
     return unless $self->is_remote();
+    $c->stats->profile(begin => "remote_file_sync");
     my $files = {};
     for my $f (@{$self->{'files'}}) {
         next unless -f $f->{'path'};
@@ -2487,6 +2488,7 @@ sub remote_file_sync {
         $self->{'config'}->{'files_root'} =~ s|/+|/|gmx;
     }
 
+    $c->stats->profile(end => "remote_file_sync");
     return;
 }
 

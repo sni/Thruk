@@ -119,9 +119,9 @@ sub set_object_model {
     $c->{'obj_db'}->remote_file_sync($c);
 
     if($c->{'obj_db'}->{'cached'}) {
-        $c->stats->profile(begin => "checking objects");
+        $c->stats->profile(begin => "check_files_changed($refresh)");
         $c->{'obj_db'}->check_files_changed($refresh);
-        $c->stats->profile(end => "checking objects");
+        $c->stats->profile(end => "check_files_changed($refresh)");
     }
 
     $c->{'obj_db'}->{'errors'} = Thruk::Utils::array_uniq(Thruk::Utils::list($c->{'obj_db'}->{'errors'}));
