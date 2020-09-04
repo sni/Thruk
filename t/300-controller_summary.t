@@ -4,7 +4,6 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 170;
 }
 
 BEGIN {
@@ -48,3 +47,5 @@ for my $url (@{$pages}) {
         'like'    => 'Alert Summary Report',
     );
 }
+
+done_testing();
