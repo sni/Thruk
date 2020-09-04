@@ -346,19 +346,20 @@ sub test_page {
         return $return;
     }
 
-    my $job_id;
+    my($job_location, $job_id);
     # job redirect
     if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         $job_id = $1;
+        $job_location = $request->{'_headers'}->{'location'};
     }
     # job page?
-    if(defined $return->{'content'} && $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+    elsif(defined $return->{'content'} && $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         $job_id = $1;
+        $job_location = "/thruk/cgi-bin/job.cgi?job=".$job_id;
     }
     # follow job
     if($job_id) {
-        my $job_location = "/thruk/cgi-bin/job.cgi?job=".$1;
-        wait_for_job($job_id);
+        wait_for_job($job_location);
         $request = _request($job_location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
