@@ -924,7 +924,7 @@ sub init_logging {
                     $caller_level++;
                     @caller = caller($caller_level);
                 }
-                my $path = abs_path($caller[1]);
+                my $path = abs_path($caller[1]) || $caller[1];
                 $path =~ s%^$cwd/%./%gmx;
                 return(sprintf("%s:%d", $path, $caller[2]));
             });
