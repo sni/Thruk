@@ -1,7 +1,7 @@
 ﻿[% IF use_pager AND pager %]
 [% IF pages > 1 %]
 
-  <form action="" method="GET">
+  <form action="[% IF original_url; base_url(c, original_url); END %]" method="GET">
   [% FOREACH par = c.request.parameters.keys %]
     [% NEXT IF !c.request.parameters.defined(par) %]
     [% NEXT IF par == 'entries' %]

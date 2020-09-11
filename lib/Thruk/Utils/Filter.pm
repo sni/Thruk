@@ -313,6 +313,23 @@ sub full_uri {
     return $uri;
 }
 
+########################################
+
+=head2 base_url
+
+  base_uri($c)
+
+returns a html escaped correct uri but only the url part and without parameters
+
+ex.: status.cgi
+
+=cut
+sub base_url {
+    my($c, $url) = @_;
+    $url = uri_with($c, undef, undef, $url);
+    $url =~ s/\?.*//gmx;
+    return($url);
+}
 
 ########################################
 

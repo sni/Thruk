@@ -132,6 +132,7 @@ sub check_templates_file {
                                     |full_uri\(
                                     |short_uri\(
                                     |uri_with\(
+                                    |base_url\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
@@ -150,6 +151,7 @@ sub check_templates_file {
                                     |full_uri\(
                                     |short_uri\(
                                     |uri_with\(
+                                    |base_url\(
                                     |escape_js\(
                                     |name2id\(
                                     |encode_json_obj\(
