@@ -633,7 +633,7 @@ sub job_page {
         return $c->detach('/error/index/22') unless defined $dir;
         push @{$c->stash->{'profile'}}, @{$profiles} if $profiles;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
-        if((defined $err && $err ne '') && (!defined $rc || $rc != 0)) {
+        if((defined $err && $err ne '') && (!defined $rc || $rc != 0 || (!$out && !$stash))) {
             $c->error($err);
             $c->log->error($err);
             return $c->detach('/error/index/23');
