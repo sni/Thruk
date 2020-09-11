@@ -42,7 +42,11 @@ TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/showlog.cgi',
     'like'   => ["Event Log", "LOG VERSION: 2.0", "Local time is"],
 );
-
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4&logcachedetails=abcd',
+    'follow'  => 1,
+    'like'    => ['Logcache Details for Backend', 'Log Entries by Type', 'unclassified', 'PROGRAMM'],
+);
 # cannot determine fixed number of tests, number depends on wether initial import redirects or not,
 # which depends on machine load and speed (initial import redirects after 10 seconds)
 done_testing();

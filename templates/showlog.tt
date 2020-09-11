@@ -3,9 +3,19 @@
 [% PROCESS _message.tt %]
 
 <form action="showlog.cgi" method="GET" id="date_form">
-  <input type="hidden" name="entries" value="[% entries_per_page | html %]">
-  <input type="hidden" name="host" value="[% host | html %]">
-  <input type="hidden" name="service" value="[% service | html %]">
+  [% FOREACH par = c.request.parameters.keys %]
+    [% NEXT IF !c.request.parameters.defined(par) %]
+    [% NEXT IF par == 'pattern' %]
+    [% NEXT IF par == 'exclude_pattern' %]
+    [% NEXT IF par == 'start' %]
+    [% NEXT IF par == 'end' %]
+    [% NEXT IF par == 'archive' %]
+    [% NEXT IF par == 'update.x' %]
+    [% NEXT IF par == 'update.y' %]
+    [% FOR value IN c.request.parameters.$par.list %]
+      <input type="hidden" name="[% par %]" value="[% value | html %]">
+    [% END %]
+  [% END %]
   <table border="0" width="100%" cellpadding="0" cellspacing="0" class="infoboxrow">
     <tr>
       <td align="left" valign="top" width="33%">

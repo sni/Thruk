@@ -1192,6 +1192,28 @@ sub array_uniq_list {
 
 ########################################
 
+=head2 hash_invert
+
+  hash_invert($hash)
+
+return hash with keys and values inverted
+
+=cut
+
+sub hash_invert {
+    my($hash) = @_;
+
+    my %invert;
+    for my $k (sort keys %{$hash}) {
+        my $v = $hash->{$k};
+        $invert{$v} = $k;
+    }
+
+    return \%invert;
+}
+
+########################################
+
 =head2 logs2xls
 
   logs2xls($c)

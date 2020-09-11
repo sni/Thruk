@@ -1534,6 +1534,7 @@ lists thruk jobs.
 |pid                               | process id
 |rc                                | return code
 |remaining                         | remaining seconds for the job to complete
+|show_output                       | flag whether output console will be displayed
 |start                             | timestamp when the job started
 |stderr                            | stderr output
 |stdout                            | stdout output

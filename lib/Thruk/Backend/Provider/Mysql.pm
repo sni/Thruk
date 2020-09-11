@@ -52,6 +52,16 @@ $Thruk::Backend::Provider::Mysql::db_types = {
     'LOG ROTATION'            => 0, # INFO
 };
 
+$Thruk::Backend::Provider::Mysql::db_classes = {
+    'INFO'          => 0,
+    'ALERT'         => 1,
+    'PROGRAMM'      => 2,
+    'NOTIFICATION'  => 3,
+    'PASSIVE'       => 4,
+    'COMMAND'       => 5,
+    'STATE'         => 6,
+};
+
 use constant {
     MODE_IMPORT         => 1,
     MODE_UPDATE         => 2,
@@ -696,6 +706,7 @@ sub _get_filter {
             $filter =~ s/message\ RLIKE\ '/p1.output\ RLIKE\ '/gmx;
         }
     }
+    $filter =~ s/\Qtype = ''\E/type IS NULL/gmx;
     $filter =~ s/\ AND\ \)/)/gmx;
     $filter =~ s/\(\ AND\ \(/((/gmx;
     $filter =~ s/AND\s+AND/AND/gmx;
@@ -941,20 +952,71 @@ sub _log_stats {
         $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %7d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $res->{$key.'_log'}->{'Rows'});
         my $status  = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
         push @result, {
-            key             => $key,
-            name            => $c->stash->{'backend_detail'}->{$key}->{'name'},
-            index_size      => $index_size,
-            data_size       => $data_size,
-            items           => $res->{$key.'_log'}->{'Rows'},
-            cache_version   => $status->{'cache_version'}->{'value'},
-            last_update     => $status->{'last_update'}->{'value'},
-            last_reorder    => $status->{'last_reorder'}->{'value'},
+            key              => $key,
+            name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            index_size       => $index_size,
+            data_size        => $data_size,
+            items            => $res->{$key.'_log'}->{'Rows'},
+            cache_version    => $status->{'cache_version'}->{'value'},
+            last_update      => $status->{'last_update'}->{'value'},
+            last_reorder     => $status->{'last_reorder'}->{'value'},
+            reorder_duration => $status->{'reorder_duration'}->{'value'} // '',
+            update_duration  => $status->{'update_duration'}->{'value'} // '',
         };
     }
 
     $c->stats->profile(end => "Mysql::_log_stats");
     return @result if wantarray;
     return $output;
+}
+
+##########################################################
+
+=head2 _logcache_stats_types
+
+  _logcache_stats_types
+
+gather log type statistics
+
+=cut
+
+sub _logcache_stats_types {
+    my($self, $c, $groupby, $backends) = @_;
+
+    $c->stats->profile(begin => "Mysql::_logcache_stats_types: ".$groupby);
+
+    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
+    $backends  = Thruk::Utils::list($backends);
+
+    my @result;
+    for my $key (@{$backends}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        next unless $peer->{'logcache'};
+        $peer->logcache->reconnect();
+        my $dbh  = $peer->logcache->_dbh();
+        my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
+        next unless defined $res->{$key.'_log'};
+        my $types  = [values %{$dbh->selectall_hashref("SELECT IFNULL(".$groupby.", '') as $groupby, count(*) as total FROM `".$key."_log` GROUP BY ".$groupby, $groupby)}];
+        $types     = [reverse sort { $a->{'total'} <=> $b->{'total'} } @{$types}];
+        my $total = 0;
+        for my $t (@{$types}) {
+            $total += $t->{'total'};
+        }
+        for my $t (@{$types}) {
+            $t->{'procent'} = 0;
+            if($total > 0) {
+                $t->{'procent'} = $t->{'total'} * 100 / $total;
+            }
+        }
+        push @result, {
+            key     => $key,
+            name    => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            types   => $types,
+        };
+    }
+
+    $c->stats->profile(end => "Mysql::_logcache_stats_types: ".$groupby);
+    return \@result;
 }
 
 ##########################################################
@@ -1145,6 +1207,7 @@ sub _update_logcache {
     }
 
     $mode = 'import' if $fresh_created;
+    my $start = time();
 
     my $log_count = 0;
     eval {
@@ -1167,7 +1230,7 @@ sub _update_logcache {
     };
     my $error = $@ || '';
 
-    _finish_update($c, $dbh, $prefix) or $error .= $dbh->errstr;
+    _finish_update($c, $dbh, $prefix, time() - $start) or $error .= $dbh->errstr;
 
     if($error) {
         $c->log->error('logcache '.$mode.' failed: '.$error);
@@ -1179,9 +1242,10 @@ sub _update_logcache {
 
 ##########################################################
 sub _finish_update {
-    my($c, $dbh, $prefix) = @_;
+    my($c, $dbh, $prefix, $duration) = @_;
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(6,'update_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->commit || return;
     return 1;
@@ -1429,6 +1493,7 @@ sub _update_logcache_optimize {
         print "no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force\n" if $verbose > 1;
         return(-1);
     }
+    my $start = time();
 
     eval {
         print "update logs table order..." if $verbose > 1;
@@ -1456,6 +1521,9 @@ sub _update_logcache_optimize {
         }
     }
 
+    $dbh->commit or die $dbh->errstr;
+    my $duration = time() - $start;
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(5,'reorder_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     $dbh->commit or die $dbh->errstr;
     return(-1);
 }
@@ -2113,6 +2181,7 @@ sub _insert_logs {
         elsif($l->{'type'} eq 'SERVICE NOTIFICATION' or $l->{'type'} eq 'HOST NOTIFICATION') {
             $l->{'plugin_output'} = ''; # would result in duplicate output otherwise
         }
+        &_set_class($l);
 
         my $state             = $l->{'state'};
         if($state eq '')      { $state   = 'NULL'; }
@@ -2377,6 +2446,8 @@ sub _get_create_statements {
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(2, 'update_pid', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(3, 'last_reorder', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(4, 'cache_version', '".$Thruk::Backend::Provider::Mysql::cache_version."')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(5, 'reorder_duration', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(6, 'update_duration', '')",
     );
     return \@statements;
 }

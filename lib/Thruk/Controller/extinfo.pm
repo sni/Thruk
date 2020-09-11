@@ -793,6 +793,13 @@ sub _process_perf_info_page {
         }
     }
 
+    # logcache statistics
+    if(    $c->check_user_roles("authorized_for_configuration_information")
+       and $c->check_user_roles("authorized_for_system_information")) {
+        if($c->req->parameters->{'logcachedetails'}) {
+            return _process_perf_info_logcache_details($c);
+        }
+    }
 
     $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
@@ -923,6 +930,68 @@ sub _apache_status {
     } else {
         $c->stash->{content}  = 'not available: '.$res->code;
     }
+    return 1;
+}
+
+##########################################################
+# create the performance info logcache details
+sub _process_perf_info_logcache_details {
+    my($c) = @_;
+    $c->stash->{'no_auto_reload'} = 1;
+
+    my $peer_key = $c->req->parameters->{'logcachedetails'};
+    my $peer     = $c->{'db'}->get_peer_by_key($peer_key);
+    if(!$peer) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such backend' });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4");
+    }
+    if(!$c->config->{'logcache'} || !$peer->{'logcache'}) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'logcache is disabled' });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4");
+    }
+
+    my $action = $c->req->parameters->{'submit'};
+    if($action) {
+        if($action eq 'update') {
+            return(Thruk::Utils::External::cmd($c, {
+                cmd            => $c->config->{'thruk_bin'}." logcache update -v --local -b $peer_key 2>&1",
+                wait_message   => 'logcache will be updated...',
+                forward        => 'extinfo.cgi?type=4&logcachedetails='.$peer_key,
+                show_output    => 1,
+            }));
+        }
+        if($action eq 'optimize') {
+            return(Thruk::Utils::External::cmd($c, {
+                cmd            => $c->config->{'thruk_bin'}." logcache optimize -v -f --local -b $peer_key 2>&1",
+                wait_message   => 'logcache will be optimized...',
+                forward        => 'extinfo.cgi?type=4&logcachedetails='.$peer_key,
+                show_output    => 1,
+            }));
+        }
+    }
+
+    return if Thruk::Utils::External::render_page_in_background($c);
+
+    my $logcache_stats = $c->{'db'}->logcache_stats($c, 1, [$peer_key]);
+    if(!$logcache_stats->{$peer_key}) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'failed to fetch logcache statistics' });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4");
+    }
+    $c->stash->{'logcache_stats'} = $logcache_stats->{$peer_key};
+    $c->stash->{'logcache_types'} = $peer->logcache()->_logcache_stats_types($c, "type", [$peer_key])->[0]->{'types'};
+    $c->stash->{'logcache_class'} = $peer->logcache()->_logcache_stats_types($c, "class", [$peer_key])->[0]->{'types'};
+    my $db_classes = Thruk::Utils::hash_invert($Thruk::Backend::Provider::Mysql::db_classes);
+    for my $t (@{$c->stash->{'logcache_class'}}) {
+        $t->{'param'} = $t->{'class'} // '';
+        $t->{'type'}  = $db_classes->{$t->{'class'}} // $t->{'class'};
+    }
+    for my $t (@{$c->stash->{'logcache_types'}}) {
+        $t->{'param'} = $t->{'type'} // '';
+    }
+
+    $c->stash->{peer}     = $peer;
+    $c->stash->{peer_key} = $peer_key;
+    $c->stash->{template} = 'extinfo_type_4_logcache_details.tt';
     return 1;
 }
 

@@ -35,6 +35,7 @@ use Thruk::Utils::Log qw/_error _info _debug _trace/;
             nofork       => "don't fork"
             no_shell     => "wrap command in a shell unless no_shell is set"
             env          => hash with extra environment variables
+            show_output  => show console with output
         }
     );
 
@@ -94,6 +95,7 @@ sub cmd {
             background   => "return $jobid if set, or redirect otherwise"
             clean        => "remove job after displaying it if true"
             render       => "set to a true value to render page immediatly"
+            show_output  => show console with output
         }
     )
 
@@ -328,7 +330,7 @@ return status of a job
 sub read_job {
     my($c, $id) = @_;
 
-    my($is_running,$time,$percent,$message,$forward,$remaining,$user) = get_status($c, $id);
+    my($is_running,$time,$percent,$message,$forward,$remaining,$user,$show_output) = get_status($c, $id);
     return unless defined $time;
 
     my $job_dir = $c->config->{'var_path'}.'/jobs/'.$id;
@@ -369,6 +371,7 @@ sub read_job {
         'percent'    => 0+$percent,
         'message'    => $message // '',
         'forward'    => $forward // '',
+        'show_output'=> $show_output // 0,
         'remaining'  => 0+$remaining,
     };
 
@@ -434,6 +437,11 @@ sub get_status {
         chomp($forward);
     }
 
+    my $show_output;
+    if(-f $dir."/show_output") {
+        $show_output = 1;
+    }
+
     my $remaining;
     if($percent =~ m/^([\d\.]+)\s+([\d\.\-]+)\s+(.*)$/mx) {
         $percent   = $1;
@@ -442,7 +450,7 @@ sub get_status {
     }
     if($percent eq "") { $percent = 0; }
 
-    return($is_running,$time,$percent,$message,$forward,$remaining,$user);
+    return($is_running,$time,$percent,$message,$forward,$remaining,$user,$show_output);
 }
 
 
@@ -465,6 +473,9 @@ sub get_json_status {
     my $json = {};
     for my $key (qw/is_running time percent message forward remaining start end/) {
         $json->{$key} = $job->{$key};
+    }
+    if($job->{'show_output'}) {
+        $json->{'output'} = $job->{'stdout'}.$job->{'stderr'};
     }
 
     return $c->render(json => $json);
@@ -585,7 +596,7 @@ sub job_page {
         return get_json_status($c, $job);
     }
 
-    my($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
+    my($is_running,$time,$percent,$message,$forward,$remaining,$user,$show_output) = get_status($c, $job);
     return $c->detach('/error/index/22') unless defined $is_running;
 
     if($cancel) {
@@ -593,14 +604,16 @@ sub job_page {
         return;
     }
 
-    # try to directly serve the request if it takes less than 3 seconds
-    $c->stats->profile(begin => "job_page waiting for job: ".$job);
-    while($is_running and $time < 3) {
-        Time::HiRes::sleep(0.1) if $time <  1;
-        Time::HiRes::sleep(0.3) if $time >= 1;
-        ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
+    if(!$show_output) {
+        # try to directly serve the request if it takes less than 3 seconds
+        $c->stats->profile(begin => "job_page waiting for job: ".$job);
+        while($is_running and $time < 3) {
+            Time::HiRes::sleep(0.1) if $time <  1;
+            Time::HiRes::sleep(0.3) if $time >= 1;
+            ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
+        }
+        $c->stats->profile(end => "job_page waiting for job: ".$job);
     }
-    $c->stats->profile(end => "job_page waiting for job: ".$job);
 
     # job still running?
     if($is_running) {
@@ -612,6 +625,7 @@ sub job_page {
         $c->stash->{infoBoxTitle}          = 'please stand by';
         $c->stash->{hide_backends_chooser} = 1;
         $c->stash->{'has_jquery_ui'}       = 1;
+        $c->stash->{show_output}           = $show_output || 0;
         $c->stash->{template}             = 'waiting_for_job.tt';
     } else {
         # job finished, display result
@@ -828,6 +842,14 @@ sub do_parent_stuff {
         print $fh $conf->{'forward'};
         print $fh "\n";
         Thruk::Utils::IO::close($fh, $dir."/forward");
+    }
+
+    # write show_output file
+    if(defined $conf->{'show_output'}) {
+        open($fh, '>', $dir."/show_output") or die("cannot write show_output: $!");
+        print $fh "1";
+        print $fh "\n";
+        Thruk::Utils::IO::close($fh, $dir."/show_output");
     }
 
     $c->stash->{'job_id'} = $id;

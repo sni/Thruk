@@ -486,6 +486,7 @@
                       <th class='data'>Items</th>
                       <th class='data'>Oldest Item</th>
                       <th class='data'>Latest Item</th>
+                      <th class='data'></th>
                     </tr>
                     [% IF logcache_error %]
                     <tr>
@@ -501,6 +502,7 @@
                       <td class='dataVal'>[% format_number(s.items) %]</td>
                       <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
                       <td class='dataVal'>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
+                      <td class='dataVal'><a href="extinfo.cgi?type=4&logcachedetails=[% peer_key %]"><img src="[% url_prefix %]themes/[% theme %]/images/folder_explore.png" alt="Show Details" title="Show Details" width="16" height="16" border="0"></a></td>
                     </tr>
                     [% END %]
                     [% END %]

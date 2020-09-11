@@ -872,7 +872,7 @@ return logcache statistics
 =cut
 
 sub logcache_stats {
-    my($self, $c, $with_dates) = @_;
+    my($self, $c, $with_dates, $backends) = @_;
     return unless defined $c->config->{'logcache'};
 
     my $type = '';
@@ -884,7 +884,7 @@ sub logcache_stats {
             Thruk::Backend::Provider::Mysql->import;
             $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
         }
-        @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
+        @stats = Thruk::Backend::Provider::Mysql->_log_stats($c, $backends);
     } else {
         die("unknown type: ".$type);
     }

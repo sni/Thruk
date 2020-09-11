@@ -29,6 +29,7 @@
                         height              =>  24,
                         percent_per_second  =>   1,
                         show_message        =>   0,
+                        show_console        => show_output,
                     }
     %]
     [% END %]

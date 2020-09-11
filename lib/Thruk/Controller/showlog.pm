@@ -77,6 +77,13 @@ sub index {
     $c->stash->{'host'}    = $host;
     $c->stash->{'service'} = $service;
 
+    if(defined $c->req->parameters->{'class'}) {
+        push @{$filter}, { class => $c->req->parameters->{'class'} };
+    }
+    if(defined $c->req->parameters->{'type'}) {
+        push @{$filter}, { type => $c->req->parameters->{'type'} };
+    }
+
     my $order = "DESC";
     if($oldestfirst) {
         $order = "ASC";
