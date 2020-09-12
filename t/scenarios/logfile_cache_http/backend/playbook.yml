@@ -2,6 +2,8 @@
 - hosts: all
   roles:
     - role: common
+    - role: local_tests
+    - role: thruk_developer
   tasks:
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set MYSQL on

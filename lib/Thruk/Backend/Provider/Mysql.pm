@@ -2325,6 +2325,7 @@ sub _release_write_locks {
 ##########################################################
 sub _set_class {
     my($l) = @_;
+    return if defined $l->{'class'};
     my $type = $l->{'type'};
     $l->{'class'} = $Thruk::Backend::Provider::Mysql::db_types->{$type} if defined $type;
     return if defined $l->{'class'};

@@ -10,3 +10,7 @@ extra_wait_start:
 
 extra_test:
 	$(THRUK) logcache stats | grep ^core
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /test/t/local_test.sh 0
+
+extra_test_verbose:
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /test/t/local_test.sh 1

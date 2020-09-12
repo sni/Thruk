@@ -2056,6 +2056,7 @@ t/scenarios/backend_naemon/Makefile
 t/scenarios/backend_naemon/omd/Dockerfile
 t/scenarios/backend_naemon/omd/playbook.yml
 t/scenarios/backend_naemon/omd/test.cfg
+t/scenarios/backend_naemon/panorama/1.tab
 t/scenarios/backend_naemon/t/300-controller_extinfo.t
 t/scenarios/backend_naemon/t/300-controller_status.t
 t/scenarios/backend_naemon/t/300-controller_tac.t
@@ -2248,6 +2249,8 @@ t/scenarios/logfile_cache_http/t/100-logcache.t
 t/scenarios/logfile_cache_http/t/300-controller_extinfo.t
 t/scenarios/logfile_cache_http/t/300-controller_notifications.t
 t/scenarios/logfile_cache_http/t/300-controller_showlog.t
+t/scenarios/logfile_cache_http/t/local/logcache.t
+t/scenarios/logfile_cache_http/t/local_test.sh
 t/scenarios/logfile_cache_http/thruk.conf
 t/scenarios/logfile_cache_http/thruk_local.conf
 t/scenarios/logfile_cache_icinga2_ido_e2e/docker-compose.yml
