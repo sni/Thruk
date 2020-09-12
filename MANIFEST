@@ -2056,7 +2056,6 @@ t/scenarios/backend_naemon/Makefile
 t/scenarios/backend_naemon/omd/Dockerfile
 t/scenarios/backend_naemon/omd/playbook.yml
 t/scenarios/backend_naemon/omd/test.cfg
-t/scenarios/backend_naemon/panorama/1.tab
 t/scenarios/backend_naemon/t/300-controller_extinfo.t
 t/scenarios/backend_naemon/t/300-controller_status.t
 t/scenarios/backend_naemon/t/300-controller_tac.t
