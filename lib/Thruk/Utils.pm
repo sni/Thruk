@@ -826,7 +826,7 @@ sub get_custom_vars {
     if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
         for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
-            for my $pattern (ref $c->config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$c->config->{'action_menu_apply'}->{$menu}} : ($c->config->{'action_menu_apply'}->{$menu})) {
+            for my $pattern (@{list($c->config->{'action_menu_apply'}->{$menu})}) {
                 if(!$prefix && $data->{'description'}) {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
                     ## no critic
