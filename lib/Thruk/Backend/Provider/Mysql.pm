@@ -2142,7 +2142,7 @@ sub _insert_logs {
 
     # check pid / lock
     my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
-    if(scalar @pids == 1 && $pids[0] != $$) {
+    if(scalar @pids == 1 && $pids[0] && $pids[0] != $$) {
         print "WARNING: logcache update already running with pid ".$pids[0]."\n" if $verbose;
         return $log_count;
     }
@@ -2221,7 +2221,10 @@ sub _insert_logs {
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose);
     $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
-    _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
+    # release locks, unless in import mode. Import releases lock later
+    if($mode ne 'import') {
+        _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
+    }
 
     print '. '.$log_count . " entries added\n" if $verbose > 1;
     return $log_count;
