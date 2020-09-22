@@ -127,9 +127,9 @@
                     [% menu.data %]
                     [% action_menus_inserted.item(menu.data) = 1 %]
                     [% END %]
-                    print_action_menu([% menu.function %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "orientation" => "b-l", "show_title" => true}) %]);
+                    print_action_menu([% menu.function %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "orientation" => "b-l", "show_title" => "true"}) %]);
                   [% ELSE %]
-                    print_action_menu([% menu.data %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "orientation" => "b-l", "show_title" => true}) %]);
+                    print_action_menu([% menu.data %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "orientation" => "b-l", "show_title" => "true"}) %]);
                   [% END %]
                   </script>
                 [% END %]
