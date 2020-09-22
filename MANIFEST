@@ -1729,6 +1729,7 @@ support/0004-fcgish.patch
 support/0005-logrotate.patch
 support/apache_fcgid.conf
 support/convert_old_datafile.pl
+support/fake_log_archive.pl
 support/fcgid_env.sh
 support/htpasswd
 support/icinga2_ido_fetchlogs.sh
