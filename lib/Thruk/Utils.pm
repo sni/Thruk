@@ -98,6 +98,20 @@ sub format_number {
     return $number;
 }
 
+##############################################
+
+=head2 format_disk_size
+
+  my $string = format_disk_size($number)
+
+return human readable disk size
+
+=cut
+sub format_disk_size {
+    my($number) = @_;
+    my $str = sprintf("%.1f%s", reduce_number($number, "B", 1024));
+    return $str;
+}
 
 ##############################################
 
