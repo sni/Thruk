@@ -58,7 +58,7 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
-    my $result = _fetch_results($c, $opts);
+    my $result = _fetch_results($c, $opts, $opt);
     # return here for simple requests
     if(scalar @{$result} == 1 && !$result->[0]->{'output'} && !$result->[0]->{'warning'} && !$result->[0]->{'critical'} && !$result->[0]->{'rename'}) {
         return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, all_stdout => 1});
@@ -70,7 +70,7 @@ sub cmd {
 
 ##############################################
 sub _fetch_results {
-    my($c, $opts) = @_;
+    my($c, $opts, $global_opts) = @_;
 
     for my $opt (@{$opts}) {
         my $url = $opt->{'url'};
@@ -79,7 +79,7 @@ sub _fetch_results {
         # But for security reasons only from the command line
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
             if($url =~ m/^https?:/mx) {
-                my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'});
+                my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
                 if($Thruk::Utils::CLI::verbose >= 2) {
                     _debug("request:");
                     _debug($res->request->as_string());
@@ -166,7 +166,6 @@ sub _parse_args {
             'perffilter' => [],
         };
         Getopt::Long::GetOptionsFromArray($s,
-            "k|insecure"      => \$opt->{'insecure'},
             "H|header=s"      =>  $opt->{'headers'},
             "m|method=s"      => \$opt->{'method'},
             "d|data=s"        =>  $opt->{'postdata'},

@@ -174,18 +174,18 @@ sub store_objects {
 
 =head2 request_url
 
-    request_url($c, $url, [$cookies], [$method], [$postdata], [$headers])
+    request_url($c, $url, [$cookies], [$method], [$postdata], [$headers], [$insecure])
 
 returns requested url as string. In list context returns ($code, $result)
 
 =cut
 sub request_url {
-    my($c, $url, $cookies, $method, $postdata, $headers) = @_;
+    my($c, $url, $cookies, $method, $postdata, $headers, $insecure) = @_;
     $method = 'GET' unless $method;
 
     # external url?
     if($url =~ m/^https?:/mx) {
-        my($response) = _external_request($url, $cookies, $method, $postdata, $headers);
+        my($response) = _external_request($url, $cookies, $method, $postdata, $headers, $insecure);
         my $result = {
             code    => $response->code(),
             result  => $response->decoded_content || $response->content,
@@ -501,12 +501,17 @@ sub _request {
 
 ##############################################
 sub _external_request {
-    my($url, $cookies, $method, $postdata, $headers) = @_;
+    my($url, $cookies, $method, $postdata, $headers, $insecure) = @_;
     if(!defined $method) {
         $method = $postdata ? "POST" : "GET";
     }
     _debug(sprintf("_external_request(%s, %s)", $url, $method)) if $Thruk::Utils::CLI::verbose >= 2;
     my $ua = _get_user_agent();
+    if($insecure) {
+        Thruk::UserAgent::disable_verify_hostname($ua);
+    } else {
+        Thruk::UserAgent::disable_verify_hostname_by_url($ua, $url);
+    }
     if($cookies) {
         my $cookie_string = "";
         for my $key (keys %{$cookies}) {
