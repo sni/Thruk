@@ -3673,4 +3673,50 @@ sub dclone {
 
 ##############################################
 
+=head2 text_table
+
+    text_table( keys => [keys], data => <list of hashes> )
+
+returns ascii text table
+
+=cut
+sub text_table {
+    my %opt = @_;
+    my $keys = $opt{'keys'};
+    my $data = $opt{'data'};
+    return if scalar @{$data} == 0;
+    if(!$keys) {
+        $keys = [sort keys %{$data->[0]}];
+    }
+    # create format string
+    my $rowformat = "";
+    my $separator = "";
+    for my $key (@{$keys}) {
+        # find longest item
+        my $maxsize = length($key);
+        for my $row (@{$data}) {
+            my $l = length($row->{$key} // "");
+            if($l > $maxsize) { $maxsize = $l; }
+        }
+        $rowformat .= "| %-".$maxsize."s ";
+        $separator .= "+".('-' x ($maxsize+2));
+    }
+    $rowformat .= "|\n";
+    $separator .= "+\n";
+    my $output = $separator;
+    $output .= sprintf($rowformat, @{$keys});
+    $output .= $separator;
+    for my $row (@{$data}) {
+        my @values;
+        for my $key (@{$keys}) {
+            push @values, $row->{$key} // '';
+        }
+        $output .= sprintf($rowformat, @values);
+    }
+    $output .= $separator;
+    return($output);
+}
+
+##############################################
+
 1;

@@ -404,25 +404,25 @@ sub get_logs {
 
     my $dbh = $self->_dbh;
     my $sql = '
-        SELECT
-            l.time as time,
-            l.class as class,
-            l.type as type,
-            l.state as state,
-            l.state_type as state_type,
-            IFNULL(h.host_name, "") as host_name,
-            IFNULL(s.service_description, "") as service_description,
-            c.name as contact_name,
-            l.message as message,
-            "'.$prefix.'" as peer_key
-        FROM
-            `'.$prefix.'_log` l
-            LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id
-            LEFT JOIN `'.$prefix.'_service` s ON l.service_id = s.service_id
-            LEFT JOIN `'.$prefix.'_contact` c ON l.contact_id = c.contact_id
-        '.$where.'
-        '.$orderby.'
-        '.$limit.'
+    SELECT
+        l.time as time,
+        l.class as class,
+        l.type as type,
+        l.state as state,
+        l.state_type as state_type,
+        IFNULL(h.host_name, "") as host_name,
+        IFNULL(s.service_description, "") as service_description,
+        c.name as contact_name,
+        l.message as message,
+        "'.$prefix.'" as peer_key
+    FROM
+        `'.$prefix.'_log` l
+        LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id
+        LEFT JOIN `'.$prefix.'_service` s ON l.service_id = s.service_id
+        LEFT JOIN `'.$prefix.'_contact` c ON l.contact_id = c.contact_id
+    '.$where.'
+    '.$orderby.'
+    '.$limit.'
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
 
@@ -433,7 +433,17 @@ sub get_logs {
         open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     }
 
-    _trace($sql) if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 3);
+    # add performance related debug output
+    if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 2) {
+        _debug($sql);
+
+        _debug("EXPLAIN:");
+        _debug(_sql_debug("EXPLAIN\n".$sql, $dbh));
+
+        my $debug_sql = "SHOW INDEXES FROM `".$prefix."_log`";
+        _debug($debug_sql.":");
+        _debug(_sql_debug($debug_sql, $dbh));
+    }
 
     # querys with authorization
     my $data;
@@ -482,6 +492,7 @@ sub get_logs {
             $data = $dbh->selectall_arrayref($sql, { Slice => {} });
         }
     }
+
     if($fh) {
         my $rc = Thruk::Utils::IO::close($fh, $filename);
         if(!$rc) {
@@ -677,25 +688,7 @@ sub _get_filter {
     }
     $filter = " WHERE ".$filter if $filter;
 
-    # message filter have to go into a having clause
     $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
-    if($filter and $filter =~ m/message\ (NOT\ LIKE|NOT\ RLIKE|RLIKE|=|LIKE|!=)\ /mx) {
-        if($filter =~ s/^\ WHERE\ \(((\(host_name\ =\ '.+'(\ AND\ service_description\ =\ '.+')?\)\ AND\ )?time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
-            my $timef = $1;
-            my $having = $filter;
-            $filter = 'WHERE ('.$timef.')';
-            # time filter are the only filter
-            if($having eq ')') {
-                $having = '';
-            } else {
-                $having =~ s/^\ AND\ //mx;
-                $having =~ s/\)$//mx;
-                $filter = $filter.' HAVING ('.$having.')';
-            }
-        } else {
-            $filter =~ s/message\ RLIKE\ '/p1.output\ RLIKE\ '/gmx;
-        }
-    }
     $filter =~ s/\Qtype = ''\E/type IS NULL/gmx;
     $filter =~ s/\ AND\ \)/)/gmx;
     $filter =~ s/\(\ AND\ \(/((/gmx;
@@ -902,7 +895,7 @@ sub _get_logs_start_end {
     my $dbh  = $self->_dbh();
     return([$start, $end]) unless _tables_exist($dbh, $prefix);
     my($where) = $self->_get_filter($options{'filter'});
-    my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM `'.$prefix.'_log` '.$where.' LIMIT 1', { Slice => {} })};
+    my @data = @{$dbh->selectall_arrayref('SELECT MIN(l.time) as mi, MAX(l.time) as ma FROM `'.$prefix.'_log` l '.$where.' LIMIT 1', { Slice => {} })};
     $start   = $data[0]->{'mi'} if defined $data[0];
     $end     = $data[0]->{'ma'} if defined $data[0];
     return([$start, $end]);
@@ -2163,6 +2156,20 @@ sub _set_class {
     $l->{'type'}    = '';
     $l->{'class'}   = 0; # LOGCLASS_INFO
     return;
+}
+
+##########################################################
+sub _sql_debug {
+    my($sql, $dbh) = @_;
+
+    my $sth = $dbh->prepare($sql);
+    $sth->execute;
+    my $data = $sth->fetchall_arrayref({});
+
+    return(Thruk::Utils::text_table(
+        keys => $sth->{'NAME'},
+        data => $data,
+    ));
 }
 
 ##########################################################
