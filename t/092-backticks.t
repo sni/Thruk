@@ -22,6 +22,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m/LEFT\ JOIN/mx;
     next if $line =~ m/INSERT\ INTO/mx;
     next if $line =~ m/CREATE\ INDEX/mx;
+    next if $line =~ m/LOAD\ DATA/mx;
     next if $line =~ m/\$(prefix|key)\.('|")_/mx;
     next if $line =~ m%\Qlib/Monitoring/Availability.pm:\E%mx;
     next if $line =~ m%\Qconf/lib/Monitoring/Config.pm:\E%mx;

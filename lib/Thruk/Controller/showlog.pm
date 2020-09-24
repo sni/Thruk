@@ -56,7 +56,7 @@ sub index {
                             { host_name           => $host },
                             { service_description => $service},
                         ]},
-                        { -and => [
+                        $c->config->{'logcache'} ? {} : { -and => [
                             {type    => 'EXTERNAL COMMAND' },
                             {message => { '~~' => '(\s|;)'.quotemeta($host).';'.quotemeta($service).'(;|$)' }},
                         ]},
@@ -67,7 +67,7 @@ sub index {
         push @{$filter}, {
                 -or => [
                         { host_name => $host },
-                        { -and => [
+                        $c->config->{'logcache'} ? {} : { -and => [
                             {type    => 'EXTERNAL COMMAND' },
                             {message => { '~~' => '(\s|;)'.quotemeta($host).'(;|$)' }},
                         ]},

@@ -434,7 +434,7 @@ sub get_logs {
     }
 
     # add performance related debug output
-    if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 2) {
+    if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 3) {
         _debug($sql);
 
         _debug("EXPLAIN:");
@@ -1853,6 +1853,8 @@ sub _import_logcache_from_file {
             &_set_class($l);
             if($state eq '')      { $state      = 'NULL'; }
 
+            if($l->{'class'} == 5) { &_set_external_command($l); }
+
             my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
             if($l->{'service_description'}) {
                 $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
@@ -1948,10 +1950,8 @@ sub _insert_logs {
         $log_count++;
         print '.' if $log_count%$dots_each == 0 && $verbose > 1;
 
-        $l->{'type'} = '' unless defined $l->{'type'};
-        $l->{'type'} = 'TIMEPERIOD TRANSITION' if $l->{'type'} =~ m/^TIMEPERIOD\ TRANSITION/mxo;
-
         &_set_class($l);
+        if($l->{'class'} == 5) { &_set_external_command($l); }
 
         my $state             = $l->{'state'} // undef;
         my $state_type        = $l->{'state_type'};
@@ -2122,10 +2122,10 @@ sub _release_write_locks {
 ##########################################################
 sub _set_class {
     my($l) = @_;
-    return if defined $l->{'class'};
+    return if $l->{'class'};
     my $type = $l->{'type'};
     $l->{'class'} = $Thruk::Backend::Provider::Mysql::db_types->{$type} if defined $type;
-    return if defined $l->{'class'};
+    return if $l->{'class'};
     if(!defined $l->{'message'}) {
         $l->{'class'}   = 0; # LOGCLASS_INFO
         $l->{'message'} = $type;
@@ -2138,7 +2138,6 @@ sub _set_class {
        or $l->{'message'} =~ m/Bailing\ out/mxo
        or $l->{'message'} =~ m/active\ mode\.\.\./mxo
        or $l->{'message'} =~ m/standby\ mode\.\.\./mxo
-       or $l->{'message'} =~ m/LOG\ VERSION:/mxo
     ) {
         $l->{'class'} = 2; # LOGCLASS_PROGRAM
         $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if $l->{'type'};
@@ -2155,6 +2154,37 @@ sub _set_class {
     $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if $l->{'type'};
     $l->{'type'}    = '';
     $l->{'class'}   = 0; # LOGCLASS_INFO
+    return;
+}
+
+##########################################################
+sub _set_external_command {
+    my($l) = @_;
+    # add hosts/services to external commands
+    my $msg = $l->{'message'};
+    $msg =~ s/^\[\d+\]\ EXTERNAL\ COMMAND:\ //gmxo;
+    $msg =~ s/^(.*?);//gmxo;
+    my $cmd;
+    if($1) {
+        $cmd = $1;
+    }
+    return unless $cmd;
+    if($cmd =~ m/_HOST(_|$)/mx) {
+        if($msg =~ m/^([^;]+);(;|$)/gmx) {
+            $l->{'host_name'} = $1;
+        }
+    }
+    elsif($cmd =~ m/_SVC(_|$)/mx) {
+        if($msg =~ m/^([^;]+);([^;]+)(;|$)/gmx) {
+            $l->{'host_name'} = $1;
+            $l->{'service_description'} = $2;
+        }
+    }
+    elsif($cmd =~ m/_CONTACT(_|$)/mx) {
+        if($msg =~ m/^([^;]+);(;|$)/gmx) {
+            $l->{'contact_name'} = $1;
+        }
+    }
     return;
 }
 

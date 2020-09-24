@@ -95,8 +95,7 @@ sub index {
 
     # add system messages
     unless($nosystem) {
-        push @prop_filter, { message => { '~' => 'starting\.\.\.' }};
-        push @prop_filter, { message => { '~' => 'shutting down\.\.\.' }};
+        push @prop_filter, { class => 2 };
     }
 
     # join type filter together
