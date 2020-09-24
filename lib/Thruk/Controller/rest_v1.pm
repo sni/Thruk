@@ -1170,6 +1170,9 @@ sub get_rest_paths {
 sub _append_time_filter {
     my($c, $filter) = @_;
 
+    # always use a limit, otherwise mysql wont use an index
+    $c->req->parameters->{'limit'} = 1000000 unless $c->req->parameters->{'limit'};
+
     return if($c->req->parameters->{'q'} && $c->req->parameters->{'q'} =~ m/time/mx);
     for my $f (@{$filter}) {
         if(ref $f eq 'HASH' && $f->{'time'}) {

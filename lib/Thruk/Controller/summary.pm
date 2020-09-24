@@ -379,13 +379,13 @@ sub _get_alerts_from_log {
 
     if($c->stash->{alerttypefilter} ne "Service") {
         $c->stats->profile(begin => "summary.pm fetch host logs");
-        $hostlogs = $c->{'db'}->get_logs(filter => [$hostfilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')]);
+        $hostlogs = $c->{'db'}->get_logs(filter => [$hostfilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end   => "summary.pm fetch host logs");
     }
 
     if($c->stash->{alerttypefilter} ne "Host") {
         $c->stats->profile(begin => "summary.pm fetch service logs");
-        $servicelogs = $c->{'db'}->get_logs(filter => [$servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')]);
+        $servicelogs = $c->{'db'}->get_logs(filter => [$servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end   => "summary.pm fetch service logs");
     }
 

@@ -138,7 +138,7 @@ sub index {
         $c->stats->profile(end   => "history::updatecache");
 
         $c->stats->profile(begin => "history::fetch");
-        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1);
+        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1, limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end => "history::fetch");
     }
 
