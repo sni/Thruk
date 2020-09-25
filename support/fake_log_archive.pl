@@ -70,9 +70,8 @@ ReadMode 0; # reset tty
 
 while(1) {
   my $file = $options->{'output_dir'}.'/'.strftime("%d-%m-%Y", localtime($start)).".log";
-  my $ts_daystart = Thruk::Utils::DateTime::mktime(strftime("%Y", localtime($start)), strftime("%m", localtime($start)), strftime("%d", localtime($start)), 0,0,0);
-  my $ts_dayend   = $ts_daystart+(26*3600); # add 26 hours to compensate daylight saving timeshift
-     $ts_dayend   = Thruk::Utils::DateTime::mktime(strftime("%Y", localtime($ts_dayend)), strftime("%m", localtime($ts_dayend)), strftime("%d", localtime($ts_dayend)), 0,0,0);
+  my $ts_daystart = Thruk::Utils::DateTime::start_of_day($start);
+  my $ts_dayend   = Thruk::Utils::DateTime::start_of_day($ts_daystart+(26*3600)); # add 26 hours to compensate daylight saving timeshift
   my $daylength = $ts_dayend - $ts_daystart;
   my $step = $daylength / $options->{'logs_per_day'};
   printf("writing %s (daylength: %ds) ... ", $file, $daylength);

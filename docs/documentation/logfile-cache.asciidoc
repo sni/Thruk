@@ -16,6 +16,9 @@ reports.
 For maximum performance, the Logfile Cache Database should be installed on the
 same server as Thruk itself (or at least in the same network).
 
+The idea is to store complete log data for about half a year in the cache. Then
+up to 2 years of compacted logfiles to generate sla reports.
+
 
 === Configuration
 
@@ -49,7 +52,7 @@ logfilecache:
 
 Initial import:
 -------
-    %> thruk -a logcacheimport --local
+    %> thruk -a logcache import --local -v
     ...
     OK - imported 20374 log items from 1 site successfully in 4.94s (4122/s)
 -------
@@ -63,7 +66,7 @@ Depending on the size, this may take a while.
 
 Logfile Cache Update
 -------
-    %> thruk -a logcacheupdate
+    %> thruk -a logcache update -v
     OK - imported 3 log items from 3 sites successfully in 0.13s (23/s)
 -------
 
@@ -78,7 +81,7 @@ The MySQL logcache supports import from files too. Duplicates are not imported
 twice, so you can do that safely as often as you like.
 
 -------
-    %> thruk -a logcacheupdate --local /var/log/naemon/archive/naemon-09-07-2012-00.log
+    %> thruk -a logcache update --local /var/log/naemon/archive/naemon-09-07-2012-00.log
     OK - imported 2 log items from 1 site successfully in 0.01s (247/s)
 -------
 
@@ -90,7 +93,7 @@ contacts have changed.
 
 Update logfile caches authentication information:
 -------
-    %> thruk -a logcacheauthupdate
+    %> thruk -a logcache authupdate
     OK - updated 71 log items from 3 sites successfully in 0.25s (286/s)
 -------
 
@@ -101,10 +104,18 @@ with the logcacheclean command. Optionally you can define the number of days
 which should be kept in the cache.
 
 -------
-    %> thruk -a logcacheclean=730
+    %> thruk -a logcache clean -v
     OK - removed 18046 log items from 1 site successfully in 0.08s (218816/s)
 -------
 
+==== Compact
+Compact removes duplicate information which is not required for sla reporting.
+Notifications will also kept.
+
+-------
+    %> thruk -a logcache compact -v
+    OK - compacted 18046 log items from 1 site successfully in 0.08s (218816/s)
+-------
 
 
 ==== Statistics
@@ -113,7 +124,7 @@ There is also a command to check the current usage statistics of your
 logfile cache:
 
 -------
-    %> thruk -a logcachestats
+    %> thruk -a logcache stats
     Backend              Index Size      Data Size       Items
     Devel                 14.4 MB        136.4 MB       238104
 -------
@@ -126,16 +137,19 @@ adjust the paths.
 
 -------
   # update logcache data
-  */5 * * * * $OMD_ROOT/bin/thruk -a logcacheupdate     >>$OMD_ROOT/var/log/thruk.log 2>&1
+  */5 * * * * $OMD_ROOT/bin/thruk -a logcache update     >>$OMD_ROOT/var/log/thruk.log 2>&1
 
   # update authentication data in our logcache
-  0   2 * * * $OMD_ROOT/bin/thruk -a logcacheauthupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
+  0   2 * * * $OMD_ROOT/bin/thruk -a logcache authupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
 
   # optimize and repair tables
-  0  20 * * * $OMD_ROOT/bin/thruk -a logcacheoptimize   >>$OMD_ROOT/var/log/thruk.log 2>&1
+  0  20 * * * $OMD_ROOT/bin/thruk -a logcache optimize   >>$OMD_ROOT/var/log/thruk.log 2>&1
 
-  # clean logfiles from cache after two years
-  0   1 * * * $OMD_ROOT/bin/thruk -a logcacheclean=730  >>$OMD_ROOT/var/log/thruk.log 2>&1
+  # clean logfiles from cache after default duration (thruk.conf: logcache_clean_duration)
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcache clean      >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # compact logfiles from cache after default duration (thruk.conf: logcache_compact_duration)
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcache compact    >>$OMD_ROOT/var/log/thruk.log 2>&1
 -------
 
 
@@ -165,17 +179,20 @@ compat logfiles.
 etc/cron.d/thruk_logcache
 -------
   # update logcache data
-  * * * * * $OMD_ROOT/bin/thruk -a logcacheupdate var/icinga2/log/icinga2/compat/icinga.log >>$OMD_ROOT/var/log/thruk.log 2>&1
-  5 0 * * * $OMD_ROOT/bin/thruk -a logcacheupdate $(ls -1tr var/icinga2/log/icinga2/compat/archives/*.log) >>$OMD_ROOT/var/log/thruk.log 2>&1
+  * * * * * $OMD_ROOT/bin/thruk -a logcache update var/icinga2/log/icinga2/compat/icinga.log >>$OMD_ROOT/var/log/thruk.log 2>&1
+  5 0 * * * $OMD_ROOT/bin/thruk -a logcache update $(ls -1tr var/icinga2/log/icinga2/compat/archives/*.log) >>$OMD_ROOT/var/log/thruk.log 2>&1
 
   # update authentication data in our logcache
-  0   2 * * * $OMD_ROOT/bin/thruk -a logcacheauthupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
+  0   2 * * * $OMD_ROOT/bin/thruk -a logcache authupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
 
   # optimize and repair tables
-  0  20 * * * $OMD_ROOT/bin/thruk -a logcacheoptimize   >>$OMD_ROOT/var/log/thruk.log 2>&1
+  0  20 * * * $OMD_ROOT/bin/thruk -a logcache optimize   >>$OMD_ROOT/var/log/thruk.log 2>&1
 
-  # clean logfiles from cache after two years
-  0   1 * * * $OMD_ROOT/bin/thruk -a logcacheclean=730  >>$OMD_ROOT/var/log/thruk.log 2>&1
+  # clean logfiles from cache after default duration (thruk.conf: logcache_clean_duration)
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcache clean      >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # compact logfiles from cache after default duration (thruk.conf: logcache_compact_duration)
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcache compact    >>$OMD_ROOT/var/log/thruk.log 2>&1
 -------
 
 

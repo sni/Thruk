@@ -36,7 +36,7 @@
         <td class='host[% status %]'>[% status %]</td>
         [% END %]
         <td class='[% class %]'>[% d.state_type %]</td>
-        <td class='[% class %]'>[% d.plugin_output %]</td>
+        <td class='[% class %]' style="text-align: left;">[% log_line_plugin_output(d) %]</td>
       </tr>
       [% END %]
     </table>

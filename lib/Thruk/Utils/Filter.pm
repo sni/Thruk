@@ -95,6 +95,7 @@ format: 0d 0h 29m 43s
         3    =>       0m 04s
         4    =>          15m (trimmed)
         5    =>        15min (trimmed)
+        6    =>        2y 5d (highest 2)
 
 =cut
 sub duration {
@@ -109,11 +110,16 @@ sub duration {
 
     $options = 1 unless defined $options;
 
+    my $years   = 0;
     my $days    = 0;
     my $hours   = 0;
     my $minutes = 0;
     my $seconds = 0;
-    if($options == 1) {
+    if($options == 1 || $options == 4 || $options == 5 || $options == 6) {
+        if($duration >= (365*86400)) {
+            $years     = int($duration/(365*86400));
+            $duration = $duration%(365*86400);
+        }
         if($duration >= 86400) {
             $days     = int($duration/86400);
             $duration = $duration%86400;
@@ -155,6 +161,16 @@ sub duration {
         if($hours   > 0) { push @res, $hours."hours"; }
         if($minutes > 0) { push @res, $minutes."min"; }
         if($seconds > 0) { push @res, $seconds."sec"; }
+        return($minus.join(" ", @res));
+    }
+    elsif($options == 6) {
+        my @res;
+        if($years   > 0) { push @res, $years."y"; }
+        if($days    > 0) { push @res, $days."d"; }
+        if($hours   > 0) { push @res, $hours."h"; }
+        if($minutes > 0) { push @res, $minutes."m"; }
+        if($seconds > 0) { push @res, $seconds."s"; }
+        if(scalar @res > 2) { @res = splice(@res, 0, 2); }
         return($minus.join(" ", @res));
     }
     confess("unknown options in duration(): ".$options);
@@ -1432,6 +1448,36 @@ return random id
 =cut
 sub random_id {
     return(int(rand(1000000000)));
+}
+
+########################################
+
+=head2 log_line_plugin_output
+
+    log_line_plugin_output($log_entry)
+
+return plugin output of logline
+
+=cut
+sub log_line_plugin_output {
+    my($l) = @_;
+    return($l->{'plugin_output'}) if defined $l->{'plugin_output'};
+    my $output = $l->{'message'};
+    $output =~ s/^\[\d+\]\s+//gmx;
+    my @parts = split(/;/mx, $output);
+    if($l->{'type'} eq 'SERVICE NOTIFICATION') {
+        return($parts[5] // '');
+    }
+    if($l->{'type'} eq 'SERVICE ALERT') {
+        return($parts[5] // '');
+    }
+    if($l->{'type'} eq 'HOST NOTIFICATION') {
+        return($parts[4] // '');
+    }
+    if($l->{'type'} eq 'HOST ALERT') {
+        return($parts[4] // '');
+    }
+    return('');
 }
 
 ########################################

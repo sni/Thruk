@@ -151,14 +151,13 @@ sub perl {
 
             $err = $@;
             if($err) {
+                undef $rc;
                 if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
                     open(my $fh, '>', $dir."/forward");
                     print $fh $c->stash->{'last_redirect_to'},"\n";
                     Thruk::Utils::IO::close($fh, $dir."/forward");
                     $err = undef;
                     $rc  = 0;
-                } else {
-                    $rc = 1;
                 }
             }
 
@@ -235,6 +234,9 @@ sub render_page_in_background {
 
     # render page if not running inside a webserver
     return if(!$ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
+
+    return if exists $c->req->parameters->{'noexternalforks'};
+    return if $ENV{'THRUK_NO_BACKGROUND_PAGES'};
 
     my @caller = caller(1);
     return(

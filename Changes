@@ -2,7 +2,6 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - rewrite config reading, cgi.cfg will now simply be merged
-          - add logcache to thruk selfcheck
           - add dynamic columns for status overview page
           - add dynamic columns for status grid page
           - add multiselect removal for recurring downtimes
@@ -19,6 +18,11 @@ next:
             - added option --no-reload-core to thruk cp commit
             - added option --no-reload-cron to thruk cp commit
             - added configuration option sync_downtime_ack_state
+          - Logcache:
+            - add logcache statistics and action to performance info page
+            - improve performance
+            - add compact mode
+            - add logcache to thruk selfcheck
           - internals:
             - update fancytree 2.36.1
 

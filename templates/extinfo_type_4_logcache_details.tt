@@ -21,67 +21,96 @@
     </table><br>
     <div align="center" class="extinfo4 logcachedetails">
       <div class='dataTitle perfDataTitle'>Logcache Details for Backend '[% peer.name %]'</div>
-      <table border="1" cellspacing="0" cellpadding="0" class="data">
+      <table border="0" class="data">
+        <tr class='data'>
+          <th class='data'>Backend</th>
+          <th class='data'>Data Usage</th>
+          <th class='data'>Index Usage</th>
+          <th class='data'>Items</th>
+          <th class='data'>Oldest Item</th>
+          <th class='data'>Latest Item</th>
+          <th class='data'>Logcache Duration</th>
+          <th class='data'>Logcache Version</th>
+        </tr>
+        [% s = logcache_stats %]
         <tr>
-          <td class='stateInfoTable1'>
-            <table border="0">
-              <tr class='data'>
-                <th class='data'>Backend</th>
-                <th class='data'>Data Usage</th>
-                <th class='data'>Index Usage</th>
-                <th class='data'>Items</th>
-                <th class='data'>Oldest Item</th>
-                <th class='data'>Latest Item</th>
-              </tr>
-              [% s = logcache_stats %]
-              <tr>
-                <td class='dataVal'>[% s.name %]</td>
-                <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-                <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-                <td class='dataVal'>[% format_number(s.items) %]</td>
-                <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
-                <td class='dataVal'>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
-              </tr>
+          <td class='dataVal'>[% s.name %]</td>
+          <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+          <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+          <td class='dataVal'>[% format_number(s.items) %]</td>
+          <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
+          <td class='dataVal'>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
+          <td class='dataVal'>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
+          <td class='dataVal'>[% s.cache_version %]</td>
+        </tr>
+      </table>
 
-              <tr>
-                <td style="height:30px;"></td>
-              </tr>
+      <table border="0" class="data" style="margin: 30px 15px;">
+        <tr class='data'>
+          <th class='data'>Last Update</th>
+          <th class='data'>Update Duration</th>
+          <th class='data'></th>
+        </tr>
+        <tr>
+          <td class='dataVal'>[% date_format(c, s.last_update,) %]</td>
+          <td class='dataVal'>[% IF s.update_duration != ""; duration(s.update_duration, 3); END %]</td>
+          <td class='dataVal' style="text-align: center;">
+            <form action="extinfo.cgi" method="POST">
+              <input type="hidden" name="type" value="4">
+              <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <button name="submit" value="update" style="width: 160px;">run update</button>
+            </form>
+          </td>
+        </tr>
 
-              <tr class='data'>
-                <th class='data'>Logcache Version</th>
-                <th class='data'>Last Update</th>
-                <th class='data'>Update Duration</th>
-                <th class='data'>Last Optimize</th>
-                <th class='data'>Optimize Duration</th>
-                <th class='data'></th>
-              </tr>
-              [% s = logcache_stats %]
-              <tr>
-                <td class='dataVal'>[% s.cache_version %]</td>
-                <td class='dataVal'>[% date_format(c, s.last_update,) %]</td>
-                <td class='dataVal'>[% IF s.update_duration != ""; duration(s.update_duration, 3); END %]</td>
-                <td class='dataVal'>[% IF s.last_reorder > 0; date_format(c, s.last_reorder); END %]</td>
-                <td class='dataVal'>[% IF s.reorder_duration != ""; duration(s.reorder_duration, 3); END %]</td>
-              </tr>
+        <tr class='data'>
+          <th class='data'>Last Compact</th>
+          <th class='data'>Compact Duration</th>
+          <th class='data'></th>
+        </tr>
+        <tr>
+          <td class='dataVal'>[% IF s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
+          <td class='dataVal'>[% IF s.compact_duration != ""; duration(s.compact_duration, 3); END %]</td>
+          <td class='dataVal' style="text-align: center;">
+            <form action="extinfo.cgi" method="POST">
+              <input type="hidden" name="type" value="4">
+              <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <button name="submit" value="compact" style="width: 160px;">run compact ([% c.config.logcache_compact_duration %])</button>
+            </form>
+          </td>
+        </tr>
 
-              <tr>
-                <td style="height:30px;"></td>
-              </tr>
+        <tr class='data'>
+          <th class='data'>Last Optimize</th>
+          <th class='data'>Optimize Duration</th>
+          <th class='data'></th>
+        </tr>
+        <tr>
+          <td class='dataVal'>[% IF s.last_reorder > 0; date_format(c, s.last_reorder); END %]</td>
+          <td class='dataVal'>[% IF s.reorder_duration != ""; duration(s.reorder_duration, 3); END %]</td>
+          <td class='dataVal' style="text-align: center;">
+            <form action="extinfo.cgi" method="POST">
+              <input type="hidden" name="type" value="4">
+              <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <button name="submit" value="optimize" style="width: 160px;">run optimize</button>
+            </form>
+          </td>
+        </tr>
 
-              <tr class='data'>
-                <th class='data' colspan="6" style="text-align: center;">Actions</th>
-              </tr>
-              <tr>
-                <td class='dataVal' colspan="6" style="text-align: center;">
-                  <form action="extinfo.cgi" method="POST">
-                  <input type="hidden" name="type" value="4">
-                  <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-                  <button name="submit" value="update">run update</button>
-                  <button name="submit" value="optimize">run optimize</button>
-                  </form>
-                </td>
-              </tr>
-            </table>
+        <tr class='data'>
+          <th class='data'>Duration</th>
+          <th class='data'>Oldest Item</th>
+          <th class='data'></th>
+        </tr>
+        <tr>
+          <td class='dataVal'>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
+          <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start, "%Y-%m-%d") %][% END %]</td>
+          <td class='dataVal' style="text-align: center;">
+            <form action="extinfo.cgi" method="POST">
+              <input type="hidden" name="type" value="4">
+              <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <button name="submit" value="clean" style="width: 160px;">run clean ([% c.config.logcache_clean_duration %])</button>
+            </form>
           </td>
         </tr>
       </table>

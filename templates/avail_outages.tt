@@ -126,7 +126,7 @@ Host Outages: [% host | html %]
     <td class="status [% rowclass %]">[% duration(l.duration) %]</td>
     [% END %]
     <td class="status [% rowclass %] status[% l.class.upper | html %]">[% l.type %]</td>
-    <td class="status [% rowclass %]">[% l.plugin_output %]</td>
+    <td class="status [% rowclass %]">[% log_line_plugin_output(l) %]</td>
     <td class="status [% rowclass %]"><a href="showlog.cgi?host=[% host | uri %][% IF service %]&service=[% service | uri %][% END %]&start=[% l.start | uri %]&end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %]"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></a></td>
   </tr>
   [% END %]

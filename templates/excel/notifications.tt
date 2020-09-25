@@ -29,7 +29,7 @@
         [% ELSIF col == "Time"        %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(n.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
         [% ELSIF col == "Contact"     %]<cell>[% escape_xml(n.contact_name) %]</cell>
         [% ELSIF col == "Command"     %]<cell>[% escape_xml(n.command_name) %]</cell>
-        [% ELSIF col == "Information" %]<cell>[% escape_xml(n.plugin_output) %]</cell>
+        [% ELSIF col == "Information" %]<cell>[% escape_xml(log_line_plugin_output(n)) %]</cell>
         [% END %]
         [% END %]
     </row>

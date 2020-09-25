@@ -380,7 +380,7 @@ sub _draw_states {
         # host/service state?
         my($color,$height, $state, $plugin_output);
         $state         = ucfirst $log->{'class'};
-        $plugin_output = $log->{'plugin_output'};
+        $plugin_output = Thruk::Utils::Filter::log_line_plugin_output($log);
         if(   $log->{'class'} eq 'UP')            { $color = $colors->{'green'};    $height = 60; }
         elsif($log->{'class'} eq 'DOWN')          { $color = $colors->{'red'};      $height = 40; }
         elsif($log->{'class'} eq 'UNREACHABLE')   { $color = $colors->{'darkred'};  $height = 20; }
@@ -466,7 +466,7 @@ sub _draw_states {
                 "end_human"          => POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
                 "start"              => $log->{'start'},
                 "end"                => $log->{'end'},
-                "plugin_output"      => $log->{'plugin_output'},
+                "plugin_output"      => Thruk::Utils::Filter::log_line_plugin_output($log),
 
                 "t1"                 => $t1,
                 "t2"                 => $t2,

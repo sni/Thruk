@@ -9,6 +9,7 @@ use parent 'Thruk::Backend::Provider::Base';
 use Thruk::Utils qw//;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 use Carp qw/confess/;
+use POSIX ();
 
 =head1 NAME
 
@@ -403,6 +404,27 @@ sub get_logs {
     $prefix    =~ s/^logs_//gmx;
 
     my $dbh = $self->_dbh;
+
+    # check logcache version
+    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
+    if(scalar @versions < 1 || $versions[0] != $Thruk::Backend::Provider::Mysql::cache_version) {
+        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $Thruk::Backend::Provider::Mysql::cache_version, $versions[0] // '0'));
+    }
+
+    # check compact timerange and set a warning flag
+    my $c =$Thruk::Request::c;
+    if($c) {
+        my $compact_start_data = _get_compact_start_date($c);
+        # get time filter
+        my($start, $end) = _extract_time_filter($options{'filter'});
+        if($start && $start < $compact_start_data) {
+            $c->stash->{'logs_from_compacted_zone'} = 1;
+        }
+        elsif($end && $end < $compact_start_data) {
+            $c->stash->{'logs_from_compacted_zone'} = 1;
+        }
+    }
+
     my $sql = '
     SELECT
         l.time as time,
@@ -445,7 +467,7 @@ sub get_logs {
         _debug(_sql_debug($debug_sql, $dbh));
     }
 
-    # querys with authorization
+    # queries with authorization
     my $data;
     if($auth_data->{'username'}) {
         my($contact,$strict,$authorized_for_all_services,$authorized_for_all_hosts,$authorized_for_system_information) = ($auth_data->{'username'},$auth_data->{'strict'},$auth_data->{'authorized_for_all_services'},$auth_data->{'authorized_for_all_hosts'},$auth_data->{'authorized_for_system_information'});
@@ -486,7 +508,7 @@ sub get_logs {
             my $sth = $dbh->prepare($sql);
             $sth->execute;
             while(my $r = $sth->fetchrow_arrayref()) {
-                print $fh encode_utf8($r->[9]),"\n";
+                print $fh encode_utf8($r->[8]),"\n";
             }
         } else {
             $data = $dbh->selectall_arrayref($sql, { Slice => {} });
@@ -919,7 +941,6 @@ sub _log_stats {
     ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
     $backends  = Thruk::Utils::list($backends);
 
-    my $output = sprintf("%-20s %-15s %-13s %7s\n", 'Backend', 'Index Size', 'Data Size', 'Items');
     my @result;
     for my $key (@{$backends}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
@@ -930,9 +951,6 @@ sub _log_stats {
         next unless defined $res->{$key.'_log'};
         my $index_size = $res->{$key.'_log'}->{'Index_length'};
         my $data_size  = $res->{$key.'_log'}->{'Data_length'};
-        my($val1,$unit1) = Thruk::Utils::reduce_number($index_size, 'B', 1024);
-        my($val2,$unit2) = Thruk::Utils::reduce_number($data_size, 'B', 1024);
-        $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %7d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $res->{$key.'_log'}->{'Rows'});
         my $status  = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
         push @result, {
             key              => $key,
@@ -943,14 +961,25 @@ sub _log_stats {
             cache_version    => $status->{'cache_version'}->{'value'},
             last_update      => $status->{'last_update'}->{'value'},
             last_reorder     => $status->{'last_reorder'}->{'value'},
+            last_compact     => $status->{'last_compact'}->{'value'},
             reorder_duration => $status->{'reorder_duration'}->{'value'} // '',
             update_duration  => $status->{'update_duration'}->{'value'} // '',
+            compact_duration => $status->{'compact_duration'}->{'value'} // '',
+            compact_till     => $status->{'compact_till'}->{'value'} // '',
         };
     }
 
     $c->stats->profile(end => "Mysql::_log_stats");
     return @result if wantarray;
-    return $output;
+    return Thruk::Utils::text_table(
+        keys => [['Backend', 'name'],
+                 { name => 'Index Size',  key => 'index_size', type => 'bytes', format => "%.1f" },
+                 { name => 'Data Size',   key => 'data_size',  type => 'bytes', format => "%.1f" },
+                 ['Items', 'items'],
+                 { name => 'Last Update', key => 'last_update', type => 'date', format => '%Y-%m-%d %H:%M:%S' },
+                ],
+        data => \@result,
+    );
 }
 
 ##########################################################
@@ -1126,6 +1155,12 @@ sub _import_logs {
                 $log_count->[0] += $tmp->[0];
                 $log_count->[1] += $tmp->[1];
             }
+            elsif($mode eq 'compact') {
+                my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart, $options->{'force'});
+                $log_count = [0,0] unless ref $log_count eq 'ARRAY';
+                $log_count->[0] += $tmp->[0];
+                $log_count->[1] += $tmp->[1];
+            }
             elsif($mode eq 'drop') {
                 $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
             }
@@ -1158,17 +1193,27 @@ sub _import_logs {
 
 ##########################################################
 sub _update_logcache {
-    my($self, $c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart) = @_;
+    my($self, $c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart,$force) = @_;
 
     #&timing_breakpoint('_update_logcache');
     unless(defined $blocksize) {
         $blocksize = 86400;
-        $blocksize = 365 if $mode eq 'clean';
+        if($mode eq 'clean') {
+            $blocksize = Thruk::Utils::expand_duration($c->config->{'logcache_clean_duration'}) / 86400;
+        }
+        if($mode eq 'compact') {
+            $blocksize = Thruk::Utils::expand_duration($c->config->{'logcache_compact_duration'}) / 86400;
+        }
     }
 
     if($mode eq 'drop') {
         _drop_tables($dbh, $prefix);
         return;
+    }
+
+    my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
+    if(!$rc && $mode eq 'update') {
+        $mode = 'import';
     }
 
     # check tables and lock
@@ -1180,13 +1225,12 @@ sub _update_logcache {
         $fresh_created = 1;
     }
     return(-1) unless _check_lock($dbh, $prefix, $verbose, $c);
-    my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
-    if(!$rc && $mode eq 'update') {
-        $mode = 'import';
-    }
 
     if($mode eq 'clean') {
         return(_update_logcache_clean($dbh, $prefix, $verbose, $blocksize));
+    }
+    if($mode eq 'compact') {
+        return($self->_update_logcache_compact($c, $dbh, $prefix, $verbose, $blocksize, $force));
     }
 
     $mode = 'import' if $fresh_created;
@@ -1334,6 +1378,112 @@ sub _update_logcache_clean {
 
     $dbh->commit or confess($dbh->errstr);
     return([$log_count, $plugin_ref_count]);
+}
+
+##########################################################
+sub _update_logcache_compact {
+    my($self, $c, $dbh, $prefix, $verbose, $blocksize, $force) = @_;
+    my $log_count = 0;
+    my $log_clear = 0;
+
+    if($blocksize =~ m/^\d+[a-z]{1}/mx) {
+        # blocksize is in days
+        $blocksize = int(Thruk::Utils::expand_duration($blocksize) / 86400);
+    }
+    my $t1     = time();
+    my $end  = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize * 86400));
+    print "compacting logs older than: ", scalar localtime $end, "\n" if $verbose > 1;
+    my $status = $dbh->selectall_hashref("SELECT name, value FROM `".$prefix."_status`", 'name');
+    my $start  = $status->{'compact_till'}->{'value'};
+    if(!$start || $force) {
+        my($mstart) = @{$self->_get_logs_start_end()};
+        $start = $mstart;
+    }
+    if(!$start) {
+        return([$log_count, $log_clear]);
+    }
+    my $current = $start;
+    while(1) {
+        if($current >= $end) {
+            last;
+        }
+
+        print "compacting ", scalar localtime $current, ": " if $verbose > 1;
+        my $next = Thruk::Utils::DateTime::start_of_day($current + 26*86400); # add 2 extra hours to compensate timshifts
+
+        my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
+        $sth->execute;
+        my $processed = 0;
+        my @delete;
+        my $alerts = {};
+        for my $l (@{$sth->fetchall_arrayref({})}) {
+            $processed++;
+            if($processed%10000 == 0) {
+                $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
+                $dbh->commit or confess($dbh->errstr);
+                $log_clear += scalar @delete;
+                @delete = ();
+                print '.' if $verbose > 1;
+            }
+            if(_is_compactable($l, $alerts)) {
+                push @delete, $l->{'log_id'};
+            }
+        }
+
+        printf("%d removed. done\n", scalar @delete) if $verbose > 1;
+        $current  = $next;
+        $log_count += $processed;
+        $log_clear += scalar @delete;
+
+        if(scalar @delete > 0) {
+            $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
+            $dbh->commit or confess($dbh->errstr);
+        }
+    }
+
+    my $duration = time() - $t1;
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(7,'last_compact',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(8,'compact_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(9,'compact_till','".$end."') ON DUPLICATE KEY UPDATE value='".$end."'");
+
+    $dbh->commit or confess($dbh->errstr);
+    return([$log_count, $log_clear]);
+}
+
+##########################################################
+# returns true if log entry can be removed during compact
+sub _is_compactable {
+    my($l, $alertstore) = @_;
+    if($l->{'class'} == 2 || $l->{'class'} == 3 || $l->{'class'} == 5 || $l->{'class'} == 6) {
+        # keep program, notifications, external commands, timeperiod transitions
+        return;
+    }
+    if($l->{'class'} == 1) {
+        if($l->{'type'} eq 'HOST DOWNTIME ALERT' || $l->{'type'} eq 'SERVICE DOWNTIME ALERT') {
+            # keep downtimes
+            return;
+        }
+        # remove duplicate alerts
+        my $uniq = sprintf("%s;%s", $l->{'state_type'}, $l->{'state'});
+        if($l->{'type'} eq 'SERVICE ALERT') {
+            my $host_id    = $l->{'host_id'} // $l->{'host_name'};
+            my $service_id = $l->{'service_id'} // $l->{'service_description'};
+            my $chk = $alertstore->{'svc'}->{$host_id}->{$service_id};
+            if(!$chk || $chk ne $uniq) {
+                $alertstore->{'svc'}->{$host_id}->{$service_id} = $uniq;
+                return;
+            }
+        }
+        elsif($l->{'type'} eq 'HOST ALERT') {
+            my $host_id = $l->{'host_id'} // $l->{'host_name'};
+            my $chk     = $alertstore->{'hst'}->{$host_id};
+            if(!$chk || $chk ne $uniq) {
+                $alertstore->{'hst'}->{$host_id} = $uniq;
+                return;
+            }
+        }
+    }
+    return 1;
 }
 
 ##########################################################
@@ -1675,6 +1825,11 @@ sub _import_peer_logfiles {
         }
         $c->stats->profile(end => "get last mysql timestamp");
     }
+    if($mode eq 'import') {
+        # it does not make send to import more than we would clean immediatly again
+        my $mend = time() - Thruk::Utils::expand_duration($c->config->{'logcache_clean_duration'});
+        push @{$filter}, {time => { '>=' => $mend }};
+    }
 
     my $log_count = 0;
     my($start, $end);
@@ -1715,6 +1870,9 @@ sub _import_peer_logfiles {
         $dbh->do('SET unique_checks = 0');
         $dbh->do('ALTER TABLE `'.$prefix.'_log` DISABLE KEYS');
     }
+    my $compact_start_data = _get_compact_start_date($c);
+    my $alertstore = {};
+    my $last_day = "";
 
     my @columns = qw/class time type state host_name service_description message state_type contact_name/;
     my $reordered = 0;
@@ -1723,6 +1881,19 @@ sub _import_peer_logfiles {
         $c->stats->profile(begin => $stime);
         my $duplicate_lookup = {};
         print scalar localtime $time if $verbose > 1;
+
+        my $today = POSIX::strftime("%Y-%m-%d", localtime($time));
+        if($last_day ne $today) {
+            $alertstore = {};
+            $last_day = $today;
+        }
+
+        my $import_compacted = 0;
+        if($mode eq 'import') {
+            if(($time + $blocksize - 1) < $compact_start_data) {
+                $import_compacted = 1;
+            }
+        }
 
         my $logs = [];
         my $file = $peer->{'class'}->{'fetch_command'} ? 1 : undef;
@@ -1755,9 +1926,9 @@ sub _import_peer_logfiles {
 
         if($file) {
             $file = $logs;
-            $log_count += $self->_import_logcache_from_file($mode,$dbh,[$file],$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup,$c);
+            $log_count += $self->_import_logcache_from_file($mode,$dbh,[$file],$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup,$c, $import_compacted, $alertstore);
         } else {
-            $log_count += $self->_insert_logs($dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c);
+            $log_count += $self->_insert_logs($dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c, undef, $import_compacted, $alertstore);
             $reordered = 1;
         }
 
@@ -1789,7 +1960,7 @@ sub _import_peer_logfiles {
 
 ##########################################################
 sub _import_logcache_from_file {
-    my($self,$mode,$dbh,$files,$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup, $c) = @_;
+    my($self,$mode,$dbh,$files,$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup, $c, $import_compacted, $alertstore) = @_;
     my $log_count = 0;
 
     require Monitoring::Availability::Logs;
@@ -1847,7 +2018,7 @@ sub _import_logcache_from_file {
                 }
             }
             $l->{'state'}         = '' unless defined $l->{'state'};
-            $l->{'message'}       = $line;
+            $l->{'message'}       = $original_line;
             my $state             = $l->{'state'};
             my $state_type        = $l->{'state_type'};
             &_set_class($l);
@@ -1868,17 +2039,22 @@ sub _import_logcache_from_file {
             }
 
             # Set type to NULL to prevent SQL insert errors if type is not a special type.
-            undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}};
-
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.($state_type ? $dbh->quote($state_type) : 'NULL').','.$contact.','.$host.','.$svc.','.$dbh->quote($l->{'message'}).')';
+            undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'} // ''};
 
             # commit every 1000th to avoid to large blocks
             if($log_count%1000 == 0) {
                 $self->_safe_insert($dbh, $stm, \@values, $verbose);
                 $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
                 @values = ();
+                print '.' if $verbose;
             }
-            print '.' if $log_count%1000 == 0 and $verbose;
+
+            if($import_compacted && _is_compactable($l, $alertstore)) {
+                # skip insert
+                next;
+            }
+
+            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.($state_type ? $dbh->quote($state_type) : 'NULL').','.$contact.','.$host.','.$svc.','.$dbh->quote($original_line).')';
         }
         $self->_safe_insert($dbh, $stm, \@values, $verbose);
         $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
@@ -1896,7 +2072,7 @@ sub _import_logcache_from_file {
 
 ##########################################################
 sub _insert_logs {
-    my($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,$use_extended_inserts) = @_;
+    my($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,$use_extended_inserts, $import_compacted, $alertstore) = @_;
     my $log_count = 0;
 
     my $dots_each = 1000;
@@ -1937,6 +2113,7 @@ sub _insert_logs {
     my($fh, $datafilename);
     if(!$use_extended_inserts) {
         ($fh, $datafilename) = tempfile();
+        $fh->binmode (":encoding(utf-8)");
     }
     #&timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
@@ -1970,7 +2147,12 @@ sub _insert_logs {
         }
 
         # Set type to NULL to prevent SQL insert errors if type is not a special type.
-        undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}};
+        undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'} // ''};
+
+        if($import_compacted && _is_compactable($l, $alertstore)) {
+            # skip insert
+            next;
+        }
 
         if($use_extended_inserts) {
             push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$dbh->quote($state).','.$dbh->quote($state_type).','.$dbh->quote($contact).','.$dbh->quote($host).','.$dbh->quote($svc).','.$dbh->quote($l->{'message'}).')';
@@ -2145,13 +2327,12 @@ sub _set_class {
         return;
     }
 
-    if($type =~ m/^TIMEPERIOD\ TRANSITION/mxo) {
+    if($type && $type =~ m/^TIMEPERIOD\ TRANSITION/mxo) {
         $l->{'type'}  = 'TIMEPERIOD TRANSITION';
         $l->{'class'} = 6; # LOGCLASS_STATE
         return;
     }
 
-    $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if $l->{'type'};
     $l->{'type'}    = '';
     $l->{'class'}   = 0; # LOGCLASS_INFO
     return;
@@ -2203,6 +2384,56 @@ sub _sql_debug {
 }
 
 ##########################################################
+sub _extract_time_filter {
+    my($filter) = @_;
+    my($start, $end);
+    if(ref $filter eq 'ARRAY') {
+        for my $f (@{$filter}) {
+            if(ref $f eq 'HASH') {
+                my($s, $e) = _extract_time_filter($f);
+                $start = $s if defined $s;
+                $end   = $e if defined $e;
+            }
+        }
+    }
+    if(ref $filter eq 'HASH') {
+        if($filter->{'-and'}) {
+            my($s, $e) = _extract_time_filter($filter->{'-and'});
+            $start = $s if defined $s;
+            $end   = $e if defined $e;
+        } else {
+            if($filter->{'time'}) {
+                if(ref $filter->{'time'} eq 'HASH') {
+                    my $op  = (keys %{$filter->{'time'}})[0];
+                    my $val = $filter->{'time'}->{$op};
+                    if($op eq '>' || $op eq '>=') {
+                        $start = $val;
+                        return($start, $end);
+                    }
+                    if($op eq '<' || $op eq '<=') {
+                        $end = $val;
+                        return($start, $end);
+                    }
+                }
+            }
+        }
+    }
+    return($start, $end);
+}
+
+##########################################################
+sub _get_compact_start_date {
+    my($c) = @_;
+    my $blocksize = $c->config->{'logcache_compact_duration'};
+    # blocksize is given in days unless specified
+    if($blocksize !~ m/^\d+$/mx) {
+        $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
+    }
+    my $ts = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize*86400));
+    return($ts);
+}
+
+##########################################################
 sub _get_create_statements {
     my($prefix) = @_;
     my @statements = (
@@ -2241,6 +2472,7 @@ sub _get_create_statements {
     # log
         "DROP TABLE IF EXISTS `".$prefix."_log`",
         "CREATE TABLE IF NOT EXISTS `".$prefix."_log` (
+          log_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
           time int(11) unsigned NOT NULL,
           class tinyint(4) unsigned NOT NULL,
           type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') DEFAULT NULL,
@@ -2250,9 +2482,10 @@ sub _get_create_statements {
           host_id mediumint(9) unsigned DEFAULT NULL,
           service_id mediumint(9) unsigned DEFAULT NULL,
           message mediumtext NOT NULL,
+          PRIMARY KEY (log_id),
           KEY time (time),
           KEY host_id (host_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci PACK_KEYS=1",    # using utf8_bin here would break case-insensitive rlike queries
 
     # service
         "DROP TABLE IF EXISTS `".$prefix."_service`",
@@ -2279,6 +2512,9 @@ sub _get_create_statements {
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(4, 'cache_version', '".$Thruk::Backend::Provider::Mysql::cache_version."')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(5, 'reorder_duration', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(6, 'update_duration', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(7, 'last_compact', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(8, 'compact_duration', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(9, 'compact_till', '')",
     );
     return \@statements;
 }

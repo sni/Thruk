@@ -34,7 +34,8 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
         - stats                     Display logcache statistics.
         - authupdate                Update authentication data.
         - optimize                  Run table optimize.
-        - clean [duration]          Clean cache and keep everything within given duration (in days). Default: 1y
+        - clean [duration]          Clean cache and keep everything within given duration (in days). Defaults to `logcache_clean_duration`
+        - compact [duration]        Compact cache and remove unnecessary thins. Duration is given in in days). Defaults to `logcache_compact_duration`
         - removeunused              Remove unused tables for no longer existing backends.
         - drop                      Remove all tables and data.
 
@@ -100,12 +101,16 @@ sub cmd {
             }
         }
     } elsif($mode eq 'clean') {
-        $blocksize = $opt->{'start'} || shift @{$commandoptions};
+        $blocksize = $opt->{'start'} || shift @{$commandoptions} || $c->config->{'logcache_clean_duration'};
         # blocksize is given in days unless specified
-        if(defined $blocksize) {
-            if($blocksize !~ m/^\d+$/mx) {
-                $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
-            }
+        if($blocksize !~ m/^\d+$/mx) {
+            $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
+        }
+    } elsif($mode eq 'compact') {
+        $blocksize = $opt->{'start'} || shift @{$commandoptions} || $c->config->{'logcache_compact_duration'};
+        # blocksize is given in days unless specified
+        if($blocksize !~ m/^\d+$/mx) {
+            $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
         }
     }
 
@@ -180,13 +185,23 @@ sub cmd {
             return("canceled\n", 1);
         }
     }
+    if($mode eq 'compact' && !$global_options->{'yes'} && $terminal_attached) {
+        local $|=1;
+        my $start = time() - (($blocksize // 365) * 86400);
+        printf("Do you really want to compact data older than %s?\nContinue? [n]: ", scalar localtime($start));
+        my $buf;
+        sysread STDIN, $buf, 1;
+        if($buf !~ m/^(y|j)/mxi) {
+            return("canceled\n", 1);
+        }
+    }
 
     if($mode eq 'stats') {
         my $stats;
         $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         Thruk::Backend::Manager::close_logcache_connections($c);
-        return($stats."\n", 0);
+        return($stats, 0);
     }
     elsif($mode eq 'removeunused') {
         my $stats= Thruk::Backend::Provider::Mysql->_log_removeunused($c);
@@ -199,13 +214,14 @@ sub cmd {
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         my $plugin_ref_count;
-        if($mode eq 'clean') {
+        if($mode eq 'clean' || $mode eq 'compact') {
             $plugin_ref_count = $log_count->[1];
             $log_count        = $log_count->[0];
         }
         my $action = "imported";
         $action    = "updated"   if $mode eq 'authupdate';
         $action    = "removed"   if $mode eq 'clean';
+        $action    = "compacted" if $mode eq 'compact';
         Thruk::Backend::Manager::close_logcache_connections($c);
         return("\n", 1) if $log_count == -1;
         my($rc, $msg) = (0, 'OK');
@@ -237,6 +253,21 @@ sub cmd {
                            ($elapsed),
                            $details,
                            ), $rc);
+        }
+        if($mode eq 'compact') {
+        return(sprintf("%s - %s %i log items and removed %d%s from %i site%s %s in %.2fs (%i/s)\n%s",
+                       $msg,
+                       $action,
+                       $log_count,
+                       $plugin_ref_count,
+                       $log_count > 0 ? " (".int(($plugin_ref_count / $log_count)*100)."%)" : '',
+                       $backend_count,
+                       ($backend_count == 1 ? '' : 's'),
+                       $res,
+                       ($elapsed),
+                       (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
+                       $details,
+                       ), $rc);
         }
         return(sprintf("%s - %s %i log items %sfrom %i site%s %s in %.2fs (%i/s)\n%s",
                        $msg,

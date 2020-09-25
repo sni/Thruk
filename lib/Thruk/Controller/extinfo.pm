@@ -952,10 +952,10 @@ sub _process_perf_info_logcache_details {
 
     my $action = $c->req->parameters->{'submit'};
     if($action) {
-        if($action eq 'update') {
+        if($action eq 'update' || $action eq 'clean' || $action eq 'compact') {
             return(Thruk::Utils::External::cmd($c, {
-                cmd            => $c->config->{'thruk_bin'}." logcache update -v --local -b $peer_key 2>&1",
-                wait_message   => 'logcache will be updated...',
+                cmd            => $c->config->{'thruk_bin'}." logcache $action -v --local -b $peer_key 2>&1",
+                wait_message   => 'logcache will be '.$action.'ed...',
                 forward        => 'extinfo.cgi?type=4&logcachedetails='.$peer_key,
                 show_output    => 1,
             }));

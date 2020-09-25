@@ -496,7 +496,7 @@
                     [% FOREACH peer_key = logcache_stats.keys.sort %]
                     [% s = logcache_stats.$peer_key %]
                     <tr>
-                      <td class='dataVal'>[% s.name %]</td>
+                      <td class='dataVal'><a href="extinfo.cgi?type=4&logcachedetails=[% peer_key %]">[% s.name %]</a></td>
                       <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
                       <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
                       <td class='dataVal'>[% format_number(s.items) %]</td>

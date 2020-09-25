@@ -3677,7 +3677,13 @@ sub dclone {
 
     text_table( keys => [keys], data => <list of hashes> )
 
-returns ascii text table
+    a key can be:
+
+        - "string"
+        - ["column name", "data key"]
+        - { "name" => "column header", "key" => "data key", type => $type, format => $formatstring }
+
+returns ascii text table or undef on errors or no data/columns
 
 =cut
 sub text_table {
@@ -3688,15 +3694,59 @@ sub text_table {
     if(!$keys) {
         $keys = [sort keys %{$data->[0]}];
     }
-    # create format string
+    # normalize columns
+    my $columns  = [];
+    my $colnames = [];
+    for my $key (@{$keys}) {
+        my $col = {};
+        if(ref $key eq 'HASH') {
+            $col = $key;
+        }
+        elsif(ref $key eq 'ARRAY') {
+            $col->{'name'} = $key->[0];
+            $col->{'key'}  = $key->[1];
+        }
+        else {
+            $col->{'name'} = $key;
+            $col->{'key'}  = $key;
+        }
+        $col->{'data'} = [];
+        push @{$colnames}, $col->{'name'};
+        push @{$columns},  $col;
+    }
+    return if scalar @{$columns} == 0;
+
+    # normalize data and create format string
     my $rowformat = "";
     my $separator = "";
-    for my $key (@{$keys}) {
+    for my $col (@{$columns}) {
         # find longest item
-        my $maxsize = length($key);
+        my $key = $col->{'key'};
+        my $maxsize = length($col->{"name"});
         for my $row (@{$data}) {
-            my $l = length($row->{$key} // "");
+            my $val = $row->{$key} // "";
+            if($col->{'type'}) {
+                if($col->{'type'} eq 'date') {
+                    if($col->{'format'}) {
+                        $val = POSIX::strftime($col->{'format'}, localtime($val));
+                    } else {
+                        $val = scalar localtime $val;
+                    }
+                }
+                elsif($col->{'type'} eq 'bytes') {
+                    my($val1,$unit1) = Thruk::Utils::reduce_number($val, 'B', 1024);
+                    if($col->{'format'}) {
+                        $val1 = sprintf($col->{'format'}, $val1);
+                    }
+                    $val = $val1.$unit1;
+                }
+                elsif($col->{'format'}) {
+                    $val = sprintf($col->{'format'}, $val);
+                }
+            }
+            my $l = length($val);
             if($l > $maxsize) { $maxsize = $l; }
+            push @{$col->{'data'}}, $val;
         }
         $rowformat .= "| %-".$maxsize."s ";
         $separator .= "+".('-' x ($maxsize+2));
@@ -3704,14 +3754,15 @@ sub text_table {
     $rowformat .= "|\n";
     $separator .= "+\n";
     my $output = $separator;
-    $output .= sprintf($rowformat, @{$keys});
+    $output .= sprintf($rowformat, @{$colnames});
     $output .= $separator;
-    for my $row (@{$data}) {
+    for my $rownum (0 .. scalar @{$data} - 1) {
         my @values;
-        for my $key (@{$keys}) {
-            push @values, $row->{$key} // '';
+        for my $col (@{$columns}) {
+            push @values, $col->{'data'}->[$rownum] // '';
         }
         $output .= sprintf($rowformat, @values);
+        $rownum++;
     }
     $output .= $separator;
     return($output);

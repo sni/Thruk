@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Date::Calc qw/Normalize_DHMS/;
 use Carp qw/confess/;
-use POSIX ();
+use POSIX qw/strftime/;
 
 ##############################################
 =head1 METHODS
@@ -59,6 +59,22 @@ sub normal_mktime {
     my $timestamp = mktime($year,$mon,$day, $hour,$min,$sec);
     $timestamp += $add_time;
     return $timestamp;
+}
+
+########################################
+
+=head2 start_of_day
+
+  start_of_day($ts)
+
+returns start of day for given timestamp (00:00:00)
+
+=cut
+sub start_of_day {
+    my($ts) = @_;
+
+    my @localtime = localtime($ts);
+    return(mktime(strftime("%Y", @localtime), strftime("%m", @localtime), strftime("%d", @localtime), 0,0,0));
 }
 
 ##############################################

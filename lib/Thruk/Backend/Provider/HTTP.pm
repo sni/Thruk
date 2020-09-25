@@ -490,7 +490,7 @@ sub get_logs {
     my($self, @options) = @_;
 
     my %options = @options;
-    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'} && !$ENV{'THRUK_NOLOGCACHE'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }

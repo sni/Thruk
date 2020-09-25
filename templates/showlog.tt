@@ -98,6 +98,14 @@
   </table>
 </form>
 
+[% IF logs_from_compacted_zone %]
+<div id="compact_log_alert" class="alert closable floating" style="position: absolute; left: 0; right: 0; margin-left: auto; margin-right: auto; z-index: 100; top: 7px; width: 600px; text-align: center;">
+  <a href="#" onclick="fade('compact_log_alert', 500);return false;" style="position: absolute; right: 2px; top: 2px;"><img src='[% url_prefix %]themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
+  This page is based on the compacted logfile cache which is optimized for sla reporting.<br>
+  <a href="[% uri_with(c, 'logcache' => 0) %]">Click here to show all log entries by disabling the cache.</a>
+</div>
+[% END %]
+
 [% PROCESS _logs.tt %]
 
 [% PROCESS _footer.tt %]

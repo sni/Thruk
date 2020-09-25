@@ -918,6 +918,9 @@ retrieve logfiles
 sub get_logs {
     my($self, @args) = @_;
     my $c = $Thruk::Request::c;
+
+    local $ENV{'THRUK_NOLOGCACHE'} = 1 if (defined $c->req->parameters->{'logcache'} && $c->req->parameters->{'logcache'} == 0);
+
     my $data;
     eval {
         $data = $self->_do_on_peers( 'get_logs', \@args);

@@ -13,6 +13,7 @@ my $cmds = [
 for my $cmd (@{$cmds}) {
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
   ok($ph, 'cmd started');
+  my $pod = 0;
   while(my $line = <$ph>) {
     chomp($line);
     $line =~ s/'.*?'//gmx;
@@ -27,6 +28,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m%\Qlib/Monitoring/Availability.pm:\E%mx;
     next if $line =~ m%\Qconf/lib/Monitoring/Config.pm:\E%mx;
     next if $line =~ m%\Q`_log`\E%mx;
+    next if $line =~ m/Defaults\ to/mx;
     next unless $line =~ m/`/gmx;
     fail($line);
   }

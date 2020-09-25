@@ -1497,6 +1497,22 @@ ex.:
 
   logcache_delta_updates = 1
 
+=== logcache_clean_duration
+Default duration when running `thruk logcache clean`.
+
+ex.:
+
+  logcache_clean_duration = 2y
+
+=== logcache_compact_duration
+Default duration when running `thruk logcache compact`. Compact removes
+duplicate alerts having the same state. It also removes basically everything
+not required for sla reports and keeps a few extras like notifications.
+
+ex.:
+
+  logcache_compact_duration = 10w
+
 
 === logcache_import_command
 The import command replaces the builtin logcache update with an external
