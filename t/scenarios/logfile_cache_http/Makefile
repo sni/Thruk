@@ -14,3 +14,6 @@ extra_test:
 
 extra_test_verbose:
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /test/t/local_test.sh 1
+
+mysql:
+	mysql -u thruk -pthruk -h 127.0.0.3 -P 63306 thruk
