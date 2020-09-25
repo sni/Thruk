@@ -6,12 +6,13 @@ use Getopt::Long;
 use POSIX qw/strftime mktime/;
 use File::Slurp qw/read_file/;
 use Term::ReadKey;
-use lib $ENV{'OMD_ROOT'}.'/share/thruk/lib/';
-use Thruk::Utils;
 
 BEGIN {
     die("must be run inside OMD.") unless $ENV{'OMD_ROOT'};
+    push @INC, $ENV{'OMD_ROOT'}.'/share/thruk/lib/';
 }
+
+use Thruk::Utils;
 
 END {
     ReadMode 0; # reset tty
