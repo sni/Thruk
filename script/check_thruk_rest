@@ -167,6 +167,9 @@ script has the following arguments
     the threshold range syntax from
     https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 
+    nested values can be accessed by :: or . between levels.
+    {<lvl1>::<lvl2>}<value> or <lvl1>.<lvl2>:<value>
+
 =item B<-c> I<threshold>, B<--critical>=I<threshold>
 
     Apply critical threshold. Format is the same as for warnings.
@@ -215,6 +218,17 @@ script has the following arguments
         --perffilter="^m"
 
 =back
+
+=head1 NESTED JSON DATA
+
+Nested json data can be accessed by :: or . like for example:
+
+      check_thruk_rest -w {hits::value}80 -c hits.value:@10:20 /hosts/totals
+
+Details on the thresholdformat can be found here: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+
+Lists can be enumerated like this {hits::0}
+
 
 =head1 RETURN VALUE
 
@@ -267,6 +281,15 @@ check_thruk_rest returns 0 on OK, 1 on Warning, 2 on Critical and 3 on Unknown
         -o "{STATUS} - iss position lat:{iss_position::latitude} lon:{iss_position::longitude} (last update {timestamp%strftime:%m/%d/%y %H:%M:%S})" \
         http://api.open-notify.org/iss-now.json
 
+    - checking local json files:
+      check_thruk_rest \
+        -o "{STATUS} - {hits}" \
+        "/path/to/file.json"
+
+    - checking json from string argument:
+      check_thruk_rest \
+        -o "{STATUS} - {hits}" \
+        '{"hits":5}'
 
 =head1 AUTHOR
 

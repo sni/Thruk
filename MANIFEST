@@ -1874,6 +1874,7 @@ t/900-javascript_utils.t
 t/data/broken_config/a.conf
 t/data/broken_config/b.conf
 t/data/broken_config2/a.conf
+t/data/check_thruk_rest/kibana.json
 t/data/check_thruk_rest/nested.json
 t/data/javascript_tests.js
 t/data/javascript_tests_login_tt.js

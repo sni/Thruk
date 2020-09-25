@@ -78,7 +78,15 @@ sub _fetch_results {
         # Support local files and remote urls as well.
         # But for security reasons only from the command line
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
-            if($url =~ m/^https?:/mx) {
+            # json arguments
+            if($url =~ m/^\s*\[.*\]\s*$/mx || $url =~ m/^\s*\{.*\}\s*$/mx) {
+                $opt->{'result'} = $url;
+                $opt->{'rc'}     = 0;
+                _debug("json data from command line argument:");
+                _debug($opt->{'result'});
+                next;
+            }
+            elsif($url =~ m/^https?:/mx) {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
                 if($Thruk::Utils::CLI::verbose >= 2) {
                     _debug("request:");
@@ -102,7 +110,7 @@ sub _fetch_results {
                 _debug("loading local file: ".$url);
                 $opt->{'result'} = Thruk::Utils::IO::read($url);
                 $opt->{'rc'}     = 0;
-                _debug("json data:");
+                _debug("json data from local file ".$url.":");
                 _debug($opt->{'result'});
                 next;
             }
@@ -223,40 +231,57 @@ sub _parse_args {
 
 ##############################################
 sub _apply_threshold {
-    my($threshold, $data, $totals) = @_;
-    return unless scalar @{$data->{$threshold}} > 0;
+    my($threshold_name, $data, $totals) = @_;
+    return unless scalar @{$data->{$threshold_name}} > 0;
     $data->{'data'} = decode_json($data->{'result'}) unless $data->{'data'};
 
-    for my $t (@{$data->{$threshold}}) {
-        my($attr,$val1, $val2) = split(/:/mx, $t, 3);
+    for my $t (@{$data->{$threshold_name}}) {
+        my($attr, $threshold);
+        # {key1.key2...}threshold
+        # {key1::key2...}threshold
+        if($t =~ m/^\s*\{([^\}]*)\}\s*(.*)\s*$/mx) {
+            $attr      = $1;
+            $threshold = $2;
+        }
+        # key1.key2...:threshold
+        # key:threshold
+        elsif($t =~ m/^\s*([^:]*?):\s*(.*)\s*$/mx) {
+            $attr      = $1;
+            $threshold = $2;
+        } else {
+            _set_rc($data, 3, "unknown threshold format, syntax is --$threshold_name={key}threshold, got: ".$t."\n");
+            return;
+        }
+        $attr =~ s/\./::/gmx;
+
         my($value, $ok) = _get_value($data->{'data'}, $attr);
         if(!$ok) {
-            _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold=key:value\n");
+            _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold_name=key:value\n");
             return;
         }
         $value = 0 unless defined $value;
-        if(defined $val2) {
+        if($threshold !~ m/^[\-\d\.]+$/mx) {
             eval {
                 require Monitoring::Plugin::Range;
             };
             if($@) {
                 die("Monitoring::Plugin module is required when using threshold ranges");
             }
-            my $r = Monitoring::Plugin::Range->parse_range_string($val1.":".$val2);
+            my $r = Monitoring::Plugin::Range->parse_range_string($threshold);
             if($r->check_range($value)) {
-                if($threshold eq 'warning')  { _set_rc($data, 1); }
-                if($threshold eq 'critical') { _set_rc($data, 2); }
+                if($threshold_name eq 'warning')  { _set_rc($data, 1); }
+                if($threshold_name eq 'critical') { _set_rc($data, 2); }
             }
             # save range object
-            $totals->{'range'}->{$attr}->{$threshold} = $r;
+            $totals->{'range'}->{$attr}->{$threshold_name} = $r;
             next;
         }
         # single value check
-        if($value < 0 || $value > $val1) {
-            if($threshold eq 'warning')  { _set_rc($data, 1); }
-            if($threshold eq 'critical') { _set_rc($data, 2); }
+        if($value < 0 || $value > $threshold) {
+            if($threshold_name eq 'warning')  { _set_rc($data, 1); }
+            if($threshold_name eq 'critical') { _set_rc($data, 2); }
         }
-        $totals->{$threshold}->{$attr} = $val1;
+        $totals->{$threshold_name}->{$attr} = $threshold;
     }
     return;
 }
