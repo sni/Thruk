@@ -2125,7 +2125,7 @@ sub _insert_logs {
         next if $import_filter && $l->{'message'} =~ $import_filter;
 
         $log_count++;
-        print '.' if $log_count%$dots_each == 0 && $verbose > 1;
+        print '.' if($log_count%$dots_each == 0 && $verbose > 1);
 
         &_set_class($l);
         if($l->{'class'} == 5) { &_set_external_command($l); }
