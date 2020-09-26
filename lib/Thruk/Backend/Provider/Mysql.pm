@@ -1081,7 +1081,7 @@ sub _log_removeunused {
         }
         $removed++;
     }
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
 
     return "no old tables found in logcache" if $removed == 0;
 
@@ -1211,11 +1211,6 @@ sub _update_logcache {
         return;
     }
 
-    my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
-    if(!$rc && $mode eq 'update') {
-        $mode = 'import';
-    }
-
     # check tables and lock
     _drop_tables($dbh, $prefix) if $mode eq 'import';
     my $fresh_created = 0;
@@ -1224,6 +1219,12 @@ sub _update_logcache {
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
         $fresh_created = 1;
     }
+
+    my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
+    if(!$rc && $mode eq 'update') {
+        $mode = 'import';
+    }
+
     return(-1) unless _check_lock($dbh, $prefix, $verbose, $c);
 
     if($mode eq 'clean') {
@@ -1335,7 +1336,7 @@ sub _check_lock {
     $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE') unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
     $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
     return(1);
 }
@@ -1376,7 +1377,7 @@ sub _update_logcache_clean {
     my $log_count = $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
     return([$log_count, $plugin_ref_count]) if $log_count == 0;
 
-    $dbh->commit or confess($dbh->errstr);
+    $dbh->commit || confess $dbh->errstr;
     return([$log_count, $plugin_ref_count]);
 }
 
@@ -1420,7 +1421,7 @@ sub _update_logcache_compact {
             $processed++;
             if($processed%10000 == 0) {
                 $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
-                $dbh->commit or confess($dbh->errstr);
+                $dbh->commit || confess $dbh->errstr;
                 $log_clear += scalar @delete;
                 @delete = ();
                 print '.' if $verbose > 1;
@@ -1437,7 +1438,7 @@ sub _update_logcache_compact {
 
         if(scalar @delete > 0) {
             $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
-            $dbh->commit or confess($dbh->errstr);
+            $dbh->commit || confess $dbh->errstr;
         }
     }
 
@@ -1446,7 +1447,7 @@ sub _update_logcache_compact {
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(8,'compact_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(9,'compact_till','".$end."') ON DUPLICATE KEY UPDATE value='".$end."'");
 
-    $dbh->commit or confess($dbh->errstr);
+    $dbh->commit || confess $dbh->errstr;
     return([$log_count, $log_clear]);
 }
 
@@ -1536,7 +1537,7 @@ sub _update_logcache_auth {
 
     print "\n" if $verbose > 1;
 
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
 
     return(scalar @{$hosts} + scalar @{$services});
 }
@@ -1579,10 +1580,10 @@ sub _update_logcache_optimize {
         }
     }
 
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
     my $duration = time() - $start;
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(5,'reorder_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
     return(-1);
 }
 
@@ -2196,7 +2197,7 @@ sub _insert_logs {
             # retry with extended inserts
             return(_insert_logs($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,1));
         }
-        $dbh->commit or die $dbh->errstr;
+        $dbh->commit || confess $dbh->errstr;
         #&timing_breakpoint('_insert_logs load data local done');
     }
 
@@ -2216,7 +2217,7 @@ sub _create_tables {
     for my $stm (@{_get_create_statements($prefix)}) {
         $dbh->do($stm);
     }
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
     return;
 }
 
@@ -2227,7 +2228,7 @@ sub _drop_tables {
         $dbh->do("DROP TABLE IF EXISTS `".$prefix."_".$table.'`');
     }
     $dbh->do("DROP TABLE IF EXISTS `".$prefix."_plugin_output`");
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
     return;
 }
 
@@ -2252,7 +2253,7 @@ sub _safe_insert {
             }
         }
     }
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit || confess $dbh->errstr;
     return;
 }
 
