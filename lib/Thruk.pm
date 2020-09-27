@@ -926,6 +926,7 @@ sub init_logging {
                 }
                 my $path = abs_path($caller[1]) || $caller[1];
                 $path =~ s%^$cwd/%./%gmx;
+                $path =~ s%^/opt/omd/versions/.*?/share/thruk/%./%gmx;
                 return(sprintf("%s:%d", $path, $caller[2]));
             });
         }
