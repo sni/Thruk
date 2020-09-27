@@ -169,7 +169,7 @@ sub _dbh {
         my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'};
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};
-        $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1});
+        $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1, mysql_local_infile => 1});
         $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
         $self->{'mysql'}->do("SET myisam_stats_method=nulls_ignored");
         #&timing_breakpoint('connected');
@@ -2192,8 +2192,8 @@ sub _insert_logs {
         my $err = $@;
         unlink($datafilename);
         if($err) {
-            print "ERROR DETAIL: ".$@."\n"   if $verbose;
-            print "ERROR SQL: ".$stm."\n" if $verbose;
+            print "ERROR DETAIL: ".$err."\n" if $verbose;
+            print "ERROR SQL: ".$stm."\n"    if $verbose;
             # retry with extended inserts
             return(_insert_logs($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,1));
         }
