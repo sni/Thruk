@@ -132,7 +132,21 @@
               </tr>
               [% FOREACH t = s.1 %]
               <tr>
-                <td class='dataVal'><a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">[% IF t.param != ""; t.type; ELSE; "unclassified"; END %]</a></td>
+                <td class='dataVal'>
+                  <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
+                  [% IF t.param != "" %]
+                    [% t.type %]
+                  [% ELSE %]
+                    [% IF s.0 == "type" %]
+                      &lt;untyped&gt;
+                    [% ELSIF s.0 == "class" %]
+                      &lt;unclassified&gt;
+                    [% ELSE %]
+                      &lt;unknown &gt;
+                    [% END %]
+                  [% END %]
+                  </a>
+                </td>
                 <td class='dataVal' style="text-align: right;">[% format_number(t.total) %]</td>
                 <td class='dataVal' style="text-align: right;">[% sprintf("%1.f", t.procent) %]%</td>
               </tr>

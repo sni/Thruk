@@ -1465,7 +1465,7 @@ sub _is_compactable {
             return;
         }
         # remove duplicate alerts
-        my $uniq = sprintf("%s;%s", $l->{'state_type'}, $l->{'state'});
+        my $uniq = sprintf("%s;%s", $l->{'state_type'}//'', $l->{'state'}//'');
         if($l->{'type'} eq 'SERVICE ALERT') {
             my $host_id    = $l->{'host_id'} // $l->{'host_name'};
             my $service_id = $l->{'service_id'} // $l->{'service_description'};
@@ -1994,6 +1994,7 @@ sub _import_logcache_from_file {
             my $original_line = $line;
             my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
             next unless($l && $l->{'time'});
+            next if $import_filter && $original_line =~ $import_filter;
 
             if($mode eq 'update') {
                 if($last_duplicate_ts < $l->{'time'}) {
@@ -2001,46 +2002,14 @@ sub _import_logcache_from_file {
                     $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
                     @values = ();
                     $duplicate_lookup = $self->_fill_lookup_logs($prefix,$l->{'time'},$l->{'time'}+86400);
-                    #print "duplicate output lookup filled with ".(scalar keys %{$duplicate_lookup})." entries (".(scalar localtime $l->{'time'})." till ".(scalar localtime $l->{'time'}+86400).")\n" if $verbose;
                     $last_duplicate_ts = $l->{'time'}+86400;
                 }
                 next if defined $duplicate_lookup->{$original_line};
             }
 
-            next if $import_filter && $original_line =~ $import_filter;
-
             $log_count++;
-            $l->{'state_type'} = '';
-            if(exists $l->{'hard'}) {
-                if($l->{'hard'}) {
-                    $l->{'state_type'} = 'HARD';
-                } else {
-                    $l->{'state_type'} = 'SOFT';
-                }
-            }
-            $l->{'state'}         = '' unless defined $l->{'state'};
-            $l->{'message'}       = $original_line;
-            my $state             = $l->{'state'};
-            my $state_type        = $l->{'state_type'};
-            &_set_class($l);
-            if($state eq '')      { $state      = 'NULL'; }
-
-            if($l->{'class'} == 5) { &_set_external_command($l); }
-
-            my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
-            if($l->{'service_description'}) {
-                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-                $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host, $auto_increments, $foreign_key_stash);
-            }
-            elsif($l->{'host_name'}) {
-                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-            }
-            if($l->{'contact_name'}) {
-                $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-            }
-
-            # Set type to NULL to prevent SQL insert errors if type is not a special type.
-            undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'} // ''};
+            $l->{'message'} = $original_line;
+            my($host, $svc, $contact) = _fix_import_log($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
             # commit every 1000th to avoid to large blocks
             if($log_count%1000 == 0) {
@@ -2055,7 +2024,7 @@ sub _import_logcache_from_file {
                 next;
             }
 
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.($state_type ? $dbh->quote($state_type) : 'NULL').','.$contact.','.$host.','.$svc.','.$dbh->quote($original_line).')';
+            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$dbh->quote($l->{'state'}).','.$dbh->quote($l->{'state_type'}).','.$dbh->quote($contact).','.$dbh->quote($host).','.$dbh->quote($svc).','.$dbh->quote($original_line).')';
         }
         $self->_safe_insert($dbh, $stm, \@values, $verbose);
         $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
@@ -2128,27 +2097,7 @@ sub _insert_logs {
         $log_count++;
         print '.' if($log_count % $dots_each == 0 && $verbose > 1);
 
-        &_set_class($l);
-        if($l->{'class'} == 5) { &_set_external_command($l); }
-
-        my $state             = $l->{'state'} // undef;
-        my $state_type        = $l->{'state_type'};
-        if((!$state_type) || (($state_type ne 'HARD') && ($state_type ne 'SOFT'))) { undef $state_type; } # if set to NULL then $dbh->quote($state_type) returns 'NULL' instead of NULL. Only accept HARD or SOFT state
-
-        my($host, $svc, $contact);
-        if($l->{'host_name'} && $l->{'service_description'}) {
-            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-            $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host, $auto_increments, $foreign_key_stash);
-        }
-        elsif($l->{'host_name'}) {
-            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-        }
-        if($l->{'contact_name'}) {
-            $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-        }
-
-        # Set type to NULL to prevent SQL insert errors if type is not a special type.
-        undef $l->{'type'} if !defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'} // ''};
+        my($host, $svc, $contact) = _fix_import_log($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
         if($import_compacted && _is_compactable($l, $alertstore)) {
             # skip insert
@@ -2156,17 +2105,17 @@ sub _insert_logs {
         }
 
         if($use_extended_inserts) {
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$dbh->quote($state).','.$dbh->quote($state_type).','.$dbh->quote($contact).','.$dbh->quote($host).','.$dbh->quote($svc).','.$dbh->quote($l->{'message'}).')';
+            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$dbh->quote($l->{'state'}).','.$dbh->quote($l->{'state_type'}).','.$dbh->quote($contact).','.$dbh->quote($host).','.$dbh->quote($svc).','.$dbh->quote($l->{'message'}).')';
         } else {
             printf($fh "%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\n",
                     $l->{'time'},
                     $l->{'class'},
-                    $l->{'type'}    // '\N',
-                    $state          // '\N',
-                    $state_type     // '\N',
-                    $contact        // '\N',
-                    $host           // '\N',
-                    $svc            // '\N',
+                    $l->{'type'}       // '\N',
+                    $l->{'state'}      // '\N',
+                    $l->{'state_type'} // '\N',
+                    $contact           // '\N',
+                    $host              // '\N',
+                    $svc               // '\N',
                     $l->{'message'},
             );
         }
@@ -2303,12 +2252,44 @@ sub _release_write_locks {
 }
 
 ##########################################################
+sub _fix_import_log {
+    my($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
+    my($host, $svc, $contact);
+
+    $l->{'state_type'} = undef;
+    if(exists $l->{'hard'}) {
+        if($l->{'hard'}) {
+            $l->{'state_type'} = 'HARD';
+        } else {
+            $l->{'state_type'} = 'SOFT';
+        }
+    }
+    $l->{'state'}    = undef unless(defined $l->{'state'} && $l->{'state'} ne '');
+    &_set_class($l);
+    &_set_type($l);
+
+    if($l->{'class'} == 5) { &_set_external_command($l); }
+
+    if($l->{'service_description'}) {
+        $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+        $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host, $auto_increments, $foreign_key_stash);
+    }
+    elsif($l->{'host_name'}) {
+        $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+    }
+    if($l->{'contact_name'}) {
+        $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+    }
+}
+
+##########################################################
 sub _set_class {
     my($l) = @_;
     return if $l->{'class'};
     my $type = $l->{'type'};
     $l->{'class'} = $Thruk::Backend::Provider::Mysql::db_types->{$type} if defined $type;
     return if $l->{'class'};
+
     if(!defined $l->{'message'}) {
         $l->{'class'}   = 0; # LOGCLASS_INFO
         $l->{'message'} = $type;
@@ -2328,14 +2309,29 @@ sub _set_class {
         return;
     }
 
-    if($type && $type =~ m/^TIMEPERIOD\ TRANSITION/mxo) {
+    $l->{'type'}    = '';
+    $l->{'class'}   = 0; # LOGCLASS_INFO
+    return;
+}
+
+##########################################################
+sub _set_type {
+    my($l) = @_;
+
+    if($l->{'message'} =~ m/^\[\d+\]\s+TIMEPERIOD\ TRANSITION/mxo) {
         $l->{'type'}  = 'TIMEPERIOD TRANSITION';
         $l->{'class'} = 6; # LOGCLASS_STATE
         return;
     }
 
-    $l->{'type'}    = '';
-    $l->{'class'}   = 0; # LOGCLASS_INFO
+    if(defined $l->{'type'}) {
+        if(!defined $Thruk::Backend::Provider::Mysql::db_types->{$l->{'type'}}) {
+            # Set type to NULL to prevent SQL insert errors if type is not a special type.
+            undef $l->{'type'};
+        }
+        return;
+    }
+
     return;
 }
 
