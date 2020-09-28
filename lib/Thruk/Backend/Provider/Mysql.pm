@@ -1888,12 +1888,9 @@ sub _import_peer_logfiles {
         }
 
         my $import_compacted = 0;
-        my $compact_filter = [];
         if($mode eq 'import') {
             if(($time + $blocksize - 1) < $compact_start_data) {
                 $import_compacted = 1;
-                # skip info and passives, woud be skipped later anyway
-                $compact_filter = [{ 'class' => { '!=' => 0 } }, { 'class' => { '!=' => 4 } }];
             }
         }
 
@@ -1906,7 +1903,7 @@ sub _import_peer_logfiles {
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
                                                                     { time => { '<=' => ($time + $blocksize - 1) } },
-                                                            ]}, @{$import_filter}, @{$compact_filter} ],
+                                                            ]}, @{$import_filter} ],
                                                  columns => \@columns,
                                                  file => $file,
                                                 );
