@@ -93,7 +93,7 @@ prepare:
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker-compose kill
+	docker-compose kill -s INT
 	docker-compose rm -f
 	-docker network prune -f
 	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
