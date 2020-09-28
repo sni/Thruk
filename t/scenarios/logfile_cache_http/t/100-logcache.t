@@ -45,7 +45,7 @@ TestUtils::test_page(
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4&logcachedetails=abcd',
     'follow'  => 1,
-    'like'    => ['Logcache Details for Backend', 'Log Entries by Type', 'untyped', 'PROGRAMM'],
+    'like'    => ['Logcache Details for Backend', 'Log Entries by Type', 'untyped', 'timeperiod transition'],
 );
 # cannot determine fixed number of tests, number depends on wether initial import redirects or not,
 # which depends on machine load and speed (initial import redirects after 10 seconds)
