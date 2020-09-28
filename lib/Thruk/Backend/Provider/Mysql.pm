@@ -1459,7 +1459,7 @@ sub _is_compactable {
         # keep program, notifications, external commands, timeperiod transitions
         return;
     }
-    if($l->{'class'} == 1) {
+    elsif($l->{'class'} == 1) {
         if($l->{'type'} eq 'HOST DOWNTIME ALERT' || $l->{'type'} eq 'SERVICE DOWNTIME ALERT') {
             # keep downtimes
             return;

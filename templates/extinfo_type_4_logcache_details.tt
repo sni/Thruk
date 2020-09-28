@@ -116,7 +116,7 @@
       </table>
 
       <table><tr>
-      [% FOREACH s = [["type", logcache_types], ["class", logcache_class]] %]
+      [% FOREACH s = [["class", logcache_class], ["type", logcache_types]] %]
       <td valign="top">
       <table border="1" cellspacing="0" cellpadding="0" class="data" style="margin: 30px 15px;">
         <tr>
@@ -135,7 +135,7 @@
                 <td class='dataVal'>
                   <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
                   [% IF t.param != "" %]
-                    [% t.type %]
+                    [% t.type | lc %]
                   [% ELSE %]
                     [% IF s.0 == "type" %]
                       &lt;untyped&gt;
