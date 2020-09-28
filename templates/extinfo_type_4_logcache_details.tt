@@ -69,7 +69,7 @@
           <th class='data'></th>
         </tr>
         <tr>
-          <td class='dataVal'>[% IF s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
+          <td class='dataVal'>[% IF s.last_compact && s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
           <td class='dataVal'>[% IF s.compact_duration != ""; duration(s.compact_duration, 3); END %]</td>
           <td class='dataVal' style="text-align: center;">
             <form action="extinfo.cgi" method="POST">
