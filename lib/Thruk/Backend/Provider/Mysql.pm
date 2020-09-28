@@ -414,7 +414,7 @@ sub get_logs {
     # check compact timerange and set a warning flag
     my $c =$Thruk::Request::c;
     if($c) {
-        my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
+        my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
         # get time filter
         my($start, $end) = Thruk::Backend::Manager::extract_time_filter($options{'filter'});
         if($start && $start < $compact_start_data) {
@@ -1826,11 +1826,6 @@ sub _import_peer_logfiles {
         }
         $c->stats->profile(end => "get last mysql timestamp");
     }
-    if($mode eq 'import') {
-        # it does not make send to import more than we would clean immediatly again
-        my $mend = time() - Thruk::Utils::expand_duration($c->config->{'logcache_clean_duration'});
-        push @{$filter}, {time => { '>=' => $mend }};
-    }
 
     my $log_count = 0;
     my($start, $end);
@@ -1838,9 +1833,14 @@ sub _import_peer_logfiles {
         $start = $forcestart;
     }
     elsif(scalar @{$filter} == 0) {
+        my $mend;
+        if($mode eq 'import') {
+            # it does not make send to import more than we would clean immediatly again
+            $mend = time() - Thruk::Utils::expand_duration($c->config->{'logcache_clean_duration'});
+        }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
-        ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'});
+        ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'}, $mend);
         $c->stats->profile(end => "get livestatus timestamp no filter");
     } else {
         $c->stats->profile(begin => "get livestatus timestamp");
@@ -1854,7 +1854,7 @@ sub _import_peer_logfiles {
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
 
-    print "importing ", scalar localtime $start, "\n" if $verbose > 1;
+    print "importing from ", scalar localtime $start, "\n" if $verbose > 1;
     print "until latest entry in logfile: ", scalar localtime $end, "\n" if($end && $verbose > 1);
     my $time = $start;
     $end = time() unless $end;
@@ -1864,14 +1864,12 @@ sub _import_peer_logfiles {
     for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
         push @{$import_filter}, { message => { '!~~' => $f } }
     }
-
     if($mode eq 'import') {
-        $dbh->do('SET autocommit = 0');
         $dbh->do('SET foreign_key_checks = 0');
         $dbh->do('SET unique_checks = 0');
         $dbh->do('ALTER TABLE `'.$prefix.'_log` DISABLE KEYS');
     }
-    my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
+    my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
     my $alertstore = {};
     my $last_day = "";
 
@@ -1890,9 +1888,12 @@ sub _import_peer_logfiles {
         }
 
         my $import_compacted = 0;
+        my $compact_filter = [];
         if($mode eq 'import') {
             if(($time + $blocksize - 1) < $compact_start_data) {
                 $import_compacted = 1;
+                # skip info and passives, woud be skipped later anyway
+                $compact_filter = [{ 'class' => { '!=' => 0 } }, { 'class' => { '!=' => 4 } }];
             }
         }
 
@@ -1905,7 +1906,7 @@ sub _import_peer_logfiles {
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
                                                                     { time => { '<=' => ($time + $blocksize - 1) } },
-                                                            ]}, @{$import_filter} ],
+                                                            ]}, @{$import_filter}, @{$compact_filter} ],
                                                  columns => \@columns,
                                                  file => $file,
                                                 );
@@ -1920,7 +1921,11 @@ sub _import_peer_logfiles {
         if($@) {
             my $err = $@;
             chomp($err);
-            print $err;
+            if($mode eq 'import') {
+                die($err);
+            } else {
+                print($err);
+            }
         }
 
         $time = $time + $blocksize;
@@ -2054,6 +2059,7 @@ sub _import_logcache_from_file {
 sub _insert_logs {
     my($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,$use_extended_inserts, $import_compacted, $alertstore) = @_;
     my $log_count = 0;
+    my $compacted = 0;
 
     my $dots_each = 1000;
     if($mode eq 'update') {
@@ -2111,6 +2117,7 @@ sub _insert_logs {
 
         if($import_compacted && _is_compactable($l, $alertstore)) {
             # skip insert
+            $compacted++;
             next;
         }
 
@@ -2176,7 +2183,13 @@ sub _insert_logs {
         _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     }
 
-    print '. '.$log_count . " entries added\n" if $verbose > 1;
+    if($verbose > 1) {
+        if($compacted > 0) {
+            print '. '.($log_count-$compacted) . " entries added and ".$compacted." compacted rows skipped\n";
+        } else {
+            print '. '.$log_count . " entries added\n";
+        }
+    }
     return $log_count;
 }
 

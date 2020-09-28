@@ -1210,7 +1210,7 @@ returns date of first and last log entry
 
 =cut
 sub get_logs_start_end_no_filter {
-    my($peer) = @_;
+    my($peer, $start_at) = @_;
     my($start, $end);
 
     my @steps = (86400*365, 86400*30, 86400*7, 86400);
@@ -1226,7 +1226,7 @@ sub get_logs_start_end_no_filter {
     # so we try a very early date, since requests with an non-existing timerange are super fast
     # (livestatus has an index on all files with start and end timestamp and only parses the file if it matches)
 
-    $time = time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
+    $time = $start_at // time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
     for my $step (@steps) {
         while($time <= time()) {
             my($data) = $peer->get_logs(nocache => 1, filter => [{ time => { '<=' => $time }}], columns => [qw/time/], options => { limit => 1 });
