@@ -788,7 +788,7 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
-    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'} && !$ENV{'THRUK_NOLOGCACHE'}) {
+    if(Thruk::Backend::Manager::can_use_logcache($self, \%options)) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }

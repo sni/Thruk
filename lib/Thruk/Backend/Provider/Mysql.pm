@@ -414,9 +414,9 @@ sub get_logs {
     # check compact timerange and set a warning flag
     my $c =$Thruk::Request::c;
     if($c) {
-        my $compact_start_data = _get_compact_start_date($c);
+        my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
         # get time filter
-        my($start, $end) = _extract_time_filter($options{'filter'});
+        my($start, $end) = Thruk::Backend::Manager::extract_time_filter($options{'filter'});
         if($start && $start < $compact_start_data) {
             $c->stash->{'logs_from_compacted_zone'} = 1;
         }
@@ -1871,7 +1871,7 @@ sub _import_peer_logfiles {
         $dbh->do('SET unique_checks = 0');
         $dbh->do('ALTER TABLE `'.$prefix.'_log` DISABLE KEYS');
     }
-    my $compact_start_data = _get_compact_start_date($c);
+    my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
     my $alertstore = {};
     my $last_day = "";
 
@@ -2399,56 +2399,6 @@ sub _sql_debug {
         keys => $sth->{'NAME'},
         data => $data,
     ));
-}
-
-##########################################################
-sub _extract_time_filter {
-    my($filter) = @_;
-    my($start, $end);
-    if(ref $filter eq 'ARRAY') {
-        for my $f (@{$filter}) {
-            if(ref $f eq 'HASH') {
-                my($s, $e) = _extract_time_filter($f);
-                $start = $s if defined $s;
-                $end   = $e if defined $e;
-            }
-        }
-    }
-    if(ref $filter eq 'HASH') {
-        if($filter->{'-and'}) {
-            my($s, $e) = _extract_time_filter($filter->{'-and'});
-            $start = $s if defined $s;
-            $end   = $e if defined $e;
-        } else {
-            if($filter->{'time'}) {
-                if(ref $filter->{'time'} eq 'HASH') {
-                    my $op  = (keys %{$filter->{'time'}})[0];
-                    my $val = $filter->{'time'}->{$op};
-                    if($op eq '>' || $op eq '>=') {
-                        $start = $val;
-                        return($start, $end);
-                    }
-                    if($op eq '<' || $op eq '<=') {
-                        $end = $val;
-                        return($start, $end);
-                    }
-                }
-            }
-        }
-    }
-    return($start, $end);
-}
-
-##########################################################
-sub _get_compact_start_date {
-    my($c) = @_;
-    my $blocksize = $c->config->{'logcache_compact_duration'};
-    # blocksize is given in days unless specified
-    if($blocksize !~ m/^\d+$/mx) {
-        $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
-    }
-    my $ts = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize*86400));
-    return($ts);
 }
 
 ##########################################################

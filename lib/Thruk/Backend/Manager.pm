@@ -907,6 +907,110 @@ sub logcache_stats {
 
 ########################################
 
+=head2 get_expanded_start_date
+
+  get_expanded_start_date($c, $blocksize)
+
+returns start of day for expanded duration
+
+=cut
+sub get_expanded_start_date {
+    my($c, $blocksize) = @_;
+    # blocksize is given in days unless specified
+    if($blocksize !~ m/^\d+$/mx) {
+        $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
+    }
+    my $ts = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize*86400));
+    return($ts);
+}
+
+########################################
+
+=head2 extract_time_filter
+
+  extract_time_filter($filter)
+
+returns start and end time filter from given query
+
+=cut
+sub extract_time_filter {
+    my($filter) = @_;
+    my($start, $end);
+    if(ref $filter eq 'ARRAY') {
+        for my $f (@{$filter}) {
+            if(ref $f eq 'HASH') {
+                my($s, $e) = extract_time_filter($f);
+                $start = $s if defined $s;
+                $end   = $e if defined $e;
+            }
+        }
+    }
+    if(ref $filter eq 'HASH') {
+        if($filter->{'-and'}) {
+            my($s, $e) = extract_time_filter($filter->{'-and'});
+            $start = $s if defined $s;
+            $end   = $e if defined $e;
+        } else {
+            if($filter->{'time'}) {
+                if(ref $filter->{'time'} eq 'HASH') {
+                    my $op  = (keys %{$filter->{'time'}})[0];
+                    my $val = $filter->{'time'}->{$op};
+                    if($op eq '>' || $op eq '>=') {
+                        $start = $val;
+                        return($start, $end);
+                    }
+                    if($op eq '<' || $op eq '<=') {
+                        $end = $val;
+                        return($start, $end);
+                    }
+                }
+            }
+        }
+    }
+    return($start, $end);
+}
+
+########################################
+
+=head2 can_use_logcache
+
+  can_use_logcache()
+
+returns true if query can use the logcache
+
+=cut
+sub can_use_logcache {
+    my($provider, $options) = @_;
+    return if $ENV{'THRUK_NOLOGCACHE'};
+    return if $options->{'nocache'};
+    return if !defined $provider->{'_peer'}->{'logcache'};
+    my $c = $Thruk::Request::c;
+    if($c) {
+        my $bypass = $c->config->{'logcache_auto_bypass'} // 0;
+        if($bypass == 0) {
+            return 1;
+        }
+        my $cleaned = get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
+        my($start, $end) = extract_time_filter($options->{'filter'});
+        return 1 if (!defined $start && !defined $end);
+        if($bypass == 1) {
+            if(($end//$start) >= $cleaned) {
+                return 1;
+            }
+            return;
+        }
+        if($bypass == 2) {
+            if(($start//$end) >= $cleaned) {
+                return 1;
+            }
+            return;
+        }
+    }
+    return 1;
+}
+
+########################################
+
 =head2 get_logs
 
   get_logs(@args)
@@ -914,7 +1018,6 @@ sub logcache_stats {
 retrieve logfiles
 
 =cut
-
 sub get_logs {
     my($self, @args) = @_;
     my $c = $Thruk::Request::c;
@@ -948,7 +1051,6 @@ sub get_logs {
 update the logcache, returns 1 on success or undef otherwise
 
 =cut
-
 sub renew_logcache {
     my($self, $c, $noforks) = @_;
     $noforks = 0 unless defined $noforks;
