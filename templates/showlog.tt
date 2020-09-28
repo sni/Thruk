@@ -9,6 +9,9 @@
     [% NEXT IF par == 'exclude_pattern' %]
     [% NEXT IF par == 'start' %]
     [% NEXT IF par == 'end' %]
+    [% NEXT IF par == 'logcache' %]
+    [% NEXT IF par == 'showsites' %]
+    [% NEXT IF par == 'oldestfirst' %]
     [% NEXT IF par == 'archive' %]
     [% NEXT IF par == 'update.x' %]
     [% NEXT IF par == 'update.y' %]
@@ -78,6 +81,13 @@
                 <input type='checkbox' id="oldestfirst" name="oldestfirst" [% IF oldestfirst %] checked[% END %]> <label for="oldestfirst">Older Entries First</label>
               </td>
             </tr>
+            [% IF c.config.defined("logcache") && c.config.logcache %]
+            <tr>
+              <td align="left" valign="bottom" class='optBoxItem'>
+                <input type='checkbox' id="disable_logcache" name="logcache" value="0" [% IF c.req.parameters.exists("logcache") && c.req.parameters.logcache == 0 %] checked[% END %]> <label for="disable_logcache">Disable Logcache</label>
+              </td>
+            </tr>
+            [% END %]
             [% IF backends.size > 1 %]
             <tr>
               <td align="left" valign="bottom" class='optBoxItem'>
