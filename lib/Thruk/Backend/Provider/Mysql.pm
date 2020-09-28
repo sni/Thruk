@@ -1673,7 +1673,7 @@ sub _get_contact_lookup {
 ##########################################################
 sub _host_lookup {
     my($host_lookup, $host_name, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
-    return 'NULL' unless $host_name;
+    return unless $host_name;
 
     my $id = $host_lookup->{$host_name};
     return $id if $id;
@@ -1747,7 +1747,7 @@ sub _get_log_service_auth {
 ##########################################################
 sub _service_lookup {
     my($service_lookup, $host_lookup, $host_name, $service_description, $dbh, $prefix, $host_id, $auto_increments, $foreign_key_stash) = @_;
-    return 'NULL' unless $service_description;
+    return unless $service_description;
 
     my $id = $service_lookup->{$host_name}->{$service_description};
     return $id if $id;
@@ -1771,7 +1771,7 @@ sub _service_lookup {
 ##########################################################
 sub _contact_lookup {
     my($contact_lookup, $contact_name, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
-    return 'NULL' unless $contact_name;
+    return unless $contact_name;
 
     my $id = $contact_lookup->{$contact_name};
     return $id if $id;
@@ -2024,7 +2024,17 @@ sub _import_logcache_from_file {
                 next;
             }
 
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$dbh->quote($l->{'state'}).','.$dbh->quote($l->{'state_type'}).','.$dbh->quote($contact).','.$dbh->quote($host).','.$dbh->quote($svc).','.$dbh->quote($original_line).')';
+            push @values, sprintf('(%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+                    $l->{'time'},
+                    $l->{'class'},
+                    $dbh->quote($l->{'type'}),
+                    $dbh->quote($l->{'state'}),
+                    $dbh->quote($l->{'state_type'}),
+                    $dbh->quote($contact),
+                    $dbh->quote($host),
+                    $dbh->quote($svc),
+                    $dbh->quote($l->{'message'}),
+            );
         }
         $self->_safe_insert($dbh, $stm, \@values, $verbose);
         $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
@@ -2105,7 +2115,17 @@ sub _insert_logs {
         }
 
         if($use_extended_inserts) {
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$dbh->quote($l->{'state'}).','.$dbh->quote($l->{'state_type'}).','.$dbh->quote($contact).','.$dbh->quote($host).','.$dbh->quote($svc).','.$dbh->quote($l->{'message'}).')';
+            push @values, sprintf('(%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+                    $l->{'time'},
+                    $l->{'class'},
+                    $dbh->quote($l->{'type'}),
+                    $dbh->quote($l->{'state'}),
+                    $dbh->quote($l->{'state_type'}),
+                    $dbh->quote($contact),
+                    $dbh->quote($host),
+                    $dbh->quote($svc),
+                    $dbh->quote($l->{'message'}),
+            );
         } else {
             printf($fh "%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\0%s\n",
                     $l->{'time'},
@@ -2280,6 +2300,7 @@ sub _fix_import_log {
     if($l->{'contact_name'}) {
         $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix, $auto_increments, $foreign_key_stash);
     }
+    return($host, $svc, $contact);
 }
 
 ##########################################################
