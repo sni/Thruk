@@ -1952,10 +1952,12 @@ sub _import_peer_logfiles {
     }
     # update index statistics
     $c->stats->profile(begin => "update index statistics");
+    print "running check/analyse..." if $verbose > 1;
     for my $table (@Thruk::Backend::Provider::Mysql::tables) {
         $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
         $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
     }
+    print "done\n" if $verbose > 1;
     $c->stats->profile(end => "update index statistics");
 
     return $log_count;
