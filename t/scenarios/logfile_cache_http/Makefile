@@ -9,10 +9,11 @@ extra_wait_start:
 	$(THRUK) logcache stats
 
 extra_test:
-	$(THRUK) logcache stats | grep ^core
+	$(THRUK) logcache stats | grep " core "
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /test/t/local_test.sh 0
 
 extra_test_verbose:
+	$(THRUK) logcache stats | grep " core "
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /test/t/local_test.sh 1
 
 mysql:
