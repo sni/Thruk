@@ -86,3 +86,13 @@ jQuery(document).ready(function() {
 </script>
 [% END %]
 ------
+
+
+Show alert box on all pages:
+
+.common-header.ssi:
+------
+<div class="alert floating" style="position: absolute; left: 0; right: 0; margin-left: auto; margin-right: auto; z-index: 100; top: 7px; width: 600px; text-align: center;">
+  This alert will be visible on pages.
+</div>
+------
