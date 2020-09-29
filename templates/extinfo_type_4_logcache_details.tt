@@ -43,7 +43,7 @@
           <td class='dataVal'>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
           <td class='dataVal'>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
           <td class='dataVal'>[% s.cache_version %]</td>
-          <td class='dataVal'>[% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %]</td>
+          <td class='dataVal'>[% IF s.items > 0 %][% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %][% END %]</td>
         </tr>
       </table>
 
