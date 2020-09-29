@@ -824,14 +824,20 @@ sub _req {
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->timeout($self->{'logs_timeout'}) if $sub =~ m/logs/gmx;
+    my $postdata;
+    eval {
+        $postdata = encode_json({
+                        credential => $self->{'auth'},
+                        options    => $options,
+        });
+    };
+    if($@) {
+        confess($@);
+    }
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},
-                        { data => encode_json({
-                                    credential => $self->{'auth'},
-                                    options    => $options,
-                                }),
-                        },
+                        { data => $postdata },
                     );
 
     if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&|%3f)job=(.*)$/mx) {
