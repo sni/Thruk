@@ -854,6 +854,9 @@ sub _get_subfilter {
                 $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
                 $v = $self->{'query_meta'}->{'host_lookup'}->{$v} // 0;
             }
+            if($k eq 'contact_name') {
+                $k = 'c.name';
+            }
             return $k.' = '._quote($v);
         }
 
