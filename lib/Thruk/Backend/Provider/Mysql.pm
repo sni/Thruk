@@ -1955,15 +1955,11 @@ sub _import_peer_logfiles {
         print "done\n" if $verbose > 1;
         #&timing_breakpoint('_import_peer_logfiles enable index done');
     }
+
     # update index statistics
-    $c->stats->profile(begin => "update index statistics");
-    print "running check/analyse..." if $verbose > 1;
-    for my $table (@Thruk::Backend::Provider::Mysql::tables) {
-        $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
-        $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
+    if($log_count > 0) {
+        _check_index($c, $dbh, $prefix, $verbose);
     }
-    print "done\n" if $verbose > 1;
-    $c->stats->profile(end => "update index statistics");
 
     return $log_count;
 }
@@ -2370,6 +2366,31 @@ sub _set_type {
         return;
     }
 
+    return;
+}
+
+##########################################################
+sub _check_index {
+    my($c, $dbh, $prefix, $verbose) = @_;
+    $c->stats->profile(begin => "update index statistics");
+    print "running check/analyse..." if $verbose > 1;
+
+    my $data = $dbh->selectall_hashref("SHOW INDEXES FROM `".$prefix."_log`", "Key_name");
+    if($data && $data->{'host_id'}) {
+        my($hostcount) = @{$dbh->selectcol_arrayref("SELECT COUNT(*) as total FROM `".$prefix."_host`")};
+        if($data->{'host_id'}->{'Cardinality'} < $hostcount * 5) {
+            $c->stats->profile(end => "update index statistics");
+            print "not required\n" if $verbose > 1;
+            return;
+        }
+    }
+
+    for my $table (@Thruk::Backend::Provider::Mysql::tables) {
+        $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
+        $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
+    }
+    print "done\n" if $verbose > 1;
+    $c->stats->profile(end => "update index statistics");
     return;
 }
 
