@@ -2335,7 +2335,7 @@ sub _set_class {
        or $l->{'message'} =~ m/standby\ mode\.\.\./mxo
     ) {
         $l->{'class'} = 2; # LOGCLASS_PROGRAM
-        $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if($l->{'type'} && $l->{'message'} !~ m/^\[\d+}\]/mx);
+        $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if($l->{'type'} && $l->{'message'} !~ m/^\[\d+\]/mx);
         $l->{'type'}    = '';
         return;
     }
