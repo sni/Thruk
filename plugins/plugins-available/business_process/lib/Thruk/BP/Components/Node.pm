@@ -49,6 +49,8 @@ sub new {
         'notification_period'       => $data->{'notification_period'} || '',
         'max_check_attempts'        => $data->{'max_check_attempts'} || '',
         'event_handler'             => $data->{'event_handler'} || '',
+        'host_object_attributes'    => $data->{'host_object_attributes'}    || {},
+        'service_object_attributes' => $data->{'service_object_attributes'} || {},
         'create_obj'                => $data->{'create_obj'}    || 0,
         'create_obj_ok'             => 1,
         'scheduled_downtime_depth'  => 0,
@@ -212,6 +214,9 @@ sub get_objects_conf {
             next unless $bp->{$key};
             $obj->{'hosts'}->{$bp->{'name'}}->{'contact_groups'} = join(',', @{$bp->{$key}});
         }
+        for my $key (sort keys %{$self->{'host_object_attributes'}}) {
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $self->{'host_object_attributes'}->{$key};
+        }
     }
 
     $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}} = {
@@ -235,6 +240,9 @@ sub get_objects_conf {
         next unless $self->{$key};
         next unless scalar @{$self->{$key}} > 0;
         $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{'contact_groups'} = join(',', @{$self->{$key}});
+    }
+    for my $key (sort keys %{$self->{'service_object_attributes'}}) {
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = $self->{'service_object_attributes'}->{$key};
     }
 
     return($obj);

@@ -9,6 +9,7 @@ use Carp;
 
 use Thruk::Utils::Filter;
 use Thruk::BP::Components::BP;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 =head1 NAME
 
@@ -207,6 +208,7 @@ sub save_bp_objects {
     }
 
     my($fh, $filename) = tempfile();
+    _debug(sprintf("writing objects to %s", $filename));
     binmode($fh, ":encoding(UTF-8)");
     print $fh "########################\n";
     print $fh "# thruk: readonly\n";
@@ -226,6 +228,7 @@ sub save_bp_objects {
 
     # check if something changed
     if($new_hex ne $old_hex) {
+        _debug(sprintf("moving %s to %s", $filename, $file));
         if(!move($filename, $file)) {
             return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
         }
@@ -278,6 +281,7 @@ sub save_bp_objects {
             }
         }
     } else {
+        _debug(sprintf("no differences in %s and %s", $filename, $file));
         # discard file
         unlink($filename);
         $msg = "no reload required";
