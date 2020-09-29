@@ -398,12 +398,15 @@ sub get_logs {
         $limit = ' LIMIT '.$options{'options'}->{'limit'};
     }
 
-    my($where,$auth_data) = $self->_get_filter($options{'filter'});
-
     my $prefix = $options{'collection'};
     $prefix    =~ s/^logs_//gmx;
-
     my $dbh = $self->_dbh;
+
+    $self->{'query_meta'} = {
+        dbh     => $dbh,
+        prefix  => $prefix,
+    };
+    my($where,$auth_data) = $self->_get_filter($options{'filter'});
 
     # check logcache version
     my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
@@ -434,7 +437,7 @@ sub get_logs {
         l.state_type as state_type,
         IFNULL(h.host_name, "") as host_name,
         IFNULL(s.service_description, "") as service_description,
-        c.name as contact_name,
+        IFNULL(c.name, "") as contact_name,
         l.message as message,
         "'.$prefix.'" as peer_key
     FROM
@@ -845,9 +848,11 @@ sub _get_subfilter {
                 }
                 return $k.' '.$v;
             }
-            # contact_name must be renamed, cannot use column alias in where clause
-            if($k eq 'contact_name') {
-                $k = 'c.name';
+            # using ids makes mysql prefer index
+            if($k eq 'host_name') {
+                $k = 'l.host_id';
+                $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
+                $v = $self->{'query_meta'}->{'host_lookup'}->{$v} // 0;
             }
             return $k.' = '._quote($v);
         }
