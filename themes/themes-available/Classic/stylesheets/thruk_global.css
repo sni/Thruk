@@ -521,6 +521,7 @@ div.thruk_message table {
   background-color: #f2dede;
   border-color: #eed3d7;
   position: relative;
+  z-index: 100;
 }
 
 .smallalert {
@@ -535,6 +536,19 @@ div.thruk_message table {
 
 DIV.alert HR {
   color: #b94a48;
+}
+
+/* warning alerts */
+.alert.yellow, .smallalert.yellow {
+  color: #554500;
+  background-color: #fdeaad;
+  border-color: #554500;
+}
+.alerttext.yellow {
+  color: #554500;
+}
+DIV.alert.yellow HR {
+  color: #554500;
 }
 
 /* show log filter */
