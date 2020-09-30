@@ -25,6 +25,7 @@ The panorama command manages panorama dashboards from the command line.
     available commands are:
 
       - clean           remove empty dashboards
+      - json <nr>       load and  return given dashboard
 
 =back
 
@@ -33,6 +34,7 @@ The panorama command manages panorama dashboards from the command line.
 use warnings;
 use strict;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Cpanel::JSON::XS qw/encode_json/;
 
 ##############################################
 
@@ -60,18 +62,34 @@ sub cmd {
     }
 
     my $command = shift @{$commandoptions} || 'help';
-    my $output  = "";
+    my($rc, $output) = (0, "");
     if($command eq 'clean' || $command eq 'clean_dashboards') {
         $c->stash->{'is_admin'} = 1;
         $c->{'panorama_var'}    = $c->config->{'var_path'}.'/panorama';
         my $num = Thruk::Utils::Panorama::clean_old_dashboards($c);
         $output = "OK - cleaned up $num old dashboards\n";
+    }
+    elsif($command eq 'json') {
+        my $nr = shift @{$commandoptions};
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless defined $nr;
+        my $file;
+        if(-e $nr) {
+            $file = $nr;
+            $nr   = -1;
+        }
+        my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, undef, $file);
+        if($dashboard) {
+            $output = encode_json($dashboard);
+            $output .= "\n";
+        } else {
+            $rc = 1;
+        }
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
     $c->stats->profile(end => "_cmd_panorama($action)");
-    return($output, 0);
+    return($output, $rc);
 }
 
 ##############################################

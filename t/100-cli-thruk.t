@@ -196,6 +196,16 @@ TestUtils::test_command({
     cmd  => $BIN.' -a clean_dashboards',
     like => ['/OK - cleaned up \d+ old dashboards/'],
 });
+# panorama cleanup with new syntax
+TestUtils::test_command({
+    cmd  => $BIN.' panorama clean',
+    like => ['/OK - cleaned up \d+ old dashboards/'],
+});
+# panorama json
+TestUtils::test_command({
+    cmd  => $BIN.' panorama json 0',
+    like => ['/Create New Dashboard:/', '/TP.loadDashboardWindow/'],
+});
 
 # plugin list
 TestUtils::test_command({

@@ -200,12 +200,12 @@ return dashboard data.
 
 =cut
 sub load_dashboard {
-    my($c, $nr, $meta_data_only) = @_;
+    my($c, $nr, $meta_data_only, $file) = @_;
     $nr       =~ s/^pantab_//gmx;
-    my $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
+    $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab' unless $file;
 
     # only numbers allowed
-    return if $nr !~ m/^\d+$/gmx;
+    return if $nr !~ m/^\-?\d+$/gmx;
 
     # startpage can be overridden, only load original file if there is none in etc/
     if($nr == 0 && !-s $file) {
@@ -243,7 +243,7 @@ sub load_dashboard {
     my @stat = stat($file);
     $dashboard->{'ts'}       = $stat[9] unless ($scripted && $dashboard->{'ts'});
     $dashboard->{'nr'}       = $nr;
-    $dashboard->{'id'}       = 'pantab_'.$nr;
+    $dashboard->{'id'}       = 'pantab_'.$nr unless $nr < 0;
     $dashboard->{'file'}     = $file;
     $dashboard->{'scripted'} = $scripted;
 
@@ -336,7 +336,7 @@ sub is_authorized_for_dashboard {
 
     # does that dashboard already exist?
     if(-s $file) {
-        $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1) unless $dashboard;
+        $dashboard = load_dashboard($c, $nr, 1) unless $dashboard;
         if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
             return ACCESS_READONLY if $c->stash->{'readonly'};
             return ACCESS_OWNER;

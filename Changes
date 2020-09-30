@@ -18,6 +18,8 @@ next:
             - added option --no-reload-core to thruk cp commit
             - added option --no-reload-cron to thruk cp commit
             - added configuration option sync_downtime_ack_state
+          - Panorama:
+            - support scripted dashboards in any scripting language
           - Logcache:
             - add logcache statistics and action to performance info page
             - improve performance

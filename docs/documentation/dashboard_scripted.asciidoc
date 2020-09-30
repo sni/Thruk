@@ -30,6 +30,7 @@ root@host:/etc/thruk %> ls -la panorama/
 -rwxr-xr-x  1 thruk thruk  5307 Aug 12 10:15 5.tab
 ------
 
+=== Perl
 A scripted dashboard basically looks like this:
 
 ------
@@ -113,6 +114,35 @@ $dashboard->{'ts'} = time()-time()%30;
 This will make open dashboards reload the dashboard source every 30 seconds.
 
 
+=== Other Script Languages
+{% include new_since.ad version="2.38" %}
+Since release 2.38 you can write your dashboards in any language you like. The
+tab file has to be executable and must return the json decodable representation
+of the dashboard.
+See the shell script example at the end of this page.
+
+
+=== Environment
+{% include new_since.ad version="2.38" %}
+The following environment variables are set:
+
+   - `DASHBOARD`          = the id number of the dashboard
+   - `DASHBOARD_FILE`     = path to source file
+   - `REMOTE_USER`        = user name of current user requesting the dashboard
+   - `REMOTE_USER_GROUPS` = contact groups for the user above
+
+
+=== Debugging
+{% include new_since.ad version="2.38" %}
+The thruk cli tool can be used to evaluate the scripted dashboard.
+
+print json data of dashboard nr 5.:
+
+   %> thruk panorama json 5
+
+print json data of dashboard with given path:
+
+   %> thruk panorama json ~/etc/thruk/panorama/5.tab
 
 === Examples
 
@@ -269,4 +299,65 @@ for my $group (@{$groups}) {
 # update every 10 seconds
 $dashboard->{'ts'}                          = time()-time()%10;
 $dashboard->{'tab'}->{'xdata'}->{'refresh'} = 10;
+------
+
+
+==== Shell Scripted Dashboard
+
+This example is a simple shell script which has label with the current time.
+
+------
+#!/bin/bash
+# title:  Scripted Bash
+# user:   thrukadmin
+# groups: [{"*" : "read-only"}]
+
+LABEL="Dynamic dashboard<br>generated at: $(date)";
+
+cat<<EOT
+{
+   "file_version" : 2,
+   "panlet_1" : {
+      "xdata" : {
+         "appearance" : {
+            "type" : "icon"
+         },
+         "cls" : "TP.TextLabelWidget",
+         "label" : {
+            "bgcolor" : "",
+            "bordercolor" : "",
+            "bordersize" : 1,
+            "display" : "always",
+            "fontbold" : "",
+            "fontcenter" : "",
+            "fontcolor" : "#000000",
+            "fontfamily" : "",
+            "fontitalic" : "",
+            "fontsize" : 14,
+            "height" : "",
+            "labeltext" : "$LABEL",
+            "offsetx" : 0,
+            "offsety" : 0,
+            "orientation" : "horizontal",
+            "position" : "top-left",
+            "roundcorners" : "",
+            "width" : ""
+         },
+         "layout" : {
+            "center" : "centered",
+            "x" : 4,
+            "y" : 28,
+         },
+         "link" : {}
+      }
+   },
+   "tab" : {
+      "xdata" : {
+         "refresh" : "90",
+         "title" : "Dashboard"
+      }
+   },
+   "ts": $(date +%s)
+}
+EOT
 ------

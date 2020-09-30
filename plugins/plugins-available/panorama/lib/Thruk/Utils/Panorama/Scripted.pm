@@ -16,6 +16,7 @@ use Carp qw/confess/;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 use Encode qw(decode_utf8);
+use Thruk::Utils::IO;
 
 ##############################################
 =head1 METHODS
@@ -46,6 +47,10 @@ sub load_dashboard {
     if($code =~ m/^\#\s*user:\s*(.*?)$/mx) {
         $meta->{'user'} = $1;
     }
+    $meta->{'type'} = 'perl';
+    if($code =~ m/^\#\!/mx && $code !~ m/^\#\!.*?perl/mx) {
+        $meta->{'type'} = 'other';
+    }
     _merge_meta($dashboard, $meta);
 
     if($meta_data_only) {
@@ -53,27 +58,53 @@ sub load_dashboard {
         return($dashboard);
     }
 
-    $Thruk::Utils::Panorama::Scripted::c    = $c;
-    $Thruk::Utils::Panorama::Scripted::nr   = $nr;
-    $Thruk::Utils::Panorama::Scripted::data = $data || '{}';
-    $Thruk::Utils::Panorama::Scripted::meta = $meta;
+    local $ENV{DASHBOARD}          = $nr;
+    local $ENV{DASHBOARD_FILE}     = $file;
+    local $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
+    local $ENV{REMOTE_USER_GROUPS} = join(';', @{$c->user->{'groups'}});
 
-    ## no critic
-    eval("#line 1 $file\n".$code);
-    ## use critic
-    if($@) {
-        $c->log->error("error while loading dynamic dashboard from ".$file.": ".$@);
-        return;
+    if($meta->{'type'} eq 'perl') {
+        $Thruk::Utils::Panorama::Scripted::c    = $c;
+        $Thruk::Utils::Panorama::Scripted::nr   = $nr;
+        $Thruk::Utils::Panorama::Scripted::data = $data || '{}';
+        $Thruk::Utils::Panorama::Scripted::meta = $meta;
+
+        ## no critic
+        eval("#line 1 $file\n".$code);
+        ## use critic
+        if($@) {
+            $c->log->error("error while loading dynamic dashboard from ".$file.": ".$@);
+            return;
+        }
+
+        _merge_meta($dashboard, $meta);
+        $dashboard = _cleanup_dashboard($dashboard, $nr);
+
+        # cleanup
+        $Thruk::Utils::Panorama::Scripted::c    = undef;
+        $Thruk::Utils::Panorama::Scripted::nr   = undef;
+        $Thruk::Utils::Panorama::Scripted::data = undef;
+        $Thruk::Utils::Panorama::Scripted::meta = undef;
+    } else {
+        my($rc, $output) = Thruk::Utils::IO::cmd($c, $file);
+        if($rc != 0) {
+            my $err = "got rc $rc while executing dynamic dashboard from ".$file;
+            $c->log->error($err);
+            $c->log->error($output);
+            return;
+        }
+        eval {
+            my $json = Cpanel::JSON::XS->new->utf8;
+            $json->relaxed();
+            $dashboard = $json->decode($output);
+        };
+        if($@) {
+            $c->log->error("error while parsing output from dynamic dashboard in ".$file.": ".$@);
+            return;
+        }
+        _merge_meta($dashboard, $meta);
+        $dashboard = _cleanup_dashboard($dashboard, $nr);
     }
-
-    _merge_meta($dashboard, $meta);
-    $dashboard = _cleanup_dashboard($dashboard, $nr);
-
-    # cleanup
-    $Thruk::Utils::Panorama::Scripted::c    = undef;
-    $Thruk::Utils::Panorama::Scripted::nr   = undef;
-    $Thruk::Utils::Panorama::Scripted::data = undef;
-    $Thruk::Utils::Panorama::Scripted::meta = undef;
 
     $c->stats->profile(end => "Utils::Panorama::Scripted::load_dashboard($file)");
 
