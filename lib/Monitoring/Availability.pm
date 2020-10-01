@@ -327,7 +327,6 @@ sub calculate {
         'timeformat'                     => $self->{'timeformat'},
         'breakdown'                      => $self->{'breakdown'},
     };
-    my $result;
 
     for my $opt_key (keys %opts) {
         if(exists $self->{'report_options'}->{$opt_key}) {
@@ -344,9 +343,32 @@ sub calculate {
     $self->_log('calculate()')             if $verbose;
     $self->_log($self->{'report_options'}) if $verbose;
 
+    # if we have more than one host or service, we dont build up a log
+    $self->{'report_options'}->{'build_log'} = TRUE;
+    if(scalar @{$self->{'report_options'}->{'hosts'}} == 1) {
+        $self->{'report_options'}->{'build_log'} = HOST_ONLY;
+    }
+    elsif(scalar @{$self->{'report_options'}->{'services'}} == 1) {
+        $self->{'report_options'}->{'build_log'} = SERVICE_ONLY;
+    }
+
+    # set some variables for faster access
+    $report_options_start             = $self->{'report_options'}->{'start'};
+    $report_options_end               = $self->{'report_options'}->{'end'};
+    $report_options_includesoftstates = $self->{'report_options'}->{'includesoftstates'};
+
+    my $result = {
+        'hosts'     => {},
+        'services'  => {},
+        'total'     => {
+            'start'                                 => $report_options_start,
+            'end'                                   => $report_options_end,
+            'duration'                              => $report_options_end - $report_options_start,
+            'time_indeterminate_outside_timeperiod' => 0,
+        }
+    };
+
     # create lookup hash for faster access
-    $result->{'hosts'}    = {};
-    $result->{'services'} = {};
     for my $host (@{$self->{'report_options'}->{'hosts'}}) {
         $result->{'hosts'}->{$host} = 1;
     }
@@ -360,20 +382,12 @@ sub calculate {
         $result->{'services'}->{$service->{'host'}}->{$service->{'service'}} = 1;
     }
 
-    # if we have more than one host or service, we dont build up a log
-    $self->{'report_options'}->{'build_log'} = TRUE;
-    if(scalar @{$self->{'report_options'}->{'hosts'}} == 1) {
-        $self->{'report_options'}->{'build_log'} = HOST_ONLY;
-    }
-    elsif(scalar @{$self->{'report_options'}->{'services'}} == 1) {
-        $self->{'report_options'}->{'build_log'} = SERVICE_ONLY;
-    }
-
     $self->{'report_options'}->{'calc_all'} = FALSE;
     if(scalar keys %{$result->{'services'}} == 0 and scalar keys %{$result->{'hosts'}} == 0) {
         $self->_log('will calculate availability for all hosts/services found') if $verbose;
         $self->{'report_options'}->{'calc_all'} = TRUE;
     }
+    $report_options_calc_all = $self->{'report_options'}->{'calc_all'};
 
     $self->_set_breakpoints();
 
@@ -381,12 +395,6 @@ sub calculate {
         $self->_set_empty_hosts($result);
         $self->_set_empty_services($result);
     }
-
-    # set some variables for faster access
-    $report_options_start             = $self->{'report_options'}->{'start'};
-    $report_options_end               = $self->{'report_options'}->{'end'};
-    $report_options_includesoftstates = $self->{'report_options'}->{'includesoftstates'};
-    $report_options_calc_all          = $self->{'report_options'}->{'calc_all'};
 
     # read in logs
     if($self->{'report_options'}->{'log_file'} && !$self->{'report_options'}->{'log_string'} && !$self->{'report_options'}->{'log_dir'}) {
@@ -830,6 +838,7 @@ sub _process_log_line {
 
     # process starts / stops?
     if(defined $data->{'proc_start'}) {
+        &_set_system_event($self, $result, $data );
         unless($self->{'report_options'}->{'assumestatesduringnotrunning'}) {
             if($data->{'proc_start'} == START_NORMAL or $data->{'proc_start'} == START_RESTART) {
                 # set an event for all services and set state to no_data
@@ -909,6 +918,7 @@ sub _process_log_line {
                 $last_state = $last_known_state if(defined $last_known_state and $last_known_state >= 0);
                 &_set_host_event($self,$host_name, $result, { 'time' => $data->{'time'}, 'state' => $last_state });
             }
+            &_set_system_event($self, $result, $data );
             $self->{'in_timeperiod'} = $data->{'to'};
 
             # set a log entry
@@ -1095,6 +1105,29 @@ sub _process_log_line {
     return 1;
 }
 
+########################################
+sub _set_system_event {
+    my($self, $result, $data) = @_;
+
+    $self->_log('_set_system_event()') if $verbose;
+
+    our $last_system_event;
+    $last_system_event = 0 unless defined $last_system_event;
+    my $duration = $data->{'time'} - $last_system_event;
+    $last_system_event = $data->{'time'};
+
+    # check if we are inside the report time
+    if($report_options_start >= $data->{'time'} || $report_options_end < $data->{'time'}) {
+        return;
+    }
+
+    if(!$self->{'in_timeperiod'}) {
+        $result->{'total'}->{'time_indeterminate_outside_timeperiod'} += $duration;
+        return;
+    }
+
+    return 1;
+}
 
 ########################################
 sub _set_service_event {
@@ -1319,6 +1352,8 @@ sub _insert_fake_event {
     my($self, $result, $time) = @_;
 
     $self->_log('_insert_fake_event()') if $verbose;
+    &_set_system_event($self, $result, { 'time' => $time } );
+
     for my $host (keys %{$result->{'services'}}) {
         for my $service (keys %{$result->{'services'}->{$host}}) {
             my $last_service_state = STATE_UNSPECIFIED;
