@@ -365,7 +365,7 @@ sub calculate {
             'end'                                   => $report_options_end,
             'duration'                              => $report_options_end - $report_options_start,
             'time_indeterminate_outside_timeperiod' => 0,
-        }
+        },
     };
 
     # create lookup hash for faster access
