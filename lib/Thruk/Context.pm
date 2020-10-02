@@ -547,6 +547,7 @@ sub cookie {
         $options->{'expires'} = "Thu, 01-01-1970 01:00:01 GMT";
     }
     if(defined $value) {
+        $options->{'samesite'} = 'lax' unless $options->{'samesite'};
         $c->res->cookies->{$name} = { value => $value, %{$options}};
         return;
     }

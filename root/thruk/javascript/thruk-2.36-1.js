@@ -485,7 +485,7 @@ function cookieSave(name, value, expires, domain) {
 
   if(expires > 0) {
     expires   = new Date(now.getTime() + (expires*1000));
-    expirestr = " expires=" + expires.toGMTString() + ";";
+    expirestr = " expires=" + expires.toGMTString();
   }
 
   var cookieStr = name+"="+value+"; path="+cookie_path+";"+expirestr;
@@ -494,9 +494,12 @@ function cookieSave(name, value, expires, domain) {
     cookieStr += ";domain="+domain;
   }
 
+  cookieStr += ";samesite=lax";
+
   // cleanup befor we set new cookie
   cookieRemoveAll(name);
 
+  cookieStr += ";";
   document.cookie = cookieStr;
 }
 
