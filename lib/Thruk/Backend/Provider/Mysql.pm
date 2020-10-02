@@ -1533,6 +1533,7 @@ sub _update_logcache_auth {
     $count = 0;
     for my $service (@{$services}) {
         my $service_id = &_service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
+        next unless $service_id;
         my @values;
         for my $contact (@{$service->{'contacts'}}) {
             my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
@@ -1756,6 +1757,7 @@ sub _get_log_service_auth {
 sub _service_lookup {
     my($service_lookup, $host_lookup, $host_name, $service_description, $dbh, $prefix, $host_id, $auto_increments, $foreign_key_stash) = @_;
     return unless $service_description;
+    return unless $host_name;
 
     my $id = $service_lookup->{$host_name}->{$service_description};
     return $id if $id;
