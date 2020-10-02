@@ -904,9 +904,13 @@ sub init_external {
 
     $c->stash->{job_id}         = $id;
     $c->stash->{job_dir}        = $c->config->{'var_path'}."/jobs/".$id."/";
-    $c->stash->{original_url}   = Thruk::Utils::Filter::full_uri($c);
-    $c->stash->{original_uri}   = $c->req->uri->as_string();
-    $c->stash->{original_param} = $c->req->parameters;
+    my $url = Thruk::Utils::Filter::full_uri($c);
+    # will confuse the report html preview otherwise and repace the histoy_url with remote.cgi which is useless
+    if($url !~ m/remote\.cgi$/mx) {
+        $c->stash->{original_url}   = $url;
+        $c->stash->{original_uri}   = $c->req->uri->as_string();
+        $c->stash->{original_param} = $c->req->parameters;
+    }
 
     return($id, $dir);
 }
