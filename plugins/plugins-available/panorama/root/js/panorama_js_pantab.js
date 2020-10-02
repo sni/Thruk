@@ -800,7 +800,7 @@ Ext.define('TP.Pantab', {
 
         if(!tab.bgDragEl) {
             var iconContainer = Ext.fly('iconContainer');
-            tab.bgDragEl = iconContainer.createChild('<img>', iconContainer.dom.childNodes[0]);
+            tab.bgDragEl = iconContainer.createChild({tag:'img', id:'pantab_'+tab.nr()+'_bgDragEl'}, iconContainer.dom.childNodes[0]);
             tab.bgDragEl.dom.style.position = "fixed";
             tab.bgDragEl.dom.style.width    = "100%";
             tab.bgDragEl.dom.style.height   = "100%";
