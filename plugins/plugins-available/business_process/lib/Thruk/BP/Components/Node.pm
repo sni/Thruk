@@ -437,7 +437,6 @@ sub _set_function {
         $self->{'notification_period'}  = '';
         $self->{'max_check_attempts'}   = '';
         $self->{'event_handler'}        = '';
-        $self->{'create_obj'} = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
         # fix operator
         if($self->{'service'}) {
             my $op = $self->{'function_args'}->[2] // '=';
@@ -460,8 +459,7 @@ sub _set_function {
         } else {
             $self->{'servicegroup'} = $self->{'function_args'}->[1] || '';
         }
-        $self->{'template'}    = '';
-        $self->{'create_obj'}  = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
+        $self->{'template'} = '';
     }
     return;
 }

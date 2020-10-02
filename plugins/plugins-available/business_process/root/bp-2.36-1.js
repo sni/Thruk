@@ -1087,13 +1087,6 @@ function bp_update_obj_create() {
 /* toggle status function disabled fields */
 function bp_update_status_function(type, node) {
     var type = jQuery('#bp_function').val();
-    if(type == "status" || type == "groupstatus") {
-        jQuery(".no_supports_link").show();
-        jQuery(".supports_link").hide();
-    } else {
-        jQuery(".no_supports_link").hide();
-        jQuery(".supports_link").show();
-    }
 
     jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
     jQuery("INPUT[name=bp_contacts]").parents("TR").hide();
