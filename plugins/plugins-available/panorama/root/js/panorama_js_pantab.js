@@ -1075,7 +1075,7 @@ Ext.define('TP.Pantab', {
             }, {
                 text:   'Set Maintenance Mode',
                 icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
-                hidden: readonly || tab.readonly || tab.isMaintenance(),
+                hidden: !!(readonly || tab.readonly || tab.isMaintenance()),
                 handler: function() {
                     Ext.Msg.prompt('Put Dashboard into Maintenance Mode', 'Please enter maintenance message:', function(btn, text){
                         if (btn == 'ok'){
@@ -1086,7 +1086,7 @@ Ext.define('TP.Pantab', {
             }, {
                 text:   'Remove Maintenance Mode',
                 icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
-                hidden: readonly || tab.readonly || !tab.isMaintenance(),
+                hidden: !!(readonly || tab.readonly || !tab.isMaintenance()),
                 handler: function() { tab.setMaintenance(null, true); }
             }, '-', {
                 text:   'Save Dashboard',
