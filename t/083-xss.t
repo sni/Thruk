@@ -225,6 +225,8 @@ sub check_libs_file {
     my $content = read_file($file);
     my $failed = 0;
 
+    return if($filter && $file !~ m%$filter%mx);
+
     # do not put json encoded structures into stash, instead use json_encode() from within the template
     while($content =~ m%(\$c->stash[^\n]*encode[^\n]*)%gms) {
         my $match = substr($content, $-[0], $+[0]-$-[0]);

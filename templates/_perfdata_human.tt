@@ -26,8 +26,8 @@
         [% IF has_parents %]
         <td class="[% class %]" align="right">[% IF last_parent != p.parent %][% p.parent %][% last_parent = p.parent %][% ELSE %][% END %]</td>
         [% END %]
-        <td class="[% class %]" align="left">[% p.name %]</td>
-        <td class="[% class %]" align="right" style="padding-right: 8px;">[% format_number(p.value) %][% p.unit %]</td>
+        <td class="[% class %]" align="left">[% p.name | html %]</td>
+        <td class="[% class %]" align="right" style="padding-right: 8px;">[% format_number(p.value) %][% p.unit | html %]</td>
         [% IF has_warn %]<td class="[% class %]">[% format_number(p.warn) %]</td>[% END %]
         [% IF has_crit %]<td class="[% class %]">[% format_number(p.crit) %]</td>[% END %]
         [% IF has_min  %]<td class="[% class %]">[% format_number(p.min) %]</td>[% END %]
@@ -41,7 +41,7 @@
     <div id="perfdata_raw" style="display:none;">
       [% perfdata = orig_perfdata %]
       [% PROCESS _perfdata_table write="true" %]
-      [% orig_perfdata %]
+      [% orig_perfdata | html %]
     </div>
   [% ELSE %]
     <script type="text/javascript">
@@ -49,6 +49,6 @@
     hideElement('raw_perf_switch');
     -->
     </script>
-    [% orig_perfdata %]
+    [% orig_perfdata | html %]
   [% END %]
 [% END %]
