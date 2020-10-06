@@ -45,7 +45,7 @@ if [ "$branch" != "" ]; then
     debversion=$(echo "${newversion}~${branch}+${release}" | tr -d '-')
     rpmrelease=`echo $branch | tr -d '-'`
 else
-    debversion="${newversion}_${release}"
+    debversion="${newversion}+${release}"
     rpmrelease=$release
 fi
 if [ $rpmrelease -gt 1 ]; then branch=$rpmrelease; fi
@@ -79,7 +79,7 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
                 -i MANIFEST                 \
                 -i root/thruk/startup.html  \
                 -i .gitignore
-    changesheader=$(printf "%-8s %s\n" "$debversion" "$fulldate")
+    changesheader=$(printf "%-8s %s\n" "$fileversion" "$fulldate")
     sed -r "s/^next.*/$changesheader/" -i Changes
     sed -r "s/${VERSION}/$newversion/" -i dist.ini
     git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.css plugins/plugins-available/mobile/root/mobile-$fileversion.css
