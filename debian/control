@@ -2,7 +2,7 @@ Source: thruk
 Section: net
 Priority: optional
 Maintainer: Sven Nierlein <sven.nierlein@consol.de>
-Build-Depends: debhelper (>= 7), libthruk (>=2.32), lsb-release, apache2
+Build-Depends: debhelper (>= 7), libthruk (>=2.38), lsb-release, apache2
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/Thruk/issues
@@ -22,7 +22,7 @@ Description: Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 Package: thruk-base
 Architecture: any
 Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
-         libthruk (>=2.32),
+         libthruk (>=2.38),
          apache2 | nginx-light | nginx-full | nginx-extras,
          libapache2-mod-fcgid | nginx-light | nginx-full | nginx-extras,
          cron, logrotate

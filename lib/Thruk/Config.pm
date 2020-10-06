@@ -31,7 +31,7 @@ BEGIN {
 
 ######################################
 
-our $VERSION = '2.36';
+our $VERSION = '2.38';
 
 my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '';
@@ -51,7 +51,7 @@ my $base_defaults = {
     'name'                                  => 'Thruk',
     'version'                               => $VERSION,
     'branch'                                => $branch,
-    'released'                              => 'July 09, 2020',
+    'released'               => 'October 06, 2020',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
