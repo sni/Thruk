@@ -1508,7 +1508,7 @@ sub _set_host_macros {
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
     $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
-    $macros->{'$HOSTSTATE$'}          = (defined $macros->{'$HOSTSTATEID$'})         ? Thruk::Utils::Filter::text2hoststate($macros->{'$HOSTSTATEID$'}) : 0;
+    $macros->{'$HOSTSTATE$'}          = Thruk::Utils::Filter::hoststate2text($macros->{'$HOSTSTATEID$'}) // "";
     $macros->{'$HOSTSTATETYPE'}       = (defined $macros->{'$HOSTSTATETYPE'})        ? $macros->{'$HOSTSTATETYPE'} == 1 ? 'HARD' : 'SOFT' : '';
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
@@ -1548,7 +1548,7 @@ sub _set_service_macros {
     # normal service macros
     $macros->{'$SERVICEDESC$'}           = $service->{'description'};
     $macros->{'$SERVICESTATEID$'}        = $service->{'state'};
-    $macros->{'$SERVICESTATE$'}          = Thruk::Utils::Filter::text2state($service->{'state'});
+    $macros->{'$SERVICESTATE$'}          = Thruk::Utils::Filter::state2text($service->{'state'}) // "";
     $macros->{'$SERVICESTATETYPE$'}      = $service->{'state_type'} ? 'HARD' : 'SOFT';
     $macros->{'$SERVICELATENCY$'}        = $service->{'latency'};
     $macros->{'$SERVICEOUTPUT$'}         = $service->{'plugin_output'};
