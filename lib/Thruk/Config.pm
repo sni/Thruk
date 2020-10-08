@@ -1178,6 +1178,10 @@ sub _parse_rows {
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
+                if($k eq 'peer') {
+                    $next->{'_FILE'} = $file;
+                    $next->{'_LINE'} = $cur_line;
+                }
                 $cur_line = _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
                 if(!defined $conf->{$k}) {
                     $conf->{$k} = $next;

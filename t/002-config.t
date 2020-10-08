@@ -32,10 +32,10 @@ if(!$@) {
     local $ENV{'THRUK_CONFIG'} = 't/data/nested_config';
     my $config = Thruk::Config::set_config_env();
     my $expected_backends = {
-        'peer' => [{ 'name' => 'local1' },
-                    { 'name' => 'local2' },
-                    { 'name' => 'local3' },
-                    { 'name' => 'local4' }
+        'peer' => [{ 'name' => 'local1', '_FILE' => 't/data/nested_config/thruk_local.d/a.conf', '_LINE' => 4 },
+                   { 'name' => 'local2', '_FILE' => 't/data/nested_config/thruk_local.d/b.conf', '_LINE' => 9 },
+                   { 'name' => 'local3', '_FILE' => 't/data/nested_config/thruk_local.d/b.conf', '_LINE' => 12 },
+                   { 'name' => 'local4', '_FILE' => 't/data/nested_config/thruk_local.conf', '_LINE' => 8 }
     ]};
     my $expected_bp_config = {
         'objects_reload_cmd' => '/bin/true',

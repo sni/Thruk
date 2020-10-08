@@ -817,8 +817,8 @@ sub _process_backends_page {
                 push @{$numbers}, $1;
             }
         }
-        my $backends = [];
-        my $new = 0;
+        my $backends = {};
+        my $has_new = 0;
         for my $x (sort { $a <=> $b } @{$numbers}) {
             my $backend = {
                 'name'    => $c->req->parameters->{'name'.$x},
@@ -846,6 +846,7 @@ sub _process_backends_page {
             }
 
             # add values from existing backend config
+            my $savefile = $file;
             if(defined $backend->{'id'}) {
                 my $peer = $c->{'db'}->get_peer_by_key($backend->{'id'});
                 $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
@@ -853,14 +854,18 @@ sub _process_backends_page {
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
                 $backend->{'state_host'} = $peer->{'config'}->{'state_host'} if defined $peer->{'config'}->{'state_host'};
+                $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
             }
-            $new = 1 if $x == 1;
-            push @{$backends}, $backend;
+            $has_new = 1 if $x == 1;
+            $backends->{$savefile} = [] unless $backends->{$savefile};
+            push @{$backends->{$savefile}}, $backend;
         }
         # put new one at the end
-        if($new) { push(@{$backends}, shift(@{$backends})) }
-        my $string    = Thruk::Utils::Conf::get_component_as_string($backends);
-        Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>\s*');
+        if($has_new) { push(@{$backends->{$file}}, shift(@{$backends->{$file}})) }
+        for my $f (sort keys %{$backends}) {
+            my $string = Thruk::Utils::Conf::get_component_as_string($backends->{$f});
+            Thruk::Utils::Conf::replace_block($f, $string, '<Component\s+Thruk::Backend>', '<\/Component>\s*');
+        }
         Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully.' );
         return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=backends');
     }
@@ -894,40 +899,24 @@ sub _process_backends_page {
     }
 
     my $backends = [];
-    my $conf;
-    if(-f $file) {
-        $conf = Thruk::Config::read_config_file($file);
-    }
-    if(!defined $conf->{'Component'}->{'Thruk::Backend'}) {
-        $file =~ s/thruk_local\.conf/thruk.conf/mx;
-        $conf = Thruk::Config::read_config_file($file) if $file;
-    }
-
-    if(keys %{$conf} > 0) {
-        if($conf->{'Component'}->{'Thruk::Backend'} && ref($conf->{'Component'}->{'Thruk::Backend'}) eq 'HASH' && defined $conf->{'Component'}->{'Thruk::Backend'}->{'peer'}) {
-            if(ref $conf->{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
-                $backends = $conf->{'Component'}->{'Thruk::Backend'}->{'peer'};
-            } else {
-                push @{$backends}, $conf->{'Component'}->{'Thruk::Backend'}->{'peer'};
-            }
-        }
-    }
-    if(scalar @{$backends} == 0) {
-        # add empty sample backend
-        push @{$backends}, { 'name' => '' };
-    }
-    # set ids
-    for my $b (@{$backends}) {
-        $b->{'type'}        = 'livestatus' unless defined $b->{'type'};
-        $b->{'id'}          = substr(Thruk::Utils::Crypt::hexdigest(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'id'};
+    my $peers    = $c->{'db'}->get_peers(1);
+    push @{$peers}, {} if scalar @{$peers} == 0;
+    for my $p (@{$peers}) {
+        my $b = Thruk::Utils::dclone($p->{'peer_config'});
+        $b->{'name'}        = $b->{'name'} // '';
+        $b->{'type'}        = lc($b->{'type'} // 'livestatus');
+        $b->{'id'}          = $p->{'key'}  // substr(Thruk::Utils::Crypt::hexdigest(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5);
         $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
         $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';
         $b->{'remote_name'} = $b->{'options'}->{'remote_name'} || '';
-        $b->{'hidden'}      = 0 unless defined $b->{'hidden'};
-        $b->{'section'}     = '' unless defined $b->{'section'};
-        $b->{'type'}        = lc($b->{'type'});
+        $b->{'hidden'}      = $b->{'hidden'}  // 0;
+        $b->{'section'}     = $b->{'section'} // '';
+        $b->{'file'}        = $b->{'_FILE'}   // $file;
+        $b->{'lineno'}      = $b->{'_LINE'}   // '';
+        push @{$backends}, $b;
     }
+    $c->stash->{'conf_file'}  = $file;
     $c->stash->{'conf_sites'} = $backends;
     $c->stash->{'subtitle'}   = "Thruk Backends Manager";
     $c->stash->{'template'}   = 'conf_backends.tt';

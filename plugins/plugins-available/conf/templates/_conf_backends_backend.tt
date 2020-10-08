@@ -35,7 +35,7 @@
   <td class='dataVar' align="left">Auth-Key</td>
   <td class='dataVal' colspan=2 nowrap>
     <input type="text" name="auth[% x %]" value="[% b.auth | html %]" style="width: 200px;" placeholder="authkey">
-    <a href="#" onclick="overlib('The authorization key must provided for security reasons.<br>It is located on the remote host in<br><ul><li>/var/lib/thruk/secret.key<\/li><\/ul>or<ul><li>var/thruk/secret.key (for OMD)<\/li><\/ul>',CAPTION,'Authorization Key',WIDTH,600,[% c.config.info_popup_options %]); return false;"><img id="authinfoimg[% x %]" src="[% url_prefix %]themes/[% theme %]/images/help.png" alt="help" style="vertical-align: text-bottom;" width=16 height=16></a>
+    <a href="#" onclick="overlib('The authorization key is used to authorize http requests.<br>It must be provided from the remote host and can be either:<br><ul><li>an api key (<a href=&quot;http://thruk.org/documentation/rest.html#_api-key&quot; target=&quot;_blank&quot;>read more in the docs</a>)<\/li><li>the key from /var/lib/thruk/secret.key<\/li><li> the key from ~/var/thruk/secret.key (for OMD)<\/li><\/ul>',CAPTION,'Authorization Key',WIDTH,600,[% c.config.info_popup_options %]); return false;"><img id="authinfoimg[% x %]" src="[% url_prefix %]themes/[% theme %]/images/help.png" alt="help" style="vertical-align: text-bottom;" width=16 height=16></a>
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_proxy">
@@ -61,6 +61,12 @@
   <td class='dataVar' align="left">Section</td>
   <td class='dataVal' colspan=2>
     <input type="text" name="section[% x %]" value="[% b.section | html %]" style="width: 200px;" placeholder="group sites by sections">
+  </td>
+</tr>
+<tr class="backend_conf_[% x %]">
+  <td class='dataVar' align="left">Saved to</td>
+  <td class='dataVal' colspan=2>
+    [% IF b.file != "" %][% b.file %]:[% b.lineno %][% ELSE %][% conf_file %][% END %]
   </td>
 </tr>
 <tr class="backend_conf_[% x %]"><td colspan=3><hr></td></tr>
