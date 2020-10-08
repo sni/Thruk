@@ -328,9 +328,9 @@ sub _lmd_checks  {
     }
 
     # try to run
-    my $cmd = ($c->config->{'lmd_core_bin'} || 'lmd').' --help 2>&1';
+    my $cmd = ($c->config->{'lmd_core_bin'} || 'lmd').' --version 2>&1';
     my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
-    if($rc != 2 || $output !~ m/\QUsage of\E/mx) {
+    if($output !~ m/\Qlmd - version \E/mx) {
         $details .= sprintf("  - cannot execute lmd: %s\n", $output);
         return({sub => 'lmd', rc => 2, msg => "LMD WARNING", details => $details });
     }
