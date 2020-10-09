@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add LOCAL rest api sites alias
+          - fix service macros in action urls
+          - fix backend manager in config tool
 
 2.38     Tue Oct  6 09:53:31 CEST 2020
           - rewrite config reading, cgi.cfg will now simply be merged
