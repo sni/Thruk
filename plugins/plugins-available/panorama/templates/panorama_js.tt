@@ -54,7 +54,7 @@ Ext.onReady(function() {
             margins:  '0 0 0 0',
             items:    [ new TP.TabBar() ]
         });
-        [% IF thruk_debug && !c.config.demo_mode %]
+        [% IF thruk_author && !c.config.demo_mode %]
         Ext.getCmp('debug_tab').show();
         Ext.getCmp('debug_dom_elements').show();
         [% END %]

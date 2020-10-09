@@ -27,7 +27,7 @@
   var has_jquery_ui       = [% has_jquery_ui %];
   var jquery_ui_url       = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js';
   var jquery_ui_css       = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css';
-  var thruk_debug_js      = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+  var thruk_debug_js      = [% IF thruk_author %]true[% ELSE %]false[% END %];
   var minimal             = [% IF minimal %]true[% ELSE %]false[% END %];
   var CSRFtoken           = '[% get_user_token(c) %]';
 [% IF c.user_exists %]

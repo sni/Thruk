@@ -73,7 +73,7 @@ XMLHttpRequest = function(){ return({
 self           = {};
 top            = {};
 url_prefix     = '/thruk';
-thruk_debug_js = 1;
+thruk_debug_js = true;
 thruk_onerror  = function() {};
 ", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('root/thruk/vendor/extjs-*/ext-all-debug.js');

@@ -24,7 +24,7 @@ sub index {
     my ( $c ) = @_;
 
     if(   (!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'TEST_LEAK' && $ENV{'THRUK_SRC'} ne 'TEST'))
-       && !$c->config->{'thruk_debug'}) {
+       && !Thruk->debug) {
         die("test.cgi is disabled unless in test mode!");
     }
 

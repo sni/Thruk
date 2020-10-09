@@ -73,7 +73,7 @@
     var check_frame_loaded_interval;
     var load_errors = 0;
     var is_reloading;
-    var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+    var thruk_debug_js = [% IF thruk_author %]true[% ELSE %]false[% END %];
     if(top.frames.length > 0) {
         check_frame_loaded_interval = window.setInterval('check_frame_loaded()', 5000);
     }

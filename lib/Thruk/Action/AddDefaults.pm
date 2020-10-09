@@ -354,7 +354,7 @@ sub end {
                 }
             }
         };
-        print STDERR $@ if $@ && $c->config->{'thruk_debug'};
+        print STDERR $@ if $@ && Thruk->debug;
     }
 
     # figure out intelligent titles
@@ -603,7 +603,7 @@ sub add_defaults {
         if($@) {
             # side.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
-            if($c->config->{'thruk_debug'}) {
+            if(Thruk->debug) {
                 $c->log->warn("data source error: $@");
             } else {
                 $c->log->debug("data source error: $@");
@@ -725,7 +725,7 @@ sub add_safe_defaults {
     eval {
         add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     };
-    print STDERR $@ if($@ and $c->config->{'thruk_debug'});
+    print STDERR $@ if($@ && Thruk->debug);
     return;
 }
 

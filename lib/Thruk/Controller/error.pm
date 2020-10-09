@@ -260,7 +260,7 @@ sub index {
         }
     }
 
-    if($c->config->{'thruk_debug'}) {
+    if(Thruk->debug) {
         $c->stash->{errorDetails} .= $errorDetails;
     }
 

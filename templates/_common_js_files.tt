@@ -1,4 +1,4 @@
-﻿[%+ UNLESS thruk_debug %]
+﻿[%+ UNLESS thruk_author %]
 <script type="text/javascript" src="[% url_prefix %]cache/thruk-[% version %]-[% filebranch %].js"></script>
 [% ELSE %]
   [% FOREACH jsfiles = c.config.all_in_one_javascript %]

@@ -32,7 +32,7 @@ var window = {
   addEventListener: function() {}
 };
 var document = window.document;
-thruk_debug_js = 1;
+thruk_debug_js = true;
 function jQuery() { return({
   focus: function() {}
 })};

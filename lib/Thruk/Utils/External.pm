@@ -193,7 +193,7 @@ sub perl {
         _clean_unstorable_refs($c->stash);
         store(\%{$c->stash}, $dir."/stash");
 
-        if($c->config->{'thruk_debug'}) {
+        if(Thruk->debug) {
             open(my $fh, '>', $dir."/stash.dump");
             print $fh Dumper($c->stash);
             CORE::close($fh);

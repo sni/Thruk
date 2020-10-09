@@ -52,7 +52,7 @@ if [ $rpmrelease -gt 1 ]; then branch=$rpmrelease; fi
 fileversion="$newversion-$rpmrelease"
 
 # replace all versions everywhere
-sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$date',/" -i lib/Thruk/Config.pm
+sed -r "s/'released'\s*=>\s*'.*',/'released'                              => '$date',/" -i lib/Thruk/Config.pm
 sed -i support/thruk.spec -e 's/^Release:.*$/Release: '$rpmrelease'/'
 sed -r "s/branch\s*= '.*';/branch       = '$branch';/" \
     -i lib/Thruk/Config.pm     \

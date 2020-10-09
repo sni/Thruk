@@ -13,12 +13,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]vendor/extjs-[% extjs_version %]/resources/css/ext-all-gray.css">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %]-[% filebranch %].css' />
-    [% IF thruk_debug %]
+    [% IF thruk_author %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all-debug.js"></script>
     [% ELSE %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all.js"></script>
     [% END %]
-    [% IF thruk_debug || panorama_debug %]
+    [% IF thruk_author || panorama_debug %]
       [% FOREACH js = c.config.all_in_one_javascript_panorama %]
         <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]

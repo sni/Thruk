@@ -2,18 +2,18 @@
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/common.css' />
 [% IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END %]
 [% END %]
-[% IF !all_in_one_css || thruk_debug %]
+[% IF !all_in_one_css || thruk_author %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css' />
 [%+ END %]
 [% UNLESS use_frames %]
-  [% IF !all_in_one_css || thruk_debug %]
+  [% IF !all_in_one_css || thruk_author %]
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes.css' />
   [%+ END %]
 [% END %]
-[% IF !all_in_one_css || thruk_debug %]
+[% IF !all_in_one_css || thruk_author %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
 [%+ END %]
-[% IF all_in_one_css && !thruk_debug %]
+[% IF all_in_one_css && !thruk_author %]
   [% IF use_frames %]
   <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-[% version %]-[% filebranch %].css' />
   [%+ ELSE %]

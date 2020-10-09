@@ -1099,7 +1099,7 @@ sub finalize_request {
             require Devel::Cycle;
             $Devel::Cycle::FORMATTING = "cooked";
         };
-        print STDERR $@ if $@ && $c->config->{'thruk_debug'};
+        print STDERR $@ if $@ && Thruk->debug;
         unless($@) {
             my $counter = 0;
             $Devel::Cycle::already_warned{'GLOB'}++;

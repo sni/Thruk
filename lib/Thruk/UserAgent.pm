@@ -32,7 +32,7 @@ returns new UserAgent object
 sub new {
     my($class, $config, $thruk_config) = @_;
     confess("no config") unless $config;
-    my $verify_hostnames = $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'};
+    my $verify_hostnames = $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'} // 1;
     my $self = {
         'timeout'               => 180,
         'agent'                 => 'thruk',
@@ -43,7 +43,7 @@ sub new {
         'protocols_allowed'     => ['http', 'https'],
         'requests_redirectable' => [ 'GET' ],           # not used
     };
-    if(defined $verify_hostnames && !$verify_hostnames) {
+    if(!$verify_hostnames) {
         $self->{'ssl_opts'}->{'verify_hostname'} = 0;
         $self->{'ssl_opts'}->{'SSL_verify_mode'} = SSL_verify_mode_NONE;
     }

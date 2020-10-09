@@ -556,6 +556,21 @@ ex.:
   log4perl_conf = ./log4perl.conf
 
 
+=== thruk_verbose
+verbosity / debug level
+same as setting THRUK_VERBOSE environment.
+
+  - `0` = info / warnings (default)
+  - `1` = verbose
+  - `2` = debug
+  - `3` = enables performance debug output for each request (same as THRUK_PERFORMANCE_DEBUG=3 in env)
+  - `4` = trace
+
+ex.:
+
+  thruk_verbose = 0
+
+
 === slow_page_log_threshold
 
 If a page takes longer to render than this amount of seonds, a

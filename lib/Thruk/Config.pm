@@ -51,7 +51,7 @@ my $base_defaults = {
     'name'                                  => 'Thruk',
     'version'                               => $VERSION,
     'branch'                                => $branch,
-    'released'               => 'October 06, 2020',
+    'released'                              => 'October 06, 2020',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
@@ -336,15 +336,13 @@ for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
 }
 
 # set TT strict mode only for authors
-$base_defaults->{'thruk_debug'}  = 0;
 $base_defaults->{'thruk_author'} = 0;
 $base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $view_tt_settings->{'STRICT'}     = 1;
     $view_tt_settings->{'CACHE_SIZE'} = 0 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $view_tt_settings->{'STAT_TTL'}   = 1 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
-    $view_tt_settings->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
-    $base_defaults->{'thruk_debug'}  = 1;
+    $view_tt_settings->{'PRE_DEFINE'}->{'thruk_author'} = 1;
     $base_defaults->{'thruk_author'} = 1;
 }
 
@@ -402,7 +400,7 @@ sub get_default_stash {
         'show_form'                 => '1',      # used in _status_filter.tt
         'show_top_pane'             => 0,        # used in _header.tt on status pages
         'body_class'                => '',       # used in _conf_bare.tt on config pages
-        'thruk_debug'               => $base_defaults->{'thruk_debug'},
+        'thruk_verbose'             => $ENV{'THRUK_VERBOSE'} // 0,
         'all_in_one_css'            => 0,
         'hide_backends_chooser'     => 0,
         'show_sitepanel'            => 'off',
@@ -439,6 +437,14 @@ sub set_config_env {
 
     my $configs = _load_config_files(\@files);
     my $config  = Storable::dclone($base_defaults);
+
+    ## no critic
+    if($config->{'thruk_verbose'}) {
+        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $config->{'thruk_verbose'}) {
+            $ENV{'THRUK_VERBOSE'} = $config->{'thruk_verbose'};
+        }
+    }
+    ## use critic
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs

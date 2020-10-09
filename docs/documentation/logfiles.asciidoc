@@ -48,7 +48,7 @@ To get more verbose log output, you have to create a `.thruk` file in the
 home directory of the Thruk user (usually the webserver user) or in case of
 OMD in the site folder.
 
-The following locations will work:
+The following locations will work depending on your setup:
 
  - ~/.thruk
  - /etc/sysconfig/thruk
