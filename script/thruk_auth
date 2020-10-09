@@ -186,7 +186,7 @@ sub process {
 
     # revalidation disabled
     my $basicauth = $session->{'hash'};
-    if($sessioncachetimeout == 0 || ($basicauth && $basicauth eq 'none')) {
+    if($sessioncachetimeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
         print STDERR "thruk_auth: session ok (not revalidated)" if $verbose;
         # uptime mtime of sessionfile
@@ -201,7 +201,7 @@ sub process {
             $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1);
         };
         alarm(0);
-        if($rc == -1 or $@) {
+        if($@ || $rc == -1) {
             print STDERR "thruk_auth: technical problem during login for ".$user if $verbose;
             print STDERR "thruk_auth: ".$@ if $@;
             unlink($session->{'file'});

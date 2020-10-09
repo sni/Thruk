@@ -127,6 +127,7 @@ returns  0 if unsuccessful
 =cut
 sub verify_basic_auth {
     my($config, $basic_auth, $login, $timeout) = @_;
+    confess("no basic auth data to verify") unless $basic_auth;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
 
     # unset proxy which eventually has been set from https backends
