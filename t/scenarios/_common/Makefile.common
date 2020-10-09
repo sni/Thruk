@@ -75,7 +75,7 @@ server:
 	cd ../../.. && THRUK_PERFORMANCE_DEBUG=1 ./script/thruk_server.pl -r
 
 web:
-	@python -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
+	@python3 -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
 
 prepare:
 	@echo "### $@: $$(date "+%FT%T.%N")"
