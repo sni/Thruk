@@ -1130,6 +1130,11 @@ sub set_enabled_backends {
                     for my $peer (@{$c->{'db'}->get_peers()}) {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     }
+                }
+                elsif($b eq 'LOCAL') {
+                    for my $peer (@{$c->{'db'}->get_local_peers()}) {
+                        $disabled_backends->{$peer->{'key'}} = 0;
+                    }
                 } else {
                     my $peer = $c->{'db'}->get_peer_by_key($b);
                     if($peer) {
@@ -1157,6 +1162,11 @@ sub set_enabled_backends {
                 for my $peer (@{$c->{'db'}->get_peers()}) {
                     $disabled_backends->{$peer->{'key'}} = 0;
                 }
+            }
+            elsif($b eq 'LOCAL') {
+                for my $peer (@{$c->{'db'}->get_local_peers()}) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
                 if($peer) {
@@ -1174,6 +1184,10 @@ sub set_enabled_backends {
     # by param
     elsif($num_backends > 1 and defined $backend) {
         $c->log->debug('set_enabled_backends() by param') if Thruk->debug;
+        # reset
+        for my $peer (@{$c->{'db'}->get_peers()}) {
+            $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
+        }
         if($backend eq 'ALL') {
             my @keys;
             for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -1181,11 +1195,15 @@ sub set_enabled_backends {
                 push @keys, $peer->{'key'};
             }
             $c->stash->{'param_backend'} = join(",", @keys);
-        } else {
-            # reset
-            for my $peer (@{$c->{'db'}->get_peers()}) {
-                $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
+        }
+        elsif($backend eq 'LOCAL') {
+            my @keys;
+            for my $peer (@{$c->{'db'}->get_local_peers()}) {
+                $disabled_backends->{$peer->{'key'}} = 0;
+                push @keys, $peer->{'key'};
             }
+            $c->stash->{'param_backend'} = join(",", @keys);
+        } else {
             for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
                 $disabled_backends->{$b} = 0;
             }

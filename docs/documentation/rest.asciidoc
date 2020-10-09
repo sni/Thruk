@@ -327,6 +327,12 @@ request. You can combine multiple sites with commas.
 Thruk uses all backends unless they are configured as `hidden=yes`. In that case you can force selecting all backends with the `/sites/ALL/` prefix.
 =======
 
+[TIP]
+.Local Sites
+=======
+In case you want to send queries only to local backends (those using a unix socket connection) you can use the `/sites/LOCAL/` prefix.
+=======
+
 
 == Error Handling
 
@@ -1807,4 +1813,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

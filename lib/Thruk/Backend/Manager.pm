@@ -170,6 +170,31 @@ sub get_peers {
 
 ##########################################################
 
+=head2 get_local_peers
+
+  get_local_peers()
+
+returns all configured peers which use a local unix socket to connect
+
+=cut
+
+sub get_local_peers {
+    my($self) = @_;
+
+    my @peers;
+    for my $b (@{$self->{'backends'}}) {
+        for my $addr (@{$b->peer_list()}) {
+            if($addr !~ m/:/mx) {
+                push @peers, $b;
+                last;
+            }
+        }
+    }
+    return \@peers;
+}
+
+##########################################################
+
 =head2 get_peer_by_key
 
   get_peer_by_key()
@@ -1920,6 +1945,9 @@ sub select_backends {
     }
     if(defined $backends && $backends->{'ALL'}) {
         push @{$get_results_for}, 'ALL';
+    }
+    if(defined $backends && $backends->{'LOCAL'}) {
+        push @{$get_results_for}, 'LOCAL';
     }
     return($get_results_for, $arg, \%arg);
 }

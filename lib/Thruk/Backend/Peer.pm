@@ -95,7 +95,7 @@ sub peer_list {
         }
         return($list);
     }
-    elsif($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
+    elsif($self->{'peer_config'}->{'options'}->{'fallback_peer'}) {
         return([$self->{'peer_config'}->{'options'}->{'fallback_peer'}, $self->{'addr'}]);
     }
     return([$self->{'addr'}]);
