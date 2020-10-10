@@ -342,7 +342,6 @@ if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $view_tt_settings->{'STRICT'}     = 1;
     $view_tt_settings->{'CACHE_SIZE'} = 0 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $view_tt_settings->{'STAT_TTL'}   = 1 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
-    $view_tt_settings->{'PRE_DEFINE'}->{'thruk_author'} = 1;
     $base_defaults->{'thruk_author'} = 1;
 }
 
