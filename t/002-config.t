@@ -23,6 +23,7 @@ if(!$@) {
                                                         -CComments  => 0,
         );
         my $thruk_conf = Thruk::Config::read_config_file($file);
+        _clean_extra_config_data($thruk_conf);
         is_deeply($thruk_conf, \%general_conf, "Thruk::Config returns the same as Config::General for ".$file) or diag(Dumper($thruk_conf, \%general_conf));
     }
 }
@@ -122,3 +123,16 @@ if(!$@) {
 };
 
 done_testing();
+
+####################################################
+sub _clean_extra_config_data {
+    my($thruk_conf) = @_;
+    for my $key (sort keys %{$thruk_conf}) {
+        if($key =~ m/^(_FILE|_LINE)$/mx) {
+            delete $thruk_conf->{$key};
+        }
+        elsif(ref $thruk_conf->{$key} eq 'HASH') {
+            _clean_extra_config_data($thruk_conf->{$key});
+        }
+    }
+}
