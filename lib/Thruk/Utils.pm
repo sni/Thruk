@@ -3663,6 +3663,7 @@ deep clones any object
 =cut
 sub dclone {
     my($obj) = @_;
+    return unless defined $obj;
 
     # use faster Clone module if available
     return(Clone::clone($obj)) if $INC{'Clone.pm'};
