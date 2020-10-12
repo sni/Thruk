@@ -857,6 +857,7 @@ sub _process_backends_page {
                 $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
             }
             $has_new = 1 if $x == 1;
+            $savefile =~ s|/thruk\.conf$|/thruk_local.conf|gmx;
             $backends->{$savefile} = [] unless $backends->{$savefile};
             push @{$backends->{$savefile}}, $backend;
         }

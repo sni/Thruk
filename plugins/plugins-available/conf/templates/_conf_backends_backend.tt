@@ -64,7 +64,7 @@
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">
-  <td class='dataVar' align="left">Saved to</td>
+  <td class='dataVar' align="left">Source</td>
   <td class='dataVal' colspan=2>
     [% IF b.file != "" %][% b.file %]:[% b.lineno %][% ELSE %][% conf_file %][% END %]
   </td>
