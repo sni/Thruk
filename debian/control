@@ -25,7 +25,7 @@ Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
          libthruk (>=2.38),
          apache2 | nginx-light | nginx-full | nginx-extras,
          libapache2-mod-fcgid | nginx-light | nginx-full | nginx-extras,
-         cron, logrotate
+         cron, logrotate, liblwp-protocol-https-perl
 Provides: thruk
 Replaces: thruk (<< 2.00)
 Breaks: thruk (<< 2.00)

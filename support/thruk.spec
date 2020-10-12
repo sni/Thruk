@@ -78,12 +78,7 @@ Requires:    apache2 apache2-mod_fcgid cron
 %if 0%{?el7}%{?el8}%{?fedora}
 BuildRequires: perl(ExtUtils::Install) httpd
 Requires: httpd mod_fcgid cronie
-%endif
-
-# rhel6 requirements
-%if 0%{?el6}
-BuildRequires: perl(ExtUtils::MakeMaker) httpd
-Requires: httpd mod_fcgid cronie
+Requires: perl-LWP-Protocol-https
 %endif
 
 %description base
