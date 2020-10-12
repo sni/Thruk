@@ -147,12 +147,12 @@ sub reconnect {
         if(!$INC{'IO/Socket/SSL.pm'}) {
             confess("IO::Socket::SSL required for proxy connections");
         }
-        ## no critic
-        $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
-        ## use critic
         my $con_proxy = $self->{'proxy'};
         $con_proxy =~ s#^(http|https)://#connect://#mx;
         $self->{'ua'}->proxy('https', $con_proxy);
+    }
+    if($self->{'addr'} =~ m/^https:/mx) {
+        require IO::Socket::SSL;
     }
     return($self->{'ua'});
 }

@@ -104,7 +104,7 @@ sub init_backend_thread_pool {
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-        if($https_count > 2 and $pool_size > 1) {
+        if($https_count > 2 && $pool_size > 1) {
             eval {
                 require IO::Socket::SSL;
                 IO::Socket::SSL->import();

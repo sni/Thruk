@@ -20,6 +20,10 @@ use Thruk::Utils::IO ();
 
 use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
 
+## no critic
+$ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
+## use critic
+
 ##############################################
 =head1 METHODS
 
