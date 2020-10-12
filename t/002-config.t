@@ -127,12 +127,18 @@ done_testing();
 ####################################################
 sub _clean_extra_config_data {
     my($thruk_conf) = @_;
+    return unless ref $thruk_conf eq 'HASH';
     for my $key (sort keys %{$thruk_conf}) {
         if($key =~ m/^(_FILE|_LINE)$/mx) {
             delete $thruk_conf->{$key};
         }
         elsif(ref $thruk_conf->{$key} eq 'HASH') {
             _clean_extra_config_data($thruk_conf->{$key});
+        }
+        elsif(ref $thruk_conf->{$key} eq 'ARRAY') {
+            for my $v (@{$thruk_conf->{$key}}) {
+                _clean_extra_config_data($v);
+            }
         }
     }
 }
