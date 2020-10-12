@@ -24,6 +24,7 @@ requires 'Cpanel::JSON::XS'                       => 0;     # required by Thruk:
 requires 'Class::Inspector'                       => 0;     # required by Thruk::Config
 requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
 requires 'HTTP::Request'                          => 6.12;  # required by Thruk::Utils::CLI, versions before cannot handle delete or patch requests
+requires 'HTTP::Request::Common'                  => 0;     # required by Thruk::UserAgent
 requires 'Pod::Usage'                             => 0;     # required by Thruk::Utils::CL
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::UserAgent
 requires 'Net::HTTP'                              => 6.02;  # required for HTTP connections. Version required due to timeout bug

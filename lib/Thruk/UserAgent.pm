@@ -15,6 +15,7 @@ use warnings;
 use Carp qw/confess/;
 use File::Temp qw/tempfile/;
 use HTTP::Response ();
+use HTTP::Request::Common;
 use Thruk::Utils::IO ();
 
 use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
@@ -358,7 +359,9 @@ sub _get_response {
     my($self, $cmd) = @_;
     my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
     if($rc != 0 || $output !~ m|^HTTP/|mx) {
-        die($output);
+        my $res = HTTP::Response->new(500);
+        $res->content($output);
+        return($res);
     }
     return(HTTP::Response->parse($output));
 }
