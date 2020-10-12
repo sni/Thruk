@@ -1982,7 +1982,6 @@ t/scenarios/auth_krb5/vnc/Dockerfile
 t/scenarios/auth_krb5/vnc/kinit.sh
 t/scenarios/auth_krb5/vnc/krb5.conf
 t/scenarios/auth_krb5/vnc/user.js
-t/scenarios/auth_oauth/.hydra
 t/scenarios/auth_oauth/docker-compose.yml
 t/scenarios/auth_oauth/Makefile
 t/scenarios/auth_oauth/omd/Dockerfile
