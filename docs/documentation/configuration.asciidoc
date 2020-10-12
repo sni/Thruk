@@ -571,6 +571,15 @@ ex.:
   thruk_verbose = 0
 
 
+=== thruk_author
+Enable author tweaks. Same as setting THRUK_AUTHOR environment.
+Only required for development, disables caches, enables template strict mode and more.
+
+ex.:
+
+  thruk_author = 1
+
+
 === slow_page_log_threshold
 
 If a page takes longer to render than this amount of seonds, a

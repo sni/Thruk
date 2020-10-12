@@ -339,9 +339,6 @@ for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
 $base_defaults->{'thruk_author'} = 0;
 $base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
-    $view_tt_settings->{'STRICT'}     = 1;
-    $view_tt_settings->{'CACHE_SIZE'} = 0 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
-    $view_tt_settings->{'STAT_TTL'}   = 1 unless($base_defaults->{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $base_defaults->{'thruk_author'} = 1;
 }
 
