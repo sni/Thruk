@@ -12,7 +12,6 @@ BEGIN {
     use IO::Socket::SSL;
     IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
     $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = "0";
-    #$ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = 'Net::SSL';
 }
 
 # omd admin tests
