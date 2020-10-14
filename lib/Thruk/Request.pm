@@ -68,6 +68,19 @@ sub _url {
     return($self->encoding->decode($url));
 }
 
+# returns uri, but applies HTTP_X_FORWARDED_* environment if set
+sub uri {
+    my($self) = @_;
+    my $uri = $self->SUPER::uri(@_);
+    $uri->scheme($self->{'env'}->{'HTTP_X_FORWARDED_PROTO'}) if $self->{'env'}->{'HTTP_X_FORWARDED_PROTO'};
+    $uri->host($self->{'env'}->{'HTTP_X_FORWARDED_HOST'}) if $self->{'env'}->{'HTTP_X_FORWARDED_HOST'};
+    my $port = $self->{'env'}->{'HTTP_X_FORWARDED_PORT'};
+    if($port && $port != $uri->port) {
+        $uri->port($port);
+    }
+    return($uri);
+}
+
 1;
 __END__
 
