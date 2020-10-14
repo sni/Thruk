@@ -145,6 +145,7 @@ sub _build_app {
         require Thruk::Config;
         $config = Thruk::Config::set_config_env();
     }
+    $self->init_logging() if $config->{'thruk_verbose'}; # must be reinitialized
     $self->{'config'} = $config;
     $Thruk::Utils::IO::config = $config;
 
@@ -909,6 +910,7 @@ sub init_logging {
         if($log4perl_conf =~ m/log4perl\.appender\..*\.filename=(.*)\s*$/mx) {
             $self->config->{'log4perl_logfile_in_use'} = $1;
         }
+        $log4perl_conf =~ s/\.Threshold=INFO/.Threshold=DEBUG/gmx if $self->debug;
         Log::Log4perl::init(\$log4perl_conf);
         $logger = Log::Log4perl::get_logger("thruk.log");
         $self->{'_log_type'} = 'file';

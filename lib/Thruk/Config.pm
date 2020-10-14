@@ -434,14 +434,6 @@ sub set_config_env {
     my $configs = _load_config_files(\@files);
     my $config  = Storable::dclone($base_defaults);
 
-    ## no critic
-    if($config->{'thruk_verbose'}) {
-        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $config->{'thruk_verbose'}) {
-            $ENV{'THRUK_VERBOSE'} = $config->{'thruk_verbose'};
-        }
-    }
-    ## use critic
-
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
     my $base_backends;
@@ -454,6 +446,14 @@ sub set_config_env {
         }
     }
     $config->{'Thruk::Backend'} = $base_backends unless($config->{'Thruk::Backend'} && scalar keys %{$config->{'Thruk::Backend'}} > 0);
+
+    ## no critic
+    if($config->{'thruk_verbose'}) {
+        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $config->{'thruk_verbose'}) {
+            $ENV{'THRUK_VERBOSE'} = $config->{'thruk_verbose'};
+        }
+    }
+    ## use critic
 
     return(set_default_config($config));
 }
