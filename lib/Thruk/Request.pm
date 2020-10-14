@@ -121,6 +121,10 @@ Returns B<decoded> GET and POST parameters.
 
 Returns urldecoded utf8 uri as string.
 
+=head2 uri
+
+Returns L<Uri> object, but applies HTTP_X_FORWARDED_* environment if set.
+
 =head1 SEE ALSO
 
 L<Plack::Request>, L<Plack::Request::WithEncoding>
