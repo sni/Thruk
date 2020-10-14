@@ -1628,7 +1628,8 @@ ex.:
 === ssl_verify_hostnames
 
 Can be set to enable / disable hostname verification for https connections. For
-example for the cookie login or the http backend.
+example for the cookie login, https backends or oauth requests. It is not recommended
+to disabled hostname verification, set `ssl_ca_path` or `ssl_ca_file` instead.
 
 ex.:
 
@@ -1637,11 +1638,22 @@ ex.:
 
 === ssl_ca_path
 
-Sets path to your certificates.
+Sets path to your certificates. Either set `ssl_ca_path` or `ssl_ca_file`.
+Not both. Defaults to `ssl_ca_file = Mozilla::CA::SSL_ca_file()` if Mozilla::CA perl
+module is installed or `ssl_ca_path = '/etc/ssl/certs'` otherwise.
 
 ex.:
 
   ssl_ca_path = /etc/ssl/certs
+
+
+=== ssl_ca_file
+
+Sets path to your ca store. See `ssl_ca_path` for details.
+
+ex.:
+
+    ssl_ca_file = /etc/ssl/certs/ca.pem
 
 
 == Cookie Authentication Settings

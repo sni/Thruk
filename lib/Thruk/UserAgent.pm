@@ -17,6 +17,7 @@ use File::Temp qw/tempfile/;
 use HTTP::Response ();
 use HTTP::Request::Common;
 use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
 use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
 
@@ -37,21 +38,44 @@ returns new UserAgent object
 sub new {
     my($class, $config, $thruk_config) = @_;
     confess("no config") unless $config;
-    my $verify_hostnames = $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} // $thruk_config->{'ssl_verify_hostnames'} // 1;
+    my $verify_hostnames = $thruk_config->{'ssl_verify_hostnames'} // 1;
     my $self = {
         'timeout'               => 180,
         'agent'                 => 'thruk',
-        'ssl_opts'              => {
-                'SSL_ca_path'       => $thruk_config->{ssl_ca_path} || "/etc/ssl/certs",
-        },
+        'ssl_opts'              => {},
         'max_redirect'          => 7,
         'protocols_allowed'     => ['http', 'https'],
         'requests_redirectable' => [ 'GET' ],           # not used
     };
-    if(!$verify_hostnames) {
+    if(!$verify_hostnames || (defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} && !$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'})) {
+        ## no critic
+        $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; # required for older IO::Socket::SSLs
+        ## use critic
         $self->{'ssl_opts'}->{'verify_hostname'} = 0;
         $self->{'ssl_opts'}->{'SSL_verify_mode'} = SSL_verify_mode_NONE;
+        _debug("SSL verify_hostname is disabled");
     }
+    # ca settings
+    if($thruk_config->{ssl_ca_path}) {
+        $self->{'ssl_opts'}->{'SSL_ca_path'} = $thruk_config->{ssl_ca_path};
+        _debug(sprintf("using SSL_ca_path: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_path'}));
+    } elsif($thruk_config->{ssl_ca_file}) {
+        $self->{'ssl_opts'}->{'SSL_ca_file'} = $thruk_config->{ssl_ca_file};
+        _debug(sprintf("using SSL_ca_file: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_file'}));
+    } else {
+        ## no critic
+        eval "use Mozilla::CA;";
+        ## use critic
+        if($@) {
+            _trace(sprintf("failed to load Mozilla::CA: %s", $@));
+            $self->{'ssl_opts'}->{'SSL_ca_path'} = "/etc/ssl/certs";
+            _debug(sprintf("using default SSL_ca_path: %s (no Mozilla::CA module installed)", $self->{'ssl_opts'}->{'SSL_ca_path'}));
+        } else {
+            $self->{'ssl_opts'}->{'SSL_ca_file'} = Mozilla::CA::SSL_ca_file();
+            _debug(sprintf("using SSL_ca_file: %s (from Mozilla::CA::SSL_ca_file)", $self->{'ssl_opts'}->{'SSL_ca_file'}));
+        }
+    }
+
     for my $key (sort keys %{$config}) {
         $self->{$key} = $config->{$key};
     }

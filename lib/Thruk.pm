@@ -915,7 +915,7 @@ sub init_logging {
     } else {
         my $format = '[%d{ABSOLUTE}][%p] %m{chomp}%n';
         if($ENV{'TEST_AUTHOR'} || $self->config->{'thruk_author'} || $self->debug) {
-            $format = '[%d{ABSOLUTE}][%p][%-30Z] %m{chomp}%n';
+            $format = '[%d{ABSOLUTE}][%p][%-50Z] %m{chomp}%n';
             my $cwd = Cwd::getcwd;
             Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', sub {
                 my($layout, $message, $category, $priority, $caller_level) = @_;
@@ -927,6 +927,8 @@ sub init_logging {
                 my $path = abs_path($caller[1]) || $caller[1];
                 $path =~ s%^$cwd/%./%gmx;
                 $path =~ s%^/opt/omd/versions/.*?/share/thruk/%./%gmx;
+                $path =~ s%/plugins/plugins-available/%/plug/%gmx;
+                $path =~ s%^\./%%gmx;
                 return(sprintf("%s:%d", $path, $caller[2]));
             });
         }

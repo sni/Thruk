@@ -60,6 +60,7 @@ feature     ('https_backends_support',
   -default                                        => 0,
   'LWP::Protocol::https'                          => 0,     # required by Thruk::Backend::Provider::HTTP
   'LWP::Protocol::connect'                        => 0,     # required by Thruk::Backend::Provider::HTTP
+  'Mozilla::CA'                                   => 0,     # required by Thruk::UserAgent
 );
 
 # mysql logcache support
