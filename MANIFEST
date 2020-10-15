@@ -67,6 +67,7 @@ lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
 lib/Thruk/Backend/Provider/Mysql.pm
 lib/Thruk/Config.pm
+lib/Thruk/Constants.pm
 lib/Thruk/Context.pm
 lib/Thruk/Controller/avail.pm
 lib/Thruk/Controller/broadcast.pm

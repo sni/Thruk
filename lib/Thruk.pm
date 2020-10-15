@@ -52,19 +52,6 @@ BEGIN {
     ## use critic
     $tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
-use constant {
-    # backend states
-    ADD_DEFAULTS        => 0,
-    ADD_SAFE_DEFAULTS   => 1,
-    ADD_CACHED_DEFAULTS => 2,
-};
-
-use base 'Exporter';
-our @EXPORT_OK = (
-    'ADD_DEFAULTS',
-    'ADD_SAFE_DEFAULTS',
-    'ADD_CACHED_DEFAULTS',
-);
 
 use Carp qw/confess longmess/;
 $Carp::MaxArgLen = 500;
@@ -73,6 +60,7 @@ use Module::Load qw/load/;
 use Data::Dumper qw/Dumper/;
 use Plack::Util ();
 use POSIX ();
+use Thruk::Constants ':add_defaults';
 
 ###################################################
 $Data::Dumper::Sortkeys = 1;

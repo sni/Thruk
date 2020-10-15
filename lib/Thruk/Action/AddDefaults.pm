@@ -25,7 +25,7 @@ use POSIX ();
 use Storable qw/dclone/;
 use URI::Escape qw/uri_escape/;
 use Thruk::Utils::Filter ();
-use Thruk qw/ADD_DEFAULTS ADD_SAFE_DEFAULTS ADD_CACHED_DEFAULTS/;
+use Thruk::Constants qw/:add_defaults :peer_states/;
 
 my @stash_config_keys = qw/
     url_prefix product_prefix title_prefix use_pager start_page documentation_link
@@ -42,36 +42,6 @@ my @stash_config_keys = qw/
     force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
     thruk_author
 /;
-
-use constant {
-    REACHABLE        => 0,
-    UNREACHABLE      => 1,
-    HIDDEN_USER      => 2,
-    HIDDEN_PARAM     => 3,
-    DISABLED_AUTH    => 4,
-
-    DISABLED_CONF    => 5,  # site has no backend config at all
-    HIDDEN_CONF      => 6,  # site has backend config but is not selected
-    UP_CONF          => 7,  # site has backend config and is currently selected
-
-    HIDDEN_LMD_PARENT => 8,
-};
-
-use base 'Exporter';
-our @EXPORT_OK = (
-    'REACHABLE',
-    'UNREACHABLE',
-    'HIDDEN_USER',
-    'HIDDEN_PARAM',
-    'DISABLED_AUTH',
-
-    'DISABLED_CONF',
-    'HIDDEN_CONF',
-    'UP_CONF',
-
-    'HIDDEN_LMD_PARENT',
-);
-our %EXPORT_TAGS = ( peer_states => \@EXPORT_OK );
 
 ######################################
 

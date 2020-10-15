@@ -13,7 +13,7 @@ Utilities Collection for Checking Thruks Integrity
 use warnings;
 use strict;
 use Thruk::Utils::RecurringDowntimes;
-use Thruk::Action::AddDefaults ':peer_states';
+use Thruk::Constants ':peer_states';
 
 my $rc_codes = {
     '0'     => 'OK',

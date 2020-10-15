@@ -8,7 +8,7 @@ use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
 
-use Thruk::Action::AddDefaults qw/HIDDEN_CONF DISABLED_CONF UP_CONF HIDDEN_LMD_PARENT/;
+use Thruk::Constants qw/:peer_states/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
