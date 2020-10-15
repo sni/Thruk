@@ -203,7 +203,7 @@ quicktest:
 	    t/9*.t
 
 authortest:
-	TEST_AUTHOR=1 THRUK_TEST_E2E=1 $(MAKE) test
+	TEST_AUTHOR=1 THRUK_AUTHOR=1 THRUK_TEST_E2E=1 $(MAKE) test
 
 timedtest:
 	for file in $(TEST_FILES); do \
