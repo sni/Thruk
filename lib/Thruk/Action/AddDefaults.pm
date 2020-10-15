@@ -49,9 +49,9 @@ use constant {
     HIDDEN_PARAM     => 3,
     DISABLED_AUTH    => 4,
 
-    DISABLED_CONF    => 5,
-    HIDDEN_CONF      => 6,
-    UP_CONF          => 7,
+    DISABLED_CONF    => 5,  # site has no backend config at all
+    HIDDEN_CONF      => 6,  # site has backend config but is not selected
+    UP_CONF          => 7,  # site has backend config and is currently selected
 
     HIDDEN_LMD_PARENT => 8,
 };

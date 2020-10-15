@@ -3,7 +3,6 @@
   jQuery.noConflict();
   [% PROCESS _header_initial_states.tt %]
   var thruk_static_export = false;
-  var backend_chooser     = '[% backend_chooser %]';
   [% IF refresh_rate +%]
   var refresh_rate        = [% refresh_rate %];
   [% END +%]

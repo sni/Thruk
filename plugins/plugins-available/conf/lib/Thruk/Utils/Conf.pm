@@ -7,21 +7,9 @@ use File::Slurp qw/read_file/;
 use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
+
+use Thruk::Action::AddDefaults qw/HIDDEN_CONF DISABLED_CONF UP_CONF HIDDEN_LMD_PARENT/;
 #use Thruk::Timer qw/timing_breakpoint/;
-
-use constant {
-    REACHABLE        => 0,
-    UNREACHABLE      => 1,
-    HIDDEN_USER      => 2,
-    HIDDEN_PARAM     => 3,
-    DISABLED_AUTH    => 4,
-
-    DISABLED_CONF    => 5,
-    HIDDEN_CONF      => 6,
-    UP_CONF          => 7,
-
-    HIDDEN_LMD_PARENT => 8,
-};
 
 =head1 NAME
 
