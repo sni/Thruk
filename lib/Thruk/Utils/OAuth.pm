@@ -50,7 +50,7 @@ sub handle_oauth_login {
         if(!$auth) {
             return $c->detach_error({msg => "oauth provider not found", code => 500, debug_information => { oauth => $data->{'oauth'} }});
         }
-        my $ua = Thruk::UserAgent->new({}, { use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
+        my $ua = Thruk::UserAgent->new({}, $c->config);
         $ua->default_header(Accept => "application/json");
         $c->log->debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk->debug;
         my $res = $ua->post($auth->{'token_url'}, {

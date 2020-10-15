@@ -184,7 +184,7 @@ sub request_url {
 
     # external url?
     if($url =~ m/^https?:/mx) {
-        my($response) = _external_request($url, $cookies, $method, $postdata, $headers, $insecure);
+        my($response) = _external_request($c, $url, $cookies, $method, $postdata, $headers, $insecure);
         my $result = {
             code    => $response->code(),
             result  => $response->decoded_content || $response->content,
@@ -379,7 +379,7 @@ sub _run {
     unless($self->{'opt'}->{'local'}) {
         my $remoteurl = _get_remote_url($c, $self->{'opt'}->{'remoteurl'});
         _debug("_run(): fetching from ".$remoteurl);
-        ($result,$response) = _request($self->{'opt'}->{'credential'}, $remoteurl, $self->{'opt'});
+        ($result,$response) = _request($c, $self->{'opt'}->{'credential'}, $remoteurl, $self->{'opt'});
         _debug("_run(): fetching done");
         if(!defined $result && $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$remoteurl." failed: "._format_response_error($response));
@@ -461,10 +461,10 @@ sub _run {
 
 ##############################################
 sub _request {
-    my($credential, $url, $options) = @_;
+    my($c, $credential, $url, $options) = @_;
     _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
 
-    my $ua = _get_user_agent();
+    my $ua = _get_user_agent($c->config);
     Thruk::UserAgent::disable_verify_hostname_by_url($ua, $url);
 
     my $response = $ua->post($url, {
@@ -500,12 +500,12 @@ sub _request {
 
 ##############################################
 sub _external_request {
-    my($url, $cookies, $method, $postdata, $headers, $insecure) = @_;
+    my($c, $url, $cookies, $method, $postdata, $headers, $insecure) = @_;
     if(!defined $method) {
         $method = $postdata ? "POST" : "GET";
     }
     _debug(sprintf("_external_request(%s, %s)", $url, $method)) if $Thruk::Utils::CLI::verbose >= 2;
-    my $ua = _get_user_agent();
+    my $ua = _get_user_agent($c->config);
     if($insecure) {
         Thruk::UserAgent::disable_verify_hostname($ua);
     } else {
@@ -929,7 +929,7 @@ sub _cmd_configtool {
         return("failed to set objects model", 1);
     }
     if($peerkey ne $c->stash->{'param_backend'}) {
-        return("failed to set objects model, got configtool section for wrong backend", 1);
+        return(sprintf("failed to set objects model, got configtool section for wrong backend '%s' ne '%s'",$peerkey, $c->stash->{'param_backend'}), 1);
     }
     # outgoing file sync
     elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
@@ -1202,7 +1202,7 @@ sub _cmd_ext_job {
 
 ##############################################
 sub _get_user_agent {
-    my $config = { 'use_curl' => $ENV{'THRUK_CURL'} };
+    my($config) = @_;
     my $ua = Thruk::UserAgent->new({}, $config);
     $ua->requests_redirectable(['GET', 'POST', 'HEAD']);
     $ua->agent("thruk_cli");
