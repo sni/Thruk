@@ -25,6 +25,7 @@ use POSIX ();
 use Storable qw/dclone/;
 use URI::Escape qw/uri_escape/;
 use Thruk::Utils::Filter ();
+use Thruk qw/ADD_DEFAULTS ADD_SAFE_DEFAULTS ADD_CACHED_DEFAULTS/;
 
 my @stash_config_keys = qw/
     url_prefix product_prefix title_prefix use_pager start_page documentation_link
@@ -434,7 +435,7 @@ sub end {
 
 sub add_defaults {
     my ($c, $safe, $no_config_adjustments) = @_;
-    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
+    $safe = ADD_DEFAULTS unless defined $safe;
 
     confess("no c?") unless defined $c;
     $c->stats->profile(begin => "AddDefaults::add_defaults");
@@ -609,7 +610,7 @@ sub add_defaults {
             } else {
                 $c->log->debug("data source error: $@");
             }
-            return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
+            return 1 if $safe == ADD_SAFE_DEFAULTS;
             return $c->detach('/error/index/9');
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
@@ -724,7 +725,7 @@ sub add_defaults {
 sub add_safe_defaults {
     my ($c) = @_;
     eval {
-        add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+        add_defaults($c, ADD_SAFE_DEFAULTS);
     };
     print STDERR $@ if($@ && Thruk->debug);
     return;
@@ -740,7 +741,7 @@ sub add_safe_defaults {
 
 sub add_cached_defaults {
     my ($c) = @_;
-    add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    add_defaults($c, ADD_CACHED_DEFAULTS);
     # make sure process info is not getting too old
     if(!$c->stash->{'processinfo_time'} || $c->stash->{'processinfo_time'} < time() - 90) {
         Thruk::Action::AddDefaults::delayed_proc_info_update($c);
@@ -1015,7 +1016,7 @@ set process info into stash
 sub set_processinfo {
     my($c, $safe, $cached_data) = @_;
     my $last_program_restart = 0;
-    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
+    $safe = ADD_DEFAULTS unless defined $safe;
 
     $c->stats->profile(begin => "AddDefaults::set_processinfo");
 
@@ -1035,7 +1036,7 @@ sub set_processinfo {
     } else {
         $fetch = 1;
     }
-    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $safe == Thruk::ADD_CACHED_DEFAULTS;
+    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $safe == ADD_CACHED_DEFAULTS;
     $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
     if($fetch) {

@@ -58,6 +58,14 @@ use constant {
     ADD_SAFE_DEFAULTS   => 1,
     ADD_CACHED_DEFAULTS => 2,
 };
+
+use base 'Exporter';
+our @EXPORT_OK = (
+    'ADD_DEFAULTS',
+    'ADD_SAFE_DEFAULTS',
+    'ADD_CACHED_DEFAULTS',
+);
+
 use Carp qw/confess longmess/;
 $Carp::MaxArgLen = 500;
 use File::Slurp qw(read_file);
