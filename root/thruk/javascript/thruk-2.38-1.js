@@ -1280,7 +1280,7 @@ function site_panel_search() {
         var site = initial_backends[key];
         var name = site.section+'/'+site.name;
         var show = true;
-        jQuery.find(searches).each(function(i, v) {
+        jQuery(searches).each(function(i, v) {
             if(v == "") { return true; }
             if(!name.match(v)) {
                 show = false;
