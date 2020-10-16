@@ -1247,13 +1247,29 @@ switch user and groups
 
 sub switch_user {
     my($uid, $groups) = @_;
-    ## no critic
-    $) = join(" ", @{$groups});
-    ## use critic
+    if(scalar @{$groups} > 0) {
+        POSIX::setgid($groups->[0]) || confess("setgid failed: ".$!);
+        ## no critic
+        $) = join(" ", @{$groups});
+        $( = $groups->[0];
+        ## use critic
+    }
     my @cmd = _get_orig_cmd_line();
     print STDERR "switching to uid: $uid\n" if $ENV{'THRUK_VERBOSE'};
     POSIX::setuid($uid) || confess("setuid failed: ".$!);
     print STDERR "re-exec: ".'"'.join('" "', @cmd).'"'."\n" if $ENV{'THRUK_VERBOSE'};
+    # clean perl5lib
+    if($ENV{'PERL5LIB'}) {
+        my @clean;
+        for my $lib (split(/:/mx, $ENV{'PERL5LIB'})) {
+            next unless -x $lib.'/.';
+            next unless -r $lib.'/.';
+            push @clean, $lib;
+        }
+        ## no critic
+        $ENV{'PERL5LIB'} = join(':', @clean);
+        ## use critic
+    }
     exec(@cmd) || confess("exec (".'"'.join('" "', @cmd).'"'.") failed: ".$!);
 }
 

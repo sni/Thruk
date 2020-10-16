@@ -1,0 +1,63 @@
+use strict;
+use warnings;
+use Test::More;
+
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
+plan tests => 42;
+
+###########################################################
+# verify that we use the correct thruk binary
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "type thruk"',
+    like => ['/\/thruk\/script\/thruk/'],
+}) or BAIL_OUT("wrong thruk path");
+
+###########################################################
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -l -vv 2>&1"',
+    like => ['/switching to uid: 1000/'],
+});
+
+# make paths absolute
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "sed -i /omd/sites/demo/etc/thruk/thruk_local.d/lmd.conf -e \'s%~/%/omd/sites/demo/%g\'"',
+    like => ['/^$/'],
+});
+
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -vv lmd stop 2>&1"',
+    like => ['/switching to uid: 1000/', '/STOPPED - 0 lmd running/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -vv lmd status 2>&1"',
+    like => ['/switching to uid: 1000/', '/STOPPED - 0 lmd running/'],
+    exit => 2,
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -vv lmd start 2>&1"',
+    like => ['/switching to uid: 1000/', '/start cmd: lmd/', '/OK - lmd started/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -vv lmd status 2>&1"',
+    like => ['/switching to uid: 1000/', '/OK - lmd running with pid/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "ps -fu demo"',
+    like => [qr(\Qlmd -pidfile /omd/sites/demo/tmp/thruk/lmd/pid\E)],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "ls -la /omd/sites/demo/tmp/thruk/lmd/"',
+    like => [qr(demo\s+demo\s+\d+.*?live\.sock), qr(demo\s+demo\s+\d+.*?pid)],
+});
