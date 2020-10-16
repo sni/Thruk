@@ -1427,9 +1427,10 @@ sub _get_orig_cmd_line {
     # cannot use @ARGV here, because that gets consumed by GetOpt
     local $/ = undef;
     my @cmd;
-    open(my $cmd, "/proc/self/cmdline") or die("cannot open /proc/self/cmdline: $!");
+    open(my $cmd, '<', '/proc/self/cmdline') or die("cannot open /proc/self/cmdline: $!");
     my $cmd_started = 0;
-    for my $e (split /\0+/,<$cmd>) {
+    my @argv = split(/\0+/mx, <$cmd>);
+    for my $e (@argv) {
         if($e eq $0) {
             $cmd_started = 1;
         }
