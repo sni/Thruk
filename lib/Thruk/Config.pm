@@ -527,6 +527,8 @@ sub set_default_config {
     if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
         if(defined $uid and $> == 0) {
             switch_user($uid, $groups);
+            print STDERR "ERROR: re-exec with uid $uid did not work\n";
+            exit(3);
         }
     }
 
@@ -1247,11 +1249,12 @@ sub switch_user {
     my($uid, $groups) = @_;
     ## no critic
     $) = join(" ", @{$groups});
-    # using POSIX::setuid here leads to
-    # 'Insecure dependency in eval while running setgid'
-    $> = $uid or confess("setuid failed: ".$!);
     ## use critic
-    return;
+    my @cmd = _get_orig_cmd_line();
+    print STDERR "switching to uid: $uid\n" if $ENV{'THRUK_VERBOSE'};
+    POSIX::setuid($uid) || confess("setuid failed: ".$!);
+    print STDERR "re-exec: ".'"'.join('" "', @cmd).'"'."\n" if $ENV{'THRUK_VERBOSE'};
+    exec(@cmd) || confess("exec (".'"'.join('" "', @cmd).'"'.") failed: ".$!);
 }
 
 ########################################
@@ -1417,6 +1420,25 @@ sub _fixup_config {
     }
 
     return($config);
+}
+
+########################################
+sub _get_orig_cmd_line {
+    # cannot use @ARGV here, because that gets consumed by GetOpt
+    local $/ = undef;
+    my @cmd;
+    open(my $cmd, "/proc/self/cmdline") or die("cannot open /proc/self/cmdline: $!");
+    my $cmd_started = 0;
+    for my $e (split /\0+/,<$cmd>) {
+        if($e eq $0) {
+            $cmd_started = 1;
+        }
+        if($cmd_started) {
+            push @cmd, $e;
+        }
+    }
+    CORE::close $cmd;
+    return($^X, @cmd);
 }
 
 ########################################
