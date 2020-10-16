@@ -326,7 +326,7 @@ sub _read_secret {
     }
     my $secret;
     my $secretfile = $var_path.'/secret.key';
-    if(-e $secretfile) {
+    if(-r $secretfile) {
         _debug("reading secret file: ".$secretfile) if $Thruk::Utils::CLI::verbose >= 2;
         $secret = read_file($var_path.'/secret.key');
         chomp($secret);
