@@ -1219,18 +1219,15 @@ sub _update_logcache {
         return;
     }
 
-    # check tables and lock
-    _drop_tables($dbh, $prefix) if $mode eq 'import';
-    my $fresh_created = 0;
-    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
-    if(_create_tables_if_not_exist($dbh, $prefix, $verbose)) {
-        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
-        $fresh_created = 1;
+    if($mode eq 'update') {
+        $mode = 'import' if _update_logcache_version($c, $dbh, $prefix, $verbose);
     }
 
-    my $rc = _update_logcache_version($c, $dbh, $prefix, $verbose);
-    if(!$rc && $mode eq 'update') {
-        $mode = 'import';
+    # check tables
+    _drop_tables($dbh, $prefix) if $mode eq 'import';
+    my $fresh_created = 0;
+    if(_create_tables_if_not_exist($dbh, $prefix, $verbose)) {
+        $fresh_created = 1;
     }
 
     return(-1) unless _check_lock($dbh, $prefix, $verbose, $c);
@@ -1363,11 +1360,11 @@ sub _update_logcache_version {
         # only log message if not importing already
         my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
         print "WARNING: ".$msg."\n" if $verbose;
-        $c->log->error($msg);
-        return;
+        $c->log->warn($msg);
+        return 1;
     }
 
-    return(1);
+    return;
 }
 
 ##########################################################
