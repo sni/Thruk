@@ -481,6 +481,7 @@ var TP = {
             TP.updateAllIcons(tb, panel.id);
         } else {
             panel.refreshHandler();
+            panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
         }
     },
 
