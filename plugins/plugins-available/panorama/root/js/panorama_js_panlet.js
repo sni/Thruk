@@ -148,6 +148,11 @@ Ext.define('TP.Panlet', {
         if(one_tab_only) {
             state.pos[1] += 25;
         }
+        if(state.size) {
+            delete state.width;
+            delete state.height;
+        }
+        delete state.maximized;
         return state;
     },
     applyState: function(state) {
