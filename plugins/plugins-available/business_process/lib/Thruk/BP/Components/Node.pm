@@ -50,6 +50,7 @@ sub new {
         'max_check_attempts'        => $data->{'max_check_attempts'} || '',
         'event_handler'             => $data->{'event_handler'} || '',
         'host_object_attributes'    => $data->{'host_object_attributes'}    || {},
+        'host_name'                 => $data->{'host_name'},
         'service_object_attributes' => $data->{'service_object_attributes'} || {},
         'create_obj'                => $data->{'create_obj'}    || 0,
         'create_obj_ok'             => 1,
@@ -220,7 +221,7 @@ sub get_objects_conf {
     }
 
     $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}} = {
-        'host_name'           => $bp->{'name'},
+        'host_name'           => $self->{'host_name'} // $bp->{'name'},
         'service_description' => $self->{'label'},
         'display_name'        => $self->{'label'},
         'use'                 => $self->{'template'} || 'thruk-bp-node-template',
@@ -496,7 +497,7 @@ sub result_to_cmd {
     else {
         my $cmd = sprintf("[%d] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s",
                                     time(),
-                                    $bp->{'name'},
+                                    ($self->{'host_name'} // $bp->{'name'}),
                                     $self->{'label'},
                                     $status,
                                     $output,
@@ -578,7 +579,7 @@ sub _get_status {
         $output = $bp->{'status_text'} if $self->{'id'} eq 'node1';
     }
     $string .= sprintf "# Time: %s\n",scalar localtime time();
-    $string .= sprintf "host_name=%s\n", $bp->{'name'};
+    $string .= sprintf "host_name=%s\n", ($self->{'host_name'} // $bp->{'name'});
     if(!$firstnode) {
         $string .= sprintf "service_description=%s\n", $self->{'label'};
     }

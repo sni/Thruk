@@ -39,7 +39,7 @@ If you are not using OMD, you will have to do some manual steps:
    https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg[github]
    or /usr/share/thruk/thruk_templates.cfg into your naemon conf.d
    folder, ex .:/etc/naemon/conf.d/thruk_bp_templates.cfg
- - add default contacts or contactgroups to Thruk BP Host Template (thruk-bp-template)  
+ - add default contacts or contactgroups to Thruk BP Host Template (thruk-bp-template)
  - change the 'objects_templates_file' to that location.
  - create an empty file thruk_bp_generated.cfg, ex.:
    /etc/naemon/conf.d/thruk_bp_generated.cfg
@@ -188,3 +188,30 @@ All custom aggregation functions have 'use warnings' and 'use strict' enabled by
 default and run in 'Thruk::BP::Functions' context, means they have access to all
 normal aggregation functions and helpers from link:../api/Thruk/BP/Functions.html
 =======
+
+
+== Scripted Business Processes
+It is a total valid use case to generate business process from a custom script.
+
+  1. Simply generate and write out the json structure into your `bp` folder.
+  2. Run `thruk bp commit` to update cronjobs and generate objects.
+
+The `bp` folder is usually in `~/var/thruk/bp/` when using OMD or `/var/lib/thruk/bp` otherwise.
+
+There are a few extra attributes you can add to your nodes when exporting them:
+
+=== Extra Node Attributes
+
+  - `create_obj`: if set to 1, node will be exported as service.
+  - `host_name`: use this host to add the exported service to.
+  - `service_object_attributes`: hash list of extra attributes added to this service.
+  - `host_object_attributes`: hash list of extra attributes added to the host container of the
+     business process. (only useful for node1)
+
+=== Extra BP Attributes
+
+  - `create_host_object`: if set to 0, no bp host object will be exported.
+     You are then responsible that this host does exist.
+
+Other attributes should be mostly self explaining and can be adopted from a manual
+created business process by looking at the file in your `bp` folder.
