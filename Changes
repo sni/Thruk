@@ -6,6 +6,7 @@ next:
           - fix backend manager in config tool
           - fix initial setuid when starting thruk as root
           - Panorama:
+            - fix inline action menus
             - fix loading mask staying forever
 
 2.38     Tue Oct  6 09:53:31 CEST 2020

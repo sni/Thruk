@@ -468,18 +468,38 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
     var menuName = tmp.shift();
     var menuArgs = tmp;
     var menu;
+    var menuData;
     Ext.Array.each(action_menu_items, function(val, i) {
         if(val.name == menuName) {
             menu = val;
             return(false);
         }
     });
+    if(str == '__inline' && extraOptions.menu) {
+        str = extraOptions.menu;
+    }
+    // menu might be json string
+    if(!menu) {
+        try {
+            menuData  = Ext.JSON.decode(str);
+        } catch(e) {
+            return(false);
+        }
+        if(menuData) {
+            menuData.inline = true;
+            menu = {
+                name: "inline",
+                data: menuData
+            };
+        }
+    }
     if(!menu) {
         TP.Msg.msg("fail_message~~no such menu: "+str);
         return(false);
     }
-    var menuData;
-    if(menu.type == "js" && menu["function"] && window[menu["function"]]) {
+    if(menuData) {
+    }
+    else if(menu.type == "js" && menu["function"] && window[menu["function"]]) {
         try {
             var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions, args: menuArgs });
             menuData = window[menu["function"]](args);

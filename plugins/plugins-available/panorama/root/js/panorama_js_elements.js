@@ -939,7 +939,7 @@ Ext.define('TP.ActionMenuButton', {
     }
 });
 
-function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, target, callback) {
+function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, target, callback, menuData) {
     var fakePanel = Ext.create('Ext.panel.Panel', {
         autoShow: false,
         floating: true,
@@ -973,6 +973,9 @@ function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, 
                         }, 1000);
                     }
                 };
+                if(menuData) {
+                    options.menu = menuData;
+                }
                 TP.iconClickHandlerExec(This.id, action_link, This, target, undefined, options);
             }
         }

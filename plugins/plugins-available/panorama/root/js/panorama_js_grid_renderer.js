@@ -301,7 +301,12 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, host_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Host Actions' title='Perform Extra Host Actions'><\/a>"; }
     if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Host Notes' title='View Extra Host Notes'><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
-    var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
+    var action_menu;
+    if(d.THRUK_ACTION_MENU) {
+        action_menu = d.THRUK_ACTION_MENU;
+    } else if(item && item.raw && item.raw.THRUK_ACTION_MENU) {
+        action_menu = item.raw.THRUK_ACTION_MENU;
+    }
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.name);
     }
@@ -557,26 +562,39 @@ function action_icon(o, action_icon) {
 TP.addActionIconsFromMenu = function(action_menu_name, host, service) {
     var icons = "";
     var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', '', '', {}, true);
+    if(menuData === false) {
+        return(icons);
+    }
     if(Ext.isArray(menuData)) {
-        Ext.Array.forEach(menuData, function(icon, i) {
-            icons += TP.addActionIcon(icon, action_menu_name, host, service);
+        Ext.Array.forEach(menuData, function(item, i) {
+            icons += TP.addActionIcon(item, null, host, service);
         });
+    } else if(menuData.inline) {
+        icons += TP.addActionIcon(menuData, null, host, service);
     } else {
         icons += TP.addActionIcon(menuData, action_menu_name, host, service);
     }
     return(icons);
 }
 
-TP.addActionIcon = function(icon, menuName, host, service) {
+TP.addActionIcon = function(menuData, menuName, host, service) {
     var href = "";
-    if(icon.action) {
-        href = icon.action;
+    if(menuData.action) {
+        href = menuData.action;
     }
     else {
-        href = "menu://"+menuName;
+        if(menuName === null) {
+            href = "menu://__inline";
+        } else {
+            href = "menu://"+menuName;
+        }
     }
-    var icon = '<a href="'+href+'" target="'+(icon.target || '')+'" onclick="return(TP.checkActionLink(this))" data-host="'+encodeURIComponent(host||'')+'" data-service="'+encodeURIComponent(service||'')+'">'
-              +'<img src="'+replace_macros(icon.icon)+'" alt="'+replace_macros(icon.title||icon.label)+'" border="0" height="20" width="20">'
+    var icon = '<a href="'+href+'" target="'+(menuData.target || '')
+                    +'" onclick="return(TP.checkActionLink(this))" data-host="'+encodeURIComponent(host||'')
+                    +'" data-service="'+encodeURIComponent(service||'')
+                    +(menuName === null ? '" data-menu="'+encodeURIComponent(Ext.JSON.encode(menuData) ||'') : '')
+                +'">'
+              +'<img src="'+replace_macros(menuData.icon)+'" alt="'+replace_macros(menuData.title||menuData.label)+'" border="0" height="20" width="20">'
               +'</a>';
     return(icon);
 }
@@ -600,6 +618,6 @@ TP.checkActionLink = function(a) {
     if(!panel) {
         return(false);
     }
-    openActionUrlWithFakePanel(a, panel, a.href, decodeURIComponent(a.dataset.host || ''), decodeURIComponent(a.dataset.service || ''), a.target);
+    openActionUrlWithFakePanel(a, panel, a.href, decodeURIComponent(a.dataset.host || ''), decodeURIComponent(a.dataset.service || ''), a.target, undefined, decodeURIComponent(a.dataset.menu || ''));
     return(false);
 }
