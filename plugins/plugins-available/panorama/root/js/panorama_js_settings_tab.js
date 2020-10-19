@@ -1120,7 +1120,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
 
                         /* reload, permissions might have changed */
-                        tab.mask = Ext.getBody().mask("reloading dashboard...");
+                        tab.addMask("reloading dashboard...");
                         TP.cp.saveChanges(null, function() {
                             TP.renewDashboardDo(tab, function() {
                                 tab_win_settings.destroy();

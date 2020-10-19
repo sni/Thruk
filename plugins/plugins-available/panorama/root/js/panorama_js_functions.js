@@ -115,7 +115,7 @@ var TP = {
             }
             if(one_tab_only) {
                 if(opt.replace_id && id != opt.replace_id) {
-                    tabbar.getActiveTab().body.mask("loading");
+                    tabbar.getActiveTab().addMask("loading");
                 }
             }
         }
@@ -1306,7 +1306,7 @@ var TP = {
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
-            if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
+            if(tab) { tab.removeMask(); }
             if(callback) { callback(); }
             return;
         }
@@ -1363,7 +1363,7 @@ var TP = {
             callback: function(options, success, response) {
                 TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
-                if(tab && tab.body && tab.mask) { Ext.getBody().unmask(); tab.mask = undefined; }
+                if(tab) { tab.removeMask(); }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;
@@ -2045,9 +2045,7 @@ var TP = {
         }
         TP.log('['+tab.id+'] renewDashboardDo');
         var duration = 1000;
-        if(tab.isActiveTab() && !tab.mask) {
-            tab.mask = Ext.getBody().mask("updating dashboard");
-        }
+        tab.addMask("updating dashboard");
         tab.renewInProgress = true;
         Ext.Ajax.request({
             url: 'panorama.cgi?task=dashboard_data',
