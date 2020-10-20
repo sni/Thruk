@@ -9,6 +9,7 @@ BEGIN {
 }
 
 plan tests => 159;
+delete $ENV{'THRUK_TEST_NO_AUDIT_LOG'};
 
 ###########################################################
 # verify that we use the correct thruk binary

@@ -215,6 +215,13 @@ my $base_defaults = {
     'logcache_clean_duration'               => '2y',
     'logcache_compact_duration'             => '10w',
     'slow_page_log_threshold'               => 15,
+    'audit_log'                             => {
+                'login'                         => 1,
+                'logout'                        => 1,
+                'session'                       => 0,
+                'external_command'              => 1,
+                'configtool'                    => 1,
+    },
     'resource_file'                         => [],
     'default_state_order'                   => 'down, unreachable,'
                                               .'unknown, critical, warning,'
