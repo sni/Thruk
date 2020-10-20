@@ -1,6 +1,7 @@
 use strict;
 use warnings;
-use Test::More;
+use Test::More 0.96;
+use File::Slurp qw/read_file/;
 
 BEGIN {
   plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -53,12 +54,14 @@ for my $p (@{$plugins}) {
       symlink('../plugins/plugins-available/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf', 'thruk_local.d/test-'.$p->{'name'}.'.conf');
     }
     for my $testfile (glob("plugins/plugins-available/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
-        TestUtils::test_command({
-            cmd     => sprintf("%s %s plugins/plugins-available/%s", $^X, $testfile, $p->{'name'}),
-            like    => ['/ok|\#\ SKIP/'],
-            unlike  => ['/not ok/'],
-            exit    => 0,
-          });
+        my $testsource = read_file($testfile);
+        subtest $testfile => sub {
+            # required for ex.: t/092-todo.t
+            local @ARGV = (sprintf("plugins/plugins-available/%s", $p->{'name'}));
+            $testsource =~ s/^\Quse warnings;\E//gmx;
+            no warnings qw(redefine);
+            eval("#line 1 $testfile\n".$testsource);
+        };
     }
     if(-e 'plugins/plugins-available/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf') {
       unlink('thruk_local.d/test-'.$p->{'name'}.'.conf');
