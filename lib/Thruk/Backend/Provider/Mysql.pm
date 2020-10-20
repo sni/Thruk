@@ -2291,7 +2291,6 @@ sub _fix_import_log {
     my($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash) = @_;
     my($host, $svc, $contact);
 
-    $l->{'state_type'} = undef;
     if(exists $l->{'hard'}) {
         if($l->{'hard'}) {
             $l->{'state_type'} = 'HARD';
