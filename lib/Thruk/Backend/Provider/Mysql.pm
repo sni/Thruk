@@ -2298,7 +2298,11 @@ sub _fix_import_log {
             $l->{'state_type'} = 'SOFT';
         }
     }
-    $l->{'state'}    = undef unless(defined $l->{'state'} && $l->{'state'} ne '');
+    if($l->{'state_type'} && ($l->{'state_type'} ne 'HARD' && $l->{'state_type'} ne 'SOFT')) {
+        $l->{'state_type'} = undef;
+    }
+
+    $l->{'state'} = undef unless(defined $l->{'state'} && $l->{'state'} ne '');
     &_set_class($l);
     &_set_type($l);
 
