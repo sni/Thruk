@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use Data::Dumper;
 use Test::More;
 
 BEGIN {
@@ -47,6 +48,17 @@ TestUtils::test_page(
     'follow'  => 1,
     'like'    => ['Logcache Details for Backend', 'Log Entries by Type', 'untyped', 'timeperiod transition'],
 );
+
+################################################################################
+# check common import issues
+my $peer   = $c->{'db'}->get_peers(1)->[0]->{'class'}->{'_peer'};
+my $prefix = $peer->{'key'};
+my $dbh    = $peer->logcache()->_dbh();
+{
+    my @data   = @{$dbh->selectall_arrayref('SELECT * FROM `'.$prefix.'_log` l WHERE l.state_type IS NULL AND l.type = "SERVICE ALERT" LIMIT 10', { Slice => {} })};
+    is(scalar @data, 0, "all service alerts have a state_type set") or diag(Dumper(\@data));
+};
+
 # cannot determine fixed number of tests, number depends on wether initial import redirects or not,
 # which depends on machine load and speed (initial import redirects after 10 seconds)
 done_testing();
