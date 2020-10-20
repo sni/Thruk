@@ -832,18 +832,13 @@ sub _bulk_send_backend {
 
     for my $cmd (@{$commands2send}) {
         utf8::decode($cmd);
-        my $logstr = sprintf('%s[%s][%s] cmd: %s%s',
+        my $logstr = sprintf('%s[%s] cmd: %s%s',
                                 ($testmode ? 'TESTMODE: ' : ''),
-                                $c->user->get('username'),
                                 $backends_string,
                                 $cmd,
                                 ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
                             );
-        if($ENV{'THRUK_TEST_CMD_NO_LOG'}) {
-            $ENV{'THRUK_TEST_CMD_NO_LOG'} .= "\n".$logstr;
-        } else {
-            $c->audit_log($logstr);
-        }
+        $c->audit_log("external_command", $logstr);
         $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
         push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
     }

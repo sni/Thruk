@@ -590,6 +590,24 @@ ex.:
   slow_page_log_threshold = 30
 
 
+=== audit_logs
+
+Defines an optional seperate logfile with some extra audit relevant log
+entries. The different categories can be used to enable/disabled specific
+messages. The `logfile` can use strftime format pattern to for ex.: add the
+timestamp to the logfile.
+
+ex.:
+
+  <audit_logs>
+    logfile          = /var/log/audit/thruk-%Y.%m.%d.log  # if set, audit log will be appended to this file. strftime format can used in the filename.
+    login            = 1    # log if user logs in
+    logout           = 1    # log if user logs out
+    external_command = 1    # log external commands
+    configtool       = 1    # log changes made with the config tool
+  </audit_logs>
+
+
 === plugin_path
 
 Path to your plugins directory. Can be used to specify different

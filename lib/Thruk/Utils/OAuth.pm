@@ -88,12 +88,12 @@ sub handle_oauth_login {
         }
         $c->log->debug(sprintf("oauth login step2: got user id: %s", $login)) if Thruk->debug;
         $login = Thruk::Authentication::User::transform_username($c->config, $login);
-        my($sessionid) = Thruk::Utils::CookieAuth::store_session($c->config, undef, {
+        my $session = Thruk::Utils::CookieAuth::store_session($c->config, undef, {
                                                                     address    => $c->req->address,
                                                                     username   => $login,
         });
         $c->log->debug(sprintf("oauth login step2: login succesful as user: %s", $login)) if Thruk->verbose;
-        return(Thruk::Controller::login::login_successful($c, $login, $sessionid, $referer, $cookie_path, $cookie_domain));
+        return(Thruk::Controller::login::login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain, "oauth: ".$auth->{'login'}));
     }
 
     # oauth login flow, step 1

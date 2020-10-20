@@ -1,6 +1,7 @@
 .travis.yml
 t/travis
 error.log
+audit.log
 notes.txt
 .DS_Store
 \.docx

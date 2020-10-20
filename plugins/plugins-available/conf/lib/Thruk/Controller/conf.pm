@@ -1459,7 +1459,7 @@ sub _process_user_password_page {
                 $c->log->error("changing password for ".$user." failed: ".$err);
                 Thruk::Utils::set_message($c, 'fail_message', "Password change failed.");
             } else {
-                $c->audit_log("user changed password for ".$user);
+                $c->audit_log("configtool", "new password set for user ".$user);
                 Thruk::Utils::set_message($c, 'success_message', "Password changed successfully");
             }
         }
@@ -1508,7 +1508,7 @@ sub _update_password {
             return unless Thruk::Utils::check_csrf($c);
             my $err = _htpasswd_password($c, $user, undef);
             return $err if $err;
-            $c->audit_log($c->stash->{remote_user}." removed password for ".$user);
+            $c->audit_log("configtool", "password removed for user ".$user);
             return;
         }
 
@@ -1520,7 +1520,7 @@ sub _update_password {
             if($pass1 eq $pass2) {
                 my $err = _htpasswd_password($c, $user, $pass1);
                 return $err if $err;
-                $c->audit_log($c->stash->{remote_user}." changed password for ".$user);
+                $c->audit_log("configtool", "new password set for user ".$user);
                 return;
             } else {
                 return('Passwords do not match');

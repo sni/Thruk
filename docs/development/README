@@ -120,8 +120,8 @@ Can be one of:
     - TEST
 
 
-==== THRUK_TEST_CMD_NO_LOG
-Don't log sent test commands from cmd.cgi.
+==== THRUK_TEST_NO_AUDIT_LOG
+Don't log to audit log.
 
 ==== THRUK_TEST_NO_STDOUT_LOG
 Don't log stdout messages during some tests

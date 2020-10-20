@@ -244,7 +244,7 @@ sub commit {
         if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'}) {
             my $uniq = {};
             for my $l (@{$self->{'logs'}}) {
-                $c->audit_log($l) unless $uniq->{$l};
+                $c->audit_log("configtool", $l) unless $uniq->{$l};
                 $uniq->{$l} = 1;
             }
         }
@@ -262,7 +262,8 @@ sub commit {
             $rc = 0;
         } else {
             # do some logging
-            $c->audit_log(sprintf("[config][%s][%s] %s file '%s'",
+            $c->audit_log("configtool",
+                            sprintf("[config][%s][%s] %s file '%s'",
                                         $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
@@ -282,7 +283,8 @@ sub commit {
             $new_index{$f->{'path'}}    = $f;
         } else {
             if($c && $f->{'deleted'}) {
-                $c->audit_log(sprintf("[config][%s][%s] deleted file '%s'",
+                $c->audit_log("configtool",
+                                sprintf("[config][%s][%s] deleted file '%s'",
                                             $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $f->{'display'},

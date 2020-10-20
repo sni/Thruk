@@ -8,7 +8,6 @@ BEGIN {
 }
 
 BEGIN {
-    $ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
     use lib('t');
     require TestUtils;
     import TestUtils;
@@ -44,10 +43,10 @@ SKIP: {
         'like'     => 'This item has moved',
         'redirect' => 1,
     );
-    like($ENV{'THRUK_TEST_CMD_NO_LOG'}, '/\['.$backends->[0]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got first command');
-    like($ENV{'THRUK_TEST_CMD_NO_LOG'}, '/\['.$backends->[1]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got second command');
+    like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[0]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got first command');
+    like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[1]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got second command');
 
-    $ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
+    $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
     TestUtils::test_page(
         'url'      => '/thruk/cgi-bin/cmd.cgi',
         'post'     => {
@@ -60,7 +59,7 @@ SKIP: {
         'like'     => 'This item has moved',
         'redirect' => 1,
     );
-    like($ENV{'THRUK_TEST_CMD_NO_LOG'}, '/\['.$backends->[0]->{'key'}.','.$backends->[1]->{'key'}.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
+    like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[0]->{'key'}.','.$backends->[1]->{'key'}.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
 };
 
 TestUtils::test_page(

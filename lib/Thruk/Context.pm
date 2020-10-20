@@ -151,8 +151,8 @@ return audit_log object
 
 =cut
 sub audit_log {
-    my($c, $msg) = @_;
-    return($c->app->audit_log($msg));
+    my($c, @args) = @_;
+    return($c->app->audit_log(@args));
 }
 
 =head2 cluster

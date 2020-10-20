@@ -177,17 +177,17 @@ sub _handle_basic_login {
     }
 
     $c->stats->profile(begin => "login::external_authentication");
-    my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
+    my $session = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
     $c->stats->profile(end => "login::external_authentication");
-    if($success eq '-1') {
+    if(ref $session eq '' && $session eq '-1') {
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
     }
-    elsif($success) {
+    elsif($session) {
         # call a script hook after successful login?
         if($c->config->{'cookie_auth_login_hook'}) {
             Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
         }
-        return(login_successful($c, $login, $success, $referer, $cookie_path, $cookie_domain));
+        return(login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain, "password"));
     }
 
     $c->log->info(sprintf("login failed for %s on %s from %s%s",
@@ -221,16 +221,18 @@ sub _handle_basic_login {
 
 =head2 login_successful
 
-    login_successful($c, $login, $sessionid, $referer, $cookie_path, $cookie_domain)
+    login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain)
 
 redirects to $referer and sets sessions cookie
 
 =cut
 sub login_successful {
-    my($c, $login, $sessionid, $referer, $cookie_path, $cookie_domain) = @_;
+    my($c, $login, $session, $referer, $cookie_path, $cookie_domain, $type) = @_;
 
     $c->stash->{'remote_user'} = $login;
-    $c->cookie('thruk_auth' => $sessionid, {
+    confess("no session") unless $session;
+    $c->{'session'} = $session;
+    $c->cookie('thruk_auth' => $session->{'private_key'}, {
         path     => $cookie_path,
         domain   => $cookie_domain,
         httponly => 1,
@@ -251,6 +253,9 @@ sub login_successful {
         delete $userdata->{'login'};
         Thruk::Utils::store_user_data($c, $userdata, $login);
     }
+
+    Thruk->audit_log("login", "user login, session started (".$type.")");
+
     return $c->redirect_to($referer);
 }
 
@@ -260,6 +265,9 @@ sub _invalidate_current_session {
     my $cookie = $c->cookie('thruk_auth');
     if(defined $cookie and defined $cookie->value) {
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie->value);
+
+        $c->audit_log("logout", "user logout, session closed", $session_data->{'username'}, $session_data->{'hashed_key'});
+
         if($session_data) {
             unlink($session_data->{'file'});
         }

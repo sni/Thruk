@@ -91,12 +91,12 @@ sub external_authentication {
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
                     $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
-                    my($sessionid) = store_session($config, undef, {
+                    my $session = store_session($config, undef, {
                         hash       => $hash,
                         address    => $address,
                         username   => $login,
                     });
-                    return $sessionid;
+                    return $session;
                 }
             } else {
                 $login = '(by basic auth hash)' if ref $login eq 'HASH';
@@ -209,12 +209,14 @@ sub clean_session_files {
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
         if($mtime) {
             if($mtime < $timeout) {
+                $c->audit_log("session", "session timeout", '?', $entry);
                 unlink($file);
             }
             elsif($mtime < $fake_session_timeout) {
                 eval {
                     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
                     if($data && $data->{'fake'}) {
+                        $c->audit_log("session", "session timeout", '?', $entry);
                         unlink($file);
                     } else {
                         $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
@@ -233,6 +235,9 @@ sub clean_session_files {
             $c->log->warn(sprintf("user %s has %d open sessions (max. %d) cleaning up.", $user, $num, $max_sessions_per_user));
             for my $file (reverse sort { $user_sessions->{$b} <=> $user_sessions->{$a} } keys %{$user_sessions}) {
                 if($num > $max_sessions_per_user) {
+                    my $entry = $file;
+                    $entry =~ s|^.*/||gmx;
+                    $c->audit_log("session", "max session reached, cleaning old session", $user, $entry);
                     unlink($file);
                     $num--;
                 } else {
@@ -315,11 +320,14 @@ sub store_session {
 
     # restore some keys which should not be stored
     $data->{'private_key'} = $sessionid;
-    $data->{'hash_raw'} = $hash_raw if $hash_raw;
-    $data->{'hash'}     = $hash_orig if $hash_orig;
-    $data->{'file'}     = $sessionfile;
+    $data->{'hash_raw'}    = $hash_raw if $hash_raw;
+    $data->{'hash'}        = $hash_orig if $hash_orig;
+    $data->{'file'}        = $sessionfile;
+    $data->{'hashed_key'}  = $hashed_key;
 
-    return($sessionid, $sessionfile, $data);
+    Thruk->audit_log("session", "session created", $data->{'username'}, $hashed_key);
+
+    return($data);
 }
 
 ##############################################

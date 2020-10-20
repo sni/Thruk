@@ -15,7 +15,6 @@ BEGIN {
     import TestUtils;
 }
 
-$ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
 ###############################################################################
 TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',

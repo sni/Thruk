@@ -1133,11 +1133,12 @@ returns user token which can be used to validate requests
 sub get_user_token {
     my($c) = @_;
     return("") unless $c->{'session'};
+    return("") unless $c->{'session'}->{'private_key'};
 
     my $sessiondata = $c->{'session'};
     if(!$sessiondata->{'csrf_token'}) {
         # session but no token yet
-        (undef, undef,$sessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $sessiondata->{'private_key'}, $sessiondata);
+        $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $sessiondata->{'private_key'}, $sessiondata);
     }
     return $sessiondata->{'csrf_token'};
 }

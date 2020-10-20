@@ -1800,12 +1800,11 @@ sub get_fake_session {
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
     }
-    my($sessionid, $sessionfile,$newsessiondata) = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
-    $c->stash->{'fake_session_id'}   = $sessionid;
-    $c->stash->{'fake_session_file'} = $sessionfile;
-    $sessiondata->{'file'}           = $sessionfile;
-    return($sessionid, $newsessiondata) if wantarray;
-    return($sessionid);
+    $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
+    $c->stash->{'fake_session_id'}   = $sessiondata->{'private_key'};
+    $c->stash->{'fake_session_file'} = $sessiondata->{'file'};
+    return($sessiondata->{'private_key'}, $sessiondata) if wantarray;
+    return($sessiondata->{'private_key'});
 }
 
 ########################################

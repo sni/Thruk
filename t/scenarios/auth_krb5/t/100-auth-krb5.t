@@ -9,7 +9,6 @@ BEGIN {
     import TestUtils;
 }
 
-$ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
 ###############################################################################
 TestUtils::test_page(
     'url'     => '/thruk/r/sites?status=0&columns=count(*)',

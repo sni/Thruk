@@ -26,7 +26,9 @@ my $c = TestUtils::get_c();
       'hash'     => 'test',
       'username' => 'user',
     };
-    my($sessionid2,$sessionfile,$data2) = Thruk::Utils::CookieAuth::store_session($c->config, $sessionid, $data);
+    my $data2 = Thruk::Utils::CookieAuth::store_session($c->config, $sessionid, $data);
+    my $sessionid2  = $data2->{'private_key'};
+    my $sessionfile = $data2->{'file'};
     is($sessionid2, $sessionid, "session id did not change: ".$sessionid2);
     isnt($sessionfile, undef, "got file: ".$sessionfile);
     is($data2->{'hash'}, $data->{'hash'}, "basic auth hash is untouched");

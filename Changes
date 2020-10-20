@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add LOCAL rest api sites alias
+          - add audit log settings
           - fix service macros in action urls
           - fix backend manager in config tool
           - fix initial setuid when starting thruk as root

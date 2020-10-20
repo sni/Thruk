@@ -13,6 +13,7 @@ Monitoring web interface for Naemon, Nagios, Icinga and Shinken.
 use strict;
 use warnings;
 use Cwd qw/abs_path/;
+use Time::HiRes;
 use Thruk::Utils::Crypt ();
 use Thruk::Utils::IO ();
 
@@ -532,7 +533,40 @@ sub log {
 
 =cut
 sub audit_log {
-    my($self, $msg) = @_;
+    my($app, @args) = @_;
+    $app = ref($app) ne "" ? $app : $thruk;
+    return($app->_audit_log(@args));
+}
+
+sub _audit_log {
+    my($self, $category, $msg, $user, $sessionid) = @_;
+    if(!$user) {
+        $user = '?';
+        if(defined $Thruk::Request::c) {
+            my $c = $Thruk::Request::c;
+            $user = $c->stash->{'remote_user'} // '?';
+        }
+    }
+    if(!$sessionid) {
+        $sessionid = '?';
+        if(defined $Thruk::Request::c) {
+            my $c = $Thruk::Request::c;
+            $sessionid = $c->{'session'}->{'hashed_key'} // '?';
+        }
+    }
+
+    $msg = sprintf("[%s][%s][%s] %s", $category, $user, $sessionid, $msg);
+
+    if($ENV{'THRUK_TEST_NO_AUDIT_LOG'}) {
+        $ENV{'THRUK_TEST_NO_AUDIT_LOG'} .= "\n".$msg;
+        return;
+    }
+
+    if(defined $self->config->{'audit_logs'}->{$category} && !$self->config->{'audit_logs'}->{$category}) {
+        # audit log disabled for this category
+        $self->log->debug($msg);
+        return;
+    }
 
     $self->log->info($msg);
 
@@ -546,6 +580,22 @@ sub audit_log {
             # change back
             $self->{'_log'} = 'screen';
         }
+    }
+
+    if(defined $self->config->{'audit_logs'} && $self->config->{'audit_logs'}->{'logfile'}) {
+        my $file = $self->config->{'audit_logs'}->{'logfile'};
+        my(undef, $microseconds) = Time::HiRes::gettimeofday();
+        my $milliseconds = substr(sprintf("%06s", $microseconds), 0, 3);
+        my @localtime = localtime;
+        my $log = sprintf("[%s,%s][%s]%s\n",
+            POSIX::strftime("%Y-%m-%d %H:%M:%S", @localtime),
+            $milliseconds,
+            $Thruk::HOSTNAME,
+            $msg,
+        );
+        $log =~ s/\n*$//gmx;
+        $file = POSIX::strftime($file, @localtime) if $file =~ m/%/gmx;
+        Thruk::Utils::IO::write($file, $log."\n", undef, 1);
     }
 
     return;
