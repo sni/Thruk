@@ -129,10 +129,9 @@ sub process {
     # direct access with basic auth
     if($extra->[1]) {
         print STDERR "thruk_auth: script bypass cookie auth for $path" if $verbose;
-        my $sessionid = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
-        if($sessionid && $sessionid ne '-1') {
+        my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
+        if(ref $session eq 'HASH' && $session->{'private_key'}) {
             print STDERR "thruk_auth: script login successful" if $verbose;
-            my $session = Thruk::Utils::CookieAuth::retrieve_session(config => $config, id => $sessionid);
             unlink($session->{'file'});
             return "/loginok/".$session->{'username'}."/".$path."\n";
         } else {
