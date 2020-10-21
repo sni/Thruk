@@ -74,6 +74,13 @@ sub request {
 }
 
 #########################
+sub clear {
+    undef $placktest;
+    undef $Thruk::Backend::Pool::peers;
+    undef $Thruk::thruk;
+}
+
+#########################
 sub ctx_request {
     my($url) = @_;
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;

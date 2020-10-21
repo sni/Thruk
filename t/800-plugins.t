@@ -54,6 +54,7 @@ for my $p (@{$plugins}) {
       symlink('../plugins/plugins-available/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf', 'thruk_local.d/test-'.$p->{'name'}.'.conf');
     }
     for my $testfile (glob("plugins/plugins-available/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
+        TestUtils::clear();
         my $testsource = read_file($testfile);
         subtest $testfile => sub {
             # required for ex.: t/092-todo.t
