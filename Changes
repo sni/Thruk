@@ -8,6 +8,7 @@ next:
           - fix initial setuid when starting thruk as root
           - fix user/group config component overrides
           - Panorama:
+            - add dashboard clone button
             - fix inline action menus
             - fix loading mask staying forever
 

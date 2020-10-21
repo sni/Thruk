@@ -130,6 +130,24 @@ TP.getExportTab = function(options) {
         }]
     }, {
         xtype:      'fieldcontainer',
+        fieldLabel: 'Clone',
+        items: [{
+            xtype: 'button',
+            width:  150,
+            text: 'Clone Current Dashboard',
+            handler: function() {
+                var exportText = '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(Ext.JSON.encode(TP.cp.lastdata[options.tab.id])).match(/.{1,65}/g).join("\n")+"\n# End Export";
+                if(TP.importAllTabs(exportText)) {
+                    if(TP.dashboardsSettingWindow) {
+                        TP.dashboardsSettingWindow.destroy();
+                    }
+                    if(options.close_handler) { options.close_handler(); }
+                    Ext.MessageBox.alert('Success', 'Dashboard cloned Successful');
+                }
+            }
+        }]
+    }, {
+        xtype:      'fieldcontainer',
         fieldLabel: 'Reset',
         items: [{
             xtype: 'button',
