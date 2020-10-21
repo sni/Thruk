@@ -533,13 +533,10 @@ sub log {
 
 =cut
 sub audit_log {
-    my($app, @args) = @_;
-    $app = ref($app) ne "" ? $app : $thruk;
-    return($app->_audit_log(@args));
-}
+    my($self, $category, $msg, $user, $sessionid, $print) = @_;
+    $self = ref($self) ne "" ? $self : $thruk;
+    $print = $print // 1;
 
-sub _audit_log {
-    my($self, $category, $msg, $user, $sessionid) = @_;
     if(!$user) {
         $user = '?';
         if(defined $Thruk::Request::c) {
@@ -556,7 +553,6 @@ sub _audit_log {
     }
 
     $msg = sprintf("[%s][%s][%s] %s", $category, $user, $sessionid, $msg);
-
     if($ENV{'THRUK_TEST_NO_AUDIT_LOG'}) {
         $ENV{'THRUK_TEST_NO_AUDIT_LOG'} .= "\n".$msg;
         return;
@@ -568,9 +564,8 @@ sub _audit_log {
         return;
     }
 
-    $self->log->info($msg);
-
     # log to thruk.log but remain screen log setting
+    my $logged = 0;
     if($self->{'_log_type'} && $self->{'_log_type'} eq 'screen') {
         local $ENV{'THRUK_SRC'} = undef;
         $self->init_logging();
@@ -579,8 +574,11 @@ sub _audit_log {
             $self->log->info($msg);
             # change back
             $self->{'_log'} = 'screen';
+            $logged = 1;
         }
     }
+
+    $self->log->info($msg) if(!$logged || $print);
 
     if(defined $self->config->{'audit_logs'} && $self->config->{'audit_logs'}->{'logfile'}) {
         my $file = $self->config->{'audit_logs'}->{'logfile'};

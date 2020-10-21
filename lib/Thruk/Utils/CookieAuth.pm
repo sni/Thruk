@@ -209,14 +209,14 @@ sub clean_session_files {
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
         if($mtime) {
             if($mtime < $timeout) {
-                $c->audit_log("session", "session timeout", '?', $entry);
+                $c->audit_log("session", "session timeout", '?', $entry, 0);
                 unlink($file);
             }
             elsif($mtime < $fake_session_timeout) {
                 eval {
                     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
                     if($data && $data->{'fake'}) {
-                        $c->audit_log("session", "session timeout", '?', $entry);
+                        $c->audit_log("session", "session timeout", '?', $entry, 0);
                         unlink($file);
                     } else {
                         $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
@@ -237,7 +237,7 @@ sub clean_session_files {
                 if($num > $max_sessions_per_user) {
                     my $entry = $file;
                     $entry =~ s|^.*/||gmx;
-                    $c->audit_log("session", "max session reached, cleaning old session", $user, $entry);
+                    $c->audit_log("session", "max session reached, cleaning old session", $user, $entry, 0);
                     unlink($file);
                     $num--;
                 } else {
@@ -327,7 +327,7 @@ sub store_session {
 
     if(defined $Thruk::Request::c) {
         my $c = $Thruk::Request::c;
-        $c->audit_log("session", "session created", $data->{'username'}, $hashed_key);
+        $c->audit_log("session", "session created", $data->{'username'}, $hashed_key, 0);
     }
 
     return($data);
