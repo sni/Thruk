@@ -1936,6 +1936,7 @@ t/data/split_plugins/thruk_local.d/b.conf
 t/data/test_c_style.conf
 t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
+t/data/user_overrides/thruk.conf
 t/helper/create_test_logs
 t/install_javascript_spidermonkey.sh
 t/perlcriticrc

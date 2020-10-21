@@ -3,8 +3,15 @@ use warnings;
 use Data::Dumper;
 use Test::More;
 
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
 use_ok("Thruk");
 use_ok("Thruk::Config");
+use_ok("Thruk::Action::AddDefaults");
 
 my $config = Thruk::Config::set_config_env();
 is(ref Thruk->config, 'HASH', "got a config");
@@ -121,6 +128,25 @@ if(!$@) {
     my $exp = [ '3', '0-4,11-12' ];
     is_deeply($config->{'command_disabled'}, $exp, "parsing cookie domain from thruk_local.d");
 };
+
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/user_overrides';
+    my $config = Thruk::Config::set_config_env();
+    is_deeply($config->{'user_password_min_length'}, 5, "parsing value from thruk_local.d");
+    my $exp = { readonly => 1 };
+    is_deeply($config->{'Thruk::Plugin::Panorama'}, $exp, "parsing value from thruk_local.d");
+
+    my $c = TestUtils::get_c();
+    local $c->stash->{'remote_user'} = "test";
+    Thruk::Action::AddDefaults::add_safe_defaults($c);
+
+    is_deeply($c->config->{'user_password_min_length'}, 10, "parsing test user value from thruk_local.d");
+    $exp = { readonly => 0 };
+    is_deeply($c->config->{'Thruk::Plugin::Panorama'}, $exp, "parsing test user value from thruk_local.d");
+};
+
+####################################################
 
 done_testing();
 

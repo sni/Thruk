@@ -1438,6 +1438,10 @@ sub _fixup_config {
                     }
                     $config->{$type}->{$name} = $data;
                 }
+                for my $key (sort keys %{$config->{$type}->{$name}->{'Component'}}) {
+                    $config->{$type}->{$name}->{$key} = delete $config->{$type}->{$name}->{'Component'}->{$key};
+                }
+                delete $config->{$type}->{$name}->{'Component'};
             }
         }
     }

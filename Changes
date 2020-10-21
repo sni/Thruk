@@ -6,6 +6,7 @@ next:
           - fix service macros in action urls
           - fix backend manager in config tool
           - fix initial setuid when starting thruk as root
+          - fix user/group config component overrides
           - Panorama:
             - fix inline action menus
             - fix loading mask staying forever

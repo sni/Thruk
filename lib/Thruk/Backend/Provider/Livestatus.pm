@@ -109,7 +109,11 @@ create new manager
 sub new {
     my($class, $peer_config, $thruk_config) = @_;
 
-    my $options = $peer_config->{'options'};
+    my $options = {};
+    # clone options, otherwise $peer_config->options would end up being a Lite class and cannot be reused
+    for my $key (keys %{$peer_config->{'options'}}) {
+        $options->{$key} = $peer_config->{'options'}->{$key};
+    }
     confess("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     my $self = {
