@@ -36,6 +36,8 @@ my $extra_tests = [
 for my $p (@{$plugins}) {
     next if($filter && $p->{'name'} ne $filter);
     next if(defined $p->{'travis'} && $ENV{'TEST_TRAVIS'} && !$p->{'travis'});
+
+    # install plugin or use existing if core plugin
     my $use_existing = 0;
     if(-e 'plugins/plugins-available/'.$p->{'name'}) {
       $use_existing = 1;
@@ -49,12 +51,15 @@ for my $p (@{$plugins}) {
       });
     }
 
+    # enable additional test config
     if(-e 'plugins/plugins-available/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf') {
       mkdir('thruk_local.d');
       symlink('../plugins/plugins-available/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf', 'thruk_local.d/test-'.$p->{'name'}.'.conf');
     }
+
+    # run plugin test files
+    TestUtils::clear();
     for my $testfile (glob("plugins/plugins-available/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
-        TestUtils::clear();
         my $testsource = read_file($testfile);
         subtest $testfile => sub {
             # required for ex.: t/092-todo.t
@@ -64,10 +69,13 @@ for my $p (@{$plugins}) {
             eval("#line 1 $testfile\n".$testsource);
         };
     }
+
+    # remove additional test config again
     if(-e 'plugins/plugins-available/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf') {
       unlink('thruk_local.d/test-'.$p->{'name'}.'.conf');
     }
 
+    # uninstall plugin
     if(!$use_existing) {
       TestUtils::test_command({
           cmd     => $BIN.' plugin remove '.$p->{'name'},
