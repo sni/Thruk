@@ -175,7 +175,7 @@ sub nice_addon_name {
     elsif($dir =~ m/^(.*)\-[\d\.]+$/mx) {
         $dir = $1;
     }
-    my $nicename = join(' ', map(ucfirst, split(/_/mx, $dir)));
+    my $nicename = join(' ', split(/_/mx, $dir));
     return($nicename, $dir);
 }
 

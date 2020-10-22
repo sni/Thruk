@@ -41,7 +41,7 @@ use strict;
 use Data::Dumper;
 use File::Temp qw/tempdir/;
 use File::Copy qw/move/;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/_error _warn _info _debug _trace/;
 
 ##############################################
 # no backends required for this command
@@ -206,7 +206,7 @@ sub _do_plugin_install {
     # create tmp folder
     my $tmpdir = tempdir( CLEANUP => 1 );
 
-    my $tarball;
+    my($tarball, $stick_version);
     if(-e $name) {
         # install from file
         $tarball = $name;
@@ -236,6 +236,7 @@ sub _do_plugin_install {
         }
         $tarball = $tmpdir.'/'.$plugin->{'name'}.'.tar.gz';
         Thruk::Utils::IO::write($tarball, $res[1]->{'result'});
+        $stick_version = $plugin->{'version'};
     }
     _debug("inspecting tarball");
     my $tar_out = Thruk::Utils::IO::cmd($c, ["tar", "tvfz", $tarball]);
@@ -269,6 +270,12 @@ sub _do_plugin_install {
     move($root, $tmpdir.'/'.$name);
     $root = $tmpdir.'/'.$name;
     my $plugin = Thruk::Utils::Plugin::read_plugin_details($root);
+    if(!$plugin->{'version'} && $stick_version) {
+        Thruk::Utils::IO::write($root.'/description.txt', 'Version: v'.$stick_version, undef, 1);
+    }
+    if($plugin->{'version'} && $stick_version && $plugin->{'version'} ne $stick_version) {
+        _warn(sprintf("expected version v%s, but downloaded plugin is version v%s", $stick_version, $plugin->{'version'}));
+    }
 
     # do we overwrite an existing plugin?
     if(!$globaloptions->{'force'} && -e $plugin_available_dir.'/'.$plugin->{'dir'}) {
