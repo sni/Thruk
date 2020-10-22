@@ -46,7 +46,7 @@
 [% END %]
   </div>
   [% IF thruk_author %]
-  <pre style="margin-top: 50px;">[% escape_html(stacktrace) %]</pre>
+  <pre style="margin-top: 50px; text-align: left;">[% escape_html(stacktrace) %]</pre>
   [% END %]
   [% END %]
 [% IF make_test_mode || thruk_author %]
