@@ -33,6 +33,12 @@ my $extra_tests = [
   't/900-javascript_syntax.t',
 ];
 
+TestUtils::test_command({
+    cmd     => $BIN.' plugin search report -f',
+    like    => ['/reports2/'],
+    exit    => 0,
+});
+
 for my $p (@{$plugins}) {
     next if($filter && $p->{'name'} ne $filter);
     next if(defined $p->{'travis'} && $ENV{'TEST_TRAVIS'} && !$p->{'travis'});
