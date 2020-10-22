@@ -16,11 +16,16 @@ use Carp;
 use Data::Dumper qw/Dumper/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw(_error _info _debug _trace);
+our @EXPORT_OK = qw(_error _warn _info _debug _trace);
 
 ##############################################
 sub _error {
     return _debug($_[0],'error');
+}
+
+##############################################
+sub _warn {
+    return _debug($_[0],'warning');
 }
 
 ##############################################
@@ -52,9 +57,10 @@ sub _debug {
             print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
         } else {
             confess('no c') unless defined $c;
-            if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
-            if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
-            if(uc($lvl) eq 'DEBUG') { $c->log->debug($line) }
+            if(uc($lvl) eq 'ERROR')   { $c->log->error($line) }
+            if(uc($lvl) eq 'WARNING') { $c->log->warn($line) }
+            if(uc($lvl) eq 'INFO')    { $c->log->info($line)  }
+            if(uc($lvl) eq 'DEBUG')   { $c->log->debug($line) }
         }
     }
     return;
