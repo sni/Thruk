@@ -555,7 +555,7 @@ Ext.define('Ext.ux.SearchStore', {
             if(type == 'group') {
                 type = 'contactgroup';
             }
-            if(type == 'user') {
+            if(type == 'user' || type == 'owner') {
                 type = 'contact';
             }
             if(type == 'action menu') {

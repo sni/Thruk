@@ -10,6 +10,7 @@ next:
           - Panorama:
             - add dashboard clone button
             - add get_screen_data function for scripted dashboards
+            - add option to transfer dashboards to other user
             - fix inline action menus
             - fix loading mask staying forever
 

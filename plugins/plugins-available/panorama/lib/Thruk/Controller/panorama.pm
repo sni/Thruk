@@ -425,7 +425,12 @@ sub _stateprovider {
                 }
                 $param_data->{'id'}   = $newid || $key;
                 $param_data->{'user'} = $c->stash->{'remote_user'};
-                if(!_save_dashboard($c, $param_data)) {
+                my $extra = {};
+                if($c->stash->{'is_admin'} && $param_data->{'tab'}->{'xdata'}->{'owner'}) {
+                    $extra->{'user'} = $param_data->{'tab'}->{'xdata'}->{'owner'};
+                }
+                delete $param_data->{'tab'}->{'xdata'}->{'owner'};
+                if(!_save_dashboard($c, $param_data, $extra)) {
                     $json = { 'status' => 'failed' };
                 } else {
                     if($newid) {

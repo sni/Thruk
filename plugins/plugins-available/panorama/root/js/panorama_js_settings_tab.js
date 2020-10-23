@@ -347,10 +347,13 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     });
     var permissionsItems = [{
         /* show owner */
-        xtype:      'textfield',
+        xtype:      'searchCbo',
         fieldLabel: 'Owner',
         name:       'owner',
-        disabled:    true
+        id:         'ownerCombo',
+        panel:      {tab: tab},
+        disabled:   !thruk_is_admin,
+        allowBlank:  false
     }, {
         /* permissions */
         xtype:      'fieldcontainer',
@@ -1101,6 +1104,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                                 tab.xdata.users.push(row);
                             }
                         });
+                        if(thruk_is_admin) {
+                            tab.xdata.owner = Ext.getCmp("ownerCombo").getValue();
+                        }
 
                         tab.applyXdata(undefined, false);
 
