@@ -151,4 +151,32 @@ sub load_data {
     return($dashboard);
 }
 
+##############################################
+
+=head2 get_screen_data
+
+  get_screen_data()
+
+return hints about users screen
+
+=cut
+sub get_screen_data {
+    my $c = $Thruk::Request::c;
+    my $screen = {};
+    return $screen unless $c;
+    if($c->cookie('thruk_screen')) {
+        eval {
+            $screen = decode_json($c->cookie('thruk_screen')->value);
+        };
+        if($screen->{'height'}) {
+            $screen->{'height'} = $c->stash->{one_tab_only} ? $screen->{'height'} : ($screen->{'height'} - 25);
+            $screen->{'offset_x'} = 0;
+            $screen->{'offset_y'} = 25;
+            $screen->{'gridsnap'} = 20;
+            $screen->{'tabbar'}   = $c->stash->{one_tab_only} ? 0 : 1;
+        }
+    }
+    return $screen;
+}
+
 1;

@@ -27,6 +27,9 @@ if(TP.initial_active_tab == undefined) {
 Ext.QuickTips.init();
 
 Ext.onReady(function() {
+    cookieSave("thruk_tz", getBrowserTimezone());
+    cookieSave("thruk_screen", JSON.stringify(getScreenData()));
+
     /* main viewport */
     if(one_tab_only) {
         TP.viewport = new Ext.Viewport({

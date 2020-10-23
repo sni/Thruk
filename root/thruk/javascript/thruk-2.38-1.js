@@ -117,6 +117,13 @@ function init_page() {
 
     // store browsers timezone in a cookie so we can use it in later requests
     cookieSave("thruk_tz", getBrowserTimezone());
+    cookieSave("thruk_screen", JSON.stringify(getScreenData()));
+    jQuery(document).resize(function() {
+        cookieSave("thruk_screen", JSON.stringify(getScreenData()));
+    });
+    jQuery(window).resize(function() {
+        cookieSave("thruk_screen", JSON.stringify(getScreenData()));
+    });
 
     /* show calendar popups for these */
     jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_clear").on("click", show_cal);
@@ -144,6 +151,14 @@ function getBrowserTimezone() {
         }
     } catch(e) {}
     return(timezone);
+}
+
+function getScreenData() {
+    var data = {
+        height: jQuery(document).height(),
+        width:  jQuery(document).width()
+    }
+    return(data);
 }
 
 var error_count = 0;

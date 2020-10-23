@@ -9,6 +9,7 @@ next:
           - fix user/group config component overrides
           - Panorama:
             - add dashboard clone button
+            - add get_screen_data function for scripted dashboards
             - fix inline action menus
             - fix loading mask staying forever
 

@@ -81,6 +81,32 @@ my $_functionname = sub { ... };
 
 Besides that, you can of course load perl modules and use functions from them.
 
+==== Predefined Functions
+
+===== load_data
+
+Returns the static dashboard from the `__DATA__` block of the dashboard file.
+
+===== get_screen_data
+
+Returns the screen size of current user. Can be used to adjust layout to screen.
+Width/Height is the actual available size of the screen for dashboard excluding
+the size of the tabbar. Offset_x/y defines the start of the dashboard. For example
+in tabbed mode, the offset y is 25px to compensate the tab bar.
+Grid snap is the grid size.
+
+------
+   {
+      width:    <height in px>,
+      height:   <width in px>,
+      offset_x: <dashboard offset x in px>,
+      offset_y: <dashboard offset y in px>,
+      gridsnap: <grid snap in px>,
+      tabbar:   <1 if tabbar is visible, 0 if not>
+   }
+------
+
+
 
 ==== Refresh
 
