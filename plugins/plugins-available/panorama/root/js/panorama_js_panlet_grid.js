@@ -66,6 +66,7 @@ Ext.define('TP.GridLoader', {
             data:  {'items': data.data },
             fields: fields,
             pageSize: panel.xdata.pageSize,
+            remoteSort: true,
             proxy: {
                 type: 'memory',
                 reader: {
@@ -117,6 +118,12 @@ Ext.define('TP.GridLoader', {
                     } else {
                         panel.xdata.groupField = undefined;
                     }
+                    if(panel.grid.store.sorters.length == 1) {
+                        var sorter = panel.grid.store.sorters.get(0);
+                        panel.xdata.sort = [sorter.property, sorter.direction];
+                    } else {
+                        panel.xdata.sort = undefined;
+                    }
 
                     // save columns width explitcitly
                     for(var x=0; x<panel.grid.columns.length; x++) {
@@ -136,6 +143,7 @@ Ext.define('TP.GridLoader', {
                         delete state.columns[x]["id"];
                     }
 
+                    delete panel.xdata.gridstate.storeState;
                     panel.saveState();
                     return false;
                 },
@@ -175,6 +183,7 @@ Ext.define('TP.GridLoader', {
 
         TP.setPagingToolbarVisibility(panel, pagingToolbar, data);
 
+        panel.applyGridSorter(panel.xdata, panel.xdata.gridstate);
         if(panel.xdata.gridstate != undefined) {
             /* applyState throws internal error but state gets applied anyway */
             try {
@@ -234,6 +243,7 @@ Ext.define('TP.PanletGrid', {
 
         var state = TP.cp.get(panel.id);
         if(state && state.xdata && state.xdata.gridstate) {
+            panel.applyGridSorter(state.xdata, state.xdata.gridstate);
             panel.initialState = TP.clone(state.xdata.gridstate);
         }
 
@@ -258,6 +268,20 @@ Ext.define('TP.PanletGrid', {
                 panel.grid.setBodyStyle("background:transparent");
             }
         }
+    },
+    applyGridSorter: function(xdata, gridstate) {
+        if(!xdata)      { return; }
+        if(!xdata.sort) { return; }
+        gridstate["storeState"] = {
+            "sorters" : [
+                {
+                    "direction" : xdata.sort[1],
+                    "property" : xdata.sort[0],
+                    "root" : "data"
+                }
+            ]
+        }
+        return;
     }
 });
 
@@ -294,7 +318,7 @@ TP.setPagingToolbarVisibility = function(panel, pagingToolbar, data) {
     var b = Ext.get(panel.grid.id+"-body");
     var body;
     if(b) { body = b.dom.firstChild }
-    if(data.paging) {
+    if(data.paging && data.data.length > 0) {
         if(pagingToolbar) {
             pagingToolbar.show();
             if(pagingToolbar.items.getAt(9)) {

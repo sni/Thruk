@@ -1733,7 +1733,7 @@ sub _task_hosts {
     my $data = $c->{'db'}->get_hosts(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
                                      pager         => 1,
                                      extra_columns => [qw/long_plugin_output/],
-                                     sort          => { ASC => [ 'name' ] },
+                                     sort          => _append_sort($c->req->parameters->{'sort'}, { ASC => [ 'name' ] }),
                                     );
 
     my $json = {
@@ -1835,7 +1835,7 @@ sub _task_services {
     $c->{'db'}->get_services(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
                              pager         => 1,
                              extra_columns => [qw/long_plugin_output/],
-                             sort          => { ASC => [ 'host_name',   'description' ] },
+                             sort          => _append_sort($c->req->parameters->{'sort'}, { ASC => [ 'host_name',   'description' ] }),
                             );
 
     my $json = {
@@ -3714,6 +3714,19 @@ sub _check_media_permissions {
     }
 
     return 1;
+}
+
+##########################################################
+sub _append_sort {
+    my($param, $default) = @_;
+    if(!$param || ref $param ne 'ARRAY') {
+        return($default);
+    }
+
+    my $others = $default->{'ASC'} || $default->{'DESC'};
+    return({
+        $param->[1] => [ $param->[0], @{$others} ],
+    });
 }
 
 ##########################################################
