@@ -79,6 +79,8 @@ before_install:
   - cpanm -q -f --installdeps --notest --no-man-pages .
   # required for plugins test
   - cpanm -q -f --notest --no-man-pages Spreadsheet/ParseExcel.pm
+  # use latest version of critics
+  - cpanm -q -f --notest --no-man-pages Perl::Critic
   - git config --global user.email "travis@localhost"
   - git config --global user.name "Travis Testuser"
   - echo "export PERL5LIB=\$PERL5LIB:$HOME/perl5/lib/perl5" > ~/.thruk
