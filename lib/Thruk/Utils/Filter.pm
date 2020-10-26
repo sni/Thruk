@@ -1157,10 +1157,19 @@ sub get_cmd_submit_hash {
     return('{}') unless $data;
     my $hash = {};
     my $x = 0;
+    my $hosts = {};
+    my $hostbackends = {};
     if($type eq 'svc') {
         for my $d (@{$data}) {
             $hash->{'r'.$x} = $d->{'host_name'}.';'.$d->{'description'}.';'.$d->{'peer_key'};
+            $hosts->{$d->{'host_name'}} = 'r'.$x unless $hosts->{$d->{'host_name'}};
+            $hostbackends->{$d->{'host_name'}}->{$d->{'peer_key'}} = 1;
             $x++;
+        }
+        for my $hst (keys %{$hosts}) {
+            my $row      = $hosts->{$hst};
+            my $backends = join("|", keys %{$hostbackends->{$hst}});
+            $hash->{$row} .= ';'.$backends;
         }
     }
     elsif($type eq 'hst') {

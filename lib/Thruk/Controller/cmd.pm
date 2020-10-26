@@ -216,8 +216,8 @@ sub index {
                 return $c->detach('/error/index/7');
             }
             #my( $host, $service, $backend )...
-            my( $host, undef, $backend ) = split /;/mx, $hostdata;
-            my @backends                 = split /\|/mx, defined $backend ? $backend : '';
+            my( $host, undef, $svcbackend, $hstbackend ) = split /;/mx, $hostdata;
+            my @backends                 = split /\|/mx, ($hstbackend // $svcbackend // '');
             $c->stash->{'lasthost'}      = $host;
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
@@ -821,11 +821,11 @@ sub _bulk_send_backend {
     return 1 if $options->{'command'} eq '';
 
     my @names;
-    for my $b (ref $backends eq 'ARRAY' ? @{$backends} : ($backends)) {
+    for my $b (@{$options->{'backend'}}) {
         my $peer = $c->{'db'}->get_peer_by_key($b);
         push @names, (defined $peer ? $peer->peer_name() : $b);
     }
-    my $backends_string = join(',', @names);
+    my $backends_string = join(',', sort @names);
 
     my $testmode = 0;
     $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->req->parameters->{'test_only'});

@@ -7,6 +7,7 @@ next:
           - fix backend manager in config tool
           - fix initial setuid when starting thruk as root
           - fix user/group config component overrides
+          - fix host commands from services page when host exists on multiple backends
           - Panorama:
             - add dashboard clone button
             - add get_screen_data function for scripted dashboards
