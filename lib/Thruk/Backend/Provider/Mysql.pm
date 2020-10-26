@@ -408,6 +408,8 @@ sub get_logs {
     };
     my($where,$auth_data) = $self->_get_filter($options{'filter'});
 
+    return unless _tables_exist($dbh, $prefix);
+
     # check logcache version
     my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
     if(scalar @versions < 1 || $versions[0] != $Thruk::Backend::Provider::Mysql::cache_version) {
