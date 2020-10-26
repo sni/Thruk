@@ -1161,16 +1161,18 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        if($c->check_user_roles('authorized_for_admin')) {
-            if($Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'}) {
-                my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'};
-                $res->[2]->{$key}->{'configtool'} = {
-                    'core_type'      => $tmp->{'core_type'},
-                    'obj_readonly'   => $tmp->{'obj_readonly'},
-                    'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
-                    'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
-                };
-            }
+        my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'};
+        if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
+            $res->[2]->{$key}->{'configtool'} = {
+                'core_type'      => $tmp->{'core_type'},
+                'obj_readonly'   => $tmp->{'obj_readonly'},
+                'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
+                'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
+            };
+        } else {
+            $res->[2]->{$key}->{'configtool'} = {
+                'disable'        => 1,
+            };
         }
     }
 

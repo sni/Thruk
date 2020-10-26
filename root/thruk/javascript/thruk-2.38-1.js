@@ -1211,7 +1211,11 @@ function create_site_panel_popup_tree_data(d, current, tree) {
         } else if(d.sub[sectionname].down > 0) {
             icon = "../images/folder_red.png";
         } else if(d.sub[sectionname].up > 0 && d.sub[sectionname].disabled > 0) {
-            icon = "../images/folder_green_mixed.png";
+            if(backend_chooser == "switch") {
+                icon = "../images/folder_green.png";
+            } else {
+                icon = "../images/folder_green_mixed.png";
+            }
         } else if(d.sub[sectionname].up == 0) {
             icon = "../images/folder_gray.png";
         }
@@ -1257,6 +1261,12 @@ function create_site_panel_popup_tree_data(d, current, tree) {
             } else if(current_backend_states[peer_key] == 2) {
                 icon = "../images/nofolder_gray.png";
                 selected = false; // checkbox off
+            }
+            if(backend_chooser == "switch") {
+                if(!array_contains(param_backend, peer_key)) {
+                    icon = "../images/nofolder_gray.png";
+                    selected = false; // checkbox off
+                }
             }
             var key = '/'+peer_key;
             nodes.push({
@@ -3513,17 +3523,22 @@ function splitN(str, separator, limit) {
     return str;
 }
 
-// checks if user has given group
-function hasContactGroup(name) {
-    if(!remote_groups) {
+//returns true if array contains given element
+function array_contains(list, needle) {
+    if(!list) {
         return(false);
     }
-    for(var x=0; x<remote_groups.length; x++) {
-        if(remote_groups[x] == name) {
+    for(var x=0; x<list.length; x++) {
+        if(list[x] === needle) {
             return(true);
         }
     }
     return(false);
+}
+
+// checks if user has given group
+function hasContactGroup(name) {
+    return(array_contains(remote_groups, name));
 }
 
 // show stacktrace controls on error page
