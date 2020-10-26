@@ -31,7 +31,7 @@
       <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
       [% END %]
       [% IF backends.size > 1 %]
-      <td align='center' class='[% class %]'>[% d.peer_name %]</td>
+      <td align='center' class='[% class %]'>[% peer_name(d).join(", ") %]</td>
       [% END %]
       [% END %]
       <td align='center' class='[% class %]'>[% date_format(c, d.entry_time) %]</td>
