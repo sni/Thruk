@@ -34,7 +34,7 @@ BEGIN {
 our $VERSION = '2.38';
 
 my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
-my $branch       = '';
+my $branch       = '2';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch  = $branch || 1;
 if($branch) {
@@ -51,7 +51,7 @@ my $base_defaults = {
     'name'                                  => 'Thruk',
     'version'                               => $VERSION,
     'branch'                                => $branch,
-    'released'                              => 'October 06, 2020',
+    'released'                              => 'October 27, 2020',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
