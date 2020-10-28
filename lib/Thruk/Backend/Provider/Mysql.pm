@@ -924,9 +924,10 @@ sub _get_logs_start_end {
     my($start, $end);
     my $prefix = $options{'collection'} || $self->{'peer_config'}->{'peer_key'};
     $prefix    =~ s/^logs_//gmx;
-    my $dbh  = $self->_dbh();
+    my $dbh  = $options{'dbh'} || $self->_dbh();
     return([$start, $end]) unless _tables_exist($dbh, $prefix);
-    my($where) = $self->_get_filter($options{'filter'});
+    my $where = "";
+    ($where) = $self->_get_filter($options{'filter'}) if $options{'filter'};
     my @data = @{$dbh->selectall_arrayref('SELECT MIN(l.time) as mi, MAX(l.time) as ma FROM `'.$prefix.'_log` l '.$where.' LIMIT 1', { Slice => {} })};
     $start   = $data[0]->{'mi'} if defined $data[0];
     $end     = $data[0]->{'ma'} if defined $data[0];
@@ -962,6 +963,7 @@ sub _log_stats {
         my $index_size = $res->{$key.'_log'}->{'Index_length'};
         my $data_size  = $res->{$key.'_log'}->{'Data_length'};
         my $status  = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
+        my(undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
         push @result, {
             key              => $key,
             name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
@@ -976,6 +978,7 @@ sub _log_stats {
             update_duration  => $status->{'update_duration'}->{'value'} // '',
             compact_duration => $status->{'compact_duration'}->{'value'} // '',
             compact_till     => $status->{'compact_till'}->{'value'} // '',
+            last_entry       => $last_entry // '',
         };
     }
 
@@ -987,6 +990,7 @@ sub _log_stats {
                  { name => 'Data Size',   key => 'data_size',  type => 'bytes', format => "%.1f" },
                  ['Items', 'items'],
                  { name => 'Last Update', key => 'last_update', type => 'date', format => '%Y-%m-%d %H:%M:%S' },
+                 { name => 'Last Item',   key => 'last_entry',  type => 'date', format => '%Y-%m-%d %H:%M:%S' },
                 ],
         data => \@result,
     );
@@ -2226,7 +2230,7 @@ sub _safe_insert {
         $dbh->do($stm.join(',', @{$values}));
     };
     if($@) {
-        print "ERROR INSERT: ".$@."\n" if $verbose;
+        print STDERR "ERROR INSERT: ".$@."\n" if $verbose;
 
         # insert failed for some reason, try them one by one to see which one breaks
         for my $v (@{$values}) {
@@ -2234,8 +2238,8 @@ sub _safe_insert {
                 $dbh->do($stm.$v);
             };
             if ($@) {
-                print "ERROR DETAIL: ".$@."\n"   if $verbose;
-                print "ERROR SQL: ".$stm.$v."\n" if $verbose;
+                print STDERR "ERROR DETAIL: ".$@."\n"   if $verbose;
+                print STDERR "ERROR SQL: ".$stm.$v."\n" if $verbose;
             }
         }
     }
@@ -2300,7 +2304,7 @@ sub _fix_import_log {
             $l->{'state_type'} = 'SOFT';
         }
     }
-    if($l->{'state_type'} && ($l->{'state_type'} ne 'HARD' && $l->{'state_type'} ne 'SOFT')) {
+    if(!$l->{'state_type'} || ($l->{'state_type'} ne 'HARD' && $l->{'state_type'} ne 'SOFT')) {
         $l->{'state_type'} = undef;
     }
 
