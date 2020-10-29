@@ -120,7 +120,10 @@ sub _apply_data {
 
 END {
     if($obj) {
-        $obj->store();
+        local $SIG{PIPE} = 'IGNORE';
+        eval {
+            $obj->store();
+        };
     }
 }
 
