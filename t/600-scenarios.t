@@ -44,7 +44,11 @@ for my $dir (@{$scenarios}) {
         chdir($dir);
         my $archive = [];
         for my $step (qw/clean update prepare wait_start test_verbose clean/) {
-            _run($dir, $step, $archive);
+            my($rc,$out) = _run($dir, $step, $archive);
+            if($rc != 0) {
+                _run($dir, "clean", $archive);
+                last;
+            }
         }
         chdir($pwd);
     }
@@ -83,16 +87,16 @@ sub _run {
     # already printed in verbose mode
     if(!$verbose && $rc != 0) {
         for my $a (@{$archive}) {
-            diag("*** make output ************************************************************************************");
+            my $chr = $a->[1] == 0 ? '*' : '!';
+            diag("");
+            diag("");
+            diag(($chr x 3).sprintf(" make %-12s ", $a->[0]).($chr x 58));
             diag("step: ".$a->[0]);
             diag("rc:   ".$a->[1]);
             diag($a->[2]);
-            diag("****************************************************************************************************");
+            diag($chr x 78);
+            diag("");
         }
     };
-    if($step eq "prepare" && $rc != 0) {
-        diag(`docker ps`);
-        BAIL_OUT("$step failed");
-    }
     return($rc, $out);
 }

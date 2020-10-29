@@ -23,7 +23,7 @@ wait_start:
 wait_start_failed:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: startup failed"
-	-test -e thruk.conf && $(THRUK) -l
+	-test -e thruk.conf && $(THRUK) -vvv -l
 	-docker ps
 	-docker-compose logs --tail=30 --no-color -t | sort
 	$(MAKE) wait_start_failed_extra
