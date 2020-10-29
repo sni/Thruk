@@ -852,13 +852,16 @@ sub _req {
         eval {
             $data = decode_json($response->decoded_content);
         };
-        die(sprintf("decode_json failed: %s\nrequest:\n%s\n\nresponse:\n%s\n", $@, $response->request->as_string(), $response->as_string())) if $@;
-        die($@."\n") if $@;
+        my $err = $@;
+        if($err) {
+            die(sprintf("decode_json failed: %s\nrequest:\n%s\n\nresponse:\n%s\n", $err, $response->request->as_string(), $response->as_string()));
+        }
         my $remote_version = $data->{'version'};
         $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
         $self->{'remote_version'} = $data->{'version'};
         $self->{'remote_branch'}  = $data->{'branch'};
         if($data->{'rc'} == 1) {
+            _debug_log_request_response($c, $response);
             if($data->{'output'} =~ m/no\ such\ command/mx) {
                 die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
@@ -873,7 +876,9 @@ sub _req {
             if($data->{'output'}->[3]) {
                 my $err = $data->{'output'}->[3];
                 $err =~ s/^ERROR:\s*//gmx;
-                die($err);
+                $err =~ s/^\Qhttp backend error: \E//gmx;
+                _debug_log_request_response($c, $response);
+                die("http backend error: ".$err);
             }
             $self->_replace_peer_key($data->{'output'}->[2]);
 
@@ -884,15 +889,24 @@ sub _req {
             return $data if $options->{'want_data'};
             return $data->{'output'};
         }
+        _debug_log_request_response($c, $response);
         die("not an array ref, got ".ref($data->{'output'}));
     }
-    if($c && Thruk->debug) {
-      $c->log->debug("request:");
-      $c->log->debug($response->request->as_string());
-      $c->log->debug("response:");
-      $c->log->debug($response->as_string());
-    }
+    _debug_log_request_response($c, $response);
     die(_format_response_error($response));
+}
+
+##########################################################
+sub _debug_log_request_response {
+    my($c, $response) = @_;
+    return unless $c;
+    return unless Thruk->debug;
+
+    $c->log->debug("request:");
+    $c->log->debug($response->request->as_string());
+    $c->log->debug("response:");
+    $c->log->debug($response->as_string());
+    return;
 }
 
 ##########################################################
