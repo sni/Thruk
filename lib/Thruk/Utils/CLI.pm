@@ -369,6 +369,11 @@ sub _run {
         $self->{'opt'}->{'local'} = 1;
     }
 
+    # some more env variables force local mode
+    if($ENV{'THRUK_NO_COMMANDS'} || $ENV{'THRUK_TEST_NO_AUDIT_LOG'}) {
+        $self->{'opt'}->{'local'} = 1;
+    }
+
     my $c = $self->get_c();
     my($result, $response);
 
