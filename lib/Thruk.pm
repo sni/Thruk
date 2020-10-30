@@ -544,12 +544,22 @@ sub audit_log {
             $user = $c->stash->{'remote_user'} // '?';
         }
     }
+
     if(!$sessionid) {
-        $sessionid = '?';
         if(defined $Thruk::Request::c) {
             my $c = $Thruk::Request::c;
-            $sessionid = $c->{'session'}->{'hashed_key'} // '?';
+            if($c->{'session'}) {
+                $sessionid = $c->{'session'}->{'hashed_key'};
+            }
         }
+    }
+    if(!$sessionid) {
+        if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
+            $sessionid = 'command line';
+        }
+    }
+    if(!$sessionid) {
+        $sessionid = '?';
     }
 
     $msg = sprintf("[%s][%s][%s] %s", $category, $user, $sessionid, $msg);
