@@ -229,7 +229,10 @@ do the initial start unless it has been started already or isn't used at all
 sub check_initial_start {
     my($c, $config, $background) = @_;
     return if(!$config->{'use_lmd_core'});
-    return if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
+    if(!$ENV{'THRUK_JOB_ID'}) {
+        return if !defined $ENV{'THRUK_SRC'};
+        return if($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer');
+    }
 
     #&timing_breakpoint("lmd check_initial_start");
 

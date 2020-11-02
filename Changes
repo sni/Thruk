@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - LMD:
             - add reload/config cli lmd command
+            - fix automatic reload on backends change at startup
 
 2.38-2   Tue Oct 27 11:42:38 CET 2020
           - add LOCAL rest api sites alias
