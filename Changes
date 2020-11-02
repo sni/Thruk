@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - LMD:
+            - add reload/config cli lmd command
+
 2.38-2   Tue Oct 27 11:42:38 CET 2020
           - add LOCAL rest api sites alias
           - add audit log settings

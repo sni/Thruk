@@ -65,7 +65,7 @@ sub check_proc {
         return;
     }
 
-    _write_lmd_config($config);
+    write_lmd_config($config);
 
     $c->log->info("lmd not running, starting up...") if $log_missing;
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
@@ -168,6 +168,30 @@ sub restart {
 
     check_proc($config, $c, 0);
 
+    return;
+}
+
+########################################
+
+=head2 reload
+
+  reload($c, $config)
+
+send sighub tp lmd process
+
+=cut
+
+sub reload {
+    my($config) = @_;
+
+    my $lmd_dir = $config->{'tmp_path'}.'/lmd';
+    if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
+        my $pid = read_file($lmd_dir.'/pid');
+        chomp($pid);
+        if(kill("SIGHUP", $pid)) {
+            return(1);
+        }
+    }
     return;
 }
 
@@ -362,7 +386,7 @@ check if the backends have changed and send a sighup to lmd if so
 sub _check_changed_lmd_config {
     my($config) = @_;
     # return if it has not changed
-    return unless _write_lmd_config($config);
+    return unless write_lmd_config($config);
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     my $pidfile = $lmd_dir.'/pid';
@@ -375,14 +399,14 @@ sub _check_changed_lmd_config {
 
 ##############################################
 
-=head2 _write_lmd_config
+=head2 write_lmd_config
 
-  _write_lmd_config($config)
+  write_lmd_config($config)
 
 write lmd.ini, returns true if file has changed or false otherwise
 
 =cut
-sub _write_lmd_config {
+sub write_lmd_config {
     my($config) = @_;
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
 

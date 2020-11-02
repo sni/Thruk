@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 42;
+plan tests => 52;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -60,4 +60,14 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/bin/bash -c "ls -la /omd/sites/demo/tmp/thruk/lmd/"',
     like => [qr(demo\s+demo\s+\d+.*?live\.sock), qr(demo\s+demo\s+\d+.*?pid)],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -vv lmd config 2>&1"',
+    like => ['/switching to uid: 1000/', '/OK - lmd config did not change/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk --local -vv lmd reload 2>&1"',
+    like => ['/switching to uid: 1000/', '/OK - lmd reload successful/'],
 });

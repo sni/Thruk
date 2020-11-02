@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 159;
+plan tests => 167;
 delete $ENV{'THRUK_TEST_NO_AUDIT_LOG'};
 
 ###########################################################
@@ -36,6 +36,15 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk lmd status',
     like => ['/OK - lmd running with pid/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk lmd config',
+    like => ['/OK - lmd config did not change/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk lmd reload',
+    like => ['/OK - lmd reload successful/'],
 });
 
 ###########################################################

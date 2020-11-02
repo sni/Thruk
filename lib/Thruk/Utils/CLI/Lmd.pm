@@ -27,7 +27,9 @@ The lmd command controls the LMD process.
     - start        starts the lmd process
     - stop         stops the lmd process
     - restart      restart the lmd process
+    - reload       send sighup to lmd process
     - status       displays status of lmd process
+    - config       write lmd config file
 
 =back
 
@@ -98,6 +100,12 @@ sub cmd {
             sleep(1);
         }
     }
+    elsif($mode eq 'reload') {
+        if(Thruk::Utils::LMD::reload($c->config)) {
+            return("OK - lmd reload successful.\n", 0);
+        }
+        return("CRITICAL - unable to reload lmd. Is lmd running?\n", 2);
+    }
     elsif($mode eq 'restart') {
         Thruk::Utils::LMD::restart($c, $c->config);
         # wait for the startup
@@ -109,6 +117,12 @@ sub cmd {
             last if($status && scalar @{$status} == $started);
             sleep(1);
         }
+    }
+    elsif($mode eq 'config') {
+        if(Thruk::Utils::LMD::write_lmd_config($c->config)) {
+            return("OK - new lmd config written (but not yet activated, run 'thruk lmd reload')\n", 0);
+        }
+        return("OK - lmd config did not change\n", 0);
     }
 
     my($status, $started) = Thruk::Utils::LMD::status($c->config);
