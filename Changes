@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - fix setting cookie path (#1049)
           - LMD:
             - add reload/config cli lmd command
             - fix automatic reload on backends change at startup

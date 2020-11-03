@@ -557,13 +557,12 @@ sub set_default_config {
     $config->{'all_problems_link'}     = $config->{'url_prefix'}.'cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems' unless defined $config->{'all_problems_link'};
     $config->{'cookie_auth_login_url'} = $config->{'url_prefix'}.'cgi-bin/login.cgi' unless defined $config->{'cookie_auth_login_url'};
 
-    $config->{'cookie_path'} = $config->{'url_prefix'};
+    $config->{'cookie_path'} = $config->{'cookie_path'} // $config->{'url_prefix'};
     my $product_prefix       = $config->{'product_prefix'};
     $config->{'cookie_path'} =~ s/\/\Q$product_prefix\E\/*$//mx;
     $config->{'cookie_path'} = '/'.$product_prefix if $config->{'cookie_path'} eq '';
     $config->{'cookie_path'} =~ s|/*$||mx; # remove trailing slash, chrome doesn't seem to like them
     $config->{'cookie_path'} = $config->{'cookie_path'}.'/'; # seems like the above comment is not valid anymore and chrome now requires the trailing slash
-    $config->{'cookie_path'} = '' if $config->{'cookie_path'} eq '/';
 
     if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
         my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
