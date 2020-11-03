@@ -892,11 +892,13 @@ sub _calculate_section_totals {
     }
 
     if($section->{'sub'}) {
-        for my $s (values %{$section->{'sub'}}) {
+        for my $n (keys %{$section->{'sub'}}) {
+            my $s = $section->{'sub'}->{$n};
             _calculate_section_totals($c, $s, $backend_detail, $initial_backends);
             for my $key (qw/up disabled down total/) {
                 $section->{$key} += $s->{$key};
             }
+            delete $section->{'sub'}->{$n} if($s->{'total'} == 0);
         }
     }
 
