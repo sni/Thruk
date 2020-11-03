@@ -390,14 +390,7 @@ sub _check_changed_lmd_config {
     my($config) = @_;
     # return if it has not changed
     return unless write_lmd_config($config);
-
-    my $lmd_dir = $config->{'tmp_path'}.'/lmd';
-    my $pidfile = $lmd_dir.'/pid';
-    if(-s $pidfile) {
-        my $pid = read_file($pidfile);
-        kill(1, $pid);
-    }
-    return;
+    return reload($config);
 }
 
 ##############################################
