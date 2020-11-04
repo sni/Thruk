@@ -32,11 +32,17 @@ sub register {
     # set Template::Provider
     $settings->{'LOAD_TEMPLATES'} = [];
 
+    if($app->config->{'thruk_author'}) {
+        $settings->{'STRICT'}     = 1;
+        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || $ENV{'THRUK_SRC'} eq 'TEST');
+        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || $ENV{'THRUK_SRC'} eq 'TEST');
+    }
+
     # user template provider
     if($app->config->{'user_template_path'}) {
         # use short ttl, because folder is user writable
         my %custom_settings = (%{$settings}, (STAT_TTL => 30, INCLUDE_PATH => [$app->config->{'user_template_path'}]));
-        $custom_settings{'STAT_TTL'}   = $settings->{'STAT_TTL'} if $custom_settings{'STAT_TTL'} > $settings->{'STAT_TTL'};
+        $custom_settings{'STAT_TTL'} = $settings->{'STAT_TTL'} if $custom_settings{'STAT_TTL'} > $settings->{'STAT_TTL'};
         $template_provider_user = Template::Provider->new(\%custom_settings);
         push @{$settings->{'LOAD_TEMPLATES'}}, $template_provider_user;
     }
@@ -52,12 +58,6 @@ sub register {
           $app->config->{'base_templates_dir'},
     ]));
     push @{$settings->{'LOAD_TEMPLATES'}}, Template::Provider->new(\%base_settings);
-
-    if($app->config->{'thruk_author'}) {
-        $settings->{'STRICT'}     = 1;
-        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || $ENV{'THRUK_SRC'} eq 'TEST');
-        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || $ENV{'THRUK_SRC'} eq 'TEST');
-    }
 
     $app->{'tt'} = Template->new($settings);
     $app->{'config'}->{'strict_tt'} = $settings->{'STRICT'};
