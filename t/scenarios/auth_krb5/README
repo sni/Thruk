@@ -2,6 +2,9 @@
 
 to manually reproduce things here you need to:
 
-  - connect by vnc to 127.0.0.3:5901 (password is "vncpassword")
+  - connect by vnc either by
+    - vnc 127.0.0.3:5901
+    - http://127.0.0.3:6901/
+    - password is "vncpassword"
   - open firefox and connect to: https://omd.test.local/demo/
 
