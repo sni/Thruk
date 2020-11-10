@@ -2254,6 +2254,10 @@ sub get_host_columns {
         { title => "In Notificaton Period", "field" => "in_notification_period", "checked" => 0 },
         { title => "In Check Period",      "field" => "in_check_period",       "checked" => 0 },
     );
+    if($ENV{'THRUK_USE_LMD'}) {
+        push @{$columns},
+        { title => "Last Cache Update",    "field" => "lmd_last_cache_update", "checked" => 0 };
+    }
     if($c->config->{'show_custom_vars'}) {
         for my $var (@{$c->config->{'show_custom_vars'}}) {
             if($var !~ m/\*/mx) { # does not work with wildcards
@@ -2331,6 +2335,10 @@ sub get_service_columns {
         { title => "In Notificaton Period", "field" => "in_notification_period", "checked" => 0 },
         { title => "In Check Period",      "field" => "in_check_period",       "checked" => 0 },
     );
+    if($ENV{'THRUK_USE_LMD'}) {
+        push @{$columns},
+        { title => "Last Cache Update",    "field" => "lmd_last_cache_update", "checked" => 0 };
+    }
     if($c->config->{'show_custom_vars'}) {
         for my $var (@{$c->config->{'show_custom_vars'}}) {
             if($var !~ m/\*/mx) { # does not work with wildcards

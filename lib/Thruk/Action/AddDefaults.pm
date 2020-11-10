@@ -670,6 +670,11 @@ sub add_defaults {
         }
     }
 
+    $c->stash->{'has_lmd'} = 0;
+    if($c->config->{'use_lmd_core'}) {
+        $c->stash->{'has_lmd'}   = 1;
+    }
+
     ###############################
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
 

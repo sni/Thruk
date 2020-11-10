@@ -252,12 +252,11 @@ sub get_processinfo {
             if(defined $options{'extra_columns'}) {
                 push @{$options{'columns'}}, @{$options{'extra_columns'}};
             }
-            if($ENV{'THRUK_USE_LMD'} && $ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.0')) {
-                push @{$options{'columns'}}, 'configtool';
-            }
             if($ENV{'THRUK_USE_LMD'}) {
+                push @{$options{'columns'}}, 'configtool';
                 push @{$options{'columns'}}, 'peer_name';
                 push @{$options{'columns'}}, 'peer_addr';
+                push @{$options{'columns'}}, 'lmd_last_cache_update';
             }
         }
 
@@ -298,7 +297,7 @@ sub get_sites {
         $options{'columns'} = [qw/
             peer_key peer_name key name addr status bytes_send bytes_received queries
             last_error last_update last_online response_time idling last_query
-            parent section
+            parent section lmd_last_cache_update
             federation_key federation_name federation_addr federation_type
         /];
         if(defined $options{'extra_columns'}) {
@@ -410,6 +409,7 @@ sub get_hosts {
         }
         if($self->{'lmd_optimizations'}) {
             push @{$options{'columns'}}, 'last_state_change_order';
+            push @{$options{'columns'}}, 'lmd_last_cache_update';
         } else {
             my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
             $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
@@ -581,6 +581,9 @@ sub get_services {
         # only available since > 1.0.9
         if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'} > 1000009) {
             push @{$options{'columns'}},  qw/depends_exec depends_notify parents/;
+        }
+        if($self->{'lmd_optimizations'}) {
+            push @{$options{'columns'}}, 'lmd_last_cache_update';
         }
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};

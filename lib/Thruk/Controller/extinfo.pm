@@ -819,11 +819,7 @@ sub _process_perf_info_page {
     }
 
     # add lmd cache statistics
-    $c->stash->{'has_lmd'} = 0;
-    if($c->config->{'use_lmd_core'}) {
-        $c->stash->{'has_lmd'}   = 1;
-        $c->stash->{'lmd_stats'} = $c->{'db'}->lmd_stats($c);
-    }
+    $c->stash->{'lmd_stats'} = $c->{'db'}->lmd_stats($c) if $c->stash->{'has_lmd'};
 
     return 1;
 }

@@ -329,7 +329,11 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Update:</td>
-                            <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
+                            [% IF host.exists("lmd_last_cache_update") %]
+                            <td class='dataVal'>[% date_format(c, host.lmd_last_cache_update) %]&nbsp;&nbsp;( [% duration(date.now - host.lmd_last_cache_update, 4) %] ago, lmd cached )</td>
+                            [% ELSE %]
+                            <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0s ago )</td>
+                            [% END %]
                           </tr>
                           [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
                           <tr>

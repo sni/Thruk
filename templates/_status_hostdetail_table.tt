@@ -183,6 +183,9 @@
         <td class='[% class %] percent_state_change' style="display: none;" nowrap align="left">[% sprintf('%.2f', h.percent_state_change) %]%</td>
         <td class='[% class %] in_notification_period' style="display: none;" nowrap>[% IF h.in_notification_period %]Yes[% ELSE %]No[% END %]</td>
         <td class='[% class %] in_check_period' style="display: none;" nowrap>[% IF h.in_check_period %]Yes[% ELSE %]No[% END %]</td>
+        [% IF has_lmd %]
+        <td class='[% class %] lmd_last_cache_update' style="display: none;" nowrap>[% date_format(c, h.lmd_last_cache_update) %]</td>
+        [% END %]
         [% FOREACH col = default_columns.$paneprefix %]
           [% IF col.field.match('^cust_') %]
           [% val = "";

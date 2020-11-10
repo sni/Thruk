@@ -4,6 +4,8 @@ next:
           - fix setting cookie path (#1049)
           - LMD:
             - add reload/config cli lmd command
+            - add last_lmd_cache_update to available columns
+            - show last_lmd_cache_update on extinfo page
             - fix automatic reload on backends change at startup
 
 2.38-2   Tue Oct 27 11:42:38 CET 2020

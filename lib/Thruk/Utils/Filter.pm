@@ -153,6 +153,7 @@ sub duration {
         if($hours   > 0) { push @res, $hours."h"; }
         if($minutes > 0) { push @res, $minutes."m"; }
         if($seconds > 0) { push @res, $seconds."s"; }
+        if(scalar @res == 0) { push @res, "0s"; }
         return($minus.join(" ", @res));
     }
     elsif($options == 5) {
@@ -161,6 +162,7 @@ sub duration {
         if($hours   > 0) { push @res, $hours."hours"; }
         if($minutes > 0) { push @res, $minutes."min"; }
         if($seconds > 0) { push @res, $seconds."sec"; }
+        if(scalar @res == 0) { push @res, "0sec"; }
         return($minus.join(" ", @res));
     }
     elsif($options == 6) {
@@ -171,6 +173,7 @@ sub duration {
         if($minutes > 0) { push @res, $minutes."m"; }
         if($seconds > 0) { push @res, $seconds."s"; }
         if(scalar @res > 2) { @res = splice(@res, 0, 2); }
+        if(scalar @res == 0) { push @res, "0s"; }
         return($minus.join(" ", @res));
     }
     confess("unknown options in duration(): ".$options);
