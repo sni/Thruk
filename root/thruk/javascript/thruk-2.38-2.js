@@ -6226,6 +6226,14 @@ function show_cal(ev) {
         return;
     }
 
+    // do not open if target input contains short durations like 2m or 10d
+    if(ev.target.tagName == "INPUT") {
+        var val = ev.target.value;
+        if(String(val).match(/^\d+\w$/)) {
+            return;
+        }
+    }
+
     var id1       = ev.target.id;
     var hasClear  = ev.target.className.match(/cal_popup_clear/)       ? true : false;
     var hasRange  = ev.target.className.match(/cal_popup_range/)       ? true : false;
