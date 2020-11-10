@@ -8,3 +8,21 @@ to manually reproduce things here you need to:
     - password is "vncpassword"
   - open firefox and connect to: https://omd.test.local/demo/
 
+
+This setup looks like this:
+
+  +-----+      +------+       +------------+
+  |     | vnc  |      |       |            |
+  | VNC +----->+ OMD  +------>+ Remote OMD |
+  |     | http |      | https |            |
+  +-+---+      +-+----+       +-+----------+
+    ^           ^               |
+    |krb        |krb            |krb
+    |           |               |
+  +-+-----------+-+             |
+  |               |             |
+  | Kerberos Host +<------------+
+  |               |
+  +---------------+
+
+(http://asciiflow.com/)
