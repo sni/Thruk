@@ -96,11 +96,13 @@ clean:
 	docker-compose kill -s INT
 	docker-compose kill
 	docker-compose rm -f
-	-docker network prune -f
-	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_clean
 	@echo "### $@: $$(date "+%FT%T.%N")"
+
+clean_docker_killall:
+	-docker network prune -f
+	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
 
 update:
 	@echo "### $@: $$(date "+%FT%T.%N")"
