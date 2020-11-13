@@ -154,6 +154,9 @@ sub perl {
                 undef $rc;
                 if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
                     open(my $fh, '>', $dir."/forward");
+                    if(ref $c->stash->{'last_redirect_to'}) {
+                        confess("invalid redirect url: ".Dumper($c->stash->{'last_redirect_to'}));
+                    }
                     print $fh $c->stash->{'last_redirect_to'},"\n";
                     Thruk::Utils::IO::close($fh, $dir."/forward");
                     $err = undef;
@@ -840,6 +843,9 @@ sub do_parent_stuff {
 
     # write forward file
     if(defined $conf->{'forward'}) {
+        if(ref $conf->{'forward'}) {
+            confess("invalid redirect url: ".Dumper($conf->{'forward'}));
+        }
         open($fh, '>', $dir."/forward") or die("cannot write forward: $!");
         print $fh $conf->{'forward'};
         print $fh "\n";
