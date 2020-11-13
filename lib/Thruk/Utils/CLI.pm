@@ -478,8 +478,12 @@ sub _request {
             options    => $options,
         }),
     });
+    if($Thruk::Utils::CLI::verbose >= 2) {
+        _debug(" -> request:");
+        _debug(Thruk::Utils::clean_credentials_from_string($response->request->as_string()));
+    }
     if($response->is_success) {
-        _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
+        _debug(" -> request was successful") if $Thruk::Utils::CLI::verbose >= 2;
         my $data_str = $response->decoded_content || $response->content;
         my $data;
         eval {
@@ -489,16 +493,13 @@ sub _request {
             _error(" -> decode failed: ".Dumper($@, $data_str, $response));
             return(undef, $response);
         }
-        _debug("   -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
-        _debug("   -> ".Dumper($data))     if $Thruk::Utils::CLI::verbose >= 2;
+        _debug("   -> ".Thruk::Utils::clean_credentials_from_string(Dumper($data)))     if $Thruk::Utils::CLI::verbose >= 2;
         return($data, $response);
     }
 
     if($Thruk::Utils::CLI::verbose >= 2) {
         _debug(" -> request failed:");
-        _debug($response->request->as_string());
-        _debug(" -> response:");
-        _debug($response->as_string());
+        _debug(Thruk::Utils::clean_credentials_from_string($response->as_string()));
     }
     return(undef, $response);
 }

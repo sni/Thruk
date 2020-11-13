@@ -3590,16 +3590,34 @@ sub dump_params {
     local $Data::Dumper::Indent = 0;
     my $dump = Dumper($params);
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
-    for my $key (qw/credential credentials CSRFtoken/) {
-        $dump    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx;  # remove from json encoded data
-        $dump    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx;  # same, but with single quotes
-
-        $dump    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
-        $dump    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
-    }
+    $dump    = clean_credentials_from_string($dump);
     $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
     $dump    =~ s%;$%%gmx;
     return($dump);
+}
+
+##############################################
+
+=head2 clean_credentials_from_string
+
+    clean_credentials_from_string($string)
+
+returns strings with potential credentials removed
+
+=cut
+sub clean_credentials_from_string {
+    my($str) = @_;
+
+    for my $key (qw/credential credentials CSRFtoken/) {
+        $str    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx; # remove from json encoded data
+        $str    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx; # same, but with single quotes
+        $str    =~ s|(%22)($key)(%22%3A%22).*?(%22)|$1$2$3...$4|gmx;  # remove from url encoded data
+
+        $str    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
+        $str    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
+    }
+
+    return($str);
 }
 
 ##############################################
