@@ -45,3 +45,28 @@ TestUtils::test_command({
     cmd  => '/usr/bin/env file tmp/grafana.png',
     like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGBA, non-interlaced/'],
 });
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk graph --host=test --service=Ping --width=200 --height=200 --format=png > tmp/grafana.png"',
+    like => ['/^$/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/usr/bin/env file tmp/grafana.png',
+    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGBA, non-interlaced/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "thruk graph --host=test --service=Ping --width=200 --height=200 --format=base64 -o tmp/grafana.base64"',
+    like => ['/graph written to/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "base64 -d tmp/grafana.base64 > tmp/grafana.png"',
+    like => ['/^$/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/usr/bin/env file tmp/grafana.png',
+    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGBA, non-interlaced/'],
+});

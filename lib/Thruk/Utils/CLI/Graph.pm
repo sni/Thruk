@@ -52,6 +52,10 @@ The graph command exports pnp/grafana graphs
 
     Grafana panelId. Defaults to 1.
 
+=item B<output>
+
+    Write output to file, default is printing to stdout.
+
 =back
 
 =cut
@@ -93,6 +97,7 @@ sub cmd {
          "width=i"          => \$opt->{'width'},
          "height=i"         => \$opt->{'height'},
          "source=i"         => \$opt->{'source'},
+         "o|output=s"       => \$opt->{'output'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -142,6 +147,9 @@ sub cmd {
         require MIME::Base64;
         $img = MIME::Base64::encode_base64($img);
     }
+    elsif($format eq 'png') {
+        $c->res->content_type('image/png');
+    }
     Thruk::Utils::IO::write($cache_file, $img);
     _debug("cached graph to ".$cache_file) if $Thruk::Utils::CLI::verbose >= 2;
 
@@ -153,6 +161,10 @@ sub cmd {
             _debug("removed old cached file (mtime: ".scalar($mtime)."): ".$file) if $Thruk::Utils::CLI::verbose >= 2;
             unlink($file);
         }
+    }
+    if($opt->{'output'} && $opt->{'output'} ne '-') {
+        Thruk::Utils::IO::write($opt->{'output'}, $img);
+        $img = sprintf("graph written to %s", $opt->{'output'});
     }
     $c->stats->profile(end => "_cmd_graph($action)");
     return($img, 0);
