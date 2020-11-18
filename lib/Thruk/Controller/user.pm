@@ -31,9 +31,14 @@ sub index {
 
     my $keywords = $c->req->uri->query;
     if($keywords && $keywords =~ m/setcookie/gmx) {
-        my $url = $c->req->parameters->{'referer'};
+        my $url = delete $c->req->parameters->{'referer'};
         if(!$url || $url !~ m/^\//gmx) {
             $url = $c->stash->{'url_prefix'};
+        } else {
+            delete $c->req->parameters->{'setcookie'};
+            $url = URI->new($url);
+            $url->query_form($c->req->parameters);
+            $url = $url->as_string;
         }
         return $c->redirect_to($url);
     }
