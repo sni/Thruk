@@ -292,7 +292,7 @@ sub authenticate {
             _set_stash_user($c, $user, $auth_src);
             return($user);
         }
-        ($username, $auth_src, $roles, $superuser,$internal, $sessionid, $sessiondata) = _request_username($c, $options{'apikey'});
+        ($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata) = _request_username($c, $options{'apikey'});
 
         # transform username upper/lower case?
         $original_username = $username;
@@ -351,7 +351,7 @@ sub _set_stash_user {
 
 get username from env
 
-returns $username, $src, $original_username, $roles, $superuser, $internal
+returns $username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata
 
 =cut
 sub _request_username {
@@ -414,6 +414,11 @@ sub _request_username {
     elsif(defined $c->config->{'use_ssl_authentication'} and $c->config->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
         $username = $env->{'SSL_CLIENT_S_DN_CN'};
         $auth_src = "ssl_authentication";
+    }
+    # kerberos authentication
+    elsif(($env->{'AUTH_TYPE'}//'') eq 'Negotiate' && ($env->{'GSS_NAME'}//'') ne '' ) {
+        $username = $env->{'GSS_NAME'};
+        $auth_src = "Negotiate";
     }
     # basic authentication
     elsif(defined $env->{'REMOTE_USER'} && $env->{'REMOTE_USER'} ne '' ) {

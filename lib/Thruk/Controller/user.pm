@@ -29,6 +29,15 @@ sub index {
     $c->stash->{'infoBoxTitle'}    = 'User Profile';
     $c->stash->{'new_private_key'} = '';
 
+    my $keywords = $c->req->uri->query;
+    if($keywords && $keywords =~ m/setcookie/gmx) {
+        my $url = $c->req->parameters->{'referer'};
+        if(!$url || $url !~ m/^\//gmx) {
+            $url = $c->stash->{'url_prefix'};
+        }
+        return $c->redirect_to($url);
+    }
+
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
         my $send   = $c->req->parameters->{'send'};

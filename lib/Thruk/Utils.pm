@@ -1770,14 +1770,14 @@ sub absolute_url {
 
 =head2 get_fake_session
 
-  get_fake_session($c, [$sessionid], [$roles], [$address])
+  get_fake_session($c, [$sessionid], [$roles], [$address], $extra)
 
 create and return fake session id along with session data for current user
 
 =cut
 
 sub get_fake_session {
-    my($c, $id, $username, $roles, $ip) = @_;
+    my($c, $id, $username, $roles, $ip, $extra) = @_;
 
     if(!$c->user_exists) {
         confess("no user");
@@ -1799,6 +1799,11 @@ sub get_fake_session {
     };
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
+    }
+    if($extra) {
+        for my $key (sort keys %{$extra}) {
+            $sessiondata->{$key} = $extra->{$key};
+        }
     }
     $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessiondata->{'private_key'};
