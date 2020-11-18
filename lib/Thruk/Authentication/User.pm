@@ -503,6 +503,8 @@ run transformation rules for username
 sub transform_username {
     my($config, $username, $c) = @_;
 
+    return $username if(!defined $username || $username eq '');
+
     # change case?
     $username = lc($username) if $config->{'make_auth_user_lowercase'};
     $username = uc($username) if $config->{'make_auth_user_uppercase'};

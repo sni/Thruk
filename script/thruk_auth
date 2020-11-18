@@ -106,8 +106,8 @@ sub process {
     # direct login by secret/api key
     if($extra->[2] && $extra->[2] =~ m/[a-zA-Z0-9_]+/mx) {
         my $secret_key  = read_file($secret_file) if -s $secret_file;
-        chomp($secret_key);
-        if($extra->[3] && $extra->[2] eq $secret_key) {
+        chomp($secret_key) if $secret_key;
+        if($secret_key && $extra->[3] && $extra->[2] eq $secret_key) {
             my $user = $extra->[3];
             return "/loginok/".$user."/".$path."\n";
         }
