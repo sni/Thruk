@@ -7,10 +7,10 @@ use Data::Dumper qw/Dumper/;
 use Carp qw/carp confess/;
 use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
-use IO::Select;
+use IO::Select ();
 
-use Monitoring::Livestatus::INET qw//;
-use Monitoring::Livestatus::UNIX qw//;
+use Monitoring::Livestatus::INET ();
+use Monitoring::Livestatus::UNIX ();
 
 our $VERSION = '0.82';
 

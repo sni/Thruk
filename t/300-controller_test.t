@@ -24,42 +24,30 @@ END {
 }
 BEGIN { use_ok 'Thruk::Controller::test' }
 
-# remove old leftovers
-unlink('/tmp/thruk_test_error.log');
-unlink('/tmp/thruk_test_debug.log');
+$ENV{'THRUK_TEST_NO_LOG'} = "";
 
 my($res, $c) = ctx_request('/thruk/side.html');
-$c->app->config->{'log4perl_conf'} = "t/data/log4perl.conf";
-$c->app->init_logging();
 
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/test.cgi',
     'like'    => 'Read what\'s new in Thruk',
 );
 # should not have leaks under normal conditions
-my $str = read_file('/tmp/thruk_test_error.log');
-unlike($str, '/found leaks:/', 'got leak str');
-unlike($str, '/Thruk::Context=/', 'got leaks location');
-unlink('/tmp/thruk_test_error.log');
-unlink('/tmp/thruk_test_debug.log');
+unlike($ENV{'THRUK_TEST_NO_LOG'}, '/found leaks:/', 'got leak str');
+unlike($ENV{'THRUK_TEST_NO_LOG'}, '/Thruk::Context=/', 'got leaks location');
+$ENV{'THRUK_TEST_NO_LOG'} = "";
 
 # test leak detection
-$c->app->init_logging();
-$ENV{'THRUK_SRC'} = 'TEST_LEAK';
+Thruk::Utils::Log::reset_logging();
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/test.cgi?action=leak',
     'like'    => 'Read what\'s new in Thruk',
 );
 
-$str = read_file('/tmp/thruk_test_error.log');
-like($str, '/found leaks:/', 'got leak str');
-like($str, '/Thruk::Context=/', 'got leaks location');
+like($ENV{'THRUK_TEST_NO_LOG'}, '/found leaks:/', 'got leak str');
+like($ENV{'THRUK_TEST_NO_LOG'}, '/Thruk::Context=/', 'got leaks location');
 
 END {
     # restore env
-    $ENV{'THRUK_SRC'} = 'TEST';
-
-    # remove old leftovers
-    unlink('/tmp/thruk_test_error.log');
-    unlink('/tmp/thruk_test_debug.log');
+    $ENV{'THRUK_MODE'} = 'TEST';
 }

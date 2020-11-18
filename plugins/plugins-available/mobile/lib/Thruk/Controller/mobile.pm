@@ -2,6 +2,7 @@ package Thruk::Controller::mobile;
 
 use strict;
 use warnings;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -146,7 +147,7 @@ sub index {
             $json->{pnp_url}           = $pnp_url   if defined $pnp_url;
             return $c->render(json => $json);
         } else {
-            $c->log->error("unknown type: ".$type);
+            _error("unknown type: ".$type);
             return;
         }
     }

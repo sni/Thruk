@@ -2,6 +2,7 @@ package Thruk::Controller::login;
 
 use strict;
 use warnings;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -190,7 +191,7 @@ sub _handle_basic_login {
         return(login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain, "password"));
     }
 
-    $c->log->info(sprintf("login failed for %s on %s from %s%s",
+    _info(sprintf("login failed for %s on %s from %s%s",
                             $login,
                             $referer,
                             $c->req->address,
@@ -266,7 +267,7 @@ sub _invalidate_current_session {
     if(defined $cookie and defined $cookie->value) {
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie->value);
 
-        $c->audit_log("logout", "user logout, session closed", $session_data->{'username'}, $session_data->{'hashed_key'});
+        _audit_log("logout", "user logout, session closed", $session_data->{'username'}, $session_data->{'hashed_key'});
 
         if($session_data && $session_data->{'file'}) {
             unlink($session_data->{'file'});

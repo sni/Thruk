@@ -2,10 +2,10 @@ package Thruk::Controller::error;
 
 use strict;
 use warnings;
-use Carp qw/cluck confess longmess/;
+use Carp qw/confess longmess/;
 use Data::Dumper;
 use Time::HiRes qw/tv_interval/;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -250,13 +250,13 @@ sub index {
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code == 503 && $c->stash->{errorDetails} =~ m/connecting\./mx) {
             # check if all lmd backends are in connecting state
-            $c->log->warn("cannot process request, all backends are in state 'connecting'.");
+            _warn("cannot process request, all backends are in state 'connecting'.");
             $c->stash->{errorDescription} .= "\nplease try again in a  few seconds.";
         }
         elsif($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
             Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails, $c->stash->{errorDebugInfo});
         } else {
-            $c->log->debug($errors->{$arg1}->{'mess'});
+            _debug($errors->{$arg1}->{'mess'});
         }
     }
 
@@ -298,9 +298,9 @@ sub index {
     $c->res->headers->expires(time - 3600);
     $c->res->headers->header(cache_control => "public, max-age=0");
 
-    # return errer as json for rest api calls
+    # return error as json for rest api calls
     if($c->want_json_response()) {
-        if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 2) {
+        if(Thruk->verbose >= 2) {
             cluck($c->stash->{errorMessage});
         }
         return $c->render(json => {
@@ -312,12 +312,12 @@ sub index {
         });
     }
 
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+    if(Thruk->mode eq 'CLI') {
         _error($c->stash->{errorMessage});
         _error($c->stash->{errorDescription});
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
         _error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
-        if($Thruk::Utils::CLI::verbose) {
+        if(Thruk->verbose) {
             cluck($c->stash->{errorMessage});
         }
     }

@@ -8,7 +8,7 @@ use lib 'lib';
 # create connection pool
 # has to be done really early to save memory
 BEGIN {
-    $ENV{'THRUK_SRC'} = 'FastCGI';
+    $ENV{'THRUK_MODE'} = 'FASTCGI';
     use Thruk::Backend::Pool;
     Thruk::Backend::Pool::init_backend_thread_pool();
 }

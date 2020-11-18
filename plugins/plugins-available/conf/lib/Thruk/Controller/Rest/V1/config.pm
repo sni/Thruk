@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Storable qw/dclone/;
 use Time::HiRes qw/sleep/;
-use Cpanel::JSON::XS qw//;
+use Cpanel::JSON::XS ();
 
 use Thruk::Controller::rest_v1;
 use Thruk::Controller::conf;

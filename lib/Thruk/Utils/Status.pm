@@ -15,6 +15,7 @@ use warnings;
 use Thruk::Utils;
 use Carp qw/confess/;
 use URI::Escape qw/uri_unescape/;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -2112,7 +2113,7 @@ sub serveraction {
         return(1, 'not a valid customaction url');
     }
 
-    $c->log->debug('running server action: '.$action.' for user '.$c->stash->{'remote_user'});
+    _debug('running server action: '.$action.' for user '.$c->stash->{'remote_user'});
 
     my @args = map { Thruk::Utils::decode_any(uri_unescape($_)) } (split(/\//mx, $action));
     $action = shift @args;
@@ -2124,7 +2125,7 @@ sub serveraction {
     # expand ~ in $cmd
     my @cmd = glob($cmd);
     if($cmd[0]) { $cmd = $cmd[0]; }
-    $c->log->debug('raw cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
+    _debug('raw cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
     if(!-x $cmd) {
         return(1, $cmd.' is not executable');
     }
@@ -2150,7 +2151,7 @@ sub serveraction {
         my $rc;
         ($arg, $rc) = $c->{'db'}->replace_macros($arg, {}, $macros);
     }
-    $c->log->debug('parsed cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
+    _debug('parsed cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
 
     my($rc, $output);
     eval {

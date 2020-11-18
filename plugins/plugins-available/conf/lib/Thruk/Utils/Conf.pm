@@ -7,6 +7,7 @@ use File::Slurp qw/read_file/;
 use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
+use Thruk::Utils::Log qw/:all/;
 
 use Thruk::Constants qw/:peer_states/;
 #use Thruk::Timer qw/timing_breakpoint/;
@@ -637,10 +638,10 @@ sub store_model_retention {
         $c->config->{'conf_retention_file'} = $file;
         $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
-        $c->log->debug('saved object retention data');
+        _debug('saved object retention data');
     };
     if($@) {
-        $c->log->error($@);
+        _error($@);
         $c->stats->profile(end => "store_model_retention($backend)");
         return;
     }
@@ -712,23 +713,23 @@ sub get_model_retention {
             for my $backend (keys %{$model_configs}) {
                 if(defined $c->stash->{'backend_detail'}->{$backend}) {
                     $model->init($backend, undef, $model_configs->{$backend}, $c->stats);
-                    $c->log->debug('restored object retention data for '.$backend);
+                    _debug('restored object retention data for '.$backend);
                 }
             }
         } else {
             # old or unknown file
-            $c->log->debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
+            _debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
             unlink($file);
         }
     };
     if($@) {
         unlink($file);
-        $c->log->error($@);
+        _error($@);
         $c->stats->profile(end => "get_model_retention($backend)");
         return;
     }
 
-    $c->log->debug('model retention file '.$file.' loaded.');
+    _debug('model retention file '.$file.' loaded.');
 
     $c->stats->profile(end => "get_model_retention($backend)");
     return 1;
@@ -801,7 +802,7 @@ sub init_cached_config {
     $c->{'obj_db'}->{'cached'} = 1;
 
     unless(_compare_configs($peer_conftool, $c->{'obj_db'}->{'config'})) {
-        $c->log->debug("config object base files have changed, reloading complete obj db");
+        _debug("config object base files have changed, reloading complete obj db");
         $c->{'obj_db'}->{'initialized'} = 0;
         undef $c->{'obj_db'};
         $c->stash->{'obj_model_changed'} = 0;
@@ -809,7 +810,7 @@ sub init_cached_config {
         return 0;
     }
 
-    $c->log->debug("cached config object loaded");
+    _debug("cached config object loaded");
     $c->stats->profile(end => "init_cached_config()");
     return 1;
 }

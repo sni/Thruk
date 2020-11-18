@@ -5,7 +5,7 @@ use warnings;
 use lib 'lib';
 
 BEGIN {
-    $ENV{'THRUK_SRC'} = 'DebugServer';
+    $ENV{'THRUK_MODE'} = 'DEVSERVER';
 }
 
 if(grep {/^\-r/} @ARGV) {
@@ -23,30 +23,16 @@ if(grep {/^\-r/} @ARGV) {
 if(!grep {/^\-p/} @ARGV) {
     push @ARGV, '-p', '3000';
 }
-# use -vvvv for trace mode
-if(grep {/^\-vvvv/} @ARGV) {
-    @ARGV = grep {!/^\-vvvv/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 4;
+# set verbose mode
+if(my($param) = grep {/^\-+(v+)/} @ARGV) {
+    $param =~ s/^\-+//gmx;
+    $ENV{'THRUK_VERBOSE'} = length($param);
+    @ARGV = grep {!/^\-+v+/} @ARGV;
 }
-# use -vvv for super verbose mode for backwards compatibility
-elsif(grep {/^\-vvv/} @ARGV) {
-    @ARGV = grep {!/^\-vvv/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 3;
-}
-# use -vv for very verbose mode for backwards compatibility
-elsif(grep {/^\-vv/} @ARGV) {
-    @ARGV = grep {!/^\-vv/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 2;
-}
-# use -v for verbose mode for backwards compatibility
-if(grep {/^\-v/} @ARGV) {
-    @ARGV = grep {!/^\-v/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 1 unless(defined $ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} > 1);
-}
-# use -d for verbose mode for backwards compatibility
+# use -d for debug mode for backwards compatibility
 if(grep {/^\-d/} @ARGV) {
     @ARGV = grep {!/^\-d/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 3;
+    $ENV{'THRUK_VERBOSE'} = 3 if $ENV{'THRUK_VERBOSE'} < 3;
 }
 
 my $bin = $0;

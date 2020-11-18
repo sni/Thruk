@@ -25,7 +25,7 @@ use strict;
 use Getopt::Long ();
 use Cpanel::JSON::XS qw/decode_json/;
 use Thruk::Utils::Filter ();
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 
 our $skip_backends = \&_skip_backends;
 
@@ -48,12 +48,6 @@ sub cmd {
         return({output => $opts, rc => 2});
     }
 
-    # logging to screen would break json output
-    {
-        delete $c->app->{'_log'};
-        local $ENV{'THRUK_SRC'} = undef;
-        $c->app->init_logging();
-    }
     if(scalar @{$opts} == 0) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
@@ -88,11 +82,11 @@ sub _fetch_results {
             }
             elsif($url =~ m/^https?:/mx) {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
-                if($Thruk::Utils::CLI::verbose >= 2) {
-                    _debug("request:");
-                    _debug($res->request->as_string());
-                    _debug("response:");
-                    _debug($res->as_string());
+                if(Thruk->verbose >= 2) {
+                    _debug2("request:");
+                    _debug2($res->request->as_string());
+                    _debug2("response:");
+                    _debug2($res->as_string());
                 }
                 $opt->{'result'} = $result->{'result'};
                 $opt->{'rc'}     = $code == 200 ? 0 : 3;
@@ -124,8 +118,8 @@ sub _fetch_results {
 
         $opt->{'result'} = $sub_c->res->body;
         $opt->{'rc'}     = ($sub_c->res->code == 200 ? 0 : 3);
-        _debug("json data:");
-        _debug($opt->{'result'});
+        _debug2("json data:");
+        _debug2($opt->{'result'});
     }
     return($opts);
 }

@@ -33,8 +33,8 @@ The cache handles the internal thruk cache.
 
 use warnings;
 use strict;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
-use Cpanel::JSON::XS qw//;
+use Thruk::Utils::Log qw/:all/;
+use Cpanel::JSON::XS ();
 
 ##############################################
 # no backends required for this command

@@ -10,6 +10,7 @@ use Encode qw(decode_utf8 encode_utf8);
 use Module::Load qw/load/;
 use Carp qw/confess/;
 use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -23,9 +24,7 @@ Thruk Controller.
 
 =cut
 
-BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-}
+#use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 my @runtime_keys = qw/state stateHist stateDetails
@@ -903,7 +902,7 @@ sub _task_load_dashboard {
                 Thruk::Utils::IO::write($usercontent_folder.$file,$content);
             };
             if($@) {
-                $c->log->error('Usercontent upload for '.$file.' failed: '.$@);
+                _error('Usercontent upload for '.$file.' failed: '.$@);
                 $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Usercontent upload for '.$file.' failed.', success => Cpanel::JSON::XS::false });
                 return;
             }
@@ -1367,9 +1366,9 @@ sub _avail_calc {
             Thruk::Utils::Avail::calculate_availability($c)
         };
         if($@) {
-            $c->log->error("calculating availability failed for filter:");
-            $c->log->error(Dumper($c->req->parameters));
-            $c->log->error($@);
+            _error("calculating availability failed for filter:");
+            _error(Dumper($c->req->parameters));
+            _error($@);
             return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
         }
     }
@@ -1397,9 +1396,9 @@ sub _avail_calc {
                     Thruk::Utils::Avail::calculate_availability($c)
                 };
                 if($@) {
-                    $c->log->error("calculating availability failed for host filter:");
-                    $c->log->error(Dumper($c->req->parameters));
-                    $c->log->error($@);
+                    _error("calculating availability failed for host filter:");
+                    _error(Dumper($c->req->parameters));
+                    _error($@);
                     return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
             }
@@ -1425,9 +1424,9 @@ sub _avail_calc {
                     Thruk::Utils::Avail::calculate_availability($c)
                 };
                 if($@) {
-                    $c->log->error("calculating availability failed for service filter:");
-                    $c->log->error(Dumper($c->req->parameters));
-                    $c->log->error($@);
+                    _error("calculating availability failed for service filter:");
+                    _error(Dumper($c->req->parameters));
+                    _error($@);
                     return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
             }
@@ -2784,7 +2783,7 @@ sub _task_dashboard_save_states {
         $states = decode_json($c->req->parameters->{'states'});
     };
     if($@) {
-        $c->log->warn('_task_dashboard_save_states failed: '.$@);
+        _warn('_task_dashboard_save_states failed: '.$@);
         return;
     }
     for my $id (keys %{$runtime}, keys %{$states}) {
@@ -3095,7 +3094,7 @@ sub _get_gearman_stats {
         PeerPort => $port,
     )
     or do {
-        $c->log->warn("can't connect to port $port on $host: $!") unless(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
+        _warn("can't connect to port $port on $host: $!") unless(Thruk->mode eq 'TEST');
         return $data;
     };
     $handle->autoflush(1);
@@ -3140,7 +3139,7 @@ sub _do_filter {
         $filter = decode_json($c->req->parameters->{'filter'});
     };
     if($@) {
-        $c->log->warn('filter failed: '.$@);
+        _warn('filter failed: '.$@);
         return;
     }
 

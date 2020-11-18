@@ -17,6 +17,7 @@ use Time::HiRes qw/sleep/;
 use File::Copy qw/copy/;
 use Carp qw/confess/;
 use Thruk::Utils::External;
+use Thruk::Utils::Log qw/:all/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
@@ -52,7 +53,7 @@ sub check_proc {
         ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock, 'ex');
     };
     if($@) {
-        $c->log->error("failed to get lmd startup lock: ". $@);
+        _error("failed to get lmd startup lock: ". $@);
         return;
     }
 
@@ -67,7 +68,7 @@ sub check_proc {
 
     write_lmd_config($config);
 
-    $c->log->info("lmd not running, starting up...") if $log_missing;
+    _info("lmd not running, starting up...") if $log_missing;
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config '.$lmd_dir.'/lmd.ini';
@@ -79,10 +80,10 @@ sub check_proc {
     }
     $cmd .= ' >/dev/null 2>&1 &';
 
-    $c->log->debug("start cmd: ". $cmd);
+    _debug("start cmd: ". $cmd);
     my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
     if($rc != 0) {
-        $c->log->error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
+        _error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
     } else {
         # wait up to 5 seconds for pid file
         my $pid;
@@ -96,9 +97,9 @@ sub check_proc {
             sleep(1);
         }
         if($pid) {
-            $c->log->debug(sprintf('lmd started with pid %d', $pid));
+            _debug(sprintf('lmd started with pid %d', $pid));
         } else {
-            $c->log->warn(sprintf('lmd failed to start, you may find details in the lmd.log file.'));
+            _warn(sprintf('lmd failed to start, you may find details in the lmd.log file.'));
         }
     }
 
@@ -230,8 +231,7 @@ sub check_initial_start {
     my($c, $config, $background) = @_;
     return if(!$config->{'use_lmd_core'});
     if(!$ENV{'THRUK_JOB_ID'}) {
-        return if !defined $ENV{'THRUK_SRC'};
-        return if($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer');
+        return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
     }
 
     #&timing_breakpoint("lmd check_initial_start");
@@ -298,7 +298,7 @@ send sigusr1 to lmd to create a thread dump
 sub create_thread_dump {
     my($config) = @_;
     return if(!$config->{'use_lmd_core'});
-    return if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
+    return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
     my $pid_file = $lmd_dir.'/pid';
     my $pid = check_pid($pid_file);
@@ -344,7 +344,7 @@ sub kill_if_not_responding {
         my $err = $@;
         alarm(0);
         if($err) {
-            $c->log->warn("lmd not responding, killing with force: err - ".$err);
+            _warn("lmd not responding, killing with force: err - ".$err);
             kill('USR1', $lmd_pid);
             sleep(1);
             kill(2, $lmd_pid);
@@ -362,7 +362,7 @@ sub kill_if_not_responding {
         sleep(1);
     }
     if($rc != 0) {
-        $c->log->warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
+        _warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
         kill('USR1', $lmd_pid);
         kill(2, $pid);
         sleep(1);

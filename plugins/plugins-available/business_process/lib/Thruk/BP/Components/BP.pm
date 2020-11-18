@@ -11,6 +11,7 @@ use Thruk::Utils;
 use Thruk::Utils::IO;
 use Thruk::BP::Components::Node;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -203,7 +204,7 @@ sub update_status {
         $self->{'affected_peers'} = $self->_extract_affected_backends($livedata);
         my $failed = $self->_list_failed_backends($c, $previous_affected, $c->stash->{'failed_backends'});
         if(scalar @{$failed} > 0 && ($self->{'last_check'} > (time() - 180))) {
-            $c->log->warn("not updating business process '".$self->{'name'}."' because the backends ".join(",", @{$failed})." are available. Waiting 3 minutes to recover, last successful update: ".(scalar localtime $self->{'last_check'}));
+            _warn("not updating business process '".$self->{'name'}."' because the backends ".join(",", @{$failed})." are available. Waiting 3 minutes to recover, last successful update: ".(scalar localtime $self->{'last_check'}));
             return;
         }
         for my $n (@{$self->{'nodes'}}) {
@@ -846,7 +847,7 @@ sub _submit_results_to_core {
     }
     # log a warning that there is nothing to send result too
     if(!$c->{'no_result_warned'}) {
-        $c->log->warn("no result_backend set, cannot send results to core. Either set result_backend or spool_dir when having multiple backends.");
+        _warn("no result_backend set, cannot send results to core. Either set result_backend or spool_dir when having multiple backends.");
         $c->{'no_result_warned'} = 1;
     }
     return;
@@ -932,7 +933,7 @@ sub _sync_ack_downtime_status {
     }
     # log a warning that there is nothing to send result too
     if(!$c->{'no_result_warned'} && !$peer) {
-        $c->log->warn("no result_backend set, cannot sync acknowledgement / downtime status to core.");
+        _warn("no result_backend set, cannot sync acknowledgement / downtime status to core.");
         $c->{'no_result_warned'} = 1;
         return;
     }

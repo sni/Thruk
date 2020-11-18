@@ -19,6 +19,7 @@ use warnings;
 use File::Slurp qw/read_file/;
 use Carp qw/confess/;
 use Thruk::Utils;
+use Thruk::Utils::Log qw/:all/;
 
 our $possible_roles = [
     'authorized_for_admin',
@@ -115,13 +116,13 @@ sub set_dynamic_attributes {
 
     my $data;
     if($skip_db_access) {
-        $c->log->debug("using cached user data") if Thruk->verbose;
+        _debug("using cached user data") if Thruk->verbose;
         $data = $c->cache->get->{'users'}->{$username} || {};
         if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
     } else {
-        $c->log->debug("fetching user data from livestatus") if Thruk->verbose;
+        _debug("fetching user data from livestatus") if Thruk->verbose;
         $data = $self->get_dynamic_roles($c);
     }
 
@@ -260,7 +261,7 @@ sub get_dynamic_roles {
         $can_submit_commands = 0;
     }
 
-    $c->log->debug("can_submit_commands: $can_submit_commands");
+    _debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
         if(!grep /authorized_for_read_only/mx, @{$roles}) {
             push @{$roles}, 'authorized_for_read_only';
@@ -409,12 +410,12 @@ sub check_permissions {
         return 0;
     }
     $count = 0 unless defined $count;
-    $c->log->debug("count: ".$count);
+    _debug("count: ".$count);
     if($count > 0) {
-        $c->log->debug("check_permissions('".$type."', '".$value."', '".$value2."') -> access granted");
+        _debug("check_permissions('".$type."', '".$value."', '".$value2."') -> access granted");
         return 1;
     }
-    $c->log->debug("check_permissions('".$type."', '".$value."', '".$value2."') -> access denied");
+    _debug("check_permissions('".$type."', '".$value."', '".$value2."') -> access denied");
     return 0;
 }
 
@@ -511,12 +512,12 @@ sub transform_username {
 
     # regex replace?
     if($config->{'make_auth_replace_regex'}) {
-        $c->log->debug("authentication regex replace before: ".$username) if $c;
+        _debug("authentication regex replace before: ".$username) if $c;
         ## no critic
         eval('$username =~ '.$config->{'make_auth_replace_regex'});
         ## use critic
-        $c->log->error("authentication regex replace error: ".$@) if ($c && $@);
-        $c->log->debug("authentication regex replace after : ".$username) if $c;
+        _error("authentication regex replace error: ".$@) if ($c && $@);
+        _debug("authentication regex replace after : ".$username) if $c;
     }
     return($username);
 }

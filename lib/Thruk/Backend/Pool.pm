@@ -3,16 +3,15 @@ package Thruk::Backend::Pool;
 use strict;
 use warnings;
 
-BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-    #&timing_breakpoint('starting pool');
-}
+#use Thruk::Timer qw/timing_breakpoint/;
+#&timing_breakpoint('starting pool');
 
 use Carp qw/confess/;
 use Thruk::Backend::Peer ();
+use Thruk ();
+use Thruk::Config ();
 use Thruk::Utils::IO ();
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk::Config ();
 
 =head1 NAME
 
@@ -60,8 +59,7 @@ sub init_backend_thread_pool {
     $peer_order  = [];
     $peers       = {};
 
-    my $config       = Thruk::Config::set_config_env();
-    $Thruk::Utils::IO::config = $config;
+    my $config       = Thruk->config;
     my $peer_configs = Thruk::Config::list($backends || $config->{'Thruk::Backend'}->{'peer'});
     my $num_peers    = scalar @{$peer_configs};
     if(defined $config->{'connection_pool_size'}) {

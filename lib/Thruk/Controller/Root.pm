@@ -3,6 +3,7 @@ package Thruk::Controller::Root;
 use strict;
 use warnings;
 use URI::Escape qw/uri_escape/;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -78,13 +79,13 @@ sub thruk_index {
 
         # external link, put in frames
         my $start_page = uri_escape( $c->stash->{'start_page'} );
-        $c->log->debug( "redirecting to framed start page: '".$c->stash->{'url_prefix'}."frame.html?link=" . $start_page . "'" );
+        _debug( "redirecting to framed start page: '".$c->stash->{'url_prefix'}."frame.html?link=" . $start_page . "'" );
         return $c->redirect_to( $c->stash->{'url_prefix'}."frame.html?link=" . $start_page );
     }
     elsif ( $c->stash->{'start_page'} ne $c->stash->{'url_prefix'}.'main.html' ) {
 
         # internal link, no need to put in frames
-        $c->log->debug( "redirecting to default start page: '" . $c->stash->{'start_page'} . "'" );
+        _debug( "redirecting to default start page: '" . $c->stash->{'start_page'} . "'" );
         return $c->redirect_to( $c->stash->{'start_page'} );
     }
 

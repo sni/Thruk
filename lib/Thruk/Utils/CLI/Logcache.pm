@@ -45,10 +45,10 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
 
 use warnings;
 use strict;
-use Thruk::Utils qw//;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils ();
+use Thruk::Utils::Log qw/:all/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Getopt::Long qw//;
+use Getopt::Long ();
 
 ##############################################
 
@@ -124,8 +124,6 @@ sub cmd {
 
     my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
-
-    my $verbose = $Thruk::Utils::CLI::verbose // 0;
 
     eval {
         if($type eq 'mysql') {
@@ -210,7 +208,7 @@ sub cmd {
         return($stats."\n", 0);
     } else {
         my $t0 = [gettimeofday];
-        my($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
+        my($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, undef, $blocksize, $opt);
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         my $plugin_ref_count;
@@ -231,11 +229,7 @@ sub cmd {
             ($rc, $msg) = (1, 'ERROR');
         }
 
-        my $details = '';
-        if(!$verbose) {
-            # already printed if verbose
-            $details = join("\n", @{$errors})."\n";
-        }
+        my $details = scalar @{$errors} > 0 ? join("\n", @{$errors})."\n" : "";
         if($mode eq 'drop') {
             return(sprintf("%s - droped logcache for %i site%s in %.2fs\n%s",
                            $msg,

@@ -16,6 +16,7 @@ use Carp;
 use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
 use Thruk::Utils::Filter;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 =head1 METHODS
@@ -344,7 +345,7 @@ sub _renew_navigation {
     eval("#line 1 $file\n".read_file($file));
     ## use critic
     if($@) {
-        $c->log->error("error while loading navigation from ".$file.": ".$@);
+        _error("error while loading navigation from ".$file.": ".$@);
         confess($@);
     }
 
@@ -393,7 +394,7 @@ sub _renew_navigation {
                 eval '$rc = '.$link->{'visible_cb'}.'($c);';
                 ## use critic
                 if($@) {
-                    $c->log->error("error while running callback ".$link->{'visible_cb'}.": ".$@);
+                    _error("error while running callback ".$link->{'visible_cb'}.": ".$@);
                 }
                 next unless $rc;
             }

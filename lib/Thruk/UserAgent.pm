@@ -17,7 +17,7 @@ use File::Temp qw/tempfile/;
 use HTTP::Response ();
 use HTTP::Request::Common;
 use Thruk::Utils::IO ();
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 
 use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
 

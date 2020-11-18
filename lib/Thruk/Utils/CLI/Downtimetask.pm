@@ -26,6 +26,7 @@ The downtimetask command executes recurring downtimes tasks.
 
 use warnings;
 use strict;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -247,7 +248,6 @@ sub set_downtime {
                       (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape_utf8($downtime->{'hostgroup'}) : '',
                       (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
                      );
-    local $ENV{'THRUK_SRC'} = 'CLI';
     my $old = $c->config->{'lock_author_names'};
     $c->config->{'lock_author_names'} = 0;
     my @res = Thruk::Utils::CLI::request_url($c, $url);

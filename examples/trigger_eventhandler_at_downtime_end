@@ -21,7 +21,6 @@ elif [ "$OMD_ROOT" != "" ]; then
 else
   export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
   if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
-  if [ "$REMOTEURL" = "" ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
 fi
 
 eval 'exec perl -x $0 ${1+"$@"} ;'
@@ -37,7 +36,7 @@ use warnings;
 use Pod::Usage;
 use Getopt::Long;
 use Thruk::Utils::CLI;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 use Encode qw/encode_utf8/;
 
 binmode(STDOUT, ":encoding(UTF-8)");

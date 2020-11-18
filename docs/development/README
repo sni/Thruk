@@ -27,10 +27,8 @@ the following environment variables are used within Thruk:
 ==== NO_DISABLED_PLUGINS_TEST
 Can be set to skip tests of disabled plugins.
 
-
 ==== NO_EXTERNAL_JOBS
 Override 'no_external_job_forks' config setting.
-
 
 ==== REMOTE_USER
 Will be set to the current username.
@@ -44,39 +42,25 @@ Will be set to the current contacts alias name when running external hooks and s
 ==== REMOTE_USER_EMAIL
 Will be set to the current contacts email address when running external hooks and scripts.
 
-==== REMOTEURL
-Start url for init script.
-
-
-==== STARTURL
-Same like REMOTEURL.
-
-
 ==== TEST_AUTHOR
 Can be set to run author specific tests which may fail in
 certain cases.
 
-
 ==== TEST_ERROR
 Suppress logging of errors.
-
 
 ==== THRUK_AUTHOR
 Put Thruk into author mode which enables strict templates checking and
 disables all template caches.
 
-
 ==== THRUK_BACKENDS
 Override currently used backends. Comma seperated list.
-
 
 ==== THRUK_BIN
 Can be set to specify location of the thruk binary used for tests.
 
-
 ==== THRUK_CONFIG
 Specify location of config files.
-
 
 ==== THRUK_VERBOSE
 Set debug level.
@@ -87,37 +71,28 @@ Put Thruk into demo mode which forbids any config saves.
 ==== THRUK_GROUP_ID
 Contains thruks primary group id.
 
-
 ==== THRUK_GROUPS
 Contains all groups as semicolon separated list.
 
-
 ==== THRUK_NO_COMMANDS
 Don't send commands from cmd.cgi.
-
 
 ==== THRUK_NO_CONNECTION_POOL
 Skip connection pool and do all requests serial.
 
 Can be used whenever backends will be accessed.
 
-
 ==== THRUK_NO_TOUCH_PERM
 Do not touch permissions of opened files.
 
-
-==== THRUK_PLUGIN_DEBUG
-Can be used to get more details when loading plugins.
-
-
-==== THRUK_SRC
+==== THRUK_MODE
 
 Can be one of:
 
-    - SCRIPTS
-    - CLI
-    - FastCGI
-    - TEST
+    - `FASTCGI`   - fast cgi script
+    - `DEVSERVER` - development server
+    - `CLI`       - bin/thruk and script/*
+    - `TEST`      - used in tests from t/*
 
 
 ==== THRUK_TEST_NO_AUDIT_LOG
@@ -125,6 +100,9 @@ Don't log to audit log.
 
 ==== THRUK_TEST_NO_STDOUT_LOG
 Don't log stdout messages during some tests
+
+==== THRUK_NO_COLOR
+Don't use colours in terminal output.
 
 ==== THRUK_USER_ID
 Contains thruks user id.
@@ -134,5 +112,3 @@ print memory and cpu usage to stderr
 
 ==== PLACK_TEST_EXTERNALSERVER_URI
 Used to specify external test url during tests.
-
-

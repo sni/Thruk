@@ -9,8 +9,9 @@ use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Storable ();
 use Class::Inspector ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::Broadcast ();
+
+use Thruk::Base ();
+use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::IO ();
 
 =head1 NAME
@@ -25,33 +26,30 @@ Generic Access to Thruks Config
 
 ###################################################
 # load timing class
-BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-}
+#use Thruk::Timer qw/timing_breakpoint/;
 
 ######################################
 
 our $VERSION = '2.38';
 
-my $project_root = home('Thruk::Config') or confess('could not determine project_root: '.Dumper(\%INC));
+our $config;
+my $project_root = home() or confess('could not determine project_root: '.Dumper(\%INC));
 my $branch       = '2';
 my $gitbranch    = get_git_name($project_root);
-my $filebranch  = $branch || 1;
+my $filebranch   = $branch || 1;
 if($branch) {
     $branch = $branch.'~'.$gitbranch if $gitbranch ne '';
 } else {
     $branch = $gitbranch if $gitbranch;
 }
 confess('got no project_root') unless $project_root;
-## no critic
-$ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
-## use critic
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
     'version'                               => $VERSION,
     'branch'                                => $branch,
     'released'                              => 'October 27, 2020',
+    'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
@@ -296,58 +294,13 @@ my $base_defaults = {
     ],
 };
 
-# settings used for the template toolkit renderer
-my $view_tt_settings = {
-    'TEMPLATE_EXTENSION'                    => '.tt',
-    'ENCODING'                              => 'utf-8',
-    'INCLUDE_PATH'                          => $project_root.'/templates', # will be overwritten during render
-    'RECURSION'                             => 1,
-    'PRE_CHOMP'                             => 0,
-    'POST_CHOMP'                            => 0,
-    'TRIM'                                  => 0,
-    'COMPILE_EXT'                           => '.ttc',
-    'STAT_TTL'                              => 604800, # templates do not change in production
-    'STRICT'                                => 0,
-    'EVAL_PERL'                             => 1,
-    'FILTERS'                               => {
-                'duration'                      => \&Thruk::Utils::Filter::duration,
-                'nl2br'                         => \&Thruk::Utils::Filter::nl2br,
-                'strip_command_args'            => \&Thruk::Utils::Filter::strip_command_args,
-                'escape_html'                   => \&Thruk::Utils::Filter::escape_html,
-                'lc'                            => \&Thruk::Utils::Filter::lc,
-    },
-    'PRE_DEFINE'                            => {
-                # subs from Thruk::Utils::Filter will be added automatically
-                'dump'                          => \&Thruk::Utils::Filter::debug,
-                'get_broadcasts'                => \&Thruk::Utils::Broadcast::get_broadcasts,
-                'command_disabled'              => \&Thruk::Utils::command_disabled,
-                'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
-                'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
-                'basename'                      => \&Thruk::Utils::basename,
-                'debug_details'                 =>   get_debug_details(),
-                'format_date'                   => \&Thruk::Utils::format_date,
-                'format_cronentry'              => \&Thruk::Utils::format_cronentry,
-                'format_number'                 => \&Thruk::Utils::format_number,
-                'set_favicon_counter'           => \&Thruk::Utils::Status::set_favicon_counter,
-                'get_pnp_url'                   => \&Thruk::Utils::get_pnp_url,
-                'get_graph_url'                 => \&Thruk::Utils::get_graph_url,
-                'get_action_url'                => \&Thruk::Utils::get_action_url,
-                'reduce_number'                 => \&Thruk::Utils::reduce_number,
-                'get_custom_vars'               => \&Thruk::Utils::get_custom_vars,
-    },
-};
-
-# export filter functions
-for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
-    $view_tt_settings->{'PRE_DEFINE'}->{$s} = \&{'Thruk::Utils::Filter::'.$s};
-}
-
 # set TT strict mode only for authors
 $base_defaults->{'thruk_author'} = 0;
 $base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $base_defaults->{'thruk_author'} = 1;
 }
+$config = set_config_env();
 
 ######################################
 
@@ -366,7 +319,7 @@ sub get_default_stash {
         'inject_stats'              => 1,
         'user_profiling'            => 0,
         'real_page'                 => '',
-        'make_test_mode'            => $ENV{'THRUK_SRC'} eq 'TEST' ? 1 : 0,
+        'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
         'version'                   => $VERSION,
         'branch'                    => $branch,
         'filebranch'                => $filebranch,
@@ -439,30 +392,32 @@ sub set_config_env {
     my @files = @_;
 
     my $configs = _load_config_files(\@files);
-    my $config  = Storable::dclone($base_defaults);
+    my $conf    = Storable::dclone($base_defaults);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
     my $base_backends;
     for my $cfg (@{$configs}) {
         my $file = $cfg->[0];
-        merge_sub_config($config, $cfg->[1]);
+        merge_sub_config($conf, $cfg->[1]);
         if($file =~ m/\Qthruk.conf\E$/mx) {
-            $base_backends = delete $config->{'Thruk::Backend'};
-            $config->{'Thruk::Backend'} = {};
+            $base_backends = delete $conf->{'Thruk::Backend'};
+            $conf->{'Thruk::Backend'} = {};
         }
     }
-    $config->{'Thruk::Backend'} = $base_backends unless($config->{'Thruk::Backend'} && scalar keys %{$config->{'Thruk::Backend'}} > 0);
+    $conf->{'Thruk::Backend'} = $base_backends unless($conf->{'Thruk::Backend'} && scalar keys %{$conf->{'Thruk::Backend'}} > 0);
 
     ## no critic
-    if($config->{'thruk_verbose'}) {
-        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $config->{'thruk_verbose'}) {
-            $ENV{'THRUK_VERBOSE'} = $config->{'thruk_verbose'};
+    if($conf->{'thruk_verbose'}) {
+        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $conf->{'thruk_verbose'}) {
+            $ENV{'THRUK_VERBOSE'} = $conf->{'thruk_verbose'};
         }
     }
     ## use critic
 
-    return(set_default_config($config));
+    $conf = set_default_config($conf);
+    $config = $conf;
+    return($conf);
 }
 
 ######################################
@@ -531,11 +486,10 @@ sub set_default_config {
     $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
     ## use critic
 
-    if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI') {
+    if(Thruk::Base->mode eq 'CLI') {
         if(defined $uid and $> == 0) {
             switch_user($uid, $groups);
-            print STDERR "ERROR: re-exec with uid $uid did not work\n";
-            exit(3);
+            _fatal("re-exec with uid $uid did not work");
         }
     }
 
@@ -579,12 +533,9 @@ sub set_default_config {
     $config->{'extra_version'}      = '' unless defined $config->{'extra_version'};
     $config->{'extra_version_link'} = '' unless defined $config->{'extra_version_link'};
 
-    ## no critic
-    $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
-    ## use critic
     # external jobs can be disabled by env
     # don't disable for CLI, breaks config reload over http somehow
-    if(defined $ENV{'NO_EXTERNAL_JOBS'} || $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
+    if(defined $ENV{'NO_EXTERNAL_JOBS'} || Thruk::Base->mode eq 'SCRIPTS') {
         $config->{'no_external_job_forks'} = 1;
     }
 
@@ -594,7 +545,7 @@ sub set_default_config {
     my $plugin_dir = $config->{'plugin_path'};
     $plugin_dir = $plugin_dir.'/plugins-enabled/*/';
 
-    print STDERR "using plugins: ".$plugin_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+    _debug2("using plugins: ".$plugin_dir);
 
     for my $addon (glob($plugin_dir)) {
 
@@ -607,17 +558,17 @@ sub set_default_config {
             CORE::mkdir($config->{home}.'/root/thruk/plugins');
         }
 
-        print STDERR "loading plugin: ".$addon_name."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+        _trace("loading plugin: ".$addon_name);
 
         # lib directory included?
         if(-d $addon.'lib') {
-            print STDERR " -> lib\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+            _trace(" -> lib");
             unshift(@INC, $addon.'lib');
         }
 
         # template directory included?
         if(-d $addon.'templates') {
-            print STDERR " -> templates\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+            _trace(" -> templates");
             push @{$config->{plugin_templates_paths}}, $addon.'templates';
         }
     }
@@ -631,11 +582,11 @@ sub set_default_config {
     for my $theme (sort glob($themes_dir)) {
         $theme =~ s/\/$//gmx;
         $theme =~ s/^.*\///gmx;
-        print STDERR "theme -> $theme\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+        _trace("theme -> ".$theme);
         push @themes, $theme;
     }
 
-    print STDERR "using themes: ".$themes_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+    _debug2("using themes: ".$themes_dir);
 
     $config->{'themes'} = \@themes;
 
@@ -643,7 +594,6 @@ sub set_default_config {
     # use uid to make tmp dir more uniq
     $config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $config->{'tmp_path'};
     $config->{'tmp_path'} =~ s|/$||mx;
-    $view_tt_settings->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
 
     $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{etc_path}.'/ssi';
 
@@ -695,7 +645,7 @@ sub set_default_config {
 
     # expand action_menu_items_folder
     my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
-    for my $folder (@{Thruk::Config::list($action_menu_items_folder)}) {
+    for my $folder (@{list($action_menu_items_folder)}) {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*');
         for my $file (@files) {
@@ -761,19 +711,14 @@ sub _load_config_files {
                     my $ext;
                     if($tmpfile =~ m/\.([^.]+)$/mx) { $ext = $1; }
                     if(!$ext) {
-                        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
-                            print STDERR "skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname\n";
-                        }
+                        _debug2("skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname");
                         next;
                     }
                     if($ext ne 'conf' && $ext ne 'cfg') {
                         # only read if the extension matches the hostname
-                        our $hostname;
-                        chomp($hostname = Thruk::Utils::IO::cmd("hostname")) unless $hostname;
+                        my $hostname = &hostname;
                         if($tmpfile !~ m/\Q$hostname\E$/mx) {
-                            if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 1) {
-                                print STDERR "skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'\n";
-                            }
+                            _debug2("skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'");
                             next;
                         }
                     }
@@ -813,26 +758,56 @@ return template toolkit config
 
 =cut
 sub get_toolkit_config {
-    return($view_tt_settings);
-}
+    require Thruk::Utils::Filter;
+    require Thruk::Utils::Broadcast;
 
-##############################################
+    my $view_tt_settings = {
+        'TEMPLATE_EXTENSION'                    => '.tt',
+        'ENCODING'                              => 'utf-8',
+        'INCLUDE_PATH'                          => $project_root.'/templates', # will be overwritten during render
+        'COMPILE_DIR'                           => $config->{'tmp_path'}.'/ttc_'.$>,
+        'RECURSION'                             => 1,
+        'PRE_CHOMP'                             => 0,
+        'POST_CHOMP'                            => 0,
+        'TRIM'                                  => 0,
+        'COMPILE_EXT'                           => '.ttc',
+        'STAT_TTL'                              => 604800, # templates do not change in production
+        'STRICT'                                => 0,
+        'EVAL_PERL'                             => 1,
+        'FILTERS'                               => {
+                    'duration'                      => \&Thruk::Utils::Filter::duration,
+                    'nl2br'                         => \&Thruk::Utils::Filter::nl2br,
+                    'strip_command_args'            => \&Thruk::Utils::Filter::strip_command_args,
+                    'escape_html'                   => \&Thruk::Utils::Filter::escape_html,
+                    'lc'                            => \&Thruk::Utils::Filter::lc,
+        },
+        'PRE_DEFINE'                            => {
+                    # subs from Thruk::Utils::Filter will be added automatically
+                    'dump'                          => \&Thruk::Utils::Filter::debug,
+                    'get_broadcasts'                => \&Thruk::Utils::Broadcast::get_broadcasts,
+                    'command_disabled'              => \&Thruk::Utils::command_disabled,
+                    'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
+                    'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
+                    'basename'                      => \&Thruk::Utils::basename,
+                    'debug_details'                 =>   get_debug_details(),
+                    'format_date'                   => \&Thruk::Utils::format_date,
+                    'format_cronentry'              => \&Thruk::Utils::format_cronentry,
+                    'format_number'                 => \&Thruk::Utils::format_number,
+                    'set_favicon_counter'           => \&Thruk::Utils::Status::set_favicon_counter,
+                    'get_pnp_url'                   => \&Thruk::Utils::get_pnp_url,
+                    'get_graph_url'                 => \&Thruk::Utils::get_graph_url,
+                    'get_action_url'                => \&Thruk::Utils::get_action_url,
+                    'reduce_number'                 => \&Thruk::Utils::reduce_number,
+                    'get_custom_vars'               => \&Thruk::Utils::get_custom_vars,
+        },
+    };
 
-=head2 get_thruk_version
-
-  get_thruk_version($c, [$config])
-
-return thruk version string
-
-=cut
-
-sub get_thruk_version {
-    my($c, $config) = @_;
-    $config = $c->config unless $config;
-    if($config->{'branch'}) {
-        return($config->{'version'}.'-'.$config->{'branch'});
+    # export filter functions
+    for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
+        $view_tt_settings->{'PRE_DEFINE'}->{$s} = \&{'Thruk::Utils::Filter::'.$s};
     }
-    return($config->{'version'});
+
+    return($view_tt_settings);
 }
 
 ##############################################
@@ -914,6 +889,7 @@ return home folder
 =cut
 sub home {
     my($class) = @_;
+    $class = 'Thruk::Config' unless $class;
     (my $file = "$class.pm") =~ s{::}{/}gmx;
     if(my $inc_entry = $INC{$file}) {
         $inc_entry = Cwd::abs_path($inc_entry);
@@ -954,7 +930,7 @@ sub expand_numeric_list {
             } elsif($block =~ m/^(\d+)$/gmx) {
                     $list->{$1} = 1;
             } else {
-                $c->log->error("'$block' is not a valid number or range") if defined $c;
+                _error("'$block' is not a valid number or range") if defined $c;
             }
         }
     }
@@ -1008,12 +984,9 @@ sub finalize {
     Thruk::Action::AddDefaults::restore_user_backends($c);
 
     if($Thruk::deprecations_log) {
-        if(    $ENV{'THRUK_SRC'} ne 'TEST'
-           and $ENV{'THRUK_SRC'} ne 'CLI'
-           and $ENV{'THRUK_SRC'} ne 'SCRIPTS'
-        ) {
+        if(Thruk::Base->mode ne 'TEST' && Thruk::Base->mode ne 'CLI') {
             for my $warning (@{$Thruk::deprecations_log}) {
-                $c->log->info($warning);
+                _info($warning);
             }
         }
         undef $Thruk::deprecations_log;
@@ -1129,9 +1102,7 @@ sub read_config_file {
     $files = list($files);
     my $conf = {};
     for my $f (@{$files}) {
-        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
-            print STDERR "reading config file: ".$f."\n";
-        }
+        _debug2("reading config file: ".$f);
         # since perl 5.23 sysread on utf-8 handles is deprecated, so we need to open the file manually
         open my $fh, '<:encoding(UTF-8)', $f or die "Can't open '$f' for reading: $!";
         my @rows = <$fh>;
@@ -1261,9 +1232,9 @@ sub switch_user {
         ## use critic
     }
     my @cmd = _get_orig_cmd_line();
-    print STDERR "switching to uid: $uid\n" if $ENV{'THRUK_VERBOSE'};
+    _debug("switching to uid: $uid") if $ENV{'THRUK_VERBOSE'};
     POSIX::setuid($uid) || confess("setuid failed: ".$!);
-    print STDERR "re-exec: ".'"'.join('" "', @cmd).'"'."\n" if $ENV{'THRUK_VERBOSE'};
+    _debug("re-exec: ".'"'.join('" "', @cmd).'"');
     # clean perl5lib
     if($ENV{'PERL5LIB'}) {
         my @clean;
@@ -1318,8 +1289,8 @@ sub read_cgi_cfg {
        || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
        || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
       ) {
-        $app->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
-        $app->log->debug("reading $file");
+        _debug("cgi.cfg has changed, updating...") if defined $last_stat;
+        _debug2("reading $file");
         $app->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
         $app->{'cgi.cfg_effective'} = $file;
         $app->{'cgi_cfg'}           = read_config_file($file);
@@ -1468,17 +1439,53 @@ sub _get_orig_cmd_line {
     return($^X, @cmd);
 }
 
+##############################################
+
+=head2 hostname
+
+  hostname()
+
+return system hostname
+
+=cut
+
+sub hostname {
+    our $hostname;
+    return($hostname) if $hostname;
+    chomp($hostname = Thruk::Utils::IO::cmd("hostname"));
+    return($hostname);
+}
+
+##############################################
+
+=head2 get_thruk_version
+
+  get_thruk_version()
+
+return full thruk version string, ex.: 2.38-2~feature_branch.45a4ceb
+
+=cut
+
+sub get_thruk_version {
+    if($branch) {
+        return($VERSION.'-'.$branch);
+    }
+    return($VERSION);
+}
+
 ########################################
 
 =head2 version
 
   version()
 
-return version string
+return version string, ex.: 2.38-2
 
 =cut
 sub version {
     return(sprintf("%s-%s", $VERSION, $filebranch));
 }
+
+########################################
 
 1;

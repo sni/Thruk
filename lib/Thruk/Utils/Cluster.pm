@@ -19,6 +19,7 @@ use Thruk::Backend::Provider::HTTP;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
+use Thruk::Utils::Log qw/:all/;
 
 my $context;
 
@@ -289,11 +290,11 @@ sub run_cluster {
         Thruk::Utils::IO::write($jobs_path.'/'.$digest, $Thruk::NODE_ID."\n", undef, 1);
         my $lock = [split(/\n/mx, Thruk::Utils::IO::read($jobs_path.'/'.$digest))]->[0];
         if($lock ne $Thruk::NODE_ID) {
-            $c->log->debug(sprintf("run_cluster once: %s running on %s already", $sub, $lock));
+            _debug(sprintf("run_cluster once: %s running on %s already", $sub, $lock));
             return(1);
         }
         $self->_cleanup_jobs_folder();
-        $c->log->debug(sprintf("run_cluster once: %s starting on %s", $sub, $lock));
+        _debug(sprintf("run_cluster once: %s starting on %s", $sub, $lock));
 
         # continue and run on this node
         return(0);
@@ -315,7 +316,7 @@ sub run_cluster {
     for my $n (@nodeids) {
         next unless $self->{'nodes_by_id'}->{$n};
         next if($type eq 'others' && $self->is_it_me($n));
-        $c->log->debug(sprintf("%s trying on %s", $sub, $n));
+        _debug(sprintf("%s trying on %s", $sub, $n));
         my $node = $self->{'nodes_by_id'}->{$n};
         my $http = Thruk::Backend::Provider::HTTP->new({
                             options => {
@@ -333,9 +334,9 @@ sub run_cluster {
         if($err) {
             $err =~ s/^(OMD:.*?)\ at\ \/.*$/$1/gmx;
             if(!$node->{'last_error'} && !$node->{'maintenance'}) {
-                $c->log->error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
+                _error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
             } else {
-                $c->log->debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
+                _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
             }
             Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                 $n => {
@@ -510,9 +511,9 @@ sub heartbeat {
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
         next if(defined $node_id && $n->{'node_id'} ne $node_id);
-        $c->log->debug(sprintf("sending heartbeat: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("sending heartbeat: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
         $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
-        $c->log->debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
     return($nodes);
 }

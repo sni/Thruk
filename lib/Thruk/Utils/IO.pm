@@ -23,9 +23,9 @@ use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
 use Cwd qw/abs_path/;
 use Time::HiRes qw/sleep/;
+use Thruk::Utils::Log qw/:all/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
-$Thruk::Utils::IO::config = undef;
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
 
 ##############################################
@@ -146,27 +146,21 @@ sub ensure_permissions {
     my @stat = stat($path);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
-    if(!$Thruk::Utils::IO::config) {
-        require Thruk::Backend::Pool;
-        $Thruk::Utils::IO::config = Thruk::Config::set_config_env();
-    }
-    my $config = $Thruk::Utils::IO::config;
+    require Thruk;
+    my $config = Thruk->config;
     # set modes
     if($mode eq 'file') {
         if($cur ne $config->{'mode_file'}) {
-            chmod(oct($config->{'mode_file'}), $path)
-                or warn("failed to ensure permissions (0660/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn '$path'`);
+            chmod(oct($config->{'mode_file'}), $path) || _warn("failed to ensure permissions (0660/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn '$path'`);
         }
     }
     elsif($mode eq 'dir') {
         if($cur ne $config->{'mode_dir'}) {
-            chmod(oct($config->{'mode_dir'}), $path)
-                or warn("failed to ensure permissions (0770/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn '$path'`);
+            chmod(oct($config->{'mode_dir'}), $path) || _warn("failed to ensure permissions (0770/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn '$path'`);
         }
     }
     else {
-        chmod($mode, $path)
-            or warn("failed to ensure permissions (".$mode.") with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn '$path'`);
+        chmod($mode, $path) || _warn("failed to ensure permissions (".$mode.") with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn '$path'`);
     }
 
     # change owner too if we are root
@@ -230,7 +224,7 @@ sub file_lock {
                             # lock seems to be orphaned, continue normally unless in test mode
                             confess("got orphaned lock") if $ENV{'TEST_RACE'};
                             $locked = 1;
-                            warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                            _warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
                             last;
                         }
                         next;
@@ -250,7 +244,7 @@ sub file_lock {
                         move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
                         move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
                         unlink($file.'.orphaned');
-                        warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                        _warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
                         $retrys = 0; # start over...
                     }
                 }
@@ -294,7 +288,7 @@ sub file_lock {
     }
 
     if($retrys > 0) {
-        warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
+        _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
@@ -367,7 +361,9 @@ sub json_store {
     print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
     Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
 
-    if($Thruk::Utils::IO::config && $Thruk::Utils::IO::config->{'thruk_author'}) {
+    require Thruk;
+    my $config = Thruk->config;
+    if($config->{'thruk_author'}) {
         eval {
             my $test = $json->decode(scalar read_file($tmpfile));
         };
@@ -575,7 +571,7 @@ sub cmd {
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
         #&timing_breakpoint('IO::cmd: '.$prog.' <args...>');
-        $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
+        _debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
         my $sel = IO::Select->new;
@@ -611,13 +607,13 @@ sub cmd {
     } else {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
-        $c->log->debug( "running cmd: ". $cmd ) if $c;
+        _debug( "running cmd: ". $cmd ) if $c;
         local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx; # let the system reap the childs, we don't care
 
         # background process?
         if($cmd =~ m/&\s*$/mx) {
             if($cmd !~ m|2>&1|mx) {
-                $c->log->warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
+                _warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
             }
         }
 
@@ -632,8 +628,8 @@ sub cmd {
     } else {
         $rc = $rc>>8;
     }
-    $c->log->debug( "rc:     ". $rc )     if $c;
-    $c->log->debug( "output: ". $output ) if $c;
+    _debug( "rc:     ". $rc )     if $c;
+    _debug( "output: ". $output ) if $c;
     #&timing_breakpoint('IO::cmd done');
     return($rc, $output) if wantarray;
     return($output);

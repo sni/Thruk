@@ -10,6 +10,7 @@ use Carp;
 use Storable qw/dclone/;
 use Thruk::Utils;
 use Thruk::Config;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -230,13 +231,13 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
-        $c->log->debug("pre save hook: '" . $cmd . "', rc: " . $rc);
+        _debug("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
-            $c->log->info('pre save hook out: '.$out);
+            _info('pre save hook out: '.$out);
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "Save canceled by pre_obj_save_cmd hook!\n".$out, escape => 0 });
             return;
         }
-        $c->log->debug('pre save hook out: '.$out);
+        _debug('pre save hook out: '.$out);
     }
 
     # log stashed changes
@@ -244,7 +245,7 @@ sub commit {
         if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'}) {
             my $uniq = {};
             for my $l (@{$self->{'logs'}}) {
-                $c->audit_log("configtool", $l) unless $uniq->{$l};
+                _audit_log("configtool", $l) unless $uniq->{$l};
                 $uniq->{$l} = 1;
             }
         }
@@ -262,7 +263,7 @@ sub commit {
             $rc = 0;
         } else {
             # do some logging
-            $c->audit_log("configtool",
+            _audit_log("configtool",
                             sprintf("[config][%s][%s] %s file '%s'",
                                         $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
@@ -283,7 +284,7 @@ sub commit {
             $new_index{$f->{'path'}}    = $f;
         } else {
             if($c && $f->{'deleted'}) {
-                $c->audit_log("configtool",
+                _audit_log("configtool",
                                 sprintf("[config][%s][%s] deleted file '%s'",
                                             $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
@@ -313,13 +314,13 @@ sub commit {
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
         my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
-        $c->log->debug("post save hook: '" . $cmd . "', rc: " . $rc);
+        _debug("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
-            $c->log->info('post save hook out: '.$out);
+            _info('post save hook out: '.$out);
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "post_obj_save_cmd hook failed!\n".$out, escape => 0 });
             return;
         }
-        $c->log->debug('post save hook out: '.$out);
+        _debug('post save hook out: '.$out);
     }
 
     $self->_rebuild_index(); # also checks files again for errors
@@ -2399,9 +2400,9 @@ sub _remote_do {
                     });
     };
     if($@) {
-        warn($@) if $ENV{'THRUK_SRC'} eq 'TEST';
+        warn($@) if Thruk->mode eq 'TEST';
         my $msg = $@;
-        $c->log->error($@);
+        _error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
         my @text = split(/\n/mx, $msg);
         Thruk::Utils::set_message( $c, 'fail_message', $sub." failed: ".$text[0] );
@@ -2478,7 +2479,7 @@ sub remote_file_sync {
         my $f = $remotefiles->{$path};
         if(defined $f->{'content'}) {
             my $localpath = $localdir.'/'.$path;
-            $c->log->debug('updating file: '.$path);
+            _debug('updating file: '.$path);
             my $dir       = $localpath;
             $dir          =~ s/\/[^\/]+$//mx;
             Thruk::Utils::IO::mkdir_r($dir);
@@ -2487,13 +2488,13 @@ sub remote_file_sync {
         }
     }
     for my $f (@{$self->{'files'}}) {
-        $c->log->debug('checking file: '.$f->{'display'});
+        _debug('checking file: '.$f->{'display'});
         if(!defined $remotefiles->{$f->{'display'}}) {
-            $c->log->debug('deleting file: '.$f->{'display'});
+            _debug('deleting file: '.$f->{'display'});
             $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
             unlink($f->{'path'});
         } else {
-            $c->log->debug('keeping file: '.$f->{'display'});
+            _debug('keeping file: '.$f->{'display'});
         }
     }
 

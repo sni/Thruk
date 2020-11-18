@@ -23,7 +23,7 @@ use Thruk::Utils::Reports::Render;
 use Thruk::Views::ToolkitRenderer;
 use Thruk::Utils::External;
 use Thruk::Action::AddDefaults;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 use MIME::Lite;
 use File::Copy;
 use Encode qw(encode_utf8 decode_utf8 encode);
@@ -1501,7 +1501,7 @@ sub _is_authorized_for_report {
         return 1;
     }
 
-    return 1 if defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI';
+    return 1 if Thruk->mode eq 'CLI';
 
     if(defined $c->stash->{'remote_user'}) {
         if(defined $report->{'user'} && $report->{'user'} eq $c->stash->{'remote_user'}) {
@@ -1756,7 +1756,7 @@ sub _initialize_report_templates {
     # show errors if module was found
     if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {
         $Thruk::Utils::Reports::error = $@;
-        $c->log->error($@);
+        _error($@);
     }
     for my $s (@{$custom}) {
         $c->stash->{$s} = \&{'Thruk::Utils::Reports::CustomRender::'.$s};
@@ -1815,7 +1815,7 @@ sub _report_die {
     $Thruk::Utils::Reports::error = $err;
     set_running($c, $nr, 0, undef, time()) if $nr;
     check_for_waiting_reports($c);
-    if($ENV{'THRUK_CRON'} || ($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI')) {
+    if($ENV{'THRUK_CRON'} || (Thruk->mode eq 'CLI')) {
         return;
     }
     return $c->detach('/error/index/13');

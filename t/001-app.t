@@ -24,4 +24,4 @@ ok($request->headers('content-length'), "static content request has content-leng
 
 use_ok("Thruk::Config");
 use Config;
-diag(sprintf("Thruk: %s - Perl: %s - Arch: %s", Thruk::Config::version(), $^V, $Config{'archname'}));
+diag(sprintf("Thruk: %s - Perl: %s - Arch: %s", Thruk::Config::get_thruk_version(), $^V, $Config{'archname'}));

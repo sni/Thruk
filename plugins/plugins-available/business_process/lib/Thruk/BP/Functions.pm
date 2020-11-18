@@ -2,6 +2,7 @@ package Thruk::BP::Functions;
 
 use strict;
 use warnings;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -658,7 +659,7 @@ sub custom {
     eval {
         do($f->{'file'});
         if($@) {
-            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+            _info("internal error while loading filter file ".$f->{'file'}.": ".$@);
         }
         ## no critic
         eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $real_args, $livedata);');
@@ -667,14 +668,14 @@ sub custom {
             $status      = 3;
             $short_desc  = "UNKNOWN";
             $status_text = $@;
-            $c->log->info("internal error in custom function $fname: $@");
+            _info("internal error in custom function $fname: $@");
         }
     };
     if($@) {
         $status      = 3;
         $short_desc  = "UNKNOWN";
         $status_text = $@;
-        $c->log->info("internal error in custom function $fname: $@");
+        _info("internal error in custom function $fname: $@");
     }
     $short_desc  = '(no output)' unless $short_desc;
     $status_text = '(no output)' unless $status_text;

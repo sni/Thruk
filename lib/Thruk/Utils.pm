@@ -15,7 +15,7 @@ use warnings;
 use Thruk::Utils::IO ();
 use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::DateTime ();
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 use Carp qw/confess croak longmess/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Monday_of_Week Week_of_Year Today Add_Delta_Days/;
@@ -48,14 +48,14 @@ sub parse_date {
     eval {
         $timestamp = _parse_date($string);
         if(defined $timestamp) {
-            $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
+            _debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         } else {
-            $c->log->debug("error parsing data: '".$string."'");
+            _debug("error parsing data: '".$string."'");
         }
     };
     if($@) {
-        $c->log->error("parse_date error for '".$string."' - ".$@);
-        $c->log->error(longmess());
+        _error("parse_date error for '".$string."' - ".$@);
+        _error(longmess());
     }
     return $timestamp;
 }
@@ -375,8 +375,8 @@ sub get_start_end_for_timeperiod {
         return(undef, undef);
     }
 
-    $c->log->debug("start: ".$start." - ".(scalar localtime($start)));
-    $c->log->debug("end  : ".$end." - ".(scalar localtime($end)));
+    _debug("start: ".$start." - ".(scalar localtime($start)));
+    _debug("end  : ".$end." - ".(scalar localtime($end)));
 
     if($end >= $start) {
         return($start, $end);
@@ -607,7 +607,7 @@ sub read_ssi {
             unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
             $output .= $content;
         } else {
-            $c->log->warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
+            _warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
         }
         $output .= "\n<!-- END SSI $dir/$inc -->\n" if Thruk->verbose;
     }
@@ -1502,7 +1502,7 @@ sub get_perf_image {
     if($options->{'service'}) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $options->{'host'}, description => $options->{'service'} }]);
         if(scalar @{$svcdata} == 0) {
-            $c->log->error("no such service ".$options->{'service'}." on host ".$options->{'host'});
+            _error("no such service ".$options->{'service'}." on host ".$options->{'host'});
             return("");
         }
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
@@ -1511,7 +1511,7 @@ sub get_perf_image {
     } else {
         my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $options->{'host'}}]);
         if(scalar @{$hstdata} == 0) {
-            $c->log->error("no such host ".$options->{'host'});
+            _error("no such host ".$options->{'host'});
             return("");
         }
         $pnpurl                = get_pnp_url($c, $hstdata->[0], 1);
@@ -2274,7 +2274,7 @@ sub set_user {
     my($c, %options) = @_;
     confess("no username") unless $options{'username'};
     confess("no auth_src") unless $options{'auth_src'};
-    $c->log->debug(sprintf("set_user: %s, superuser: %s, internal: %s", $options{'username'}, $options{'superuser'} ? 'yes' : 'no', $options{'internal'} ? 'yes' : 'no'));
+    _debug(sprintf("set_user: %s, superuser: %s, internal: %s", $options{'username'}, $options{'superuser'} ? 'yes' : 'no', $options{'internal'} ? 'yes' : 'no'));
     if($c->user_exists) {
         if($c->user->{'internal'} || $options{'force'}) {
             # ok
@@ -2317,7 +2317,7 @@ sub change_user {
     confess("not allowed") unless $c->user->{'superuser'};
     return $c->user if $c->user->{'username'} eq $username;
 
-    $c->log->debug(sprintf("change_user: %s", $username));
+    _debug(sprintf("change_user: %s", $username));
     my $previous_user = delete $c->{'user'};
     delete $c->stash->{'remote_user'};
     delete $c->{'session'};
@@ -2367,7 +2367,7 @@ check and write pid file if none exists
 sub check_pid_file {
     my($c) = @_;
     my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
-    if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'FastCGI' && ! -f $pidfile) {
+    if(Thruk->mode eq 'FASTCGI' && ! -f $pidfile) {
         open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
         Thruk::Utils::IO::close($fh, $pidfile);
@@ -2387,7 +2387,7 @@ restart fcgi process and redirects to given page
 
 sub restart_later {
     my($c, $redirect) = @_;
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+    if(Thruk->mode eq 'FASTCGI') {
         my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
         if(-f $pidfile) {
             my $pids = [split(/\s/mx, read_file($pidfile))];
@@ -2450,11 +2450,11 @@ sub wait_after_reload {
         alarm(0);
         if($@) {
             $c->stats->profile(comment => "get_processinfo: ".$@);
-            $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
+            _debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
         }
         elsif($pkey && $c->stash->{'failed_backends'}->{$pkey}) {
             $c->stats->profile(comment => "get_processinfo: ".$c->stash->{'failed_backends'}->{$pkey});
-            $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
+            _debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
         }
         elsif($pkey and $time) {
             # not yet restarted
@@ -2464,7 +2464,7 @@ sub wait_after_reload {
                     $done = 1;
                     last;
                 } else {
-                    $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+                    _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
                 }
             }
         }
@@ -2479,7 +2479,7 @@ sub wait_after_reload {
                     $done = 1;
                     last;
                 } else {
-                    $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core)));
+                    _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core)));
                 }
             }
         } else {
@@ -2497,7 +2497,7 @@ sub wait_after_reload {
         # clean up cached groups which may have changed
         $c->cache->clear();
     } else {
-        $c->log->error('waiting for core reload failed');
+        _error('waiting for core reload failed');
         return(0);
     }
     return(1);
@@ -2559,7 +2559,7 @@ sub read_data_file {
         return($res);
     }
     if($c) {
-        $c->log->warn("error loading $filename - ".$@);
+        _warn("error loading $filename - ".$@);
     } else {
         warn("error loading $filename - ".$@);
     }
@@ -2781,7 +2781,7 @@ sub precompile_templates {
         close STDERR;
         open(STDERR, ">", \$stderr_output);
     };
-    $c->log->error($@) if $@;
+    _error($@) if $@;
 
     my $num = 0;
     for my $file (keys %{$uniq}) {
@@ -2800,12 +2800,12 @@ sub precompile_templates {
         open STDERR, ">&".$savestderr;
         ## use critic
     };
-    $c->log->error($@) if $@;
+    _error($@) if $@;
 
     $c->config->{'precompile_templates'} = 2;
     my $elapsed = tv_interval ( $t0 );
     my $result = sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
-    $c->log->info($result) if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS'));
+    _debug($result);
     return $result;
 }
 
@@ -2886,7 +2886,7 @@ check if memory limit is above the threshold
 sub check_memory_usage {
     my($c) = @_;
     my $mem = $c->stash->{'memory_end'} || Thruk::Backend::Pool::get_memory_usage();
-    $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
+    _debug2("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         my $inc = "";
         if($c->app->{'previous_reqest_memory'}) {
@@ -2913,20 +2913,20 @@ log error along with details about url and logged in user
 
 sub log_error_with_details {
     my($c, @errorDetails) = @_;
-    $c->log->error("***************************");
-    $c->log->error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
-    $c->log->error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
-    $c->log->error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
-    $c->log->error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
-    $c->log->error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
+    _error("***************************");
+    _error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
+    _error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    _error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+    _error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+    _error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
     for my $details (@errorDetails) {
         for my $line (@{list($details)}) {
             for my $splitted (split(/\n|<br>/mx, $line)) {
-                $c->log->error($splitted);
+                _error($splitted);
             }
         }
     }
-    $c->log->error("***************************");
+    _error("***************************");
     return;
 }
 
@@ -2990,7 +2990,7 @@ sub check_csrf {
     my($c, $skip_request_method) = @_;
 
     # script generated sessions are ok, we only want to protect browsers here
-    return 1 if($ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'CLI');
+    return 1 if(Thruk->mode eq 'CLI');
     return 1 if $c->req->header('X-Thruk-Auth-Key');
     return 1 if($c->{'session'} && $c->{'session'}->{'fake'});
 

@@ -18,6 +18,7 @@ use File::Temp qw/tempfile/;
 use File::Slurp qw/read_file/;
 use POSIX ();
 use Monitoring::Availability;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -100,7 +101,7 @@ sub calculate_availability {
         }
     }
     else {
-        $c->log->error("unknown report type");
+        _error("unknown report type");
         return;
     }
 
@@ -226,7 +227,7 @@ sub calculate_availability {
 
     my $logs;
     my $logstart = $start - $backtrack * 86400;
-    $c->log->debug("logstart: ".$logstart." - ".(scalar localtime($logstart)));
+    _debug("logstart: ".$logstart." - ".(scalar localtime($logstart)));
     my $logfilter = {
         -and => [
             time => { '>=' => $logstart },

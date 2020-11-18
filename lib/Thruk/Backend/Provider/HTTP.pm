@@ -6,6 +6,7 @@ use Data::Dumper;
 use Carp qw/confess/;
 use Module::Load qw/load/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
+use Thruk::Utils::Log qw/:all/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -902,10 +903,10 @@ sub _debug_log_request_response {
     return unless $c;
     return unless Thruk->debug;
 
-    $c->log->debug("request:");
-    $c->log->debug($response->request->as_string());
-    $c->log->debug("response:");
-    $c->log->debug($response->as_string());
+    _debug("request:");
+    _debug($response->request->as_string());
+    _debug("response:");
+    _debug($response->as_string());
     return;
 }
 
@@ -939,10 +940,10 @@ sub _ua_post_with_timeout {
     # manually handle redirects so we can better handle special cases in OMD
     if(my $location = $res->{'_headers'}->{'location'}) {
         if($location =~ m|/login.cgi\?[^/]+?/omd/error.py.*?code=(\d+)$|mx && $c) {
-            $c->log->debug("request:");
-            $c->log->debug($res->request->as_string());
-            $c->log->debug("response:");
-            $c->log->debug($res->as_string());
+            _debug("request:");
+            _debug($res->request->as_string());
+            _debug("response:");
+            _debug($res->as_string());
             $c->detach_error({msg => "remote backend returned an error: ".$1, code => 502, log => 1});
             return;
         }

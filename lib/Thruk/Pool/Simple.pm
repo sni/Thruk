@@ -3,7 +3,7 @@ package Thruk::Pool::Simple;
 use warnings;
 use strict;
 use threads qw/yield/;
-use Thread::Queue qw//;
+use Thread::Queue ();
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 #use Thruk::Timer qw/timing_breakpoint/;
 

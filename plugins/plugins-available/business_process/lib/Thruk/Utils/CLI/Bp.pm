@@ -58,7 +58,7 @@ use strict;
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval sleep/;
 use Thruk::Utils;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -218,7 +218,7 @@ sub cmd {
             my $local_rc = 0;
             for my $bp (@{$chunk}) {
                 $last_bp = $bp;
-                _debug("[$$] updating bp '".$bp->{'name'}."'") if $Thruk::Utils::CLI::verbose >= 1;
+                _debug2("[$$] updating bp '".$bp->{'name'}."'");
                 eval {
                     $bp->update_status($c);
                 };
@@ -228,7 +228,7 @@ sub cmd {
                     $local_rc = 1;
                     $rc = 1;
                 }
-                _debug("[$$] OK") if $Thruk::Utils::CLI::verbose >= 1;
+                _debug2("[$$] OK");
             }
             exit($local_rc) if $worker_num > 1;
         } else {

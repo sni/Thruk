@@ -6,6 +6,7 @@ use Thruk::Utils;
 use Thruk::BP::Functions;
 use Thruk::BP::Utils;
 use Thruk::Utils::Filter;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -641,23 +642,23 @@ sub _filter {
         }
     }
     if(!$f) {
-        $c->log->info("custom filter $fname not found");
+        _info("custom filter $fname not found");
         return;
     }
     eval {
         do($f->{'file'});
         if($@) {
-            $c->log->info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+            _info("internal error while loading filter file ".$f->{'file'}.": ".$@);
         }
         ## no critic
         eval($fname.'($c, $args);');
         ## use critic
         if($@) {
-            $c->log->info("internal error in custom filter $fname: $@");
+            _info("internal error in custom filter $fname: $@");
         }
     };
     if($@) {
-        $c->log->info("internal error in custom filter $fname: $@");
+        _info("internal error in custom filter $fname: $@");
     }
 
     return;

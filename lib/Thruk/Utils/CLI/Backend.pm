@@ -32,7 +32,7 @@ The backend command lists livestatus backends
 
 use warnings;
 use strict;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 

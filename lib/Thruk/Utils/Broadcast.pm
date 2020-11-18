@@ -12,6 +12,7 @@ Broadcast Utilities Collection for Thruk
 
 use strict;
 use warnings;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -45,7 +46,7 @@ sub get_broadcasts {
             $broadcast = Thruk::Utils::IO::json_lock_retrieve($file);
         };
         if($@) {
-            $c->log->error("could not read broadcast file $file: ".$@);
+            _error("could not read broadcast file $file: ".$@);
             next;
         }
 

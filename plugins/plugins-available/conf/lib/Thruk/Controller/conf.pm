@@ -15,6 +15,7 @@ use Thruk::Utils::Conf;
 use Thruk::Utils::Conf::Defaults;
 use Thruk::Utils::Plugin;
 use Thruk::Authentication::User;
+use Thruk::Utils::Log qw/:all/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -374,7 +375,7 @@ sub _process_json_page {
                 if($dat->{'disabled'}) { $name = $name.' (disabled)' }
                 push @{$objects}, $name;
             } else {
-                $c->log->warn("object without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
+                _warn("object without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
             }
         }
         for my $dat (@{$c->{'obj_db'}->get_templates_by_type($type)}) {
@@ -382,7 +383,7 @@ sub _process_json_page {
             if(defined $name) {
                 push @{$templates}, $name;
             } else {
-                $c->log->warn("template without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
+                _warn("template without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
             }
         }
         $json = [ { 'name' => $type.'s',
@@ -1456,10 +1457,10 @@ sub _process_user_password_page {
         elsif($pass1 ne '' && $pass1 eq $pass2) {
             my $err = _htpasswd_password($c, $user, $pass1, $old);
             if($err) {
-                $c->log->error("changing password for ".$user." failed: ".$err);
+                _error("changing password for ".$user." failed: ".$err);
                 Thruk::Utils::set_message($c, 'fail_message', "Password change failed.");
             } else {
-                $c->audit_log("configtool", "new password set for user ".$user);
+                _audit_log("configtool", "new password set for user ".$user);
                 Thruk::Utils::set_message($c, 'success_message', "Password changed successfully");
             }
         }
@@ -1508,7 +1509,7 @@ sub _update_password {
             return unless Thruk::Utils::check_csrf($c);
             my $err = _htpasswd_password($c, $user, undef);
             return $err if $err;
-            $c->audit_log("configtool", "password removed for user ".$user);
+            _audit_log("configtool", "password removed for user ".$user);
             return;
         }
 
@@ -1520,7 +1521,7 @@ sub _update_password {
             if($pass1 eq $pass2) {
                 my $err = _htpasswd_password($c, $user, $pass1);
                 return $err if $err;
-                $c->audit_log("configtool", "new password set for user ".$user);
+                _audit_log("configtool", "new password set for user ".$user);
                 return;
             } else {
                 return('Passwords do not match');
@@ -1543,9 +1544,9 @@ sub _htpasswd_password {
         if(_cmd($c, $cmd)) {
             return;
         }
-        $c->log->error("failed to remove password.");
-        $c->log->error("cmd: ".join(" ", @{$cmd}));
-        $c->log->error($c->stash->{'output'});
+        _error("failed to remove password.");
+        _error("cmd: ".join(" ", @{$cmd}));
+        _error($c->stash->{'output'});
         return( 'failed to remove password, check the logfile!' );
     }
 
@@ -1583,9 +1584,9 @@ sub _htpasswd_password {
         pop @{$cmd};
         push @{$cmd}, '****';
     }
-    $c->log->error("failed to update password.");
-    $c->log->error("cmd: ".join(" ", @{$cmd}));
-    $c->log->error($c->stash->{'output'});
+    _error("failed to update password.");
+    _error("cmd: ".join(" ", @{$cmd}));
+    _error($c->stash->{'output'});
     return('failed to update password, check the logfile!');
 }
 
@@ -1614,7 +1615,7 @@ sub _store_changes {
         Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode." );
         return;
     }
-    $c->log->debug("saving config changes to ".$file);
+    _debug("saving config changes to ".$file);
     my $res = Thruk::Utils::Conf::update_conf($file, $data, $old_hex, $defaults, $update_in_conf);
     if(defined $res) {
         if($res eq "no changes made." && $ignore_no_changes_made) {

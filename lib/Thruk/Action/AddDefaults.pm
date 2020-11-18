@@ -26,6 +26,7 @@ use Storable qw/dclone/;
 use URI::Escape qw/uri_escape/;
 use Thruk::Utils::Filter ();
 use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Utils::Log qw/:all/;
 
 my @stash_config_keys = qw/
     url_prefix product_prefix title_prefix use_pager start_page documentation_link
@@ -184,10 +185,10 @@ sub begin {
         my $product_prefix = $c->config->{'product_prefix'};
         # if changed, adjust thruk_auth as well
         if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
-            $c->log->debug($1.".cgi does not require authentication") if Thruk->debug;
+            _debug($1.".cgi does not require authentication") if Thruk->debug;
         } else {
             if(!$c->authenticate(skip_db_access => 1)) {
-                $c->log->debug("user authentication failed") if Thruk->verbose;
+                _debug("user authentication failed") if Thruk->verbose;
                 return $c->detach('/error/index/10');
             }
         }
@@ -288,7 +289,7 @@ sub end {
     my @errors = @{ $c->error };
     if( scalar @errors > 0 ) {
         for my $error (@errors) {
-            $c->log->error($error);
+            _error($error);
         }
         return $c->detach('/error/index/13');
     }
@@ -314,9 +315,9 @@ sub end {
                 # there will be new scalars from time to time
                 delete $res->{'SCALAR'} if $res->{'SCALAR'} and $res->{'SCALAR'} < 10;
                 if($Thruk::COUNT >= 2 && scalar keys %{$res} > 0) {
-                    $c->log->info("request: ".$Thruk::COUNT." (".$c->req->path."):");
+                    _info("request: ".$Thruk::COUNT." (".$c->req->path."):");
                     for my $key (sort { ($res->{$b} <=> $res->{$a}) } keys %{$res}) {
-                        $c->log->info(sprintf("+%-10i %30s  -  total %10i\n", $res->{$key}, $key, $c->config->{'arena'}->{$key}));
+                        _info(sprintf("+%-10i %30s  -  total %10i\n", $res->{$key}, $key, $c->config->{'arena'}->{$key}));
                     }
                 }
             }
@@ -568,7 +569,7 @@ sub add_defaults {
                 $last_program_restart = set_processinfo($c, $safe, $cached_data);
             };
             last unless $@;
-            $c->log->debug("retry $x, data source error: $@") if Thruk->debug;
+            _debug("retry $x, data source error: $@") if Thruk->debug;
             last if $x == $retrys;
             sleep 1;
         }
@@ -576,9 +577,9 @@ sub add_defaults {
             # side.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
             if(Thruk->debug) {
-                $c->log->warn("data source error: $@");
+                _warn("data source error: $@");
             } else {
-                $c->log->debug("data source error: $@");
+                _debug("data source error: $@");
             }
             return 1 if $safe == ADD_SAFE_DEFAULTS;
             return $c->detach('/error/index/9');
@@ -599,7 +600,7 @@ sub add_defaults {
         if(   !$c->stash->{'last_program_restart'}
            || !$c->user->{'timestamp'}
            || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
-           || ($ENV{THRUK_SRC} && $ENV{THRUK_SRC} eq 'CLI')
+           || Thruk->mode eq 'CLI'
            || ($c->user->{'timestamp'} < (time() - 600))
         ) {
             # refresh dynamic roles and groups
@@ -948,7 +949,7 @@ sub _disable_backends_by_group {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
                 if(defined $contactgroups->{$group}) {
-                    $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                    _debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
                     # delete old completly hidden state
                     delete $disabled_backends->{$peer->{'key'}};
                     # but disabled by cookie?
@@ -1057,7 +1058,7 @@ sub set_processinfo {
             next unless($processinfo->{$backend} and $processinfo->{$backend}->{'program_start'});
             my $delay = int($processinfo->{$backend}->{'program_start'} + $delay_pages_after_backend_reload - time());
             if($delay > 0) {
-                $c->log->debug("delaying page delivery by $delay seconds...");
+                _debug("delaying page delivery by $delay seconds...");
                 sleep($delay);
             }
         }
@@ -1097,7 +1098,7 @@ sub set_enabled_backends {
     ###############################
     # by args
     if(defined $backends) {
-        $c->log->debug('set_enabled_backends() by args') if Thruk->debug;
+        _debug('set_enabled_backends() by args') if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1121,7 +1122,7 @@ sub set_enabled_backends {
                     } else {
                         # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
                         #die("got no peer for: ".$b)
-                        $c->log->warn(sprintf("no backend found for: %s", $b));
+                        _warn(sprintf("no backend found for: %s", $b));
                     }
                 }
             }
@@ -1130,7 +1131,7 @@ sub set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        $c->log->debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
+        _debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1153,7 +1154,7 @@ sub set_enabled_backends {
                 } else {
                     # silently ignore, leads to hen/egg problem when using federation peers
                     #die("got no peer for: ".$b);
-                    #$c->log->warn(sprintf("no backend found for: %s", $b));
+                    #_warn(sprintf("no backend found for: %s", $b));
                 }
             }
         }
@@ -1162,7 +1163,7 @@ sub set_enabled_backends {
     ###############################
     # by param
     elsif($num_backends > 1 and defined $backend) {
-        $c->log->debug('set_enabled_backends() by param') if Thruk->debug;
+        _debug('set_enabled_backends() by param') if Thruk->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
@@ -1192,7 +1193,7 @@ sub set_enabled_backends {
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
-        $c->log->debug('set_enabled_backends() by cookie') if Thruk->debug;
+        _debug('set_enabled_backends() by cookie') if Thruk->debug;
         for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -1200,7 +1201,7 @@ sub set_enabled_backends {
         }
     }
     elsif(defined $c->{'db'}) {
-        $c->log->debug('set_enabled_backends() using defaults') if Thruk->debug;
+        _debug('set_enabled_backends() using defaults') if Thruk->debug;
         my $display_too = 0;
         if(defined $c->req->header('user-agent') and $c->req->header('user-agent') !~ m/thruk/mxi) {
             $display_too = 1;
@@ -1220,7 +1221,7 @@ sub set_enabled_backends {
         }
         $c->{'db'}->disable_backends($disabled_backends);
     }
-    $c->log->debug("backend groups filter enabled") if $has_groups;
+    _debug("backend groups filter enabled") if $has_groups;
 
     # renew state of connections
     if($num_backends > 1 && $c->config->{'check_local_states'} && !$ENV{'THRUK_USE_LMD'}) {
@@ -1231,7 +1232,7 @@ sub set_enabled_backends {
     if(defined $backends) {
         set_possible_backends($c, $disabled_backends);
     }
-    $c->log->debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
+    _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
     return($disabled_backends, $has_groups);
 }
 
@@ -1245,7 +1246,7 @@ sub set_enabled_backends {
 sub die_when_no_backends {
     my($c) = @_;
     if(!defined $c->stash->{'pi_detail'} && _any_backend_enabled($c)) {
-        $c->log->error("got no result from any backend, please check backend connection and logfiles");
+        _error("got no result from any backend, please check backend connection and logfiles");
         return $c->detach('/error/index/9');
     }
     return;
@@ -1307,7 +1308,7 @@ sub check_federation_peers {
     if($@) {
         # may fail for older lmd releases which don't have parent or section information
         if($@ =~ m/\Qbad request: table sites has no column\E/mx) {
-            $c->log->info("cannot check lmd federation mode, please update LMD.");
+            _info("cannot check lmd federation mode, please update LMD.");
             ## no critic
             $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'} = 1;
             ## use critic

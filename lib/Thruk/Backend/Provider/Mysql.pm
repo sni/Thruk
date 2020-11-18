@@ -6,8 +6,8 @@ use warnings;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
-use Thruk::Utils qw//;
-use Thruk::Utils::Log qw/_error _info _debug _trace/;
+use Thruk::Utils ();
+use Thruk::Utils::Log qw/:all/;
 use Carp qw/confess/;
 use POSIX ();
 
@@ -461,15 +461,15 @@ sub get_logs {
     }
 
     # add performance related debug output
-    if($Thruk::Utils::CLI::verbose && $Thruk::Utils::CLI::verbose >= 3) {
-        _debug($sql);
+    if(Thruk->verbose >= 3) {
+        _trace($sql);
 
-        _debug("EXPLAIN:");
-        _debug(_sql_debug("EXPLAIN\n".$sql, $dbh));
+        _trace("EXPLAIN:");
+        _trace(_sql_debug("EXPLAIN\n".$sql, $dbh));
 
         my $debug_sql = "SHOW INDEXES FROM `".$prefix."_log`";
-        _debug($debug_sql.":");
-        _debug(_sql_debug($debug_sql, $dbh));
+        _trace($debug_sql.":");
+        _trace(_sql_debug($debug_sql, $dbh));
     }
 
     # queries with authorization
@@ -1114,9 +1114,8 @@ imports logs into Mysql
 =cut
 
 sub _import_logs {
-    my($self, $c, $mode, $verbose, $backends, $blocksize, $options) = @_;
+    my($self, $c, $mode, $backends, $blocksize, $options) = @_;
     my $files = $options->{'files'} || [];
-    $verbose = 0 unless defined $verbose;
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
     my $forcestart;
@@ -1140,7 +1139,7 @@ sub _import_logs {
     }
 
     if(scalar @peer_keys > 1 and scalar @{$files} > 0) {
-        print "ERROR: you must specify a backend (-b) when importing files.\n" if $verbose;
+        _error("you must specify a backend (-b) when importing files.");
         return(0, -1);
     }
 
@@ -1155,42 +1154,43 @@ sub _import_logs {
         $peer->logcache->reconnect();
         my $dbh = $peer->logcache->_dbh;
 
-        print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose > 1;
+        _info("running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'});
 
         # backends maybe down, we still want to continue updates
         eval {
             my $count;
             if($mode eq 'update' or $mode eq 'import') {
-                $count = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                $count = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'clean') {
-                my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart);
                 $log_count = [0,0] unless ref $log_count eq 'ARRAY';
                 $log_count->[0] += $tmp->[0];
                 $log_count->[1] += $tmp->[1];
             }
             elsif($mode eq 'compact') {
-                my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart, $options->{'force'});
+                my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart, $options->{'force'});
                 $log_count = [0,0] unless ref $log_count eq 'ARRAY';
                 $log_count->[0] += $tmp->[0];
                 $log_count->[1] += $tmp->[1];
             }
             elsif($mode eq 'drop') {
-                $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'authupdate') {
-                $count = $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
+                $count = $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix);
             }
             elsif($mode eq 'optimize') {
-                $count = $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
+                $count = $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $options);
             } else {
                 die("unknown mode: ".$mode."\n");
             }
             $log_count += $count if($count && $count > 0);
         };
-        if($@) {
-            print "ERROR: ", $@,"\n" if $verbose;
-            push @{$errors}, $@;
+        my $err = $@;
+        if($err) {
+            _debug($err);
+            push @{$errors}, $err;
         }
 
         # cleanup connection
@@ -1207,7 +1207,7 @@ sub _import_logs {
 
 ##########################################################
 sub _update_logcache {
-    my($self, $c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart,$force) = @_;
+    my($self, $c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart,$force) = @_;
 
     #&timing_breakpoint('_update_logcache');
     unless(defined $blocksize) {
@@ -1226,23 +1226,23 @@ sub _update_logcache {
     }
 
     if($mode eq 'update') {
-        $mode = 'import' if _update_logcache_version($c, $dbh, $prefix, $verbose);
+        $mode = 'import' if _update_logcache_version($c, $dbh, $prefix);
     }
 
     # check tables
     _drop_tables($dbh, $prefix) if $mode eq 'import';
     my $fresh_created = 0;
-    if(_create_tables_if_not_exist($dbh, $prefix, $verbose)) {
+    if(_create_tables_if_not_exist($dbh, $prefix)) {
         $fresh_created = 1;
     }
 
-    return(-1) unless _check_lock($dbh, $prefix, $verbose, $c);
+    return(-1) unless _check_lock($dbh, $prefix, $c);
 
     if($mode eq 'clean') {
-        return(_update_logcache_clean($dbh, $prefix, $verbose, $blocksize));
+        return(_update_logcache_clean($dbh, $prefix, $blocksize));
     }
     if($mode eq 'compact') {
-        return($self->_update_logcache_compact($c, $dbh, $prefix, $verbose, $blocksize, $force));
+        return($self->_update_logcache_compact($c, $dbh, $prefix, $blocksize, $force));
     }
 
     $mode = 'import' if $fresh_created;
@@ -1255,14 +1255,14 @@ sub _update_logcache {
         my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
 
         if(defined $files and scalar @{$files} > 0) {
-            $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup,$c);
+            $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$host_lookup,$service_lookup,$prefix,$contact_lookup,$c);
         } else {
-            $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup,$forcestart);
+            $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$host_lookup,$service_lookup,$prefix,$contact_lookup,$forcestart);
         }
 
         if($mode eq 'import') {
-            print "updateing auth cache\n" if $verbose > 1;
-            $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
+            _debug2("updateing auth cache");
+            $self->_update_logcache_auth($c, $peer, $dbh, $prefix);
         }
     };
     my $error = $@ || '';
@@ -1270,7 +1270,7 @@ sub _update_logcache {
     _finish_update($c, $dbh, $prefix, time() - $start) or $error .= $dbh->errstr;
 
     if($error) {
-        $c->log->error('logcache '.$mode.' failed: '.$error);
+        _error('logcache '.$mode.' failed: '.$error);
         die($error);
     }
 
@@ -1291,11 +1291,11 @@ sub _finish_update {
 ##########################################################
 # returns 1 if tables have been newly created or undef if already exist
 sub _create_tables_if_not_exist {
-    my($dbh, $prefix, $verbose) = @_;
+    my($dbh, $prefix) = @_;
 
     return if _tables_exist($dbh, $prefix);
 
-    print "creating logcache tables\n" if $verbose > 1;
+    _debug2("creating logcache tables");
     _create_tables($dbh, $prefix);
     return 1;
 }
@@ -1316,7 +1316,7 @@ sub _tables_exist {
 
 ##########################################################
 sub _check_lock {
-    my($dbh, $prefix, $verbose, $c) = @_;
+    my($dbh, $prefix, $c) = @_;
 
     # check if there is already a update / import running
     my $skip          = 0;
@@ -1326,7 +1326,7 @@ sub _check_lock {
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
-                print "WARNING: logcache update already running with pid ".$pids[0]."\n" if $verbose;
+                _info("WARNING: logcache update already running with pid ".$pids[0]);
                 $skip = 1;
             }
         }
@@ -1337,7 +1337,7 @@ sub _check_lock {
     };
     $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
     if($@) {
-        print "$@\n" if $verbose;
+        _debug($@);
         return;
     }
     if($skip) {
@@ -1354,7 +1354,7 @@ sub _check_lock {
 
 ##########################################################
 sub _update_logcache_version {
-    my($c, $dbh, $prefix, $verbose) = @_;
+    my($c, $dbh, $prefix) = @_;
 
     my $cache_version = 1;
     my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
@@ -1365,8 +1365,7 @@ sub _update_logcache_version {
     if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
         # only log message if not importing already
         my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
-        print "WARNING: ".$msg."\n" if $verbose;
-        $c->log->warn($msg);
+        _warn($msg);
         return 1;
     }
 
@@ -1375,7 +1374,7 @@ sub _update_logcache_version {
 
 ##########################################################
 sub _update_logcache_clean {
-    my($dbh, $prefix, $verbose, $blocksize) = @_;
+    my($dbh, $prefix, $blocksize) = @_;
 
     if($blocksize =~ m/^\d+[a-z]{1}/mx) {
         # blocksize is in days
@@ -1383,7 +1382,7 @@ sub _update_logcache_clean {
     }
 
     my $start = time() - ($blocksize * 86400);
-    print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose > 1;
+    _debug2("cleaning logs older than: ", scalar localtime $start);
     my $plugin_ref_count = 0;
     my $log_count = $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
     return([$log_count, $plugin_ref_count]) if $log_count == 0;
@@ -1394,7 +1393,7 @@ sub _update_logcache_clean {
 
 ##########################################################
 sub _update_logcache_compact {
-    my($self, $c, $dbh, $prefix, $verbose, $blocksize, $force) = @_;
+    my($self, $c, $dbh, $prefix, $blocksize, $force) = @_;
     my $log_count = 0;
     my $log_clear = 0;
 
@@ -1404,7 +1403,7 @@ sub _update_logcache_compact {
     }
     my $t1     = time();
     my $end  = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize * 86400));
-    print "compacting logs older than: ", scalar localtime $end, "\n" if $verbose > 1;
+    _debug("compacting logs older than: ".(scalar localtime $end));
     my $status = $dbh->selectall_hashref("SELECT name, value FROM `".$prefix."_status`", 'name');
     my $start  = $status->{'compact_till'}->{'value'};
     if(!$start || $force) {
@@ -1420,7 +1419,7 @@ sub _update_logcache_compact {
             last;
         }
 
-        print "compacting ", scalar localtime $current, ": " if $verbose > 1;
+        _infos("compacting ".(scalar localtime $current). ": ");
         my $next = Thruk::Utils::DateTime::start_of_day($current + 26*86400); # add 2 extra hours to compensate timshifts
 
         my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
@@ -1435,14 +1434,14 @@ sub _update_logcache_compact {
                 $dbh->commit || confess $dbh->errstr;
                 $log_clear += scalar @delete;
                 @delete = ();
-                print '.' if $verbose > 1;
+                _infoc('.');
             }
             if(_is_compactable($l, $alerts)) {
                 push @delete, $l->{'log_id'};
             }
         }
 
-        printf("%d removed. done\n", scalar @delete) if $verbose > 1;
+        _debug(sprintf("%d removed. done", scalar @delete));
         $current  = $next;
         $log_count += $processed;
         $log_clear += scalar @delete;
@@ -1500,8 +1499,8 @@ sub _is_compactable {
 
 ##########################################################
 sub _update_logcache_auth {
-    #my($self, $c, $peer, $dbh, $prefix, $verbose) = @_;
-    my($self, undef, $peer, $dbh, $prefix, $verbose) = @_;
+    #my($self, $c, $peer, $dbh, $prefix) = @_;
+    my($self, undef, $peer, $dbh, $prefix) = @_;
 
     # bad idea, this moves contact ids which are also used in notifications log entries
     #$dbh->do("TRUNCATE TABLE `".$prefix."_contact`");
@@ -1511,7 +1510,7 @@ sub _update_logcache_auth {
 
     # update hosts
     my($hosts)    = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
-    print "hosts" if $verbose > 1;
+    _debugs("hosts: ");
     my $stm = "INSERT INTO `".$prefix."_contact_host_rel` (contact_id, host_id) VALUES";
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
     my $count = 0;
@@ -1524,12 +1523,12 @@ sub _update_logcache_auth {
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
         $count++;
-        print "." if $count%100 == 0 && $verbose > 1;
+        _debugc(".") if $count%100 == 0;
     }
-    print "\n" if $verbose > 1;
+    _debug("done");
 
     # update services
-    print "services" if $verbose > 1;
+    _debugs("services: ");
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_service_rel`");
     $stm = "INSERT INTO `".$prefix."_contact_service_rel` (contact_id, service_id) VALUES";
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description contacts/]);
@@ -1544,10 +1543,10 @@ sub _update_logcache_auth {
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
         $count++;
-        print "." if $count%1000 == 0 && $verbose > 1;
+        _debugc(".") if $count%1000 == 0;
     }
 
-    print "\n" if $verbose > 1;
+    _debug("done");
 
     $dbh->commit || confess $dbh->errstr;
 
@@ -1556,23 +1555,23 @@ sub _update_logcache_auth {
 
 ##########################################################
 sub _update_logcache_optimize {
-    my($self, $c, $peer, $dbh, $prefix, $verbose, $options) = @_;
+    my($self, $c, $peer, $dbh, $prefix, $options) = @_;
 
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
     if(!$options->{'force'} && scalar @times > 0 && $times[0] && $times[0] > time()-86400) {
-        print "no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force\n" if $verbose > 1;
+        _info("no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force");
         return(-1);
     }
     my $start = time();
 
     eval {
-        print "update logs table order..." if $verbose > 1;
+        _infos("update logs table order...");
         $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
         $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-        print "done\n" if $verbose > 1;
+        _info("done");
     };
-    print "$@\n" if($@ && $verbose);
+    _warn($@) if $@;
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         # remove temp files from previously repair attempt if filesystem was full
@@ -1581,14 +1580,14 @@ sub _update_logcache_optimize {
             Thruk::Utils::IO::cmd("rm -f $root/var/mysql/thruk_log_cache/*.TMD");
         }
         # repair / optimize tables
-        print "optimizing / repairing tables\n" if $verbose > 1;
+        _debug("optimizing / repairing tables");
         for my $table (@Thruk::Backend::Provider::Mysql::tables) {
-            print $table.'...' if $verbose > 1;
+            _infos($table.'...');
             $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
             $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
             $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
             $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
-            print "OK\n" if $verbose > 1;
+            _info("OK");
         }
     }
 
@@ -1824,7 +1823,7 @@ sub _fill_lookup_logs {
 
 ##########################################################
 sub _import_peer_logfiles {
-    my($self,$c,$mode,$peer,$blocksize,$dbh,$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup,$forcestart) = @_;
+    my($self,$c,$mode,$peer,$blocksize,$dbh,$host_lookup,$service_lookup,$prefix,$contact_lookup,$forcestart) = @_;
 
     # get start / end timestamp
     my($mstart, $mend);
@@ -1834,7 +1833,7 @@ sub _import_peer_logfiles {
         # get last timestamp from Mysql
         ($mstart, $mend) = @{$peer->logcache->get_logs_start_end(collection => $prefix)};
         if(defined $mend) {
-            print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose > 1;
+            _debug("latest entry in logcache: ".(scalar localtime $mend));
             push @{$filter}, {time => { '>=' => $mend }};
         }
         $c->stats->profile(end => "get last mysql timestamp");
@@ -1867,8 +1866,8 @@ sub _import_peer_logfiles {
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
 
-    print "importing from ", scalar localtime $start, "\n" if $verbose > 1;
-    print "until latest entry in logfile: ", scalar localtime $end, "\n" if($end && $verbose > 1);
+    _info("importing from ".(scalar localtime $start));
+    _info("until latest entry in logfile: ".(scalar localtime $end)) if $end;
     my $time = $start;
     $end = time() unless $end;
 
@@ -1892,7 +1891,7 @@ sub _import_peer_logfiles {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
         my $duplicate_lookup = {};
-        print scalar localtime $time if $verbose > 1;
+        _infos(scalar localtime $time);
 
         my $today = POSIX::strftime("%Y-%m-%d", localtime($time));
         if($last_day ne $today) {
@@ -1926,7 +1925,7 @@ sub _import_peer_logfiles {
                 $duplicate_lookup = $self->_fill_lookup_logs($prefix,$time,($time+$blocksize));
                 #&timing_breakpoint('_fill_lookup_logs_logs done');
             }
-            print ":" if $verbose > 1;
+            _infoc(":");
         };
         if($@) {
             my $err = $@;
@@ -1942,9 +1941,9 @@ sub _import_peer_logfiles {
 
         if($file) {
             $file = $logs;
-            $log_count += $self->_import_logcache_from_file($mode,$dbh,[$file],$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup,$c, $import_compacted, $alertstore);
+            $log_count += $self->_import_logcache_from_file($mode,$dbh,[$file],$host_lookup,$service_lookup,$prefix,$contact_lookup,$c, $import_compacted, $alertstore);
         } else {
-            $log_count += $self->_insert_logs($dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c, undef, $import_compacted, $alertstore);
+            $log_count += $self->_insert_logs($dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$prefix,$contact_lookup,$c, undef, $import_compacted, $alertstore);
             $reordered = 1;
         }
 
@@ -1952,7 +1951,7 @@ sub _import_peer_logfiles {
     }
 
     if($mode eq 'import') {
-        print "creating index..." if $verbose > 1;
+        _debugs("creating index...");
         #&timing_breakpoint('_import_peer_logfiles enable index');
         $dbh->do('SET foreign_key_checks = 1');
         $dbh->do('SET unique_checks = 1');
@@ -1960,13 +1959,13 @@ sub _import_peer_logfiles {
         if($reordered) {
             $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
         }
-        print "done\n" if $verbose > 1;
+        _debug("done");
         #&timing_breakpoint('_import_peer_logfiles enable index done');
     }
 
     # update index statistics
     if($log_count > 0) {
-        _check_index($c, $dbh, $prefix, $verbose);
+        _check_index($c, $dbh, $prefix);
     }
 
     return $log_count;
@@ -1974,7 +1973,7 @@ sub _import_peer_logfiles {
 
 ##########################################################
 sub _import_logcache_from_file {
-    my($self,$mode,$dbh,$files,$host_lookup,$service_lookup,$verbose,$prefix,$contact_lookup, $c, $import_compacted, $alertstore) = @_;
+    my($self,$mode,$dbh,$files,$host_lookup,$service_lookup,$prefix,$contact_lookup, $c, $import_compacted, $alertstore) = @_;
     my $log_count = 0;
 
     require Monitoring::Availability::Logs;
@@ -1995,7 +1994,7 @@ sub _import_logcache_from_file {
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
     for my $f (@{$files}) {
-        print $f if $verbose > 1;
+        _infos($f);
         my $duplicate_lookup  = {};
         my $last_duplicate_ts = 0;
         my @values;
@@ -2011,8 +2010,8 @@ sub _import_logcache_from_file {
 
             if($mode eq 'update') {
                 if($last_duplicate_ts < $l->{'time'}) {
-                    $self->_safe_insert($dbh, $stm, \@values, $verbose);
-                    $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+                    $self->_safe_insert($dbh, $stm, \@values);
+                    $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
                     @values = ();
                     $duplicate_lookup = $self->_fill_lookup_logs($prefix,$l->{'time'},$l->{'time'}+86400);
                     $last_duplicate_ts = $l->{'time'}+86400;
@@ -2026,10 +2025,10 @@ sub _import_logcache_from_file {
 
             # commit every 1000th to avoid to large blocks
             if($log_count%1000 == 0) {
-                $self->_safe_insert($dbh, $stm, \@values, $verbose);
-                $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+                $self->_safe_insert($dbh, $stm, \@values);
+                $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
                 @values = ();
-                print '.' if $verbose;
+                _infoc('.');
             }
 
             if($import_compacted && _is_compactable($l, $alertstore)) {
@@ -2049,15 +2048,15 @@ sub _import_logcache_from_file {
                     $dbh->quote($l->{'message'}),
             );
         }
-        $self->_safe_insert($dbh, $stm, \@values, $verbose);
-        $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+        $self->_safe_insert($dbh, $stm, \@values);
+        $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
         CORE::close($fh);
-        print "\n" if $verbose > 1;
+        _debug("\n");
     }
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         _release_write_locks($dbh);
-        print "it is recommended to run logcacheoptimize after importing logfiles.\n" if $verbose;
+        _info("it is recommended to run logcacheoptimize after importing logfiles.");
     }
 
     return $log_count;
@@ -2065,7 +2064,7 @@ sub _import_logcache_from_file {
 
 ##########################################################
 sub _insert_logs {
-    my($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,$use_extended_inserts, $import_compacted, $alertstore) = @_;
+    my($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$prefix,$contact_lookup,$c,$use_extended_inserts, $import_compacted, $alertstore) = @_;
     my $log_count = 0;
     my $compacted = 0;
 
@@ -2084,7 +2083,7 @@ sub _insert_logs {
     # check pid / lock
     my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
     if(scalar @pids == 1 && $pids[0] && $pids[0] != $$) {
-        print "WARNING: logcache update already running with pid ".$pids[0]."\n" if $verbose;
+        _warn("logcache update already running with pid ".$pids[0]);
         return $log_count;
     }
 
@@ -2119,7 +2118,7 @@ sub _insert_logs {
         next if $import_filter && $l->{'message'} =~ $import_filter;
 
         $log_count++;
-        print '.' if($log_count % $dots_each == 0 && $verbose > 1);
+        _infoc('.') if $log_count % $dots_each == 0;
 
         my($host, $svc, $contact) = _fix_import_log($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
@@ -2158,14 +2157,14 @@ sub _insert_logs {
         # commit every 1000th to avoid to large blocks
         if($use_extended_inserts && $log_count%1000 == 0) {
             #&timing_breakpoint('_insert_logs logs calculated');
-            $self->_safe_insert($dbh, $stm, \@values, $verbose);
+            $self->_safe_insert($dbh, $stm, \@values);
             @values = ();
             #&timing_breakpoint('_insert_logs logs inserted');
-            $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+            $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
         }
     }
     if($use_extended_inserts) {
-        $self->_safe_insert($dbh, $stm, \@values, $verbose);
+        $self->_safe_insert($dbh, $stm, \@values);
     } else {
         #&timing_breakpoint('_insert_logs load data local');
         CORE::close($fh);
@@ -2176,27 +2175,25 @@ sub _insert_logs {
         my $err = $@;
         unlink($datafilename);
         if($err) {
-            print "ERROR DETAIL: ".$err."\n" if $verbose;
-            print "ERROR SQL: ".$stm."\n"    if $verbose;
+            _error("ERROR DETAIL: ".$err);
+            _error("ERROR SQL: ".$stm);
             # retry with extended inserts
-            return(_insert_logs($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup,$c,1));
+            return(_insert_logs($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$prefix,$contact_lookup,$c,1));
         }
         $dbh->commit || confess $dbh->errstr;
         #&timing_breakpoint('_insert_logs load data local done');
     }
 
-    $self->_safe_insert_stash($dbh, $prefix, $verbose, $foreign_key_stash);
+    $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
     # release locks, unless in import mode. Import releases lock later
     if($mode != MODE_IMPORT) {
         _release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     }
 
-    if($verbose > 1) {
-        if($compacted > 0) {
-            print '. '.($log_count-$compacted) . " entries added and ".$compacted." compacted rows skipped\n";
-        } else {
-            print '. '.$log_count . " entries added\n";
-        }
+    if($compacted > 0) {
+        _info('. '.($log_count-$compacted) . " entries added and ".$compacted." compacted rows skipped");
+    } else {
+        _info('. '.$log_count . " entries added");
     }
     return $log_count;
 }
@@ -2224,13 +2221,13 @@ sub _drop_tables {
 
 ##########################################################
 sub _safe_insert {
-    my($self, $dbh, $stm, $values, $verbose) = @_;
+    my($self, $dbh, $stm, $values) = @_;
     return if scalar @{$values} == 0;
     eval {
         $dbh->do($stm.join(',', @{$values}));
     };
     if($@) {
-        print STDERR "ERROR INSERT: ".$@."\n" if $verbose;
+        _error("ERROR INSERT: ".$@);
 
         # insert failed for some reason, try them one by one to see which one breaks
         for my $v (@{$values}) {
@@ -2238,8 +2235,8 @@ sub _safe_insert {
                 $dbh->do($stm.$v);
             };
             if ($@) {
-                print STDERR "ERROR DETAIL: ".$@."\n"   if $verbose;
-                print STDERR "ERROR SQL: ".$stm.$v."\n" if $verbose;
+                _error("ERROR DETAIL: ".$@);
+                _error("ERROR SQL: ".$stm.$v);
             }
         }
     }
@@ -2249,20 +2246,20 @@ sub _safe_insert {
 
 ##########################################################
 sub _safe_insert_stash {
-    my($self, $dbh, $prefix, $verbose, $foreign_key_stash) = @_;
+    my($self, $dbh, $prefix, $foreign_key_stash) = @_;
 
     if($foreign_key_stash->{'host'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_host` (host_id, host_name) VALUES", \@{$foreign_key_stash->{'host'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_host` (host_id, host_name) VALUES", \@{$foreign_key_stash->{'host'}});
         delete $foreign_key_stash->{'host'};
     }
 
     if($foreign_key_stash->{'service'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_service` (service_id, host_id, service_description) VALUES", \@{$foreign_key_stash->{'service'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_service` (service_id, host_id, service_description) VALUES", \@{$foreign_key_stash->{'service'}});
         delete $foreign_key_stash->{'service'};
     }
 
     if($foreign_key_stash->{'contact'}) {
-        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_contact` (contact_id, name) VALUES", \@{$foreign_key_stash->{'contact'}}, $verbose);
+        $self->_safe_insert($dbh, "INSERT INTO `".$prefix."_contact` (contact_id, name) VALUES", \@{$foreign_key_stash->{'contact'}});
         delete $foreign_key_stash->{'contact'};
     }
 
@@ -2382,16 +2379,16 @@ sub _set_type {
 
 ##########################################################
 sub _check_index {
-    my($c, $dbh, $prefix, $verbose) = @_;
+    my($c, $dbh, $prefix) = @_;
     $c->stats->profile(begin => "update index statistics");
-    print "running check/analyse..." if $verbose > 1;
+    _debugs("running check/analyse...");
 
     my $data = $dbh->selectall_hashref("SHOW INDEXES FROM `".$prefix."_log`", "Key_name");
     if($data && $data->{'host_id'}) {
         my($hostcount) = @{$dbh->selectcol_arrayref("SELECT COUNT(*) as total FROM `".$prefix."_host`")};
         if($data->{'host_id'}->{'Cardinality'} < $hostcount * 5) {
             $c->stats->profile(end => "update index statistics");
-            print "not required\n" if $verbose > 1;
+            _debug("not required");
             return;
         }
     }
@@ -2400,7 +2397,7 @@ sub _check_index {
         $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
         $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
     }
-    print "done\n" if $verbose > 1;
+    _debug("done");
     $c->stats->profile(end => "update index statistics");
     return;
 }

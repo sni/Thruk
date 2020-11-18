@@ -6,6 +6,7 @@ use Data::Dumper;
 use Cpanel::JSON::XS qw/encode_json/;
 use File::Slurp qw/read_file/;
 use Module::Load qw/load/;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -67,7 +68,7 @@ sub index {
     if($action eq 'startup') {
         if(!$c->config->{'started'}) {
             $c->config->{'started'} = 1;
-            $c->log->debug("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
+            _debug("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
             $c->stash->{'text'} = 'startup done';
         }
         return;
@@ -79,7 +80,7 @@ sub index {
             $c->stash->{'text'} = 'already compiled';
         } else {
             $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
-            $c->log->info($c->stash->{'text'});
+            _info($c->stash->{'text'});
         }
         return;
     }
@@ -93,18 +94,18 @@ sub index {
                 if($file and -e $file) {
                     my $msg = read_file($file);
                     unlink($file);
-                    $c->log->error($msg);
+                    _error($msg);
                     return;
                 }
             }
             if(ref $body eq 'FileHandle') {
                 while(<$body>) {
-                    $c->log->error($_);
+                    _error($_);
                 }
                 return;
             }
         }
-        $c->log->error('log request without a file: '.Dumper($c->req));
+        _error('log request without a file: '.Dumper($c->req));
         return;
     }
 

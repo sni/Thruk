@@ -23,8 +23,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    if(   (!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'TEST_LEAK' && $ENV{'THRUK_SRC'} ne 'TEST'))
-       && !Thruk->debug) {
+    if(Thruk->mode ne 'TEST_LEAK' && Thruk->mode ne 'TEST' && !Thruk->debug) {
         die("test.cgi is disabled unless in test mode!");
     }
 

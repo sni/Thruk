@@ -3,6 +3,7 @@ package Thruk::Controller::cmd;
 use strict;
 use warnings;
 use Data::Dumper;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -199,7 +200,7 @@ sub index {
             }
             _set_host_service_from_down_com_ids($c);
             if( do_send_command($c) ) {
-                $c->log->debug("command succeeded");
+                _debug("command succeeded");
             }
             else {
                 $errors++;
@@ -232,7 +233,7 @@ sub index {
             }
             else {
                 if( do_send_command($c) ) {
-                    $c->log->debug("command for host $host succeeded");
+                    _debug("command for host $host succeeded");
                 }
                 else {
                     $errors++;
@@ -242,8 +243,8 @@ sub index {
                         Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
                     }
                     Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
-                    $c->log->debug("command for host $host failed");
-                    $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
+                    _debug("command for host $host failed");
+                    _debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
             }
         }
@@ -278,7 +279,7 @@ sub index {
             }
             else {
                 if( do_send_command($c) ) {
-                    $c->log->debug("command for $service on host $host succeeded");
+                    _debug("command for $service on host $host succeeded");
                 }
                 else {
                     $errors++;
@@ -288,8 +289,8 @@ sub index {
                         Thruk::Utils::set_message( $c, 'fail_message', sprintf("command for %s on host %s failed", $service, $host));
                     }
                     Thruk::Utils::append_message( $c, ', '.$c->stash->{'form_errors'}->[0]{'message'}) if $c->stash->{'form_errors'}->[0];
-                    $c->log->debug("command for $service on host $host failed");
-                    $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
+                    _debug("command for $service on host $host failed");
+                    _debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
             }
         }
@@ -339,13 +340,13 @@ sub _remove_all_downtimes {
     for my $id ( @ids ) {
         $c->req->parameters->{'down_id'} = $id;
         if( do_send_command($c) ) {
-            $c->log->debug("removing downtime $id succeeded");
+            _debug("removing downtime $id succeeded");
             Thruk::Utils::set_message( $c, 'success_message', "removing downtime $id succeeded" );
         }
         else {
-            $c->log->debug("removing downtime $id failed");
+            _debug("removing downtime $id failed");
             Thruk::Utils::set_message( $c, 'fail_message', "removing downtime $id failed" );
-            $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
+            _debug( Dumper( $c->stash->{'form_errors'} ) );
         }
     }
 
@@ -421,7 +422,7 @@ sub redirect_or_success {
 
     my $wait = defined $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 0;
     if(bulk_send($c, $c->stash->{'commands2send'})) {
-        $c->log->debug("bulk sending commands succeeded");
+        _debug("bulk sending commands succeeded");
     } else {
         if($c->stash->{'last_command_error'}) {
             Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$c->stash->{'last_command_error'});
@@ -532,7 +533,7 @@ sub redirect_or_success {
                                                 );
                     }
                 };
-                $c->log->debug(Dumper($@)) if $@;
+                _debug(Dumper($@)) if $@;
                 if(defined $c->stash->{'additional_wait'}) {
                     sleep(1);
                 }
@@ -596,14 +597,14 @@ sub do_send_command {
     if( ref $c and defined $c->{'spread_startdates'} and scalar @{ $c->{'spread_startdates'} } > 0 ) {
         my $new_start_time = shift @{ $c->{'spread_startdates'} };
         my $new_date = Thruk::Utils::format_date( $new_start_time, '%Y-%m-%d %H:%M:%S' );
-        $c->log->debug( "setting spreaded start date to: " . $new_date );
+        _debug( "setting spreaded start date to: " . $new_date );
         $c->req->parameters->{'start_time'} = $new_date;
         $start_time_unix = $new_start_time;
     }
     elsif ( $c->req->parameters->{'start_time'} ) {
         if( $c->req->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
             my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->req->parameters->{'start_time'} ), '%Y-%m-%d %H:%M:%S' );
-            $c->log->debug( "setting start date to: " . $new_date );
+            _debug( "setting start date to: " . $new_date );
             $c->req->parameters->{'start_time'} = $new_date;
         }
         $start_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'start_time'} );
@@ -611,7 +612,7 @@ sub do_send_command {
     if( $c->req->parameters->{'end_time'} ) {
         if( $c->req->parameters->{'end_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
             my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} ), '%Y-%m-%d %H:%M:%S' );
-            $c->log->debug( "setting end date to: " . $new_date );
+            _debug( "setting end date to: " . $new_date );
             $c->req->parameters->{'end_time'} = $new_date;
         }
         $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
@@ -622,7 +623,7 @@ sub do_send_command {
         if($c->req->parameters->{'expire_time'}) {
             if( $c->req->parameters->{'expire_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
                 my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->req->parameters->{'expire_time'} ), '%Y-%m-%d %H:%M:%S' );
-                $c->log->debug( "setting expire date to: " . $new_date );
+                _debug( "setting expire date to: " . $new_date );
                 $c->req->parameters->{'expire_time'} = $new_date;
             }
             if($c->req->parameters->{'expire_time'}) {
@@ -671,7 +672,7 @@ sub do_send_command {
         if($@ =~ m/error\ \-\ (.*?)\ at\ /gmx) {
             push @{$c->stash->{'form_errors'}}, { message => $1 };
         } else {
-            $c->log->error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
+            _error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
         }
     }
 
@@ -838,7 +839,7 @@ sub _bulk_send_backend {
                                 $cmd,
                                 ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
                             );
-        $c->audit_log("external_command", $logstr);
+        _audit_log("external_command", $logstr);
         $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
         push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
     }
@@ -891,7 +892,7 @@ sub generate_spread_startdates {
 
     # calculate time between checks
     my $delta = $spread / $number;
-    $c->log->debug( "calculating spread with delta: " . $delta . " seconds" );
+    _debug( "calculating spread with delta: " . $delta . " seconds" );
 
     for my $x ( 1 .. $number ) {
         push @{$spread_dates}, int( $starttimestamp + ( $x * $delta ) );
@@ -1051,7 +1052,7 @@ sub add_remove_comments_commands_from_disabled_commands {
 
     for my $cmd (@{$cmds_for_type->{$cmd_typ}}) {
         for my $comm (@{$c->{'db'}->get_comments_by_pattern($c, $host, $service, $cmd)}) {
-            $c->log->debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
+            _debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
             if ($cmd =~ m/HOST/mx) {
                 push @{$list->{$comm->{'backend'}}},
                     sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d\n", time(), $comm->{'id'});

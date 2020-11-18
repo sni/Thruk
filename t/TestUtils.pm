@@ -6,7 +6,7 @@ package TestUtils;
 # Test Utils
 #########################
 BEGIN {
-  $ENV{'THRUK_SRC'} = 'TEST';
+  $ENV{'THRUK_MODE'} = 'TEST';
   $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
   $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ s#/$##gmx if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 }

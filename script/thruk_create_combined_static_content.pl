@@ -2,7 +2,7 @@
 
 # create combined javascript/css files
 BEGIN {
-    $ENV{'THRUK_SRC'} = 'SCRIPTS';
+    $ENV{'THRUK_MODE'} = 'CLI';
 
     # do we want compression at all?
     if(-e 'Makefile') {

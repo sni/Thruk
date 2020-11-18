@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Thruk::Utils;
 use Thruk::Utils::Panorama::Scripted;
+use Thruk::Utils::Log qw/:all/;
 use Cpanel::JSON::XS;
 
 =head1 NAME
@@ -18,9 +19,7 @@ Thruk Controller.
 
 =cut
 
-BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-}
+#use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 use constant {
@@ -177,7 +176,7 @@ sub get_dashboard_list {
                 };
             }
         } else {
-            $c->log->warn("panorama dashboard with unusual name skipped: ".$file);
+            _warn("panorama dashboard with unusual name skipped: ".$file);
         }
     }
 
@@ -227,7 +226,7 @@ sub load_dashboard {
         if(!defined $dashboard) {
             my $content = Thruk::Utils::IO::read($file);
             if($content =~ m/^\#\s*title:/mx) {
-                $c->log->warn("non-executable scripted dashboard found in $file, forgot to chmod +x");
+                _warn("non-executable scripted dashboard found in $file, forgot to chmod +x");
             }
         }
     }

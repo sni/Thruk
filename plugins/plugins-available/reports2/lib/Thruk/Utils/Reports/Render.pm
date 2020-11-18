@@ -23,6 +23,7 @@ use MIME::Base64;
 use Encode qw/encode_utf8/;
 use Thruk::Utils;
 use Thruk::Utils::Avail;
+use Thruk::Utils::Log qw/:all/;
 
 $Thruk::Utils::Reports::Render::locale = {};
 
@@ -1037,7 +1038,7 @@ sub _read_static_content_file {
     }
 
     croak("_read_static_content_file($baseurl, ".($report_base_url||'').", $url) $file: $!") if $ENV{'TEST_AUTHOR'};
-    $c->log->info("_read_static_content_file($baseurl, ".($report_base_url||'').", $url) $file: $!");
+    _info("_read_static_content_file($baseurl, ".($report_base_url||'').", $url) $file: $!");
     return(404, { result => ''}) if wantarray;
     return '';
 }

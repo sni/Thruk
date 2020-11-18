@@ -21,7 +21,6 @@ elif [ "$OMD_ROOT" != "" ]; then
 else
   export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
   if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
-  if [ "$REMOTEURL" = "" ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
 fi
 
 eval 'exec perl -x $0 ${1+"$@"} ;'
@@ -90,7 +89,6 @@ if($options->{'version'}) {
     $branch = Thruk::Config::get_git_name() unless $branch ne '';
     print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
 }
-$options->{'verbose'} = 0 if $options->{'quiet'};
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
     _print_modules();
@@ -143,8 +141,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                   Thruk installations specified by the
                                   remote-url.
     -r, --remote-url=<url>        URL to remote installation.
-    -k, --insecure                skip ssl certificate verification when accessing remote url.
-        --local                   Don't try to connect fastcgi daemon first.
+    -k, --insecure                skip ssl certificate verification.
 
     -y, --yes                     answer yes to all given questions.
     -f, --force                   some actions need to be forced
@@ -227,25 +224,9 @@ script has the following arguments
 
     use this username for authentication
 
-=item B<-c> I<credential>, B<--credential>=I<credential>
-
-    use this key for authentication when using remoteurl
-
-=item B<-r> I<remote-url>, B<--remote-url>=I<remote-url>
-
-    Connect to this remote instance instead of the local one.
-    Defaults to http://localhost/thruk/cgi-bin/remote.cgi.
-    Retrieving information from the fcgi daemon saves time to
-    startup and allows to connect to remote located sites.
-
 =item B<-k>, B<--insecure>
 
     Skip ssl certificate verification when accessing remote url.
-
-=item B<--local>
-
-    Don't contact remote server. Normally remote-url is tried first for
-    faster access.
 
 =item B<-y> , B<--yes>
 

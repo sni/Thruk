@@ -2,6 +2,7 @@ package Thruk::Controller::rest_v1;
 
 use strict;
 use warnings;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -173,7 +174,7 @@ sub process_rest_request {
         };
         if($@) {
             $data = { 'message' => 'error during request', description => $@, code => 500 };
-            $c->log->error($@);
+            _error($@);
         }
     }
 
@@ -315,7 +316,7 @@ sub _fetch {
             };
             my $err = $@;
             if($err) {
-                $c->log->error($err);
+                _error($err);
                 return({ 'message' => 'error loading '.$pkg_name.' rest submodule', code => 500, 'description' => $@ });
             }
 

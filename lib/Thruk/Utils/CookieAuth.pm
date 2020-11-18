@@ -23,6 +23,7 @@ use Encode qw/encode_utf8/;
 use File::Slurp qw/read_file/;
 use Carp qw/confess/;
 use File::Copy qw/move/;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
@@ -209,14 +210,14 @@ sub clean_session_files {
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
         if($mtime) {
             if($mtime < $timeout) {
-                $c->audit_log("session", "session timeout", '?', $entry, 0);
+                _audit_log("session", "session timeout", '?', $entry, 0);
                 unlink($file);
             }
             elsif($mtime < $fake_session_timeout) {
                 eval {
                     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
                     if($data && $data->{'fake'}) {
-                        $c->audit_log("session", "session timeout", '?', $entry, 0);
+                        _audit_log("session", "session timeout", '?', $entry, 0);
                         unlink($file);
                     } else {
                         $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
@@ -232,12 +233,12 @@ sub clean_session_files {
         my $user_sessions = $sessions_by_user->{$user};
         my $num = scalar keys %{$user_sessions};
         if($num > $max_sessions_per_user) {
-            $c->log->warn(sprintf("user %s has %d open sessions (max. %d) cleaning up.", $user, $num, $max_sessions_per_user));
+            _warn(sprintf("user %s has %d open sessions (max. %d) cleaning up.", $user, $num, $max_sessions_per_user));
             for my $file (reverse sort { $user_sessions->{$b} <=> $user_sessions->{$a} } keys %{$user_sessions}) {
                 if($num > $max_sessions_per_user) {
                     my $entry = $file;
                     $entry =~ s|^.*/||gmx;
-                    $c->audit_log("session", "max session reached, cleaning old session", $user, $entry, 0);
+                    _audit_log("session", "max session reached, cleaning old session", $user, $entry, 0);
                     unlink($file);
                     $num--;
                 } else {
@@ -326,8 +327,7 @@ sub store_session {
     $data->{'hashed_key'}  = $hashed_key;
 
     if(defined $Thruk::Request::c) {
-        my $c = $Thruk::Request::c;
-        $c->audit_log("session", "session created", $data->{'username'}, $hashed_key, 0);
+        _audit_log("session", "session created", $data->{'username'}, $hashed_key, 0);
     }
 
     return($data);

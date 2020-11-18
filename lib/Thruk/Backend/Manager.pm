@@ -9,6 +9,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk ();
 use Thruk::Utils ();
 use Thruk::Utils::Filter ();
+use Thruk::Utils::Log qw/:all/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;
@@ -696,11 +697,10 @@ runs reconnect on all peers
 
 sub reconnect {
     my($self, @args) = @_;
-    my $c = $Thruk::Request::c;
     eval {
         $self->_do_on_peers( 'reconnect', \@args);
     };
-    $c->log->debug($@) if $@;
+    _debug($@) if $@;
     return 1;
 }
 
@@ -853,12 +853,12 @@ sub set_backend_state_from_local_connections {
                     my $peer = $self->get_peer_by_key($key);
 
                     if($host->{'state'} == 0) {
-                        $c->log->debug($key." -> enabled by local state check (".$host->{'name'}.")");
+                        _debug($key." -> enabled by local state check (".$host->{'name'}.")");
                         $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
                         $peer->{'runnning'}   = 1;
                         $peer->{'last_error'} = 'UP: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
                     } else {
-                        $c->log->debug($key." -> disabled by local state check (".$host->{'name'}.")");
+                        _debug($key." -> disabled by local state check (".$host->{'name'}.")");
                         $self->disable_backend($key);
                         $peer->{'runnning'}   = 0;
                         $peer->{'last_error'} = 'ERROR: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
@@ -877,8 +877,8 @@ sub set_backend_state_from_local_connections {
     # log errors only once
     if($@) {
         return $disabled if $safe;
-        $c->log->error("failed setting states by local check");
-        $c->log->debug($@);
+        _error("failed setting states by local check");
+        _debug($@);
     }
 
     $c->stats->profile( end => "set_backend_state_from_local_connections() " );
@@ -1093,7 +1093,7 @@ sub renew_logcache {
         if($err =~ m/\Qprevent further page processing\E/mx) {
             die($err);
         }
-        $c->log->error($err);
+        _error($err);
         $c->stash->{errorMessage}     = "Logfilecache Unavailable";
         $c->stash->{errorDescription} = $@;
         $c->stash->{errorDescription} =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
@@ -1114,13 +1114,13 @@ retrieve backend and ID of host or service comment(s) that match the given patte
 
 sub get_comments_by_pattern {
     my ($self, $c, $host, $svc, $pattern) = @_;
-    $c->log->debug("get_comments_by_pattern() has been called: host = $host, service = ".($svc||'').", pattern = $pattern");
+    _debug("get_comments_by_pattern() has been called: host = $host, service = ".($svc||'').", pattern = $pattern");
     my $options  = {'filter' => [{'host_name' => $host}, {'service_description' => $svc}, {'comment' => {'~' => $pattern}}]};
     my $comments = $self->get_comments(%{$options});
     my $ids      = [];
     for my $comm (@{$comments}) {
         my ($cmd) = $comm->{'comment'} =~ m/^DISABLE_([A-Z_]+):/mx;
-        $c->log->debug("found comment for command DISABLE_$cmd with ID $comm->{'id'} on backend $comm->{'peer_key'}");
+        _debug("found comment for command DISABLE_$cmd with ID $comm->{'id'} on backend $comm->{'peer_key'}");
         push @{$ids}, {'backend' => $comm->{'peer_key'}, 'id' => $comm->{'id'}};
     }
     return $ids;
@@ -1641,7 +1641,7 @@ sub _do_on_peers {
        && ($function =~ m/^get_/mx || $function eq 'send_command')
        && ($function ne 'get_logs' || !$c->config->{'logcache'})
        ) {
-        $c->log->debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
+        _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
 
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
@@ -1687,7 +1687,7 @@ sub _do_on_peers {
         }
     } else {
         $skip_lmd = 1;
-        $c->log->debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
+        _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
         ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
@@ -1696,7 +1696,7 @@ sub _do_on_peers {
     if(!defined $result && $num_selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
-        $c->log->debug($err);
+        _debug($err);
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
         }
@@ -1928,18 +1928,18 @@ sub select_backends {
     for my $peer ( @{ $self->get_peers() } ) {
         if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
             if(!$ENV{'THRUK_USE_LMD'}) {
-                $c->log->debug("skipped peer (down): ".$peer->{'name'}) if Thruk->trace;
+                _debug("skipped peer (down): ".$peer->{'name'}) if Thruk->trace;
                 next;
             }
         }
         if(defined $backends) {
             unless(defined $backends->{$peer->{'key'}}) {
-                $c->log->debug("skipped peer (undef): ".$peer->{'name'}) if Thruk->trace;
+                _debug("skipped peer (undef): ".$peer->{'name'}) if Thruk->trace;
                 next;
             }
         }
         elsif($peer->{'enabled'} != 1) {
-            $c->log->debug("skipped peer (disabled): ".$peer->{'name'}) if Thruk->trace;
+            _debug("skipped peer (disabled): ".$peer->{'name'}) if Thruk->trace;
             next;
         }
         push @{$get_results_for}, $peer->{'key'};
@@ -3080,7 +3080,7 @@ sub rpc {
     if($backend->{'type'} ne 'http') {
         die("only supported for http backends");
     }
-    $c->log->debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
+    _debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
     return($backend->{'class'}->rpc($c, $function, $args));
 }
 

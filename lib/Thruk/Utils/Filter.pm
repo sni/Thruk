@@ -18,7 +18,8 @@ use URI::Escape qw/uri_escape/;
 use Cpanel::JSON::XS ();
 use Encode qw/decode_utf8/;
 use File::Slurp qw/read_file/;
-use Data::Dumper qw//;
+use Data::Dumper ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 # use faster HTML::Escape if available
@@ -248,7 +249,7 @@ sub date_format {
         ($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst) = Localtime($timestamp);
     };
     if($@) {
-        $c->log->warn("date_format($timestamp) failed: $@");
+        _warn("date_format($timestamp) failed: $@");
         return "err:$timestamp";
     }
 
@@ -564,7 +565,7 @@ sub get_action_menu {
             $sourcefile = $1;
             if(!-r $sourcefile) {
                 my $err = $sourcefile.': '.$!;
-                $c->log->error("error in action menu ".$menu.": ".$err);
+                _error("error in action menu ".$menu.": ".$err);
                 $c->stash->{'checked_action_menus'}->{$menu} = { err => $err };
                 return($c->stash->{'checked_action_menus'}->{$menu});
             }
@@ -587,7 +588,7 @@ sub get_action_menu {
             my $err = validate_json($c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             if($err) {
                 $c->stash->{'checked_action_menus'}->{$menu}->{'err'} = $err;
-                $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$c->stash->{'checked_action_menus'}->{$menu}->{'data'});
+                _error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$c->stash->{'checked_action_menus'}->{$menu}->{'data'});
             }
         }
         $c->stash->{'checked_action_menus'}->{$menu}->{'name'} = $menu;
@@ -599,7 +600,7 @@ sub get_action_menu {
 
     my $err = validate_json($menu);
     if($err) {
-        $c->log->error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$menu);
+        _error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$menu);
     }
     if($ENV{THRUK_REPORT} && !$err) {
         # workaround for images beeing placed by js document.write later

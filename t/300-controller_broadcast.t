@@ -5,7 +5,7 @@ use Test::More;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 90;
+    plan tests => 91;
 }
 
 BEGIN {
@@ -65,8 +65,10 @@ $test_broadcast =<<EOT;
 EOT
 Thruk::Utils::IO::write($test_file, $test_broadcast);
 
-$c->{'app'}->init_logging();
-$c->{'app'}->{'_log'}->level('FATAL'); # turn off logging
-TestUtils::test_page( 'url' => '/thruk/cgi-bin/tac.cgi', like => ["Tactical Monitoring Overview"] );
+{
+    local $ENV{'THRUK_TEST_NO_LOG'} = "";
+    TestUtils::test_page( 'url' => '/thruk/cgi-bin/tac.cgi', like => ["Tactical Monitoring Overview"] );
+    like($ENV{'THRUK_TEST_NO_LOG'}, "/could not read broadcast file/", "log output ok");
+}
 
 unlink($test_file);

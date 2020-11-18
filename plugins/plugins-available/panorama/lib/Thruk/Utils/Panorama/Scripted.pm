@@ -17,6 +17,7 @@ use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 use Encode qw(decode_utf8);
 use Thruk::Utils::IO;
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 =head1 METHODS
@@ -73,7 +74,7 @@ sub load_dashboard {
         eval("#line 1 $file\n".$code);
         ## use critic
         if($@) {
-            $c->log->error("error while loading dynamic dashboard from ".$file.": ".$@);
+            _error("error while loading dynamic dashboard from ".$file.": ".$@);
             return;
         }
 
@@ -89,8 +90,8 @@ sub load_dashboard {
         my($rc, $output) = Thruk::Utils::IO::cmd($c, $file);
         if($rc != 0) {
             my $err = "got rc $rc while executing dynamic dashboard from ".$file;
-            $c->log->error($err);
-            $c->log->error($output);
+            _error($err);
+            _error($output);
             return;
         }
         eval {
@@ -99,7 +100,7 @@ sub load_dashboard {
             $dashboard = $json->decode($output);
         };
         if($@) {
-            $c->log->error("error while parsing output from dynamic dashboard in ".$file.": ".$@);
+            _error("error while parsing output from dynamic dashboard in ".$file.": ".$@);
             return;
         }
         _merge_meta($dashboard, $meta);

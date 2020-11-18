@@ -34,8 +34,8 @@ sub register {
 
     if($app->config->{'thruk_author'}) {
         $settings->{'STRICT'}     = 1;
-        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || $ENV{'THRUK_SRC'} eq 'TEST');
-        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || $ENV{'THRUK_SRC'} eq 'TEST');
+        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || Thruk->mode eq 'TEST');
+        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || Thruk->mode eq 'TEST');
     }
 
     # user template provider
@@ -60,7 +60,7 @@ sub register {
     push @{$settings->{'LOAD_TEMPLATES'}}, Template::Provider->new(\%base_settings);
 
     $app->{'tt'} = Template->new($settings);
-    $app->{'config'}->{'strict_tt'} = $settings->{'STRICT'};
+    $app->config->{'strict_tt'} = $settings->{'STRICT'};
     return;
 }
 
