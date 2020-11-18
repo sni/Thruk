@@ -268,7 +268,7 @@ sub _invalidate_current_session {
 
         $c->audit_log("logout", "user logout, session closed", $session_data->{'username'}, $session_data->{'hashed_key'});
 
-        if($session_data) {
+        if($session_data && $session_data->{'file'}) {
             unlink($session_data->{'file'});
         }
     }
