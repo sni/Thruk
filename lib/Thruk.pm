@@ -46,7 +46,7 @@ BEGIN {
 }
 
 use Thruk::Base qw/:all/;
-use Thruk::Config ();
+use Thruk::Config;
 use Thruk::Constants ':add_defaults';
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::IO ();

@@ -33,6 +33,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ##############################################
 use strict;
 use warnings;
+use Thruk::Config 'noautoload';
 
 our $VERSION = '2.38';
 my $branch       = '2';
@@ -187,7 +188,6 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
-use Thruk::Config;
 use Thruk::Utils::Scripts;
 use Monitoring::Config;
 use Monitoring::Config::File;
