@@ -300,11 +300,24 @@ $base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $base_defaults->{'thruk_author'} = 1;
 }
-$config = set_config_env();
 
 ######################################
 
 =head1 METHODS
+
+=head2 import
+
+    initialize config
+
+=cut
+sub import {
+    my($package, $args) = @_;
+    $args = array2hash(list($args));
+    $config = set_config_env() unless $args->{'noautoload'};
+    return;
+}
+
+######################################
 
 =head2 get_default_stash
 
@@ -949,9 +962,7 @@ create a hash by key
 
 =cut
 sub array2hash {
-    my $data = shift;
-    my $key  = shift;
-    my $key2 = shift;
+    my($data, $key, $key2) = @_;
 
     return {} unless defined $data;
     confess("not an array") unless ref $data eq 'ARRAY';

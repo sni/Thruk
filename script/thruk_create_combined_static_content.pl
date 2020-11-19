@@ -14,7 +14,7 @@ use warnings;
 use strict;
 use lib 'lib';
 use lib 'plugins/plugins-available/panorama/lib';
-use Thruk::Config;
+use Thruk::Config 'noautoload';
 
 my($dos2unix);
 for my $p (reverse split/:/, $ENV{'PATH'}) {
