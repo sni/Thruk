@@ -9,7 +9,7 @@ use warnings;
 use Carp qw/confess/;
 use Thruk::Backend::Peer ();
 use Thruk ();
-use Thruk::Config ();
+use Thruk::Config;
 use Thruk::Utils::IO ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
