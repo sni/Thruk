@@ -313,7 +313,7 @@ if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
 sub import {
     my($package, $args) = @_;
     $args = array2hash(list($args));
-    $config = set_config_env() unless $args->{'noautoload'};
+    $config = set_config_env() if(!$config && !$args->{'noautoload'});
     return;
 }
 

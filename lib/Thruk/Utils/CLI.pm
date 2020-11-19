@@ -23,7 +23,7 @@ use HTTP::Request 6.12 ();
 use Module::Load qw/load/;
 
 use Thruk ();
-use Thruk::Config ();
+use Thruk::Config; # autoload config
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::IO ();
