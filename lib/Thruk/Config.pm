@@ -396,6 +396,18 @@ sub get_default_stash {
 
 ######################################
 
+=head2 get_config
+
+return config set by set_config_env
+
+=cut
+sub get_config {
+    confess("not initialized") unless $config;
+    return($config);
+}
+
+######################################
+
 =head2 set_config_env
 
 return basic config hash and sets environment

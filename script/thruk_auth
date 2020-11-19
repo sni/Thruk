@@ -42,7 +42,7 @@ use Thruk::Utils::APIKeys;
 $| = 1;
 
 ##########################################################
-my $config              = Thruk::Config::set_config_env();
+my $config              = Thruk::Config::get_config();
 my $verbose             = $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} // $config->{'cookie_auth_verbose'} // 0;
 my $guest               = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} || undef;
 my $secret_file         = $config->{'var_path'}.'/secret.key';
