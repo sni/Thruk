@@ -255,7 +255,7 @@ sub login_successful {
         Thruk::Utils::store_user_data($c, $userdata, $login);
     }
 
-    Thruk->audit_log("login", "user login, session started (".$type.")");
+    _audit_log("login", "user login, session started (".$type.")");
 
     return $c->redirect_to($referer);
 }
