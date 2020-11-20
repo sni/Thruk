@@ -45,15 +45,21 @@ $m->{'_peer'} = $m;
 
 #####################################################################
 # import data
-Thruk::Backend::Provider::Mysql::_drop_tables($dbh, $prefix);
-Thruk::Backend::Provider::Mysql::_create_tables($dbh, $prefix);
-my($logcount) = $m->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files);
-is($logcount, 10, 'imported all items from '.$files->[0]);
+{
+    local $ENV{THRUK_QUIET} = 1;
+    Thruk::Backend::Provider::Mysql::_drop_tables($dbh, $prefix);
+    Thruk::Backend::Provider::Mysql::_create_tables($dbh, $prefix);
+    my($logcount) = $m->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files);
+    is($logcount, 10, 'imported all items from '.$files->[0]);
+};
 
 #####################################################################
 # check duplicate detection
-($logcount) = $m->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files);
-is($logcount, 0, 'don\'t import duplicates '.$files->[0]);
+{
+    local $ENV{THRUK_QUIET} = 1;
+    my($logcount) = $m->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files);
+    is($logcount, 0, 'don\'t import duplicates '.$files->[0]);
+};
 
 #####################################################################
 my($tempfile) = $m->get_logs(file => 1, collection => $prefix, sort => { 'ASC' => 'time'});

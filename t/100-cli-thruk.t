@@ -167,7 +167,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => $BIN.' -a logcacheupdate',
     like    => ['/(^$|OK - imported \d+ log items from \d+ site|FAILED - logcache is not enabled)/'],
-    errlike => ['/(^$|FAILED - logcache is not enabled)/'],
+    errlike => ['/(running update for site|FAILED - logcache is not enabled)/'],
     exit    => undef,
 });
 

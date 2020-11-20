@@ -417,7 +417,7 @@ sub _request_username {
     }
     # kerberos authentication
     elsif(($env->{'AUTH_TYPE'}//'') eq 'Negotiate' && ($env->{'GSS_NAME'}//'') ne '' ) {
-        $username = $env->{'GSS_NAME'};
+        $username = $env->{'REMOTE_USER'} // $env->{'GSS_NAME'};
         $auth_src = "Negotiate";
     }
     # basic authentication
@@ -736,6 +736,17 @@ sub clone_user_config {
     $c->{'config'} = Thruk::Utils::dclone($c->{'config'});
     $c->{'config'}->{'cloned'} = 1;
     return;
+}
+
+=head2 log
+
+$c->log->...
+
+compat wrapper for accessing logger
+
+=cut
+sub log {
+    return(Thruk::Utils::Log::log());
 }
 
 1;

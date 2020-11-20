@@ -727,8 +727,11 @@ sub _load_config_files {
     my @local_files;
     my @base_files;
     if(scalar @{$files} == 0) {
-        for my $path ($ENV{'THRUK_CONFIG'}, '.') {
-            next unless defined $path;
+        for my $p ($ENV{'THRUK_CONFIG'}, '.') {
+            next unless defined $p;
+            my $path = "$p";
+            $path =~ s|/$||gmx;
+            next unless -d $path.'/.';
             push @base_files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
                 my @tmpfiles = sort glob($path.'/thruk_local.d/*');

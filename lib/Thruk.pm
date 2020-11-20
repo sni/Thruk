@@ -142,6 +142,7 @@ sub _build_app {
     #&timing_breakpoint('startup() cgi.cfg parsed');
 
     $self->set_timezone();
+    &_create_secret_file();
     &_set_ssi();
     &_setup_pidfile();
     &_setup_cluster();
@@ -646,6 +647,28 @@ sub _clean_exit {
 }
 
 ###################################################
+# create secret file
+sub _create_secret_file {
+    my $config = Thruk->config;
+    if(Thruk->mode eq 'FASTCGI' || Thruk->mode eq 'DEVSERVER') {
+        my $var_path   = $config->{'var_path'} or die("no var path!");
+        my $secretfile = $var_path.'/secret.key';
+        unless(-s $secretfile) {
+            require Thruk::Utils::Crypt;
+            my $digest = Thruk::Utils::Crypt::random_uuid([time()]);
+            Thruk::Utils::IO::write($secretfile, $digest);
+            chmod(0600, $secretfile);
+            $config->{'secret_key'} = $digest;
+        } else {
+            my $secret_key = read_file($secretfile);
+            chomp($secret_key);
+            $config->{'secret_key'} = $secret_key;
+        }
+    }
+    return;
+}
+
+###################################################
 
 =head2 set_timezone
 
@@ -1072,6 +1095,19 @@ sub graceful_stop {
         kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
     }
     return 1;
+}
+
+###################################################
+
+=head2 log
+
+Thruk->log->...
+
+compat wrapper for accessing logger
+
+=cut
+sub log {
+    return(Thruk::Utils::Log::log());
 }
 
 ###################################################

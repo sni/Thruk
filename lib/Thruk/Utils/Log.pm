@@ -346,17 +346,24 @@ sub _init_logging {
         }
     }
 
-    my $log;
+    my($log, $target);
     if(defined $log4perl_conf && -s $log4perl_conf) {
         $log = _get_file_logger($log4perl_conf, $config);
+        $target = "file";
     } else {
         $log = _get_screen_logger($config);
+        $target = "screen";
     }
 
-    if(Thruk::Base::verbose()) {
+    our $last_log_level;
+    our $last_log_target;
+    my $level = Thruk::Base::verbose();
+    if(Thruk::Base::verbose() && (($last_log_level//-1) != $level || ($last_log_target//'') ne $target)) {
         $logger = $log; # would result in deep recursion otherwise
-        _debug("logging initialized with loglevel ".Thruk::Base::verbose());
+        _debug($target." logging initialized with loglevel ".$level);
         $logger = undef;
+        $last_log_level  = $level;
+        $last_log_target = $target;
     }
 
     $logger = $log if $config; # save logger if fully initialized

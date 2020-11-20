@@ -21,7 +21,7 @@ TestUtils::test_command({
 # test thruk logcache example
 {
     TestUtils::test_command({
-        cmd     => "/usr/bin/env thruk logcache import -y",
+        cmd     => "/usr/bin/env thruk logcache import -q -y",
         like    => [qr(\QOK - imported\E)],
     });
     TestUtils::test_command({

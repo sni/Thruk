@@ -349,6 +349,7 @@ sub _run {
         $log_timestamps = 1;
     }
 
+    local $ENV{'THRUK_QUIET'}        = 1 if  $ENV{'THRUK_CRON'};
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if !$ENV{'THRUK_CRON'};
 
     my $c = $self->get_c();
@@ -386,7 +387,7 @@ sub _run {
 
     if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
-        print STDOUT $result->{'output'} unless $self->{'opt'}->{'quiet'};
+        print STDOUT $result->{'output'};
     } else {
         binmode STDERR;
         print STDERR $result->{'output'};
