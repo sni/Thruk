@@ -230,7 +230,7 @@ sub _add_config_tool_matches {
     return unless ($c->config->{'use_feature_configtool'} && $config_backends->{$peer_key});
 
     $c->stash->{'param_backend'} = $peer_key;
-    Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model. Object configuration enabled?");
+    Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model".($c->stash->{set_object_model_err} ? ': '.$c->stash->{set_object_model_err}.'.' : '.'));
     my $objects;
     if($type eq 'service') {
         $objects = $c->{'obj_db'}->get_objects_by_name('service', $name, 0, 'ho:'.$name2);

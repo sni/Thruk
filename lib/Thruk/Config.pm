@@ -559,8 +559,7 @@ sub set_default_config {
     $config->{'extra_version_link'} = '' unless defined $config->{'extra_version_link'};
 
     # external jobs can be disabled by env
-    # don't disable for CLI, breaks config reload over http somehow
-    if(defined $ENV{'NO_EXTERNAL_JOBS'} || Thruk::Base->mode eq 'SCRIPTS') {
+    if(defined $ENV{'NO_EXTERNAL_JOBS'}) {
         $config->{'no_external_job_forks'} = 1;
     }
 

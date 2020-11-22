@@ -91,7 +91,7 @@ sub set_object_model {
                                                forward => $c->req->url,
                                               });
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
-            if($c->config->{'no_external_job_forks'} == 1 && !$no_recursion) {
+            if($c->config->{'no_external_job_forks'} && !$no_recursion) {
                 # should be parsed now
                 return set_object_model($c, 1);
             }

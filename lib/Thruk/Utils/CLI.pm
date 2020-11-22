@@ -69,6 +69,7 @@ sub new {
     ## no critic
     $ENV{'THRUK_MODE'}       = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
+    Thruk->config->{'no_external_job_forks'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}   = join(';', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}    = $ENV{'THRUK_VERBOSE'} // $options->{'verbose'} // 0;
@@ -140,7 +141,7 @@ sub get_object_db {
     my $c = $self->get_c();
     die("Config tool not enabled!") unless $c->config->{'use_feature_configtool'} == 1;
     require Thruk::Utils::Conf;
-    Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model. Object configuration enabled?");
+    Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model".($c->stash->{set_object_model_err} ? ': '.$c->stash->{set_object_model_err}.'.' : '.'));
     return $c->{'obj_db'};
 }
 
