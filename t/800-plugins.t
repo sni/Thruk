@@ -67,6 +67,7 @@ for my $p (@{$plugins}) {
     TestUtils::clear();
     for my $testfile (glob("plugins/plugins-available/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
         my $testsource = read_file($testfile);
+        Thruk::Config::set_config_env();
         subtest $testfile => sub {
             # required for ex.: t/092-todo.t
             local @ARGV = (sprintf("plugins/plugins-available/%s", $p->{'name'}));
