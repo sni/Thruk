@@ -933,6 +933,24 @@ sub home {
     return 0;
 }
 
+######################################
+
+=head2 secret_key
+
+  secret_key()
+
+return secret_key
+
+=cut
+sub secret_key {
+    my $config      = &get_config();
+    my $secret_file = $config->{'var_path'}.'/secret.key';
+    return unless -s $secret_file;
+    my $secret_key  = read_file($secret_file);
+    chomp($secret_key);
+    return($secret_key);
+}
+
 ########################################
 
 =head2 expand_numeric_list

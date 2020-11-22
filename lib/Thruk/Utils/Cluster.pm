@@ -321,7 +321,7 @@ sub run_cluster {
         my $http = Thruk::Backend::Provider::HTTP->new({
                             options => {
                                 peer => $node->{'node_url'},
-                                auth => $c->config->{'secret_key'},
+                                auth => Thruk::Config::secret_key(),
                             },
                         }, $c->config);
         my $t1   = [gettimeofday];

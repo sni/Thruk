@@ -301,40 +301,6 @@ sub load_module {
 ##############################################
 # INTERNAL SUBS
 ##############################################
-sub _read_secret {
-    my($self) = @_;
-    my $files = [];
-    push @{$files}, 'thruk.conf';
-    push @{$files}, $ENV{'THRUK_CONFIG'}.'/thruk.conf'       if defined $ENV{'THRUK_CONFIG'};
-    push @{$files}, 'thruk_local.conf';
-    push @{$files}, $ENV{'THRUK_CONFIG'}.'/thruk_local.conf' if defined $ENV{'THRUK_CONFIG'};
-    my $var_path = './var';
-    for my $file (@{$files}) {
-        next unless -f $file;
-        open(my $fh, '<', $file) or die("open file $file failed (id: ".Thruk::Utils::IO::cmd("id -a").", pwd: ".Thruk::Utils::IO::cmd("pwd")."): ".$!);
-        while(my $line = <$fh>) {
-            next if substr($line, 0, 1) eq '#';
-            if($line =~ m/^\s*var_path\s*=\s*(.*?)\s*$/mxo) {
-                $var_path = $1;
-            }
-        }
-        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
-    }
-    my $secret;
-    my $secretfile = $var_path.'/secret.key';
-    if(-r $secretfile) {
-        _debug2("reading secret file: ".$secretfile);
-        $secret = read_file($var_path.'/secret.key');
-        chomp($secret);
-    } else {
-        # don't print error unless in debug mode.
-        # will be printed in debians postinst installcron otherwise
-        _debug2("reading secret file ".$secretfile." failed: ".$!);
-    }
-    return $secret;
-}
-
-##############################################
 sub _run {
     my($self) = @_;
 

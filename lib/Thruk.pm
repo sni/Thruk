@@ -650,21 +650,14 @@ sub _clean_exit {
 # create secret file
 sub _create_secret_file {
     my $config = Thruk->config;
-    if(Thruk->mode eq 'FASTCGI' || Thruk->mode eq 'DEVSERVER') {
-        my $var_path   = $config->{'var_path'} or die("no var path!");
-        my $secretfile = $var_path.'/secret.key';
-        unless(-s $secretfile) {
-            require Thruk::Utils::Crypt;
-            my $digest = Thruk::Utils::Crypt::random_uuid([time()]);
-            Thruk::Utils::IO::write($secretfile, $digest);
-            chmod(0600, $secretfile);
-            $config->{'secret_key'} = $digest;
-        } else {
-            my $secret_key = read_file($secretfile);
-            chomp($secret_key);
-            $config->{'secret_key'} = $secret_key;
-        }
-    }
+    return unless (Thruk->mode eq 'FASTCGI' || Thruk->mode eq 'DEVSERVER');
+    my $var_path   = $config->{'var_path'} || die("no var path!");
+    my $secretfile = $var_path.'/secret.key';
+    return if -s $secretfile;
+    require Thruk::Utils::Crypt;
+    my $digest = Thruk::Utils::Crypt::random_uuid([time()]);
+    Thruk::Utils::IO::write($secretfile, $digest);
+    chmod(0600, $secretfile);
     return;
 }
 

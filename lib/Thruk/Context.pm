@@ -365,16 +365,13 @@ sub _request_username {
 
     # authenticate by secret.key from http header
     if($apikey) {
-        # ensure secret key is fresh
-        my $secret_file = $c->config->{'var_path'}.'/secret.key';
-        $c->config->{'secret_key'} = read_file($secret_file) if -s $secret_file;
-        chomp($c->config->{'secret_key'});
+        my $secret_key =Thruk::Config::secret_key();
         $apikey =~ s/^\s+//mx;
         $apikey =~ s/\s+$//mx;
         if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
-        elsif($apikey eq $c->config->{'secret_key'} && $c->config->{'secret_key'} ne '') {
+        elsif($secret_key && $apikey eq $secret_key) {
             $username = $c->req->header('X-Thruk-Auth-User') || $c->config->{'default_user_name'};
             if(!$username) {
                 $username  = '(api)';
