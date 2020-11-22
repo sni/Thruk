@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 43;
+plan tests => 47;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -36,10 +36,14 @@ TestUtils::test_command({
     cmd     => $curl.' "https://127.0.0.1/demo/grafana/"',
     waitfor => '"login":"\(api\)"',
 });
-TestUtils::test_command({
-    cmd  => $curl.' "https://127.0.0.1/demo/thruk/cgi-bin/extinfo.cgi?type=grafana&host=test&service=Ping&width=200&height=200" -o tmp/grafana.png',
-    like => ['/^$/'],
-});
+
+# fails directly after first start, so do it twice
+for (1..2) {
+    TestUtils::test_command({
+        cmd  => $curl.' "https://127.0.0.1/demo/thruk/cgi-bin/extinfo.cgi?type=grafana&host=test&service=Ping&width=200&height=200" -o tmp/grafana.png',
+        like => ['/^$/'],
+    });
+}
 
 TestUtils::test_command({
     cmd  => '/usr/bin/env file tmp/grafana.png',
