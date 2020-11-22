@@ -1703,6 +1703,7 @@ script/nagexp
 script/nagimp
 script/naglint
 script/pnp_export.sh
+script/puppeteer.js
 script/reenable_actions
 script/test_cpan_modules.pl
 script/test_page_rps
@@ -1944,6 +1945,8 @@ t/install_javascript_spidermonkey.sh
 t/perlcriticrc
 t/scenarios/_common/ansible/roles/common/tasks/main.yml
 t/scenarios/_common/ansible/roles/common/vars/main.yml
+t/scenarios/_common/ansible/roles/grafana_node_puppeteer/tasks/main.yml
+t/scenarios/_common/ansible/roles/grafana_node_puppeteer/vars/main.yml
 t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
 t/scenarios/_common/ansible/roles/service_sshd/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml

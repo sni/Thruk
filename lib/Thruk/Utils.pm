@@ -1609,6 +1609,7 @@ sub get_perf_image {
     # create fake session
     my($sessionid) = get_fake_session($c);
     local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$options->{'format'};
+    local $ENV{THRUK_SESSION_ID} = $sessionid;
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {
@@ -1621,17 +1622,23 @@ sub get_perf_image {
     if($grafanaurl) {
         $cmd = $exporter.' "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
-    Thruk::Utils::IO::cmd($c, $cmd);
+    my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
     unlink($c->stash->{'fake_session_file'});
-    if(-s $filename) {
+    if(-e $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
         if($options->{'format'} eq 'png') {
-            return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+            # check if this is a real image
+            if(substr($imgdata, 0, 10) =~ m/PNG/mx) {
+                return $imgdata;
+            }
+        } else {
+            return $imgdata;
         }
-        return $imgdata;
+        _error($imgdata) if $imgdata;
     }
-    return "";
+    _error($out) if $out;
+    return '';
 }
 
 ##############################################

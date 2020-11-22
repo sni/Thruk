@@ -1,0 +1,6 @@
+- yum:
+    name:
+      - npm
+      - chromium
+    state: present
+- shell: "sudo su - {{ site }} -c 'npm i puppeteer'"

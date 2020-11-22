@@ -4,6 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
+    - role: grafana_node_puppeteer
   tasks:
   - shell: "omd config demo set APACHE_MODE own"
   - shell: "omd config demo set GRAFANA on"
