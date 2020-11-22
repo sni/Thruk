@@ -122,21 +122,22 @@ sub _build_app {
     my $self = {};
     bless($self, $class);
     $thruk = $self unless $thruk;
+    my $config = Thruk->config;
 
     #&timing_breakpoint('startup()');
 
     $self->{'errors'} = [];
 
     for my $key (@Thruk::Action::AddDefaults::stash_config_keys) {
-        confess("$key not defined in config,\n".Dumper(Thruk->config)) unless defined Thruk->config->{$key};
+        confess("$key not defined in config,\n".Dumper($config)) unless defined $config->{$key};
     }
 
     _init_cache();
 
     ###################################################
     # load and parse cgi.cfg into $c->config
-    unless(Thruk::Config::read_cgi_cfg($self, Thruk->config)) {
-        die("\n\n*****\nfailed to load cgi config: ".(Thruk->config->{'cgi.cfg'} // 'none')."\n*****\n\n");
+    unless(Thruk::Config::read_cgi_cfg($self, $config)) {
+        die("\n\n*****\nfailed to load cgi config: ".($config->{'cgi.cfg'} // 'none')."\n*****\n\n");
     }
     $self->_add_additional_roles();
     #&timing_breakpoint('startup() cgi.cfg parsed');
@@ -207,13 +208,12 @@ sub _build_app {
 
     ###################################################
     # load routes dynamically from plugins
-    our $routes_already_loaded;
-    $routes_already_loaded = {} unless defined $routes_already_loaded;
-    for my $plugin_dir (glob(Thruk->config->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
+    $config->{'routes_already_loaded'} = {} unless defined $config->{'routes_already_loaded'};
+    for my $plugin_dir (glob($config->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
         my $route_file = $plugin_dir;
         $route_file =~ s|/lib/Thruk/Controller/.*\.pm$|/routes|gmx;
         if(-f $route_file) {
-            next if $routes_already_loaded->{$route_file};
+            next if $config->{'routes_already_loaded'}->{$route_file};
             my $routes = $self->{'routes'};
             my $app    = $self;
             ## no critic
@@ -223,7 +223,7 @@ sub _build_app {
                 _error("error while loading routes from ".$route_file.": ".$@);
                 confess($@);
             }
-            $routes_already_loaded->{$route_file} = 1;
+            $config->{'routes_already_loaded'}->{$route_file} = 1;
         }
         elsif($plugin_dir =~ m|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm|gmx) {
             my $plugin_class = $1;
@@ -253,8 +253,8 @@ sub _build_app {
 
     ###################################################
     my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
-    Thruk::Utils::LMD::check_initial_start($c, Thruk->config, 1);
-    $self->cluster->register($c) if Thruk->config->{'cluster_enabled'};
+    Thruk::Utils::LMD::check_initial_start($c, $config, 1);
+    $self->cluster->register($c) if $config->{'cluster_enabled'};
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");

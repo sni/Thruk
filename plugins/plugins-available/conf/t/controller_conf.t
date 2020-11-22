@@ -48,7 +48,7 @@ TestUtils::test_page(
 
 ###########################################################
 # test connection check
-my $config = Thruk::Config::set_config_env();
+my $config = Thruk::Config::get_config();
 my $firstbackend;
 if(ref $config->{'Thruk::Backend'}->{'peer'} eq 'HASH') { $config->{'Thruk::Backend'}->{'peer'} = [$config->{'Thruk::Backend'}->{'peer'}]; }
 for my $p (@{$config->{'Thruk::Backend'}->{'peer'}}) {
