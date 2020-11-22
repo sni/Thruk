@@ -27,7 +27,7 @@ my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
 my($host,$service) = TestUtils::get_test_service();
 
-my $config   = Thruk::Config::set_config_env();
+my $config   = Thruk::Config::get_config();
 my $var_path = $config->{'var_path'};
 my $etc_path = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} ? '/etc/thruk' : $config->{'etc_path'};
 

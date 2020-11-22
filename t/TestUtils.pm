@@ -41,7 +41,6 @@ my $has_curl = 0; # does require newer curl, disabling for now (2020-06-09) # ha
 
 use Thruk;
 use Thruk::Config;
-Thruk::Config::set_config_env(); # adds plugins to INC which is required for many tests
 our $placktest;
 
 #########################
@@ -572,7 +571,7 @@ sub set_cookie {
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
-    my $config      = Thruk::Config::set_config_env();
+    my $config      = Thruk::Config::get_config();
     my $cookie_path = $config->{'cookie_path'};
     $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
     $cookie_jar->save();
@@ -677,7 +676,7 @@ sub wait_for_job {
         $job = $1;
     }
     my $start  = time();
-    my $config = Thruk::Config::set_config_env();
+    my $config = Thruk::Config::get_config();
 
     if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $joburl) {
         $joburl = '/thruk/r/thruk/jobs/'.$job unless $joburl;

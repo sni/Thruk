@@ -33,7 +33,7 @@ for my $file (@tplfiles) {
 }
 
 use_ok("Thruk::Config");
-my $config = Thruk::Config::set_config_env();
+my $config = Thruk::Config::get_config();
 
 my $files = ['root/thruk/startup.html'];
 for my $file (@{$files}) {
