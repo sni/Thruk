@@ -68,6 +68,9 @@ sub index {
         $c->req->env->{'REQUEST_METHOD'} = "POST";
     }
 
+    # printing audit log breaks json output, ex. for commands
+    local $ENV{'THRUK_AUDIT_DEFAULT_PRINT'} = 0;
+
     my $format   = 'json';
     my $backends = [];
     # strip known path prefixes

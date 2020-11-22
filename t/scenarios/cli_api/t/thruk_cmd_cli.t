@@ -177,6 +177,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => "/usr/bin/env thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now'",
     like => ['/Command request successfully submitted/'],
+    errlike => ['/SCHEDULE_HOST_CHECK/'],
 });
 TestUtils::test_command({
     cmd  => "/usr/bin/env thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now' --local",
