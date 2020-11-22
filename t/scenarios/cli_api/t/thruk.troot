@@ -18,7 +18,7 @@ TestUtils::test_command({
 }) or BAIL_OUT("wrong thruk path");
 
 ###########################################################
-
+delete $ENV{'THRUK_MODE'};
 TestUtils::test_command({
     cmd  => '/bin/bash -c "thruk --local -l -vv 2>&1"',
     like => ['/switching to uid: 1000/'],

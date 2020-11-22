@@ -99,6 +99,11 @@ if($options->{'listcommands'}) {
     exit 0;
 }
 
+# required when starting thruk as root to get logging right
+$ENV{'THRUK_VERBOSE'}    = $ENV{'THRUK_VERBOSE'} // $options->{'verbose'} // 0;
+$ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
+$ENV{'THRUK_VERBOSE'}    = 0 if$ENV{'THRUK_QUIET'};
+
 require Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();

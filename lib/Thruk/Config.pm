@@ -1276,7 +1276,7 @@ sub switch_user {
         ## use critic
     }
     my @cmd = _get_orig_cmd_line();
-    _debug("switching to uid: $uid") if $ENV{'THRUK_VERBOSE'};
+    _debug("switching to uid: $uid");
     POSIX::setuid($uid) || confess("setuid failed: ".$!);
     _debug("re-exec: ".'"'.join('" "', @cmd).'"');
     # clean perl5lib

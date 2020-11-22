@@ -301,7 +301,7 @@ sub index {
     # return error as json for rest api calls
     if($c->want_json_response()) {
         if(Thruk->verbose >= 2) {
-            cluck($c->stash->{errorMessage});
+            Carp::cluck($c->stash->{errorMessage});
         }
         return $c->render(json => {
             failed      => Cpanel::JSON::XS::true,
@@ -318,7 +318,7 @@ sub index {
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
         _error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
         if(Thruk->verbose) {
-            cluck($c->stash->{errorMessage});
+            Carp::cluck($c->stash->{errorMessage});
         }
     }
 
