@@ -5,8 +5,9 @@ use Test::More;
 use File::Temp qw/tempfile/;
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-plan tests => 11;
+plan tests => 12;
 
+use_ok('Thruk::Config');
 use_ok('Thruk::Utils::Cache');
 
 my $testkeys = [
