@@ -189,7 +189,7 @@ sub _log {
 sub _audit_log {
     my($category, $msg, $user, $sessionid, $print) = @_;
     my $config = _config();
-    $print = $print // $ENV{'THRUK_AUDIT_DEFAULT_PRINT'} // 1;
+    $print = $print // 1;
 
     if(!$user) {
         $user = '?';
@@ -231,11 +231,7 @@ sub _audit_log {
     # log to thruk.log and print to screen
     _init_logging() unless $logger;
     $filelogger->info($msg) if $filelogger;
-    if($print) {
-        _info($msg);
-    } elsif(!$filelogger) {
-        _debug($msg);
-    }
+    _info($msg) if($print || !$filelogger);
 
     if(defined $config->{'audit_logs'} && $config->{'audit_logs'}->{'logfile'}) {
         my $file = $config->{'audit_logs'}->{'logfile'};

@@ -69,7 +69,7 @@ sub index {
     }
 
     # printing audit log breaks json output, ex. for commands
-    local $ENV{'THRUK_AUDIT_DEFAULT_PRINT'} = 0;
+    local $ENV{'THRUK_QUIET'} = 1 unless Thruk->verbose;
 
     my $format   = 'json';
     my $backends = [];
