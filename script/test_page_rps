@@ -274,7 +274,7 @@ sub test_tag {
         $rc += $?;
     }
     my $first_req = tv_interval($t0);
-    printf("% 6.2fs | ", ($rc == 0 ? $first_req : 'Err'));
+    printf("% 7s | ", ($rc == 0 ? sprintf("%.2fs", $first_req) : 'Err'));
 
 
     # warm up
