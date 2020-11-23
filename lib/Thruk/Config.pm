@@ -511,7 +511,7 @@ sub set_default_config {
     $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
     ## use critic
 
-    if(Thruk::Base->mode eq 'CLI') {
+    if(Thruk::Base->mode eq 'CLI_SETUID') {
         if(defined $uid and $> == 0) {
             switch_user($uid, $groups);
             _fatal("re-exec with uid $uid did not work");
@@ -1027,7 +1027,7 @@ sub finalize {
     Thruk::Action::AddDefaults::restore_user_backends($c);
 
     if($Thruk::deprecations_log) {
-        if(Thruk::Base->mode ne 'TEST' && Thruk::Base->mode ne 'CLI') {
+        if(Thruk::Base::mode() ne 'TEST' && Thruk::Base::mode() ne 'CLI') {
             for my $warning (@{$Thruk::deprecations_log}) {
                 _info($warning);
             }

@@ -208,7 +208,7 @@ sub _audit_log {
         }
     }
     if(!$sessionid) {
-        if(Thruk::Base::mode() eq 'CLI') {
+        if(Thruk::Base::mode_cli()) {
             $sessionid = 'command line';
         }
     }

@@ -312,7 +312,7 @@ sub index {
         });
     }
 
-    if(Thruk->mode eq 'CLI') {
+    if(Thruk::Base::mode_cli()) {
         _error($c->stash->{errorMessage});
         _error($c->stash->{errorDescription});
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};

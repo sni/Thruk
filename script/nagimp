@@ -33,9 +33,11 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ##############################################
 use strict;
 use warnings;
+use Thruk::Config 'noautoload';
 
 our $VERSION = '2.38';
 my $branch       = '2';
+$branch      = Thruk::Config::get_git_name() unless $branch ne '';
 
 my $nagimp = Thruk::nagimp->new();
 exit $nagimp->run();

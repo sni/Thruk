@@ -68,7 +68,7 @@ returns the psgi code ref
 sub startup {
     my($class) = @_;
 
-    if(mode() ne 'TEST') {
+    if(Thruk::Base::mode() ne 'TEST') {
         require Thruk::Backend::Pool;
         Thruk::Backend::Pool::init_backend_thread_pool();
     }
@@ -87,7 +87,7 @@ sub startup {
 
     my $app = $class->_build_app();
 
-    if(Thruk->mode eq 'DEVSERVER' || Thruk->mode eq 'TEST') {
+    if(Thruk::Base::mode() eq 'DEVSERVER' || Thruk::Base::mode() eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
                     path         => sub {
@@ -271,7 +271,7 @@ sub _dispatcher {
     $Thruk::COUNT++;
     #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
     # connection keep alive breaks IE in development server
-    if(Thruk->mode eq 'DEVSERVER' || Thruk->mode eq 'TEST') {
+    if(Thruk::Base::mode() eq 'DEVSERVER' || Thruk::Base::mode() eq 'TEST') {
         delete $env->{'HTTP_CONNECTION'};
     }
     my $c = Thruk::Context->new($thruk, $env);
@@ -541,7 +541,7 @@ sub _check_exit_reason {
 my $pidfile;
 sub _setup_pidfile {
     $pidfile  = Thruk->config->{'tmp_path'}.'/thruk.pid';
-    if(Thruk->mode eq 'FASTCGI') {
+    if(Thruk::Base::mode() eq 'FASTCGI') {
         -s $pidfile || unlink(Thruk->config->{'tmp_path'}.'/thruk.cache');
         open(my $fh, '>>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
@@ -554,7 +554,7 @@ sub _setup_pidfile {
 sub _remove_pid {
     return unless $pidfile;
     local $SIG{PIPE} = 'IGNORE';
-    if(Thruk->mode eq 'FASTCGI') {
+    if(Thruk::Base::mode() eq 'FASTCGI') {
         my $remaining = [];
         if($pidfile && -f $pidfile) {
             my $pids = [split(/\s/mx, read_file($pidfile))];
@@ -650,7 +650,7 @@ sub _clean_exit {
 # create secret file
 sub _create_secret_file {
     my $config = Thruk->config;
-    return unless (Thruk->mode eq 'FASTCGI' || Thruk->mode eq 'DEVSERVER');
+    return unless (Thruk::Base::mode() eq 'FASTCGI' || Thruk::Base::mode() eq 'DEVSERVER');
     my $var_path   = $config->{'var_path'} || die("no var path!");
     my $secretfile = $var_path.'/secret.key';
     return if -s $secretfile;
@@ -942,7 +942,7 @@ sub finalize_request {
     Thruk::Config::finalize($c);
 
     # does this process need a restart?
-    if(Thruk->mode eq 'FASTCGI') {
+    if(Thruk::Base::mode() eq 'FASTCGI') {
         if($c->config->{'max_process_memory'}) {
             Thruk::Utils::check_memory_usage($c);
         }

@@ -89,10 +89,11 @@ Do not touch permissions of opened files.
 
 Can be one of:
 
-    - `FASTCGI`   - fast cgi script
-    - `DEVSERVER` - development server
-    - `CLI`       - bin/thruk and script/*
-    - `TEST`      - used in tests from t/*
+    - `FASTCGI`       - fast cgi script
+    - `DEVSERVER`     - development server
+    - `CLI_SETUID`    - bin/thruk and scripts/* which should change user when started as root
+    - `CLI`           - script/*
+    - `TEST`          - used in tests from t/*
 
 
 ==== THRUK_TEST_NO_AUDIT_LOG

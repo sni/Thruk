@@ -1,12 +1,43 @@
-#!/usr/bin/env perl
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+BASEDIR=$(dirname $0)/..
+
+# git version
+if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$BASEDIR/lib";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+
+# omd
+elif [ "$OMD_ROOT" != "" ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+
+# pkg installation
+else
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
 # vim: expandtab:ts=4:sw=4:syntax=perl
+#line 32
 
 ##############################################
 use strict;
 use warnings;
+use Thruk::Config 'noautoload';
 
 our $VERSION = '2.38';
 my $branch       = '2';
+$branch      = Thruk::Config::get_git_name() unless $branch ne '';
 
 my $nagexp = Thruk::nagexp->new();
 exit $nagexp->run();

@@ -600,7 +600,7 @@ sub add_defaults {
         if(   !$c->stash->{'last_program_restart'}
            || !$c->user->{'timestamp'}
            || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
-           || Thruk->mode eq 'CLI'
+           || Thruk::Base::mode_cli()
            || ($c->user->{'timestamp'} < (time() - 600))
         ) {
             # refresh dynamic roles and groups

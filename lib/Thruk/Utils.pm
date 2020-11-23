@@ -3005,7 +3005,7 @@ sub check_csrf {
     my($c, $skip_request_method) = @_;
 
     # script generated sessions are ok, we only want to protect browsers here
-    return 1 if(Thruk->mode eq 'CLI');
+    return 1 if Thruk::Base::mode_cli();
     return 1 if $c->req->header('X-Thruk-Auth-Key');
     return 1 if($c->{'session'} && $c->{'session'}->{'fake'});
 

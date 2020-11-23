@@ -82,7 +82,7 @@ sub new {
             'memory_begin'  => $memory_begin,
     });
     bless($self, $class);
-    weaken($self->{'app'}) unless Thruk->mode eq 'CLI';
+    weaken($self->{'app'}) unless Thruk::Base::mode_cli();
     $self->stats->enable();
 
     # extract non-url encoded q= param from raw body parameters
@@ -319,7 +319,7 @@ sub authenticate {
 
     # set session id for all requests
     if(!$sessiondata && !$internal) {
-        if(Thruk->mode ne 'CLI') {
+        if(!Thruk::Base::mode_cli()) {
             ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
             $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
         }
@@ -433,7 +433,7 @@ sub _request_username {
         $auth_src = "default_user_name";
     }
 
-    elsif(!defined $username && Thruk->mode eq 'CLI') {
+    elsif(!defined $username && Thruk::Base::mode_cli()) {
         $username = $c->config->{'default_cli_user_name'};
         $auth_src = "cli";
     }

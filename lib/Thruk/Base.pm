@@ -50,6 +50,19 @@ sub mode {
 
 ###################################################
 
+=head2 mode_cli
+
+    mode_cli()
+
+returns true if thruk is cli runtime mode
+
+=cut
+sub mode_cli {
+    return(&mode() =~ m/^CLI/mx ? 1 : 0);
+}
+
+###################################################
+
 =head2 verbose
 
     verbose()
