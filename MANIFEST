@@ -1790,6 +1790,7 @@ t/093-manifest.t
 t/094-template_encoding.t
 t/095-doc_coverage.t
 t/095-doc_rest.t
+t/095-doc_roles_coverage.t
 t/096-makefile_requirements.t
 t/097-Pod.t
 t/098-Pod-Coverage.t

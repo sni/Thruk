@@ -1295,9 +1295,9 @@ sub _process_bookmarks {
     my $public        = $c->req->parameters->{'public'} || 0;
     my $save_backends = $c->req->parameters->{'save_backends'} || 0;
 
-    # public only allowed for admins
+    # public only allowed for bookmark admins
     if($public) {
-        if(!$c->check_user_roles('admin')) {
+        if(!$c->check_user_roles('public_bookmarks')) {
             $public = 0;
         }
     }
@@ -1367,7 +1367,7 @@ sub _process_bookmarks {
         }
         $done++;
 
-        if($c->check_user_roles('admin')) {
+        if($c->check_user_roles('public_bookmarks')) {
             for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
                 next unless defined $bookmark;
                 my($section, $name) = split(/::/mx, $bookmark ,2);

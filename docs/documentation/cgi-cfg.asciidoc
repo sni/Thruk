@@ -176,6 +176,14 @@ ex.:
   authorized_for_all_host_commands = thrukadmin
 
 
+=== authorized_for_public_bookmarks
+A comma-delimited list of usernames that can manage public bookmarks.
+
+ex.:
+
+  authorized_for_public_bookmarks = thrukadmin
+
+
 === authorized_for_broadcasts
 A comma-delimited list of usernames that can manage broadcasts.
 
@@ -191,6 +199,15 @@ edit business processes.
 ex.:
 
   authorized_for_business_processes = thrukadmin
+
+
+=== authorized_for_panorama_view_media_manager
+A comma-delimited list of usernames that have the permission to upload and
+overwrite status icon sets and background images in panorama view dashboards.
+
+ex.:
+
+  authorized_for_panorama_view_media_manager= = thrukadmin
 
 
 === authorized_for_reports
