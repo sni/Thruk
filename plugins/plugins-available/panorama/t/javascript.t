@@ -132,6 +132,7 @@ js_eval_ok($filename) && unlink($filename);
 
 #################################################
 # tests from javascript_tests file
+Log::Log4perl::get_logger("JavaScript::SpiderMonkey")->level("ERROR"); # JavaScript::SpiderMonkey uses DEBUG, so set loglevel to error
 my @functions = read_file('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/xt/panorama/javascript_tests.js');
 for my $f (@functions) {
