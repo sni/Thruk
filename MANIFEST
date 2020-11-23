@@ -19,6 +19,7 @@ debian/thruk-plugin-reporting.postinst
 debian/thruk-plugin-reporting.prerm
 debian/thruk.dsc
 dist.ini
+docs/documentation/cgi-cfg.asciidoc
 docs/documentation/configuration.asciidoc
 docs/manpages/nagexp.3
 docs/manpages/nagimp.3

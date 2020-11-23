@@ -48,7 +48,7 @@ inc/File/Copy/Recursive.pm
 ^log4perl.conf$
 TODO
 docs/development
-docs/documentation/(?!configuration.asciidoc)
+docs/documentation/(?!(configuration|cgi-cfg).asciidoc)
 plugins/plugins-available/conf/test.pl
 plugins/plugins-available/conf/tmon.out
 thruk_.*.changes
