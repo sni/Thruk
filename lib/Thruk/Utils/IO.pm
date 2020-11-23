@@ -146,8 +146,8 @@ sub ensure_permissions {
     my @stat = stat($path);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
-    require Thruk;
-    my $config = Thruk->config;
+    require Thruk::Config;
+    my $config = Thruk::Config::get_config();
     # set modes
     if($mode eq 'file') {
         if($cur ne $config->{'mode_file'}) {
@@ -361,8 +361,8 @@ sub json_store {
     print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
     Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
 
-    require Thruk;
-    my $config = Thruk->config;
+    require Thruk::Config;
+    my $config = Thruk::Config::get_config();
     if($config->{'thruk_author'}) {
         eval {
             my $test = $json->decode(scalar read_file($tmpfile));
