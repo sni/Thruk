@@ -26,6 +26,15 @@ our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc
                     );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
+use constant {
+    ERROR   => 0,
+    WARNING => 1,
+    INFO    => 2,
+    DEBUG   => 3,
+    DEBUG2  => 4,
+    TRACE   => 5,
+};
+
 ##############################################
 
 our $logger;
@@ -48,62 +57,62 @@ sub log {
 
 ##############################################
 sub _fatal {
-    _log('ERROR', \@_);
+    &_log(ERROR, \@_);
     exit(3);
 }
 
 ##############################################
 sub _error {
-    return _log('ERROR', \@_);
+    return &_log(ERROR, \@_);
 }
 
 ##############################################
 sub _warn {
-    return _log('WARNING', \@_);
+    return &_log(WARNING, \@_);
 }
 
 ##############################################
 sub _info {
-    return _log('INFO', \@_);
+    return &_log(INFO, \@_);
 }
 
 ##############################################
 # start info entry, but do not add newline
 sub _infos {
-    return _log('INFO', \@_, { newline => 0 });
+    return &_log(INFO, \@_, { newline => 0 });
 }
 
 ##############################################
 # continue info entry, still do not add newline and simply append given text
 sub _infoc {
-    return _log('INFO', \@_, { append => 1 });
+    return &_log(INFO, \@_, { append => 1 });
 }
 
 ##############################################
 sub _trace {
-    return _log('TRACE', \@_);
+    return &_log(TRACE, \@_);
 }
 
 ##############################################
 sub _debug {
-    return _log('DEBUG', \@_);
+    return &_log(DEBUG, \@_);
 }
 
 ##############################################
 # start debug entry, but do not add newline
 sub _debugs {
-    return _log('DEBUG', \@_, { newline => 0 });
+    return &_log(DEBUG, \@_, { newline => 0 });
 }
 
 ##############################################
 # continue debug entry, still do not add newline and simply append given text
 sub _debugc {
-    return _log('DEBUG', \@_, { append => 1 });
+    return &_log(DEBUG, \@_, { append => 1 });
 }
 
 ##############################################
 sub _debug2 {
-    return _log('DEBUG2', \@_);
+    return &_log(DEBUG2, \@_);
 }
 
 ##############################################
@@ -111,20 +120,19 @@ sub _log {
     my($lvl, $data, $options) = @_;
     my $line = shift @{$data};
     return unless defined $line;
-    $lvl = 'DEBUG' unless defined $lvl;
     if(Thruk::Base::quiet()) {
-        return if($lvl ne 'WARN' && $lvl ne 'ERROR');
+        return if $lvl > WARNING;
     } else {
-        return if($lvl eq 'TRACE'  && !Thruk::Base::trace());
-        return if($lvl eq 'DEBUG'  && !Thruk::Base::verbose());
-        return if($lvl eq 'DEBUG2' && !Thruk::Base::debug());
+        return if($lvl >= DEBUG  && !Thruk::Base::verbose());
+        return if($lvl >= DEBUG2 && !Thruk::Base::debug());
+        return if($lvl >= TRACE  && !Thruk::Base::trace());
     }
     if(defined $ENV{'THRUK_TEST_NO_LOG'}) {
         $ENV{'THRUK_TEST_NO_LOG'} .= $line."\n";
         return;
     }
     if(ref $line) {
-        return _log($lvl, [Dumper([$line, @{$data}])], $options);
+        return &_log($lvl, [Dumper([$line, @{$data}])], $options);
     } elsif(scalar @{$data} > 0) {
         $line = sprintf($line, @{$data});
     }
@@ -163,10 +171,10 @@ sub _log {
     }
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth+2;
     for my $l (split/\n/mx, $line) {
-        if(   $lvl eq 'ERROR')   { $log->error($l); }
-        elsif($lvl eq 'WARNING') { $log->warn($l);  }
-        elsif($lvl eq 'INFO')    { $log->info($l);  }
-        else                     { $log->debug($l); }
+        if(   $lvl == ERROR)   { $log->error($l); }
+        elsif($lvl == WARNING) { $log->warn($l);  }
+        elsif($lvl == INFO)    { $log->info($l);  }
+        else                   { $log->debug($l); }
     }
     if($appender_changed) {
         # skip newline and timestamp

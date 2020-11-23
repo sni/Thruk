@@ -7,8 +7,6 @@ use Time::HiRes qw/sleep/;
 use Cpanel::JSON::XS ();
 
 use Thruk::Controller::rest_v1;
-use Thruk::Controller::conf;
-use Thruk::Utils::Conf;
 
 =head1 NAME
 
@@ -170,6 +168,7 @@ sub _rest_get_config_files {
 Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH','POST'], qr%^/(host|hostgroup|servicegroup|timeperiod|contact|contactgroup|command|)s?/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
 sub _rest_get_config {
     my($c, undef, $type, $name, $name2) = @_;
+    require Thruk::Utils::Conf;
     my $live = [];
     my $method = $c->req->method();
     if($type eq 'host') {
@@ -283,6 +282,8 @@ sub _rest_get_config_objects {
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/objects?$%mx, \&_rest_get_config_objects_new, ["admin"]);
 sub _rest_get_config_objects_new {
     my($c) = @_;
+    require Thruk::Controller::conf;
+    require Thruk::Utils::Conf;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $type      = delete $c->req->parameters->{':TYPE'};
     my $new_file  = delete $c->req->parameters->{':FILE'};
@@ -334,6 +335,7 @@ sub _rest_get_config_objects_new {
 Thruk::Controller::rest_v1::register_rest_path_v1('PATCH', qr%^/config/objects?$%mx, \&_rest_get_config_objects_patch, ["admin"]);
 sub _rest_get_config_objects_patch {
     my($c) = @_;
+    require Thruk::Utils::Conf;
     my($backends) = $c->{'db'}->select_backends("get_");
     local $ENV{'THRUK_BACKENDS'} = join(',', @{$backends}); # required for sub requests
     my $changed = 0;
@@ -364,6 +366,7 @@ sub _rest_get_config_objects_patch {
 Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE', 'POST', 'PATCH'], qr%^/config/objects?/([^/]+)$%mx, \&_rest_get_config_objects_update, ["admin"]);
 sub _rest_get_config_objects_update {
     my($c, undef, $id) = @_;
+    require Thruk::Utils::Conf;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $changed = 0;
     my $method = $c->req->method();
@@ -416,6 +419,7 @@ sub _rest_get_config_diff {
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/check$%mx, \&_rest_get_config_check, ["admin"]);
 sub _rest_get_config_check {
     my($c) = @_;
+    require Thruk::Controller::conf;
     local $c->config->{'no_external_job_forks'} = undef;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $jobs = [];
@@ -454,6 +458,7 @@ sub _rest_get_config_check {
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/save$%mx, \&_rest_get_config_save, ["admin"]);
 sub _rest_get_config_save {
     my($c) = @_;
+    require Thruk::Utils::Conf;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $saved = 0;
     for my $peer_key (@{$backends}) {
@@ -475,6 +480,7 @@ sub _rest_get_config_save {
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/reload$%mx, \&_rest_get_config_reload, ["admin"]);
 sub _rest_get_config_reload {
     my($c) = @_;
+    require Thruk::Controller::conf;
     local $c->config->{'no_external_job_forks'} = undef;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $jobs = [];
@@ -519,6 +525,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/revert$%mx
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/discard$%mx, \&_rest_get_config_revert, ["admin"]);
 sub _rest_get_config_revert {
     my($c) = @_;
+    require Thruk::Utils::Conf;
     my($backends) = $c->{'db'}->select_backends("get_");
     my $reverted = 0;
     for my $peer_key (@{$backends}) {
@@ -536,6 +543,7 @@ sub _rest_get_config_revert {
 ##########################################################
 sub _set_object_model {
     my($c, $peer_key) = @_;
+    require Thruk::Utils::Conf;
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};

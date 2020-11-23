@@ -12,7 +12,6 @@ use Class::Inspector ();
 
 use Thruk::Base ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -856,7 +855,7 @@ sub get_git_name {
     chdir($project_root.'/../../');
 
     # directly on git tag?
-    my($rc, $tag) = Thruk::Utils::IO::cmd("git describe --tag --exact-match 2>&1");
+    my($rc, $tag) = _cmd("git describe --tag --exact-match 2>&1");
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
@@ -864,10 +863,10 @@ sub get_git_name {
         return '';
     }
 
-    my $branch = Thruk::Utils::IO::cmd("git branch --no-color 2>/dev/null");
+    my $branch = _cmd("git branch --no-color 2>/dev/null");
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$hash) {
-        $hash = Thruk::Utils::IO::cmd("git log -1 --no-color --pretty=format:%h 2> /dev/null");
+        $hash = _cmd("git log -1 --no-color --pretty=format:%h 2> /dev/null");
     }
     chdir($dir);
     if($branch eq 'master') {
@@ -1482,6 +1481,14 @@ sub _get_orig_cmd_line {
     return($^X, @cmd);
 }
 
+########################################
+sub _cmd {
+    my($cmd) = @_;
+    my $out = `$cmd`;
+    my $rc  = $?>>8;
+    return($rc, $out);
+}
+
 ##############################################
 
 =head2 hostname
@@ -1494,8 +1501,7 @@ return system hostname
 
 sub hostname {
     our $hostname;
-    return($hostname) if $hostname;
-    chomp($hostname = Thruk::Utils::IO::cmd("hostname"));
+    $hostname = _cmd("hostname") unless $hostname;
     return($hostname);
 }
 
