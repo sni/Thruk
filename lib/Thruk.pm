@@ -147,7 +147,7 @@ sub _build_app {
     &_set_ssi();
     &_setup_pidfile();
     &_setup_cluster();
-    Thruk::Utils::Log->log(); # create log file if it doesn't exist
+    Thruk::Utils::Log->log() if Thruk::Base::mode() eq 'FASTCGI'; # create log file if it doesn't exist
 
     ###################################################
     # create backends
