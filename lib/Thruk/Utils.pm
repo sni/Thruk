@@ -1632,12 +1632,15 @@ sub get_perf_image {
             if(substr($imgdata, 0, 10) =~ m/PNG/mx) {
                 return $imgdata;
             }
+            if($imgdata) {
+                _debug("failed to fetch png image, got this instead:");
+                _debug($imgdata);
+            }
         } else {
             return $imgdata;
         }
-        _error($imgdata) if $imgdata;
     }
-    _error($out) if $out;
+    _debug($out) if $out;
     return '';
 }
 
