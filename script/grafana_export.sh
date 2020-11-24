@@ -22,10 +22,10 @@ export PATH=$PATH:$DIR
 
 INPUT="$INPUT&from=$START&to=$END"
 
-if [ -n $OMD_ROOT ]; then
+if [ -n "$OMD_ROOT" ]; then
     export NODE_PATH=$OMD_ROOT/node_modules/
 fi
-if [ -n $NODE_PATH ] && [ -d $NODE_PATH ]; then
+if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
     node $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
     rc=$?
 else
