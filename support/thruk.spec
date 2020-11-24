@@ -433,6 +433,7 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/script/grafana_export.sh
 %attr(0644,root,root) %{_datadir}/thruk/script/html2pdf.js
 %attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
+%attr(0644,root,root) %{_datadir}/thruk/script/puppeteer.js
 %attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/convert_old_datafile
 %attr(0755,root,root) %{_datadir}/thruk/script/check_thruk_rest
