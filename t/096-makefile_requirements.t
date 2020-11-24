@@ -22,6 +22,7 @@ my $replace = {
     'Digest::MD4'                                 => 'Excel::Template',
     'Log::Dispatch::File'                         => 'Log::Log4perl',
     'Template::Plugin::Date'                      => 'Template',
+    'Date::Manip::TZ'                             => 'Date::Manip',
 };
 
 # first get all we have already

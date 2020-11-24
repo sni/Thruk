@@ -3443,7 +3443,7 @@ sub get_timezone_data {
         $timezones = $data->{'timezones'};
     } else {
         require Date::Manip::TZ;
-        my $tz  = new Date::Manip::TZ;
+        my $tz  = Date::Manip::TZ->new();
         # https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/TZ.pod#$date
         my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
         my $date = [$year+1900, $mon+1, $mday, $hour, $min, $sec];
