@@ -79,24 +79,21 @@ feature     ('performance_tweaking',
 
 # requirements test requirements
 if(scalar @ARGV != 1 || $ARGV[0] ne '--checkdeps') {
-feature     ('author_test',
-  -default                                                                  => 0,
-  'Test::Simple'                                                            => 0,
-  'HTML::Lint'                                                              => 0,
-  'File::BOM'                                                               => 0,
-  'Test::Cmd'                                                               => 0,
-  'Test::Pod'                                                               => 1.40,
-  'Test::Perl::Critic'                                                      => 0,
-  'Test::Pod::Coverage'                                                     => 0,
-  'Perl::Critic::Policy::Dynamic::NoIndirect'                               => 0,
-  'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs'          => 0,
-  'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
-  'Perl::Critic::Policy::Modules::ProhibitPOSIXimport'                      => 0,
-  'Test::JavaScript'                                                        => 0,
-  'Test::Vars'                                                              => 0,
-  'Devel::Cycle'                                                            => 0,
-  'Devel::Gladiator'                                                        => 0,
-);
+  test_requires 'Test::Simple'                                                            => 0;
+  test_requires 'HTML::Lint'                                                              => 0;
+  test_requires 'File::BOM'                                                               => 0;
+  test_requires 'Test::Cmd'                                                               => 0;
+  test_requires 'Test::Pod'                                                               => 1.40;
+  test_requires 'Test::Perl::Critic'                                                      => 0;
+  test_requires 'Test::Pod::Coverage'                                                     => 0;
+  test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect'                               => 0;
+  test_requires 'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs'          => 0;
+  test_requires 'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0;
+  test_requires 'Perl::Critic::Policy::Modules::ProhibitPOSIXimport'                      => 0;
+  test_requires 'Test::JavaScript'                                                        => 0;
+  test_requires 'Test::Vars'                                                              => 0;
+  test_requires 'Devel::Cycle'                                                            => 0;
+  test_requires 'Devel::Gladiator'                                                        => 0;
 };
 
 ##################################
