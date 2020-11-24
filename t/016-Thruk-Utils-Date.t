@@ -5,7 +5,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 28;
+    plan tests => 31;
 
     use lib('t');
     require TestUtils;
@@ -84,3 +84,16 @@ for my $comp (@{$compare}) {
         }
     };
 }
+
+#########################
+my $timezones = Thruk::Utils::get_timezone_data($c);
+ok(scalar @{$timezones} > 0, "got timezones: ".$timezones);
+my $berlin;
+for my $tz (@{$timezones}) {
+    if($tz->{'text'} eq 'Europe/Berlin') {
+        $berlin = $tz;
+        last;
+    }
+}
+ok($berlin, "got entry for berlin");
+is($berlin->{'offset'}, $berlin->{'abbr'} eq 'CET' ? 3600 : 7200, "got offset for berlin");

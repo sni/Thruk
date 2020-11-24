@@ -50,9 +50,9 @@ Ext.define('TP.PanletClock', {
             if(panel.xdata.timezone == "Local Browser") {
                 newText = d.strftime(panel.xdata.timeformat);
             } else {
-                /* update offset */
-                var hour = d.strftime("%H");
-                if(panel.lastHour != hour || panel.lastTZ != panel.xdata.timezone) {
+                /* update offset every minute */
+                var offsetUpdate = d.strftime("%H:%M");
+                if(panel.lastOffsetUpdate != offsetUpdate || panel.lastTZ != panel.xdata.timezone) {
                     if(TP.timezoneStore.loading) {
                         /* try again later */
                         window.setTimeout(function() { panel.refreshHandler(); }, 100 );
@@ -77,7 +77,7 @@ Ext.define('TP.PanletClock', {
                         panel.clockItem.update("ERROR: unknown timezone");
                         return;
                     }
-                    panel.lastHour = hour;
+                    panel.lastOffsetUpdate = offsetUpdate;
                     panel.lastTZ   = panel.xdata.timezone;
                 }
                 var localTime   = d.getTime();

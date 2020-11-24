@@ -28,8 +28,6 @@ use POSIX ();
 use MIME::Base64 ();
 use URI::Escape ();
 
-use Module::Load qw/load/;
-
 ##############################################
 =head1 METHODS
 
@@ -3440,20 +3438,28 @@ sub get_timezone_data {
     my $timezones = [];
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
     my $data  = $cache->get('timezones');
-    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H");
+    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H:%M");
     if(defined $data && $data->{'timestamp'} eq $timestamp) {
         $timezones = $data->{'timezones'};
     } else {
-        load "DateTime";
-        load "DateTime::TimeZone";
-        my $dt = DateTime->now;
-        for my $name (DateTime::TimeZone->all_names) {
-            $dt->set_time_zone($name);
+        require Date::Manip::TZ;
+        my $tz  = new Date::Manip::TZ;
+        # https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/TZ.pod#$date
+        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+        my $date = [$year+1900, $mon+1, $mday, $hour, $min, $sec];
+        for my $tzname (sort values %Date::Manip::Zones::ZoneNames) {
+            next unless($tzname =~ m%/%mx || $tzname eq 'UTC');
+            my $zone = $tz->date_period($date, $tzname);
+            my $offset = $zone->[3];
+            if(ref $offset ne "ARRAY") {
+                $offset = [split(":", $offset)];
+            }
+            $offset = ($offset->[0] * 3600) + ($offset->[1] * 60) + ($offset->[2]);
             push @{$timezones}, {
-                text   => $name,
-                abbr   => $dt->time_zone()->short_name_for_datetime($dt),
-                offset => $dt->offset(),
-                isdst  => $dt->is_dst() ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
+                text   => $tzname,
+                abbr   => $zone->[4],
+                offset => $offset, # in seconds
+                isdst  => $zone->[5] ? 1 : 0,
             };
         }
         $cache->set('timezones', {
