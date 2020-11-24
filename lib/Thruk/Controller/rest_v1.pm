@@ -1385,6 +1385,9 @@ sub _rest_get_thruk_users {
     if($c->check_user_roles('admin')) {
         $is_admin = 1;
     }
+    if(!$c->config->{'use_feature_configtool'}) {
+        return({ 'message' => 'config tool plugin is disabled', code => 400 });
+    }
 
     if(!defined $id) {
         # prefill contacts / groups cache
@@ -1394,6 +1397,7 @@ sub _rest_get_thruk_users {
 
     my $total_number = 0;
     my $total_locked = 0;
+    require Thruk::Utils::Conf;
     my $users = Thruk::Utils::Conf::get_cgi_user_list($c);
     delete $users->{'*'};
     $users = [sort keys %{$users}];
