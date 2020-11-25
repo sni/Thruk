@@ -1486,6 +1486,7 @@ sub _cmd {
     my($cmd) = @_;
     my $out = `$cmd`;
     my $rc  = $?>>8;
+    chomp($out);
     return($rc, $out);
 }
 
