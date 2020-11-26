@@ -252,6 +252,8 @@ sub begin {
 
     # do some sanity checks
     if($c->req->parameters->{'referer'}) {
+        $c->req->parameters->{'referer'} =~ s%^http://$c->{'env'}->{'SERVER_NAME'}(:80|)/%/%gmx;
+        $c->req->parameters->{'referer'} =~ s%^https://$c->{'env'}->{'SERVER_NAME'}(:443|)/%/%gmx;
         if($c->req->parameters->{'referer'} =~ m/^(\w+:\/\/|\/\/)/mx) {
             $c->error("unsupported referer");
             return $c->detach('/error/index/100');
