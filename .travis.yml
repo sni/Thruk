@@ -81,12 +81,14 @@ before_install:
   - cpanm -q -f --notest --no-man-pages Spreadsheet/ParseExcel.pm
   # use latest version of critics
   - cpanm -q -f --notest --no-man-pages Perl::Critic
+  - cpanm -q -f --notest --no-man-pages Test::Vars
   - git config --global user.email "travis@localhost"
   - git config --global user.name "Travis Testuser"
   - echo "export PERL5LIB=\$PERL5LIB:$HOME/perl5/lib/perl5" > ~/.thruk
   # ensure we have a test database in place for tests
   - mysql -e "create database IF NOT EXISTS test;" -uroot
   # ensure we have all modules loaded
+  - perl Makefile.PL
   - if [ $(perl Makefile.PL 2>&1 | grep -c missing) -ne 0 ]; then exit 1; fi
   - '[ "$TRAVIS_BRANCH" != "e2e" -o "$TRAVIS_SECURE_ENV_VARS" == "false" ] || openssl aes-256-cbc -K $encrypted_9c186b83851c_key -iv $encrypted_9c186b83851c_iv -in t/scenarios/e2e/.dropbox_uploader.enc -out ~/.dropbox_uploader -d'
 
