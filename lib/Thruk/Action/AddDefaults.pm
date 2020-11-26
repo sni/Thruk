@@ -466,7 +466,7 @@ sub add_defaults {
         } else {
             $timezone = $user_tz;
         }
-        if($timezone =~ m/^UTC(.+)$/mx) {
+        if($timezone && $timezone =~ m/^UTC(.+)$/mx) {
             my $offset = $1*3600;
             for my $tz (@{Thruk::Utils::get_timezone_data($c)}) {
                 if($tz->{'offset'} == $offset) {
