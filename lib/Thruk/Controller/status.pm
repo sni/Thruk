@@ -240,6 +240,7 @@ sub _process_raw_request {
         my @hostfilter;
         if(defined $host and $host ne '') {
             for my $h (split(/\s*,\s*/mx, $host)) {
+                next if $h eq '*';
                 my $op = "=";
                 if(Thruk::Utils::looks_like_regex($h)) {
                     $op = "~";

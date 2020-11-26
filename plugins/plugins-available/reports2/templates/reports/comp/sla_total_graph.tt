@@ -29,9 +29,9 @@ jQuery(document).ready(function() {
       [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
         [% val = round_decimals(values.$x.0, param.decimals) %]
         [% IF values.$x.0 == -1 %][%# no data at all... #%]
-        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% _hst(hst) %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% _hst(hst) | html %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
         [% ELSE %]
-        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% _hst(hst) %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% _hst(hst) | html %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
         [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
         [% END %]
       [% END %]
@@ -41,9 +41,9 @@ jQuery(document).ready(function() {
           label[[% x %]] = "";
           [% val = round_decimals(values.$x.0, param.decimals) %]
           [% IF loop.last %]
-          label[[% x %]] += "<span class='graph_svc_hst_legend'>[% _hst(hst) %]<\/span>";
+          label[[% x %]] += "<span class='graph_svc_hst_legend'>[% _hst(hst) | html %]<\/span>";
           [% END %]
-          label[[% x %]] += "<span class='graph_svc_legend'> - [% _svc(hst, svc)  %]<\/span>";
+          label[[% x %]] += "<span class='graph_svc_legend'> - [% _svc(hst, svc) | html %]<\/span>";
           [% IF values.$x.0 == -1 %][%# no data at all... #%]
           label[[% x %]] += "<span class='graph_percent_legend'>n/a<\/span>";
           [% ELSE %]
@@ -54,6 +54,16 @@ jQuery(document).ready(function() {
         [% END %]
       [% END %]
     [%+ END +%]
+
+    [% IF param.exists("overview_max_level") %]
+    var tmp = render_apply_overview_threshold([% param.overview_max_level %], graph_data, label);
+    graph_data = tmp.data;
+    label      = tmp.label;
+    if(tmp.hidden > 0) {
+      jQuery("#hidden_[% nr %]").html("<span> ( incl. "+tmp.hidden+" x sla &gt;= [% param.overview_max_level %]% ) </span>");
+      jQuery("#hidden_[% nr %]").parent("TR").show();
+    }
+    [% END %]
 
     var max_entries_per_page = 32;
     render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type | html %]", label, max_entries_per_page);
@@ -70,6 +80,9 @@ jQuery(document).ready(function() {
     [% value = round_decimals(val, param.decimals) %]
     <span class='[% IF value < param.sla %] sla_nok[% END %]'>[% value %] %</span>
     </td>
+  </tr>
+  <tr style="display: none;">
+    <td colspan="2" style="text-align: center;" id="hidden_[% nr %]"></td>
   </tr>
 </table>
 [% END %]
