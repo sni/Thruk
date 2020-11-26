@@ -1,15 +1,18 @@
 use strict;
 use warnings;
 use Test::More;
+use ExtUtils::Manifest;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+my($e_m_v) = ($ExtUtils::Manifest::VERSION =~ m/^(\d+\.\d+)/mx);
+plan skip_all => 'ExtUtils::Manifest > 1.51 required, this is '.$ExtUtils::Manifest::VERSION unless $e_m_v > 1.51;
 
-use_ok("ExtUtils::Manifest");
+
 
 # first do a make distcheck
 SKIP: {
     # https://github.com/Perl-Toolchain-Gang/ExtUtils-Manifest/issues/5
-    skip "distcheck is broken with ExtUtils::Manifest >= 1.66", 1 if $ExtUtils::Manifest::VERSION >= 1.66;
+    skip "distcheck is broken with ExtUtils::Manifest >= 1.66", 1 if $e_m_v >= 1.66;
     open(my $ph, '-|', 'make distcheck 2>&1') or die('make failed: '.$!);
     while(<$ph>) {
         my $line = $_;
