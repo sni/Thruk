@@ -28,6 +28,14 @@ or by curl:
 ------
 
 
+=== Notifications Per Hour Group by Site
+
+List total number of notifications send in the last 60 minutes grouped by backend name:
+
+------
+  %> thruk r '/notifications?time[gt]=-60m&columns=count(*):notifications_per_hour,peer_name'
+------
+
 === Sending Commands
 
 ==== Add Service Downtime
