@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 185;
+    plan tests => 212;
 
     use lib('t');
     require TestUtils;
@@ -38,7 +38,7 @@ my $pages = [{
         url          => '/downtimes',
         like         => ['"test comment",', 'omdadmin'],
     }, {
-        url          => '/services/localhost/Ping',
+        url          => '/services/localhost/Ping?columns=perf_data_expanded',
         like         => ['"rta"'],
         waitfor      => '"rta"',
     }, {
@@ -61,6 +61,18 @@ my $pages = [{
     }, {
         url          => '/config/diff',
         like         => ['conf.d/example.cfg', 'generic\-service,srv\-perf'],
+    }, {
+        url          => '/config/revert',
+        post         => {},
+        like         => ['successfully reverted stashed changes'],
+    }, {
+        url          => '/services/localhost/Ping/config',
+        method       => 'PATCH',
+        post         => { 'use' => ["does_not_exist"] },
+        like         => ['changed 1 objects successfully'],
+    }, {
+        url          => '/config/precheck',
+        like         => ['referenced template', 'does_not_exist', 'does not exist in example.cfg', '"failed" : true'],
     }, {
         url          => '/config/revert',
         post         => {},
@@ -89,7 +101,6 @@ for my $test (@{$pages}) {
     $test->{'content_type'} = 'application/json;charset=UTF-8' unless $test->{'content_type'};
     $test->{'url'}          = '/thruk/r'.$test->{'url'};
     my $page = TestUtils::test_page(%{$test});
-    #BAIL_OUT("failed") unless Test::More->builder->is_passing;
 }
 
 ################################################################################
@@ -126,7 +137,7 @@ for my $test (@{$pages}) {
     );
     my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
     ok(scalar @{$tstdata} > 0, "got result");
-    ok(defined $tstdata->[0]->{':KEY'}, "got result");
+    ok(defined $tstdata->[0]->{'state'}, "got result");
 
     $page = TestUtils::test_page(
         url => '/thruk/r/hosts?columns=min(state),max(state),avg(state),count(state),sum(state)',

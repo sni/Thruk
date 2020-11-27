@@ -296,6 +296,17 @@ Rename columns by appending `:name`
   %> thruk r '/thruk/sessions?columns=count(*):sessions'
 ------
 
+Renaming can be combined with grouping columns. Rename goes first.
+
+------
+  %> thruk r '/services?columns=avg(execution_time):avg_exec_time,host_name'
+------
+
+The group by column can be renamed as well:
+
+------
+  %> thruk r '/services?columns=avg(execution_time),peer_name:site'
+------
 
 == Backends / Sites
 
@@ -567,7 +578,7 @@ alias for /comments?id=<id>
 
 === POST /config/check
 
-Returns result from config check.
+Returns result from config check. This check does require changes to be saved to disk before running the check.
 
 === GET /config/diff
 
@@ -669,6 +680,19 @@ Update object configuration partially.
 === DELETE /config/objects/<id>
 
 Remove given object from configuration.
+
+=== GET /config/precheck
+
+Returns result from Thruks config precheck. The precheck does not require changes to be saved to disk before running the check.
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|errors                            | list of errors encountered
+|failed                            | boolean flag wether configuration check has failed or not
+|peer_key                          | backend id when having multiple sites connected
+|===========================================
+
 
 === POST /config/reload
 

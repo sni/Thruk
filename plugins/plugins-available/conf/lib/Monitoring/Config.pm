@@ -329,6 +329,23 @@ sub commit {
 
 ##########################################################
 
+=head2 get_errors
+
+    get_errors()
+
+return all errors
+
+=cut
+sub get_errors {
+    my($self) = @_;
+
+    $self->_collect_errors();
+    $self->_rebuild_index(); # checks for reference errors
+    return([@{$self->{'parse_errors'}}, @{$self->{'errors'}}]);
+}
+
+##########################################################
+
 =head2 print_errors
 
     print_errors([$fh])
@@ -979,6 +996,7 @@ sub update_object {
     my $oldname = $obj->get_name();
 
     my $file = $obj->{'file'};
+    return if $file->readonly();
 
     # invalidate all caches, because this object might have been used as template
     for my $file (@{$self->{'files'}}) {

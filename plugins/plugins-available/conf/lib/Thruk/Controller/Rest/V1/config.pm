@@ -7,6 +7,7 @@ use Time::HiRes qw/sleep/;
 use Cpanel::JSON::XS ();
 
 use Thruk::Controller::rest_v1;
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -337,7 +338,7 @@ sub _rest_get_config_objects_patch {
     my($c) = @_;
     require Thruk::Utils::Conf;
     my($backends) = $c->{'db'}->select_backends("get_");
-    local $ENV{'THRUK_BACKENDS'} = join(',', @{$backends}); # required for sub requests
+    local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends}); # required for sub requests
     my $changed = 0;
     my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
     for my $conf (@{$objs}) {
@@ -414,8 +415,34 @@ sub _rest_get_config_diff {
 }
 
 ##########################################################
+# REST PATH: GET /config/precheck
+# Returns result from Thruks config precheck. The precheck does not require changes to be saved to disk before running the check.
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/precheck$%mx, \&_rest_get_config_precheck, ["admin"]);
+sub _rest_get_config_precheck {
+    my($c) = @_;
+    require Thruk::Controller::conf;
+    local $c->config->{'no_external_job_forks'} = undef;
+    my($backends) = $c->{'db'}->select_backends("get_");
+
+    my $checks = [];
+    for my $peer_key (@{$backends}) {
+        _set_object_model($c, $peer_key) || next;
+        my $errors = $c->{'obj_db'}->get_errors();
+        for my $e (@{$errors}) {
+            $e =~ s|<a[^>]*>(.*?)<\/a>|$1|gmx;
+        }
+        push @{$checks}, {
+            'peer_key' => $peer_key,
+            'errors'   => $errors,
+            'failed'   => scalar @{$errors} == 0 ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
+        };
+    }
+    return($checks);
+}
+
+##########################################################
 # REST PATH: POST /config/check
-# Returns result from config check.
+# Returns result from config check. This check does require changes to be saved to disk before running the check.
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/check$%mx, \&_rest_get_config_check, ["admin"]);
 sub _rest_get_config_check {
     my($c) = @_;
@@ -596,8 +623,21 @@ sub _update_object {
                 $o->{'conf'}->{$key} = $c->req->body_parameters->{$key};
             }
         }
-        $c->{'obj_db'}->update_object($o, $o->{'conf'}, join("\n", @{$o->{'comments'}}));
-        $changed++;
+        if($o->{'file'}->readonly) {
+            $c->detach_error({
+                code  => 403,
+                msg   => 'cannot change readonly file '.$o->{'file'}->{'path'}.'.',
+                descr => 'attempt to change readonly file.',
+            });
+        }
+        if($c->{'obj_db'}->update_object($o, $o->{'conf'}, join("\n", @{$o->{'comments'}}))) {
+            $changed++;
+        } else {
+            $c->detach_error({
+                code  => 403,
+                msg   => 'failed to patch object in file '.$o->{'file'}->{'path'}.'.',
+            });
+        }
     }
     elsif($method eq 'POST') {
         if(scalar keys %{$c->req->body_parameters} == 0) {
@@ -613,8 +653,21 @@ sub _update_object {
                 $conf->{$key} = $c->req->body_parameters->{$key};
             }
         }
-        $c->{'obj_db'}->update_object($o, $conf, join("\n", @{$o->{'comments'}}));
-        $changed++;
+        if($o->{'file'}->readonly) {
+            $c->detach_error({
+                code  => 403,
+                msg   => 'cannot change readonly file '.$o->{'file'}->{'path'}.'.',
+                descr => 'attempt to change readonly file.',
+            });
+        }
+        if($c->{'obj_db'}->update_object($o, $conf, join("\n", @{$o->{'comments'}}))) {
+            $changed++;
+        } else {
+            $c->detach_error({
+                code  => 403,
+                msg   => 'failed to patch object in file '.$o->{'file'}->{'path'}.'.',
+            });
+        }
     }
     return($changed);
 }
