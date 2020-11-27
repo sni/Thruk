@@ -995,8 +995,8 @@ sub _expand_perfdata_and_custom_vars {
 
     # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
     my $columns = get_request_columns($c, NAME) || [];
-    push @{$columns}, @{get_filter_columns($c)};
     if($columns && scalar @{$columns} > 0) {
+        push @{$columns}, @{get_filter_columns($c)};
         my $ref_columns;
         if($type eq 'hosts') {
             $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
