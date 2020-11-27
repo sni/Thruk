@@ -1061,6 +1061,7 @@ sub _expand_perfdata_and_custom_vars {
                 $row->{$name} = $p->{'value'};
                 $row->{$name.'_unit'} = $p->{'unit'};
             }
+            $row->{'perf_data_expanded'} = $perfdata;
         }
         if($row->{'host_perf_data'}) {
             my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'host_perf_data'}))[0];
@@ -1073,6 +1074,7 @@ sub _expand_perfdata_and_custom_vars {
                 $row->{$name} = $p->{'value'};
                 $row->{$name.'_unit'} = $p->{'unit'};
             }
+            $row->{'host_perf_data_expanded'} = $perfdata;
         }
     }
     return($data);
