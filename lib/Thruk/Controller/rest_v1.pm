@@ -531,18 +531,23 @@ sub _apply_stats {
     my $new_columns   = [];
     my $stats_columns = [];
     my $group_columns = [];
+    my $group_column_name;
     for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
         for my $col (split(/\s*,\s*/mx, $col)) {
             if($col =~ m/^(.*)\(([^\)]+)\):?([^:]*)$/mx) {
                 push @{$stats_columns}, { op => $1, col => $2 };
                 push @{$new_columns}, $col;
             } else {
+                my $alias;
+                ($col, $alias) = split(/:/mx, $col, 2);
+                $group_column_name = $alias if defined $alias;
                 push @{$group_columns}, $col;
             }
         }
     }
+    $group_column_name = $group_column_name // join(';', @{$group_columns});
     return($data) unless scalar @{$stats_columns} > 0;
-    unshift @{$new_columns}, ':KEY' if scalar @{$group_columns} > 0;
+    unshift @{$new_columns}, $group_column_name if scalar @{$group_columns} > 0;
     $c->req->parameters->{'columns'} = $new_columns;
 
     my $result = {};
@@ -610,7 +615,7 @@ sub _apply_stats {
         my $result_row = $result->{$key};
         my $row = {};
         $key =~ s/^;//gmx;
-        $row->{':KEY'} = $key;
+        $row->{$group_column_name} = $key;
         for(my $x = 0; $x < $num_stats; $x++) {
             my $col = $stats_columns->[$x];
             my $result_key = $col->{'op'}.'('.$col->{'col'}.')';
