@@ -996,7 +996,7 @@ sub update_object {
     my $oldname = $obj->get_name();
 
     my $file = $obj->{'file'};
-    return if $file->readonly();
+    return if(defined $file && $file->readonly());
 
     # invalidate all caches, because this object might have been used as template
     for my $file (@{$self->{'files'}}) {
