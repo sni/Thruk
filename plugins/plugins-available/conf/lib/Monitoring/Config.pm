@@ -990,13 +990,12 @@ sub update_object {
 
     return unless defined $obj;
 
-    my $oldchanged = $obj->{'file'}->{'changed'};
-    my $oldcommit  = $self->{'needs_commit'};
-
-    my $oldname = $obj->get_name();
-
     my $file = $obj->{'file'};
     return if(defined $file && $file->readonly());
+
+    my $oldchanged = $obj->{'file'}->{'changed'};
+    my $oldcommit  = $self->{'needs_commit'};
+    my $oldname    = $obj->get_name();
 
     # invalidate all caches, because this object might have been used as template
     for my $file (@{$self->{'files'}}) {
