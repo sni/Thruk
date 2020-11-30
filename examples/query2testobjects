@@ -1,0 +1,230 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+BASEDIR=$(dirname $0)/..
+
+# git version
+if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$BASEDIR/lib";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+
+# omd
+elif [ "$OMD_ROOT" != "" ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+
+# pkg installation
+else
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 32
+
+##############################################
+use strict;
+use warnings;
+use Getopt::Long qw//;
+use MIME::Base64;
+use Encode;
+
+use Thruk::Utils::Status;
+use Thruk::Utils::CLI;
+use Thruk::Utils::Log qw/:all/;
+
+my $options = {
+    'verbose'  => 0,
+    'help'     => 0,
+    'query'    => [],
+};
+Getopt::Long::Configure('bundling');
+Getopt::Long::GetOptions (
+   "h|help"    => \$options->{'help'},
+   "v|verbose" => sub { $options->{'verbose'}++ },
+   "<>"        => sub { push @{$options->{'query'}}, @_; },
+) || do {
+    print STDERR "usage: $0 <query>\nsee --help for detailed help.\n";
+    exit 3;
+};
+if($options->{'help'}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+    exit(3);
+}
+if(scalar @{$options->{'query'}} == 0) {
+    print STDERR "usage: $0 <query>\nsee --help for detailed help.\n";
+    exit(3);
+}
+$ENV{'THRUK_VERBOSE'} = $options->{'verbose'};
+
+my $query = join(" ", @{$options->{'query'}});
+_debug("using query: %s", $query);
+my $servicefilter = Thruk::Utils::Status::parse_lexical_filter($query);
+
+my $cli              = Thruk::Utils::CLI->new($options);
+my $db               = $cli->get_db();
+my $services         = $db->get_services(filter => $servicefilter, extra_columns => [qw/long_plugin_output host_long_plugin_output host_max_check_attempts/]);
+my $hosts            = {};
+my $rand             = int(rand(10000000));
+my $check_dummy      = 'check_dummy_'.$rand;
+my $dummy_contact    = 'dummy_'.$rand;
+my $dummy_timeperiod = 'dummy_'.$rand;
+my $references       = {};
+for my $svc (@{$services}) {
+    if(!defined $hosts->{$svc->{'host_name'}}) {
+        $hosts->{$svc->{'host_name'}} = 1;
+        _print_obj("host", $svc);
+    }
+    _print_obj("service", $svc);
+}
+_print_commands();
+_print_contact();
+_print_timeperiod();
+_print_references($references);
+
+exit 0;
+
+##############################################
+sub _print_obj {
+    my($type, $data) = @_;
+    if($type eq 'host') {
+        my $newdata = {};
+        for my $key (sort keys %{$data}) {
+            my $newkey = $key;
+            next unless $key =~ m/^host_/mx;
+            $newkey =~ s/^host_//mx unless $newkey eq 'host_name';
+            $newdata->{$newkey} = $data->{$key};
+        }
+        $data = $newdata;
+    }
+
+    my $attr_translate = {
+        'groups'    => $type.'groups',
+    };
+    $data->{'contacts'}             = $dummy_contact;
+    $data->{'host_contacts'}        = $dummy_contact;
+    $data->{'check_period'}         = $dummy_timeperiod;
+    $data->{'notification_period'}  = $dummy_timeperiod;
+
+    printf("define %s {\n", $type);
+    for my $key (qw/address check_interval check_period description display_name
+                    host_name notification_interval notification_period contacts
+                    retry_interval active_checks_enabled max_check_attempts
+                    groups parents passive_checks_enabled icon_image_alt
+                    action_url_expanded icon_image_expanded notes_expanded notes_url_expanded
+                   /) {
+        my $val = $data->{$key};
+        next unless defined $val;
+        if(ref $val eq 'ARRAY') {
+            $val = join(',', @{$val});
+        }
+        my $newkey = $key;
+        $newkey =~ s/_expanded$//mx;
+        $newkey = $attr_translate->{$newkey} if defined $attr_translate->{$newkey};
+        printf("  %-25s %s\n", $newkey, $val) if $val ne '';
+        if($key eq 'groups') {
+            for my $group (@{$data->{$key}}) {
+                $references->{$newkey}->{$group} = 1;
+            }
+        }
+    }
+    for(my $x = 0; $x < scalar @{$data->{'custom_variable_names'}}; $x++) {
+        printf("  %-25s %s\n", "_".$data->{'custom_variable_names'}->[$x], $data->{'custom_variable_values'}->[$x]);
+    }
+    printf("  %-25s %s!%d!%s\n",
+                "check_command",
+                $check_dummy,
+                $data->{'state'},
+                _base64($data->{'plugin_output'}.'|'.$data->{'perf_data'}."\n".$data->{'long_plugin_output'}),
+    );
+    printf("}\n\n");
+}
+
+##############################################
+sub _print_commands {
+    printf("define command {\n");
+    printf("  %-25s %s\n", "command_name", $check_dummy);
+    printf("  %-25s %s\n", "command_line", "/usr/bin/printf '\$ARG2\$' | base64 -d && exit \$ARG1\$");
+    printf("}\n\n");
+}
+
+##############################################
+sub _print_contact {
+    printf("define contact {\n");
+    printf("  %-25s %s\n", "contact_name", $dummy_contact);
+    printf("  %-25s %s\n", "host_notifications_enabled", "0");
+    printf("  %-25s %s\n", "service_notifications_enabled", "0");
+    printf("  %-25s %s\n", "host_notification_period", $dummy_timeperiod);
+    printf("  %-25s %s\n", "service_notification_period", $dummy_timeperiod);
+    printf("  %-25s %s\n", "host_notification_commands", $check_dummy);
+    printf("  %-25s %s\n", "service_notification_commands", $check_dummy);
+    printf("}\n\n");
+}
+
+##############################################
+sub _print_timeperiod {
+    printf("define timeperiod {\n");
+    printf("  %-25s %s\n", "timeperiod_name", $dummy_timeperiod);
+    printf("  %-25s %s\n", "alias",           $dummy_timeperiod);
+    printf("  %-25s %s\n", "monday",    "00:00-24:00");
+    printf("  %-25s %s\n", "tuesday",   "00:00-24:00");
+    printf("  %-25s %s\n", "wednesday", "00:00-24:00");
+    printf("  %-25s %s\n", "thursday",  "00:00-24:00");
+    printf("  %-25s %s\n", "friday",    "00:00-24:00");
+    printf("  %-25s %s\n", "saturday",  "00:00-24:00");
+    printf("  %-25s %s\n", "sunday",    "00:00-24:00");
+    printf("}\n\n");
+}
+
+##############################################
+sub _print_references {
+    my($references) = @_;
+    for my $type (sort keys %{$references}) {
+        my $names = $references->{$type};
+        $type =~ s/s$//mx;
+        for my $name (sort keys %{$names}) {
+            printf("define %s {\n", $type);
+            printf("  %-25s %s\n", $type.'_name', $name);
+            printf("}\n\n");
+        }
+    }
+}
+
+##############################################
+sub _base64 {
+    my($str) = @_;
+    return(encode_base64(Encode::encode_utf8($str), ""));
+}
+
+##############################################
+
+=head1 NAME
+
+query2testobjects - Command Line Utility which creates object configuration based on a livestatus service query
+
+=head1 SYNOPSIS
+
+Usage: query2testobjects <query>
+
+=head1 DESCRIPTION
+
+This script creates a test object configuration based on a livestatus query
+
+=head1 EXAMPLE
+
+query2testobjects 'host_group = test and description ~ ^test'
+
+=head1 AUTHOR
+
+2020, Sven Nierlein, <sven@consol.de>
+
+=cut

@@ -36,6 +36,7 @@ examples/dump_services
 examples/get_logs
 examples/list_hosts
 examples/objectcache2csv
+examples/query2testobjects
 examples/remove_duplicates
 examples/trigger_eventhandler_at_downtime_end
 get_version
