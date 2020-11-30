@@ -780,8 +780,14 @@ DIV#search-results ul li.wzd A IMG {
 }
 
 .command_line {
-  max-width:800px;
+  max-width:1000px;
   word-wrap: break-word;
+}
+
+.command_line.mightOverflow {
+  max-height:300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .config_info {
