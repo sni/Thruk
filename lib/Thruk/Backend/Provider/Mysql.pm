@@ -2386,7 +2386,7 @@ sub _check_index {
     my $data = $dbh->selectall_hashref("SHOW INDEXES FROM `".$prefix."_log`", "Key_name");
     if($data && $data->{'host_id'}) {
         my($hostcount) = @{$dbh->selectcol_arrayref("SELECT COUNT(*) as total FROM `".$prefix."_host`")};
-        if($data->{'host_id'}->{'Cardinality'} < $hostcount * 5) {
+        if(!$data->{'host_id'}->{'Cardinality'} || $data->{'host_id'}->{'Cardinality'} < $hostcount * 5) {
             $c->stats->profile(end => "update index statistics");
             _debug("not required");
             return;
