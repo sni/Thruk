@@ -588,6 +588,7 @@
               <tr>
                 <th class='comment' nowrap>Check Command</th>
                 <td class='comment'><pre class="no_margin command_line config_info mightOverflow" onClick="removeClass(this, 'mightOverflow');">[% command.line | html %]</pre></td>
+              </tr>
               <tr>
                 <th class='comment' nowrap>Expanded Command</th>
                 <td class='comment'>
