@@ -137,6 +137,11 @@ sub cmd {
         return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
+    if($ENV{'THRUK_CRON'}) {
+        return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
+    }
+
+
     Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
     my $backends = $c->stash->{'backends'};
 

@@ -1205,6 +1205,11 @@ sub _import_logs {
         $c->stats->profile(end => "$key");
     }
 
+    our $global_lock_created;
+    if($global_lock_created) {
+        unlink($c->config->{'tmp_path'}."/logcache_import.lock");
+    }
+
     $c->stats->profile(end => "Mysql::_import_logs($mode)");
     return($backend_count, $log_count, $errors);
 }
@@ -1236,7 +1241,7 @@ sub _update_logcache {
         $fresh_created = 1;
     }
 
-    return(-1) unless _check_lock($dbh, $prefix, $c);
+    return(-1) unless _check_lock($dbh, $prefix, $c, $mode);
 
     if($mode eq 'clean') {
         return(_update_logcache_clean($dbh, $prefix, $blocksize));
@@ -1267,7 +1272,7 @@ sub _update_logcache {
     };
     my $error = $@ || '';
 
-    _finish_update($c, $dbh, $prefix, time() - $start) or $error .= $dbh->errstr;
+    _finish_update($c, $dbh, $prefix, time() - $start, $mode) or $error .= $dbh->errstr;
 
     if($error) {
         _error('logcache '.$mode.' failed: '.$error);
@@ -1316,7 +1321,10 @@ sub _tables_exist {
 
 ##########################################################
 sub _check_lock {
-    my($dbh, $prefix, $c) = @_;
+    my($dbh, $prefix, $c, $mode) = @_;
+
+    # import locks all other operations
+    return unless check_global_lock($c);
 
     # check if there is already a update / import running
     my $skip          = 0;
@@ -1349,6 +1357,39 @@ sub _check_lock {
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
     $dbh->commit || confess $dbh->errstr;
     $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
+
+    if($mode eq 'import' || $ENV{'THRUK_CRON'}) {
+        our $global_lock_created = 1;
+        Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
+    }
+
+    return(1);
+}
+
+##########################################################
+
+=head2 check_global_lock
+
+  check_global_lock($c)
+
+returns true if no global lock exists
+
+=cut
+
+sub check_global_lock {
+    my($c) = @_;
+    # import locks all other operations
+    if(-e $c->config->{'tmp_path'}."/logcache_import.lock") {
+        my $pid = Thruk::Utils::IO::read($c->config->{'tmp_path'}."/logcache_import.lock");
+        if($pid && $pid != $$) {
+            if($pid && kill(0, $pid)) {
+                _info("WARNING: logcache import currently running with pid ".$pid);
+                return;
+            }
+            _warn("WARNING: removing stale lock file");
+            unlink($c->config->{'tmp_path'}."/logcache_import.lock", $$);
+        }
+    }
     return(1);
 }
 
