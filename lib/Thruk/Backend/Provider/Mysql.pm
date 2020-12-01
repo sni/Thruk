@@ -1154,6 +1154,10 @@ sub _import_logs {
         $peer->logcache->reconnect();
         my $dbh = $peer->logcache->_dbh;
 
+        if($mode eq 'update') {
+            $mode = 'import' if _update_logcache_version($c, $dbh, $prefix);
+        }
+
         _info("running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'});
 
         # backends maybe down, we still want to continue updates
@@ -1223,10 +1227,6 @@ sub _update_logcache {
     if($mode eq 'drop') {
         _drop_tables($dbh, $prefix);
         return;
-    }
-
-    if($mode eq 'update') {
-        $mode = 'import' if _update_logcache_version($c, $dbh, $prefix);
     }
 
     # check tables
@@ -1355,6 +1355,8 @@ sub _check_lock {
 ##########################################################
 sub _update_logcache_version {
     my($c, $dbh, $prefix) = @_;
+
+    return 1 unless _tables_exist($dbh, $prefix);
 
     my $cache_version = 1;
     my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
