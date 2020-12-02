@@ -20,11 +20,13 @@ sub get_subs {
     open(my $fh, '<', $file) or die("cannot open file $file: $!");
     while(<$fh>) {
         if($_ =~ /^\s*sub\s+([\w\d_\_]+)/mx) {
-            next if $1 =~ m/^_/mx; # skip private subs
-            next if $1 eq 'propagate_session_file'; # not required
-            next if $1 eq 'rpc';                    # only available on http
-            next if $1 eq 'request';                # only available on http
-            push @subs, $1;
+            my $func = $1;
+            next if $func =~ m/^_/mx; # skip private subs
+            next if $func eq 'propagate_session_file'; # not required
+            next if $func eq 'rpc';                    # only available on http
+            next if $func eq 'request';                # only available on http
+            next if $func eq 'check_global_lock';      # only available on mysql
+            push @subs, $func;
         }
     }
     close($fh);
