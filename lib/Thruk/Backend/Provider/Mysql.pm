@@ -1463,7 +1463,7 @@ sub _update_logcache_compact {
         }
 
         _infos("compacting ".(scalar localtime $current). ": ");
-        my $next = Thruk::Utils::DateTime::start_of_day($current + 26*86400); # add 2 extra hours to compensate timshifts
+        my $next = Thruk::Utils::DateTime::start_of_day($current + 26*3600); # add 2 extra hours to compensate timshifts
 
         my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
         $sth->execute;
