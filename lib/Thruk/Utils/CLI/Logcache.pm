@@ -142,8 +142,7 @@ sub cmd {
     }
 
 
-    Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
-    my $backends = $c->stash->{'backends'};
+    my($backends) = $c->{'db'}->select_backends('get_logs');
 
     if($mode eq 'import' && !$global_options->{'yes'}) {
         # check if tables already existing
@@ -151,52 +150,34 @@ sub cmd {
         for my $peer_key (@{$backends}) {
             my($stats) = Thruk::Backend::Provider::Mysql->_log_stats($c, $peer_key);
             if($stats && $stats->{'items'} > 0) {
-                printf("logcache does already exist for backend: %s.\n", $stats->{'name'});
+                _info("logcache does already exist for backend: %s.", $stats->{'name'});
                 $exist = 1;
             }
         }
 
         if($exist) {
-            local $|=1;
-            print "Import removes current cache and imports new logfile data.\n";
-            print "Use 'thruk logcache update' to delta update the cache.\nContinue? [n]: ";
-            my $buf;
-            sysread STDIN, $buf, 1;
-            if($buf !~ m/^(y|j)/mxi) {
-                return("canceled\n", 1);
-            }
+            _info("Import removes current cache and imports new logfile data.");
+            _info("Use 'thruk logcache update' to delta update the cache.");
+            return("canceled\n", 1) unless _user_confirm();
         }
     }
 
     if($mode eq 'drop' && !$global_options->{'yes'}) {
-        local $|=1;
-        print "Do you really want to drop all data and remove the logcache?\nContinue? [n]: ";
-        my $buf;
-        sysread STDIN, $buf, 1;
-        if($buf !~ m/^(y|j)/mxi) {
-            return("canceled\n", 1);
-        }
+        _info("Do you really want to drop all data and remove the logcache?");
+        return("canceled\n", 1) unless _user_confirm();
     }
 
     if($mode eq 'clean' && !$global_options->{'yes'} && $terminal_attached) {
         local $|=1;
         my $start = time() - (($blocksize // 365) * 86400);
-        printf("Do you really want to drop all data older than %s?\nContinue? [n]: ", scalar localtime($start));
-        my $buf;
-        sysread STDIN, $buf, 1;
-        if($buf !~ m/^(y|j)/mxi) {
-            return("canceled\n", 1);
-        }
+        _info("Do you really want to drop all data older than %s?", scalar localtime($start));
+        return("canceled\n", 1) unless _user_confirm();
     }
     if($mode eq 'compact' && !$global_options->{'yes'} && $terminal_attached) {
         local $|=1;
         my $start = time() - (($blocksize // 365) * 86400);
-        printf("Do you really want to compact data older than %s?\nContinue? [n]: ", scalar localtime($start));
-        my $buf;
-        sysread STDIN, $buf, 1;
-        if($buf !~ m/^(y|j)/mxi) {
-            return("canceled\n", 1);
-        }
+        _info("Do you really want to compact data older than %s?", scalar localtime($start));
+        return("canceled\n", 1) unless _user_confirm();
     }
 
     if($mode eq 'stats') {
@@ -281,6 +262,18 @@ sub cmd {
                        $details,
                        ), $rc);
     }
+}
+
+##############################################
+sub _user_confirm {
+    _infos("Continue? [n]: ");
+    my $buf;
+    sysread STDIN, $buf, 1;
+    if($buf !~ m/^(y|j)/mxi) {
+        return;
+    }
+    _info("");
+    return(1);
 }
 
 ##############################################

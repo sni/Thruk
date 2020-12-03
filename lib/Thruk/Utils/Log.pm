@@ -160,7 +160,7 @@ sub _log {
         $appender_changed = 1;
     }
     elsif($last_was_plain) {
-        # skip newline and timestamp
+        # skip timestamp but add newline
         my $appenders = Log::Log4perl::appenders();
         for my $appender (values %{$appenders}) {
             $layouts->{'original'} = $appender->layout() unless $layouts->{'original'};
@@ -177,7 +177,7 @@ sub _log {
         else                   { $log->debug($l); }
     }
     if($appender_changed) {
-        # skip newline and timestamp
+        # reset appender layout
         my $appenders = Log::Log4perl::appenders();
         for my $appender (values %{$appenders}) {
             $appender->layout($layouts->{'original'});
@@ -275,7 +275,7 @@ sub wrap_stdout2log {
     open($capture, '>', \$tmp) or die("cannot open stdout capture: $!");
     tie *$capture, 'Thruk::Utils::Log', (*STDOUT);
     select $capture;
-    $|=1;
+    STDOUT->autoflush(1);
     ## use critic
     return($capture);
 }
@@ -397,6 +397,8 @@ sub _get_file_logger {
 sub _get_screen_logger {
     my($config) = @_;
     return($screenlogger) if $screenlogger;
+
+    STDERR->autoflush(1);
 
     # since we log to stderr, check if stderr is attached to a terminal
     ## no critic
