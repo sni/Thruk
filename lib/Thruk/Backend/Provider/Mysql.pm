@@ -1890,7 +1890,7 @@ sub _import_peer_logfiles {
     elsif(scalar @{$filter} == 0) {
         my $mend;
         if($mode eq 'import') {
-            # it does not make send to import more than we would clean immediatly again
+            # it does not make sense to import more than we would clean immediatly again
             $mend = time() - Thruk::Utils::expand_duration($c->config->{'logcache_clean_duration'});
         }
         # fetching logs without any filter is a terrible bad idea

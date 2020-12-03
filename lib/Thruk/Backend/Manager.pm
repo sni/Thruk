@@ -1266,7 +1266,8 @@ sub get_logs_start_end_no_filter {
         }
         $start = $time;
     }
-    ($start, undef) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
+    my($lstart, undef) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
+    $start = $lstart if $lstart;
 
     return($start, $end);
 }
