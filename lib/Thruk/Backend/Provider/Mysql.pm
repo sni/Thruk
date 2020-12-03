@@ -1943,10 +1943,8 @@ sub _import_peer_logfiles {
         }
 
         my $import_compacted = 0;
-        if($mode eq 'import') {
-            if(($time + $blocksize - 1) < $compact_start_data) {
-                $import_compacted = 1;
-            }
+        if(($time + $blocksize - 1) < $compact_start_data) {
+            $import_compacted = 1;
         }
 
         my $logs = [];
