@@ -2,7 +2,7 @@ Source: thruk
 Section: net
 Priority: optional
 Maintainer: Sven Nierlein <sven.nierlein@consol.de>
-Build-Depends: debhelper (>= 7), libthruk (>=2.38), lsb-release, apache2
+Build-Depends: debhelper (>= 7), libthruk (>=2.38), lsb-release, apache2, perl, libmodule-install-perl
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/Thruk/issues
