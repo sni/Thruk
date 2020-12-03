@@ -168,13 +168,11 @@ sub cmd {
     }
 
     if($mode eq 'clean' && !$global_options->{'yes'} && $terminal_attached) {
-        local $|=1;
         my $start = time() - (($blocksize // 365) * 86400);
         _info("Do you really want to drop all data older than %s?", scalar localtime($start));
         return("canceled\n", 1) unless _user_confirm();
     }
     if($mode eq 'compact' && !$global_options->{'yes'} && $terminal_attached) {
-        local $|=1;
         my $start = time() - (($blocksize // 365) * 86400);
         _info("Do you really want to compact data older than %s?", scalar localtime($start));
         return("canceled\n", 1) unless _user_confirm();
