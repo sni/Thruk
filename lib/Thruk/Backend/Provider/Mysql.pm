@@ -1484,7 +1484,7 @@ sub _update_logcache_compact {
             }
         }
 
-        _debug(sprintf("%d removed. done", scalar @delete));
+        _info(sprintf("%d removed. done", scalar @delete));
         $current  = $next;
         $log_count += $processed;
         $log_clear += scalar @delete;
