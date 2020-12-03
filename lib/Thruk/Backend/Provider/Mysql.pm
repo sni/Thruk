@@ -1472,7 +1472,7 @@ sub _update_logcache_compact {
         my $alerts = {};
         for my $l (@{$sth->fetchall_arrayref({})}) {
             $processed++;
-            if($processed%10000 == 0) {
+            if($processed%10000 == 0 && scalar @delete > 0) {
                 $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
                 $dbh->commit || confess $dbh->errstr;
                 $log_clear += scalar @delete;
