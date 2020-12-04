@@ -630,9 +630,11 @@ function resetRefresh() {
 }
 
 /* stops the reload interval */
-function stopRefresh() {
+function stopRefresh(silent) {
   refreshPage = 0;
-  jQuery("#refresh_label").html(" (stopped)").addClass("alerttext");
+  if(!silent) {
+    jQuery("#refresh_label").html(" (stopped)").addClass("alerttext");
+  }
   setRefreshRate(0);
 }
 
@@ -783,7 +785,7 @@ function updateUrl() {
 
 /* reloads the current page and adds some parameter from a hash */
 function reloadPage() {
-    stopRefresh();
+    stopRefresh(true);
     window.clearTimeout(refreshTimer);
     var obj = document.getElementById('refresh_rate');
     if(obj) {
