@@ -28,7 +28,6 @@ Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl, patch
-BuildRequires: perl(Module::Install)
 Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
 BuildRequires: libthruk >= 2.38
@@ -73,6 +72,7 @@ Requires:    apache2 apache2-mod_fcgid cronie
 BuildRequires: apache2
 Requires:    apache2 apache2-mod_fcgid cron
 %endif
+BuildRequires: perl(Module::Install)
 %endif
 
 # >=rhel7 and fedora
