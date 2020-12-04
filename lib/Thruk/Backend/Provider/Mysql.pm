@@ -1468,6 +1468,7 @@ sub _update_logcache_compact {
         my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
         $sth->execute;
         my $processed = 0;
+        my $removed = 0;
         my @delete;
         my $alerts = {};
         for my $l (@{$sth->fetchall_arrayref({})}) {
@@ -1480,19 +1481,23 @@ sub _update_logcache_compact {
                 _infoc('.');
             }
             if(_is_compactable($l, $alerts)) {
+                $removed++;
                 push @delete, $l->{'log_id'};
             }
         }
 
-        _info(sprintf("%d removed. done", scalar @delete));
+        _info(sprintf("%d of %d removed (%.1f%%). done", $removed, $processed, $removed > 0 ? (($removed / $processed) * 100) : 0));
         $current  = $next;
         $log_count += $processed;
-        $log_clear += scalar @delete;
+        $log_clear += $removed;
 
         if(scalar @delete > 0) {
             $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
             $dbh->commit || confess $dbh->errstr;
         }
+
+        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(9,'compact_till','".$end."') ON DUPLICATE KEY UPDATE value='".$next."'");
+        $dbh->commit || confess $dbh->errstr;
     }
 
     my $duration = time() - $t1;
@@ -1891,11 +1896,14 @@ sub _import_peer_logfiles {
         my $mend;
         if($mode eq 'import') {
             # it does not make sense to import more than we would clean immediatly again
-            $mend = time() - Thruk::Utils::expand_duration($c->config->{'logcache_clean_duration'});
+            $mend = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
         }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
         ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'}, $mend);
+        if(defined $mend && $start < $mend) {
+            $start = $mend;
+        }
         $c->stats->profile(end => "get livestatus timestamp no filter");
     } else {
         $c->stats->profile(begin => "get livestatus timestamp");
