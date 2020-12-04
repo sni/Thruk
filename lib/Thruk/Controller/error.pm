@@ -326,7 +326,7 @@ sub index {
     $c->stash->{'disable_backspace'} = 0;
 
     $c->stash->{'show_home_button'}      = $c->user_exists ? $c->stash->{'url_prefix'} : $c->stash->{'url_prefix'}."cgi-bin/login.cgi";
-    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
 
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');
