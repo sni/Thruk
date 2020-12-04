@@ -1286,7 +1286,8 @@ sub lmd_stats {
     my($self, $c) = @_;
     return unless defined $c->config->{'use_lmd_core'};
     $self->reset_failed_backends();
-    my $stats = $self->get_sites( backend => $self->peer_key() );
+    my($backends) = $self->select_backends('get_');
+    my $stats = $self->get_sites( backend => $backends );
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
     my $start_time = $status->[0]->{'start_time'};
     my $now = time();
