@@ -137,7 +137,7 @@ sub cmd {
         return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
-    if($ENV{'THRUK_CRON'}) {
+    if($ENV{'THRUK_CRON'} && $mode eq 'update') {
         return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
     }
 
