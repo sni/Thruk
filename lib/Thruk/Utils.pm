@@ -3085,7 +3085,7 @@ sub backends_list_to_hash {
     };
     if($c->{'db'}->{'sections_depth'} >= 1) {
         # save original list
-        my($selected_backends, undef, undef) = $c->{'db'}->select_backends('get_hosts');
+        my($selected_backends) = $c->{'db'}->select_backends('get_hosts');
 
         # save completly enabled sections
         Thruk::Action::AddDefaults::update_site_panel_hashes($c, $backends);

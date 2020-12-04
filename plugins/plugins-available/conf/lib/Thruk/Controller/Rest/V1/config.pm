@@ -28,7 +28,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/files?$%mx,
 sub _rest_get_config_files {
     my($c) = @_;
     my $method = $c->req->method();
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $data = [];
     my $content_required = Thruk::Controller::rest_v1::column_required($c, 'content');
     for my $peer_key (@{$backends}) {
@@ -261,7 +261,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/config/fullobjects
 sub _rest_get_config_objects {
     my($c, $path_info) = @_;
     my $expand = $path_info =~ m/fullobjects/mx ? 1 : 0;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $data = [];
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
@@ -285,7 +285,7 @@ sub _rest_get_config_objects_new {
     my($c) = @_;
     require Thruk::Controller::conf;
     require Thruk::Utils::Conf;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $type      = delete $c->req->parameters->{':TYPE'};
     my $new_file  = delete $c->req->parameters->{':FILE'};
     my $created   = 0;
@@ -337,7 +337,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('PATCH', qr%^/config/objects?$
 sub _rest_get_config_objects_patch {
     my($c) = @_;
     require Thruk::Utils::Conf;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends}); # required for sub requests
     my $changed = 0;
     my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
@@ -368,7 +368,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE', 'POST', 'PATCH'], q
 sub _rest_get_config_objects_update {
     my($c, undef, $id) = @_;
     require Thruk::Utils::Conf;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $changed = 0;
     my $method = $c->req->method();
     for my $peer_key (@{$backends}) {
@@ -399,7 +399,7 @@ sub _rest_get_config_diff {
     my($c) = @_;
     my $diff = [];
     my $ignore_whitespace_changes = $c->req->parameters->{'ignore_whitespace'} // 0;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
         my $changed_files = $c->{'obj_db'}->get_changed_files();
@@ -422,7 +422,7 @@ sub _rest_get_config_precheck {
     my($c) = @_;
     require Thruk::Controller::conf;
     local $c->config->{'no_external_job_forks'} = undef;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
 
     my $checks = [];
     for my $peer_key (@{$backends}) {
@@ -448,7 +448,7 @@ sub _rest_get_config_check {
     my($c) = @_;
     require Thruk::Controller::conf;
     local $c->config->{'no_external_job_forks'} = undef;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $jobs = [];
     # start jobs in background
     for my $peer_key (@{$backends}) {
@@ -486,7 +486,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/save$%mx, 
 sub _rest_get_config_save {
     my($c) = @_;
     require Thruk::Utils::Conf;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $saved = 0;
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
@@ -509,7 +509,7 @@ sub _rest_get_config_reload {
     my($c) = @_;
     require Thruk::Controller::conf;
     local $c->config->{'no_external_job_forks'} = undef;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $jobs = [];
     # start jobs in background
     for my $peer_key (@{$backends}) {
@@ -553,7 +553,7 @@ Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/discard$%m
 sub _rest_get_config_revert {
     my($c) = @_;
     require Thruk::Utils::Conf;
-    my($backends) = $c->{'db'}->select_backends("get_");
+    my($backends) = $c->{'db'}->select_backends();
     my $reverted = 0;
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;

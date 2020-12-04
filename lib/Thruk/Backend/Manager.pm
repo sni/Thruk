@@ -1143,7 +1143,7 @@ sub _renew_logcache {
     # check if this is the first import at all
     # and do a external import in that case
     #my($get_results_for, $arg_array, $arg_hash)...
-    my($get_results_for, undef, undef) = $self->select_backends('renew_logcache', \@args);
+    my($get_results_for) = $self->select_backends('renew_logcache', \@args);
     my $check = 0;
     $self->{'logcache_checked'} = {} unless defined $self->{'logcache_checked'};
     for my $key (@{$get_results_for}) {
@@ -1286,7 +1286,7 @@ sub lmd_stats {
     my($self, $c) = @_;
     return unless defined $c->config->{'use_lmd_core'};
     $self->reset_failed_backends();
-    my($backends) = $self->select_backends('get_');
+    my($backends) = $self->select_backends();
     my $stats = $self->get_sites( backend => $backends );
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
     my $start_time = $status->[0]->{'start_time'};
@@ -1868,6 +1868,8 @@ sub select_backends {
     my($self, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
     confess("no context") unless $c;
+
+    $function = 'get_' unless $function;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
