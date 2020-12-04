@@ -3629,7 +3629,7 @@ returns strings with potential credentials removed
 sub clean_credentials_from_string {
     my($str) = @_;
 
-    for my $key (qw/credential credentials CSRFtoken/) {
+    for my $key (qw/password credential credentials CSRFtoken/) {
         $str    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx; # remove from json encoded data
         $str    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx; # same, but with single quotes
         $str    =~ s|(%22)($key)(%22%3A%22).*?(%22)|$1$2$3...$4|gmx;  # remove from url encoded data
