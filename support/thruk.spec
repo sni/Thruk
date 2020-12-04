@@ -72,6 +72,7 @@ Requires:    apache2 apache2-mod_fcgid cronie
 BuildRequires: apache2
 Requires:    apache2 apache2-mod_fcgid cron
 %endif
+%else
 BuildRequires: perl(Module::Install)
 %endif
 
