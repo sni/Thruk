@@ -1244,7 +1244,7 @@ sub _update_logcache {
     return(-1) unless _check_lock($dbh, $prefix, $c, $mode);
 
     if($mode eq 'clean') {
-        return(_update_logcache_clean($dbh, $prefix, $blocksize));
+        return(_update_logcache_clean($c, $dbh, $prefix, $blocksize));
     }
     if($mode eq 'compact') {
         return($self->_update_logcache_compact($c, $dbh, $prefix, $blocksize, $force));
@@ -1417,12 +1417,14 @@ sub _update_logcache_version {
 
 ##########################################################
 sub _update_logcache_clean {
-    my($dbh, $prefix, $blocksize) = @_;
+    my($c, $dbh, $prefix, $blocksize) = @_;
 
     if($blocksize =~ m/^\d+[a-z]{1}/mx) {
         # blocksize is in days
         $blocksize = int(Thruk::Utils::expand_duration($blocksize) / 86400);
     }
+
+    _check_index($c, $dbh, $prefix);
 
     my $start = time() - ($blocksize * 86400);
     _debug2("cleaning logs older than: ", scalar localtime $start);
