@@ -132,7 +132,7 @@ sub _log {
         return;
     }
     if(ref $line) {
-        return &_log($lvl, [Dumper([$line, @{$data}])], $options);
+        return &_log($lvl, [Dumper($line)], $options);
     } elsif(scalar @{$data} > 0) {
         $line = sprintf($line, @{$data});
     }

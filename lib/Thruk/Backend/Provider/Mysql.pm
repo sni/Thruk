@@ -1456,29 +1456,33 @@ sub _update_logcache_compact {
     if(!$start) {
         return([$log_count, $log_clear]);
     }
+
+    _check_index($c, $dbh, $prefix);
+
     my $current = $start;
     while(1) {
         if($current >= $end) {
             last;
         }
 
-        _infos("compacting ".(scalar localtime $current). ": ");
+        _infos("compacting ".(scalar localtime $current));
         my $next = Thruk::Utils::DateTime::start_of_day($current + 26*3600); # add 2 extra hours to compensate timshifts
 
         my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
         $sth->execute;
+        _infoc(': ');
         my $processed = 0;
         my $removed = 0;
         my @delete;
         my $alerts = {};
         for my $l (@{$sth->fetchall_arrayref({})}) {
             $processed++;
-            if($processed%10000 == 0 && scalar @delete > 0) {
+            _infoc('.') if $processed%10000 == 0;
+            if($removed%10000 == 0 && scalar @delete > 0) {
                 $dbh->do("DELETE FROM `".$prefix."_log` WHERE log_id IN (".join(",", @delete).")");
                 $dbh->commit || confess $dbh->errstr;
                 $log_clear += scalar @delete;
                 @delete = ();
-                _infoc('.');
             }
             if(_is_compactable($l, $alerts)) {
                 $removed++;
@@ -2001,10 +2005,7 @@ sub _import_peer_logfiles {
 
     if($mode eq 'import') {
         _debugs("creating index...");
-        #&timing_breakpoint('_import_peer_logfiles enable index');
-        $dbh->do('SET foreign_key_checks = 1');
-        $dbh->do('SET unique_checks = 1');
-        $dbh->do('ALTER TABLE `'.$prefix.'_log` ENABLE KEYS');
+        _enable_index($dbh, $prefix);
         if($reordered) {
             $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
         }
@@ -2018,6 +2019,16 @@ sub _import_peer_logfiles {
     }
 
     return $log_count;
+}
+
+##########################################################
+sub _enable_index {
+    my($dbh,$prefix) = @_;
+    #&timing_breakpoint('_import_peer_logfiles enable index');
+    $dbh->do('SET foreign_key_checks = 1');
+    $dbh->do('SET unique_checks = 1');
+    $dbh->do('ALTER TABLE `'.$prefix.'_log` ENABLE KEYS');
+    return;
 }
 
 ##########################################################
@@ -2434,6 +2445,11 @@ sub _check_index {
 
     my $data = $dbh->selectall_hashref("SHOW INDEXES FROM `".$prefix."_log`", "Key_name");
     if($data && $data->{'host_id'}) {
+        if(exists $data->{'host_id'}->{'Cardinality'} && !defined $data->{'host_id'}->{'Cardinality'}) {
+            _warn("table index was disabled, enabling...");
+            _enable_index($dbh, $prefix);
+            _warn("done.");
+        }
         my($hostcount) = @{$dbh->selectcol_arrayref("SELECT COUNT(*) as total FROM `".$prefix."_host`")};
         if(!$hostcount || !$data->{'host_id'}->{'Cardinality'} || $data->{'host_id'}->{'Cardinality'} < $hostcount * 5) {
             $c->stats->profile(end => "update index statistics");
