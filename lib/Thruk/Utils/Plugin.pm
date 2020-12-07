@@ -106,7 +106,7 @@ sub get_online_plugins {
             $plugin->{'repository'} = $url;
             $plugin->{'dir'}        = $plugin->{'name'};
             $plugin->{'name'}       = nice_addon_name($plugin->{'name'});
-            $plugin->{'version'}    =~ s/^v//gmx;
+            $plugin->{'version'}    =~ s/^v//gmx if $plugin->{'version'};
             $plugin->{'installed'}  = 0;
         }
         push @{$plugins}, @{$data};
