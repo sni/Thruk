@@ -94,6 +94,7 @@ prepare:
 		echo "$${LOGLINE}"; \
 		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ docker-compose && exit 0; \
 		[[ "$${LOGLINE}" == *"ERROR"* ]] && pkill -P $$$$ docker-compose && exit 1; \
+		[[ "$${LOGLINE}" == *"exited with code"* ]] && pkill -P $$$$ docker-compose && exit 1; \
 	done
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
