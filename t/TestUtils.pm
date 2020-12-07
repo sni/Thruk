@@ -287,7 +287,7 @@ sub test_page {
             $redirects++;
             last if $redirects > 10;
         }
-        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request);
+        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request, 1);
     }
 
     if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
@@ -327,7 +327,7 @@ sub test_page {
                 $return->{'content'} = $request->content;
                 if($request->is_error) {
                     fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
-                    bail_out_req('request failed', $request);
+                    bail_out_req('request failed', $request, 1);
                 }
                 $return->{'content'} = $request->content;
             } else {
@@ -370,7 +370,7 @@ sub test_page {
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$job_location.' should succeed. Original url: '.$opts->{'url'});
-            bail_out_req('request failed', $request);
+            bail_out_req('request failed', $request, 1);
         }
     }
 
@@ -391,14 +391,14 @@ sub test_page {
         }
     }
     else {
-        ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or bail_out_req('request failed', $request);
+        ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or bail_out_req('request failed', $request, 1);
     }
 
     # text that should appear
     if(defined $opts->{'like'}) {
         for my $like (@{_list($opts->{'like'})}) {
             use Carp;
-            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or BAIL_OUT("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
+            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
         }
     }
 
@@ -1033,7 +1033,7 @@ sub _set_test_page_defaults {
 
 #########################
 sub bail_out_req {
-    my($msg, $res) = @_;
+    my($msg, $res, $die) = @_;
     my $page    = $res->content;
     my $error   = "";
     if($page =~ m/<!--error:(.*?):error-->/smx) {
@@ -1044,11 +1044,13 @@ sub bail_out_req {
             require HTML::Entities;
             HTML::Entities::decode_entities($error);
         };
+        die($0.': '.$res->code.' '.$msg."\n".$error) if $die;
         BAIL_OUT($0.': '.$res->code.' '.$msg."\n".$error);
     }
     if($page =~ m/<pre\s+id="error">(.*)$/mx) {
         $error = $1;
         $error =~ s|</pre>$||gmx;
+        die($0.': '.$res->code.' '.$msg.' - '.$error) if $die;
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
@@ -1058,6 +1060,7 @@ sub bail_out_req {
             $error = URI::Escape::uri_unescape($error);
         };
         diag($error);
+        die($0.': '.$res->code.' '.$msg.' - '.$error) if $die;
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
     diag("\n######################################################\n");
@@ -1070,6 +1073,7 @@ sub bail_out_req {
     diag("\n\norigin:\n");
     diag(Carp::longmess);
     diag("\n######################################################\n");
+    die($0.': '.$msg) if $die;
     BAIL_OUT($0.': '.$msg);
     return;
 }

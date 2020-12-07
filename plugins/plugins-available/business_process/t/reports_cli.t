@@ -29,7 +29,7 @@ TestUtils::set_test_user_token();
 my $test = TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process');
 $test->{'content'} =~ m|\&amp;bp=(\d+)\&amp;|mx;
 my $bpid = $1;
-ok($bpid, "got bp id: ".$bpid) or BAIL_OUT("got no bp id, cannot test");
+ok($bpid, "got bp id: ".$bpid) || die("got no bp id, cannot test");
 TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'commit', 'bp' => $bpid }, follow => 1, like => 'business process updated sucessfully');
 
 my $test_pdf_reports = [{
@@ -86,7 +86,7 @@ for my $report (@{$test_pdf_reports}) {
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999 --local > '.$tmpfile.'; cat '.$tmpfile,
         like => $like,
-    }) or BAIL_OUT("report failed in ".$0);
+    }) || die ("report failed in ".$0);
 
     # do some tests on the actual pdf if possible
     if(!defined $report->{'type'} or $report->{'type'} eq 'pdf') {
