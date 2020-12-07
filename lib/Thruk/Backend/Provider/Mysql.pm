@@ -1169,14 +1169,18 @@ sub _import_logs {
             elsif($mode eq 'clean') {
                 my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart);
                 $log_count = [0,0] unless ref $log_count eq 'ARRAY';
-                $log_count->[0] += $tmp->[0];
-                $log_count->[1] += $tmp->[1];
+                if(ref $tmp eq 'ARRAY') {
+                    $log_count->[0] += $tmp->[0];
+                    $log_count->[1] += $tmp->[1];
+                }
             }
             elsif($mode eq 'compact') {
                 my $tmp = $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart, $options->{'force'});
                 $log_count = [0,0] unless ref $log_count eq 'ARRAY';
-                $log_count->[0] += $tmp->[0];
-                $log_count->[1] += $tmp->[1];
+                if(ref $tmp eq 'ARRAY') {
+                    $log_count->[0] += $tmp->[0];
+                    $log_count->[1] += $tmp->[1];
+                }
             }
             elsif($mode eq 'drop') {
                 $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart);
@@ -1468,7 +1472,7 @@ sub _update_logcache_compact {
         }
 
         _infos("compacting ".(scalar localtime $current));
-        my $next = Thruk::Utils::DateTime::start_of_day($current + 26*3600); # add 2 extra hours to compensate timshifts
+        my $next = Thruk::Utils::DateTime::start_of_day($current + 74*3600); # since we usually backtrack 4 days in reports, use 3days plus 2 extra hours to compensate timshifts to compact state changes
 
         my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
         $sth->execute;
@@ -2030,6 +2034,10 @@ sub _enable_index {
     $dbh->do('SET foreign_key_checks = 1');
     $dbh->do('SET unique_checks = 1');
     $dbh->do('ALTER TABLE `'.$prefix.'_log` ENABLE KEYS');
+    for my $table (@Thruk::Backend::Provider::Mysql::tables) {
+        $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
+        $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
+    }
     return;
 }
 
