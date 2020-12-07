@@ -32,6 +32,7 @@ The backend command lists livestatus backends
 
 use warnings;
 use strict;
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -44,32 +45,41 @@ use Thruk::Utils::Log qw/:all/;
 
 =cut
 sub cmd {
-    my($c) = @_;
-    $c->{'db'}->enable_backends();
+    my($c, $action, $commandoptions, $data, $src, $opt) = @_;
+
+    my $backends;
+    if(!defined $opt->{'backends'} || scalar @{$opt->{'backends'}} == 0) {
+        $c->{'db'}->enable_backends();
+    } else {
+        ($backends) = $c->{'db'}->select_backends();
+        $backends = Thruk::Utils::array2hash($backends);
+    }
     eval {
         $c->{'db'}->get_processinfo();
     };
     _debug($@) if $@;
     Thruk::Action::AddDefaults::set_possible_backends($c, {});
-    my $output = '';
-    $output .= sprintf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
-    $output .= sprintf("-------------------------------------------------\n");
+    my @data;
     for my $key (@{$c->stash->{'backends'}}) {
+        next if($backends && !$backends->{$key});
         my $peer = $c->{'db'}->get_peer_by_key($key);
         my $addr = $c->stash->{'backend_detail'}->{$key}->{'addr'};
         $addr    =~ s|/cgi-bin/remote.cgi$||mx;
-        $output .= sprintf("%-4s %-8s %-10s %s",
-                (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? ' * ' : '',
-                $key,
-                $c->stash->{'backend_detail'}->{$key}->{'name'},
-                $addr,
-        );
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
         chomp($error);
-        $output .= " (".($error || 'OK').")";
-        $output .= "\n";
+        push @data, {
+            Key     => $key,
+            Section => $peer->{'section'},
+            Name    => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            Enabled => (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? 'Yes' : 'No',
+            Address => $addr,
+            Status  => $error || 'OK',
+        };
     }
-    $output .= sprintf("-------------------------------------------------\n");
+    my $output = Thruk::Utils::text_table(
+        keys => ['Name', 'Section', 'Key', 'Enabled', 'Address', 'Status'],
+        data => \@data,
+    );
     return($output, 0);
 }
 

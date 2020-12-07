@@ -58,8 +58,8 @@ TestUtils::test_command({
 # list backends
 my $test = {
     cmd  => $BIN.' -l',
-    like => ['/\s+\*\s*\w{1,5}\s*[^\s]+/',
-             '/Def\s+Key\s+Name/'
+    like => ['/\w+\s+\|\s+\w+\s+\|\s+Yes/',
+             '/Name.*Section.*Key/'
             ],
 };
 TestUtils::test_command($test);
@@ -70,10 +70,10 @@ if($test->{'exit'} == 0) {
     my @backends;
     my @names;
     for my $line (@out) {
-        $line =~ s/^\ \*\s+//mx;
-        $line =~ s/^\s+//gmx;
+        next if $line =~ m/^\+/mx;
+        next if $line =~ m/^\|\s+Name\s*/mx;
         my $data = [split(/\s+/mx, $line)];
-        push @backends, $data->[0];
+        push @backends, $data->[5];
         push @names, $data->[1];
     }
     if(scalar @backends > 1) {
