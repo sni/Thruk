@@ -4,8 +4,15 @@ next:
           - add colored terminal output for thruk cli
           - add separate role public_bookmarks to manage public bookmarks
           - fix setting cookie path (#1049)
+          - CLI:
+            - expand section from -b parameter
+          - Rest:
+            - add text table output option --text / -t
+            - add format output options --csv and --xls
           - Reporting:
             - add overview sla threshold to reduce items in overview graph
+          - Logcache:
+            - improve initial import and compacting
           - LMD:
             - add reload/config cli lmd command
             - add last_lmd_cache_update to available columns
