@@ -20,7 +20,7 @@ wait_start:
 	$(THRUK) -l
 	$(MAKE) extra_wait_start
 
-wait_start_failed:
+wait_start_failed: non_interactive_only
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: startup failed"
 	-test -e thruk.conf && $(THRUK) -vvv -l
@@ -48,7 +48,7 @@ test_verbose: wait_start
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
 
-failed_test:
+failed_test: non_interactive_only
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
 	-docker ps
@@ -69,6 +69,14 @@ failed_test:
 
 extra_failed_test:
 	exit 1
+
+ifdef INTERACTIVE
+non_interactive_only:
+	exit 1
+else
+non_interactive_only:
+	:
+endif
 
 server:
 	test -f thruk_local.conf || exit 1
