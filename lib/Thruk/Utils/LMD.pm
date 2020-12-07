@@ -210,11 +210,18 @@ sub shutdown_procs {
     return unless $config->{'use_lmd_core'};
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     my $pidfile = $lmd_dir.'/pid';
+    my $pid;
     if(-s $pidfile) {
-        my $pid = read_file($pidfile);
+        $pid = read_file($pidfile);
         kill(15, $pid);
     }
     delete $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
+    if($pid) {
+        for (0..30) {
+            last unless kill(0, $pid);
+            Time::HiRes::sleep(0.1);
+        }
+    }
     return;
 }
 
