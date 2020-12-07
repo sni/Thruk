@@ -68,11 +68,14 @@ $ENV{'THRUK_VERBOSE'} = $options->{'verbose'};
 
 my $query = join(" ", @{$options->{'query'}});
 _debug("using query: %s", $query);
-my $servicefilter = Thruk::Utils::Status::parse_lexical_filter($query);
-
+my $servicefilter    = Thruk::Utils::Status::parse_lexical_filter($query);
 my $cli              = Thruk::Utils::CLI->new($options);
 my $db               = $cli->get_db();
 my $services         = $db->get_services(filter => $servicefilter, extra_columns => [qw/long_plugin_output host_long_plugin_output host_max_check_attempts/]);
+if(scalar @{$services} == 0) {
+    print STDERR "query did not return any host or service.\n";
+    exit(2);
+}
 my $hosts            = {};
 my $rand             = int(rand(10000000));
 my $check_dummy      = 'check_dummy_'.$rand;
