@@ -1538,8 +1538,8 @@ sub _is_compactable {
         # remove duplicate alerts
         my $uniq = sprintf("%s;%s", $l->{'state_type'}//'', $l->{'state'}//'');
         if($l->{'type'} eq 'SERVICE ALERT') {
-            my $host_id    = $l->{'host_id'} // $l->{'host_name'};
-            my $service_id = $l->{'service_id'} // $l->{'service_description'};
+            my $host_id    = $l->{'host_id'} // $l->{'host_name'} // '';
+            my $service_id = $l->{'service_id'} // $l->{'service_description'} // '';
             my $chk = $alertstore->{'svc'}->{$host_id}->{$service_id};
             if(!$chk || $chk ne $uniq) {
                 $alertstore->{'svc'}->{$host_id}->{$service_id} = $uniq;
