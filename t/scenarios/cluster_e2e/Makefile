@@ -11,9 +11,7 @@ wait_start:
 	done
 	docker-compose exec --user root thruk sudo -iu demo thruk cluster ping
 	docker-compose exec --user root thruk sudo -iu demo thruk cluster status
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk1 sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk2 sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk3 sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
+	docker-compose exec --user root thruk sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
 
 wait_start_failed_extra:
 	-curl -kv http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi
