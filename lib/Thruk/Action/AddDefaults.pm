@@ -25,6 +25,7 @@ use POSIX ();
 use Storable qw/dclone/;
 use URI::Escape qw/uri_escape/;
 use Thruk::Utils::Filter ();
+use Thruk::Utils::LMD ();
 use Thruk::Constants qw/:add_defaults :peer_states/;
 use Thruk::Utils::Log qw/:all/;
 
@@ -676,6 +677,9 @@ sub add_defaults {
     $c->stash->{'has_lmd'} = 0;
     if($c->config->{'use_lmd_core'}) {
         $c->stash->{'has_lmd'}   = 1;
+        ## no critic
+        $ENV{'THRUK_LMD_VERSION'} = Thruk::Utils::LMD::get_lmd_version($c->config) unless $ENV{'THRUK_LMD_VERSION'};
+        ## use critic
     }
 
     ###############################
