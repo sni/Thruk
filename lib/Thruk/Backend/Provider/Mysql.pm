@@ -1446,6 +1446,9 @@ sub _update_logcache_compact {
     my $log_count = 0;
     my $log_clear = 0;
 
+    # since we usually backtrack 4 days in reports, use 3days plus 2 extra hours to compensate timshifts to compact state changes
+    my $offset = 74*3600;
+
     if($blocksize =~ m/^\d+[a-z]{1}/mx) {
         # blocksize is in days
         $blocksize = int(Thruk::Utils::expand_duration($blocksize) / 86400);
@@ -1465,14 +1468,14 @@ sub _update_logcache_compact {
 
     _check_index($c, $dbh, $prefix);
 
-    my $current = $start;
+    my $current = Thruk::Utils::DateTime::start_of_day($start - $offset);
     while(1) {
         if($current >= $end) {
             last;
         }
 
         _infos("compacting ".(scalar localtime $current));
-        my $next = Thruk::Utils::DateTime::start_of_day($current + 74*3600); # since we usually backtrack 4 days in reports, use 3days plus 2 extra hours to compensate timshifts to compact state changes
+        my $next = Thruk::Utils::DateTime::start_of_day($current + $offset);
 
         my $sth = $dbh->prepare("SELECT log_id, class, type, state, state_type, host_id, service_id, message FROM `".$prefix."_log` WHERE time >= $current and time < $next");
         $sth->execute;
@@ -1614,6 +1617,8 @@ sub _update_logcache_auth {
 ##########################################################
 sub _update_logcache_optimize {
     my($self, $c, $peer, $dbh, $prefix, $options) = @_;
+
+    return(-1) unless _tables_exist($dbh, $prefix);
 
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
@@ -1882,6 +1887,8 @@ sub _fill_lookup_logs {
 ##########################################################
 sub _import_peer_logfiles {
     my($self,$c,$mode,$peer,$blocksize,$dbh,$host_lookup,$service_lookup,$prefix,$contact_lookup,$forcestart) = @_;
+
+    return(-1) unless _tables_exist($dbh, $prefix);
 
     # get start / end timestamp
     my($mstart, $mend);
