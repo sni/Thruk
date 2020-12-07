@@ -1121,14 +1121,19 @@ sub set_enabled_backends {
                     for my $peer (@{$c->{'db'}->get_local_peers()}) {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     }
+                }
+                elsif($b =~ m|\/|mx) {
+                    if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                        _warn(sprintf("no backend found for section: %s", $b));
+                    }
                 } else {
                     my $peer = $c->{'db'}->get_peer_by_key($b);
                     if($peer) {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     } else {
-                        # silently ignore, this can happen if backends have changed but are saved in dashboards or reports
-                        #die("got no peer for: ".$b)
-                        _warn(sprintf("no backend found for: %s", $b));
+                        if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                            _warn(sprintf("no backend found for: %s", $b));
+                        }
                     }
                 }
             }
@@ -1153,14 +1158,21 @@ sub set_enabled_backends {
                 for my $peer (@{$c->{'db'}->get_local_peers()}) {
                     $disabled_backends->{$peer->{'key'}} = 0;
                 }
+            }
+            elsif($b =~ m|\/|mx) {
+                if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                    _warn(sprintf("no backend found for section: %s", $b));
+                }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
                 if($peer) {
                     $disabled_backends->{$peer->{'key'}} = 0;
                 } else {
-                    # silently ignore, leads to hen/egg problem when using federation peers
-                    #die("got no peer for: ".$b);
-                    #_warn(sprintf("no backend found for: %s", $b));
+                    if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                        # silently ignore, leads to hen/egg problem when using federation peers
+                        #die("got no peer for: ".$b);
+                        #_warn(sprintf("no backend found for: %s", $b));
+                    }
                 }
             }
         }
@@ -1189,6 +1201,11 @@ sub set_enabled_backends {
                 push @keys, $peer->{'key'};
             }
             $c->stash->{'param_backend'} = join(",", @keys);
+        }
+        elsif($backend =~ m|\/|mx) {
+            if(!_set_disabled_by_section($c, $backend, $disabled_backends)) {
+                _warn(sprintf("no backend found for section: %s", $backend));
+            }
         } else {
             for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
                 $disabled_backends->{$b} = 0;
@@ -1240,6 +1257,22 @@ sub set_enabled_backends {
     }
     _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
     return($disabled_backends, $has_groups);
+}
+
+########################################
+sub _set_disabled_by_section {
+    my($c, $backend, $disabled_backends) = @_;
+    $backend =~ s/\/$//gmx;
+    $backend = $backend.'/';
+    my $found;
+    for my $peer (@{$c->{'db'}->get_peers()}) {
+        my $test = $peer->{'section'}.'/';
+        if($test =~ m|^\Q$backend\E|mx) {
+            $disabled_backends->{$peer->{'key'}} = 0;
+            $found++;
+        }
+    }
+    return($found);
 }
 
 ########################################
