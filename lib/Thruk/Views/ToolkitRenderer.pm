@@ -73,6 +73,7 @@ sub render_tt {
     my($c) = @_;
     my $t1 = [gettimeofday];
     my $template = $c->stash->{'template'};
+    confess("no template") unless $template;
     $c->stats->profile(begin => "render_tt: ".$template);
     my $output;
     render($c, $template, undef, \$output);

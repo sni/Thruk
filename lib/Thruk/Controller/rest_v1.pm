@@ -74,7 +74,7 @@ sub index {
     my $format   = 'json';
     my $backends = [];
     # strip known path prefixes
-    while($path_info =~ m%^/(csv|xls|sites?|backends?)(/.*)$%mx) {
+    while($path_info =~ m%^/(csv|text|human|xls|sites?|backends?)(/.*)$%mx) {
         my $prefix = $1;
         $path_info = $2;
         if($prefix eq 'csv') {
@@ -82,6 +82,9 @@ sub index {
         }
         elsif($prefix eq 'xls') {
             $format = 'xls';
+        }
+        elsif($prefix eq 'human' || $prefix eq 'text') {
+            $format = 'human';
         }
         elsif($prefix eq 'sites' || $prefix eq 'backend') {
             if($path_info =~ m%^/([^/]+)(/.*)$%mx) {
@@ -144,6 +147,9 @@ sub index {
     }
     if($format eq 'xls') {
         return(_format_xls_output($c, $data));
+    }
+    if($format eq 'human') {
+        return(_format_human_output($c, $data));
     }
     return($c->render(json => $data));
 }
@@ -262,6 +268,16 @@ sub _escape_newlines {
     $str =~ s/\n/\\n/gmx;
     $str =~ s/\r//gmx;
     return $str;
+}
+
+##########################################################
+sub _format_human_output {
+    my($c, $data) = @_;
+
+    $c->res->headers->content_type('text/plain');
+    $c->stash->{'template'} = 'passthrough.tt';
+    $c->stash->{'text'}     = Thruk::Utils::text_table(data => $data);
+    return;
 }
 
 ##########################################################

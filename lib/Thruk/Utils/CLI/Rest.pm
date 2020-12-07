@@ -112,6 +112,10 @@ sub _fetch_results {
 
         $url =~ s|^/||gmx;
 
+        if($opt->{'format'}) {
+            $url = $opt->{'format'}.'/'.$url;
+        }
+
         $c->stats->profile(begin => "_cmd_rest($url)");
         my $sub_c = $c->sub_request('/r/v1/'.$url, uc($opt->{'method'}), $opt->{'postdata'}, 1);
         $c->stats->profile(end => "_cmd_rest($url)");
@@ -137,7 +141,7 @@ sub _parse_args {
             push @{$current_args}, $a;
         } elsif($a =~ m/^\-/mx) {
             push @{$current_args}, $a;
-            push @{$current_args}, shift @{$args};
+            push @{$current_args}, shift @{$args} if defined $args->[0];
         } else {
             push @{$current_args}, $a;
             push @{$split_args}, $current_args;
@@ -166,6 +170,7 @@ sub _parse_args {
             'rename'     => [],
             'headers'    => [],
             'perffilter' => [],
+            'format'     => '',
         };
         Getopt::Long::GetOptionsFromArray($s,
             "H|header=s"      =>  $opt->{'headers'},
@@ -177,6 +182,10 @@ sub _parse_args {
               "perfunit=s"    =>  $opt->{'perfunit'},
               "perffilter=s"  =>  $opt->{'perffilter'},
               "rename=s"      =>  $opt->{'rename'},
+              "csv"           =>  sub { $opt->{'format'} = 'csv' },
+              "xls"           =>  sub { $opt->{'format'} = 'xls' },
+              "human"         =>  sub { $opt->{'format'} = 'human' },
+            "t|text"          =>  sub { $opt->{'format'} = 'human' },
         );
 
         # last option of parameter set is the url

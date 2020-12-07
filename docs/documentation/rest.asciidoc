@@ -373,6 +373,10 @@ CSV output is available via `/csv/` path prefix.
 ------
 
 ------
+  %> thruk r /hosts?columns=name,state --csv
+------
+
+------
   %> curl -g http://localhost/thruk/r/csv/hosts/stats
 ------
 
@@ -382,6 +386,30 @@ Excel output is available via `/xls/` path prefix.
 
 ------
   %> thruk r /xls/hosts?columns=name,state
+------
+
+------
+  %> thruk r /hosts?columns=name,state --xls
+------
+
+=== Table
+
+Human readable table output is available via `/human/` or `/text/` path prefix.
+
+------
+  %> thruk r /human/hosts?columns=name,state
+------
+
+------
+  %> thruk r /hosts?columns=name,state --human
+------
+
+------
+  %> thruk r /hosts?columns=name,state --text
+------
+
+------
+  %> thruk r /hosts?columns=name,state -t
 ------
 
 == HTTP Methods
@@ -1838,4 +1866,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
