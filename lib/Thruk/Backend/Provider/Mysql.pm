@@ -1316,7 +1316,7 @@ sub _tables_exist {
 
     # check if our tables exist
     my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'\_%"')};
-    if(scalar @tables >= 1) {
+    if(scalar @tables >= 5) {
         return 1;
     }
 
@@ -1537,7 +1537,7 @@ sub _is_compactable {
         }
         # remove duplicate alerts
         my $uniq = sprintf("%s;%s", $l->{'state_type'}//'', $l->{'state'}//'');
-        if($l->{'type'} eq 'SERVICE ALERT') {
+        if($l->{'type'} eq 'SERVICE ALERT' || $l->{'type'} eq 'CURRENT SERVICE STATE' || $l->{'type'} eq 'INITIAL SERVICE STATE') {
             my $host_id    = $l->{'host_id'} // $l->{'host_name'} // '';
             my $service_id = $l->{'service_id'} // $l->{'service_description'} // '';
             my $chk = $alertstore->{'svc'}->{$host_id}->{$service_id};
@@ -1546,7 +1546,7 @@ sub _is_compactable {
                 return;
             }
         }
-        elsif($l->{'type'} eq 'HOST ALERT') {
+        elsif($l->{'type'} eq 'HOST ALERT' || $l->{'type'} eq 'CURRENT HOST STATE' || $l->{'type'} eq 'INITIAL HOST STATE') {
             my $host_id = $l->{'host_id'} // $l->{'host_name'};
             my $chk     = $alertstore->{'hst'}->{$host_id};
             if(!$chk || $chk ne $uniq) {
