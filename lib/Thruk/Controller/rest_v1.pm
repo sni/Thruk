@@ -48,7 +48,7 @@ use constant {
     PRE_STATS    =>  1,
     POST_STATS   =>  2,
 
-    NAME         =>  1,
+    ALIAS        =>  1,
     RAW          =>  2,
 };
 
@@ -235,7 +235,7 @@ sub _format_csv_output {
 
     my $output;
     if(ref $data eq 'ARRAY') {
-        my $columns = $hash_columns || get_request_columns($c, NAME) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        my $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         $output = "";
         for my $d (@{$data}) {
             my $x = 0;
@@ -297,7 +297,7 @@ sub _format_xls_output {
 
     my $columns = [];
     if(ref $data eq 'ARRAY') {
-        $columns = $hash_columns || get_request_columns($c, NAME) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
                 $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
@@ -512,6 +512,10 @@ sub _apply_filter {
 
     my @filtered;
     my $filter = _get_filter($c, $stage);
+    if(scalar @{$filter} == 0) {
+        _debug("skipping empty %s filter", $stage == POST_STATS ? 'post-stats' : 'data');
+        return($data);
+    }
     my $nr     = 1;
     my $missed = {};
     for my $d (@{$data}) {
@@ -519,6 +523,12 @@ sub _apply_filter {
             push @filtered, $d;
         }
         $nr++;
+    }
+    if(Thruk->debug) {
+        if(scalar @{$filter} > 0) {
+            _debug("applying %s filter", $stage == POST_STATS ? 'post-stats' : 'data');
+            _debug($filter);
+        }
     }
 
     # did we have filter for not existing keys
@@ -529,12 +539,27 @@ sub _apply_filter {
         }
     }
     if(scalar @{$missing_keys} > 0) {
+        my $alias_columns = get_aliased_columns($c);
+        for my $missing (@{$missing_keys}) {
+            if(defined $alias_columns->{$missing}) {
+                return({
+                    'message'     => 'alias column name used in filter',
+                    'description' => sprintf("alias column names cannot be used in filter, use '%s' instead of '%s'", $alias_columns->{$missing}, $missing),
+                    'code'        => 400,
+                    'failed'      => Cpanel::JSON::XS::true,
+                });
+            }
+        }
         return({
             'message'     => 'possible typo in filter',
             'description' => "no datarow has attribute(s) named: ".join(", ", @{$missing_keys}),
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
         });
+    }
+    if(Thruk->trace) {
+        _trace("filtered data:");
+        _trace(\@filtered);
     }
     return \@filtered;
 }
@@ -649,6 +674,7 @@ sub _apply_stats {
             }
             $row->{$result_key} = $val;
         }
+        delete $row->{''} if defined $row->{''} && $row->{''} eq '';
         push @{$data}, $row;
     }
 
@@ -666,6 +692,10 @@ sub _apply_stats {
 
     get_request_columns($c, $type)
 
+    $type can be:
+        - RAW   - returns columsn as is, alias definitions untouched
+        - ALIAS - returns column alias or the name if none specified
+
 returns list of requested columns or undef
 
 =cut
@@ -679,12 +709,36 @@ sub get_request_columns {
         push @{$columns}, split(/\s*,\s*/mx, $col);
     }
     $columns = Thruk::Utils::array_uniq($columns);
-    if($type == NAME) {
+    if($type == ALIAS) {
         for(@{$columns}) {
             $_ =~ s/^[^:]+:.*?$//gmx;
         }
     }
     return($columns);
+}
+
+##########################################################
+
+=head2 get_aliased_columns
+
+    get_aliased_columns($c)
+
+returns hash of columns with their alias
+
+=cut
+sub get_aliased_columns {
+    my($c) = @_;
+
+    my $alias_columns = {};
+    my $columns = get_request_columns($c, RAW);
+    if($columns) {
+        for my $col (@{$columns}) {
+            if($col =~ m/^([^:]+):(.*)$/mx) {
+                $alias_columns->{$2} = $1;
+            }
+        }
+    }
+    return($alias_columns);
 }
 
 ##########################################################
@@ -752,7 +806,7 @@ sub column_required {
     }
 
     # from ?columns=...
-    my $req_col = get_request_columns($c, NAME);
+    my $req_col = get_request_columns($c, ALIAS);
     if(defined $req_col && scalar @{$req_col} >= 0 && grep(/^$col$/mx, @{$req_col})) {
         return 1;
     }
@@ -811,6 +865,8 @@ sub _apply_sort {
         push @{$sort}, split(/\s*,\s*/mx, $s);
     }
 
+    my $alias_columns = get_aliased_columns($c);
+
     my @compares;
     for my $key (@{$sort}) {
         my $order = 'asc';
@@ -820,6 +876,9 @@ sub _apply_sort {
         } else {
             $key =~ s/^\+//mx;
         }
+
+        $key = $alias_columns->{$key} if defined $alias_columns->{$key};
+
         # sort numeric
         if( defined $data->[0]->{$key} and Thruk::Backend::Manager::looks_like_number($data->[0]->{$key}) ) {
             if($order eq 'asc') {
@@ -867,7 +926,7 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = get_request_columns($c, NAME) || [];
+        my $columns = get_request_columns($c, ALIAS) || [];
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
             $columns = Thruk::Utils::array_uniq($columns);
@@ -1015,7 +1074,7 @@ sub _expand_perfdata_and_custom_vars {
     my $allowed_list = $c->config->{'show_custom_vars'};
 
     # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
-    my $columns = get_request_columns($c, NAME) || [];
+    my $columns = get_request_columns($c, ALIAS) || [];
     if($columns && scalar @{$columns} > 0) {
         push @{$columns}, @{get_filter_columns($c)};
         my $ref_columns;

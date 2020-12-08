@@ -296,7 +296,7 @@ Rename columns by appending `:name`
   %> thruk r '/thruk/sessions?columns=count(*):sessions'
 ------
 
-Renaming can be combined with grouping columns. Rename goes first.
+Renaming can be combined with grouping columns.
 
 ------
   %> thruk r '/services?columns=avg(execution_time):avg_exec_time,host_name'
@@ -306,6 +306,12 @@ The group by column can be renamed as well:
 
 ------
   %> thruk r '/services?columns=avg(execution_time),peer_name:site'
+------
+
+Aggregation functions can be used in filter (alias cannot be used in filter):
+
+------
+  %> thruk r '/services?columns=avg(execution_time):exec_time&avg(execution_time)[gt]=0'
 ------
 
 == Backends / Sites

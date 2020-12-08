@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 212;
+    plan tests => 221;
 
     use lib('t');
     require TestUtils;
@@ -146,4 +146,17 @@ for my $test (@{$pages}) {
     is(scalar keys %{$tstdata}, 5, "got result");
     is($tstdata->{'min(state)'}, 0, "got min state");
     is($tstdata->{'count(state)'}, 2, "got count state");
+};
+
+################################################################################
+# test aggregation functions with alias and filter
+{
+    my $page = TestUtils::test_page(
+        url  => '/thruk/r/services?columns=count(*):total,state&sort=total&host_name='.$host.'&total[gte]=0',
+        fail => 1,
+    );
+    my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
+    is(ref $tstdata, 'HASH', "got error result");
+    is($tstdata->{'failed'}, Cpanel::JSON::XS::true, "query should fail");
+    like($tstdata->{'description'}, qr(alias column names cannot be used in filter), "query should fail");
 };
