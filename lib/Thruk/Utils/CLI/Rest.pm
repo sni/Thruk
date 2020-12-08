@@ -100,7 +100,7 @@ sub _fetch_results {
                     })."\n";
                 }
                 next;
-            } elsif(-r $url) {
+            } elsif(-r $url && -f $url) {
                 _debug("loading local file: ".$url);
                 $opt->{'result'} = Thruk::Utils::IO::read($url);
                 $opt->{'rc'}     = 0;
