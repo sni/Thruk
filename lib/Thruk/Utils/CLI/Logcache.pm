@@ -119,7 +119,7 @@ sub cmd {
     $opt->{'files'} = \@{$commandoptions};
 
     if($src ne 'local' and $mode eq 'import') {
-        return("ERROR - please run the initial import with --local\n", 1);
+        return("ERROR - please run the initial import locally\n", 1);
     }
 
     my $type = '';
@@ -280,19 +280,23 @@ sub _user_confirm {
 
 Initial import
 
-  %> thruk logcache import --local
+  %> thruk logcache import
 
 Initial import, but only import last 3 weeks and fetch 12 hours per import block
 
-  %> thruk logcache import --local --start=3w --blocksize=12h
+  %> thruk logcache import --start=3w --blocksize=12h
 
 Run delta update with logfiles retrieved by livestatus
 
   %> thruk logcache update
 
-Run update from given files. (Also possible for initial import)
+Run update from given files.
 
-  %> thruk logcache update /var/log/naemon/archive/2017-07-*.log
+  %> thruk logcache import /var/log/naemon/archive/2017-07-*.log
+
+Run import from archive.
+
+  %> thruk logcache import /var/log/naemon/archive/ /var/log/naemon/naemon.log
 
 Prune logcache data older than 3 years
 

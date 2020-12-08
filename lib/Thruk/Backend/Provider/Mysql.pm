@@ -1263,7 +1263,7 @@ sub _update_logcache {
         my $service_lookup = _get_service_lookup($dbh,$peer,$prefix, $host_lookup, $mode eq 'import' ? 0 : 1);
         my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
 
-        if(defined $files and scalar @{$files} > 0) {
+        if(defined $files && scalar @{$files} > 0) {
             $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$host_lookup,$service_lookup,$prefix,$contact_lookup,$c);
         } else {
             $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$host_lookup,$service_lookup,$prefix,$contact_lookup,$forcestart);
@@ -2081,65 +2081,76 @@ sub _import_logcache_from_file {
 
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
-    for my $f (@{$files}) {
-        _infos($f);
-        my $duplicate_lookup  = {};
-        my $last_duplicate_ts = 0;
-        my @values;
+    for my $p (@{$files}) {
+        my $expanded = [];
+        if(-f $p) {
+            $expanded = [$p];
+        } elsif(-d $p.'/.') {
+            $expanded = [glob($p.'/*')];
+        } else {
+            $expanded = [glob($p)];
+        }
+        for my $f (@{$expanded}) {
+            next unless -f $f;
+            _infos($f);
+            my $duplicate_lookup  = {};
+            my $last_duplicate_ts = 0;
+            my @values;
 
-        open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
-        while(my $line = <$fh>) {
-            chomp($line);
-            &Thruk::Utils::decode_any($line);
-            my $original_line = $line;
-            my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
-            next unless($l && $l->{'time'});
-            next if $import_filter && $original_line =~ $import_filter;
+            open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
+            while(my $line = <$fh>) {
+                chomp($line);
+                &Thruk::Utils::decode_any($line);
+                my $original_line = $line;
+                my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
+                next unless($l && $l->{'time'});
+                next if $import_filter && $original_line =~ $import_filter;
 
-            if($mode eq 'update') {
-                if($last_duplicate_ts < $l->{'time'}) {
+                if($mode eq 'update') {
+                    if($last_duplicate_ts < $l->{'time'}) {
+                        $self->_safe_insert($dbh, $stm, \@values);
+                        $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
+                        @values = ();
+                        $duplicate_lookup = $self->_fill_lookup_logs($prefix,$l->{'time'},$l->{'time'}+86400);
+                        $last_duplicate_ts = $l->{'time'}+86400;
+                    }
+                    next if defined $duplicate_lookup->{$original_line};
+                }
+
+                $log_count++;
+                $l->{'message'} = $original_line;
+                my($host, $svc, $contact) = _fix_import_log($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash);
+
+                # commit every 1000th to avoid to large blocks
+                if($log_count%1000 == 0) {
                     $self->_safe_insert($dbh, $stm, \@values);
                     $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
                     @values = ();
-                    $duplicate_lookup = $self->_fill_lookup_logs($prefix,$l->{'time'},$l->{'time'}+86400);
-                    $last_duplicate_ts = $l->{'time'}+86400;
+                    _infoc('.');
                 }
-                next if defined $duplicate_lookup->{$original_line};
+
+                if($import_compacted && _is_compactable($l, $alertstore, $import_filter)) {
+                    # skip insert
+                    next;
+                }
+
+                push @values, sprintf('(%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+                        $l->{'time'},
+                        $l->{'class'},
+                        $dbh->quote($l->{'type'}),
+                        $dbh->quote($l->{'state'}),
+                        $dbh->quote($l->{'state_type'}),
+                        $dbh->quote($contact),
+                        $dbh->quote($host),
+                        $dbh->quote($svc),
+                        $dbh->quote($l->{'message'}),
+                );
             }
-
-            $log_count++;
-            $l->{'message'} = $original_line;
-            my($host, $svc, $contact) = _fix_import_log($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash);
-
-            # commit every 1000th to avoid to large blocks
-            if($log_count%1000 == 0) {
-                $self->_safe_insert($dbh, $stm, \@values);
-                $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
-                @values = ();
-                _infoc('.');
-            }
-
-            if($import_compacted && _is_compactable($l, $alertstore, $import_filter)) {
-                # skip insert
-                next;
-            }
-
-            push @values, sprintf('(%s,%s,%s,%s,%s,%s,%s,%s,%s)',
-                    $l->{'time'},
-                    $l->{'class'},
-                    $dbh->quote($l->{'type'}),
-                    $dbh->quote($l->{'state'}),
-                    $dbh->quote($l->{'state_type'}),
-                    $dbh->quote($contact),
-                    $dbh->quote($host),
-                    $dbh->quote($svc),
-                    $dbh->quote($l->{'message'}),
-            );
+            $self->_safe_insert($dbh, $stm, \@values);
+            $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
+            CORE::close($fh);
+            _info(". OK");
         }
-        $self->_safe_insert($dbh, $stm, \@values);
-        $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
-        CORE::close($fh);
-        _debug("\n");
     }
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
