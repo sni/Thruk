@@ -423,7 +423,7 @@ sub _get_screen_logger {
     }
 
     Log::Log4perl::Layout::PatternLayout::add_global_cspec('Q', \&_priority_error_warn_only);
-    if(!Thruk::Base::verbose() || Thruk::Base::quiet()) {
+    if(!Thruk::Base::verbose() || (Thruk::Base::quiet() && !$ENV{'THRUK_CRON'})) {
         $format = '%Q%m{chomp}';
     }
 

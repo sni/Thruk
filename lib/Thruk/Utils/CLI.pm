@@ -352,12 +352,22 @@ sub _run {
         $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
     }
 
-    if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
-        binmode STDOUT;
-        print STDOUT $result->{'output'};
+    local $ENV{'THRUK_QUIET'} = undef  if $ENV{'THRUK_CRON'};
+    Thruk::Utils::Log::reset_logging() if $ENV{'THRUK_CRON'};
+    if($result->{'rc'} == 0 || $result->{'all_stdout'}) {
+        if($log_timestamps) {
+            _info($result->{'output'});
+        } else {
+            binmode STDOUT;
+            print STDOUT $result->{'output'};
+        }
     } else {
-        binmode STDERR;
-        print STDERR $result->{'output'};
+        if($log_timestamps) {
+            _error($result->{'output'});
+        } else {
+            binmode STDERR;
+            print STDERR $result->{'output'};
+        }
     }
     return $result->{'rc'};
 }
