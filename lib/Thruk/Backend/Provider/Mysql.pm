@@ -1468,6 +1468,7 @@ sub _update_logcache_compact {
 
     _check_index($c, $dbh, $prefix);
 
+    my $import_filter = _get_exclude_filter($c->config);
     my $current = Thruk::Utils::DateTime::start_of_day($start - $offset);
     while(1) {
         if($current >= $end) {
@@ -1493,7 +1494,7 @@ sub _update_logcache_compact {
                 $log_clear += scalar @delete;
                 @delete = ();
             }
-            if(_is_compactable($l, $alerts)) {
+            if(_is_compactable($l, $alerts, $import_filter)) {
                 $removed++;
                 push @delete, $l->{'log_id'};
             }
@@ -1525,7 +1526,9 @@ sub _update_logcache_compact {
 ##########################################################
 # returns true if log entry can be removed during compact
 sub _is_compactable {
-    my($l, $alertstore) = @_;
+    my($l, $alertstore, $excludepattern) = @_;
+    return 1 if($excludepattern && $l->{'message'} =~ $excludepattern);
+
     if($l->{'class'} == 2 || $l->{'class'} == 3 || $l->{'class'} == 5 || $l->{'class'} == 6) {
         # keep program, notifications, external commands, timeperiod transitions
         return;
@@ -2049,6 +2052,20 @@ sub _enable_index {
 }
 
 ##########################################################
+sub _get_exclude_filter {
+    my($config) = @_;
+    if(scalar @{Thruk::Utils::list($config->{'logcache_import_exclude'})} == 0) {
+        return;
+    }
+    my $import_filter;
+    my $f = join('|', @{Thruk::Utils::list($config->{'logcache_import_exclude'})});
+    ## no critic
+    $import_filter = qr/($f)/i;
+    ## use critic
+    return($import_filter);
+}
+
+##########################################################
 sub _import_logcache_from_file {
     my($self,$mode,$dbh,$files,$host_lookup,$service_lookup,$prefix,$contact_lookup, $c, $import_compacted, $alertstore) = @_;
     my $log_count = 0;
@@ -2060,13 +2077,7 @@ sub _import_logcache_from_file {
     my $foreign_key_stash = {};
 
     # add import filter
-    my $import_filter;
-    if(scalar @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})} > 0) {
-        my $f = join('|', @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})});
-        ## no critic
-        $import_filter = qr/($f)/i;
-        ## use critic
-    }
+    my $import_filter = _get_exclude_filter($c->config);
 
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
@@ -2108,7 +2119,7 @@ sub _import_logcache_from_file {
                 _infoc('.');
             }
 
-            if($import_compacted && _is_compactable($l, $alertstore)) {
+            if($import_compacted && _is_compactable($l, $alertstore, $import_filter)) {
                 # skip insert
                 next;
             }
@@ -2169,13 +2180,7 @@ sub _insert_logs {
     my $foreign_key_stash = {};
 
     # add import filter
-    my $import_filter;
-    if(scalar @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})} > 0) {
-        my $f = join('|', @{Thruk::Utils::list($c->config->{'logcache_import_exclude'})});
-        ## no critic
-        $import_filter = qr/($f)/i;
-        ## use critic
-    }
+    my $import_filter = _get_exclude_filter($c->config);
 
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
@@ -2199,7 +2204,7 @@ sub _insert_logs {
 
         my($host, $svc, $contact) = _fix_import_log($l, $host_lookup, $service_lookup, $contact_lookup, $dbh, $prefix, $auto_increments, $foreign_key_stash);
 
-        if($import_compacted && _is_compactable($l, $alertstore)) {
+        if($import_compacted && _is_compactable($l, $alertstore, $import_filter)) {
             # skip insert
             $compacted++;
             next;
