@@ -3766,7 +3766,10 @@ sub text_table {
             my $val = $row->{$key} // "";
             if($col->{'type'}) {
                 if($col->{'type'} eq 'date') {
-                    if($col->{'format'}) {
+                    if(!$val) {
+                        $val = '';
+                    }
+                    elsif($col->{'format'}) {
                         $val = POSIX::strftime($col->{'format'}, localtime($val));
                     } else {
                         $val = scalar localtime $val;
