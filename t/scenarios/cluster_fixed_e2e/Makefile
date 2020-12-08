@@ -5,12 +5,12 @@ export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
-	   docker-compose exec --user root thruk1 sudo -iu demo thruk cluster ping >/dev/null 2>&1; \
-	   if [ $$(docker-compose exec --user root thruk1 sudo -iu demo thruk cluster status | grep -c OK) -eq 3 ]; then break; else sleep 1; fi; \
+	   docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk1 sudo -iu demo thruk cluster ping >/dev/null 2>&1; \
+	   if [ $$(docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk1 sudo -iu demo thruk cluster status | grep -c OK) -eq 3 ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
-	docker-compose exec --user root thruk1 sudo -iu demo thruk cluster ping
-	docker-compose exec --user root thruk1 sudo -iu demo thruk cluster status
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk1 sudo -iu demo thruk cluster ping
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk1 sudo -iu demo thruk cluster status
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk1 sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk2 sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root thruk3 sudo -iu demo thruk r -m POST /thruk/cluster/heartbeat
