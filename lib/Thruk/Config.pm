@@ -29,11 +29,11 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.38';
+our $VERSION = '2.40';
 
 our $config;
 my $project_root = home() or confess('could not determine project_root: '.Dumper(\%INC));
-my $branch       = '2';
+my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
 if($branch) {
@@ -47,7 +47,7 @@ my $base_defaults = {
     'name'                                  => 'Thruk',
     'version'                               => $VERSION,
     'branch'                                => $branch,
-    'released'                              => 'October 27, 2020',
+    'released'                              => 'December 08, 2020',
     'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',

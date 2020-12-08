@@ -23,7 +23,7 @@ use POSIX ();
 
 use 5.008000;
 
-our $VERSION = '2.38';
+our $VERSION = '2.40';
 
 ###################################################
 # load timing class
