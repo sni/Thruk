@@ -986,8 +986,8 @@ sub _log_stats {
     return @result if wantarray;
     return Thruk::Utils::text_table(
         keys => [['Backend', 'name'],
-                 { name => 'Index Size',  key => 'index_size', type => 'bytes', format => "%.1f" },
                  { name => 'Data Size',   key => 'data_size',  type => 'bytes', format => "%.1f" },
+                 { name => 'Index Size',  key => 'index_size', type => 'bytes', format => "%.1f" },
                  ['Items', 'items'],
                  { name => 'Last Update', key => 'last_update', type => 'date', format => '%Y-%m-%d %H:%M:%S' },
                  { name => 'Last Item',   key => 'last_entry',  type => 'date', format => '%Y-%m-%d %H:%M:%S' },
