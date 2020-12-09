@@ -31,9 +31,13 @@ http://your_webserver/thruk/r/v1/.
 
 === Basic Auth
 
-Basic authentication is not possible with the rest API. Use API keys instead.
-This is a limitation of the apache configuration which cannot set the remote user
-if supplied, but pass through the request if not.
+Basic authentication is possible with the rest API but not recommended. Use API
+keys instead.  This is a limitation of the apache configuration which cannot
+set the remote user if supplied, but pass through the request if not.
+
+------
+  %> curl -gk 'https://username:password@localhost/thruk/r/hosts'
+------
 
 === Cookie Auth
 
