@@ -59,13 +59,13 @@ sub get_list {
     my $result    = [];
     for my $type (qw/host service/) {
         my $templates = $c->{'obj_db'}->get_templates_by_type($type);
-        my $pnp_templates = [];
+        my $perf_templates = [];
         for my $tmp (@{$templates}) {
             if($tmp->get_name =~ m/$pattern/mx) {
-                push @{$pnp_templates}, $tmp;
+                push @{$perf_templates}, $tmp;
             }
         }
-        if(scalar @{$pnp_templates} == 0) {
+        if(scalar @{$perf_templates} == 0) {
             push @{$result}, {
                 ident      => 'no'.$type.'template',
                 id         => '',
@@ -77,7 +77,7 @@ sub get_list {
             };
             next;
         }
-        if(scalar @{$pnp_templates} > 1) {
+        if(scalar @{$perf_templates} > 1) {
             push @{$result}, {
                 ident      => 'too many'.$type.'template',
                 id         => '',
@@ -89,28 +89,28 @@ sub get_list {
             };
             next;
         }
-        my $pnp_template      = $pnp_templates->[0];
-        my $pnp_template_name = $pnp_template->get_name();
+        my $perf_template      = $perf_templates->[0];
+        my $perf_template_name = $perf_template->get_name();
         # check the template itself
-        if(!$pnp_template->{'conf'}->{'action_url'}) {
+        if(!$perf_template->{'conf'}->{'action_url'}) {
             push @{$result}, {
                 ident      => $type.'template_no_action_url',
-                id         => $pnp_template->get_id(),
-                name       => $pnp_template->get_name(),
+                id         => $perf_template->get_id(),
+                name       => $perf_template->get_name(),
                 type       => $type,
-                obj        => $pnp_template,
+                obj        => $perf_template,
                 message    => 'no action_url found in perf template',
                 cleanable  => 0,
             };
             next;
         }
-        if(!defined $pnp_template->{'conf'}->{'process_perf_data'}) {
+        if(!defined $perf_template->{'conf'}->{'process_perf_data'}) {
             push @{$result}, {
                 ident      => $type.'template_no_process_perf_data',
-                id         => $pnp_template->get_id(),
-                name       => $pnp_template->get_name(),
+                id         => $perf_template->get_id(),
+                name       => $perf_template->get_name(),
                 type       => $type,
-                obj        => $pnp_template,
+                obj        => $perf_template,
                 message    => 'no process_perf_data found in perf template',
                 cleanable  => 0,
             };
@@ -178,19 +178,19 @@ sub get_list {
             my @skip_attributes;
             if($liveobj->{'perf_data'}) {
                 # this object should use the perf template and have no action_url or process_perf_data defined by itself
-                if(!$obj->{'conf'}->{'use'} || !grep(/^\Q$pnp_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
+                if(!$obj->{'conf'}->{'use'} || !grep(/^\Q$perf_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
                     my $used_templates = $obj->get_used_templates($c->{'obj_db'});
-                    if(!grep(/^\Q$pnp_template_name\E$/mx, @{$used_templates})) {
+                    if(!grep(/^\Q$perf_template_name\E$/mx, @{$used_templates})) {
                         push @{$result}, {
-                            ident      => $obj->get_id().'/use_pnp_template',
+                            ident      => $obj->get_id().'/use_perf_template',
                             id         => $obj->get_id(),
                             name       => $obj->get_name(),
                             type       => $obj->get_type(),
                             obj        => $obj,
-                            message    => 'object should use the '.$pnp_template_name.' template',
+                            message    => 'object should use the '.$perf_template_name.' template',
                             cleanable  => 1,
                             action     => 'add_template',
-                            template   => $pnp_template_name,
+                            template   => $perf_template_name,
                         };
                         next;
                     }
@@ -198,17 +198,17 @@ sub get_list {
                 @skip_attributes = qw/action_url process_perf_data/;
             } else {
                 # this object should not use the perf template and have no process_perf_data defined by itself
-                if($obj->{'conf'}->{'use'} && grep(/^\Q$pnp_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
+                if($obj->{'conf'}->{'use'} && grep(/^\Q$perf_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
                     push @{$result}, {
-                        ident      => $obj->get_id().'/del_pnp_template',
+                        ident      => $obj->get_id().'/del_perf_template',
                         id         => $obj->get_id(),
                         name       => $obj->get_name(),
                         type       => $obj->get_type(),
                         obj        => $obj,
-                        message    => 'object should use not the '.$pnp_template_name.' template, as it has no performance data',
+                        message    => 'object should use not the '.$perf_template_name.' template, as it has no performance data',
                         cleanable  => 1,
                         action     => 'del_template',
-                        template   => $pnp_template_name,
+                        template   => $perf_template_name,
                     };
                     next;
                 }
