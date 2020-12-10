@@ -48,12 +48,20 @@ returns list of potential objects to cleanup
 sub get_list {
     my($self, $c, $ignores) = @_;
 
+    my $pattern = "pnp";
+    if($ENV{'OMD_ROOT'}) {
+        my $site_config = Thruk::Config::parse_omd_site_config();
+        if($site_config->{'CONFIG_PNP4NAGIOS'} eq 'off' && $site_config->{'CONFIG_NAGFLUX'} eq 'on') {
+            $pattern = "-perf";
+        }
+    }
+
     my $result    = [];
     for my $type (qw/host service/) {
         my $templates = $c->{'obj_db'}->get_templates_by_type($type);
         my $pnp_templates = [];
         for my $tmp (@{$templates}) {
-            if($tmp->get_name =~ m/pnp/mx) {
+            if($tmp->get_name =~ m/$pattern/mx) {
                 push @{$pnp_templates}, $tmp;
             }
         }
@@ -64,7 +72,7 @@ sub get_list {
                 name       => $type.' template',
                 type       => $type,
                 obj        => '',
-                message    => 'did not find any template matching *pnp*, please create pnp templates first.',
+                message    => 'did not find any template matching *'.$pattern.'*, please create perf templates first.',
                 cleanable  => 0,
             };
             next;
@@ -76,7 +84,7 @@ sub get_list {
                 name       => $type.' template',
                 type       => $type,
                 obj        => '',
-                message    => 'found more than one template matching *pnp*, cannot continue.',
+                message    => 'found more than one template matching *'.$pattern.'*, cannot continue.',
                 cleanable  => 0,
             };
             next;
@@ -91,7 +99,7 @@ sub get_list {
                 name       => $pnp_template->get_name(),
                 type       => $type,
                 obj        => $pnp_template,
-                message    => 'no action_url found in pnp template',
+                message    => 'no action_url found in perf template',
                 cleanable  => 0,
             };
             next;
@@ -103,7 +111,7 @@ sub get_list {
                 name       => $pnp_template->get_name(),
                 type       => $type,
                 obj        => $pnp_template,
-                message    => 'no process_perf_data found in pnp template',
+                message    => 'no process_perf_data found in perf template',
                 cleanable  => 0,
             };
             next;
@@ -126,6 +134,7 @@ sub get_list {
         }
         for my $obj (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
             # skip thruk bp objects and other known generated things
+            next if $obj->{'file'}->{'readonly'};
             next if $obj->{'file'}->{'path'} =~ m/\Qthruk_bp_generated.cfg\E/mx;
             next if $obj->{'file'}->{'path'} =~ m/\Qcheck_mk_objects.cfg\E/mx;
 
@@ -168,7 +177,7 @@ sub get_list {
 
             my @skip_attributes;
             if($liveobj->{'perf_data'}) {
-                # this object should use the pnp template and have no action_url or process_perf_data defined by itself
+                # this object should use the perf template and have no action_url or process_perf_data defined by itself
                 if(!$obj->{'conf'}->{'use'} || !grep(/^\Q$pnp_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
                     my $used_templates = $obj->get_used_templates($c->{'obj_db'});
                     if(!grep(/^\Q$pnp_template_name\E$/mx, @{$used_templates})) {
@@ -178,7 +187,7 @@ sub get_list {
                             name       => $obj->get_name(),
                             type       => $obj->get_type(),
                             obj        => $obj,
-                            message    => 'object should use the pnp template',
+                            message    => 'object should use the '.$pnp_template_name.' template',
                             cleanable  => 1,
                             action     => 'add_template',
                             template   => $pnp_template_name,
@@ -188,7 +197,7 @@ sub get_list {
                 }
                 @skip_attributes = qw/action_url process_perf_data/;
             } else {
-                # this object should not use the pnp template and have no process_perf_data defined by itself
+                # this object should not use the perf template and have no process_perf_data defined by itself
                 if($obj->{'conf'}->{'use'} && grep(/^\Q$pnp_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
                     push @{$result}, {
                         ident      => $obj->get_id().'/del_pnp_template',
@@ -196,7 +205,7 @@ sub get_list {
                         name       => $obj->get_name(),
                         type       => $obj->get_type(),
                         obj        => $obj,
-                        message    => 'object should use not the pnp template, as it has no performance data',
+                        message    => 'object should use not the '.$pnp_template_name.' template, as it has no performance data',
                         cleanable  => 1,
                         action     => 'del_template',
                         template   => $pnp_template_name,
