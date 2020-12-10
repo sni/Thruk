@@ -694,9 +694,8 @@ sub set_default_config {
 
     # enable OMD tweaks
     if($ENV{'OMD_ROOT'}) {
-        my $site = $ENV{'OMD_SITE'};
-        my $root = $ENV{'OMD_ROOT'};
-        my $site_config = _parse_omd_site_config($root."/etc/omd/site.conf");
+        my $site        = $ENV{'OMD_SITE'};
+        my $site_config = parse_omd_site_config();
         my $siteport    = $site_config->{'CONFIG_APACHE_TCP_PORT'};
         my $ssl         = $site_config->{'CONFIG_APACHE_MODE'};
         my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
@@ -1359,9 +1358,17 @@ sub merge_cgi_cfg {
 }
 
 ########################################
-# parses omd sites key/value config file
-sub _parse_omd_site_config {
+
+=head2 parse_omd_site_config
+
+  parse_omd_site_config([$file])
+
+parses omd sites key/value config file
+
+=cut
+sub parse_omd_site_config {
     my($file) = @_;
+    $file = $ENV{'OMD_ROOT'}."/etc/omd/site.conf" unless $file;
     my $site_config = {};
     for my $line (read_file($file)) {
         if($line =~ m/^(CONFIG_.*?)='([^']*)'$/mx) {
