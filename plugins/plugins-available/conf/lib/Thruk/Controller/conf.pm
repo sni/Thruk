@@ -1373,7 +1373,7 @@ sub _process_tools_page {
             $c->stats->profile(begin => "tool cleanup");
             $tools->{$tool}->cleanup($c, $c->req->parameters->{'ident'}, $ignores->{$tool});
             $c->stats->profile(end => "tool cleanup");
-            $c->stash->{'obj_model_changed'} = 1;
+            Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}); # directly store because its directly called from render_page_in_background()
             if($c->req->parameters->{'ident'} eq 'all') {
                 $c->stats->profile(end => "tool: ".$tool);
                 return $c->redirect_to('conf.cgi?sub=objects&tools='.$tool);
