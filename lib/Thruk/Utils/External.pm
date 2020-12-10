@@ -177,6 +177,7 @@ sub perl {
             CORE::close(STDOUT);
         };
 
+        # unrendered output from template and stash
         if($conf->{'render'} && $c->stash->{'template'} && !$c->{'rendered'}) {
             local $c->stash->{'job_conf'}->{'clean'} = undef;
             _finished_job_page($c, $c->stash);
@@ -189,6 +190,15 @@ sub perl {
             $c->stash->{'file_name_meta'} = {
                 code    => $res->[0],
                 headers => $res->[1],
+            };
+        }
+        # rendered output, ex.: from return $c->render(json => $json);
+        elsif($conf->{'render'} && $c->{'rendered'}) {
+            local $c->stash->{'job_conf'}->{'clean'} = undef;
+            $c->stash->{'file_name'} = "perl_res";
+            $c->stash->{'file_name_meta'} = {
+                code    => $c->res->code(),
+                headers => $c->res->headers->psgi_flatten,
             };
         }
 
