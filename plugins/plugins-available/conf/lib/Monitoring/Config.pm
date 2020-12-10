@@ -9,7 +9,7 @@ use Data::Dumper;
 use Carp;
 use Storable qw/dclone/;
 use Thruk::Utils;
-use Thruk::Config;
+use Thruk::Config 'noautoload';
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
