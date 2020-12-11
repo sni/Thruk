@@ -74,3 +74,5 @@
       port: 6557
   - shell: sudo su - demo -c "thruk bp commit --local"
   - shell: sudo su - demo -c "thruk cron install --local"
+  #- shell: yum -y install strace
+  #- shell: sudo su - demo -c "sed -i etc/init.d/apache -e 's%\(\$APACHE_BIN -f.*\)%rm -f tmp/trace.log/*; nohup strace -f -s 2000 -tt -ff -o tmp/trace.log \1 \&%'"

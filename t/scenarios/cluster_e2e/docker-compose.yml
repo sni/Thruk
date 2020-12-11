@@ -32,6 +32,9 @@ services:
         - .:/test:ro
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
+    # required for strace
+    #cap_add:
+    #    - SYS_PTRACE
 
 volumes:
   shared_etc:
