@@ -1058,7 +1058,7 @@ sub stop_all {
         my @pids = read_file($pidfile);
         for my $pid (@pids) {
             next if $pid == $$;
-            kill(15, $pid);
+            kill("TERM", $pid);
         }
     }
     return 1;
@@ -1082,11 +1082,11 @@ sub graceful_stop {
     elsif($c && $c->env->{'psgix.cleanup'}) {
         # supported since plack 1.0046
         push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
-            kill(15, $$);
+            kill("TERM", $$);
         };
     } else {
         # kill it the hard way
-        kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
+        kill("TERM", $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
     }
     return 1;
 }
