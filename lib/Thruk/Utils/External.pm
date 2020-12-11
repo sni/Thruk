@@ -186,16 +186,16 @@ sub perl {
             my $res = $c->res->finalize;
             Thruk::finalize_request($c, $res);
             Thruk::Utils::IO::write($dir."/result.dat", $res->[2]->[0]);
-            $c->stash->{'file_name'} = "result.dat";
+            $c->stash->{'file_name'}      = "result.dat";
             $c->stash->{'file_name_meta'} = {
                 code    => $res->[0],
                 headers => $res->[1],
             };
         }
         # rendered output, ex.: from return $c->render(json => $json);
-        elsif($conf->{'render'} && $c->{'rendered'}) {
+        elsif($conf->{'render'} && $c->{'rendered'} && !$c->stash->{'last_redirect_to'} && -e $dir."/perl_res") {
             local $c->stash->{'job_conf'}->{'clean'} = undef;
-            $c->stash->{'file_name'} = "perl_res";
+            $c->stash->{'file_name'}      = "perl_res";
             $c->stash->{'file_name_meta'} = {
                 code    => $c->res->code(),
                 headers => $c->res->headers->psgi_flatten,
