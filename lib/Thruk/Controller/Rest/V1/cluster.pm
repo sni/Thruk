@@ -81,6 +81,8 @@ sub _rest_get_thruk_cluster_restart {
         _debug(sprintf("restarting node: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
 
+    sleep(1);
+
     # ping nodes to start at least one process
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
