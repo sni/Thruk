@@ -2,6 +2,7 @@ package Thruk::Controller::statusmap;
 
 use strict;
 use warnings;
+use Carp;
 use Module::Load qw/load/;
 
 =head1 NAME
@@ -27,7 +28,6 @@ sub index {
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     if(!$c->config->{'statusmap_modules_loaded'}) {
-        load Carp, qw/confess carp/;
         load Data::Dumper, qw/Dumper/;
         load Encode, qw/decode_utf8/;
         $c->config->{'statusmap_modules_loaded'} = 1;

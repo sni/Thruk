@@ -32,7 +32,6 @@ sub index {
     }
 
     if(!$c->config->{'reports2_modules_loaded'}) {
-        load Carp, qw/confess carp/;
         load Thruk::Utils::Reports;
         load Thruk::Utils::Avail;
         load URI::Escape;

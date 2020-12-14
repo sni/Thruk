@@ -90,6 +90,9 @@ for my $file (@{$files}) {
       fail("using Carp could be removed from $file");
     }
   }
+  if($content =~ m/confess|croak|cluck|longmess/mxi && $content !~ m/use\s+Carp/) {
+      fail("$file uses Carp methods but misses use Carp;");
+  }
   if(grep/^\Qutf8\E$/mx, @{$modules}) {
     if($content !~ /utf8::/mxi) {
       fail("using utf8 could be removed from $file");

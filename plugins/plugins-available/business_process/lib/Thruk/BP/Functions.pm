@@ -2,6 +2,7 @@ package Thruk::BP::Functions;
 
 use strict;
 use warnings;
+use Carp;
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

@@ -15,6 +15,7 @@ use strict;
 use Digest ();
 use Crypt::Rijndael ();
 use MIME::Base64 ();
+use Carp;
 use Encode qw/encode_utf8 decode/;
 
 ##############################################

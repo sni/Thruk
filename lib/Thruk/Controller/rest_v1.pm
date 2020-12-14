@@ -22,6 +22,7 @@ use Module::Load qw/load/;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS ();
 use URI::Escape qw/uri_unescape/;
+use Carp;
 use Thruk::Utils::Status ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
