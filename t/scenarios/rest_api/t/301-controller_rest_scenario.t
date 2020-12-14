@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 221;
+    plan tests => 229;
 
     use lib('t');
     require TestUtils;
@@ -94,6 +94,9 @@ my $pages = [{
         url          => '/thruk/panorama/1/maintenance',
         method       => 'DELETE',
         like         => ['maintenance mode removed'],
+    }, {
+        url          => '/servicegroups/?q=***name = "Http Check"***&columns=worst_service_state',
+        like         => ['worst_service_state'],
     }
 ];
 

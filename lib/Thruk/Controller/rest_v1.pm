@@ -943,19 +943,20 @@ sub _livestatus_options {
             }
             elsif($ref_columns eq 'logs') {
                 $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
-            } else {
-                confess("unsupported type: ".$type);
             }
-            # if all requested columns are default columns, we can pass the columns to livestatus
-            my $found = 1;
-            for my $col (@{$columns}) {
-                if(!$ref_columns->{$col}) {
-                    $found = 0;
-                    last;
+
+            if($ref_columns) {
+                # if all requested columns are default columns, we can pass the columns to livestatus
+                my $found = 1;
+                for my $col (@{$columns}) {
+                    if(!$ref_columns->{$col}) {
+                        $found = 0;
+                        last;
+                    }
                 }
-            }
-            if($found) {
-                $options->{'columns'} = $columns;
+                if($found) {
+                    $options->{'columns'} = $columns;
+                }
             }
         }
 
