@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.40-2   Mon Dec 14 11:10:41 CET 2020
           - Config Tool:
             - fix running tools
             - support histou templates in perf data tool

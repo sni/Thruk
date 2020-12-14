@@ -36,7 +36,7 @@ use warnings;
 use Thruk::Config 'noautoload';
 
 our $VERSION = '2.40';
-my $branch       = '';
+my $branch       = '2';
 $branch      = Thruk::Config::get_git_name() unless $branch ne '';
 
 my $nagexp = Thruk::nagexp->new();
