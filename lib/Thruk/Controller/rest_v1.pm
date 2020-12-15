@@ -34,7 +34,8 @@ use Thruk::Utils::CookieAuth ();
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters = [qw/limit offset sort columns backend backends q CSRFtoken/];
+my $reserved_query_parameters = [qw/limit offset sort columns backend backends q CSRFtoken transform/];
+my $panorama_reserved         = [qw/_dc page meta/];
 my $op_translation_words      = {
     'eq'     => '=',
     'ne'     => '!=',
@@ -179,10 +180,16 @@ sub process_rest_request {
 
     if(!$data) {
         eval {
+            # generic pre processing
+            _pre_processing($c);
+
             $data = _fetch($c, $path_info);
 
             # generic post processing
-            $data = _post_processing($c, $data);
+            my $total;
+            ($data, $total) = _post_processing($c, $data);
+
+            $data = _add_meta_data($c, $data, $total) unless _is_failed($data);
         };
         if($@) {
             $data = { 'message' => 'error during request', description => $@, code => 500 };
@@ -411,6 +418,20 @@ sub _fetch {
 }
 
 ##########################################################
+sub _pre_processing {
+    my($c) = @_;
+    delete $c->stash->{'last_query_total'};
+
+    if(defined $c->req->parameters->{'start'} && $c->req->parameters->{'limit'} && $c->req->parameters->{'page'}) {
+        $c->req->parameters->{'offset'} = delete $c->req->parameters->{'start'};
+    }
+    if(defined $c->req->parameters->{'query'} && $c->req->parameters->{'columns'}) {
+        $c->req->parameters->{Thruk::Utils::list($c->req->parameters->{'columns'}.'[~]')->[0]} = delete $c->req->parameters->{'query'};
+    }
+    return;
+}
+
+##########################################################
 sub _post_processing {
     my($c, $data) = @_;
     return unless $data;
@@ -431,10 +452,16 @@ sub _post_processing {
         }
     }
 
+    my $total;
     if(ref $data eq 'ARRAY') {
         # Sorting
         $data = _apply_sort($c, $data);
         return($data) if _is_failed($data);
+
+        $total = $c->stash->{'last_query_total'} // scalar @{$data};
+
+        # regex transformation
+        $data = _apply_transform($c, $data);
 
         # Offset
         my $offset = $c->req->parameters->{'offset'} || 0;
@@ -462,7 +489,18 @@ sub _post_processing {
     return($data) if _is_failed($data);
 
     $c->stats->profile(end => "_post_processing");
-    return $data;
+    return($data, $total);
+}
+
+##########################################################
+sub _add_meta_data {
+    my($c, $data, $total) = @_;
+    return($data) unless $c->req->parameters->{'meta'};
+    $data = {
+        data  => $data,
+        total => $total,
+    };
+    return($data);
 }
 
 ##########################################################
@@ -471,6 +509,13 @@ sub _get_filter {
     my $filter = [];
 
     my $reserved = Thruk::Utils::array2hash($reserved_query_parameters);
+
+    # panorama store queries
+    if(defined $c->req->parameters->{'_dc'}) {
+        for my $key (@{$panorama_reserved}) {
+            $reserved->{$key} = $key;
+        }
+    }
 
     for my $key (keys %{$c->req->parameters}) {
         next if $reserved->{$key};
@@ -866,12 +911,13 @@ sub _apply_columns {
 
 ##########################################################
 sub _apply_sort {
-    my($c, $data) = @_;
+    my($c, $data, $sortby) = @_;
+    $sortby = $sortby // $c->req->parameters->{'sort'};
 
-    return $data unless $c->req->parameters->{'sort'};
+    return $data unless $sortby;
     return $data if scalar @{$data} == 0;
     my $sort = [];
-    for my $s (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
+    for my $s (@{Thruk::Utils::list($sortby)}) {
         push @{$sort}, split(/\s*,\s*/mx, $s);
     }
 
@@ -924,10 +970,50 @@ sub _apply_sort {
 }
 
 ##########################################################
+sub _apply_transform {
+    my($c, $data) = @_;
+
+    my $transform = $c->req->parameters->{'transform'};
+    return $data unless $transform;
+    $transform = qr($transform);
+    my $columns = Thruk::Utils::list($c->req->parameters->{'columns'});
+    if(scalar @{$columns} != 1) {
+        return({
+            'message'     => 'transform only works in comination with a single column.',
+            'code'        => 400,
+            'failed'      => Cpanel::JSON::XS::true,
+        });
+    }
+    my $col = $columns->[0];
+
+    # transform only the columns we need
+    for my $row (@{$data}) {
+        ## no critic
+        if($row->{$col} =~ m/$transform/) {
+            $row->{$col} = $1 if defined $1 && $1 ne '';
+        }
+        ## use critic
+    }
+
+    # apply columns, otherwise calculation uniqness will consider all columns
+    $data = _apply_columns($c, $data);
+
+    # make result uniq
+    $data = Thruk::Utils::array_uniq_obj($data);
+
+    $c->stash->{'last_query_total'} = scalar @{$data};
+
+    # sort again
+    $data = _apply_sort($c, $data, $col);
+
+    return($data);
+}
+
+##########################################################
 sub _livestatus_options {
     my($c, $type) = @_;
     my $options = {};
-    if($c->req->parameters->{'limit'}) {
+    if($c->req->parameters->{'limit'} && !$c->req->parameters->{'transform'}) {
         $options->{'options'}->{'limit'} = $c->req->parameters->{'limit'};
         if($c->req->parameters->{'offset'}) {
             $options->{'options'}->{'limit'} += $c->req->parameters->{'offset'};
@@ -944,8 +1030,14 @@ sub _livestatus_options {
             if($type eq 'hosts') {
                 $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
             }
+            elsif($type eq 'hostgroups') {
+                $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_hostgroup_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns}]);
+            }
             elsif($type eq 'services') {
                 $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+            }
+            elsif($type eq 'servicegroups') {
+                $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_servicegroup_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns}]);
             }
             elsif($type eq 'contacts') {
                 $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);

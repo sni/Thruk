@@ -96,6 +96,7 @@ TP.iconShowEditDialog = function(panel) {
             valueField:   'value',
             store:         TP.iconTypesStore,
             editable:      false,
+            hidden:        panel.hideFilterType,
             listConfig : {
                 getInnerTpl: function(displayField) {
                     return '<div class="x-combo-list-item"><img src="{icon}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
@@ -268,7 +269,8 @@ TP.iconShowEditDialog = function(panel) {
                     maxValue:      360,
                     step:           15,
                     value:         panel.xdata.layout.rotation != undefined ? panel.xdata.layout.rotation : 0,
-                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyRotation(This.value, xdata); } }
+                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyRotation(This.value, xdata); } },
+                    hidden:        panel.hideRotate,
                 }, {
                     fieldLabel:   'Z-Index',
                     xtype:        'numberfield',
@@ -292,7 +294,7 @@ TP.iconShowEditDialog = function(panel) {
                     value:         panel.xdata.layout.scale != undefined ? panel.xdata.layout.scale : 100,
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } },
                     disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
-                    hidden:        panel.iconType == 'text' ? true : false
+                    hidden:        panel.hideScale,
                 }, {
                     fieldLabel:   'Size',
                     id:           'layoutsize',
@@ -473,6 +475,7 @@ TP.iconShowEditDialog = function(panel) {
     var linkTab = {
         title: 'Link',
         type:  'panel',
+        hidden: !panel.hideLinkTab,
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -589,12 +592,123 @@ TP.iconShowEditDialog = function(panel) {
                         }
                     }]
                 }, {
+                    xtype:        'fieldcontainer',
                     fieldLabel:   'Color',
-                    xtype:        'colorcbo',
-                    name:         'fontcolor',
-                    value:        '#000000',
-                    mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
-                    mouseout:      function(color) { labelUpdate(); }
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    items:        [{
+                        xtype:        'colorcbo',
+                        name:         'fontcolor',
+                        value:        '#000000',
+                        mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                        mouseout:      function(color) { labelUpdate(); },
+                        flex:          1
+                    }, {
+                        xtype:        'label',
+                        text:         'Align:',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 12}
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontcenter',
+                        value:         panel.xdata.label.fontcenter
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        itemId:       'fontcenterleft',
+                        icon:         url_prefix+'plugins/panorama/images/text_align_left.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) {
+                            this.up('fieldcontainer').getComponent("fontcentercenter").toggle(false, true);
+                            this.up('fieldcontainer').getComponent("fontcenterright").toggle(false, true);
+                            this.up('form').getForm().setValues({fontcenter: state ? 'left' : '' });
+                            labelUpdate();
+                        },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontcenter == "left") { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        itemId:       'fontcentercenter',
+                        icon:         url_prefix+'plugins/panorama/images/text_align_center.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) {
+                            this.up('fieldcontainer').getComponent("fontcenterleft").toggle(false, true);
+                            this.up('fieldcontainer').getComponent("fontcenterright").toggle(false, true);
+                            this.up('form').getForm().setValues({fontcenter: state ? 'center' : '' });
+                            labelUpdate();
+                        },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontcenter == "center" || panel.xdata.label.fontcenter == "1") { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        itemId:         'fontcenterright',
+                        icon:         url_prefix+'plugins/panorama/images/text_align_right.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) {
+                            this.up('fieldcontainer').getComponent("fontcenterleft").toggle(false, true);
+                            this.up('fieldcontainer').getComponent("fontcentercenter").toggle(false, true);
+                            this.up('form').getForm().setValues({fontcenter: state ? 'right' : '' });
+                            labelUpdate();
+                        },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontcenter == "right") { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'label',
+                        text:         'Vertical:',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 12}
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontvertical',
+                        value:         panel.xdata.label.fontvertical
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        itemId:       'fontverticaltop',
+                        icon:         url_prefix+'plugins/panorama/images/text_padding_top.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) {
+                            this.up('fieldcontainer').getComponent("fontverticalmiddle").toggle(false, true);
+                            this.up('fieldcontainer').getComponent("fontverticalbottom").toggle(false, true);
+                            this.up('form').getForm().setValues({fontvertical: state ? 'top' : '' });
+                            labelUpdate();
+                        },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontvertical == "top") { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        itemId:       'fontverticalmiddle',
+                        icon:         url_prefix+'plugins/panorama/images/text_align_justify.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) {
+                            this.up('fieldcontainer').getComponent("fontverticaltop").toggle(false, true);
+                            this.up('fieldcontainer').getComponent("fontverticalbottom").toggle(false, true);
+                            this.up('form').getForm().setValues({fontvertical: state ? 'middle' : '' });
+                            labelUpdate();
+                        },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontvertical == "middle") { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        itemId:       'fontverticalbottom',
+                        icon:         url_prefix+'plugins/panorama/images/text_padding_bottom.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) {
+                            this.up('fieldcontainer').getComponent("fontverticaltop").toggle(false, true);
+                            this.up('fieldcontainer').getComponent("fontverticalmiddle").toggle(false, true);
+                            this.up('form').getForm().setValues({fontvertical: state ? 'bottom' : '' });
+                            labelUpdate();
+                        },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontvertical == "bottom") { this.toggle(); } }
+                        }
+                    }]
                 }, {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Font',
@@ -641,20 +755,6 @@ TP.iconShowEditDialog = function(panel) {
                         toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontbold: state ? '1' : ''}); },
                         listeners: {
                             afterrender: function() { if(panel.xdata.label.fontbold) { this.toggle(); } }
-                        }
-                    }, {
-                        xtype:        'hiddenfield',
-                        name:         'fontcenter',
-                        value:         panel.xdata.label.fontcenter
-                    }, {
-                        xtype:        'button',
-                        enableToggle:  true,
-                        name:         'fontcenter',
-                        icon:         url_prefix+'plugins/panorama/images/text_align_center.png',
-                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
-                        toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontcenter: state ? '1' : '' }); },
-                        listeners: {
-                            afterrender: function() { if(panel.xdata.label.fontcenter) { this.toggle(); } }
                         }
                     }]
                 }, {
@@ -768,7 +868,7 @@ TP.iconShowEditDialog = function(panel) {
 
     /* Popup Tab */
     var popupTab;
-    if(panel.xdata.cls != 'TP.TextLabelWidget') {
+    if(panel.getDetails) {
         popupTab = {
             title: 'Popup',
             type:  'panel',
@@ -929,7 +1029,7 @@ TP.iconShowEditDialog = function(panel) {
         fields: ['contactgroup', 'permission'],
         data: access
     });
-    var permissionsItems = [,{
+    var permissionsItems = [{
             xtype: 'label',
             text:  'Hide/show this icon for specific contactgroups',
             style: "margin-left: 26%;"
@@ -998,6 +1098,7 @@ TP.iconShowEditDialog = function(panel) {
     var permissionsTab = {
         title : 'Permissions',
         type  : 'panel',
+        hidden: !panel.hidePermissionsTab,
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -1019,6 +1120,7 @@ TP.iconShowEditDialog = function(panel) {
     var sourceTab = {
         title: 'Source',
         type:  'panel',
+        hidden: !panel.hideSourceTab,
         listeners: {
             activate: function(This) {
                 var xdata = TP.get_icon_form_xdata(settingsWindow);
@@ -1147,15 +1249,6 @@ TP.iconShowEditDialog = function(panel) {
         ],
         listeners: {
             afterRender: function (This) {
-                var form = Ext.getCmp('layoutForm').getForm();
-                this.nav = Ext.create('Ext.util.KeyNav', this.el, {
-                    'left':  function(evt){ form.setValues({x: Number(form.getValues().x)-1}); },
-                    'right': function(evt){ form.setValues({x: Number(form.getValues().x)+1}); },
-                    'up':    function(evt){ form.setValues({y: Number(form.getValues().y)-1}); },
-                    'down':  function(evt){ form.setValues({y: Number(form.getValues().y)+1}); },
-                    ignoreInputFields: true,
-                    scope: panel
-                });
                 TP.setIconSettingsValues(panel.xdata);
             },
             destroy: function() {
@@ -1274,6 +1367,9 @@ TP.iconShowEditDialog = function(panel) {
         }
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
+    }
+    if(panel.iconSettingsInitCallback) {
+        panel.iconSettingsInitCallback();
     }
 };
 

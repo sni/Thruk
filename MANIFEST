@@ -496,9 +496,14 @@ plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_go.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_center.png
+plugins/plugins-available/panorama/root/images/text_align_justify.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
+plugins/plugins-available/panorama/root/images/text_align_right.png
 plugins/plugins-available/panorama/root/images/text_bold.png
 plugins/plugins-available/panorama/root/images/text_italic.png
+plugins/plugins-available/panorama/root/images/text_padding_bottom.png
+plugins/plugins-available/panorama/root/images/text_padding_top.png
+plugins/plugins-available/panorama/root/images/textfield_add.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/transparent_picker.png
 plugins/plugins-available/panorama/root/images/user_suit.png
@@ -509,6 +514,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_elements.js
 plugins/plugins-available/panorama/root/js/panorama_js_form_filter.js
 plugins/plugins-available/panorama/root/js/panorama_js_functions.js
 plugins/plugins-available/panorama/root/js/panorama_js_grid_renderer.js
+plugins/plugins-available/panorama/root/js/panorama_js_keyboard_events.js
 plugins/plugins-available/panorama/root/js/panorama_js_menu_add.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_chart.js
@@ -545,6 +551,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_panlet_squares.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url_bp.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url_nagvis.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_variable.js
 plugins/plugins-available/panorama/root/js/panorama_js_pantab.js
 plugins/plugins-available/panorama/root/js/panorama_js_settings_dashboards.js
 plugins/plugins-available/panorama/root/js/panorama_js_settings_tab.js
@@ -2050,6 +2057,14 @@ t/scenarios/backend_http_readonly/t/301-proxy.t
 t/scenarios/backend_http_readonly/t/301-status.t
 t/scenarios/backend_http_readonly/t/local/lmd.t
 t/scenarios/backend_http_readonly/t/local_test.sh
+t/scenarios/backend_https/docker-compose.yml
+t/scenarios/backend_https/Makefile
+t/scenarios/backend_https/omd/Dockerfile
+t/scenarios/backend_https/omd/playbook.yml
+t/scenarios/backend_https/omd/test.cfg
+t/scenarios/backend_https/t/300-controller_extinfo.t
+t/scenarios/backend_https/thruk.conf
+t/scenarios/backend_https/thruk_local.conf
 t/scenarios/backend_icinga/docker-compose.yml
 t/scenarios/backend_icinga/Makefile
 t/scenarios/backend_icinga/omd/Dockerfile

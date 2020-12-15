@@ -28,6 +28,9 @@ Ext.define('TP.HostStatusIcon', {
         ]);
     },
     getName: function() {
+        if(this.host) {
+            return(this.host.name);
+        }
         return(this.xdata.general.host);
     },
     getDetails: function() {
@@ -130,6 +133,9 @@ Ext.define('TP.HostgroupStatusIcon', {
         this.callParent([newStatus]);
     },
     getName: function() {
+        if(this.hostgroup) {
+            return(this.hostgroup.name);
+        }
         return(this.xdata.general.hostgroup);
     },
     getDetails: function() {
@@ -187,6 +193,10 @@ Ext.define('TP.ServiceStatusIcon', {
         ]);
     },
     getName: function() {
+        if(this.service) {
+            // TODO: check
+            return(this.service.host_name + ' - ' + this.service.description);
+        }
         return(this.xdata.general.host + ' - ' + this.xdata.general.service);
     },
     getDetails: function() {
@@ -274,6 +284,9 @@ Ext.define('TP.ServicegroupStatusIcon', {
         this.callParent([newStatus]);
     },
     getName: function() {
+        if(this.servicegroup) {
+            return(this.servicegroup.name);
+        }
         return(this.xdata.general.servicegroup);
     },
     getDetails: function() {
@@ -368,7 +381,7 @@ Ext.define('TP.FilterStatusIcon', {
         this.callParent([newStatus]);
     },
     getName: function() {
-        return(this.xdata.general.name);
+        return(this.tab.replaceVars(this.xdata.general.name));
     },
     getDetails: function() {
         var panel = this;
@@ -428,7 +441,7 @@ Ext.define('TP.HostServicesStatusIcon', {
         ]);
     },
     getName: function() {
-        return(this.xdata.general.host);
+        return(this.tab.replaceVars(this.xdata.general.host));
     },
     applyXdata: function(xdata) {
         this.callParent([xdata]);
@@ -476,7 +489,7 @@ Ext.define('TP.SiteStatusIcon', {
         this.callParent([newStatus]);
     },
     getName: function() {
-        return(this.xdata.general.site);
+        return(this.tab.replaceVars(this.xdata.general.site));
     },
     getDetails: function() {
         var details = [];
@@ -504,6 +517,7 @@ Ext.define('TP.TextLabelWidget', {
     iconType:           'text',
     html:               '',
     hideAppearanceTab:  true,
+    showScale:          false,
     initialSettingsTab: 4,
     rotateLabel:        true,
     constructor: function (config) {
@@ -676,7 +690,7 @@ Ext.define('TP.DashboardStatusIcon', {
         if(tab) {
             return(tab.xdata.title || tab.title);
         }
-        return("dashboard #"+this.xdata.general.dashboard);
+        return("dashboard #"+this.tab.replaceVars(this.xdata.general.dashboard));
     },
     getDetails: function() {
         var details = [];

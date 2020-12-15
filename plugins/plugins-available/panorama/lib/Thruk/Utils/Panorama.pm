@@ -37,6 +37,7 @@ use constant {
 ##########################################################
 my @runtime_keys = qw/state stateHist stateDetails
                       currentPage pageSize totalCount
+                      vars
                     /;
 
 use base 'Exporter';
@@ -574,8 +575,13 @@ sub save_runtime_file {
 
     if($merge_states) {
         for my $id (keys %{$runtime}, keys %{$merge_states}) {
+            my $panel = $id;
+            $panel =~ s/^pantab_\d+_//gmx;
+            if($panel =~ m/^pantab_\d+/mx) {
+                $panel = "tab";
+            }
             for my $key (@runtime_keys) {
-                $runtime->{$id}->{$key} = $merge_states->{$id}->{$key} if defined $merge_states->{$id}->{$key};
+                $runtime->{$panel}->{$key} = $merge_states->{$id}->{$key} if defined $merge_states->{$id}->{$key};
             }
         }
     }

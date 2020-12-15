@@ -75,7 +75,7 @@ Ext.define('TP.SmallWidget', {
                 xdata: TP.clone(this.xdata)
             };
             var tab = this.tab;
-            if(state.xdata.map || tab.map) {
+            if((state.xdata.map || tab.map) && !this.geoMapStatic) {
                 delete state.xdata.layout.x;
                 delete state.xdata.layout.y;
                 delete state.xdata.appearance.connectorfromx;
@@ -408,7 +408,6 @@ Ext.define('TP.SmallWidget', {
                         if(This.dragEl2) { TP.moveIcons = TP.removeFromList(TP.moveIcons, This.dragEl2); This.dragEl2.el.dom.style.outline = ""; }
                         This.el.dom.style.outline = "2px dotted orange";
                         TP.moveIcons.push(This);
-                        TP.createIconMoveKeyNav();
                     }
                     if(TP.moveIcons.length == 0) {
                         TP.resetMoveIcons();
@@ -642,6 +641,7 @@ Ext.define('TP.SmallWidget', {
     // * key: can be set if a connector is moved and only one of (center, from, to) should be updated
     updateMapLonLat: function(xdata, key) {
         var panel = this;
+        if(panel.geoMapStatic) { return; }
         if(xdata == undefined) { xdata = panel.xdata; }
         var tab   = panel.tab;
         if(tab == undefined || tab.map == undefined || tab.map.map == undefined) { return; }
@@ -696,6 +696,7 @@ Ext.define('TP.SmallWidget', {
     // moves panel to position accoring to lat/lon
     moveToMapLonLat: function(movedOnly, xdata) {
         var panel = this;
+        if(panel.geoMapStatic) { return; }
         var tab   = panel.tab;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(!tab || tab.map == undefined || tab.map.map == undefined) { return; }
@@ -951,13 +952,12 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         /* static icons must be refreshed, even when inactive, because they won't be updated later on */
-        if(panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata); }
+        if(panel.appearance && panel.appearance.updateRenderAlways) { panel.appearance.updateRenderAlways(xdata); }
         /* no need for changes if we are not the active tab */
         if(!panel.tab.isActiveTab()) { return; }
-        if(panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
+        if(panel.appearance && panel.appearance.updateRenderActive) { panel.appearance.updateRenderActive(xdata, forceColor); }
         if(panel.el) { panel.size = panel.getSize(); }
     },
-
     redraw: function() {
         var panel = this;
         var key = panel.id;

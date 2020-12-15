@@ -2562,36 +2562,41 @@ parse lexical filter from string. returns filter structure.
 
 =cut
 sub parse_lexical_filter {
-    my($string) = @_;
+    my($string, $raw, $pos) = @_;
     if(ref $string ne 'SCALAR') {
         my $copy = $string;
         $string = \$copy;
     }
+    if(!defined $raw) { $raw = ${$string}; $pos = 0; }
     if(${$string} =~ m/^(.{3})/mx) {
         my $separator = $1;
         if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
             if(${$string} =~ m/\Q$separator\E(.*?)\Q$separator\E/gmx) {
                 ${$string} = $1;
+                $pos += length($separator);
             }
         }
     }
     my $filter = [];
     my($token,$key,$op,$val,$combine);
     while(${$string} ne '') {
-        if(${$string} =~ s/^\s*(
+        if(${$string} =~ s/^(\s*)(
                               \(
                             | \)
                             | [\d\w\^~\.\-_\*]+
                             | '[^']*'
                             | "[^"]*"
                             | [=\!~><]+
-                        )\s*//mx) {
-            $token = $1;
+                        )(\s*)//mx) {
+            $token = $2;
+            $pos += length($1);
+            my $tokenlength = length($3) + length($token);
             if(!defined $key) {
                 $key = $token;
                 if($key eq '(') {
                     undef $key;
-                    my $f = parse_lexical_filter($string);
+                    $pos = $pos + $tokenlength;
+                    my $f = parse_lexical_filter($string, $raw, $pos);
                     push @{$filter}, $f;
                     next;
                 }
@@ -2599,16 +2604,18 @@ sub parse_lexical_filter {
                     return($filter);
                 }
                 if(lc($key) eq 'and' || lc($key) eq 'or') {
-                    if(scalar @{$filter} == 0) { die("unexpected ".uc($key)." at ".${$string}); }
+                    if(scalar @{$filter} == 0) { die(sprintf("unexpected ".uc($key)." at character %d in %s", $pos+length(${$string}), $raw)); }
                     $combine = lc($key);
                     undef $key;
                 }
+                $pos = $pos + $tokenlength;
                 next;
             }
             elsif(!defined $op) {
                 $op = $token;
                 if($op eq '~')  { $op = '~~'; }
                 if($op eq '!~') { $op = '!~~'; }
+                $pos = $pos + $tokenlength;
                 next;
             }
             elsif(!defined $val) {
@@ -2632,10 +2639,11 @@ sub parse_lexical_filter {
                     }
                 }
                 undef $combine;
+                $pos = $pos + $tokenlength;
                 next;
             }
         } else {
-            die("parse error at ".${$string});
+            die(sprintf("parse error at character %d in %s", $pos+length(${$string}), $raw));
         }
     }
     return $filter;

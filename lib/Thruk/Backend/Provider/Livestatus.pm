@@ -47,6 +47,9 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
 $Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
     contacts contact_groups long_plugin_output services
 /];
+$Thruk::Backend::Provider::Livestatus::default_hostgroup_columns = [qw/
+    name alias members action_url notes notes_url
+/];
 $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns = [qw/
     num_hosts
     num_hosts_down num_hosts_pending num_hosts_unreach num_hosts_up
@@ -84,6 +87,9 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
 /];
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
     contacts contact_groups long_plugin_output
+/];
+$Thruk::Backend::Provider::Livestatus::default_servicegroup_columns = [qw/
+    name alias members action_url notes notes_url
 /];
 $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns = [qw/
     num_services
@@ -505,9 +511,7 @@ sub get_hostgroups {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            name alias members action_url notes notes_url
-        /];
+        $options{'columns'} = $Thruk::Backend::Provider::Livestatus::default_hostgroup_columns;
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
@@ -674,9 +678,7 @@ sub get_servicegroups {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            name alias members action_url notes notes_url
-        /];
+        $options{'columns'} = $Thruk::Backend::Provider::Livestatus::default_servicegroup_columns;
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }

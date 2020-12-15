@@ -75,16 +75,6 @@ Ext.onReady(function() {
     [% END %]
     cleanUnderscoreUrl();
 
-    /* disable backspace on body to prevent accidentally leaving the page */
-    Ext.EventManager.on(document, 'keydown', function(evt, t) {
-        if(evt.getKey() == evt.BACKSPACE && evt.target) {
-            if(evt.target.tagName.toLowerCase() != "input" && evt.target.tagName.toLowerCase() != "textarea") {
-                evt.preventDefault();
-                return false;
-            }
-        }
-    });
-
     /* disable scrolling if body is masked */
     var bodyDom  = Ext.getBody().dom;
     var bodyMask = false;

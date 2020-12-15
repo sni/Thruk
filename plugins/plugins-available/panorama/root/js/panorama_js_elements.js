@@ -524,12 +524,35 @@ Ext.define('Ext.ux.NumberFieldUnit', {
     getSubmitValue: function()      { var value = Number(this.rawToValue(this.callParent())); return(value); }
 });
 
+Ext.define('Ext.ux.NameValueMode', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'name',     type: 'string'},
+        {name: 'value',    type: 'string'},
+        {name: 'disabled', type: 'bool'},
+        {name: 'hidden',   type: 'bool'}
+    ]
+});
+
 Ext.define('Ext.ux.SearchModel', {
     extend: 'Ext.data.Model',
     fields: [
         {name: 'text', type: 'string'},
         {name: 'value',  type: 'string'}
     ]
+});
+
+Ext.define('TP.data.reader.JsonExtend', {
+    extend: 'Ext.data.reader.Json',
+    alias : 'reader.tp_json_extend',
+    readRecords: function(data) {
+        if(this.panel) {
+            for(var key in this.panel.tab.getVars()) {
+                data[this.root].unshift({text: "{{"+key+"}}", value: "{{"+key+"}}"});
+            }
+        }
+        return this.callParent([data]);
+    }
 });
 
 Ext.define('Ext.ux.SearchStore', {
@@ -600,6 +623,7 @@ Ext.define('Ext.ux.SearchStore', {
             store.lastParam  = param;
             store.lastLoaded = now;
             store.lastExtraParams = store.proxy.extraParams;
+            store.proxy.reader.panel = store.panel;
             return true;
         },
         load: function(store, operation, eOpts) {
@@ -613,7 +637,7 @@ Ext.define('Ext.ux.SearchStore', {
         url:    'status.cgi',
         method: 'POST',
         reader: {
-            type: 'json',
+            type: 'tp_json_extend',
             root: 'data'
         }
     }
@@ -673,6 +697,7 @@ Ext.define('Ext.ux.SearchCombobox', {
                     doReload = true;
                 }
             }
+            proxy.addParams = me.store.panel.tab.replaceVars(proxy.addParams);
             if(me.store.search_type != type) {
                 me.store.search_type = type;
                 doReload = true;
@@ -983,3 +1008,105 @@ function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, 
     fakePanel.show();
     return;
 }
+
+Ext.define('Ext.ux.ComboWithSearch', {
+    extend:     'Ext.form.field.ComboBox',
+    alias:      'widget.searchpickercbo',
+    defaultListConfig: {
+        xtype: "searchboundlist"
+    },
+    initComponent() {
+        this.callParent();
+        this.addListener('collapse',  function() {
+            if(this.picker) {
+                this.picker.destroy();
+                this.picker = null;
+            }
+        });
+    }
+});
+
+Ext.define('Ext.ux.BoundlistWithSearch', {
+    extend:     'Ext.view.BoundList',
+    alias:      'widget.searchboundlist',
+    initComponent() {
+        var searchTpl = '<div id="'+this.id+'-pickersearchEl" style="width:100%; height: 26px;"></div>';
+        this.tpl = new Ext.XTemplate(searchTpl, this.tpl.html, this.tpl);
+
+        this.addListener('show',  function(picker) {
+            if(picker.searchtoolbar) {
+                picker.searchtoolbar.items.getAt(0).setValue("");
+                picker.searchtoolbar.items.getAt(0).focus();
+                return;
+            }
+            // TODO: delay, first triggerclick shows nothing
+            if(!document.getElementById(picker.id+"-pickersearchEl")) { return; }
+            picker.searchtoolbar = Ext.create('Ext.toolbar.Toolbar', {
+                renderTo: picker.id+"-pickersearchEl",
+                width:    "100%",
+                items: [{
+                        xtype:     'textfield',
+                        name:      'pickersearch',
+                        width:     "100%",
+                        emptyText: 'enter search term',
+                        selectOnFocus: true,
+                        listeners: {
+                            change: function(This, newValue, oldValue, eOpts) {
+                                // TODO: set panel value
+a=This; // TODO: search for ...store.panel
+console.log(a);
+                                //panel.comboExtraFilter = newValue;
+                                //panel.formField.store.load();
+                            }
+                        }
+                    }]
+            });
+            window.setTimeout(function() {
+                picker.searchtoolbar.items.getAt(0).focus();
+            }, 300);
+        });
+
+        this.addListener('destroy',  function(picker) {
+            if(picker.searchtoolbar) {
+                picker.searchtoolbar.destroy();
+                delete picker.searchtoolbar;
+            }
+        });
+
+        this.callParent();
+    }
+});
+
+Ext.define('Ext.ux.plugin.ComboItemsDisableable', {
+    extend: 'Ext.AbstractPlugin',
+    alias: 'plugin.comboitemsdisableable',
+
+    init: function (cmp) {
+        var me = this;
+        me.disabledField = me.disabledField || 'disabled';
+        me.hiddenField   = me.hiddenField   || 'hidden';
+        cmp.tpl = Ext.create('Ext.XTemplate',
+            '<ul class="' + Ext.plainListCls + ' ' + cmp.cls + '"><tpl for=".">',
+            '  <tpl if="this.isDisabled(' + me.disabledField + ')">',
+            '    <div class="x-boundlist-item item-disabled"><em>{' + cmp.displayField + '}</em></div>',
+            '  <tpl else>',
+            '    <tpl if="this.isHidden(' + me.hiddenField + ')"><div style="display:none;"></tpl>',
+            '      '+(cmp.listConfig.getInnerTpl ? cmp.listConfig.getInnerTpl(cmp.displayField) : '<div class="x-boundlist-item">{' + cmp.displayField + '}</div>'),
+            '    <tpl if="this.isHidden(' + me.hiddenField + ')"></div></tpl>',
+            '  </tpl>',
+            '</tpl></ul>', {
+                isDisabled: function(disabled) {
+                    return disabled;
+                },
+                isHidden: function(hidden) {
+                    return hidden;
+                }
+            }
+        );
+
+        // make sure disabled items are not selectable
+        cmp.on('beforeselect', function(combo, record, index) {
+            return !record.get(me.disabledField);
+        });
+    }
+});

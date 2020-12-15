@@ -30,6 +30,11 @@ next:
             - add overview sla threshold to reduce items in overview graph
           - Logcache:
             - improve initial import and compacting
+          - Panorama:
+            - add user input and variables
+            - delete multiple selected icons by delete/backspace key
+            - add label text align options
+            - fix keyboard controls in firefox
           - LMD:
             - add reload/config cli lmd command
             - add last_lmd_cache_update to available columns

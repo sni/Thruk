@@ -29,6 +29,10 @@ Ext.define('TP.Pantab', {
             }
         }
 
+        if(!this.xdata.vars) {
+            this.xdata.vars = {};
+        }
+
         // contains the currently active backends
         this.activeBackends = undefined;
         this.callParent();
@@ -334,6 +338,12 @@ Ext.define('TP.Pantab', {
             if(found) {
                 allStates[panel.id] = saveData;
             }
+        }
+        if(tab.xdata.vars) {
+            allStates[tab.id] = {
+                vars: tab.xdata.vars
+            };
+            found++;
         }
         if(found) {
             Ext.Ajax.request({
@@ -713,8 +723,6 @@ Ext.define('TP.Pantab', {
                         controlsDiv.destroy();
                         tab.lockButton.destroy();
                         tab.lockButton = undefined;
-                        tab.keyMap.destroy();
-                        tab.keyMap = null;
                     }
                 }
             };
@@ -775,20 +783,6 @@ Ext.define('TP.Pantab', {
                 };
                 tab.saveState();
             }
-            // toggle map navigation on space
-            tab.keyMap = new Ext.util.KeyMap({
-                target: Ext.getBody(),
-                key: Ext.EventObject.SPACE,
-                fn: function(key, evt) {
-                    if(!tab.map) { return; }
-                    if(evt.target.tagName == "INPUT" || evt.target.tagName == "TEXTAREA") { return; }
-                    if(tab.lockButton.hasCls('unlocked')) {
-                        tab.disableMapControls();
-                    } else {
-                        tab.enableMapControls();
-                    }
-                }
-            });
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
@@ -1390,6 +1384,84 @@ Ext.define('TP.Pantab', {
         }
         tab.mask = undefined;
         Ext.getBody().unmask();
+    },
+    setVar: function(name, value) {
+        var tab = this;
+        tab.xdata.vars[name] = value;
+        return;
+    },
+    getVars: function(name) {
+        var tab = this;
+        if(!tab.xdata.vars) {
+            tab.xdata.vars = {};
+        }
+        var vars = tab.xdata.vars;
+        if(name != undefined) {
+            var val = vars[name];
+            if(val == undefined) { val = ""; }
+            return(val);
+        }
+        return(vars);
+    },
+    replaceVars: function(txt, json) {
+        var tab = this;
+
+        // if its a json string, unwind, replace and put back together
+        if(json && txt) {
+            try {
+                txt = Ext.JSON.decode(txt);
+                txt = tab.replaceVars(txt);
+                txt = Ext.JSON.encode(txt);
+            } catch(e) {
+                console.log(e);
+            }
+            return(txt);
+        }
+
+        // recurse into arrays
+        if(Ext.isArray(txt)) {
+            Ext.Array.each(txt, function(el, idx) {
+                txt[idx] = tab.replaceVars(el);
+            });
+            return(txt);
+        }
+
+        // recurse into hashes
+        if(Ext.isObject(txt)) {
+            for(var key in txt) {
+                txt[key] = tab.replaceVars(txt[key]);
+            }
+            return(txt);
+        }
+
+        var matches = String(txt).match(/(\{\{.*?\}\})/g);
+        if(!matches) {
+            return(txt);
+        }
+
+        var vars    = tab.getVars();
+        Ext.Array.each(matches, function(item, idx) {
+            var name    = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
+            var replace = "";
+            if(vars[name] != undefined) {
+                replace = vars[name];
+                if(Ext.isArray(replace)) {
+                    if(replace.length == 1 && replace[0] == '* ALL *') {
+                        replace = '.*';
+                    } else {
+                        var escaped = [];
+                        for(var x = 0; x < replace.length; x++) {
+                            escaped.push(Ext.util.Format.escapeRegex(String(replace[x])));
+                        }
+                        replace = "("+escaped.join("|")+")";
+                    }
+                } else {
+                    replace = Ext.util.Format.escapeRegex(String(vars[name]));
+                }
+            }
+            txt = txt.replace(item, replace);
+        });
+        return(txt);
     }
 });
 
@@ -1401,7 +1473,6 @@ Ext.onReady(function() {
             TP.lassoEl.destroy();
             TP.lassoEl = undefined;
             Ext.getBody().removeListener("mousemove", TP.lassoDragHandler);
-            TP.createIconMoveKeyNav();
             TP.skipResetMoveIcons = true;
             window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
         }

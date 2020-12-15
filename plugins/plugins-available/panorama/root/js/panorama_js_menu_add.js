@@ -22,6 +22,10 @@ TP.addPanletsMenu = function(options) {
                 cls:    options.open == 'left' ? 'hideRightArrow' : '',
                 hideOnClick: false,
                 menu:    [{
+                        text:   'Input Field',
+                        icon:   url_prefix+'plugins/panorama/images/textfield_add.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.VariableWidget'}, -8, -8) }
+                    }, '-', {
                         text:   'Line / Arrow / Watermark',
                         icon:   url_prefix+'plugins/panorama/images/link_go.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.ServiceStatusIcon', conf: { xdata: { appearance: { type: 'connector' }}}}, -8, -8) }

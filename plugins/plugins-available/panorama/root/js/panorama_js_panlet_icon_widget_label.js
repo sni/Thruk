@@ -68,7 +68,7 @@ Ext.define('TP.IconLabel', {
         if(!panel.labelEl || !panel.labelEl.el) { return; }
         var el    = panel.labelEl.el.dom;
         var style = el.style;
-        style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
+        style.zIndex = Number(panel.el.dom.style.zIndex) + (panel.labelBehindPanel ? -1 : 1); /* keep above/behind icon */
         var oldTxt = panel.labelEl.el.dom.innerHTML;
         if(oldTxt != txt) {
             panel.labelEl.update(txt);
@@ -78,7 +78,19 @@ Ext.define('TP.IconLabel', {
         style.background   = cfg.bgcolor;
         style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
         style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
-        style.textAlign    = cfg.fontcenter ? 'center' : 'unset';
+        if(cfg.fontcenter == "1" || cfg.fontcenter == "center") {
+            style.textAlign = 'center'
+        } else if(cfg.fontcenter) {
+            style.textAlign = cfg.fontcenter;
+        } else {
+            style.textAlign = 'unset'
+        }
+        if(cfg.fontvertical) {
+            style.display       = "table";
+            panel.labelEl.update("<span style='display:table-cell; vertical-align:"+cfg.fontvertical+";'>"+txt+"</span>");
+        } else {
+            style.verticalAlign = "unset";
+        }
         style.paddingLeft  = "3px";
         style.paddingRight = "3px";
         if(cfg.orientation == 'vertical') { panel.labelEl.addCls('vertical');    }
@@ -89,7 +101,7 @@ Ext.define('TP.IconLabel', {
 
     setIconLabelDynamicText: function(txt) {
         var panel = this;
-        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability', 'nl2br'];
+        var allowed_functions = ['strftime', 'sprintf', 'if', 'availability', 'nl2br', 'ucfirst'];
         if(TP.availabilities == undefined) { TP.availabilities = {}; }
         if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
         var matches = txt.match(/(\{\{.*?\}\})/g);

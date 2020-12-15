@@ -188,7 +188,7 @@ TD.slider_txt {
 .x-boundlist-selected img.chkCombo{
   background-position: 0 -13px;
 }
-DIV.x-boundlist-selected {
+UL.multiselect DIV.x-boundlist-selected {
   background: none;
 }
 LI.x-boundlist-selected {

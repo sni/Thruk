@@ -1775,6 +1775,7 @@ sub _do_on_peers {
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
+    $c->stash->{'last_query_total'} = $totalsize;
     return($data, $totalsize) if wantarray;
     return $data;
 }

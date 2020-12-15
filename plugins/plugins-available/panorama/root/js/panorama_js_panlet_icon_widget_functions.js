@@ -248,28 +248,11 @@ TP.resetMoveIcons = function() {
         }
     });
     TP.moveIcons = undefined;
-    if(TP.keynav) {
-        TP.keynav.destroy();
-        TP.keynav = undefined;
-    }
     if(TP.lassoEl) {
         TP.lassoEl.destroy();
         TP.lassoEl = undefined;
     }
 }
-
-TP.createIconMoveKeyNav = function() {
-    if(TP.keynav) { return; }
-    TP.keynav = Ext.create('Ext.util.KeyNav', Ext.getBody(), {
-        'left':  function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]-1, pos[1]); }},
-        'right': function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]+1, pos[1]); }},
-        'up':    function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]-1); }},
-        'down':  function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]+1); }},
-        'esc':   function(evt){ TP.resetMoveIcons(); },
-        ignoreInputFields: true
-    });
-}
-
 
 /* delay link opening to allow double click menu */
 TP.iconClickHandler = function(id) {
@@ -1010,7 +993,13 @@ TP.evalInContext = function(js, context) {
 }
 
 TP.getPanelMacros = function(panel) {
-    var macros = { panel: panel };
+    var macros = {
+        panel: panel
+    }
+    var vars = panel.tab.getVars();
+    for(var key in vars) {
+        macros[key] = vars[key];
+    }
     if(panel.servicegroup) { macros.totals = panel.servicegroup; macros['alias'] = panel.servicegroup.alias; macros['name'] = panel.servicegroup.name; }
     if(panel.hostgroup)    { macros.totals = panel.hostgroup;    macros['alias'] = panel.hostgroup.alias;    macros['name'] = panel.hostgroup.name; }
     if(panel.results)      { macros.totals = panel.results; }
@@ -1025,6 +1014,12 @@ TP.getPanelMacros = function(panel) {
         }
     } else {
         macros.perfdata = {};
+    }
+    if(panel.getMacros) {
+        vars = panel.getMacros();
+        for(var key in vars) {
+            macros[key] = vars[key];
+        }
     }
     return(macros);
 }

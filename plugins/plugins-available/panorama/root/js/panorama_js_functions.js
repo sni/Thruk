@@ -832,6 +832,9 @@ var TP = {
             baseParams['current_tab'] = panel.tab.id;
         }
         TP.log('['+panel.id+'] loading '+url);
+        if(baseParams.filter) {
+            baseParams.filter = panel.tab.replaceVars(baseParams.filter, true);
+        }
         panel.loader.load({url:url, baseParams: baseParams});
     },
 
@@ -1192,7 +1195,7 @@ var TP = {
         }
         return binary;
     },
-    /* update an array store with new data */
+    /* update an array store with new single value array: [["op1"], ["opt2"], ...] */
     updateArrayStore: function(store, data) {
         if(!store) { return; }
         store.suspendEvents(false);
@@ -1207,7 +1210,7 @@ var TP = {
             store.loadRawData([[data[x]]], true);
         }
     },
-    /* update an array store with new data with key/value */
+    /* update an array store with new data with key/value: [["opt1", "name1"], ["opt2", "name2"], ...] */
     updateArrayStoreKV: function(store, data) {
         if(!store) { return; }
         store.suspendEvents(false);
@@ -1222,19 +1225,19 @@ var TP = {
             store.loadRawData({name:data[x][0], value:data[x][1]}, true);
         }
     },
-    /* update an array store with new data from hash */
+    /* update an array store with new data from hash: [{name: "name1", value: "opt1"}, {name: "name2", value: "opt2"}, ...] */
     updateArrayStoreHash: function(store, data) {
         if(!store) { return; }
         store.suspendEvents(false);
         store.removeAll();
         var num = data.length-1;
         for(var x=0;x<num;x++) {
-            store.loadRawData({name:data[x]['name'], value:data[x]['value']}, true);
+            store.loadRawData(data[x], true);
         }
         store.resumeEvents();
         // add last one to trigger some events
         if(data.length > 0) {
-            store.loadRawData({name:data[x]['name'], value:data[x]['value']}, true);
+            store.loadRawData(data[x], true);
         }
     },
     /* return location object for url */
@@ -1661,7 +1664,8 @@ var TP = {
             if(p.xdata && p.xdata.general) {
                 /* custom filter */
                 if(p.xdata.general.filter) {
-                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter, p.xdata.general.backends]);
+                    var replaced = tab.replaceVars(p.xdata.general.filter, true);
+                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, replaced, p.xdata.general.backends]);
                     if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
                     if(req.filter[filter] == undefined) { req.filter[filter] = []; }
                     req.filter[filter].push(p.id);
@@ -1671,59 +1675,65 @@ var TP = {
 
                 /* update services */
                 else if(p.xdata.general.service && p.xdata.general.host) {
-                    if(req.services[p.xdata.general.host] == undefined) {
-                        req.services[p.xdata.general.host] = {};
-                        ref.services[p.xdata.general.host] = {};
+                    var host    = tab.replaceVars(p.xdata.general.host);
+                    var service = tab.replaceVars(p.xdata.general.service);
+                    if(req.services[host] == undefined) {
+                        req.services[host] = {};
+                        ref.services[host] = {};
                     }
-                    if(ref.services[p.xdata.general.host][p.xdata.general.service] == undefined) {
-                        ref.services[p.xdata.general.host][p.xdata.general.service] = [];
+                    if(ref.services[host][service] == undefined) {
+                        ref.services[host][service] = [];
                     }
-                    if(req.services[p.xdata.general.host][p.xdata.general.service] == undefined) {
-                        req.services[p.xdata.general.host][p.xdata.general.service] = [];
+                    if(req.services[host][service] == undefined) {
+                        req.services[host][service] = [];
                     }
                     if(p.xdata.label && p.xdata.label.labeltext && p.xdata.label.labeltext.match("long_plugin_output")) {
                         req.has_long_plugin_output = true;
                     }
-                    req.services[p.xdata.general.host][p.xdata.general.service].push(p.id);
-                    ref.services[p.xdata.general.host][p.xdata.general.service].push(p);
+                    req.services[host][service].push(p.id);
+                    ref.services[host][service].push(p);
                     count++;
                 }
                 /* update hosts */
                 else if(p.xdata.general.host) {
-                    if(ref.hosts[p.xdata.general.host] == undefined) { ref.hosts[p.xdata.general.host] = []; }
-                    if(req.hosts[p.xdata.general.host] == undefined) { req.hosts[p.xdata.general.host] = []; }
+                    var host = tab.replaceVars(p.xdata.general.host);
+                    if(ref.hosts[host] == undefined) { ref.hosts[host] = []; }
+                    if(req.hosts[host] == undefined) { req.hosts[host] = []; }
                     if(p.xdata.label && p.xdata.label.labeltext && p.xdata.label.labeltext.match("long_plugin_output")) {
                         req.has_long_plugin_output = true;
                     }
-                    req.hosts[p.xdata.general.host].push(p.id);
-                    ref.hosts[p.xdata.general.host].push(p);
+                    req.hosts[host].push(p.id);
+                    ref.hosts[host].push(p);
                     count++;
                 }
                 /* update hostgroups */
                 else if(p.xdata.general.hostgroup) {
-                    if(ref.hostgroups[p.xdata.general.hostgroup] == undefined) { ref.hostgroups[p.xdata.general.hostgroup] = []; }
-                    if(req.hostgroups[p.xdata.general.hostgroup] == undefined) { req.hostgroups[p.xdata.general.hostgroup] = []; }
-                    req.hostgroups[p.xdata.general.hostgroup].push(p.id);
-                    ref.hostgroups[p.xdata.general.hostgroup].push(p);
+                    var hostgroup = tab.replaceVars(p.xdata.general.hostgroup);
+                    if(ref.hostgroups[hostgroup] == undefined) { ref.hostgroups[hostgroup] = []; }
+                    if(req.hostgroups[hostgroup] == undefined) { req.hostgroups[hostgroup] = []; }
+                    req.hostgroups[hostgroup].push(p.id);
+                    ref.hostgroups[hostgroup].push(p);
                     count++;
                 }
                 /* update servicegroups */
                 else if(p.xdata.general.servicegroup) {
-                    if(ref.servicegroups[p.xdata.general.servicegroup] == undefined) { ref.servicegroups[p.xdata.general.servicegroup] = []; }
-                    if(req.servicegroups[p.xdata.general.servicegroup] == undefined) { req.servicegroups[p.xdata.general.servicegroup] = []; }
-                    req.servicegroups[p.xdata.general.servicegroup].push(p.id);
-                    ref.servicegroups[p.xdata.general.servicegroup].push(p);
+                    var servicegroup = tab.replaceVars(p.xdata.general.servicegroup);
+                    if(ref.servicegroups[servicegroup] == undefined) { ref.servicegroups[servicegroup] = []; }
+                    if(req.servicegroups[servicegroup] == undefined) { req.servicegroups[servicegroup] = []; }
+                    req.servicegroups[servicegroup].push(p.id);
+                    ref.servicegroups[servicegroup].push(p);
                     count++;
                 }
                 /* update sites */
                 else if(p.xdata.general.site) {
-                    if(ref.sites[p.xdata.general.site] == undefined) { ref.sites[p.xdata.general.site] = []; }
-                    ref.sites[p.xdata.general.site].push(p);
+                    var site = tab.replaceVars(p.xdata.general.site);
+                    if(ref.sites[site] == undefined) { ref.sites[site] = []; }
+                    ref.sites[site].push(p);
                     count++;
                 }
                 /* update dashboards */
                 else if(p.xdata.general.dashboard) {
-                    var tab_id = TP.nr2TabId(p.xdata.general.dashboard);
+                    var tab_id = TP.nr2TabId(tab.replaceVars(p.xdata.general.dashboard));
                     if(ref.dashboards[tab_id] == undefined) { ref.dashboards[tab_id] = []; }
                     ref.dashboards[tab_id].push(p);
                     count++;
