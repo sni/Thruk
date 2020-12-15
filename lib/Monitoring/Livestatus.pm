@@ -12,7 +12,7 @@ use IO::Select ();
 use Monitoring::Livestatus::INET ();
 use Monitoring::Livestatus::UNIX ();
 
-our $VERSION = '0.82';
+our $VERSION = '0.84';
 
 
 # list of allowed options

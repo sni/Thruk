@@ -4,7 +4,7 @@ use parent 'Monitoring::Livestatus';
 use strict;
 use warnings;
 use IO::Socket::UNIX ();
-use Carp qw/confess croak/;
+use Carp qw/confess/;
 
 =head1 NAME
 
@@ -54,7 +54,7 @@ sub _open {
     if(!-S $self->{'peer'}) {
         my $msg = "failed to open socket $self->{'peer'}: $!";
         if($self->{'errors_are_fatal'}) {
-            croak($msg);
+            confess($msg);
         }
         $Monitoring::Livestatus::ErrorCode    = 500;
         $Monitoring::Livestatus::ErrorMessage = $msg;
@@ -70,7 +70,7 @@ sub _open {
         if(!defined $sock || !$sock->connected()) {
             my $msg = "failed to connect to $self->{'peer'}: $!";
             if($self->{'errors_are_fatal'}) {
-                croak($msg);
+                confess($msg);
             }
             $Monitoring::Livestatus::ErrorCode    = 500;
             $Monitoring::Livestatus::ErrorMessage = $msg;
