@@ -8,7 +8,7 @@ BASEDIR=$(dirname $0)/..
 
 # git version
 if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
-  export PERL5LIB="$PERL5LIB:$BASEDIR/lib";
+  export PERL5LIB="$BASEDIR/lib:$PERL5LIB";
   if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
   if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
 
