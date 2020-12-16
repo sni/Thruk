@@ -197,6 +197,7 @@ sub file_lock {
 
     # we can only lock files in existing folders
     my $basename = $file;
+    if($basename !~ m|^[\.\/]|mx) { $basename = './'.$basename; }
     $basename    =~ s%/[^/]*$%%gmx;
     if(!-d $basename.'/.') {
         confess("cannot lock $file in non-existing folder: ".$!);
