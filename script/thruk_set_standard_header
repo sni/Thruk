@@ -7,7 +7,10 @@ if [ "x$1" = "xcheck" ]; then
   CHECK_ONLY=1
 fi
 
-for file in $(grep -c "exec perl" examples/* script/* | grep -v :0 | grep -v thruk_set_standard_header | awk -F: {' print $1 '}); do
+for file in $(grep -c "exec perl" examples/* script/* support/* | grep -v :0 | grep -v thruk_set_standard_header | awk -F: {' print $1 '}); do
+  if [[ $file =~ support/standard_script_header ]]; then
+    continue
+  fi
   linenr=$(grep -n "^#line " $file | head -n 1 | awk -F: '{ print $1 }')
   if [ "x" = "x$linenr" ]; then
     echo "could not detect line in $file"
