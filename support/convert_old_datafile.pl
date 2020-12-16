@@ -26,6 +26,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
+use Thruk::Config;
 use Thruk::Utils::IO;
 use Thruk::Utils;
 
@@ -64,5 +65,5 @@ for my $filename (@ARGV) {
     }
 
     # save file to original destination
-    Thruk::Utils::IO::json_lock_store($filename, $VAR1, 1);
+    Thruk::Utils::IO::json_lock_store($filename, $VAR1, { pretty => 1 });
 }

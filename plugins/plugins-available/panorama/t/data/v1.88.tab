@@ -1,0 +1,223 @@
+{
+  "tab" => {
+    "xdata" => {
+      "autohideheader" => 1,
+      "backends" => [],
+      "background" => "none",
+      "defaulticonset" => "default",
+      "groups" => [],
+      "refresh" => 90,
+      "select_backends" => 0,
+      "title" => "Test Dashboard v1.88"
+    }
+  },
+  "tabpan-tab_1_panlet_1" => {
+    "height" => 200,
+    "maximized" => bless( do{\(my $o = 0)}, 'JSON::XS::Boolean' ),
+    "pos" => [
+      0,
+      25
+    ],
+    "size" => {
+      "height" => 200,
+      "width" => 800
+    },
+    "title" => "Hosts",
+    "width" => 800,
+    "xdata" => {
+      "backends" => [],
+      "cls" => "TP.PanletGridHosts",
+      "currentPage" => 1,
+      "gridstate" => {
+        "columns" => [
+          {
+            "id" => "h1"
+          },
+          {
+            "id" => "h2"
+          },
+          {
+            "id" => "h3"
+          },
+          {
+            "id" => "h4"
+          },
+          {
+            "id" => "h5"
+          },
+          {
+            "id" => "h6"
+          },
+          {
+            "id" => "h7"
+          },
+          {
+            "id" => "h8"
+          },
+          {
+            "id" => "h9"
+          },
+          {
+            "id" => "h10"
+          },
+          {
+            "id" => "h11"
+          },
+          {
+            "id" => "h12"
+          },
+          {
+            "id" => "h13"
+          },
+          {
+            "id" => "h14"
+          },
+          {
+            "id" => "h15"
+          },
+          {
+            "id" => "h16"
+          },
+          {
+            "id" => "h17"
+          },
+          {
+            "id" => "h18"
+          },
+          {
+            "id" => "h19"
+          },
+          {
+            "id" => "h20"
+          },
+          {
+            "id" => "h21"
+          },
+          {
+            "id" => "h22"
+          },
+          {
+            "id" => "h23"
+          },
+          {
+            "id" => "h24"
+          },
+          {
+            "id" => "h25"
+          },
+          {
+            "id" => "h26"
+          },
+          {
+            "id" => "h27"
+          },
+          {
+            "id" => "h28"
+          },
+          {
+            "id" => "h29"
+          },
+          {
+            "id" => "h30"
+          },
+          {
+            "id" => "h31"
+          },
+          {
+            "id" => "h32"
+          },
+          {
+            "id" => "h33"
+          },
+          {
+            "id" => "h34"
+          },
+          {
+            "id" => "h35"
+          },
+          {
+            "id" => "h36"
+          }
+        ]
+      },
+      "groupField" => undef,
+      "pageSize" => 6,
+      "refresh" => -1,
+      "totalCount" => 45,
+      "url" => "panorama.cgi?task=hosts"
+    }
+  },
+  "tabpan-tab_1_panlet_2" => {
+    "xdata" => {
+      "appearance" => {
+        "iconset" => "",
+        "type" => "icon"
+      },
+      "cls" => "TP.HostStatusIcon",
+      "general" => {
+        "host" => "localhost"
+      },
+      "label" => {
+        "bgcolor" => "",
+        "bordercolor" => "",
+        "bordersize" => 1,
+        "fontbold" => "",
+        "fontcolor" => "#000000",
+        "fontfamily" => "",
+        "fontitalic" => "",
+        "fontsize" => 14,
+        "labeltext" => "Host: {{name}}",
+        "offsetx" => 0,
+        "offsety" => 0,
+        "orientation" => "horizontal",
+        "position" => "below"
+      },
+      "layout" => {
+        "scale" => 100,
+        "x" => 306,
+        "y" => 422,
+        "zindex" => 0
+      },
+      "link" => {},
+      "nsize" => [
+        16,
+        16
+      ],
+      "size" => 23
+    }
+  },
+  "tabpan-tab_1_panlet_3" => {
+    "xdata" => {
+      "appearance" => {
+        "type" => "icon"
+      },
+      "cls" => "TP.TextLabelWidget",
+      "general" => {
+        "text" => ""
+      },
+      "label" => {
+        "bgcolor" => "",
+        "bordercolor" => "",
+        "bordersize" => 1,
+        "fontbold" => "",
+        "fontcolor" => "#000000",
+        "fontfamily" => "",
+        "fontitalic" => "",
+        "fontsize" => 14,
+        "labeltext" => "Test Label v1.88",
+        "offsetx" => 0,
+        "offsety" => 0,
+        "orientation" => "horizontal",
+        "position" => "below"
+      },
+      "layout" => {
+        "scale" => 100,
+        "x" => 640,
+        "y" => 300,
+        "zindex" => 0
+      },
+      "link" => {}
+    }
+  },
+  "user" => "thrukadmin"
+};

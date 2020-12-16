@@ -558,6 +558,7 @@ plugins/plugins-available/panorama/routes
 plugins/plugins-available/panorama/scripts/disable_debug.sh
 plugins/plugins-available/panorama/scripts/enable_debug.sh
 plugins/plugins-available/panorama/t/controller_panorama.t
+plugins/plugins-available/panorama/t/data/v1.88.tab
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/t/javascript_pattern.t
 plugins/plugins-available/panorama/t/javascript_tests.js
@@ -1808,6 +1809,7 @@ t/100-cli-examples.t
 t/100-cli-livecache.t
 t/100-cli-naglint.t
 t/100-cli-naglint2.t
+t/100-cli-scripts-convertdatafiles.t
 t/100-cli-thruk.t
 t/100-model_Thruk.t
 t/100-scripts.t
