@@ -15,6 +15,7 @@ done_testing();
 
 sub check_json_xs {
     my($file) = @_;
+    return if $file =~ m|v1.88.tab|gmx;
     ok($file, $file);
     my $out = `grep -n JSON::XS "$file" | grep -v Cpanel::JSON::XS`;
     if($out) {
