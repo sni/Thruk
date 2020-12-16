@@ -1298,7 +1298,7 @@ sub _process_bookmarks {
 
     # public only allowed for bookmark admins
     if($public) {
-        if(!$c->check_user_roles('public_bookmarks')) {
+        if(!$c->check_user_roles('authorized_for_public_bookmarks')) {
             $public = 0;
         }
     }
@@ -1368,7 +1368,7 @@ sub _process_bookmarks {
         }
         $done++;
 
-        if($c->check_user_roles('public_bookmarks')) {
+        if($c->check_user_roles('authorized_for_public_bookmarks')) {
             for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
                 next unless defined $bookmark;
                 my($section, $name) = split(/::/mx, $bookmark ,2);

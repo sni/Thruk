@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix managing public bookmarks (#1065)
+
 2.40-2   Mon Dec 14 11:10:41 CET 2020
           - Config Tool:
             - fix running tools
