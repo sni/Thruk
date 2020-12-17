@@ -37,6 +37,7 @@ The lmd command controls the LMD process.
 
 use warnings;
 use strict;
+use Time::HiRes qw/sleep/;
 use Thruk::Utils::LMD;
 
 our $skip_backends = 1;
@@ -72,12 +73,12 @@ sub cmd {
         }
         Thruk::Utils::LMD::check_proc($c->config, $c, 0);
         # wait for the startup
-        for(my $x = 0; $x <= 20; $x++) {
+        for(my $x = 0; $x <= 200; $x++) {
             eval {
                 ($status, $started) = Thruk::Utils::LMD::status($c->config);
             };
             last if($status && scalar @{$status} == $started);
-            sleep(1);
+            sleep(0.1);
         }
         return("OK - lmd started\n", 0) if(defined $started and $started > 0);
         return("FAILED - starting lmd failed\n", 1);
@@ -86,7 +87,7 @@ sub cmd {
         Thruk::Utils::LMD::shutdown_procs($c->config);
         # wait for the fully stopped
         my($status, $started, $total, $failed);
-        for(my $x = 0; $x <= 20; $x++) {
+        for(my $x = 0; $x <= 200; $x++) {
             eval {
                 ($status, $started) = Thruk::Utils::LMD::status($c->config);
                 if($c->config->{'use_lmd_core'}) {
@@ -97,7 +98,7 @@ sub cmd {
                 }
             };
             last if(defined $started && $started == 0 && defined $total && $total == $failed);
-            sleep(1);
+            sleep(0.1);
         }
     }
     elsif($mode eq 'reload') {
@@ -110,12 +111,12 @@ sub cmd {
         Thruk::Utils::LMD::restart($c, $c->config);
         # wait for the startup
         my($status, $started);
-        for(my $x = 0; $x <= 20; $x++) {
+        for(my $x = 0; $x <= 200; $x++) {
             eval {
                 ($status, $started) = Thruk::Utils::LMD::status($c->config);
             };
             last if($status && scalar @{$status} == $started);
-            sleep(1);
+            sleep(0.1);
         }
     }
     elsif($mode eq 'config') {

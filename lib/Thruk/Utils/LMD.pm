@@ -90,11 +90,11 @@ sub check_proc {
         my $retries = 0;
         while(!$pid) {
             $pid = check_pid($lmd_dir.'/pid');
-            if($pid || $retries >= 5) {
+            if($pid || $retries >= 50) {
                 last;
             }
             $retries++;
-            sleep(1);
+            sleep(0.1);
         }
         if($pid) {
             _debug(sprintf('lmd started with pid %d', $pid));
@@ -159,12 +159,12 @@ sub restart {
 
     # wait till its stopped
     my($status, $started) = (1, 1);
-    for(my $x = 0; $x <= 20; $x++) {
+    for(my $x = 0; $x <= 200; $x++) {
         eval {
             ($status, $started) = status($config);
         };
         last if $started == 0;
-        sleep 1;
+        sleep(0.1);
     }
 
     check_proc($config, $c, 0);
