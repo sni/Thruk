@@ -16,7 +16,7 @@ my $has_memory  = 1;
 # do not print column header during tests
 unless($INC{'Test/More.pm'}) {
     printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s\n",
-                "thread", "ttime", "dtime", "tmem", "dmem", "message", "caller");
+                "thread", "ttime", "Δtime", "tmem", "Δmem", "message", "caller");
     printf(STDERR ("-"x140)."\n");
 }
 
@@ -48,7 +48,7 @@ sub timing_breakpoint {
     $callfile =~ s|^.*lib/||mxo;
     printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s:%d\n",
                     $thr,
-                    $elapsed > 0.001 ? sprintf("%.1fs", $total)        : '------',
+                    $elapsed > 0.001 ? sprintf("%.2fs", $total)        : '------',
                     $elapsed > 0.001 ? sprintf("%.3fs", $elapsed)      : '------',
                     ($deltamem > 10 || $deltamem < -10) ? sprintf("%.1fMB", $memory/1024)   : '------',
                     ($deltamem > 10 || $deltamem < -10) ? sprintf("%.2fMB", $deltamem/1024) : '------',
