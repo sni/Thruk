@@ -33,6 +33,10 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ###################################################
 use strict;
 use warnings;
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+    #&timing_breakpoint('./script/thruk');
+};
 use Getopt::Long qw//;
 
 our $VERSION = '2.40';
