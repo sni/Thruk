@@ -368,7 +368,7 @@ Ext.define('TP.VariableWidget', {
                 };
             }
             panel.formField = panel.add({
-                xtype:          'searchpickercbo',
+                xtype:          'combo',
                 name:            xdata.general.name,
                 value:           panel.tab.getVars(xdata.general.name),
                 id:              panel.id+'.var.'+xdata.general.name,
@@ -376,7 +376,6 @@ Ext.define('TP.VariableWidget', {
                 height:          xdata.layout.size_y,
                 matchFieldWidth: false,
                 triggerAction:  'all',
-                editable:        false,
                 pageSize:        20,
                 remoteFilter:    true,
                 queryMode:      'remote',
@@ -391,13 +390,12 @@ Ext.define('TP.VariableWidget', {
                 }),
                 listeners: {
                     change: changeListener,
-                    expand: function(combo) {
-                        panel.comboExtraFilter = ""; // reset filter
-                        window.setTimeout(function() {
-                            if(combo.picker.searchtoolbar) {
-                                combo.picker.searchtoolbar.items.getAt(0).focus();
+                    focus: function(combo) {
+                        combo.store.load(function(records, operation, success) {
+                            if(success) {
+                                combo.expand();
                             }
-                        }, 300);
+                        });
                     },
                 },
                 plugins: [{
@@ -446,6 +444,24 @@ Ext.define('TP.VariableWidget', {
         return({
             name: xdata.general.name
         });
+    },
+    getNormalizedValue: function() {
+        var panel = this;
+        var current = panel.formField.getValue();
+console.log(current);
+        if(!Ext.isArray(current)) {
+            if(panel.formField.isDirty()) {
+console.log("dirty");
+            }
+            current = [current];
+        }
+        var result = [];
+        for(var x = 0; x < current.length; x++) {
+            if(current[x] != "") {
+                result.push(current);
+            }
+        }
+        return(result);
     }
 });
 
@@ -495,10 +511,11 @@ Ext.define('TP.data.VarsStore', {
                 }
             });
             var query = panel.tab.replaceVars(xdata.general.query);
-            if(panel.comboExtraFilter) {
-                if(query != "") { query += " and "; }
-                panel.comboExtraFilter = panel.comboExtraFilter.replace('"', '');
-                query += xdata.general.column+' ~~ "'+panel.comboExtraFilter+'"';
+            var current = panel.getNormalizedValue();
+            if(current.length > 0) {
+                //if(query != "") { query += " and "; }
+                //panel.comboExtraFilter = panel.comboExtraFilter.replace('"', ''); //TODO: check
+                //query += xdata.general.column+' ~~ "'+panel.comboExtraFilter+'"';
             }
             store.proxy.url = '../r'+xdata.general.rest_url;
             store.proxy.extraParams = {
@@ -544,10 +561,10 @@ Ext.define('TP.data.reader.JsonVariables', {
         if(reader.xdata.general.regex) {
             regex = new RegExp(reader.xdata.general.regex, "i");
         }
-        var filter;
-        if(reader.panel.comboExtraFilter && reader.panel.comboExtraFilter != "") {
-            filter = new RegExp(reader.panel.comboExtraFilter, "i");
-        }
+        //var filter;
+        //if(reader.panel.comboExtraFilter && reader.panel.comboExtraFilter != "") { // TODO: check
+        //    filter = new RegExp(reader.panel.comboExtraFilter, "i");
+       // }
         var data  = raw.data;
         var total = raw.total || data.length;
         var uniq  = {};
@@ -559,7 +576,7 @@ Ext.define('TP.data.reader.JsonVariables', {
             } else {
                 val = data[x];
             }
-            if(filter  && !filter.test(val))  { continue; }
+//            if(filter  && !filter.test(val))  { continue; }
             if(regex) {
                 var matches = regex.exec(val);
                 if(matches && matches[1]) {
@@ -584,12 +601,12 @@ Ext.define('TP.data.reader.JsonVariables', {
             result.unshift({name: TP.VariableWidgetAll, value: "__ALL__"});
         }
 
-        var current = reader.panel.items.getAt(0).getValue();
+        var current = reader.panel.getNormalizedValue();
         if(!Ext.isArray(current)) { current = [current]; }
         for(var x = 0; x < current.length; x++) {
-            if(current[x] != "" && current[x] != TP.VariableWidgetAll && !uniq[current[x]]) {
+            if(current[x] != TP.VariableWidgetAll && !uniq[current[x]]) {
                 var hidden = false;
-                if(filter  && !filter.test(val))  { hidden = true; }
+//                if(filter  && !filter.test(val))  { hidden = true; }
                 result.push({name: current[x], value: current[x], hidden: hidden});
                 total++;
             }
