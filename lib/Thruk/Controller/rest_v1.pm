@@ -22,6 +22,7 @@ use Module::Load qw/load/;
 use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS ();
 use URI::Escape qw/uri_unescape/;
+use Time::HiRes ();
 use Carp;
 use Thruk::Utils::Status ();
 use Thruk::Backend::Manager ();
@@ -1359,7 +1360,7 @@ sub _rest_get_thruk {
         thruk_version       => $c->config->{'version'},             # thruk version
         thruk_branch        => $c->config->{'branch'},              # thruk branch name
         thruk_release_date  => $c->config->{'released'},            # thruk release date
-        localtime           => time(),                              # current server unix timestamp / epoch
+        localtime           => Time::HiRes::time(),                 # current server unix timestamp / epoch
         project_root        => $c->config->{'project_root'},        # thruk root folder
         etc_path            => $c->config->{'etc_path'},            # configuration folder
         var_path            => $c->config->{'var_path'},            # variable data folder
@@ -1605,6 +1606,7 @@ sub _rest_get_sites {
         $c->{'db'}->get_processinfo();
     };
     Thruk::Action::AddDefaults::set_possible_backends($c, {});
+    my $time = time();
     for my $key (@{$c->stash->{'backends'}}) {
         my $addr  = $c->stash->{'backend_detail'}->{$key}->{'addr'};
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
@@ -1623,6 +1625,7 @@ sub _rest_get_sites {
             federation_name  => $peer->{'fed_info'}->{'name'} || [ $peer->{'name'} ],
             federation_addr  => $peer->{'fed_info'}->{'addr'} || [ $peer->{'addr'} ],
             federation_type  => $peer->{'fed_info'}->{'type'} || [ $peer->{'type'} ],
+            localtime        => $time,
         };
     }
     return($data);

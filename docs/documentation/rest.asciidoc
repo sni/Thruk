@@ -1338,6 +1338,7 @@ lists configured backends
 |federation_type                   | contains the real backend type if using federation
 |id                                | id for this backend
 |last_error                        | error message if backend is not connected
+|localtime                         | current local unix timestamp of thruk host
 |name                              | name of the backend
 |section                           | section name
 |status                            | 0 if the site is online, 1 if the site is down
@@ -1876,3 +1877,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+
