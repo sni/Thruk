@@ -37,7 +37,7 @@ The lmd command controls the LMD process.
 
 use warnings;
 use strict;
-use Time::HiRes qw/sleep/;
+use Time::HiRes ();
 use Thruk::Utils::LMD;
 
 our $skip_backends = 1;
@@ -78,7 +78,7 @@ sub cmd {
                 ($status, $started) = Thruk::Utils::LMD::status($c->config);
             };
             last if($status && scalar @{$status} == $started);
-            sleep(0.1);
+            Time::HiRes::sleep(0.1);
         }
         return("OK - lmd started\n", 0) if(defined $started and $started > 0);
         return("FAILED - starting lmd failed\n", 1);
@@ -98,7 +98,7 @@ sub cmd {
                 }
             };
             last if(defined $started && $started == 0 && defined $total && $total == $failed);
-            sleep(0.1);
+            Time::HiRes::sleep(0.1);
         }
     }
     elsif($mode eq 'reload') {
@@ -116,7 +116,7 @@ sub cmd {
                 ($status, $started) = Thruk::Utils::LMD::status($c->config);
             };
             last if($status && scalar @{$status} == $started);
-            sleep(0.1);
+            Time::HiRes::sleep(0.1);
         }
     }
     elsif($mode eq 'config') {

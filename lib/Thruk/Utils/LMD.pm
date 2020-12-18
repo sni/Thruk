@@ -13,7 +13,7 @@ LMD Utilities Collection for Thruk
 use strict;
 use warnings;
 use File::Slurp qw/read_file/;
-use Time::HiRes qw/sleep/;
+use Time::HiRes ();
 use File::Copy qw/copy/;
 use Carp qw/confess/;
 use Thruk::Utils::External;
@@ -94,7 +94,7 @@ sub check_proc {
                 last;
             }
             $retries++;
-            sleep(0.1);
+            Time::HiRes::sleep(0.1);
         }
         if($pid) {
             _debug(sprintf('lmd started with pid %d', $pid));
@@ -164,7 +164,7 @@ sub restart {
             ($status, $started) = status($config);
         };
         last if $started == 0;
-        sleep(0.1);
+        Time::HiRes::sleep(0.1);
     }
 
     check_proc($config, $c, 0);
