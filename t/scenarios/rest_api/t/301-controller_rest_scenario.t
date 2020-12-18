@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 229;
+    plan tests => 237;
 
     use lib('t');
     require TestUtils;
@@ -29,6 +29,10 @@ my $pages = [{
     }, {
         url          => '/csv/services/totals?q=***description ~ http and description !~ cert***&columns=total',
         like         => ['total;2'],
+        content_type => 'text/plain; charset=UTF-8',
+    }, {
+        url          => '/csv/services?columns=count(*):num,host_name&sort=-count(*)',
+        like         => ['localhost;8'],
         content_type => 'text/plain; charset=UTF-8',
     }, {
         url          => '/services/'.$host.'/'.$service.'/cmd/schedule_svc_downtime',

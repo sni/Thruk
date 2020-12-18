@@ -51,6 +51,7 @@ use constant {
 
     ALIAS        =>  1,
     RAW          =>  2,
+    NAMES        =>  3,
 };
 
 ##########################################################
@@ -695,6 +696,7 @@ sub _apply_stats {
 
     $type can be:
         - RAW   - returns columsn as is, alias definitions untouched
+        - NAMES - returns column name
         - ALIAS - returns column alias or the name if none specified
 
 returns list of requested columns or undef
@@ -712,7 +714,13 @@ sub get_request_columns {
     $columns = Thruk::Utils::array_uniq($columns);
     if($type == ALIAS) {
         for(@{$columns}) {
-            $_ =~ s/^[^:]+:.*?$//gmx;
+            $_ =~ s/^[^:]+:(.*?)$/$1/gmx;
+        }
+    }
+    if($type == NAMES) {
+        for(@{$columns}) {
+            $_ =~ s/^([^:]+):.*?$/$1/gmx; # strip alias
+            $_ =~ s/^.*\(([^)]+)\)$/$1/gmx; # extract column name from aggregation function
         }
     }
     return($columns);
@@ -807,7 +815,7 @@ sub column_required {
     }
 
     # from ?columns=...
-    my $req_col = get_request_columns($c, ALIAS);
+    my $req_col = get_request_columns($c, NAMES);
     if(defined $req_col && scalar @{$req_col} >= 0 && grep(/^$col$/mx, @{$req_col})) {
         return 1;
     }
@@ -927,7 +935,7 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = get_request_columns($c, ALIAS) || [];
+        my $columns = get_request_columns($c, NAMES) || [];
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
             $columns = Thruk::Utils::array_uniq($columns);
@@ -1075,8 +1083,8 @@ sub _expand_perfdata_and_custom_vars {
     my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
     my $allowed_list = $c->config->{'show_custom_vars'};
 
-    # since expanding takes some time, only do it if we have no columns specified or if no-standard columns were requested
-    my $columns = get_request_columns($c, ALIAS) || [];
+    # since expanding takes some time, only do it if we have no columns specified or if none-standard columns were requested
+    my $columns = get_request_columns($c, NAMES) || [];
     if($columns && scalar @{$columns} > 0) {
         push @{$columns}, @{get_filter_columns($c)};
         my $ref_columns;
