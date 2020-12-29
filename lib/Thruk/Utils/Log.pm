@@ -239,7 +239,7 @@ sub _audit_log {
     # log to thruk.log and print to screen
     _init_logging() unless $logger;
     $filelogger->info($msg) if $filelogger;
-    _info($msg) if($print || !$filelogger);
+    _info($msg) if(($print && $screenlogger) || !$filelogger);
 
     if(defined $config->{'audit_logs'} && $config->{'audit_logs'}->{'logfile'}) {
         my $file = $config->{'audit_logs'}->{'logfile'};
