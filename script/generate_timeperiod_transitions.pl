@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # read rc files if exist
+unset PROFILEDOTD
 [ -e ~/.profile ] && . ~/.profile
 [ -e ~/.thruk   ] && . ~/.thruk
 
@@ -28,7 +29,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 
 #! -*- perl -*-
 # vim: expandtab:ts=4:sw=4:syntax=perl
-#line 32
+#line 33
 
 use strict;
 use warnings;
