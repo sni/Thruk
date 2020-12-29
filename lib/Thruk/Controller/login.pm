@@ -72,7 +72,7 @@ sub index {
 
     if(defined $keywords) {
         if($keywords eq 'logout') {
-            _invalidate_current_session($c, $cookie_path);
+            _invalidate_current_session($c, $cookie_path, "user logout");
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
             return $c->redirect_to($logoutref) if $logoutref;
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
@@ -86,20 +86,20 @@ sub index {
             Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies'.$hint );
         }
         if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
-            _invalidate_current_session($c, $cookie_path);
+            _invalidate_current_session($c, $cookie_path, "session expired");
             Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
         }
         if($keywords =~ /^invalid\&(.*)$/mx or $keywords eq 'invalid') {
-            _invalidate_current_session($c, $cookie_path);
+            _invalidate_current_session($c, $cookie_path, "session invalid");
             Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
         }
         if($keywords =~ /^problem\&(.*)$/mx or $keywords eq 'problem') {
             # don't remove all sessions when there is a (temporary) technical problem
-            #_invalidate_current_session($c, $cookie_path);
+            #_invalidate_current_session($c, $cookie_path, "technical issue");
             Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
         }
         if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
-            _invalidate_current_session($c, $cookie_path);
+            _invalidate_current_session($c, $cookie_path, "user locked");
             Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
         }
         if($keywords =~ /^setsession\&(.*)$/mx or $keywords eq 'setsession') {
@@ -192,12 +192,12 @@ sub _handle_basic_login {
         return(login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain, "password"));
     }
 
-    _info(sprintf("login failed for %s on %s from %s%s",
+    _audit_log("login", sprintf("login failed for %s on %s from %s%s",
                             $login,
                             $referer,
                             $c->req->address,
                             ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
-                    ));
+                    ), $login);
     Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
     if($c->config->{cookie_auth_disable_after_failed_logins}) {
         # increase failed login counter and disable account if it exceeds
@@ -263,12 +263,15 @@ sub login_successful {
 
 ##########################################################
 sub _invalidate_current_session {
-    my($c, $cookie_path) = @_;
+    my($c, $cookie_path, $hint) = @_;
+    $hint = "session invalidated" unless $hint;
     my $cookie = $c->cookie('thruk_auth');
     if(defined $cookie and defined $cookie->value) {
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie->value);
 
-        _audit_log("logout", "user logout, session closed", $session_data->{'username'}, $session_data->{'hashed_key'});
+        my $sessionid = $session_data->{'hashed_key'};
+        $sessionid = (Thruk::Utils::CookieAuth::private2hashed($cookie->value))[0] unless $sessionid; # try to reconstruct the session id for already removed session files
+        _audit_log("logout", "session ended, ".$hint, $session_data->{'username'}, $sessionid);
 
         if($session_data && $session_data->{'file'}) {
             unlink($session_data->{'file'});

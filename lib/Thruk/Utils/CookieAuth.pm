@@ -469,7 +469,7 @@ sub _upgrade_session_file {
 
 returns random sessionid along with the hashed key and the hash type
 
-  returns $sessionid, $hashed_key
+  returns $sessionid, $hashed_key, $digest_name
 
 =cut
 
@@ -478,6 +478,31 @@ sub generate_sessionid {
     $sessionid = Thruk::Utils::Crypt::random_uuid() unless $sessionid;
     my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
     return($sessionid, $hashed_key, $digest_name);
+}
+
+##############################################
+
+=head2 private2hashed
+
+  private2hashed($sessionid)
+
+returns hashed_key for given private key
+
+  returns $hashed_key, $digest_name
+
+=cut
+
+sub private2hashed {
+    my($sessionid) = @_;
+    my $digest_nr;
+    if($sessionid =~ $session_key_regex) {
+        $digest_nr = substr($2, 1) if $2;
+    } else {
+        return;
+    }
+    my $digest_name = Thruk::Utils::Crypt::digest_name($digest_nr);
+    my $hashed_key  = Thruk::Utils::Crypt::hexdigest($sessionid, $digest_name);
+    return($hashed_key, $digest_name);
 }
 
 1;
