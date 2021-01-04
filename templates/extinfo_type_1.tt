@@ -24,6 +24,9 @@
                 <a href="notifications.cgi?host=[% host.name | uri %]">View Notifications For This Host</a>
                 [% IF c.check_user_roles('authorized_for_configuration_information') %]
                 <br><a href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]">View Configuration For This Host</a>
+                  [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+                  <a href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]"> (Edit This Host)</a>
+                  [% END %]
                 [% END %]
               </td>
             </tr>

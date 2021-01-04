@@ -24,6 +24,9 @@
                 <a href="notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Notifications For This Service</a>
                 [% IF c.check_user_roles('authorized_for_configuration_information') %]
                 <br><a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">View Configuration For This Service</a>
+                  [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+                  <a href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"> (Edit This Service)</a>
+                  [% END %]
                 [% END %]
                 <br><a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]">View All '[% IF service.description.length > 7; service.description.substr(0, 7) | html %]...[% ELSE; service.description | html; END %]' Services</a> (<a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap">As Performance Map</a>)
                 <br>
