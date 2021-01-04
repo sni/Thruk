@@ -22,6 +22,10 @@
                 <tr class='data'>
                   <td colspan=2><hr></td>
                 </tr>
+                <tr class='data'>
+                  <td><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Show references' title='Show references' width="16" height="16"></td>
+                  <td class='command'><a href="status.cgi?style=[% IF type == "host" %]host[% END %]detail&dfl_s0_type=[% type | html %]&dfl_s0_op=%3D&dfl_s0_value=[% object.get_name() | html %]">Show live objects</a></td>
+                </tr>
                 [% IF type == 'host' && !object.is_template() %]
                 <tr class='data'>
                   <td><img src='[% url_prefix %]themes/[% theme %]/images/server_edit.png' border="0" alt='Show services for this host' title='Show services for this host' width="16" height="16"></td>
