@@ -46,7 +46,7 @@ sub timing_breakpoint {
     }
     my $callfile = $caller[1];
     $callfile =~ s|^.*lib/||mxo;
-    printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s:%d\n",
+    my $info = sprintf("%-8s  %7s    %7s    %7s   %8s    %-50s %s:%d",
                     $thr,
                     $elapsed > 0.001 ? sprintf("%.2fs", $total)        : '------',
                     $elapsed > 0.001 ? sprintf("%.3fs", $elapsed)      : '------',
@@ -56,6 +56,12 @@ sub timing_breakpoint {
                     $callfile,
                     $caller[2],
     );
+    if($ENV{'THRUK_STRACE_DEBUG'}) {
+        $info = "THRUK-DEBUG: ".$info;
+        POSIX::write(666, $info, length($info));
+    } else {
+        print STDERR $info,"\n";
+    }
     $lasttime = $tmp;
     return $elapsed;
 }
