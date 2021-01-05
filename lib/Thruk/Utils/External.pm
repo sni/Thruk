@@ -760,23 +760,21 @@ sub do_child_stuff {
         $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         $ENV{REMOTE_USER_GROUPS} = join(';', @{$c->user->{'groups'}});
     }
-
-    $|=1; # autoflush
     ## use critic
 
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
 
-    # connect stdin to dev/null
-    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
-
     # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
-    for my $fd (3..10) {
+    for my $fd (0..10) {
         my $io = IO::Handle->new_from_fd($fd,"r");
         if(defined $io && -S $io) {
             POSIX::close($fd);
         }
     }
+
+    # connect stdin to dev/null
+    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     my $fallback_log = '/dev/null';
@@ -786,6 +784,10 @@ sub do_child_stuff {
     open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
     $fallback_log    = $dir."/stdout" if $dir;
     open(*STDOUT, ">>", $fallback_log) || die "can't reopen stdout to $fallback_log: $!";
+
+    ## no critic
+    $|=1; # autoflush
+    ## use critic
 
     # logging must be reset after closing the filehandles
     Thruk::Utils::Log::reset_logging();
