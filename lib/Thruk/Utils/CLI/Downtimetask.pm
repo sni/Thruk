@@ -191,7 +191,7 @@ sub _handle_file {
 
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
-    if($downtime->{'service'}) {
+    if($downtime->{'service'} && scalar @{$downtime->{'service'}} > 0) {
         $output = 'scheduled'.$flexible.' downtime for service \''.join(', ', @{$downtime->{'service'}}).'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
     } else {
         $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
