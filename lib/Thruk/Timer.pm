@@ -14,7 +14,7 @@ my $has_threads = 0;
 my $has_memory  = 1;
 
 # do not print column header during tests
-unless($INC{'Test/More.pm'}) {
+if(!$INC{'Test/More.pm'} && !$ENV{'THRUK_STRACE_DEBUG'}) {
     printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s\n",
                 "thread", "ttime", "Δtime", "tmem", "Δmem", "message", "caller");
     printf(STDERR ("-"x140)."\n");
