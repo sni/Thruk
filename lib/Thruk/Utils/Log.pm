@@ -346,7 +346,7 @@ sub _init_logging {
 
     my($log4perl_conf);
     if($config) {
-        if(Thruk::Base::mode() eq 'FASTCGI' || $ENV{'THRUK_JOB_DIR'} || $ENV{'THRUK_CRON'}) {
+        if(Thruk::Base::mode() eq 'FASTCGI' || $ENV{'THRUK_JOB_DIR'} || $ENV{'THRUK_CRON'} || $ENV{'THRUK_AUTH_SCRIPT'}) {
             if(defined $config->{'log4perl_conf'} && ! -s $config->{'log4perl_conf'} ) {
                 die("\n\n*****\nfailed to load log4perl config: ".$config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
             }

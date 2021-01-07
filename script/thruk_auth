@@ -33,9 +33,17 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 
 use warnings;
 use strict;
+
+BEGIN {
+    ## no critic
+    $ENV{'THRUK_AUTH_SCRIPT'} = 1;
+    ## use critic
+}
+
 use File::Slurp;
 use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
+use Thruk::Utils::Log qw( _audit_log );
 use Thruk::Utils::CookieAuth;
 use Thruk::Utils::IO;
 use Thruk::Utils::APIKeys;
@@ -177,6 +185,7 @@ sub process {
     # session timeout reached?
     if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
         print STDERR "thruk_auth: session timeout: ".$sessioncache->{$auth}->{'login'} if $verbose;
+        _audit_log("session", "session timeout hit, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
         unlink($session->{'file'});
         delete $sessioncache->{$auth};
         return "/loginok/".$guest."/".$path."\n" if $guest;
@@ -203,12 +212,14 @@ sub process {
         if($@ || $rc == -1) {
             print STDERR "thruk_auth: technical problem during login for ".$user if $verbose;
             print STDERR "thruk_auth: ".$@ if $@;
+            _audit_log("session", "technical issue during session revalidation, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
             return $loginurl."?problem&".$path."\n";
         }
         if($rc == 0) {
             print STDERR "thruk_auth: basic auth verify failed for ".$user if $verbose;
+            _audit_log("session", "session revalidation failed, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
             return $loginurl."?invalid&".$path."\n";
