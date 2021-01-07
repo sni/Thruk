@@ -950,7 +950,7 @@ sub _livestatus_options {
             elsif($type eq 'contacts') {
                 $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
             }
-            elsif($ref_columns eq 'logs') {
+            elsif($type eq 'logs') {
                 $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
             }
 
