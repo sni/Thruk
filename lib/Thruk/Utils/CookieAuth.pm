@@ -157,7 +157,7 @@ sub verify_basic_auth {
         }
     }
     printf(STDERR "thruk_auth: basic auth result: %s\n", $res->decoded_content) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
-    if($res->code == 500 and $res->decoded_content =~ m/\Qtimeout during auth check\E/mx) {
+    if($res->code == 500 && $res->decoded_content =~ m/(\Qtimeout during auth check\E|\Qread timeout at\E)/mx) {
         return -1;
     }
     return 0;
@@ -210,14 +210,15 @@ sub clean_session_files {
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
         if($mtime) {
             if($mtime < $timeout) {
-                _audit_log("session", "session timeout", '?', $entry, 0);
+                my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                _audit_log("session", "session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                 unlink($file);
             }
             elsif($mtime < $fake_session_timeout) {
                 eval {
                     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
                     if($data && $data->{'fake'}) {
-                        _audit_log("session", "session timeout", '?', $entry, 0);
+                        _audit_log("session", "short session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                         unlink($file);
                     } else {
                         $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
