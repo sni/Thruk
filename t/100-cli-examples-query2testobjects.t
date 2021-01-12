@@ -18,7 +18,7 @@ plan(tests => 5);
 
 ###########################################################
 TestUtils::test_command({
-    cmd     => './examples/query2testobjects host_name != none_existing',
+    cmd     => './examples/query2testobjects "state != -1"',
     like    => [qr(\Qdefine host {\E), qr(\Qdefine command {\E)],
 });
 
