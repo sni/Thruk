@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - make broadcast preview draggable
           - fix managing public bookmarks (#1065)
 
 2.40-2   Mon Dec 14 11:10:41 CET 2020

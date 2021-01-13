@@ -218,6 +218,7 @@ then use later like: {{variable}} and {{another}}</pre>
     } else {
       jQuery('.broadcast_panel_container DIV.broadcast').html(val);
     }
+    jQuery('.broadcast_panel_container').addClass("clickable").draggable();
   }
 
   jQuery(document).ready(function() {
