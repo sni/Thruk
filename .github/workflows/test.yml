@@ -1,0 +1,25 @@
+name: test
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      #- name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
+      #  uses: mxschmitt/action-tmate@v3
+      - name: ./.build/prepare_machine.sh
+        run: sudo ./.build/prepare_machine.sh
+      - name: ./.build/install_deps.sh
+        run: sudo su naemon -c ./.build/install_deps.sh
+      - name: make citest
+        run: sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && make citest'

@@ -206,6 +206,18 @@ quicktest:
 authortest:
 	TEST_AUTHOR=1 THRUK_AUTHOR=1 THRUK_TEST_E2E=1 $(MAKE) test
 
+citest:
+	cp t/ci/thruk_local.conf .
+	touch .author
+	./configure
+	$(MAKE)
+	TEST_AUTHOR=1 \
+		THRUK_AUTHOR=1 \
+		TEST_MYSQL="mysql://root:root@localhost:3306/test" \
+		PERL_DL_NONLAZY=1 \
+		PERL5LIB=.:$$PERL5LIB \
+		$(MAKE) test
+
 timedtest:
 	for file in $(TEST_FILES); do \
 		printf "%-60s" $$file; \

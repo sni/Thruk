@@ -22,7 +22,7 @@ my $plugins = [
     { name => 'omd' },
     { name => 'pansnaps' },
     { name => 'status-dashboard' },
-    { name => 'woshsh',          travis => 0 }, # somehow broken on travis
+    { name => 'woshsh' },
 ];
 my $filter = $ARGV[0];
 my $extra_tests = [
@@ -41,7 +41,6 @@ TestUtils::test_command({
 
 for my $p (@{$plugins}) {
     next if($filter && $p->{'name'} ne $filter);
-    next if(defined $p->{'travis'} && $ENV{'TEST_TRAVIS'} && !$p->{'travis'});
 
     # install plugin or use existing if core plugin
     my $use_existing = 0;

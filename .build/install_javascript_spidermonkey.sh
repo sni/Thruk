@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 if ! test -d ~/perl5; then
     echo "script will install JavaScript-SpiderMonkey-0.25 into ~/perl5 but target folder could not be found"
     exit 1

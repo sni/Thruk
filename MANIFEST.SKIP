@@ -1,5 +1,3 @@
-.travis.yml
-t/travis
 error.log
 audit.log
 notes.txt
@@ -97,3 +95,6 @@ t/scenarios/*/panorama/
 action_menus/*.js
 t/scenarios/pentest_skipfish/results/\d+
 t/scenarios/pentest_arachni/results/
+.build/
+.github/
+^continue$
