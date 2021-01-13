@@ -1,4 +1,4 @@
-name: test
+name: citest
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  citest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
