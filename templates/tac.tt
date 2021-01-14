@@ -183,7 +183,7 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && host_stats.down_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=42">[% host_stats.down_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.down_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=10">[% host_stats.down_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
                   [% IF !empty && host_stats.down_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=1">[% host_stats.down_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
                   [% IF !empty && host_stats.down_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=4">[% host_stats.down_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
                   [% IF strict_passive_mode %]
@@ -204,7 +204,7 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && host_stats.unreachable_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=42">[% host_stats.unreachable_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.unreachable_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=10">[% host_stats.unreachable_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
                   [% IF !empty && host_stats.unreachable_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=1">[% host_stats.unreachable_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
                   [% IF !empty && host_stats.unreachable_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=4">[% host_stats.unreachable_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
                   [% IF strict_passive_mode %]
@@ -272,7 +272,7 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.critical_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=42'>[% service_stats.critical_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.critical_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=10'>[% service_stats.critical_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
                   [% IF !empty && service_stats.critical_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=12'>[% service_stats.critical_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
                   [% IF !empty && service_stats.critical_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=1'>[% service_stats.critical_and_scheduled %] Scheduled</a></td></tr>[% END %]
                   [% IF !empty && service_stats.critical_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=4'>[% service_stats.critical_and_ack %] Acknowledged</a></td></tr>[% END %]
@@ -294,7 +294,7 @@
               <td width="10">&nbsp; </td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.warning_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=42'>[% service_stats.warning_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.warning_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=10'>[% service_stats.warning_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
                   [% IF !empty && service_stats.warning_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=12'>[% service_stats.warning_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
                   [% IF !empty && service_stats.warning_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=1'>[% service_stats.warning_and_scheduled %] Scheduled</a></td></tr>[% END %]
                   [% IF !empty && service_stats.warning_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=4'>[% service_stats.warning_and_ack %] Acknowledged</a></td></tr>[% END %]
@@ -316,7 +316,7 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.unknown_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=42'>[% service_stats.unknown_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.unknown_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=10'>[% service_stats.unknown_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
                   [% IF !empty && service_stats.unknown_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=12'>[% service_stats.unknown_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
                   [% IF !empty && service_stats.unknown_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=1'>[% service_stats.unknown_and_scheduled %] Scheduled</a></td></tr>[% END %]
                   [% IF !empty && service_stats.unknown_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=4'>[% service_stats.unknown_and_ack %] Acknowledged</a></td></tr>[% END %]
