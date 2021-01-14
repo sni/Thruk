@@ -8,6 +8,7 @@ use Thruk::Utils::CookieAuth;
 use Thruk::Controller::login;
 use Thruk::Utils::Crypt;
 use Thruk::Utils::IO;
+use Thruk::Utils;
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -154,7 +155,7 @@ sub _cleanup_oauth_files {
 sub _get_json {
     my($c, $res) = @_;
 
-    my $body = $res->decoded_content || $res->content;
+    my $body = Thruk::Utils::decode_any($res->decoded_content || $res->content);
     if($body && $body =~ m/^\s*\{/gmx) {
         my $data = decode_json($body);
         if($data && $data->{'error'}) {
