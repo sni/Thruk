@@ -202,7 +202,7 @@ function render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, typ
 
 function render_apply_overview_threshold(threshold, data, label) {
     if(threshold == -1 || threshold <= 0) {
-        return(data, label);
+        return({data: data, label: label, hidden: 0});
     }
     var x = 0;
     var new_data  = [];

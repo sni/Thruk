@@ -60,7 +60,7 @@ jQuery(document).ready(function() {
     graph_data = tmp.data;
     label      = tmp.label;
     if(tmp.hidden > 0) {
-      jQuery("#hidden_[% nr %]").html("<span> ( incl. "+tmp.hidden+" x sla &gt;= [% param.overview_max_level %]% ) </span>");
+      jQuery("#hidden_[% nr %]").html("<span> ( excl. "+tmp.hidden+" x sla &gt;= [% param.overview_max_level %]% ) </span>");
       jQuery("#hidden_[% nr %]").parent("TR").show();
     }
     [% END %]
