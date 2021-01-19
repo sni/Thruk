@@ -28,7 +28,7 @@ my $testport = 50000;
     for my $x (0..99) {
         eval {
             $socket = IO::Socket::INET->new(Listen    => 5,
-                                            LocalAddr => '127.0.0.1',
+                                            LocalAddr => '127.0.0.3',
                                             LocalPort => $testport,
                                             Proto     => 'tcp');
         };
@@ -89,7 +89,7 @@ my($http_dir, $local_dir, $input_dir,$test_name);
 my $httppid;
 my $now = time();
 {
-    my $cmd = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+    my $cmd = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -o 127.0.0.3 -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
     ok($cmd, $cmd);
     local $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
     $httppid = fork();
@@ -100,7 +100,7 @@ my $now = time();
     ok($httppid, "http server started with pid: ".$httppid);
     my $connected;
     for my $x (1..15) {
-        my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
+        my $socket = IO::Socket::INET->new('127.0.0.3:'.$testport);
         $connected = 1 if($socket and $socket->connected());
         last if $connected;
         last unless -d "/proc/$httppid";

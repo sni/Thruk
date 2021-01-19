@@ -56,6 +56,7 @@ thruk_server.pl - Thruk Development Server
 thruk_server.pl [options]
 
    -p <port>            use tcp port. default: 3000
+   -o <listen>          bind to specific address. default: all
    -d                   debug mode
    -v                   verbose mode
    -vv                  very verbose mode
