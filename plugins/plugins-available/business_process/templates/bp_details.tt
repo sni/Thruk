@@ -230,7 +230,7 @@
                 <td class="command mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% r.fullid %]"><b>[% r.name | html %]</b></a></td>
               </tr>
               [% END %]
-              [% IF incoming_refs.size > 0 %]
+              [% IF incoming_refs.size > 0 && outgoing_refs.size > 0 %]
               <tr class='data'><td colspan=2><hr></td></tr>
               [% END %]
               [% FOREACH r = outgoing_refs %]
