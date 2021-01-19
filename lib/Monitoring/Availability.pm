@@ -1402,13 +1402,13 @@ sub _set_default_options {
     my $options = shift;
 
     $options->{'backtrack'}                      = 4             unless defined $options->{'backtrack'};
-    $options->{'assumeinitialstates'}            = 'yes'         unless defined $options->{'assumeinitialstates'};
-    $options->{'assumestateretention'}           = 'yes'         unless defined $options->{'assumestateretention'};
-    $options->{'assumestatesduringnotrunning'}   = 'yes'         unless defined $options->{'assumestatesduringnotrunning'};
-    $options->{'includesoftstates'}              = 'no'          unless defined $options->{'includesoftstates'};
+    $options->{'assumeinitialstates'}            = 1             unless defined $options->{'assumeinitialstates'};
+    $options->{'assumestateretention'}           = 1             unless defined $options->{'assumestateretention'};
+    $options->{'assumestatesduringnotrunning'}   = 1             unless defined $options->{'assumestatesduringnotrunning'};
+    $options->{'includesoftstates'}              = 0             unless defined $options->{'includesoftstates'};
     $options->{'initialassumedhoststate'}        = 'unspecified' unless defined $options->{'initialassumedhoststate'};
     $options->{'initialassumedservicestate'}     = 'unspecified' unless defined $options->{'initialassumedservicestate'};
-    $options->{'showscheduleddowntime'}          = 'yes'         unless defined $options->{'showscheduleddowntime'};
+    $options->{'showscheduleddowntime'}          = 1             unless defined $options->{'showscheduleddowntime'};
     $options->{'timeformat'}                     = '%s'          unless defined $options->{'timeformat'};
     $options->{'breakdown'}                      = BREAK_NONE    unless defined $options->{'breakdown'};
 
@@ -1435,10 +1435,10 @@ sub _verify_options {
                        showscheduleddowntime
                       /) {
         if(defined $options->{$yes_no}) {
-            if(lc $options->{$yes_no} eq 'yes') {
+            if(lc $options->{$yes_no} eq 'yes' || $options->{$yes_no} eq '1') {
                 $options->{$yes_no} = TRUE;
             }
-            elsif(lc $options->{$yes_no} eq 'no') {
+            elsif(lc $options->{$yes_no} eq 'no' || $options->{$yes_no} eq '0') {
                 $options->{$yes_no} = FALSE;
             } else {
                 croak($yes_no.' unknown, please use \'yes\' or \'no\'. Got: '.$options->{$yes_no});

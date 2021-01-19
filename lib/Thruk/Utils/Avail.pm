@@ -129,10 +129,10 @@ sub calculate_availability {
     }
 
     my $rpttimeperiod                = $c->req->parameters->{'rpttimeperiod'} || '';
-    my $assumeinitialstates          = $c->req->parameters->{'assumeinitialstates'};
-    my $assumestateretention         = $c->req->parameters->{'assumestateretention'};
-    my $assumestatesduringnotrunning = $c->req->parameters->{'assumestatesduringnotrunning'};
-    my $includesoftstates            = $c->req->parameters->{'includesoftstates'};
+    my $assumeinitialstates          = _parse_bool_req($c->req->parameters->{'assumeinitialstates'}, 1);
+    my $assumestateretention         = _parse_bool_req($c->req->parameters->{'assumestateretention'}, 1);
+    my $assumestatesduringnotrunning = _parse_bool_req($c->req->parameters->{'assumestatesduringnotrunning'}, 1);
+    my $includesoftstates            = _parse_bool_req($c->req->parameters->{'includesoftstates'}, 0);
     my $initialassumedhoststate      = $c->req->parameters->{'initialassumedhoststate'};
     my $initialassumedservicestate   = $c->req->parameters->{'initialassumedservicestate'};
     my $backtrack                    = $c->req->parameters->{'backtrack'};
@@ -160,18 +160,6 @@ sub calculate_availability {
     # default backtrack is 4 days
     $backtrack = 4 unless defined $backtrack;
     $backtrack = 4 if $backtrack < 0;
-
-    $assumeinitialstates          = 'yes' unless defined $assumeinitialstates;
-    $assumeinitialstates          = 'no'  unless $assumeinitialstates          eq 'yes';
-
-    $assumestateretention         = 'yes' unless defined $assumestateretention;
-    $assumestateretention         = 'no'  unless $assumestateretention         eq 'yes';
-
-    $assumestatesduringnotrunning = 'yes' unless defined $assumestatesduringnotrunning;
-    $assumestatesduringnotrunning = 'no'  unless $assumestatesduringnotrunning eq 'yes';
-
-    $includesoftstates            = 'no'  unless defined $includesoftstates;
-    $includesoftstates            = 'no'  unless $includesoftstates            eq 'yes';
 
     $initialassumedhoststate      = 0 unless defined $initialassumedhoststate;
     $initialassumedhoststate      = 0 unless $initialassumedhoststate ==  0  # Unspecified
@@ -217,7 +205,7 @@ sub calculate_availability {
     my $services = [];
 
     my $softlogfilter;
-    if(!$includesoftstates || $includesoftstates eq 'no') {
+    if(!$includesoftstates) {
         # Somehow nagios can change from a Hard Critical into a Soft Critical which then results in a soft ok.
         # Any ok state always resets the current problem, so no matter if a ok is soft or hard, we have
         # to count it in. Otherwise we could end up with a critical last entry in the logfile, even if
@@ -565,7 +553,7 @@ sub calculate_availability {
     if($c->config->{'report_include_class2'} != 0) { # 0 means force - off
         if($c->config->{'report_include_class2'} == 2 # 2 means force on
            || ($c->config->{'report_include_class2'} == 1 # 1 means default auto
-               && ($full_log_entries || $assumestatesduringnotrunning eq 'no'))
+               && ($full_log_entries || !$assumestatesduringnotrunning))
         ) {
             push @typefilter, { class => 2 }; # programm messages
         }
@@ -1102,5 +1090,14 @@ sub _initialassumedservicestate_to_state {
 }
 
 ##############################################
+sub _parse_bool_req {
+    my($val, $default) = @_;
+    if(!defined $val) {
+        return($default // 0);
+    }
+    return(1) if(lc($val) eq 'yes');
+    return(1) if($val eq '1');
+    return(0);
+}
 
 1;
