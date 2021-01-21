@@ -54,7 +54,7 @@ sub register {
 
     # base template provider
     my %base_settings = (%{$settings}, (INCLUDE_PATH => [
-        @{$app->config->{'plugin_templates_paths'}},
+        reverse @{$app->config->{'plugin_templates_paths'}}, # last plugin overrides template
           $app->config->{'base_templates_dir'},
     ]));
     push @{$settings->{'LOAD_TEMPLATES'}}, Template::Provider->new(\%base_settings);

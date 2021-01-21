@@ -211,7 +211,7 @@ sub get_tt_template_paths {
     }
     push(@{$list},
           $c->config->{'themes_path'}.'/themes-enabled/'.$c->stash->{'theme'}.'/templates',
-        @{$c->config->{'plugin_templates_paths'}},
+        reverse @{$c->config->{'plugin_templates_paths'}}, # last plugin overrides template
           $c->config->{'base_templates_dir'},
     );
     return(Thruk::Utils::array_uniq($list));
