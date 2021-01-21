@@ -6,7 +6,7 @@ use Cpanel::JSON::XS;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 237;
+    plan tests => 246;
 
     use lib('t');
     require TestUtils;
@@ -38,6 +38,11 @@ my $pages = [{
         url          => '/services/'.$host.'/'.$service.'/cmd/schedule_svc_downtime',
         post         => { 'start_time' => 'now', 'end_time' => '+60m', 'comment_data' => 'test comment' },
         like         => ['Command successfully submitted'],
+    }, {
+        url          => '/system/cmd/del_downtime_by_host_name',
+        method       => 'POST',
+        post         => { 'hostname' => "localhost", 'comment' => "commentfilter" },
+        like         => ['DEL_DOWNTIME_BY_HOST_NAME', ';localhost;;;commentfilter'],
     }, {
         url          => '/downtimes',
         like         => ['"test comment",', 'omdadmin'],

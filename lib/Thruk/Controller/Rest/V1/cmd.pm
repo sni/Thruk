@@ -117,7 +117,7 @@ sub _rest_get_external_command {
             if($arg eq 'plugin_state')       { $val = 0; }
             if($arg eq 'options')            { $val = 0; }
             if($arg eq 'triggered_by')       { $val = 0; }
-            if($arg eq 'start_time')         { $val = time(); }
+            if($arg eq 'start_time')         { $val = time() unless $cmd->{'name'} =~ m/del_.*_by_/gmxi; }
             if($arg eq 'end_time')           { $val = time() + $c->config->{'downtime_duration'}; }
             if($arg eq 'sticky_ack')         { $val = 1; }
             if($arg eq 'send_notification')  { $val = $c->config->{'cmd_defaults'}->{'send_notification'} // 1; }
@@ -135,7 +135,11 @@ sub _rest_get_external_command {
             my $orig = $val;
             $val = Thruk::Utils::parse_date($c, $val);
             if(!defined $val) {
-                return({ 'message' => 'failed to parse time in '.$arg, 'description' => $orig.' is not a valid time definition', code => 400 });
+                if($cmd->{'name'} =~ m/del_.*_by_/mxi) {
+                    $val = '';
+                } else {
+                    return({ 'message' => 'failed to parse time in '.$arg, 'description' => $orig.' is not a valid time definition', code => 400 });
+                }
             }
         }
         if($arg eq 'duration') {
