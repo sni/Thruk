@@ -279,7 +279,6 @@ return the primary objects name
 =cut
 sub get_primary_name {
     my($self, $full, $conf, $fallback) = @_;
-    $full = 0 unless $full;
     $conf = $self->{'conf'} unless $conf;
 
     return $fallback if defined $fallback;

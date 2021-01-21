@@ -287,6 +287,8 @@ plugins/plugins-available/conf/t/data/1/host.cfg
 plugins/plugins-available/conf/t/data/10/host.cfg
 plugins/plugins-available/conf/t/data/11/nested.cfg
 plugins/plugins-available/conf/t/data/12/regex_matching.cfg
+plugins/plugins-available/conf/t/data/13/core.cfg
+plugins/plugins-available/conf/t/data/13/file1.cfg
 plugins/plugins-available/conf/t/data/2/host.cfg
 plugins/plugins-available/conf/t/data/3/timeperiods.cfg
 plugins/plugins-available/conf/t/data/4/core.cfg

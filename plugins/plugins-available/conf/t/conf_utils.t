@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 718;
+    plan tests => 722;
 }
 
 BEGIN {
@@ -454,6 +454,19 @@ for my $mergedir (qw/1/) {
           'use' => [ 'generic-host' ]
     };
     is_deeply($data, $expected, 'getting request params');
+};
+
+###########################################################
+# incomplete service definitions (empty hostgroup assignment)
+{
+    $objects = Monitoring::Config->new({ core_conf => './t/xt/conf/data/13/core.cfg' });
+    $objects->init();
+    my $objs = $objects->get_objects();
+    is(scalar @{$objs}, 5, "number of objects");
+    is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
+    my $ref_errors = $objects->_check_references();
+    is(scalar @{$ref_errors}, 0, "number of reference errors") or diag(Dumper($ref_errors));
+    is(ref $objects->{'objects'}->{'byname'}->{'service'}->{'testsvc'}, 'HASH', "services by name is still a hash") or diag(Dumper($objects->{'objects'}->{'byname'}->{'service'}));
 };
 
 ###########################################################

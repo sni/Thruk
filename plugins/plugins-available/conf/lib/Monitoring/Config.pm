@@ -2024,12 +2024,14 @@ sub _rebuild_index {
             if(defined $primary) {
                 my $found = $self->_update_obj_in_index($objects, $obj, $primary, $conf);
                 if($found == 0) {
-                    $objects->{'byname'}->{$obj->{'type'}}->{$primary} = $obj->{'id'};
+                    if(ref $obj->{'primary_key'} eq '') {
+                        $objects->{'byname'}->{$obj->{'type'}}->{$primary} = $obj->{'id'};
+                    } elsif($obj->must_have_name()) {
+                        push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::link_obj($obj);
+                    }
                 }
-            } else {
-                if($obj->must_have_name()) {
-                    push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::link_obj($obj);
-                }
+            } elsif($obj->must_have_name()) {
+                push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::link_obj($obj);
             }
         }
     }
