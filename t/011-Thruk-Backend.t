@@ -25,6 +25,7 @@ sub get_subs {
             next if $func eq 'propagate_session_file'; # not required
             next if $func eq 'rpc';                    # only available on http
             next if $func eq 'request';                # only available on http
+            next if $func eq 'rest_request';           # only available on http
             next if $func eq 'check_global_lock';      # only available on mysql
             push @subs, $func;
         }

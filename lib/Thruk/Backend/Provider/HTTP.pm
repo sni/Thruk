@@ -802,6 +802,53 @@ sub request {
 
 ##########################################################
 
+=head2 rest_request
+
+    rest_request($restpath, $method, $parameters)
+
+returns result for given request
+
+=cut
+sub rest_request {
+    my($self, $restpath, $method, $parameters) = @_;
+    my $c = $Thruk::Request::c;
+    $restpath =~ s%^/%%gmx;
+    $self->{'ua'} || $self->reconnect();
+    $self->{'ua'}->timeout($self->{'timeout'});
+    my $url = $self->{'addr'};
+    $url =~ s%\Q/cgi-bin/remote.cgi\E$%%gmx;
+    $url = $url.'/r/'.$restpath;
+
+    my $request = HTTP::Request->new($method, $url);
+    $request->method(uc($method));
+    $request->header('X-Thruk-Auth-Key' => $self->{'auth'});
+    $request->header('Accept'           => 'application/json');
+    if($parameters) {
+        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content(Cpanel::JSON::XS->new->encode($parameters)); # using ->utf8 here would end in double encoding
+        $request->header('Content-Length' => undef);
+    }
+
+    my $response = $self->{'ua'}->request($request);
+    _debug_log_request_response($c, $response);
+
+    if(!$response->is_success) {
+        die(sprintf("request failed:\nrequest:\n%s\n\nresponse:\n%s\n", $response->request->as_string(), $response->as_string()));
+    }
+
+    my $data;
+    eval {
+        $data = decode_json($response->decoded_content);
+    };
+    my $err = $@;
+    if($err) {
+        die(sprintf("decode_json failed: %s\nrequest:\n%s\n\nresponse:\n%s\n", $err, $response->request->as_string(), $response->as_string()));
+    }
+    return($data);
+}
+
+##########################################################
+
 =head2 _req
 
   _req($sub, $options)

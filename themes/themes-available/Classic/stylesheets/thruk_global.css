@@ -1693,3 +1693,46 @@ LABEL.disabled {
 TR.api_keys TD {
   vertical-align: top;
 }
+
+.bubble {
+  position: absolute;
+  padding: 5px;
+  background: #d9d9d9;
+  min-height: 100px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  border: #000000 solid 1px;
+  color: #5f6268;
+  text-align: left;
+}
+
+.bubble:after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 10px 15px 10px 0;
+  border-color: transparent #CED2D6;
+  display: block;
+  width: 0;
+  z-index: 1;
+  left: -15px;
+  top: 50px;
+}
+
+.bubble:before {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  border-width: 10px 15px 10px 0;
+  border-color: transparent #000000;
+  display: block;
+  width: 0;
+  z-index: 0;
+  left: -16px;
+  top: 50px;
+}
+
+.bubble TH {
+  vertical-align: top;
+}

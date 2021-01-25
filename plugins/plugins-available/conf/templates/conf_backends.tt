@@ -14,7 +14,7 @@ Note: some options are not accessible here for security reasons.
 [% END %]
 <table border="0" class='data conftoolusers' style="width:360px;">
   <tr>
-    <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
+    <th colspan=4 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
   </tr>
   [% x = 0 %]
   [% FOREACH b = conf_sites %]
@@ -70,6 +70,19 @@ Note: some options are not accessible here for security reasons.
     });
   }
 
+  function list_roles(roles) {
+    if(!roles) { return("none"); }
+    var list = [];
+    for(var x = 0; x < roles.length; x++) {
+      roles[x] = roles[x].replace(/^authorized_for_/, "")
+      if(roles[x] == "admin") {
+        return("admin");
+      }
+      list.push(roles[x]);
+    }
+    return(list.join(",<br>"));
+  }
+
   var orig_src;
   function conf_test_connection(btn, loopid) {
     var nr          = btn.name.substr(4);
@@ -88,6 +101,7 @@ Note: some options are not accessible here for security reasons.
     showElement(img);
     jQuery('#thruk_message').remove();
 
+    jQuery("#backend_conf_"+nr+"_details").hide();
     jQuery.ajax({
         url:  'conf.cgi',
         data: {
@@ -106,6 +120,21 @@ Note: some options are not accessible here for security reasons.
           if(data.ok == 1) {
             img.src   = '[% url_prefix %]themes/[% theme %]/images/accept.png';
             img.title = 'connection test successful';
+            details = "";
+            if(data.data) {
+              details +=  "<tr><th>Version:</th><td>"+data.data.program_version+"</td></tr>"
+            }
+            if(data.whoami) {
+              details +=  "<tr><th>User:</th><td>"+data.whoami.id+"</td></tr>"
+                         +"<tr><th>Readonly:</th><td>"+(data.whoami.can_submit_commands ? 'no' : 'yes')+"</td></tr>"
+                         +"<tr><th>Groups:</th><td>"+(data.whoami.groups ? data.whoami.groups.join(", ") : 'none')+"</td></tr>"
+                         +"<tr><th>Roles:</th><td>"+list_roles(data.whoami.roles)+"</td></tr>"
+            }
+            jQuery("#backend_conf_"+nr+"_details").show().html(
+                 "<table>"
+                +details
+                +"</table>"
+            );
           } else {
             img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
             img.title = data.error;

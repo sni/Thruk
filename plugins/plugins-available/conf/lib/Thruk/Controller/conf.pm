@@ -879,9 +879,10 @@ sub _process_backends_page {
         my $proxy       = $c->req->parameters->{'proxy'};
         my $remote_name = $c->req->parameters->{'remote_name'};
         my @test;
+        my $con;
         eval {
             local $ENV{'THRUK_USE_LMD'} = "";
-            my $con = Thruk::Backend::Peer->new({
+            $con = Thruk::Backend::Peer->new({
                                                  type    => $type,
                                                  name    => 'test connection',
                                                  options => { peer => $peer, auth => $auth, proxy => $proxy, remote_name => $remote_name },
@@ -891,6 +892,13 @@ sub _process_backends_page {
         my $json;
         if(scalar @test >= 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1 and scalar keys %{$test[0]->{(keys %{$test[0]})[0]}} > 0) {
             $json = { ok => 1 };
+            if($type eq 'http') {
+                eval {
+                    my $who = $con->{'class'}->rest_request("/thruk/whoami", "POST", {});
+                    $json->{'whoami'} = $who;
+                };
+            }
+            $json->{'data'} = $test[0]->{(keys %{$test[0]})[0]};
         } else {
             my $error = $@;
             $error =~ s/\s+at\s\/.*//gmx;
