@@ -204,7 +204,7 @@ sub update_status {
         $self->{'affected_peers'} = $self->_extract_affected_backends($livedata);
         my $failed = $self->_list_failed_backends($c, $previous_affected, $c->stash->{'failed_backends'});
         if(scalar @{$failed} > 0 && ($self->{'last_check'} > (time() - 180))) {
-            _warn("not updating business process '".$self->{'name'}."' because the backends ".join(",", @{$failed})." are available. Waiting 3 minutes to recover, last successful update: ".(scalar localtime $self->{'last_check'}));
+            _warn("not updating business process '".$self->{'name'}."' because the backends ".join(",", @{$failed})." are unavailable. Waiting 3 minutes to recover, last successful update: ".(scalar localtime $self->{'last_check'}));
             return;
         }
         for my $n (@{$self->{'nodes'}}) {
