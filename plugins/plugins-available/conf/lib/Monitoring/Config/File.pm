@@ -372,6 +372,7 @@ sub update_readonly_status {
     $self->{'readonly_from_pattern'} = 0;
     if(defined $readonlypattern) {
         for my $p ( ref $readonlypattern eq 'ARRAY' ? @{$readonlypattern} : ($readonlypattern) ) {
+            next if $p eq '';
             if($self->{'path'} =~ m|$p|mx) {
                 $self->{'readonly_from_pattern'} = 1;
                 last;
