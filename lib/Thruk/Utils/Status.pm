@@ -1674,7 +1674,7 @@ sub get_groups_filter {
 
   set_selected_columns($c, $prefixes, [$type])
 
-set selected columns for the excel export
+set selected columns for the excel export (columns are also set from templates/status_detail.tt, ...)
 
 =cut
 sub set_selected_columns {

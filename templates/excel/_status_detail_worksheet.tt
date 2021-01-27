@@ -9,6 +9,7 @@
         [% ELSIF col == "Hostname"                 %]<cell width='30'>Hostname</cell>
         [% ELSIF col == "Hostdisplayname"          %]<cell width='30'>Hostname</cell>
         [% ELSIF col == "Host Parents"             %]<cell width='30'>Parents</cell>
+        [% ELSIF col == "Host Groups"              %]<cell width='30'>Hostgroups</cell>
         [% ELSIF col == "Host Alias"               %]<cell width='30'>Host Alias</cell>
         [% ELSIF col == "IP"                       %]<cell width='10'>IP</cell>
         [% ELSIF col == "Host Acknowledged"        %]<cell width='16'>Host Acknowledged</cell>
@@ -61,6 +62,7 @@
         [% ELSIF col == "Hostdisplayname"          %]<cell>[% escape_xml(s.host_display_name) %]</cell>
         [% ELSIF col == "Host Alias"               %]<cell>[% escape_xml(s.host_alias) %]</cell>
         [% ELSIF col == "Host Parents"             %]<cell>[% escape_xml(s.host_parents.join(', ')) %]</cell>
+        [% ELSIF col == "Host Groups"              %]<cell>[% escape_xml(s.host_groups.join(', ')) %]</cell>
         [% ELSIF col == "IP"                       %]<cell>[% escape_xml(s.host_address) %]</cell>
         [% ELSIF col == "Host Acknowledged"        %]<cell>[% IF s.host_acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Host Downtime"            %]<cell>[% IF s.host_scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
