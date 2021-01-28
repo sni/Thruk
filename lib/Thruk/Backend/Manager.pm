@@ -2613,10 +2613,29 @@ sub _merge_stats_answer {
 ##########################################################
 sub _sum_answer {
     my($self, $data) = @_;
-    if($ENV{'THRUK_USE_LMD'}) {
-        return($data);
-    }
     my $return;
+
+    if($ENV{'THRUK_USE_LMD'}) {
+        if(ref $data ne 'ARRAY') {
+            return($data);
+        }
+        if(scalar @{$data} == 1) {
+            return($data->[0]);
+        }
+        for my $row (@{$data}) {
+            for my $key (keys %{$row}) {
+                if($key eq 'peer_key') {
+                    $return->{$key} = [] unless $return->{$key};
+                    push @{$return->{$key}}, $row->{$key};
+                }
+                elsif(looks_like_number($row->{$key})) {
+                    $return->{$key} = 0 unless $return->{$key};
+                    $return->{$key} += $row->{$key};
+                }
+            }
+        }
+        return($return);
+    }
 
     my @peers = keys %{$data};
     return if scalar @peers == 0;

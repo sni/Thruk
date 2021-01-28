@@ -1299,7 +1299,7 @@ sub get_extra_perf_stats {
                   /)
                   ->hashref_array();
 
-    if(defined $data) {
+    if(defined $data && !$ENV{'THRUK_USE_LMD'}) {
         $data = shift @{$data};
     }
 
