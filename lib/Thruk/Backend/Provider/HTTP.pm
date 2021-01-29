@@ -1078,7 +1078,7 @@ sub _format_response_error {
     if($response->decoded_content && $response->decoded_content =~ m|<h1>(OMD:.*?)</h1>|sxm) {
         return($1);
     }
-    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)\-\->|sxm) {
+    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)(:error\|)\-\->|sxm) {
         $message = "\n".$1;
     }
     if(defined $response) {
