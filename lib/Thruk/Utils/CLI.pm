@@ -961,6 +961,17 @@ sub _cmd_raw {
     die("no backends...") unless $key;
 
     if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
+        my($stats) = $c->{'db'}->logcache_stats($c);
+        for my $key (sort keys %{$stats}) {
+            my $s = $stats->{$key};
+            if($s->{'mode'} eq 'import') {
+                return($c->detach_error({
+                    code => 503,
+                    msg  => "logcache import is currently running, please come back later",
+                    log  => 0,
+                }));
+            }
+        }
         $c->{'db'}->renew_logcache($c);
     }
 

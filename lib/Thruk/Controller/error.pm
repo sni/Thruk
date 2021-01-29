@@ -19,6 +19,14 @@ Thruk Controller.
 
         return $c->detach('/error/index/<nr>');
 
+    detailed errors:
+        return $c->detach_error({
+            msg   => "main error",
+            descr => "more descriptive details",
+            code  => http code,
+            log   => 0|1, #  force logging
+        });
+
 
     custom errors:
 
@@ -253,7 +261,7 @@ sub index {
             _warn("cannot process request, all backends are in state 'connecting'.");
             $c->stash->{errorDescription} .= "\nplease try again in a  few seconds.";
         }
-        elsif($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req) {
+        elsif((!defined $log_req || $log_req) && ($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req)) {
             Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails, $c->stash->{errorDebugInfo});
         } else {
             _debug($errors->{$arg1}->{'mess'});
@@ -312,7 +320,7 @@ sub index {
         });
     }
 
-    if(Thruk::Base::mode_cli()) {
+    if(Thruk::Base::mode_cli() && (!defined $log_req || $log_req)) {
         _error($c->stash->{errorMessage});
         _error($c->stash->{errorDescription});
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};

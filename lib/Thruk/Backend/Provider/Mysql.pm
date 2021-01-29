@@ -1199,7 +1199,12 @@ sub _import_logs {
         my $err = $@;
         if($err) {
             _debug($err);
-            push @{$errors}, $err;
+            if($err =~ m/(.*\Qplease come back later\E)/mx) {
+                _warn(sprintf("skipping %s, remote site is currently running an cache import, please try again later.", $peer->{'name'}));
+                push @{$errors}, ""; # count it as failed
+            } else {
+                push @{$errors}, $err;
+            }
         }
 
         # cleanup connection
@@ -1280,7 +1285,7 @@ sub _update_logcache {
     _finish_update($c, $dbh, $prefix, time() - $start, $mode) or $error .= $dbh->errstr;
 
     if($error) {
-        _error('logcache '.$mode.' failed: '.$error);
+        _error('logcache '.$mode.' failed: '.$error) unless $error =~ m/(.*\Qplease come back later\E)/mx;
         die($error);
     }
 
