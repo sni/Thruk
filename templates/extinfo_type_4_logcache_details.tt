@@ -45,6 +45,9 @@
           <td class='dataVal'>[% s.cache_version %]</td>
           <td class='dataVal'>[% IF s.items > 0 %][% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %][% END %]</td>
         </tr>
+        [% IF s.mode != "" %]
+          <td class='dataVal' colspan="9" style="text-align: center; color: red;"><b>currently running <i>[% s.mode %]</i> since [% date_format(c, s.last_update) %]...</b></td>
+        [% END %]
       </table>
 
       <table border="0" class="data" style="margin: 30px 15px;">
@@ -60,7 +63,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-              <button name="submit" value="update" style="width: 160px;">run update</button>
+              <button name="submit" value="update" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run update</button>
             </form>
           </td>
         </tr>
@@ -77,7 +80,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-              <button name="submit" value="compact" style="width: 160px;">run compact ([% c.config.logcache_compact_duration %])</button>
+              <button name="submit" value="compact" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run compact ([% c.config.logcache_compact_duration %])</button>
             </form>
           </td>
         </tr>
@@ -94,7 +97,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-              <button name="submit" value="optimize" style="width: 160px;">run optimize</button>
+              <button name="submit" value="optimize" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run optimize</button>
             </form>
           </td>
         </tr>
@@ -111,7 +114,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-              <button name="submit" value="clean" style="width: 160px;">run clean ([% c.config.logcache_clean_duration %])</button>
+              <button name="submit" value="clean" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run clean ([% c.config.logcache_clean_duration %])</button>
             </form>
           </td>
         </tr>
