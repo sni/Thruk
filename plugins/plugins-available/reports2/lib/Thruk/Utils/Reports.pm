@@ -1810,6 +1810,13 @@ sub check_for_waiting_reports {
 ##########################################################
 sub _report_die {
     my($c, $nr, $err, $logfile) = @_;
+
+    # redirect from $c->detach_error
+    if($c->stash->{'error_data'} && $c->{'detached'}) {
+        $err = $c->stash->{'error_data'}->{'msg'}."\n";
+        $err .= $c->stash->{'error_data'}->{'descr'}."\n" if $c->stash->{'error_data'}->{'descr'};
+    }
+
     _error($err);
     Thruk::Utils::IO::write($logfile, $err, undef, 1);
     $Thruk::Utils::Reports::error = $err;

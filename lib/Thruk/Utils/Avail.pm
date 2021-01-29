@@ -575,7 +575,11 @@ sub calculate_availability {
     $total_nr += scalar @{$services} if defined $services;
     return(scalar @{$hosts}, scalar @{$services}) if $c->req->parameters->{'get_total_numbers_only'};
     if($total_nr > $c->config->{'report_max_objects'}) {
-        die("too many objects: ".$total_nr.", maximum ".$c->config->{'report_max_objects'}.", please use more specific filter or raise limit (report_max_objects)!");
+        return($c->detach_error({
+            msg   => sprintf("too many objects: %d", $total_nr),
+            descr => sprintf("maximum configured number of objects: %d - please use more specific filter or raise limit (report_max_objects)", $c->config->{'report_max_objects'}),
+            code  => 500,
+        }));
     }
 
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
