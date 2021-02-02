@@ -438,22 +438,20 @@ sub write_lmd_config {
         my $peer = $Thruk::Backend::Pool::peers->{$key};
         next if $peer->{'federation'};
         $site_config .= "[[Connections]]\n";
-        $site_config .= "name    = '".$peer->peer_name()."'\n";
-        $site_config .= "id      = '".$key."'\n";
-        $site_config .= "source  = ['".join("', '", @{$peer->peer_list()})."']\n";
+        $site_config .= "name           = '".$peer->peer_name()."'\n";
+        $site_config .= "id             = '".$key."'\n";
+        $site_config .= "source         = ['".join("', '", @{$peer->peer_list()})."']\n";
         # section is supported starting with lmd 1.1.6
         if($supports_section && $peer->{'section'} && $peer->{'section'} ne 'Default') {
             $site_config .= "section = '".$peer->{'section'}."'\n";
         }
-        if($peer->{'type'} eq 'http') {
-            $site_config .= "auth = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n";
-            $site_config .= "remote_name = '".$peer->{'peer_config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'peer_config'}->{'options'}->{'remote_name'};
-        }
-        $site_config .= "tlsCertificate = '".$peer->{'peer_config'}->{'options'}->{'cert'}."'\n"    if $peer->{'peer_config'}->{'options'}->{'cert'};
-        $site_config .= "tlsKey         = '".$peer->{'peer_config'}->{'options'}->{'key'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'key'};
-        $site_config .= "tlsCA          = '".$peer->{'peer_config'}->{'options'}->{'ca_file'}."'\n" if $peer->{'peer_config'}->{'options'}->{'ca_file'};
+        $site_config .= "auth           = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'auth'};
+        $site_config .= "remote_name    = '".$peer->{'peer_config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'peer_config'}->{'options'}->{'remote_name'};
+        $site_config .= "tlsCertificate = '".$peer->{'peer_config'}->{'options'}->{'cert'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'cert'};
+        $site_config .= "tlsKey         = '".$peer->{'peer_config'}->{'options'}->{'key'}."'\n"      if $peer->{'peer_config'}->{'options'}->{'key'};
+        $site_config .= "tlsCA          = '".$peer->{'peer_config'}->{'options'}->{'ca_file'}."'\n"  if $peer->{'peer_config'}->{'options'}->{'ca_file'};
         $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'peer_config'}->{'options'}->{'verify'} && $peer->{'peer_config'}->{'options'}->{'verify'} == 0);
-        $site_config .= "proxy          = '".$peer->{'peer_config'}->{'options'}->{'proxy'}."'\n"   if $peer->{'peer_config'}->{'options'}->{'proxy'};
+        $site_config .= "proxy          = '".$peer->{'peer_config'}->{'options'}->{'proxy'}."'\n"    if $peer->{'peer_config'}->{'options'}->{'proxy'};
         if($peer->{'peer_config'}->{'lmd_options'}) {
             for my $key (sort keys %{$peer->{'peer_config'}->{'lmd_options'}}) {
                 $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'peer_config'}->{'lmd_options'}->{$key});
