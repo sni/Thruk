@@ -40,9 +40,6 @@ server {
     ssl_certificate /etc/nginx/ssl/thruk.example.com.crt;
     ssl_certificate_key /etc/nginx/ssl/thruk.example.com.key;
 
-    auth_basic              "Thruk server authentication";
-    auth_basic_user_file    /etc/nginx/users;
-
     root /usr/share/thruk/root;
 
     location /thruk/documentation.html {
@@ -68,8 +65,17 @@ server {
     }
 
     location / {
+        auth_basic              "Thruk server authentication";
+        auth_basic_user_file    /etc/nginx/users;
+
         # First attempt to serve request as file, then
         # as directory, then fall back to displaying a 404.
+        try_files $uri @thruk;
+    }
+    location /thruk/cgi-bin/remote.cgi {
+        try_files $uri @thruk;
+    }
+    location /thruk/r/ {
         try_files $uri @thruk;
     }
 }
