@@ -140,6 +140,7 @@ sub cmd {
             follow  => 1,
     });
     if(!$img) {
+        _warn($c->stash->{'last_graph_output'}) if $c->stash->{'last_graph_output'};
         _info(sprintf("could not export any image, check if the %s %s%s has a valid graph url (action_url or notes_url).",
                 ($opt->{'service'} && $opt->{'service'} ne '_HOST_') ? 'service' : 'host',
                 $opt->{'host'},

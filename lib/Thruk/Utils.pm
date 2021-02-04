@@ -1639,6 +1639,7 @@ sub get_perf_image {
         }
     }
     _debug($out) if $out;
+    $c->stash->{'last_graph_output'} = $out;
     return '';
 }
 

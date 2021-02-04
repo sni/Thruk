@@ -2,5 +2,6 @@
     name:
       - npm
       - chromium
+      - libxshmfence
     state: present
 - shell: "sudo su - {{ site }} -c 'npm i puppeteer'"
