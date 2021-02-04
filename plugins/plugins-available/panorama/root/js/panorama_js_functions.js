@@ -444,8 +444,20 @@ var TP = {
             TP.cp.set(config.conf.id, config.state);
         }
         TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
-        config.conf.tab      = tb;
-        var win = Ext.create(config.type, config.conf);
+        config.conf.tab = tb;
+
+        // does this widget class exist?
+        if(!Ext.ClassManager.get(config.type)) {
+            TP.Msg.msg("fail_message~~cannot create panel of type: "+config.type+". Thruk version conflict?");
+            return;
+        }
+
+        try {
+            var win = Ext.create(config.type, config.conf);
+        } catch(err) {
+            TP.logError("global", "panelCreateException", err);
+            throw err;
+        }
         if(config.conf.autoShow) { win.show(); }
         if((smartPlacement == undefined || smartPlacement == true) && !(config.conf.pos)) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
