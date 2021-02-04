@@ -903,6 +903,7 @@ sub finalize_request {
         _warn(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
         _warn(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
         _warn(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+        _warn($c->stash->{errorDetails}) if $c->stash->{errorDetails}; # might contain hints about the current dashboard
         _warn($c->stats->report());
     }
 
