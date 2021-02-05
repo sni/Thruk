@@ -640,6 +640,7 @@ sub _process_users_page {
             my $userdata = Thruk::Utils::get_user_data($c, $name);
             if($send eq 'unlock account') {
                 delete $userdata->{'login'}->{'locked'};
+                $userdata->{'login'}->{'failed'} = 0;
             } else {
                 $userdata->{'login'}->{'locked'} = 1;
             }
