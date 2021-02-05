@@ -36,9 +36,13 @@ sub load_dashboard {
 
     my $dashboard = {};
     my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", read_file($file)), 2));
+    if($code =~ m/^\{/mx) {
+        _warn(sprintf("dashboard %s is executable but seems to be a normal json data file. Remove executable bit: chmod -x %s", $file, $file));
+        return;
+    }
 
     # set meta data
-    my $meta = { nr => $nr, groups => '[]', title => 'Dashboard', user => '' };
+    my $meta = { nr => $nr, groups => [], title => 'Dashboard', user => '' };
     if($code =~ m/^\#\s*title:\s*(.*?)$/mx) {
         $meta->{'title'} = $1;
     }
@@ -52,6 +56,7 @@ sub load_dashboard {
     if($code =~ m/^\#\!/mx && $code !~ m/^\#\!.*?perl/mx) {
         $meta->{'type'} = 'other';
     }
+
     _merge_meta($dashboard, $meta);
 
     if($meta_data_only) {

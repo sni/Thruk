@@ -226,7 +226,8 @@ sub load_dashboard {
         if(!defined $dashboard) {
             my $content = Thruk::Utils::IO::read($file);
             if($content =~ m/^\#\s*title:/mx) {
-                _warn("non-executable scripted dashboard found in $file, forgot to chmod +x");
+                _warn(sprintf("non-executable scripted dashboard found in %s, forgot to: chmod +x %s", $file, $file));
+                return;
             }
         }
     }
