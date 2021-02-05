@@ -175,6 +175,12 @@ sub _handle_basic_login {
 
     my $userdata = Thruk::Utils::get_user_data($c, $login);
     if($userdata->{'login'}->{'locked'}) {
+        _audit_log("login", sprintf("login attempt for locked account %s on %s from %s%s",
+                                $login,
+                                $referer,
+                                $c->req->address,
+                                ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
+                        ), $login);
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
     }
 
@@ -205,6 +211,13 @@ sub _handle_basic_login {
         $userdata->{'login'}->{'failed'}++;
         $userdata->{'login'}->{'last_failed'} = { time => time(), ip => $c->req->address, forwarded_for => $c->env->{'HTTP_X_FORWARDED_FOR'} };
         if($userdata->{'login'}->{'failed'} >= $c->config->{cookie_auth_disable_after_failed_logins}) {
+            _audit_log("login", sprintf("account %s locked after %d failed attempts on %s from %s%s",
+                                    $login,
+                                    $userdata->{'login'}->{'failed'},
+                                    $referer,
+                                    $c->req->address,
+                                    ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
+                            ), $login);
             $userdata->{'login'}->{'locked'} = 1;
         }
 
