@@ -1356,14 +1356,16 @@ register_rest_path_v1('GET', '/thruk', \&_rest_get_thruk);
 sub _rest_get_thruk {
     my($c) = @_;
     return({
-        rest_version        => $VERSION,                            # rest api version
-        thruk_version       => $c->config->{'version'},             # thruk version
-        thruk_branch        => $c->config->{'branch'},              # thruk branch name
-        thruk_release_date  => $c->config->{'released'},            # thruk release date
-        localtime           => Time::HiRes::time(),                 # current server unix timestamp / epoch
-        project_root        => $c->config->{'project_root'},        # thruk root folder
-        etc_path            => $c->config->{'etc_path'},            # configuration folder
-        var_path            => $c->config->{'var_path'},            # variable data folder
+        rest_version        => $VERSION,                                # rest api version
+        thruk_version       => $c->config->{'version'},                 # thruk version
+        thruk_branch        => $c->config->{'branch'},                  # thruk branch name
+        thruk_release_date  => $c->config->{'released'},                # thruk release date
+        localtime           => Time::HiRes::time(),                     # current server unix timestamp / epoch
+        project_root        => $c->config->{'project_root'},            # thruk root folder
+        etc_path            => $c->config->{'etc_path'},                # configuration folder
+        var_path            => $c->config->{'var_path'},                # variable data folder
+        extra_version       => $c->config->{'extra_version'}//'',       # might contain omd version
+        extra_link          => $c->config->{'extra_version_link'}//'',  # contains link from extra_versions product
     });
 }
 

@@ -550,11 +550,11 @@ sub set_default_config {
         $omdlink    =~ s/.*?\///gmx;
         $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
         $config->{'extra_version'}      = 'OMD '.$omdlink;
-        $config->{'extra_version_link'} = 'http://www.omdistro.org';
+        $config->{'extra_version_link'} = 'https://labs.consol.de/omd/';
     }
     elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
         $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
-        $config->{'extra_version_link'} = 'http://www.naemon.org';
+        $config->{'extra_version_link'} = 'https://www.naemon.org';
         chomp($config->{'extra_version'});
     }
     $config->{'extra_version'}      = '' unless defined $config->{'extra_version'};

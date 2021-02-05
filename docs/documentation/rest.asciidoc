@@ -1405,6 +1405,8 @@ hash of basic information about this thruk instance
 |project_root                      | thruk root folder
 |etc_path                          | configuration folder
 |var_path                          | variable data folder
+|extra_version                     | might contain omd version
+|extra_link                        | contains link from extra_versions product
 |===========================================
 
 
