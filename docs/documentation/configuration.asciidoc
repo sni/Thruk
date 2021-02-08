@@ -2620,8 +2620,9 @@ lists.
 
 === obj_readonly
 Use `obj_readonly` regular expressions which will be appended to the backend
-specific readonly patterns from the Component Backend peer configtool. Read
-details on the link:/documentation/configuration.html#peer[configtool section].
+specific readonly patterns from the Component Backend peer configtool. The same 
+effect can be achieved by adding _"# thruk: readonly"_ on top of a object config file. 
+Readdetails on the link:/documentation/configuration.html#peer[configtool section].
 
 === default_keys_host
 
