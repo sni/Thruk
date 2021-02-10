@@ -1093,6 +1093,9 @@ The pattern is a simple perl regular substitute expression in the form of
 ex.:
 
   commandline_obfuscate_pattern = /(\-\-password=")[^"]*(")/$1"***"$2/
+  commandline_obfuscate_pattern = /(check_vmware_.*\-p )(\S+)/$1"***"/
+  commandline_obfuscate_pattern = /(check_.*\--pw )(\S+)/$1"***"/
+  commandline_obfuscate_pattern = /(check_.*\"password\": )(\S+)/$1"***"/
 
 
 
