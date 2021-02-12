@@ -15,6 +15,7 @@ my $total  = scalar @{$own} + scalar @{$public};
 my $_add_panlet = sub {
     my($x, $y, $d) = @_;
     return unless($d && $d->{'nr'});
+    return unless $d->{'name'};
     if($d->{'ts'} && $dashboard->{'ts'} < $d->{'ts'}) {
         $dashboard->{'ts'} = $d->{'ts'};
     }
