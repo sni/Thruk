@@ -1318,12 +1318,46 @@ var TP = {
             return;
         }
 
-        var statusReq = TP.getStatusReq(tab, id, xdata);
+        var panels = TP.getAllPanel(tab);
+        if(panels.length < 50 || id != undefined) {
+            return(TP.updateAllIconsBulkDo(tab, id, xdata, reschedule, callback));
+        }
+
+        // fetch 50 icons at a time, otherwise we might get timeouts from the backends
+        var bucket  = {}
+        var items   = 0;
+        for(var nr=0; nr<panels.length; nr++) {
+            items++;
+            bucket[panels[nr].id] = true;
+            if(items >= 50) {
+                if(nr == panels.length-1) {
+                    // run the last bulk with callback and update sub dashboards
+                    TP.updateAllIconsBulkDo(tab, bucket, xdata, reschedule, callback, true);
+                } else {
+                    TP.updateAllIconsBulkDo(tab, bucket, xdata, reschedule);
+                }
+                bucket = [];
+                items  = 0;
+            }
+        }
+        if(items > 0) {
+            // run the last bulk with callback and update sub dashboards
+            TP.updateAllIconsBulkDo(tab, bucket, xdata, reschedule, callback, true);
+        }
+    },
+
+    updateAllIconsBulkDo: function(tab, ids, xdata, reschedule, callback, withSubDashboards) {
+        var statusReq = TP.getStatusReq(tab, ids, xdata);
         if(statusReq == undefined) {
             if(tab) { tab.removeMask(); }
             if(callback) { callback(); }
             return;
         }
+        var id;
+        if(ids && !Ext.isArray(ids)) {
+            id = ids;
+        }
+
         var req = statusReq.req,
             ref = statusReq.ref;
 
@@ -1338,7 +1372,7 @@ var TP = {
         };
         TP.iconUpdateRunning[tab.id] = true;
         var subReqs = {};
-        if(!id) {
+        if(!id || withSubDashboards) {
             // add dashboard icons status request
             params.sub = {};
             var subtabs = tab.getAllSubDashboards(true);
