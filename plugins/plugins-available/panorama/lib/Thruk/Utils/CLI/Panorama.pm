@@ -36,7 +36,7 @@ The panorama command manages panorama dashboards from the command line.
 use warnings;
 use strict;
 use Thruk::Utils::Log qw/:all/;
-use Cpanel::JSON::XS qw/encode_json/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Getopt::Long ();
 
 ##############################################
@@ -123,16 +123,52 @@ sub cmd {
                 next;
             }
             my $changed = 0;
-            if($opt->{'remove-panel-backends'}) {
-                _info("  - removing panel backends");
-                for my $p (sort keys %{$dashboard}) {
-                    next unless $p =~ m/^panlet_/mx;
-                    _debug("    - ".$p);
-                    my $panel = $dashboard->{$p};
-                    if($panel->{'xdata'}->{'general'} && $panel->{'xdata'}->{'general'}->{'backends'}) {
+            _info("  - removing panel backends") if $opt->{'remove-panel-backends'};
+            for my $p (sort keys %{$dashboard}) {
+                next unless $p =~ m/^panlet_/mx;
+                _debug("    - ".$p);
+                my $panel = $dashboard->{$p};
+
+                if($opt->{'remove-panel-backends'}) {
+                    if($panel->{'xdata'}->{'general'} && $panel->{'xdata'}->{'general'}->{'backends'} && scalar @{$panel->{'xdata'}->{'general'}->{'backends'}} > 0) {
                         $panel->{'xdata'}->{'general'}->{'backends'} = [];
                         $changed++;
                     }
+                }
+                if($panel->{'xdata'}->{'cls'} && $panel->{'xdata'}->{'cls'} eq 'TP.FilterStatusIcon') {
+                    my $filter = decode_json($panel->{'xdata'}->{'general'}->{'filter'});
+                    for my $f (@{$filter}) {
+                        my $type = $f->{'type'};
+                        for my $key (sort keys %{$f}) {
+                            if($key =~ m/^displayfield\-/mx) {
+                                delete $f->{$key};
+                                $changed++;
+                            }
+                            if($key eq 'val_pre' && $f->{$key} eq '') {
+                                delete $f->{$key};
+                                $changed++;
+                            }
+                            if($key eq 'value_date') {
+                                if($type ne 'next_check' && $type ne 'last_check') {
+                                    delete $f->{$key};
+                                    $changed++;
+                                }
+                            }
+                            if(($key eq 'hostprops' || $key eq 'serviceprops') && !$f->{$key}) {
+                                delete $f->{$key};
+                                $changed++;
+                            }
+                            if($key eq 'hoststatustypes' && $f->{$key} eq '15') {
+                                delete $f->{$key};
+                                $changed++;
+                            }
+                            if($key eq 'servicestatustypes' && $f->{$key} eq '31') {
+                                delete $f->{$key};
+                                $changed++;
+                            }
+                        }
+                    }
+                    $panel->{'xdata'}->{'general'}->{'filter'} = encode_json($filter);
                 }
             }
             if($changed) {
