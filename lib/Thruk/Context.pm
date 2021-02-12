@@ -568,6 +568,7 @@ sub redirect_to {
     $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
+    confess("invalid redirect url: ".Dumper($url)) if $url =~ m/ARRAY\(/mx;
     $c->stash->{'last_redirect_to'} = $url;
     return(1);
 }

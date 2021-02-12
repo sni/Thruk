@@ -154,7 +154,7 @@ sub perl {
                 undef $rc;
                 if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
                     open(my $fh, '>', $dir."/forward");
-                    if(ref $c->stash->{'last_redirect_to'}) {
+                    if(ref $c->stash->{'last_redirect_to'} || $c->stash->{'last_redirect_to'} =~ m/ARRAY\(/mx) {
                         confess("invalid redirect url: ".Dumper($c->stash->{'last_redirect_to'}));
                     }
                     print $fh $c->stash->{'last_redirect_to'},"\n";
