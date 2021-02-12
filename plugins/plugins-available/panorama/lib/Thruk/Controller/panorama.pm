@@ -27,11 +27,6 @@ Thruk Controller.
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
-my @runtime_keys = qw/state stateHist stateDetails
-                      currentPage pageSize totalCount
-                    /;
-
-##########################################################
 
 =head2 index
 
@@ -424,7 +419,7 @@ sub _stateprovider {
                     $extra->{'user'} = $param_data->{'tab'}->{'xdata'}->{'owner'};
                 }
                 delete $param_data->{'tab'}->{'xdata'}->{'owner'};
-                if(!_save_dashboard($c, $param_data, $extra)) {
+                if(!Thruk::Utils::Panorama::save_dashboard($c, $param_data, $extra)) {
                     $json = { 'status' => 'failed' };
                 } else {
                     if($newid) {
@@ -906,7 +901,7 @@ sub _task_load_dashboard {
     }
     $data->{'id'}   = 'new';
     $data->{'user'} = $c->stash->{'remote_user'};
-    $data = _save_dashboard($c, $data);
+    $data = Thruk::Utils::Panorama::save_dashboard($c, $data);
     my $newid = $data->{'id'};
 
     # must be text/html result, otherwise extjs form result handler dies
@@ -2772,7 +2767,6 @@ sub _task_dashboard_save_states {
     $nr      =~ s/^pantab_//gmx;
 
     my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
-    my $runtime   = _extract_runtime_data($dashboard);
     my $states;
     eval {
         $states = decode_json($c->req->parameters->{'states'});
@@ -2781,14 +2775,8 @@ sub _task_dashboard_save_states {
         _warn('_task_dashboard_save_states failed: '.$@);
         return;
     }
-    for my $id (keys %{$runtime}, keys %{$states}) {
-        for my $key (@runtime_keys) {
-            $runtime->{$id}->{$key} = $states->{$id}->{$key} if defined $states->{$id}->{$key};
-        }
-    }
-    my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $nr);
-    Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
-    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for last_used
+
+    Thruk::Utils::Panorama::save_runtime_file($c, $dashboard, $states);
 
     my $json = { 'status' => 'ok' };
     _add_misc_details($c, undef, $json);
@@ -2836,7 +2824,7 @@ sub _task_dashboard_data {
             },
             id      => 'new',
         };
-        $dashboard = _save_dashboard($c, $dashboard);
+        $dashboard = Thruk::Utils::Panorama::save_dashboard($c, $dashboard);
     } else {
         $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     }
@@ -2977,7 +2965,7 @@ sub _task_dashboard_update {
             elsif($field eq 'user' and $c->stash->{'is_admin'}) {
                 $extra_settings->{$field} = $value;
             }
-            _save_dashboard($c, $dashboard, $extra_settings);
+            Thruk::Utils::Panorama::save_dashboard($c, $dashboard, $extra_settings);
         }
     }
     _add_misc_details($c, 1, $json);
@@ -3416,83 +3404,6 @@ sub _summarize_query {
 }
 
 ##########################################################
-sub _save_dashboard {
-    my($c, $dashboard, $extra_settings) = @_;
-
-    my $nr   = delete $dashboard->{'id'};
-    $nr      =~ s/^pantab_//gmx;
-    my $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
-
-    my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
-    return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
-
-    # do not overwrite scripted dashboards
-    return if $nr eq "0"; # may be non-numeric too
-    return if $dashboard->{'scripted'};
-    return if -x $file;
-
-    if($nr eq 'new') {
-        # find next free number
-        $nr = $c->config->{'Thruk::Plugin::Panorama'}->{'new_files_start_at'} || 1;
-        $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
-        while(-e $file) {
-            $nr++;
-            $file = $c->{'panorama_etc'}.'/'.$nr.'.tab';
-        }
-    }
-
-    # preserve some settings
-    if($existing) {
-        $dashboard->{'user'} = $existing->{'user'} || $c->stash->{'remote_user'};
-    }
-
-    if($extra_settings) {
-        for my $key (keys %{$extra_settings}) {
-            $dashboard->{$key} = $extra_settings->{$key};
-        }
-    }
-
-    delete $dashboard->{'version'}; # leftover from imported dashboard
-    delete $dashboard->{'nr'};
-    delete $dashboard->{'id'};
-    delete $dashboard->{'file'};
-    delete $dashboard->{'locked'};
-    delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
-    delete $dashboard->{'tab'}->{'xdata'}->{''};
-    delete $dashboard->{'tab'}->{'readonly'};
-    delete $dashboard->{'tab'}->{'user'};
-    delete $dashboard->{'tab'}->{'ts'};
-    delete $dashboard->{'tab'}->{'public'};
-    delete $dashboard->{'tab'}->{'scripted'};
-
-    # set file version
-    $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
-
-    if($dashboard->{'tab'}->{'xdata'}->{'backends'}) {
-        $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
-    }
-
-    for my $key (sort keys %{$dashboard}) {
-        my $newkey = $key;
-        $newkey =~ s/^.*_(panlet_\d+)$/$1/gmx;
-        $dashboard->{$newkey} = delete $dashboard->{$key};
-    }
-
-    # save runtime data in extra file
-    my $runtime      = _extract_runtime_data($dashboard);
-    my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $nr);
-
-    Thruk::Utils::write_data_file($file, $dashboard, 1);
-    Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
-    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for last_used
-    Thruk::Utils::backup_data_file($c->{'panorama_etc'}.'/'.$nr.'.tab', $c->{'panorama_var'}.'/'.$nr.'.tab', 'a', 5, 600);
-    $dashboard->{'nr'} = $nr;
-    $dashboard->{'id'} = 'pantab_'.$nr;
-    $dashboard->{'ts'} = [stat($file)]->[9];
-    return $dashboard;
-}
-
-##########################################################
 sub _merge_dashboard_into_hash {
     my($c, $dashboard, $data) = @_;
     return $data unless $dashboard;
@@ -3651,22 +3562,6 @@ sub _set_preload_images {
         push @{$c->stash->{preload_img}}, $i;
     }
     return;
-}
-
-##########################################################
-sub _extract_runtime_data {
-    my($dashboard) = @_;
-    my $runtime = {};
-    for my $tab (keys %{$dashboard}) {
-        next unless ref $dashboard->{$tab} eq 'HASH';
-        delete $dashboard->{$tab}->{""};
-        for my $key (@runtime_keys) {
-            if(defined $dashboard->{$tab}->{'xdata'} && defined $dashboard->{$tab}->{'xdata'}->{$key}) {
-                $runtime->{$tab}->{$key} = delete $dashboard->{$tab}->{'xdata'}->{$key};
-            }
-        }
-    }
-    return($runtime);
 }
 
 ##########################################################

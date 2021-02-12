@@ -1,7 +1,9 @@
 _thruk_cmd_options() {
     cmd=$1
     echo "help"
-    thruk $cmd help 2>&1 | grep ^\ *- | awk '{print $2 }'
+    HELP=$(thruk $cmd help 2>&1)
+    echo "$HELP" | grep ^\ *- | grep -v '^\ *--' | awk '{print $2 }'
+    echo "$HELP" | grep '^\ *--' | awk '{print $1 }'
     return
 }
 

@@ -34,6 +34,11 @@ use constant {
     DASHBOARD_FILE_VERSION => 2,
 };
 
+##########################################################
+my @runtime_keys = qw/state stateHist stateDetails
+                      currentPage pageSize totalCount
+                    /;
+
 use base 'Exporter';
 our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/);
 
@@ -313,6 +318,114 @@ sub load_dashboard {
 
 ##########################################################
 
+=head2 save_dashboard
+
+    save_dashboard($c, $dashboard, [$extra_settings])
+
+save dashboard to disk
+
+returns $dashboard or undef on errors
+
+=cut
+sub save_dashboard {
+    my($c, $dashboard, $extra_settings) = @_;
+
+    my $nr   = delete $dashboard->{'id'};
+    $nr      =~ s/^pantab_//gmx;
+    my $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
+
+    my $existing = $nr eq 'new' ? $dashboard : load_dashboard($c, $nr, 1);
+    return unless is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
+
+    # do not overwrite scripted dashboards
+    return if $nr eq "0"; # may be non-numeric too
+    return if $dashboard->{'scripted'};
+    return if -x $file;
+
+    if($nr eq 'new') {
+        # find next free number
+        $nr = $c->config->{'Thruk::Plugin::Panorama'}->{'new_files_start_at'} || 1;
+        $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
+        while(-e $file) {
+            $nr++;
+            $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
+        }
+    }
+
+    # preserve some settings
+    if($existing) {
+        $dashboard->{'user'} = $existing->{'user'} || $c->stash->{'remote_user'};
+    }
+
+    if($extra_settings) {
+        for my $key (keys %{$extra_settings}) {
+            $dashboard->{$key} = $extra_settings->{$key};
+        }
+    }
+
+    delete $dashboard->{'version'}; # leftover from imported dashboard
+    delete $dashboard->{'nr'};
+    delete $dashboard->{'id'};
+    delete $dashboard->{'file'};
+    delete $dashboard->{'locked'};
+    delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
+    delete $dashboard->{'tab'}->{'xdata'}->{''};
+    delete $dashboard->{'tab'}->{'readonly'};
+    delete $dashboard->{'tab'}->{'user'};
+    delete $dashboard->{'tab'}->{'ts'};
+    delete $dashboard->{'tab'}->{'public'};
+    delete $dashboard->{'tab'}->{'scripted'};
+
+    # set file version
+    $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
+
+    if($dashboard->{'tab'}->{'xdata'}->{'backends'}) {
+        $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
+    }
+
+    for my $key (sort keys %{$dashboard}) {
+        my $newkey = $key;
+        $newkey =~ s/^.*_(panlet_\d+)$/$1/gmx;
+        $dashboard->{$newkey} = delete $dashboard->{$key};
+    }
+
+    # save runtime data in extra file
+    save_runtime_file($c, $dashboard, undef, $nr);
+
+    Thruk::Utils::write_data_file($file, $dashboard, 1);
+    Thruk::Utils::backup_data_file($c->config->{'etc_path'}.'/panorama/'.$nr.'.tab', $c->config->{'var_path'}.'/panorama/'.$nr.'.tab', 'a', 5, 600);
+    $dashboard->{'nr'} = $nr;
+    $dashboard->{'id'} = 'pantab_'.$nr;
+    $dashboard->{'ts'} = [stat($file)]->[9];
+    return $dashboard;
+}
+
+##########################################################
+
+=head2 extract_runtime_data
+
+    extract_runtime_data($dashboard)
+
+returns runtime data for given dashboard
+
+=cut
+sub extract_runtime_data {
+    my($dashboard) = @_;
+    my $runtime = {};
+    for my $tab (keys %{$dashboard}) {
+        next unless ref $dashboard->{$tab} eq 'HASH';
+        delete $dashboard->{$tab}->{""};
+        for my $key (@runtime_keys) {
+            if(defined $dashboard->{$tab}->{'xdata'} && defined $dashboard->{$tab}->{'xdata'}->{$key}) {
+                $runtime->{$tab}->{$key} = delete $dashboard->{$tab}->{'xdata'}->{$key};
+            }
+        }
+    }
+    return($runtime);
+}
+
+##########################################################
+
 =head2 is_authorized_for_dashboard
 
     is_authorized_for_dashboard($c, $nr, [$dashboard])
@@ -444,6 +557,36 @@ sub set_is_admin {
     }
     return;
 }
+##########################################################
+
+=head2 save_runtime_file
+
+    save_runtime_file($c, $dashboard, [$merge_states])
+
+return nothing
+
+=cut
+sub save_runtime_file {
+    my($c, $dashboard, $merge_states, $nr) = @_;
+    $nr = $dashboard->{'nr'} unless defined $nr;
+
+    my $runtime = extract_runtime_data($dashboard);
+
+    if($merge_states) {
+        for my $id (keys %{$runtime}, keys %{$merge_states}) {
+            for my $key (@runtime_keys) {
+                $runtime->{$id}->{$key} = $merge_states->{$id}->{$key} if defined $merge_states->{$id}->{$key};
+            }
+        }
+    }
+
+    my $runtime_file = get_runtime_file($c, $nr);
+    Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
+    Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for last_used
+
+    return;
+}
+
 ##########################################################
 
 1;

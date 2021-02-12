@@ -25,7 +25,9 @@ The panorama command manages panorama dashboards from the command line.
     available commands are:
 
       - clean           remove empty dashboards
-      - json <nr>       load and  return given dashboard
+      - json <nr>       load and return given dashboard in json format
+      - trim <nr|file>  trim specified dashboard with given options
+            --remove-panel-backends     remove backends for all icons so they inherit them from the dashboard
 
 =back
 
@@ -35,6 +37,7 @@ use warnings;
 use strict;
 use Thruk::Utils::Log qw/:all/;
 use Cpanel::JSON::XS qw/encode_json/;
+use Getopt::Long ();
 
 ##############################################
 
@@ -61,6 +64,19 @@ sub cmd {
         return("panorama plugin is disabled.\n", 1);
     }
 
+    # parse options
+    my $opt = {
+      'remove-panel-backends' => undef,
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptionsFromArray($commandoptions,
+       "remove-panel-backends" => \$opt->{'remove-panel-backends'},
+    ) or do {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    };
+
     my $command = shift @{$commandoptions} || 'help';
     my($rc, $output) = (0, "");
     if($command eq 'clean' || $command eq 'clean_dashboards') {
@@ -83,6 +99,48 @@ sub cmd {
             $output .= "\n";
         } else {
             $rc = 1;
+        }
+    }
+    elsif($command eq 'trim') {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) if scalar @{$commandoptions} == 0;
+        for my $nr (@{$commandoptions}) {
+            my $file;
+            if(-e $nr) {
+                $file = $nr;
+                $nr   = -1;
+            }
+            my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, undef, $file);
+            if(!$dashboard) {
+                _fatal("cannot open dashboard: ".$nr);
+            }
+            _info("trim dashboard: ".$dashboard->{'file'});
+            if($dashboard->{'scripted'}) {
+                _info("  - skipping scripted dashboard");
+                next;
+            }
+            if($dashboard->{'readonly'}) {
+                _info("  - skipping readonly dashboard");
+                next;
+            }
+            my $changed = 0;
+            if($opt->{'remove-panel-backends'}) {
+                _info("  - removing panel backends");
+                for my $p (sort keys %{$dashboard}) {
+                    next unless $p =~ m/^panlet_/mx;
+                    _debug("    - ".$p);
+                    my $panel = $dashboard->{$p};
+                    if($panel->{'xdata'}->{'general'} && $panel->{'xdata'}->{'general'}->{'backends'}) {
+                        $panel->{'xdata'}->{'general'}->{'backends'} = [];
+                        $changed++;
+                    }
+                }
+            }
+            if($changed) {
+                Thruk::Utils::Panorama::save_dashboard($c, $dashboard);
+                _info("    - changes saved");
+            } else {
+                _info("    - no changes");
+            }
         }
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
