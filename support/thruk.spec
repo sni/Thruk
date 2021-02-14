@@ -20,8 +20,8 @@ URL:           http://thruk.org
 %else
 %define fullname %{name}-%{version}-%{release}
 %endif
-# detect obs builds which contains a dot in the release version
-%if %(echo "%{release}" | grep -Fc ".") > 0
+# detect obs builds which use very high release numbers
+%if %release > 100
 %define fullname %{name}-%{version}
 %endif
 Source0:       %{fullname}.tar.gz
