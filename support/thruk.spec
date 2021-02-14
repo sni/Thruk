@@ -21,7 +21,7 @@ URL:           http://thruk.org
 %define fullname %{name}-%{version}-%{release}
 %endif
 # detect obs builds which use very high release numbers
-%if "%{release}" >= 100
+%if %{release} >= 100
 %define fullname %{name}-%{version}
 %endif
 Source0:       %{fullname}.tar.gz
