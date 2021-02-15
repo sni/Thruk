@@ -1399,7 +1399,6 @@ hash of basic information about this thruk instance
 |Attribute                         | Description
 |rest_version                      | rest api version
 |thruk_version                     | thruk version
-|thruk_branch                      | thruk branch name
 |thruk_release_date                | thruk release date
 |localtime                         | current server unix timestamp / epoch
 |project_root                      | thruk root folder
@@ -1551,7 +1550,6 @@ lists cluster nodes
 [options="header"]
 |===========================================
 |Attribute                         | Description
-|branch                            | Branch version of this node
 |hostname                          | host name of the cluster node
 |last_contact                      | timestamp of last successful contact
 |last_error                        | text of last error message
