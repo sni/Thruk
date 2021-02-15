@@ -847,8 +847,6 @@ sub _get_git_info {
     }
 
     my($hash);
-    my $dir = Cwd::getcwd;
-    chdir($project_root.'/../../');
 
     # directly on git tag?
     my($rc, $tag) = _cmd($project_root.'/../../ && git describe --tag --exact-match 2>&1');
