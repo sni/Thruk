@@ -139,7 +139,6 @@ sub load_statefile {
         $n->{'last_error'}    = '' unless $n->{'last_error'};
         $n->{'response_time'} = '' unless defined $n->{'response_time'};
         $n->{'version'}       = '' unless defined $n->{'version'};
-        $n->{'branch'}        = '' unless defined $n->{'branch'};
         $n->{'maintenance'}   = 0  unless defined $n->{'maintenance'};
     }
 
@@ -358,7 +357,6 @@ sub run_cluster {
                         last_error    => '',
                         response_time => $elapsed,
                         version       => $r->{'version'},
-                        branch        => $r->{'branch'},
                         hostname      => $r->{'output'}->[0]->{'hostname'},
                         node_id       => $n,
                         maintenance   => $r->{'output'}->[0]->{'maintenance'},
@@ -428,7 +426,6 @@ sub pong {
         node_id     => $Thruk::NODE_ID,
         hostname    => $Thruk::HOSTNAME,
         version     => $c->config->{'version'},
-        branch      => $c->config->{'branch'},
         maintenance => $c->cluster->{'node'}->{'maintenance'},
     });
 }

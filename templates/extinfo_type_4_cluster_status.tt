@@ -37,7 +37,6 @@
                         <th class='data'>Version</th>
                         <th class='data'>Actions</th>
                       </tr>
-                      [% my_version = version _ "_" _ branch %]
                       [% FOREACH n = c.cluster.nodes %]
                       <tr id="row_node_[% loop.index %]">
                         <td class='dataVal'><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
@@ -85,11 +84,10 @@
                         </td>
                         <td class='dataVal' style="text-align: center;">
                           [% IF c.cluster.is_it_me(n) %]
-                          [% version %][% IF branch %]-[% branch %][% END %]
+                          [% version %]
                           [% ELSE %]
-                          [% n.version %][% IF n.branch %]-[% n.branch %][% END %]
-                          [% cmp_version = n.version _ "_" _ n.branch %]
-                          [% IF cmp_version != "_" && cmp_version != my_version %]
+                          [% n.version %]
+                          [% IF n.version != version %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/warning.png" width="16" height="16" alt="version mismatch" title="version mismatch" style="vertical-align: sub;">
                           [% END %]
                           [% END %]

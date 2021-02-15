@@ -3,9 +3,9 @@ use warnings;
 use inc::Module::Install;
 
 name 'thruk';
-all_from 'lib/Thruk.pm';
-
 license 'perl';
+all_from 'lib/Thruk/Config.pm';
+
 resources(
     'homepage',   => 'http://www.thruk.org',
     'bugtracker'  => 'http://github.com/sni/Thruk/issues',

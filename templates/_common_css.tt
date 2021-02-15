@@ -15,9 +15,9 @@
 [%+ END %]
 [% IF all_in_one_css && !thruk_author %]
   [% IF use_frames %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-[% version %]-[% filebranch %].css' />
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-[% version %].css' />
   [%+ ELSE %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-noframes-[% version %]-[% filebranch %].css' />
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-noframes-[% version %].css' />
   [%+ END %]
 [% END %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/daterangepicker-3.0.5/daterangepicker.css' />

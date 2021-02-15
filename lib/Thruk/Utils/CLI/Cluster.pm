@@ -96,7 +96,7 @@ sub cmd {
                 $n->{'hostname'},
                 $n->{'node_url'},
                 $n->{'response_time'} ? sprintf("%.2fs", $n->{'response_time'}) : '',
-                $n->{'branch'} ? $n->{'version'}.'-'.$n->{'branch'} : $n->{'version'},
+                $n->{'version'},
             );
         }
         $output .= ('-' x 110)."\n";

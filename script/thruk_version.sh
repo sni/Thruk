@@ -1,21 +1,26 @@
 #!/bin/bash
+#
+# usage: ./script/thruk_version.sh
+#
+# Will ask for new version and set files accordingly. If NEWVERSION env is set, that version will be used.
 
 set -x
-VERSION=`grep ^VERSION Makefile | head -n 1 | awk '{ print $3 }'`;
-BRANCH=`grep branch script/thruk | grep ^my | awk -F"'" '{ print $2 }'`
+VERSION=`grep "^VERSION\ *=" Makefile | head -n 1 | awk '{ print $3 }'`;
 export LC_TIME=C
 
-if [ "x${BRANCH}" = "x" ]; then
-  BRANCH=1
-fi
+OLDFILEVERSION=$(grep root/thruk/javascript/thruk- MANIFEST | sed -e 's/^.*thruk-\(.*\)\.js/\1/')
+LAST_GIT_TAG=$(git tag -l | tail -n 1 | tr -d 'v')
+COMMITCOUNT=$(git rev-list HEAD --count)
+DATE=`date "+%B %d, %Y"`
+FULLDATE=`date`
 
 test -e .git         || { echo "not in a git directory"; exit 1; }
 which dch >/dev/null || { echo "dch not found"; exit 1; }
-if [ ! -e "root/thruk/javascript/thruk-${VERSION}-${BRANCH}.js" ]; then
+if [ ! -e "root/thruk/javascript/thruk-${OLDFILEVERSION}.js" ]; then
     yes 'n' | perl Makefile.PL >/dev/null 2>&1
 fi
-if [ ! -e "root/thruk/javascript/thruk-${VERSION}-${BRANCH}.js" ]; then echo "Makefile was out of date, please run make again."; exit 1; fi
-if [ "$NEWVERSION" = "" ]; then newversion=$(dialog --stdout --inputbox "New Version:" 0 0 "${VERSION}-${BRANCH}"); else newversion="$NEWVERSION"; fi
+if [ ! -e "root/thruk/javascript/thruk-${OLDFILEVERSION}.js" ]; then echo "Makefile was out of date, please run make again."; exit 1; fi
+if [ "$NEWVERSION" = "" ]; then NEWVERSION=$(dialog --stdout --inputbox "New Version:" 0 0 "${LAST_GIT_TAG}"); else NEWVERSION="$NEWVERSION"; fi
 
 if [ "x$DEBEMAIL" = "x" ]; then
     export DEBEMAIL="Thruk Development Team <devel@thruk.org>"
@@ -27,80 +32,65 @@ fi
 set -e
 set -u
 
-if [ -n "$newversion" ]; then
-    date=`date "+%B %d, %Y"`
-    fulldate=`date`
-    branch=`echo "$newversion" | awk '{ print $2 }'`
-    newversion=`echo "$newversion" | awk '{ print $1 }'`
-fi
-release=`echo "$newversion" | awk -F "-" '{ print $2 }'`
-if [ -n "$release" ]; then
-    newversion=`echo "$newversion" | awk -F "-" '{ print $1 }'`
+# NEWVERSION can be:
+# 2.40             release without minor release
+# 2.40-2           release with minor release
+# 2.41 2021-02-15  daily version with timestamp
+DAILY=`echo "$NEWVERSION" | awk '{ print $2 }'`
+NEWVERSION=`echo "$NEWVERSION" | awk '{ print $1 }'`
+
+if [ "$DAILY" != "" ]; then
+    RPMVERSION=$(echo "${NEWVERSION}~${DAILY}"   | tr -d '-')
 else
-    release=1
+    RPMVERSION=$(echo "${NEWVERSION}"   | tr '-' '.')
+    # append -1 if no minor release is set
+    if [ $(echo "$NEWVERSION" | grep -Fc "-") -eq 0 ]; then
+        RPMVERSION="${RPMVERSION}.1"
+    fi
 fi
-date=`date "+%B %d, %Y"`
-debversion="$newversion"
-if [ "$branch" != "" ]; then
-    debversion=$(echo "${newversion}~${branch}+${release}" | tr -d '-')
-    rpmrelease=`echo $branch | tr -d '-'`
-else
-    debversion="${newversion}+${release}"
-    rpmrelease=$release
-fi
-if [ $rpmrelease -gt 1 ]; then branch=$rpmrelease; fi
-fileversion="$newversion-$rpmrelease"
+FILEVERSION="$RPMVERSION"
+DEBVERSION="${RPMVERSION}+1"
+CHANGESHEADER=$(printf "%-8s %s\n" "$NEWVERSION" "$FULLDATE")
 
 # replace all versions everywhere
-sed -r "s/'released'\s*=>\s*'.*',/'released'                              => '$date',/" -i lib/Thruk/Config.pm
-sed -i support/thruk.spec -e 's/^Release:.*$/Release: '$rpmrelease'/'
-sed -r "s/branch\s*= '.*';/branch       = '$branch';/" \
-    -i lib/Thruk/Config.pm     \
-    -i script/thruk            \
-    -i script/check_thruk_rest \
-    -i script/naglint          \
-    -i script/nagexp           \
-    -i script/nagimp
+sed -r "s/'released'\s*=>\s*'.*',/'released'                              => '$DATE',/" -i lib/Thruk/Config.pm
+sed -i support/thruk.spec -e 's/^Release:.*$/Release:       '${COMMITCOUNT}.1'/'
+
 # replace unreleased with unstable, otherwise dch thinks there was no release yet and replaces the last entry
 sed -e 's/UNRELEASED/unstable/g' -i debian/changelog
-dch --newversion "$debversion" --package "thruk" -D "UNRELEASED" --urgency "low" "new upstream release"
+dch --newversion "$DEBVERSION" --package "thruk" -D "UNRELEASED" --urgency "low" "new upstream release"
 sed -e 's/unstable/UNRELEASED/g' -i debian/changelog
-if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
-    sed -r "s/^Version:\s*.*/Version:       $newversion/" -i support/thruk.spec
-    sed -r "s/'${VERSION}'/'$newversion'/" \
-                -i lib/Thruk.pm            \
-                -i lib/Thruk/Config.pm     \
-                -i script/thruk            \
-                -i script/check_thruk_rest \
-                -i script/naglint          \
-                -i script/nagexp           \
-                -i script/nagimp
-    sed -r "s/\-${VERSION}-${BRANCH}(\.|_)/-$fileversion\1/" \
+
+if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
+    sed -r "s/^Version:\s*.*/Version:       $RPMVERSION/" -i support/thruk.spec
+    sed -r "s/'${OLDFILEVERSION}'/'$FILEVERSION'/" \
+                -i lib/Thruk/Config.pm
+    sed -r "s/\-${OLDFILEVERSION}(\.|_)/-$FILEVERSION\1/" \
                 -i MANIFEST                 \
                 -i root/thruk/startup.html  \
                 -i .gitignore
-    changesheader=$(printf "%-8s %s\n" "$fileversion" "$fulldate")
-    sed -r "s/^next.*/$changesheader/" -i Changes
-    sed -r "s/${VERSION}/$newversion/" -i dist.ini
-    git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.css plugins/plugins-available/mobile/root/mobile-$fileversion.css
-    git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.js plugins/plugins-available/mobile/root/mobile-$fileversion.js
-    git mv plugins/plugins-available/business_process/root/bp-${VERSION}-${BRANCH}.css plugins/plugins-available/business_process/root/bp-$fileversion.css
-    git mv plugins/plugins-available/business_process/root/bp-${VERSION}-${BRANCH}.js plugins/plugins-available/business_process/root/bp-$fileversion.js
-    git mv plugins/plugins-available/panorama/root/panorama-${VERSION}-${BRANCH}.css plugins/plugins-available/panorama/root/panorama-$fileversion.css
-    git mv root/thruk/javascript/thruk-${VERSION}-${BRANCH}.js root/thruk/javascript/thruk-$fileversion.js
-    if [ -e root/thruk/cache/thruk-${VERSION}-${BRANCH}.js ]; then
-        mv root/thruk/cache/thruk-${VERSION}-${BRANCH}.js root/thruk/cache/thruk-$fileversion.js
+    sed -r "s/^next.*/$CHANGESHEADER/" -i Changes
+    sed -r "s/${OLDFILEVERSION}/$FILEVERSION/" -i dist.ini
+
+    git mv plugins/plugins-available/mobile/root/mobile-${OLDFILEVERSION}.css plugins/plugins-available/mobile/root/mobile-$FILEVERSION.css
+    git mv plugins/plugins-available/mobile/root/mobile-${OLDFILEVERSION}.js plugins/plugins-available/mobile/root/mobile-$FILEVERSION.js
+    git mv plugins/plugins-available/business_process/root/bp-${OLDFILEVERSION}.css plugins/plugins-available/business_process/root/bp-$FILEVERSION.css
+    git mv plugins/plugins-available/business_process/root/bp-${OLDFILEVERSION}.js plugins/plugins-available/business_process/root/bp-$FILEVERSION.js
+    git mv plugins/plugins-available/panorama/root/panorama-${OLDFILEVERSION}.css plugins/plugins-available/panorama/root/panorama-$FILEVERSION.css
+    git mv root/thruk/javascript/thruk-${OLDFILEVERSION}.js root/thruk/javascript/thruk-$FILEVERSION.js
+    if [ -e root/thruk/cache/thruk-${OLDFILEVERSION}.js ]; then
+        mv root/thruk/cache/thruk-${OLDFILEVERSION}.js root/thruk/cache/thruk-$FILEVERSION.js
     fi
     for theme in Thruk Thruk2; do
-        if [ -e root/thruk/cache/${theme}-${VERSION}-${BRANCH}.css ]; then
-            mv root/thruk/cache/${theme}-${VERSION}-${BRANCH}.css root/thruk/cache/${theme}-${fileversion}.css
+        if [ -e root/thruk/cache/${theme}-${OLDFILEVERSION}.css ]; then
+            mv root/thruk/cache/${theme}-${OLDFILEVERSION}.css root/thruk/cache/${theme}-${FILEVERSION}.css
         fi
-        if [ -e root/thruk/cache/${theme}-noframes-${VERSION}-${BRANCH}.css ]; then
-            mv root/thruk/cache/${theme}-noframes-${VERSION}-${BRANCH}.css root/thruk/cache/${theme}-noframes-${fileversion}.css
+        if [ -e root/thruk/cache/${theme}-noframes-${OLDFILEVERSION}.css ]; then
+            mv root/thruk/cache/${theme}-noframes-${OLDFILEVERSION}.css root/thruk/cache/${theme}-noframes-${FILEVERSION}.css
         fi
     done
-    if [ -e root/thruk/cache/thruk-panorama-${VERSION}-${BRANCH}.js ]; then
-        mv root/thruk/cache/thruk-panorama-${VERSION}-${BRANCH}.js root/thruk/cache/thruk-panorama-${fileversion}.js
+    if [ -e root/thruk/cache/thruk-panorama-${OLDFILEVERSION}.js ]; then
+        mv root/thruk/cache/thruk-panorama-${OLDFILEVERSION}.js root/thruk/cache/thruk-panorama-${FILEVERSION}.js
     fi
     git add \
         docs/manpages/nagexp.3 \
@@ -112,15 +102,11 @@ yes n | perl Makefile.PL > /dev/null
 git add                     \
     MANIFEST                \
     support/thruk.spec      \
-    lib/Thruk.pm            \
     docs/manpages/thruk.3   \
     root/thruk/startup.html \
-    script/thruk            \
-    script/check_thruk_rest \
     dist.ini                \
     lib/Thruk/Config.pm     \
-    script/naglint          \
-    script/nagexp           \
-    script/nagimp           \
+    Changes                 \
+    debian/changelog        \
     .gitignore
 git status

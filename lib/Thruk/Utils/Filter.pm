@@ -1045,14 +1045,10 @@ returns full version string
 sub fullversion {
     my($c) = @_;
     die("no c") unless defined $c;
-    my $str = $c->config->{'version'};
-    if($c->config->{'branch'}) {
-        $str .= '~'.$c->config->{'branch'};
-    }
+    my $str = $c->config->{'version'} // '';
     if($c->config->{'extra_version'}) {
         $str .= '/ '.$c->config->{'extra_version'};
     }
-    $str = '' unless defined $str;
     return $str;
 }
 

@@ -25,18 +25,16 @@ for my $p (reverse split/:/, $ENV{'PATH'}) {
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
 my $config   = Thruk::Config::get_base_config();
-my $branch   = $config->{'filebranch'} ;
 die('no config') unless $config->{'all_in_one_javascript'};
-die('no config') unless $Thruk::Config::VERSION;
-die('no config') unless $branch;
-my $version = $Thruk::Config::VERSION.'-'.$branch;
+die('no config') unless $config->{'version'};
+my $version = $config->{'version'};
 my @themes  = qw/Thruk Thruk2/;
 
 #################################################
 # check if update is required
 my $newest = 0;
 for my $file (@{$config->{'all_in_one_javascript'}}) {
-    my @s   = stat('root/thruk/'.$file) or die('root/thruk/'.$file.": ".$@);
+    my @s   = stat('root/thruk/'.$file) or die('root/thruk/'.$file.": ".$!);
     $newest = $s[9] if $newest < $s[9];
 }
 my $js_required = 1;

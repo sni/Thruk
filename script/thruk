@@ -34,14 +34,13 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ###################################################
 use strict;
 use warnings;
+use Thruk::Config 'noautoload';
+
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
     #&timing_breakpoint('./script/thruk');
 };
 use Getopt::Long qw//;
-
-our $VERSION = '2.40';
-my $branch       = '2';
 
 my $options = {
     'verbose'        => 0,
@@ -90,9 +89,7 @@ if($options->{'help'}) {
     exit(3);
 }
 if($options->{'version'}) {
-    require Thruk::Config;
-    $branch = Thruk::Config::get_git_name() unless $branch ne '';
-    print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
+    print "thruk v", Thruk::Config::get_thruk_version(), "\n"; exit 3;
 }
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
@@ -117,7 +114,6 @@ exit $cli->_run();
 ##############################################
 sub _print_modules {
     require Thruk::Utils;
-    require Thruk::Config;
     # read the config which puts our loaded addons into @INC and those cli modules will be found as well
     Thruk::Config::set_config_env();
     print "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";

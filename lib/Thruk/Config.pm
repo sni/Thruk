@@ -13,6 +13,8 @@ use Class::Inspector ();
 use Thruk::Base ();
 use Thruk::Utils::Log qw/:all/;
 
+use 5.008000;
+
 =head1 NAME
 
 Thruk::Config - Generic Access to Thruks Config
@@ -29,24 +31,14 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.40';
+our $VERSION = '2.40.2';
 
 our $config;
-my $project_root = home() or confess('could not determine project_root: '.Dumper(\%INC));
-my $branch       = '2';
-my $gitbranch    = get_git_name($project_root);
-my $filebranch   = $branch || 1;
-if($branch) {
-    $branch = $branch.'~'.$gitbranch if $gitbranch ne '';
-} else {
-    $branch = $gitbranch if $gitbranch;
-}
-confess('got no project_root') unless $project_root;
+my $project_root = home() || confess('could not determine project_root from inc: '.Dumper(\%INC));
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
-    'version'                               => $VERSION,
-    'branch'                                => $branch,
+    'version'                               => &get_thruk_version(),
     'released'                              => 'December 14, 2020',
     'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
@@ -54,7 +46,6 @@ my $base_defaults = {
     'image_path'                            => $project_root.'/root/thruk/images',
     'project_root'                          => $project_root,
     'home'                                  => $project_root,
-    'filebranch'                            => $filebranch,
     'default_view'                          => 'TT',
     'base_templates_dir'                    => $project_root.'/templates',
     'cgi.cfg'                               => 'cgi.cfg',
@@ -247,7 +238,7 @@ my $base_defaults = {
     'physical_logo_path'                    => [],
     'all_in_one_javascript'                 => [
                 'vendor/jquery-3.5.1.min.js',
-                'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
+                'javascript/thruk-'.$VERSION.'.js',
                 'vendor/daterangepicker-3.0.5/moment.min.js',
                 'vendor/daterangepicker-3.0.5/daterangepicker.js',
                 'vendor/overlib-4.21.js',
@@ -279,7 +270,7 @@ my $base_defaults = {
     'jquery_ui'                             => '1.12.1',
     'all_in_one_javascript_panorama'        => [
                 'vendor/jquery-3.5.1.min.js',
-                'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
+                'javascript/thruk-'.$VERSION.'.js',
                 'vendor/extjs_ux/form/MultiSelect.js',
                 'vendor/extjs_ux/form/ItemSelector.js',
                 'vendor/extjs_ux/chart/series/KPIGauge.js',
@@ -336,8 +327,6 @@ sub get_default_stash {
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
         'version'                   => $VERSION,
-        'branch'                    => $branch,
-        'filebranch'                => $filebranch,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
         'stacktrace'                => '',
@@ -840,41 +829,47 @@ sub get_toolkit_config {
 
 ##############################################
 
-=head2 get_git_name
+=head2 _get_git_info
 
-  get_git_name()
+  _get_git_info()
 
-return git branch name
+return git branch/tag/has information to be used in the version
 
 =cut
 
-sub get_git_name {
-    my $project_root = $INC{'Thruk/Config.pm'};
-    $project_root =~ s/\/Config\.pm$//gmx;
-    return '' unless -d $project_root.'/../../.git';
+sub _get_git_info {
+    my($project_root) = @_;
+    our $git_info;
+    return $git_info if defined $git_info;
+    if(! -d $project_root.'/../../.git') {
+        $git_info = '';
+        return $git_info;
+    }
+
     my($hash);
     my $dir = Cwd::getcwd;
     chdir($project_root.'/../../');
 
     # directly on git tag?
-    my($rc, $tag) = _cmd("git describe --tag --exact-match 2>&1");
+    my($rc, $tag) = _cmd($project_root.'/../../ && git describe --tag --exact-match 2>&1');
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
-        chdir($dir);
-        return '';
+        $git_info = '';
+        return $git_info;
     }
 
-    my $branch = _cmd("git branch --no-color 2>/dev/null");
+    my $branch = _cmd($project_root.'/../../ && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$hash) {
-        $hash = _cmd("git log -1 --no-color --pretty=format:%h 2> /dev/null");
+        $hash = _cmd($project_root.'/../../ && git log -1 --no-color --pretty=format:%h 2> /dev/null');
     }
-    chdir($dir);
     if($branch eq 'master') {
-        return $hash;
+        $git_info = $hash;
+        return $git_info;
     }
-    return $branch.'.'.$hash;
+    $git_info = $branch.'~'.$hash;
+    return $git_info;
 }
 
 ########################################
@@ -1522,13 +1517,14 @@ sub hostname {
 
   get_thruk_version()
 
-return full thruk version string, ex.: 2.38-2~feature_branch.45a4ceb
+return full thruk version string, ex.: 2.40.2~feature_branch~45a4ceb
 
 =cut
 
 sub get_thruk_version {
-    if($branch) {
-        return($VERSION.'-'.$branch);
+    my $git_info = _get_git_info($project_root);
+    if($git_info) {
+        return($VERSION.'-'.$git_info);
     }
     return($VERSION);
 }
@@ -1539,13 +1535,32 @@ sub get_thruk_version {
 
   version()
 
-return version string, ex.: 2.38-2
+return version string, ex.: 2.40.2
 
 =cut
 sub version {
-    return(sprintf("%s-%s", $VERSION, $filebranch));
+    return($VERSION);
 }
 
 ########################################
+
+###################################################
+
+=head1 SEE ALSO
+
+L<Thruk>
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-present, <sven@nierlein.org>
+
+=head1 LICENSE
+
+Thruk is Copyright (c) 2009-2019 by Sven Nierlein and others.
+This is free software; you can redistribute it and/or modify it under the
+same terms as the Perl5 programming language system
+itself.
+
+=cut
 
 1;

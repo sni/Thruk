@@ -3,7 +3,7 @@
 SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
-DAILYTARBALL=$(shell ./get_version | tr ' ' '~')
+DAILYTARBALL=$(shell ./get_version | tr -d '-' | tr ' ' '~')
 
 newversion: versionprecheck
 	test -e .git
@@ -21,14 +21,6 @@ dailydist: cleandist
 
 releasedist: cleandist dist
 	git describe --tag --exact-match
-	# required for servicepack releases, like 2.10-2
-	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
-		tar zxf thruk-$(VERSION).tar.gz; \
-		mv thruk-$(VERSION) thruk-$(DAILYVERSION); \
-		tar cfz thruk-$(DAILYVERSION).tar.gz thruk-$(DAILYVERSION); \
-		rm -f thruk-$(VERSION).tar.gz; \
-		rm -rf thruk-$(DAILYVERSION); \
-	fi
 	ls -la *.gz
 
 cleandist:

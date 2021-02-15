@@ -35,9 +35,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use strict;
 use warnings;
 use Getopt::Long qw//;
-
-our $VERSION = '2.40';
-my $branch       = '2';
+use Thruk::Config 'noautoload';
 
 my $options = {
     'verbose'        => 0,
@@ -67,9 +65,7 @@ if($options->{'help'} || scalar @{$options->{'commandoptions'}} == 1) {
     exit(3);
 }
 if($options->{'version'}) {
-    require Thruk::Config;
-    $branch = Thruk::Config::get_git_name() unless $branch ne '';
-    print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
+    print "check_thruk_rest v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
 }
 
 require Thruk::Utils::CLI;

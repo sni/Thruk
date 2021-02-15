@@ -3540,7 +3540,6 @@ sub _add_misc_details {
         _add_json_dashboard_timestamps($c, $json, $c->req->parameters->{'current_tab'});
         _add_json_pi_detail($c, $json);
         $json->{'server_version'}       = $c->config->{'version'};
-        $json->{'server_version'}      .= '~'.$c->config->{'branch'} if $c->config->{'branch'};
         $json->{'server_extra_version'} = $c->config->{'extra_version'};
         $json->{'broadcasts'}           = Thruk::Utils::Broadcast::get_broadcasts($c, undef, undef, 1);
         $c->stats->profile(end => "_add_misc_details");

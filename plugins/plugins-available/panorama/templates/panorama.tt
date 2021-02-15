@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]vendor/extjs-[% extjs_version %]/resources/css/ext-all-gray.css">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %]-[% filebranch %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %].css' />
     [% IF thruk_author %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all-debug.js"></script>
     [% ELSE %]
@@ -27,7 +27,7 @@
       [% END %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/js/panorama_js_track_timers.js"></script>
     [% ELSE %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]cache/thruk-panorama-[% version %]-[% filebranch %].js"></script>
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]cache/thruk-panorama-[% version %].js"></script>
     [% END %]
 </head>
 <body onunload="TP.unload()">

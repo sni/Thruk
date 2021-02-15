@@ -21,10 +21,6 @@ use Data::Dumper qw/Dumper/;    $Data::Dumper::Sortkeys = 1;
 use Plack::Util ();
 use POSIX ();
 
-use 5.008000;
-
-our $VERSION = '2.40';
-
 ###################################################
 # load timing class
 #use Thruk::Timer qw/timing_breakpoint/;

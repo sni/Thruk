@@ -49,7 +49,6 @@ sub new {
         'proxy'                => $options->{'proxy'},
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
-        'min_backend_version'  => 1.63,
     };
     bless $self, $class;
 
@@ -906,14 +905,9 @@ sub _req {
         }
         my $remote_version = $data->{'version'};
         $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
-        $self->{'remote_version'} = $data->{'version'};
-        $self->{'remote_branch'}  = $data->{'branch'};
         if($data->{'rc'} == 1) {
             _debug_log_request_response($c, $response);
             if($data->{'output'} =~ m/no\ such\ command/mx) {
-                die('backend too old, version returned: '.($remote_version || 'unknown'));
-            }
-            if(defined $data->{'version'} && ($data->{'version'} < $self->{'min_backend_version'})) {
                 die('backend too old, version returned: '.($remote_version || 'unknown'));
             }
             die('internal error: '.$data->{'output'}) if $data->{'output'};

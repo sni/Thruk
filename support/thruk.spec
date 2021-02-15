@@ -9,21 +9,13 @@
 %endif
 
 Name:          thruk
-Version:       2.40
-Release: 2
+Version:       2.40.2
+Release:       10799.1
 License:       GPL-2.0-or-later
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
-%if "%{release}" == "1"
 %define fullname %{name}-%{version}
-%else
-%define fullname %{name}-%{version}-%{release}
-%endif
-# detect obs builds which use very high release numbers
-%if %{release} > 100
-%define fullname %{name}-%{version}
-%endif
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring

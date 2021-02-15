@@ -34,11 +34,6 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ##############################################
 use strict;
 use warnings;
-use Thruk::Config 'noautoload';
-
-our $VERSION = '2.40';
-my $branch       = '2';
-$branch      = Thruk::Config::get_git_name() unless $branch ne '';
 
 my $nagexp = Thruk::nagexp->new();
 exit $nagexp->run();
@@ -150,6 +145,7 @@ use Data::Dumper;
 use POSIX qw( strftime );
 use File::Temp qw(tempdir);
 use Cwd;
+use Thruk::Config 'noautoload';
 
 ##############################################
 sub new {
@@ -162,7 +158,7 @@ sub new {
 ##############################################
 sub run {
     my($self) = @_;
-    my $vers  = "Thruk Version ".$VERSION.($branch ne '' ? '~'.$branch : '');
+    my $vers  = Thruk::Config::get_thruk_version();
     my $host  = `hostname`;
     my $args  = $0.' '.join(' ', @ARGV);
     chomp($host);
@@ -186,7 +182,7 @@ sub run {
        "<>"             => sub { push @{$self->{'opt'}->{'files'}}, $_[0] },
     ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
 
-    if($self->{'opt'}->{'version'}) { print $vers,"\n"; exit 0; }
+    if($self->{'opt'}->{'version'}) { print "nagexp v",$vers,"\n"; exit 3; }
     pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
     pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: missing input file\n" } )   if scalar @{$self->{'opt'}->{'files'}} == 0;
     pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: too many input files" } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
