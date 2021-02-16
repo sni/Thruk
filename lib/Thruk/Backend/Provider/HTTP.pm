@@ -904,7 +904,7 @@ sub _req {
             die(sprintf("decode_json failed: %s\nrequest:\n%s\n\nresponse:\n%s\n", $err, $response->request->as_string(), $response->as_string()));
         }
         my $remote_version = $data->{'version'};
-        $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
+        $remote_version = $remote_version.'.'.$data->{'branch'} if $data->{'branch'};
         if($data->{'rc'} == 1) {
             _debug_log_request_response($c, $response);
             if($data->{'output'} =~ m/no\ such\ command/mx) {

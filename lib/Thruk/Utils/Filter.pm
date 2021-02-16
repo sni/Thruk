@@ -1045,7 +1045,7 @@ returns full version string
 sub fullversion {
     my($c) = @_;
     die("no c") unless defined $c;
-    my $str = $c->config->{'version'} // '';
+    my $str = $c->config->{'thrukversion'} // '';
     if($c->config->{'extra_version'}) {
         $str .= '/ '.$c->config->{'extra_version'};
     }

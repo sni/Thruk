@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 
-var thruk_version       = '[% version %]';
+var thruk_version       = '[% thrukversion %]';
 var thruk_extra_version = '[% c.config.extra_version %]';
 var server_time         = new Date([% date.now * 1000 %]);
 var client_time         = new Date();

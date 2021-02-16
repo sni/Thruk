@@ -46,7 +46,7 @@ sub index {
             return;
         }
         if(ref $res eq 'HASH') {
-            $res->{'version'} = $c->config->{'version'} unless defined $res->{'version'};
+            $res->{'version'} = $c->config->{'thrukversion'} unless defined $res->{'version'};
         }
         my $res_json;
         eval {

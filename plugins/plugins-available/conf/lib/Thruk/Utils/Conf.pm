@@ -632,7 +632,7 @@ sub store_model_retention {
         my $data = {
             'configs'      => {$backend => $model->{'configs'}->{$backend}},
             'release_date' => $c->config->{'released'},
-            'version'      => $c->config->{'version'},
+            'version'      => $c->config->{'thrukversion'},
         };
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
@@ -708,7 +708,7 @@ sub get_model_retention {
         if(defined $data->{'release_date'}
            and $data->{'release_date'} eq $c->config->{'released'}
            and defined $data->{'version'}
-           and $data->{'version'} eq $c->config->{'version'}
+           and $data->{'version'} eq $c->config->{'thrukversion'}
         ) {
             my $model_configs = $data->{'configs'};
             for my $backend (keys %{$model_configs}) {

@@ -75,7 +75,7 @@
     <br>
     <br>
     <div id="currentversioninfo">
-    <div class="version">Version [% version %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+    <div class="version">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
     <div class="releasedate">[% c.config.released %]</div>
     </div>
     [% PROCESS _disclaimer.tt %]

@@ -1,5 +1,5 @@
-﻿[% PROCESS _header.tt css="plugins/business_process/bp-${version}.css"
-                      js=["plugins/business_process/bp-${version}.js",
+﻿[% PROCESS _header.tt css="plugins/business_process/bp-${fileversion}.css"
+                      js=["plugins/business_process/bp-${fileversion}.js",
                           "plugins/business_process/bp-ie-fixes.js",
                           "vendor/dagre-0.4.6/dagre.min.js"
                          ]

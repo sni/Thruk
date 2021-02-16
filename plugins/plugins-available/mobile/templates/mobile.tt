@@ -3,7 +3,7 @@
   <head>
     <title>[% title_prefix %]Mobile Thruk</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/mobile/mobile-[% version %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/mobile/mobile-[% fileversion %].css' />
     <link rel="stylesheet" href="[% url_prefix %]plugins/mobile/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="[% url_prefix %]plugins/mobile/vendor/jquery-2.1.4.min.js"></script>
     <script type="application/x-javascript">
@@ -17,7 +17,7 @@
       var strict_passive_mode    = [% strict_passive_mode %];
       var CSRFtoken              = "[% get_user_token(c) %]";
     </script>
-    <script src="[% url_prefix %]plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]plugins/mobile/mobile-[% fileversion %].js" type="application/x-javascript" charset="utf-8"></script>
     <script src="[% url_prefix %]plugins/mobile/vendor/jquery.mobile.router.min-443d352.js"></script>
     <script src="[% url_prefix %]plugins/mobile/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <link rel="apple-touch-icon" href="[% url_prefix %]plugins/mobile/img/thruk.png" />

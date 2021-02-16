@@ -1357,7 +1357,7 @@ sub _rest_get_thruk {
     my($c) = @_;
     return({
         rest_version        => $VERSION,                                # rest api version
-        thruk_version       => $c->config->{'version'},                 # thruk version
+        thruk_version       => $c->config->{'thrukversion'},            # thruk version
         thruk_release_date  => $c->config->{'released'},                # thruk release date
         localtime           => Time::HiRes::time(),                     # current server unix timestamp / epoch
         project_root        => $c->config->{'project_root'},            # thruk root folder

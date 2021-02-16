@@ -84,10 +84,10 @@
                         </td>
                         <td class='dataVal' style="text-align: center;">
                           [% IF c.cluster.is_it_me(n) %]
-                          [% version %]
+                          [% thrukversion %]
                           [% ELSE %]
                           [% n.version %]
-                          [% IF n.version != version %]
+                          [% IF n.version != thrukversion %]
                             <img src="[% url_prefix %]themes/[% theme %]/images/warning.png" width="16" height="16" alt="version mismatch" title="version mismatch" style="vertical-align: sub;">
                           [% END %]
                           [% END %]

@@ -38,7 +38,8 @@ my $project_root = home() || confess('could not determine project_root from inc:
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
-    'version'                               => &get_thruk_version(),
+    'thrukversion'                          => &get_thruk_version(),
+    'fileversion'                           => $VERSION,
     'released'                              => 'December 14, 2020',
     'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
@@ -326,7 +327,8 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'version'                   => $base_defaults->{'version'},
+        'thrukversion'              => &get_thruk_version(),
+        'fileversion'               => $VERSION,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
         'stacktrace'                => '',
