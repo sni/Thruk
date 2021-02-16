@@ -326,7 +326,7 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'version'                   => $VERSION,
+        'version'                   => $base_defaults->{'version'},
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
         'stacktrace'                => '',
@@ -841,7 +841,7 @@ sub _get_git_info {
     my($project_root) = @_;
     our $git_info;
     return $git_info if defined $git_info;
-    if(! -d $project_root.'/../../.git') {
+    if(! -d $project_root.'/.git') {
         $git_info = '';
         return $git_info;
     }
@@ -849,7 +849,7 @@ sub _get_git_info {
     my($hash);
 
     # directly on git tag?
-    my($rc, $tag) = _cmd($project_root.'/../../ && git describe --tag --exact-match 2>&1');
+    my($rc, $tag) = _cmd('cd '.$project_root.' && git describe --tag --exact-match 2>&1');
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
@@ -857,13 +857,13 @@ sub _get_git_info {
         return $git_info;
     }
 
-    my $branch = _cmd($project_root.'/../../ && git branch --no-color 2>/dev/null');
+    my $branch = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$hash) {
-        $hash = _cmd($project_root.'/../../ && git log -1 --no-color --pretty=format:%h 2> /dev/null');
+        $hash = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2> /dev/null');
     }
 
-    my $commits = _cmd($project_root.'/../../ && git log --oneline $(git describe --tags --abbrev=0).. 2>/dev/null | wc -l');
+    my $commits = _cmd('cd '.$project_root.' && git log --oneline $(git describe --tags --abbrev=0).. 2>/dev/null | wc -l');
 
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
@@ -908,7 +908,7 @@ EOT
 
   home()
 
-return home folder
+return thruk base folder.
 
 =cut
 sub home {
@@ -1529,21 +1529,6 @@ sub get_thruk_version {
     }
     return($VERSION);
 }
-
-########################################
-
-=head2 version
-
-  version()
-
-return version string, ex.: 2.40.2
-
-=cut
-sub version {
-    return($VERSION);
-}
-
-########################################
 
 ###################################################
 
