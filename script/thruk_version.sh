@@ -40,7 +40,7 @@ DAILY=`echo "$NEWVERSION" | awk '{ print $2 }'`
 NEWVERSION=`echo "$NEWVERSION" | awk '{ print $1 }'`
 
 if [ "$DAILY" != "" ]; then
-    RPMVERSION=$(echo "${NEWVERSION}~${DAILY}"   | tr -d '-')
+    RPMVERSION=$(echo "${NEWVERSION}.${DAILY}"   | tr -d '-')
 else
     RPMVERSION=$(echo "${NEWVERSION}"   | tr '-' '.')
     # append -1 if no minor release is set

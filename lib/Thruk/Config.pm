@@ -862,11 +862,14 @@ sub _get_git_info {
     if(!$hash) {
         $hash = _cmd($project_root.'/../../ && git log -1 --no-color --pretty=format:%h 2> /dev/null');
     }
+
+    my $commits = _cmd($project_root.'/../../ && git log --oneline $(git describe --tags --abbrev=0).. 2>/dev/null | wc -l');
+
     if($branch eq 'master') {
-        $git_info = $hash;
+        $git_info = "+".$commits."~".$hash;
         return $git_info;
     }
-    $git_info = $branch.'~'.$hash;
+    $git_info = "+".$commits."~".$branch.'~'.$hash;
     return $git_info;
 }
 
@@ -1515,14 +1518,14 @@ sub hostname {
 
   get_thruk_version()
 
-return full thruk version string, ex.: 2.40.2~feature_branch~45a4ceb
+return full thruk version string, ex.: 2.40.2+10~feature_branch~45a4ceb
 
 =cut
 
 sub get_thruk_version {
     my $git_info = _get_git_info($project_root);
     if($git_info) {
-        return($VERSION.'-'.$git_info);
+        return($VERSION.$git_info);
     }
     return($VERSION);
 }

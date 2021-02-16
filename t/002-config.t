@@ -17,6 +17,9 @@ my $config = Thruk::Config::set_config_env();
 is(ref Thruk->config, 'HASH', "got a config");
 ok(defined Thruk->config->{'version'}, "got a version");
 
+chomp(my $makefile_version = `grep "^VERSION\ *=" Makefile | head -n 1 | awk '{ print \$3 }'`);
+is($makefile_version, Thruk->config->{'version'}, "Makefile has correct version: ".Thruk->config->{'version'});
+
 $config = Thruk::Config::set_config_env('t/data/test_c_style.conf');
 is($config->{'Thruk::Backend'}->{'peer'}->{'configtool'}->{'obj_readonly'}, '^(?!.*/test)', 'parsing c style comments');
 

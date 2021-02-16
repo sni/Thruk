@@ -3,7 +3,6 @@
 SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
-DAILYTARBALL=$(shell ./get_version | tr -d '-' | tr ' ' '~')
 
 newversion: versionprecheck
 	test -e .git
@@ -16,7 +15,6 @@ dailydist: cleandist
 	$(MAKE) newversion
 	$(MAKE) dist
 	$(MAKE) resetdaily
-	mv thruk-*.tar.gz thruk-$(DAILYTARBALL).tar.gz
 	ls -la *.gz
 
 releasedist: cleandist dist
