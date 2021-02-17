@@ -861,6 +861,10 @@ sub _get_git_info {
 
     my $branch = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
+    if(!$branch) {
+        $git_info = '';
+        return $git_info;
+    }
     if(!$hash) {
         $hash = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2> /dev/null');
     }
