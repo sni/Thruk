@@ -865,7 +865,7 @@ sub _get_git_info {
         $hash = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2> /dev/null');
     }
 
-    my $commits = _cmd('cd '.$project_root.' && git log --oneline $(git describe --tags --abbrev=0).. 2>/dev/null | wc -l');
+    my $commits = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0).. 2>/dev/null | wc -l');
 
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
