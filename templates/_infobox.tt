@@ -3,7 +3,7 @@
   <tr>
     <td class='infoBox'>
       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
-      Last Update: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span id="refresh_label" title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]<br />
+      [% IF show_last_update %]Last Update: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span id="refresh_label" title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]<br />[% END %]
       <a href='http://www.thruk.org' target='_blank' class='homepageURL'>Thruk [% thrukversion %]</a>[% IF c.config.extra_version %]<span class="infoboxlinks"> - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a></span>[% END %]<br />
       [% IF c.user_exists %]
       Logged in as <i>[% remote_user %]</i><br />

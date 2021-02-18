@@ -382,6 +382,7 @@ sub get_default_stash {
         'has_jquery_ui'             => 0,
         'physical_logo_path'        => [],
         'fav_counter'               => 0,
+        'show_last_update'          => 1,
     };
     $stash = {%{$pre}, %{$stash}};
     return($stash);
