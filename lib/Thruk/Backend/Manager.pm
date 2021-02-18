@@ -38,8 +38,6 @@ sub new {
     my( $class ) = @_;
     my $self = {
         'initialized'         => 0,
-        'state_hosts'         => {},
-        'local_hosts'         => {},
         'backends'            => [],
         'backend_debug'       => 0,
         'sections'            => {},
@@ -83,11 +81,6 @@ sub init {
         $self->{'by_key'}->{$peer->{'key'}}   = $peer;
         $self->{'by_name'}->{$peer->{'name'}} = $peer;
 
-        if($peer->{'state_host'}) {
-            $self->{'state_hosts'}->{$peer->{'key'}} = { source => $peer->{'state_host'} };
-        } else {
-            $self->{'local_hosts'}->{$peer->{'key'}} = 1;
-        }
         my @sections = split(/\/+/mx, $peer->{'section'});
         if(scalar @sections == 0) {
             @sections = ();
@@ -787,103 +780,6 @@ sub expand_command {
         'note'          => $note,
     };
     return $return;
-}
-
-########################################
-
-=head2 set_backend_state_from_local_connections
-
-  set_backend_state_from_local_connections
-
-enables/disables remote backends based on a state from local instances
-
-=cut
-
-sub set_backend_state_from_local_connections {
-    my( $self, $disabled, $safe, $cached_data ) = @_;
-    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
-
-    my $c = $Thruk::Request::c;
-
-    return $disabled unless scalar keys %{$self->{'local_hosts'}} >= 1;
-    return $disabled unless scalar keys %{$self->{'state_hosts'}} >= 1;
-
-    $c->stats->profile( begin => "set_backend_state_from_local_connections() " );
-
-    my $options = [
-        'backend', [ keys %{$self->{'local_hosts'}} ],
-        'columns', [qw/address name alias state/],
-    ];
-
-    my @filter;
-    for my $host (values %{$self->{'state_hosts'}}) {
-        push @filter, { '-or' => [ { name    => { '=' => $host->{'source'} } },
-                                   { alias   => { '=' => $host->{'source'} } },
-                                   { address => { '=' => $host->{'source'} } },
-                      ]};
-    }
-    push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
-
-
-    for(1..3) {
-        # reset failed states, otherwise retry would be useless
-        $self->reset_failed_backends();
-
-        eval {
-            my $data;
-            if($safe == Thruk::ADD_CACHED_DEFAULTS) {
-                $data = $cached_data->{'local_states'};
-            }
-            $data = $self->_do_on_peers( "get_hosts", $options ) unless defined $data;
-            for my $host (@{$data}) {
-                # find matching keys
-                my $key;
-                for my $state_key (keys %{$self->{'state_hosts'}}) {
-                    my $name = $self->{'state_hosts'}->{$state_key}->{'source'};
-                    next unless $name;
-                    $key = $state_key if $host->{'name'}    eq $name;
-                    $key = $state_key if $host->{'address'} eq $name;
-                    $key = $state_key if $host->{'alias'}   eq $name;
-
-                    next unless defined $key;
-                    next if defined $disabled->{$key} and $disabled->{$key} == 2;
-
-                    $self->{'state_hosts'}->{$key}->{'name'} = $host->{'name'};
-
-                    my $peer = $self->get_peer_by_key($key);
-
-                    if($host->{'state'} == 0) {
-                        _debug($key." -> enabled by local state check (".$host->{'name'}.")");
-                        $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
-                        $peer->{'runnning'}   = 1;
-                        $peer->{'last_error'} = 'UP: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
-                    } else {
-                        _debug($key." -> disabled by local state check (".$host->{'name'}.")");
-                        $self->disable_backend($key);
-                        $peer->{'runnning'}   = 0;
-                        $peer->{'last_error'} = 'ERROR: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
-                        $disabled->{$key}     = 1;
-                    }
-                }
-            }
-            $cached_data->{'local_states'} = $data;
-        };
-        if($@) {
-            sleep(1);
-        } else {
-            last;
-        }
-    }
-    # log errors only once
-    if($@) {
-        return $disabled if $safe;
-        _error("failed setting states by local check");
-        _debug($@);
-    }
-
-    $c->stats->profile( end => "set_backend_state_from_local_connections() " );
-
-    return $disabled;
 }
 
 ########################################

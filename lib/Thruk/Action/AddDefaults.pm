@@ -559,9 +559,7 @@ sub add_defaults {
     if(!$no_config_adjustments && !$c->stash->{'config_adjustments'}->{'extra_backends'}) {
         $c->stats->profile(begin => "AddDefaults::get_proc_info");
         my $last_program_restart = 0;
-        my $retrys = 1;
-        # try 3 times if all cores are local
-        $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
+        my $retrys = 3;
         $retrys = 1 if $safe; # but only once on safe/cached pages
 
         for my $x (1..$retrys) {
@@ -1245,11 +1243,6 @@ sub set_enabled_backends {
         $c->{'db'}->disable_backends($disabled_backends);
     }
     _debug("backend groups filter enabled") if $has_groups;
-
-    # renew state of connections
-    if($num_backends > 1 && $c->config->{'check_local_states'} && !$ENV{'THRUK_USE_LMD'}) {
-        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($disabled_backends, $safe, $cached_data);
-    }
 
     # when set by args, update
     if(defined $backends) {

@@ -855,7 +855,6 @@ sub _process_backends_page {
                 $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
-                $backend->{'state_host'} = $peer->{'config'}->{'state_host'} if defined $peer->{'config'}->{'state_host'};
                 $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
             }
             $has_new = 1 if $x == 1;

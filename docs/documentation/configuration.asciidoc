@@ -164,7 +164,7 @@ ex.:
 
 === use_timezone
 
-*deprecated* use `server_timezone` now.
+**DEPRECATED** use `server_timezone` now.
 
 === server_timezone
 {% include new_since.ad version="2.22" %}
@@ -1423,16 +1423,7 @@ ex.:
 == Connection Settings
 
 === check_local_states
-Get the status for remote backends from local instances. This can
-increase performance when using multiple remote sites. It is enabled
-by default when using more than one site. You have to define
-hostchecks in any local backend (using unix sockets) with a name or
-alias of the address of your remote backends. To explicitly connect
-a host to a specific backend, set 'state_host' in that peer configuration.
-
-ex.:
-
-  check_local_states = 1
+**DEPRECATED:** please use link:lmd.html[LMD] when using multiple backends.
 
 
 === backend_debug
@@ -1461,6 +1452,8 @@ Enable lmd connection handling. Set to 1 to enable.
 LMD handles all backend connections in a separate process
 which will be started automatically with thruk if enabled.
 Read more on lmd at: https://github.com/sni/lmd
+or here link:lmd.html[LMD].
+
 
 ex.:
 
@@ -2406,10 +2399,10 @@ for details.
                         without the right contactgroup don't even see
                         that there is a backend. Note that this implies
                         one extra backend request per page.
-                        (deprecated, please do not use)
+                        (**DEPRECATED** - please do not use)
      ** `section`       to group backends/sites by different sections, enter a
                         section.
-     ** `state_host`    Set 'state_host' explicitly. See See <<check_local_states,check_local_states>> for details.
+     ** `state_host`    **DEPRECATED** - please use link:lmd.html[LMD] when using multiple backends.
      ** `logcache`      Set logcache connection for this specific backend. Set to `0` to disable logcache for this site.
      ** `options`
         *** `peer`            address of this connection.

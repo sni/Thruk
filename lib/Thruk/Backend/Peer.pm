@@ -179,7 +179,6 @@ sub _initialise_peer {
     $self->{'configtool'}    = $peer_config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
-    $self->{'state_host'}    = $peer_config->{'state_host'};
 
     # shorten backend id
     my $key = $peer_config->{'id'};
@@ -206,7 +205,6 @@ sub _initialise_peer {
     # state hosts
     my $addr              = $self->{'addr'};
     $self->{'local'}      = 0;
-    $self->{'state_host'} = $peer_config->{'state_host'};
     if($addr) {
         if($self->{'type'} eq 'http') {
             $addr =~ s/^http(|s):\/\///mx;
@@ -215,16 +213,6 @@ sub _initialise_peer {
         if($self->{'type'} eq 'livestatus') {
             $addr =~ s/^tls:\/\///mx;
             $addr =~ s/:.*$//mx;
-        }
-
-        if($self->{'state_host'}) {
-            $self->{'local'} = 0;
-        }
-        elsif($addr =~ m/^\//mx or $addr eq 'localhost' or $addr =~ /^127\.0\.0\./mx) {
-            $self->{'local'} = 1;
-        } else {
-            $self->{'local'} = 0;
-            $self->{'state_host'} = $addr;
         }
     }
 

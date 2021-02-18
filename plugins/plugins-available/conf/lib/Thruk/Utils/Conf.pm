@@ -376,7 +376,6 @@ sub get_component_as_string {
         $string .= "        id      = ".$b->{'id'}."\n"      if $b->{'id'};
         $string .= "        type    = ".$b->{'type'}."\n";
         $string .= "        hidden  = ".$b->{'hidden'}."\n"  if $b->{'hidden'};
-        $string .= "        state_host  = ".$b->{'state_host'}."\n"  if $b->{'state_host'};
         $string .= "        groups  = ".$b->{'groups'}."\n"  if $b->{'groups'};
         $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
         $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
