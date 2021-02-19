@@ -831,6 +831,7 @@ sub update_site_panel_hashes {
     }
 
     # create sections and subsection for site panel
+    $c->{'db'}->update_sections(); # need to recalculate, using the config tool removes sections without config backends
     _calculate_section_totals($c, $c->{'db'}->{'sections'}, $backend_detail, $initial_backends);
 
     my $show_sitepanel = 'list';

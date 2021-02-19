@@ -109,7 +109,7 @@ calculate sections
 sub update_sections {
     my($self) = @_;
 
-    $self->{'sections'} = {};
+    $self->{'sections'}       = {};
     $self->{'sections_depth'} = 0;
     for my $peer (@{$self->get_peers(1)}) {
         my @sections = split(/\/+/mx, $peer->{'section'});
