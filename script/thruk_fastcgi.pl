@@ -7,10 +7,11 @@ use lib 'lib';
 ###################################################
 # create connection pool
 # has to be done really early to save memory
+my $pool;
 BEGIN {
     $ENV{'THRUK_MODE'} = 'FASTCGI';
     use Thruk::Backend::Pool;
-    Thruk::Backend::Pool::init_backend_thread_pool();
+    $pool = Thruk::Backend::Pool->new();
 }
 
 use Plack::Handler::FCGI ();
@@ -19,4 +20,4 @@ my $server = Plack::Handler::FCGI->new(
     nproc  => 1,
     detach => 1,
 );
-$server->run(Thruk->startup);
+$server->run(Thruk->startup($pool));

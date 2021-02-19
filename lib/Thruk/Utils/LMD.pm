@@ -66,7 +66,7 @@ sub check_proc {
         return;
     }
 
-    write_lmd_config($config);
+    write_lmd_config($c, $config);
 
     _info("lmd not running, starting up...") if $log_missing;
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
@@ -254,7 +254,7 @@ sub check_initial_start {
     }
 
     check_proc($config, $c, 0);
-    _check_changed_lmd_config($config);
+    _check_changed_lmd_config($c, $config);
 
     #&timing_breakpoint("lmd check_initial_start done");
 
@@ -346,7 +346,7 @@ sub kill_if_not_responding {
         Thruk::Utils::External::do_child_stuff($c, 0, 0);
         alarm($lmd_timeout);
         eval {
-            $data = $Thruk::Backend::Pool::lmd_peer->_raw_query("GET sites\n");
+            $data = $c->{'db'}->lmd_peer->_raw_query("GET sites\n");
         };
         my $err = $@;
         alarm(0);
@@ -388,15 +388,15 @@ sub kill_if_not_responding {
 
 =head2 _check_changed_lmd_config
 
-  _check_changed_lmd_config($config)
+  _check_changed_lmd_config($c, $config)
 
 check if the backends have changed and send a sighup to lmd if so
 
 =cut
 sub _check_changed_lmd_config {
-    my($config) = @_;
+    my($c, $config) = @_;
     # return if it has not changed
-    return unless write_lmd_config($config);
+    return unless write_lmd_config($c, $config);
     return reload($config);
 }
 
@@ -404,13 +404,13 @@ sub _check_changed_lmd_config {
 
 =head2 write_lmd_config
 
-  write_lmd_config($config)
+  write_lmd_config($c, $config)
 
 write lmd.ini, returns true if file has changed or false otherwise
 
 =cut
 sub write_lmd_config {
-    my($config) = @_;
+    my($c, $config) = @_;
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
 
     # gather configs
@@ -432,10 +432,10 @@ sub write_lmd_config {
         $supports_section = 1;
     }
 
-    confess("got no peers") if scalar @{$Thruk::Backend::Pool::peer_order} == 0;
+    confess("got no peers") if scalar @{$c->{'db'}->peer_order} == 0;
 
-    for my $key (@{$Thruk::Backend::Pool::peer_order}) {
-        my $peer = $Thruk::Backend::Pool::peers->{$key};
+    for my $key (@{$c->{'db'}->peer_order}) {
+        my $peer = $c->{'db'}->peers->{$key};
         next if $peer->{'federation'};
         $site_config .= "[[Connections]]\n";
         $site_config .= "name           = '".$peer->peer_name()."'\n";

@@ -34,7 +34,7 @@ sub index {
     my $action = $c->req->parameters->{'action'} || '';
 
     if($action eq 'leak') {
-        my $leak = Thruk::Backend::Manager->new();
+        my $leak = Thruk::Backend::Pool->new();
         $leak->{'test'} = $leak;
         $c->stash->{ctx} = $c;
     }

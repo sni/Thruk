@@ -1204,6 +1204,26 @@ sub array_uniq_list {
 
 ########################################
 
+=head2 array_remove
+
+  array_remove($array, $element)
+
+removes element from array
+
+=cut
+
+sub array_remove {
+    my($array, $remove) = @_;
+    my @list;
+    for my $e (@{$array}) {
+        next if $e eq $remove;
+        push @list, $e;
+    }
+    return \@list;
+}
+
+########################################
+
 =head2 hash_invert
 
   hash_invert($hash)
@@ -1336,6 +1356,7 @@ return url for remote thruk installation
 sub get_remote_thruk_url {
     my($c, $id) = @_;
     my $peer = $c->{'db'}->get_peer_by_key($id);
+    confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
     if($peer->{'fed_info'}) {
         $url = $peer->{'fed_info'}->{'addr'}->[scalar @{$peer->{'fed_info'}->{'addr'}}-1];
@@ -2899,7 +2920,7 @@ check if memory limit is above the threshold
 
 sub check_memory_usage {
     my($c) = @_;
-    my $mem = $c->stash->{'memory_end'} || Thruk::Backend::Pool::get_memory_usage();
+    my $mem = $c->stash->{'memory_end'} || Thruk::Utils::IO::get_memory_usage();
     _debug2("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         my $inc = "";

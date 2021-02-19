@@ -55,11 +55,6 @@ sub has_util {
 #########################
 sub request {
     my($url) = @_;
-    if(!defined $Thruk::Backend::Pool::peers) {
-        require Thruk::Backend::Pool;
-        Thruk::Backend::Pool::init_backend_thread_pool();
-    }
-
     my($req, $res);
     if(!$placktest) {
         $placktest = Plack::Test->create(Thruk->startup);
@@ -75,7 +70,6 @@ sub request {
 #########################
 sub clear {
     undef $placktest;
-    undef $Thruk::Backend::Pool::peers;
     undef $Thruk::thruk;
 }
 
@@ -421,7 +415,7 @@ sub test_page {
     SKIP: {
         skip "skipped memory check", 1 if $ENV{'TEST_SKIP_MEMORY'};
         require Thruk::Backend::Pool;
-        my $rsize = Thruk::Backend::Pool::get_memory_usage($$);
+        my $rsize = Thruk::Utils::IO::get_memory_usage($$);
         ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
     }
 

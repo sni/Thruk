@@ -6,7 +6,7 @@ use Log::Log4perl qw(:easy);
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 41;
+    plan tests => 42;
 }
 
 BEGIN {
@@ -17,19 +17,20 @@ BEGIN {
 }
 
 ################################################################################
+# initialize empty pool
+use_ok("Thruk::Backend::Pool");
+my $p = Thruk::Backend::Pool->new();
+isa_ok($p, 'Thruk::Backend::Pool');
+
 # initialize backend manager
 use_ok("Thruk::Backend::Manager");
-my $b = Thruk::Backend::Manager->new();
+my $b = Thruk::Backend::Manager->new($p);
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();
-$b->init();
 
 Log::Log4perl->easy_init($INFO);
 my $logger = Log::Log4perl->get_logger();
-$b->init();
-
-is($b->{'initialized'}, 1, 'Backend Manager Initialized') or BAIL_OUT("$0: no need to run further tests without valid connection");
 
 my $disabled_backends = $b->disable_hidden_backends();
 $b->disable_backends($disabled_backends);

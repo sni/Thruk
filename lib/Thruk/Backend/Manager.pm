@@ -35,51 +35,83 @@ create new manager
 =cut
 
 sub new {
-    my( $class ) = @_;
+    my($class, $pool) = @_;
     my $self = {
-        'initialized'         => 0,
-        'backends'            => [],
-        'sections'            => {},
-        'by_key'              => {},
-        'by_name'             => {},
+        'pool'                => $pool,
         'last_program_starts' => {},
     };
+    confess("no connection pool") unless $pool;
     bless $self, $class;
+    $self->update_sections();
     return $self;
 }
 
 ##########################################################
 
-=head2 init
+=head2 pool
 
-initialize this model
+returns connection pool
 
 =cut
 
-sub init {
-    my( $self, %options ) = @_;
+sub pool {
+    my($self) = @_;
+    return $self->{'pool'};
+}
 
-    for my $key (%options) {
-        $self->{$key} = $options{$key};
-    }
+##########################################################
 
-    return if $self->{'initialized'} == 1;
+=head2 peers
 
-    # retain order
-    $self->{'backends'} = [];
-    for my $key (@{$Thruk::Backend::Pool::peer_order}) {
-        push @{$self->{'backends'}}, $Thruk::Backend::Pool::peers->{$key};
-    }
+returns hash of peers
 
-    # check if we initialized at least one backend
-    return if scalar @{ $self->{'backends'} } == 0;
+=cut
+
+sub peers {
+    my($self) = @_;
+    return $self->{'pool'}->peers;
+}
+
+##########################################################
+
+=head2 peer_order
+
+returns list of peers
+
+=cut
+
+sub peer_order {
+    my($self) = @_;
+    return $self->{'pool'}->peer_order;
+}
+
+##########################################################
+
+=head2 lmd_peer
+
+returns pools lmd_peer
+
+=cut
+
+sub lmd_peer {
+    my($self) = @_;
+    return $self->{'pool'}->lmd_peer;
+}
+
+##########################################################
+
+=head2 update_sections
+
+calculate sections
+
+=cut
+
+sub update_sections {
+    my($self) = @_;
 
     $self->{'sections'} = {};
     $self->{'sections_depth'} = 0;
     for my $peer (@{$self->get_peers(1)}) {
-        $self->{'by_key'}->{$peer->{'key'}}   = $peer;
-        $self->{'by_name'}->{$peer->{'name'}} = $peer;
-
         my @sections = split(/\/+/mx, $peer->{'section'});
         if(scalar @sections == 0) {
             @sections = ();
@@ -104,9 +136,7 @@ sub init {
         push @{$cur_section->{'peers'}}, $peer->{'key'};
     }
 
-    $self->{'initialized'} = 1;
-
-    return 1;
+    return;
 }
 
 
@@ -152,10 +182,10 @@ returns all configured peers (except config-only)
 
 sub get_peers {
     my($self, $all) = @_;
-    return \@{$self->{'backends'}} if $all;
+    return \@{$self->pool->{'objects'}} if $all;
 
     my @peers;
-    for my $b (@{$self->{'backends'}}) {
+    for my $b (@{$self->pool->{'objects'}}) {
         push @peers, $b if $b->{'addr'};
     }
     return \@peers;
@@ -175,7 +205,7 @@ sub get_local_peers {
     my($self) = @_;
 
     my @peers;
-    for my $b (@{$self->{'backends'}}) {
+    for my $b (@{$self->pool->{'objects'}}) {
         for my $addr (@{$b->peer_list()}) {
             if($addr !~ m/:/mx) {
                 push @peers, $b;
@@ -199,9 +229,9 @@ returns peer by key
 sub get_peer_by_key {
     my($self, $key) = @_;
     confess("missing argument") unless defined $key;
-    my $peer = $self->{'by_key'}->{$key};
+    my $peer = $self->pool->peers->{$key};
     return $peer if $peer;
-    $peer = $self->{'by_name'}->{$key};
+    $peer = $self->pool->{'by_name'}->{$key};
     return $peer if $peer;
     return;
 }
@@ -218,7 +248,7 @@ returns peer by name
 
 sub get_peer_by_name {
     my($self, $name) = @_;
-    return $self->{'by_name'}->{$name};
+    return $self->pool->{'by_name'}->{$name};
 }
 
 ##########################################################
@@ -1575,7 +1605,7 @@ sub _do_on_peers {
                     $err = $1;
                 }
                 if(!$c->stash->{'lmd_ok'} && $code != 502) {
-                    $c->stash->{'lmd_error'} = $Thruk::Backend::Pool::lmd_peer->peer_addr().": ".$err;
+                    $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
                     Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
                 }
@@ -1898,7 +1928,7 @@ sub _get_result_lmd {
         return($result, $type, $totalsize);
     }
 
-    my $peer = $Thruk::Backend::Pool::lmd_peer;
+    my $peer = $self->lmd_peer;
     $peer->{'live'}->default_backends(@{$peers});
     my @res = $peer->$function(@{$arg});
     $peer->{'live'}->default_backends();
@@ -1917,6 +1947,7 @@ sub _get_result_lmd {
             next if $key eq 'ALL';
             delete $c->stash->{'failed_backends'}->{$key};
             my $peer = $self->get_peer_by_key($key);
+            next unless $peer;
             $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
             $peer->{'runnning'}   = 1;
             $peer->{'last_error'} = 'OK';
@@ -1924,6 +1955,7 @@ sub _get_result_lmd {
         for my $key (keys %{$meta->{'failed'}}) {
             $c->stash->{'failed_backends'}->{$key} = $meta->{'failed'}->{$key};
             my $peer = $self->get_peer_by_key($key);
+            next unless $peer;
             $peer->{'runnning'}   = 0;
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
@@ -1983,7 +2015,7 @@ sub _get_result_serial {
         # skip already failed peers for this request
         next if $c->stash->{'failed_backends'}->{$key};
 
-        my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg);
+        my @res = $self->pool->do_on_peer($key, $function, $arg);
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         chomp($last_error) if $last_error;
@@ -2028,10 +2060,10 @@ sub _get_result_parallel {
             push @jobs, [$key, $function, $arg];
         }
     }
-    $Thruk::Backend::Pool::pool->add_bulk(\@jobs);
+    $self->pool->add_bulk(\@jobs);
 
     my $times = {};
-    my $results = $Thruk::Backend::Pool::pool->remove_all();
+    my $results = $self->pool->remove_all();
     for my $res (@{$results}) {
         my($key, $time, $typ, $size, $data, $last_error) = @{$res};
         $times->{$key} = $time;

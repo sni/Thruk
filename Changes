@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
-          - remove `state_host` from backends, use LMD instead
+          - remove `check_local_states` and `state_host` from backends, use LMD instead
           - make broadcast preview draggable
           - fix managing public bookmarks (#1065)
           - fix unhandled problems link on tactical overview (#1058)

@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 112;
+    plan tests => 114;
 
     use lib('t');
     require TestUtils;
@@ -60,12 +60,14 @@ my $sorted_by_abc_exp = [
 ];
 #########################
 # initialize backend manager
+use_ok 'Thruk::Backend::Pool';
+my $p = Thruk::Backend::Pool->new();
+isa_ok($p, 'Thruk::Backend::Pool');
 use_ok 'Thruk::Backend::Manager';
-my $b = Thruk::Backend::Manager->new();
+my $b = Thruk::Backend::Manager->new($p);
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();
-$b->init( 'c' => $c );
 
 #########################
 my $app = $c->app;

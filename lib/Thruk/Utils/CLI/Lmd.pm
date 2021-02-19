@@ -64,8 +64,6 @@ sub cmd {
     }
     my $mode = shift @{$commandoptions};
 
-    Thruk::Backend::Pool::init_backend_thread_pool();
-
     if($mode eq 'start') {
         my($status, $started) = Thruk::Utils::LMD::status($c->config);
         if($started && $status->[0] && $status->[0]->{'pid'}) {
@@ -120,7 +118,7 @@ sub cmd {
         }
     }
     elsif($mode eq 'config') {
-        if(Thruk::Utils::LMD::write_lmd_config($c->config)) {
+        if(Thruk::Utils::LMD::write_lmd_config($c, $c->config)) {
             return("OK - new lmd config written (but not yet activated, run 'thruk lmd reload')\n", 0);
         }
         return("OK - lmd config did not change\n", 0);

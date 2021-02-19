@@ -70,9 +70,6 @@ sub begin {
     $c->stash->{'c'} = $c;
     weaken($c->stash->{'c'});
 
-    # restore original backends if previously changed
-    restore_user_backends($c);
-
     # frame options
     my $use_frames = $c->config->{'use_frames'};
     my $show_nav_button = 1;
@@ -232,12 +229,6 @@ sub begin {
     # otherwise except it doesn't exist either. Then better take the later if both do not exist.
     if($ENV{'THRUK_CONFIG'} && (-d $ENV{'THRUK_CONFIG'}.'/usercontent/.' || !-d $c->stash->{'usercontent_folder'}.'/.')) {
         $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent';
-    }
-
-    # initialize our backends
-    if(!$c->{'db'} ) {
-        $c->{'db'} = $c->app->{'db'};
-        $c->{'db'}->init() if $c->{'db'};
     }
 
     # ex.: global bookmarks from var/global_user_data
@@ -433,16 +424,8 @@ sub add_defaults {
             Thruk::Config::set_default_config($c->config);
             set_configs_stash($c);
             if($backends_changed) {
-                $c->app->{'config_adjustments_extra'} = {
-                    peer_order  => $Thruk::Backend::Pool::peer_order,
-                    peers       => $Thruk::Backend::Pool::peers,
-                    pool        => $Thruk::Backend::Pool::pool,
-                    pool_size   => $Thruk::Backend::Pool::pool_size,
-                    xs          => $Thruk::Backend::Pool::xs,
-                };
-                Thruk::Backend::Pool::init_backend_thread_pool($c->config->{'Thruk::Backend'}->{'peer'});
-                $c->{'db'} = Thruk::Backend::Manager->new();
-                $c->{'db'}->init();
+                my $pool = Thruk::Backend::Pool->new($c->config->{'Thruk::Backend'}->{'peer'});
+                $c->{'db'} = Thruk::Backend::Manager->new($pool);
             }
             add_defaults($c, $safe, 1);
         }
@@ -494,10 +477,7 @@ sub add_defaults {
 
     ###############################
     # redirect to error page unless we have a connection
-    if(    !$c->{'db'}
-        || !defined $c->{'db'}->{'backends'}
-        || ref $c->{'db'}->{'backends'} ne 'ARRAY'
-        || scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+    if(!$c->{'db'} || scalar @{$c->{'db'}->peer_order} == 0 ) {
 
         return 1 if $c->{'errored'};
 
@@ -533,20 +513,12 @@ sub add_defaults {
     # no backend?
     return unless $c->{'db'};
 
-    # set check_local_states
-    unless(defined $c->config->{'check_local_states'}) {
-        $c->config->{'check_local_states'} = 0;
-        if(scalar @{$c->{'db'}->{'backends'}} > 1) {
-            $c->config->{'check_local_states'} = 1;
-        }
-    }
-
     ###############################
     # read cached data
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
-    my($disabled_backends,$has_groups) = set_enabled_backends($c, undef, $safe, $cached_data);
+    my($disabled_backends,$has_groups) = set_enabled_backends($c);
 
     ###############################
     # add program status
@@ -1073,13 +1045,13 @@ sub set_processinfo {
 
 =head2 set_enabled_backends
 
-  set_enabled_backends($c, [$backends, $safe, $cached_data])
+  set_enabled_backends($c, [$backends])
 
 set enabled backends from environment or given list
 
 =cut
 sub set_enabled_backends {
-    my($c, $backends, $safe, $cached_data) = @_;
+    my($c, $backends) = @_;
 
     # first all backends are enabled
     if(defined $c->{'db'}) {
@@ -1350,8 +1322,8 @@ sub check_federation_peers {
     for my $row (@{$all_sites_info}) {
         my $key = $row->{'key'};
         $existing->{$key} = 1;
-        if(!$Thruk::Backend::Pool::peers->{$key}) {
-            my $parent = $Thruk::Backend::Pool::peers->{$row->{'parent'}};
+        if(!$c->{'db'}->peers->{$key}) {
+            my $parent = $c->{'db'}->peers->{$row->{'parent'}};
             next unless $parent;
             my $subpeerconfig = {
                 name => $row->{'name'},
@@ -1376,32 +1348,26 @@ sub check_federation_peers {
             if($parent->{'peer_config'}->{'configtool'}->{'disable'}) {
                 $subpeer->{'peer_config'}->{'configtool'}->{'disable'} = 1;
             }
-            $Thruk::Backend::Pool::peers->{$subpeer->{'key'}} = $subpeer;
-            push @{$Thruk::Backend::Pool::peer_order}, $subpeer->{'key'};
+            $c->{'db'}->pool->peer_add($subpeer);
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;
             $changed++;
         }
     }
     # remove exceeding backends
-    my $new_order = [];
-    for my $key (@{$Thruk::Backend::Pool::peer_order}) {
-        my $peer = $Thruk::Backend::Pool::peers->{$key};
+    for my $key (@{$c->{'db'}->peer_order}) {
+        my $peer = $c->{'db'}->peers->{$key};
         if(!$peer->{'federation'}) {
-            push @{$new_order}, $key;
             next;
         }
         if(!$existing->{$key}) {
             delete $cached_data->{'processinfo'}->{$key};
-            delete $Thruk::Backend::Pool::peers->{$key};
+            $c->{'db'}->pool->peer_remove($key);
             $changed++;
             next;
         }
-        push @{$new_order}, $key;
     }
     if($changed) {
-        $Thruk::Backend::Pool::peer_order = $new_order;
-        $c->{'db'}->{'initialized'} = 0;
-        $c->{'db'}->init();
+        $c->{'db'}->update_sections();
         # fetch missing processinfo
         $processinfo = $c->{'db'}->get_processinfo();
         for my $key (keys %{$processinfo}) {
@@ -1411,35 +1377,13 @@ sub check_federation_peers {
     # set a few extra infos
     for my $d (@{$all_sites_info}) {
         my $key = $d->{'key'};
-        my $peer = $Thruk::Backend::Pool::peers->{$key};
+        my $peer = $c->{'db'}->peers->{$key};
         next unless $peer;
         for my $col (qw/last_online last_update last_error/) {
             $peer->{$col} = $d->{$col};
         }
     }
     return($processinfo, $cached_data);
-}
-
-########################################
-
-=head2 restore_user_backends
-
-    restore global pool adjustments
-
-=cut
-sub restore_user_backends {
-    my($c) = @_;
-    return unless $c->app->{'config_adjustments_extra'};
-
-    # restore original backends if previously changed
-    $Thruk::Backend::Pool::peer_order   = $c->stash->{'config_adjustments_extra'}->{peer_order};
-    $Thruk::Backend::Pool::peers        = $c->stash->{'config_adjustments_extra'}->{peers};
-    $Thruk::Backend::Pool::pool         = $c->stash->{'config_adjustments_extra'}->{pool};
-    $Thruk::Backend::Pool::pool_size    = $c->stash->{'config_adjustments_extra'}->{pool_size};
-    $Thruk::Backend::Pool::xs           = $c->stash->{'config_adjustments_extra'}->{xs};
-    delete $c->app->{'config_adjustments_extra'};
-
-    return;
 }
 
 ########################################

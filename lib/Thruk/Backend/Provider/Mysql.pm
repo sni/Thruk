@@ -966,7 +966,7 @@ sub _log_stats {
         my(undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
         push @result, {
             key              => $key,
-            name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            name             => $peer->{'name'},
             index_size       => $index_size,
             data_size        => $data_size,
             items            => $res->{$key.'_log'}->{'Rows'},
@@ -1037,7 +1037,7 @@ sub _logcache_stats_types {
         }
         push @result, {
             key     => $key,
-            name    => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            name    => $peer->{'name'},
             types   => $types,
         };
     }
@@ -1159,7 +1159,7 @@ sub _import_logs {
             $mode = 'import' if _update_logcache_version($c, $dbh, $prefix);
         }
 
-        _info("running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'});
+        _info("running ".$mode." for site ".$peer->{'name'});
 
         # backends maybe down, we still want to continue updates
         eval {

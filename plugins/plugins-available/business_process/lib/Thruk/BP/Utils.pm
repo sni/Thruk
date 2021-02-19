@@ -233,8 +233,8 @@ sub save_bp_objects {
             return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
         }
         my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-        if(!$result_backend && $Thruk::Backend::Pool::peer_order && scalar @{$Thruk::Backend::Pool::peer_order}) {
-            my $peer_key = $Thruk::Backend::Pool::peer_order->[0];
+        if(!$result_backend) {
+            my $peer_key = $c->{'db'}->peer_order->[0];
             $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
         }
 

@@ -50,7 +50,7 @@ sub new {
     my $config = $app->config || confess("uninitialized, no app config");
     my $memory_begin;
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        $memory_begin = Thruk::Backend::Pool::get_memory_usage();
+        $memory_begin = Thruk::Utils::IO::get_memory_usage();
     }
 
     # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
@@ -69,6 +69,7 @@ sub new {
     my $req = Thruk::Request->new($env);
     my $self = {
         app    => $app,
+        db     => $app->{'db'},
         env    => $env,
         config => $config,
         req    => $req,

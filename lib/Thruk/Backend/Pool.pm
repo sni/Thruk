@@ -12,6 +12,7 @@ use Thruk ();
 use Thruk::Config;
 use Thruk::Utils::IO ();
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Plack::Util::Accessor qw(peers peer_order lmd_peer);
 
 =head1 NAME
 
@@ -27,25 +28,32 @@ Pool of backend connections
 
 ########################################
 
-=head2 init_backend_thread_pool
+=head2 new
 
-  init_backend_thread_pool()
+  Thruk::Backend::Pool->new($backend_configs)
 
-init thread connection pool
+return new db connection pool
 
 =cut
 
-sub init_backend_thread_pool {
-    my($backends) = @_;
-    our($peer_order, $peers, $pool, $pool_size, $xs, $lmd_peer);
-    return if(defined $peers && !$backends);
+sub new {
+    my($class, $backend_configs) = @_;
+    my $self = {
+        'peer_order' => [],     # keys in correct order
+        'objects'    => [],     # peer objects in correct order
+        'peers'      => {},     # peer objects by key
+        'by_name'    => {},     # peer objects by name
+        'xs'         => 0,      # flag wether xs is available
+        'lmd_peer'   => undef,  # lmd peer
+    };
+    bless $self, $class;
+
     #&timing_breakpoint('creating pool');
 
-    $xs = 0;
     eval {
         require Thruk::Utils::XS;
         Thruk::Utils::XS->import();
-        $xs = 1;
+        $self->{'xs'} = 1;
     };
 
     # change into home folder so we can use relative paths
@@ -56,12 +64,10 @@ sub init_backend_thread_pool {
         chdir($ENV{'HOME'});
     }
 
-    $peer_order  = [];
-    $peers       = {};
-
     my $config       = Thruk->config;
-    my $peer_configs = Thruk::Config::list($backends || $config->{'Thruk::Backend'}->{'peer'});
+    my $peer_configs = Thruk::Config::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
     my $num_peers    = scalar @{$peer_configs};
+    my $pool_size;
     if(defined $config->{'connection_pool_size'}) {
         $pool_size   = $config->{'connection_pool_size'};
     } elsif($num_peers >= 3) {
@@ -72,7 +78,6 @@ sub init_backend_thread_pool {
     $pool_size       = 1 if $ENV{'THRUK_NO_CONNECTION_POOL'};
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
-
 
     # if we have multiple https backends, make sure we use the thread safe IO::Socket::SSL
     my $https_count = 0;
@@ -92,13 +97,14 @@ sub init_backend_thread_pool {
             Thruk::Utils::IO::mkdir_r($config->{'tmp_path'}.'/lmd') ;
         };
         die("could not create lmd ".$config->{'tmp_path'}.'/lmd'.': '.$@) if $@;
-        $lmd_peer = Thruk::Backend::Provider::Livestatus->new({options => {
+        my $lmd_peer = Thruk::Backend::Provider::Livestatus->new({options => {
                                                 peer      => $config->{'tmp_path'}.'/lmd/live.sock',
                                                 peer_key  => 'lmdpeer',
                                                 retries_on_connection_error => 0,
                                             }});
         $lmd_peer->peer_key('lmdpeer');
         $lmd_peer->{'lmd_optimizations'} = 1;
+        $self->{'lmd_peer'} = $lmd_peer;
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
@@ -120,12 +126,11 @@ sub init_backend_thread_pool {
     }
 
     if($num_peers > 0) {
-        my  $peer_keys   = {};
+        my $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
             my $peer = Thruk::Backend::Peer->new($peer_config, $config, $peer_keys);
             $peer_keys->{$peer->{'key'}} = 1;
-            $peers->{$peer->{'key'}}     = $peer;
-            push @{$peer_order}, $peer->{'key'};
+            $self->peer_add($peer);
             if($peer_config->{'groups'} && !$config->{'deprecations_shown'}->{'backend_groups'}) {
                 $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
                 push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
@@ -134,18 +139,18 @@ sub init_backend_thread_pool {
         }
         #&timing_breakpoint('peers created');
         if($pool_size > 1) {
-            #printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::IO::get_memory_usage(), $pool_size) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
             ## no critic
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             ## use critic
             require Thruk::Pool::Simple;
-            $pool = Thruk::Pool::Simple->new(
+            $self->{'thread_pool'} = Thruk::Pool::Simple->new(
                 size    => $pool_size,
-                handler => \&_do_thread,
+                handler => \&{$self->_do_thread},
             );
-            #printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
         } else {
-            #printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB without pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
             ## no critic
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
             ## use critic
@@ -153,31 +158,75 @@ sub init_backend_thread_pool {
     }
 
     #&timing_breakpoint('creating pool done');
+    return($self);
+}
+
+########################################
+
+=head2 peer_add
+
+  peer_add($peer)
+
+add peer to pool
+
+=cut
+
+sub peer_add {
+    my($self, $peer) = @_;
+    $self->{'peers'}->{$peer->{'key'}}    = $peer;
+    $self->{'by_name'}->{$peer->{'name'}} = $peer;
+    push @{$self->{'peer_order'}}, $peer->{'key'};
+    push @{$self->{'objects'}}, $peer;
     return;
 }
 
 ########################################
 
-=head2 shutdown_backend_thread_pool
+=head2 peer_remove
 
-  shutdown_backend_thread_pool()
+  peer_remove($key|$peer)
+
+remove peer from pool
+
+=cut
+
+sub peer_remove {
+    my($self, $key) = @_;
+    my $peer;
+    if(ref $key eq '') {
+        $peer = $self->{'peers'}->{$key};
+    } else {
+        $peer = $key;
+        $key  = $peer->{'key'};
+    }
+    delete $self->{'peers'}->{$key};
+    delete $self->{'by_name'}->{$peer->{'name'}};
+    $self->{'peer_order'} = Thruk::Utils::array_remove($self->{'peer_order'}, $key);
+    $self->{'objects'}    = Thruk::Utils::array_remove($self->{'objects'}, $peer);
+    return;
+}
+
+########################################
+
+=head2 shutdown_threads
+
+  shutdown_threads()
 
 shutdown thread connection pool
 
 =cut
 
-sub shutdown_backend_thread_pool {
-    our($peer_order, $peers, $pool, $pool_size);
+sub shutdown_threads {
+    my($self) = @_;
 
-    if($pool) {
-        eval {
-            local $SIG{ALRM} = sub { die "alarm\n" };
-            alarm(3);
-            $pool->shutdown();
-            $pool = undef;
-        };
-        alarm(0);
-    }
+    return unless $self->{'thread_pool'};
+    eval {
+        local $SIG{ALRM} = sub { die "alarm\n" };
+        alarm(3);
+        $self->{'thread_pool'}->shutdown();
+        delete $self->{'thread_pool'};
+    };
+    alarm(0);
     return;
 }
 
@@ -192,9 +241,9 @@ do the work on threads
 =cut
 
 sub _do_thread {
-    my($key, $function, $arg) = @_;
+    my($self, $key, $function, $arg) = @_;
     my $t1 = [gettimeofday];
-    my $res = do_on_peer($key, $function, $arg);
+    my $res = $self->do_on_peer($key, $function, $arg);
     my $elapsed = tv_interval($t1);
     unshift @{$res}, $elapsed;
     unshift @{$res}, $key;
@@ -205,14 +254,14 @@ sub _do_thread {
 
 =head2 do_on_peer
 
-  do_on_peer($key, $function, $args)
+  do_on_peer($self, $key, $function, $args)
 
 run a function on a backend peer
 
 =cut
 
 sub do_on_peer {
-    my($key, $function, $arg) = @_;
+    my($self, $key, $function, $arg) = @_;
 
     # make it possible to run code in thread context
     if(ref $arg eq 'ARRAY') {
@@ -244,8 +293,8 @@ sub do_on_peer {
         }
     }
 
-    my $peer = $Thruk::Backend::Pool::peers->{$key};
-    confess("no peer for key: $key, got: ".join(', ', keys %{$Thruk::Backend::Pool::peers})) unless defined $peer;
+    my $peer = $self->{'peers'}->{$key};
+    confess("no peer for key: $key, got: ".join(', ', keys %{$self->{'peers'}})) unless defined $peer;
     my($type, $size, $data, $last_error);
     my $errors = 0;
     while($errors < 3) {
@@ -289,33 +338,25 @@ sub do_on_peer {
 
 ########################################
 
-=head2 get_memory_usage
+=head2 set_logger
 
-  get_memory_usage([$pid])
+  set_logger($logger, $verbose)
 
-return memory usage of pid or own process if no pid specified
+set logger object for all pool peers and sets verbose
 
 =cut
 
-sub get_memory_usage {
-    my($pid) = @_;
-    $pid = $$ unless defined $pid;
-    my $page_size_in_kb = 4;
-    if(sysopen(my $fh, "/proc/$pid/statm", 0)) {
-        sysread($fh, my $line, 255) or die $!;
-        CORE::close($fh);
-        my(undef, $rss) = split(/\s+/mx, $line,  3);
-        return(sprintf("%.2f", ($rss*$page_size_in_kb)/1024));
+sub set_logger {
+    my($self, $logger, $verbose) = @_;
+    for my $peer (values %{$self->{'peers'}}) {
+        next unless $peer->{'class'};
+        next unless $peer->{'class'}->{'live'};
+        next unless $peer->{'class'}->{'live'}->{'backend_obj'};
+        my $peer_cls = $peer->{'class'}->{'live'}->{'backend_obj'};
+        $peer_cls->{'logger'} = $logger;
+        $peer_cls->verbose($verbose);
     }
-    my $rsize;
-    open(my $ph, '-|', "ps -p $pid -o rss") or die("ps failed: $!");
-    while(my $line = <$ph>) {
-        if($line =~ m/(\d+)/mx) {
-            $rsize = sprintf("%.2f", $1/1024);
-        }
-    }
-    CORE::close($ph);
-    return($rsize);
+    return;
 }
 
 ########################################

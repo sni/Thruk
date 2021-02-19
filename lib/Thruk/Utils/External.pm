@@ -769,8 +769,7 @@ sub do_child_stuff {
     }
     ## use critic
 
-    Thruk::Backend::Pool::shutdown_backend_thread_pool();
-
+    $c->{'app'}->{'pool'}->shutdown_threads() if $c->{'app'}->{'pool'};
 
     # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
     for my $fd (0..10) {

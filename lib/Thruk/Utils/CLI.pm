@@ -934,8 +934,7 @@ sub _cmd_raw {
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults($c, 1);
     }
-    my @keys = @{$Thruk::Backend::Pool::peer_order};
-    my $key = $keys[0];
+    my $key;
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
         if(ref $opt->{'remote_name'} eq 'ARRAY') {
@@ -956,7 +955,7 @@ sub _cmd_raw {
         die('no such backend: '.$opt->{'backends'}->[0]) unless defined $peer;
         $key = $peer->peer_key();
     } else {
-        $key = $keys[0];
+        $key = $c->{'db'}->peer_order->[0];
     }
     die("no backends...") unless $key;
 
@@ -1028,7 +1027,7 @@ sub _cmd_raw {
 
     # passthrough livestatus results if possible (used by cascaded lmd setups)
     if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
-        my $peer = $Thruk::Backend::Pool::lmd_peer;
+        my $peer = $c->{'db'}->lmd_peer;
         my $query = $opt->{'args'}->[0];
         chomp($query);
         $query .= "\nBackends: ".$key."\n";
@@ -1038,7 +1037,7 @@ sub _cmd_raw {
     }
 
     local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend
-    my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
+    my @res = $c->{'db'}->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
     # add proxy version and config tool settings to processinfo
@@ -1047,7 +1046,7 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'peer_config'}->{'configtool'};
+        my $tmp = $c->{'db'}->peers->{$key}->{'peer_config'}->{'configtool'};
         if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
             $res->[2]->{$key}->{'configtool'} = {
                 'core_type'      => $tmp->{'core_type'},

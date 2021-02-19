@@ -42,6 +42,7 @@ BEGIN {
 }
 
 use Thruk::Base qw/:all/;
+use Thruk::Backend::Pool ();
 use Thruk::Config;
 use Thruk::Constants ':add_defaults';
 use Thruk::Utils::Log qw/:all/;
@@ -62,11 +63,10 @@ returns the psgi code ref
 
 =cut
 sub startup {
-    my($class) = @_;
+    my($class, $pool) = @_;
 
     if(Thruk::Base::mode() ne 'TEST') {
-        require Thruk::Backend::Pool;
-        Thruk::Backend::Pool::init_backend_thread_pool();
+        $pool = Thruk::Backend::Pool->new() unless $pool;
     }
 
     require Thruk::Context;
@@ -81,7 +81,7 @@ sub startup {
     require Thruk::Views::ToolkitRenderer;
     require Thruk::Views::JSONRenderer;
 
-    my $app = $class->_build_app();
+    my $app = $class->_build_app($pool);
 
     if(Thruk::Base::mode() eq 'DEVSERVER' || Thruk::Base::mode() eq 'TEST') {
         require  Plack::Middleware::Static;
@@ -114,8 +114,10 @@ sub startup {
 
 ###################################################
 sub _build_app {
-    my($class) = @_;
-    my $self = {};
+    my($class, $pool) = @_;
+    my $self = {
+        pool => $pool,
+    };
     bless($self, $class);
     $thruk = $self unless $thruk;
     my $config = Thruk->config;
@@ -146,17 +148,10 @@ sub _build_app {
     Thruk::Utils::Log->log() if Thruk::Base::mode() eq 'FASTCGI'; # create log file if it doesn't exist
 
     ###################################################
-    # create backends
-    $self->{'db'} = Thruk::Backend::Manager->new();
-    if(Thruk->trace && $Thruk::Backend::Pool::peers) {
-        for my $key (@{$Thruk::Backend::Pool::peer_order}) {
-            next unless $Thruk::Backend::Pool::peers->{$key}->{'class'};
-            next unless $Thruk::Backend::Pool::peers->{$key}->{'class'}->{'live'};
-            next unless $Thruk::Backend::Pool::peers->{$key}->{'class'}->{'live'}->{'backend_obj'};
-            my $peer_cls = $Thruk::Backend::Pool::peers->{$key}->{'class'}->{'live'}->{'backend_obj'};
-            $peer_cls->{'logger'} = Thruk::Utils::Log->log();
-            $peer_cls->verbose(1);
-        }
+    # create backend manager
+    $self->{'db'} = Thruk::Backend::Manager->new($self->pool);
+    if(Thruk->trace) {
+        $self->pool->set_logger(Thruk::Utils::Log->log(), 1);
     }
     #&timing_breakpoint('startup() backends created');
 
@@ -425,6 +420,21 @@ sub find_route_match {
         }
     }
     return;
+}
+
+###################################################
+
+=head2 pool
+
+    return connection pool
+
+=cut
+sub pool {
+    my($self, $backends) = @_;
+    if(!$self->{'pool'} || $backends) {
+        $self->{'pool'} = Thruk::Backend::Pool->new($backends);
+    }
+    return($self->{'pool'});
 }
 
 ###################################################
@@ -738,7 +748,7 @@ sub _setup_development_signals {
         print STDERR "adding USR1 signal handler\n";
         ## no critic
         $SIG{'USR1'} = sub {
-            printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Backend::Pool::get_memory_usage());
+            printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Utils::IO::get_memory_usage());
             eval {
                 require Devel::SizeMe;
                 Devel::SizeMe::perl_size();
@@ -909,7 +919,7 @@ sub finalize_request {
     Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
 
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'memory_begin'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
-        $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
+        $c->stash->{'memory_end'} = Thruk::Utils::IO::get_memory_usage();
         $url     = $c->req->url unless $url;
         $url     =~ s|^https?://[^/]+/|/|mxo;
         $url     =~ s/^cgi\-bin\///mxo;
@@ -936,8 +946,15 @@ sub finalize_request {
     # save metrics to disk
     $c->app->{_metrics}->store() if $c->app->{_metrics};
 
-    # restore user specific settings
-    Thruk::Config::finalize($c);
+    # show deprecations
+    if($Thruk::deprecations_log) {
+        if(Thruk::Base::mode() ne 'TEST' && Thruk::Base::mode() ne 'CLI') {
+            for my $warning (@{$Thruk::deprecations_log}) {
+                _info($warning);
+            }
+        }
+        undef $Thruk::deprecations_log;
+    }
 
     # does this process need a restart?
     if(Thruk::Base::mode() eq 'FASTCGI') {

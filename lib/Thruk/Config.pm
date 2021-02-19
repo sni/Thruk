@@ -625,7 +625,6 @@ sub set_default_config {
     # when using lmd, some settings don't make sense
     if($config->{'use_lmd_core'}) {
         $config->{'connection_pool_size'} = 1; # no pool required when using caching
-        $config->{'check_local_states'}   = 0; # local state checking not required
     }
 
     # make this setting available in env
@@ -1015,31 +1014,6 @@ sub array2hash {
     }
 
     return \%hash;
-}
-
-########################################
-
-=head2 finalize
-
-    restore used specific settings from global hash
-
-=cut
-
-sub finalize {
-    my($c) = @_;
-
-    Thruk::Action::AddDefaults::restore_user_backends($c);
-
-    if($Thruk::deprecations_log) {
-        if(Thruk::Base::mode() ne 'TEST' && Thruk::Base::mode() ne 'CLI') {
-            for my $warning (@{$Thruk::deprecations_log}) {
-                _info($warning);
-            }
-        }
-        undef $Thruk::deprecations_log;
-    }
-
-    return;
 }
 
 ######################################
