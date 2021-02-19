@@ -39,7 +39,6 @@ sub new {
     my $self = {
         'initialized'         => 0,
         'backends'            => [],
-        'backend_debug'       => 0,
         'sections'            => {},
         'by_key'              => {},
         'by_name'             => {},

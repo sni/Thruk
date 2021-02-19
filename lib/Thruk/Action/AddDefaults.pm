@@ -237,11 +237,7 @@ sub begin {
     # initialize our backends
     if(!$c->{'db'} ) {
         $c->{'db'} = $c->app->{'db'};
-        if(defined $c->{'db'}) {
-            $c->{'db'}->init(
-                'backend_debug' => $c->config->{'backend_debug'},
-            );
-        }
+        $c->{'db'}->init() if $c->{'db'};
     }
 
     # ex.: global bookmarks from var/global_user_data
