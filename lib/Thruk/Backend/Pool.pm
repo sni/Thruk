@@ -146,7 +146,7 @@ sub new {
             require Thruk::Pool::Simple;
             $self->{'thread_pool'} = Thruk::Pool::Simple->new(
                 size    => $pool_size,
-                handler => \&{$self->_do_thread},
+                handler => sub { $self->_do_thread(@_) },
             );
             printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
         } else {
