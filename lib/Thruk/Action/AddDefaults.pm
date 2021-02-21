@@ -527,10 +527,10 @@ sub add_defaults {
     if(!$no_config_adjustments && !$c->stash->{'config_adjustments'}->{'extra_backends'}) {
         $c->stats->profile(begin => "AddDefaults::get_proc_info");
         my $last_program_restart = 0;
-        my $retrys = 3;
-        $retrys = 1 if $safe; # but only once on safe/cached pages
+        my $retries = 3;
+        $retries = 1 if $safe; # but only once on safe/cached pages
 
-        for my $x (1..$retrys) {
+        for my $x (1..$retries) {
             # reset failed states, otherwise retry would be useless
             $c->{'db'}->reset_failed_backends($c);
 
@@ -539,7 +539,7 @@ sub add_defaults {
             };
             last unless $@;
             _debug("retry $x, data source error: $@") if Thruk->debug;
-            last if $x == $retrys;
+            last if $x == $retries;
             sleep 1;
         }
         if($@) {
