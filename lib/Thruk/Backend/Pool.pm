@@ -12,7 +12,7 @@ use Thruk ();
 use Thruk::Config;
 use Thruk::Utils::IO ();
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Plack::Util::Accessor qw(peers peer_order lmd_peer);
+use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
 
 =head1 NAME
 

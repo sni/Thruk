@@ -2060,10 +2060,10 @@ sub _get_result_parallel {
             push @jobs, [$key, $function, $arg];
         }
     }
-    $self->pool->add_bulk(\@jobs);
+    $self->pool->thread_pool->add_bulk(\@jobs);
 
     my $times = {};
-    my $results = $self->pool->remove_all();
+    my $results = $self->pool->thread_pool->remove_all();
     for my $res (@{$results}) {
         my($key, $time, $typ, $size, $data, $last_error) = @{$res};
         $times->{$key} = $time;
