@@ -538,7 +538,7 @@ sub add_defaults {
                 $last_program_restart = set_processinfo($c, $safe, $cached_data);
             };
             last unless $@;
-            _debug("retry $x, data source error: $@") if Thruk->debug;
+            _debug("retry $x, data source error: $@");
             last if $x == $retries;
             sleep 1;
         }
