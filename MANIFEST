@@ -1862,6 +1862,7 @@ t/610-scenario-backend_http.t
 t/610-scenario-backend_http_readonly.t
 t/610-scenario-backend_icinga.t
 t/610-scenario-backend_icinga2.t
+t/610-scenario-backend_multi.t
 t/610-scenario-backend_naemon.t
 t/610-scenario-backend_shinken.t
 t/610-scenario-backend_tls_livestatus.t
@@ -2067,6 +2068,16 @@ t/scenarios/backend_icinga2/t/300-controller_status.t
 t/scenarios/backend_icinga2/t/300-controller_tac.t
 t/scenarios/backend_icinga2/thruk.conf
 t/scenarios/backend_icinga2/thruk_local.conf
+t/scenarios/backend_multi/docker-compose.yml
+t/scenarios/backend_multi/Makefile
+t/scenarios/backend_multi/omd/Dockerfile
+t/scenarios/backend_multi/omd/playbook.yml
+t/scenarios/backend_multi/omd/test.cfg
+t/scenarios/backend_multi/t/300-controller_extinfo.t
+t/scenarios/backend_multi/t/300-controller_status.t
+t/scenarios/backend_multi/t/300-controller_tac.t
+t/scenarios/backend_multi/thruk.conf
+t/scenarios/backend_multi/thruk_local.conf
 t/scenarios/backend_naemon/docker-compose.yml
 t/scenarios/backend_naemon/Makefile
 t/scenarios/backend_naemon/omd/Dockerfile
