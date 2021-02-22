@@ -1164,7 +1164,6 @@ sub _read_socket_do {
         return('200', $self->_get_error(200), undef);
     }
 
-    return($self->_socket_error($statement, 'eof, connection closed'.($! ? ': '.$! : ''))) if $sock->eof;
     $sock->read($header, 16) || return($self->_socket_error($statement, 'reading header from socket failed'.($! ? ': '.$! : '')));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
