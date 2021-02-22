@@ -4,3 +4,8 @@
     warn: false
 - shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
 - shell: "omd config {{ site }} set TMPFS off"
+- name: increase livestatus xinetd limit, may be hit during tests otherwise
+  lineinfile:
+    path: "/opt/omd/sites/{{ site }}/etc/naemon/xinetd.conf"
+    line: "    cps         = 10000 3"
+    regexp: '^\s*cps'
