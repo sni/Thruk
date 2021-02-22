@@ -87,7 +87,7 @@ is_deeply($res, $expected_resource, 'reading resource file');
 # set resource file
 $c->{'config'}->{'expand_user_macros'} = [];
 $c->{'config'}->{'resource_file'} = 't/data/resource.cfg';
-for my $backend ( @{$b->{'backends'}} ) {
+for my $backend ( @{$p->{'objects'}} ) {
     if(defined $backend->{'resource_file'}) {
         $backend->{'resource_file'} = $c->{'config'}->{'resource_file'};
     }
