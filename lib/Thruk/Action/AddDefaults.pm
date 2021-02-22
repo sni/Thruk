@@ -530,6 +530,7 @@ sub add_defaults {
         my $retries = 3;
         $retries = 1 if $safe; # but only once on safe/cached pages
 
+        my $err;
         for my $x (1..$retries) {
             # reset failed states, otherwise retry would be useless
             $c->{'db'}->reset_failed_backends($c);
@@ -537,18 +538,19 @@ sub add_defaults {
             eval {
                 $last_program_restart = set_processinfo($c, $safe, $cached_data);
             };
-            last unless $@;
-            _debug("retry $x, data source error: $@");
+            $err = $@;
+            last unless $err;
+            _debug(sprintf("retry %d/%d (safe: %d), data source error: %s", $x, $retries, $safe, $err));
             last if $x == $retries;
             sleep 1;
         }
-        if($@) {
+        if($err) {
             # side.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
             if(Thruk->debug) {
-                _warn("data source error: $@");
+                _warn("data source error: $err");
             } else {
-                _debug("data source error: $@");
+                _debug("data source error: $err");
             }
             return 1 if $safe == ADD_SAFE_DEFAULTS;
             return $c->detach('/error/index/9');
