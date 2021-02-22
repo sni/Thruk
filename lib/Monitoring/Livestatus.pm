@@ -1135,10 +1135,9 @@ sub _send_socket {
 sub _send_socket_do {
     my($self, $statement) = @_;
     my $sock = $self->_open() or return(491, $self->_get_error(491, $@ || $!), $@ || $!);
-    utf8::decode($statement);
-    utf8::encode($statement);
-    print $sock $statement or return($self->_socket_error($statement, $sock, 'write to socket failed: '.($@ || $!)));
-    print $sock "\n";
+    utf8::decode($statement); # make sure
+    utf8::encode($statement); # query is utf8
+    $sock->printflush($statement,"\n") || return($self->_socket_error($statement, 'write to socket failed'.($! ? ': '.$! : '')));
     return $sock;
 }
 
@@ -1165,7 +1164,8 @@ sub _read_socket_do {
         return('200', $self->_get_error(200), undef);
     }
 
-    $sock->read($header, 16) or return($self->_socket_error($statement, $sock, 'reading header from socket failed, check your livestatus logfile: '.$!));
+    return($self->_socket_error($statement, 'eof, connection closed'.($! ? ': '.$! : ''))) if $sock->eof;
+    $sock->read($header, 16) || return($self->_socket_error($statement, 'reading header from socket failed'.($! ? ': '.$! : '')));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
     return($status, $msg, undef) if !defined $content_length;
@@ -1187,10 +1187,10 @@ sub _read_socket_do {
                 $remaining = $remaining -$length;
                 if($remaining < $length) { $length = $remaining; }
             }
-            $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, $sock, 'reading remaining '.$length.' bytes from socket failed: '.$!));
+            $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, 'reading remaining '.$length.' bytes from socket failed'.($! ? ': '.$! : '')));
             $json_decoder->incr_reset;
         } else {
-            $sock->read($recv, $content_length) or return($self->_socket_error($statement, $sock, 'reading body from socket failed'));
+            $sock->read($recv, $content_length) or return($self->_socket_error($statement, 'reading body from socket failed'.($! ? ': '.$! : '')));
         }
     }
 
@@ -1203,13 +1203,11 @@ sub _read_socket_do {
 
 ########################################
 sub _socket_error {
-    #my($self, $statement, $sock, $body)...
-    my($self, $statement, undef, $body) = @_;
+    my($self, $statement, $err) = @_;
 
     my $message = "\n";
     $message   .= "peer                ".Dumper($self->peer_name);
     $message   .= "statement           ".Dumper($statement);
-    $message   .= "message             ".Dumper($body);
 
     $self->{'logger'}->error($message) if $self->{'verbose'};
 
@@ -1222,7 +1220,7 @@ sub _socket_error {
         }
     }
     $self->_close();
-    return(500, $self->_get_error(500), $message);
+    return(500, $self->_get_error(500).($err ? " - ".$err : ""), $message);
 }
 
 ########################################
