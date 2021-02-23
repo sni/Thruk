@@ -1958,6 +1958,8 @@ t/scenarios/_common/ansible/roles/grafana_node_puppeteer/tasks/main.yml
 t/scenarios/_common/ansible/roles/grafana_node_puppeteer/vars/main.yml
 t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
 t/scenarios/_common/ansible/roles/service_sshd/tasks/main.yml
+t/scenarios/_common/ansible/roles/test-config-generator/tasks/main.yml
+t/scenarios/_common/ansible/roles/test-config-generator/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/vars/main.yml
 t/scenarios/_common/Makefile.common
@@ -2089,6 +2091,7 @@ t/scenarios/backend_naemon/t/300-controller_tac.t
 t/scenarios/backend_naemon/thruk.conf
 t/scenarios/backend_naemon/thruk_local.conf
 t/scenarios/backend_nagios4/docker-compose.yml
+t/scenarios/backend_nagios4/lmd.ini
 t/scenarios/backend_nagios4/Makefile
 t/scenarios/backend_nagios4/omd/Dockerfile
 t/scenarios/backend_nagios4/omd/playbook.yml

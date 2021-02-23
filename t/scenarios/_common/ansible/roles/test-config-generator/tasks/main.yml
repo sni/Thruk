@@ -1,0 +1,12 @@
+- name: "install perl / git dependencies"
+  yum:
+    name:
+      - perl-ExtUtils-Manifest
+      - perl-ExtUtils-Install
+      - perl-File-Which
+      - perl-IPC-Cmd
+    state: present
+- name: "install Monitoring::Generator::TestConfig"
+  shell: "sudo su - {{ site }} -c 'cpanm -n Monitoring::Generator::TestConfig'"
+- name: "run create_monitoring_test_config.pl"
+  shell: "sudo su - {{ site }} -c 'create_monitoring_test_config.pl'"
