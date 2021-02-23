@@ -1,16 +1,21 @@
-- yum:
+- name: "install perl / git dependencies"
+  yum:
     name:
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - git-core
     state: present
-- yum:
+- name: "glibc-langpack-en when rhel >= 8"
+  yum:
     name:
       - glibc-langpack-en
     state: present
   when: ansible_distribution_version|int >= 8
-- shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"
-- shell: "sudo su - {{ site }} -c 'cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git'"
+- name: "install File::ChangeNotify"
+  shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"
+- name: "git clone omd_utils"
+  shell: "sudo su - {{ site }} -c 'cd ~/local/share && git clone --depth=1 --branch=master git://github.com/sni/omd_utils.git'"
   args:
     creates: "/omd/sites/{{ site }}/local/share/omd_utils"
-- shell: "sudo su - {{ site }} -c 'yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk'"
+- name: "run install.sh from omd_utils"
+  shell: "sudo su - {{ site }} -c 'yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk'"

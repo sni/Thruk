@@ -1,14 +1,16 @@
-- name: yum clean all
+- name: "yum clean all"
   shell: yum clean all
   args:
     warn: false
-- shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
-- shell: "omd config {{ site }} set TMPFS off"
-- name: check if xinetd file exists
+- name: "run set_admin_password"
+  shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
+- name: "disable TMPFS"
+  shell: "omd config {{ site }} set TMPFS off"
+- name: "check if xinetd file exists"
   stat:
     path: /opt/omd/sites/{{ site }}/etc/naemon/xinetd.conf
   register: xinetd_livestatus
-- name: increase livestatus xinetd limit, may be hit during tests otherwise
+- name: "increase livestatus xinetd limit, may be hit during tests otherwise"
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/naemon/xinetd.conf
     line: "    cps         = 10000 3"
