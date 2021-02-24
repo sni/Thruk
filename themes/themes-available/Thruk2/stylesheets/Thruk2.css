@@ -1505,6 +1505,12 @@ TD.contacts {
   max-width: 0;
   white-space: nowrap;
 }
+.mightOverflowBlock {
+  overflow: hidden;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 TD.host_name > TABLE TD {
   padding: 0;

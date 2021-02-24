@@ -3553,8 +3553,10 @@ function nice_stacktrace_expand() {
 }
 
 function removeClass(el, cls) {
-console.log(el);
     jQuery(el).removeClass(cls);
+}
+function toggleClass(el, cls) {
+    jQuery(el).toggleClass(cls);
 }
 
 /*******************************************************************************

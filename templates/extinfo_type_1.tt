@@ -341,7 +341,7 @@
                           [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
                           <tr>
                             <td class='dataVar'>Contacts</td>
-                            <td class='dataVal mightOverflow' onClick="removeClass(this, 'mightOverflow');">[% host.contacts.join(', ') %]</td>
+                            <td class='dataVal'><span class='mightOverflowBlock clickable' style="width: 480px;" onClick="toggleClass(this, 'mightOverflowBlock');">[% host.contacts.join(', ') %]</span></td>
                           </tr>
                           [% END %]
                           [% IF show_modified_attributes %]
