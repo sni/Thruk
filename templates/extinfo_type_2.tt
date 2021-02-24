@@ -198,13 +198,15 @@
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar' valign='top'> Status Information: </td>
+                            <td class='dataVar' valign='top'> Status Information:<br><div align="center"><a href="#" id="moreStatusOutputButton" style="display: none;" class="more_button" onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');">...</a></div></td>
                             <td class='dataVal detail_plugin_output'>
+                              <span class='detail_plugin_outputBlock mightOverflowBlock' style="max-width: 1000px; max-height: 600px;">
                               [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
                               [% IF escape_html_tags %][% nl2br(escape_html(service.plugin_output)) %][% ELSE %][% nl2br(service.plugin_output) %][% END %]
                               [% IF service.long_plugin_output %]
                               <br>[% IF escape_html_tags %][% nl2br(escape_html(service.long_plugin_output)) %][% ELSE %][% nl2br(service.long_plugin_output) %][% END %]
                               [% END %]
+                              </span>
                             </td>
                           </tr>
                           <tr>
@@ -611,5 +613,15 @@
     </div>
 
     [% PROCESS user_ext_service_info.tt %]
+
+<script type="text/javascript">
+<!--
+jQuery(document).ready(function() {
+  if(jQuery(".detail_plugin_outputBlock").innerWidth() >= 1000 && jQuery(".detail_plugin_outputBlock").innerHeight() >= 600) {
+    jQuery("#moreStatusOutputButton").show();
+  }
+});
+-->
+</script>
 
 [% PROCESS _footer.tt %]

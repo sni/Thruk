@@ -1736,3 +1736,34 @@ TR.api_keys TD {
 .bubble TH {
   vertical-align: top;
 }
+
+.mightOverflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mightOverflow50 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 50%;
+  max-width: 0;
+  white-space: nowrap;
+}
+.mightOverflowBlock {
+  overflow: hidden;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more_button {
+	background-color:#ededed;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#777777;
+	font-size:11px;
+	font-weight:bold;
+	padding:0px 3px 4px 3px;
+  line-height: 11px;
+	text-decoration:none;
+}

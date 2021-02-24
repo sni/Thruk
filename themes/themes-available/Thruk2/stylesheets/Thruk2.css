@@ -1494,23 +1494,6 @@ TD.contacts {
   width: 50%;
   max-width: 0;
 }
-.mightOverflow {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mightOverflow50 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 50%;
-  max-width: 0;
-  white-space: nowrap;
-}
-.mightOverflowBlock {
-  overflow: hidden;
-  display: block;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 TD.host_name > TABLE TD {
   padding: 0;
