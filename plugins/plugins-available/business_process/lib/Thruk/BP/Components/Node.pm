@@ -73,6 +73,11 @@ sub new {
     # first node is always linked
     $self->{'create_obj'} = 1 if($self->{'id'} and $self->{'id'} eq 'node1');
 
+    for my $key (qw/id label template/) {
+        next unless defined $self->{$key};
+        $self->{$key} = Thruk::Utils::trim_whitespace($self->{$key});
+    }
+
     $self->_set_function($data);
 
     return $self;

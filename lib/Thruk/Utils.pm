@@ -3447,6 +3447,25 @@ sub clean_regex {
 
 ##############################################
 
+=head2 trim_whitespace
+
+    trim_whitespace()
+
+returns cleaned string
+
+=cut
+sub trim_whitespace {
+    my($str) = @_;
+
+    # trim leading and trailing whitespace
+    $str =~ s/^\s+//mx;
+    $str =~ s/\s+$//mx;
+
+    return($str);
+}
+
+##############################################
+
 =head2 get_timezone_data
 
     get_timezone_data()

@@ -84,7 +84,11 @@ sub new {
     for my $key (@saved_keys) {
         $self->{$key} = $bpdata->{$key} if defined $bpdata->{$key};
     }
-    $self->set_label($c, $bpdata->{'name'});
+    for my $key (qw/name template/) {
+        next unless defined $self->{$key};
+        $self->{$key} = Thruk::Utils::trim_whitespace($self->{$key});
+    }
+    $self->set_label($c, $self->{'name'});
 
     return unless $self->{'name'};
 
