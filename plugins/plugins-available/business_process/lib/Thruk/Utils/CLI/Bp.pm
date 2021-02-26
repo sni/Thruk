@@ -216,9 +216,13 @@ sub cmd {
                 Thruk::Utils::External::do_child_stuff($c);
             }
             my $local_rc = 0;
+            my $total = scalar @{$chunk};
+            my $nr    = 0;
+            my $numsize = length("$total");
             for my $bp (@{$chunk}) {
+                my $t1 = [gettimeofday];
+                $nr++;
                 $last_bp = $bp;
-                _debug2("[$$] updating bp '".$bp->{'name'}."'");
                 eval {
                     $bp->update_status($c);
                 };
@@ -228,7 +232,16 @@ sub cmd {
                     $local_rc = 1;
                     $rc = 1;
                 }
-                _debug2("[$$] OK");
+                my $elapsed = tv_interval($t1);
+                _debug(sprintf("[%d] %0".$numsize."d/%d bp %s in %.3fs | % 4s.tbp | '%s'",
+                    $$,
+                    $nr,
+                    $total,
+                    $err ? 'update failed' : 'update OK',
+                    $elapsed,
+                    $bp->{'id'},
+                    $bp->{'name'},
+                ));
             }
             exit($local_rc) if $worker_num > 1;
         } else {
@@ -273,7 +286,7 @@ sub cmd {
     $c->stats->profile(end => "_cmd_bp($action)");
 
     if($rc == 0) {
-        return(sprintf("OK - %d business processes updated in %.2fs\n", $num_bp, $elapsed), 0);
+        return(sprintf("OK - %d business processes updated in %.2fs (%.1f/s)\n", $num_bp, $elapsed, ($num_bp/$elapsed)), 0);
     }
     return(sprintf("FAILED - calculating business processes failed, please consult the log files or run manually with options '--worker=0', exit code: %d\n", $rc), $rc);
 }
