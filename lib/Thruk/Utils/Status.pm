@@ -270,8 +270,8 @@ sub get_search_from_param {
         if(defined $globals->{$key} and $globals->{$key} ne '') {
             my $text_filter = {
                 val_pre => '',
-                type    => $key,
-                value   => $globals->{$key},
+                type    => $key             // '',
+                value   => $globals->{$key} // '',
                 op      => '=',
             };
             push @{ $search->{'text_filter'} }, $text_filter;
@@ -487,7 +487,7 @@ sub classic_filter {
             {
             'val_pre' => '',
             'type'    => 'host',
-            'value'   => $host,
+            'value'   => $host // '',
             'op'      => '=',
             };
     }
@@ -496,7 +496,7 @@ sub classic_filter {
             {
             'val_pre' => '',
             'type'    => 'hostgroup',
-            'value'   => $hostgroup,
+            'value'   => $hostgroup // '',
             'op'      => '=',
             };
     }
@@ -505,7 +505,7 @@ sub classic_filter {
             {
             'val_pre' => '',
             'type'    => 'servicegroup',
-            'value'   => $servicegroup,
+            'value'   => $servicegroup // '',
             'op'      => '=',
             };
         $c->stash->{'has_service_filter'} = 1;
@@ -773,6 +773,8 @@ sub single_search {
 
     # do the text filter
     for my $filter ( @{ $search->{'text_filter'} } ) {
+        $filter->{'op'}   = '='      unless defined $filter->{'op'};
+        $filter->{'type'} = 'search' unless defined $filter->{'type'};
 
         # resolve search prefix
         if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
@@ -784,7 +786,7 @@ sub single_search {
             $filter->{'op'}    = '=';
         }
 
-        my $value  = $filter->{'value'};
+        my $value  = $filter->{'value'} // '';
 
         my $op     = '=';
         my $rop    = '=';
