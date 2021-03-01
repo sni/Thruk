@@ -38,10 +38,10 @@ use Thruk::Utils::CLI;
 my $cli   = Thruk::Utils::CLI->new;
 my $odb   = $cli->get_object_db();
 my $hosts = $odb->get_objects_by_type('host');
-printf("%-20s   %s\n", "Host", "File");
-print("===========================================================\n");
+printf("%-30s   %s\n", "Host", "File");
+print("="x80,"\n");
 for my $h (@{$hosts}) {
-    printf("%-20s   %s:%d\n", $h->get_primary_name(), $h->{'file'}->{'display'}, $h->{'line'});
+    printf("%-30s   %s:%d\n", ($h->get_primary_name()||$h->get_name()), $h->{'file'}->{'display'}, $h->{'line'});
 }
 exit 0;
 
