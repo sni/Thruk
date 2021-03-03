@@ -1,5 +1,5 @@
-﻿<div id="mainfooter">
-  <div id="maincopy">
+﻿<div class="mainfooter">
+  <div class="maincopy">
     Copyright &copy; 2009-present Thruk Developer Team.<br>
     Copyright &copy; 2009 Nagios Core Development Team and Community Contributors.<br>
     Copyright &copy; 1999-2009 Ethan Galstad.
@@ -11,7 +11,7 @@
     <br>
   </div>
   <div class="logos">
-    <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_mid.png" width="139" height="50" border="0" style="padding: 0 20px 0 0;" title="Thruk" alt="Thruk"></a>
-    <a href="http://github.com/sni/Thruk" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/github.png" width="100" height="45" border="0" alt="Github.com Logo"></a>
+    <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_mid.png" width="139" height="50" title="Thruk" alt="Thruk"></a>
+    <a href="http://github.com/sni/Thruk" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/github.png" width="100" height="45" alt="Github.com Logo"></a>
   </div>
 </div>

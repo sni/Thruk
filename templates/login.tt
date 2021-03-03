@@ -17,66 +17,56 @@
        Copyright (c) 1999-2009 Ethan Galstad.
   -->
   [% PROCESS _header_broadcast.tt %]
-  <br><br>
-  <br><br>
   [% PROCESS _message.tt %]
-  <div align="center">
-    <div id="mainlogo"><a href="[% c.config.home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
-    <div class="loginmask">
-      <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
-          <input type="hidden" name="referer" value="" id="referer">
-          <table class="infoBox">
-            <tr><td class="infoBox">
-              <div class="infoBoxTitle" align="center">Thruk Monitoring Webinterface</div>
-              <table width="100%">
-                [% IF c.config.basic_auth_enabled %]
-                <tr>
-                  <th>Username</th>
-                  <td><input type="text" name="login" class="logininput" id='loginuser'></td>
-                </tr>
-                <tr>
-                  <th>Password</th>
-                  <td><input type="password" name="password" class="logininput"></td>
-                </tr>
-                [% END %]
-                [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
-                <tr>
-                  [% IF c.config.basic_auth_enabled %]
-                  <td>&nbsp;</td>
-                  [% END %]
-                  <td align="center">
-                    [% IF c.config.basic_auth_enabled %]
-                    <input type="submit" name="submit" value="Login" class="loginbutton">
-                    [% END %]
-                    [% FOREACH auth = c.config.auth_oauth.provider %]
-                    <table>
-                      [% IF c.config.basic_auth_enabled || !loop.first %]
-                      <tr>
-                        <td width="40%"><hr></td>
-                        <td align="center">or</td>
-                        <td width="40%"><hr></td>
-                      </tr>
-                      [% END %]
-                      <tr>
-                        <td colspan="3">
-                          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
-                        </td>
-                      </tr>
-                    </table>
-                    [% END %]
-                  </td>
-                </tr>
-                [% END %]
-              </table>
-            </td></tr>
-          </table>
-      </form>
-    </div>
-    <br>
-    <br>
-    <div id="currentversioninfo">
-    <div class="version">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
-    <div class="releasedate">[% c.config.released %]</div>
+  <div class="loginmask">
+    <div class="mainlogo"><a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
+    <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
+      <input type="hidden" name="referer" value="" id="referer">
+      <div>Thruk Monitoring Webinterface</div>
+      <table>
+        [% IF c.config.basic_auth_enabled %]
+        <tr>
+          <th>Username</th>
+          <td><input type="text" name="login" class="logininput" id='loginuser'></td>
+        </tr>
+        <tr>
+          <th>Password</th>
+          <td><input type="password" name="password" class="logininput"></td>
+        </tr>
+        [% END %]
+        [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
+        <tr>
+          [% IF c.config.basic_auth_enabled %]
+          <td>&nbsp;</td>
+          [% END %]
+          <td align="center">
+            [% IF c.config.basic_auth_enabled %]
+            <input type="submit" name="submit" value="Login" class="loginbutton">
+            [% END %]
+            [% FOREACH auth = c.config.auth_oauth.provider %]
+            <table>
+              [% IF c.config.basic_auth_enabled || !loop.first %]
+              <tr>
+                <td width="40%"><hr></td>
+                <td align="center">or</td>
+                <td width="40%"><hr></td>
+              </tr>
+              [% END %]
+              <tr>
+                <td colspan="3">
+                  <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
+                </td>
+              </tr>
+            </table>
+            [% END %]
+          </td>
+        </tr>
+        [% END %]
+      </table>
+    </form>
+    <div class="currentversioninfo">
+      <div class="version">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+      <div class="releasedate">[% c.config.released %]</div>
     </div>
     [% PROCESS _disclaimer.tt %]
   </div>

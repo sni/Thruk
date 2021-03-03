@@ -109,7 +109,7 @@ sub begin {
     $c->stash->{'theme'} = $theme;
 
     $c->stash->{all_in_one_css} = 0;
-    if($theme eq 'Thruk' || $theme eq 'Thruk2') {
+    if($theme eq 'Thruk' || $theme eq 'Thruk2' || $theme eq 'Thruk3') {
         $c->stash->{all_in_one_css} = 1;
     }
 

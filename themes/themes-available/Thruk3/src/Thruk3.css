@@ -1,0 +1,81 @@
+/* Thruk3.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*******************************************************************************
+ * general
+ */
+body {
+  @apply
+    bg-river-bed-100
+    font-sans
+    text-river-bed-600
+    text-sm
+    leading-normal tracking-normal
+  ;
+}
+
+/*******************************************************************************
+ * buttons
+ */
+BUTTON, INPUT[type=submit] {
+    @apply bg-gray-200 border rounded-sm border-black font-medium p-1 shadow text-black hover:bg-gray-400;
+}
+
+/*******************************************************************************
+ * Login Page
+ */
+BODY.loginpage {
+    @apply flex text-center;
+    min-height: 99.5vh;
+    background: #f1f1f1;
+    background: -moz-radial-gradient(center, ellipse cover,    #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* FF3.6-15 */
+    background: -webkit-radial-gradient(center, ellipse cover, #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* Chrome10-25,Safari5.1-6 */
+    background: radial-gradient(ellipse at center,             #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+
+    DIV.mainlogo {
+        @apply flex md:pt-10 md:pb-3
+    }
+    DIV.mainlogo A {
+        @apply flex-shrink mx-auto
+    }
+    DIV.mainlogo IMG {
+        @apply w-1/2 md:w-auto mx-auto;
+    }
+    DIV.loginmask {
+        @apply mx-auto
+    }
+
+    DIV.loginmask FORM {
+        @apply mx-auto border p-2 mb-6 border-blue-800 rounded bg-gray-400 shadow-float inline-block;
+        background: #cfd8dc;
+    }
+    DIV.loginmask FORM DIV {
+        @apply font-bold;
+    }
+    DIV.loginmask DIV.version {
+        @apply font-bold;
+    }
+    DIV.currentversioninfo {
+        @apply pb-3;
+    }
+
+    DIV.mainfooter {
+        @apply opacity-20 font-light text-xs hidden md:block
+    }
+    DIV.mainfooter:hover {
+        @apply opacity-100 font-medium
+    }
+
+    BUTTON, INPUT[type=submit] {
+        @apply w-28
+    }
+}
+
+DIV.mainfooter DIV.logos {
+    @apply flex w-1/2 mx-auto;
+}
+DIV.mainfooter DIV.logos A {
+    @apply mx-auto;
+}
