@@ -52,7 +52,7 @@
   </tr>
   <tr>
     <td>
-<table border="0" class='comment blockHeadBorder' width='650'>
+<table border="0" class='comment blockHeadBorder' width='810'>
   <tr class='comment' style="cursor:pointer">
     <th class='comment' width="20" nowrap>
       <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_histou_img(-0.5)">
@@ -67,7 +67,7 @@
     </th>
   </tr>
   <tr>
-    <td colspan=7 align="center">
+    <td colspan=7 align="center" style="width: 800px; height: 262px;">
       <a id="histou_graph_link" href="[% histou_url %]"><div style="z-index: 100; position: absolute; width: 800px; height: 262px;"></div></a>
       <div id="histou_graph_pane" style="position: relative; width: 800px; height: 262px; overflow: hidden;">
         <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
