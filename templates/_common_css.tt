@@ -1,4 +1,5 @@
-﻿[%+ UNLESS all_in_one_css %]
+﻿<link rel='stylesheet' type='text/css' href='[% url_prefix %]/vendor/reseter.css' />
+[%+ UNLESS all_in_one_css %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/common.css' />
 [% IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END %]
 [% END %]
