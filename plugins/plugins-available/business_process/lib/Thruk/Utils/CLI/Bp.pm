@@ -197,6 +197,9 @@ sub cmd {
     if($worker_num <= 0) {
         $worker_num = 1;
     }
+    if($worker_num > $num_bp) {
+        $worker_num = $num_bp;
+    }
     alarm(0);
     if($worker_num > 0) {
         alarm($timeout);

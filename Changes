@@ -7,6 +7,8 @@ next:
           - fix unhandled problems link on tactical overview (#1058)
           - Panorama:
             - update icons in bulk of size 50 instead of all at once
+          - Logcache:
+            - add logcache_worker options
 
 2.40-2   Mon Dec 14 11:10:41 CET 2020
           - Config Tool:

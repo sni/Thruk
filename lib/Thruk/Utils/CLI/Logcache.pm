@@ -31,6 +31,8 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
                                     No default, will import all available logfiles
                                     if not set. Ex.: --start=1y
         - update                    Delta update all logfiles since last import/update.
+                 [-w|--worker=<nr>] Use this number of worker processes to update all sites.
+                                    Defaults to 'auto' which trys to find a suitable number automatically.
         - stats                     Display logcache statistics.
         - authupdate                Update authentication data.
         - optimize                  Run table optimize.
@@ -80,13 +82,16 @@ sub cmd {
     ## use critic
 
     # parse options
-    my $opt = {};
+    my $opt = {
+        'worker'    => 'auto',
+    };
     Getopt::Long::Configure('no_ignore_case');
     Getopt::Long::Configure('bundling');
     Getopt::Long::Configure('pass_through');
     Getopt::Long::GetOptionsFromArray($commandoptions,
-       "s|start=s"          => \$opt->{'start'},
-       "blocksize=s"        => \$opt->{'blocksize'},
+       "s|start=s"      => \$opt->{'start'},
+       "blocksize=s"    => \$opt->{'blocksize'},
+       "w|worker=i"     => \$opt->{'worker'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -141,7 +146,6 @@ sub cmd {
         return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
     }
 
-
     my($backends) = $c->{'db'}->select_backends('get_logs');
 
     if($mode eq 'import' && !$global_options->{'yes'}) {
@@ -191,22 +195,119 @@ sub cmd {
         $c->stats->profile(end => "_cmd_import_logs($action)");
         return($stats."\n", 0);
     } else {
-        my $t0 = [gettimeofday];
-        my($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, undef, $blocksize, $opt);
-        my $elapsed = tv_interval($t0);
-        $c->stats->profile(end => "_cmd_import_logs($action)");
-        my $plugin_ref_count;
-        if($mode eq 'clean' || $mode eq 'compact') {
-            $plugin_ref_count = $log_count->[1];
-            $log_count        = $log_count->[0];
+        my $worker_num = 1;
+        my $num_sites  = scalar @{$backends};
+        if($mode eq 'update' || $mode eq 'compact') {
+            $worker_num = int($c->config->{'logcache_worker'} || 0);
+            if($worker_num == 0) {
+                # try to autmatically find a suitable number of workers
+                $worker_num = 1;
+                if($num_sites > 10) {
+                    $worker_num = 2;
+                }
+                if($num_sites > 20) {
+                    $worker_num = 3;
+                }
+                if($num_sites > 100) {
+                    $worker_num = 5;
+                }
+            }
+            if($opt->{'worker'} ne 'auto') {
+                $worker_num = $opt->{'worker'};
+            }
+            if($worker_num <= 0) {
+                $worker_num = 1;
+            }
+            if($worker_num > $num_sites) {
+                $worker_num = $num_sites;
+            }
         }
+
+        _debug("running ".$mode." command with ".$worker_num." workers") if $worker_num > 1;
+        my @child_pids;
+        my $chunks           = Thruk::Utils::array_chunk($backends, $worker_num);
+        my $rc               = 0;
+        my $plugin_ref_count = 0;
+        my $log_count        = 0;
+        my $errors           = [];
+        my $t0               = [gettimeofday];
+        for my $chunk (@{$chunks}) {
+            my $child_pid;
+            if($worker_num > 1) {
+                $child_pid = fork();
+                die("failed to fork: $!") if $child_pid == -1;
+            }
+            if(!$child_pid) {
+                if($worker_num > 1) {
+                    Thruk::Utils::External::do_child_stuff($c);
+                }
+                my $local_rc = 0;
+                my $total = scalar @{$chunk};
+                my $nr    = 0;
+                my $numsize = length("$total");
+                for my $backend (@{$chunk}) {
+                    my $t1 = [gettimeofday];
+                    $nr++;
+                    eval {
+                        my $t0 = [gettimeofday];
+                        my(undef, $loc_log_count, $loc_errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $backend, $blocksize, $opt);
+                        my $elapsed = tv_interval($t0);
+                        $c->stats->profile(end => "_cmd_import_logs($action)");
+                        if($mode eq 'clean' || $mode eq 'compact') {
+                            $plugin_ref_count += $loc_log_count->[1];
+                            $log_count        += $loc_log_count->[0];
+                        } else {
+                            $log_count        += $loc_log_count;
+                        }
+                        push @{$errors}, @{$loc_errors} if $loc_errors;
+                    };
+                    my $err = $@;
+                    if($err) {
+                        _error("[$$] backend '".$backend."' failed: ".$err);
+                        $local_rc = 1;
+                        $rc = 1;
+                    }
+                    my $elapsed = tv_interval($t1);
+                    _debug(sprintf("[%d] %0".$numsize."d/%d backend %s %s in %.3fs",
+                        $$,
+                        $nr,
+                        $total,
+                        $mode,
+                        $err ? 'FAILED' : 'OK',
+                        $elapsed,
+                    ));
+                }
+                exit($local_rc) if $worker_num > 1;
+            } else {
+                _debug("worker start with pid: ".$child_pid);
+                push @child_pids, $child_pid;
+            }
+        }
+        if($worker_num > 1) {
+            _debug("waiting for workers to finish");
+            while(1) {
+                my $pid = wait();
+                last if $pid == -1;
+                if($? != 0) {
+                    $rc = $?>>8;
+                    _error("worker ".$pid." exited with rc: ".$rc);
+                } else {
+                    _debug("worker ".$pid." exited ok");
+                }
+                @child_pids = grep(!/^$pid$/mx, @child_pids);
+                Time::HiRes::sleep(0.1);
+            }
+            _debug("all worker finished");
+        }
+        my $elapsed = tv_interval($t0);
+
         my $action = "imported";
         $action    = "updated"   if $mode eq 'authupdate';
         $action    = "removed"   if $mode eq 'clean';
         $action    = "compacted" if $mode eq 'compact';
         Thruk::Backend::Manager::close_logcache_connections($c);
         return("\n", 1) if $log_count == -1;
-        my($rc, $msg) = (0, 'OK');
+        my $msg = 'OK';
         my $res = 'successfully';
         if(scalar @{$errors} > 0) {
             $res = 'with '.scalar @{$errors}.' errors';
@@ -217,8 +318,8 @@ sub cmd {
         if($mode eq 'drop') {
             return(sprintf("%s - droped logcache for %i site%s in %.2fs\n%s",
                            $msg,
-                           $backend_count,
-                           ($backend_count == 1 ? '' : 's'),
+                           $num_sites,
+                           ($num_sites == 1 ? '' : 's'),
                            ($elapsed),
                            $details,
                            ), $rc);
@@ -226,8 +327,8 @@ sub cmd {
         if($mode eq 'optimize') {
             return(sprintf("%s - optimized logcache for %i site%s in %.2fs\n%s",
                            $msg,
-                           $backend_count,
-                           ($backend_count == 1 ? '' : 's'),
+                           $num_sites,
+                           ($num_sites == 1 ? '' : 's'),
                            ($elapsed),
                            $details,
                            ), $rc);
@@ -239,8 +340,8 @@ sub cmd {
                        $log_count,
                        $plugin_ref_count,
                        $log_count > 0 ? " (".int(($plugin_ref_count / $log_count)*100)."%)" : '',
-                       $backend_count,
-                       ($backend_count == 1 ? '' : 's'),
+                       $num_sites,
+                       ($num_sites == 1 ? '' : 's'),
                        $res,
                        ($elapsed),
                        (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
@@ -252,8 +353,8 @@ sub cmd {
                        $action,
                        $log_count,
                        $plugin_ref_count ? "(and ".$plugin_ref_count." plugin ouput references) " : '',
-                       $backend_count,
-                       ($backend_count == 1 ? '' : 's'),
+                       $num_sites,
+                       ($num_sites == 1 ? '' : 's'),
                        $res,
                        ($elapsed),
                        (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
