@@ -34,6 +34,9 @@ use warnings;
 use strict;
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Constants qw/:add_defaults :peer_states/;
+
+our $skip_backends = 1;
 
 ##############################################
 
@@ -46,6 +49,8 @@ use Thruk::Utils::Log qw/:all/;
 =cut
 sub cmd {
     my($c, $action, $commandoptions, $data, $src, $opt) = @_;
+
+    Thruk::Action::AddDefaults::add_defaults($c, ADD_SAFE_DEFAULTS);
 
     my $backends;
     if(!defined $opt->{'backends'} || scalar @{$opt->{'backends'}} == 0) {
