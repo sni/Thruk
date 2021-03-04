@@ -79,3 +79,54 @@ DIV.mainfooter DIV.logos {
 DIV.mainfooter DIV.logos A {
     @apply mx-auto;
 }
+
+
+/*******************************************************************************
+ * settings popup
+ */
+#pref_pane {
+    @apply shadow-float;
+    width:490px;
+    min-height:100px;
+    position:fixed;
+    top: 0px;
+    right: 0px;
+    z-index: 99;
+    background-color:#ffffff;
+    border-width: 1px;
+    border-spacing: 2px;
+    border-style: inset;
+    border-color: #C4C2C2;
+
+    TH {
+        @apply text-left;
+    }
+
+    TABLE.pref_pane {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        border-collapse: separate;
+        background-color: inherit;
+        width: 100%;
+    }
+
+    TABLE.pref_pane .separator {
+        border-bottom: 1px dotted grey;
+        text-align: center;
+        padding-top: 10px;
+    }
+
+    .pref_pane_long_inp {
+        width: 270px;
+    }
+    .pref_pane_short_inp {
+        width: 160px;
+    }
+
+    img.pref_pane_button {
+        position:absolute;
+        top: 4px;
+        right: 4px;
+        z-index: 100;
+    }
+}

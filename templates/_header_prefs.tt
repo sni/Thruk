@@ -1,86 +1,77 @@
-﻿<div>
-  <a href="#" onclick="toggleElement('pref_pane'); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
-    <table class="pref_pane" border=1 width="490">
-      <tr>
-        <td>
-          <table width="470">
-            <tr>
-              <th colspan=2 class="separator">Settings</th>
-            </tr>
-            <tr>
-              <th width="100">User Profile:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="show user profile" width=16 height=16 style="vertical-align:sub;">
-                <input type="button" name="submit" value="show user profile" onClick="window.location='[% url_prefix %]cgi-bin/user.cgi'; return false;" class="pref_pane_short_inp">
-              </td>
-            </tr>
-            <tr>
-              <th colspan=2 class="separator">Session Settings</th>
-            </tr>
-            <tr>
-              <th width="100">Theme:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
-                <select name="theme" id="pref_theme" class="pref_pane_short_inp">
-                  [% FOR t = c.config.themes %]
-                  <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
-                  [% END %]
-                </select>
-                <input type="button" name="submit" value="change" onClick="prefSubmit(full_uri, '[% theme %]')">
-              </td>
-            </tr>
-            [% IF show_sounds %]
-            <tr>
-              <th>Sounds:</th>
-              <td>
-                [% IF has_cgi_sounds %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:sub;">
-                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')" class="pref_pane_short_inp">
-                [% ELSE %]
-                <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:sub;">
-                <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled class="pref_pane_short_inp">
-                [% END %]
-              </td>
-            </tr>
-            [% END %]
-            <tr>
-              <th>Favicon:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:sub;">
-                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')" class="pref_pane_short_inp">
-              </td>
-            </tr>
-            <tr>
-              <th colspan=2 class="separator">Page Actions</th>
-            </tr>
-            [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
-            <tr>
-              <th>Report:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:sub;">
-                <input type="button" name="submit" value="create e-mail report for this page" class="pref_pane_long_inp" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(original_uri ? original_uri : encodeURIComponent(full_uri)); return false;">
-              </td>
-            </tr>
-            [% END %]
-            [% IF has_debug_options %]
-            <tr>
-              <th>Debug:</th>
-              <td>
-                <img src="[% url_prefix %]themes/[% theme %]/images/wand.png" alt="debug mode" width=16 height=16 style="vertical-align:sub;">
-                <input type="button" name="submit" value="open page with debug options"  class="pref_pane_long_inp" onClick="window.location=uriWith(full_uri, { debug: 1 }); return false;">
-              </td>
-            </tr>
-            [% END %]
-            <tr>
-              <th>Page Refresh:</th>
-              <td nowrap>
-              <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:sub;">
-              <span id="refresh_rate"></span>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-</div>
-<div class="pref_pane_shadow shadow"></div>
+﻿<a href="#" onclick="toggleElement('pref_pane'); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
+<table class="pref_pane">
+  <tr>
+    <th colspan=2 class="separator">Settings</th>
+  </tr>
+  <tr>
+    <th>User Profile:</th>
+    <td>
+      <img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="show user profile" width=16 height=16 style="vertical-align:sub;">
+      <input type="button" name="submit" value="show user profile" onClick="window.location='[% url_prefix %]cgi-bin/user.cgi'; return false;" class="pref_pane_short_inp">
+    </td>
+  </tr>
+  <tr>
+    <th colspan=2 class="separator">Session Settings</th>
+  </tr>
+  <tr>
+    <th>Theme:</th>
+    <td>
+      <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
+      <select name="theme" id="pref_theme" class="pref_pane_short_inp">
+        [% FOR t = c.config.themes %]
+        <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+        [% END %]
+      </select>
+      <input type="button" name="submit" value="change" onClick="prefSubmit(full_uri, '[% theme %]')">
+    </td>
+  </tr>
+  [% IF show_sounds %]
+  <tr>
+    <th>Sounds:</th>
+    <td>
+      [% IF has_cgi_sounds %]
+      <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:sub;">
+      <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')" class="pref_pane_short_inp">
+      [% ELSE %]
+      <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:sub;">
+      <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled class="pref_pane_short_inp">
+      [% END %]
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <th>Favicon:</th>
+    <td>
+      <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:sub;">
+      <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')" class="pref_pane_short_inp">
+    </td>
+  </tr>
+  <tr>
+    <th colspan=2 class="separator">Page Actions</th>
+  </tr>
+  [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
+  <tr>
+    <th>Report:</th>
+    <td>
+      <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:sub;">
+      <input type="button" name="submit" value="create e-mail report for this page" class="pref_pane_long_inp" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(original_uri ? original_uri : encodeURIComponent(full_uri)); return false;">
+    </td>
+  </tr>
+  [% END %]
+  [% IF has_debug_options %]
+  <tr>
+    <th>Debug:</th>
+    <td>
+      <img src="[% url_prefix %]themes/[% theme %]/images/wand.png" alt="debug mode" width=16 height=16 style="vertical-align:sub;">
+      <input type="button" name="submit" value="open page with debug options"  class="pref_pane_long_inp" onClick="window.location=uriWith(full_uri, { debug: 1 }); return false;">
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <th>Page Refresh:</th>
+    <td nowrap>
+    <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:sub;">
+    <span id="refresh_rate"></span>
+    </td>
+  </tr>
+</table>
