@@ -19,6 +19,7 @@ Thruk Controller
 
 use HTTP::Request 6.12 ();
 use Thruk::UserAgent ();
+use Thruk::Utils::Log qw/:all/;
 
 ##########################################################
 sub index {
@@ -146,37 +147,35 @@ sub _cleanup_response {
         $res->header("set-cookie", $newcookie);
     }
 
-    if($res->header('content-type') && $res->header('content-type') =~ m/^(text\/html|application\/json)/mxi) {
+    if($replace_prefix && $res->header('content-type') && $res->header('content-type') =~ m/^(text\/html|application\/json)/mxi) {
         my $body = $res->decoded_content || $res->content;
-        if($replace_prefix) {
-            # make thruk links work, but only if we are not proxying thruk itself
-            if($url !~ m|/thruk/|mx) {
-                $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
-            } else {
-                # if its thruk itself, insert a message at the top
-                if($body =~ m/site_panel_container/mx) {
-                    my $header = "";
-                    $c->stash->{'proxy_peer'} = $peer;
-                    Thruk::Views::ToolkitRenderer::render($c, "_proxy_header.tt", $c->stash, \$header);
-                    $body =~ s/<\/body>/$header<\/body>/gmx;
-                }
-                # fix cookie path
-                $body =~ s%^var\s+cookie_path\s*=\s+'([^']+)';%var cookie_path = '$proxy_prefix$1';%gmx;
+        # make thruk links work, but only if we are not proxying thruk itself
+        if($url !~ m|/thruk/|mx) {
+            $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
+        } else {
+            # if its thruk itself, insert a message at the top
+            if($body =~ m/site_panel_container/mx) {
+                my $header = "";
+                $c->stash->{'proxy_peer'} = $peer;
+                Thruk::Views::ToolkitRenderer::render($c, "_proxy_header.tt", $c->stash, \$header);
+                $body =~ s/<\/body>/$header<\/body>/gmx;
             }
-
-            # send other links to our proxy
-            $body =~ s%("|')$replace_prefix%$1$proxy_prefix$replace_prefix%gmx;
-
-            # length has changed
-            $res->headers()->remove_header('content-length');
-
-            # unset content encoding header, because its no longer gziped content but plain text
-            $res->headers()->remove_header('content-encoding');
-
-            # replace content
-            $res->content(undef);
-            $res->add_content_utf8($body);
+            # fix cookie path
+            $body =~ s%^var\s+cookie_path\s*=\s+'([^']+)';%var cookie_path = '$proxy_prefix$1';%gmx;
         }
+
+        # send other links to our proxy
+        $body =~ s%("|')$replace_prefix%$1$proxy_prefix$replace_prefix%gmx;
+
+        # length has changed
+        $res->headers()->remove_header('content-length');
+
+        # unset content encoding header, because its no longer gziped content but plain text
+        $res->headers()->remove_header('content-encoding');
+
+        # replace content
+        $res->content(undef);
+        $res->add_content_utf8($body);
     }
 
     return;
