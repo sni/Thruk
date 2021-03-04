@@ -249,9 +249,7 @@ sub cmd {
                     my $t1 = [gettimeofday];
                     $nr++;
                     eval {
-                        my $t0 = [gettimeofday];
                         my(undef, $loc_log_count, $loc_errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $backend, $blocksize, $opt);
-                        my $elapsed = tv_interval($t0);
                         $c->stats->profile(end => "_cmd_import_logs($action)");
                         if($mode eq 'clean' || $mode eq 'compact') {
                             $plugin_ref_count += $loc_log_count->[1];

@@ -1971,6 +1971,7 @@ return list of <number> evenly chunked parts
 
 sub array_chunk {
     my($list, $number) = @_;
+    return($list) if $number <= 1;
     my $size   = POSIX::ceil(scalar @{$list} / $number);
     my $chunks = array_chunk_fixed_size($list, $size);
     return($chunks);

@@ -1536,6 +1536,18 @@ ex.:
 
   logcache_delta_updates = 1
 
+
+=== logcache_worker
+
+When having multiple sites, you can change the number of parallel updates
+with the logcache_worker option. Setting worker number to 1 disables parallel
+execution.
+
+ex.:
+
+  logcache_worker = auto
+
+
 === logcache_clean_duration
 Default duration when running `thruk logcache clean`.
 
@@ -2616,8 +2628,8 @@ lists.
 
 === obj_readonly
 Use `obj_readonly` regular expressions which will be appended to the backend
-specific readonly patterns from the Component Backend peer configtool. The same 
-effect can be achieved by adding _"# thruk: readonly"_ on top of a object config file. 
+specific readonly patterns from the Component Backend peer configtool. The same
+effect can be achieved by adding _"# thruk: readonly"_ on top of a object config file.
 Readdetails on the link:/documentation/configuration.html#peer[configtool section].
 
 === default_keys_host
