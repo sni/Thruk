@@ -140,6 +140,9 @@ sub _cleanup_response {
         $res->header('location', $proxy_prefix.$loc);
     }
 
+    # leads to endless redirect loop in grafana
+    $res->header('Link', '') if $res->header('Link');
+
     # replace path in cookies
     if($res->header("set-cookie")) {
         my $newcookie = $res->header("set-cookie");
