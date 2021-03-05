@@ -35,6 +35,8 @@ use warnings;
 use strict;
 use Module::Load qw/load/;
 
+use Thruk::Utils::Log qw/:all/;
+
 ##############################################
 # no backends required for this command
 our $skip_backends = 1;
@@ -81,12 +83,15 @@ sub _install {
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1; # skip further subsequent cluster calls
 
     Thruk::Utils::update_cron_file_maintenance($c);
+    _debug("maintenance cron installed");
 
     require Thruk::Utils::Cluster;
     Thruk::Utils::Cluster::update_cron_file($c);
+    _debug("cluster cron installed") if $c->cluster->is_clustered();
 
     require Thruk::Utils::RecurringDowntimes;
     Thruk::Utils::RecurringDowntimes::update_cron_file($c);
+    _debug("downtime cron installed");
 
     if($c->app->{'_cron_callbacks'}) {
         for my $function (sort keys %{$c->app->{'_cron_callbacks'}}) {
@@ -95,6 +100,7 @@ sub _install {
             my $function_ref = \&{$function};
             load $pkg_name;
             &{$function_ref}($c);
+            _debug($pkg_name." cron installed");
         }
     }
 

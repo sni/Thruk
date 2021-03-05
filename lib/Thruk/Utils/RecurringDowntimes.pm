@@ -2,9 +2,10 @@ package Thruk::Utils::RecurringDowntimes;
 
 use strict;
 use warnings;
+use File::Copy qw/move/;
+
 use Thruk::Utils;
 use Thruk::Utils::Auth;
-use File::Copy qw/move/;
 
 =head1 NAME
 
