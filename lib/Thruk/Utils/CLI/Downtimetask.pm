@@ -44,6 +44,10 @@ sub cmd {
         return("ERROR - authorized_for_admin role required", 1);
     }
 
+    if(!$commandoptions || scalar @{$commandoptions} == 0) {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    }
+
     $c->stats->profile(begin => "_cmd_downtimetask($action)");
     require URI::Escape;
     require Thruk::Utils::RecurringDowntimes;
