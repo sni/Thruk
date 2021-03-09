@@ -815,6 +815,18 @@ sub bulk_send {
 sub _bulk_send_backend {
     my($c, $backends, $commands2send) = @_;
 
+    # do not send more than 100 at once
+    my $chunksize = 100;
+    if(scalar @{$commands2send} > $chunksize) {
+        my $chunks = Thruk::Utils::array_chunk_fixed_size($commands2send, $chunksize);
+        for my $chunk (@{$chunks}) {
+            if(!_bulk_send_backend($c, $backends, $chunk)) {
+                return;
+            }
+        }
+        return 1;
+    }
+
     my $options = {};
     map(chomp, @{$commands2send});
     $options->{'command'} = join("\n\n", @{$commands2send});
