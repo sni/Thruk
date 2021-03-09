@@ -5,6 +5,5 @@ var thruk_errors        = [];
 var bug_email_rcpt      = "[% bug_email_rcpt %]";
 var skip_js_errors      = [% json_encode(skip_js_errors.list) %];
 var show_error_reports  = "[% show_error_reports %]";
-var thruk_debug_details = [% json_encode(debug_details.list) %];
 window.onerror          = thruk_onerror;
 [%+ END +%]

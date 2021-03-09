@@ -1277,7 +1277,7 @@ sub save_debug_information_to_tmp_file {
     print $fh "parameters:\n";
     print $fh Dumper($c->req->parameters);
     print $fh "debug info:\n";
-    print $fh Thruk::Config::get_debug_details();
+    print $fh Thruk::Config::get_debug_details($c);
     if($c->stash->{'original_url'}) {
         print $fh "*************************************\n";
         print $fh "job:\n";

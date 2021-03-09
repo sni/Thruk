@@ -808,7 +808,7 @@ sub get_toolkit_config {
                     'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
                     'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
                     'basename'                      => \&Thruk::Utils::basename,
-                    'debug_details'                 =>   get_debug_details(),
+                    'debug_details'                 => \&get_debug_details,
                     'format_date'                   => \&Thruk::Utils::format_date,
                     'format_cronentry'              => \&Thruk::Utils::format_cronentry,
                     'format_number'                 => \&Thruk::Utils::format_number,
@@ -883,29 +883,37 @@ sub _get_git_info {
 
 =head2 get_debug_details
 
-  get_debug_details()
+  get_debug_details($c)
 
 return details useful for debuging
 
 =cut
 
 sub get_debug_details {
-    my $uname = join(" ", POSIX::uname());
-    my $release = "";
-    for my $f (qw|/etc/redhat-release /etc/issue|) {
-        if(-e $f) {
-            $release = read_file($f);
-            last;
-        }
+    my($c) = @_;
+    my $details = '';
+    my $level = $c->config->{'machine_debug_info'} || 'prod';
+    return($details) if $level eq 'none';
+
+    if($level eq 'full') {
+        $details .= "uname:      ".join(" ", POSIX::uname())."\n";
     }
-    $release =~ s/^\s*//gmx;
-    $release =~ s/\\\w//gmx;
-    $release =~ s/\s*$//gmx;
-    my $details =<<"EOT";
-uname:      $uname
-release:    $release
-EOT
-    return $details;
+
+    if($level eq 'prod' || $level eq 'full') {
+        my $release = "";
+        for my $f (qw|/etc/redhat-release /etc/issue|) {
+            if(-e $f) {
+                $release = read_file($f);
+                last;
+            }
+        }
+        $release =~ s/^\s*//gmx;
+        $release =~ s/\\\w//gmx;
+        $release =~ s/\s*$//gmx;
+        $details .= "release:    $release\n";
+    }
+
+    return($details);
 }
 
 ######################################

@@ -590,6 +590,20 @@ ex.:
   slow_page_log_threshold = 30
 
 
+=== machine_debug_info
+
+Set level of machine information send in bug reports.
+
+Possible options:
+    - `prod` contains release information (default)
+    - `full` contains uname and release information
+    - `none` no information
+
+ex.:
+
+    machine_debug_info = prod
+
+
 === audit_logs
 
 Defines an optional seperate logfile with some extra audit relevant log

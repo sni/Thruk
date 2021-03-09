@@ -182,7 +182,7 @@ function thruk_onerror(msg, url, line, col, error) {
     }
     if(skip) { return; }
     error_count++;
-    var text = getErrorText(thruk_debug_details.join("\n"), error);
+    var text = getErrorText(error);
     if(show_error_reports == "server" || show_error_reports == "both") {
         sendJSError(url_prefix+"cgi-bin/remote.cgi?log", text);
     }
@@ -2471,7 +2471,7 @@ function showErrorTextPopup(text) {
 }
 
 /* create error text for bug reports */
-function getErrorText(details, error) {
+function getErrorText(error) {
     var text = "";
     text = text + "Version:    " + version_info+"\n";
     text = text + "Release:    " + released+"\n";
@@ -2486,7 +2486,6 @@ function getErrorText(details, error) {
         text = text + initial_backends[key].state + ' / ' + initial_backends[key].version + ' / ' + initial_backends[key].data_src_version + "\n";
         first = 0;
     }
-    text = text + details + "\n";
     text = text + "Error List:\n";
     for(var nr=0; nr<thruk_errors.length; nr++) {
         text = text + thruk_errors[nr]+"\n";
