@@ -3818,11 +3818,15 @@ sub text_table {
                     }
                 }
                 elsif($col->{'type'} eq 'bytes') {
-                    my($val1,$unit1) = Thruk::Utils::reduce_number($val, 'B', 1024);
-                    if($col->{'format'}) {
-                        $val1 = sprintf($col->{'format'}, $val1);
+                    if(!defined $val || $val eq '') {
+                        $val = "";
+                    } else {
+                        my($val1,$unit1) = reduce_number($val, 'B', 1024);
+                        if($col->{'format'}) {
+                            $val1 = sprintf($col->{'format'}, $val1);
+                        }
+                        $val = $val1.$unit1;
                     }
-                    $val = $val1.$unit1;
                 }
                 elsif($col->{'format'}) {
                     $val = sprintf($col->{'format'}, $val);

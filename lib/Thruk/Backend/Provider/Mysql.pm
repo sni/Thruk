@@ -955,21 +955,34 @@ sub _log_stats {
     my @result;
     for my $key (@{$backends}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
-        next unless $peer->{'logcache'};
-        $peer->logcache->reconnect();
-        my $dbh  = $peer->logcache->_dbh();
-        my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
-        next unless defined $res->{$key.'_log'};
-        my $index_size = $res->{$key.'_log'}->{'Index_length'};
-        my $data_size  = $res->{$key.'_log'}->{'Data_length'};
-        my $status  = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
-        my(undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
+        my $msg = "OK";
+        my($index_size, $data_size, $items, $last_entry);
+        my $status  = {};
+        if(!$peer->{'logcache'}) {
+            $msg = "logcache is disabled";
+        } else {
+            $peer->logcache->reconnect();
+            my $dbh  = $peer->logcache->_dbh();
+            my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
+            if(!defined $res->{$key.'_log'}) {
+                $msg = "logcache not yet created";
+            } else {
+                $index_size = $res->{$key.'_log'}->{'Index_length'};
+                $data_size  = $res->{$key.'_log'}->{'Data_length'};
+                $items      = $res->{$key.'_log'}->{'Rows'};
+                $status     = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
+                (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
+                if($status->{'lock_mode'}->{'value'}) {
+                    $msg = "running ".$status->{'lock_mode'}->{'value'}." since ".scalar localtime($status->{'last_update'}->{'value'});
+                }
+            }
+        }
         push @result, {
             key              => $key,
             name             => $peer->{'name'},
             index_size       => $index_size,
             data_size        => $data_size,
-            items            => $res->{$key.'_log'}->{'Rows'},
+            items            => $items,
             cache_version    => $status->{'cache_version'}->{'value'},
             last_update      => $status->{'last_update'}->{'value'},
             last_reorder     => $status->{'last_reorder'}->{'value'},
@@ -980,6 +993,7 @@ sub _log_stats {
             compact_till     => $status->{'compact_till'}->{'value'} // '',
             last_entry       => $last_entry // '',
             mode             => $status->{'lock_mode'}->{'value'} // '',
+            status           => $msg,
         };
     }
 
@@ -992,6 +1006,7 @@ sub _log_stats {
                  ['Items', 'items'],
                  { name => 'Last Update', key => 'last_update', type => 'date', format => '%Y-%m-%d %H:%M:%S' },
                  { name => 'Last Item',   key => 'last_entry',  type => 'date', format => '%Y-%m-%d %H:%M:%S' },
+                 { name => 'Status',      key => 'status' },
                 ],
         data => \@result,
     );

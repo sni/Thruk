@@ -183,8 +183,7 @@ sub cmd {
     }
 
     if($mode eq 'stats') {
-        my $stats;
-        $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
+        my $stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats, 0);
