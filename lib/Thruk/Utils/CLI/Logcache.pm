@@ -153,7 +153,7 @@ sub cmd {
         my $exist = 0;
         for my $peer_key (@{$backends}) {
             my($stats) = Thruk::Backend::Provider::Mysql->_log_stats($c, $peer_key);
-            if($stats && $stats->{'items'} > 0) {
+            if($stats && $stats->{'cache_version'}) {
                 _info("logcache does already exist for backend: %s.", $stats->{'name'});
                 $exist = 1;
             }

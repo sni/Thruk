@@ -1085,7 +1085,7 @@ sub _renew_logcache {
     for my $key (@{$get_results_for}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
         next unless($peer && $peer->{'logcache'});
-        push @{$backends2import}, $key unless defined $stats->{$key};
+        push @{$backends2import}, $key unless(defined $stats->{$key} && $stats->{$key}->{'cache_version'});
     }
 
     if($c->config->{'logcache_import_command'}) {
