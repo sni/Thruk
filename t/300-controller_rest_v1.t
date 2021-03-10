@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 480;
+    plan tests => 488;
 }
 
 BEGIN {
@@ -16,6 +16,7 @@ BEGIN {
 }
 BEGIN { use_ok 'Thruk::Controller::rest_v1' }
 
+my $config = Thruk::Config::get_config();
 TestUtils::set_test_user_token();
 my($host,$service) = TestUtils::get_test_service();
 
@@ -56,6 +57,7 @@ my $list_pages = [
     '/thruk/sessions',
     '/thruk/users',
     '/thruk/api_keys',
+    '/thruk/logcache/stats',
 ];
 
 my $hash_pages = [
@@ -73,12 +75,16 @@ my $hash_pages = [
 ];
 
 for my $url (@{$list_pages}) {
-    my $page = TestUtils::test_page(
-        'url'          => '/thruk/r'.$url,
-        'content_type' => 'application/json;charset=UTF-8',
-    );
-    my $data = decode_json($page->{'content'});
-    is(ref $data, 'ARRAY', "json result is an array: ".$url);
+    SKIP: {
+        skip "skipped, logcache is disabled ", 8 if ($url =~ m/logcache/mx && !$config->{'logcache'});
+
+        my $page = TestUtils::test_page(
+            'url'          => '/thruk/r'.$url,
+            'content_type' => 'application/json;charset=UTF-8',
+        );
+        my $data = decode_json($page->{'content'});
+        is(ref $data, 'ARRAY', "json result is an array: ".$url);
+    };
 }
 
 for my $url (@{$hash_pages}) {

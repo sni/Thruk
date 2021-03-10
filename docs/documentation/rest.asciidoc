@@ -1618,6 +1618,32 @@ lists thruk jobs.
 get thruk job status for given id.
 alias for /thruk/jobs?id=<id>
 
+=== GET /thruk/logcache/stats
+
+lists logcache statistics
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|cache_version                     | db schema version
+|compact_duration                  | duration of last compact run in seconds
+|compact_till                      | timestamp marker where last compact run finished
+|data_size                         | used size of data in bytes
+|index_size                        | used size of index in bytes
+|items                             | number of items/rows
+|key                               | peer key
+|last_compact                      | timestamp of last compact run
+|last_entry                        | timestamp of last log entry
+|last_reorder                      | timestamp of last optimize run
+|last_update                       | timestamp of last update run
+|mode                              | current lock mode
+|name                              | peer name
+|reorder_duration                  | duration of last reorder run in seconds
+|status                            | human readable status
+|update_duration                   | duration of last update run in seconds
+|===========================================
+
+
 === GET /thruk/metrics
 
 alias for /thruk/stats
