@@ -50,7 +50,7 @@ sub _rest_get_thruk_logcache_stats {
 
     my @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
     Thruk::Backend::Manager::close_logcache_connections($c);
-    return(\@stats)
+    return(\@stats);
 }
 
 ##########################################################
