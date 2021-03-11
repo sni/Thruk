@@ -13,7 +13,14 @@ body {
     text-river-bed-600
     text-sm
     leading-normal tracking-normal
+    flex
   ;
+}
+
+@media print {
+  .noprint {
+    display:none;
+  }
 }
 
 /*******************************************************************************
@@ -27,33 +34,32 @@ BUTTON, INPUT[type=submit] {
  * Login Page
  */
 BODY.loginpage {
-    @apply flex text-center;
-    min-height: 99.5vh;
+    @apply flex flex-col text-center;
     background: #f1f1f1;
     background: -moz-radial-gradient(center, ellipse cover,    #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* FF3.6-15 */
     background: -webkit-radial-gradient(center, ellipse cover, #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* Chrome10-25,Safari5.1-6 */
     background: radial-gradient(ellipse at center,             #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 
-    DIV.mainlogo {
-        @apply flex md:pt-10 md:pb-3
-    }
-    DIV.mainlogo A {
-        @apply flex-shrink mx-auto
-    }
-    DIV.mainlogo IMG {
-        @apply w-1/2 md:w-auto mx-auto;
-    }
     DIV.loginmask {
-        @apply mx-auto
+        @apply bg-gray-200 rounded py-6 px-10 m-14 flex flex-col items-center justify-center mx-auto shadow-float
     }
 
     DIV.loginmask FORM {
-        @apply mx-auto border p-2 mb-6 border-blue-800 rounded bg-gray-400 shadow-float inline-block;
-        background: #cfd8dc;
+        @apply mt-4 mb-4
     }
+
     DIV.loginmask FORM DIV {
-        @apply font-bold;
+        @apply mb-4
     }
+
+    DIV.loginmask FORM BUTTON {
+        @apply bg-gray-500 hover:bg-gray-600 text-white font-bold w-full py-3
+    }
+
+    DIV.loginmask FORM INPUT {
+        @apply border-solid border border-gray-400 rounded px-2 py-3
+    }
+
     DIV.loginmask DIV.version {
         @apply font-bold;
     }
@@ -67,19 +73,15 @@ BODY.loginpage {
     DIV.mainfooter:hover {
         @apply opacity-100 font-medium
     }
-
-    BUTTON, INPUT[type=submit] {
-        @apply w-28
-    }
 }
 
 DIV.mainfooter DIV.logos {
     @apply flex w-1/2 mx-auto;
 }
+
 DIV.mainfooter DIV.logos A {
     @apply mx-auto;
 }
-
 
 /*******************************************************************************
  * settings popup

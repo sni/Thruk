@@ -4,6 +4,9 @@
   <head>
     <title>Thruk Monitoring Webinterface</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_css.tt use_frames=1 %]
     [% PROCESS _common_js_files.tt %]
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
@@ -18,58 +21,40 @@
   -->
   [% PROCESS _header_broadcast.tt %]
   [% PROCESS _message.tt %]
+
   <div class="loginmask">
-    <div class="mainlogo"><a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
+    <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
     <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
       <input type="hidden" name="referer" value="" id="referer">
-      <div>Thruk Monitoring Webinterface</div>
-      <table>
-        [% IF c.config.basic_auth_enabled %]
-        <tr>
-          <th>Username</th>
-          <td><input type="text" name="login" class="logininput" id='loginuser'></td>
-        </tr>
-        <tr>
-          <th>Password</th>
-          <td><input type="password" name="password" class="logininput"></td>
-        </tr>
-        [% END %]
-        [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
-        <tr>
-          [% IF c.config.basic_auth_enabled %]
-          <td>&nbsp;</td>
+      [% IF c.config.basic_auth_enabled %]
+        <div>
+          <input type="text" name="user" placeholder="User" required />
+        </div>
+        <div>
+          <input type="password" name="password" placeholder="Password" required />
+        </div>
+        <button type="submit">Sign in</button>
+      [% END %]
+      [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
+        [% FOREACH auth = c.config.auth_oauth.provider %]
+          [% IF c.config.basic_auth_enabled || !loop.first %]
+          <div>
+            or
+          </div>
           [% END %]
-          <td align="center">
-            [% IF c.config.basic_auth_enabled %]
-            <input type="submit" name="submit" value="Login" class="loginbutton">
-            [% END %]
-            [% FOREACH auth = c.config.auth_oauth.provider %]
-            <table>
-              [% IF c.config.basic_auth_enabled || !loop.first %]
-              <tr>
-                <td width="40%"><hr></td>
-                <td align="center">or</td>
-                <td width="40%"><hr></td>
-              </tr>
-              [% END %]
-              <tr>
-                <td colspan="3">
-                  <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
-                </td>
-              </tr>
-            </table>
-            [% END %]
-          </td>
-        </tr>
+        <div>
+          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
+        </div>
         [% END %]
-      </table>
+      [% END %]
     </form>
     <div class="currentversioninfo">
-      <div class="version">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+      <div class="version"><a href="https://github.com/sni/Thruk/blob/master/Changes" target="_blank">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</a></div>
       <div class="releasedate">[% c.config.released %]</div>
     </div>
-    [% PROCESS _disclaimer.tt %]
   </div>
+  [% PROCESS _disclaimer.tt %]
+
   <script type="text/javascript">
   <!--
     function clean_ref(ref, keepflag) {
@@ -128,6 +113,7 @@
     jQuery('#loginuser').focus();
   -->
   </script>
+
   [% IF ssi_footer; ssi_footer | evaltt; END %]
   </body>
 </html>
