@@ -1,4 +1,6 @@
 /* Thruk3.css */
+@import '@fortawesome/fontawesome-free/css/all.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +15,6 @@ body {
     text-river-bed-600
     text-sm
     leading-normal tracking-normal
-    flex
   ;
 }
 
@@ -38,6 +39,23 @@ body {
  */
 BUTTON, INPUT[type=submit] {
     @apply bg-gray-200 border rounded-sm border-black font-medium p-1 shadow text-black hover:bg-gray-400;
+}
+
+BUTTON.primary {
+    @apply bg-yellow-300 hover:bg-yellow-400
+}
+
+BUTTON.round {
+    @apply w-8 h-2 rounded-full shadow-float border-none
+}
+BUTTON.round.big {
+    @apply w-11 h-11 text-2xl
+}
+.button_peerUP {
+    @apply bg-green-500 !important;
+}
+.button_peerDOWN {
+    @apply bg-red-500 !important;
 }
 
 /*******************************************************************************
@@ -212,5 +230,75 @@ DIV.mainfooter DIV.logos A {
     .thruk_dev_panel .stats_elapsed {
         text-align: right;
         padding-right: 10px;;
+    }
+}
+
+/*******************************************************************************
+ * top navigation
+ */
+
+TABLE.top_nav {
+    @apply w-full;
+
+    BUTTON.round {
+        @apply mx-1
+    }
+}
+
+/*******************************************************************************
+ * status page command popup
+ */
+div.cmd_pane {
+  min-width:400px;
+  height:100px;
+  visibility:hidden;
+  position:fixed;
+  top: 60px;
+  right: 0px;
+  z-index: 99;
+  color: black;
+  font-size: 9pt;
+  white-space: nowrap;
+}
+table.cmd_pane {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #C4C2C2;
+  border-collapse: separate;
+  background-color: #C4C2C2;
+}
+table.cmd_pane > tbody > tr > td {
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C2C2;
+}
+
+img.cmd_pane_button {
+  position:absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 100;
+}
+th.cmd_pane a, th.cmd_pane {
+  text-align:center;
+  color:#DCE5C1;
+  font-size:10pt;
+}
+
+/*******************************************************************************
+ * site panel / backends
+ */
+DIV.backend {
+    @apply float-left;
+
+    INPUT {
+        @apply bg-gray-200 border rounded-sm border-black font-medium p-0 shadow text-black hover:bg-gray-400 w-20 text-xs;
     }
 }

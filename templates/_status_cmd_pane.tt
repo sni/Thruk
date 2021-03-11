@@ -1,6 +1,5 @@
 ﻿[% USE date %]
 <div class="cmd_pane" id="cmd_pane">
-<div class="shadow"><div class="shadowcontent">
 <form action="cmd.cgi" method="POST" id="quick_cmd_form">
   <input type="hidden" name="referer" value="[% short_uri(c) %]" id="form_cmd_referer">
   <input type="hidden" name="selected_services" id="selected_services" value="">
@@ -224,5 +223,4 @@
     </tr>
   </table>
 </form>
-</div></div>
 </div>
