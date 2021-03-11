@@ -299,6 +299,9 @@ sub _update_docs {
     # fake panorama maintmode
     Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
 
+    # set fake logcache
+    $c->config->{'logcache'} = 'mysql://user:pw@localhost:3306/thruk' unless $c->config->{'logcache'};
+
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
