@@ -1,5 +1,5 @@
 ﻿[% total = time_total; IF total < 1; total = 1; END %]
-<div style="bottom: 8px; right: 8px; width: 200px; position: fixed; border: 0; z-index: 101; padding: 0;" class="thruk_dev_panel clickable" onclick="stopRefresh(); toggleElement('stats_details', undefined, true);">
+<div style="bottom: 8px; right: 8px; width: 200px; height: 20px; position: fixed; border: 0; z-index: 101; padding: 0;" class="thruk_dev_panel clickable" onclick="stopRefresh(); toggleElement('stats_details', undefined, true);">
   <div style="position: absolute; text-align: center; width: 200px; line-height: 20px;[% IF time_total > 1 %]font-weight: bold; color: red;[% END %]">Time: [% sprintf("%.3fs", time_total) %]</div>
   <table>
     <tr>

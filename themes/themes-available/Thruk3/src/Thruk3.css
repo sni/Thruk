@@ -23,6 +23,16 @@ body {
   }
 }
 
+.clickable:hover {
+  cursor: pointer;
+  vertical-align: middle;
+}
+.notclickable {
+  cursor: default;
+  vertical-align: middle;
+}
+
+
 /*******************************************************************************
  * buttons
  */
@@ -130,5 +140,77 @@ DIV.mainfooter DIV.logos A {
         top: 4px;
         right: 4px;
         z-index: 100;
+    }
+}
+
+/*******************************************************************************
+ * settings popup
+ */
+.thruk_dev_panel {
+    position: absolute;
+    border: 1px dashed grey;
+    background: #DDDDDD;
+    padding: 0 5px;
+    z-index: 100;
+    -webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    border-radius: 3px;
+
+    TABLE {
+        border-collapse: collapse;
+    }
+
+    DIV.profiles {
+        height: 600px;
+        overflow-y: auto;
+        min-width: 700px;
+        white-space: pre;
+        font-family: monospace;
+    }
+
+    .thruk_dev_panel_bar {
+        padding: 0;
+        margin: 0;
+        border: 1px solid black;
+        height: 20px;
+        min-width: 1px;
+    }
+
+    .thruk_dev_panel_square {
+        width: 8px;
+        height: 8px;
+        border: 1px solid gray;
+        margin-right: 3px;
+        display: inline-block;
+    }
+
+    .thruk_dev_panel TABLE TH {
+        text-align: left;
+    }
+
+    .thruk_dev_panel DIV.profiles TR:hover {
+        background: #cecece;
+    }
+
+    .thruk_dev_panel button.previous {
+        border: 0;
+        background: url('../images/resultset_previous.png') no-repeat;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .thruk_dev_panel button.next {
+        border: 0;
+        background: url('../images/resultset_next.png') no-repeat;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .thruk_dev_panel .stats_elapsed {
+        text-align: right;
+        padding-right: 10px;;
     }
 }
