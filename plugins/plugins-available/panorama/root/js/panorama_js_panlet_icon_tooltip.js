@@ -472,7 +472,7 @@ TP.renderTipDetails = function(data) {
     TP.iconTip.detailsTarget.doLayout();
     TP.suppressIconTipForce = false;
     if(panel.xdata.popup && panel.xdata.popup.popup_position == "relative position") {
-        TP.iconTip.setFixedOffsetPosition(img, panel.xdata.popup.popup_x, panel.xdata.popup.popup_y);
+        TP.iconTip.setFixedOffsetPosition(TP.iconTipTarget, panel.xdata.popup.popup_x, panel.xdata.popup.popup_y);
     }
     else if(panel.xdata.popup && panel.xdata.popup.popup_position == "absolute position") {
         TP.iconTip.setFixedPosition(panel.xdata.popup.popup_x, panel.xdata.popup.popup_y);
