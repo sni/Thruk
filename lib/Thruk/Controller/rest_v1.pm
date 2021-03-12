@@ -1377,7 +1377,13 @@ sub _rest_get_thruk_config {
     my $data = {};
     for my $key (keys %{$c->config}) {
         next if $key eq 'secret_key';
-        $data->{$key} = $c->config->{$key};
+        if($key eq 'logcache') {
+            my $val = $c->config->{$key};
+            $val =~ s|//.*?@|//...:...@|gmx;
+            $data->{$key} = $val;
+        } else {
+            $data->{$key} = $c->config->{$key};
+        }
     }
     return($data);
 }
