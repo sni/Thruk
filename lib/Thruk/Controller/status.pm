@@ -185,6 +185,7 @@ sub _process_raw_request {
             if($prefix eq 'hg:') { $type = "hostgroup"; }
             if($prefix eq 'sg:') { $type = "servicegroup"; }
         }
+        if($filter eq '*') { $filter = ""; }
     }
 
     my $json;
