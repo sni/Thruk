@@ -317,6 +317,22 @@ sub do_filter {
 
     $prefix = 'dfl_' unless defined $prefix;
 
+    # rewrite prefix
+    if(!$params->{$prefix.'s0_type'}) {
+        for my $prfx ($prefix, qw/dfl_ ovr_ grd_ svc_ hst_/) {
+            if(exists $params->{$prfx.'s0_type'}) {
+                if($prefix ne $prfx) {
+                    for my $key (sort keys %{$params}) {
+                        my $newkey = $key;
+                        $newkey =~ s/^$prfx/$prefix/gmx;
+                        $params->{$newkey} = delete $params->{$key};
+                    }
+                }
+                last;
+            }
+        }
+    }
+
     unless ( exists $params->{$prefix.'s0_hoststatustypes'}
           or exists $params->{$prefix.'s0_type'}
           or exists $params->{'s0_hoststatustypes'}
@@ -552,7 +568,7 @@ sub do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq '')) {
+    if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grp_' or $prefix eq '')) {
         Thruk::Utils::Status::fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 

@@ -7,6 +7,7 @@ next:
           - fix managing public bookmarks (#1065)
           - fix unhandled problems link on tactical overview (#1058)
           - fix sending many commands at once
+          - fix switching between search views
           - Panorama:
             - update icons in bulk of size 50 instead of all at once
           - Logcache:
