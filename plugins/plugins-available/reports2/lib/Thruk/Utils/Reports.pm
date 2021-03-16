@@ -894,6 +894,21 @@ sub get_report_data_from_param {
         $p->{$1} = $params->{$key};
     }
 
+    for my $key (keys %{$params}) {
+        # complex filter
+        if($key =~ m/^filter\.(.*)$/mx) {
+            my $name    = $1;
+            my $prefix  = $params->{$key};
+            $p->{$name} = {};
+            for my $k (keys %{$params}) {
+                if($k =~ m/^$prefix(.*$)/mx) {
+                    my $fk = $1;
+                    $p->{$name}->{'dfl_'.$fk} = $params->{$k};
+                }
+            }
+        }
+    }
+
     # optional variables
     for my $key (keys %{$params}) {
         next unless $key =~ m/^optional\.([\w\.]+)$/mx;
@@ -1738,9 +1753,7 @@ sub _initialize_report_templates {
     $c->stash->{'param'}              = $options->{'params'};
     $c->stash->{'r'}                  = $options;
     $c->stash->{'show_empty_outages'} = 1;
-    for my $p (keys %{$options->{'params'}}) {
-        $c->req->parameters->{$p} = $options->{'params'}->{$p};
-    }
+    apply_report_parameters($c, $c->req->parameters, $options->{'params'});
 
     # set some render helper
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
@@ -1826,6 +1839,30 @@ sub _report_die {
         return;
     }
     return $c->detach('/error/index/13');
+}
+
+##########################################################
+sub apply_report_parameters {
+    my($c, $to, $from) = @_;
+
+    for my $p (keys %{$from}) {
+        if($p eq 'filter') {
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, $from->{$p});
+            if($from->{'filter_type'} eq 'Both' || $from->{'filter_type'} eq 'Services') {
+                $to->{'s_filter'} = $servicefilter;
+            }
+            if($from->{'filter_type'} eq 'Both' || $from->{'filter_type'} eq 'Hosts') {
+                $to->{'h_filter'} = $hostfilter;
+            }
+            if($from->{'filter_type'} eq 'Both') {
+                $to->{'include_services_hosts'} = 1;
+            }
+        } else {
+            $to->{$p} = $from->{$p};
+        }
+    }
+
+    return($to);
 }
 
 ##########################################################
