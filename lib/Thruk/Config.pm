@@ -818,6 +818,7 @@ sub get_toolkit_config {
                     'get_action_url'                => \&Thruk::Utils::get_action_url,
                     'reduce_number'                 => \&Thruk::Utils::reduce_number,
                     'get_custom_vars'               => \&Thruk::Utils::get_custom_vars,
+                    'get_searches'                  => \&Thruk::Utils::Status::get_searches,
         },
     };
 

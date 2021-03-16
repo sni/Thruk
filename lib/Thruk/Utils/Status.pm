@@ -342,7 +342,7 @@ sub do_filter {
 
         # classic search
         my $search;
-        ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($c, $params);
+        ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = classic_filter($c, $params);
 
         # convert that into a new search
         push @{$searches}, $search;
@@ -355,13 +355,13 @@ sub do_filter {
         }
 
         # complex filter search?
-        push @{$searches}, Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s0', 1 );
+        push @{$searches}, get_search_from_param( $c, $prefix.'s0', 1, $params );
         for my $x (@{_get_search_ids($c, $params, $prefix, $c->config->{'maximum_search_boxes'})}) {
             next if $x == 0; # already added
-            my $search = Thruk::Utils::Status::get_search_from_param( $c, $prefix.'s' . $x );
+            my $search = get_search_from_param( $c, $prefix.'s' . $x, $params );
             push @{$searches}, $search if defined $search;
         }
-        ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_search( $c, $searches, $prefix );
+        ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = do_search( $c, $searches, $prefix );
     }
 
     $prefix = 'dfl_' unless $prefix ne '';
@@ -372,7 +372,22 @@ sub do_filter {
         $c->stash->{'show_filter_table'} = 1;
     }
 
-    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'});
+    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
+}
+
+##############################################
+
+=head2 get_searches
+
+  get_searches($prefix, $params)
+
+returns filter from request parameter
+
+=cut
+sub get_searches {
+    my($c, $prefix, $params) = @_;
+    my(undef, undef, undef, undef, undef, $searches) = do_filter($c, $prefix, $params);
+    return($searches);
 }
 
 ##############################################
@@ -395,6 +410,8 @@ sub reset_filter {
         delete $params->{$key} if $key =~ m/^dfl_/mx;
         delete $params->{$key} if $key =~ m/^svc_/mx;
         delete $params->{$key} if $key =~ m/^hst_/mx;
+        delete $params->{$key} if $key =~ m/^ovr_/mx;
+        delete $params->{$key} if $key =~ m/^grd_/mx;
     }
     return;
 }
@@ -466,7 +483,7 @@ sub classic_filter {
 
     # fill the host/service totals box
     unless($errors or $c->stash->{'minimal'}) {
-        Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->stash;
+        fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->stash;
     }
 
     # then add some more filter based on get parameter
@@ -478,7 +495,7 @@ sub classic_filter {
     my( $host_statustype_filtername,  $host_prop_filtername,  $service_statustype_filtername,  $service_prop_filtername );
     my( $host_statustype_filtervalue, $host_prop_filtervalue, $service_statustype_filtervalue, $service_prop_filtervalue );
     ( $hostfilter, $servicefilter, $host_statustype_filtername, $host_prop_filtername, $service_statustype_filtername, $service_prop_filtername, $host_statustype_filtervalue, $host_prop_filtervalue, $service_statustype_filtervalue, $service_prop_filtervalue )
-        = Thruk::Utils::Status::extend_filter( $c, $hostfilter, $servicefilter, $hoststatustypes, $hostprops, $servicestatustypes, $serviceprops );
+        = extend_filter( $c, $hostfilter, $servicefilter, $hoststatustypes, $hostprops, $servicestatustypes, $serviceprops );
 
     # create a new style search hash
     my $search = {
@@ -550,7 +567,7 @@ sub do_search {
     my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
 
     for my $search ( @{$searches} ) {
-        my($tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter) = Thruk::Utils::Status::single_search($c, $search);
+        my($tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter) = single_search($c, $search);
         push @hostfilter,          $tmp_hostfilter          if defined $tmp_hostfilter;
         push @servicefilter,       $tmp_servicefilter       if defined $tmp_servicefilter;
         push @hostgroupfilter,     $tmp_hostgroupfilter     if defined $tmp_hostgroupfilter;
@@ -569,7 +586,7 @@ sub do_search {
 
     # fill the host/service totals box
     if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {
-        Thruk::Utils::Status::fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
+        fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
     # if there is only one search with a single text filter
@@ -688,7 +705,7 @@ sub fill_totals_box {
     $c->stash->{'service_stats'} = $service_stats;
 
     # set audio file to play
-    Thruk::Utils::Status::set_audio_file($c);
+    set_audio_file($c);
 
     return 1;
 }
@@ -726,27 +743,27 @@ sub extend_filter {
     # host statustype filter (up,down,...)
     my( $host_statustype_filtername, $host_statustype_filter, $host_statustype_filter_service );
     ( $hoststatustypes, $host_statustype_filtername, $host_statustype_filter, $host_statustype_filter_service )
-        = Thruk::Utils::Status::get_host_statustype_filter($hoststatustypes);
+        = get_host_statustype_filter($hoststatustypes);
     push @hostfilter,    $host_statustype_filter         if defined $host_statustype_filter;
     push @servicefilter, $host_statustype_filter_service if defined $host_statustype_filter_service;
 
     # host props filter (downtime, acknowledged...)
     my( $host_prop_filtername, $host_prop_filter, $host_prop_filter_service );
     ( $hostprops, $host_prop_filtername, $host_prop_filter, $host_prop_filter_service )
-        = Thruk::Utils::Status::get_host_prop_filter($hostprops);
+        = get_host_prop_filter($hostprops);
     push @hostfilter,    $host_prop_filter         if defined $host_prop_filter;
     push @servicefilter, $host_prop_filter_service if defined $host_prop_filter_service;
 
     # service statustype filter (ok,warning,...)
     my( $service_statustype_filtername, $service_statustype_filter_service );
     ( $servicestatustypes, $service_statustype_filtername, $service_statustype_filter_service )
-        = Thruk::Utils::Status::get_service_statustype_filter($servicestatustypes, $c);
+        = get_service_statustype_filter($servicestatustypes, $c);
     push @servicefilter, $service_statustype_filter_service if defined $service_statustype_filter_service;
 
     # service props filter (downtime, acknowledged...)
     my( $service_prop_filtername, $service_prop_filter_service );
     ( $serviceprops, $service_prop_filtername, $service_prop_filter_service )
-        = Thruk::Utils::Status::get_service_prop_filter($serviceprops, $c);
+        = get_service_prop_filter($serviceprops, $c);
     push @servicefilter, $service_prop_filter_service if defined $service_prop_filter_service;
 
     $hostfilter    = Thruk::Utils::combine_filter( '-and', \@hostfilter );
@@ -772,7 +789,7 @@ sub single_search {
     my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
 
     my( $tmp_hostfilter, $tmp_servicefilter, $host_statustype_filtername, $host_prop_filtername, $service_statustype_filtername, $service_prop_filtername, $host_statustype_filtervalue, $host_prop_filtervalue, $service_statustype_filtervalue, $service_prop_filtervalue )
-        = Thruk::Utils::Status::extend_filter( $c, undef, undef, $search->{'hoststatustypes'}, $search->{'hostprops'}, $search->{'servicestatustypes'}, $search->{'serviceprops'} );
+        = extend_filter( $c, undef, undef, $search->{'hoststatustypes'}, $search->{'hostprops'}, $search->{'servicestatustypes'}, $search->{'serviceprops'} );
 
     $search->{'host_statustype_filtername'}    = $host_statustype_filtername;
     $search->{'host_prop_filtername'}          = $host_prop_filtername;
@@ -923,7 +940,7 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
             if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
-                my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'hostgroup');
+                my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'hostgroup');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
@@ -938,7 +955,7 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'servicegroup' ) {
             if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
-                my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'servicegroup');
+                my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'servicegroup');
                 push @servicefilter,       $sfilter;
                 push @servicetotalsfilter, $sfilter;
             } else {
@@ -950,7 +967,7 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
             if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
-                my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'contacts');
+                my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'contacts');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
@@ -1083,7 +1100,7 @@ sub single_search {
         # Filter on the downtime duration
         elsif ( $filter->{'type'} eq 'downtime duration' ) {
             $value                 = Thruk::Utils::expand_duration($value);
-            my($hfilter, $sfilter) = Thruk::Utils::Status::get_downtimes_filter($c, $op, $value);
+            my($hfilter, $sfilter) = get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
