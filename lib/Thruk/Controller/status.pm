@@ -443,8 +443,7 @@ sub _process_details_page {
     $c->stash->{'has_user_columns'}->{'dfl_'} = $user_data->{'columns'}->{'svc'} ? 1 : 0;
 
     # which host to display?
-    #my( $hostfilter, $servicefilter, $groupfilter )...
-    my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
 
     if($c->req->parameters->{'q'}) {
@@ -590,8 +589,7 @@ sub _process_hostdetails_page {
     $c->stash->{'has_user_columns'}->{'dfl_'} = $user_data->{'columns'}->{'hst'} ? 1 : 0;
 
     # which host to display?
-    #my( $hostfilter, $servicefilter, $groupfilter )...
-    my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
 
     # do the sort
@@ -686,7 +684,7 @@ sub _process_overview_page {
     $c->stash->{'columns'} = $c->req->parameters->{'columns'} || 3;
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c, 'ovr_');
+    my($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_filter($c, 'ovr_');
     return 1 if $c->stash->{'has_error'};
 
     die("no substyle!") unless defined $c->stash->{substyle};
@@ -836,7 +834,7 @@ sub _process_grid_page {
     $c->stash->{'paneprefix'} = 'grd_';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c, "grd_");
+    my($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_filter($c, "grd_");
     return 1 if $c->stash->{'has_error'};
 
     my($host_data, $services_data) = _fill_host_services_hashes($c,
@@ -951,7 +949,7 @@ sub _process_summary_page {
     die("no substyle!") unless defined $c->stash->{substyle};
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
 
     # get all host/service groups
@@ -1067,8 +1065,8 @@ sub _process_combined_page {
     $c->stash->{'has_user_columns'}->{'svc_'} = $user_data->{'columns'}->{'svc'} ? 1 : 0;
 
     # which host to display?
-    my( $hostfilter)           = Thruk::Utils::Status::do_filter($c, 'hst_');
-    my( undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
+    my($hostfilter)           = Thruk::Utils::Status::do_filter($c, 'hst_');
+    my(undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
     return 1 if $c->stash->{'has_error'};
 
     # services
@@ -1203,8 +1201,7 @@ sub _process_perfmap_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     # which host to display?
-    #my( $hostfilter, $servicefilter, $groupfilter )...
-    my( undef, $servicefilter, undef ) = Thruk::Utils::Status::do_filter($c);
+    my(undef, $servicefilter) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
 
     # do the sort
