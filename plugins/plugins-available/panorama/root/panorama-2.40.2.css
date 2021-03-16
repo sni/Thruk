@@ -191,8 +191,9 @@ TD.slider_txt {
 DIV.x-boundlist-selected {
   background: none;
 }
-LI.x-boundlist-selected {
-  background: none;
+
+.x-boundlist-item {
+  white-space: nowrap;
 }
 
 /* type of refresh tool, when connection is broken */
