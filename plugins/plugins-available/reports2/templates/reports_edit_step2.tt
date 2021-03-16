@@ -219,7 +219,7 @@
   [% ELSIF type == 'radio' %]
       [% FOR v = fh.extra %]
         <input type="radio" id="[% v | html %]" name="params.[% key %]" value="[% v | html %]"[% IF v == value %] checked[% END %]>
-        <label for="[% v | html %]">[% v %]</label>
+        <label for="[% v | html %]">[% v | html %]</label>
       [% END %]
   [% ELSIF type == 'themes' %]
     <select name='params.[% key %]'>

@@ -1842,6 +1842,16 @@ sub _report_die {
 }
 
 ##########################################################
+
+=head2 apply_report_parameters
+
+  apply_report_parameters($c, $to, $from)
+
+set report parameters into target hash
+
+returns target hash
+
+=cut
 sub apply_report_parameters {
     my($c, $to, $from) = @_;
 
