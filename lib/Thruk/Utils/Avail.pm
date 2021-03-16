@@ -224,11 +224,11 @@ sub calculate_availability {
 
     # services
     $c->stash->{'services'} = {};
-    if(defined $service || $c->req->parameters->{s_filter}) {
+    if(defined $service || exists $c->req->parameters->{s_filter}) {
         my $all_services;
         my @servicefilter;
         my @hostfilter;
-        if($c->req->parameters->{s_filter}) {
+        if(exists $c->req->parameters->{s_filter}) {
             $servicefilter = $c->req->parameters->{s_filter};
             $service       = 1;
         }
@@ -279,7 +279,7 @@ sub calculate_availability {
             for my $host (@{$tmphosts}) {
                 $tmp{$host->{'host_name'}} = 1;
             }
-            for my $host (keys %tmp) {
+            for my $host (sort keys %tmp) {
                 push @hostfilter, { 'host_name' => $host };
             }
         }
@@ -287,10 +287,10 @@ sub calculate_availability {
     }
 
     # single/multiple hosts
-    elsif((defined $host and $host ne 'all') || $c->req->parameters->{h_filter}) {
+    elsif((defined $host and $host ne 'all') || exists $c->req->parameters->{h_filter}) {
         my @servicefilter;
         my @hostfilter;
-        if($c->req->parameters->{h_filter}) {
+        if(exists $c->req->parameters->{h_filter}) {
             $hostfilter = $c->req->parameters->{h_filter};
         }
         else {
