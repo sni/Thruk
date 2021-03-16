@@ -773,6 +773,23 @@ returns a list of contactgroups
 sub get_contactgroups {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "contactgroups");
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    }
+
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
+        ($size, $limit) = $self->_get_query_size('contactgroups', \%options, 'name', 'name');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
+    }
+
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members
@@ -781,7 +798,19 @@ sub get_contactgroups {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
-    return $self->_get_table('contactgroups', \%options);
+
+    # get result
+    my $data = $self->_get_table('contactgroups', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
+    unless(wantarray) {
+        confess("get_contactgroups() should not be called in scalar context");
+    }
+    return($data, undef, $size);
 }
 
 ##########################################################
@@ -933,13 +962,42 @@ returns a list of contacts
 sub get_contacts {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "contacts");
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    }
+
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
+        ($size, $limit) = $self->_get_query_size('contacts', \%options, 'name', 'name');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
+    }
+
     unless(defined $options{'columns'}) {
         $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_contact_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
-    return $self->_get_table('contacts', \%options);
+
+    # get result
+    my $data = $self->_get_table('contacts', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
+    unless(wantarray) {
+        confess("get_contacts() should not be called in scalar context");
+    }
+    return($data, undef, $size);
 }
 
 ##########################################################

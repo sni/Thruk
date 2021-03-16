@@ -191,14 +191,14 @@ sub _process_raw_request {
     my $json;
     if($type eq 'contact' || $type eq 'contacts') {
         my $data = [];
-        my $size = 1;
+        my $size = 0;
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             $data = ["you are not authorized for configuration information"];
         } else {
             ($data, $size) = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
         }
         if($c->req->parameters->{'wildcards'}) {
-            unshift @{$data}, '*';
+            unshift @{$data}, { name => '*', alias => '*' };
             $size++;
         }
         push @{$json}, { 'name' => "contacts", 'data' => $data, 'total' => $size };
