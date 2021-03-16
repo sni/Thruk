@@ -648,7 +648,9 @@ Ext.define('Ext.ux.SearchCombobox', {
                 var index = me.up().items.findIndex("name", "type");
                 if(index >= 0) {
                     var typeInput = me.up().items.getAt(index);
-                    type = typeInput.getValue().toLowerCase();
+                    if(typeInput && typeInput.getValue()) {
+                        type = typeInput.getValue().toLowerCase();
+                    }
                 }
                 if(type == "custom variable") { type = "custom value"; }
 
