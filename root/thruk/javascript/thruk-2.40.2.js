@@ -5814,9 +5814,13 @@ function new_filter(cloneObj, parentObj, btnId) {
 
   // hide the original button
   hideElement(pane_prefix + btnId);
+
   var hideBtn = document.getElementById(pane_prefix+new_prefix + 'filter_button_mini');
   if(hideBtn) { hideElement( hideBtn); }
-  hideElement(pane_prefix + new_prefix + 'btn_accept_search');
+
+  var acceptBtn = document.getElementById(pane_prefix + new_prefix + 'btn_accept_search');
+  if(acceptBtn) { hideElement(acceptBtn); }
+
   if(document.getElementById(pane_prefix + new_prefix + 'btn_columns')) {
     hideElement(pane_prefix + new_prefix + 'btn_columns');
   }
