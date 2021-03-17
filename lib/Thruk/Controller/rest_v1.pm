@@ -1528,7 +1528,7 @@ sub _get_userdata {
     my($c, $name) = @_;
     my $profile;
     if($name) {
-        $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+        $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c, 1);
     } else {
         $profile = $c->user;
         $name    = $c->user->{'username'};
