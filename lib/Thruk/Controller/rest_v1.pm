@@ -1507,6 +1507,7 @@ sub _rest_get_thruk_users {
         next if(defined $id && $id ne $name);
         my $userdata = _get_userdata($c, $name);
         $total_locked++ if $userdata->{'locked'} == Cpanel::JSON::XS::true;
+        $total_number++;
         push @{$data}, $userdata;
     }
     if($id) {
