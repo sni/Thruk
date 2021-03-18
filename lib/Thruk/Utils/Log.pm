@@ -492,7 +492,7 @@ sub _striped_caller_information {
 sub _color_by_level {
     my($layout, $message, $category, $priority) = @_;
     return("") if $ENV{'THRUK_NO_COLOR'};
-    if($priority eq 'DEBUG') { return(Term::ANSIColor::color("GREY14")); }
+    if($priority eq 'DEBUG') { return(Term::ANSIColor::colorvalid("GREY14") ? Term::ANSIColor::color("GREY14") : Term::ANSIColor::color("FAINT") ); }
     if($priority eq 'ERROR') { return(Term::ANSIColor::color("BRIGHT_RED")); }
     if($priority eq 'WARN')  { return(Term::ANSIColor::color("BRIGHT_YELLOW")); }
     return("");
