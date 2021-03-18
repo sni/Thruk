@@ -194,8 +194,8 @@ TestUtils::test_command({
 
 # verbose output
 TestUtils::test_command({
-    cmd    => $BIN.' selfcheck filesystem -vv 2>&1',
-    like   => ['/Filesystem:/', 'screen logging initialized with loglevel 2'],
+    cmd    => $BIN.' selfcheck filesystem -vv',
+    errlike => ['/Filesystem:/', '/screen logging initialized with loglevel 2/'],
 });
 
 # panorama cleanup
