@@ -221,7 +221,7 @@
   <th align="right" valign="top">Filter</th>
   <td align="left">
     <table id="dfl_s0_filterTable" style="width: 320px;">
-    [% PROCESS _status_filter_single.tt paneprefix="dfl_" prefix="s0" %]
+    [% PROCESS _status_filter_single.tt paneprefix="dfl_" prefix="s0" onchange="" %]
     </table>
   </td>
 </tr>

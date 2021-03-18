@@ -50,7 +50,7 @@
 
     [% IF total_services > 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
-        [% PROCESS 'reports/comp/sla_total_graph_outage.tt' type='service' %]
+        [% PROCESS 'reports/comp/sla_total_graph.tt' type='service' %]
       [% END %]
     [% END %]
 

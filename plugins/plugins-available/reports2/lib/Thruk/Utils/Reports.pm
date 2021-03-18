@@ -1858,14 +1858,15 @@ sub apply_report_parameters {
     for my $p (keys %{$from}) {
         if($p eq 'filter') {
             my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, $from->{$p});
-            if($from->{'filter_type'} eq 'Both' || $from->{'filter_type'} eq 'Services') {
+            if($from->{'filter_type'} eq 'Both') {
+                $to->{'s_filter'} = $servicefilter;
+                $to->{'include_host_services'} = 1;
+            }
+            elsif($from->{'filter_type'} eq 'Services') {
                 $to->{'s_filter'} = $servicefilter;
             }
-            if($from->{'filter_type'} eq 'Both' || $from->{'filter_type'} eq 'Hosts') {
+            elsif($from->{'filter_type'} eq 'Hosts') {
                 $to->{'h_filter'} = $hostfilter;
-            }
-            if($from->{'filter_type'} eq 'Both') {
-                $to->{'include_services_hosts'} = 1;
             }
         } else {
             $to->{$p} = $from->{$p};

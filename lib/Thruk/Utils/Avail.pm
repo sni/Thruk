@@ -224,10 +224,21 @@ sub calculate_availability {
             push @hostfilter, { 'host_name' => $host };
         }
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+
+        if($params->{'include_host_services'}) {
+            for my $host (sort keys %{$services_data}) {
+                push @{$hosts}, $host;
+                if($initialassumedhoststate == -1) {
+                    # get host data from first service
+                    my $names = [sort keys %{$services_data->{$host}}];
+                    my $hst = $services_data->{$host}->{$names->[0]};
+                    $initial_states->{'hosts'}->{$host} = $hst->{'host_state'};
+                }
+            }
+        }
     }
 
-    if(exists $params->{h_filter}) {
-        my @servicefilter;
+    elsif(exists $params->{h_filter}) {
         my @hostfilter;
         $hostfilter = $params->{h_filter};
 
@@ -246,8 +257,6 @@ sub calculate_availability {
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
     }
 
-    if(exists $params->{h_filter} || exists $params->{s_filter}) {
-    }
     elsif(defined $service) {
         my $all_services;
         my @servicefilter;
@@ -533,7 +542,7 @@ sub calculate_availability {
     ########################
     # fetch logs
     my(@loghostfilter,@logservicefilter);
-    unless($service) {
+    if(!$service || $params->{'include_host_services'}) {
         push @loghostfilter, [ { type => 'HOST ALERT' }, $softlogfilter ];
         push @loghostfilter, [ { type => 'INITIAL HOST STATE' } , $softlogfilter ];
         push @loghostfilter, [ { type => 'CURRENT HOST STATE' }, $softlogfilter ];
@@ -937,11 +946,10 @@ sub outages {
             next if  $l->{'host'} ne $host;
             next if !$l->{'service'};
         } else {
+            next if(defined $l->{'host'} && $l->{'host'}    ne $host);
             if($service) {
-                next if(defined $l->{'service'} and $l->{'service'} ne $service);
-                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
-            } else {
-                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+                next if(defined $l->{'service'} &&  $l->{'service'} ne $service);
+                next if(defined $l->{'host'}    && !$l->{'service'});
             }
         }
 

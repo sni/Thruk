@@ -12,6 +12,8 @@ next:
             - update icons in bulk of size 50 instead of all at once
           - Logcache:
             - add logcache_worker options
+          - Reporting:
+            - add custom filter sla/outage reports
 
 2.40-2   Mon Dec 14 11:10:41 CET 2020
           - Config Tool:

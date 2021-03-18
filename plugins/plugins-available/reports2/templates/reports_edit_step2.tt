@@ -218,7 +218,7 @@
     </table>
   [% ELSIF type == 'radio' %]
       [% FOR v = fh.extra %]
-        <input type="radio" id="[% v | html %]" name="params.[% key %]" value="[% v | html %]"[% IF v == value %] checked[% END %]>
+        <input type="radio" id="[% v | html %]" name="params.[% key %]" value="[% v | html %]"[% IF v == value %] checked[% END %] onchange="reports_update_affected_sla_objects(this)">
         <label for="[% v | html %]">[% v | html %]</label>
       [% END %]
   [% ELSIF type == 'themes' %]
@@ -313,12 +313,12 @@
         <table border="1" class='filter filter_box' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
           <tr>
             <td class='filter' style="position: relative;">
-              <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %]; position: absolute; right: 5px; top: 5px;" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)" alt="remove">
+              <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %]; position: absolute; right: 5px; top: 5px;" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id);reports_update_affected_sla_objects(this);" alt="remove">
               <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable" width="100%">
-                [% PROCESS _status_filter_single.tt %]
+                [% PROCESS _status_filter_single.tt onchange="reports_update_affected_sla_objects(this);" %]
               </table>
             </td>
-            <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
+            <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id);reports_update_affected_sla_objects(this);" id="[% paneprefix %][% prefix %]_new_filter">
               <img src="[% url_prefix %]themes/[% theme %]/images/right.png" alt="add new filter"><br>
               or
             </td>
