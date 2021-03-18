@@ -200,15 +200,59 @@ sub calculate_availability {
 
     # services
     $c->stash->{'services'} = {};
-    if(defined $service || exists $params->{s_filter}) {
+    if(exists $params->{s_filter}) {
+        my $all_services;
+        $servicefilter = $params->{s_filter};
+        $service       = 1;
+        $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        die('no such service: '.($service||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ])) unless scalar @{$all_services} > 0;
+        my $services_data;
+        for my $service (@{$all_services}) {
+            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+            push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+            if($initialassumedservicestate == -1) {
+                $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
+            }
+        }
+        if(scalar keys %{$services_data} == 0) {
+            return $c->detach('/error/index/15');
+        }
+        $c->stash->{'services'} = $services_data;
+
+        my @hostfilter;
+        for my $host (sort keys %{$services_data}) {
+            push @hostfilter, { 'host_name' => $host };
+        }
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+    }
+
+    if(exists $params->{h_filter}) {
+        my @servicefilter;
+        my @hostfilter;
+        $hostfilter = $params->{h_filter};
+
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+        die('no such host: '.($host||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ])) unless scalar @{$host_data} > 0;
+        if($initialassumedhoststate == -1) {
+            for my $host (@{$host_data}) {
+                $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
+            }
+        }
+        for my $host (@{$host_data}) {
+            push @{$hosts}, $host->{'name'};
+            push @hostfilter, { 'host_name' => $host->{'name'} };
+        }
+        $c->stash->{'hosts'} = Thruk::Utils::array2hash($host_data, 'name');
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+    }
+
+    if(exists $params->{h_filter} || exists $params->{s_filter}) {
+    }
+    elsif(defined $service) {
         my $all_services;
         my @servicefilter;
         my @hostfilter;
-        if(exists $params->{s_filter}) {
-            $servicefilter = $params->{s_filter};
-            $service       = 1;
-        }
-        elsif($service ne 'all') {
+        if($service ne 'all') {
             $host = '*' if $host =~ m/^\s*$/mx;
             for my $h (split(/\s*,\s*/mx, $host)) {
                 if($h =~ m/\*/mx) {
@@ -263,42 +307,37 @@ sub calculate_availability {
     }
 
     # single/multiple hosts
-    elsif((defined $host and $host ne 'all') || exists $params->{h_filter}) {
+    elsif(defined $host and $host ne 'all') {
         my @servicefilter;
         my @hostfilter;
-        if(exists $params->{h_filter}) {
-            $hostfilter = $params->{h_filter};
-        }
-        else {
-            for my $h (split(/\s*,\s*/mx, $host)) {
-                if($h =~ m/\*/mx) {
-                    $h   =~ s/\.\*/\*/gmx;
-                    $h   =~ s/\*/.*/gmx;
-                    push @hostfilter,    { 'name'      => { '~~' => $h }};
-                    push @servicefilter, { 'host_name' => { '~~' => $h }};
-                } else {
-                    push @hostfilter,    { 'name'      => $h };
-                    push @servicefilter, { 'host_name' => $h };
-                }
+        for my $h (split(/\s*,\s*/mx, $host)) {
+            if($h =~ m/\*/mx) {
+                $h   =~ s/\.\*/\*/gmx;
+                $h   =~ s/\*/.*/gmx;
+                push @hostfilter,    { 'name'      => { '~~' => $h }};
+                push @servicefilter, { 'host_name' => { '~~' => $h }};
+            } else {
+                push @hostfilter,    { 'name'      => $h };
+                push @servicefilter, { 'host_name' => $h };
             }
-            if($params->{'include_host_services'}) {
-                # host availability page includes services too, so
-                # calculate service availability for services on these hosts too
-                my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
-                for my $service (@{$service_data}) {
-                    $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
-                    push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
-                }
+        }
+        if($params->{'include_host_services'}) {
+            # host availability page includes services too, so
+            # calculate service availability for services on these hosts too
+            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+            for my $service (@{$service_data}) {
+                $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+                push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+            }
 
-                if($initialassumedservicestate == -1) {
-                    for my $service (@{$service_data}) {
-                        $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
-                    }
+            if($initialassumedservicestate == -1) {
+                for my $service (@{$service_data}) {
+                    $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
                 }
             }
-            $hostfilter        = Thruk::Utils::combine_filter('-or', \@hostfilter);
-            $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
         }
+        $hostfilter        = Thruk::Utils::combine_filter('-or', \@hostfilter);
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
 
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         die('no such host: '.($host||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ])) unless scalar @{$host_data} > 0;

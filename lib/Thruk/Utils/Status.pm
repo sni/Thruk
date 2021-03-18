@@ -358,7 +358,7 @@ sub do_filter {
         push @{$searches}, get_search_from_param( $c, $prefix.'s0', 1, $params );
         for my $x (@{_get_search_ids($c, $params, $prefix, $c->config->{'maximum_search_boxes'})}) {
             next if $x == 0; # already added
-            my $search = get_search_from_param( $c, $prefix.'s' . $x, $params );
+            my $search = get_search_from_param( $c, $prefix.'s' . $x, undef, $params );
             push @{$searches}, $search if defined $search;
         }
         ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = do_search( $c, $searches, $prefix );
