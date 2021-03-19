@@ -345,7 +345,7 @@ sub calculate {
 
     # if we have more than one host or service, we dont build up a log
     $self->{'report_options'}->{'build_log'} = TRUE;
-    if(scalar @{$self->{'report_options'}->{'hosts'}} == 1) {
+    if(scalar @{$self->{'report_options'}->{'hosts'}} == 1 && scalar @{$self->{'report_options'}->{'services'}} == 0) {
         $self->{'report_options'}->{'build_log'} = HOST_ONLY;
     }
     elsif(scalar @{$self->{'report_options'}->{'services'}} == 1) {

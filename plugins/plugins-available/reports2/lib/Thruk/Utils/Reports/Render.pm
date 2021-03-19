@@ -173,16 +173,15 @@ sub outages {
 
     my $c                  = $Thruk::Request::c or die("not initialized!");
     my $u                  = $c->stash->{'unavailable_states'};
-    my $host               = $hst // $c->req->parameters->{'host'};
-    my $service            = $svc // $c->req->parameters->{'service'};
     my $only_host_services = $c->req->parameters->{'only_host_services'};
+    confess("got no host") unless $hst;
 
-    my $outages = Thruk::Utils::Avail::outages($logs, $u, $start, $end, $host, $service, $only_host_services);
+    my $outages = Thruk::Utils::Avail::outages($logs, $u, $start, $end, $hst, $svc, $only_host_services);
     if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
-        if($service eq '') {
-            $c->stash->{'last_outages'}->{'hosts'}->{$host} = $outages;
+        if($svc eq '') {
+            $c->stash->{'last_outages'}->{'hosts'}->{$hst} = $outages;
         } else {
-            $c->stash->{'last_outages'}->{'services'}->{$host}->{$service} = $outages;
+            $c->stash->{'last_outages'}->{'services'}->{$hst}->{$svc} = $outages;
         }
     }
     return($outages);
@@ -491,18 +490,16 @@ sub get_availability_percents {
     my($hst, $svc) = @_;
     my $c = $Thruk::Request::c or die("not initialized!");
 
-    my $host               = $hst // $c->req->parameters->{'host'};
-    my $service            = $svc // $c->req->parameters->{'service'};
     my $avail_data         = $c->stash->{'avail_data'};
     my $unavailable_states = $c->stash->{'unavailable_states'};
-    confess("No host in parameters:\n".Dumper($c->req->parameters)) unless defined $host;
+    confess("no host") unless defined $hst;
 
-    my $availability = Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service);
+    my $availability = Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $hst, $svc);
     if($c->req->parameters->{'attach_json'} && lc($c->req->parameters->{'attach_json'}) ne 'no') {
-        if($service eq '') {
-            $c->stash->{'last_availability'}->{'hosts'}->{$host} = $availability;
+        if($svc eq '') {
+            $c->stash->{'last_availability'}->{'hosts'}->{$hst} = $availability;
         } else {
-            $c->stash->{'last_availability'}->{'services'}->{$host}->{$service} = $availability;
+            $c->stash->{'last_availability'}->{'services'}->{$hst}->{$svc} = $availability;
         }
     }
     return($availability);

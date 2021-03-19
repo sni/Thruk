@@ -594,6 +594,7 @@ plugins/plugins-available/reports2/templates/reports/comp/page_cover.tt
 plugins/plugins-available/reports2/templates/reports/comp/page_standard.tt
 plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt
 plugins/plugins-available/reports2/templates/reports/comp/report.tt
+plugins/plugins-available/reports2/templates/reports/comp/sla_details.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_by_time.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_fixed.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_page.tt
@@ -618,6 +619,7 @@ plugins/plugins-available/reports2/templates/reports/sla_host.tt
 plugins/plugins-available/reports2/templates/reports/sla_host_outage.tt
 plugins/plugins-available/reports2/templates/reports/sla_hostgroup.tt
 plugins/plugins-available/reports2/templates/reports/sla_outage.tt
+plugins/plugins-available/reports2/templates/reports/sla_report.tt
 plugins/plugins-available/reports2/templates/reports/sla_service.tt
 plugins/plugins-available/reports2/templates/reports/sla_service_outage.tt
 plugins/plugins-available/reports2/templates/reports/sla_servicegroup.tt
