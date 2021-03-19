@@ -394,7 +394,7 @@ sub _logcache_checks  {
             $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, ($s->{'cache_version'}//0), $Thruk::Backend::Provider::Mysql::cache_version);
             $errors++;
         }
-        if($s->{'last_update'} < time() - 1800) {
+        if($s->{'last_update'} && $s->{'last_update'} < time() - 1800) {
             $details .= sprintf("  - [logcache %s] last update too old: %s (hint: check logcache update cronjob)\n", $s->{'name'}, scalar localtime $s->{'last_update'});
             $errors++;
         }
