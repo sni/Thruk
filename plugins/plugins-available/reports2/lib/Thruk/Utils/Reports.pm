@@ -1105,10 +1105,12 @@ sub get_report_templates {
             my $name;
             my $path = $file;
             ($file, $name) = _get_report_tt_name($file);
+            my $deprecated = Thruk::Utils::get_template_variable($c, 'reports/'.$file, 'deprecated', { block => 'edit' }, 1);
             $templates->{$file} = {
-                file => $file,
-                name => $name,
-                path => $path,
+                file        => $file,
+                name        => $name,
+                path        => $path,
+                deprecated  => $deprecated || 0,
             };
         }
     }
@@ -1295,7 +1297,7 @@ sub store_report_data {
     if(!$report->{'user'}) {
         confess("tried to save report without user");
     }
-    if($report->{'desc'} eq 'Description' && $report->{'name'} eq 'New Report' && !$report->{'params'}->{'timeperiod'} && $report->{'template'} eq 'sla_host.tt') {
+    if($report->{'desc'} eq 'Description' && $report->{'name'} eq 'New Report' && !$report->{'params'}->{'timeperiod'} && $report->{'template'} eq 'sla_report.tt') {
         confess("tried to save empty report");
     }
 
@@ -1348,12 +1350,12 @@ sub read_report_file {
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
     if($report->{'template'} && !defined $available_templates->{$report->{'template'}}) {
         my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
-        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
         $needs_save = 1;
         Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }
     if(!$report->{'template'}) {
-        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
         $needs_save = 1;
         Thruk::Utils::set_message( $c, 'fail_message', 'No Report Template set in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }

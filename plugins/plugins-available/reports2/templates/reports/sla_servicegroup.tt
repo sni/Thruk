@@ -1,6 +1,7 @@
 ﻿[%# EDIT #%]
 [% IF block == 'edit' %]
   [%
+    deprecated = 1;
     required_fields = [
         { 'language'                    => [ 'Language',                    'language',        'en'                    ,'' , 1 ] },
         { 'affected_sla_objects'        => [ '',                            'affected_sla_objects', ''                         ] },

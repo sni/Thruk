@@ -2755,18 +2755,17 @@ return variable defined from template
 sub get_template_variable {
     my($c, $template, $var, $stash, $noerror) = @_;
 
-    # more stash variables to set?
     $stash = {} unless defined $stash;
-    for my $key (keys %{$stash}) {
-        $c->stash->{$key} = $stash->{$key};
-    }
 
-    $c->stash->{'temp'}  = $template;
-    $c->stash->{'var'}   = $var;
+    # more stash variables to set?
+    $stash = { %{$c->stash}, %{$stash} };
+
+    $stash->{'temp'}  = $template;
+    $stash->{'var'}   = $var;
     my $default_time_locale = POSIX::setlocale(POSIX::LC_TIME);
     my $data;
     eval {
-        Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', undef, \$data);
+        Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', $stash, \$data);
     };
     if($@) {
         return "" if $noerror;

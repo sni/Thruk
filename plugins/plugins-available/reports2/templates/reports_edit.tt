@@ -150,6 +150,7 @@
     <td class="dataOdd" align="left" colspan=2>
       <select name="template" style="min-width: 180px;" onchange="update_reports_type('[% r.nr %]', this.value)">
         [% FOREACH file = templates.keys.sort %]
+        [% IF templates.$file.deprecated && file != r.template; NEXT; END %]
         <option value="[% file | html %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
         [% END %]
       </select>
