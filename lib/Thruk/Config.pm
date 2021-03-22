@@ -98,6 +98,7 @@ my $base_defaults = {
     'show_config_edit_buttons'              => 0,
     'show_backends_in_table'                => 0,
     'show_logout_button'                    => 0,
+    'logout_link'                           => '/thruk/cgi-bin/login.cgi?logout',
     'commandline_obfuscate_pattern'         => [],
     'backends_with_obj_config'              => {},
     'use_feature_statusmap'                 => 0,

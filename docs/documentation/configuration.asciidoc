@@ -1135,6 +1135,14 @@ ex.:
   show_logout_button=1
 
 
+=== logout_link
+{% include new_since.ad version="2.42" %}
+Change url of logout link. Might be useful in combination with oauth.
+
+ex.:
+
+  logout_link=/thruk/cgi-bin/login.cgi?logout
+
 
 === show_long_plugin_output
 
