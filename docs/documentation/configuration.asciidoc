@@ -1625,6 +1625,12 @@ This script should return the plain text logfiles on stdout (standard
 naemon/nagios logfile format). This might be useful if you pull the logfiles
 from a ndo/ido database.
 
+[TIP]
+.mixedsetup
+=======
+When having mixed backend cores, this command can be overridden in the peer configuration.
+=======
+
 See `./support/icinga2_ido_fetchlogs.sh` for an example.
 
 There are some useful enviromenet variables set before the script is started to
@@ -2438,6 +2444,7 @@ for details.
                         section.
      ** `state_host`    **DEPRECATED** - please use link:lmd.html[LMD] when using multiple backends.
      ** `logcache`      Set logcache connection for this specific backend. Set to `0` to disable logcache for this site.
+     ** `logcache_fetchlogs_command` Override global logcache_fetchlogs_command.
      ** `options`
         *** `peer`            address of this connection.
         *** `resource_file`   resource_file for this peer (used for macro replacement)
