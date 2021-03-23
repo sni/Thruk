@@ -167,7 +167,16 @@ sub cmd {
     }
 
     if($mode eq 'drop' && !$global_options->{'yes'}) {
-        _info("Do you really want to drop all data and remove the logcache?");
+        my $found = 0;
+        for my $peer_key (@{$backends}) {
+            my($stats) = Thruk::Backend::Provider::Mysql->_log_stats($c, $peer_key);
+            if($stats && $stats->{'cache_version'}) {
+                _info("logcache will be removed for backend: %s.", $stats->{'name'});
+                $found++;
+            }
+        }
+        return("no logcache tables found.\n", 0) if $found == 0;
+        _info("Do you really want to drop all data and remove the logcache for the %d listed backends?", $found);
         return("canceled\n", 1) unless _user_confirm();
     }
 
