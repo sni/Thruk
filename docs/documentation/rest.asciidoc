@@ -1629,6 +1629,7 @@ lists logcache statistics
 |compact_duration                  | duration of last compact run in seconds
 |compact_till                      | timestamp marker where last compact run finished
 |data_size                         | used size of data in bytes
+|enabled                           | flag wether logcache is enabled for this backend or not
 |index_size                        | used size of index in bytes
 |items                             | number of items/rows
 |key                               | peer key
