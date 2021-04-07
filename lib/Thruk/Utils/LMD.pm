@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use File::Slurp qw/read_file/;
 use Time::HiRes ();
-use File::Copy qw/copy/;
+use File::Copy qw/copy move/;
 use Carp qw/confess/;
 use Thruk::Utils::External;
 use Thruk::Utils::Log qw/:all/;
@@ -34,13 +34,26 @@ makes sure lmd process is running
 sub check_proc {
     my($config, $c, $log_missing) = @_;
 
-    my $lmd_dir = $config->{'tmp_path'}.'/lmd';
-    my $logfile = $lmd_dir.'/lmd.log';
-    my $size    = -s $logfile;
-    if($size && $size > 20*1024*1024) { # rotate logfile if its more than 20mb
-        copy($logfile.'.1', $logfile.'.2') if -e $logfile.'.1';
+    my $lmd_dir    = $config->{'tmp_path'}.'/lmd';
+    my $logfile    = $lmd_dir.'/lmd.log';
+    my $size       = -s $logfile;
+    my $keep       = $config->{'lmd_rotate_keep_logs'} || 3;
+    my $rotatesize = ($config->{'lmd_rotate_size'} || 20 ) *1024*1024; # rotate logfile if its more than 20mb
+    if($size && $size > $rotatesize) {
+        if(-e $logfile.'.'.$keep) {
+            unlink($logfile.'.'.$keep);
+            _debug(sprintf("removed %s", $logfile.'.'.$keep));
+        }
+        while($keep > 1) {
+            if(-e $logfile.'.'.($keep-1)) {
+                move($logfile.'.'.($keep-1), $logfile.'.'.$keep);
+                _debug(sprintf("moved %s to %s", $logfile.'.'.($keep-1), $logfile.'.'.$keep));
+            }
+            $keep--;
+        }
         copy($logfile, $logfile.'.1');
         Thruk::Utils::IO::write($logfile, '');
+        _debug(sprintf("moved %s to %s.1", $logfile, $logfile));
     }
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
         return;
