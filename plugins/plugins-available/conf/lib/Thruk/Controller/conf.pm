@@ -913,6 +913,7 @@ sub _process_backends_page {
     push @{$peers}, {} if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
         my $b = Thruk::Utils::dclone($p->{'peer_config'});
+        next if(!$b->{'_LINE'} && $p->{'federation'});
         $b->{'name'}        = $b->{'name'} // '';
         $b->{'type'}        = lc($b->{'type'} // 'livestatus');
         $b->{'id'}          = $p->{'key'}  // substr(Thruk::Utils::Crypt::hexdigest(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5);
