@@ -79,9 +79,16 @@ while (<STDIN>) {
 
     my $t0 = [gettimeofday];
     print STDERR "thruk_auth: url '$in' " if $verbose > 1;
-    my $res = process($in);
-    print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
-    print STDOUT $res;
+    eval {
+        my $res = process($in);
+        print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
+        print STDOUT $res;
+    };
+    my $err = $@;
+    if($err) {
+        print STDOUT $loginurl."?problem\n";
+        print STDERR "thruk_auth error: ".$err;
+    }
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
 }
