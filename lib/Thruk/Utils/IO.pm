@@ -488,6 +488,9 @@ sub json_patch {
     if(-s $file) {
         ($data, $content) = json_retrieve($file, $fh);
     } else {
+        if(!$options->{'allow_empty'}) {
+            confess("attempt to patch empty file without allow_empty option: $file");
+        }
         ($data, $content) = ({}, "");
     }
     $data = merge_deep($data, $patch_data);

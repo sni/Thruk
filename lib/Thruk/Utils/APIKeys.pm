@@ -42,6 +42,7 @@ sub get_keys {
     for my $file (glob($folder.'/*')) {
         my $basename = Thruk::Utils::basename($file);
         next unless $basename =~ $hashed_key_file_regex;
+        next if $basename =~ /\.stats$/mx;
         if($filename && $basename ne $filename) {
             next;
         }
@@ -204,6 +205,7 @@ sub remove_key {
     for my $k (@{$keys}) {
         if(Thruk::Utils::basename($k->{'file'}) eq $file) {
             unlink($k->{'file'});
+            unlink($k->{'file'}.'.stats');
         }
     }
     if($c->check_user_roles('admin')) {
@@ -211,6 +213,7 @@ sub remove_key {
         for my $k (@{$keys}) {
             if(Thruk::Utils::basename($k->{'file'}) eq $file) {
                 unlink($k->{'file'});
+                unlink($k->{'file'}.'.stats');
             }
         }
     }
@@ -251,6 +254,10 @@ sub read_key {
     $data->{'file'}       = $file;
     $data->{'digest'}     = $type;
     $data->{'superuser'}  = 1 if delete $data->{'system'}; # migrate system keys
+    if(-s $file.'.stats') {
+        my $stats = Thruk::Utils::IO::json_lock_retrieve($file.'.stats');
+        $data = { %{$stats}, %{$data} };
+    }
     return($data);
 }
 

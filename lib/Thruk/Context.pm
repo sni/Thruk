@@ -388,7 +388,7 @@ sub _request_username {
             }
             my $addr = $c->req->address;
             $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
-            Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, { pretty => 1 });
+            Thruk::Utils::IO::json_lock_store($data->{'file'}.'.stats', { last_used => time(), last_from => $addr }, { pretty => 1 });
             $username = $data->{'user'};
             if($data->{'superuser'}) {
                 $superuser = 1;

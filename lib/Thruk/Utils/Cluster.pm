@@ -83,7 +83,7 @@ sub load_statefile {
             if($registered->{$key}->{'last_update'} < $now - $self->{'config'}->{'cluster_node_stale_timeout'}) {
                 Thruk::Utils::IO::json_lock_patch($self->{'registerfile'}, {
                     $key => undef,
-                }, { pretty => 1 });
+                }, { pretty => 1, allow_empty => 1 });
                 next:
             }
             $nodes->{$key} = $n;
@@ -170,7 +170,7 @@ sub register {
                 node_url    => $self->_build_node_url() || '',
                 last_update => time(),
             },
-        }, { pretty => 1 });
+        }, { pretty => 1, allow_empty => 1 });
     }
 
     $self->load_statefile();
@@ -192,7 +192,7 @@ sub unregister {
         $Thruk::NODE_ID => {
             pids => { $$ => undef },
         },
-    }, { pretty => 1 });
+    }, { pretty => 1, allow_empty => 1 });
     return;
 }
 
@@ -215,7 +215,7 @@ sub refresh {
         $Thruk::NODE_ID => {
             pids => { $$ => $now },
         },
-    }, { pretty => 1 });
+    }, { pretty => 1, allow_empty => 1 });
     $self->{'node'}->{'pids'}->{$$}  = $now;
     return;
 }
@@ -341,7 +341,7 @@ sub run_cluster {
                 $n => {
                     last_error => $err,
                 },
-            }, { pretty => 1 });
+            }, { pretty => 1, allow_empty => 1 });
             $node->{'last_error'} = $err;
         } else {
             if($sub =~ m/Cluster::pong/mx) {
@@ -361,14 +361,14 @@ sub run_cluster {
                         node_id       => $n,
                         maintenance   => $r->{'output'}->[0]->{'maintenance'},
                     },
-                }, { pretty => 1 });
+                }, { pretty => 1, allow_empty => 1 });
             } else {
                 Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                     $n => {
                         last_contact  => time(),
                         last_error    => '',
                     },
-                }, { pretty => 1 });
+                }, { pretty => 1, allow_empty => 1 });
             }
         }
         $r = $r->{'output'} if $r;
@@ -418,7 +418,7 @@ sub pong {
             $Thruk::NODE_ID => {
                 node_url => $url,
             },
-        }, { pretty => 1 });
+        }, { pretty => 1, allow_empty => 1 });
         $c->cluster->{'node'}->{'node_url'} = $url;
     }
     return({
@@ -477,7 +477,7 @@ sub maint {
                     $node->{'node_id'} => {
                         maintenance => $val,
                     },
-                }, { pretty => 1 });
+                }, { pretty => 1, allow_empty => 1 });
             }
             $node->{'maintenance'} = $val;
             # update others
