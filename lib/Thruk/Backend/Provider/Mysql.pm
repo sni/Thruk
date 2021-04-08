@@ -875,26 +875,27 @@ sub _get_subfilter {
 
 ##########################################################
 sub _quote {
-    return "''" unless defined $_[0];
-    if(ref $_[0] eq 'ARRAY') {
+    my($str) = @_;
+    return "''" unless defined $str;
+    if(ref $str eq 'ARRAY') {
         my $list = [];
-        for my $v (@{$_[0]}) {
+        for my $v (@{$str}) {
             push @{$list}, _quote($v);
         }
         return $list;
     }
-    if($_[0] =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
-        return $_[0];
+    if($str =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
+        return $str;
     }
-    $_[0] =~ s/\\\\/\\/gmx;
-    $_[0] =~ s/\'/\\'/gmx;
-    $_[0] =~ s/\"/\\"/gmx;
-    $_[0] =~ s/\x08/\\b/gmx;
-    $_[0] =~ s/\n/\\n/gmx;
-    $_[0] =~ s/\r/\\r/gmx;
-    $_[0] =~ s/\t/\\t/gmx;
-    $_[0] =~ s/\x1A/\\Z/gmx;
-    return("'".$_[0]."'");
+    $str =~ s/\\\\/\\/gmx;
+    $str =~ s/\'/\\'/gmx;
+    $str =~ s/\"/\\"/gmx;
+    $str =~ s/\x08/\\b/gmx;
+    $str =~ s/\n/\\n/gmx;
+    $str =~ s/\r/\\r/gmx;
+    $str =~ s/\t/\\t/gmx;
+    $str =~ s/\x1A/\\Z/gmx;
+    return("'".$str."'");
 }
 
 ##########################################################
