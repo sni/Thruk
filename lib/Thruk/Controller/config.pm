@@ -69,6 +69,10 @@ sub index {
             $filter = [ { 'name' => $c->req->parameters->{'jump2'} } ];
         }
         $c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => 1, extra_columns => ['contacts', 'contact_groups'], filter => $filter );
+        # use obfuscated command later
+        for my $hst (@{$c->stash->{'data'}}) {
+            $hst->{'_check_command'} = $c->{'db'}->expand_command('host' => $hst, 'source' => $c->config->{'show_full_commandline_source'} );
+        }
         $c->stash->{template} = 'config_hosts.tt';
     }
 
@@ -79,6 +83,10 @@ sub index {
             $filter = [ { 'host_name' => $c->req->parameters->{'jump2'}, 'description' => $c->req->parameters->{'jump3'} } ];
         }
         $c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => 1, extra_columns => ['contacts', 'contact_groups'], filter => $filter);
+        # use obfuscated command later
+        for my $svc (@{$c->stash->{'data'}}) {
+            $svc->{'_check_command'} = $c->{'db'}->expand_command('host' => $svc, 'service' => $svc, 'source' => $c->config->{'show_full_commandline_source'} );
+        }
         $c->stash->{template} = 'config_services.tt';
     }
 
