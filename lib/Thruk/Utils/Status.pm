@@ -210,7 +210,7 @@ sub get_search_from_param {
     my($c, $prefix, $force, $params) = @_;
     $params = $c->req->parameters unless defined $params;
 
-    unless ( $force || exists $params->{$prefix . '_hoststatustypes'} || exists $params->{$prefix . '_type'}) {
+    unless ( $force || exists $params->{$prefix . '_hoststatustypes'} || exists $params->{$prefix . '_type'} || exists $params->{$prefix . '_hostprops'}) {
         return;
     }
 
@@ -335,7 +335,11 @@ sub do_filter {
 
     unless ( exists $params->{$prefix.'s0_hoststatustypes'}
           or exists $params->{$prefix.'s0_type'}
+          or exists $params->{$prefix.'s0_hostprops'}
+          or exists $params->{$prefix.'s0_servicestatustypes'}
+          or exists $params->{$prefix.'s0_serviceprops'}
           or exists $params->{'s0_hoststatustypes'}
+          or exists $params->{'s0_hostprops'}
           or exists $params->{'s0_type'}
           or exists $params->{'complex'} )
     {
