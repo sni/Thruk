@@ -1411,6 +1411,18 @@ sub read_report_file {
     }
     $report->{'is_public'} = 0 unless defined $report->{'is_public'};
 
+    # make permissions uniq
+    my $uniq_perm = {};
+    my $new_perm  = [];
+    for my $p (@{$report->{'permissions'}}) {
+        my $u = sprintf("%s;%s;%s", $p->{'type'}, $p->{'perm'}, join('|', @{$p->{'name'}}));
+        if(!defined $uniq_perm->{$u}) {
+            $uniq_perm->{$u} = $p;
+            push @{$new_perm}, $p;
+        }
+    }
+    $report->{'permissions'} = $new_perm;
+
     # check if its really running
     if($report->{'var'}->{'is_running'} == -1 && $report->{'var'}->{'start_time'} < time() - 10) {
         $report->{'var'}->{'is_running'} = 0;
