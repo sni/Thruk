@@ -391,7 +391,7 @@ sub _logcache_checks  {
 
     for my $s (@stats) {
         next unless $s->{'enabled'};
-        if(($s->{'cache_version'}//0) != $Thruk::Backend::Provider::Mysql::cache_version) {
+        if(($s->{'cache_version'}||0) != $Thruk::Backend::Provider::Mysql::cache_version) {
             $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, ($s->{'cache_version'}//0), $Thruk::Backend::Provider::Mysql::cache_version);
             $errors++;
         }
