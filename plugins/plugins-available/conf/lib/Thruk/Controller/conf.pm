@@ -2156,9 +2156,19 @@ sub _object_clone {
     if($obj->{'file'}->{'readonly'}) { $c->stash->{'new_file'} = ''; }
     my $newobj = Monitoring::Config::Object->new(
         type     => $obj->get_type(),
-        conf     => $obj->{'conf'},
+        conf     => dclone($obj->{'conf'}),
         coretype => $c->{'obj_db'}->{'coretype'},
     );
+    my $name = $newobj->get_name()." clone";
+    if(scalar @{$c->{'obj_db'}->get_objects_by_name($newobj->get_type(), $name)} > 0) {
+        for my $i (2..100) {
+            if(scalar @{$c->{'obj_db'}->get_objects_by_name($newobj->get_type(), $name.' '.$i)} == 0) {
+                $name = $name.' '.$i;
+                last;
+            }
+        }
+    }
+    $newobj->set_name($name);
     return $newobj;
 }
 
