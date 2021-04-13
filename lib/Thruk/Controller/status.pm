@@ -511,7 +511,8 @@ sub _process_details_page {
 
         # redirect to host details page if there are hosts but no service filter
         if($c->stash->{'num_hosts'} > 0) {
-            my $url = $c->stash->{'url_prefix'}.'cgi-bin/'.Thruk::Utils::Filter::uri_with($c, {'style' => 'hostdetail'});
+            # remove columns, they are different for hosts
+            my $url = $c->stash->{'url_prefix'}.'cgi-bin/'.Thruk::Utils::Filter::uri_with($c, {'style' => 'hostdetail', 'dfl_columns' => undef });
             $url =~ s/&amp;/&/gmx;
             Thruk::Utils::set_message( $c, 'info_message', 'No services found for this filter, redirecting to host view.' );
             return $c->redirect_to($url);
