@@ -677,8 +677,6 @@ sub calculate_availability {
     }
 
     if($params->{'outages'}) {
-        $c->stash->{'service'}       = $service // "";
-        $c->stash->{'host'}          = $host;
         $c->stash->{'withdowntimes'} = $params->{'withdowntimes'} // 0;
         $c->stash->{'template'} = 'avail_outages.tt';
         my $only_host_services = undef;
@@ -693,8 +691,30 @@ sub calculate_availability {
             }
         }
         my $logs = $ma->get_full_logs() || [];
-        my $outages = outages($logs, $unavailable_states, $start, $end, $host, $service, $only_host_services);
+        my $outages = [];
+        for my $hst (@{$hosts}) {
+            my $out = outages($logs, $unavailable_states, $start, $end, $hst, "", $only_host_services);
+            push @{$outages}, @{$out};
+        }
+        for my $svc (@{$services}) {
+            my $out = outages($logs, $unavailable_states, $start, $end, $svc->{'host'}, $svc->{'service'}, $only_host_services);
+            push @{$outages}, @{$out};
+        }
+
+        $c->stash->{'type'}    = $params->{'type'} // 'hosts';
+        $c->stash->{'host'}    = '';
+        $c->stash->{'service'} = '';
+        if(scalar @{$hosts} == 1 && scalar @{$services} == 0) {
+            $c->stash->{'host'}    = $hosts->[0];
+        }
+        if(scalar @{$hosts} == 0 && scalar @{$services} == 1) {
+            $c->stash->{'host'}    = $services->[0]->{'host'};
+            $c->stash->{'service'} = $services->[0]->{'service'};
+        }
         $c->stash->{'outages'} = $outages;
+        if($view_mode eq 'json') {
+            $c->stash->{'json'} = $outages;
+        }
         return;
     }
 
@@ -945,10 +965,12 @@ sub outages {
             next if  $l->{'host'} ne $host;
             next if !$l->{'service'};
         } else {
-            next if(defined $l->{'host'} && $l->{'host'}    ne $host);
+            next if(defined $l->{'host'} && $l->{'host'} ne $host);
             if($service) {
                 next if(defined $l->{'service'} &&  $l->{'service'} ne $service);
                 next if(defined $l->{'host'}    && !$l->{'service'});
+            } else {
+                next if(defined $l->{'host'}    && $l->{'service'});
             }
         }
 

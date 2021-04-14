@@ -67,7 +67,9 @@
     [% END %]
     </td>
   </tr>
+  [% IF show_hint %]
   <tr><td style="height: 70px;"></td></tr>
+  [% END %]
 </table>
 </div>
 [% END %]

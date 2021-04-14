@@ -186,6 +186,29 @@ sub _outages {
     $c->req->parameters->{'outages'} = 1;
     $c->req->parameters->{'t1'} = $start;
     $c->req->parameters->{'t2'} = $end;
+
+    if(!$c->req->parameters->{'dfl_s0_hostprops'} && !$c->req->parameters->{'host'}) {
+        $c->req->parameters->{'host'} = "all";
+    }
+
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "hosts";
+        if($c->req->parameters->{'service'}) {
+            $c->req->parameters->{'type'} = "services";
+        }
+    }
+    if($c->req->parameters->{'type'} eq "both") {
+        $c->req->parameters->{'include_host_services'} = 1;
+    }
+
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    return 1 if $c->stash->{'has_error'};
+    if($c->req->parameters->{'type'} eq "services" || $c->req->parameters->{'type'} eq 'both') {
+        $c->req->parameters->{'s_filter'} = $servicefilter;
+    } else {
+        $c->req->parameters->{'h_filter'} = $hostfilter;
+    }
+
     return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
 }
 

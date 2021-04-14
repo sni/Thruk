@@ -439,6 +439,7 @@ sub classic_filter {
     my $hostgroup    = $params->{'hostgroup'}    || '';
     my $servicegroup = $params->{'servicegroup'} || '';
     my $contact      = $params->{'contact'}      || '';
+    my $service      = $params->{'service'}      || '';
 
     $c->stash->{'host'}         = $host         if defined $c->stash;
     $c->stash->{'hostgroup'}    = $hostgroup    if defined $c->stash;
@@ -460,6 +461,9 @@ sub classic_filter {
         } else {
             push @hostfilter,    [ { 'name'      => $host } ];
             push @servicefilter, [ { 'host_name' => $host } ];
+        }
+        if($service) {
+            push @servicefilter, [ { 'description' => $service } ];
         }
     }
     if ( $hostgroup ne 'all' and $hostgroup ne '' ) {
@@ -527,6 +531,15 @@ sub classic_filter {
             'value'   => $host // '',
             'op'      => '=',
             };
+        if($service) {
+        push @{ $search->{'text_filter'} },
+            {
+            'val_pre' => '',
+            'type'    => 'service',
+            'value'   => $service // '',
+            'op'      => '=',
+            };
+        }
     }
     if ( $hostgroup ne '' ) {
         push @{ $search->{'text_filter'} },
