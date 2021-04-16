@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.42     Fri Apr 16 21:33:20 CEST 2021
           - remove `check_local_states` and `state_host` from backends, use LMD instead
           - make broadcast preview draggable
           - add machine_debug_info option to set amount of machine debug information
