@@ -63,7 +63,7 @@
         <table border="0" class='optBox'>
           <tr>
               <td class='optBoxItem'>
-                <select name='includesoftstates'>
+                <select name='includesoftstates' style="width: 100%;">
                   <option value="0"[% IF includesoftstates == 0 %] selected[% END %]>Exclude Softstates</option>
                   <option value="1"[% IF includesoftstates == 1 %] selected[% END %]>Include Softstates</option>
                 </select>
@@ -71,7 +71,7 @@
             </tr>
           <tr>
             <td class='optBoxItem'>
-              <select name='withdowntimes'>
+              <select name='withdowntimes' style="width: 100%;">
                 <option value="0"[% IF withdowntimes == 0 %] selected[% END %]>Include Downtimes</option>
                 <option value="1"[% IF withdowntimes == 1 %] selected[% END %]>Exclude Downtimes</option>
               </select>
@@ -79,7 +79,7 @@
           </tr>
           <tr>
             <td class='optBoxItem'>
-              <select name='type'>
+              <select name='type' style="width: 100%;">
                 <option value="both"[% IF type == "both" %] selected[% END %]>Hosts &amp; Services</option>
                 <option value="hosts"[% IF type == "hosts" %] selected[% END %]>Hosts Only</option>
                 <option value="services"[% IF type == "services" %] selected[% END %]>Services Only</option>
