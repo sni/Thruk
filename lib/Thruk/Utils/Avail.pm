@@ -683,6 +683,7 @@ sub calculate_availability {
         my $unavailable_states = {
             critical             => 1,
             down                 => 1,
+            unknown              => 1,
             unreachable          => 1,
         };
         if($c->stash->{'withdowntimes'} == 0) {
