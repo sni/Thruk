@@ -1349,6 +1349,21 @@ ex.:
   show_custom_vars = *
 
 
+=== expose_custom_vars
+Expose custom vars sets a list of custom variables
+which is safe for all users/contacts to view.
+They will be used in filtering and column selection
+as well as in json result sets. Basically they will
+be handled the same way as `show_custom_vars` except they
+will not be displayed automatically.
+Syntax is the same as `show_custom_vars`.
+
+ex.:
+
+  expose_custom_vars = _VAR1
+
+
+
 === expand_user_macros
 Expand user macros ($USERx$) for host / service commands and custom
 variables. Can be specified more than once to define multiple user

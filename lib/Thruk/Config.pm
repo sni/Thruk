@@ -150,6 +150,7 @@ my $base_defaults = {
     'downtime_duration'                     => 7200,
     'expire_ack_duration'                   => 86400,
     'show_custom_vars'                      => [],
+    'expose_custom_vars'                    => [],
     'expand_user_macros'                    => ['ALL'],
     'themes_path'                           => './themes',
     'priorities'                            => {
@@ -468,7 +469,7 @@ sub set_default_config {
     }
 
     # ensure comma separated lists
-    for my $key (qw/csrf_allowed_hosts show_custom_vars/) {
+    for my $key (qw/csrf_allowed_hosts show_custom_vars expose_custom_vars/) {
         $config->{$key} = _comma_separated_list($config->{$key});
     }
 

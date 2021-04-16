@@ -526,7 +526,7 @@ sub _get_json_host {
            $json_host->{'data'}->{'icon_image'} = $icon_image;
     }
     my $vars = Thruk::Utils::get_custom_vars($c, $host);
-    for my $custvar (@{$c->config->{'show_custom_vars'}}) {
+    for my $custvar (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
         my $name = $custvar;
         $name =~ s/^_//gmx;
         $json_host->{'data'}->{$custvar} = $vars->{$name} // 'none';

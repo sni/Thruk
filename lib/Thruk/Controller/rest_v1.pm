@@ -1082,7 +1082,7 @@ sub _expand_perfdata_and_custom_vars {
 
     # check wether user is allowed to see all custom variables
     my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
-    my $allowed_list = $c->config->{'show_custom_vars'};
+    my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
 
     # since expanding takes some time, only do it if we have no columns specified or if none-standard columns were requested
     my $columns = get_request_columns($c, NAMES) || [];

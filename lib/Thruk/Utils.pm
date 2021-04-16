@@ -797,6 +797,26 @@ sub set_paging_steps {
     return;
 }
 
+########################################
+
+=head2 get_exposed_custom_vars
+
+  get_exposed_custom_vars($config, [$skip_wildcards])
+
+return combined list of show_custom_vars and expose_custom_vars
+
+=cut
+sub get_exposed_custom_vars {
+    my($config, $skip_wildcards) = @_;
+    my $vars = {};
+    for my $src (qw/show_custom_vars expose_custom_vars/) {
+        for my $var (@{list($config->{$src})}) {
+            next if($skip_wildcards && $var =~ m/\*/mx);
+            $vars->{$var} = 1;
+        }
+    }
+    return([sort keys %{$vars}]);
+}
 
 ########################################
 

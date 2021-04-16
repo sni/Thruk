@@ -580,6 +580,7 @@ sub _process_thruk_page {
                         datetime_format_trends
                         use_new_command_box
                         show_custom_vars
+                        expose_custom_vars
                     /],
         ],
         [ 'Paging', [qw/

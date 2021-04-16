@@ -527,11 +527,11 @@ sub generate_report {
     Thruk::Utils::IO::close($fh, $logfile);
 
     # check for exposed custom variables
-    my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+    my $allowed = Thruk::Utils::get_exposed_custom_vars($c->config);
     for my $key (qw/hostnameformat_cust servicenameformat_cust/) {
         if($options->{'params'}->{$key}) {
             if(!Thruk::Utils::check_custom_var_list($options->{'params'}->{$key}, $allowed)) {
-                return(_report_die($c, $nr, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars", $logfile));
+                return(_report_die($c, $nr, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars or expose_custom_vars", $logfile));
             }
         }
     }

@@ -58,6 +58,7 @@ sub get_thruk_cfg {
                 shown_inline_pnp                        => ['BOOL',   '1'],
                 show_modified_attributes                => ['BOOL',   '1'],
                 show_custom_vars                        => ['ARRAY',  []],
+                expose_custom_vars                      => ['ARRAY',  []],
                 use_new_command_box                     => ['BOOL',   '1'],
                 can_submit_commands                     => ['BOOL',   '1'],
                 datetime_format                         => ['STRING', ''],

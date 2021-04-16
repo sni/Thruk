@@ -1778,21 +1778,17 @@ sub _task_hosts {
         paging      => Cpanel::JSON::XS::true,
     };
 
-    if($c->config->{'show_custom_vars'}) {
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                $var =~ s/^_//gmx;
-                push @{$json->{'columns'}},
-                { 'header' => $var, dataIndex => $var, hidden => Cpanel::JSON::XS::true };
-            }
+    if($c->config->{'show_custom_vars'} || $c->config->{'expose_custom_vars'}) {
+        for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+            $var =~ s/^_//gmx;
+            push @{$json->{'columns'}},
+            { 'header' => $var, dataIndex => $var, hidden => Cpanel::JSON::XS::true };
         }
         for my $h ( @{$c->stash->{'data'}}) {
             my $cust = Thruk::Utils::get_custom_vars($c, $h);
-            for my $var (@{$c->config->{'show_custom_vars'}}) {
-                if($var !~ m/\*/mx) { # does not work with wildcards
-                    $var =~ s/^_//gmx;
-                    $h->{$var} = $cust->{$var} // '';
-                }
+            for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+                $var =~ s/^_//gmx;
+                $h->{$var} = $cust->{$var} // '';
             }
             $h->{'THRUK_ACTION_MENU'} = $cust->{'THRUK_ACTION_MENU'} // '';
         }
@@ -1901,22 +1897,18 @@ sub _task_services {
         paging      => Cpanel::JSON::XS::true,
     };
 
-    if($c->config->{'show_custom_vars'}) {
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                $var =~ s/^_//gmx;
-                push @{$json->{'columns'}},
-                { 'header' => $var, dataIndex => $var, hidden => Cpanel::JSON::XS::true };
-            }
+    if($c->config->{'show_custom_vars'} || $c->config->{'expose_custom_vars'}) {
+        for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+            $var =~ s/^_//gmx;
+            push @{$json->{'columns'}},
+            { 'header' => $var, dataIndex => $var, hidden => Cpanel::JSON::XS::true };
         }
     }
     for my $s ( @{$c->stash->{'data'}}) {
         my $cust = Thruk::Utils::get_custom_vars($c, $s, undef, 1);
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                $var =~ s/^_//gmx;
-                $s->{$var} = $cust->{$var} // $cust->{'HOST'.$var} // '';
-            }
+        for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+            $var =~ s/^_//gmx;
+            $s->{$var} = $cust->{$var} // $cust->{'HOST'.$var} // '';
         }
         $s->{'THRUK_ACTION_MENU'}     = $cust->{'THRUK_ACTION_MENU'} // '';
         $s->{'HOSTTHRUK_ACTION_MENU'} = $cust->{'HOSTTHRUK_ACTION_MENU'} // '';

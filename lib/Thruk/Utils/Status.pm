@@ -2311,13 +2311,9 @@ sub get_host_columns {
         push @{$columns},
         { title => "Last Cache Update",    "field" => "lmd_last_cache_update", "checked" => 0 };
     }
-    if($c->config->{'show_custom_vars'}) {
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                push @{$columns},
-                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
-            }
-        }
+    for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+        push @{$columns},
+        { title => $var,                   "field" => "cust_".$var,           "checked" => 0 };
     }
 
     my @selected;
@@ -2392,13 +2388,9 @@ sub get_service_columns {
         push @{$columns},
         { title => "Last Cache Update",    "field" => "lmd_last_cache_update", "checked" => 0 };
     }
-    if($c->config->{'show_custom_vars'}) {
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                push @{$columns},
-                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
-            }
-        }
+    for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+        push @{$columns},
+        { title => $var,                   "field" => "cust_".$var,           "checked" => 0 };
     }
 
 
@@ -2436,13 +2428,9 @@ sub get_overview_columns {
         { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
     ];
 
-    if($c->config->{'show_custom_vars'}) {
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                push @{$columns},
-                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
-            }
-        }
+    for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+        push @{$columns},
+        { title => $var,                   "field" => "cust_".$var,           "checked" => 0 };
     }
 
     my @selected;
@@ -2478,13 +2466,9 @@ sub get_grid_columns {
         { title => "Site",                 "field" => "peer_name",            "checked" => 0 },
     ];
 
-    if($c->config->{'show_custom_vars'}) {
-        for my $var (@{$c->config->{'show_custom_vars'}}) {
-            if($var !~ m/\*/mx) { # does not work with wildcards
-                push @{$columns},
-                { title => $var,               "field" => "cust_".$var,           "checked" => 0 };
-            }
-        }
+    for my $var (@{Thruk::Utils::get_exposed_custom_vars($c->config, 1)}) {
+        push @{$columns},
+        { title => $var,                   "field" => "cust_".$var,           "checked" => 0 };
     }
 
     my @selected;
@@ -2726,7 +2710,7 @@ sub get_custom_variable_names {
     # filter all of them which are not listed by show_custom_vars unless we have extended permissions
     if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
         my $newlist = [];
-        my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+        my $allowed = Thruk::Utils::get_exposed_custom_vars($c->config);
         for my $varname (@{$data}) {
             if(Thruk::Utils::check_custom_var_list($varname, $allowed)) {
                 push @{$newlist}, $varname;

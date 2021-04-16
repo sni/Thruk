@@ -1492,4 +1492,19 @@ sub log_line_plugin_output {
 
 ########################################
 
+=head2 get_exposed_custom_vars
+
+    get_exposed_custom_vars([$skip_wildcards])
+
+return list of exposed custom variable names
+
+=cut
+sub get_exposed_custom_vars {
+    my($skip_wildcards) = @_;
+    my $c = $Thruk::Request::c or die("not initialized!");
+    return(Thruk::Utils::get_exposed_custom_vars($c->config, $skip_wildcards));
+}
+
+########################################
+
 1;
