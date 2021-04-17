@@ -146,7 +146,11 @@
     </td>
     <td class="status [% rowclass %]">
       [% IF ! r.readonly %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=remove" onclick="return confirm('really remove?')"><img src='[% url_prefix %]themes/[% theme %]/images/delete.png' border="0" alt='Remove Report' title='Remove Report' width=16 height=16></a>
+        <form action="reports2.cgi" method="POST">
+        <input type="hidden" name="report" value="[% r.nr %]">
+        <input type="hidden" name="action" value="remove">
+        <input type="image" name="submit" value="remove" src="[% url_prefix %]themes/[% theme %]/images/delete.png" style="width:16px; height: 16px;" onclick="return confirm('really remove?')">
+        </form>
       [% END %]
     </td>
   </tr>
