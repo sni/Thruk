@@ -808,6 +808,7 @@ return combined list of show_custom_vars and expose_custom_vars
 =cut
 sub get_exposed_custom_vars {
     my($config, $skip_wildcards) = @_;
+    confess("no config") unless defined $config;
     my $vars = {};
     for my $src (qw/show_custom_vars expose_custom_vars/) {
         for my $var (@{list($config->{$src})}) {
@@ -994,6 +995,49 @@ sub check_custom_var_list {
         }
     }
     return;
+}
+
+########################################
+
+=head2 set_data_row_cust_vars
+
+  set_data_row_cust_vars($obj, $allowed, $allowed_list)
+
+set custom variables for host/service obj
+
+=cut
+sub set_data_row_cust_vars {
+    my($obj, $allowed, $allowed_list) = @_;
+
+    if($obj->{'custom_variable_names'}) {
+        $obj->{'custom_variables'} = get_custom_vars(undef, $obj);
+        for my $key (@{$obj->{'custom_variable_names'}}) {
+            if($allowed || check_custom_var_list($key, $allowed_list)) {
+                $obj->{'_'.uc($key)} = $obj->{'custom_variables'}->{$key};
+            } else {
+                delete $obj->{'custom_variables'}->{$key};
+            }
+        }
+        if(!$allowed) {
+            $obj->{'custom_variable_names'}  = [keys   %{$obj->{'custom_variables'}}];
+            $obj->{'custom_variable_values'} = [values %{$obj->{'custom_variables'}}];
+        }
+    }
+    if($obj->{'host_custom_variable_names'}) {
+        $obj->{'host_custom_variables'} = get_custom_vars(undef, $obj, 'host_');
+        for my $key (@{$obj->{'host_custom_variable_names'}}) {
+            if($allowed || check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
+                $obj->{'_HOST'.uc($key)} = $obj->{'host_custom_variables'}->{$key};
+            } else {
+                delete $obj->{'host_custom_variables'}->{$key};
+            }
+        }
+        if(!$allowed) {
+            $obj->{'host_custom_variable_names'}  = [keys   %{$obj->{'host_custom_variables'}}];
+            $obj->{'host_custom_variable_values'} = [values %{$obj->{'host_custom_variables'}}];
+        }
+    }
+    return($obj);
 }
 
 ########################################

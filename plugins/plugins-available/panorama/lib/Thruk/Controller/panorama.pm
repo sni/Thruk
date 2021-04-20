@@ -1942,17 +1942,21 @@ sub _task_squares_data {
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $now        = time();
-    my $data       = [];
+    my $now          = time();
+    my $data         = [];
+    my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+    my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+
     if($source eq 'services' || $source eq 'both') {
         my $services = $c->{'db'}->get_services(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
-                                    columns => [qw/host_name description state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
+                                    columns => [qw/host_name description state acknowledged scheduled_downtime_depth has_been_checked last_state_change/, $c->req->parameters->{'service_label'} ? qw/host_alias custom_variable_names custom_variable_values host_custom_variable_names host_custom_variable_values/ : ()],
                                     sort    => { ASC => [ 'host_name',   'description' ] },
                                 );
         for my $svc (@{$services}) {
+            Thruk::Utils::set_data_row_cust_vars($svc, $allowed, $allowed_list);
             push @{$data}, { uniq         => $svc->{'host_name'}.';'.$svc->{'description'},
-                             name         => $svc->{'host_name'}.' - '.$svc->{'description'},
+                             name         => $c->req->parameters->{'service_label'} ? _task_squares_data_label($svc, $c->req->parameters->{'service_label'}) : $svc->{'host_name'}.' - '.$svc->{'description'},
                              host_name    => $svc->{'host_name'},
                              description  => $svc->{'description'},
                              state        => $svc->{'has_been_checked'} == 0 ? 4 : $svc->{'state'},
@@ -1968,12 +1972,13 @@ sub _task_squares_data {
     if($source eq 'hosts' || $source eq 'both') {
         my $hosts = $c->{'db'}->get_hosts(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
-                                    columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked last_state_change/],
+                                    columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked last_state_change/, $c->req->parameters->{'host_label'} ? qw/alias custom_variable_names custom_variable_values/ : ()],
                                     sort    => { ASC => [ 'name' ] },
                                 );
         for my $hst (@{$hosts}) {
+            Thruk::Utils::set_data_row_cust_vars($hst, $allowed, $allowed_list);
             push @{$data}, { uniq         => $hst->{'name'},
-                             name         => $hst->{'name'},
+                             name         => $c->req->parameters->{'host_label'} ? _task_squares_data_label($hst, $c->req->parameters->{'host_label'}) : $hst->{'name'},
                              host_name    => $hst->{'name'},
                              description  => '',
                              state        => $hst->{'state'},
@@ -2068,6 +2073,31 @@ sub _task_squares_data {
 
     _add_misc_details($c, undef, $json);
     return $c->render(json => $json);
+}
+
+##########################################################
+sub _task_squares_data_label {
+    my($obj, $label) = @_;
+    my $res = $label;
+    for my $key (qw/host_name host_alias name alias description/) {
+        my $val = $obj->{$key} // '';
+        $res =~ s|\{\{$key\}\}|$val|gmxi;
+    }
+    if($obj->{'custom_variables'}) {
+        for my $key (sort keys %{$obj->{'custom_variables'}}) {
+            my $val = $obj->{'custom_variables'}->{$key} // '';
+            $res =~ s|\{\{_$key\}\}|$val|gmxi;
+        }
+    }
+    if($obj->{'host_custom_variables'}) {
+        for my $key (sort keys %{$obj->{'custom_variables'}}) {
+            my $val = $obj->{'custom_variables'}->{$key} // '';
+            $res =~ s|\{\{_HOST$key\}\}|$val|gmxi;
+        }
+    }
+    # remove all remaining placeholder
+    $res =~ s|\{\{.*?\}\}||gmxi;
+    return($res);
 }
 
 ##########################################################

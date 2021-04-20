@@ -1112,34 +1112,7 @@ sub _expand_perfdata_and_custom_vars {
     }
 
     for my $row (@{$data}) {
-        if($row->{'custom_variable_names'}) {
-            $row->{'custom_variables'} = Thruk::Utils::get_custom_vars(undef, $row);
-            for my $key (@{$row->{'custom_variable_names'}}) {
-                if($allowed || Thruk::Utils::check_custom_var_list($key, $allowed_list)) {
-                    $row->{'_'.uc($key)} = $row->{'custom_variables'}->{$key};
-                } else {
-                    delete $row->{'custom_variables'}->{$key};
-                }
-            }
-            if(!$allowed) {
-                $row->{'custom_variable_names'}  = [keys   %{$row->{'custom_variables'}}];
-                $row->{'custom_variable_values'} = [values %{$row->{'custom_variables'}}];
-            }
-        }
-        if($row->{'host_custom_variable_names'}) {
-            $row->{'host_custom_variables'} = Thruk::Utils::get_custom_vars(undef, $row, 'host_');
-            for my $key (@{$row->{'host_custom_variable_names'}}) {
-                if($allowed || Thruk::Utils::check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
-                    $row->{'_HOST'.uc($key)} = $row->{'host_custom_variables'}->{$key};
-                } else {
-                    delete $row->{'host_custom_variables'}->{$key};
-                }
-            }
-            if(!$allowed) {
-                $row->{'host_custom_variable_names'}  = [keys   %{$row->{'host_custom_variables'}}];
-                $row->{'host_custom_variable_values'} = [values %{$row->{'host_custom_variables'}}];
-            }
-        }
+        Thruk::Utils::set_data_row_cust_vars($row, $allowed, $allowed_list);
 
         if($row->{'perf_data'}) {
             my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'perf_data'}))[0];
