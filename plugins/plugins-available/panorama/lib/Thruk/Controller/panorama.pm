@@ -1956,7 +1956,7 @@ sub _task_squares_data {
         for my $svc (@{$services}) {
             Thruk::Utils::set_data_row_cust_vars($svc, $allowed, $allowed_list);
             push @{$data}, { uniq         => $svc->{'host_name'}.';'.$svc->{'description'},
-                             name         => $c->req->parameters->{'service_label'} ? _task_squares_data_label($svc, $c->req->parameters->{'service_label'}) : $svc->{'host_name'}.' - '.$svc->{'description'},
+                             name         => $c->req->parameters->{'service_label'} ? _squares_data_label($svc, $c->req->parameters->{'service_label'}) : $svc->{'host_name'}.' - '.$svc->{'description'},
                              host_name    => $svc->{'host_name'},
                              description  => $svc->{'description'},
                              state        => $svc->{'has_been_checked'} == 0 ? 4 : $svc->{'state'},
@@ -1978,7 +1978,7 @@ sub _task_squares_data {
         for my $hst (@{$hosts}) {
             Thruk::Utils::set_data_row_cust_vars($hst, $allowed, $allowed_list);
             push @{$data}, { uniq         => $hst->{'name'},
-                             name         => $c->req->parameters->{'host_label'} ? _task_squares_data_label($hst, $c->req->parameters->{'host_label'}) : $hst->{'name'},
+                             name         => $c->req->parameters->{'host_label'} ? _squares_data_label($hst, $c->req->parameters->{'host_label'}) : $hst->{'name'},
                              host_name    => $hst->{'name'},
                              description  => '',
                              state        => $hst->{'state'},
@@ -2076,7 +2076,7 @@ sub _task_squares_data {
 }
 
 ##########################################################
-sub _task_squares_data_label {
+sub _squares_data_label {
     my($obj, $label) = @_;
     my $res = $label;
     for my $key (qw/host_name host_alias name alias description/) {
