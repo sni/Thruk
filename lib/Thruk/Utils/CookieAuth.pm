@@ -220,7 +220,7 @@ sub clean_session_files {
                     if($data && $data->{'fake'}) {
                         _audit_log("session", "short session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                         unlink($file);
-                    } else {
+                    } elsif(defined $data->{'username'}) {
                         $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
                     }
                 };
