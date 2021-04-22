@@ -56,13 +56,6 @@ sub remove_all {
     return(\@encoded);
 }
 
-sub end {
-    my($self) = @_;
-    $self->{workq}->end();
-    $self->{retq}->end();
-    return;
-}
-
 sub shutdown {
     #&timing_breakpoint('Pool::Simple::shutdown');
     for my $thr (threads->list()) {

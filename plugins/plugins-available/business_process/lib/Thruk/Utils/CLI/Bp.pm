@@ -141,22 +141,13 @@ sub cmd {
     };
 
     # calculate bps
-    my @child_pids;
     my $last_bp;
     my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
     if($rate < 1) { $rate = 1; }
     if($rate > 5) { $rate = 5; }
     my $timeout = ($rate*60) -5;
     local $SIG{ALRM} = sub {
-        # kill child pids
-        for my $pid (@child_pids) {
-            kill(2, $pid);
-        }
-        sleep(1);
-        for my $pid (@child_pids) {
-            kill(9, $pid);
-        }
-        die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown'));
+        die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp : 'unknown'));
     };
     alarm($timeout);
 
@@ -165,8 +156,8 @@ sub cmd {
 
     undef $id if $id eq 'all';
     my $t0     = [gettimeofday];
-    my $bps    = Thruk::BP::Utils::load_bp_data($c, $id);
-    my $num_bp = scalar @{$bps};
+    my $ids    = Thruk::BP::Utils::get_bp_ids($c, $id);
+    my $num_bp = scalar @{$ids};
 
     # update bp
     my $hosts = {};
@@ -174,102 +165,68 @@ sub cmd {
         my $vars = Thruk::Utils::get_custom_vars($c, $hst);
         $hosts->{$hst->{'name'}}->{$vars->{'THRUK_BP_ID'}} = $hst->{'peer_key'};
     }
-    for my $bp (@{$bps}) {
-        if($hosts->{$bp->{'name'}}->{$bp->{'id'}}) {
-            $bp->{'bp_backend'} = $hosts->{$bp->{'name'}}->{$bp->{'id'}};
-        }
-    }
 
     my $worker_num = int($c->config->{'Thruk::Plugin::BP'}->{'worker'} || 0);
     if($worker_num == 0) {
         # try to autmatically find a suitable number of workers
         $worker_num = 1;
-        if($num_bp > 20) {
-            $worker_num = 3;
-        }
-        if($num_bp > 100) {
-            $worker_num = 5;
-        }
+        if($num_bp >  20) { $worker_num = 3; }
+        if($num_bp > 100) { $worker_num = 5; }
+        if($num_bp > 500) { $worker_num = 8; }
     }
-    if($opt->{'worker'} ne 'auto') {
-        $worker_num = $opt->{'worker'};
-    }
-    if($worker_num <= 0) {
-        $worker_num = 1;
-    }
-    if($worker_num > $num_bp) {
-        $worker_num = $num_bp;
-    }
+    if($opt->{'worker'} ne 'auto') { $worker_num = $opt->{'worker'}; }
+    if($worker_num <= 0)           { $worker_num = 1; }
+    if($worker_num > $num_bp)      { $worker_num = $num_bp; }
+
     alarm(0);
     if($worker_num > 0) {
         alarm($timeout);
     }
     _debug("calculating business process with ".$worker_num." workers") if $worker_num > 1;
-    my $chunks = Thruk::Utils::array_chunk($bps, $worker_num);
 
-    my $rc = 0;
-    for my $chunk (@{$chunks}) {
-        my $child_pid;
-        if($worker_num > 1) {
-            $child_pid = fork();
-            die("failed to fork: $!") if $child_pid == -1;
-        }
-        if(!$child_pid) {
-            if($worker_num > 1) {
-                Thruk::Utils::External::do_child_stuff($c);
+    my $numsize = length("$num_bp");
+    my $nr      = 0;
+    my $rc      = 0;
+    Thruk::Utils::scale_out(
+        scale  => $worker_num,
+        jobs   => $ids,
+        worker => sub {
+            my($id) = @_;
+            my $t1 = [gettimeofday];
+            my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
+            my $bp;
+            if($bps && $bps->[0]) { $bp = $bps->[0]; }
+            return unless $bp;
+            if($hosts->{$bp->{'name'}}->{$bp->{'id'}}) {
+                $bp->{'bp_backend'} = $hosts->{$bp->{'name'}}->{$bp->{'id'}};
             }
-            my $local_rc = 0;
-            my $total = scalar @{$chunk};
-            my $nr    = 0;
-            my $numsize = length("$total");
-            for my $bp (@{$chunk}) {
-                my $t1 = [gettimeofday];
-                $nr++;
-                $last_bp = $bp;
-                eval {
-                    $bp->update_status($c);
-                };
-                my $err = $@ || $bp->{'failed'};
-                if($err) {
-                    _error("[$$] bp '".$bp->{'name'}."' failed: ".$err);
-                    $local_rc = 1;
-                    $rc = 1;
-                }
-                my $elapsed = tv_interval($t1);
-                _debug(sprintf("[%d] %0".$numsize."d/%d bp %s in %.3fs | % 4s.tbp | '%s'",
-                    $$,
-                    $nr,
-                    $total,
-                    $err ? 'update failed' : 'update OK',
-                    $elapsed,
-                    $bp->{'id'},
-                    $bp->{'name'},
-                ));
+            eval {
+                $bp->update_status($c);
+            };
+            my $err = $@ || $bp->{'failed'};
+            if($err) {
+                _error("bp '".$bp->{'name'}."' failed: ".$err);
             }
-            exit($local_rc) if $worker_num > 1;
-        } else {
-            _debug("worker start with pid: ".$child_pid);
-            push @child_pids, $child_pid;
+            my $elapsed = tv_interval($t1);
+            return($bp->{'id'}, $bp->{'name'}, $err, $elapsed);
+        },
+        collect => sub {
+            my($res, $item) = @_;
+            my($id, $name, $err, $elapsed) = @{$item};
+            _debug(sprintf("%0".$numsize."d/%d bp %s in %.3fs | % 4s.tbp | '%s'",
+                ++$nr,
+                $num_bp,
+                $err ? 'update failed' : 'update OK',
+                $elapsed,
+                $id,
+                $name,
+            ));
+            #$last_bp = $name;
+            #$rc = 1 if $err;
+            #return($res);
         }
-    }
-    if($worker_num > 1) {
-        alarm($timeout);
-        _debug("waiting ".$timeout." seconds for workers to finish");
-        while(1) {
-            my $pid = wait();
-            last if $pid == -1;
-            if($? != 0) {
-                $rc = $?>>8;
-                _error("worker ".$pid." exited with rc: ".$rc);
-            } else {
-                _debug("worker ".$pid." exited ok");
-            }
-            @child_pids = grep(!/^$pid$/mx, @child_pids);
-            Time::HiRes::sleep(0.1);
-        }
-        alarm(0);
-        _debug("all worker finished");
-    }
+    );
+
     my $elapsed = tv_interval($t0);
     if(!defined $id) {
         $c->metrics->set('business_process_duration_seconds', $elapsed, "business process calculation duration in seconds");
