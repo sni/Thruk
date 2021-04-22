@@ -740,7 +740,7 @@ do all child things after a fork
 
 =cut
 sub do_child_stuff {
-    my($c, $dir, $id) = @_;
+    my($c, $dir, $id, $keep_stdout_err) = @_;
 
     POSIX::setsid() or die "Can't start a new session: $!";
 
@@ -783,13 +783,15 @@ sub do_child_stuff {
     open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
-    my $fallback_log = '/dev/null';
-    $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if $c->config->{'log4perl_logfile_in_use'};
-    $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
-    $fallback_log    = $dir."/stderr" if $dir;
-    open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
-    $fallback_log    = $dir."/stdout" if $dir;
-    open(*STDOUT, ">>", $fallback_log) || die "can't reopen stdout to $fallback_log: $!";
+    unless($keep_stdout_err) {
+        my $fallback_log = '/dev/null';
+        $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if $c->config->{'log4perl_logfile_in_use'};
+        $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
+        $fallback_log    = $dir."/stderr" if $dir;
+        open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
+        $fallback_log    = $dir."/stdout" if $dir;
+        open(*STDOUT, ">>", $fallback_log) || die "can't reopen stdout to $fallback_log: $!";
+    }
 
     ## no critic
     $|=1; # autoflush
