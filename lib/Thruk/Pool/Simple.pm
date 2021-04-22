@@ -5,6 +5,7 @@ use strict;
 use threads qw/yield/;
 use Thread::Queue ();
 use Cpanel::JSON::XS qw/decode_json encode_json/;
+use Thruk::Utils::Log qw/:all/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
@@ -74,11 +75,17 @@ sub _handle_work {
     local $SIG{'KILL'} = sub { exit; };
     while(my $job = $self->{workq}->dequeue()) {
         #&timing_breakpoint('Pool::Simple::_handle_work waited');
-        my $enc = decode_json($job);
-        #&timing_breakpoint('Pool::Simple::_handle_work decoded');
-        my @res = $self->{'handler'}(@{$enc});
+        my @res;
+        eval {
+            my $enc = decode_json($job);
+            #&timing_breakpoint('Pool::Simple::_handle_work decoded');
+            @res = $self->{'handler'}(@{$enc});
+        };
+        if($@) {
+            _warn("worker failed: %s", $@);
+        }
         #&timing_breakpoint('Pool::Simple::_handle_work worked');
-        $enc = encode_json(\@res);
+        my $enc = encode_json(\@res);
         #&timing_breakpoint('Pool::Simple::_handle_work encoded');
         $self->{retq}->enqueue($enc);
         #&timing_breakpoint('Pool::Simple::_handle_work enqueued');
