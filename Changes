@@ -5,6 +5,8 @@ next:
             - add columns comment to csv output
             - add /hostgroups/<name>/outages
             - add /serviceroups/<name>/outages
+            - add /hosts/<name>/outages
+            - add /servics/<host>/<service>/outages
 
 2.42     Fri Apr 16 21:33:20 CEST 2021
           - remove `check_local_states` and `state_host` from backends, use LMD instead
