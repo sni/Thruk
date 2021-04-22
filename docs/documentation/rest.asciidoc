@@ -876,6 +876,33 @@ Update hostgroup configuration partially.
 
 Deletes given hostgroup from configuration.
 
+=== GET /hostgroups/<name>/outages
+
+list of outages for this hostgroup.
+
+Optional arguments:
+
+  * type          - both | hosts | services
+  * timeperiod    - last24hours | lastmonth | thismonth | ...
+  * start         - unix timestamp
+  * end           - unix timestamp
+  * withdowntimes - 0/1 wheter downtimes should count as outages
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
+
 === GET /hostgroups/<name>/stats
 
 hash of livestatus hostgroup statistics.
@@ -1162,6 +1189,33 @@ Update servicegroup configuration partially.
 === DELETE /servicegroups/<name>/config
 
 Deletes given servicegroup from configuration.
+
+=== GET /servicegroups/<name>/outages
+
+list of outages for this servicegroup.
+
+Optional arguments:
+
+  * type          - both | hosts | services
+  * timeperiod    - last24hours | lastmonth | thismonth | ...
+  * start         - unix timestamp
+  * end           - unix timestamp
+  * withdowntimes - 0/1 wheter downtimes should count as outages
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
 
 === GET /servicegroups/<name>/stats
 

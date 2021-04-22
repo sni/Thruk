@@ -25,6 +25,14 @@ my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' 
 my $host_name = $test_svc->{'host_name'};
 my $service_description = $test_svc->{'description'};
 
+# get sample hostgroup
+my $test_hostgroup = $c->sub_request('/r/hostgroups', 'GET', {'limit' => '1', 'columns' => 'name' })->[0] || die("need at least one hostgroup");
+my $host_group = $test_hostgroup->{'name'};
+
+# get sample servicegroup
+my $test_servicegroup = $c->sub_request('/r/servicegroups', 'GET', {'limit' => '1', 'columns' => 'name' })->[0] || die("need at least one servicegroup");
+my $service_group = $test_servicegroup->{'name'};
+
 my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
 _update_docs($c, "docs/documentation/rest_commands.asciidoc");
@@ -434,16 +442,22 @@ sub _fetch_keys {
     return if($url eq '/lmd/sites' && !$ENV{'THRUK_USE_LMD'});
     return if $doc =~ m/see\ /mxi;
 
-    my $host    = uri_escape($host_name);
-    my $service = uri_escape($service_description);
+    my $host         = uri_escape($host_name);
+    my $service      = uri_escape($service_description);
+    my $hostgroup    = uri_escape($host_group);
+    my $servicegroup = uri_escape($service_group);
 
     my $keys = {};
     $c->{'rendered'} = 0;
-    delete $c->req->parameters->{'sort'};
+    for my $param (sort keys %{$c->req->parameters}) {
+        delete $c->req->parameters->{$param};
+    }
     print STDERR "fetching keys for ".$url."\n";
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
     $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
+    $tst_url =~ s|/hostgroups/<name>|/hostgroups/$hostgroup|gmx;
+    $tst_url =~ s|/servicegroups/<name>|/servicegroups/$servicegroup|gmx;
     $tst_url =~ s|<name>|$host|gmx;
     $tst_url =~ s|<host>|$host|gmx;
     $tst_url =~ s|<service>|$service|gmx;
