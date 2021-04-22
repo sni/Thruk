@@ -17,6 +17,7 @@ use Data::Dumper qw/Dumper/;
 use Time::HiRes ();
 use POSIX ();
 use File::Slurp qw(read_file);
+use threads ();
 
 use Thruk::Base ();
 
@@ -139,7 +140,13 @@ sub _log {
     my $log = _init_logging();
     my $appender_changed;
     our $last_was_plain;
+    my $thread_str = _thread_id();
     if(defined $options->{'newline'} && !$options->{'newline'}) {
+        # progess log output does not work with threads, store and output all at once
+        if($thread_str) {
+            $log->{'_thr'}->{$thread_str} = $line;
+            return;
+        }
         # skip newline from format
         my $appenders = Log::Log4perl::appenders();
         for my $appender (values %{$appenders}) {
@@ -151,6 +158,11 @@ sub _log {
     }
     elsif($options->{'append'}) {
         # skip newline and timestamp
+        if($thread_str) {
+            $log->{'_thr'}->{$thread_str} = "" unless defined $log->{'_thr'}->{$thread_str};
+            $log->{'_thr'}->{$thread_str} .= $line;
+            return;
+        }
         my $appenders = Log::Log4perl::appenders();
         for my $appender (values %{$appenders}) {
             $layouts->{'original'} = $appender->layout() unless $layouts->{'original'};
@@ -168,6 +180,9 @@ sub _log {
         }
         $appender_changed = 1;
         $last_was_plain  = undef;
+    }
+    elsif($thread_str && $log->{'_thr'}->{$thread_str}) {
+        $line = (delete $log->{'_thr'}->{$thread_str}).$line;
     }
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth+2;
     for my $l (split/\n/mx, $line) {
@@ -411,8 +426,9 @@ sub _get_screen_logger {
 
     my $format = '[%d{ABSOLUTE}][%p] %m{chomp}';
     if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base::debug()) {
-        $format = '[%d{ABSOLUTE}]['.($use_color ? '%p{1}' : '%p').'][%-30Z] %m{chomp}';
+        $format = '[%d{ABSOLUTE}]['.($use_color ? '%p{1}' : '%p').'][%-30Z]%U %m{chomp}';
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
+        Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
     }
 
     my($pre, $post) = ("", "");
@@ -485,6 +501,14 @@ sub _striped_caller_information {
     if(length $str > 30) {
         $str = "...".substr($str, -27);
     }
+    return($str);
+}
+
+##############################################
+sub _thread_id {
+    my $str = "";
+    my $id = threads->tid();
+    $str = '[thr'.$id.']' if $id;
     return($str);
 }
 

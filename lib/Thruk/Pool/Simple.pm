@@ -13,8 +13,8 @@ sub new {
     die('no size given')    unless $arg{'size'};
     die('no handler given') unless $arg{'handler'};
     my $self = {
-        size    => $arg{'size'},
-        handler => $arg{'handler'},
+        size     => $arg{'size'},
+        handler  => $arg{'handler'},
     };
     $self->{workq} = Thread::Queue->new();
     $self->{retq}  = Thread::Queue->new();
@@ -33,7 +33,7 @@ sub add_bulk {
     #&timing_breakpoint('Pool::Simple::add_bulk');
     my @encoded;
     for my $job (@{$jobs}) {
-        push @encoded, encode_json($job);
+        push @encoded, encode_json(ref $job ? $job : [$job]);
     }
     #&timing_breakpoint('Pool::Simple::add_bulk encoded');
     $self->{workq}->enqueue(@encoded);
@@ -45,15 +45,22 @@ sub add_bulk {
 
 sub remove_all {
     my($self) = @_;
-    my @res = $self->{retq}->dequeue($self->{num});
-    $self->{num} = 0;
     #&timing_breakpoint('Pool::Simple::remove_all dequeue');
     my @encoded;
-    for my $res (@res) {
-        push @encoded, decode_json($res);
+    while($self->{num} > 0) {
+        my $res = $self->{retq}->dequeue();
+        push @encoded, decode_json($res) if $res;
+        $self->{num}--;
     }
     #&timing_breakpoint('Pool::Simple::remove_all decoded');
     return(\@encoded);
+}
+
+sub end {
+    my($self) = @_;
+    $self->{workq}->end();
+    $self->{retq}->end();
+    return;
 }
 
 sub shutdown {
@@ -76,9 +83,9 @@ sub _handle_work {
         #&timing_breakpoint('Pool::Simple::_handle_work waited');
         my $enc = decode_json($job);
         #&timing_breakpoint('Pool::Simple::_handle_work decoded');
-        my $res = $self->{'handler'}(@{$enc});
+        my @res = $self->{'handler'}(@{$enc});
         #&timing_breakpoint('Pool::Simple::_handle_work worked');
-        $enc = encode_json($res);
+        $enc = encode_json(\@res);
         #&timing_breakpoint('Pool::Simple::_handle_work encoded');
         $self->{retq}->enqueue($enc);
         #&timing_breakpoint('Pool::Simple::_handle_work enqueued');
@@ -107,7 +114,7 @@ Thruk::Pool::Simple - A simple thread-pool implementation
 
   $pool->add_bulk([\@arg1, \@arg2, ...])    # put some work onto the queue
 
-  my @results = $pool->remove_all();        # get all results
+  my @results = $pool->remove_all();        # get all results (blocks till all threads are finished)
 
 =head1 DESCRIPTION
 

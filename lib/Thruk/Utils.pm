@@ -3921,4 +3921,45 @@ sub text_table {
 
 ##############################################
 
+=head2 scale_out
+
+    scale_out( scale => worker_num, jobs => list of jobs, worker => sub ref, collect => sub ref )
+
+scale out worker, run jobs and returns result from collect sub.
+
+=cut
+sub scale_out {
+    my %opt = @_;
+
+    return if scalar @{$opt{'jobs'}} == 0;
+
+    if($opt{'scale'} == 1 || scalar @{$opt{'jobs'}} == 1) {
+        my $res = [];
+        for my $job (@{$opt{'jobs'}}) {
+            my @item = &{$opt{'worker'}}(@{$job});
+            &{$opt{'collect'}}($res, \@item);
+        }
+        return(@{$res});
+    }
+
+    require Thruk::Pool::Simple;
+    my $pool = Thruk::Pool::Simple->new(
+        size    => $opt{'scale'},
+        handler => $opt{'worker'},
+    );
+    $pool->add_bulk($opt{'jobs'});
+    my $results          = $pool->remove_all();
+    my $plugin_ref_count = 0;
+    my $log_count        = 0;
+    my $errors           = [];
+    my $res = [];
+    for my $r (@{$results}) {
+        &{$opt{'collect'}}($res, $r);
+    }
+    $pool->end();
+    return(@{$res});
+}
+
+##############################################
+
 1;

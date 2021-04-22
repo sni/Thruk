@@ -247,7 +247,7 @@ sub _do_thread {
     my $elapsed = tv_interval($t1);
     unshift @{$res}, $elapsed;
     unshift @{$res}, $key;
-    return($res);
+    return(@{$res});
 }
 
 ########################################
