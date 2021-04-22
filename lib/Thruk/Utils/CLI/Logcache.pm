@@ -267,7 +267,7 @@ sub cmd {
                     $elapsed,
                 ));
                 return($res);
-            }
+            },
         );
 
         my $elapsed = tv_interval($t0);

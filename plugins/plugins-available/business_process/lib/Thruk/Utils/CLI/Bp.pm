@@ -224,7 +224,7 @@ sub cmd {
             #$last_bp = $name;
             #$rc = 1 if $err;
             #return($res);
-        }
+        },
     );
 
     my $elapsed = tv_interval($t0);
