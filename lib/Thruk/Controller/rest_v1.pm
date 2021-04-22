@@ -236,10 +236,11 @@ sub _format_csv_output {
         $data = $list;
     }
 
+
     my $output;
     if(ref $data eq 'ARRAY') {
         my $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
-        $output = "";
+        $output = '#'.join(';', @{$columns})."\n";
         for my $d (@{$data}) {
             my $x = 0;
             for my $col (@{$columns}) {
