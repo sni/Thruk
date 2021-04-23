@@ -278,6 +278,15 @@ sub _escape_newlines {
 sub _format_human_output {
     my($c, $data) = @_;
 
+    if(ref $data eq 'HASH') {
+        my $list = [];
+        my $columns = [sort keys %{$data}];
+        for my $col (@{$columns}) {
+            push @{$list}, { key => $col, value => $data->{$col} };
+        }
+        $data = $list;
+    }
+
     $c->res->headers->content_type('text/plain');
     $c->stash->{'template'} = 'passthrough.tt';
     $c->stash->{'text'}     = Thruk::Utils::text_table(data => $data);
