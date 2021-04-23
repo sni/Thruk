@@ -151,14 +151,14 @@ sub get_bp_ids {
 
 =head2 next_free_bp_file
 
-    next_free_bp_file($c)
+    next_free_bp_file($c, [$id])
 
 return next free bp file
 
 =cut
 sub next_free_bp_file {
-    my($c) = @_;
-    my $num = 1;
+    my($c, $id) = @_;
+    my $num = $id // 1;
     my $base_folder = bp_base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
