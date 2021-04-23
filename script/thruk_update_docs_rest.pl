@@ -10,6 +10,7 @@ use Data::Dumper;
 use Thruk::Utils::CLI;
 use Thruk::Controller::rest_v1;
 use Thruk::Utils::IO;
+use Thruk::Utils::Log qw/:all/;
 
 ################################################################################
 my $c = Thruk::Utils::CLI->new()->get_c();
@@ -20,18 +21,13 @@ $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
 my $res = $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
 die("request failed: ".Dumper($res)) unless(ref $res eq 'HASH' && $res->{'message'} && $res->{'message'} =~ m/objects\ successfully/mx);
+
 # get sample host and service
-my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' => 'host_name,description' })->[0] || die("need at least one service");
-my $host_name = $test_svc->{'host_name'};
+my $test_svc = $c->sub_request('/r/services', 'GET', {'limit' => '1', 'columns' => 'host_name,description,host_groups,groups', 'host_groups[ne]' => '', 'groups[ne]' => '' })->[0] || die("need at least one service which has a hostgroup and a servicegroup");
+my $host_name           = $test_svc->{'host_name'};
 my $service_description = $test_svc->{'description'};
-
-# get sample hostgroup
-my $test_hostgroup = $c->sub_request('/r/hostgroups', 'GET', {'limit' => '1', 'columns' => 'name' })->[0] || die("need at least one hostgroup");
-my $host_group = $test_hostgroup->{'name'};
-
-# get sample servicegroup
-my $test_servicegroup = $c->sub_request('/r/servicegroups', 'GET', {'limit' => '1', 'columns' => 'name' })->[0] || die("need at least one servicegroup");
-my $service_group = $test_servicegroup->{'name'};
+my $host_group          = $test_svc->{'host_groups'}->[0];
+my $service_group       = $test_svc->{'groups'}->[0];
 
 my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
@@ -310,6 +306,23 @@ sub _update_docs {
     # set fake logcache
     $c->config->{'logcache'} = 'mysql://user:pw@localhost:3306/thruk' unless $c->config->{'logcache'};
 
+    # create fake outages
+    if($output_file =~ m/rest.asciidoc/mx) {
+        local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
+        my $host         = uri_escape($host_name);
+        my $service      = uri_escape($service_description);
+        my $hostgroup    = uri_escape($host_group);
+        my $servicegroup = uri_escape($service_group);
+        Thruk::Action::AddDefaults::set_enabled_backends($c);
+        $c->req->parameters->{'plugin_state'}  = 2;
+        $c->req->parameters->{'plugin_output'} = "$0 test";
+        Thruk::Controller::rest_v1::process_rest_request($c, "/hosts/".$host."/cmd/process_host_check_result", "POST");
+        Thruk::Controller::rest_v1::process_rest_request($c, "/services/".$host."/".$service."/cmd/process_service_check_result", "POST");
+        sleep(1);
+        Thruk::Controller::rest_v1::process_rest_request($c, "/hosts/".$host."/cmd/schedule_forced_host_check", "POST");
+        Thruk::Controller::rest_v1::process_rest_request($c, "/services/".$host."/".$service."/cmd/schedule_forced_svc_check", "POST");
+    };
+
     my $content    = read_file($output_file);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
@@ -374,7 +387,7 @@ sub _update_docs {
                         my $help = Thruk::Utils::IO::json_lock_retrieve($c->{'config'}->{'var_path'}.'/thruk.stats.help');
                         $desc = $help->{$doc->[0]};
                     }
-                    printf(STDERR "WARNING: no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
+                    _warn("no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
                     $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
                 }
                 $content .= "|===========================================\n\n\n";
@@ -452,7 +465,7 @@ sub _fetch_keys {
     for my $param (sort keys %{$c->req->parameters}) {
         delete $c->req->parameters->{$param};
     }
-    print STDERR "fetching keys for ".$url."\n";
+    _info("fetching keys for %s", $url);
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
     $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
@@ -464,6 +477,9 @@ sub _fetch_keys {
     if($tst_url eq "/config/files") {
         # column would be optimized away otherwise
         $c->req->parameters->{'sort'} = "content";
+    }
+    if($tst_url =~ "/outages") {
+        $c->req->parameters->{'includesoftstates'} = 1;
     }
     Thruk::Action::AddDefaults::set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::process_rest_request($c, $tst_url);
@@ -482,7 +498,8 @@ sub _fetch_keys {
         }
     }
     else {
-        print STDERR "ERROR: got no usable data in url ".$tst_url."\n".Dumper($data);
+        _warn("got no usable data in url %s", $tst_url);
+        _warn($data);
         return;
     }
     my $list = [];
