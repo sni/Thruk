@@ -882,11 +882,12 @@ list of outages for this hostgroup.
 
 Optional arguments:
 
-  * type          - both | hosts | services
-  * timeperiod    - last24hours | lastmonth | thismonth | ...
-  * start         - unix timestamp
-  * end           - unix timestamp
-  * withdowntimes - 0/1 wheter downtimes should count as outages
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
 
 [options="header"]
 |===========================================
@@ -1017,11 +1018,12 @@ list of outages for this host.
 
 Optional arguments:
 
-  * type          - both | hosts | services
-  * timeperiod    - last24hours | lastmonth | thismonth | ...
-  * start         - unix timestamp
-  * end           - unix timestamp
-  * withdowntimes - 0/1 wheter downtimes should count as outages
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
 
 [options="header"]
 |===========================================
@@ -1036,6 +1038,7 @@ Optional arguments:
 |start                             | unix timestamp of outage start
 |type                              | log entry type
 |===========================================
+
 
 === GET /hosts/<name>/services
 
@@ -1222,11 +1225,12 @@ list of outages for this servicegroup.
 
 Optional arguments:
 
-  * type          - both | hosts | services
-  * timeperiod    - last24hours | lastmonth | thismonth | ...
-  * start         - unix timestamp
-  * end           - unix timestamp
-  * withdowntimes - 0/1 wheter downtimes should count as outages
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
 
 [options="header"]
 |===========================================
@@ -1336,11 +1340,12 @@ list of outages for this service.
 
 Optional arguments:
 
-  * type          - both | hosts | services
-  * timeperiod    - last24hours | lastmonth | thismonth | ...
-  * start         - unix timestamp
-  * end           - unix timestamp
-  * withdowntimes - 0/1 wheter downtimes should count as outages
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
 
 [options="header"]
 |===========================================
@@ -1355,6 +1360,7 @@ Optional arguments:
 |start                             | unix timestamp of outage start
 |type                              | log entry type
 |===========================================
+
 
 === GET /services/stats
 
