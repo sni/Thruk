@@ -161,13 +161,13 @@ sub index {
 
 =head2 process_rest_request
 
-  process_rest_request($c, $path_info)
+  process_rest_request($c, $path_info, [$method])
 
 returns json response
 
 =cut
 sub process_rest_request {
-    my($c, $path_info) = @_;
+    my($c, $path_info, $method) = @_;
 
     my $data;
     my $raw_body = $c->req->raw_body;
@@ -179,7 +179,7 @@ sub process_rest_request {
 
     if(!$data) {
         eval {
-            $data = _fetch($c, $path_info);
+            $data = _fetch($c, $path_info, $method);
 
             # generic post processing
             $data = _post_processing($c, $data);
