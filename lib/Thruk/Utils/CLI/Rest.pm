@@ -175,8 +175,8 @@ sub _parse_args {
         Getopt::Long::GetOptionsFromArray($s,
             "H|header=s"      =>  $opt->{'headers'},
             "m|method=s"      => \$opt->{'method'},
-            "d|data=s"        =>  sub { _set_postdata($opt->{'postdata'}, 0, $src, @_); },
-            "D|rawdata=s"     =>  sub { _set_postdata($opt->{'postdata'}, 1, $src, @_); },
+            "d|data=s"        =>  sub { _set_postdata($opt, 0, $src, @_); },
+            "D|rawdata=s"     =>  sub { _set_postdata($opt, 1, $src, @_); },
             "o|output=s"      => \$opt->{'output'},
             "w|warning=s"     =>  $opt->{'warning'},
             "c|critical=s"    =>  $opt->{'critical'},
@@ -194,9 +194,6 @@ sub _parse_args {
             $opt->{'url'} = pop(@{$s});
         }
 
-        if($opt->{'postdata'} && scalar keys %{$opt->{'postdata'}} > 0 && !$opt->{'method'}) {
-            $opt->{'method'} = 'POST';
-        }
         $opt->{'method'} = 'GET' unless $opt->{'method'};
 
         push @commands, $opt;
@@ -207,7 +204,11 @@ sub _parse_args {
 
 ##############################################
 sub _set_postdata {
-    my($opt, $overwrite, $src, undef, $data) = @_;
+    my($opts, $overwrite, $src, undef, $data) = @_;
+    my $postdata = $opts->{'postdata'};
+    if(!$opts->{'method'}) {
+        $opts->{'method'} = 'POST';
+    }
 
     if($src && $src eq 'local' && $data && $data =~ m/^\@(.*)$/mx) {
         my $file = $1;
@@ -220,7 +221,7 @@ sub _set_postdata {
             _fatal("could not read file %s, file must contain hash data structure, got: %s", $file, ref $data);
         }
         for my $key (sort keys %{$data}) {
-            $opt->{$key} = $data->{$key};
+            $postdata->{$key} = $data->{$key};
         }
         return;
     }
@@ -234,17 +235,17 @@ sub _set_postdata {
             _fatal("failed to parse json data argument: %s", $@);
         }
         for my $key (sort keys %{$data}) {
-            $opt->{$key} = $data->{$key};
+            $postdata->{$key} = $data->{$key};
         }
         return;
     }
     my($key,$val) = split(/=/mx, $data, 2);
     return unless $key;
-    if(defined $opt->{$key} && !$overwrite) {
-        $opt->{$key} = [$opt->{$key}] unless ref $opt->{$key} eq 'ARRAY';
-        push @{$opt->{$key}}, $val;
+    if(defined $postdata->{$key} && !$overwrite) {
+        $postdata->{$key} = [$postdata->{$key}] unless ref $postdata->{$key} eq 'ARRAY';
+        push @{$postdata->{$key}}, $val;
     } else {
-        $opt->{$key} = $val;
+        $postdata->{$key} = $val;
     }
     return;
 }
