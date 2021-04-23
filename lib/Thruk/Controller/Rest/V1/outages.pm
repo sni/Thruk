@@ -120,6 +120,14 @@ sub _rest_get_servicegroup_outages {
 ##########################################################
 sub _rest_outages {
     my($c) = @_;
+    if($c->req->parameters->{'timeperiod'} && ($c->req->parameters->{'start'} || $c->req->parameters->{'end'})) {
+        return({
+                'message'     => 'use either timeperiod or start/end, not both.',
+                'code'        => 400,
+                'failed'      => Cpanel::JSON::XS::true,
+        });
+    }
+
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
     if($c->stash->{'has_error'}) {
         return({
