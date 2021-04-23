@@ -3834,6 +3834,7 @@ sub text_table {
     my %opt = @_;
     my $keys = $opt{'keys'};
     my $data = $opt{'data'};
+    confess("data must be an array") unless ref $data eq 'ARRAY';
     return if scalar @{$data} == 0;
     if(!$keys) {
         $keys = [sort keys %{$data->[0]}];
