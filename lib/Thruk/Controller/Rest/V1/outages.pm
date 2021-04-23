@@ -215,7 +215,7 @@ sub _rest_outages_clean_param {
     my($c) = @_;
     # cleanup parameters, would affect post rendering
     for my $param (qw/outages type s_filter h_filter include_host_services
-                      start end timeperiod t1 t2 withdowntimes/) {
+                      start end timeperiod t1 t2 withdowntimes includesoftstates/) {
         delete $c->req->parameters->{$param};
     }
     return;
