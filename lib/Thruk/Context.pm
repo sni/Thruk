@@ -669,11 +669,18 @@ sub sub_request {
         'plack.cookie.parsed' => $c->env->{'plack.cookie.parsed'},
         'plack.cookie.string' => $c->env->{'plack.cookie.string'},
     };
-    $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
     _debug2("sub_request to ".$url);
     my $sub_c = Thruk::Context->new($c->app, $env);
     $sub_c->{'user'} = $c->user;
     $sub_c->stash->{'remote_user'} = $c->stash->{'remote_user'};
+
+    $sub_c->req->parameters();
+    if($postdata) {
+        for my $key (sort keys %{$postdata}) {
+            $sub_c->req->body_parameters->{$key} = $postdata->{$key};
+            $sub_c->req->parameters->{$key}      = $postdata->{$key};
+        }
+    }
 
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;
