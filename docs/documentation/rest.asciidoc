@@ -1045,6 +1045,33 @@ Optional arguments:
 lists services for given host.
 alias for /services?host_name=<name>
 
+=== GET /hosts/outages
+
+list of outages for all hosts.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
 === GET /hosts/stats
 
 hash of livestatus host statistics.
@@ -1337,6 +1364,34 @@ Deletes given service from configuration.
 === GET /services/<host>/<service>/outages
 
 list of outages for this service.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
+
+=== GET /services/outages
+
+list of outages for all services.
 
 Optional arguments:
 

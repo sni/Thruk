@@ -22,6 +22,31 @@ Thruk Controller
 use Thruk::Utils::Avail ();
 
 ##########################################################
+# REST PATH: GET /hosts/outages
+# list of outages for all hosts.
+#
+# Optional arguments:
+#
+#   * type              - both | hosts | services
+#   * timeperiod        - last24hours | lastmonth | thismonth | ...
+#   * start             - unix timestamp
+#   * end               - unix timestamp
+#   * withdowntimes     - 0/1 wheter downtimes should count as outages
+#   * includesoftstates - 0/1 wheter soft states should be used as well
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hosts?/outages$%mx, \&_rest_get_hosts_outages, undef, 1);
+sub _rest_get_hosts_outages {
+    my($c) = @_;
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "hosts";
+    }
+    $c->req->parameters->{'host'} = 'all' unless $c->req->parameters->{'host'};
+    my $outages = _rest_outages($c);
+    delete $c->req->parameters->{'host'};
+    _rest_outages_clean_param($c);
+    return($outages);
+}
+
+##########################################################
 # REST PATH: GET /hosts/<name>/outages
 # list of outages for this host.
 #
@@ -64,6 +89,31 @@ sub _rest_get_hostgroup_outages {
     $c->req->parameters->{'hostgroup'} = $group;
     my $outages = _rest_outages($c);
     delete $c->req->parameters->{'hostgroup'};
+    _rest_outages_clean_param($c);
+    return($outages);
+}
+
+##########################################################
+# REST PATH: GET /services/outages
+# list of outages for all services.
+#
+# Optional arguments:
+#
+#   * type              - both | hosts | services
+#   * timeperiod        - last24hours | lastmonth | thismonth | ...
+#   * start             - unix timestamp
+#   * end               - unix timestamp
+#   * withdowntimes     - 0/1 wheter downtimes should count as outages
+#   * includesoftstates - 0/1 wheter soft states should be used as well
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/services?/outages$%mx, \&_rest_get_services_outages, undef, 1);
+sub _rest_get_services_outages {
+    my($c) = @_;
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "services";
+    }
+    $c->req->parameters->{'host'} = 'all' unless $c->req->parameters->{'host'};
+    my $outages = _rest_outages($c);
+    delete $c->req->parameters->{'host'};
     _rest_outages_clean_param($c);
     return($outages);
 }

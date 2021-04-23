@@ -1163,7 +1163,7 @@ sub _get_help_for_path {
 
 =head2 register_rest_path_v1
 
-    register_rest_path_v1($protocol, $path|$regex, $function, $roles)
+    register_rest_path_v1($protocol, $path|$regex, $function, [$roles], [$first])
 
 register rest path.
 
@@ -1171,9 +1171,13 @@ returns nothing
 
 =cut
 sub register_rest_path_v1 {
-    my($proto, $path, $function, $roles) = @_;
+    my($proto, $path, $function, $roles, $first) = @_;
     for my $prot (@{Thruk::Utils::list($proto)}) {
-        push @{$rest_paths}, [$prot, $path, $function, $roles];
+        if($first) {
+            unshift @{$rest_paths}, [$prot, $path, $function, $roles];
+        } else {
+            push @{$rest_paths}, [$prot, $path, $function, $roles];
+        }
     }
     return;
 }
