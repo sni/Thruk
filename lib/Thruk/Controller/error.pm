@@ -213,8 +213,8 @@ sub index {
             'code' => 500, # internal server error
         },
         '24'  => {
-            'mess'    => 'CSFR Security Alert',
-            'dscr'    => 'Using this formular requires a POST with a valid CSFR token or an API key.',
+            'mess'    => 'CSRF Security Alert',
+            'dscr'    => 'Using this formular requires a POST with a valid CSRF token or an API key.',
             'code'    => 403, # forbidden
             'log_req' => 1,
         },

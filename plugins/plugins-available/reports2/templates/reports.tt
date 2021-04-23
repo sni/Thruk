@@ -149,6 +149,7 @@
         <form action="reports2.cgi" method="POST">
         <input type="hidden" name="report" value="[% r.nr %]">
         <input type="hidden" name="action" value="remove">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
         <input type="image" name="submit" value="remove" src="[% url_prefix %]themes/[% theme %]/images/delete.png" style="width:16px; height: 16px;" onclick="return confirm('really remove?')" alt="remove report">
         </form>
       [% END %]
