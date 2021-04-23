@@ -1034,7 +1034,6 @@ Optional arguments:
 |host                              | host name
 |in_downtime                       | 0/1 flag wether this outage is in a downtime
 |plugin_output                     | last plugin output during outage
-|service                           | service description (only for service outages)
 |start                             | unix timestamp of outage start
 |type                              | log entry type
 |===========================================
@@ -1067,10 +1066,10 @@ Optional arguments:
 |host                              | host name
 |in_downtime                       | 0/1 flag wether this outage is in a downtime
 |plugin_output                     | last plugin output during outage
-|service                           | service description (only for service outages)
 |start                             | unix timestamp of outage start
 |type                              | log entry type
 |===========================================
+
 
 === GET /hosts/stats
 
