@@ -962,6 +962,7 @@ sub outages {
     my $in_timeperiod  = 1;
 
     for my $l (@{$logs}) {
+        next unless $l->{'type'};
         if($only_host_services) {
             next if  $l->{'host'} ne $host;
             next if !$l->{'service'};
