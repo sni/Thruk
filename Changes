@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Reporting:
+            - fix deleting reports
           - Rest
             - add columns comment to csv output
             - add /.../outages for hosts/services and groups
