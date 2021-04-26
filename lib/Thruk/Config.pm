@@ -31,7 +31,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.42.1';
+our $VERSION = '2.42.2';
 
 our $config;
 my $project_root = home() || confess('could not determine project_root from inc: '.Dumper(\%INC));
@@ -40,7 +40,7 @@ my $base_defaults = {
     'name'                                  => 'Thruk',
     'thrukversion'                          => &get_thruk_version(),
     'fileversion'                           => $VERSION,
-    'released'                              => 'April 16, 2021',
+    'released'                              => 'April 26, 2021',
     'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',

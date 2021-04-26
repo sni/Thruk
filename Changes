@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.42-2   Mon Apr 26 10:02:54 CEST 2021
           - Reporting:
             - fix deleting reports
           - Rest

@@ -20,7 +20,7 @@ if [ ! -e "root/thruk/javascript/thruk-${OLDFILEVERSION}.js" ]; then
     yes 'n' | perl Makefile.PL >/dev/null 2>&1
 fi
 if [ ! -e "root/thruk/javascript/thruk-${OLDFILEVERSION}.js" ]; then echo "Makefile was out of date, please run make again."; exit 1; fi
-if [ "$NEWVERSION" = "" ]; then NEWVERSION=$(dialog --stdout --inputbox "New Version:" 0 0 "${LAST_GIT_TAG}"); else NEWVERSION="$NEWVERSION"; fi
+if [ "$NEWVERSION" = "" ]; then NEWVERSION=$(dialog --stdout --inputbox "New Version (v2.40 / 2.40-2):" 0 35 "${LAST_GIT_TAG}"); else NEWVERSION="$NEWVERSION"; fi
 
 if [ "x$DEBEMAIL" = "x" ]; then
     export DEBEMAIL="Thruk Development Team <devel@thruk.org>"
