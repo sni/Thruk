@@ -13,7 +13,6 @@ Utilities Collection for CLI logging
 use warnings;
 use strict;
 use Cwd qw/abs_path/;
-use Data::Dumper qw/Dumper/;
 use Time::HiRes ();
 use POSIX ();
 use File::Slurp qw(read_file);
@@ -133,7 +132,8 @@ sub _log {
         return;
     }
     if(ref $line) {
-        return &_log($lvl, [Dumper($line)], $options);
+        require Thruk::Utils;
+        return &_log($lvl, [Thruk::Utils::dump_params($line, 0, 0)], $options);
     } elsif(scalar @{$data} > 0) {
         $line = sprintf($line, @{$data});
     }

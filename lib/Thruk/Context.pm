@@ -172,14 +172,26 @@ sub detach {
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($c, $1);
         $c->{'detached'} = 1;
-        die("prevent further page processing");
+        die("prevent further page processing from detach() via ".$filename.":".$line);
     }
     confess("detach: ".$url." at ".$c->req->url);
 }
 
+
 =head2 detach_error
 
-detach_error to other controller
+  detach_error($c, $data)
+
+end current request with an error.
+
+$data contains:
+{
+        msg                 short error message
+        descr               long description of the error
+        code                http return code, defaults to 500;
+        log                 flag wether error should be logged. Error codes > 500 are automatically logged if `log` is undefined
+        debug_information   more details which will be logged, (string / array)
+}
 
 =cut
 sub detach_error {
@@ -194,7 +206,7 @@ sub detach_error {
     if(!$c->{'errored'}) {
         Thruk::Controller::error::index($c, 99);
         $c->{'detached'} = 1;
-        die("prevent further page processing");
+        die("prevent further page processing from detach_eror() via ".$filename.":".$line);
     }
     confess("detach_error at ".$c->req->url);
 }

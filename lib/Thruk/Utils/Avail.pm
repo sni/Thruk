@@ -203,8 +203,9 @@ sub calculate_availability {
     if(exists $params->{s_filter}) {
         $servicefilter = $params->{s_filter};
         $service       = 1;
-        my $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
-        die('no service matches filter: '.Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ])) unless scalar @{$all_services} > 0;
+        my $filter     = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
+        my $all_services = $c->{'db'}->get_services(filter => $filter );
+        _die_no_matches($c, 'service', 'filter', @{$filter}) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
@@ -214,7 +215,7 @@ sub calculate_availability {
             }
         }
         if(scalar keys %{$services_data} == 0) {
-            return $c->detach('/error/index/15');
+            _die_no_matches($c, 'service', 'filter', @{$filter}) unless scalar @{$all_services} > 0;
         }
         $c->stash->{'services'} = $services_data;
 
@@ -241,8 +242,9 @@ sub calculate_availability {
         my @hostfilter;
         $hostfilter = $params->{h_filter};
 
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no such host: '.Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ])) unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', 'filter', @{$filter}) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
@@ -286,8 +288,9 @@ sub calculate_availability {
                 Thruk::Utils::combine_filter('-or', \@servicefilter),
             ]);
         }
-        $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
-        die('no such service: '.($service||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ])) unless scalar @{$all_services} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
+        $all_services = $c->{'db'}->get_services(filter => $filter);
+        _die_no_matches($c, 'service', 'name: '.$host.' - '.$service, @{$filter}) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
@@ -347,8 +350,9 @@ sub calculate_availability {
         $hostfilter        = Thruk::Utils::combine_filter('-or', \@hostfilter);
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
 
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no such host: '.($host||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ])) unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', "name: ".$host, @{$filter}) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
@@ -362,8 +366,9 @@ sub calculate_availability {
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
-        die('no hosts found for all') unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')] ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', undef, @{$filter}) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
         $logserviceheadfilter = { service_description => undef };
@@ -392,8 +397,9 @@ sub calculate_availability {
             $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
 
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no host found for hostgroup: '.$hostgroup) unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', 'hostgroup:' .$hostgroup, @{$filter}) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
             $groupfilter       = Thruk::Utils::combine_filter('-or', \@groupfilter);
@@ -471,10 +477,11 @@ sub calculate_availability {
         $groupfilter          = Thruk::Utils::combine_filter('-or', \@groupfilter);
         $servicefilter        = Thruk::Utils::combine_filter('-or', \@servicefilter);
 
-        my $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        my $filter       = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
+        my $all_services = $c->{'db'}->get_services(filter => $filter);
         my $groups       = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
 
-        die('no such host/service') unless scalar @{$all_services} > 0;
+        _die_no_matches($c, 'service', 'servicegroup: '.$servicegroup, @{$filter}) unless scalar @{$all_services} > 0;
 
         my $service_data;
         for my $service (@{$all_services}) {
@@ -1148,6 +1155,42 @@ sub _parse_bool_req {
     return(1) if(lc($val) eq 'yes');
     return(1) if($val eq '1');
     return(0);
+}
+
+
+##############################################
+sub _die_no_matches {
+    my($c, $type, $name, $authfilter, $otherfilter) = @_;
+
+    my $filter = Thruk::Utils::dump_params([$authfilter, $otherfilter], 0);
+    $filter =~ s/\n/ /gmx;
+
+    # if first part of filter isn't empty, its most likely a permission isse
+    if($authfilter) {
+        my $data;
+        if($type eq 'host') {
+            $data = $c->{'db'}->get_hosts(filter => [$otherfilter]);
+        }
+        elsif($type eq 'service') {
+            $data = $c->{'db'}->get_services(filter => [$otherfilter]);
+        }
+        # found anything when not using authentication
+        if($data && ref $data eq 'ARRAY' && scalar @{$data} > 0) {
+            $c->detach_error({
+                msg               => sprintf("insufficient permissions for user %s", $c->stash->{'remote_user'}//'?'),
+                descr             => sprintf("user %s has no permissions for any %s%s: %s", $c->stash->{'remote_user'}//'?', $type, $name ? " by ".$name : "", $filter),
+                code              => 400,
+                debug_information => [$authfilter, $otherfilter],
+            });
+        }
+    }
+    $c->detach_error({
+        msg               => sprintf("found no %s%s", $type, $name ? " by ".$name : ""),
+        descr             => sprintf("%s query%s returned no objects: %s", $type, $name ? " by ".$name : "", $filter),
+        code              => 400,
+        debug_information => [$authfilter, $otherfilter],
+    });
+    return;
 }
 
 1;

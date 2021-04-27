@@ -184,9 +184,14 @@ sub process_rest_request {
             # generic post processing
             $data = _post_processing($c, $data);
         };
-        if($@) {
-            $data = { 'message' => 'error during request', description => $@, code => 500 };
-            _error($@);
+        my $err = $@;
+        if($err) {
+            $data = { 'message' => 'error during request', description => $err, code => 500 };
+            if($c->{"detached"}) {
+                _debug($err);
+            } else {
+                _error($err);
+            }
         }
     }
 

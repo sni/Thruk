@@ -3014,12 +3014,15 @@ sub log_error_with_details {
     my($c, @errorDetails) = @_;
     _error("***************************");
     _error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
-    _error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    _error(sprintf("params:  %s\n", dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
     _error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
     _error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
     _error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
     for my $details (@errorDetails) {
         for my $line (@{list($details)}) {
+            if(ref $line ne '') {
+                $line = dump_params($line, 0, 0);
+            }
             for my $splitted (split(/\n|<br>/mx, $line)) {
                 _error($splitted);
             }
@@ -3705,19 +3708,23 @@ sub merge_host_dependencies {
 
 =head2 dump_params
 
-    dump_params($c->req->parameters)
+    dump_params($c->req->parameters, [$max_length], [$flat])
 
 returns stringified parameters
 
 =cut
 sub dump_params {
-    my($params) = @_;
+    my($params, $max_length, $flat) = @_;
+    $max_length = 250 unless defined $max_length;
+    $flat       = 1   unless defined $flat;
     $params = dclone($params);
-    local $Data::Dumper::Indent = 0;
+    local $Data::Dumper::Indent = 0 if $flat;
     my $dump = Dumper($params);
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = clean_credentials_from_string($dump);
-    $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
+    if($max_length && $max_length > 3 && length($dump) > $max_length) {
+        $dump    = substr($dump, 0, ($max_length-3)).'...';
+    }
     $dump    =~ s%;$%%gmx;
     return($dump);
 }

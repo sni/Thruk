@@ -1247,6 +1247,21 @@ sub debug {
 
 ##############################################
 
+=head2 dump2str
+
+  dump2str($anything, [$max_length], [$flat])
+
+returns string from object
+
+=cut
+sub dump2str {
+    my($any, $max_length, $flat) = @_;
+    return($any) if ref $any eq "";
+    return(Thruk::Utils::dump_params($any, $max_length, $flat));
+}
+
+##############################################
+
 =head2 peer_name
 
   get peer_name from dataset
