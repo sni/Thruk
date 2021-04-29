@@ -58,7 +58,7 @@
                       </tr>
                       [% END %]
                       <tr>
-                        <td colspan="3">
+                        <td colspan="3" align="center">
                           <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
                         </td>
                       </tr>
