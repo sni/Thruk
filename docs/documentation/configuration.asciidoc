@@ -1529,6 +1529,14 @@ ex.:
   lmd_timeout=5
 
 
+=== lmd_remote
+Instead of using LMD managed by Thruk, you can run your own LMD and let Thruk use that one
+instead
+
+ex.:
+
+  lmd_remote=localhost:3333
+
 
 === logcache
 Enables caching logfiles for faster access and less memory usage for

@@ -990,16 +990,17 @@ sub set_processinfo {
         $fetch = 1;
     }
     $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $safe == ADD_CACHED_DEFAULTS;
+    $fetch = 1 if $c->config->{'lmd_remote'};
     $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
-        $processinfo = $c->{'db'}->get_processinfo();
+        $processinfo = $c->{'db'}->get_processinfo() unless $c->config->{'lmd_remote'};
         if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0) {
             # may happen when no backends are selected or the current selected backends comes from a federation http
             $processinfo = {};
         }
-        if(ref $processinfo eq 'HASH') {
+        if(ref $processinfo eq 'HASH' || $c->config->{'lmd_remote'}) {
             if($ENV{'THRUK_USE_LMD'}) {
                 ($processinfo, $cached_data) = check_federation_peers($c, $processinfo, $cached_data);
             }
@@ -1326,13 +1327,14 @@ sub check_federation_peers {
         my $key = $row->{'key'};
         $existing->{$key} = 1;
         if(!$c->{'db'}->peers->{$key}) {
+            $row->{'parent'} = 'LMD' if(!$row->{'parent'} && $c->config->{'lmd_remote'});
             my $parent = $c->{'db'}->peers->{$row->{'parent'}};
             next unless $parent;
             my $subpeerconfig = {
                 name => $row->{'name'},
                 id   => $key,
                 type => $parent->{'peer_config'}->{'type'},
-                section => $row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name(),
+                section => $row->{'parent'} ? $row->{'section'} : ($row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name()),
                 options => $parent->{'peer_config'}->{'type'} eq 'http' ? dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
@@ -1369,7 +1371,7 @@ sub check_federation_peers {
             next;
         }
     }
-    if($changed) {
+    if($changed || !$processinfo) {
         $c->{'db'}->update_sections();
         # fetch missing processinfo
         $processinfo = $c->{'db'}->get_processinfo();

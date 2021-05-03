@@ -254,6 +254,8 @@ sub check_initial_start {
         return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
     }
 
+    return if $config->{'lmd_remote'};
+
     #&timing_breakpoint("lmd check_initial_start");
 
     local $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
@@ -339,6 +341,8 @@ send test query and kill hard if it does not respond
 =cut
 sub kill_if_not_responding {
     my($c, $config) = @_;
+
+    return if $config->{'lmd_remote'};
 
     my $lmd_timeout = $config->{'lmd_timeout'} // 5;
     return if $lmd_timeout <= 0;
