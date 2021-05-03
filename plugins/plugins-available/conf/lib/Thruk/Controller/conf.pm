@@ -911,7 +911,7 @@ sub _process_backends_page {
 
     my $backends = [];
     my $peers    = $c->{'db'}->get_peers(1);
-    push @{$peers}, {} if scalar @{$peers} == 0;
+    $peers = [{}] if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
         my $b = Thruk::Utils::dclone($p->{'peer_config'});
         next if(!$b->{'_LINE'} && $p->{'federation'});
