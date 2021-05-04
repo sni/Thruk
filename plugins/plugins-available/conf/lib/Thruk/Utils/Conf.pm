@@ -378,6 +378,7 @@ sub get_component_as_string {
         $string .= "        hidden  = ".$b->{'hidden'}."\n"  if $b->{'hidden'};
         $string .= "        groups  = ".$b->{'groups'}."\n"  if $b->{'groups'};
         $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
+        $string .= "        logcache_fetchlogs_command = ".$b->{'logcache_fetchlogs_command'}."\n" if $b->{'logcache_fetchlogs_command'};
         $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         for my $p (@{$b->{options}->{peer}}) {
         $string .= "            peer          = ".$p."\n";
@@ -404,6 +405,13 @@ sub get_component_as_string {
                 }
             }
             $string .= "        </configtool>\n";
+        }
+        if($b->{'lmd_options'} && scalar keys %{$b->{'lmd_options'}} > 0) {
+            $string .= "        <lmd_options>\n";
+            for my $key (sort keys %{$b->{'lmd_options'}}) {
+                $string .= "            $key      = ".$b->{'lmd_options'}->{$key}."\n";
+            }
+            $string .= "        </lmd_options>\n";
         }
         $string .= "    </peer>\n";
     }
