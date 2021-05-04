@@ -829,8 +829,9 @@ return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my($c, $data, $prefix, $add_host) = @_;
+    my($c, $data, $prefix, $add_host, $add_action_menu) = @_;
     $prefix = '' unless defined $prefix;
+    $add_action_menu = 1 unless defined $add_action_menu;
 
     my %hash;
 
@@ -856,7 +857,7 @@ sub get_custom_vars {
     }
 
     # add action menu from apply rules
-    if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+    if($add_action_menu && $c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
         for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (@{list($c->config->{'action_menu_apply'}->{$menu})}) {
