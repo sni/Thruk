@@ -639,6 +639,7 @@ sub _filter {
     my($c, $fname, $args) = @_;
 
     $c->stash->{'bp_custom_filter'} = Thruk::BP::Utils::get_custom_filter($c) unless defined $c->stash->{'bp_custom_filter'};
+    $c->stash->{'bp_custom_files'}  = {} unless $c->stash->{'bp_custom_files'};
     my $f;
     for my $tmp (@{$c->stash->{'bp_custom_filter'}}) {
         if($tmp->{'function'} eq $fname) {
@@ -651,19 +652,19 @@ sub _filter {
         return;
     }
     eval {
-        do($f->{'file'});
-        if($@) {
-            _info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+        # load each file only once
+        if(!$c->stash->{'bp_custom_files'}->{$f->{'file'}}) {
+            do($f->{'file'});
+            if($@) {
+                _info("internal error while loading filter file ".$f->{'file'}.": ".$@);
+            }
+            $c->stash->{'bp_custom_files'}->{$f->{'file'}} = 1;
         }
-        ## no critic
-        eval($fname.'($c, $args);');
-        ## use critic
-        if($@) {
-            _info("internal error in custom filter $fname: $@");
-        }
+        __PACKAGE__->can($fname)->($c, $args);
     };
-    if($@) {
-        _info("internal error in custom filter $fname: $@");
+    my $err = $@;
+    if($err) {
+        _warn("internal error in custom filter $fname: $err");
     }
 
     return;
