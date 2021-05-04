@@ -398,7 +398,7 @@ sub statusfilter {
     my($aggregation, $type, $filter, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
 
     $c->stash->{'minimal'} = 1; # do not fill totals boxes
-    my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '');
+    my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '', 1);
 
     my $node_filter = Thruk::Utils::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
     my($ack_filter, $downtime_filter, $unknown_filter, $extra) = (0,0,0, {});

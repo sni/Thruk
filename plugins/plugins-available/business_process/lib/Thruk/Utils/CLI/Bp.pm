@@ -153,9 +153,17 @@ sub cmd {
     # set backends to default list, bp result should be deterministic
     $c->{'db'}->enable_default_backends();
 
-    undef $id if $id eq 'all';
     my $t0     = [gettimeofday];
-    my $ids    = Thruk::BP::Utils::get_bp_ids($c, $id);
+    my $ids    = [];
+    if($id eq 'all') {
+        $ids = Thruk::BP::Utils::get_bp_ids($c);
+    } else {
+        for my $id ($id, @{$commandoptions}) {
+            my $local_ids = Thruk::BP::Utils::get_bp_ids($c, $id);
+            push @{$ids}, @{$local_ids};
+        }
+        $ids = Thruk::Utils::array_uniq($ids);
+    }
     my $num_bp = scalar @{$ids};
 
     # update bp

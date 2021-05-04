@@ -573,18 +573,18 @@ sub classic_filter {
 
 =head2 do_search
 
-  do_search($c, $searches, $prefix)
+  do_search($c, $searches, $prefix, [$strict])
 
-returns combined filter
+returns combined filter. When using strict, alias or display_name are not used.
 
 =cut
 sub do_search {
-    my( $c, $searches, $prefix ) = @_;
+    my( $c, $searches, $prefix, $strict ) = @_;
 
     my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
 
     for my $search ( @{$searches} ) {
-        my($tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter) = single_search($c, $search);
+        my($tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter) = single_search($c, $search, $strict);
         push @hostfilter,          $tmp_hostfilter          if defined $tmp_hostfilter;
         push @servicefilter,       $tmp_servicefilter       if defined $tmp_servicefilter;
         push @hostgroupfilter,     $tmp_hostgroupfilter     if defined $tmp_hostgroupfilter;
@@ -794,13 +794,13 @@ sub extend_filter {
 
 =head2 single_search
 
-  single_search($c, $search)
+  single_search($c, $search, [$strict])
 
 processes a single search box filter
 
 =cut
 sub single_search {
-    my( $c, $search ) = @_;
+    my( $c, $search, $strict ) = @_;
 
     my $errors = 0;
     my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
@@ -934,7 +934,6 @@ sub single_search {
 
             # check for wildcards
             if( CORE::index( $value, '*' ) >= 0 and $op eq '=' ) {
-
                 # convert wildcards into real regexp
                 my $searchhost = $value;
                 $searchhost = Thruk::Utils::convert_wildcards_to_regex($searchhost);
@@ -944,15 +943,27 @@ sub single_search {
                 push @servicetotalsfilter, { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
             }
             else {
-                push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
-                push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
-                push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
-                push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
+                if($strict || $op eq  '=') {
+                    push @hostfilter,          { $joinop => [ name      => { $op => $value } ] };
+                    push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value } ] };
+                    push @servicefilter,       { $joinop => [ host_name => { $op => $value } ] };
+                    push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value } ] };
+                } else {
+                    push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
+                    push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
+                    push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
+                    push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
+                }
             }
         }
         elsif ( $filter->{'type'} eq 'service' ) {
-            push @servicefilter,       { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
-            push @servicetotalsfilter, { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
+            if($strict || $op eq  '=') {
+                push @servicefilter,       { $joinop => [ description => { $op => $value } ] };
+                push @servicetotalsfilter, { $joinop => [ description => { $op => $value } ] };
+            } else {
+                push @servicefilter,       { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
+                push @servicetotalsfilter, { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
+            }
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
