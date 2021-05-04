@@ -602,6 +602,20 @@ sub get_host_totals_stats {
 
 ##########################################################
 
+=head2 get_host_less_stats
+
+  get_host_less_stats
+
+returns the host statistics but with less columns
+
+=cut
+
+sub get_host_less_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
 =head2 get_service_stats
 
 =cut
@@ -620,6 +634,20 @@ returns the services statistics used on the service/host details page
 =cut
 
 sub get_service_totals_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
+=head2 get_service_less_stats
+
+  get_service_less_stats
+
+returns the services statistics but with less columns
+
+=cut
+
+sub get_service_less_stats {
     confess("not implemented");
 }
 
