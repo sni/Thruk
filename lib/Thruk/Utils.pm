@@ -3944,8 +3944,9 @@ sub scale_out {
     if($opt{'scale'} == 1 || scalar @{$opt{'jobs'}} == 1) {
         my $res = [];
         for my $job (@{$opt{'jobs'}}) {
-            my @item = &{$opt{'worker'}}(ref $job eq 'ARRAY' ? @{$job} : $job);
-            &{$opt{'collect'}}($res, \@item);
+            my $item = [&{$opt{'worker'}}(ref $job eq 'ARRAY' ? @{$job} : $job)];
+            $item = &{$opt{'collect'}}($item);
+            push @{$res}, $item if $item;
         }
         return(@{$res});
     }
@@ -3956,12 +3957,7 @@ sub scale_out {
         handler => $opt{'worker'},
     );
     $pool->add_bulk($opt{'jobs'});
-    my $results = $pool->remove_all();
-    my $res     = [];
-    for my $r (@{$results}) {
-        &{$opt{'collect'}}($res, $r);
-    }
-    return(@{$res});
+    return($pool->remove_all($opt{'collect'}));
 }
 
 ##############################################

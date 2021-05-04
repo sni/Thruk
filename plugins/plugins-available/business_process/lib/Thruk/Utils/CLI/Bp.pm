@@ -141,13 +141,12 @@ sub cmd {
     };
 
     # calculate bps
-    my $last_bp;
     my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
     if($rate < 1) { $rate = 1; }
     if($rate > 5) { $rate = 5; }
     my $timeout = ($rate*60) -5;
     local $SIG{ALRM} = sub {
-        die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp : 'unknown'));
+        die("hit ".$timeout."s timeout");
     };
     alarm($timeout);
 
@@ -211,7 +210,7 @@ sub cmd {
             return($bp->{'id'}, $bp->{'name'}, $err, $elapsed);
         },
         collect => sub {
-            my($res, $item) = @_;
+            my($item) = @_;
             my($id, $name, $err, $elapsed) = @{$item};
             _debug(sprintf("%0".$numsize."d/%d bp %s in %.3fs | % 4s.tbp | '%s'",
                 ++$nr,
@@ -221,9 +220,6 @@ sub cmd {
                 $id,
                 $name,
             ));
-            #$last_bp = $name;
-            #$rc = 1 if $err;
-            #return($res);
         },
     );
 

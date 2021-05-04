@@ -34,6 +34,8 @@ makes sure lmd process is running
 sub check_proc {
     my($config, $c, $log_missing) = @_;
 
+    return if $config->{'lmd_remote'};
+
     my $lmd_dir    = $config->{'tmp_path'}.'/lmd';
     my $logfile    = $lmd_dir.'/lmd.log';
     my $size       = -s $logfile;

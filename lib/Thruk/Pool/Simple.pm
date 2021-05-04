@@ -45,13 +45,19 @@ sub add_bulk {
 }
 
 sub remove_all {
-    my($self) = @_;
+    my($self, $cb) = @_;
     #&timing_breakpoint('Pool::Simple::remove_all dequeue');
     my @encoded;
     while($self->{num} > 0) {
         my $res = $self->{retq}->dequeue();
-        push @encoded, decode_json($res) if $res;
         $self->{num}--;
+        if($res) {
+            $res = decode_json($res);
+        }
+        if($cb) {
+            $res = &{$cb}($res);
+        }
+        push @encoded, $res if $res;
     }
     #&timing_breakpoint('Pool::Simple::remove_all decoded');
     return(\@encoded);

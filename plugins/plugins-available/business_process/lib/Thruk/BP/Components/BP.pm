@@ -863,7 +863,7 @@ sub _submit_results_to_core_backend {
 
     my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
     my $peer = $c->{'db'}->get_peer_by_key($name);
-    die("no backend found by name ".$name) unless $peer;
+    die("configured result_backend ".$name." does not exist.") unless $peer;
     my $pkey = $peer->peer_key();
 
     for my $id (@{$results}) {
@@ -941,6 +941,7 @@ sub _sync_ack_downtime_status {
         $c->{'no_result_warned'} = 1;
         return;
     }
+    return unless $peer;
     my $pkey   = $peer->peer_key();
     my $author = "(thruk)";
 
