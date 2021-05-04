@@ -1133,6 +1133,52 @@ sub get_host_totals_stats {
 
 ##########################################################
 
+=head2 get_host_less_stats
+
+  get_host_less_stats
+
+same as get_host_stats but less numbers and therefore faster
+
+=cut
+sub get_host_less_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststatsless')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_host_less_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
+        'plain_down'                        => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'down_and_ack'                      => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
+        'down_and_scheduled'                => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+        'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
+        'plain_unreachable'                 => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unreachable_and_ack'               => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+        'unreachable_and_scheduled'         => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('hoststatsless');
+    return($self->get_host_stats(%options));
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -1244,6 +1290,56 @@ sub get_service_totals_stats {
     ];
     $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
     return($self->get_service_totals_stats(%options));
+}
+
+##########################################################
+
+=head2 get_service_less_stats
+
+  get_service_less_stats
+
+same as get_service_stats but less numbers and therefore faster
+
+=cut
+sub get_service_less_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestatsless')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_service_less_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    # unhandled are required for playing sounds on details page
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'plain_ok'                          => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+        'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+        'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+        'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+        'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
+        'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('servicestatsless');
+    return($self->get_service_less_stats(%options));
 }
 
 ##########################################################
