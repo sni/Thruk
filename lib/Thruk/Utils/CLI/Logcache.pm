@@ -227,7 +227,8 @@ sub cmd {
         my $numsize = length("$num_sites");
 
         my $nr = 0;
-        my($log_count, $plugin_ref_count, $errors) = Thruk::Utils::scale_out(
+        my($log_count, $plugin_ref_count, $errors) = (0,0,[]);
+        Thruk::Utils::scale_out(
             scale  => $worker_num,
             jobs   => $backends,
             worker => sub {
@@ -253,12 +254,12 @@ sub cmd {
                 return($log_count, $plugin_ref_count, $err, $elapsed);
             },
             collect => sub {
-                my($res, $item) = @_;
-                my($log_count, $plugin_ref_count, $err, $elapsed) = @{$item};
-                $res->[0] += $log_count;
-                $res->[1] += $plugin_ref_count;
-                $res->[2] = [] unless $res->[2];
-                push @{$res->[2]}, $err if $err;
+                my($item) = @_;
+                $log_count        += $item->[0];
+                $plugin_ref_count += $item->[1];
+                my $err            = $item->[2];
+                my $elapsed        = $item->[3];
+                push @{$errors}, $err if $err;
                 _debug(sprintf("%0".$numsize."d/%d backend %s %s in %.3fs",
                     ++$nr,
                     $num_sites,
@@ -266,7 +267,7 @@ sub cmd {
                     $err ? 'FAILED' : 'OK',
                     $elapsed,
                 ));
-                return($res);
+                return;
             },
         );
 
