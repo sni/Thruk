@@ -227,7 +227,7 @@ sub cmd {
     );
 
     my $elapsed = tv_interval($t0);
-    if(!defined $id) {
+    if($id eq 'all') {
         $c->metrics->set('business_process_duration_seconds', $elapsed, "business process calculation duration in seconds");
         $c->metrics->set('business_process_last_update', time(), "timestamp of last business process calculation");
         $c->metrics->set('business_process_total', $num_bp, "total number of business processes");
