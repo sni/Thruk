@@ -1451,7 +1451,7 @@ sub check_global_lock {
                 return;
             }
             _warn("WARNING: removing stale lock file");
-            unlink($c->config->{'tmp_path'}."/logcache_import.lock", $$);
+            unlink($c->config->{'tmp_path'}."/logcache_import.lock");
         }
     }
     return(1);

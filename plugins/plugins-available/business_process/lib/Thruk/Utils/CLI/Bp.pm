@@ -59,6 +59,7 @@ use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval sleep/;
 use Thruk::Utils;
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Pidfile ();
 
 ##############################################
 
@@ -141,14 +142,12 @@ sub cmd {
     };
 
     # calculate bps
-    my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
-    if($rate < 1) { $rate = 1; }
-    if($rate > 5) { $rate = 5; }
-    my $timeout = ($rate*60) -5;
-    local $SIG{ALRM} = sub {
-        die("hit ".$timeout."s timeout");
-    };
-    alarm($timeout);
+    my $lockfile;
+    if($ENV{'THRUK_CRON'} && $id eq 'all') {
+        $lockfile = $c->config->{'tmp_path'}."/bp.lock";
+        my $lock = Thruk::Utils::Pidfile::lock($c, $lockfile);
+        _fatalf("Previous business process calculation still running (pid %s). Exiting...", $lock) if $lock;
+    }
 
     # set backends to default list, bp result should be deterministic
     $c->{'db'}->enable_default_backends();
@@ -185,10 +184,6 @@ sub cmd {
     if($worker_num <= 0)           { $worker_num = 1; }
     if($worker_num > $num_bp)      { $worker_num = $num_bp; }
 
-    alarm(0);
-    if($worker_num > 0) {
-        alarm($timeout);
-    }
     _debug("calculating business process with ".$worker_num." workers") if $worker_num > 1;
 
     my $numsize = length("$num_bp");
@@ -248,6 +243,10 @@ sub cmd {
     }
 
     $c->stats->profile(end => "_cmd_bp($action)");
+
+    if($lockfile) {
+        Thruk::Utils::Pidfile::unlock($c, $lockfile);
+    }
 
     if($rc == 0) {
         return(sprintf("OK - %d business processes updated in %.2fs (%.1f/s)\n", $num_bp, $elapsed, ($num_bp/$elapsed)), 0);
