@@ -49,11 +49,9 @@
       [% END %]
     </form>
     <div class="currentversioninfo">
-      <div class="version"><a href="https://github.com/sni/Thruk/blob/master/Changes" target="_blank">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</a></div>
-      <div class="releasedate">[% c.config.released %]</div>
+      <div class="version"><a href="https://www.thruk.org/" target="_blank">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</a></div>
     </div>
   </div>
-  [% PROCESS _disclaimer.tt %]
 
   <script type="text/javascript">
   <!--

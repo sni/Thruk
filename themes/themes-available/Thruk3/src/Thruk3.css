@@ -62,7 +62,7 @@ BUTTON.round.big {
  * Login Page
  */
 BODY.loginpage {
-    @apply flex flex-col text-center;
+    @apply flex flex-col text-center h-screen w-screen;
     background: #f1f1f1;
     background: -moz-radial-gradient(center, ellipse cover,    #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* FF3.6-15 */
     background: -webkit-radial-gradient(center, ellipse cover, #f1f1f1 0%, #eeeeee 65%, #b0bec5 100%); /* Chrome10-25,Safari5.1-6 */
@@ -90,9 +90,6 @@ BODY.loginpage {
 
     DIV.loginmask DIV.version {
         @apply font-bold;
-    }
-    DIV.currentversioninfo {
-        @apply pb-3;
     }
 
     DIV.mainfooter {
