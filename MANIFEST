@@ -89,6 +89,7 @@ lib/Thruk/Controller/Rest/V1/broadcast.pm
 lib/Thruk/Controller/Rest/V1/cluster.pm
 lib/Thruk/Controller/Rest/V1/cmd.pm
 lib/Thruk/Controller/Rest/V1/logcache.pm
+lib/Thruk/Controller/Rest/V1/outages.pm
 lib/Thruk/Controller/Rest/V1/recurring_downtimes.pm
 lib/Thruk/Controller/rest_v1.pm
 lib/Thruk/Controller/restricted.pm
@@ -150,6 +151,7 @@ lib/Thruk/Utils/LMD.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
 lib/Thruk/Utils/OAuth.pm
+lib/Thruk/Utils/Pidfile.pm
 lib/Thruk/Utils/Plugin.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
 lib/Thruk/Utils/References.pm
@@ -178,8 +180,8 @@ plugins/plugins-available/business_process/lib/Thruk/Controller/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Controller/Rest/V1/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Utils/CLI/Bp.pm
 plugins/plugins-available/business_process/preview.png
-plugins/plugins-available/business_process/root/bp-2.40.2.css
-plugins/plugins-available/business_process/root/bp-2.40.2.js
+plugins/plugins-available/business_process/root/bp-2.42.2.css
+plugins/plugins-available/business_process/root/bp-2.42.2.js
 plugins/plugins-available/business_process/root/bp-ie-fixes.js
 plugins/plugins-available/business_process/root/images/lock.png
 plugins/plugins-available/business_process/root/images/testmode_critical.png
@@ -372,8 +374,8 @@ plugins/plugins-available/mobile/root/img/ndisabled.gif
 plugins/plugins-available/mobile/root/img/passiveonly.gif
 plugins/plugins-available/mobile/root/img/startup.png
 plugins/plugins-available/mobile/root/img/thruk.png
-plugins/plugins-available/mobile/root/mobile-2.40.2.css
-plugins/plugins-available/mobile/root/mobile-2.40.2.js
+plugins/plugins-available/mobile/root/mobile-2.42.2.css
+plugins/plugins-available/mobile/root/mobile-2.42.2.js
 plugins/plugins-available/mobile/root/vendor/jqm-1.4.5/images/ajax-loader.gif
 plugins/plugins-available/mobile/root/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.css
 plugins/plugins-available/mobile/root/vendor/jqm-1.4.5/jquery.mobile-1.4.5.min.js
@@ -556,7 +558,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_tabbar.js
 plugins/plugins-available/panorama/root/js/panorama_js_tabbar_search.js
 plugins/plugins-available/panorama/root/js/panorama_js_track_timers.js
 plugins/plugins-available/panorama/root/js/panorama_js_utils_base64.js
-plugins/plugins-available/panorama/root/panorama-2.40.2.css
+plugins/plugins-available/panorama/root/panorama-2.42.2.css
 plugins/plugins-available/panorama/routes
 plugins/plugins-available/panorama/scripts/disable_debug.sh
 plugins/plugins-available/panorama/scripts/enable_debug.sh
@@ -594,9 +596,11 @@ plugins/plugins-available/reports2/templates/reports/comp/page_cover.tt
 plugins/plugins-available/reports2/templates/reports/comp/page_standard.tt
 plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt
 plugins/plugins-available/reports2/templates/reports/comp/report.tt
+plugins/plugins-available/reports2/templates/reports/comp/sla_details.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_by_time.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_fixed.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_page.tt
+plugins/plugins-available/reports2/templates/reports/comp/sla_outage_details.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_outages.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_outages_latest.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_outages_worst.tt
@@ -604,7 +608,6 @@ plugins/plugins-available/reports2/templates/reports/comp/sla_prepare.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_render_settings.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_table.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph.tt
-plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph_outage.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt
 plugins/plugins-available/reports2/templates/reports/eventlog.tt
 plugins/plugins-available/reports2/templates/reports/locale/de.tt
@@ -617,6 +620,8 @@ plugins/plugins-available/reports2/templates/reports/report_from_url.tt
 plugins/plugins-available/reports2/templates/reports/sla_host.tt
 plugins/plugins-available/reports2/templates/reports/sla_host_outage.tt
 plugins/plugins-available/reports2/templates/reports/sla_hostgroup.tt
+plugins/plugins-available/reports2/templates/reports/sla_outage.tt
+plugins/plugins-available/reports2/templates/reports/sla_report.tt
 plugins/plugins-available/reports2/templates/reports/sla_service.tt
 plugins/plugins-available/reports2/templates/reports/sla_service_outage.tt
 plugins/plugins-available/reports2/templates/reports/sla_servicegroup.tt
@@ -663,12 +668,12 @@ README.md
 root/favicon.ico
 root/index.html
 root/robots.txt
-root/thruk/cache/Thruk-2.40.2.css
-root/thruk/cache/thruk-2.40.2.js
-root/thruk/cache/Thruk-noframes-2.40.2.css
-root/thruk/cache/thruk-panorama-2.40.2.js
-root/thruk/cache/Thruk2-2.40.2.css
-root/thruk/cache/Thruk2-noframes-2.40.2.css
+root/thruk/cache/Thruk-2.42.2.css
+root/thruk/cache/thruk-2.42.2.js
+root/thruk/cache/Thruk-noframes-2.42.2.css
+root/thruk/cache/thruk-panorama-2.42.2.js
+root/thruk/cache/Thruk2-2.42.2.css
+root/thruk/cache/Thruk2-noframes-2.42.2.css
 root/thruk/images/expand.png
 root/thruk/images/folder_blue.png
 root/thruk/images/folder_blue_mixed.png
@@ -688,7 +693,7 @@ root/thruk/images/pbar-ani.gif
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/thruk-2.40.2.js
+root/thruk/javascript/thruk-2.42.2.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
 root/thruk/media/unknown.wav

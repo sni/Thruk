@@ -74,7 +74,7 @@
             or
           </td>
         </tr>
-        [% PROCESS _status_filter_single.tt %]
+        [% PROCESS _status_filter_single.tt onchange="" %]
       </table>
     </td>
   </tr>

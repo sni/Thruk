@@ -1,29 +1,32 @@
 ﻿
 [% IF block == 'edit' %]
   [%
-    deprecated = 1;
     required_fields = [
         { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1    ] },
         { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                         ] },
-        { 'host'                         => [ 'Host',                       'hosts',           ''                              ] },
-        { 'service'                      => [ 'Service',                    'services',        ''                              ] },
+        { 'filter_type'                  => [ 'Objects',                    'radio',           'Both'                ,'', 1, ['Services', 'Hosts', 'Both']  ] },
+        { 'filter'                       => [ 'Filter',                     'filter',          { 'host' => 'all' }             ] },
+
         { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'lastweek'                      ] },
         { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'days'                          ] },
         { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                              ] },
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
+        { 'hostnameformat'               => [ 'Hostname Format',            'hostformat', 'hostname'                           ] },
         { 'servicenameformat'            => [ 'Servicename Format',         'serviceformat', 'description'                     ] },
         { 'dateformat'                   => [ 'Dateformat',                 'dateformat', ''                                   ] },
         { 'datetimeformat'               => [ 'Datetimeformat',             'datetimeformat', ''                               ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
+        { 'initialassumedhoststate'      => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'            ] },
         { 'initialassumedservicestate'   => [ 'Initial Assumed State',      'svc_initialassumedstate',          '0'            ] },
         { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                            ] },
-        { 'unavailable'                  => [ 'Unavailable States',         'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
+        { 'unavailable'                  => [ 'Host Unavailable States',     'hst_unavailable', ['down', 'unreachable'], '', 1 ] },
+        { 'unavailable'                  => [ 'Service Unavailable States',  'svc_unavailable', ['critical', 'unknown'], '', 1 ] },
         { 'overview_max_level'           => [ 'Overview SLA %',             'int_box',         '-1' ,'hide object from overview table if sla is above or equal threshold', 0, 100 ] },
         { 'details_max_level'            => [ 'Details SLA %',              'int_box',         '100' ,'hide details if sla is above or equal threshold', 1, 100 ] },
         { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '100', 'cancel mail if no object breaks this sla', 0, 100] },
-        { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '5'          ,'max. # pages per service', 1, 5 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '5'          ,'max. # pages per host', 1, 5 ] },
     ];
   %]
 [% END %]
@@ -36,48 +39,48 @@
 
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
-  [% PROCESS 'reports/comp/sla_render_settings.tt' %]
+  [%# report settings #%]
+  [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
   [%
     title        = loc('SLA Outage Report')
     subtitle     = r.name
     coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat) ];
-    IF param.host;    coverdetails.push(loc('Host:'),    param.host);    END;
-    IF param.service; coverdetails.push(loc('Service:'), param.service); END;
   %]
 
   [% WRAPPER 'reports/comp/report.tt' %]
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
     [% PROCESS 'reports/comp/backend_error_page.tt' %]
+    [% IF param.filter_type == "Hosts" %]
+      [% type = "host" %]
+    [% ELSIF param.filter_type == "Services" %]
+      [% type = "service" %]
+    [% ELSE %]
+      [% type = "both" %]
+    [% END %]
 
-    [% IF total_services > 1 %]
+    [% IF (total_hosts + total_services) > 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
-        [% PROCESS 'reports/comp/sla_total_graph.tt' type='service' %]
+        [% PROCESS 'reports/comp/sla_total_graph.tt' %]
       [% END %]
     [% END %]
 
-    [% FOREACH hst = avail_data.services.keys.sort %]
-      [% FOREACH svc = avail_data.services.$hst.keys.sort %]
-        [% available = get_availability_percents(hst, svc) %]
-        [% p = available.total.percent;
-           IF p == -1; p = 100; END;
-           IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
-           IF total_services > 1 && param.details_max_level != -1 && p >= param.details_max_level; NEXT;
-          END %]
-        [% IF p < param.sla %]
-          [% pagetitle                    = loc("Service: %s on %s", _svc(hst, svc), _hst(hst)) %]
-          [% out = outages(logs, start, end) %]
-          [% page_data = page_splice(out, 12, param.max_outages_pages)  %]
-          [% FOREACH datablock = page_data %]
-            [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = pagetitle %]
-              [% FOREACH o = datablock %]
-                <div class="outages">
-                    [% format_date(o.start, reportDateTimeFormat) %] - [% IF o.end == ""; "..."; ELSE; format_date(o.end, reportDateTimeFormat); END; %]
-                    <span class="duration">([% duration(o.duration) %])</span>
-                </div>
-                <div class="output">[% log_line_plugin_output(o) %]</div>
-              [% END %]
-            [% END %]
-          [% END %]
+    [% IF param.filter_type == "Hosts" %]
+      [% FOREACH hst = avail_data.hosts.keys.sort %]
+        [% PROCESS 'reports/comp/sla_outage_details.tt' svc="" %]
+      [% END %]
+
+    [% ELSIF param.filter_type == "Services" %]
+      [% FOREACH hst = avail_data.services.keys.sort %]
+        [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+          [% PROCESS 'reports/comp/sla_outage_details.tt' %]
+        [% END %]
+      [% END %]
+
+    [% ELSIF param.filter_type == "Both" %]
+      [% FOREACH hst = avail_data.services.keys.sort %]
+        [% PROCESS 'reports/comp/sla_outage_details.tt' svc="" %]
+        [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+          [% PROCESS 'reports/comp/sla_outage_details.tt' %]
         [% END %]
       [% END %]
     [% END %]

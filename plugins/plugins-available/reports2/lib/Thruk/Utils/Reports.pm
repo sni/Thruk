@@ -424,7 +424,7 @@ sub report_remove {
     clean_report_tmp_files($c, $nr);
 
     my $index_file = $c->config->{'var_path'}.'/reports/.index';
-    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
+    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
 
     # remove cron entries
     update_cron_file($c);
@@ -527,11 +527,11 @@ sub generate_report {
     Thruk::Utils::IO::close($fh, $logfile);
 
     # check for exposed custom variables
-    my $allowed = Thruk::Utils::list($c->config->{'show_custom_vars'});
+    my $allowed = Thruk::Utils::get_exposed_custom_vars($c->config);
     for my $key (qw/hostnameformat_cust servicenameformat_cust/) {
         if($options->{'params'}->{$key}) {
             if(!Thruk::Utils::check_custom_var_list($options->{'params'}->{$key}, $allowed)) {
-                return(_report_die($c, $nr, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars", $logfile));
+                return(_report_die($c, $nr, "report contains custom variable ".$options->{'params'}->{$key}." which is not exposed by: show_custom_vars or expose_custom_vars", $logfile));
             }
         }
     }
@@ -894,6 +894,21 @@ sub get_report_data_from_param {
         $p->{$1} = $params->{$key};
     }
 
+    for my $key (keys %{$params}) {
+        # complex filter
+        if($key =~ m/^filter\.(.*)$/mx) {
+            my $name    = $1;
+            my $prefix  = $params->{$key};
+            $p->{$name} = {};
+            for my $k (keys %{$params}) {
+                if($k =~ m/^$prefix(.*$)/mx) {
+                    my $fk = $1;
+                    $p->{$name}->{'dfl_'.$fk} = $params->{$k};
+                }
+            }
+        }
+    }
+
     # optional variables
     for my $key (keys %{$params}) {
         next unless $key =~ m/^optional\.([\w\.]+)$/mx;
@@ -1008,14 +1023,14 @@ sub set_running {
         $update->{'var'}->{'is_running'} = $val;
         if($val == 0) {
             $update->{'var'}->{'running_node'} = undef;
-            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
+            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         } else {
             $update->{'var'}->{'running_node'} = $Thruk::NODE_ID;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => {
                                         is_running   => $val,
                                         running_node => $Thruk::NODE_ID,
                                         is_waiting   => undef,
-                                    }}, { pretty => 1 });
+                                    }}, { pretty => 1, allow_empty => 1 });
         }
     }
     $update->{'var'}->{'start_time'} = $start if defined $start;
@@ -1046,7 +1061,7 @@ sub set_waiting {
 
     my $update = {};
     $update->{'var'}->{'is_waiting'} = ($waiting || undef);
-    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_waiting => ($waiting||undef) }}, { pretty => 1 }) if defined $waiting;
+    Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_waiting => ($waiting||undef) }}, { pretty => 1, allow_empty => 1 }) if defined $waiting;
     if(defined $with_mails) {
         $update->{'var'}->{'send_mails_next_time'} = $with_mails ? 1 : undef;
     }
@@ -1090,10 +1105,12 @@ sub get_report_templates {
             my $name;
             my $path = $file;
             ($file, $name) = _get_report_tt_name($file);
+            my $deprecated = Thruk::Utils::get_template_variable($c, 'reports/'.$file, 'deprecated', { block => 'edit' }, 1);
             $templates->{$file} = {
-                file => $file,
-                name => $name,
-                path => $path,
+                file        => $file,
+                name        => $name,
+                path        => $path,
+                deprecated  => $deprecated || 0,
             };
         }
     }
@@ -1280,7 +1297,7 @@ sub store_report_data {
     if(!$report->{'user'}) {
         confess("tried to save report without user");
     }
-    if($report->{'desc'} eq 'Description' && $report->{'name'} eq 'New Report' && !$report->{'params'}->{'timeperiod'} && $report->{'template'} eq 'sla_host.tt') {
+    if($report->{'desc'} eq 'Description' && $report->{'name'} eq 'New Report' && !$report->{'params'}->{'timeperiod'} && $report->{'template'} eq 'sla_report.tt') {
         confess("tried to save empty report");
     }
 
@@ -1333,12 +1350,12 @@ sub read_report_file {
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
     if($report->{'template'} && !defined $available_templates->{$report->{'template'}}) {
         my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
-        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
         $needs_save = 1;
         Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }
     if(!$report->{'template'}) {
-        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
         $needs_save = 1;
         Thruk::Utils::set_message( $c, 'fail_message', 'No Report Template set in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }
@@ -1394,21 +1411,33 @@ sub read_report_file {
     }
     $report->{'is_public'} = 0 unless defined $report->{'is_public'};
 
+    # make permissions uniq
+    my $uniq_perm = {};
+    my $new_perm  = [];
+    for my $p (@{$report->{'permissions'}}) {
+        my $u = sprintf("%s;%s;%s", $p->{'type'}, $p->{'perm'}, join('|', @{$p->{'name'}}));
+        if(!defined $uniq_perm->{$u}) {
+            $uniq_perm->{$u} = $p;
+            push @{$new_perm}, $p;
+        }
+    }
+    $report->{'permissions'} = $new_perm;
+
     # check if its really running
     if($report->{'var'}->{'is_running'} == -1 && $report->{'var'}->{'start_time'} < time() - 10) {
         $report->{'var'}->{'is_running'} = 0;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         $needs_save = 1;
     }
     if($report->{'var'}->{'is_running'} > 0 && $c->cluster->kill($c, $report->{'var'}->{'running_node'}, 0, $report->{'var'}->{'is_running'}) != 1) {
         $report->{'var'}->{'is_running'} = 0;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         $needs_save = 1;
     }
     if($ENV{'THRUK_REPORT_PARENT'} && $report->{'var'}->{'is_running'} == $ENV{'THRUK_REPORT_PARENT'}) {
         $report->{'var'}->{'is_running'} = $$;
         $report->{'var'}->{'running_node'} = $Thruk::NODE_ID;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::NODE_ID, is_waiting => undef }}, { pretty => 1 });
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::NODE_ID, is_waiting => undef }}, { pretty => 1, allow_empty => 1 });
         $needs_save = 1;
     }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
@@ -1448,7 +1477,7 @@ sub read_report_file {
         if($report->{'error'} =~ m%\S+%mx) {
             $report->{'failed'} = 1;
             $report->{'var'}->{'is_running'} = 0;
-            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1 });
+            Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         }
 
         # nice error message
@@ -1738,9 +1767,7 @@ sub _initialize_report_templates {
     $c->stash->{'param'}              = $options->{'params'};
     $c->stash->{'r'}                  = $options;
     $c->stash->{'show_empty_outages'} = 1;
-    for my $p (keys %{$options->{'params'}}) {
-        $c->req->parameters->{$p} = $options->{'params'}->{$p};
-    }
+    apply_report_parameters($c, $c->req->parameters, $options->{'params'});
 
     # set some render helper
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
@@ -1826,6 +1853,41 @@ sub _report_die {
         return;
     }
     return $c->detach('/error/index/13');
+}
+
+##########################################################
+
+=head2 apply_report_parameters
+
+  apply_report_parameters($c, $to, $from)
+
+set report parameters into target hash
+
+returns target hash
+
+=cut
+sub apply_report_parameters {
+    my($c, $to, $from) = @_;
+
+    for my $p (keys %{$from}) {
+        if($p eq 'filter') {
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, $from->{$p});
+            if($from->{'filter_type'} eq 'Both') {
+                $to->{'s_filter'} = $servicefilter;
+                $to->{'include_host_services'} = 1;
+            }
+            elsif($from->{'filter_type'} eq 'Services') {
+                $to->{'s_filter'} = $servicefilter;
+            }
+            elsif($from->{'filter_type'} eq 'Hosts') {
+                $to->{'h_filter'} = $hostfilter;
+            }
+        } else {
+            $to->{$p} = $from->{$p};
+        }
+    }
+
+    return($to);
 }
 
 ##########################################################

@@ -28,6 +28,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m%\Qlib/Monitoring/Availability.pm:\E%mx;
     next if $line =~ m%\Qconf/lib/Monitoring/Config.pm:\E%mx;
     next if $line =~ m%\Q`_log`\E%mx;
+    next if $line =~ m%\Q`log`\E%mx;
     next if $line =~ m/Defaults\ to/mx;
     next if $line =~ m/Thruk\/Config.pm/mx;
     next unless $line =~ m/`/gmx;

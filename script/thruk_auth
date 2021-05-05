@@ -79,9 +79,16 @@ while (<STDIN>) {
 
     my $t0 = [gettimeofday];
     print STDERR "thruk_auth: url '$in' " if $verbose > 1;
-    my $res = process($in);
-    print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
-    print STDOUT $res;
+    eval {
+        my $res = process($in);
+        print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
+        print STDOUT $res;
+    };
+    my $err = $@;
+    if($err) {
+        print STDOUT $loginurl."?problem\n";
+        print STDERR "thruk_auth error: ".$err;
+    }
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
 }
@@ -99,6 +106,7 @@ sub process {
         return $loginurl."\n";
     }
 
+    # %{REMOTE_ADDR}~~%{HTTP:Authorization}~~%{HTTP:X-Thruk-Auth-Key}~~%{HTTP:X-Thruk-Auth-User}
     $extra = [split(/~~/mx, $extra)];
 
     # remove last &
@@ -126,7 +134,7 @@ sub process {
                 if($data->{'superuser'}) {
                     $user = (defined $extra->[3] && $extra->[3] ne '') ? $extra->[3] : '(api)';
                 }
-                Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time() }, { pretty => 1});
+                Thruk::Utils::IO::json_lock_store($data->{'file'}.'.stats', { last_used => time(), last_from => $extra->[0]//'' }, { pretty => 1 });
                 return "/loginok/".$user."/".$path."\n" if defined $user;
                 return "/pass/".$path."\n";
             }

@@ -1,0 +1,26 @@
+﻿[% available = get_availability_percents(hst, svc) %]
+[% p = available.total.percent;
+    IF p == -1; p = 100; END;
+    IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
+    IF total_services > 1 && param.details_max_level != -1 && p >= param.details_max_level; NEXT;
+  END %]
+[% IF p < param.sla %]
+  [% IF svc == "" %]
+    [% pagetitle = loc("Host: %s", _hst(hst)) %]
+  [% ELSE %]
+    [% pagetitle = loc("Service: %s on %s", _svc(hst, svc), _hst(hst)) %]
+  [% END %]
+  [% out = outages(logs, start, end, hst, svc) %]
+  [% page_data = page_splice(out, 12, param.max_outages_pages)  %]
+  [% FOREACH datablock = page_data %]
+    [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = pagetitle %]
+      [% FOREACH o = datablock %]
+        <div class="outages">
+            [% format_date(o.start, reportDateTimeFormat) %] - [% IF o.end == ""; "..."; ELSE; format_date(o.end, reportDateTimeFormat); END; %]
+            <span class="duration">([% duration(o.duration) %])</span>
+        </div>
+        <div class="output">[% log_line_plugin_output(o) %]</div>
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]

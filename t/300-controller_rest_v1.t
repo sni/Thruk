@@ -6,7 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 488;
+    plan tests => 519;
 }
 
 BEGIN {
@@ -16,7 +16,6 @@ BEGIN {
 }
 BEGIN { use_ok 'Thruk::Controller::rest_v1' }
 
-my $config = Thruk::Config::get_config();
 TestUtils::set_test_user_token();
 my($host,$service) = TestUtils::get_test_service();
 
@@ -39,12 +38,15 @@ my $list_pages = [
     '/hosts',
     '/hosts/'.$host,
     '/hosts/'.$host.'/services',
+    '/hosts/outages',
+    '/hosts/'.$host.'/outages',
     '/logs',
     '/alerts',
     '/notifications',
     '/processinfo',
     '/servicegroups',
     '/services',
+    '/services/outages',
     '/timeperiods',
     '/lmd/sites',
     '/thruk/bp',
@@ -73,6 +75,16 @@ my $hash_pages = [
     '/thruk/metrics',
     '/thruk/whoami',
 ];
+
+# get config from rest endpoint
+my $config = {};
+{
+    my $page = TestUtils::test_page(
+        'url'          => '/thruk/r/thruk/config',
+        'content_type' => 'application/json;charset=UTF-8',
+    );
+    $config = decode_json($page->{'content'});
+}
 
 for my $url (@{$list_pages}) {
     SKIP: {

@@ -14,7 +14,7 @@
   </table><br>
   [% IF errorMessage %]
   <div class='errorMessage'>[% errorMessage %]</div>
-  <div class='errorDescription'>[% errorDescription | nl2br %]</div>
+  <div class='errorDescription'>[% dump2str(errorDescription, 0, 0) | nl2br %]</div>
   [% ELSE %]
   [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
   <div class='errorMessage'>internal server error</div>
@@ -26,7 +26,7 @@
   <br>
   <div class='errorDescription' style="text-align: left">
   Details:<br>
-  [% nice_stacktrace(escape_html(errorDetails)) %]
+  [% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]
   </div><br>
   [% END %]
 
@@ -52,7 +52,7 @@
 [% IF make_test_mode || thruk_author %]
 <!--error:
 [%+ errorMessage +%]
-[%+ errorDetails +%]
+[%+ dump2str(errorDetails) +%]
 [%+ stacktrace +%]
 :error-->
 [% ELSE %]

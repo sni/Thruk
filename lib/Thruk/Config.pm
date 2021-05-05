@@ -31,7 +31,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.40.2';
+our $VERSION = '2.42.2';
 
 our $config;
 my $project_root = home() || confess('could not determine project_root from inc: '.Dumper(\%INC));
@@ -40,7 +40,7 @@ my $base_defaults = {
     'name'                                  => 'Thruk',
     'thrukversion'                          => &get_thruk_version(),
     'fileversion'                           => $VERSION,
-    'released'                              => 'December 14, 2020',
+    'released'                              => 'April 26, 2021',
     'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
@@ -98,6 +98,7 @@ my $base_defaults = {
     'show_config_edit_buttons'              => 0,
     'show_backends_in_table'                => 0,
     'show_logout_button'                    => 0,
+    'logout_link'                           => '/thruk/cgi-bin/login.cgi?logout',
     'commandline_obfuscate_pattern'         => [],
     'backends_with_obj_config'              => {},
     'use_feature_statusmap'                 => 0,
@@ -149,6 +150,7 @@ my $base_defaults = {
     'downtime_duration'                     => 7200,
     'expire_ack_duration'                   => 86400,
     'show_custom_vars'                      => [],
+    'expose_custom_vars'                    => [],
     'expand_user_macros'                    => ['ALL'],
     'themes_path'                           => './themes',
     'priorities'                            => {
@@ -467,7 +469,7 @@ sub set_default_config {
     }
 
     # ensure comma separated lists
-    for my $key (qw/csrf_allowed_hosts show_custom_vars/) {
+    for my $key (qw/csrf_allowed_hosts show_custom_vars expose_custom_vars/) {
         $config->{$key} = _comma_separated_list($config->{$key});
     }
 
@@ -818,6 +820,7 @@ sub get_toolkit_config {
                     'get_action_url'                => \&Thruk::Utils::get_action_url,
                     'reduce_number'                 => \&Thruk::Utils::reduce_number,
                     'get_custom_vars'               => \&Thruk::Utils::get_custom_vars,
+                    'get_searches'                  => \&Thruk::Utils::Status::get_searches,
         },
     };
 

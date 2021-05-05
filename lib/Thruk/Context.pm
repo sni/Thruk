@@ -172,14 +172,26 @@ sub detach {
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
         Thruk::Controller::error::index($c, $1);
         $c->{'detached'} = 1;
-        die("prevent further page processing");
+        die("prevent further page processing from detach() via ".$filename.":".$line);
     }
     confess("detach: ".$url." at ".$c->req->url);
 }
 
+
 =head2 detach_error
 
-detach_error to other controller
+  detach_error($c, $data)
+
+end current request with an error.
+
+$data contains:
+{
+        msg                 short error message
+        descr               long description of the error
+        code                http return code, defaults to 500;
+        log                 flag wether error should be logged. Error codes > 500 are automatically logged if `log` is undefined
+        debug_information   more details which will be logged, (string / array)
+}
 
 =cut
 sub detach_error {
@@ -194,7 +206,7 @@ sub detach_error {
     if(!$c->{'errored'}) {
         Thruk::Controller::error::index($c, 99);
         $c->{'detached'} = 1;
-        die("prevent further page processing");
+        die("prevent further page processing from detach_eror() via ".$filename.":".$line);
     }
     confess("detach_error at ".$c->req->url);
 }
@@ -388,7 +400,7 @@ sub _request_username {
             }
             my $addr = $c->req->address;
             $addr   .= " (".$c->env->{'HTTP_X_FORWARDED_FOR'}.")" if($c->env->{'HTTP_X_FORWARDED_FOR'} && $addr ne $c->env->{'HTTP_X_FORWARDED_FOR'});
-            Thruk::Utils::IO::json_lock_patch($data->{'file'}, { last_used => time(), last_from => $addr }, { pretty => 1 });
+            Thruk::Utils::IO::json_lock_store($data->{'file'}.'.stats', { last_used => time(), last_from => $addr }, { pretty => 1 });
             $username = $data->{'user'};
             if($data->{'superuser'}) {
                 $superuser = 1;
@@ -669,11 +681,18 @@ sub sub_request {
         'plack.cookie.parsed' => $c->env->{'plack.cookie.parsed'},
         'plack.cookie.string' => $c->env->{'plack.cookie.string'},
     };
-    $env->{'plack.request.body_parameters'} = [%{$postdata}] if $postdata;
     _debug2("sub_request to ".$url);
     my $sub_c = Thruk::Context->new($c->app, $env);
     $sub_c->{'user'} = $c->user;
     $sub_c->stash->{'remote_user'} = $c->stash->{'remote_user'};
+
+    $sub_c->req->parameters();
+    if($postdata) {
+        for my $key (sort keys %{$postdata}) {
+            $sub_c->req->body_parameters->{$key} = $postdata->{$key};
+            $sub_c->req->parameters->{$key}      = $postdata->{$key};
+        }
+    }
 
     Thruk::Action::AddDefaults::begin($sub_c);
     my $path_info = $sub_c->req->path_info;

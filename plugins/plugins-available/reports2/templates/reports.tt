@@ -58,6 +58,7 @@
     <th class="status" nowrap>&nbsp;</th>
     <th class="status" nowrap>&nbsp;</th>
     <th class="status" nowrap>&nbsp;</th>
+    <th class="status" nowrap>&nbsp;</th>
   </tr>
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
@@ -141,6 +142,16 @@
         [% IF r.var.exists("json_file") %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Download JSON raw data' title='Download JSON raw data' width=16 height=16></a>
         [% END %]
+      [% END %]
+    </td>
+    <td class="status [% rowclass %]">
+      [% IF ! r.readonly %]
+        <form action="reports2.cgi" method="POST">
+        <input type="hidden" name="report" value="[% r.nr %]">
+        <input type="hidden" name="action" value="remove">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+        <input type="image" name="submit" value="remove" src="[% url_prefix %]themes/[% theme %]/images/delete.png" style="width:16px; height: 16px;" onclick="return confirm('really remove?')" alt="remove report">
+        </form>
       [% END %]
     </td>
   </tr>

@@ -92,7 +92,7 @@
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
     <td class='[% class %]'>[% duration(d.check_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
     <td class='[% class %]'>[% duration(d.retry_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
-    <td class='[% class %]'><a href="config.cgi?type=commands&amp;jump=[% d.check_command | strip_command_args | uri %]#[% d.check_command | strip_command_args | uri %]">[% d.check_command | html %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=commands&amp;jump=[% d._check_command.line | strip_command_args | uri %]#[% d._check_command.line | strip_command_args | uri %]">[% d._check_command.line | html %]</a></td>
     <td class='[% class %]'>[% d.check_period %]</td>
 <!--
     <td class='[% class %]'></td>

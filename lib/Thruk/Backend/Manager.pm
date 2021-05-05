@@ -2903,7 +2903,7 @@ sub _set_result_defaults {
             }
         }
     }
-    elsif($function eq "get_service_stats" || $function eq "get_service_totals_stats") {
+    elsif($function =~ m/get_service_.*stats/mx) {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
@@ -2918,7 +2918,7 @@ sub _set_result_defaults {
             $data->{$key} = 0;
         }
     }
-    elsif($function eq "get_host_stats" || $function eq "get_host_totals_stats") {
+    elsif($function =~ m/get_host_.*stats/mx) {
         $data = {};
         for my $key (qw{
                         total total_active total_passive

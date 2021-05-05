@@ -30,6 +30,7 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
     - lmd                       runs lmd related checks
     - recurring_downtimes       runs recurring downtimes checks
     - reports                   runs reporting checks
+    - logcache                  runs logcache checks
 
 =back
 

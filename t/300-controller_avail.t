@@ -5,7 +5,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 487;
+    plan tests => 529;
 }
 
 BEGIN {
@@ -113,7 +113,7 @@ for my $url (@{$pages}) {
         'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
-    is(ref $data, 'HASH', "json result is an array: ".$url);
+    is(ref $data, 'HASH', "json result is an hash: ".$url);
 }
 
 # excel pages
@@ -145,4 +145,26 @@ $res->{'content'} =~ m/>Debug Information written to:\s(.*?)</;
 my $file = $1;
 ok(-f $file, $file.' exists');
 ok(unlink($file), $file.' removed');
+
+###########################################################
+my $outages = [
+    '/thruk/cgi-bin/avail.cgi?outages=1&host='.$host,
+    '/thruk/cgi-bin/avail.cgi?outages=1&host='.$host.'&service='.$service,
+];
+
+for my $url (@{$outages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => 'Outages',
+    );
+}
+
+for my $url (@{$outages}) {
+    my $page = TestUtils::test_page(
+        'url'          => $url.'&view_mode=json',
+        'content_type' => 'application/json;charset=UTF-8',
+    );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'ARRAY', "json result is an array: ".$url);
+}
 

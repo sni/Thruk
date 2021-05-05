@@ -11,6 +11,7 @@ use Thruk::Backend::Peer ();
 use Thruk ();
 use Thruk::Config;
 use Thruk::Utils::IO ();
+use Thruk::Constants qw/:add_defaults :peer_states/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
 
@@ -98,13 +99,25 @@ sub new {
         };
         die("could not create lmd ".$config->{'tmp_path'}.'/lmd'.': '.$@) if $@;
         my $lmd_peer = Thruk::Backend::Provider::Livestatus->new({options => {
-                                                peer      => $config->{'tmp_path'}.'/lmd/live.sock',
+                                                peer      => $config->{'lmd_remote'} // $config->{'tmp_path'}.'/lmd/live.sock',
                                                 peer_key  => 'lmdpeer',
                                                 retries_on_connection_error => 0,
                                             }});
         $lmd_peer->peer_key('lmdpeer');
         $lmd_peer->{'lmd_optimizations'} = 1;
         $self->{'lmd_peer'} = $lmd_peer;
+        if($config->{'lmd_remote'}) {
+            my $p = Thruk::Backend::Peer->new({
+                options  => {
+                    peer   => $config->{'lmd_remote'},
+                },
+                name     => "lmd",
+                type     => "livestatus",
+                id       => 'LMD',
+            });
+            $p->{'disabled'} = HIDDEN_LMD_PARENT;
+            $self->peer_add($p, $config, {});
+        }
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
@@ -247,7 +260,7 @@ sub _do_thread {
     my $elapsed = tv_interval($t1);
     unshift @{$res}, $elapsed;
     unshift @{$res}, $key;
-    return($res);
+    return(@{$res});
 }
 
 ########################################

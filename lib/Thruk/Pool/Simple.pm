@@ -5,6 +5,7 @@ use strict;
 use threads qw/yield/;
 use Thread::Queue ();
 use Cpanel::JSON::XS qw/decode_json encode_json/;
+use Thruk::Utils::Log qw/:all/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
@@ -13,8 +14,8 @@ sub new {
     die('no size given')    unless $arg{'size'};
     die('no handler given') unless $arg{'handler'};
     my $self = {
-        size    => $arg{'size'},
-        handler => $arg{'handler'},
+        size     => $arg{'size'},
+        handler  => $arg{'handler'},
     };
     $self->{workq} = Thread::Queue->new();
     $self->{retq}  = Thread::Queue->new();
@@ -33,7 +34,7 @@ sub add_bulk {
     #&timing_breakpoint('Pool::Simple::add_bulk');
     my @encoded;
     for my $job (@{$jobs}) {
-        push @encoded, encode_json($job);
+        push @encoded, encode_json(ref $job ? $job : [$job]);
     }
     #&timing_breakpoint('Pool::Simple::add_bulk encoded');
     $self->{workq}->enqueue(@encoded);
@@ -44,13 +45,19 @@ sub add_bulk {
 }
 
 sub remove_all {
-    my($self) = @_;
-    my @res = $self->{retq}->dequeue($self->{num});
-    $self->{num} = 0;
+    my($self, $cb) = @_;
     #&timing_breakpoint('Pool::Simple::remove_all dequeue');
     my @encoded;
-    for my $res (@res) {
-        push @encoded, decode_json($res);
+    while($self->{num} > 0) {
+        my $res = $self->{retq}->dequeue();
+        $self->{num}--;
+        if($res) {
+            $res = decode_json($res);
+        }
+        if($cb) {
+            $res = &{$cb}($res);
+        }
+        push @encoded, $res if $res;
     }
     #&timing_breakpoint('Pool::Simple::remove_all decoded');
     return(\@encoded);
@@ -74,11 +81,17 @@ sub _handle_work {
     local $SIG{'KILL'} = sub { exit; };
     while(my $job = $self->{workq}->dequeue()) {
         #&timing_breakpoint('Pool::Simple::_handle_work waited');
-        my $enc = decode_json($job);
-        #&timing_breakpoint('Pool::Simple::_handle_work decoded');
-        my $res = $self->{'handler'}(@{$enc});
+        my @res;
+        eval {
+            my $enc = decode_json($job);
+            #&timing_breakpoint('Pool::Simple::_handle_work decoded');
+            @res = $self->{'handler'}(@{$enc});
+        };
+        if($@) {
+            _warn("worker failed: %s", $@);
+        }
         #&timing_breakpoint('Pool::Simple::_handle_work worked');
-        $enc = encode_json($res);
+        my $enc = encode_json(\@res);
         #&timing_breakpoint('Pool::Simple::_handle_work encoded');
         $self->{retq}->enqueue($enc);
         #&timing_breakpoint('Pool::Simple::_handle_work enqueued');
@@ -107,7 +120,7 @@ Thruk::Pool::Simple - A simple thread-pool implementation
 
   $pool->add_bulk([\@arg1, \@arg2, ...])    # put some work onto the queue
 
-  my @results = $pool->remove_all();        # get all results
+  my @results = $pool->remove_all();        # get all results (blocks till all threads are finished)
 
 =head1 DESCRIPTION
 

@@ -117,16 +117,48 @@ sub load_bp_data {
 
 ##########################################################
 
+=head2 get_bp_ids
+
+    get_bp_ids($c, [$id])
+
+returns list of bp ids
+
+=cut
+sub get_bp_ids {
+    my($c, $id) = @_;
+    die("requires admin permissions") unless $c->check_user_roles("admin");
+
+    my $base_folder = bp_base_folder($c);
+    my $bps       = [];
+    my $pattern   = '*.tbp';
+    if($id) {
+        return($bps) unless $id =~ m/^\d+$/mx;
+        $pattern   = $id.'.tbp';
+    }
+
+    my $ids = [];
+    my @files   = glob($base_folder.'/'.$pattern);
+    for my $file (@files) {
+        my $nr = $file;
+        $nr =~ s|^.*/(\d+)\.tbp$|$1|mx;
+        push @{$ids}, $nr;
+    }
+
+    return($ids);
+}
+
+##########################################################
+
 =head2 next_free_bp_file
 
-    next_free_bp_file($c)
+    next_free_bp_file($c, [$id])
 
 return next free bp file
 
 =cut
 sub next_free_bp_file {
-    my($c) = @_;
-    my $num = 1;
+    my($c, $id) = @_;
+    my $num = $id // 1;
     my $base_folder = bp_base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);

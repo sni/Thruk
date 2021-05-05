@@ -797,6 +797,27 @@ sub set_paging_steps {
     return;
 }
 
+########################################
+
+=head2 get_exposed_custom_vars
+
+  get_exposed_custom_vars($config, [$skip_wildcards])
+
+return combined list of show_custom_vars and expose_custom_vars
+
+=cut
+sub get_exposed_custom_vars {
+    my($config, $skip_wildcards) = @_;
+    confess("no config") unless defined $config;
+    my $vars = {};
+    for my $src (qw/show_custom_vars expose_custom_vars/) {
+        for my $var (@{list($config->{$src})}) {
+            next if($skip_wildcards && $var =~ m/\*/mx);
+            $vars->{$var} = 1;
+        }
+    }
+    return([sort keys %{$vars}]);
+}
 
 ########################################
 
@@ -808,8 +829,9 @@ return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my($c, $data, $prefix, $add_host) = @_;
+    my($c, $data, $prefix, $add_host, $add_action_menu) = @_;
     $prefix = '' unless defined $prefix;
+    $add_action_menu = 1 unless defined $add_action_menu;
 
     my %hash;
 
@@ -835,7 +857,7 @@ sub get_custom_vars {
     }
 
     # add action menu from apply rules
-    if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+    if($add_action_menu && $c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
         for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (@{list($c->config->{'action_menu_apply'}->{$menu})}) {
@@ -974,6 +996,49 @@ sub check_custom_var_list {
         }
     }
     return;
+}
+
+########################################
+
+=head2 set_data_row_cust_vars
+
+  set_data_row_cust_vars($obj, $allowed, $allowed_list)
+
+set custom variables for host/service obj
+
+=cut
+sub set_data_row_cust_vars {
+    my($obj, $allowed, $allowed_list) = @_;
+
+    if($obj->{'custom_variable_names'}) {
+        $obj->{'custom_variables'} = get_custom_vars(undef, $obj);
+        for my $key (@{$obj->{'custom_variable_names'}}) {
+            if($allowed || check_custom_var_list($key, $allowed_list)) {
+                $obj->{'_'.uc($key)} = $obj->{'custom_variables'}->{$key};
+            } else {
+                delete $obj->{'custom_variables'}->{$key};
+            }
+        }
+        if(!$allowed) {
+            $obj->{'custom_variable_names'}  = [keys   %{$obj->{'custom_variables'}}];
+            $obj->{'custom_variable_values'} = [values %{$obj->{'custom_variables'}}];
+        }
+    }
+    if($obj->{'host_custom_variable_names'}) {
+        $obj->{'host_custom_variables'} = get_custom_vars(undef, $obj, 'host_');
+        for my $key (@{$obj->{'host_custom_variable_names'}}) {
+            if($allowed || check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
+                $obj->{'_HOST'.uc($key)} = $obj->{'host_custom_variables'}->{$key};
+            } else {
+                delete $obj->{'host_custom_variables'}->{$key};
+            }
+        }
+        if(!$allowed) {
+            $obj->{'host_custom_variable_names'}  = [keys   %{$obj->{'host_custom_variables'}}];
+            $obj->{'host_custom_variable_values'} = [values %{$obj->{'host_custom_variables'}}];
+        }
+    }
+    return($obj);
 }
 
 ########################################
@@ -2755,18 +2820,17 @@ return variable defined from template
 sub get_template_variable {
     my($c, $template, $var, $stash, $noerror) = @_;
 
-    # more stash variables to set?
     $stash = {} unless defined $stash;
-    for my $key (keys %{$stash}) {
-        $c->stash->{$key} = $stash->{$key};
-    }
 
-    $c->stash->{'temp'}  = $template;
-    $c->stash->{'var'}   = $var;
+    # more stash variables to set?
+    $stash = { %{$c->stash}, %{$stash} };
+
+    $stash->{'temp'}  = $template;
+    $stash->{'var'}   = $var;
     my $default_time_locale = POSIX::setlocale(POSIX::LC_TIME);
     my $data;
     eval {
-        Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', undef, \$data);
+        Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', $stash, \$data);
     };
     if($@) {
         return "" if $noerror;
@@ -2951,12 +3015,15 @@ sub log_error_with_details {
     my($c, @errorDetails) = @_;
     _error("***************************");
     _error(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
-    _error(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    _error(sprintf("params:  %s\n", dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
     _error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
     _error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
     _error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
     for my $details (@errorDetails) {
         for my $line (@{list($details)}) {
+            if(ref $line ne '') {
+                $line = dump_params($line, 0, 0);
+            }
             for my $splitted (split(/\n|<br>/mx, $line)) {
                 _error($splitted);
             }
@@ -3642,19 +3709,23 @@ sub merge_host_dependencies {
 
 =head2 dump_params
 
-    dump_params($c->req->parameters)
+    dump_params($c->req->parameters, [$max_length], [$flat])
 
 returns stringified parameters
 
 =cut
 sub dump_params {
-    my($params) = @_;
+    my($params, $max_length, $flat) = @_;
+    $max_length = 250 unless defined $max_length;
+    $flat       = 1   unless defined $flat;
     $params = dclone($params);
-    local $Data::Dumper::Indent = 0;
+    local $Data::Dumper::Indent = 0 if $flat;
     my $dump = Dumper($params);
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = clean_credentials_from_string($dump);
-    $dump    = substr($dump, 0, 247).'...' if length($dump) > 250;
+    if($max_length && $max_length > 3 && length($dump) > $max_length) {
+        $dump    = substr($dump, 0, ($max_length-3)).'...';
+    }
     $dump    =~ s%;$%%gmx;
     return($dump);
 }
@@ -3771,6 +3842,7 @@ sub text_table {
     my %opt = @_;
     my $keys = $opt{'keys'};
     my $data = $opt{'data'};
+    confess("data must be an array") unless ref $data eq 'ARRAY';
     return if scalar @{$data} == 0;
     if(!$keys) {
         $keys = [sort keys %{$data->[0]}];
@@ -3854,6 +3926,39 @@ sub text_table {
     }
     $output .= $separator;
     return($output);
+}
+
+##############################################
+
+=head2 scale_out
+
+    scale_out( scale => worker_num, jobs => list of jobs, worker => sub ref, collect => sub ref )
+
+scale out worker, run jobs and returns result from collect sub.
+
+=cut
+sub scale_out {
+    my %opt = @_;
+
+    return if scalar @{$opt{'jobs'}} == 0;
+
+    if($opt{'scale'} == 1 || scalar @{$opt{'jobs'}} == 1) {
+        my $res = [];
+        for my $job (@{$opt{'jobs'}}) {
+            my $item = [&{$opt{'worker'}}(ref $job eq 'ARRAY' ? @{$job} : $job)];
+            $item = &{$opt{'collect'}}($item);
+            push @{$res}, $item if $item;
+        }
+        return(@{$res});
+    }
+
+    require Thruk::Pool::Simple;
+    my $pool = Thruk::Pool::Simple->new(
+        size    => $opt{'scale'},
+        handler => $opt{'worker'},
+    );
+    $pool->add_bulk($opt{'jobs'});
+    return($pool->remove_all($opt{'collect'}));
 }
 
 ##############################################

@@ -130,6 +130,34 @@ Ext.define('TP.PanletSquares', {
 
         panel.addGearItems({
             xtype:        'fieldcontainer',
+            fieldLabel:   'Icon Label',
+            layout:      { type: 'hbox', align: 'stretch' },
+            items:        [{
+                xtype:        'label',
+                text:         'Host: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
+            }, {
+                xtype:        'textfield',
+                name:         'host_label',
+                cls:          'icon',
+                value:        panel.xdata.description,
+                emptyText:    'ex.: {{name}} or {{alias}} or {{_CUSTVAR}}',
+                width:        200
+            }, {
+                xtype:        'label',
+                text:         'Service: ',
+                margins:      {top: 3, right: 2, bottom: 0, left: 7}
+            }, {
+                xtype:        'textfield',
+                name:         'service_label',
+                cls:          'icon',
+                value:        panel.xdata.description,
+                emptyText:    'ex.: {{host_name}} - {{description}}',
+                width:        200
+            }]
+        });
+        panel.addGearItems({
+            xtype:        'fieldcontainer',
             fieldLabel:   'Icon Set',
             layout:      { type: 'hbox', align: 'stretch' },
             items:        [{
@@ -223,7 +251,7 @@ Ext.define('TP.PanletSquares', {
             layout:      { type: 'hbox', align: 'stretch' },
             items:        [{
                 xtype:        'label',
-                text:         'Fade to black/white for',
+                text:         'Fade to black/white within ',
                 margins:      {top: 3, right: 2, bottom: 0, left: 7}
             }, {
                 xtype:        'textfield',

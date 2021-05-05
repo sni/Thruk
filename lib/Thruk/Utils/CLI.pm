@@ -352,7 +352,7 @@ sub _run {
         $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
     }
 
-    local $ENV{'THRUK_QUIET'} = undef  if $ENV{'THRUK_CRON'};
+    local $ENV{'THRUK_QUIET'} = undef  if($ENV{'THRUK_CRON'} && ! $self->{'opt'}->{'quiet'});
     Thruk::Utils::Log::reset_logging() if $ENV{'THRUK_CRON'};
     if($result->{'rc'} == 0 || $result->{'all_stdout'}) {
         if($log_timestamps) {

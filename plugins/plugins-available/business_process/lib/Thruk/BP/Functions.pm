@@ -398,7 +398,7 @@ sub statusfilter {
     my($aggregation, $type, $filter, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
 
     $c->stash->{'minimal'} = 1; # do not fill totals boxes
-    my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '');
+    my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '', 1);
 
     my $node_filter = Thruk::Utils::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
     my($ack_filter, $downtime_filter, $unknown_filter, $extra) = (0,0,0, {});
@@ -411,7 +411,7 @@ sub statusfilter {
     my($worst_host, $total_hosts, $good_hosts, $down_hosts) = (0,0,0,0);
     my $best_host = -1;
     if($type eq 'hosts' || $type eq 'both') {
-        my $data = $c->{'db'}->get_host_stats( filter => [ $hostfilter ]);
+        my $data = $c->{'db'}->get_host_less_stats( filter => [ $hostfilter ]);
         $data    = _statusfilter_apply_filter("host", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_hosts = $data->{'total'};
         $good_hosts  = $data->{'up'} + $data->{'pending'};
@@ -434,7 +434,7 @@ sub statusfilter {
     my $best_service = -1;
     my($worst_service, $total_services, $good_services, $down_services) = (0,0,0,0);
     if($type eq 'services' || $type eq 'both') {
-        my $data = $c->{'db'}->get_service_stats( filter => [ $servicefilter ]);
+        my $data = $c->{'db'}->get_service_less_stats( filter => [ $servicefilter ]);
         $data    = _statusfilter_apply_filter("service", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_services = $data->{'total'};
         $good_services  = $data->{'ok'}   + $data->{'pending'} + $data->{'warning'};

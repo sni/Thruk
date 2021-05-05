@@ -17,7 +17,7 @@ Using LMD has multiple advantages:
 [TIP]
 .icinga2
 =======
-It is recommended for Icinga 2 users to use LMD.
+It is recommended for Icinga 2 users to use LMD. However, Icinga2 is about to drop Livestatus support, so if possible use Naemon.
 =======
 
 

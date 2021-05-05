@@ -10,16 +10,12 @@
       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
     </tr>
     [% END %]
-    [% IF with_custom_vars && c.config.defined('show_custom_vars') && c.config.show_custom_vars.list.size > 0 %]
-      [% FOREACH v IN c.config.show_custom_vars.list %]
-        [% counter = counter + 1 %]
-        [% IF !v.match('\*'); %]
-        <tr class="sortable_row">
-          <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
-          <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
-        </tr>
-        [% END %]
-      [% END %]
+    [% FOREACH v IN get_exposed_custom_vars(1) %]
+      [% counter = counter + 1 %]
+      <tr class="sortable_row">
+        <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
+        <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
+      </tr>
     [% END %]
   </table>
 [% END %]

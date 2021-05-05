@@ -138,10 +138,6 @@ function reports_update_affected_sla_objects(input) {
         url:  'reports2.cgi',
         data: {
                 action:         'check_affected_objects',
-                host:            form.find('INPUT[name="params.host"]').val(),
-                service:         form.find('INPUT[name="params.service"]').val(),
-                hostgroup:       form.find('INPUT[name="params.hostgroup"]').val(),
-                servicegroup:    form.find('INPUT[name="params.servicegroup"]').val(),
                 template:        form.find('SELECT[name=template]').val(),
                 backends:        backends,
                 backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
@@ -172,6 +168,12 @@ function reports_update_affected_sla_objects(input) {
                 span2.addClass('error');
                 span1.attr('title', 'too many objects, please use more specific filter');
                 span2.attr('title', 'too many objects, please use more specific filter');
+            }
+            if(data['error']) {
+                //hideElement('reports_waiting');
+                //showElement(span2[0].id);
+                //thruk_message(1, 'getting affected objects failed: - ' + data['error']);
+                console.log('getting affected objects failed: - ' + data['error']);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {

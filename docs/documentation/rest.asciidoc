@@ -876,6 +876,34 @@ Update hostgroup configuration partially.
 
 Deletes given hostgroup from configuration.
 
+=== GET /hostgroups/<name>/outages
+
+list of outages for this hostgroup.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
+
 === GET /hostgroups/<name>/stats
 
 hash of livestatus hostgroup statistics.
@@ -984,10 +1012,64 @@ Deletes given host from configuration.
 lists notifications for given host.
 alias for /logs?class=3&host_name=<name>
 
+=== GET /hosts/<name>/outages
+
+list of outages for this host.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
+
 === GET /hosts/<name>/services
 
 lists services for given host.
 alias for /services?host_name=<name>
+
+=== GET /hosts/outages
+
+list of outages for all hosts.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
 
 === GET /hosts/stats
 
@@ -1163,6 +1245,34 @@ Update servicegroup configuration partially.
 
 Deletes given servicegroup from configuration.
 
+=== GET /servicegroups/<name>/outages
+
+list of outages for this servicegroup.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
+
 === GET /servicegroups/<name>/stats
 
 hash of livestatus servicegroup statistics.
@@ -1249,6 +1359,62 @@ Update service configuration partially.
 === DELETE /services/<host>/<service>/config
 
 Deletes given service from configuration.
+
+=== GET /services/<host>/<service>/outages
+
+list of outages for this service.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
+
+=== GET /services/outages
+
+list of outages for all services.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|class                             | host/service status
+|duration                          | outage duration in seconds
+|end                               | unix timestamp of outage end
+|host                              | host name
+|in_downtime                       | 0/1 flag wether this outage is in a downtime
+|plugin_output                     | last plugin output during outage
+|service                           | service description (only for service outages)
+|start                             | unix timestamp of outage start
+|type                              | log entry type
+|===========================================
+
 
 === GET /services/stats
 
@@ -1629,6 +1795,7 @@ lists logcache statistics
 |compact_duration                  | duration of last compact run in seconds
 |compact_till                      | timestamp marker where last compact run finished
 |data_size                         | used size of data in bytes
+|enabled                           | flag wether logcache is enabled for this backend or not
 |index_size                        | used size of index in bytes
 |items                             | number of items/rows
 |key                               | peer key

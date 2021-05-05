@@ -1135,6 +1135,14 @@ ex.:
   show_logout_button=1
 
 
+=== logout_link
+{% include new_since.ad version="2.42" %}
+Change url of logout link. Might be useful in combination with oauth.
+
+ex.:
+
+  logout_link=/thruk/cgi-bin/login.cgi?logout
+
 
 === show_long_plugin_output
 
@@ -1341,6 +1349,21 @@ ex.:
   show_custom_vars = *
 
 
+=== expose_custom_vars
+Expose custom vars sets a list of custom variables
+which is safe for all users/contacts to view.
+They will be used in filtering and column selection
+as well as in json result sets. Basically they will
+be handled the same way as `show_custom_vars` except they
+will not be displayed automatically.
+Syntax is the same as `show_custom_vars`.
+
+ex.:
+
+  expose_custom_vars = _VAR1
+
+
+
 === expand_user_macros
 Expand user macros ($USERx$) for host / service commands and custom
 variables. Can be specified more than once to define multiple user
@@ -1506,6 +1529,14 @@ ex.:
   lmd_timeout=5
 
 
+=== lmd_remote
+Instead of using LMD managed by Thruk, you can run your own LMD and let Thruk use that one
+instead
+
+ex.:
+
+  lmd_remote=localhost:3333
+
 
 === logcache
 Enables caching logfiles for faster access and less memory usage for
@@ -1616,6 +1647,12 @@ replaces only the the fetching logs part from the bultin logcache.
 This script should return the plain text logfiles on stdout (standard
 naemon/nagios logfile format). This might be useful if you pull the logfiles
 from a ndo/ido database.
+
+[TIP]
+.mixedsetup
+=======
+When having mixed backend cores, this command can be overridden in the peer configuration.
+=======
 
 See `./support/icinga2_ido_fetchlogs.sh` for an example.
 
@@ -1797,6 +1834,12 @@ ex.:
 
 == OAuth2 Authentication Settings
 {% include new_since.ad version="2.36" %}
+
+When the oauth provider needs to configure an allowed callback url, set the url of the login page, ex.:
+
+https://<fqdn>/<omdsite>/thruk/cgi-bin/login.cgi
+
+or without <omdsite> when not using OMD.
 
 === auth_oauth
 Set oauth (oauth2) authentication provider
@@ -2430,6 +2473,7 @@ for details.
                         section.
      ** `state_host`    **DEPRECATED** - please use link:lmd.html[LMD] when using multiple backends.
      ** `logcache`      Set logcache connection for this specific backend. Set to `0` to disable logcache for this site.
+     ** `logcache_fetchlogs_command` Override global logcache_fetchlogs_command.
      ** `options`
         *** `peer`            address of this connection.
         *** `resource_file`   resource_file for this peer (used for macro replacement)

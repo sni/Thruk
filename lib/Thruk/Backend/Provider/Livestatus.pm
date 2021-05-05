@@ -773,6 +773,23 @@ returns a list of contactgroups
 sub get_contactgroups {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "contactgroups");
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    }
+
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
+        ($size, $limit) = $self->_get_query_size('contactgroups', \%options, 'name', 'name');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
+    }
+
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members
@@ -781,7 +798,19 @@ sub get_contactgroups {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
-    return $self->_get_table('contactgroups', \%options);
+
+    # get result
+    my $data = $self->_get_table('contactgroups', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
+    unless(wantarray) {
+        confess("get_contactgroups() should not be called in scalar context");
+    }
+    return($data, undef, $size);
 }
 
 ##########################################################
@@ -933,13 +962,42 @@ returns a list of contacts
 sub get_contacts {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "contacts");
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    }
+
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
+        ($size, $limit) = $self->_get_query_size('contacts', \%options, 'name', 'name');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
+    }
+
     unless(defined $options{'columns'}) {
         $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_contact_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
-    return $self->_get_table('contacts', \%options);
+
+    # get result
+    my $data = $self->_get_table('contacts', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
+    unless(wantarray) {
+        confess("get_contacts() should not be called in scalar context");
+    }
+    return($data, undef, $size);
 }
 
 ##########################################################
@@ -1075,6 +1133,52 @@ sub get_host_totals_stats {
 
 ##########################################################
 
+=head2 get_host_less_stats
+
+  get_host_less_stats
+
+same as get_host_stats but less numbers and therefore faster
+
+=cut
+sub get_host_less_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststatsless')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_host_less_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
+        'plain_down'                        => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'down_and_ack'                      => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
+        'down_and_scheduled'                => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+        'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
+        'plain_unreachable'                 => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unreachable_and_ack'               => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+        'unreachable_and_scheduled'         => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('hoststatsless');
+    return($self->get_host_stats(%options));
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -1186,6 +1290,56 @@ sub get_service_totals_stats {
     ];
     $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
     return($self->get_service_totals_stats(%options));
+}
+
+##########################################################
+
+=head2 get_service_less_stats
+
+  get_service_less_stats
+
+same as get_service_stats but less numbers and therefore faster
+
+=cut
+sub get_service_less_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestatsless')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_service_less_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    # unhandled are required for playing sounds on details page
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+        'plain_ok'                          => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+        'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+        'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+        'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+        'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
+        'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('servicestatsless');
+    return($self->get_service_less_stats(%options));
 }
 
 ##########################################################

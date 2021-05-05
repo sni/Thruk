@@ -345,7 +345,7 @@ sub calculate {
 
     # if we have more than one host or service, we dont build up a log
     $self->{'report_options'}->{'build_log'} = TRUE;
-    if(scalar @{$self->{'report_options'}->{'hosts'}} == 1) {
+    if(scalar @{$self->{'report_options'}->{'hosts'}} == 1 && scalar @{$self->{'report_options'}->{'services'}} == 0) {
         $self->{'report_options'}->{'build_log'} = HOST_ONLY;
     }
     elsif(scalar @{$self->{'report_options'}->{'services'}} == 1) {
@@ -1616,10 +1616,34 @@ sub _calculate_log {
         $self->_log("#################################");
     }
 
-    for(my $x = 0; $x < scalar @{$self->{'full_log_store'}}; $x++) {
+    my $logstoresize = scalar @{$self->{'full_log_store'}};
+    for(my $x = 0; $x < $logstoresize; $x++) {
         my $log_entry      = $self->{'full_log_store'}->[$x];
-        my $next_log_entry = $self->{'full_log_store'}->[$x+1];
+        my $next_log_entry;
         my $log            = $log_entry->{'log'};
+
+        # find next log entry by host / service
+        if($log->{'host'}) {
+            if($log->{'service'}) {
+                for(my $offset = 1; $offset <= $logstoresize; $offset++) {
+                    my $tmp_log = $self->{'full_log_store'}->[$x+$offset];
+                    if($tmp_log->{'log'}->{'host'} && $tmp_log->{'log'}->{'host'} eq $log->{'host'} && $tmp_log->{'log'}->{'service'} && $tmp_log->{'log'}->{'service'} eq $log->{'service'}) {
+                        $next_log_entry = $tmp_log;
+                        last;
+                    }
+                }
+            } else {
+                for(my $offset = 1; $offset <= $logstoresize; $offset++) {
+                    my $tmp_log = $self->{'full_log_store'}->[$x+$offset];
+                    if($tmp_log->{'log'}->{'host'} && $tmp_log->{'log'}->{'host'} eq $log->{'host'} && !$tmp_log->{'log'}->{'service'}) {
+                        $next_log_entry = $tmp_log;
+                        last;
+                    }
+                }
+            }
+        } else {
+            $next_log_entry = $self->{'full_log_store'}->[$x+1];
+        }
 
         # set end date of current log entry
         if(defined $next_log_entry->{'log'}->{'start'}) {

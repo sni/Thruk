@@ -1,16 +1,31 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Business Process:
+            - performance improvements
+
+2.42-2   Mon Apr 26 10:02:54 CEST 2021
+          - Reporting:
+            - fix deleting reports
+          - Rest
+            - add columns comment to csv output
+            - add /.../outages for hosts/services and groups
+
+2.42     Fri Apr 16 21:33:20 CEST 2021
           - remove `check_local_states` and `state_host` from backends, use LMD instead
           - make broadcast preview draggable
           - add machine_debug_info option to set amount of machine debug information
+          - add expose_custom_vars option
           - fix managing public bookmarks (#1065)
           - fix unhandled problems link on tactical overview (#1058)
           - fix sending many commands at once
+          - fix switching between search views
           - Panorama:
             - update icons in bulk of size 50 instead of all at once
           - Logcache:
             - add logcache_worker options
+          - Reporting:
+            - add custom filter sla/outage reports
 
 2.40-2   Mon Dec 14 11:10:41 CET 2020
           - Config Tool:

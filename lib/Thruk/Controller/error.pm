@@ -3,7 +3,6 @@ package Thruk::Controller::error;
 use strict;
 use warnings;
 use Carp qw/confess longmess/;
-use Data::Dumper;
 use Time::HiRes qw/tv_interval/;
 use Thruk::Utils::Log qw/:all/;
 
@@ -213,8 +212,8 @@ sub index {
             'code' => 500, # internal server error
         },
         '24'  => {
-            'mess'    => 'CSFR Security Alert',
-            'dscr'    => 'Using this formular requires a POST with a valid CSFR token or an API key.',
+            'mess'    => 'CSRF Security Alert',
+            'dscr'    => 'Using this formular requires a POST with a valid CSRF token or an API key.',
             'code'    => 403, # forbidden
             'log_req' => 1,
         },
@@ -252,7 +251,7 @@ sub index {
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
         $code                           = $c->stash->{'error_data'}->{'code'}  // 500;
         $log_req                        = $c->stash->{'error_data'}->{'log'} if defined $c->stash->{'error_data'}->{'log'};
-        $c->stash->{errorDebugInfo}     = Dumper($c->stash->{'error_data'}->{'debug_information'}) if $c->stash->{'error_data'}->{'debug_information'};
+        $c->stash->{errorDebugInfo}     = $c->stash->{'error_data'}->{'debug_information'} if $c->stash->{'error_data'}->{'debug_information'};
     }
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
@@ -264,7 +263,9 @@ sub index {
         elsif((!defined $log_req || $log_req) && ($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req)) {
             Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails, $c->stash->{errorDebugInfo});
         } else {
-            _debug($errors->{$arg1}->{'mess'});
+            _debug($errors->{$arg1}->{'mess'} || $c->stash->{errorMessage});
+            _debug($c->stash->{errorDescription}) if $c->stash->{errorDescription};
+            _debug($c->stash->{errorDebugInfo})   if $c->stash->{errorDebugInfo};
         }
     }
 
@@ -311,13 +312,14 @@ sub index {
         if(Thruk->verbose >= 2) {
             Carp::cluck($c->stash->{errorMessage});
         }
-        return $c->render(json => {
+        my $json = {
             failed      => Cpanel::JSON::XS::true,
             message     => $c->stash->{errorMessage},
-            details     => $c->stash->{errorDetails},
-            description => $c->stash->{errorDescription},
             code        => $code,
-        });
+        };
+        $json->{'details'}     = $c->stash->{errorDetails}     if $c->stash->{errorDetails};
+        $json->{'description'} = $c->stash->{errorDescription} if $c->stash->{errorDescription};
+        return $c->render(json => $json);
     }
 
     if(Thruk::Base::mode_cli() && (!defined $log_req || $log_req)) {

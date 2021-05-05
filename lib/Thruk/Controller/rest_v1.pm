@@ -161,13 +161,13 @@ sub index {
 
 =head2 process_rest_request
 
-  process_rest_request($c, $path_info)
+  process_rest_request($c, $path_info, [$method])
 
 returns json response
 
 =cut
 sub process_rest_request {
-    my($c, $path_info) = @_;
+    my($c, $path_info, $method) = @_;
 
     my $data;
     my $raw_body = $c->req->raw_body;
@@ -179,14 +179,19 @@ sub process_rest_request {
 
     if(!$data) {
         eval {
-            $data = _fetch($c, $path_info);
+            $data = _fetch($c, $path_info, $method);
 
             # generic post processing
             $data = _post_processing($c, $data);
         };
-        if($@) {
-            $data = { 'message' => 'error during request', description => $@, code => 500 };
-            _error($@);
+        my $err = $@;
+        if($err) {
+            $data = { 'message' => 'error during request', description => $err, code => 500 };
+            if($c->{"detached"}) {
+                _debug($err);
+            } else {
+                _error($err);
+            }
         }
     }
 
@@ -236,10 +241,11 @@ sub _format_csv_output {
         $data = $list;
     }
 
+
     my $output;
     if(ref $data eq 'ARRAY') {
         my $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
-        $output = "";
+        $output = '#'.join(';', @{$columns})."\n";
         for my $d (@{$data}) {
             my $x = 0;
             for my $col (@{$columns}) {
@@ -276,6 +282,15 @@ sub _escape_newlines {
 ##########################################################
 sub _format_human_output {
     my($c, $data) = @_;
+
+    if(ref $data eq 'HASH') {
+        my $list = [];
+        my $columns = [sort keys %{$data}];
+        for my $col (@{$columns}) {
+            push @{$list}, { key => $col, value => $data->{$col} };
+        }
+        $data = $list;
+    }
 
     $c->res->headers->content_type('text/plain');
     $c->stash->{'template'} = 'passthrough.tt';
@@ -1082,7 +1097,7 @@ sub _expand_perfdata_and_custom_vars {
 
     # check wether user is allowed to see all custom variables
     my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
-    my $allowed_list = $c->config->{'show_custom_vars'};
+    my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
 
     # since expanding takes some time, only do it if we have no columns specified or if none-standard columns were requested
     my $columns = get_request_columns($c, NAMES) || [];
@@ -1112,34 +1127,7 @@ sub _expand_perfdata_and_custom_vars {
     }
 
     for my $row (@{$data}) {
-        if($row->{'custom_variable_names'}) {
-            $row->{'custom_variables'} = Thruk::Utils::get_custom_vars(undef, $row);
-            for my $key (@{$row->{'custom_variable_names'}}) {
-                if($allowed || Thruk::Utils::check_custom_var_list($key, $allowed_list)) {
-                    $row->{'_'.uc($key)} = $row->{'custom_variables'}->{$key};
-                } else {
-                    delete $row->{'custom_variables'}->{$key};
-                }
-            }
-            if(!$allowed) {
-                $row->{'custom_variable_names'}  = [keys   %{$row->{'custom_variables'}}];
-                $row->{'custom_variable_values'} = [values %{$row->{'custom_variables'}}];
-            }
-        }
-        if($row->{'host_custom_variable_names'}) {
-            $row->{'host_custom_variables'} = Thruk::Utils::get_custom_vars(undef, $row, 'host_');
-            for my $key (@{$row->{'host_custom_variable_names'}}) {
-                if($allowed || Thruk::Utils::check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
-                    $row->{'_HOST'.uc($key)} = $row->{'host_custom_variables'}->{$key};
-                } else {
-                    delete $row->{'host_custom_variables'}->{$key};
-                }
-            }
-            if(!$allowed) {
-                $row->{'host_custom_variable_names'}  = [keys   %{$row->{'host_custom_variables'}}];
-                $row->{'host_custom_variable_values'} = [values %{$row->{'host_custom_variables'}}];
-            }
-        }
+        Thruk::Utils::set_data_row_cust_vars($row, $allowed, $allowed_list);
 
         if($row->{'perf_data'}) {
             my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'perf_data'}))[0];
@@ -1189,7 +1177,7 @@ sub _get_help_for_path {
 
 =head2 register_rest_path_v1
 
-    register_rest_path_v1($protocol, $path|$regex, $function, $roles)
+    register_rest_path_v1($protocol, $path|$regex, $function, [$roles], [$first])
 
 register rest path.
 
@@ -1197,9 +1185,13 @@ returns nothing
 
 =cut
 sub register_rest_path_v1 {
-    my($proto, $path, $function, $roles) = @_;
+    my($proto, $path, $function, $roles, $first) = @_;
     for my $prot (@{Thruk::Utils::list($proto)}) {
-        push @{$rest_paths}, [$prot, $path, $function, $roles];
+        if($first) {
+            unshift @{$rest_paths}, [$prot, $path, $function, $roles];
+        } else {
+            push @{$rest_paths}, [$prot, $path, $function, $roles];
+        }
     }
     return;
 }
@@ -1377,7 +1369,13 @@ sub _rest_get_thruk_config {
     my $data = {};
     for my $key (keys %{$c->config}) {
         next if $key eq 'secret_key';
-        $data->{$key} = $c->config->{$key};
+        if($key eq 'logcache') {
+            my $val = $c->config->{$key};
+            $val =~ s|//.*?@|//...:...@|gmx;
+            $data->{$key} = $val;
+        } else {
+            $data->{$key} = $c->config->{$key};
+        }
     }
     return($data);
 }
@@ -1501,6 +1499,7 @@ sub _rest_get_thruk_users {
         next if(defined $id && $id ne $name);
         my $userdata = _get_userdata($c, $name);
         $total_locked++ if $userdata->{'locked'} == Cpanel::JSON::XS::true;
+        $total_number++;
         push @{$data}, $userdata;
     }
     if($id) {
@@ -1522,7 +1521,7 @@ sub _get_userdata {
     my($c, $name) = @_;
     my $profile;
     if($name) {
-        $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c);
+        $profile = Thruk::Authentication::User->new($c, $name)->set_dynamic_attributes($c, 1);
     } else {
         $profile = $c->user;
         $name    = $c->user->{'username'};

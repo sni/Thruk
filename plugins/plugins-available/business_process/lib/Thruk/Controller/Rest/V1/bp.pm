@@ -57,7 +57,7 @@ sub _rest_get_thruk_bp_new {
     require Thruk::BP::Utils;
 
     Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
-    my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
+    my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c, $c->req->parameters->{'id'});
     my $bp = Thruk::BP::Components::BP->new($c, $file, $c->req->parameters);
     my $label = Thruk::BP::Utils::clean_nasty($c->req->parameters->{'name'} || 'New Business Process');
     $label = Thruk::BP::Utils::make_uniq_label($c, $label);
@@ -75,7 +75,7 @@ sub _rest_get_thruk_bp_new {
     if(!$bps->[0]) {
         return({ 'message' => 'creating business process failed', code => 500 });
     }
-    return({ 'message' => 'business process sucessfully created', data => $bps->[0] });
+    return({ 'message' => 'business process sucessfully created', data => $bps->[0]->TO_JSON() });
 }
 
 ##########################################################

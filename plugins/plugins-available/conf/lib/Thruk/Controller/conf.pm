@@ -580,6 +580,7 @@ sub _process_thruk_page {
                         datetime_format_trends
                         use_new_command_box
                         show_custom_vars
+                        expose_custom_vars
                     /],
         ],
         [ 'Paging', [qw/
@@ -910,9 +911,10 @@ sub _process_backends_page {
 
     my $backends = [];
     my $peers    = $c->{'db'}->get_peers(1);
-    push @{$peers}, {} if scalar @{$peers} == 0;
+    $peers = [{}] if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
         my $b = Thruk::Utils::dclone($p->{'peer_config'});
+        next if(!$b->{'_LINE'} && $p->{'federation'});
         $b->{'name'}        = $b->{'name'} // '';
         $b->{'type'}        = lc($b->{'type'} // 'livestatus');
         $b->{'id'}          = $p->{'key'}  // substr(Thruk::Utils::Crypt::hexdigest(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5);
@@ -2155,9 +2157,19 @@ sub _object_clone {
     if($obj->{'file'}->{'readonly'}) { $c->stash->{'new_file'} = ''; }
     my $newobj = Monitoring::Config::Object->new(
         type     => $obj->get_type(),
-        conf     => $obj->{'conf'},
+        conf     => dclone($obj->{'conf'}),
         coretype => $c->{'obj_db'}->{'coretype'},
     );
+    my $name = $newobj->get_name()." clone";
+    if(scalar @{$c->{'obj_db'}->get_objects_by_name($newobj->get_type(), $name)} > 0) {
+        for my $i (2..100) {
+            if(scalar @{$c->{'obj_db'}->get_objects_by_name($newobj->get_type(), $name.' '.$i)} == 0) {
+                $name = $name.' '.$i;
+                last;
+            }
+        }
+    }
+    $newobj->set_name($name);
     return $newobj;
 }
 

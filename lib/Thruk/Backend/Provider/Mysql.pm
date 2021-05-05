@@ -602,6 +602,20 @@ sub get_host_totals_stats {
 
 ##########################################################
 
+=head2 get_host_less_stats
+
+  get_host_less_stats
+
+returns the host statistics but with less columns
+
+=cut
+
+sub get_host_less_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
 =head2 get_service_stats
 
 =cut
@@ -620,6 +634,20 @@ returns the services statistics used on the service/host details page
 =cut
 
 sub get_service_totals_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
+=head2 get_service_less_stats
+
+  get_service_less_stats
+
+returns the services statistics but with less columns
+
+=cut
+
+sub get_service_less_stats {
     confess("not implemented");
 }
 
@@ -875,19 +903,27 @@ sub _get_subfilter {
 
 ##########################################################
 sub _quote {
-    return "''" unless defined $_[0];
-    if(ref $_[0] eq 'ARRAY') {
+    my($str) = @_;
+    return "''" unless defined $str;
+    if(ref $str eq 'ARRAY') {
         my $list = [];
-        for my $v (@{$_[0]}) {
+        for my $v (@{$str}) {
             push @{$list}, _quote($v);
         }
         return $list;
     }
-    if($_[0] =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
-        return $_[0];
+    if($str =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
+        return $str;
     }
-    $_[0] =~ s/'/\'/gmx;
-    return("'".$_[0]."'");
+    $str =~ s/\\\\/\\/gmx;
+    $str =~ s/\'/\\'/gmx;
+    $str =~ s/\"/\\"/gmx;
+    $str =~ s/\x08/\\b/gmx;
+    $str =~ s/\n/\\n/gmx;
+    $str =~ s/\r/\\r/gmx;
+    $str =~ s/\t/\\t/gmx;
+    $str =~ s/\x1A/\\Z/gmx;
+    return("'".$str."'");
 }
 
 ##########################################################
@@ -980,6 +1016,7 @@ sub _log_stats {
         push @result, {
             key              => $key,
             name             => $peer->{'name'},
+            enabled          => $peer->{'logcache'} ? 1 : 0,
             index_size       => $index_size     // 0,
             data_size        => $data_size      // 0,
             items            => $items          // 0,
@@ -1414,7 +1451,7 @@ sub check_global_lock {
                 return;
             }
             _warn("WARNING: removing stale lock file");
-            unlink($c->config->{'tmp_path'}."/logcache_import.lock", $$);
+            unlink($c->config->{'tmp_path'}."/logcache_import.lock");
         }
     }
     return(1);

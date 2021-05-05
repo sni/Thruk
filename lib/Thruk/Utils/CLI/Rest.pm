@@ -39,11 +39,11 @@ our $skip_backends = \&_skip_backends;
 
 =cut
 sub cmd {
-    my($c, undef, $commandoptions, undef, undef, $opt) = @_;
+    my($c, undef, $commandoptions, undef, $src, $opt) = @_;
 
     # split args by url, then parse leading options. In case there is only one
     # url, all options belong to this url.
-    my $opts = $opt->{'_parsed_args'} // _parse_args($commandoptions);
+    my $opts = $opt->{'_parsed_args'} // _parse_args($commandoptions, $src);
     if(ref $opts eq "") {
         return({output => $opts, rc => 2});
     }
@@ -130,7 +130,7 @@ sub _fetch_results {
 
 ##############################################
 sub _parse_args {
-    my($args) = @_;
+    my($args, $src) = @_;
 
     # split by url
     my $current_args = [];
@@ -163,7 +163,7 @@ sub _parse_args {
     for my $s (@{$split_args}) {
         my $opt = {
             'method'     => undef,
-            'postdata'   => [],
+            'postdata'   => {},
             'warning'    => [],
             'critical'   => [],
             'perfunit'   => [],
@@ -175,7 +175,8 @@ sub _parse_args {
         Getopt::Long::GetOptionsFromArray($s,
             "H|header=s"      =>  $opt->{'headers'},
             "m|method=s"      => \$opt->{'method'},
-            "d|data=s"        =>  $opt->{'postdata'},
+            "d|data=s"        =>  sub { _set_postdata($opt, 0, $src, @_); },
+            "D|rawdata=s"     =>  sub { _set_postdata($opt, 1, $src, @_); },
             "o|output=s"      => \$opt->{'output'},
             "w|warning=s"     =>  $opt->{'warning'},
             "c|critical=s"    =>  $opt->{'critical'},
@@ -193,43 +194,60 @@ sub _parse_args {
             $opt->{'url'} = pop(@{$s});
         }
 
-        if($opt->{'postdata'} && scalar @{$opt->{'postdata'}} > 0 && !$opt->{'method'}) {
-            $opt->{'method'} = 'POST';
-        }
         $opt->{'method'} = 'GET' unless $opt->{'method'};
-
-        my $postdata;
-        for my $d (@{$opt->{'postdata'}}) {
-            if(ref $d eq '' && $d =~ m/^\{.*\}$/mx) {
-                my $data;
-                my $json = Cpanel::JSON::XS->new->utf8;
-                $json->relaxed();
-                eval {
-                    $data = $json->decode($d);
-                };
-                if($@) {
-                    return("ERROR: failed to parse json data argument: ".$@, 1);
-                }
-                for my $key (sort keys %{$data}) {
-                    $postdata->{$key} = $data->{$key};
-                }
-                next;
-            }
-            my($key,$val) = split(/=/mx, $d, 2);
-            next unless $key;
-            if(defined $postdata->{$key}) {
-                $postdata->{$key} = [$postdata->{$key}] unless ref $postdata->{$key} eq 'ARRAY';
-                push @{$postdata->{$key}}, $val;
-            } else {
-                $postdata->{$key} = $val;
-            }
-        }
-        $opt->{'postdata'} = $postdata if $opt->{'postdata'};
 
         push @commands, $opt;
     }
 
     return(\@commands);
+}
+
+##############################################
+sub _set_postdata {
+    my($opts, $overwrite, $src, undef, $data) = @_;
+    my $postdata = $opts->{'postdata'};
+    if(!$opts->{'method'}) {
+        $opts->{'method'} = 'POST';
+    }
+
+    if($src && $src eq 'local' && $data && $data =~ m/^\@(.*)$/mx) {
+        my $file = $1;
+        if(!-e $file) {
+            _fatal("could not read file %s: %s", $file, $!);
+        }
+        open(my $fh, '<', $file) || _fatal("could not read file %s: %s", $file, $!);
+        $data = Thruk::Utils::IO::json_retrieve($file, $fh);
+        if(ref $data ne 'HASH') {
+            _fatal("could not read file %s, file must contain hash data structure, got: %s", $file, ref $data);
+        }
+        for my $key (sort keys %{$data}) {
+            $postdata->{$key} = $data->{$key};
+        }
+        return;
+    }
+    if(ref $data eq '' && $data =~ m/^\{.*\}$/mx) {
+        my $json = Cpanel::JSON::XS->new->utf8;
+        $json->relaxed();
+        eval {
+            $data = $json->decode($data);
+        };
+        if($@) {
+            _fatal("failed to parse json data argument: %s", $@);
+        }
+        for my $key (sort keys %{$data}) {
+            $postdata->{$key} = $data->{$key};
+        }
+        return;
+    }
+    my($key,$val) = split(/=/mx, $data, 2);
+    return unless $key;
+    if(defined $postdata->{$key} && !$overwrite) {
+        $postdata->{$key} = [$postdata->{$key}] unless ref $postdata->{$key} eq 'ARRAY';
+        push @{$postdata->{$key}}, $val;
+    } else {
+        $postdata->{$key} = $val;
+    }
+    return;
 }
 
 ##############################################
@@ -599,6 +617,14 @@ Get list of hostgroups starting with literal l
 Reschedule next host check for host localhost:
 
   %> thruk r -d "start_time=now" /hosts/localhost/cmd/schedule_host_check
+
+Read POST data from file
+
+  %> thruk r -d @/tmp/postdata.json /hosts/localhost/cmd/schedule_host_check
+
+Read POST data from file but overwrite specific key with new value
+
+  %> thruk r -d @/tmp/postdata.json -D comment=... /hosts/localhost/cmd/schedule_host_check
 
 Send multiple endpoints at once:
 

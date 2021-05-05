@@ -81,15 +81,9 @@ sub index {
             $c->{'db'}->enable_backends($backends);
         }
         if($c->req->parameters->{'param'}) {
-            for my $str (split/&/mx, $c->req->parameters->{'param'}) {
-                my($key,$val) = split(/=/mx, $str, 2);
-                if($key =~ s/^params\.//mx) {
-                    $c->req->parameters->{$key} = URI::Escape::uri_unescape($val) unless exists $c->req->parameters->{$key};
-                }
-                elsif($key =~ m/^t\d+/mx) {
-                    $c->req->parameters->{$key} = URI::Escape::uri_unescape($val) unless exists $c->req->parameters->{$key};
-                }
-            }
+            my $req = Thruk::Request->new({ QUERY_STRING => $c->req->parameters->{'param'} });
+            my $params = Thruk::Utils::Reports::get_report_data_from_param($req->parameters);
+            Thruk::Utils::Reports::apply_report_parameters($c, $c->req->parameters, $params->{'params' });
         }
         eval {
             eval {
@@ -194,7 +188,7 @@ sub report_edit {
                 $r->{$key} = $c->req->parameters->{$key} if defined $c->req->parameters->{$key};
             }
         }
-        $r->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $r->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
         if($r->{'template'} !~ m/^[0-9a-zA-Z]+[\w]*\.tt$/mx) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'invalid template' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");

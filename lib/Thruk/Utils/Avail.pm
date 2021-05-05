@@ -26,21 +26,22 @@ use Thruk::Utils::Log qw/:all/;
 
 =head2 calculate_availability
 
-  calculate_availability($c)
+  calculate_availability($c, [$params])
 
 calculates the availability
 
 =cut
 sub calculate_availability {
-    my($c)         = @_;
+    my($c, $params) = @_;
+    $params = $c->req->parameters unless defined $params;
     my $start_time = time();
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 6, 'preparing logs') if $ENV{'THRUK_JOB_DIR'};
 
-    my $host           = $c->req->parameters->{'host'};
-    my $hostgroup      = $c->req->parameters->{'hostgroup'};
-    my $service        = $c->req->parameters->{'service'};
-    my $servicegroup   = $c->req->parameters->{'servicegroup'};
+    my $host           = $params->{'host'};
+    my $hostgroup      = $params->{'hostgroup'};
+    my $service        = $params->{'service'};
+    my $servicegroup   = $params->{'servicegroup'};
 
     if(defined $service and CORE::index($service, ';') > 0) {
         ($host,$service) = split/;/mx, $service;
@@ -48,57 +49,32 @@ sub calculate_availability {
         $c->stash->{service} = $service;
     }
 
-    if(defined $host and $host eq 'null') { undef $host; }
+    if(defined $host && $host eq 'null') { undef $host; }
 
-    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
+    my $view_mode = $params->{'view_mode'} || 'html';
     if($view_mode eq 'csv') {
-        $c->req->parameters->{'csvoutput'} = 1;
+        $params->{'csvoutput'} = 1;
     }
 
-    my $csvoutput = 0;
-    $csvoutput = 1 if exists $c->req->parameters->{'csvoutput'};
+    my $csvoutput = exists $params->{'csvoutput'} ? 1 : 0;
 
     if(defined $hostgroup and $hostgroup ne '') {
-        if($csvoutput) {
-            $c->stash->{template}   = 'avail_report_hosts_csv.tt';
-        } else {
-            $c->stash->{template}   = 'avail_report_hostgroup.tt';
-        }
+        $c->stash->{template} = $csvoutput ? 'avail_report_hosts_csv.tt'    : 'avail_report_hostgroup.tt';
     }
     elsif(defined $service and $service ne 'all') {
-        if($csvoutput) {
-            $c->stash->{template} = 'avail_report_services_csv.tt';
-        } else {
-            $c->stash->{template}   = 'avail_report_service.tt';
-        }
+        $c->stash->{template} = $csvoutput ? 'avail_report_services_csv.tt' : 'avail_report_service.tt';
     }
-    elsif((defined $service and $service eq 'all') || $c->req->parameters->{s_filter}) {
-        if($csvoutput) {
-            $c->stash->{template} = 'avail_report_services_csv.tt';
-        } else {
-            $c->stash->{template} = 'avail_report_services.tt';
-        }
+    elsif((defined $service and $service eq 'all') || exists $params->{s_filter}) {
+        $c->stash->{template} = $csvoutput ? 'avail_report_services_csv.tt' : 'avail_report_services.tt';
     }
     elsif(defined $servicegroup and $servicegroup ne '') {
-        if($csvoutput) {
-            $c->stash->{template} = 'avail_report_services_csv.tt';
-        } else {
-            $c->stash->{template}   = 'avail_report_servicegroup.tt';
-        }
+        $c->stash->{template} = $csvoutput ? 'avail_report_services_csv.tt' : 'avail_report_servicegroup.tt';
     }
     elsif(defined $host and $host ne 'all') {
-        if($csvoutput) {
-            $c->stash->{template}   = 'avail_report_hosts_csv.tt';
-        } else {
-            $c->stash->{template}   = 'avail_report_host.tt';
-        }
+        $c->stash->{template} = $csvoutput ? 'avail_report_hosts_csv.tt'    : 'avail_report_host.tt';
     }
-    elsif((defined $host and $host eq 'all') || $c->req->parameters->{h_filter}) {
-        if($csvoutput) {
-            $c->stash->{template}   = 'avail_report_hosts_csv.tt';
-        } else {
-            $c->stash->{template}   = 'avail_report_hosts.tt';
-        }
+    elsif((defined $host and $host eq 'all') || exists $params->{h_filter}) {
+        $c->stash->{template} = $csvoutput ? 'avail_report_hosts_csv.tt'    : 'avail_report_hosts.tt';
     }
     else {
         _error("unknown report type");
@@ -108,8 +84,8 @@ sub calculate_availability {
     if($csvoutput) {
         $c->stash->{'res_ctype'}  = 'text/csv';
         $c->stash->{'res_header'} = [ 'Content-Disposition', 'attachment; filename="availability.csv"' ];
-        delete $c->req->parameters->{'show_log_entries'};
-        delete $c->req->parameters->{'full_log_entries'};
+        delete $params->{'show_log_entries'};
+        delete $params->{'full_log_entries'};
     }
 
     # get start/end from timeperiod in params
@@ -118,28 +94,28 @@ sub calculate_availability {
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
-    $c->stash->{t1}         = $c->req->parameters->{'t1'} || $start;
-    $c->stash->{t2}         = $c->req->parameters->{'t2'} || $end;
-    if(defined $c->req->parameters->{'timeperiod'}) {
-        $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
-    } elsif(!defined $c->req->parameters->{'t1'} && !defined $c->req->parameters->{'t2'}) {
+    $c->stash->{t1}         = $params->{'t1'} || $start;
+    $c->stash->{t2}         = $params->{'t2'} || $end;
+    if(defined $params->{'timeperiod'}) {
+        $c->stash->{timeperiod} = $params->{'timeperiod'};
+    } elsif(!defined $params->{'t1'} && !defined $params->{'t2'}) {
         $c->stash->{timeperiod} = 'last24hours';
     } else {
         $c->stash->{timeperiod} = '';
     }
 
-    my $rpttimeperiod                = $c->req->parameters->{'rpttimeperiod'} || '';
-    my $assumeinitialstates          = _parse_bool_req($c->req->parameters->{'assumeinitialstates'}, 1);
-    my $assumestateretention         = _parse_bool_req($c->req->parameters->{'assumestateretention'}, 1);
-    my $assumestatesduringnotrunning = _parse_bool_req($c->req->parameters->{'assumestatesduringnotrunning'}, 1);
-    my $includesoftstates            = _parse_bool_req($c->req->parameters->{'includesoftstates'}, 0);
-    my $initialassumedhoststate      = $c->req->parameters->{'initialassumedhoststate'};
-    my $initialassumedservicestate   = $c->req->parameters->{'initialassumedservicestate'};
-    my $backtrack                    = $c->req->parameters->{'backtrack'};
-    my $show_log_entries             = $c->req->parameters->{'show_log_entries'};
-    my $full_log_entries             = $c->req->parameters->{'full_log_entries'};
-    my $zoom                         = $c->req->parameters->{'zoom'};
-    my $breakdown                    = $c->req->parameters->{'breakdown'} || '';
+    my $rpttimeperiod                = $params->{'rpttimeperiod'} || '';
+    my $assumeinitialstates          = _parse_bool_req($params->{'assumeinitialstates'}, 1);
+    my $assumestateretention         = _parse_bool_req($params->{'assumestateretention'}, 1);
+    my $assumestatesduringnotrunning = _parse_bool_req($params->{'assumestatesduringnotrunning'}, 1);
+    my $includesoftstates            = _parse_bool_req($params->{'includesoftstates'}, 0);
+    my $initialassumedhoststate      = $params->{'initialassumedhoststate'};
+    my $initialassumedservicestate   = $params->{'initialassumedservicestate'};
+    my $backtrack                    = $params->{'backtrack'};
+    my $show_log_entries             = $params->{'show_log_entries'};
+    my $full_log_entries             = $params->{'full_log_entries'};
+    my $zoom                         = $params->{'zoom'};
+    my $breakdown                    = $params->{'breakdown'} || '';
 
     # calculate zoom
     $zoom = 4 unless defined $zoom;
@@ -152,10 +128,10 @@ sub calculate_availability {
     $zoom = 1 if $zoom == 0;
 
     # show_log_entries is true if it exists
-    $show_log_entries = 1 if exists $c->req->parameters->{'show_log_entries'};
+    $show_log_entries = 1 if exists $params->{'show_log_entries'};
 
     # full_log_entries is true if it exists
-    $full_log_entries = 1 if exists $c->req->parameters->{'full_log_entries'};
+    $full_log_entries = 1 if exists $params->{'full_log_entries'};
 
     # default backtrack is 4 days
     $backtrack = 4 unless defined $backtrack;
@@ -224,15 +200,69 @@ sub calculate_availability {
 
     # services
     $c->stash->{'services'} = {};
-    if(defined $service || $c->req->parameters->{s_filter}) {
+    if(exists $params->{s_filter}) {
+        $servicefilter = $params->{s_filter};
+        $service       = 1;
+        my $filter     = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
+        my $all_services = $c->{'db'}->get_services(filter => $filter );
+        _die_no_matches($c, 'service', 'filter', @{$filter}) unless scalar @{$all_services} > 0;
+        my $services_data;
+        for my $service (@{$all_services}) {
+            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+            push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+            if($initialassumedservicestate == -1) {
+                $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
+            }
+        }
+        if(scalar keys %{$services_data} == 0) {
+            _die_no_matches($c, 'service', 'filter', @{$filter}) unless scalar @{$all_services} > 0;
+        }
+        $c->stash->{'services'} = $services_data;
+
+        my @hostfilter;
+        for my $host (sort keys %{$services_data}) {
+            push @hostfilter, { 'host_name' => $host };
+        }
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+
+        if($params->{'include_host_services'}) {
+            for my $host (sort keys %{$services_data}) {
+                push @{$hosts}, $host;
+                if($initialassumedhoststate == -1) {
+                    # get host data from first service
+                    my $names = [sort keys %{$services_data->{$host}}];
+                    my $hst = $services_data->{$host}->{$names->[0]};
+                    $initial_states->{'hosts'}->{$host} = $hst->{'host_state'};
+                }
+            }
+        }
+    }
+
+    elsif(exists $params->{h_filter}) {
+        my @hostfilter;
+        $hostfilter = $params->{h_filter};
+
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', 'filter', @{$filter}) unless scalar @{$host_data} > 0;
+        if($initialassumedhoststate == -1) {
+            for my $host (@{$host_data}) {
+                $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
+            }
+        }
+        for my $host (@{$host_data}) {
+            push @{$hosts}, $host->{'name'};
+            push @hostfilter, { 'host_name' => $host->{'name'} };
+        }
+        $c->stash->{'hosts'} = Thruk::Utils::array2hash($host_data, 'name');
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+    }
+
+    elsif(defined $service) {
         my $all_services;
         my @servicefilter;
         my @hostfilter;
-        if($c->req->parameters->{s_filter}) {
-            $servicefilter = $c->req->parameters->{s_filter};
-            $service       = 1;
-        }
-        elsif($service ne 'all') {
+        if($service ne 'all') {
             $host = '*' if $host =~ m/^\s*$/mx;
             for my $h (split(/\s*,\s*/mx, $host)) {
                 if($h =~ m/\*/mx) {
@@ -258,8 +288,9 @@ sub calculate_availability {
                 Thruk::Utils::combine_filter('-or', \@servicefilter),
             ]);
         }
-        $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
-        die('no such service: '.($service||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ])) unless scalar @{$all_services} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
+        $all_services = $c->{'db'}->get_services(filter => $filter);
+        _die_no_matches($c, 'service', 'name: '.$host.' - '.$service, @{$filter}) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
@@ -279,7 +310,7 @@ sub calculate_availability {
             for my $host (@{$tmphosts}) {
                 $tmp{$host->{'host_name'}} = 1;
             }
-            for my $host (keys %tmp) {
+            for my $host (sort keys %tmp) {
                 push @hostfilter, { 'host_name' => $host };
             }
         }
@@ -287,45 +318,41 @@ sub calculate_availability {
     }
 
     # single/multiple hosts
-    elsif((defined $host and $host ne 'all') || $c->req->parameters->{h_filter}) {
+    elsif(defined $host and $host ne 'all') {
         my @servicefilter;
         my @hostfilter;
-        if($c->req->parameters->{h_filter}) {
-            $hostfilter = $c->req->parameters->{h_filter};
-        }
-        else {
-            for my $h (split(/\s*,\s*/mx, $host)) {
-                if($h =~ m/\*/mx) {
-                    $h   =~ s/\.\*/\*/gmx;
-                    $h   =~ s/\*/.*/gmx;
-                    push @hostfilter,    { 'name'      => { '~~' => $h }};
-                    push @servicefilter, { 'host_name' => { '~~' => $h }};
-                } else {
-                    push @hostfilter,    { 'name'      => $h };
-                    push @servicefilter, { 'host_name' => $h };
-                }
+        for my $h (split(/\s*,\s*/mx, $host)) {
+            if($h =~ m/\*/mx) {
+                $h   =~ s/\.\*/\*/gmx;
+                $h   =~ s/\*/.*/gmx;
+                push @hostfilter,    { 'name'      => { '~~' => $h }};
+                push @servicefilter, { 'host_name' => { '~~' => $h }};
+            } else {
+                push @hostfilter,    { 'name'      => $h };
+                push @servicefilter, { 'host_name' => $h };
             }
-            if($c->req->parameters->{'include_host_services'}) {
-                # host availability page includes services too, so
-                # calculate service availability for services on these hosts too
-                my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+        }
+        if($params->{'include_host_services'}) {
+            # host availability page includes services too, so
+            # calculate service availability for services on these hosts too
+            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+            for my $service (@{$service_data}) {
+                $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+                push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+            }
+
+            if($initialassumedservicestate == -1) {
                 for my $service (@{$service_data}) {
-                    $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
-                    push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
-                }
-
-                if($initialassumedservicestate == -1) {
-                    for my $service (@{$service_data}) {
-                        $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
-                    }
+                    $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
                 }
             }
-            $hostfilter        = Thruk::Utils::combine_filter('-or', \@hostfilter);
-            $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
         }
+        $hostfilter        = Thruk::Utils::combine_filter('-or', \@hostfilter);
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
 
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no such host: '.($host||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ])) unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', "name: ".$host, @{$filter}) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
@@ -339,8 +366,9 @@ sub calculate_availability {
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
-        die('no hosts found for all') unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')] ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', undef, @{$filter}) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
         $logserviceheadfilter = { service_description => undef };
@@ -369,8 +397,9 @@ sub calculate_availability {
             $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
 
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no host found for hostgroup: '.$hostgroup) unless scalar @{$host_data} > 0;
+        my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
+        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        _die_no_matches($c, 'host', 'hostgroup:' .$hostgroup, @{$filter}) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
             $groupfilter       = Thruk::Utils::combine_filter('-or', \@groupfilter);
@@ -415,7 +444,7 @@ sub calculate_availability {
             }
         }
 
-        if($c->req->parameters->{'include_host_services'}) {
+        if($params->{'include_host_services'}) {
             # some pages includes services too, so
             # calculate service availability for services on these hosts too
             my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
@@ -448,10 +477,11 @@ sub calculate_availability {
         $groupfilter          = Thruk::Utils::combine_filter('-or', \@groupfilter);
         $servicefilter        = Thruk::Utils::combine_filter('-or', \@servicefilter);
 
-        my $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        my $filter       = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
+        my $all_services = $c->{'db'}->get_services(filter => $filter);
         my $groups       = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
 
-        die('no such host/service') unless scalar @{$all_services} > 0;
+        _die_no_matches($c, 'service', 'servicegroup: '.$servicegroup, @{$filter}) unless scalar @{$all_services} > 0;
 
         my $service_data;
         for my $service (@{$all_services}) {
@@ -511,20 +541,20 @@ sub calculate_availability {
             $logserviceheadfilter = Thruk::Utils::combine_filter('-or', \@services_from_groups);
         }
     } else {
-        croak("unknown report type: ".Dumper($c->req->parameters));
+        croak("unknown report type: ".Dumper($params));
     }
 
 
     ########################
     # fetch logs
     my(@loghostfilter,@logservicefilter);
-    unless($service) {
+    if(!$service || $params->{'include_host_services'}) {
         push @loghostfilter, [ { type => 'HOST ALERT' }, $softlogfilter ];
         push @loghostfilter, [ { type => 'INITIAL HOST STATE' } , $softlogfilter ];
         push @loghostfilter, [ { type => 'CURRENT HOST STATE' }, $softlogfilter ];
     }
     push @loghostfilter, { type => 'HOST DOWNTIME ALERT' };
-    if($service or $servicegroup or $c->req->parameters->{'include_host_services'}) {
+    if($service or $servicegroup or $params->{'include_host_services'}) {
         push @logservicefilter, [ { type => 'SERVICE ALERT' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'INITIAL SERVICE STATE' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'CURRENT SERVICE STATE' }, $softlogfilter ];
@@ -573,7 +603,7 @@ sub calculate_availability {
     my $total_nr = 0;
     $total_nr += scalar @{$hosts}    if defined $hosts;
     $total_nr += scalar @{$services} if defined $services;
-    return(scalar @{$hosts}, scalar @{$services}) if $c->req->parameters->{'get_total_numbers_only'};
+    return(scalar @{$hosts}, scalar @{$services}) if $params->{'get_total_numbers_only'};
     if($total_nr > $c->config->{'report_max_objects'}) {
         return($c->detach_error({
             msg   => sprintf("too many objects: %d", $total_nr),
@@ -638,7 +668,7 @@ sub calculate_availability {
     $c->stats->profile(end => "calculate availability");
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 75, 'finished calculation') if $ENV{'THRUK_JOB_DIR'};
-    if($c->req->parameters->{'debug'}) {
+    if($params->{'debug'}) {
         $c->stash->{'debug_info'} .= "\$ma_options\n";
         $c->stash->{'debug_info'} .= Dumper($ma_options);
         if($ma_options->{'log_file'}) {
@@ -653,15 +683,14 @@ sub calculate_availability {
         unlink($file) if $file;
     }
 
-    if($c->req->parameters->{'outages'}) {
-        $c->stash->{'service'}       = $service // "";
-        $c->stash->{'host'}          = $host;
-        $c->stash->{'withdowntimes'} = $c->req->parameters->{'withdowntimes'} // 0;
+    if($params->{'outages'}) {
+        $c->stash->{'withdowntimes'} = $params->{'withdowntimes'} // 0;
         $c->stash->{'template'} = 'avail_outages.tt';
         my $only_host_services = undef;
         my $unavailable_states = {
             critical             => 1,
             down                 => 1,
+            unknown              => 1,
             unreachable          => 1,
         };
         if($c->stash->{'withdowntimes'} == 0) {
@@ -670,8 +699,30 @@ sub calculate_availability {
             }
         }
         my $logs = $ma->get_full_logs() || [];
-        my $outages = outages($logs, $unavailable_states, $start, $end, $host, $service, $only_host_services);
+        my $outages = [];
+        for my $hst (@{$hosts}) {
+            my $out = outages($logs, $unavailable_states, $start, $end, $hst, "", $only_host_services);
+            push @{$outages}, @{$out};
+        }
+        for my $svc (@{$services}) {
+            my $out = outages($logs, $unavailable_states, $start, $end, $svc->{'host'}, $svc->{'service'}, $only_host_services);
+            push @{$outages}, @{$out};
+        }
+
+        $c->stash->{'type'}    = $params->{'type'} // 'hosts';
+        $c->stash->{'host'}    = '';
+        $c->stash->{'service'} = '';
+        if(scalar @{$hosts} == 1 && scalar @{$services} == 0) {
+            $c->stash->{'host'}    = $hosts->[0];
+        }
+        if(scalar @{$hosts} == 0 && scalar @{$services} == 1) {
+            $c->stash->{'host'}    = $services->[0]->{'host'};
+            $c->stash->{'service'} = $services->[0]->{'service'};
+        }
         $c->stash->{'outages'} = $outages;
+        if($view_mode eq 'json') {
+            $c->stash->{'json'} = $outages;
+        }
         return;
     }
 
@@ -918,15 +969,17 @@ sub outages {
     my $in_timeperiod  = 1;
 
     for my $l (@{$logs}) {
+        next unless $l->{'type'};
         if($only_host_services) {
             next if  $l->{'host'} ne $host;
             next if !$l->{'service'};
         } else {
+            next if(defined $l->{'host'} && $l->{'host'} ne $host);
             if($service) {
-                next if(defined $l->{'service'} and $l->{'service'} ne $service);
-                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+                next if(defined $l->{'service'} &&  $l->{'service'} ne $service);
+                next if(defined $l->{'host'}    && !$l->{'service'});
             } else {
-                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+                next if(defined $l->{'host'}    && $l->{'service'});
             }
         }
 
@@ -1102,6 +1155,42 @@ sub _parse_bool_req {
     return(1) if(lc($val) eq 'yes');
     return(1) if($val eq '1');
     return(0);
+}
+
+
+##############################################
+sub _die_no_matches {
+    my($c, $type, $name, $authfilter, $otherfilter) = @_;
+
+    my $filter = Thruk::Utils::dump_params([$authfilter, $otherfilter], 0);
+    $filter =~ s/\n/ /gmx;
+
+    # if first part of filter isn't empty, its most likely a permission isse
+    if($authfilter) {
+        my $data;
+        if($type eq 'host') {
+            $data = $c->{'db'}->get_hosts(filter => [$otherfilter]);
+        }
+        elsif($type eq 'service') {
+            $data = $c->{'db'}->get_services(filter => [$otherfilter]);
+        }
+        # found anything when not using authentication
+        if($data && ref $data eq 'ARRAY' && scalar @{$data} > 0) {
+            $c->detach_error({
+                msg               => sprintf("insufficient permissions for user %s", $c->stash->{'remote_user'}//'?'),
+                descr             => sprintf("user %s has no permissions for any %s%s: %s", $c->stash->{'remote_user'}//'?', $type, $name ? " by ".$name : "", $filter),
+                code              => 400,
+                debug_information => [$authfilter, $otherfilter],
+            });
+        }
+    }
+    $c->detach_error({
+        msg               => sprintf("found no %s%s", $type, $name ? " by ".$name : ""),
+        descr             => sprintf("%s query%s returned no objects: %s", $type, $name ? " by ".$name : "", $filter),
+        code              => 400,
+        debug_information => [$authfilter, $otherfilter],
+    });
+    return;
 }
 
 1;

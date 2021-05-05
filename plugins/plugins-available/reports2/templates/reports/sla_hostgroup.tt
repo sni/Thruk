@@ -1,6 +1,7 @@
 ﻿[%# EDIT #%]
 [% IF block == 'edit' %]
   [%
+    deprecated = 1;
     required_fields = [
         { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1   ] },
         { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                        ] },
@@ -58,9 +59,7 @@
     [% END %]
 
     [% FOREACH hst = avail_data.hosts.keys.sort %]
-      [% c.req.parameters.host    = hst %]
-      [% c.req.parameters.service = "" %]
-      [% available = get_availability_percents() %]
+      [% available = get_availability_percents(hst, "") %]
       [% p = available.total.percent;
          IF p == -1; p = 100; END;
          IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
@@ -69,9 +68,9 @@
       [% pagetitle                    = loc("Host: %s", _hst(hst)) %]
 
       [% WRAPPER 'reports/comp/page_standard.tt' %]
-        [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+        [% PROCESS 'reports/comp/sla_graph_page.tt' svc='' %]
       [% END %]
-      [% PROCESS 'reports/comp/pnp_multiple_graph_page.tt' %]
+      [% PROCESS 'reports/comp/pnp_multiple_graph_page.tt' svc='' %]
       [% PROCESS 'reports/comp/sla_outages.tt' %]
     [% END %]
   [% END %][%# report wrapper #%]

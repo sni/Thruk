@@ -273,13 +273,55 @@ sub check_recurring_downtime {
         }
     }
     elsif($downtime->{'target'} eq 'service') {
+        # check if there are host which do not match a single service or do not exist at all
         for my $hst (@{$downtime->{'host'}}) {
-            for my $svc (@{$downtime->{'service'}}) {
-                my $data = $c->{'db'}->get_services(filter => [{ 'host_name' => $hst, description => $svc } ], columns => [qw/host_name/], backend => $backends );
-                if(!$data || scalar @{$data} == 0) {
-                    $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." - ".$svc." not found in recurring downtime ".$file."\n";
-                    $errors++;
+            my $data = $c->{'db'}->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name services/], backend => $backends );
+            # does the host itself exist
+            if(!$data || scalar @{$data} == 0) {
+                $details .= "  - ERROR: host ".$hst." not found in recurring downtime ".$file."\n";
+                $errors++;
+                next;
+            }
+            # does it match at least one service
+            my $found = 0;
+            for my $svc1 (@{$downtime->{'service'}}) {
+                for my $hostdata (@{$data}) {
+                    for my $svc2 (@{$hostdata->{'services'}}) {
+                        if($svc1 eq $svc2) {
+                            $found = 1;
+                            last;
+                        }
+                    }
                 }
+            }
+            if(!$found) {
+                $details .= "  - ERROR: host ".$hst." does not have any of the configured services in recurring downtime ".$file."\n";
+                $errors++;
+                next;
+            }
+        }
+
+        # check if each service matches at least one host
+        for my $svc (@{$downtime->{'service'}}) {
+            my $data = $c->{'db'}->get_services(filter => [{ description => $svc } ], columns => [qw/host_name/], backend => $backends );
+            if(!$data || scalar @{$data} == 0) {
+                $details .= "  - ERROR: service ".$svc." not found in recurring downtime ".$file."\n";
+                $errors++;
+                next;
+            }
+            my $found = 0;
+            for my $svcdata (@{$data}) {
+                for my $hst (@{$downtime->{'host'}}) {
+                    if($hst eq $svcdata->{'host_name'}) {
+                        $found = 1;
+                        last;
+                    }
+                }
+            }
+            if(!$found) {
+                $details .= "  - ERROR: service ".$svc." does not match any of the configured hosts in recurring downtime ".$file."\n";
+                $errors++;
+                next;
             }
         }
     }
@@ -390,11 +432,12 @@ sub _logcache_checks  {
     my $to_remove = Thruk::Backend::Provider::Mysql->_log_removeunused($c, 1);
 
     for my $s (@stats) {
-        if($s->{'cache_version'} != $Thruk::Backend::Provider::Mysql::cache_version) {
-            $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, $s->{'cache_version'}, $Thruk::Backend::Provider::Mysql::cache_version);
+        next unless $s->{'enabled'};
+        if(($s->{'cache_version'}||0) != $Thruk::Backend::Provider::Mysql::cache_version) {
+            $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, ($s->{'cache_version'}//0), $Thruk::Backend::Provider::Mysql::cache_version);
             $errors++;
         }
-        if($s->{'last_update'} < time() - 1800) {
+        if($s->{'last_update'} && $s->{'last_update'} < time() - 1800) {
             $details .= sprintf("  - [logcache %s] last update too old: %s (hint: check logcache update cronjob)\n", $s->{'name'}, scalar localtime $s->{'last_update'});
             $errors++;
         }

@@ -3,15 +3,12 @@
 [% PROCESS _message.tt %]
 
 <form action="avail.cgi" method="GET" id="date_form">
-  <input type="hidden" name="host" value="[% host | html %]">
-  [% IF service %]
-  <input type="hidden" name="service" value="[% service | html %]">
-  [% END %]
   <input type="hidden" name="outages" value="1">
   <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
     <tr>
       <td align="left" valign="top" width="33%">
         [% PROCESS _infobox.tt %]
+        [% IF host %]
         <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
           <tr>
             <td class='linkBox'>
@@ -23,7 +20,7 @@
                 <a href="history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;nosystem=1">View Alert History For This Service</a><br>
                 <a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a><br>
                 <a href="extinfo.cgi?type=2&amp;host=[% host | uri %]&service=[% service | uri %]">View Information For This Service</a><br>
-              [% ELSE %]
+              [% ELSIF host %]
                 <a href="avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Hosts</a><br>
                 [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Host</a><br>[% END %]
                 [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes">View Alert Histogram For This Host</a><br>[% END %]
@@ -35,6 +32,8 @@
             </td>
           </tr>
         </table>
+        [% END %]
+        [% PROCESS _status_filter.tt show_filter_table=1 style="service" substyle="service" nav=0 entries=0 hidesearch=1 show_substyle_selector=0 show_column_select=0 %]
       </td>
       <td align="center" valign="top" width="33%">
         <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
@@ -64,7 +63,7 @@
         <table border="0" class='optBox'>
           <tr>
               <td class='optBoxItem'>
-                <select name='includesoftstates'>
+                <select name='includesoftstates' style="width: 100%;">
                   <option value="0"[% IF includesoftstates == 0 %] selected[% END %]>Exclude Softstates</option>
                   <option value="1"[% IF includesoftstates == 1 %] selected[% END %]>Include Softstates</option>
                 </select>
@@ -72,9 +71,18 @@
             </tr>
           <tr>
             <td class='optBoxItem'>
-              <select name='withdowntimes'>
+              <select name='withdowntimes' style="width: 100%;">
                 <option value="0"[% IF withdowntimes == 0 %] selected[% END %]>Include Downtimes</option>
                 <option value="1"[% IF withdowntimes == 1 %] selected[% END %]>Exclude Downtimes</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='optBoxItem'>
+              <select name='type' style="width: 100%;">
+                <option value="both"[% IF type == "both" %] selected[% END %]>Hosts &amp; Services</option>
+                <option value="hosts"[% IF type == "hosts" %] selected[% END %]>Hosts Only</option>
+                <option value="services"[% IF type == "services" %] selected[% END %]>Services Only</option>
               </select>
             </td>
           </tr>
@@ -95,17 +103,33 @@
 </form>
 
 <div align="center" class='dataTitle'>
+<table style="width: 100%;">
+  <tr>
+    <td style="width: 20%;"></td>
+    <td style="width: 60%;">
 [% IF service %]
 Service Outages: [% host | html %] - [% service | html %]
-[% ELSE %]
+[% ELSIF host %]
 Host Outages: [% host | html %]
+[% ELSE %]
+Outages:
 [% END %]
+    </td>
+    <td style="width: 20%;">
+      [% PROCESS _json_export.tt %]
+    </td>
+  </tr>
+</table>
 </div>
 <br>
 
 <div align='center'>
 <table class='status'>
   <tr>
+    [% UNLESS host %]
+    <th class="status">Host</th>
+    <th class="status">Service</th>
+    [% END %]
     <th class="status">Start</th>
     <th class="status">End</th>
     <th class="status">Duration</th>
@@ -117,6 +141,10 @@ Host Outages: [% host | html %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr>
+    [% UNLESS host %]
+    <td class="status [% rowclass %]">[% l.host | html %]</td>
+    <td class="status [% rowclass %]">[% l.service | html %]</td>
+    [% END %]
     <td class="status [% rowclass %]">[% date_format(c, l.start) %]</td>
     [% IF l.end != "" %]
     <td class="status [% rowclass %]">[% date_format(c, l.end) %]</td>
@@ -126,8 +154,8 @@ Host Outages: [% host | html %]
     <td class="status [% rowclass %]">[% duration(l.duration) %]</td>
     [% END %]
     <td class="status [% rowclass %] status[% l.class.upper | html %]">[% l.type %]</td>
-    <td class="status [% rowclass %]">[% log_line_plugin_output(l) %]</td>
-    <td class="status [% rowclass %]"><a href="showlog.cgi?host=[% host | uri %][% IF service %]&service=[% service | uri %][% END %]&start=[% l.start | uri %]&end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %]"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></a></td>
+    <td class="status [% rowclass %] mightOverflow" align="left">[% log_line_plugin_output(l) %]</td>
+    <td class="status [% rowclass %]"><a href="showlog.cgi?host=[% l.host | uri %][% IF l.exists('service') %]&service=[% l.service | uri %][% END %]&start=[% l.start | uri %]&end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %]"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></a></td>
   </tr>
   [% END %]
   [% IF outages.size == 0 %]

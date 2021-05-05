@@ -3,7 +3,13 @@ use warnings;
 use utf8;
 use Test::More;
 
-plan tests => 23;
+plan tests => 24;
+
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Status');
@@ -46,4 +52,78 @@ sub _round_timestamps {
     my($x) = @_;
     $x = int($x / 30) * 30;
     return($x);
+}
+
+################################################################################
+{
+    my $c = TestUtils::get_c();
+    my $params = {
+        'dfl_s0_hostprops' => '0',
+        'dfl_s0_hoststatustypes' => '15',
+        'dfl_s0_op' => [
+                        '=',
+                        '~'
+                        ],
+        'dfl_s0_serviceprops' => '0',
+        'dfl_s0_servicestatustypes' => '31',
+        'dfl_s0_type' => [
+                            'host',
+                            'service'
+                        ],
+        'dfl_s0_val_pre' => [
+                            '',
+                            ''
+                            ],
+        'dfl_s0_value' => [
+                            'localhost',
+                            'http'
+                        ],
+        'dfl_s1_hostprops' => '0',
+        'dfl_s1_hoststatustypes' => '15',
+        'dfl_s1_op' => '=',
+        'dfl_s1_serviceprops' => '0',
+        'dfl_s1_servicestatustypes' => '31',
+        'dfl_s1_type' => 'host',
+        'dfl_s1_val_pre' => '',
+        'dfl_s1_value' => 'test'
+    };
+    my $exp = [{
+            'host_prop_filtername'          => 'Any',
+            'host_statustype_filtername'    => 'All',
+            'hostprops'                     => 0,
+            'hoststatustypes'               => 15,
+            'service_prop_filtername'       => 'Any',
+            'service_statustype_filtername' => 'All',
+            'serviceprops'                  => 0,
+            'servicestatustypes'            => 31,
+            'text_filter'                   => [{
+                    'op'        => '=',
+                    'type'      => 'host',
+                    'val_pre'   => '',
+                    'value'     => 'localhost'
+                },
+                {
+                    'op'        => '~',
+                    'type'      => 'service',
+                    'val_pre'   => '',
+                    'value'     => 'http'
+                }]
+        }, {
+            'host_prop_filtername' => 'Any',
+            'host_statustype_filtername' => 'All',
+            'hostprops' => 0,
+            'hoststatustypes' => 15,
+            'service_prop_filtername' => 'Any',
+            'service_statustype_filtername' => 'All',
+            'serviceprops' => 0,
+            'servicestatustypes' => 31,
+            'text_filter' => [{
+                    'op'        => '=',
+                    'type'      => 'host',
+                    'val_pre'   => '',
+                    'value'     => 'test'
+                }],
+    }];
+    my $got = Thruk::Utils::Status::get_searches($c, '', $params);
+    is_deeply($got, $exp, "parsed search items from params")
 }

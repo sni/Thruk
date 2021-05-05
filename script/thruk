@@ -89,7 +89,7 @@ if($options->{'help'}) {
     exit(3);
 }
 if($options->{'version'}) {
-    print "thruk v", Thruk::Config::get_thruk_version(), "\n"; exit 3;
+    print "thruk v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
 }
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";

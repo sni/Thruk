@@ -482,6 +482,20 @@ sub get_host_totals_stats {
 
 ##########################################################
 
+=head2 get_host_less_stats
+
+  get_host_less_stats
+
+same as get_host_stats but less numbers and therefore faster
+
+=cut
+sub get_host_less_stats {
+    my $self = shift;
+    confess("unimplemented");
+}
+
+##########################################################
+
 =head2 get_service_stats
 
   get_service_stats
@@ -506,6 +520,20 @@ returns the services statistics used on the service/host details page
 =cut
 
 sub get_service_totals_stats {
+    my $self = shift;
+    confess("unimplemented");
+}
+
+##########################################################
+
+=head2 get_service_less_stats
+
+  get_service_less_stats
+
+same as get_service_stats but less numbers and therefore faster
+
+=cut
+sub get_service_less_stats {
     my $self = shift;
     confess("unimplemented");
 }

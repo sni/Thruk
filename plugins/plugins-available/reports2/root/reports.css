@@ -9,11 +9,17 @@ body.status TABLE.reports TD {
 body.status TABLE.reports INPUT[type=text] {
   width: 515px;
 }
+body.status TABLE.reports TD.filter INPUT[type=text] {
+  width: 200px;
+}
+body.status TABLE.reports TD.filter td.filterValueInput input.filter_pre_value {
+  width: 80px;
+}
 body.status TABLE.reports INPUT.date_input[type=text] {
   width: 140px;
 }
 body.status TABLE.reports INPUT[type=text].with_checkbox {
-  width: 490px;
+  width: 489px;
 }
 body.status TABLE.reports TEXTAREA {
   width: 520px;
@@ -52,6 +58,10 @@ TABLE.unavailable_states TD, TABLE.unavailable_states TH {
   border: 1px solid grey;
   padding-left: 4px;
   padding-right: 4px;
+}
+
+TABLE.filter_box {
+  border: 1px solid grey;
 }
 
 TABLE.log_states {
