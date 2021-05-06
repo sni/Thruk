@@ -107,6 +107,13 @@ $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
 $ENV{'THRUK_VERBOSE'}    = 0 if$ENV{'THRUK_QUIET'};
 $ENV{'THRUK_MODE'}       = 'CLI_SETUID';
 
+# no need to load extra modules for bash completion
+my $action = $options->{'action'} || $options->{'commandoptions'}->[0] || '';
+if($action eq 'bash_complete') {
+    require Thruk::Utils::Bash;
+    exit(Thruk::Utils::Bash::complete());
+}
+
 require Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
