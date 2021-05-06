@@ -376,10 +376,15 @@ JSON is the default output format.
 
 === CSV
 
-CSV output is available via `/csv/` path prefix.
+CSV output is available via `/csv/` path prefix. Column names will be automatically
+added as first (commented) line. This can be disabled with the `headers=0` parameter.
 
 ------
   %> thruk r /csv/hosts?columns=name,state
+------
+
+------
+  %> thruk r '/csv/hosts?columns=name,state&headers=0'
 ------
 
 ------
@@ -2070,4 +2075,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

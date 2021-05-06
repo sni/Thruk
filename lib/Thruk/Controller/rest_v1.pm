@@ -34,7 +34,7 @@ use Thruk::Utils::CookieAuth ();
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters = [qw/limit offset sort columns backend backends q CSRFtoken/];
+my $reserved_query_parameters = [qw/limit offset sort columns headers backend backends q CSRFtoken/];
 my $op_translation_words      = {
     'eq'     => '=',
     'ne'     => '!=',
@@ -245,7 +245,9 @@ sub _format_csv_output {
     my $output;
     if(ref $data eq 'ARRAY') {
         my $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
-        $output = '#'.join(';', @{$columns})."\n";
+        if(!defined $c->req->parameters->{'headers'} || $c->req->parameters->{'headers'}) {
+            $output = '#'.join(';', @{$columns})."\n";
+        }
         for my $d (@{$data}) {
             my $x = 0;
             for my $col (@{$columns}) {
