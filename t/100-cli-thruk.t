@@ -229,7 +229,6 @@ TestUtils::test_command({
 # bash completion
 {
     local $ENV{'COMP_WORD_JOINED'} = 'thruk r /sites/ALL/';
-    local $ENV{'COMP_LINE'}        = 'thruk r /sites/ALL/';
     local $ENV{'COMP_CWORD'}       = 2;
     TestUtils::test_command({
         cmd  => $BIN.' bash_complete',

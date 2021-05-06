@@ -28,10 +28,9 @@ returns bash completion
 sub complete {
     my $comp_words = [split(/\s+/mx, $ENV{'COMP_WORD_JOINED'})];
     my $comp_cword = $ENV{'COMP_CWORD'};
-    my $comp_line  = $ENV{'COMP_LINE'};
     my $cur        = $comp_words->[$comp_cword] || ''; # word under the cursur
     my $result     = [];
-    $result = _complete_rest_path($comp_words, $comp_cword, $cur, $comp_line);
+    $result = _complete_rest_path($comp_words, $comp_cword, $cur);
     print join("\n", @{$result});
     return(0);
 }
