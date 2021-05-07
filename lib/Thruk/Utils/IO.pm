@@ -19,7 +19,6 @@ use Cpanel::JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 use IO::Select ();
-use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
 use Cwd qw/abs_path/;
 use Time::HiRes qw/sleep/;
@@ -102,8 +101,32 @@ read file and return content
 
 sub read {
     my($path) = @_;
-    my $content = read_file($path);
+    open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
+    local $/ = undef;
+    my $content = <$fh>;
+    CORE::close($fh);
     return($content);
+}
+
+##############################################
+
+=head2 read_as_list
+
+  read_as_list($path)
+
+read file and return content as array
+
+=cut
+
+sub read_as_list {
+    my($path) = @_;
+    my @res;
+    open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
+    while(my $line = <$fh>) {
+        push @res, $line;
+    }
+    CORE::close($fh);
+    return(@res);
 }
 
 ##############################################
@@ -352,7 +375,7 @@ sub json_store {
             return 1 if $options->{'compare_data'} eq $write_out;
         }
         elsif(-f $file) {
-            my $old = read_file($file);
+            my $old = &read($file);
             return 1 if $old eq $write_out;
         }
     }
@@ -366,7 +389,7 @@ sub json_store {
     my $config = Thruk::Config::get_config();
     if($config->{'thruk_author'}) {
         eval {
-            my $test = $json->decode(scalar read_file($tmpfile));
+            my $test = $json->decode(&read($tmpfile));
         };
         confess("json_store failed to write a valid file: ".$@) if $@;
     }
