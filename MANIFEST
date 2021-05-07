@@ -1724,6 +1724,7 @@ script/thruk_auth
 script/thruk_create_combined_static_content.pl
 script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
+script/thruk_format_perl_modules
 script/thruk_link_images.sh
 script/thruk_optimize_images.sh
 script/thruk_patch_makefile.pl
@@ -1779,6 +1780,7 @@ t/017-Thruk-Utils-UserAgent.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
 t/022-Thruk-Utils-Log.t
+t/081-modules.t
 t/082-cmd_coverage.t
 t/083-xss.t
 t/084-script_header.t
