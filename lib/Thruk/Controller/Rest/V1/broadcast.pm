@@ -1,8 +1,12 @@
 package Thruk::Controller::Rest::V1::broadcast;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+use POSIX ();
+
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

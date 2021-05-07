@@ -1,21 +1,34 @@
 package Thruk::Controller::conf;
 
-use strict;
 use warnings;
-use Monitoring::Config;
-use Socket qw/inet_ntoa/;
-use File::Copy;
-use Cpanel::JSON::XS;
-use Storable qw/dclone/;
+use strict;
 use Data::Dumper qw/Dumper/;
-use File::Slurp qw/read_file/;
 use Encode qw/decode_utf8 encode_utf8/;
-use Thruk::Utils::References;
-use Thruk::Utils::Conf;
-use Thruk::Utils::Conf::Defaults;
-use Thruk::Utils::Plugin;
-use Thruk::Authentication::User;
+use File::Copy;
+use File::Slurp qw/read_file/;
+use Socket qw/inet_ntoa/;
+use Storable qw/dclone/;
+
+use Monitoring::Config::File ();
+use Monitoring::Config::Object ();
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Backend::Manager ();
+use Thruk::Backend::Peer ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Conf::Defaults ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Plugin ();
+use Thruk::Utils::References ();
+use Thruk::Utils::Status ();
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME

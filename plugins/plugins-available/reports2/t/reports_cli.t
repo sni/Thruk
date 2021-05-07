@@ -1,9 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
-use URI::Escape;
+use strict;
 use File::Slurp qw/read_file/;
 use File::Temp qw/tempfile/;
+use Test::More;
+use URI::Escape;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;

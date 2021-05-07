@@ -31,19 +31,20 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 # vim: expandtab:ts=4:sw=4:syntax=perl
 #line 33
 
-use strict;
 use warnings;
-use Pod::Usage;
-use Thruk::Utils;
+use strict;
 use Getopt::Long;
 use POSIX qw(mktime);
+use Pod::Usage;
+
+use Thruk::Utils ();
 
 my $options = {
     'verbose'  => 0,
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
-Getopt::Long::GetOptions (
+Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
    "v|verbose"          => sub { $options->{'verbose'}++ },
    "s|start=s"          => \$options->{'start'},

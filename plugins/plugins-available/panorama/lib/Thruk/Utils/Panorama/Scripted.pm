@@ -10,13 +10,14 @@ Scripted Panorama Dashboards
 
 =cut
 
-use strict;
 use warnings;
-use Carp qw/confess/;
-use File::Slurp qw/read_file/;
-use Cpanel::JSON::XS qw/decode_json encode_json/;
+use strict;
+use Cpanel::JSON::XS qw/decode_json/;
 use Encode qw(decode_utf8);
-use Thruk::Utils::IO;
+use File::Slurp qw/read_file/;
+
+use Thruk::Request ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

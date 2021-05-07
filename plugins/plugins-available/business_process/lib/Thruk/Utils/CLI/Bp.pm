@@ -56,8 +56,11 @@ The bp command provides all business process related cli commands.
 use warnings;
 use strict;
 use Getopt::Long ();
-use Time::HiRes qw/gettimeofday tv_interval sleep/;
-use Thruk::Utils;
+use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Pidfile ();
 

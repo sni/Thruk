@@ -10,9 +10,8 @@ JSON data renderer
 
 =cut
 
-use strict;
 use warnings;
-use Carp qw/confess/;
+use strict;
 use Cpanel::JSON::XS ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 

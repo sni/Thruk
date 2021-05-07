@@ -10,10 +10,12 @@ Excel file renderer
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::Views::ToolkitRenderer ();
 
 =head1 METHODS
 

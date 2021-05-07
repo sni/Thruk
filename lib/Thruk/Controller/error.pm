@@ -1,10 +1,16 @@
 package Thruk::Controller::error;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess longmess/;
-use Time::HiRes qw/tv_interval/;
+use Cpanel::JSON::XS ();
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Base ();
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Menu ();
 
 =head1 NAME
 

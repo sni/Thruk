@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -23,6 +24,7 @@ my $replace = {
     'Log::Dispatch::File'                         => 'Log::Log4perl',
     'Template::Plugin::Date'                      => 'Template',
     'Date::Manip::TZ'                             => 'Date::Manip',
+    'GD::Image'                                   => 'GD',
 };
 
 # first get all we have already
@@ -84,7 +86,7 @@ for my $file (@{$files}) {
   }
 
   # try to remove some commonly unused modules
-  my $content = read_file($file);
+  my $content = Thruk::Utils::IO::read($file);
   if(grep/^\QCarp\E$/mx, @{$modules}) {
     if($content !~ /confess|croak|cluck|longmess/mxi) {
       fail("using Carp could be removed from $file");
@@ -96,11 +98,6 @@ for my $file (@{$files}) {
   if(grep/^\Qutf8\E$/mx, @{$modules}) {
     if($content !~ /utf8::/mxi) {
       fail("using utf8 could be removed from $file");
-    }
-  }
-  if(grep/^\QData::Dumper\E$/mx, @{$modules}) {
-    if($content !~ /Dumper\(/mxi) {
-      fail("using Data::Dumper could be removed from $file");
     }
   }
   if(grep/^\QPOSIX\E$/mx, @{$modules}) {
@@ -177,7 +174,7 @@ sub _get_packages {
 sub _get_imported_modules {
   my($file)    = @_;
   my $modules  = {};
-  my $content  = read_file($file);
+  my $content  = Thruk::Utils::IO::read($file);
   # remove pod
   $content =~ s|^=.*?^=cut||sgmx;
   for my $line (split/\n+/mx, $content) {
@@ -228,7 +225,7 @@ sub _get_imported_modules {
 sub _get_modules_from_subs {
   my($file)    = @_;
   my $modules  = {};
-  my $content  = read_file($file);
+  my $content  = Thruk::Utils::IO::read($file);
   # remove pod
   $content =~ s|^=.*?^=cut||sgmx;
   my $package;

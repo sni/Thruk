@@ -1,8 +1,10 @@
 package Thruk::Controller::Rest::V1::logcache;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+
+use Thruk::Backend::Manager ();
+use Thruk::Controller::rest_v1 ();
 
 =head1 NAME
 

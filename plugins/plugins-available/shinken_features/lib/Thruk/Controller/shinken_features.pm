@@ -1,7 +1,14 @@
 package Thruk::Controller::shinken_features;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

@@ -12,10 +12,11 @@ defines global constants
 
 =cut
 
-use strict;
 use warnings;
-use constant qw( );
+use strict;
 use Exporter qw( import );
+
+use constant qw( );
 
 our @EXPORT_OK;
 our %EXPORT_TAGS;

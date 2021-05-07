@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use ExtUtils::Manifest;
+use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 my($e_m_v) = ($ExtUtils::Manifest::VERSION =~ m/^(\d+\.\d+)/mx);

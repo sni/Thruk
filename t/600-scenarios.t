@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cwd qw/cwd/;
+use Test::More;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 BEGIN {

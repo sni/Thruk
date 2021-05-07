@@ -35,9 +35,11 @@ The panorama command manages panorama dashboards from the command line.
 
 use warnings;
 use strict;
-use Thruk::Utils::Log qw/:all/;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Getopt::Long ();
+
+use Thruk::Utils::CLI ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 

@@ -1,15 +1,24 @@
 package Thruk::Backend::Provider::Mysql;
 
-use strict;
 use warnings;
-#use Thruk::Timer qw/timing_breakpoint/;
+use strict;
+use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
-use parent 'Thruk::Backend::Provider::Base';
-use Thruk::Utils ();
-use Thruk::Utils::Log qw/:all/;
-use Carp qw/confess/;
 use POSIX ();
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Request ();
+use Thruk::Utils ();
+use Thruk::Utils::DateTime ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
+
+use parent 'Thruk::Backend::Provider::Base';
+
+#use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 

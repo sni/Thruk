@@ -1,8 +1,9 @@
 package Thruk::Template::Context;
-use base qw(Template::Context);
-
-use strict;
 use warnings;
+use strict;
+use Template::Config ();
+
+use base qw(Template::Context);
 
 my @stack;
 my %totals;

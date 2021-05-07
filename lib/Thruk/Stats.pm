@@ -2,9 +2,12 @@ package Thruk::Stats;
 
 use warnings;
 use strict;
+use Carp qw/confess longmess/;
 use Data::Dumper;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Carp qw/confess longmess/;
+
+use Thruk ();
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {

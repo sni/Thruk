@@ -13,25 +13,26 @@ Utilities Collection for Reporting
 use warnings;
 use strict;
 use Carp;
-use Data::Dumper;
 use Class::Inspector;
-use File::Slurp;
-use Thruk::Utils;
-use Thruk::Utils::CLI;
-use Thruk::Utils::IO;
-use Thruk::Utils::Reports::Render;
-use Thruk::Views::ToolkitRenderer;
-use Thruk::Utils::External;
-use Thruk::Action::AddDefaults;
-use Thruk::Utils::Log qw/:all/;
-use MIME::Lite;
-use File::Copy;
-use Encode qw(encode_utf8 decode_utf8 encode);
-use Storable qw/dclone/;
-use File::Temp qw/tempfile/;
 use Cwd ();
-use Time::HiRes qw/sleep/;
+use Data::Dumper;
+use Encode qw(encode_utf8 decode_utf8 encode);
+use File::Copy;
+use File::Slurp;
+use MIME::Lite;
 use POSIX ();
+use Storable qw/dclone/;
+use Time::HiRes qw/sleep/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Reports::Render ();
+use Thruk::Utils::Status ();
+use Thruk::Views::ToolkitRenderer ();
 
 ##########################################################
 

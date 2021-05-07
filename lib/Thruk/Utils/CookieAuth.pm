@@ -13,16 +13,18 @@ to logout again.
 
 use warnings;
 use strict;
-use Thruk::UserAgent;
-use Thruk::Authentication::User;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::Utils::Crypt;
+use Carp qw/confess/;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
-use File::Slurp qw/read_file/;
-use Carp qw/confess/;
 use File::Copy qw/move/;
+use File::Slurp qw/read_file/;
+
+use Thruk::Authentication::User ();
+use Thruk::Request ();
+use Thruk::UserAgent ();
+use Thruk::Utils ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

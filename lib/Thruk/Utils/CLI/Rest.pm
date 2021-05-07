@@ -22,9 +22,15 @@ The rest command is a cli interface to the rest api.
 
 use warnings;
 use strict;
-use Getopt::Long ();
 use Cpanel::JSON::XS qw/decode_json/;
+use Getopt::Long ();
+use POSIX ();
+
+use Thruk ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 our $skip_backends = \&_skip_backends;

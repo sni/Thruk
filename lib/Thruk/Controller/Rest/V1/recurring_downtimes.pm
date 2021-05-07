@@ -1,8 +1,10 @@
 package Thruk::Controller::Rest::V1::recurring_downtimes;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

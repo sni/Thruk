@@ -1,11 +1,11 @@
 package Monitoring::Livestatus::INET;
-use parent 'Monitoring::Livestatus';
-
-use strict;
 use warnings;
+use strict;
+use Carp qw/confess/;
 use IO::Socket::IP ();
 use Socket qw(IPPROTO_TCP TCP_NODELAY);
-use Carp qw/confess/;
+
+use parent 'Monitoring::Livestatus';
 
 =head1 NAME
 

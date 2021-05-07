@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 use URI::Escape;
 

@@ -32,8 +32,8 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 33
 
 ##############################################
-use strict;
 use warnings;
+use strict;
 
 my $nagimp = Thruk::nagimp->new();
 exit $nagimp->run();
@@ -132,20 +132,20 @@ Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 package Thruk::nagimp;
 
-use strict;
 use warnings;
+use strict;
+use Data::Dumper;
+use File::Copy;
+use File::Slurp qw/read_file/;
 use Getopt::Long;
 use Pod::Usage;
-use Data::Dumper;
-use File::Slurp qw/read_file/;
-use File::Copy;
+
+use Monitoring::Config ();
 use Thruk::Config 'noautoload';
-use Thruk::Utils;
-use Thruk::Utils::Conf;
-use Thruk::Utils::IO;
-use Thruk::Utils::Conf::Defaults;
-use Thruk::Backend::Manager;
-use Monitoring::Config;
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Conf::Defaults ();
+use Thruk::Utils::IO ();
 
 ##############################################
 sub new {

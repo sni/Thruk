@@ -88,6 +88,7 @@ if(scalar @ARGV != 1 || $ARGV[0] ne '--checkdeps') {
   test_requires 'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs'          => 0;
   test_requires 'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0;
   test_requires 'Perl::Critic::Policy::Modules::ProhibitPOSIXimport'                      => 0;
+  test_requires 'Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport'                 => 0;
   test_requires 'Test::JavaScript'                                                        => 0;
   test_requires 'Test::Vars'                                                              => 0;
   test_requires 'Devel::Cycle'                                                            => 0;

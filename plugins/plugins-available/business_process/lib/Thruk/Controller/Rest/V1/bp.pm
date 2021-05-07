@@ -1,7 +1,11 @@
 package Thruk::Controller::Rest::V1::bp;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::BP::Components::BP ();
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

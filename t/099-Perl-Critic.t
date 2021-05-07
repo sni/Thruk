@@ -2,13 +2,14 @@
 #
 # $Id$
 #
-use strict;
 use warnings;
-use File::Slurp qw/read_file/;
+use strict;
+use Digest::MD5;
+use English qw(-no_match_vars);
 use Storable qw/nfreeze thaw/;
 use Test::More;
-use English qw(-no_match_vars);
-use Digest::MD5;
+
+use Thruk::Utils::IO ();
 
 my $cachefile = $ENV{'THRUK_CRITIC_CACHE_FILE'} || '/tmp/perl-critic-cache.'.$>.'.storable';
 my $cache     = {};
@@ -18,12 +19,17 @@ if ( not $ENV{TEST_AUTHOR} ) {
     plan( skip_all => $msg );
 }
 
-eval { require Test::Perl::Critic; };
-
+eval "use Test::Perl::Critic;";
 if ( $EVAL_ERROR ) {
    my $msg = 'Test::Perl::Critic required to criticise code';
    plan( skip_all => $msg );
 }
+require Perl::Critic::Utils;
+require Perl::Critic::Policy::Dynamic::NoIndirect;
+require Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs;
+require Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData;
+require Perl::Critic::Policy::Modules::ProhibitPOSIXimport;
+require Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport;
 
 sub save_cache {
     return if scalar keys %{$cache} == 0;
@@ -39,7 +45,7 @@ my $rcfile = 't/perlcriticrc';
 Test::Perl::Critic->import( -profile => $rcfile );
 if(-e $cachefile) {
     eval {
-        $cache = thaw(scalar read_file($cachefile));
+        $cache = thaw(Thruk::Utils::IO::read($cachefile));
         #diag("loaded $cachefile");
     };
     diag($@) if $@;

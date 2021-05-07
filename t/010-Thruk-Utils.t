@@ -2,9 +2,13 @@
 
 use warnings;
 use strict;
-use utf8;
-use Test::More;
 use Encode qw/is_utf8/;
+use Test::More;
+use utf8;
+
+use Thruk::Config 'noautoload';
+use Thruk::Context ();
+use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

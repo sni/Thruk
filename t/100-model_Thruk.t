@@ -1,7 +1,10 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Log::Log4perl qw(:easy);
+use Test::More;
+
+use Thruk::Config 'noautoload';
+use Thruk::Utils ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

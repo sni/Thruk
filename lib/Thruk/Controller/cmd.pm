@@ -1,9 +1,16 @@
 package Thruk::Controller::cmd;
 
-use strict;
 use warnings;
+use strict;
 use Data::Dumper;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Filter ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::ToolkitRenderer ();
 
 =head1 NAME
 

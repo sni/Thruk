@@ -1,8 +1,13 @@
 package Thruk::Controller::user;
 
-use strict;
 use warnings;
-use Thruk::Utils::APIKeys;
+use strict;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Utils ();
+use Thruk::Utils::APIKeys ();
 
 =head1 NAME
 

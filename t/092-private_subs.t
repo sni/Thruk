@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -23,7 +24,7 @@ sub check_private_subs {
     return if $file =~ m|script/phantomjs|mx;
 
     ok($file, $file);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     $content =~ s/^=head.*?^=cut//smgx;
     my $nr = 0;
     for my $line (split/\n/mx, $content) {

@@ -10,12 +10,14 @@ Menu Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp;
-use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
-use Thruk::Utils::Filter;
+
+use Thruk::Request ();
+use Thruk::Utils ();
+use Thruk::Utils::Filter ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -342,7 +344,7 @@ sub _renew_navigation {
     $Thruk::Utils::Menu::removed_items = {};
 
     ## no critic
-    eval("#line 1 $file\n".read_file($file));
+    eval("#line 1 $file\n".Thruk::Utils::IO::read($file));
     ## use critic
     if($@) {
         _error("error while loading navigation from ".$file.": ".$@);

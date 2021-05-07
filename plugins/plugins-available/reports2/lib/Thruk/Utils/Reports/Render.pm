@@ -16,13 +16,17 @@ use warnings;
 use strict;
 use Carp qw/confess croak/;
 use Data::Dumper;
-use File::Temp qw/tempfile/;
-use File::Slurp;
-use File::Copy qw/move/;
-use MIME::Base64;
 use Encode qw/encode_utf8/;
-use Thruk::Utils;
-use Thruk::Utils::Avail;
+use File::Copy qw/move/;
+use File::Slurp;
+use MIME::Base64;
+
+use Thruk::Request ();
+use Thruk::Utils ();
+use Thruk::Utils::Avail ();
+use Thruk::Utils::CLI ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 $Thruk::Utils::Reports::Render::locale = {};

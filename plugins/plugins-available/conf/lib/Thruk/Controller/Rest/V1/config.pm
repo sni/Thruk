@@ -1,12 +1,15 @@
 package Thruk::Controller::Rest::V1::config;
 
-use strict;
 use warnings;
-use Storable qw/dclone/;
-use Time::HiRes qw/sleep/;
+use strict;
 use Cpanel::JSON::XS ();
+use Storable qw/dclone/;
+use Time::HiRes ();
 
-use Thruk::Controller::rest_v1;
+use Monitoring::Config::Object ();
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

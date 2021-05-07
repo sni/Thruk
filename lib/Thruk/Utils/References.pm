@@ -8,7 +8,10 @@ Thruk::Utils::References - Gather objects references by name
 
 use warnings;
 use strict;
-use Thruk::Utils::RecurringDowntimes;
+
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::RecurringDowntimes ();
 
 ##############################################
 

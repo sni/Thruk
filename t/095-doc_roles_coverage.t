@@ -1,7 +1,10 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
+use Test::More;
+
+use Thruk::Authentication::User ();
+use Thruk::Config 'noautoload';
 
 use lib('t');
 use TestUtils;

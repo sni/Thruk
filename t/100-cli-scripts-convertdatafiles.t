@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempdir/;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'local tests only'  if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

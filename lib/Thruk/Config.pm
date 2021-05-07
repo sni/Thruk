@@ -1,19 +1,17 @@
 package Thruk::Config;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
+use Class::Inspector ();
 use Cwd ();
-use File::Slurp qw/read_file/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Storable ();
-use Class::Inspector ();
 
 use Thruk::Base ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-
-use 5.008000;
 
 =head1 NAME
 
@@ -329,7 +327,7 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'thrukversion'              => &get_thruk_version(),
+        'thrukversion'              => $base_defaults->{'thrukversion'},
         'fileversion'               => $VERSION,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
@@ -547,7 +545,7 @@ sub set_default_config {
         $config->{'extra_version_link'} = 'https://labs.consol.de/omd/';
     }
     elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
-        $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
+        $config->{'extra_version'}      = Thruk::Utils::IO::read($config->{'project_root'}.'/naemon-version');
         $config->{'extra_version_link'} = 'https://www.naemon.org';
         chomp($config->{'extra_version'});
     }
@@ -779,8 +777,10 @@ return template toolkit config
 
 =cut
 sub get_toolkit_config {
-    require Thruk::Utils::Filter;
+    require Thruk::Utils;
     require Thruk::Utils::Broadcast;
+    require Thruk::Utils::Filter;
+    require Thruk::Utils::Status;
 
     my $view_tt_settings = {
         'TEMPLATE_EXTENSION'                    => '.tt',
@@ -906,7 +906,7 @@ sub get_debug_details {
         my $release = "";
         for my $f (qw|/etc/redhat-release /etc/issue|) {
             if(-e $f) {
-                $release = read_file($f);
+                $release = Thruk::Utils::IO::read($f);
                 last;
             }
         }
@@ -959,7 +959,7 @@ sub secret_key {
     my $config      = &get_config();
     my $secret_file = $config->{'var_path'}.'/secret.key';
     return unless -s $secret_file;
-    my $secret_key  = read_file($secret_file);
+    my $secret_key  = Thruk::Utils::IO::read($secret_file);
     chomp($secret_key);
     return($secret_key);
 }
@@ -1361,7 +1361,7 @@ sub parse_omd_site_config {
     my($file) = @_;
     $file = $ENV{'OMD_ROOT'}."/etc/omd/site.conf" unless $file;
     my $site_config = {};
-    for my $line (read_file($file)) {
+    for my $line (Thruk::Utils::IO::read_as_list($file)) {
         if($line =~ m/^(CONFIG_.*?)='([^']*)'$/mx) {
             $site_config->{$1} = $2;
         }

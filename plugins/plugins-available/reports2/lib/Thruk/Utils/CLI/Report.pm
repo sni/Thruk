@@ -27,8 +27,10 @@ The report command creates reports from the command line.
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
-use Thruk::Utils::IO;
-use Thruk::Utils::External;
+
+use Thruk::Utils::CLI ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

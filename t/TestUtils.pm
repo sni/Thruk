@@ -1,6 +1,9 @@
-#!/usr/bin/env perl
-
 package TestUtils;
+
+use warnings;
+use strict;
+
+use Thruk::Request ();
 
 #########################
 # Test Utils
@@ -13,20 +16,22 @@ BEGIN {
 
 ###################################################
 use lib 'lib';
-use warnings;
-use strict;
+use Carp qw/confess/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
+use File::Temp qw/tempfile/;
+use HTTP::Cookies::Netscape;
+use HTTP::Request ();
+use HTTP::Request::Common 6.12 qw/GET POST/;
+use Plack::Test;
 use Test::More;
 use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
-use File::Slurp qw/read_file/;
-use HTTP::Request::Common 6.12 qw/GET POST/;
-use HTTP::Cookies::Netscape;
-use Thruk::UserAgent;
-use File::Temp qw/tempfile/;
-use Carp qw/confess/;
-use Plack::Test;
-use Cpanel::JSON::XS qw/encode_json decode_json/;
+
+use Thruk ();
+use Thruk::Config;
+use Thruk::UserAgent ();
+use Thruk::Utils::IO ();
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -39,8 +44,6 @@ my $test_token = "";
 
 my $has_curl = 0; # does require newer curl, disabling for now (2020-06-09) # has_util("curl");
 
-use Thruk;
-use Thruk::Config;
 our $placktest;
 
 #########################
@@ -205,7 +208,7 @@ sub get_test_hostgroup_cli {
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
     my $test = { cmd  => $binary.' -a listhostgroups'.$auth };
-    TestUtils::test_command($test);
+    test_command($test);
     my @groups = split(/\n/mx, $test->{'stdout'});
     my $hostgroup;
     for my $group (@groups) {
@@ -451,7 +454,7 @@ sub test_page {
                 eval {
                     require HTML::Lint;
                     $use_html_lint = 1;
-                    $lint          = new HTML::Lint;
+                    $lint          = HTML::Lint->new();
                 };
             }
             if($use_html_lint == 0) {
@@ -855,14 +858,14 @@ sub test_command {
 
 #########################
 
-=head2 overrideConfig
+=head2 override_config
 
-    overrideConfig('key', 'value')
+    override_config('key', 'value')
 
   override config setting
 
 =cut
-sub overrideConfig {
+sub override_config {
     my($key, $value) = @_;
     my $c = get_c();
     $c->config->{$key} = $value;
@@ -1066,7 +1069,7 @@ sub bail_out_req {
     diag("\n\nresponse:\n");
     diag($res->as_string());
     diag("\n\norigin:\n");
-    diag(Carp::longmess);
+    diag(Carp::longmess());
     diag("\n######################################################\n");
     die($0.': '.$msg) if $die;
     BAIL_OUT($0.': '.$msg);
@@ -1076,7 +1079,7 @@ sub bail_out_req {
 #########################
 sub set_test_user_token {
     return if $test_token;
-    $test_token = TestUtils::get_current_user_token();
+    $test_token = get_current_user_token();
     return;
 }
 
@@ -1092,7 +1095,7 @@ sub _list {
 my $errors_js = 0;
 sub verify_js {
     my($file) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my $matches = _replace_with_marker($content);
     return unless $matches;
     _check_marker($file, $content) if $errors_js;
@@ -1112,7 +1115,7 @@ sub verify_html_js {
 # verify js syntax in templates
 sub verify_tt {
     my($file) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
     _check_marker($file, $content) if $errors_js;
     return;

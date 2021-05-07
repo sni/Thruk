@@ -12,6 +12,7 @@ Pidfile offers functions to manage pid files.
 
 use warnings;
 use strict;
+
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 

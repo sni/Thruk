@@ -1,9 +1,13 @@
 package Thruk::Controller::Rest::V1::outages;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+use Cpanel::JSON::XS ();
+
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::Avail ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -19,7 +23,6 @@ Thruk Controller
 
 =cut
 
-use Thruk::Utils::Avail ();
 
 ##########################################################
 # REST PATH: GET /hosts/outages

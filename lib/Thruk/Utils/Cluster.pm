@@ -10,15 +10,19 @@ Cluster Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::Utils::Crypt;
-use Thruk::Backend::Provider::HTTP;
-use Time::HiRes qw/gettimeofday tv_interval/;
+use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
+use POSIX ();
+use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk ();
+use Thruk::Backend::Provider::HTTP ();
+use Thruk::Config 'noautoload';
+use Thruk::Utils ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 my $context;

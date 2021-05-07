@@ -1,8 +1,15 @@
 package Thruk::Controller::reports2;
 
-use strict;
 use warnings;
+use strict;
 use Module::Load qw/load/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Request ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

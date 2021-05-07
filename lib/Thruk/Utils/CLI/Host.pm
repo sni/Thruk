@@ -33,6 +33,8 @@ The host command lists hosts from livestatus queries.
 use warnings;
 use strict;
 
+use Thruk::Utils::Auth ();
+
 ##############################################
 
 =head1 METHODS

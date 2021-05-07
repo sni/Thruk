@@ -14,20 +14,24 @@ structures and change config information.
 use warnings;
 use strict;
 use Carp;
+use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper qw/Dumper/;
-use Cpanel::JSON::XS qw/encode_json decode_json/;
-use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
-use Time::HiRes qw/gettimeofday tv_interval/;
+use File::Slurp qw/read_file/;
 use HTTP::Request 6.12 ();
 use Module::Load qw/load/;
+use Time::HiRes ();
 
 use Thruk ();
+use Thruk::Action::AddDefaults ();
 use Thruk::Config; # autoload config
-use Thruk::Utils ();
-use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::IO ();
+use Thruk::Request ();
 use Thruk::UserAgent ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -796,6 +800,7 @@ sub _cmd_configtool {
     $c->req->parameters->{'backend'} = $peerkey;
 
     require Thruk::Utils::Conf;
+    require Monitoring::Config::File;
     if(!Thruk::Utils::Conf::set_object_model($c)) {
         if($c->stash->{set_object_model_err}) {
             return("failed to set objects model: ".$c->stash->{set_object_model_err}, 1);

@@ -1,12 +1,17 @@
 package Monitoring::Config::Object::Parent;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
-use Storable qw(dclone);
 use Scalar::Util qw/weaken/;
-use Monitoring::Config::Help;
-use Monitoring::Config::Object;
+use Storable qw(dclone);
+
+use Monitoring::Config ();
+use Monitoring::Config::Help ();
+use Monitoring::Config::Object ();
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Crypt ();
 
 =head1 NAME
 

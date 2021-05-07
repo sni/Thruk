@@ -1,6 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
+
+use Thruk::Config 'noautoload';
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;

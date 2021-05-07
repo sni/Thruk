@@ -1,15 +1,24 @@
 package Thruk::Backend::Manager;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
+use POSIX ();
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+
 use Thruk ();
+use Thruk::Request ();
 use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::DateTime ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::LMD ();
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;

@@ -1,9 +1,10 @@
 package Thruk::Utils::Conf::Defaults;
 
-use strict;
 use warnings;
-use Thruk::Utils::Conf;
-use Thruk::Authentication::User;
+use strict;
+
+use Thruk::Authentication::User ();
+use Thruk::Utils ();
 
 =head1 NAME
 

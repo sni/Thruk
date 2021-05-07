@@ -10,14 +10,19 @@ LMD Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use File::Slurp qw/read_file/;
-use Time::HiRes ();
-use File::Copy qw/copy move/;
+use strict;
 use Carp qw/confess/;
-use Thruk::Utils::External;
+use File::Copy qw/copy move/;
+use POSIX ();
+use Time::HiRes ();
+
+use Thruk ();
+use Thruk::Utils ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
@@ -149,7 +154,7 @@ sub status {
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
         $total_started++;
         $started = 1;
-        $pid     = read_file($lmd_dir.'/pid');
+        $pid     = Thruk::Utils::IO::read($lmd_dir.'/pid');
         chomp($pid);
         $start_time = (stat($lmd_dir.'/pid'))[10];
     }
@@ -202,7 +207,7 @@ sub reload {
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-        my $pid = read_file($lmd_dir.'/pid');
+        my $pid = Thruk::Utils::IO::read($lmd_dir.'/pid');
         chomp($pid);
         if(kill("SIGHUP", $pid)) {
             return(1);
@@ -227,7 +232,7 @@ sub shutdown_procs {
     my $pidfile = $lmd_dir.'/pid';
     my $pid;
     if(-s $pidfile) {
-        $pid = read_file($pidfile);
+        $pid = Thruk::Utils::IO::read($pidfile);
         kill(15, $pid);
     }
     delete $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
@@ -291,7 +296,7 @@ check if pidfile exists and contains a valid pid, returns zero or the actual pid
 sub check_pid {
     my($file) = @_;
     return 0 unless -s $file;
-    my $pid = read_file($file);
+    my $pid = Thruk::Utils::IO::read($file);
     if($pid =~ m/^(\d+)\s*$/mx) {
         $pid = $1;
         if(! -d '/proc/.') {
@@ -301,7 +306,7 @@ sub check_pid {
             }
         }
         elsif(-r '/proc/'.$pid.'/cmdline') {
-            my $cmd = read_file('/proc/'.$pid.'/cmdline');
+            my $cmd = Thruk::Utils::IO::read('/proc/'.$pid.'/cmdline');
             if($cmd && $cmd =~ m/lmd/mxi) {
                 return $pid;
             }
@@ -485,7 +490,7 @@ sub write_lmd_config {
     die("could not create lmd ".$lmd_dir.': '.$@) if $@;
 
     if(-s $lmd_dir.'/lmd.ini') {
-        my $old = read_file($lmd_dir.'/lmd.ini');
+        my $old = Thruk::Utils::IO::read($lmd_dir.'/lmd.ini');
         if($old eq $site_config) {
             return(0);
         }

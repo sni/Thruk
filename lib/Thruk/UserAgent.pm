@@ -10,12 +10,13 @@ UserAgent wrapper for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use File::Temp qw/tempfile/;
-use HTTP::Response ();
 use HTTP::Request::Common;
+use HTTP::Response ();
+
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 

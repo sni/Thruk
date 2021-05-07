@@ -10,10 +10,12 @@ Authorization Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 
+use Thruk ();
+use Thruk::Utils ();
 
 ##############################################
 =head1 METHODS

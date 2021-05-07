@@ -1,7 +1,14 @@
 package Thruk::Controller::proxy;
 
-use strict;
 use warnings;
+use strict;
+use HTTP::Request 6.12 ();
+
+use Thruk::Action::AddDefaults ();
+use Thruk::UserAgent ();
+use Thruk::Utils ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::ToolkitRenderer ();
 
 =head1 NAME
 
@@ -17,9 +24,6 @@ Thruk Controller
 
 =cut
 
-use HTTP::Request 6.12 ();
-use Thruk::UserAgent ();
-use Thruk::Utils::Log qw/:all/;
 
 ##########################################################
 sub index {

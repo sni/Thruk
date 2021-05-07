@@ -1,7 +1,16 @@
 package Thruk::Controller::bp;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::BP::Components::BP ();
+use Thruk::BP::Components::Node ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -273,8 +282,8 @@ sub index {
                                     'function' => $type,
                                     'depends'  => [],
                 });
-                die('could not create node: '.Data::Dumper($c->req->parameters)) unless $node;
-                die('got no parent'.Data::Dumper($c->req->parameters)) unless $parent;
+                die('could not create node: '.Data::Dumper::Dumper($c->req->parameters)) unless $node;
+                die('got no parent'.Data::Dumper::Dumper($c->req->parameters)) unless $parent;
                 $bp->add_node($node);
                 $parent->append_child($node);
             }

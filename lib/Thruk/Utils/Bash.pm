@@ -10,9 +10,10 @@ Bash completion for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use Thruk::Utils::IO;
+use strict;
+
+use Thruk::Utils::IO ();
 
 ##############################################
 

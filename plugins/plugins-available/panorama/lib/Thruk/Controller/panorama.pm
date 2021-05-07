@@ -1,16 +1,28 @@
 package Thruk::Controller::panorama;
 
-use strict;
 use warnings;
-use Data::Dumper qw/Dumper/;
-use Cpanel::JSON::XS qw/decode_json encode_json/;
-use File::Slurp qw/read_file/;
-use File::Copy qw/move copy/;
-use Encode qw(decode_utf8 encode_utf8);
-use Module::Load qw/load/;
+use strict;
 use Carp qw/confess/;
-use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/;
+use Cpanel::JSON::XS qw/decode_json/;
+use Data::Dumper qw/Dumper/;
+use Encode qw(encode_utf8);
+use File::Copy qw/move copy/;
+use IO::Socket::INET ();
+use Module::Load qw/load/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Broadcast ();
+use Thruk::Utils::Cache ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Panorama qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -756,7 +768,7 @@ sub _task_uploadecho {
         return;
     }
 
-    my $content = read_file($upload->{'tempname'});
+    my $content = Thruk::Utils::IO::read($upload->{'tempname'});
     unlink($upload->{'tempname'});
 
     # must be text/html result, otherwise extjs form result handler dies
@@ -829,7 +841,7 @@ sub _task_save_dashboard {
     for my $image (sort keys %{$images}) {
         my $file = $images->{$image};
         next unless -r $file;
-        $data->{'usercontent'}->{$image} = MIME::Base64::encode_base64("".read_file($file));
+        $data->{'usercontent'}->{$image} = MIME::Base64::encode_base64("".Thruk::Utils::IO::read($file));
     }
     $c->stash->{'template'} = 'passthrough.tt';
     my $text = "";
@@ -860,7 +872,7 @@ sub _task_load_dashboard {
         return;
     }
 
-    my $content = read_file($upload->{'tempname'});
+    my $content = Thruk::Utils::IO::read($upload->{'tempname'});
     unlink($upload->{'tempname'});
 
     $content =~ s/^\#.*$//gmx;
@@ -1530,7 +1542,7 @@ sub _task_server_stats {
     }
 
     if($show_load eq 'true') {
-        my @load = split(/\s+/mx,(read_file('/proc/loadavg')));
+        my @load = split(/\s+/mx,(Thruk::Utils::IO::read('/proc/loadavg')));
         push @{$json->{'data'}},
             { cat => 'Load',    type => 'load 1',   value => $load[0],            'warn' => $cpucount*2.5, crit => $cpucount*5.0, max => $cpucount*3, graph => '' },
             { cat => 'Load',    type => 'load 5',   value => $load[1],            'warn' => $cpucount*2.0, crit => $cpucount*3.0, max => $cpucount*3, graph => '' },
@@ -1546,7 +1558,7 @@ sub _task_server_stats {
     if($show_memory eq 'true') {
         # gather system statistics
         my $mem = {};
-        for my $line (split/\n/mx,(read_file('/proc/meminfo'))) {
+        for my $line (split/\n/mx,(Thruk::Utils::IO::read('/proc/meminfo'))) {
             my($name,$val,$unit) = split(/\s+/mx,$line,3);
             next unless defined $unit;
             $name =~ s/:$//gmx;
@@ -2697,7 +2709,7 @@ sub _task_userdata_shapes {
         $name    =~ s/\.shape$//gmx;
         push @{$shapes}, {
             name  => $name,
-            data  => scalar read_file($file),
+            data  => Thruk::Utils::IO::read($file),
         };
     }
     $shapes = Thruk::Backend::Manager::sort_result({}, $shapes, 'name');
@@ -3475,7 +3487,7 @@ sub _add_recursive_dashboards {
             my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
             if(defined $shapes && $shape && !exists $shapes->{$shape}) {
                 if(-e $c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js') {
-                    $shapes->{$shape} = scalar read_file($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
+                    $shapes->{$shape} = Thruk::Utils::IO::read($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
                 } else {
                     $shapes->{$shape} = undef;
                 }

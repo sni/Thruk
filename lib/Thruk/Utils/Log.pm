@@ -13,14 +13,17 @@ Utilities Collection for CLI logging
 use warnings;
 use strict;
 use Cwd qw/abs_path/;
-use Time::HiRes ();
+use Log::Log4perl::Appender::Screen ();
+use Log::Log4perl::Layout::PatternLayout ();
 use POSIX ();
-use File::Slurp qw(read_file);
+use Time::HiRes ();
 use threads ();
 
 use Thruk::Base ();
+use Thruk::Request ();
+use Thruk::Utils::IO ();
 
-use Exporter 'import';
+use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc
                     _debug _debug2 _debugs _debugc _trace _audit_log
                     );
@@ -264,7 +267,9 @@ sub _audit_log {
         my $log = sprintf("[%s,%s][%s]%s\n",
             POSIX::strftime("%Y-%m-%d %H:%M:%S", @localtime),
             $milliseconds,
+            ## no lint
             $Thruk::HOSTNAME,
+            ## use lint
             $msg,
         );
         $log =~ s/\n*$//gmx;
@@ -398,7 +403,7 @@ sub _get_file_logger {
     my($log4perl_conf, $config) = @_;
     return($filelogger) if $filelogger;
 
-    $log4perl_conf = read_file($log4perl_conf);
+    $log4perl_conf = Thruk::Utils::IO::read($log4perl_conf);
     if($log4perl_conf =~ m/log4perl\.appender\..*\.filename=(.*)\s*$/mx) {
         $config->{'log4perl_logfile_in_use'} = $1;
     }
@@ -532,7 +537,9 @@ sub _priority_error_warn_only {
 
 ##############################################
 sub _config {
+    ## no lint
     return($Thruk::Config::config);
+    ## use lint
 }
 
 ##############################################

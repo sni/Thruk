@@ -10,16 +10,14 @@ Monitoring web interface for Naemon, Nagios, Icinga and Shinken.
 
 =cut
 
-use strict;
 use warnings;
-use Cwd qw/abs_path/;
-use Time::HiRes;
+use strict;
 use Carp qw/confess longmess/;  $Carp::MaxArgLen = 500;
-use File::Slurp qw(read_file);
-use Module::Load qw/load/;
+use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;    $Data::Dumper::Sortkeys = 1;
-use Plack::Util ();
+use Module::Load qw/load/;
 use POSIX ();
+use Plack::Util ();
 
 ###################################################
 # load timing class
@@ -41,12 +39,15 @@ BEGIN {
     $tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
 
-use Thruk::Base qw/:all/;
+use Thruk::Authentication::User ();
 use Thruk::Backend::Pool ();
+use Thruk::Base qw/:all/;
 use Thruk::Config;
 use Thruk::Constants ':add_defaults';
-use Thruk::Utils::Log qw/:all/;
+use Thruk::Request ();
+use Thruk::Utils::Cache qw/cache/;
 use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
 
 ###################################################
 our $cluster;
@@ -209,7 +210,7 @@ sub _build_app {
             my $routes = $self->{'routes'};
             my $app    = $self;
             ## no critic
-            eval("#line 1 $route_file\n".read_file($route_file));
+            eval("#line 1 $route_file\n".Thruk::Utils::IO::read($route_file));
             ## use critic
             if($@) {
                 _error("error while loading routes from ".$route_file.": ".$@);
@@ -313,6 +314,7 @@ sub _dispatcher {
     my($route, $routename);
     my $path_info = $c->req->path_info;
     if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
+        require Thruk::Controller::error;
         eval {
             my $rc;
             if(($route, $routename) = $thruk->find_route_match($c, $path_info)) {
@@ -485,7 +487,6 @@ sub obj_db_model {
 ###################################################
 # init cache
 sub _init_cache {
-    load Thruk::Utils::Cache, qw/cache/;
     Thruk::Utils::IO::mkdir(Thruk->config->{'tmp_path'});
     return Thruk::Utils::Cache->cache(Thruk->config->{'tmp_path'}.'/thruk.cache');
 }
@@ -564,7 +565,7 @@ sub _remove_pid {
     if(Thruk::Base::mode() eq 'FASTCGI') {
         my $remaining = [];
         if($pidfile && -f $pidfile) {
-            my $pids = [split(/\s/mx, read_file($pidfile))];
+            my $pids = [split(/\s/mx, Thruk::Utils::IO::read($pidfile))];
             for my $pid (@{$pids}) {
                 next unless($pid and $pid =~ m/^\d+$/mx);
                 next if $pid == $$;
@@ -894,6 +895,7 @@ sub finalize_request {
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
         # inject stats into html page
+        require Thruk::Template::Context;
         unshift @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $tt_profiling;
         unshift @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
         my $stats = "";
@@ -976,7 +978,7 @@ sub _detect_timezone {
     }
 
     if(-r '/etc/timezone') {
-        chomp(my $tz = read_file('/etc/timezone'));
+        chomp(my $tz = Thruk::Utils::IO::read('/etc/timezone'));
         if($tz) {
             _debug(sprintf("server timezone: %s (from /etc/timezone)", $tz)) if Thruk->verbose;
             return $tz;
@@ -984,7 +986,7 @@ sub _detect_timezone {
     }
 
     if(-r '/etc/sysconfig/clock') {
-        my $content = read_file('/etc/sysconfig/clock');
+        my $content = Thruk::Utils::IO::read('/etc/sysconfig/clock');
         if($content =~ m/^\s*ZONE="([^"]+)"/mx) {
             _debug(sprintf("server timezone: %s (from /etc/sysconfig/clock)", $1)) if Thruk->verbose;
             return $1;
@@ -1069,8 +1071,7 @@ sub stop_all {
     my($self) = @_;
     $pidfile  = Thruk->config->{'tmp_path'}.'/thruk.pid';
     if(-f $pidfile) {
-        my @pids = read_file($pidfile);
-        for my $pid (@pids) {
+        for my $pid (Thruk::Utils::IO::read_as_list($pidfile)) {
             next if $pid == $$;
             kill("TERM", $pid);
         }

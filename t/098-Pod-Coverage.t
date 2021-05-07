@@ -2,14 +2,13 @@
 #
 # $Id$
 #
-use strict;
 use warnings;
+use strict;
+use English qw(-no_match_vars);
 use File::Spec;
 use Test::More;
-use English qw(-no_match_vars);
+
 use lib glob("plugins/plugins-enabled/*/lib");
-use Thruk;
-use Thruk::Action::AddDefaults;
 
 if ( not $ENV{TEST_AUTHOR} ) {
     my $msg = 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';

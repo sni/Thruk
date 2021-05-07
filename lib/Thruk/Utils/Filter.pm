@@ -10,15 +10,20 @@ Filter Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess cluck carp/;
-use Date::Calc qw/Localtime Today/;
-use URI::Escape qw/uri_escape/;
 use Cpanel::JSON::XS ();
-use Encode qw/decode_utf8/;
-use File::Slurp qw/read_file/;
 use Data::Dumper ();
+use Date::Calc qw/Localtime Today/;
+use Encode qw/decode_utf8/;
+use POSIX ();
+use URI::Escape qw/uri_escape/;
+
+use Thruk::Request ();
+use Thruk::Utils ();
+use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -210,7 +215,7 @@ wrapper around the internal sprintf
 =cut
 sub sprintf {
     my $format = shift;
-    local $SIG{__WARN__} = sub { Carp::cluck(@_); };
+    local $SIG{__WARN__} = sub { cluck(@_); };
     return CORE::sprintf $format, @_;
 }
 
@@ -569,7 +574,7 @@ sub get_action_menu {
                 $c->stash->{'checked_action_menus'}->{$menu} = { err => $err };
                 return($c->stash->{'checked_action_menus'}->{$menu});
             }
-            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(read_file($sourcefile));
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(Thruk::Utils::IO::read($sourcefile));
         } else {
             $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = $c->config->{'action_menu_items'}->{$menu};
         }
@@ -609,6 +614,7 @@ sub get_action_menu {
         for my $item (@{Thruk::Utils::list($items)}) {
             $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
         }
+        require Thruk::Utils::Reports::Render;
         return({err => $err, type => 'json', data => $menu, icons => Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)});
     }
     return({err => $err, type => 'json', data => $menu });
@@ -1256,7 +1262,6 @@ returns string from object
 =cut
 sub dump2str {
     my($any, $max_length, $flat) = @_;
-    return($any) if ref $any eq "";
     return(Thruk::Utils::dump_params($any, $max_length, $flat));
 }
 

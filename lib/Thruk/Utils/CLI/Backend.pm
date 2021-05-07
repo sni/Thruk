@@ -32,9 +32,11 @@ The backend command lists livestatus backends
 
 use warnings;
 use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Constants qw/:add_defaults :peer_states/;
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Constants qw/:add_defaults :peer_states/;
 
 our $skip_backends = 1;
 

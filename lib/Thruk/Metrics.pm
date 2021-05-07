@@ -2,6 +2,7 @@ package Thruk::Metrics;
 
 use warnings;
 use strict;
+
 use Thruk::Utils::IO ();
 
 my $obj;

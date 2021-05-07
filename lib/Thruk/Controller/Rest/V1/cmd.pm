@@ -1,13 +1,15 @@
 package Thruk::Controller::Rest::V1::cmd;
 
-use strict;
 use warnings;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Storable qw/dclone/;
 
-use Thruk::Utils;
-use Thruk::Controller::rest_v1;
-use Thruk::Controller::cmd;
+use Thruk::Controller::cmd ();
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Filter ();
 
 =head1 NAME
 

@@ -1,9 +1,10 @@
 package Monitoring::Config::Object::Discoveryrule;
 
-use strict;
 use warnings;
-use Monitoring::Config::Object::Host;
-use Monitoring::Config::Object::Service;
+use strict;
+
+use Monitoring::Config::Object::Host ();
+
 use parent 'Monitoring::Config::Object::Parent';
 
 =head1 NAME

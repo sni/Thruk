@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
+use Test::More;
 
 # ensure that all config options are well documented
 my $src = "docs/documentation/configuration.asciidoc";

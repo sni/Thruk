@@ -62,9 +62,13 @@ The graph command exports pnp/grafana graphs
 
 use warnings;
 use strict;
-use Thruk::Utils::Log qw/:all/;
-use Getopt::Long ();
 use File::Slurp qw/read_file/;
+use Getopt::Long ();
+
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 

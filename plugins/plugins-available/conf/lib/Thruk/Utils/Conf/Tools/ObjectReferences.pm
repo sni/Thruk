@@ -1,8 +1,10 @@
 package Thruk::Utils::Conf::Tools::ObjectReferences;
 
-use strict;
 use warnings;
-use Thruk::Utils::Conf;
+use strict;
+
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
 
 =head1 NAME
 

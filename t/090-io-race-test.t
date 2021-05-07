@@ -1,8 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
-use File::Slurp qw/read_file/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Race condition test. Set $ENV{TEST_RACE} to a true value to run.' unless $ENV{TEST_RACE};
@@ -24,7 +25,7 @@ my($fh, $filename) = tempfile();
 close($fh);
 Thruk::Utils::IO::json_lock_store($filename, { test => 0 });
 ok(-f $filename, "test file exists: $filename");
-is(read_file($filename), '{"test":0}', "test contains test content");
+is(Thruk::Utils::IO::read($filename), '{"test":0}', "test contains test content");
 
 ok(1, "starting $max_proc parallel processes with $test_runs writes each.");
 for my $x (1..$max_proc) {

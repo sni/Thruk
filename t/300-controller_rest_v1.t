@@ -1,8 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
-use File::Slurp qw/read_file/;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -109,7 +110,7 @@ for my $url (@{$hash_pages}) {
 }
 
 ################################################################################
-my $content = read_file(__FILE__);
+my $content = Thruk::Utils::IO::read(__FILE__);
 my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
 for my $p (sort keys %{$paths}) {
     if($paths->{$p}->{'GET'}) {

@@ -2,9 +2,9 @@
 
 use warnings;
 use strict;
+use File::Slurp qw/read_file/;
 use Getopt::Long;
 use POSIX qw/strftime mktime/;
-use File::Slurp qw/read_file/;
 use Term::ReadKey;
 
 BEGIN {
@@ -12,7 +12,8 @@ BEGIN {
     push @INC, $ENV{'OMD_ROOT'}.'/share/thruk/lib/';
 }
 
-use Thruk::Utils;
+use Thruk::Utils ();
+use Thruk::Utils::DateTime ();
 
 END {
     ReadMode 0; # reset tty

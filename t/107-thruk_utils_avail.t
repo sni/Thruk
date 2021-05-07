@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use utf8;
+use strict;
 use Test::More;
+use utf8;
 
 plan tests => 6;
 

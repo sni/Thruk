@@ -1,14 +1,20 @@
 package Thruk::BP::Utils;
 
-use strict;
 use warnings;
-use File::Temp qw/tempfile/;
+use strict;
+use Carp;
 use File::Copy qw/move/;
 use File::Slurp qw/read_file/;
-use Carp;
+use File::Temp qw/tempfile/;
 
-use Thruk::Utils::Filter;
-use Thruk::BP::Components::BP;
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::BP::Components::BP ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

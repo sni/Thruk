@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 
 BEGIN {
@@ -16,7 +16,7 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::tac' }
 
 for my $sitepanel (qw/off auto list compact collapsed/) {
-    TestUtils::overrideConfig('sitepanel', $sitepanel);
+    TestUtils::override_config('sitepanel', $sitepanel);
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/tac.cgi',
         'like'    => 'Tactical Monitoring Overview',

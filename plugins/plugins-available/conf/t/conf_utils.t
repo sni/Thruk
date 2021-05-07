@@ -1,10 +1,15 @@
-use strict;
 use warnings;
-use utf8;
-use Test::More;
+use strict;
 use Data::Dumper;
-use Storable qw/ dclone /;
 use File::Slurp;
+use File::Temp ();
+use Storable qw/ dclone /;
+use Test::More;
+use utf8;
+
+use Monitoring::Config::File ();
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});

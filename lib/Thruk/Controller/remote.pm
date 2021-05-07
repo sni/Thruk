@@ -1,11 +1,13 @@
 package Thruk::Controller::remote;
 
-use strict;
 use warnings;
-use Data::Dumper;
+use strict;
 use Cpanel::JSON::XS qw/encode_json/;
-use File::Slurp qw/read_file/;
+use Data::Dumper;
 use Module::Load qw/load/;
+
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -91,7 +93,7 @@ sub index {
             if(ref $body eq 'File::Temp') {
                 my $file = $body->filename();
                 if($file and -e $file) {
-                    my $msg = read_file($file);
+                    my $msg = Thruk::Utils::IO::read($file);
                     unlink($file);
                     _error($msg);
                     return;

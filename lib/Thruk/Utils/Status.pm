@@ -10,11 +10,16 @@ Status Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use Thruk::Utils;
+use strict;
 use Carp qw/confess/;
 use URI::Escape qw/uri_unescape/;
+
+use Thruk::Backend::Manager ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

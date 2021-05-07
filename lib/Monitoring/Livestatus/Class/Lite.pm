@@ -64,6 +64,7 @@ Set peer for live tests.
 use warnings;
 use strict;
 use Carp qw/croak confess/;
+
 use Monitoring::Livestatus ();
 
 our $VERSION = '0.07';

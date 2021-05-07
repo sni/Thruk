@@ -10,9 +10,12 @@ API keys for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use File::Copy qw/move/;
+
+use Thruk::Utils ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::IO ();
 
 my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;

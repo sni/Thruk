@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Data::Dumper;
 use Test::More;
 

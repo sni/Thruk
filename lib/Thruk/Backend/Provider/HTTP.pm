@@ -1,12 +1,20 @@
 package Thruk::Backend::Provider::HTTP;
 
-use strict;
 use warnings;
-use Data::Dumper;
+use strict;
 use Carp qw/confess/;
-use Module::Load qw/load/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
+use Data::Dumper;
+use HTTP::Request ();
+
+use Thruk ();
+use Thruk::Backend::Manager ();
+use Thruk::Request ();
+use Thruk::UserAgent ();
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -21,7 +29,6 @@ connection provider for http connections
 
 =cut
 
-use Thruk::UserAgent ();
 
 ##########################################################
 
@@ -150,9 +157,6 @@ sub reconnect {
         my $con_proxy = $self->{'proxy'};
         $con_proxy =~ s#^(http|https)://#connect://#mx;
         $self->{'ua'}->proxy('https', $con_proxy);
-    }
-    if($self->{'addr'} =~ m/^https:/mx) {
-        require IO::Socket::SSL;
     }
     return($self->{'ua'});
 }

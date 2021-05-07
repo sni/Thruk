@@ -10,11 +10,11 @@ basic helpers without dependencies
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
-
 use Exporter 'import';
+
 our @EXPORT_OK = qw(mode verbose quiet debug trace config);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
@@ -30,7 +30,9 @@ returns current configuration
 
 =cut
 sub config {
+    ## no lint
     my $config = $Thruk::Config::config;
+    ## use lint
     confess("uninitialized, no global config") unless $config;
     return($config);
 }

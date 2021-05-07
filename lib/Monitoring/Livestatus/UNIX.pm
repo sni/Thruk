@@ -1,10 +1,10 @@
 package Monitoring::Livestatus::UNIX;
-use parent 'Monitoring::Livestatus';
-
-use strict;
 use warnings;
-use IO::Socket::UNIX ();
+use strict;
 use Carp qw/confess/;
+use IO::Socket::UNIX ();
+
+use parent 'Monitoring::Livestatus';
 
 =head1 NAME
 

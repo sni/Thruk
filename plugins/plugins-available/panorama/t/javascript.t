@@ -1,10 +1,14 @@
-use strict;
 use warnings;
-use Test::More;
-use File::Temp qw/tempfile/;
+use strict;
 use File::Slurp qw/read_file/;
+use File::Temp qw/tempfile/;
+use Log::Log4perl ();
+use Test::More;
+
+use Thruk ();
 
 use lib('t');
+
 require TestUtils;
 import TestUtils;
 

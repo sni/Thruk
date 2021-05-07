@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -167,4 +167,3 @@ for my $url (@{$outages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array: ".$url);
 }
-

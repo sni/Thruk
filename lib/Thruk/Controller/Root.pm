@@ -1,9 +1,17 @@
 package Thruk::Controller::Root;
 
-use strict;
 use warnings;
+use strict;
 use URI::Escape qw/uri_escape/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Menu ();
 
 =head1 NAME
 

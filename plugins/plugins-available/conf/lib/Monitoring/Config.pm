@@ -1,15 +1,20 @@
 package Monitoring::Config;
 
-use strict;
 use warnings;
-use Carp qw/cluck/;
-use Monitoring::Config::File;
-use Encode qw/decode_utf8/;
-use Data::Dumper;
+use strict;
 use Carp;
+use Data::Dumper;
+use Encode qw/decode_utf8/;
 use Storable qw/dclone/;
-use Thruk::Utils;
+
+use Monitoring::Config::File ();
+use Monitoring::Config::Object ();
+use Monitoring::Config::Object::Parent ();
+use Thruk ();
 use Thruk::Config 'noautoload';
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

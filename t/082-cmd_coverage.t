@@ -1,8 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Data::Dumper;
-use File::Slurp qw/read_file/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 BEGIN {
     use lib('t');
@@ -52,14 +53,14 @@ done_testing();
 ################################################################################
 sub _fetch_source {
     if(-e $cache && (stat(_))[10] > time() - 3600) {
-        return(scalar read_file($cache));
+        return(scalar Thruk::Utils::IO::read($cache));
     }
     my $req = TestUtils::_external_request($src);
     die("fetching source failed: ".Dumper($req)) unless $req->is_success;
     open(my $fh, '>', $cache);
     print $fh $req->content;
     close($fh);
-    return(scalar read_file($cache));
+    return(scalar Thruk::Utils::IO::read($cache));
 }
 
 ################################################################################

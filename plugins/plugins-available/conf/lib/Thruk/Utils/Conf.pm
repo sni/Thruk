@@ -1,16 +1,24 @@
 package Thruk::Utils::Conf;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
-use File::Slurp qw/read_file/;
-use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
+use File::Slurp qw/read_file/;
 use Scalar::Util qw/weaken/;
+use Storable qw/store retrieve/;
 
-use Thruk::Utils::Log qw/:all/;
+use Thruk::Action::AddDefaults ();
 use Thruk::Constants qw/:peer_states/;
-use Thruk::Utils::Conf::Defaults;
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Conf::Defaults ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME

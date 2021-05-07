@@ -1,11 +1,12 @@
 package Thruk::BP::Components::Node;
 
-use strict;
 use warnings;
-use Thruk::Utils;
-use Thruk::BP::Functions;
-use Thruk::BP::Utils;
-use Thruk::Utils::Filter;
+use strict;
+
+use Thruk::BP::Functions ();
+use Thruk::BP::Utils ();
+use Thruk::Utils ();
+use Thruk::Utils::Filter ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

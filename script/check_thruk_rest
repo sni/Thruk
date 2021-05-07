@@ -32,9 +32,10 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 33
 
 ###################################################
-use strict;
 use warnings;
+use strict;
 use Getopt::Long qw//;
+
 use Thruk::Config 'noautoload';
 
 my $options = {
@@ -46,7 +47,7 @@ my $options = {
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
 Getopt::Long::Configure('pass_through');
-Getopt::Long::GetOptions (
+Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
    "v|verbose"          => sub { $options->{'verbose'}++ },
    "V|version"          => \$options->{'version'},

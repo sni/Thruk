@@ -1,8 +1,17 @@
 package Thruk::Controller::status;
 
-use strict;
 use warnings;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::Menu ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

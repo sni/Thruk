@@ -1,10 +1,16 @@
 package Thruk::Utils::Trends;
 
-use strict;
 use warnings;
+use strict;
 use GD qw/gdSmallFont gdStyled gdTransparent/;
+use GD::Image ();
 use POSIX ();
+
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Avail ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

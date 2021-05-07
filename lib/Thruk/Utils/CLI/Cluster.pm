@@ -37,6 +37,9 @@ Show information about a Thruk cluster
 use warnings;
 use strict;
 
+use Thruk ();
+use Thruk::Utils::CLI ();
+
 our $skip_backends = 1;
 
 ##############################################

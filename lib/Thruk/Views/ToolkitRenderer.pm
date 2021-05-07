@@ -10,11 +10,14 @@ TT template renderer
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Template ();
+use Template::Provider ();
 use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk ();
 
 my $template_provider_themes;
 my $template_provider_user;

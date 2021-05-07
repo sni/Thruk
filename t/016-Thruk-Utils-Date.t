@@ -15,8 +15,8 @@ BEGIN {
 use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::DateTime');
-use Date::Calc qw/Localtime/;
 use Config;
+use Date::Calc qw/Localtime/;
 
 my $c = TestUtils::get_c();
 

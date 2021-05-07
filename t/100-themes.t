@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 
 plan skip_all => 'internal test only'      if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

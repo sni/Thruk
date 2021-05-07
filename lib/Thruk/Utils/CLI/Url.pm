@@ -31,8 +31,10 @@ command line reports.
 
 use warnings;
 use strict;
-use Thruk::Utils::Log qw/:all/;
 use Getopt::Long ();
+
+use Thruk::Utils::CLI ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 

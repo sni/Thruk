@@ -1,9 +1,16 @@
 package Thruk::Controller::statusmap;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 use Module::Load qw/load/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

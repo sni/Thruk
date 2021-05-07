@@ -1,7 +1,7 @@
 package Thruk::Backend::Provider::Base;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 
 =head1 NAME

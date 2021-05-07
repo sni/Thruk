@@ -1,5 +1,6 @@
-use strict;
 use warnings;
+use strict;
+use POSIX ();
 use Test::More;
 
 BEGIN {

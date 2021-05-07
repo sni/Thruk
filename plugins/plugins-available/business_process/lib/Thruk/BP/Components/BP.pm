@@ -1,17 +1,22 @@
 package Thruk::BP::Components::BP;
 
-use strict;
 use warnings;
-use Data::Dumper;
+use strict;
 use Carp;
-use File::Temp;
-use File::Copy qw/move/;
+use Cpanel::JSON::XS ();
+use Data::Dumper;
 use Fcntl qw/:DEFAULT/;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::BP::Components::Node;
+use File::Copy qw/move/;
+use File::Temp;
 use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::BP::Components::Node ();
+use Thruk::BP::Utils ();
+use Thruk::Utils ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

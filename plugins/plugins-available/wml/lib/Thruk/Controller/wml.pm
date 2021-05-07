@@ -1,7 +1,11 @@
 package Thruk::Controller::wml;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Auth ();
 
 =head1 NAME
 

@@ -1,14 +1,19 @@
 package Thruk::Utils::OAuth;
 
-use strict;
 use warnings;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper;
-use Thruk::Utils::CookieAuth;
-use Thruk::Controller::login;
-use Thruk::Utils::Crypt;
-use Thruk::Utils::IO;
-use Thruk::Utils;
+
+use Thruk ();
+use Thruk::Authentication::User ();
+use Thruk::Controller::login ();
+use Thruk::UserAgent ();
+use Thruk::Utils ();
+use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

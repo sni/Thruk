@@ -1,5 +1,6 @@
-use strict;
 use warnings;
+use strict;
+use Config;
 use Test::More tests => 5;
 
 BEGIN {
@@ -23,5 +24,5 @@ ok($request->headers('last-modified'), "static content request has last-modified
 ok($request->headers('content-length'), "static content request has content-length header");
 
 use_ok("Thruk::Config");
-use Config;
+
 diag(sprintf("Thruk: %s - Perl: %s - Arch: %s", Thruk::Config::get_thruk_version(), $^V, $Config{'archname'}));

@@ -10,14 +10,19 @@ Utilities Collection for Availability Calculation
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 use Data::Dumper;
-use File::Temp qw/tempfile/;
 use File::Slurp qw/read_file/;
+use File::Temp qw/tempfile/;
 use POSIX ();
-use Monitoring::Availability;
+
+use Monitoring::Availability ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

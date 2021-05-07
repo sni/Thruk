@@ -2,14 +2,16 @@
 
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
-use URI::Escape qw/uri_escape/;
 use Data::Dumper;
+use File::Slurp qw/read_file/;
+use URI::Escape qw/uri_escape/;
 
-use Thruk::Utils::CLI;
-use Thruk::Controller::rest_v1;
-use Thruk::Utils::IO;
+use Thruk::Action::AddDefaults ();
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ################################################################################

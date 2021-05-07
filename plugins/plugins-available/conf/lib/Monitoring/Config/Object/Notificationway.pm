@@ -1,8 +1,9 @@
 package Monitoring::Config::Object::Notificationway;
 
-use strict;
 use warnings;
-use parent 'Monitoring::Config::Object::Parent';
+use strict;
+
+use Monitoring::Config::Object::Parent ();
 
 =head1 NAME
 

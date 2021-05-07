@@ -10,10 +10,10 @@ Date/Time related Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use Date::Calc qw/Normalize_DHMS/;
+use strict;
 use Carp qw/confess/;
+use Date::Calc qw/Normalize_DHMS/;
 use POSIX qw/strftime/;
 
 ##############################################

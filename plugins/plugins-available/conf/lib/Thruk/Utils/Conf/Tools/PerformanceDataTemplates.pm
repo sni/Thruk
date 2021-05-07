@@ -1,9 +1,12 @@
 package Thruk::Utils::Conf::Tools::PerformanceDataTemplates;
 
-use strict;
 use warnings;
+use strict;
 use Storable qw/dclone/;
-use Thruk::Utils::Conf;
+
+use Thruk::Config 'noautoload';
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Conf ();
 
 =head1 NAME
 

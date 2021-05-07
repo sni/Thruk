@@ -1,15 +1,15 @@
-use strict;
 use warnings;
+use strict;
 use Carp;
-use utf8;
-use Test::More;
 use Data::Dumper;
-use IO::Socket::UNIX;
-use IO::Socket::INET;
-use File::Temp qw/tempdir/;
 use File::Copy qw/copy/;
 use File::Slurp qw/read_file/;
+use File::Temp qw/tempdir/;
+use IO::Socket::INET;
+use IO::Socket::UNIX;
 use Storable qw/dclone/;
+use Test::More;
+use utf8;
 
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};

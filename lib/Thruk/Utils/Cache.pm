@@ -10,12 +10,13 @@ Cache Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
-use Thruk::Utils::IO ();
-use Storable qw(nstore retrieve);
 use File::Copy qw(move);
+use Storable qw(nstore retrieve);
+
+use Thruk::Utils::IO ();
 
 use base 'Exporter';
 our @EXPORT_OK = qw(cache);

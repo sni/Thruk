@@ -12,8 +12,11 @@ Utilities Collection for Checking Thruks Integrity
 
 use warnings;
 use strict;
-use Thruk::Utils::RecurringDowntimes;
+
 use Thruk::Constants ':peer_states';
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::RecurringDowntimes ();
 
 my $rc_codes = {
     '0'     => 'OK',
@@ -377,6 +380,7 @@ sub _lmd_checks  {
         return({sub => 'lmd', rc => 2, msg => "LMD WARNING", details => $details });
     }
 
+    require Thruk::Utils::LMD;
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
     my $pid = $status->[0]->{'pid'};
     if(!$pid) {

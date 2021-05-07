@@ -32,8 +32,8 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 33
 
 ##############################################
-use strict;
 use warnings;
+use strict;
 
 my $naglint = Thruk::naglint->new();
 exit $naglint->run();
@@ -180,14 +180,15 @@ Process objects from STDIN
 
 package Thruk::naglint;
 
-use strict;
 use warnings;
+use strict;
 use Getopt::Long;
 use Pod::Usage;
-use Thruk::Utils::Scripts;
+
+use Monitoring::Config ();
+use Monitoring::Config::File ();
 use Thruk::Config 'noautoload';
-use Monitoring::Config;
-use Monitoring::Config::File;
+use Thruk::Utils::Scripts ();
 
 ##############################################
 sub new {

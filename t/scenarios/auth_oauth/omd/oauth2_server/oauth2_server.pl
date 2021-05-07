@@ -2,6 +2,7 @@
 
 use warnings;
 use strict;
+
 BEGIN {
     $ENV{DANCER_ENVIRONMENT} = 'config';
 }

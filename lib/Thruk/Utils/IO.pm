@@ -10,19 +10,21 @@ IO Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess longmess/;
+use Cpanel::JSON::XS ();
+use Cwd qw/abs_path/;
 use Errno qw(EEXIST);
 use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
-use Cpanel::JSON::XS ();
-use POSIX ":sys_wait_h";
-use IPC::Open3 qw/open3/;
-use IO::Select ();
 use File::Copy qw/move copy/;
-use Cwd qw/abs_path/;
+use IO::Select ();
+use IPC::Open3 qw/open3/;
+use POSIX ":sys_wait_h";
 use Time::HiRes qw/sleep/;
+
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;

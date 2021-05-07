@@ -35,6 +35,8 @@ use warnings;
 use strict;
 use Module::Load qw/load/;
 
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

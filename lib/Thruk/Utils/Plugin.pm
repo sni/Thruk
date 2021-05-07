@@ -10,11 +10,15 @@ Plugins Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
+use Cpanel::JSON::XS ();
 use Data::Dumper;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::CLI ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##############################################
@@ -139,7 +143,7 @@ sub read_plugin_details {
     };
     my $desc_file = $folder.'/description.txt';
     if(-e $desc_file) {
-        my $description = read_file($desc_file);
+        my $description = Thruk::Utils::IO::read($desc_file);
         my $url         = "";
         if($description =~ s/^Url:\s*(.*)$//gmx) { $url = $1; }
         $plugin->{'description'} = $description;

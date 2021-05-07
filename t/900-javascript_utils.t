@@ -1,8 +1,8 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Slurp qw/read_file/;
 use File::Temp qw/tempfile/;
+use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 eval "use Test::JavaScript";

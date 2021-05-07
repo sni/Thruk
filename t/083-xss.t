@@ -1,8 +1,9 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use Thruk::Utils;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -90,7 +91,7 @@ sub check_templates_file {
     return if($filter && $file !~ m%$filter%mx);
     return if($file =~ m%templates/excel%mx);
     return if($file =~ m%templates/.*csv.*%mx);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my $failed = 0;
     my $escaped_keys = {};
 
@@ -222,7 +223,7 @@ sub check_libs {
 
 sub check_libs_file {
     my($file) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my $failed = 0;
 
     return if($filter && $file !~ m%$filter%mx);

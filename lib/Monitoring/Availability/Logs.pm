@@ -1,8 +1,7 @@
 package Monitoring::Availability::Logs;
 
-use 5.008;
-use strict;
 use warnings;
+use strict;
 use Carp;
 use Encode qw/decode/;
 

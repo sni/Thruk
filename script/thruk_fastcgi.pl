@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 
-use strict;
 use warnings;
+use strict;
+
 use lib 'lib';
 
 ###################################################
@@ -15,7 +16,9 @@ BEGIN {
 }
 
 use Plack::Handler::FCGI ();
-use Thruk;
+
+use Thruk ();
+
 my $server = Plack::Handler::FCGI->new(
     nproc  => 1,
     detach => 1,

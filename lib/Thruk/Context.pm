@@ -3,23 +3,30 @@ package Thruk::Context;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
+use Cpanel::JSON::XS ();
 use Scalar::Util qw/weaken/;
 use Time::HiRes qw/gettimeofday/;
-use Module::Load qw/load/;
 use URI::Escape qw/uri_escape uri_unescape/;
-use File::Slurp qw/read_file/;
 
-use Thruk::Authentication::User;
-use Thruk::Controller::error;
-use Thruk::Request;
-use Thruk::Request::Cookie;
-use Thruk::Stats;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::Utils::CookieAuth;
-use Thruk::Utils::APIKeys;
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Base ();
+use Thruk::Config 'noautoload';
+use Thruk::Controller::error ();
+use Thruk::Request ();
+use Thruk::Request::Cookie ();
+use Thruk::Stats ();
+use Thruk::Utils ();
+use Thruk::Utils::APIKeys ();
+use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::JSONRenderer ();
+use Thruk::Views::ToolkitRenderer ();
+
+use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
 
 =head1 NAME
 

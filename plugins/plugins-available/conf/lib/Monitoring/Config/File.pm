@@ -1,15 +1,17 @@
 package Monitoring::Config::File;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
-use File::Temp qw/ tempfile /;
-use Monitoring::Config::Object;
+use Encode qw(encode_utf8);
 use File::Slurp qw/read_file/;
-use Encode qw(encode_utf8 decode);
-use Thruk::Utils;
-use Thruk::Utils::Conf;
-use Thruk::Utils::IO;
+use File::Temp qw/ tempfile /;
+
+use Monitoring::Config::Object ();
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

@@ -1,7 +1,9 @@
-use strict;
 use warnings;
+use strict;
 use Data::Dumper;
 use Test::More;
+
+use Thruk::Backend::Manager ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});

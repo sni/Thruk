@@ -1,8 +1,8 @@
-use strict;
 use warnings;
-use Test::More;
-use HTML::Entities;
+use strict;
 use Cpanel::JSON::XS;
+use HTML::Entities;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});

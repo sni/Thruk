@@ -1,8 +1,8 @@
-use strict;
 use warnings;
-use utf8;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
+use Test::More;
+use utf8;
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 plan tests => 12;

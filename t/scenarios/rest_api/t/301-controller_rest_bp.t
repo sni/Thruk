@@ -1,8 +1,8 @@
 
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
 
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 

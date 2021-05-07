@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 eval "use File::BOM";
 plan skip_all => 'File::BOM required' if $@;
@@ -51,7 +52,7 @@ sub check_file {
     print $@ if $@;
     is( $type, 'UTF-8' , $file.' is utf-8');
 
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     if($content =~ m/PROCESS\s+_header\.tt/mx && $content !~ m/PROCESS\s+_footer\.tt/mx) {
         fail($file." does not process _footer.tt");
     }

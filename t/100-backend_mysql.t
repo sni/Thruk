@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Data::Dumper;
 use Test::More tests => 69;
+
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');

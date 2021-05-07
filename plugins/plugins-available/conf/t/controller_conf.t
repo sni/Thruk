@@ -1,12 +1,13 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
-use Thruk::Config;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);
 use File::Temp qw/tempfile/;
-use Thruk::Utils::IO;
+use Test::More;
+
+use Thruk::Config;
+use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});

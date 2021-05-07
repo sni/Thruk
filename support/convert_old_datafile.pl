@@ -34,9 +34,9 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 use File::Slurp qw/read_file/;
-use Thruk::Config;
-use Thruk::Utils::IO;
-use Thruk::Utils;
+
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
 
 if(scalar @ARGV == 0) {
     print STDERR "usage: $0 <files...>\n";

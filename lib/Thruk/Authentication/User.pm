@@ -1,12 +1,17 @@
 package Thruk::Authentication::User;
 
+use warnings;
+use strict;
+use Carp qw/confess/;
+
+use Thruk ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Log qw/:all/;
+
 =head1 NAME
 
 Thruk::Authentication::User - Authenticate a remote user configured using a cgi.cfg
-
-=head1 SYNOPSIS
-
-use Thruk::Authentication::User
 
 =head1 DESCRIPTION
 
@@ -14,12 +19,6 @@ This module allows you to authenticate the users.
 
 =cut
 
-use strict;
-use warnings;
-use File::Slurp qw/read_file/;
-use Carp qw/confess/;
-use Thruk::Utils;
-use Thruk::Utils::Log qw/:all/;
 
 our $possible_roles = [
     'authorized_for_admin',

@@ -15,19 +15,30 @@ creates backend manager
 =cut
 
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use Cpanel::JSON::XS qw/encode_json/;
-use Scalar::Util qw/weaken/;
 use POSIX ();
+use Scalar::Util qw/weaken/;
 use Storable qw/dclone/;
+use Template::Stash ();
 use URI::Escape qw/uri_escape/;
-use Thruk::Utils::Filter ();
-use Thruk::Utils::LMD ();
+
+use Thruk ();
+use Thruk::Backend::Manager ();
+use Thruk::Backend::Peer ();
+use Thruk::Backend::Pool ();
+use Thruk::Base ();
+use Thruk::Config 'noautoload';
 use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Utils ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::LMD ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Menu ();
+use Thruk::Utils::Status ();
 
 my @stash_config_keys = qw/
     url_prefix product_prefix title_prefix use_pager start_page documentation_link

@@ -1,8 +1,14 @@
 package Thruk::Controller::mobile;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

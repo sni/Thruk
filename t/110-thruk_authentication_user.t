@@ -2,8 +2,8 @@
 
 package FakeContext;
 
-use strict;
 use warnings;
+use strict;
 
 sub new {
     my ($class, %args) = @_;
@@ -39,9 +39,8 @@ package main;
 
 use warnings;
 use strict;
-use utf8;
 use Test::More;
-use Thruk::Utils;
+use utf8;
 
 BEGIN {
     plan tests => 4;

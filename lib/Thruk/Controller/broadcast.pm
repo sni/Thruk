@@ -1,7 +1,14 @@
 package Thruk::Controller::broadcast;
 
-use strict;
 use warnings;
+use strict;
+use POSIX ();
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
+use Thruk::Utils::Broadcast ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

@@ -1,8 +1,25 @@
 package Thruk::Controller::rest_v1;
 
-use strict;
 use warnings;
+use strict;
+use Carp;
+use Cpanel::JSON::XS ();
+use Module::Load qw/load/;
+use Time::HiRes ();
+use URI::Escape qw/uri_unescape/;
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Backend::Manager ();
+use Thruk::Backend::Provider::Livestatus ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -18,18 +35,6 @@ Thruk Controller
 
 =cut
 
-use Module::Load qw/load/;
-use File::Slurp qw/read_file/;
-use Cpanel::JSON::XS ();
-use URI::Escape qw/uri_unescape/;
-use Time::HiRes ();
-use Carp;
-use Thruk::Utils::Status ();
-use Thruk::Backend::Manager ();
-use Thruk::Backend::Provider::Livestatus ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
-use Thruk::Utils::CookieAuth ();
 
 our $VERSION = 1;
 our $rest_paths = [];
@@ -805,7 +810,7 @@ sub _set_filter_keys {
         }
     } else {
         require Data::Dumper;
-        confess("unsupported _set_filter_keys: ".Data::Dumper($f));
+        confess("unsupported _set_filter_keys: ".Data::Dumper::Dumper($f));
     }
     return;
 }
@@ -1052,7 +1057,7 @@ sub _fixup_livestatus_filter {
                     my @ops = keys %{$filter->{$f}};
                     if(scalar @ops != 1) {
                         require Data::Dumper;
-                        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper([$filter, $f]));
+                        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper::Dumper([$filter, $f]));
                     }
                     my $op  = $ops[0];
                     my $val = $filter->{$f}->{$op};
@@ -1086,7 +1091,7 @@ sub _fixup_livestatus_filter {
         }
     } else {
         require Data::Dumper;
-        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper($filter));
+        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper::Dumper($filter));
     }
 
     return;
@@ -1234,7 +1239,7 @@ sub get_rest_paths {
     my $last_proto;
     my $in_comment = 0;
     for my $file (@{$input_files}) {
-        for my $line (read_file($file)) {
+        for my $line (Thruk::Utils::IO::read_as_list($file)) {
             if($line =~ m%REST\ PATH:\ (\w+)\ (.*?)$%mx) {
                 $last_path  = $2;
                 $last_proto = $1;
@@ -2109,7 +2114,7 @@ sub _match_complex_filter {
         }
     }
     require Data::Dumper;
-    confess("unknown filter: ".Data::Dumper($filter));
+    confess("unknown filter: ".Data::Dumper::Dumper($filter));
 }
 
 ##########################################################

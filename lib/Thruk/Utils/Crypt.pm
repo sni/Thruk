@@ -12,11 +12,11 @@ Crypt offers functions to encrypt and decrypt data as well as hashing.
 
 use warnings;
 use strict;
-use Digest ();
-use Crypt::Rijndael ();
-use MIME::Base64 ();
 use Carp;
+use Crypt::Rijndael ();
+use Digest ();
 use Encode qw/encode_utf8 decode/;
+use MIME::Base64 ();
 
 ##############################################
 my $supported_digests = {

@@ -10,23 +10,33 @@ Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use Thruk::Utils::IO ();
-use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::DateTime ();
-use Thruk::Utils::Log qw/:all/;
-use Carp qw/confess croak longmess/;
+use strict;
+use Carp qw/confess longmess/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Monday_of_Week Week_of_Year Today Add_Delta_Days/;
-use File::Slurp qw/read_file/;
-use Encode qw/encode encode_utf8 decode is_utf8/;
-use File::Copy qw/move copy/;
+use Encode qw/encode_utf8 decode is_utf8/;
+use File::Copy qw/copy/;
 use File::Temp qw/tempfile/;
-use Time::HiRes qw/gettimeofday tv_interval/;
-use POSIX ();
 use MIME::Base64 ();
+use POSIX ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 use URI::Escape ();
+
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Base ();
+use Thruk::Config 'noautoload';
+use Thruk::Request ();
+use Thruk::Utils::Cache ();
+use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::DateTime ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
+use Thruk::Views::ToolkitRenderer ();
 
 ##############################################
 =head1 METHODS
@@ -600,7 +610,7 @@ sub read_ssi {
             carp("cannot execute ssi $dir/$inc: $!");
           }
         } elsif( -r "$dir/$inc" ) {
-            my $content = read_file("$dir/$inc");
+            my $content = Thruk::Utils::IO::read("$dir/$inc");
             $content = Thruk::Utils::decode_any($content);
             unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
             $output .= $content;
@@ -1709,7 +1719,7 @@ sub get_perf_image {
     my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
     unlink($c->stash->{'fake_session_file'});
     if(-e $filename) {
-        my $imgdata  = read_file($filename);
+        my $imgdata  = Thruk::Utils::IO::read($filename);
         unlink($filename);
         if($options->{'format'} eq 'png') {
             # check if this is a real image
@@ -2179,7 +2189,7 @@ sub update_cron_file {
         Thruk::Utils::IO::close($fh2, $tmperror);
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
         my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
-        my $errors = read_file($tmperror);
+        my $errors = Thruk::Utils::IO::read($tmperror);
         unlink($tmperror);
         print $fh $errors;
         # override know error with initial crontab
@@ -2491,8 +2501,7 @@ sub restart_later {
     if(Thruk->mode eq 'FASTCGI') {
         my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
         if(-f $pidfile) {
-            my $pids = [split(/\s/mx, read_file($pidfile))];
-            for my $pid (@{$pids}) {
+            for my $pid (Thruk::Utils::IO::read_as_list($pidfile)) {
                 next unless($pid and $pid =~ m/^\d+$/mx);
                 system("sleep 1 && kill -HUP $pid &");
             }
@@ -2710,8 +2719,8 @@ sub backup_data_file {
         }
     }
 
-    my $old_hash = $last_backup ? Thruk::Utils::Crypt::hexdigest(scalar read_file($last_backup)) : '';
-    my $new_hash = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
+    my $old_hash = $last_backup ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($last_backup)) : '';
+    my $new_hash = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
     if($force || $new_hash ne $old_hash) {
         copy($filename, $targetfile.'.'.$now.'.'.$mode);
 
@@ -3820,6 +3829,7 @@ sub dclone {
     return(Clone::clone($obj)) if $INC{'Clone.pm'};
 
     # else use Storable
+    require Storable;
     return(Storable::dclone($obj));
 }
 
