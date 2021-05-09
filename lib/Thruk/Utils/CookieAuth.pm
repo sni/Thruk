@@ -17,7 +17,6 @@ use Carp qw/confess/;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
 use File::Copy qw/move/;
-use File::Slurp qw/read_file/;
 
 use Thruk::Authentication::User ();
 use Thruk::Request ();
@@ -416,7 +415,7 @@ sub retrieve_session {
     # REMOVE AFTER: 01.01.2022
     my $needs_save;
     if(!$data) {
-        my $raw = scalar read_file($sessionfile);
+        my $raw = Thruk::Utils::IO::read($sessionfile);
         chomp($raw);
         my($auth,$ip,$username,$roles) = split(/~~~/mx, $raw, 4);
         return unless defined $username;

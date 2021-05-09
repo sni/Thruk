@@ -35,7 +35,6 @@ requires 'IO::Socket::IP'                         => 0;     # required by Monito
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
 requires 'Date::Calc'                             => 6.3;   # required by Thruk::Utils
-requires 'File::Slurp'                            => 0;     # required by Thruk::Utils
 requires 'Date::Manip'                            => 0;     # required by Thruk::Utils
 requires 'Excel::Template'                        => 0;     # required by Thruk::Views::ExcelRenderer
 requires 'IO::String'                             => 0;     # required by Thruk::Views::ExcelRenderer

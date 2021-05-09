@@ -136,7 +136,6 @@ use warnings;
 use strict;
 use Data::Dumper;
 use File::Copy;
-use File::Slurp qw/read_file/;
 use Getopt::Long;
 use Pod::Usage;
 
@@ -515,7 +514,7 @@ sub _unpack_tarball {
 ##############################################
 sub _readindex {
     my($self, $tempdir) = @_;
-    my $cont = read_file($tempdir.'/index') or _fatal('cannot read index file: '.$!);
+    my $cont = Thruk::Utils::IO::read($tempdir.'/index') or _fatal('cannot read index file: '.$!);
     my $VAR1;
     eval($cont);
     return $VAR1;
@@ -536,7 +535,7 @@ sub _replace_inline {
     $regex = 1 unless defined $regex;
     $files = Thruk::Utils::list($files);
     for my $file (@{$files}) {
-        my $cont = read_file($file);
+        my $cont = Thruk::Utils::IO::read($file);
         if($regex) {
             $cont    =~ s/$search/$replace/gmx;
         } else {

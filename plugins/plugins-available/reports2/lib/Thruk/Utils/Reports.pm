@@ -18,7 +18,6 @@ use Cwd ();
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8 encode);
 use File::Copy;
-use File::Slurp;
 use MIME::Lite;
 use POSIX ();
 use Storable qw/dclone/;
@@ -122,7 +121,7 @@ sub report_show {
             if(!-e $html_file) {
                 $html_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
             }
-            my $report_text = decode_utf8(read_file($html_file));
+            my $report_text = decode_utf8(Thruk::Utils::IO::read($html_file));
             $report_text    =~ s/^<body>/<body class="preview">/mx;
             $report_text    =~ s/^<html>/<html class="preview">/mx;
             $c->stash->{'text'} = $report_text;
@@ -648,7 +647,7 @@ sub generate_report {
 
     # set error if not already set
     if(!-f $attachment && !$Thruk::Utils::Reports::error) {
-        $Thruk::Utils::Reports::error = read_file($logfile);
+        $Thruk::Utils::Reports::error = Thruk::Utils::IO::read($logfile);
     }
     _error($Thruk::Utils::Reports::error);
 
@@ -1471,7 +1470,7 @@ sub read_report_file {
     # failed?
     $report->{'failed'} = 0;
     if(-s $log) {
-        $report->{'error'} = read_file($log);
+        $report->{'error'} = Thruk::Utils::IO::read($log);
 
         # strip performance debug output
         $report->{'error'}  =~ s%^\[.*INFO.*Req:.*$%%gmx;
@@ -1739,7 +1738,7 @@ sub _convert_to_pdf {
 
     # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
-        my $error = read_file($logfile);
+        my $error = Thruk::Utils::IO::read($logfile);
         if($error eq "") { $error = $out; }
         if($error =~ m/QPainter::begin/mx) {
             $out = Thruk::Utils::IO::cmd($cmd);

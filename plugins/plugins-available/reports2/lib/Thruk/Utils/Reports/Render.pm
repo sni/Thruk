@@ -18,7 +18,6 @@ use Carp qw/confess croak/;
 use Data::Dumper;
 use Encode qw/encode_utf8/;
 use File::Copy qw/move/;
-use File::Slurp;
 use MIME::Base64;
 
 use Thruk::Request ();
@@ -1035,8 +1034,8 @@ sub _read_static_content_file {
         return '';
     }
     if(-e $file) {
-        return(200, { result => "".read_file($file)}) if wantarray;
-        return read_file($file);
+        return(200, { result => "".Thruk::Utils::IO::read($file)}) if wantarray;
+        return Thruk::Utils::IO::read($file);
     }
 
     croak("_read_static_content_file($baseurl, ".($report_base_url||'').", $url) $file: $!") if $ENV{'TEST_AUTHOR'};

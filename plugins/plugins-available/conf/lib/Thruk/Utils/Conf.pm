@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use File::Slurp qw/read_file/;
 use Scalar::Util qw/weaken/;
 use Storable qw/store retrieve/;
 
@@ -257,7 +256,7 @@ sub read_conf {
 
     return('', $data, '') unless -e $file;
 
-    my $content   = read_file($file);
+    my $content   = Thruk::Utils::IO::read($file);
     my $hexdigest = Thruk::Utils::Crypt::hexdigest($content);
     my $in_block = 0;
     for my $line (split/\n/mx, $content) {
@@ -441,7 +440,7 @@ sub replace_block {
 
     my $content = "";
     if(-f $file) {
-        $content = read_file($file);
+        $content = Thruk::Utils::IO::read($file);
     }
 
     ## no critic
@@ -599,7 +598,7 @@ sub read_htpasswd {
     my ( $file ) = @_;
     my $htpasswd = {};
     return $htpasswd unless -f $file;
-    my $content  = read_file($file);
+    my $content  = Thruk::Utils::IO::read($file);
     for my $line (split/\n/mx, $content) {
         my($user,$hash) = split/:/mx, $line;
         next unless defined $hash;
@@ -652,7 +651,7 @@ sub store_model_retention {
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
         $c->config->{'conf_retention_file'} = $file;
-        $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
+        $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
         _debug('saved object retention data');
     };
@@ -707,7 +706,7 @@ sub get_model_retention {
             return 1;
         }
         # cannot trust file timestamp in cluster mode since clocks might not be synchronous
-        my $hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($file));
+        my $hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file));
         if($c->config->{'conf_retention_hex'} eq $hex) {
             $c->stats->profile(end => "get_model_retention($backend)");
             return 1;
@@ -715,7 +714,7 @@ sub get_model_retention {
     }
     $c->config->{'conf_retention'}      = \@stat;
     $c->config->{'conf_retention_file'} = $file;
-    $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
+    $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
     # try to retrieve retention data
     eval {

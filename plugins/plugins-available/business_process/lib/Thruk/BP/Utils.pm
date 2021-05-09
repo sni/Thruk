@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp;
 use File::Copy qw/move/;
-use File::Slurp qw/read_file/;
 use File::Temp qw/tempfile/;
 
 use Thruk ();
@@ -261,8 +260,8 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
-    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
+    my $new_hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
+    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
     # check if something changed
     if($new_hex ne $old_hex) {

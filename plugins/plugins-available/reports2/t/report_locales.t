@@ -1,6 +1,5 @@
 use warnings;
 use strict;
-use File::Slurp;
 use Test::More;
 
 use Thruk::Utils ();
@@ -28,12 +27,12 @@ ok(scalar keys %{$languages} > 0, 'got some languages');
 my $local_patterns = {};
 for my $path (@{$c->get_tt_template_paths()}) {
     for my $file (glob($path.'/reports/*.tt')) {
-        my $cont = read_file($file);
+        my $cont = Thruk::Utils::IO::read($file);
         my @pattern = $cont =~ m/loc\(['|"](.*?)['|"]\)/gmx;
         map { $local_patterns->{$_} = $_ } @pattern;
     }
     for my $file (glob($path.'/reports/comp/*.tt')) {
-        my $cont = read_file($file);
+        my $cont = Thruk::Utils::IO::read($file);
         my @pattern = $cont =~ m/loc\(['|"](.*?)['|"]\)/gmx;
         map { $local_patterns->{$_} = $_ } @pattern;
     }

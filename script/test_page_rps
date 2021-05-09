@@ -44,7 +44,6 @@ Sven Nierlein, 2009-2015, <sven@nierlein.org>
 use warnings;
 use strict;
 use JSON::XS;
-use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 use Getopt::Long;
 
@@ -85,7 +84,7 @@ my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
 my $results = {};
 if(-s $results_file && !$options->{'url'}) {
-    $results = JSON::XS::decode_json(read_file($results_file));
+    $results = JSON::XS::decode_json(Thruk::Utils::IO::read_as_list($results_file));
 }
 
 # clean non-existing git hashes

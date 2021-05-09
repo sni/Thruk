@@ -3,7 +3,6 @@ use strict;
 use Carp;
 use Data::Dumper;
 use File::Copy qw/copy/;
-use File::Slurp qw/read_file/;
 use File::Temp qw/tempdir/;
 use IO::Socket::INET;
 use IO::Socket::UNIX;
@@ -94,7 +93,7 @@ my $now = time();
     local $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
     $httppid = fork();
     if(!$httppid) {
-        exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
+        exec($cmd) or fail(Thruk::Utils::IO::read($http_dir.'/tmp/server.log'));
         exit 1;
     }
     ok($httppid, "http server started with pid: ".$httppid);
@@ -106,7 +105,7 @@ my $now = time();
         last unless -d "/proc/$httppid";
         sleep(1);
     }
-    bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
+    bail_out_with_kill('server did not start: '.Thruk::Utils::IO::read($http_dir.'/tmp/server.log')) unless $connected;
     ok($httppid, 'test server started: '.$httppid);
     sleep(2);
     alarm(30);

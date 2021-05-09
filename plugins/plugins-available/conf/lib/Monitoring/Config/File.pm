@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp;
 use Encode qw(encode_utf8);
-use File::Slurp qw/read_file/;
 use File::Temp qw/ tempfile /;
 
 use Monitoring::Config::Object ();
@@ -107,7 +106,7 @@ sub update_objects {
     return unless $self->{'parsed'} == 0;
     return unless defined $self->{'hex'};
 
-    my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
+    my $text = Thruk::Utils::decode_any(Thruk::Utils::IO::read($self->{'path'}));
     $self->update_objects_from_text($text);
     $self->{'changed'} = 0;
     $self->{'backup'}  = "";
@@ -410,7 +409,7 @@ sub get_meta_data {
     }
 
     # hex digest
-    $meta->{'hex'} = Thruk::Utils::Crypt::hexdigest(scalar read_file($self->{'path'}));
+    $meta->{'hex'} = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($self->{'path'}));
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -536,7 +535,7 @@ sub get_new_file_content {
 
     return $new_content if $self->{'deleted'};
 
-    return encode_utf8(Thruk::Utils::decode_any(scalar read_file($self->{'path'}))) unless $self->{'changed'};
+    return encode_utf8(Thruk::Utils::decode_any(Thruk::Utils::IO::read($self->{'path'}))) unless $self->{'changed'};
 
     my $linenr = 1;
 
@@ -577,7 +576,7 @@ sub set_backup {
     return if $self->{'backup'};
     return if $self->{'is_new_file'};
     # read file from disk
-    $self->{'backup'}  = scalar read_file($self->{'path'});
+    $self->{'backup'}  = Thruk::Utils::IO::read($self->{'path'});
     return;
 }
 
@@ -634,10 +633,10 @@ sub try_merge {
     $cmd = 'cd '.$tmpdir.' && patch -F 10 -p0 < patch 2>&1';
     my($rc2, $out) = Thruk::Utils::IO::cmd(undef, $cmd);
 
-    my $text = Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg'));
+    my $text = Thruk::Utils::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg'));
 
     my $rej;
-    $rej = ":\n".Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
+    $rej = ":\n".Thruk::Utils::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
 
     # cleanup
     unlink(glob($tmpdir.'/*'));

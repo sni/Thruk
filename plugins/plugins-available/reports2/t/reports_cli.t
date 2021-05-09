@@ -1,6 +1,5 @@
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
 use File::Temp qw/tempfile/;
 use Test::More;
 use URI::Escape;
@@ -168,7 +167,7 @@ for my $report (@{$test_pdf_reports}) {
         });
         ok(-s $mailtestfile, 'mail testfile '.$mailtestfile.' does exist');
         if(-s $mailtestfile) {
-            my $mail = read_file($mailtestfile);
+            my $mail = Thruk::Utils::IO::read($mailtestfile);
             for my $like (@{$mail_like}) {
                 like($mail, $like, 'Mail contains: '.$like);
             }

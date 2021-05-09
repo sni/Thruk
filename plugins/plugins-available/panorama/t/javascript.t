@@ -1,6 +1,5 @@
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
 use File::Temp qw/tempfile/;
 use Log::Log4perl ();
 use Test::More;
@@ -119,7 +118,7 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
     $file =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     ok($content =~ m/\n$/s, "file $file must end with a newline");
 }
 #################################################
@@ -137,7 +136,7 @@ js_eval_ok($filename) && unlink($filename);
 #################################################
 # tests from javascript_tests file
 Log::Log4perl::get_logger("JavaScript::SpiderMonkey")->level("ERROR"); # JavaScript::SpiderMonkey uses DEBUG, so set loglevel to error
-my @functions = read_file('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+my @functions = Thruk::Utils::IO::read_as_list('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/xt/panorama/javascript_tests.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");

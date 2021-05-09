@@ -14,7 +14,6 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Encode qw(decode_utf8);
-use File::Slurp qw/read_file/;
 
 use Thruk::Request ();
 use Thruk::Utils::IO ();
@@ -36,7 +35,7 @@ sub load_dashboard {
     $c->stats->profile(begin => "Utils::Panorama::Scripted::load_dashboard($file)");
 
     my $dashboard = {};
-    my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", read_file($file)), 2));
+    my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", Thruk::Utils::IO::read($file)), 2));
     if($code =~ m/^\{/mx) {
         _warn(sprintf("dashboard %s is executable but seems to be a normal json data file. Remove executable bit: chmod -x %s", $file, $file));
         return;

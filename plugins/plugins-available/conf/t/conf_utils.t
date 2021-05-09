@@ -1,7 +1,6 @@
 use warnings;
 use strict;
 use Data::Dumper;
-use File::Slurp;
 use File::Temp ();
 use Storable qw/ dclone /;
 use Test::More;
@@ -180,7 +179,7 @@ is_deeply($keys, $exp_keys, 'sort keys') or diag("got:\n".Dumper($keys)."\nexpec
 my $cloneconf = dclone($obj->{'conf'});
 $parsedfile->update_objects_from_text('');
 is(scalar @{$parsedfile->{'objects'}}, 0, 'emptied objects');
-my $text      = read_file($parsedfile->{'path'});
+my $text      = Thruk::Utils::IO::read($parsedfile->{'path'});
 $parsedfile->update_objects_from_text($text);
 ok(scalar @{$parsedfile->{'objects'}} > 0, 'read objects from text');
 $obj          = $parsedfile->{'objects'}->[0];
@@ -407,7 +406,7 @@ for my $mergedir (qw/1/) {
     $file->set_backup();
     is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
     is(scalar @{$file->{'objects'}}, 2, "number of objects");
-    $file->update_objects_from_text(Thruk::Utils::decode_any(scalar read_file("./t/xt/conf/data/merges/".$mergedir."/b.cfg")));
+    $file->update_objects_from_text(Thruk::Utils::decode_any(Thruk::Utils::IO::read("./t/xt/conf/data/merges/".$mergedir."/b.cfg")));
     is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
     is(scalar @{$file->{'objects'}}, 2, "number of objects");
     $file->{'path'} = './t/xt/conf/data/merges/'.$mergedir.'/c.cfg';

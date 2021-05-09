@@ -33,7 +33,6 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
 
 use Thruk::Utils ();
 use Thruk::Utils::IO ();
@@ -45,7 +44,7 @@ if(scalar @ARGV == 0) {
 }
 
 for my $filename (@ARGV) {
-    my $cont = read_file($filename);
+    my $cont = Thruk::Utils::IO::read($filename);
     $cont = Thruk::Utils::IO::untaint($cont);
 
     # ensure right encoding

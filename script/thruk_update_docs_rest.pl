@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
-use File::Slurp qw/read_file/;
 use URI::Escape qw/uri_escape/;
 
 use Thruk::Action::AddDefaults ();
@@ -43,7 +42,7 @@ exit 0;
 sub _update_cmds {
     my($c) = @_;
     my $output_file = "lib/Thruk/Controller/Rest/V1/cmd.pm";
-    my $content = read_file($output_file);
+    my $content = Thruk::Utils::IO::read($output_file);
     $content =~ s/^__DATA__\n.*$/__DATA__\n/gsmx;
 
     my $input_files = [glob(join(" ", (
@@ -143,7 +142,7 @@ sub _update_cmds {
         if($file =~ m/cmd_typ_(\d+)\./gmx) {
             $nr = $1;
         }
-        my $template = read_file($file);
+        my $template = Thruk::Utils::IO::read($file);
         next if $template =~ m/enable_shinken_features/gmx;
         my @matches = $template =~ m%^\s*([A-Z_]+)\s*(;|$|)(.*sprintf.*|$)%gmx;
         die("got no command in ".$file) if scalar @matches == 0;
@@ -325,7 +324,7 @@ sub _update_docs {
         Thruk::Controller::rest_v1::process_rest_request($c, "/services/".$host."/".$service."/cmd/schedule_forced_svc_check", "POST");
     };
 
-    my $content    = read_file($output_file);
+    my $content    = Thruk::Utils::IO::read($output_file);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
@@ -417,7 +416,7 @@ sub _update_docs {
 ################################################################################
 sub _update_cmds_list {
     my($c, $file, $cmds) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     $content =~ s/^<\!\-\-DATA\-\->\n.*$/<!--DATA-->\n/gsmx;
 
     $content .= "<tbody>\n";

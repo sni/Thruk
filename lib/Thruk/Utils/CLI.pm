@@ -17,7 +17,6 @@ use Carp;
 use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper qw/Dumper/;
 use Encode qw(encode_utf8);
-use File::Slurp qw/read_file/;
 use HTTP::Request 6.12 ();
 use Module::Load qw/load/;
 use Time::HiRes ();
@@ -822,7 +821,7 @@ sub _cmd_configtool {
             if(   !defined $remotefiles->{$f->{'display'}}
                || !defined $remotefiles->{$f->{'display'}}->{'mtime'}
                || $f->{'mtime'} != $remotefiles->{$f->{'display'}}->{'mtime'}) {
-                $transfer->{$f->{'display'}}->{'content'} = read_file($f->{'path'});
+                $transfer->{$f->{'display'}}->{'content'} = Thruk::Utils::IO::read($f->{'path'});
             }
         }
         $res = $transfer;

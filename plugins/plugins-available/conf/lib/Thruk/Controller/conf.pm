@@ -5,7 +5,6 @@ use strict;
 use Data::Dumper qw/Dumper/;
 use Encode qw/decode_utf8 encode_utf8/;
 use File::Copy;
-use File::Slurp qw/read_file/;
 use Socket qw/inet_ntoa/;
 use Storable qw/dclone/;
 
@@ -761,7 +760,7 @@ sub _process_plugins_page {
         $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
         if(-e $path) {
-            $c->stash->{'text'} = read_file($path);
+            $c->stash->{'text'} = Thruk::Utils::IO::read($path);
         }
         $c->stash->{'template'} = 'passthrough.tt';
         return 1;
@@ -2366,7 +2365,7 @@ sub _file_editor {
         $c->stash->{'line'}          = $c->req->parameters->{'line'} || 1;
         $c->stash->{'file_content'}  = '';
         if(-f $filename) {
-            my $content                  = read_file($filename);
+            my $content                  = Thruk::Utils::IO::read($filename);
             $c->stash->{'file_content'}  = decode_utf8($content);
         }
         $c->stash->{'template'}      = $c->config->{'use_feature_editor'} ? 'conf_objects_fancyeditor.tt' : 'conf_objects_fileeditor.tt';
