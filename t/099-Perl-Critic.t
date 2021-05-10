@@ -4,49 +4,44 @@
 #
 use warnings;
 use strict;
-use Digest::MD5;
 use English qw(-no_match_vars);
-use Storable qw/nfreeze thaw/;
 use Test::More;
 
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::IO ();
 
-my $cachefile = $ENV{'THRUK_CRITIC_CACHE_FILE'} || '/tmp/perl-critic-cache.'.$>.'.storable';
-my $cache     = {};
+my $cachefile  = $ENV{'THRUK_CRITIC_CACHE_FILE'} || '/tmp/perl-critic-cache.'.$>.'.json';
+my $cache      = {};
+my $rcfile     = 't/perlcriticrc';
+my $extrahash  = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($0).Thruk::Utils::IO::read($rcfile));
 
-if ( not $ENV{TEST_AUTHOR} ) {
-    my $msg = 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
-    plan( skip_all => $msg );
-}
+plan(skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.') unless $ENV{TEST_AUTHOR};
 
 eval "use Test::Perl::Critic;";
-if ( $EVAL_ERROR ) {
-   my $msg = 'Test::Perl::Critic required to criticise code';
-   plan( skip_all => $msg );
+if($EVAL_ERROR) {
+    plan(skip_all => 'Test::Perl::Critic required to criticise code');
 }
+
+sub save_cache {
+    return if scalar keys %{$cache} == 0;
+    Thruk::Utils::IO::json_lock_store($cachefile, $cache, { skip_config => 1 });
+    exit;
+}
+$SIG{'INT'} = 'save_cache';
+END {
+    save_cache();
+}
+
 require Perl::Critic::Utils;
 require Perl::Critic::Policy::Dynamic::NoIndirect;
 require Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs;
 require Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData;
 require Perl::Critic::Policy::Modules::ProhibitPOSIXimport;
 require Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport;
-
-sub save_cache {
-    return if scalar keys %{$cache} == 0;
-    open(my $fh, '>', $cachefile);
-    print $fh nfreeze($cache);
-    close($fh);
-    chmod(0666, $cachefile);
-    exit;
-}
-$SIG{'INT'} = 'save_cache';
-
-my $rcfile = 't/perlcriticrc';
 Test::Perl::Critic->import( -profile => $rcfile );
 if(-e $cachefile) {
     eval {
-        $cache = thaw(Thruk::Utils::IO::read($cachefile));
-        #diag("loaded $cachefile");
+        $cache = Thruk::Utils::IO::json_lock_retrieve($cachefile);
     };
     diag($@) if $@;
 }
@@ -62,20 +57,11 @@ else {
     my @files = Perl::Critic::Utils::all_perl_files(@{$dirs});
     plan( tests => scalar @files);
     for my $file (sort @files) {
-        my $ctx = Digest::MD5->new;
-        open(FILE, '<', $file);
-        $ctx->addfile(*FILE);
-        close(FILE);
-        my $md5 = $ctx->hexdigest;
-        if($cache->{$file} and $cache->{$file} eq $md5) {
-            ok(1, 'Test::Perl::Critic for "'.$file.'" cached OK');
+        my $hashsum = Thruk::Utils::Crypt::hexdigest($extrahash.Thruk::Utils::IO::read($file));
+        if($cache->{$file} and $cache->{$file} eq $hashsum) {
+            ok(1, sprintf('Test::Perl::Critic for "%s" - cached', $file));
         } else {
-            critic_ok($file) and do { $cache->{$file} = $md5 };
+            critic_ok($file) and do { $cache->{$file} = $hashsum };
         }
     }
-}
-save_cache();
-
-END {
-    save_cache();
 }
