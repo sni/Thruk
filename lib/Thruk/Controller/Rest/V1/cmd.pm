@@ -3,12 +3,9 @@ package Thruk::Controller::Rest::V1::cmd;
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
-use Storable qw/dclone/;
 
-use Thruk::Controller::cmd ();
+use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
-use Thruk::Utils ();
-use Thruk::Utils::Auth ();
 
 =head1 NAME
 
@@ -44,6 +41,12 @@ Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(services?)/([^/]
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(system|core|)/cmd/([^/]+)%mx,              \&_rest_get_external_command);
 sub _rest_get_external_command {
     my($c, undef, $type, @args) = @_;
+
+    require Thruk::Controller::cmd;
+    require Thruk::Utils::Auth;
+    require Thruk::Utils::Filter;
+    require Thruk::Utils;
+
     my $cmd_data = get_rest_external_command_data();
     my($cmd, $cmd_name, $name, $description, @cmd_args);
 
@@ -200,7 +203,7 @@ sub _rest_get_external_command {
 
     my $commands = {};
     for my $b (@{$backends}) {
-        $commands->{$b} = dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
+        $commands->{$b} = Thruk::Utils::dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
     }
 
     # handle custom commands

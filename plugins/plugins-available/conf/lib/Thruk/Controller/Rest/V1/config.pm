@@ -6,7 +6,6 @@ use Cpanel::JSON::XS ();
 use Storable qw/dclone/;
 use Time::HiRes ();
 
-use Monitoring::Config::Object ();
 use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::External ();
@@ -288,6 +287,8 @@ sub _rest_get_config_objects_new {
     my($c) = @_;
     require Thruk::Controller::conf;
     require Thruk::Utils::Conf;
+    require Monitoring::Config::Object;
+
     my($backends) = $c->{'db'}->select_backends();
     my $type      = delete $c->req->parameters->{':TYPE'};
     my $new_file  = delete $c->req->parameters->{':FILE'};

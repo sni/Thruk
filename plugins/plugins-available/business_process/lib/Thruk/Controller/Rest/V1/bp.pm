@@ -3,7 +3,6 @@ package Thruk::Controller::Rest::V1::bp;
 use warnings;
 use strict;
 
-use Thruk::BP::Components::BP ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::IO ();
 
@@ -59,6 +58,7 @@ sub _rest_get_thruk_bp_new {
     my($c) = @_;
     require Thruk::Utils::Reports;
     require Thruk::BP::Utils;
+    require Thruk::BP::Components::BP;
 
     Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
     my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c, $c->req->parameters->{'id'});
