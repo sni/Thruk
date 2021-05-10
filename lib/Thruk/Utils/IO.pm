@@ -351,10 +351,13 @@ sub file_unlock {
 stores data json encoded
 
 $options can be {
-    pretty       => 0/1,       # don't write json into a single line and use human readable intendation
-    tmpfile      => <filename> # use this tmpfile while writing new contents
-    changed_only => 0/1,       # only write the file if it has changed
-    compare_data => "...",     # use this string to compare for changed content
+    pretty                  => 0/1,         # don't write json into a single line and use human readable intendation
+    tmpfile                 => <filename>   # use this tmpfile while writing new contents
+    changed_only            => 0/1,         # only write the file if it has changed
+    compare_data            => "...",       # use this string to compare for changed content
+    skip_ensure_permissions => 0/1          # skip running ensure_permissions after write
+    skip_validate           => 0/1          # skip file validation (author only)
+    skip_config             => 0/1          # skip all steps which reqire thruk config
 }
 
 =cut
@@ -364,6 +367,11 @@ sub json_store {
 
     if(defined $options && ref $options ne 'HASH') {
         confess("json_store options have been changed to hash.");
+    }
+
+    if($options->{'skip_config'}) {
+        $options->{'skip_ensure_permissions'} = 1;
+        $options->{'skip_validate'}           = 1;
     }
 
     my $json = Cpanel::JSON::XS->new->utf8;
@@ -383,17 +391,23 @@ sub json_store {
     }
 
     my $tmpfile = $options->{'tmpfile'} // $file.'.new';
-    open(my $fh2, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
-    print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
-    Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
+    open(my $fh, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
+    print $fh ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
+    if($options->{'skip_ensure_permissions'}) {
+        CORE::close($fh) || confess("cannot close file ".$tmpfile.": ".$!);
+    } else {
+        Thruk::Utils::IO::close($fh, $tmpfile) || confess("cannot close file ".$tmpfile.": ".$!);
+    }
 
-    require Thruk::Config;
-    my $config = Thruk::Config::get_config();
-    if($config->{'thruk_author'}) {
-        eval {
-            my $test = $json->decode(&read($tmpfile));
-        };
-        confess("json_store failed to write a valid file: ".$@) if $@;
+    if(!$options->{'skip_validate'}) {
+        require Thruk::Config;
+        my $config = Thruk::Config::get_config();
+        if($config->{'thruk_author'}) {
+            eval {
+                my $test = $json->decode(&read($tmpfile));
+            };
+            confess("json_store failed to write a valid file: ".$@) if $@;
+        }
     }
 
 
