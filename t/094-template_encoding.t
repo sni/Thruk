@@ -11,37 +11,13 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $filter = $ARGV[0];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
-    check_templates($dir.'/');
+    for my $file (@{Thruk::Utils::IO::find_files($dir, '\.tt$')}) {
+        check_template($file);
+    }
 }
 done_testing();
 
-
-sub check_templates {
-    my $dir = shift;
-    my(@files, @folders);
-    opendir(my $dh, $dir) || die $!;
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        if($file =~ m/\.tt/mx) {
-            push @files, $dir.$file;
-        }
-        elsif(-d $dir.$file) {
-            push @folders, $dir.$file.'/';
-        }
-    }
-    closedir $dh;
-
-    for my $folder (sort @folders) {
-        check_templates($folder);
-    }
-    for my $file (sort @files) {
-        check_file($file);
-    }
-    return;
-}
-
-sub check_file {
+sub check_template {
     my($file) = @_;
     return if($filter && $file !~ m%$filter%mx);
     my $type;

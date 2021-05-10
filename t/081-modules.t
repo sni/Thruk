@@ -18,6 +18,9 @@ sub save_cache {
     exit;
 }
 $SIG{'INT'} = 'save_cache';
+END {
+    save_cache();
+}
 
 if(-e $cachefile) {
     eval {
@@ -26,31 +29,18 @@ if(-e $cachefile) {
     diag($@) if $@;
 }
 
-open(my $ph, '-|', 'bash -c "find ./t ./script ./lib ./plugins/plugins-available/*/lib -type f" 2>&1') or die('find failed: '.$!);
-while(<$ph>) {
-    my $file = $_;
-    chomp($file);
-    if($ARGV[0] && $ARGV[0] ne $file) { next; }
+################################################################################
+my @files = Thruk::Utils::IO::all_perl_files("./t", "./script", "./lib", glob("./plugins/plugins-available/*/lib"));
+plan( tests => scalar @files);
+for my $file (@files) {
     check_modules($file);
 }
-close($ph);
-
-save_cache();
-END {
-    save_cache();
-}
-
-done_testing();
+exit;
 
 ################################################################################
 sub check_modules {
     my($file) = @_;
-    my $content = Thruk::Utils::IO::read($file);
-    if($file !~ m/\.(pl|pm|t)$/mx && $content !~ m|\#\!/usr/bin/perl|mx && $content !~ m|\Qexec perl -x\E|mx) {
-        return;
-    }
-
-    my $hashsum = Thruk::Utils::Crypt::hexdigest($scripthash.$content);
+    my $hashsum = Thruk::Utils::Crypt::hexdigest($scripthash.Thruk::Utils::IO::read($file));
     if($cache->{$file} && $cache->{$file} eq $hashsum) {
         ok(1, sprintf("%s - cached", $file));
         return;

@@ -2872,7 +2872,7 @@ sub precompile_templates {
     my $uniq     = {};
     for my $path (@{$c->get_tt_template_paths()}) {
         next unless -d $path;
-        my $files = find_files($path, '\.tt$');
+        my $files = Thruk::Utils::IO::find_files($path, '\.tt$');
         for my $file (@{$files}) {
             $file =~ s|^$path/||gmx;
             $uniq->{$file} = 1;
@@ -2916,48 +2916,6 @@ sub precompile_templates {
     my $result = sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
     _debug($result);
     return $result;
-}
-
-##########################################################
-
-=head2 find_files
-
-  find_files($folder, $pattern)
-
-return list of files for folder and pattern
-
-=cut
-
-sub find_files {
-    my ( $dir, $match ) = @_;
-    my @files;
-    $dir =~ s/\/$//gmxo;
-
-    my @tmpfiles;
-    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        push @tmpfiles, $file;
-    }
-    closedir $dh;
-
-    for my $file (@tmpfiles) {
-        # follow sub directories
-        if(-d $dir."/".$file."/.") {
-            push @files, @{find_files($dir."/".$file, $match)};
-        }
-
-        # if its a file, make sure it matches our pattern
-        if(defined $match) {
-            my $test = $dir."/".$file;
-            next unless $test =~ m/$match/mx;
-        }
-
-        push @files, $dir."/".$file;
-    }
-
-    return \@files;
 }
 
 ##########################################################

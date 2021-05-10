@@ -53,40 +53,17 @@ my $whitelist_regex = [
 ];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
-    check_templates($dir.'/');
+    for my $file (@{Thruk::Utils::IO::find_files($dir, '\.tt$')}) {
+        check_templates($file);
+    }
 }
 @dirs = glob("./lib ./plugins/plugins-available/*/lib");
-for my $dir (@dirs) {
-    check_libs($dir.'/');
+for my $file (Thruk::Utils::IO::all_perl_files(@dirs) ) {
+    check_libs($file);
 }
 done_testing();
 
 sub check_templates {
-    my($dir) = @_;
-    my(@files, @folders);
-    opendir(my $dh, $dir) || die $!;
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        if($file =~ m/\.tt/mx) {
-            push @files, $dir.$file;
-        }
-        elsif(-d $dir.$file) {
-            push @folders, $dir.$file.'/';
-        }
-    }
-    closedir $dh;
-
-    for my $folder (sort @folders) {
-        check_templates($folder);
-    }
-    for my $file (sort @files) {
-        check_templates_file($file);
-    }
-    return;
-}
-
-sub check_templates_file {
     my($file) = @_;
     return if($filter && $file !~ m%$filter%mx);
     return if($file =~ m%templates/excel%mx);
@@ -197,31 +174,6 @@ sub check_templates_file {
 }
 
 sub check_libs {
-    my($dir) = @_;
-    my(@files, @folders);
-    opendir(my $dh, $dir) || die $!;
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        if($file =~ m/\.p(l|m)$/mx) {
-            push @files, $dir.$file;
-        }
-        elsif(-d $dir.$file) {
-            push @folders, $dir.$file.'/';
-        }
-    }
-    closedir $dh;
-
-    for my $folder (sort @folders) {
-        check_libs($folder);
-    }
-    for my $file (sort @files) {
-        check_libs_file($file);
-    }
-    return;
-}
-
-sub check_libs_file {
     my($file) = @_;
     my $content = Thruk::Utils::IO::read($file);
     my $failed = 0;

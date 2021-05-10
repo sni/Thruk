@@ -2557,7 +2557,7 @@ sub _task_userdata_backgroundimages {
     my $folder = $c->stash->{'usercontent_folder'}.'/backgrounds/';
     my $query  = $c->req->parameters->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
+    my $files = Thruk::Utils::IO::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
@@ -2592,7 +2592,7 @@ sub _task_userdata_images {
     my $folder = $c->stash->{'usercontent_folder'}.'/images/';
     my $query  = $c->req->parameters->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
+    my $files = Thruk::Utils::IO::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;

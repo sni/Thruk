@@ -709,15 +709,11 @@ sub _setup_cluster {
 sub _set_ssi {
     my $config  = Thruk->config;
     my $ssi_dir = $config->{'ssi_path'};
-    my (%ssi, $dh);
+    my %ssi;
     if(-e $ssi_dir) {
-        opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
-        for my $entry (readdir($dh)) {
-            next if $entry eq '.' or $entry eq '..';
-            next if $entry !~ /\.ssi$/mx;
+        for my $entry (@{Thruk::Utils::IO::find_files($ssi_dir, '\.ssi$')}) {
             $ssi{$entry} = 1;
         }
-        closedir $dh;
     }
     $config->{'ssi_includes'} = \%ssi;
     $config->{'ssi_path'}     = $ssi_dir;
