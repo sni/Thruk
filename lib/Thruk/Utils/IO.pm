@@ -832,6 +832,94 @@ sub get_memory_usage {
     return($rsize);
 }
 
+###################################################
+
+=head2 find_files
+
+  find_files($folder, $pattern)
+
+return list of files for folder and pattern (symlinks will be skipped)
+
+=cut
+
+sub find_files {
+    my($dir, $match) = @_;
+    my @files;
+    $dir =~ s/\/$//gmxo;
+
+    # symlinks
+    if(-l $dir) {
+        return([]);
+    }
+    # not a directory?
+    if(!-d $dir) {
+        if(defined $match) {
+            return([]) unless $dir =~ m/$match/mx;
+        }
+        return([$dir]);
+    }
+
+    my @tmpfiles;
+    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
+    while(my $file = readdir $dh) {
+        next if $file eq '.';
+        next if $file eq '..';
+        push @tmpfiles, $file;
+    }
+    closedir $dh;
+
+    for my $file (@tmpfiles) {
+        # follow sub directories
+        if(-d sprintf("%s/%s/.", $dir, $file)) {
+            push @files, @{find_files($dir."/".$file, $match)};
+        } else {
+            # if its a file, make sure it matches our pattern
+            if(defined $match) {
+                my $test = $dir."/".$file;
+                next unless $test =~ m/$match/mx;
+            }
+
+            push @files, $dir."/".$file;
+        }
+    }
+
+    return \@files;
+}
+
+##############################################
+
+=head2 all_perl_files
+
+  all_perl_files(@dirs)
+
+return list of all perl files for given folders
+
+=cut
+sub all_perl_files {
+    my(@dirs) = @_;
+    my @files;
+    for my $dir (@dirs) {
+        my $files = find_files($dir);
+        for my $file (@{$files}) {
+            if($file =~ m/\.(pl|pm)$/mx) {
+                push @files, $file;
+                next;
+            }
+            my $content = &read($file);
+
+            if($content =~ m%\#\!(/usr|)/bin/perl%mx || $content =~ m|\Qexec perl -x\E|mx) {
+                push @files, $file;
+                next;
+            }
+            if($file =~ m/\.t$/mx && $content =~ m|^\s*use\s+strict|mx) {
+                push @files, $file;
+                next;
+            }
+        }
+    }
+    return(@files);
+}
+
 ##############################################
 
 1;
