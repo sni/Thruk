@@ -1263,7 +1263,7 @@ sub clone_refs {
     my($self, $orig, $obj, $cloned_name, $new_name, $clone_refs, $test_mode) = @_;
 
     my $clone_refs_lookup = {};
-    $clone_refs_lookup = Thruk::Utils::array2hash($clone_refs) if $clone_refs;
+    $clone_refs_lookup = Thruk::Base::array2hash($clone_refs) if $clone_refs;
 
     my $clonables = {};
     # clone incoming references
@@ -1505,7 +1505,7 @@ sub get_files_root {
     # file root is empty when there are no files (yet)
     if($root eq '') {
         return $self->{'config'}->{'files_root'} if $self->{'config'}->{'files_root'};
-        my $dirs = Thruk::Utils::list($self->{'config'}->{'obj_dir'});
+        my $dirs = Thruk::Base::list($self->{'config'}->{'obj_dir'});
         if(defined $dirs->[0]) {
             $root = $dirs->[0];
         }
@@ -1564,8 +1564,8 @@ sub _set_config {
         if(defined $ENV{'OMD_ROOT'}
            && -d $ENV{'OMD_ROOT'}."/version/."
            && ! -s $core_conf
-           && scalar(@{Thruk::Utils::list($self->{'config'}->{'obj_dir'})})  == 0
-           && scalar(@{Thruk::Utils::list($self->{'config'}->{'obj_file'})}) == 0) {
+           && scalar(@{Thruk::Base::list($self->{'config'}->{'obj_dir'})})  == 0
+           && scalar(@{Thruk::Base::list($self->{'config'}->{'obj_file'})}) == 0) {
             my $newest = $self->_newest_file(
                                              $ENV{'OMD_ROOT'}.'/tmp/naemon/naemon.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',

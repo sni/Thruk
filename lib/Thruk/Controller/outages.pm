@@ -47,7 +47,7 @@ sub index {
         }
 
         my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
-        my $all_hosts = Thruk::Utils::array2hash($tmp2, 'name');
+        my $all_hosts = Thruk::Base::array2hash($tmp2, 'name');
         for my $host (@{$outages}) {
 
             # get number of comments

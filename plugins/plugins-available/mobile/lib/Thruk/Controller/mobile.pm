@@ -162,7 +162,7 @@ sub index {
     $c->stash->{links} = [];
     if($c->config->{'Thruk::Plugin::Mobile'}->{'links'}) {
         my $remote_user = $c->stash->{'remote_user'};
-        for my $link (@{Thruk::Utils::list($c->config->{'Thruk::Plugin::Mobile'}->{'links'})}) {
+        for my $link (@{Thruk::Base::list($c->config->{'Thruk::Plugin::Mobile'}->{'links'})}) {
             my($name,$url) = split(/\s*;\s*/mx, $link, 2);
             # do not replace in $link, as this would overwrite the config for all users
             $name =~ s/\$CONTACTNAME\$/$remote_user/gmx;

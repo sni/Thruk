@@ -164,7 +164,7 @@ sub cmd {
             my $local_ids = Thruk::BP::Utils::get_bp_ids($c, $id);
             push @{$ids}, @{$local_ids};
         }
-        $ids = Thruk::Utils::array_uniq($ids);
+        $ids = Thruk::Base::array_uniq($ids);
     }
     my $num_bp = scalar @{$ids};
 

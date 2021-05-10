@@ -45,14 +45,11 @@ use Thruk::Utils::Log qw/:all/;
 
 # TODO:
 #
-# - add cache to t/081-modules.t
 # - move $Thruk::Request::c to Thruk::Base or $Thruk::Globals::...
 # - move Thruk->debug to Base
 # - remove includes if already included by others, ex.: T:Utils / T:B:Manager
-# - move Thruk::Backend::Manager::can_use_logcache to T:B:Provider::Base
-# - move Thruk::Utils::array_remove to T:Base
+# - move Thruk::Backend::Manager::can_use_logcache to T:B:Provider::Base or Config
 # - move functions without module to T:Base
-# - remove digest md5
 
 my @files;
 my $options = {

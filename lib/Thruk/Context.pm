@@ -234,7 +234,7 @@ sub get_tt_template_paths {
         reverse @{$c->config->{'plugin_templates_paths'}}, # last plugin overrides template
           $c->config->{'base_templates_dir'},
     );
-    return(Thruk::Utils::array_uniq($list));
+    return(Thruk::Base::array_uniq($list));
 }
 
 =head2 render

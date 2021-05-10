@@ -474,7 +474,7 @@ sub get_computed_config {
                         my $list           = dclone($tconf->{$key});
                         $tconf->{$key}->[0] =~ s/^\+//gmx;
                         $conf->{$key}->[0] = substr($conf->{$key}->[0], 1) if(substr($conf->{$key}->[0],0,1) eq '+');
-                        @{$conf->{$key}}   = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
+                        @{$conf->{$key}}   = sort @{Thruk::Base::array_uniq([@{$list}, @{$conf->{$key}}])};
                         $conf->{$key}->[0] = '+'.$conf->{$key}->[0];
                         $conf->{$key}->[0] =~ s/^\++/+/gmx;
                     }

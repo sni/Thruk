@@ -107,7 +107,7 @@ sub _rest_get_external_command {
         return({ 'message' => 'no such command', 'description' => 'there is no command '.$cmd_name.' for type '.$type, code => 404 });
     }
 
-    my $required = Thruk::Utils::array2hash($cmd->{'required'});
+    my $required = Thruk::Base::array2hash($cmd->{'required'});
     my $args = {};
     for my $arg (@{$cmd->{'args'}}) {
         my $val = $c->req->parameters->{$arg};

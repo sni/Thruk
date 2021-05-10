@@ -39,7 +39,7 @@ sub new {
         'label'                     => $data->{'label'},
         'function'                  => '',
         'function_args'             => [],
-        'depends'                   => Thruk::Utils::list($data->{'depends'} || []),
+        'depends'                   => Thruk::Base::list($data->{'depends'} || []),
         'parents'                   => $data->{'parents'}       || [],
         'host'                      => $data->{'host'}          || '',
         'service'                   => $data->{'service'}       || '',

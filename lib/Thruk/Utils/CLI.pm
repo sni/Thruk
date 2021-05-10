@@ -1261,7 +1261,7 @@ sub _extract_queries {
     my($raw_queries) = @_;
     my $queries = [];
     my $current = "";
-    for my $raw (@{Thruk::Utils::list($raw_queries)}) {
+    for my $raw (@{Thruk::Base::list($raw_queries)}) {
         for my $line (split(/\n/mx, $raw)) {
             chomp($line);
             if($line eq '') {

@@ -278,7 +278,7 @@ sub run_cluster {
 
     my $c = $Thruk::Utils::Cluster::context || confess("uninitialized cluster");
 
-    my $nodes = Thruk::Utils::list($type);
+    my $nodes = Thruk::Base::list($type);
     if($type eq 'all' || $type eq 'others') {
         $nodes = $self->{'nodes'};
     }

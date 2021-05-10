@@ -70,7 +70,7 @@ sub new {
     }
 
     my $config       = Thruk->config;
-    my $peer_configs = Thruk::Config::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
+    my $peer_configs = Thruk::Base::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
     my $num_peers    = scalar @{$peer_configs};
     my $pool_size;
     if(defined $config->{'connection_pool_size'}) {
@@ -220,8 +220,8 @@ sub peer_remove {
     }
     delete $self->{'peers'}->{$key};
     delete $self->{'by_name'}->{$peer->{'name'}};
-    $self->{'peer_order'} = Thruk::Utils::array_remove($self->{'peer_order'}, $key);
-    $self->{'objects'}    = Thruk::Utils::array_remove($self->{'objects'}, $peer);
+    $self->{'peer_order'} = Thruk::Base::array_remove($self->{'peer_order'}, $key);
+    $self->{'objects'}    = Thruk::Base::array_remove($self->{'objects'}, $peer);
     return;
 }
 

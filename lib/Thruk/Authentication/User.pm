@@ -69,15 +69,15 @@ sub new {
             push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
         }
     }
-    $self->{'roles_from_cgi_cfg'} = Thruk::Utils::array2hash($self->{'roles'});
+    $self->{'roles_from_cgi_cfg'} = Thruk::Base::array2hash($self->{'roles'});
 
     $self->{'roles_from_session'} = {};
     if($sessiondata && $sessiondata->{'roles'}) {
         push @{$self->{'roles'}}, @{$sessiondata->{'roles'}};
-        $self->{'roles_from_session'} = Thruk::Utils::array2hash($sessiondata->{'roles'});
+        $self->{'roles_from_session'} = Thruk::Base::array2hash($sessiondata->{'roles'});
     }
 
-    $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
+    $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
 
     # Is this user internal or an admin user?
     if($self->{'internal'} || $self->check_user_roles('admin')) {
@@ -142,7 +142,7 @@ sub set_dynamic_attributes {
         $self->grant('admin');
     }
 
-    $self->{'roles'} = Thruk::Utils::array_uniq($self->{'roles'});
+    $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
 
     if(!$skip_db_access) {
         $c->cache->set('users', $username, $data);
@@ -177,7 +177,7 @@ sub clean_roles {
             push @{$cleaned_roles}, $r;
         }
     }
-    $self->{'roles'} = Thruk::Utils::array_uniq($cleaned_roles);
+    $self->{'roles'} = Thruk::Base::array_uniq($cleaned_roles);
 
     # update read-only flag
     if($readonly || $self->check_user_roles('authorized_for_read_only')) {
@@ -185,7 +185,7 @@ sub clean_roles {
     }
 
     # clean role origins
-    my $roles_hash = Thruk::Utils::array2hash($cleaned_roles);
+    my $roles_hash = Thruk::Base::array2hash($cleaned_roles);
     for my $key (qw/roles_from_cgi_cfg roles_from_session/) {
         next unless $self->{$key};
         for my $k2 (sort keys %{$self->{$key}}) {
@@ -229,7 +229,7 @@ sub get_dynamic_roles {
     # add roles from groups in cgi.cfg
     my $roles  = [];
     my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
-    my $groups_hash = Thruk::Utils::array2hash($groups);
+    my $groups_hash = Thruk::Base::array2hash($groups);
     my $roles_by_group = {};
     for my $key (@{$possible_roles}) {
         my $role = $key;
@@ -269,7 +269,7 @@ sub get_dynamic_roles {
     }
 
     return({
-        roles               => Thruk::Utils::array_uniq($roles),
+        roles               => Thruk::Base::array_uniq($roles),
         can_submit_commands => $can_submit_commands,
         alias               => $alias,
         roles_by_group      => $roles_by_group,
@@ -556,8 +556,8 @@ sub grant {
 
 sub has_group {
     my($self, $groups) = @_;
-    my $groups_hash = Thruk::Utils::array2hash($self->{'groups'});
-    $groups = Thruk::Utils::list($groups);
+    my $groups_hash = Thruk::Base::array2hash($self->{'groups'});
+    $groups = Thruk::Base::list($groups);
     for my $g (@{$groups}) {
         return(0) unless defined $groups_hash->{$g};
     }

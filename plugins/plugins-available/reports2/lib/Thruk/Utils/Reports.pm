@@ -343,7 +343,7 @@ sub report_send {
             @send_args = ($send_type);
             my $send_scalar_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_args};
             if($send_scalar_args) {
-                push @send_args, @{Thruk::Utils::list($send_scalar_args)};
+                push @send_args, @{Thruk::Base::list($send_scalar_args)};
             }
             my $send_named_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_named_args};
             if($send_named_args) {
@@ -865,7 +865,7 @@ sub get_report_data_from_param {
     my $nested_keys = {};
     for my $key (keys %{$params}) {
         next unless $key =~ m/^params\.([\w]+)\.([\w]+)$/mx;
-        $p->{$1}->{$2} = Thruk::Utils::list($params->{$key});
+        $p->{$1}->{$2} = Thruk::Base::list($params->{$key});
         $nested_keys->{$1} = 1;
     }
     for my $key (sort keys %{$nested_keys}) {
@@ -1585,7 +1585,7 @@ sub _get_report_cmd {
     if($niceval > 0) {
         $thruk_bin = $nice.' -n '.$niceval.' '.$thruk_bin;
     }
-    $numbers = Thruk::Utils::list($numbers);
+    $numbers = Thruk::Base::list($numbers);
     my $cmd = sprintf("cd %s && %s '%s report \"%s\"' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},

@@ -219,7 +219,7 @@ sub _update_cmds {
             $cmd->{'args'}     = \@args;
             $cmd->{'required'} = \@required_args;
             # sanity check, there should not be any required parameters which cannot be found in the args list
-            my $args_hash = Thruk::Utils::array2hash(\@args);
+            my $args_hash = Thruk::Base::array2hash(\@args);
             for my $r (@required_args) {
                 die("cannot find required $r in args list for file: ".$file) unless $args_hash->{$r};
             }
@@ -247,7 +247,7 @@ sub _update_cmds {
             }
             if(scalar @{$cmd->{'args'}} > 0) {
                 my $optional = [];
-                my $required = Thruk::Utils::array2hash($cmd->{'required'});
+                my $required = Thruk::Base::array2hash($cmd->{'required'});
                 for my $a (@{$cmd->{'args'}}) {
                     next if $required->{$a};
                     push @{$optional}, $a;

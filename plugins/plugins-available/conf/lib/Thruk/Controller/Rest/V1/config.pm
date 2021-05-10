@@ -195,7 +195,7 @@ sub _rest_get_config {
     my $data    = [];
     my $changed = 0;
     for my $l (@{$live}) {
-        for my $peer_key (@{Thruk::Utils::list($l->{'peer_key'})}) {
+        for my $peer_key (@{Thruk::Base::list($l->{'peer_key'})}) {
             $c->stash->{'param_backend'} = $peer_key;
             my $peer = $c->{'db'}->get_peer_by_key($peer_key);
             my $peer_name = $peer->peer_name();
@@ -596,7 +596,7 @@ sub _add_object {
         my($conf_keys, $config) = $o->get_computed_config($c->{'obj_db'});
         my $templates = $o->get_used_templates($c->{'obj_db'});
         $conf = dclone($config);
-        $conf->{':TEMPLATES'} = Thruk::Utils::array_uniq($templates);
+        $conf->{':TEMPLATES'} = Thruk::Base::array_uniq($templates);
     } else {
         $conf = dclone($o->{'conf'});
     }

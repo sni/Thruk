@@ -178,10 +178,10 @@ sub index {
             }
             $c->req->parameters->{'recurring'} = "add";
             $c->req->parameters->{'type'}      = "6";
-            $c->req->parameters->{'host'}      = join(",", @{Thruk::Utils::array_uniq(\@hosts)});
-            $c->req->parameters->{'service'}   = join(",", @{Thruk::Utils::array_uniq(\@services)});
+            $c->req->parameters->{'host'}      = join(",", @{Thruk::Base::array_uniq(\@hosts)});
+            $c->req->parameters->{'service'}   = join(",", @{Thruk::Base::array_uniq(\@services)});
             $c->req->parameters->{'comment'}   = $c->req->parameters->{'com_data'};
-            $c->req->parameters->{'backend'}   = join(",", @{Thruk::Utils::array_uniq(\@backends)});
+            $c->req->parameters->{'backend'}   = join(",", @{Thruk::Base::array_uniq(\@backends)});
             require Thruk::Controller::extinfo;
             return(Thruk::Controller::extinfo::index($c));
         }
@@ -343,7 +343,7 @@ sub _remove_all_downtimes {
 
     # get list of all downtimes
     my $data = $c->{'db'}->get_downtimes(%{$options});
-    my @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
+    my @ids     = keys %{Thruk::Base::array2hash($data, 'id')};
     for my $id ( @ids ) {
         $c->req->parameters->{'down_id'} = $id;
         if( do_send_command($c) ) {
@@ -445,10 +445,10 @@ sub redirect_or_success {
     }
 
     # only wait if we got original backends
-    my $backends = Thruk::Utils::list($c->req->parameters->{'backend'});
+    my $backends = Thruk::Base::list($c->req->parameters->{'backend'});
     if($wait and defined $c->req->parameters->{'backend.orig'}) {
         my $backends_str = join('|', @{$backends});
-        my $backendsorig = join('|', @{Thruk::Utils::list($c->req->parameters->{'backend.orig'})});
+        my $backendsorig = join('|', @{Thruk::Base::list($c->req->parameters->{'backend.orig'})});
         $wait = 0 if $backends_str ne $backendsorig;
     }
 
@@ -806,7 +806,7 @@ sub bulk_send {
     my $rc = 1;
     for my $backends (keys %{$commands}) {
         # remove duplicate commands
-        my $commands2send = Thruk::Utils::array_uniq($commands->{$backends});
+        my $commands2send = Thruk::Base::array_uniq($commands->{$backends});
 
         # bulk send only 100 at a time
         while(@{$commands2send}) {
@@ -1041,7 +1041,7 @@ sub get_affected_backends {
     # extract affected backends
     my $affected_backends = {};
     for my $row (@{$data}) {
-        for my $peer_key (@{Thruk::Utils::list($row->{'peer_key'})}) {
+        for my $peer_key (@{Thruk::Base::list($row->{'peer_key'})}) {
             $affected_backends->{$peer_key} = 1;
         }
     }

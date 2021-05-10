@@ -34,7 +34,7 @@ my $blocksize   = undef;
 # create tables
 Thruk::Action::AddDefaults::set_possible_backends($c, {});
 my $backends = $c->stash->{'backends'};
-$backends    = Thruk::Utils::list($backends);
+$backends    = Thruk::Base::list($backends);
 my $prefix   = $backends->[0];
 isnt($prefix, undef, 'got peer key: '.$prefix) or BAIL_OUT("got no peer key, cannot test");
 my $peer     = $c->{'db'}->get_peer_by_key($prefix);

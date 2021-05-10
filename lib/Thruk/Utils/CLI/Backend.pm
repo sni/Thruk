@@ -59,7 +59,7 @@ sub cmd {
         $c->{'db'}->enable_backends();
     } else {
         ($backends) = $c->{'db'}->select_backends();
-        $backends = Thruk::Utils::array2hash($backends);
+        $backends = Thruk::Base::array2hash($backends);
     }
     eval {
         $c->{'db'}->get_processinfo();

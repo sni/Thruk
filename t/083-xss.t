@@ -8,7 +8,7 @@ use Thruk::Utils::IO ();
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $filter = $ARGV[0];
-my $whitelist_vars = Thruk::Utils::array2hash([qw/
+my $whitelist_vars = Thruk::Base::array2hash([qw/
     theme url_prefix logo_path_prefix filebranch thrukversion fileversion extjs_version
     date.now pd referer cs j js jsfiles page class statusclass statusClass rowclass hostclass serviceclass
     loopclass body_class param.breakdown url defaults.$key.link

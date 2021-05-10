@@ -258,7 +258,7 @@ sub calculate_availability {
             push @{$hosts}, $host->{'name'};
             push @hostfilter, { 'host_name' => $host->{'name'} };
         }
-        $c->stash->{'hosts'} = Thruk::Utils::array2hash($host_data, 'name');
+        $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
     }
 
@@ -365,7 +365,7 @@ sub calculate_availability {
         for my $host (@{$host_data}) {
             push @{$hosts}, $host->{'name'};
         }
-        $c->stash->{'hosts'} = Thruk::Utils::array2hash($host_data, 'name');
+        $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
     }
 
     # all hosts
@@ -373,7 +373,7 @@ sub calculate_availability {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')] ];
         my $host_data = $c->{'db'}->get_hosts(filter => $filter);
         _die_no_matches($c, 'host', undef, @{$filter}) unless scalar @{$host_data} > 0;
-        $host_data    = Thruk::Utils::array2hash($host_data, 'name');
+        $host_data    = Thruk::Base::array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
         $logserviceheadfilter = { service_description => undef };
         $c->stash->{'hosts'} = $host_data;
@@ -404,7 +404,7 @@ sub calculate_availability {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
         my $host_data = $c->{'db'}->get_hosts(filter => $filter);
         _die_no_matches($c, 'host', 'hostgroup:' .$hostgroup, @{$filter}) unless scalar @{$host_data} > 0;
-        $host_data    = Thruk::Utils::array2hash($host_data, 'name');
+        $host_data    = Thruk::Base::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
             $groupfilter       = Thruk::Utils::combine_filter('-or', \@groupfilter);
             my @hosts_from_groups = ();
@@ -601,7 +601,7 @@ sub calculate_availability {
     }
 
     # make hosts uniq
-    $hosts = Thruk::Utils::array_uniq($hosts);
+    $hosts = Thruk::Base::array_uniq($hosts);
 
     # ensure reports won't wrack our server
     my $total_nr = 0;

@@ -121,7 +121,7 @@ sub set_object_model {
         $c->stats->profile(end => "check_files_changed($refresh)");
     }
 
-    $c->{'obj_db'}->{'errors'} = Thruk::Utils::array_uniq(Thruk::Utils::list($c->{'obj_db'}->{'errors'}));
+    $c->{'obj_db'}->{'errors'} = Thruk::Base::array_uniq(Thruk::Base::list($c->{'obj_db'}->{'errors'}));
     my $errnum = scalar @{$c->{'obj_db'}->{'errors'}};
     if($errnum > 0) {
         my $error = $c->{'obj_db'}->{'errors'}->[0];
@@ -391,7 +391,7 @@ sub get_component_as_string {
         $string .= "            peer          = ".$p."\n";
         }
         if($b->{'options'}->{'resource_file'}) {
-            for my $r (@{Thruk::Utils::list($b->{'options'}->{'resource_file'})}) {
+            for my $r (@{Thruk::Base::list($b->{'options'}->{'resource_file'})}) {
                 $string .= "            resource_file = ".$r."\n";
             }
         }
@@ -857,11 +857,11 @@ append/merge global config tool settings
 =cut
 sub append_global_peer_config {
     my($c, $config) = @_;
-    $config->{'obj_readonly'} = Thruk::Utils::list($config->{'obj_readonly'});
+    $config->{'obj_readonly'} = Thruk::Base::list($config->{'obj_readonly'});
     if($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'}) {
         push @{$config->{'obj_readonly'}},
-            @{Thruk::Utils::list($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'})};
-        $config->{'obj_readonly'} = Thruk::Utils::array_uniq($config->{'obj_readonly'});
+            @{Thruk::Base::list($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'})};
+        $config->{'obj_readonly'} = Thruk::Base::array_uniq($config->{'obj_readonly'});
     }
     return;
 }

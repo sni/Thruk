@@ -847,7 +847,7 @@ sub logcache_stats {
     } else {
         die("unknown type: ".$type);
     }
-    my $stats = Thruk::Utils::array2hash(\@stats, 'key');
+    my $stats = Thruk::Base::array2hash(\@stats, 'key');
 
     if($with_dates) {
         for my $key (keys %{$stats}) {
@@ -2112,12 +2112,12 @@ sub remove_duplicates {
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
     if($data && $data->[0] && ref($data->[0]) eq 'HASH') {
-        $data = Thruk::Utils::array_uniq_obj($data);
+        $data = Thruk::Base::array_uniq_obj($data);
     }
     elsif($data && $data->[0] && ref($data->[0]) eq 'ARRAY') {
-        $data = Thruk::Utils::array_uniq_list($data);
+        $data = Thruk::Base::array_uniq_list($data);
     } else {
-        $data = Thruk::Utils::array_uniq($data);
+        $data = Thruk::Base::array_uniq($data);
     }
 
     $c->stats->profile( end => "Utils::remove_duplicates()" );

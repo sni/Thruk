@@ -175,7 +175,7 @@ sub create_key_from_req_params {
     my $roles ;
     if($c->req->parameters->{'roles'} && (!$c->req->parameters->{'restrict_only'} || $c->req->parameters->{'restrict'})) {
         $roles = [];
-        for my $role (@{Thruk::Utils::list($c->req->parameters->{'roles'})}) {
+        for my $role (@{Thruk::Base::list($c->req->parameters->{'roles'})}) {
             next unless $c->user->check_role_permissions($role);
             push @{$roles}, $role;
         }

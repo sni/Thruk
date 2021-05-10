@@ -287,7 +287,7 @@ sub has_role {
     my $c = $Thruk::Request::c;
 
     for my $role (@roles) {
-        for my $role2 (@{Thruk::Utils::list($role)}) {
+        for my $role2 (@{Thruk::Base::list($role)}) {
             next if(ref $role2 eq 'Thruk::Context'); # keep backwards compatible with the old call has_role($c, $role)
             return 0 unless $c->check_user_roles($role2);
         }

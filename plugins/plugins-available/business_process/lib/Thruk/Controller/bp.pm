@@ -289,7 +289,7 @@ sub index {
             }
 
             # update children
-            $node->{'depends'} = Thruk::Utils::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
+            $node->{'depends'} = Thruk::Base::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
 
             # save object creating attributes
             for my $key (qw/host service template notification_period event_handler max_check_attempts/) {

@@ -98,7 +98,7 @@ sub new {
     return unless $self->{'name'};
 
     # read in nodes
-    for my $n (@{Thruk::Utils::list($bpdata->{'nodes'} || [])}) {
+    for my $n (@{Thruk::Base::list($bpdata->{'nodes'} || [])}) {
         my $node = Thruk::BP::Components::Node->new($n);
         $self->add_node($node, 1);
     }
@@ -106,7 +106,7 @@ sub new {
     $self->load_runtime_data();
 
     # add default filter
-    $self->{'default_filter'} = Thruk::Utils::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
+    $self->{'default_filter'} = Thruk::Base::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
 
     $self->save() if $self->{'need_save'};
 
@@ -148,7 +148,7 @@ return list of filters + default filter
 =cut
 sub filter {
     my($self) = @_;
-    return(Thruk::Utils::array_uniq([@{$self->{'default_filter'}}, @{$self->{'filter'}}]));
+    return(Thruk::Base::array_uniq([@{$self->{'default_filter'}}, @{$self->{'filter'}}]));
 }
 
 ##########################################################
@@ -232,7 +232,7 @@ sub update_status {
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
 
-    $results = Thruk::Utils::array_uniq($results);
+    $results = Thruk::Base::array_uniq($results);
 
     # update last check time
     my $now = time();
@@ -691,7 +691,7 @@ sub bulk_fetch_live_data {
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
         my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
-        $hostdata  = Thruk::Utils::array2hash($data, 'name');
+        $hostdata  = Thruk::Base::array2hash($data, 'name');
     }
     if(scalar keys %{$servicefilter} > 0) {
         my @filter;
@@ -727,7 +727,7 @@ sub bulk_fetch_live_data {
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
         my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
-        $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
+        $servicedata = Thruk::Base::array2hash($data, 'host_name', 'description');
     }
     if(!$expand_groups) {
         if(scalar keys %{$hostgroupfilter} > 0) {
@@ -740,7 +740,7 @@ sub bulk_fetch_live_data {
                                                                                      num_hosts_unreach num_hosts_up num_services num_services_crit
                                                                                      num_services_ok num_services_pending num_services_unknown
                                                                                      num_services_warn worst_service_state worst_host_state/]);
-            $hostgroupdata  = Thruk::Utils::array2hash($data, 'name');
+            $hostgroupdata  = Thruk::Base::array2hash($data, 'name');
         }
         if(scalar keys %{$servicegroupfilter} > 0) {
             my @filter;
@@ -751,7 +751,7 @@ sub bulk_fetch_live_data {
             my $data   = $c->{'db'}->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
                                                                                            num_services_ok num_services_pending num_services_unknown
                                                                                            num_services_warn worst_service_state/]);
-            $servicegroupdata  = Thruk::Utils::array2hash($data, 'name');
+            $servicegroupdata  = Thruk::Base::array2hash($data, 'name');
         }
     }
 
@@ -952,10 +952,10 @@ sub _sync_ack_downtime_status {
 
     # get all downtimes for this bp
     my $downtimes = $c->db->get_downtimes(filter => [{ 'host_custom_variables' => { '=' => 'THRUK_BP_ID '.$self->{'id'}}}, 'author' => $author ], backend => $pkey);
-    $downtimes = Thruk::Utils::array2hash($downtimes, "host_name", "service_description");
+    $downtimes = Thruk::Base::array2hash($downtimes, "host_name", "service_description");
 
     my $acks = $c->db->get_comments(filter => [{ 'host_custom_variables' => { '=' => 'THRUK_BP_ID '.$self->{'id'}}}, 'author' => $author ], backend => $pkey);
-    $acks = Thruk::Utils::array2hash($acks, "host_name", "service_description");
+    $acks = Thruk::Base::array2hash($acks, "host_name", "service_description");
 
     my $cmds = [];
     for my $id (@{$results}) {
@@ -1086,7 +1086,7 @@ sub FROM_JSON {
     return unless $self->{'name'};
 
     # read in nodes
-    for my $n (@{Thruk::Utils::list($nodes)}) {
+    for my $n (@{Thruk::Base::list($nodes)}) {
         my $node = Thruk::BP::Components::Node->new($n);
         $self->add_node($node, 1);
     }

@@ -165,7 +165,7 @@ sub get_contact_matches {
     _add_panorama_matches($c, $peer_key, 'contact', $res, $name);
 
     for my $key (sort keys %{$c->config}) {
-        my $list = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $c->config->{$key} || '']));
+        my $list = Thruk::Base::array2hash(Thruk::Base::list([split/\s*,\s*/mx, $c->config->{$key} || '']));
         if($list->{$name}) {
             _add_res($res, $peer_key, 'thruk_local.conf/cgi.cfg', {
                 name    => $key,
@@ -358,10 +358,10 @@ sub _add_report_matches {
     require Thruk::Utils::Reports;
     my $reports = Thruk::Utils::Reports::get_report_list($c, 1);
     for my $r (@{$reports}) {
-        my $hosts         = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'host'} || '']));
-        my $hostgroups    = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'hostgroup'} || '']));
-        my $services      = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'service'} || '']));
-        my $servicegroups = Thruk::Utils::array2hash(Thruk::Utils::list([split/\s*,\s*/mx, $r->{'params'}->{'servicegroup'} || '']));
+        my $hosts         = Thruk::Base::array2hash(Thruk::Base::list([split/\s*,\s*/mx, $r->{'params'}->{'host'} || '']));
+        my $hostgroups    = Thruk::Base::array2hash(Thruk::Base::list([split/\s*,\s*/mx, $r->{'params'}->{'hostgroup'} || '']));
+        my $services      = Thruk::Base::array2hash(Thruk::Base::list([split/\s*,\s*/mx, $r->{'params'}->{'service'} || '']));
+        my $servicegroups = Thruk::Base::array2hash(Thruk::Base::list([split/\s*,\s*/mx, $r->{'params'}->{'servicegroup'} || '']));
         if(
                ($type eq 'host' && $hosts->{$name})
             || ($type eq 'hostgroup' && $hostgroups->{$name})
@@ -475,7 +475,7 @@ sub _add_recurring_downtime_matches {
     } else {
         my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 0, 0);
         for my $d (@{$downtimes}) {
-            my $list = Thruk::Utils::array2hash($d->{$type} || []);
+            my $list = Thruk::Base::array2hash($d->{$type} || []);
             next unless $list->{$name};
             _add_res($res, $peer_key, 'Recurring Downtime', {
                 name    => $d->{'comment'},

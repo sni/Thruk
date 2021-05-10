@@ -611,7 +611,7 @@ sub get_action_menu {
         # workaround for images beeing placed by js document.write later
         my $image_data = {};
         my $items = Cpanel::JSON::XS->new->decode($menu);
-        for my $item (@{Thruk::Utils::list($items)}) {
+        for my $item (@{Thruk::Base::list($items)}) {
             $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
         }
         require Thruk::Utils::Reports::Render;

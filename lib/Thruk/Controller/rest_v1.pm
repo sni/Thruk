@@ -492,13 +492,13 @@ sub _get_filter {
     my($c, $stage) = @_;
     my $filter = [];
 
-    my $reserved = Thruk::Utils::array2hash($reserved_query_parameters);
+    my $reserved = Thruk::Base::array2hash($reserved_query_parameters);
 
     for my $key (keys %{$c->req->parameters}) {
         next if $reserved->{$key};
         next if $key =~ m/^\s*$/mx; # skip empty keys
         my $op   = '=';
-        my @vals = @{Thruk::Utils::list($c->req->parameters->{$key})};
+        my @vals = @{Thruk::Base::list($c->req->parameters->{$key})};
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
             $key = $1;
             $op  = lc($2);
@@ -598,7 +598,7 @@ sub _apply_stats {
     my $stats_columns = [];
     my $group_columns = [];
     my $group_column_name;
-    for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
+    for my $col (@{Thruk::Base::list($c->req->parameters->{'columns'})}) {
         for my $col (split(/\s*,\s*/mx, $col)) {
             if($col =~ m/^(.*)\(([^\)]+)\):?([^:]*)$/mx) {
                 push @{$stats_columns}, { op => $1, col => $2 };
@@ -731,10 +731,10 @@ sub get_request_columns {
     return unless $c->req->parameters->{'columns'};
 
     my $columns = [];
-    for my $col (@{Thruk::Utils::list($c->req->parameters->{'columns'})}) {
+    for my $col (@{Thruk::Base::list($c->req->parameters->{'columns'})}) {
         push @{$columns}, split(/\s*,\s*/mx, $col);
     }
-    $columns = Thruk::Utils::array_uniq($columns);
+    $columns = Thruk::Base::array_uniq($columns);
     if($type == ALIAS) {
         for(@{$columns}) {
             $_ =~ s/^[^:]+:(.*?)$/$1/gmx;
@@ -844,7 +844,7 @@ sub column_required {
     }
 
     # from ?sort=...
-    for my $sort (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
+    for my $sort (@{Thruk::Base::list($c->req->parameters->{'sort'})}) {
         for my $s (split(/\s*,\s*/mx, $sort)) {
             $s =~ s/^[\-\+]+//gmx;
             return 1 if $col eq $s;
@@ -893,7 +893,7 @@ sub _apply_sort {
     return $data unless $c->req->parameters->{'sort'};
     return $data if scalar @{$data} == 0;
     my $sort = [];
-    for my $s (@{Thruk::Utils::list($c->req->parameters->{'sort'})}) {
+    for my $s (@{Thruk::Base::list($c->req->parameters->{'sort'})}) {
         push @{$sort}, split(/\s*,\s*/mx, $s);
     }
 
@@ -961,19 +961,19 @@ sub _livestatus_options {
         my $columns = get_request_columns($c, NAMES) || [];
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
-            $columns = Thruk::Utils::array_uniq($columns);
+            $columns = Thruk::Base::array_uniq($columns);
             my $ref_columns;
             if($type eq 'hosts') {
-                $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
+                $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
             }
             elsif($type eq 'services') {
-                $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+                $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
             }
             elsif($type eq 'contacts') {
-                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+                $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
             }
             elsif($type eq 'logs') {
-                $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
+                $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
             }
 
             if($ref_columns) {
@@ -1015,16 +1015,16 @@ sub _livestatus_filter {
     my($c, $ref_columns) = @_;
     if($ref_columns && ref $ref_columns eq '') {
         if($ref_columns eq 'hosts') {
-            $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
+            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
         }
         elsif($ref_columns eq 'services') {
-            $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
         }
         elsif($ref_columns eq 'contacts') {
-            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+            $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
         }
         elsif($ref_columns eq 'logs') {
-            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
+            $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
         } else {
             confess("unsupported type: ".$ref_columns);
         }
@@ -1112,13 +1112,13 @@ sub _expand_perfdata_and_custom_vars {
         push @{$columns}, @{get_filter_columns($c)};
         my $ref_columns;
         if($type eq 'hosts') {
-            $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
+            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
         }
         elsif($type eq 'services') {
-            $ref_columns = Thruk::Utils::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
         }
         elsif($type eq 'contacts') {
-            $ref_columns = Thruk::Utils::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
+            $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
         } else {
             confess("unsupported type: ".$type);
         }
@@ -1193,7 +1193,7 @@ returns nothing
 =cut
 sub register_rest_path_v1 {
     my($proto, $path, $function, $roles, $first) = @_;
-    for my $prot (@{Thruk::Utils::list($proto)}) {
+    for my $prot (@{Thruk::Base::list($proto)}) {
         if($first) {
             unshift @{$rest_paths}, [$prot, $path, $function, $roles];
         } else {

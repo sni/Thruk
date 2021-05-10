@@ -96,14 +96,14 @@ sub index {
                 $data->{'site_panel_bookmarks'} = [] unless $data->{'site_panel_bookmarks'};
                 push @{$data->{'site_panel_bookmarks'}}, {
                     name     => $c->req->parameters->{'name'},
-                    backends => Thruk::Utils::list($c->req->parameters->{'backends[]'} || []),
-                    sections => Thruk::Utils::list($c->req->parameters->{'sections[]'} || []),
+                    backends => Thruk::Base::list($c->req->parameters->{'backends[]'} || []),
+                    sections => Thruk::Base::list($c->req->parameters->{'sections[]'} || []),
                 };
                 Thruk::Utils::store_user_data($c, $data);
             }
             if($c->req->parameters->{'reorder'}) {
                 my $data = Thruk::Utils::get_user_data($c);
-                my $neworder = Thruk::Utils::list($c->req->parameters->{'order[]'});
+                my $neworder = Thruk::Base::list($c->req->parameters->{'order[]'});
                 my $bookmarks = [];
                 for my $index (@{$neworder}) {
                     push @{$bookmarks}, $data->{'site_panel_bookmarks'}->[$index];

@@ -222,7 +222,7 @@ sub _process_raw_request {
         my $data = [];
         my $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )]);
         my $alias      = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' )], columns => [qw/name alias/]);
-        $alias = Thruk::Utils::array2hash($alias, "name");
+        $alias = Thruk::Base::array2hash($alias, "name");
         for my $group (@{$hostgroups}) {
             my $row = $alias->{$group};
             next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
@@ -235,7 +235,7 @@ sub _process_raw_request {
         my $data = [];
         my $servicegroups = $c->{'db'}->get_servicegroup_names_from_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )]);
         my $alias         = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ], columns => [qw/name alias/] );
-        $alias = Thruk::Utils::array2hash($alias, "name");
+        $alias = Thruk::Base::array2hash($alias, "name");
         for my $group (@{$servicegroups}) {
             my $row = $alias->{$group};
             next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
@@ -493,7 +493,7 @@ sub _process_details_page {
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state, $keep_state_order);
     if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
         @{$columns} = split(/\s*,\s*/mx, $c->req->parameters->{'columns'});
-        my $col_hash = Thruk::Utils::array2hash($columns);
+        my $col_hash = Thruk::Base::array2hash($columns);
         $keep_peer_addr   = delete $col_hash->{'peer_addr'};
         $keep_peer_name   = delete $col_hash->{'peer_name'};
         $keep_peer_key    = delete $col_hash->{'peer_key'};
@@ -632,7 +632,7 @@ sub _process_hostdetails_page {
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state);
     if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
         @{$columns} = split(/\s*,\s*/mx, $c->req->parameters->{'columns'});
-        my $col_hash = Thruk::Utils::array2hash($columns);
+        my $col_hash = Thruk::Base::array2hash($columns);
         $keep_peer_addr  = delete $col_hash->{'peer_addr'};
         $keep_peer_name  = delete $col_hash->{'peer_name'};
         $keep_peer_key   = delete $col_hash->{'peer_key'};
@@ -1351,7 +1351,7 @@ sub _process_bookmarks {
     # remove existing bookmarks
     if(    ( defined $button and $button eq 'add bookmark' )
         or ( defined $save   and $save   eq 'save changes' )) {
-        for my $bookmark (@{Thruk::Utils::list($bookmarks)}) {
+        for my $bookmark (@{Thruk::Base::list($bookmarks)}) {
             next unless defined $bookmark;
             my($section, $name) = split(/::/mx, $bookmark ,2);
             next unless defined $name;
@@ -1377,7 +1377,7 @@ sub _process_bookmarks {
         $done++;
 
         if($c->check_user_roles('authorized_for_public_bookmarks')) {
-            for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
+            for my $bookmark (@{Thruk::Base::list($bookmarksp)}) {
                 next unless defined $bookmark;
                 my($section, $name) = split(/::/mx, $bookmark ,2);
                 $keepp->{$section}->{$name} = 1;

@@ -995,7 +995,7 @@ sub _log_stats {
     $c->stats->profile(begin => "Mysql::_log_stats");
 
     ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
-    $backends  = Thruk::Utils::list($backends);
+    $backends  = Thruk::Base::list($backends);
 
     my @result;
     for my $key (@{$backends}) {
@@ -1074,7 +1074,7 @@ sub _logcache_stats_types {
     $c->stats->profile(begin => "Mysql::_logcache_stats_types: ".$groupby);
 
     ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
-    $backends  = Thruk::Utils::list($backends);
+    $backends  = Thruk::Base::list($backends);
 
     my @result;
     for my $key (@{$backends}) {
@@ -1192,7 +1192,7 @@ sub _import_logs {
         Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
         $backends = $c->stash->{'backends'};
     }
-    $backends = Thruk::Utils::list($backends);
+    $backends = Thruk::Base::list($backends);
     my @peer_keys;
     for my $key (@{$backends}) {
         my $peer   = $c->{'db'}->get_peer_by_key($key);
@@ -2013,7 +2013,7 @@ sub _import_peer_logfiles {
 
     # add import filter again, even if it should have been filtered in the logs query already, but it seems like not all backends handle them correctly
     my $import_filter = [];
-    for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
+    for my $f (@{Thruk::Base::list($c->config->{'logcache_import_exclude'})}) {
         push @{$import_filter}, { message => { '!~~' => $f } }
     }
     if($mode eq 'import') {
@@ -2123,11 +2123,11 @@ sub _enable_index {
 ##########################################################
 sub _get_exclude_filter {
     my($config) = @_;
-    if(scalar @{Thruk::Utils::list($config->{'logcache_import_exclude'})} == 0) {
+    if(scalar @{Thruk::Base::list($config->{'logcache_import_exclude'})} == 0) {
         return;
     }
     my $import_filter;
-    my $f = join('|', @{Thruk::Utils::list($config->{'logcache_import_exclude'})});
+    my $f = join('|', @{Thruk::Base::list($config->{'logcache_import_exclude'})});
     ## no critic
     $import_filter = qr/($f)/i;
     ## use critic

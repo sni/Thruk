@@ -258,7 +258,7 @@ sub get_events {
     # event type filter set?
     if(defined $event_types and @{$event_types} > 0) {
         my @evt_filter;
-        my $typeshash = Thruk::Utils::array2hash($event_types);
+        my $typeshash = Thruk::Base::array2hash($event_types);
         my $hst_states = 'both';
         my $svc_states = 'both';
         for my $state (qw/hard soft both/) {
@@ -987,7 +987,7 @@ sub _read_static_content_file {
     my $logo_url         = $url;
     $logo_url            =~ s/^$logo_path_prefix//gmx;
 
-    my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'});
+    my $icon_dirs  = Thruk::Base::list($c->config->{'physical_logo_path'});
     my $physical_logo;
     for my $dir (@{$icon_dirs}) {
         $dir =~ s/\/$//gmx;

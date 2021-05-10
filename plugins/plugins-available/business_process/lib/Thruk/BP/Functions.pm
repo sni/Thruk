@@ -405,7 +405,7 @@ sub statusfilter {
     $c->stash->{'minimal'} = 1; # do not fill totals boxes
     my($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_search($c, $filter, '', 1);
 
-    my $node_filter = Thruk::Utils::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
+    my $node_filter = Thruk::Base::array_uniq([@{$n->{'filter'}}, @{$bp->{'filter'}}]);
     my($ack_filter, $downtime_filter, $unknown_filter, $extra) = (0,0,0, {});
     for my $f (@{$node_filter}) {
         $ack_filter      = 1 if $f eq 'acknowledged_filter';

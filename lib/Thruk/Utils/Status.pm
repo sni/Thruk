@@ -239,7 +239,7 @@ sub get_search_from_param {
     if( defined $params->{ $prefix . '_type' } ) {
         if( ref $params->{ $prefix . '_type' } eq 'ARRAY' ) {
             for my $param ($prefix.'_val_pre', $prefix.'_value', $prefix.'_op') {
-                $params->{$param} = Thruk::Utils::list($params->{$param});
+                $params->{$param} = Thruk::Base::list($params->{$param});
             }
             for(my $x = 0; $x < scalar @{$params->{$prefix . '_type'}}; $x++) {
                 my $text_filter = {
@@ -1644,10 +1644,10 @@ sub get_comments_filter {
     }
     else {
         my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
-        my @comment_ids  = sort keys %{ Thruk::Utils::array2hash([@{$comments}], 'id') };
+        my @comment_ids  = sort keys %{ Thruk::Base::array2hash([@{$comments}], 'id') };
 
         my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
-        my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+        my @downtime_ids = sort keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
         $num             = scalar @downtime_ids + scalar @comment_ids;
         if(scalar @comment_ids == 0) { @comment_ids = (-1); }
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
@@ -1711,7 +1711,7 @@ sub get_groups_filter {
         elsif($type eq 'contacts') {
             $groups = $c->{'db'}->get_contacts( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
         }
-        @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
+        @names = sort keys %{ Thruk::Base::array2hash([@{$groups}], 'name') };
         if(scalar @names == 0) { @names = (''); }
     }
 
@@ -1776,7 +1776,7 @@ sub set_selected_columns {
             confess("must set a type");
         }
         my $ref_col = $default_cols || $default_compat_columns->{$type} || $default_compat_columns->{$prefix.$type};
-        my $cols    = Thruk::Utils::list($c->req->parameters->{$prefix.'columns'} || $ref_col);
+        my $cols    = Thruk::Base::list($c->req->parameters->{$prefix.'columns'} || $ref_col);
         for my $col (@{$cols}) {
             if($col =~ m/^\d+$/mx) {
                 push @{$columns}, $ref_col->[$col-1];
@@ -1905,7 +1905,7 @@ sub get_downtimes_filter {
     else {
         # Get all the downtimes
         my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
-        my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+        my @downtime_ids = sort keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
 
         # If no downtimes returned
         if(scalar @downtime_ids == 0) {
@@ -1935,7 +1935,7 @@ sub get_downtimes_filter {
             }
             # wipe out undefined downtimes
             @{$downtimes} = grep { defined } @{$downtimes};
-            @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+            @downtime_ids = sort keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
         }
 
         # Supress undef value if is present and not the only result, or replace undef by -1 if no results

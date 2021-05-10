@@ -64,8 +64,8 @@ sub get_broadcasts {
             next;
         }
 
-        $broadcast->{'contacts'}      = Thruk::Utils::list($broadcast->{'contacts'});
-        $broadcast->{'contactgroups'} = Thruk::Utils::list($broadcast->{'contactgroups'});
+        $broadcast->{'contacts'}      = Thruk::Base::list($broadcast->{'contacts'});
+        $broadcast->{'contactgroups'} = Thruk::Base::list($broadcast->{'contactgroups'});
 
         if(!$unfiltered) {
             next unless is_authorized_for_broadcast($c, $broadcast);
@@ -168,21 +168,21 @@ sub is_authorized_for_broadcast {
 
     my $groups = {};
     if($c->user_exists) {
-        $groups = Thruk::Utils::array2hash($c->user->{'groups'});
+        $groups = Thruk::Base::array2hash($c->user->{'groups'});
     }
 
     if(scalar @{$contacts} > 0 || scalar @{$contactgroups} > 0) {
         my $allowed = 0;
         # allowed for specific contacts
         if(scalar @{$contacts}) {
-            my $contacts = Thruk::Utils::array2hash($contacts);
+            my $contacts = Thruk::Base::array2hash($contacts);
             if($c->stash->{'remote_user'} && $contacts->{$c->stash->{'remote_user'}}) {
                 $allowed = 1;
             }
         }
         # allowed for specific contactgroups
         if(scalar @{$contactgroups}) {
-            my $contactgroups = Thruk::Utils::array2hash($contactgroups);
+            my $contactgroups = Thruk::Base::array2hash($contactgroups);
             for my $group (keys %{$groups}) {
                 if($contactgroups->{$group}) {
                     $allowed = 1;
@@ -196,14 +196,14 @@ sub is_authorized_for_broadcast {
     # hide from certain contacts or groups by exclamation mark
     my $contacts_hide      = [grep(/^\!/mx, @{$broadcast->{'contacts'}})];
     if(scalar @{$contacts_hide}) {
-        my $contacts = Thruk::Utils::array2hash($contacts_hide);
+        my $contacts = Thruk::Base::array2hash($contacts_hide);
         if($contacts->{$c->stash->{'remote_user'}}) {
             return;
         }
     }
     my $contactgroups_hide = [grep(/^\!/mx, @{$broadcast->{'contactgroups'}})];
     if(scalar @{$contactgroups_hide}) {
-        my $contactgroups = Thruk::Utils::array2hash($contactgroups_hide);
+        my $contactgroups = Thruk::Base::array2hash($contactgroups_hide);
         my $hidden = 0;
         for my $group (keys %{$groups}) {
             if($contactgroups->{$group}) {

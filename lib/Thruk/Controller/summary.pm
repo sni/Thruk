@@ -256,12 +256,12 @@ sub _display_alert_totals {
     elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Hostgroup';
         my $tmp = $c->{'db'}->get_hostgroups();
-        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
+        $box_title_data = Thruk::Base::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Host';
         my $tmp = $c->{'db'}->get_hosts(columns => [qw/name alias/]);
-        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
+        $box_title_data = Thruk::Base::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Service';
@@ -269,7 +269,7 @@ sub _display_alert_totals {
     elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Servicegroup';
         my $tmp = $c->{'db'}->get_servicegroups();
-        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
+        $box_title_data = Thruk::Base::array2hash($tmp, 'name');
     }
 
     my $totals = {};
@@ -459,7 +459,7 @@ sub _get_filter {
     my $servicegroup = $c->req->parameters->{'servicegroup'};
     if(defined $hostgroup and $hostgroup ne 'all') {
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { groups => { '>=' => $hostgroup }} ]);
-        $host_data    = Thruk::Utils::array2hash($host_data, 'name');
+        $host_data    = Thruk::Base::array2hash($host_data, 'name');
         my @hosts_from_groups = ();
         for my $hostname (keys %{$host_data}) {
             push @hosts_from_groups, { host_name => $hostname };

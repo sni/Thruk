@@ -1046,7 +1046,7 @@ sub _add_additional_roles {
         $role =~ s/authorized_contactgroup_for_/authorized_for_/mx;
         push @{$roles}, $role;
     }
-    $roles = Thruk::Config::array_uniq($roles);
+    $roles = Thruk::Base::array_uniq($roles);
     # always put readonly role at the end
     @{$roles} = sort grep(!/^authorized_for_read_only$/mx, @{$roles});
     push @{$roles}, "authorized_for_read_only";

@@ -533,7 +533,7 @@ sub _printexport_info {
 sub _replace_inline {
     my($self,$files,$search,$replace,$regex) = @_;
     $regex = 1 unless defined $regex;
-    $files = Thruk::Utils::list($files);
+    $files = Thruk::Base::list($files);
     for my $file (@{$files}) {
         my $cont = Thruk::Utils::IO::read($file);
         if($regex) {

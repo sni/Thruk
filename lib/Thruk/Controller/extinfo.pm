@@ -986,7 +986,7 @@ sub _process_perf_info_logcache_details {
     $c->stash->{'logcache_types'} = $peer->logcache()->_logcache_stats_types($c, "type", [$peer_key])->[0]->{'types'};
     $c->stash->{'logcache_class'} = $peer->logcache()->_logcache_stats_types($c, "class", [$peer_key])->[0]->{'types'};
     require Thruk::Backend::Provider::Mysql;
-    my $db_classes = Thruk::Utils::hash_invert($Thruk::Backend::Provider::Mysql::db_classes);
+    my $db_classes = Thruk::Base::hash_invert($Thruk::Backend::Provider::Mysql::db_classes);
     for my $t (@{$c->stash->{'logcache_class'}}) {
         $t->{'param'} = $t->{'class'} // '';
         $t->{'type'}  = $db_classes->{$t->{'class'}} // $t->{'class'};

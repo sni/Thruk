@@ -115,7 +115,7 @@ sub begin {
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
-    my $available_themes = Thruk::Utils::array2hash($c->config->{'themes'});
+    my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
 
@@ -902,7 +902,7 @@ sub _calculate_section_totals {
             $class = 'DOWN' if $c->stash->{'failed_backends'}->{$pd};
             $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_USER;
             $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
-            $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Utils::list($c->stash->{'param_backend'})});
+            $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Base::list($c->stash->{'param_backend'})});
             $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
             $class = 'UP'   if($backend_detail->{$pd}->{'disabled'} == UP_CONF && $class ne 'DOWN');
             $backend_detail->{$pd}->{'class'} = $class;
@@ -930,7 +930,7 @@ sub _calculate_section_totals {
 sub _disable_backends_by_group {
     my ($c,$disabled_backends) = @_;
 
-    my $contactgroups = Thruk::Utils::array2hash($c->user->{'groups'});
+    my $contactgroups = Thruk::Base::array2hash($c->user->{'groups'});
     for my $peer (@{$c->{'db'}->get_peers()}) {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
@@ -1090,7 +1090,7 @@ sub set_enabled_backends {
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        for my $str (@{Thruk::Utils::list($backends)}) {
+        for my $str (@{Thruk::Base::list($backends)}) {
             for my $b (split(/\s*,\s*/mx, $str)) {
                 # peer key can be name too
                 if($b eq 'ALL') {
@@ -1355,10 +1355,10 @@ sub check_federation_peers {
             my $subpeer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
             $subpeer->{'federation'} = $parent->{'key'};
             $subpeer->{'fed_info'} = {
-                key        => [$parent->{'key'}, @{Thruk::Utils::list($row->{'federation_key'})}],
-                name       => [$parent->{'name'}, @{Thruk::Utils::list($row->{'federation_name'})}],
-                addr       => [$parent->{'addr'}, @{Thruk::Utils::list($row->{'federation_addr'})}],
-                type       => [$parent->{'type'}, @{Thruk::Utils::list($row->{'federation_type'})}],
+                key        => [$parent->{'key'}, @{Thruk::Base::list($row->{'federation_key'})}],
+                name       => [$parent->{'name'}, @{Thruk::Base::list($row->{'federation_name'})}],
+                addr       => [$parent->{'addr'}, @{Thruk::Base::list($row->{'federation_addr'})}],
+                type       => [$parent->{'type'}, @{Thruk::Base::list($row->{'federation_type'})}],
             };
             # inherit disabled configtool from parent
             if($parent->{'peer_config'}->{'configtool'}->{'disable'}) {

@@ -649,7 +649,7 @@ sub set_default_config {
         for my $item (ref $config->{'expand_user_macros'} eq 'ARRAY' ? @{$config->{'expand_user_macros'}} : ($config->{'expand_user_macros'})) {
             next unless $item;
             if($item =~ m/^USER([\d\-]+$)/mx) {
-                my $list = expand_numeric_list($1);
+                my $list = Thruk::Base::expand_numeric_list($1);
                 for my $nr (@{$list}) {
                     push @{$new_expand_user_macros}, 'USER'.$nr;
                 }
@@ -854,7 +854,7 @@ sub _get_git_info {
     my($hash);
 
     # directly on git tag?
-    my($rc, $tag) = _cmd('cd '.$project_root.' && git describe --tag --exact-match 2>&1');
+    my($rc, $tag) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git describe --tag --exact-match 2>&1');
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
@@ -862,17 +862,17 @@ sub _get_git_info {
         return $git_info;
     }
 
-    my $branch = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
+    my(undef, $branch) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$branch) {
         $git_info = '';
         return $git_info;
     }
     if(!$hash) {
-        $hash = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2>/dev/null');
+        (undef, $hash) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2>/dev/null');
     }
 
-    my $commits = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
+    my(undef, $commits) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
 
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
@@ -964,69 +964,6 @@ sub secret_key {
     return($secret_key);
 }
 
-########################################
-
-=head2 expand_numeric_list
-
-  expand_numeric_list($txt, $c)
-
-return expanded list.
-ex.: converts '3,7-9,15' -> [3,7,8,9,15]
-
-=cut
-
-sub expand_numeric_list {
-    my($txt, $c) = @_;
-    my $list = {};
-    return [] unless defined $txt;
-
-    for my $item (@{list($txt)}) {
-        for my $block (split/\s*,\s*/mx, $item) {
-            if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
-                for my $nr ($1..$2) {
-                    $list->{$nr} = 1;
-                }
-            } elsif($block =~ m/^(\d+)$/gmx) {
-                    $list->{$1} = 1;
-            } else {
-                _error("'$block' is not a valid number or range") if defined $c;
-            }
-        }
-    }
-
-    my @arr = sort keys %{$list};
-    return \@arr;
-}
-
-########################################
-
-=head2 array2hash
-
-  array2hash($data, [ $key, [ $key2 ]])
-
-create a hash by key
-
-=cut
-sub array2hash {
-    my($data, $key, $key2) = @_;
-
-    return {} unless defined $data;
-    confess("not an array") unless ref $data eq 'ARRAY';
-
-    my %hash;
-    if(defined $key2) {
-        for my $d (@{$data}) {
-            $hash{$d->{$key}}->{$d->{$key2}} = $d;
-        }
-    } elsif(defined $key) {
-        %hash = map { $_->{$key} => $_ } @{$data};
-    } else {
-        %hash = map { $_ => $_ } @{$data};
-    }
-
-    return \%hash;
-}
-
 ######################################
 
 =head2 get_user
@@ -1073,42 +1010,6 @@ sub get_user {
         push @groups, $stat[5];
     }
     return($uid, \@groups);
-}
-
-########################################
-
-=head2 list
-
-  list($ref)
-
-return list of ref unless it is already a list
-
-=cut
-
-sub list {
-    my($d) = @_;
-    return [] unless defined $d;
-    return $d if ref $d eq 'ARRAY';
-    return([$d]);
-}
-
-######################################
-
-=head2 array_uniq
-
-  array_uniq($array)
-
-return uniq elements of array
-
-=cut
-
-sub array_uniq {
-    my($array) = @_;
-
-    my %seen = ();
-    my @unique = grep { ! $seen{ $_ }++ } @{$array};
-
-    return \@unique;
 }
 
 ########################################
@@ -1479,15 +1380,6 @@ sub _get_orig_cmd_line {
     return($^X, @cmd);
 }
 
-########################################
-sub _cmd {
-    my($cmd) = @_;
-    my $out = `$cmd`;
-    my $rc  = $?>>8;
-    chomp($out);
-    return($rc, $out);
-}
-
 ##############################################
 
 =head2 hostname
@@ -1500,7 +1392,7 @@ return system hostname
 
 sub hostname {
     our $hostname;
-    $hostname = _cmd("hostname") unless $hostname;
+    (undef, $hostname) = Thruk::Utils::IO::cmd("hostname") unless $hostname;
     return($hostname);
 }
 

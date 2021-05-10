@@ -636,7 +636,7 @@ be a predefined hash.
 sub read_resource_file {
     my($files, $macros, $with_comments) = @_;
 
-    $files = Thruk::Utils::list($files);
+    $files = Thruk::Base::list($files);
     return unless scalar @{$files} > 0;
 
     my $comments    = {};
@@ -734,37 +734,6 @@ sub combine_filter {
     return { $operator => $filter };
 }
 
-
-########################################
-
-=head2 array2hash
-
-  array2hash($data, [ $key, [ $key2 ]])
-
-create a hash by key
-
-=cut
-sub array2hash {
-    my($data, $key, $key2) = @_;
-
-    return {} unless defined $data;
-    confess("not an array") unless ref $data eq 'ARRAY';
-
-    my %hash;
-    if(defined $key2) {
-        for my $d (@{$data}) {
-            $hash{$d->{$key}}->{$d->{$key2}} = $d;
-        }
-    } elsif(defined $key) {
-        %hash = map { $_->{$key} => $_ } @{$data};
-    } else {
-        %hash = map { $_ => $_ } @{$data};
-    }
-
-    return \%hash;
-}
-
-
 ########################################
 
 =head2 set_paging_steps
@@ -821,7 +790,7 @@ sub get_exposed_custom_vars {
     confess("no config") unless defined $config;
     my $vars = {};
     for my $src (qw/show_custom_vars expose_custom_vars/) {
-        for my $var (@{list($config->{$src})}) {
+        for my $var (@{Thruk::Base::list($config->{$src})}) {
             next if($skip_wildcards && $var =~ m/\*/mx);
             $vars->{$var} = 1;
         }
@@ -870,7 +839,7 @@ sub get_custom_vars {
     if($add_action_menu && $c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
         for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
-            for my $pattern (@{list($c->config->{'action_menu_apply'}->{$menu})}) {
+            for my $pattern (@{Thruk::Base::list($c->config->{'action_menu_apply'}->{$menu})}) {
                 if(!$prefix && $data->{'description'}) {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
                     ## no critic
@@ -932,7 +901,7 @@ sub set_custom_vars {
     return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
     return unless defined $c->config->{$search};
 
-    my $vars        = Thruk::Utils::list($c->config->{$search});
+    my $vars        = Thruk::Base::list($c->config->{$search});
     my $custom_vars = get_custom_vars($c, $data, $prefix, $add_host);
 
     my $already_added = {};
@@ -1189,136 +1158,6 @@ sub store_global_user_data {
     return 1;
 }
 
-
-########################################
-
-=head2 array_uniq
-
-  array_uniq($array)
-
-return uniq elements of array
-
-=cut
-
-sub array_uniq {
-    my($array) = @_;
-
-    my %seen = ();
-    my @unique = grep { ! $seen{ $_ }++ } @{$array};
-
-    return \@unique;
-}
-
-
-########################################
-
-=head2 array_uniq_obj
-
-  array_uniq_obj($array_of_hashes)
-
-return uniq elements of array, examining all hash keys except peer_key
-
-=cut
-
-sub array_uniq_obj {
-    my($array) = @_;
-
-    my @unique;
-    my %seen;
-    my $x = 0;
-    for my $el (@{$array}) {
-        my $values = [];
-        for my $key (sort keys %{$el}) {
-            if($key =~ /^peer_(key|addr|name)$/mx) {
-                $el->{$key} = list($el->{$key});
-                next;
-            }
-            push @{$values}, ($el->{$key} // "");
-        }
-        my $ident = join(";", @{$values});
-        if(defined $seen{$ident}) {
-            # join peer_* information
-            for my $key (qw/peer_key peer_addr peer_name/) {
-                next unless $el->{$key};
-                push @{$unique[$seen{$ident}]->{$key}}, @{$el->{$key}};
-            }
-            next;
-        }
-        $seen{$ident} = $x;
-        push @unique, $el;
-        $x++;
-    }
-
-    return \@unique;
-}
-
-########################################
-
-=head2 array_uniq_list
-
-  array_uniq_list($array_of_lists)
-
-return uniq elements of array, examining all list members
-
-=cut
-
-sub array_uniq_list {
-    my($array) = @_;
-
-    my @unique;
-    my %seen;
-    for my $el (@{$array}) {
-        my $ident = join(";", @{$el});
-        next if $seen{$ident};
-        $seen{$ident} = 1;
-        push @unique, $el;
-    }
-
-    return \@unique;
-}
-
-########################################
-
-=head2 array_remove
-
-  array_remove($array, $element)
-
-removes element from array
-
-=cut
-
-sub array_remove {
-    my($array, $remove) = @_;
-    my @list;
-    for my $e (@{$array}) {
-        next if $e eq $remove;
-        push @list, $e;
-    }
-    return \@list;
-}
-
-########################################
-
-=head2 hash_invert
-
-  hash_invert($hash)
-
-return hash with keys and values inverted
-
-=cut
-
-sub hash_invert {
-    my($hash) = @_;
-
-    my %invert;
-    for my $k (sort keys %{$hash}) {
-        my $v = $hash->{$k};
-        $invert{$v} = $k;
-    }
-
-    return \%invert;
-}
-
 ########################################
 
 =head2 logs2xls
@@ -1522,7 +1361,7 @@ sub get_graph_url {
     if ($graph_word && ($c->config->{'shown_inline_pnp'} || $force)) {
         for my $type (qw/action_url_expanded notes_url_expanded/) {
             next unless defined $obj->{$type};
-            for my $regex (@{list($graph_word)}) {
+            for my $regex (@{Thruk::Base::list($graph_word)}) {
                 if ($obj->{$type} =~ m|$regex|mx){
                     $action_url = $obj->{$type};
                     last;
@@ -1956,7 +1795,7 @@ sub get_action_url {
     }
 
     if ($graph_word) {
-        for my $regex (@{list($graph_word)}) {
+        for my $regex (@{Thruk::Base::list($graph_word)}) {
             if ($action_url =~ m|$regex|mx){
                 my $new_host = $host;
                 for my $regex (@{$c->config->{'graph_replace'}}) {
@@ -1995,24 +1834,6 @@ sub get_action_url {
     return $new_action_url;
 }
 
-
-########################################
-
-=head2 list
-
-  list($ref)
-
-return list of ref unless it is already a list
-
-=cut
-
-sub list {
-    my($d) = @_;
-    return [] unless defined $d;
-    return $d if ref $d eq 'ARRAY';
-    return([$d]);
-}
-
 ########################################
 
 =head2 extract_list
@@ -2026,7 +1847,7 @@ return list by splitting $var by $sep ($var can be an array or string)
 sub extract_list {
     my($var, $sep) = @_;
     my $result = [];
-    for my $v (@{list($var)}) {
+    for my $v (@{Thruk::Base::list($var)}) {
         for my $v2 (split($sep, $v)) {
             push @{$result}, $v2;
         }
@@ -2987,7 +2808,7 @@ sub log_error_with_details {
     _error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
     _error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
     for my $details (@errorDetails) {
-        for my $line (@{list($details)}) {
+        for my $line (@{Thruk::Base::list($details)}) {
             if(ref $line ne '') {
                 $line = dump_params($line, 0, 0);
             }
@@ -3124,7 +2945,7 @@ sub backends_list_to_hash {
         # expand first
         $backends = backends_hash_to_list($c, $backends);
     }
-    $backends = list($backends);
+    $backends = Thruk::Base::list($backends);
     my $backendslist = [];
     for my $back (@{$backends}) {
         my $name;
@@ -3198,12 +3019,12 @@ sub backends_hash_to_list {
                 }
             }
         }
-        $backends = Thruk::Utils::array_uniq($backends);
+        $backends = Thruk::Base::array_uniq($backends);
         return($backends);
     }
 
     # array format
-    for my $b (@{list($hashlist)}) {
+    for my $b (@{Thruk::Base::list($hashlist)}) {
         if(ref $b eq '') {
             confess("backends uninitialized") unless $c->{'db'};
             my $backend = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
@@ -3573,10 +3394,10 @@ sub command_disabled {
 
     # command disabled should be a hash
     if(ref $c->stash->{'_command_disabled'} ne 'HASH') {
-        $c->stash->{'_command_disabled'} = array2hash(Thruk::Config::expand_numeric_list($c->config->{'command_disabled'}));
+        $c->stash->{'_command_disabled'} = Thruk::Base::array2hash(Thruk::Base::expand_numeric_list($c->config->{'command_disabled'}));
     }
     if(ref $c->stash->{'_command_enabled'} ne 'HASH') {
-        $c->stash->{'_command_enabled'} = array2hash(Thruk::Config::expand_numeric_list($c->config->{'command_enabled'}));
+        $c->stash->{'_command_enabled'} = Thruk::Base::array2hash(Thruk::Base::expand_numeric_list($c->config->{'command_enabled'}));
         if(scalar keys %{$c->stash->{'_command_enabled'}} > 0) {
             # set disabled commands from enabled list
             for my $nr (0..999) {
@@ -3648,7 +3469,7 @@ sub merge_service_dependencies {
             }
         }
     }
-    $depends = array_uniq_list($depends);
+    $depends = Thruk::Base::array_uniq_list($depends);
     return($depends);
 }
 
@@ -3668,7 +3489,7 @@ sub merge_host_dependencies {
         next unless $l;
         push @{$depends}, @{$l};
     }
-    $depends = array_uniq($depends);
+    $depends = Thruk::Base::array_uniq($depends);
     return($depends);
 }
 

@@ -187,7 +187,7 @@ sub _process_json_page {
     if($type eq 'icon') {
         my $objects = [];
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'home'}."/themes";
-        my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos");
+        my $icon_dirs  = Thruk::Base::list($c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos");
         for my $dir (@{$icon_dirs}) {
             $dir =~ s/\/$//gmx;
             next unless -d $dir.'/.';
@@ -241,7 +241,7 @@ sub _process_json_page {
             if(defined $c->req->parameters->{'plugin'} and $c->req->parameters->{'plugin'} ne '') {
                 my $help = $c->{'obj_db'}->get_plugin_help($c, $c->req->parameters->{'plugin'});
                 my @options = $help =~ m/(\-[\w\d]|\-\-[\d\w\-_]+)[=|,|\s|\$]/gmx;
-                push @{$json}, { 'name' => 'arguments', 'data' => Thruk::Utils::array_uniq(\@options) } if scalar @options > 0;
+                push @{$json}, { 'name' => 'arguments', 'data' => Thruk::Base::array_uniq(\@options) } if scalar @options > 0;
             }
         }
         return $c->render(json => $json);
@@ -301,7 +301,7 @@ sub _process_json_page {
             }
         }
         my $json = [{ 'name' => $type.'s',
-                      'data' => [ sort @{Thruk::Utils::array_uniq($members)} ],
+                      'data' => [ sort @{Thruk::Base::array_uniq($members)} ],
                    }];
         return $c->render(json => $json);
     }
@@ -329,7 +329,7 @@ sub _process_json_page {
             }
         }
         my $json = [{ 'name' => $type.'s',
-                      'data' => [ sort @{Thruk::Utils::array_uniq($descriptions)} ],
+                      'data' => [ sort @{Thruk::Base::array_uniq($descriptions)} ],
                    }];
         return $c->render(json => $json);
     }
@@ -339,12 +339,12 @@ sub _process_json_page {
         my $for  = $c->req->parameters->{'obj'};
         my $attr = $c->{'obj_db'}->get_default_keys($for, { no_alias => 1 });
         if($c->stash->{conf_config}->{'extra_custom_var_'.$for}) {
-            for my $extra (@{Thruk::Utils::list($c->stash->{conf_config}->{'extra_custom_var_'.$for})}) {
+            for my $extra (@{Thruk::Base::list($c->stash->{conf_config}->{'extra_custom_var_'.$for})}) {
                 my @extras = split/\s*,\s*/mx, $extra;
                 push @{$attr}, @extras;
             }
         }
-        $attr = [ sort @{Thruk::Utils::array_uniq($attr)} ];
+        $attr = [ sort @{Thruk::Base::array_uniq($attr)} ];
 
         # add existing custom variables from this type
         my $vars = Thruk::Utils::Status::get_custom_variable_names($c, $for, 0);
@@ -399,10 +399,10 @@ sub _process_json_page {
             }
         }
         $json = [ { 'name' => $type.'s',
-                    'data' => [ sort @{Thruk::Utils::array_uniq($objects)} ],
+                    'data' => [ sort @{Thruk::Base::array_uniq($objects)} ],
                   },
                   { 'name' => $type.' templates',
-                    'data' => [ sort @{Thruk::Utils::array_uniq($templates)} ],
+                    'data' => [ sort @{Thruk::Base::array_uniq($templates)} ],
                   },
                 ];
     }
@@ -852,7 +852,7 @@ sub _process_backends_page {
             next unless $backend->{'name'};
             delete $backend->{'id'} if $backend->{'id'} eq '';
 
-            $backend->{'options'}->{'peer'} = Thruk::Utils::list($backend->{'options'}->{'peer'});
+            $backend->{'options'}->{'peer'} = Thruk::Base::list($backend->{'options'}->{'peer'});
 
             for my $p (@{$backend->{'options'}->{'peer'}}) {
                 if($backend->{'type'} eq 'livestatus' and $p =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
@@ -1003,7 +1003,7 @@ sub _process_objects_page {
 
     # get object from params
     $c->stash->{cloned}    = 0;
-    $c->stash->{clone_ref} = Thruk::Utils::list($c->req->parameters->{'clone_ref'} || []);
+    $c->stash->{clone_ref} = Thruk::Base::list($c->req->parameters->{'clone_ref'} || []);
     my $obj = _get_context_object($c);
     if(defined $obj) {
 
@@ -1899,7 +1899,7 @@ sub _set_files_stash {
 
     # file root is empty when there are no files (yet)
     if($files_root eq '') {
-        my $dirs = Thruk::Utils::list($c->{'obj_db'}->{'config'}->{'obj_dir'});
+        my $dirs = Thruk::Base::list($c->{'obj_db'}->{'config'}->{'obj_dir'});
         if(defined $dirs->[0]) {
             $files_root = $dirs->[0];
             $files_root =~ s/\/*$//gmx;
@@ -2006,7 +2006,7 @@ sub _object_delete {
 
     if($c->req->parameters->{'ref'}) {
         my $name        = $obj->get_name();
-        my $refs_delete = Thruk::Utils::list($c->req->parameters->{'ref'});
+        my $refs_delete = Thruk::Base::list($c->req->parameters->{'ref'});
         for my $id (@{$refs_delete}) {
             for my $type (keys %{$refs}) {
                 if($refs->{$type}->{$id}) {
@@ -2838,7 +2838,7 @@ sub _gather_references {
 ##########################################################
 sub _is_extra_file {
     my($filename, $edit_files) = @_;
-    $edit_files = Thruk::Utils::list($edit_files);
+    $edit_files = Thruk::Base::list($edit_files);
     for my $file (@{$edit_files}) {
         # direct match
         if($file eq $filename) {

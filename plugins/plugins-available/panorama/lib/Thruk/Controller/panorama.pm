@@ -289,7 +289,7 @@ sub _js {
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
     } elsif(defined $c->req->parameters->{'maps'}) {
         $open_tabs = [];
-        for my $name (@{Thruk::Utils::list($c->req->parameters->{'maps'})}) {
+        for my $name (@{Thruk::Base::list($c->req->parameters->{'maps'})}) {
             my $dashboard = _get_dashboard_by_name($c, $name);
             if($dashboard) {
                 push @{$open_tabs}, $dashboard->{'nr'};
@@ -314,7 +314,7 @@ sub _js {
         tabbar => $user_data,
     };
     my $shapes = {};
-    my $open_tabs_hash = Thruk::Utils::array2hash($open_tabs);
+    my $open_tabs_hash = Thruk::Base::array2hash($open_tabs);
     for my $nr (@{$open_tabs}) {
         _add_initial_dashboard($c, $nr, $extstate, $shapes, $open_tabs_hash);
     }
@@ -2010,7 +2010,7 @@ sub _task_squares_data {
 
     # apply group by
     if($c->req->parameters->{'groupby'}) {
-        my $groupby = Thruk::Utils::list($c->req->parameters->{'groupby'});
+        my $groupby = Thruk::Base::list($c->req->parameters->{'groupby'});
         if(scalar @{$groupby} == 2 && $groupby->[0] eq 'host_name' && $groupby->[1] eq 'description') {
             # nothing todo
         }
@@ -2353,7 +2353,7 @@ sub _task_show_comments {
         push @{$generalfilter}, Thruk::Utils::combine_filter( '-or', $svc_comments_filter );
     }
 
-    my $types = Thruk::Utils::list($c->req->parameters->{'type'});
+    my $types = Thruk::Base::list($c->req->parameters->{'type'});
     my $commentfilter = [];
     my $typesfilter   = [];
     my $add_downtimes = 0;
@@ -2821,9 +2821,9 @@ sub _task_dashboard_save_states {
 sub _task_dashboard_data {
     my($c) = @_;
     my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
-    $nr = Thruk::Utils::array_uniq(Thruk::Utils::list($nr));
+    $nr = Thruk::Base::array_uniq(Thruk::Base::list($nr));
 
-    my $open_tabs_hash = Thruk::Utils::array2hash(Thruk::Utils::list($c->req->parameters->{'recursive'}));
+    my $open_tabs_hash = Thruk::Base::array2hash(Thruk::Base::list($c->req->parameters->{'recursive'}));
     if(scalar @{$nr} > 1) {
         my $json;
         my $data = {};
@@ -3233,7 +3233,7 @@ sub _summarize_hostgroup_query {
 
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ name => { '=' => $_ }}} keys %{$type_groups}]);
     my $details = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $filter ], columns => [qw/name alias/]);
-    $details = Thruk::Utils::array2hash($details, 'name');
+    $details = Thruk::Base::array2hash($details, 'name');
 
     $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
     my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
@@ -3334,7 +3334,7 @@ sub _summarize_servicegroup_query {
 
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ name => { '=' => $_ }}} keys %{$type_groups}]);
     my $details = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $filter ], columns => [qw/name alias/]);
-    $details = Thruk::Utils::array2hash($details, 'name');
+    $details = Thruk::Base::array2hash($details, 'name');
 
     $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
     my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
@@ -3606,7 +3606,7 @@ sub _get_available_fonts {
                   'message-box', 'monospace', 'sans-serif', 'serif', 'small-caption',
     ];
     if($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'}) {
-        for my $font (@{Thruk::Utils::list($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'})}) {
+        for my $font (@{Thruk::Base::list($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'})}) {
             my @extra = split/\s*,\s*/mx, $font;
             push @{$fonts}, @extra;
         }
