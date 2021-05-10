@@ -4,7 +4,7 @@ use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Encode qw/encode_utf8/;
 use Test::More;
 
-use Thruk::Config 'noautoload'
+use Thruk::Config 'noautoload';
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});

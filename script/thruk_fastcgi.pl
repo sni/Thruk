@@ -11,6 +11,7 @@ use lib 'lib';
 my $pool;
 BEGIN {
     $ENV{'THRUK_MODE'} = 'FASTCGI';
+    use Thruk::Config; # load config automatically
     use Thruk::Backend::Pool;
     $pool = Thruk::Backend::Pool->new();
 }

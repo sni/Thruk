@@ -6,13 +6,12 @@ use Storable qw/ dclone /;
 use Test::More;
 use utf8;
 
-use Monitoring::Config::File ();
 use Thruk::Utils ();
 use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 722;
+    plan tests => 723;
 }
 
 BEGIN {
@@ -27,6 +26,7 @@ if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
     unshift @INC, 'plugins/plugins-available/conf/lib';
 }
 use_ok 'Monitoring::Config';
+use_ok 'Monitoring::Config::File';
 use_ok 'Monitoring::Config::Help';
 use_ok 'Monitoring::Config::Object';
 use_ok 'Thruk::Utils::Conf::Defaults';

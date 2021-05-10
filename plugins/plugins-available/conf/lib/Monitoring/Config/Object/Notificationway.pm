@@ -3,7 +3,7 @@ package Monitoring::Config::Object::Notificationway;
 use warnings;
 use strict;
 
-use Monitoring::Config::Object::Parent ();
+use parent 'Monitoring::Config::Object::Parent';
 
 =head1 NAME
 
