@@ -44,12 +44,8 @@ use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 # TODO:
-#
-# - move $Thruk::Request::c to Thruk::Base or $Thruk::Globals::...
-# - move Thruk->debug to Base
-# - remove includes if already included by others, ex.: T:Utils / T:B:Manager
-# - move Thruk::Backend::Manager::can_use_logcache to T:B:Provider::Base or Config
 # - move functions without module to T:Base
+# - check if a required module is already use'd
 
 my @files;
 my $options = {
@@ -80,14 +76,28 @@ if(scalar @files == 0) {
 }
 
 $ENV{'THRUK_VERBOSE'} = $options->{'verbose'};
+
+## no lint
+my $replacements;
+my @replace = qw/
+    Thruk::Config
+    Thruk
+    Thruk::Utils
+    Thruk::Action::AddDefaults
+/;
+## use lint
+for my $r (reverse @replace) {
+    $replacements->{$r} = _get_used_mods($r, $replacements);
+}
+
 my $rc = 0;
 for my $file (@files) {
-    _parse_file($file);
+    _check_file($file);
 }
 exit($rc);
 
 ##############################################
-sub _parse_file {
+sub _check_file {
     my($file) = @_;
     if(-l $file) {
         _debug("skipped %s, either not readable or symlink", $file);
@@ -113,15 +123,24 @@ sub _new_block {
 ##############################################
 sub _check_modules {
     my($file) = @_;
-    my $content = Thruk::Utils::IO::read($file);
-    if($file !~ m/\.(pl|pm|t)$/mx && $content !~ m|\#\!/usr/bin/perl|mx && $content !~ m|\Qexec perl -x\E|mx) {
-        return;
-    }
-    if($file =~ m|\QMonitoring/Config/Object.pm\E|mx) {
-        _debug("skipped: %s", $file);
-        return;
-    }
     _debug("checking: %s", $file);
+
+    my($blocks, $lastblock) = _parse_file($file);
+
+    # cleanup modules
+    _clean_used($file, $blocks);
+
+    # check for missing modules, module might have been included now
+    _check_missing($file, $blocks, $lastblock);
+
+    return($blocks);
+}
+
+##############################################
+sub _parse_file {
+    my($file) = @_;
+
+    my $content = Thruk::Utils::IO::read($file);
 
     # strip pod
     $content =~ s/^=head.*?^=cut//smgx;
@@ -129,8 +148,8 @@ sub _check_modules {
     # strip no lints
     $content =~ s/^\s*\#\#\ no\ lint.*?^\s*\#\#\ use\ lint//smgx;
 
+    my $blocks = {};
     my $lastblock;
-    my $blocks    = {};
     my $cur_used;
 
     for my $line (split/\n/mx, $content) {
@@ -238,7 +257,7 @@ sub _check_modules {
                 }
 
                 $cur_used->{$mod} = $line;
-                if($arg eq ';' && $mod =~ m/^(Thruk|Monitoring)/mx) {
+                if(($arg eq ';' || $arg eq '();') && $mod =~ m/^(Thruk|Monitoring)/mx) {
                     $cur_used->{$mod} = '';
                     $arg = '();';
                 }
@@ -309,6 +328,7 @@ sub _check_modules {
             next if $m eq 'UNIVERSAL';
             next if $m eq 'Thruk::Utils::Conf::Tools'; # not a module, but collection of tools
             next if $m eq 'Thruk::Utils::PDF';         # virtual module, does not exist
+            next if $m eq 'Thruk::Globals';            # virtual module, does not exist
             if($file =~ m/thruk_format_perl_modules/mx) {
                 next if $m eq 'Thruk';
                 next if $m eq 'Digest';
@@ -322,48 +342,7 @@ sub _check_modules {
             }
         }
     }
-
-    # check again, module might have been included now
-    for my $b (values %{$blocks}) {
-        for my $f (@{$b->{'missing'}}) {
-            my($m, $line) = @{$f};
-            next if $m eq $b->{'package'}.'::Defaults';
-            my $found = 0;
-            for my $b (values %{$blocks}) {
-                if(defined $b->{'modules'}->{$m} || $m eq $b->{'package'}) {
-                    $found = 1;
-                }
-            }
-            if(!$found) {
-                $line =~ s/^\s*//gmx;
-                _log_change("%s: module '%s' missing in includes, referenced in: %s", $file, $m, $line);
-                $lastblock->{'modules'}->{$m} = 1; # fail only once
-                $lastblock->{'used'}->[0]->{$m} = "";
-                if($m eq 'Thruk::Config') {
-                    $lastblock->{'used'}->[0]->{$m} = "use Thruk::Config 'noautoload';";
-                }
-            }
-        }
-
-        for my $m (sort keys %{$b->{'modules'}}) {
-            if($b->{'modules'}->{$m} == 0) {
-                _log_change("%s: module '%s' is not used at all, consider removing it.", $file, $m);
-                for my $u (@{$b->{'used'}}) { delete $u->{$m}; }
-            }
-        }
-        for my $m (qw/warnings strict/) {
-            my $found;
-            for my $u (@{$b->{'used'}}) {
-                $found = 1 if defined $u->{$m};
-            }
-            if(!$found) {
-                _log_change("%s: missing use %s.", $file, $m);
-                $b->{'used'}->[0]->{$m} = '';
-            }
-        }
-    }
-
-    return($blocks);
+    return($blocks, $lastblock);
 }
 
 ##############################################
@@ -533,6 +512,106 @@ sub _log_change {
     _info($txt);
     $rc = 1;
 }
+##############################################
+sub _check_missing {
+    my($file, $blocks, $lastblock) = @_;
+    for my $b (values %{$blocks}) {
+        for my $f (@{$b->{'missing'}}) {
+            my($m, $line) = @{$f};
+            next if $m eq $b->{'package'}.'::Defaults';
+            my $found = 0;
+            for my $b (values %{$blocks}) {
+                if(defined $b->{'modules'}->{$m} || $m eq $b->{'package'}) {
+                    $found = 1;
+                }
+            }
+            if(!$found) {
+                $line =~ s/^\s*//gmx;
+                _log_change("%s: module '%s' missing in includes, referenced in: %s", $file, $m, $line);
+                $lastblock->{'modules'}->{$m} = 1; # fail only once
+                $lastblock->{'used'}->[0]->{$m} = "";
+                if($m eq 'Thruk::Config') {
+                    $lastblock->{'used'}->[0]->{$m} = "use Thruk::Config 'noautoload';";
+                }
+            }
+        }
+
+        for my $m (sort keys %{$b->{'modules'}}) {
+            if($b->{'modules'}->{$m} == 0) {
+                _log_change("%s: module '%s' is not used at all, consider removing it.", $file, $m);
+                for my $u (@{$b->{'used'}}) { delete $u->{$m}; }
+            }
+        }
+        for my $m (qw/warnings strict/) {
+            my $found;
+            for my $u (@{$b->{'used'}}) {
+                $found = 1 if defined $u->{$m};
+            }
+            if(!$found) {
+                _log_change("%s: missing use %s.", $file, $m);
+                $b->{'used'}->[0]->{$m} = '';
+            }
+        }
+    }
+}
+
+##############################################
+sub _clean_used {
+    my($file, $blocks) = @_;
+    for my $name (sort keys %{$blocks}) {
+        next if defined $replacements->{$name};
+        my $b = $blocks->{$name};
+        for my $u (@{$b->{'used'}}) {
+            for my $r (@replace) {
+                if(defined $u->{$r} && $u->{$r} eq '') {
+                    for my $m (sort keys %{$replacements->{$r}}) {
+                        if(defined $u->{$m} && $u->{$m} eq '' && $m ne $r) {
+                            delete $u->{$m};
+                            _log_change("%s: module '%s' removed because of '%s'.", $file, $m, $r);
+                        }
+                        _set_replaced_mods($u, $b->{'modules'}, $replacements, $m);
+                    }
+                }
+            }
+        }
+    }
+}
+
+sub _set_replaced_mods {
+    my($used, $modules, $replacements, $mod) = @_;
+    $modules->{$mod} = 1;
+    if($replacements->{$mod}) {
+        for my $s (sort keys %{$replacements->{$mod}}) {
+            if(!defined $modules->{$s}) {
+                _set_replaced_mods($used, $modules, $replacements, $s);
+            }
+        }
+    }
+}
+
+##############################################
+sub _get_used_mods {
+    my($m, $replacements) = @_;
+    my $file = './lib/'.$m.'.pm';
+    $file =~ s|::|/|gmx;
+    my($blocks) = _parse_file($file);
+    my $used = {};
+    for my $b (values %{$blocks}) {
+        for my $u (@{$b->{'used'}}) {
+            for my $m (sort keys %{$u}) {
+                next unless $m =~ m/^Thruk/mx;
+                $used->{$m} = 1;
+                if($replacements->{$m}) {
+                    for my $s (sort keys %{$replacements->{$m}}) {
+                        $used->{$s} = 1;
+                    }
+                }
+            }
+        }
+    }
+    return($used);
+}
+
 ##############################################
 
 1;
