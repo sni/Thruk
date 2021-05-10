@@ -3,8 +3,8 @@ package Thruk::Utils::Conf::Defaults;
 use warnings;
 use strict;
 
-use Thruk::Authentication::User ();
 use Thruk::Base ();
+use Thruk::Constants ();
 
 =head1 NAME
 
@@ -119,7 +119,7 @@ sub get_cgi_cfg {
         'action_url_target'                         => ['STRING', ''],
         'notes_url_target'                          => ['STRING', ''],
     };
-    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+    for my $key (@{$Thruk::Constants::possible_roles}) {
         $conf->{$key} = ['MULTI_LIST', [], {} ];
         my $groupkey = $key;
         $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;

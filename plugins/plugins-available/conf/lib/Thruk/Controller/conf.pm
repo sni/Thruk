@@ -11,6 +11,9 @@ use Storable qw/dclone/;
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
 use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Backend::Manager ();
+use Thruk::Backend::Peer ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Conf::Defaults ();
@@ -42,7 +45,7 @@ sub index {
     my($c) = @_;
 
     # Safe Defaults required for changing backends
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     #&timing_breakpoint('index start');
 
     my $subcat = $c->req->parameters->{'sub'}    || '';
@@ -480,7 +483,7 @@ sub _process_cgi_page {
         lock_author_names
     /];
     my $authgroupkeys = [];
-    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+    for my $key (@{$Thruk::Constants::possible_roles}) {
         push @{$authkeys}, $key;
         my $groupkey = $key;
         $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
@@ -651,7 +654,7 @@ sub _process_users_page {
             Thruk::Utils::store_user_data($c, $userdata, $name);
         }
         if($send eq 'remove user profile data') {
-            if(!Thruk::Utils::check_for_nasty_filename($name)) {
+            if(!Thruk::Base::check_for_nasty_filename($name)) {
                 unlink($profile_file);
                 Thruk::Utils::set_message( $c, 'success_message', 'profile removed successfully' );
             }
@@ -690,7 +693,7 @@ sub _process_users_page {
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'hex'}        = $hex;
         $c->stash->{'roles'}      = {};
-        my $roles = $Thruk::Authentication::User::possible_roles;
+        my $roles = $Thruk::Constants::possible_roles;
         $c->stash->{'role_keys'}  = $roles;
         for my $role (@{$roles}) {
             $c->stash->{'roles'}->{$role} = 0;
@@ -1173,7 +1176,7 @@ sub _process_objects_page {
             my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
             my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
             my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
-            my $roles = $Thruk::Authentication::User::possible_roles;
+            my $roles = $Thruk::Constants::possible_roles;
             $c->stash->{'hex'}       = $hex;
             $c->stash->{'role_keys'} = $roles;
             for my $role (@{$roles}) {

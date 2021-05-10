@@ -1036,7 +1036,7 @@ sub get_user_data {
     if(!defined $username || $username eq '?') {
         return {};
     }
-    confess("username not allowed") if check_for_nasty_filename($username);
+    confess("username not allowed") if Thruk::Base::check_for_nasty_filename($username);
 
     my $user_data = {};
     my $file = $c->config->{'var_path'}."/users/".$username;
@@ -1066,7 +1066,7 @@ sub store_user_data {
     }
 
     if(defined $username) {
-        confess("username not allowed") if check_for_nasty_filename($username);
+        confess("username not allowed") if Thruk::Base::check_for_nasty_filename($username);
     } else {
         $username = $c->stash->{'remote_user'};
     }
@@ -3393,24 +3393,6 @@ sub code2name {
     my $cv = B::svref_2object ($code);
     my $gv = $cv->GV;
     return($gv->NAME);
-}
-
-##############################################
-
-=head2 check_for_nasty_filename
-
-    check_for_nasty_filename($filename)
-
-returns true if nasty characters have been found and the filename is NOT safe for use
-
-=cut
-sub check_for_nasty_filename {
-    my($name) = @_;
-    confess("no name") unless defined $name;
-    if($name =~ m/(\.\.|\/|\n)/mx) {
-        return(1);
-    }
-    return;
 }
 
 ##############################################

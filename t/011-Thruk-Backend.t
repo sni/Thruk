@@ -22,12 +22,13 @@ sub get_subs {
         if($_ =~ /^\s*sub\s+([\w\d_\_]+)/mx) {
             my $func = $1;
             next if $func =~ m/^_/mx; # skip private subs
-            next if $func eq 'propagate_session_file'; # not required
-            next if $func eq 'rpc';                    # only available on http
-            next if $func eq 'request';                # only available on http
-            next if $func eq 'rest_request';           # only available on http
-            next if $func eq 'check_global_lock';      # only available on mysql
-            next if $func eq 'can_use_logcache';       # use from Base.pm
+            next if $func eq 'propagate_session_file';       # not required
+            next if $func eq 'rpc';                          # only available on http
+            next if $func eq 'request';                      # only available on http
+            next if $func eq 'rest_request';                 # only available on http
+            next if $func eq 'check_global_lock';            # only available on mysql
+            next if $func eq 'can_use_logcache';             # use from Base.pm
+            next if $func eq 'get_logs_start_end_no_filter'; # use from Base.pm
             push @subs, $func;
         }
     }

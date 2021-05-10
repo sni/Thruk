@@ -93,11 +93,11 @@ for my $file (@{$files}) {
   # try to remove some commonly unused modules
   my $content = Thruk::Utils::IO::read($file);
   if(grep/^\QCarp\E$/mx, @{$modules}) {
-    if($content !~ /confess|croak|cluck|longmess/mxi) {
+    if($content !~ /confess|croak|cluck|longmess/mx) {
       fail("using Carp could be removed from $file");
     }
   }
-  if($content =~ m/confess|croak|cluck|longmess/mxi && $content !~ m/use\s+Carp/) {
+  if($content =~ m/confess|croak|cluck|longmess/mx && $content !~ m/use\s+Carp/) {
       fail("$file uses Carp methods but misses use Carp;");
   }
   if(grep/^\Qutf8\E$/mx, @{$modules}) {

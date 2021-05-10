@@ -16,26 +16,6 @@ Thruk::Authentication::User - Authenticate a remote user configured using a cgi.
 
 This module allows you to authenticate the users.
 
-=cut
-
-
-our $possible_roles = [
-    'authorized_for_admin',
-    'authorized_for_all_host_commands',
-    'authorized_for_all_hosts',
-    'authorized_for_all_service_commands',
-    'authorized_for_all_services',
-    'authorized_for_configuration_information',
-    'authorized_for_system_commands',
-    'authorized_for_system_information',
-    'authorized_for_broadcasts',
-    'authorized_for_reports',
-    'authorized_for_business_processes',
-    'authorized_for_panorama_view_media_manager',
-    'authorized_for_public_bookmarks',
-    'authorized_for_read_only',
-];
-
 =head1 METHODS
 
 =head2 new
@@ -62,7 +42,7 @@ sub new {
     $self->{'internal'}          = $internal  ? 1 : 0;
 
     # add roles from cgi_conf
-    for my $role (@{$possible_roles}) {
+    for my $role (@{$Thruk::Constants::possible_roles}) {
         if(defined $c->config->{$role}) {
             my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{$role};
             push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
@@ -230,7 +210,7 @@ sub get_dynamic_roles {
     my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
     my $groups_hash = Thruk::Base::array2hash($groups);
     my $roles_by_group = {};
-    for my $key (@{$possible_roles}) {
+    for my $key (@{$Thruk::Constants::possible_roles}) {
         my $role = $key;
         $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
         if(defined $c->config->{$role}) {
@@ -532,7 +512,7 @@ grant role to user
 sub grant {
     my($self, $role) = @_;
     if($role eq 'admin') {
-        $self->{'roles'} = [@{$possible_roles}];
+        $self->{'roles'} = [@{$Thruk::Constants::possible_roles}];
         # remove read only role
         $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
     } else {

@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
 use Thruk::UserAgent ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
@@ -29,7 +30,7 @@ Thruk Controller.
 sub index {
     my( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     my $type = $c->req->parameters->{'type'} || 0;
 

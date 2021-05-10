@@ -30,7 +30,7 @@ use constant {
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     require Thruk::Utils::Trends;
     Thruk::Utils::Trends->import();

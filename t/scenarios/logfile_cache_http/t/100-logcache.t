@@ -3,7 +3,7 @@ use strict;
 use Data::Dumper;
 use Test::More;
 
-use Thruk::Backend::Manager ();
+use Thruk::Backend::Provider::Base ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -20,7 +20,7 @@ my $c = TestUtils::get_c();
 # wait till our backend is up and has logs
 for my $x (1..90)  {
     my $peer = $c->{'db'}->get_peers(1)->[0];
-    my $res = [Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'})];
+    my $res = [Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'})];
     if($res->[0] && $res->[0] > 0) {
         ok(1, "got log start/end at retry: ".$x);
         last;

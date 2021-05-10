@@ -18,6 +18,7 @@ use Data::Dumper;
 use Encode qw/encode_utf8/;
 use File::Copy qw/move/;
 
+use Thruk::Authentication::User ();
 use Thruk::UserAgent ();
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;

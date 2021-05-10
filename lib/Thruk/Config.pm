@@ -324,7 +324,7 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'thrukversion'              => $base_defaults->{'thrukversion'},
+        'thrukversion'              => $base_config->{'thrukversion'},
         'fileversion'               => $VERSION,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
@@ -411,7 +411,7 @@ sub set_config_env {
     my $configs     = _load_config_files(\@files);
 
     require Storable;
-    my $conf    = Storable::dclone($base_defaults);
+    my $conf    = Storable::dclone($base_config);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
@@ -453,17 +453,17 @@ sub set_default_config {
 
     ###################################################
     # normalize lists / scalars and set defaults
-    for my $key (keys %{$base_defaults}) {
-        $config->{$key} = $base_defaults->{$key} unless exists $config->{$key};
+    for my $key (keys %{$base_config}) {
+        $config->{$key} = $base_config->{$key} unless exists $config->{$key};
 
         # convert lists to scalars if the default is a scalar value
-        if(ref $base_defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
+        if(ref $base_config->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
             my $l = scalar (@{$config->{$key}});
             $config->{$key} = $config->{$key}->[$l-1];
         }
 
         # convert scalars to lists if the default is a list
-        if(ref $base_defaults->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
+        if(ref $base_config->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
             $config->{$key} = [$config->{$key}];
         }
     }

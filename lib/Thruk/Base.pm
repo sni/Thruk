@@ -326,6 +326,24 @@ sub expand_numeric_list {
     return \@arr;
 }
 
+##############################################
+
+=head2 check_for_nasty_filename
+
+    check_for_nasty_filename($filename)
+
+returns true if nasty characters have been found and the filename is NOT safe for use
+
+=cut
+sub check_for_nasty_filename {
+    my($name) = @_;
+    confess("no name") unless defined $name;
+    if($name =~ m/(\.\.|\/|\n)/mx) {
+        return(1);
+    }
+    return;
+}
+
 ###################################################
 
 =head1 SEE ALSO

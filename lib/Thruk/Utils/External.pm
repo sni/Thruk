@@ -19,6 +19,7 @@ use POSIX ":sys_wait_h";
 use Storable qw/store retrieve/;
 use Time::HiRes ();
 
+use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Log qw/:all/;
 

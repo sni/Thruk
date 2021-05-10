@@ -9,6 +9,7 @@ use Time::HiRes qw/gettimeofday/;
 use URI::Escape qw/uri_escape uri_unescape/;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
 use Thruk::Config 'noautoload';
 use Thruk::Controller::error ();
 use Thruk::Request ();

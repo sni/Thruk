@@ -1983,7 +1983,7 @@ sub _import_peer_logfiles {
         }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
-        ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'}, $mend);
+        ($start, $end) = Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'}, $mend);
         if(defined $mend && $start < $mend) {
             $start = $mend;
         }

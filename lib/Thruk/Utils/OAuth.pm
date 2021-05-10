@@ -5,6 +5,7 @@ use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper;
 
+use Thruk::Authentication::User ();
 use Thruk::Controller::login ();
 use Thruk::UserAgent ();
 use Thruk::Utils ();
@@ -38,7 +39,7 @@ sub handle_oauth_login {
     # oauth login flow, step 2
     if($code && $state) {
         _cleanup_oauth_files($auth_folder, 600);
-        if(Thruk::Utils::check_for_nasty_filename($state)) {
+        if(Thruk::Base::check_for_nasty_filename($state)) {
             return $c->detach_error({msg => "oauth state contains invalid characters.", code => 400});
         }
         _debug(sprintf("oauth login step2: code:%s state:%s", $code, $state)) if Thruk::Base->debug;

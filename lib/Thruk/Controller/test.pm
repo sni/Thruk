@@ -3,6 +3,7 @@ package Thruk::Controller::test;
 use warnings;
 use strict;
 
+use Thruk ();
 use Thruk::Action::AddDefaults ();
 
 =head1 NAME
@@ -29,7 +30,7 @@ sub index {
         die("test.cgi is disabled unless in test mode!");
     }
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     $c->stash->{'template'} = 'main.tt';
 

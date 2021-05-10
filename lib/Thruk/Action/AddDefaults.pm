@@ -25,10 +25,6 @@ use Storable qw/dclone/;
 use Template::Stash ();
 use URI::Escape qw/uri_escape/;
 
-use Thruk ();
-use Thruk::Backend::Manager ();
-use Thruk::Backend::Peer ();
-use Thruk::Backend::Pool ();
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
 use Thruk::Constants qw/:add_defaults :peer_states/;
@@ -315,8 +311,8 @@ sub end {
                 }
                 # there will be new scalars from time to time
                 delete $res->{'SCALAR'} if $res->{'SCALAR'} and $res->{'SCALAR'} < 10;
-                if($Thruk::COUNT >= 2 && scalar keys %{$res} > 0) {
-                    _info("request: ".$Thruk::COUNT." (".$c->req->path."):");
+                if($Thruk::Globals::COUNT >= 2 && scalar keys %{$res} > 0) {
+                    _info("request: ".$Thruk::Globals::COUNT." (".$c->req->path."):");
                     for my $key (sort { ($res->{$b} <=> $res->{$a}) } keys %{$res}) {
                         _info(sprintf("+%-10i %30s  -  total %10i\n", $res->{$key}, $key, $c->config->{'arena'}->{$key}));
                     }
@@ -435,7 +431,9 @@ sub add_defaults {
             Thruk::Config::set_default_config($c->config);
             set_configs_stash($c);
             if($backends_changed) {
+                require Thruk::Backend::Pool;
                 my $pool = Thruk::Backend::Pool->new($c->config->{'Thruk::Backend'}->{'peer'});
+                require Thruk::Backend::Manager;
                 $c->{'db'} = Thruk::Backend::Manager->new($pool);
             }
             add_defaults($c, $safe, 1);
@@ -1352,6 +1350,7 @@ sub check_federation_peers {
             delete $subpeerconfig->{'options'}->{'peer'};
             $subpeerconfig->{'options'}->{'peer'} = $row->{'addr'};
             $subpeerconfig->{'options'}->{'remote_name'} = $row->{'name'};
+            require Thruk::Backend::Peer;
             my $subpeer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
             $subpeer->{'federation'} = $parent->{'key'};
             $subpeer->{'fed_info'} = {

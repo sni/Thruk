@@ -39,7 +39,6 @@ BEGIN {
     $tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
 
-use Thruk::Authentication::User ();
 use Thruk::Backend::Pool ();
 use Thruk::Base qw/:all/;
 use Thruk::Config;
@@ -260,7 +259,7 @@ sub _build_app {
 sub _dispatcher {
     my($env) = @_;
 
-    $Thruk::COUNT++;
+    $Thruk::Globals::COUNT++;
     #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
     # connection keep alive breaks IE in development server
     if(Thruk::Base->mode() eq 'DEVSERVER' || Thruk::Base->mode() eq 'TEST') {
@@ -279,7 +278,7 @@ sub _dispatcher {
     local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $c->config->{'slow_page_log_threshold'} > 0;
     my $url = $c->req->url;
     $c->stats->profile(begin => "_dispatcher: ".$url);
-    $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::COUNT));
+    $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s - req: %s', (scalar localtime), $c->config->{'hostname'}, $$, $Thruk::Globals::COUNT));
     $c->cluster->refresh() if $c->config->{'cluster_enabled'};
 
     if(Thruk->verbose) {
@@ -927,7 +926,7 @@ sub finalize_request {
         push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("%.3fs", $c->stash->{'total_render_waited'}) : '-';
         _info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
                                 $$,
-                                $Thruk::COUNT,
+                                $Thruk::Globals::COUNT,
                                 $c->stash->{'memory_end'},
                                 sprintf("%.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
                                 sprintf("%.3f", $elapsed),
@@ -1038,7 +1037,7 @@ sub _load_plugin_class {
 ###################################################
 sub _add_additional_roles {
     my($self) = @_;
-    my $roles = $Thruk::Authentication::User::possible_roles;
+    my $roles = $Thruk::Constants::possible_roles;
     my $config = Thruk->config;
     for my $role (sort keys %{$config}) {
         next unless $role =~ m/authorized_(contactgroup_|)for_/mx;
@@ -1049,7 +1048,7 @@ sub _add_additional_roles {
     # always put readonly role at the end
     @{$roles} = sort grep(!/^authorized_for_read_only$/mx, @{$roles});
     push @{$roles}, "authorized_for_read_only";
-    $Thruk::Authentication::User::possible_roles = $roles;
+    $Thruk::Constants::possible_roles = $roles;
     return;
 }
 

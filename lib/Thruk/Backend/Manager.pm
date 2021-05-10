@@ -1051,53 +1051,6 @@ sub close_logcache_connections {
 
 ########################################
 
-=head2 get_logs_start_end_no_filter
-
-  get_logs_start_end_no_filter($peer)
-
-returns date of first and last log entry
-
-=cut
-sub get_logs_start_end_no_filter {
-    my($peer, $start_at) = @_;
-    my($start, $end);
-
-    my @steps = (86400*365, 86400*30, 86400*7, 86400);
-
-    my $time = time();
-    for my $step (reverse @steps) {
-        (undef, $end) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => time() - $step }}])};
-        last if $end;
-    }
-
-    # fetching logs without any filter is a terrible bad idea
-    # try to determine start date, simply requesting min/max without filter parses all logfiles
-    # so we try a very early date, since requests with an non-existing timerange are super fast
-    # (livestatus has an index on all files with start and end timestamp and only parses the file if it matches)
-
-    $time = $start_at // time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
-    for my $step (@steps) {
-        while($time <= time()) {
-            my($data) = $peer->get_logs(nocache => 1, filter => [{ time => { '<=' => $time }}], columns => [qw/time/], options => { limit => 1 });
-            if($data && $data->[0]) {
-                $time  = $time - $step;
-                last;
-            }
-            $time = $time + $step;
-        }
-        if($time > time()) {
-            $time  = $time - $step;
-        }
-        $start = $time;
-    }
-    my($lstart, undef) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
-    $start = $lstart if $lstart;
-
-    return($start, $end);
-}
-
-########################################
-
 =head2 lmd_stats
 
   lmd_stats($c)

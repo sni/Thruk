@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
 
 =head1 NAME
@@ -30,7 +31,7 @@ outages impacts index page
 sub outages_pbimp_index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
@@ -54,7 +55,7 @@ shinken status index page
 sub shinken_status {
     my ( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
@@ -261,7 +262,7 @@ businessview index page
 sub businessview_index {
     my ( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');

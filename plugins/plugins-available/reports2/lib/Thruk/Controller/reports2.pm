@@ -30,7 +30,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->check_user_roles('authorized_for_reports')) {
         return $c->detach('/error/index/26');

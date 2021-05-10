@@ -27,7 +27,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     $c->stash->{'inject_stats'} = 0;
 

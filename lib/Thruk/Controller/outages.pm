@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
 
 =head1 NAME
@@ -27,7 +28,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     state => 1,

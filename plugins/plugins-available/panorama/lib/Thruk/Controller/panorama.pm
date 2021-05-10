@@ -11,6 +11,7 @@ use IO::Socket::INET ();
 use Module::Load qw/load/;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Broadcast ();
 use Thruk::Utils::External ();
@@ -40,7 +41,7 @@ sub index {
     my ( $c ) = @_;
 
     #&timing_breakpoint('panorama::index');
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'panorama_modules_loaded'}) {
         load URI::Escape, qw/uri_unescape/;

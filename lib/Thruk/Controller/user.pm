@@ -43,7 +43,7 @@ sub index {
         return $c->redirect_to($url);
     }
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
@@ -154,7 +154,7 @@ sub user_page {
     $c->stash->{profile_user}    = $c->user;
     $c->stash->{api_keys}        = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
     $c->stash->{superuser_keys}  = $c->check_user_roles('admin') ? Thruk::Utils::APIKeys::get_superuser_keys($c) : [];
-    $c->stash->{available_roles} = $Thruk::Authentication::User::possible_roles;
+    $c->stash->{available_roles} = $Thruk::Constants::possible_roles;
     $c->stash->{template}        = 'user_profile.tt';
 
     return 1;

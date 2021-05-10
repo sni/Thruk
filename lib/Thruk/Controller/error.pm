@@ -59,7 +59,7 @@ sub index {
     $c->{'errored'} = 1;
 
     Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
     $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
 

@@ -9,6 +9,8 @@ use Time::HiRes ();
 use URI::Escape qw/uri_unescape/;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;

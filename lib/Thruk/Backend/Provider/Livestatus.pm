@@ -8,7 +8,6 @@ use POSIX ();
 use Storable qw/dclone/;
 
 use Monitoring::Livestatus::Class::Lite ();
-use Thruk::Backend::Manager ();
 use Thruk::Utils::IO ();
 
 use base 'Thruk::Backend::Provider::Base';
@@ -1666,7 +1665,7 @@ sub _get_logs_start_end {
     }
     if(!$options{'filter'} || scalar @{$options{'filter'}} == 0) {
         # not a good idea, try to assume earliest date without parsing all logfiles
-        my($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($self);
+        my($start, $end) = Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($self);
         return([$start, $end]);
     }
 

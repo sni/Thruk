@@ -37,6 +37,23 @@ my %peer_states = (
     HIDDEN_LMD_PARENT => 8,
 );
 
+our $possible_roles = [
+    'authorized_for_admin',
+    'authorized_for_all_host_commands',
+    'authorized_for_all_hosts',
+    'authorized_for_all_service_commands',
+    'authorized_for_all_services',
+    'authorized_for_configuration_information',
+    'authorized_for_system_commands',
+    'authorized_for_system_information',
+    'authorized_for_broadcasts',
+    'authorized_for_reports',
+    'authorized_for_business_processes',
+    'authorized_for_panorama_view_media_manager',
+    'authorized_for_public_bookmarks',
+    'authorized_for_read_only',
+];
+
 push @EXPORT_OK, keys(%peer_states);
 constant->import(\%peer_states);
 $EXPORT_TAGS{peer_states} = [keys %peer_states];

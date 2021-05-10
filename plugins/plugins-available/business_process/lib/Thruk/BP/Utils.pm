@@ -282,7 +282,7 @@ sub save_bp_objects {
             if($peer) {
                 $pkey = $peer->peer_key();
                 if(!$c->stash->{'has_proc_info'} || !$c->stash->{'backend_detail'}->{$pkey}) {
-                    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+                    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
                 }
                 if(!defined $c->stash->{'backend_detail'}->{$pkey} || !$c->stash->{'backend_detail'}->{$pkey}->{'running'}) {
                     return(0, "reload skipped, backend offline");

@@ -29,7 +29,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     if(!$c->config->{'avail_modules_loaded'}) {
         load Monitoring::Availability;

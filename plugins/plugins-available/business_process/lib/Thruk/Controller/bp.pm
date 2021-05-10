@@ -6,6 +6,7 @@ use strict;
 use Thruk::Action::AddDefaults ();
 use Thruk::BP::Components::BP ();
 use Thruk::BP::Components::Node ();
+use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
 
 =head1 NAME
@@ -28,7 +29,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'bp_modules_loaded'}) {
         require Data::Dumper;

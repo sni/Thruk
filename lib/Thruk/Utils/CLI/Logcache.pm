@@ -50,6 +50,7 @@ use strict;
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Manager ();
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;

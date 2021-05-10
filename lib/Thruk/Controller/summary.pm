@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
 
@@ -62,7 +63,7 @@ use constant {
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     # set defaults
     $c->stash->{title}            = 'Event Summary';
