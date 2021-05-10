@@ -322,6 +322,9 @@ sub _update_docs {
         sleep(1);
         Thruk::Controller::rest_v1::process_rest_request($c, "/hosts/".$host."/cmd/schedule_forced_host_check", "POST");
         Thruk::Controller::rest_v1::process_rest_request($c, "/services/".$host."/".$service."/cmd/schedule_forced_svc_check", "POST");
+        sleep(1);
+        # run logcache update if applicable
+        Thruk::Controller::rest_v1::process_rest_request($c, "/thruk/logcache/update", "POST") if $c->config->{'logcache'};
     };
 
     my $content    = Thruk::Utils::IO::read($output_file);

@@ -1816,6 +1816,10 @@ lists logcache statistics
 |===========================================
 
 
+=== POST /thruk/logcache/update
+
+runs the logcache delta update.
+
 === GET /thruk/metrics
 
 alias for /thruk/stats
@@ -2075,3 +2079,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+
