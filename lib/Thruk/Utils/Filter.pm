@@ -20,10 +20,7 @@ use Encode qw/decode_utf8/;
 use POSIX ();
 use URI::Escape qw/uri_escape/;
 
-use Thruk::Request ();
 use Thruk::Utils ();
-use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -1278,7 +1275,7 @@ sub peer_name {
     my($row) = @_;
     return($row->{'peer_name'}) if $row->{'peer_name'};
 
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     if($row->{'peer_key'}) {
         if(ref $row->{'peer_key'} eq 'ARRAY') {
             my $names = [];
@@ -1521,7 +1518,7 @@ return list of exposed custom variable names
 =cut
 sub get_exposed_custom_vars {
     my($skip_wildcards) = @_;
-    my $c = $Thruk::Request::c or die("not initialized!");
+    my $c = $Thruk::Globals::c or die("not initialized!");
     return(Thruk::Utils::get_exposed_custom_vars($c->config, $skip_wildcards));
 }
 

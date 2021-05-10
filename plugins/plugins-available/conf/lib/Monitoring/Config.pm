@@ -10,11 +10,9 @@ use Storable qw/dclone/;
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
 use Monitoring::Config::Object::Parent ();
-use Thruk ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -2424,7 +2422,7 @@ sub _remote_do {
                     });
     };
     if($@) {
-        warn($@) if Thruk->mode eq 'TEST';
+        warn($@) if Thruk::Base->mode eq 'TEST';
         my $msg = $@;
         _error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;

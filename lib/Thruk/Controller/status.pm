@@ -4,14 +4,8 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::Menu ();
-use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -828,7 +822,7 @@ sub _process_overview_page {
     $c->stash->{'has_user_columns'}->{'ovr_'} = $user_data->{'columns'}->{'ovr'} ? 1 : 0;
 
     my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
-    Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
+    Thruk::Utils::set_paging_steps($c, Thruk::Base->config->{'group_paging_overview'});
     Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
     return 1;
@@ -904,7 +898,7 @@ sub _process_grid_page {
     }
 
     my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
-    Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_grid'});
+    Thruk::Utils::set_paging_steps($c, Thruk::Base->config->{'group_paging_grid'});
     Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
     $host_data     = undef;
@@ -1032,7 +1026,7 @@ sub _process_summary_page {
     }
 
     my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %{$all_groups})], { 'ASC' => 'name'});
-    Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_summary'});
+    Thruk::Utils::set_paging_steps($c, Thruk::Base->config->{'group_paging_summary'});
     Thruk::Backend::Manager::page_data($c, $sortedgroups);
 
     return 1;

@@ -13,15 +13,11 @@ Utilities Collection for CLI logging
 use warnings;
 use strict;
 use Cwd qw/abs_path/;
-use Log::Log4perl::Appender::Screen ();
-use Log::Log4perl::Layout::PatternLayout ();
 use POSIX ();
 use Time::HiRes ();
 use threads ();
 
 use Thruk::Base ();
-use Thruk::Request ();
-use Thruk::Utils::IO ();
 
 use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc
@@ -123,12 +119,12 @@ sub _log {
     my($lvl, $data, $options) = @_;
     my $line = shift @{$data};
     return unless defined $line;
-    if(Thruk::Base::quiet()) {
+    if(Thruk::Base->quiet()) {
         return if $lvl > WARNING;
     } else {
-        return if($lvl >= DEBUG  && !Thruk::Base::verbose());
-        return if($lvl >= DEBUG2 && !Thruk::Base::debug());
-        return if($lvl >= TRACE  && !Thruk::Base::trace());
+        return if($lvl >= DEBUG  && !Thruk::Base->verbose());
+        return if($lvl >= DEBUG2 && !Thruk::Base->debug());
+        return if($lvl >= TRACE  && !Thruk::Base->trace());
     }
     if(defined $ENV{'THRUK_TEST_NO_LOG'}) {
         $ENV{'THRUK_TEST_NO_LOG'} .= $line."\n";
@@ -219,22 +215,22 @@ sub _audit_log {
 
     if(!$user) {
         $user = '?';
-        if(defined $Thruk::Request::c) {
-            my $c = $Thruk::Request::c;
+        if(defined $Thruk::Globals::c) {
+            my $c = $Thruk::Globals::c;
             $user = $c->stash->{'remote_user'} // '?';
         }
     }
 
     if(!$sessionid) {
-        if(defined $Thruk::Request::c) {
-            my $c = $Thruk::Request::c;
+        if(defined $Thruk::Globals::c) {
+            my $c = $Thruk::Globals::c;
             if($c->{'session'}) {
                 $sessionid = $c->{'session'}->{'hashed_key'};
             }
         }
     }
     if(!$sessionid) {
-        if(Thruk::Base::mode_cli()) {
+        if(Thruk::Base->mode_cli()) {
             $sessionid = 'command line';
         }
     }
@@ -268,7 +264,7 @@ sub _audit_log {
             POSIX::strftime("%Y-%m-%d %H:%M:%S", @localtime),
             $milliseconds,
             ## no lint
-            $Thruk::HOSTNAME,
+            $Thruk::Globals::HOSTNAME,
             ## use lint
             $msg,
         );
@@ -366,7 +362,7 @@ sub _init_logging {
 
     my($log4perl_conf);
     if($config) {
-        if(Thruk::Base::mode() eq 'FASTCGI' || $ENV{'THRUK_JOB_DIR'} || $ENV{'THRUK_CRON'} || $ENV{'THRUK_AUTH_SCRIPT'}) {
+        if(Thruk::Base->mode() eq 'FASTCGI' || $ENV{'THRUK_JOB_DIR'} || $ENV{'THRUK_CRON'} || $ENV{'THRUK_AUTH_SCRIPT'}) {
             if(defined $config->{'log4perl_conf'} && ! -s $config->{'log4perl_conf'} ) {
                 die("\n\n*****\nfailed to load log4perl config: ".$config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
             }
@@ -385,8 +381,8 @@ sub _init_logging {
 
     our $last_log_level;
     our $last_log_target;
-    my $level = Thruk::Base::verbose();
-    if(Thruk::Base::verbose() && (($last_log_level//-1) != $level || ($last_log_target//'') ne $target)) {
+    my $level = Thruk::Base->verbose();
+    if(Thruk::Base->verbose() && (($last_log_level//-1) != $level || ($last_log_target//'') ne $target)) {
         $logger = $log; # would result in deep recursion otherwise
         _debug($target." logging initialized with loglevel ".$level);
         $logger = undef;
@@ -403,11 +399,12 @@ sub _get_file_logger {
     my($log4perl_conf, $config) = @_;
     return($filelogger) if $filelogger;
 
+    require Thruk::Utils::IO;
     $log4perl_conf = Thruk::Utils::IO::read($log4perl_conf);
     if($log4perl_conf =~ m/log4perl\.appender\..*\.filename=(.*)\s*$/mx) {
         $config->{'log4perl_logfile_in_use'} = $1;
     }
-    $log4perl_conf =~ s/\.Threshold=INFO/.Threshold=DEBUG/gmx if Thruk::Base::debug();
+    $log4perl_conf =~ s/\.Threshold=INFO/.Threshold=DEBUG/gmx if Thruk::Base->debug();
     Log::Log4perl::init(\$log4perl_conf);
     $filelogger = Log::Log4perl::get_logger("thruk.log");
     return($filelogger);
@@ -417,6 +414,8 @@ sub _get_file_logger {
 sub _get_screen_logger {
     my($config) = @_;
     return($screenlogger) if $screenlogger;
+
+    require Log::Log4perl::Layout::PatternLayout;
 
     STDERR->autoflush(1);
 
@@ -430,7 +429,7 @@ sub _get_screen_logger {
     }
 
     my $format = '[%d{ABSOLUTE}][%p] %m{chomp}';
-    if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base::debug()) {
+    if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base->debug()) {
         $format = '[%d{ABSOLUTE}]['.($use_color ? '%p{1}' : '%p').'][%-30Z]%U %m{chomp}';
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
@@ -444,7 +443,7 @@ sub _get_screen_logger {
     }
 
     Log::Log4perl::Layout::PatternLayout::add_global_cspec('Q', \&_priority_error_warn_only);
-    if(!Thruk::Base::verbose() || (Thruk::Base::quiet() && !$ENV{'THRUK_CRON'})) {
+    if(!Thruk::Base->verbose() || (Thruk::Base->quiet() && !$ENV{'THRUK_CRON'})) {
         $format = '%Q%m{chomp}';
     }
 
@@ -453,6 +452,7 @@ sub _get_screen_logger {
     $layouts->{'plain_nl'}   = Log::Log4perl::Layout::PatternLayout->new($pre.'%m{chomp}%n'.$post);
     $format = $pre.$format.$post."%n";
 
+    ## no lint
     my $log_conf = "
     log4perl.logger                    = DEBUG, Screen
     log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
@@ -460,6 +460,7 @@ sub _get_screen_logger {
     log4perl.appender.Screen.layout    = Log::Log4perl::Layout::PatternLayout
     log4perl.appender.Screen.layout.ConversionPattern = $format
     ";
+    ## use lint
     Log::Log4perl::init(\$log_conf);
     $screenlogger = Log::Log4perl->get_logger("thruk.screen");
     return($screenlogger);

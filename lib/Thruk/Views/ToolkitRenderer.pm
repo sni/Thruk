@@ -17,7 +17,7 @@ use Template ();
 use Template::Provider ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
-use Thruk ();
+use Thruk::Base ();
 
 my $template_provider_themes;
 my $template_provider_user;
@@ -37,8 +37,8 @@ sub register {
 
     if($app->config->{'thruk_author'}) {
         $settings->{'STRICT'}     = 1;
-        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || Thruk->mode eq 'TEST');
-        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || Thruk->mode eq 'TEST');
+        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || Thruk::Base->mode eq 'TEST');
+        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || Thruk::Base->mode eq 'TEST');
     }
 
     # user template provider

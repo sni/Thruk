@@ -28,9 +28,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
 use Thruk::Utils::CLI ();
-use Thruk::Utils::Filter ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

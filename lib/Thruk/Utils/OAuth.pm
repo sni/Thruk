@@ -5,15 +5,9 @@ use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper;
 
-use Thruk ();
-use Thruk::Authentication::User ();
 use Thruk::Controller::login ();
 use Thruk::UserAgent ();
 use Thruk::Utils ();
-use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::Crypt ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -47,7 +41,7 @@ sub handle_oauth_login {
         if(Thruk::Utils::check_for_nasty_filename($state)) {
             return $c->detach_error({msg => "oauth state contains invalid characters.", code => 400});
         }
-        _debug(sprintf("oauth login step2: code:%s state:%s", $code, $state)) if Thruk->debug;
+        _debug(sprintf("oauth login step2: code:%s state:%s", $code, $state)) if Thruk::Base->debug;
         my $data = Thruk::Utils::IO::json_lock_retrieve($auth_folder."/".$state.".json");
         if(!$data || !defined $data->{'oauth'}) {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?expired&".$referer);
@@ -59,7 +53,7 @@ sub handle_oauth_login {
         }
         my $ua = Thruk::UserAgent->new({}, $c->config);
         $ua->default_header(Accept => "application/json");
-        _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk->debug;
+        _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk::Base->debug;
         my $res = $ua->post($auth->{'token_url'}, {
                                     client_id       => $auth->{'client_id'},
                                     client_secret   => $auth->{'client_secret'},
@@ -80,20 +74,20 @@ sub handle_oauth_login {
         } else {
             $ua->default_header(Authorization => "token ".$token->{"access_token"});
         }
-        _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk->debug;
+        _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk::Base->debug;
         $res = $ua->get($auth->{'api_url'});
         my $userinfo = _get_json($c, $res);
         if(!$userinfo) {
             return $c->detach_error({msg => "cannot fetch oauth user details", code => 500, debug_information => { res => $res }});
         }
-        _debug(sprintf("oauth login step2: got user details:")) if Thruk->debug;
-        _debug(Dumper($userinfo)) if Thruk->debug;
+        _debug(sprintf("oauth login step2: got user details:")) if Thruk::Base->debug;
+        _debug(Dumper($userinfo)) if Thruk::Base->debug;
         # get username from response hash
         my $login = $auth->{'login_field'} ? $userinfo->{$auth->{'login_field'}} : ($userinfo->{'login'} || $userinfo->{'email'});
         if(!defined $login) {
             return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
         }
-        _debug(sprintf("oauth login step2: got user id: %s", $login)) if Thruk->debug;
+        _debug(sprintf("oauth login step2: got user id: %s", $login)) if Thruk::Base->debug;
         $login = Thruk::Authentication::User::transform_username($c->config, $login);
         my $session = Thruk::Utils::CookieAuth::store_session($c->config, undef, {
                                                                     address    => $c->req->address,
@@ -102,7 +96,7 @@ sub handle_oauth_login {
         if($c->config->{'cookie_auth_login_hook'}) {
             Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
         }
-        _debug(sprintf("oauth login step2: login succesful as user: %s", $login)) if Thruk->verbose;
+        _debug(sprintf("oauth login step2: login succesful as user: %s", $login)) if Thruk::Base->verbose;
         return(Thruk::Controller::login::login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain, "oauth: ".$auth->{'login'}));
     }
 
@@ -127,7 +121,7 @@ sub handle_oauth_login {
                                     response_type   => 'code',
                                     redirect_uri    => $loginpage_uri,
                             }, 1, $auth->{'auth_url'}, 1);
-    _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk->verbose;
+    _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk::Base->verbose;
     return $c->redirect_to($oauth_login_url);
 }
 

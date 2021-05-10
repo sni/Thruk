@@ -14,8 +14,6 @@ use warnings;
 use strict;
 
 use Thruk::Utils ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

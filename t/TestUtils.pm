@@ -3,8 +3,6 @@ package TestUtils;
 use warnings;
 use strict;
 
-use Thruk::Request ();
-
 #########################
 # Test Utils
 #########################
@@ -29,9 +27,7 @@ use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
 
 use Thruk ();
-use Thruk::Config;
 use Thruk::UserAgent ();
-use Thruk::Utils::IO ();
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -80,9 +76,9 @@ sub clear {
 sub ctx_request {
     my($url) = @_;
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
-    $Thruk::Request::c = undef;
+    $Thruk::Globals::c = undef;
     my $res = request($url);
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     return($res, $c);
 }
 
@@ -1052,11 +1048,7 @@ sub bail_out_req {
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
-        $error = $1;
-        eval {
-            require URI::Escape;
-            $error = URI::Escape::uri_unescape($error);
-        };
+        $error = URI::Escape::uri_unescape($1);
         diag($error);
         die($0.': '.$res->code.' '.$msg.' - '.$error) if $die;
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);

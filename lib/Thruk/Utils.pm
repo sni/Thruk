@@ -23,11 +23,9 @@ use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 use URI::Escape ();
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
-use Thruk::Request ();
 use Thruk::Utils::Cache ();
 use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Crypt ();
@@ -601,7 +599,7 @@ sub read_ssi {
     my @files = sort grep { /\A${page}-${type}(-.*)?.ssi\z/mx } keys %{ $c->config->{ssi_includes} };
     my $output = "";
     for my $inc (@files) {
-        $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk->verbose;
+        $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk::Base->verbose;
         if( -x "$dir/$inc" ) {
           if(open(my $ph, '-|', "$dir/$inc 2>&1")) {
             while(defined(my $line = <$ph>)) { $output .= $line; }
@@ -617,7 +615,7 @@ sub read_ssi {
         } else {
             _warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
         }
-        $output .= "\n<!-- END SSI $dir/$inc -->\n" if Thruk->verbose;
+        $output .= "\n<!-- END SSI $dir/$inc -->\n" if Thruk::Base->verbose;
     }
     return $output;
 }
@@ -1650,7 +1648,7 @@ sub absolute_url {
     $baseurl = '' unless defined $baseurl;
     confess("empty") if($baseurl eq '' and $link eq '');
 
-    my $c = $Thruk::Request::c or die("not initialized!");
+    my $c = $Thruk::Globals::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
 
     # append trailing slash
@@ -2299,7 +2297,7 @@ check and write pid file if none exists
 sub check_pid_file {
     my($c) = @_;
     my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
-    if(Thruk->mode eq 'FASTCGI' && ! -f $pidfile) {
+    if(Thruk::Base->mode eq 'FASTCGI' && ! -f $pidfile) {
         open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
         Thruk::Utils::IO::close($fh, $pidfile);
@@ -2319,7 +2317,7 @@ restart fcgi process and redirects to given page
 
 sub restart_later {
     my($c, $redirect) = @_;
-    if(Thruk->mode eq 'FASTCGI') {
+    if(Thruk::Base->mode eq 'FASTCGI') {
         my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
         if(-f $pidfile) {
             for my $pid (Thruk::Utils::IO::read_as_list($pidfile)) {
@@ -2881,7 +2879,7 @@ sub check_csrf {
     my($c, $skip_request_method) = @_;
 
     # script generated sessions are ok, we only want to protect browsers here
-    return 1 if Thruk::Base::mode_cli();
+    return 1 if Thruk::Base->mode_cli();
     return 1 if $c->req->header('X-Thruk-Auth-Key');
     return 1 if($c->{'session'} && $c->{'session'}->{'fake'});
 
@@ -3715,6 +3713,71 @@ sub text_table {
     }
     $output .= $separator;
     return($output);
+}
+
+########################################
+
+=head2 get_expanded_start_date
+
+  get_expanded_start_date($c, $blocksize)
+
+returns start of day for expanded duration
+
+=cut
+sub get_expanded_start_date {
+    my($c, $blocksize) = @_;
+    # blocksize is given in days unless specified
+    if($blocksize !~ m/^\d+$/mx) {
+        $blocksize = expand_duration($blocksize) / 86400;
+    }
+    my $ts = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize*86400));
+    return($ts);
+}
+
+########################################
+
+=head2 extract_time_filter
+
+  extract_time_filter($filter)
+
+returns start and end time filter from given query
+
+=cut
+sub extract_time_filter {
+    my($filter) = @_;
+    my($start, $end);
+    if(ref $filter eq 'ARRAY') {
+        for my $f (@{$filter}) {
+            if(ref $f eq 'HASH') {
+                my($s, $e) = Thruk::Utils::extract_time_filter($f);
+                $start = $s if defined $s;
+                $end   = $e if defined $e;
+            }
+        }
+    }
+    if(ref $filter eq 'HASH') {
+        if($filter->{'-and'}) {
+            my($s, $e) = Thruk::Utils::extract_time_filter($filter->{'-and'});
+            $start = $s if defined $s;
+            $end   = $e if defined $e;
+        } else {
+            if($filter->{'time'}) {
+                if(ref $filter->{'time'} eq 'HASH') {
+                    my $op  = (keys %{$filter->{'time'}})[0];
+                    my $val = $filter->{'time'}->{$op};
+                    if($op eq '>' || $op eq '>=') {
+                        $start = $val;
+                        return($start, $end);
+                    }
+                    if($op eq '<' || $op eq '<=') {
+                        $end = $val;
+                        return($start, $end);
+                    }
+                }
+            }
+        }
+    }
+    return($start, $end);
 }
 
 ##############################################

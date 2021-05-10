@@ -15,6 +15,8 @@ use strict;
 use Carp qw/confess/;
 use Exporter 'import';
 
+use Thruk::Utils::Log qw/:all/;
+
 our @EXPORT_OK = qw(mode verbose quiet debug trace config);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 

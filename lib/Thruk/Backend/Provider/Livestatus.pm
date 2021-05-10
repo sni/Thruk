@@ -11,7 +11,7 @@ use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Backend::Manager ();
 use Thruk::Utils::IO ();
 
-use parent 'Thruk::Backend::Provider::Base';
+use base 'Thruk::Backend::Provider::Base';
 
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -830,7 +830,7 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
-    if(Thruk::Backend::Manager::can_use_logcache($self, \%options)) {
+    if(Thruk::Backend::Provider::Base::can_use_logcache($self, \%options)) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }

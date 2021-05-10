@@ -6,7 +6,6 @@ use File::Copy qw/move/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::IO ();
 
 =head1 NAME
 

@@ -18,12 +18,8 @@ use Data::Dumper;
 use Encode qw/encode_utf8/;
 use File::Copy qw/move/;
 
-use Thruk::Authentication::User ();
-use Thruk::Request ();
 use Thruk::UserAgent ();
 use Thruk::Utils ();
-use Thruk::Utils::Crypt ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -328,7 +324,7 @@ sub store_session {
     $data->{'file'}        = $sessionfile;
     $data->{'hashed_key'}  = $hashed_key;
 
-    if(defined $Thruk::Request::c) {
+    if(defined $Thruk::Globals::c) {
         _audit_log("session", "session created", $data->{'username'}, $hashed_key, 0);
     }
 

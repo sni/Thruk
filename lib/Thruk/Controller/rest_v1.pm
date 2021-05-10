@@ -8,18 +8,10 @@ use Module::Load qw/load/;
 use Time::HiRes ();
 use URI::Escape qw/uri_unescape/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Authentication::User ();
-use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -77,7 +69,7 @@ sub index {
     }
 
     # printing audit log breaks json output, ex. for commands
-    local $ENV{'THRUK_QUIET'} = 1 unless Thruk->verbose;
+    local $ENV{'THRUK_QUIET'} = 1 unless Thruk::Base->verbose;
 
     my $format   = 'json';
     my $backends = [];
@@ -396,7 +388,7 @@ sub _fetch {
             delete $c->req->body_parameters->{'CSRFtoken'};
             @matches = map { uri_unescape($_) } @matches;
             $c->stats->profile(comment => $path);
-            my $sub_name = Thruk->verbose ? Thruk::Utils::code2name($function) : '';
+            my $sub_name = Thruk::Base->verbose ? Thruk::Utils::code2name($function) : '';
             if($roles && !$c->user->check_user_roles($roles)) {
                 $data = { 'message' => 'not authorized', 'description' => 'this path requires certain roles: '.join(', ', @{$roles}), code => 403 };
             } else {
@@ -549,7 +541,7 @@ sub _apply_filter {
         }
         $nr++;
     }
-    if(Thruk->debug) {
+    if(Thruk::Base->debug) {
         if(scalar @{$filter} > 0) {
             _debug("applying %s filter", $stage == POST_STATS ? 'post-stats' : 'data');
             _debug($filter);
@@ -582,7 +574,7 @@ sub _apply_filter {
             'failed'      => Cpanel::JSON::XS::true,
         });
     }
-    if(Thruk->trace) {
+    if(Thruk::Base->trace) {
         _trace("filtered data:");
         _trace(\@filtered);
     }

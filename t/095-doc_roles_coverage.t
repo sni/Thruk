@@ -4,6 +4,7 @@ use File::Temp qw/tempfile/;
 use Test::More;
 
 use Thruk::Authentication::User ();
+use Thruk::Base ();
 use Thruk::Config 'noautoload';
 
 use lib('t');
@@ -18,7 +19,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $c     = TestUtils::get_c();
 my $docs  = get_docs();
 my $roles = $Thruk::Authentication::User::possible_roles;
-my $hash  = Thruk::Config::array2hash($roles);
+my $hash  = Thruk::Base::array2hash($roles);
 for my $role (@{$roles}) {
     is($docs->{$role}, 1, "documentation entry for: $role");
 }

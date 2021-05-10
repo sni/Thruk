@@ -10,19 +10,12 @@ use File::Copy qw/move copy/;
 use IO::Socket::INET ();
 use Module::Load qw/load/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Broadcast ();
-use Thruk::Utils::Cache ();
 use Thruk::Utils::External ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Panorama qw/:all/;
-use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -3111,7 +3104,7 @@ sub _get_gearman_stats {
         PeerPort => $port,
     )
     or do {
-        _warn("can't connect to port $port on $host: $!") unless(Thruk->mode eq 'TEST');
+        _warn("can't connect to port $port on $host: $!") unless(Thruk::Base->mode eq 'TEST');
         return $data;
     };
     $handle->autoflush(1);

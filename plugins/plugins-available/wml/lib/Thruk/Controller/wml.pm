@@ -3,7 +3,6 @@ package Thruk::Controller::wml;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
 

@@ -3,10 +3,7 @@ package Thruk::Controller::user;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Authentication::User ();
-use Thruk::Utils ();
 use Thruk::Utils::APIKeys ();
 
 =head1 NAME

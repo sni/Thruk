@@ -31,6 +31,46 @@ sub new {
     return $self;
 }
 
+########################################
+
+=head2 can_use_logcache
+
+  can_use_logcache()
+
+returns true if query can use the logcache
+
+=cut
+sub can_use_logcache {
+    my($provider, $options) = @_;
+    return if $ENV{'THRUK_NOLOGCACHE'};
+    return if $options->{'nocache'};
+    return if !defined $provider->{'_peer'}->{'logcache'};
+    my $c = $Thruk::Globals::c;
+    if($c) {
+        my $bypass = $c->config->{'logcache_auto_bypass'} // 0;
+        if($bypass == 0) {
+            return 1;
+        }
+        require Thruk::Utils;
+        my $cleaned = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
+        my($start, $end) = Thruk::Utils::extract_time_filter($options->{'filter'});
+        return 1 if (!defined $start && !defined $end);
+        if($bypass == 1) {
+            if(($end//$start) >= $cleaned) {
+                return 1;
+            }
+            return;
+        }
+        if($bypass == 2) {
+            if(($start//$end) >= $cleaned) {
+                return 1;
+            }
+            return;
+        }
+    }
+    return 1;
+}
+
 ##########################################################
 
 =head2 reconnect

@@ -44,7 +44,6 @@ use Thruk::Backend::Pool ();
 use Thruk::Base qw/:all/;
 use Thruk::Config;
 use Thruk::Constants ':add_defaults';
-use Thruk::Request ();
 use Thruk::Utils::Cache qw/cache/;
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -66,7 +65,7 @@ returns the psgi code ref
 sub startup {
     my($class, $pool) = @_;
 
-    if(Thruk::Base::mode() ne 'TEST') {
+    if(Thruk::Base->mode() ne 'TEST') {
         $pool = Thruk::Backend::Pool->new() unless $pool;
     }
 
@@ -84,7 +83,7 @@ sub startup {
 
     my $app = $class->_build_app($pool);
 
-    if(Thruk::Base::mode() eq 'DEVSERVER' || Thruk::Base::mode() eq 'TEST') {
+    if(Thruk::Base->mode() eq 'DEVSERVER' || Thruk::Base->mode() eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
                     path         => sub {
@@ -146,7 +145,7 @@ sub _build_app {
     &_set_ssi();
     &_setup_pidfile();
     &_setup_cluster();
-    Thruk::Utils::Log->log() if Thruk::Base::mode() eq 'FASTCGI'; # create log file if it doesn't exist
+    Thruk::Utils::Log->log() if Thruk::Base->mode() eq 'FASTCGI'; # create log file if it doesn't exist
 
     ###################################################
     # create backend manager
@@ -264,7 +263,7 @@ sub _dispatcher {
     $Thruk::COUNT++;
     #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
     # connection keep alive breaks IE in development server
-    if(Thruk::Base::mode() eq 'DEVSERVER' || Thruk::Base::mode() eq 'TEST') {
+    if(Thruk::Base->mode() eq 'DEVSERVER' || Thruk::Base->mode() eq 'TEST') {
         delete $env->{'HTTP_CONNECTION'};
     }
     my $c = Thruk::Context->new($thruk, $env);
@@ -291,8 +290,8 @@ sub _dispatcher {
     ###############################################
     # prepare request
     $c->{'errored'} = 0;
-    local $Thruk::Request::c = $c if $Thruk::Request::c;
-          $Thruk::Request::c = $c;
+    local $Thruk::Globals::c = $c if $Thruk::Globals::c;
+          $Thruk::Globals::c = $c;
 
     eval {
         Thruk::Action::AddDefaults::begin($c);
@@ -380,7 +379,7 @@ sub _dispatcher {
 
     finalize_request($c, $res);
 
-    $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
+    $Thruk::Globals::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
 }
 
@@ -507,15 +506,15 @@ sub _check_exit_reason {
         return;
     }
 
-    if(!defined $Thruk::Request::c) {
+    if(!defined $Thruk::Globals::c) {
         # not processing any request right now -> simply exit
         return;
     }
 
-    my $request_runtime = $now - $Thruk::Request::c->stash->{'time_begin'}->[0];
+    my $request_runtime = $now - $Thruk::Globals::c->stash->{'time_begin'}->[0];
 
     local $| = 1;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     my $url = $c->req->url;
 
     # print stacktrace
@@ -549,7 +548,7 @@ sub _check_exit_reason {
 my $pidfile;
 sub _setup_pidfile {
     $pidfile  = Thruk->config->{'tmp_path'}.'/thruk.pid';
-    if(Thruk::Base::mode() eq 'FASTCGI') {
+    if(Thruk::Base->mode() eq 'FASTCGI') {
         -s $pidfile || unlink(Thruk->config->{'tmp_path'}.'/thruk.cache');
         open(my $fh, '>>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
@@ -562,7 +561,7 @@ sub _setup_pidfile {
 sub _remove_pid {
     return unless $pidfile;
     local $SIG{PIPE} = 'IGNORE';
-    if(Thruk::Base::mode() eq 'FASTCGI') {
+    if(Thruk::Base->mode() eq 'FASTCGI') {
         my $remaining = [];
         if($pidfile && -f $pidfile) {
             my $pids = [split(/\s/mx, Thruk::Utils::IO::read($pidfile))];
@@ -658,7 +657,7 @@ sub _clean_exit {
 # create secret file
 sub _create_secret_file {
     my $config = Thruk->config;
-    return unless (Thruk::Base::mode() eq 'FASTCGI' || Thruk::Base::mode() eq 'DEVSERVER');
+    return unless (Thruk::Base->mode() eq 'FASTCGI' || Thruk::Base->mode() eq 'DEVSERVER');
     my $var_path   = $config->{'var_path'} || die("no var path!");
     my $secretfile = $var_path.'/secret.key';
     return if -s $secretfile;
@@ -698,9 +697,9 @@ sub set_timezone {
 sub _setup_cluster {
     my $config = Thruk->config;
     require Thruk::Utils::Crypt;
-    $Thruk::HOSTNAME      = $config->{'hostname'};
-    $Thruk::NODE_ID_HUMAN = $config->{'hostname'}."-".$config->{'home'}."-".abs_path($ENV{'THRUK_CONFIG'} || '.');
-    $Thruk::NODE_ID       = Thruk::Utils::Crypt::hexdigest($Thruk::NODE_ID_HUMAN);
+    $Thruk::Globals::HOSTNAME      = $config->{'hostname'};
+    $Thruk::Globals::NODE_ID_HUMAN = $config->{'hostname'}."-".$config->{'home'}."-".abs_path($ENV{'THRUK_CONFIG'} || '.');
+    $Thruk::Globals::NODE_ID       = Thruk::Utils::Crypt::hexdigest($Thruk::Globals::NODE_ID_HUMAN);
     return;
 }
 
@@ -945,17 +944,17 @@ sub finalize_request {
     $c->app->{_metrics}->store() if $c->app->{_metrics};
 
     # show deprecations
-    if($Thruk::deprecations_log) {
-        if(Thruk::Base::mode() ne 'TEST' && Thruk::Base::mode() ne 'CLI') {
-            for my $warning (@{$Thruk::deprecations_log}) {
+    if($Thruk::Globals::deprecations_log) {
+        if(Thruk::Base->mode() ne 'TEST' && Thruk::Base->mode() ne 'CLI') {
+            for my $warning (@{$Thruk::Globals::deprecations_log}) {
                 _info($warning);
             }
         }
-        undef $Thruk::deprecations_log;
+        undef $Thruk::Globals::deprecations_log;
     }
 
     # does this process need a restart?
-    if(Thruk::Base::mode() eq 'FASTCGI') {
+    if(Thruk::Base->mode() eq 'FASTCGI') {
         if($c->config->{'max_process_memory'}) {
             Thruk::Utils::check_memory_usage($c);
         }

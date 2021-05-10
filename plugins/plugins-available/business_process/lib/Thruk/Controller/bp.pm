@@ -3,14 +3,10 @@ package Thruk::Controller::bp;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::BP::Components::BP ();
 use Thruk::BP::Components::Node ();
-use Thruk::Backend::Manager ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::Status ();
 
 =head1 NAME
 

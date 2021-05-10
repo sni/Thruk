@@ -9,7 +9,6 @@ use Thruk::Controller::cmd ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::Filter ();
 
 =head1 NAME
 

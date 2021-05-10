@@ -17,10 +17,8 @@ use File::Copy qw/copy move/;
 use POSIX ();
 use Time::HiRes ();
 
-use Thruk ();
 use Thruk::Utils ();
 use Thruk::Utils::External ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 #use Thruk::Timer qw/timing_breakpoint/;
@@ -258,7 +256,7 @@ sub check_initial_start {
     my($c, $config, $background) = @_;
     return if(!$config->{'use_lmd_core'});
     if(!$ENV{'THRUK_JOB_ID'}) {
-        return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
+        return if(Thruk::Base->mode ne 'FASTCGI' && Thruk::Base->mode ne 'DEVSERVER');
     }
 
     return if $config->{'lmd_remote'};
@@ -327,7 +325,7 @@ send sigusr1 to lmd to create a thread dump
 sub create_thread_dump {
     my($config) = @_;
     return if(!$config->{'use_lmd_core'});
-    return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
+    return if(Thruk::Base->mode ne 'FASTCGI' && Thruk::Base->mode ne 'DEVSERVER');
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
     my $pid_file = $lmd_dir.'/pid';
     my $pid = check_pid($pid_file);

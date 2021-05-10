@@ -21,15 +21,11 @@ use HTTP::Request 6.12 ();
 use Module::Load qw/load/;
 use Time::HiRes ();
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Config; # autoload config
-use Thruk::Request ();
 use Thruk::UserAgent ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -72,7 +68,7 @@ sub new {
     ## no critic
     $ENV{'THRUK_MODE'}       = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
-    Thruk->config->{'no_external_job_forks'} = 1;
+    Thruk::Base->config->{'no_external_job_forks'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}   = join(';', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}    = $ENV{'THRUK_VERBOSE'} // $options->{'verbose'} // 0;
@@ -98,7 +94,7 @@ return L<Thruk::Context> context object
 =cut
 sub get_c {
     my($self) = @_;
-    return $Thruk::Request::c if defined $Thruk::Request::c;
+    return $Thruk::Globals::c if defined $Thruk::Globals::c;
     my($c, undef, undef) = _dummy_c();
     confess("internal request failed") unless $c;
     $c->stats->enable(1);
@@ -315,7 +311,7 @@ sub _run {
     }
 
     my $log_timestamps = 0;
-    if($ENV{'THRUK_CRON'} || Thruk->verbose) {
+    if($ENV{'THRUK_CRON'} || Thruk::Base->verbose) {
         $log_timestamps = 1;
     }
 
@@ -342,7 +338,7 @@ sub _run {
     _debug("_run(): building local response done, exit code ".$result->{'rc'});
     my $response = $c->res;
 
-    _debug("".$c->stats->report) if Thruk->verbose >= 3;
+    _debug("".$c->stats->report) if Thruk::Base->verbose >= 3;
 
     # no output?
     if(!defined $result->{'output'}) {
@@ -417,7 +413,7 @@ sub _external_request {
         _debug2(" -> success");
         return($response);
     }
-    if(Thruk->verbose >= 2) {
+    if(Thruk::Base->verbose >= 2) {
         _debug(" -> external request failed:");
         _debug($response->request->as_string());
         _debug(" -> response:");
@@ -452,7 +448,7 @@ sub _internal_request {
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
     my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
-    my $c      = $Thruk::Request::c;
+    my $c      = $Thruk::Globals::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
     _debug2("_internal_request() done");
     return($c, $failed, $res);

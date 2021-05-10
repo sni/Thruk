@@ -199,7 +199,7 @@ sub _initialise_peer {
 
     $self->{'class'}->peer_key($self->{'key'});
     $self->{'addr'} = $self->{'class'}->peer_addr();
-    if($thruk_config->{'backend_debug'} && Thruk->debug) {
+    if($thruk_config->{'backend_debug'} && Thruk::Base->debug) {
         $self->{'class'}->set_verbose(1);
     }
     $self->{'class'}->{'_peer'} = $self;

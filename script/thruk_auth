@@ -45,7 +45,6 @@ use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
 use Thruk::Utils::APIKeys ();
 use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw( _audit_log );
 
 $| = 1;

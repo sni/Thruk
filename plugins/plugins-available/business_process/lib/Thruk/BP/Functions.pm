@@ -6,9 +6,7 @@ use Carp;
 
 use Thruk::BP::Utils ();
 use Thruk::Utils ();
-use Thruk::Utils::Filter ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::Status ();
 
 =head1 NAME
 

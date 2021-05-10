@@ -3,10 +3,7 @@ package Thruk::Controller::minemap;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
-use Thruk::Utils::Status ();
 
 =head1 NAME
 

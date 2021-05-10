@@ -3,9 +3,7 @@ package Thruk::Controller::trends;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
 
 =head1 NAME
 

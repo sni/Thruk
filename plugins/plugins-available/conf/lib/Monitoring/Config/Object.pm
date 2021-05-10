@@ -1,8 +1,10 @@
 package Monitoring::Config::Object;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
+
+## no lint
 use Monitoring::Config::Object::Host;
 use Monitoring::Config::Object::Hostgroup;
 use Monitoring::Config::Object::Hostextinfo;
@@ -37,6 +39,8 @@ use Monitoring::Config::Object::Realm;
 use Monitoring::Config::Object::Businessimpactmodulation;
 use Monitoring::Config::Object::Resultmodulation;
 use Monitoring::Config::Object::Checkmodulation;
+
+## use lint
 
 =head1 NAME
 

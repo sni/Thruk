@@ -27,6 +27,7 @@ sub get_subs {
             next if $func eq 'request';                # only available on http
             next if $func eq 'rest_request';           # only available on http
             next if $func eq 'check_global_lock';      # only available on mysql
+            next if $func eq 'can_use_logcache';       # use from Base.pm
             push @subs, $func;
         }
     }

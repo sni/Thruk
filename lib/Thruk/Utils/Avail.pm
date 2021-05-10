@@ -21,7 +21,6 @@ use Monitoring::Availability ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -643,7 +642,7 @@ sub calculate_availability {
 
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new();
-    if(Thruk->debug) {
+    if(Thruk::Base->debug) {
         $ma->{'verbose'} = 1;
         $ma->{'logger'}  = $c->log;
     }

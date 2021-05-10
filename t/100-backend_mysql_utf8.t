@@ -2,6 +2,8 @@ use warnings;
 use strict;
 use Test::More;
 
+use Thruk::Base ();
+
 plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Set $ENV{TEST_MYSQL} to a test database connection.' unless $ENV{TEST_MYSQL};

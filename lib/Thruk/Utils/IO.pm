@@ -608,7 +608,7 @@ sub cmd {
         return(0, "cmd started in background");
     }
 
-    require Thruk::Utils;
+    require Thruk::Utils unless $no_decode;
 
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {

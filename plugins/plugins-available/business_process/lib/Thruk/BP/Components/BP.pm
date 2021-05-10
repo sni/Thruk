@@ -13,10 +13,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::BP::Components::Node ();
 use Thruk::BP::Utils ();
 use Thruk::Utils ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::Status ();
 
 =head1 NAME
 

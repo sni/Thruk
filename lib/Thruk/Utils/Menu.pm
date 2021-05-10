@@ -15,9 +15,7 @@ use strict;
 use Carp;
 use Storable qw/dclone/;
 
-use Thruk::Request ();
 use Thruk::Utils ();
-use Thruk::Utils::Filter ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -44,7 +42,7 @@ sub read_navigation {
         $file = $ENV{'THRUK_CONFIG'}.'/menu_local.conf' if -e $ENV{'THRUK_CONFIG'}.'/menu_local.conf';
     }
 
-    local $Thruk::Request::c = $c;
+    local $Thruk::Globals::c = $c;
     _renew_navigation($c, $file);
 
     $c->stats->profile(end => "Utils::Menu::read_navigation()");
@@ -263,7 +261,7 @@ returns 1 if the current user has this group
 =cut
 sub has_group {
     my($group, $tmp) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     if(defined $tmp) { $group = $tmp; }  # keep backwards compatible with the old call has_group($c, $group)
 
     if($c->user_exists) {
@@ -284,7 +282,7 @@ returns 1 if the current user has this role
 =cut
 sub has_role {
     my @roles = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     for my $role (@roles) {
         for my $role2 (@{Thruk::Base::list($role)}) {
@@ -306,7 +304,7 @@ returns 1 if the current user has the given name
 =cut
 sub is_user {
     my($name) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     my $user  = $c->stash->{'remote_user'} || '';
     if($user eq $name) {
@@ -498,7 +496,7 @@ returns the current prefered target
 
 =cut
 sub _get_menu_target {
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     return($c->{'_menu_target'} ||= _set_menu_target($c));
 }
@@ -523,7 +521,7 @@ returns the link with prefix
 sub _get_menu_link {
     my($link) = @_;
     return '' unless defined $link;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     my $product = $c->config->{'product_prefix'};
     if($link =~ s|^\Q/thruk/\E||mx || $link =~ s|^\Q$product\E/||mx) {
         return $c->stash->{'url_prefix'}.$link;

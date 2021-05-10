@@ -44,7 +44,6 @@ use File::Temp qw/tempdir/;
 
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

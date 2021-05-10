@@ -15,7 +15,6 @@ use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Encode qw(decode_utf8);
 
-use Thruk::Request ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
@@ -167,7 +166,7 @@ return hints about users screen
 
 =cut
 sub get_screen_data {
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     my $screen = {};
     return $screen unless $c;
     if($c->cookie('thruk_screen')) {

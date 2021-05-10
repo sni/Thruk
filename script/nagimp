@@ -144,7 +144,6 @@ use Thruk::Config 'noautoload';
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Conf::Defaults ();
-use Thruk::Utils::IO ();
 
 ##############################################
 sub new {

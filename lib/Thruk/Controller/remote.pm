@@ -7,7 +7,6 @@ use Data::Dumper;
 use Module::Load qw/load/;
 
 use Thruk::Utils ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

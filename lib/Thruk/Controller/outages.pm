@@ -3,10 +3,7 @@ package Thruk::Controller::outages;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 
 =head1 NAME

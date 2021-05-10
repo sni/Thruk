@@ -3,7 +3,6 @@ package Thruk::Controller::config;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 
 =head1 NAME

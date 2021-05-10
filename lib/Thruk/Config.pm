@@ -36,10 +36,8 @@ my $project_root = home() || confess('could not determine project_root from inc:
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
-    'thrukversion'                          => &get_thruk_version(),
     'fileversion'                           => $VERSION,
     'released'                              => 'April 26, 2021',
-    'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
@@ -294,6 +292,12 @@ $base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $base_defaults->{'thruk_author'} = 1;
 }
+$base_defaults->{'thrukversion'} = &get_thruk_version();
+$base_defaults->{'hostname'}     = &hostname();
+if($config) {
+    $config->{'thrukversion'} = $base_defaults->{'thrukversion'};
+    $config->{'hostname'}     = $base_defaults->{'hostname'};
+}
 
 ######################################
 
@@ -306,8 +310,9 @@ if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
 =cut
 sub import {
     my($package, $args) = @_;
-    $args = array2hash(list($args));
-    $config = set_config_env() if(!$config && !$args->{'noautoload'});
+    return if $config;
+    $args   = Thruk::Base::array2hash(Thruk::Base::list($args));
+    $config = set_config_env() unless $args->{'noautoload'};
     return;
 }
 
@@ -662,7 +667,7 @@ sub set_default_config {
 
     # expand action_menu_items_folder
     my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
-    for my $folder (@{list($action_menu_items_folder)}) {
+    for my $folder (@{Thruk::Base::list($action_menu_items_folder)}) {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*');
         for my $file (@files) {
@@ -854,7 +859,7 @@ sub _get_git_info {
     my($hash);
 
     # directly on git tag?
-    my($rc, $tag) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git describe --tag --exact-match 2>&1');
+    my($rc, $tag) = _cmd('cd '.$project_root.' && git describe --tag --exact-match 2>&1');
     if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
@@ -862,17 +867,17 @@ sub _get_git_info {
         return $git_info;
     }
 
-    my(undef, $branch) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
+    my(undef, $branch) = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$branch) {
         $git_info = '';
         return $git_info;
     }
     if(!$hash) {
-        (undef, $hash) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2>/dev/null');
+        (undef, $hash) = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2>/dev/null');
     }
 
-    my(undef, $commits) = Thruk::Utils::IO::cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
+    my(undef, $commits) = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
 
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
@@ -1016,8 +1021,8 @@ sub get_user {
 # splits lists of comma separated values into list
 sub _comma_separated_list {
     my($val) = @_;
-    $val = [split(/\s*,\s*/mx, join(",", @{list($val)}))];
-    return(array_uniq($val));
+    $val = [split(/\s*,\s*/mx, join(",", @{Thruk::Base::list($val)}))];
+    return(Thruk::Base::array_uniq($val));
 }
 
 ########################################
@@ -1032,7 +1037,7 @@ return parsed config file
 
 sub read_config_file {
     my($files) = @_;
-    $files = list($files);
+    $files = Thruk::Base::list($files);
     my $conf = {};
     for my $f (@{$files}) {
         _debug2("reading config file: ".$f);
@@ -1292,8 +1297,8 @@ sub merge_sub_config {
         if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
             if($key eq 'Thruk::Backend') {
                 # merge all backends
-                for my $peer (@{list($add->{$key})}) {
-                    $config->{$key}->{'peer'} = [ @{list($config->{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
+                for my $peer (@{Thruk::Base::list($add->{$key})}) {
+                    $config->{$key}->{'peer'} = [ @{Thruk::Base::list($config->{$key}->{'peer'})}, @{Thruk::Base::list($peer->{'peer'})} ];
                 }
             }
             elsif($key =~ '^Thruk::Plugin::') {
@@ -1392,7 +1397,7 @@ return system hostname
 
 sub hostname {
     our $hostname;
-    (undef, $hostname) = Thruk::Utils::IO::cmd("hostname") unless $hostname;
+    (undef, $hostname) = _cmd("hostname") unless $hostname;
     return($hostname);
 }
 
@@ -1412,6 +1417,14 @@ sub get_thruk_version {
         return($VERSION.$git_info);
     }
     return($VERSION);
+}
+
+###################################################
+sub _cmd {
+    my($cmd) = @_;
+    my($rc, $out) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
+    chomp($out);
+    return($rc, $out);
 }
 
 ###################################################

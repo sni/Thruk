@@ -19,14 +19,8 @@ use POSIX ":sys_wait_h";
 use Storable qw/store retrieve/;
 use Time::HiRes ();
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
-use Thruk::Utils::Crypt ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Views::ToolkitRenderer ();
 
 ##############################################
 
@@ -214,7 +208,7 @@ sub perl {
         _clean_unstorable_refs($c->stash);
         store(\%{$c->stash}, $dir."/stash");
 
-        if(Thruk->debug) {
+        if(Thruk::Base->debug) {
             open(my $fh, '>', $dir."/stash.dump");
             print $fh Dumper($c->stash);
             CORE::close($fh);
@@ -254,7 +248,7 @@ sub render_page_in_background {
     return if $ENV{'THRUK_JOB_DIR'};
 
     # render page if not running inside a webserver
-    return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
+    return if(Thruk::Base->mode ne 'FASTCGI' && Thruk::Base->mode ne 'DEVSERVER');
 
     return if exists $c->req->parameters->{'noexternalforks'};
     return if $ENV{'THRUK_NO_BACKGROUND_PAGES'};
@@ -319,7 +313,7 @@ sub cancel {
         # is it running on this node?
         if(-s $dir."/hostname") {
             my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
-            if($hosts[0] ne $Thruk::NODE_ID) {
+            if($hosts[0] ne $Thruk::Globals::NODE_ID) {
                 $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::cancel', [$c, $id, $nouser]);
                 return _is_running($c, $dir);
             }
@@ -843,7 +837,7 @@ sub do_parent_stuff {
     # write hostname file
     my $hostfile = $dir."/hostname";
     open($fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
-    print $fh $Thruk::NODE_ID, "\n", $Thruk::HOSTNAME, "\n";
+    print $fh $Thruk::Globals::NODE_ID, "\n", $Thruk::Globals::HOSTNAME, "\n";
     Thruk::Utils::IO::close($fh, $hostfile);
 
     # write start file
@@ -988,7 +982,7 @@ sub _is_running {
     if(-s $dir."/hostname") {
         my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
         my $cluster = $c ? $c->cluster : Thruk->cluster;
-        if($cluster->is_clustered() && $hosts[0] ne $Thruk::NODE_ID) {
+        if($cluster->is_clustered() && $hosts[0] ne $Thruk::Globals::NODE_ID) {
             confess('clustered _is_running requires $c') unless $c;
             my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
             if($res && exists $res->[0]) {

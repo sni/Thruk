@@ -35,7 +35,6 @@ use strict;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Constants qw/:add_defaults :peer_states/;
-use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 our $skip_backends = 1;

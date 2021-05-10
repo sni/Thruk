@@ -194,10 +194,10 @@ sub begin {
         my $product_prefix = $c->config->{'product_prefix'};
         # if changed, adjust thruk_auth as well
         if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
-            _debug($1.".cgi does not require authentication") if Thruk->debug;
+            _debug($1.".cgi does not require authentication") if Thruk::Base->debug;
         } else {
             if(!$c->authenticate(skip_db_access => 1)) {
-                _debug("user authentication failed") if Thruk->verbose;
+                _debug("user authentication failed") if Thruk::Base->verbose;
                 return $c->detach('/error/index/10');
             }
         }
@@ -328,7 +328,7 @@ sub end {
                 }
             }
         };
-        print STDERR $@ if $@ && Thruk->debug;
+        print STDERR $@ if $@ && Thruk::Base->debug;
     }
 
     # figure out intelligent titles
@@ -558,7 +558,7 @@ sub add_defaults {
         if($err) {
             # side.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
-            if(Thruk->debug) {
+            if(Thruk::Base->debug) {
                 _warn("data source error: $err");
             } else {
                 _debug("data source error: $err");
@@ -582,7 +582,7 @@ sub add_defaults {
         if(   !$c->stash->{'last_program_restart'}
            || !$c->user->{'timestamp'}
            || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
-           || Thruk::Base::mode_cli()
+           || Thruk::Base->mode_cli()
            || ($c->user->{'timestamp'} < (time() - 600))
         ) {
             # refresh dynamic roles and groups
@@ -688,7 +688,7 @@ sub add_safe_defaults {
     eval {
         add_defaults($c, ADD_SAFE_DEFAULTS);
     };
-    print STDERR $@ if($@ && Thruk->debug);
+    print STDERR $@ if($@ && Thruk::Base->debug);
     return;
 }
 
@@ -1085,7 +1085,7 @@ sub set_enabled_backends {
     ###############################
     # by args
     if(defined $backends) {
-        _debug('set_enabled_backends() by args') if Thruk->debug;
+        _debug('set_enabled_backends() by args') if Thruk::Base->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1123,7 +1123,7 @@ sub set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        _debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
+        _debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk::Base->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
@@ -1162,7 +1162,7 @@ sub set_enabled_backends {
     ###############################
     # by param
     elsif($num_backends > 1 and defined $backend) {
-        _debug('set_enabled_backends() by param') if Thruk->debug;
+        _debug('set_enabled_backends() by param') if Thruk::Base->debug;
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
@@ -1197,7 +1197,7 @@ sub set_enabled_backends {
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
-        _debug('set_enabled_backends() by cookie') if Thruk->debug;
+        _debug('set_enabled_backends() by cookie') if Thruk::Base->debug;
         for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -1205,7 +1205,7 @@ sub set_enabled_backends {
         }
     }
     elsif(defined $c->{'db'}) {
-        _debug('set_enabled_backends() using defaults') if Thruk->debug;
+        _debug('set_enabled_backends() using defaults') if Thruk::Base->debug;
         my $display_too = 0;
         if(defined $c->req->header('user-agent') and $c->req->header('user-agent') !~ m/thruk/mxi) {
             $display_too = 1;
@@ -1231,7 +1231,7 @@ sub set_enabled_backends {
     if(defined $backends) {
         set_possible_backends($c, $disabled_backends);
     }
-    _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
+    _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk::Base->debug;
     return($disabled_backends, $has_groups);
 }
 

@@ -8,23 +8,15 @@ use Scalar::Util qw/weaken/;
 use Time::HiRes qw/gettimeofday/;
 use URI::Escape qw/uri_escape uri_unescape/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Authentication::User ();
-use Thruk::Base ();
 use Thruk::Config 'noautoload';
 use Thruk::Controller::error ();
 use Thruk::Request ();
 use Thruk::Request::Cookie ();
 use Thruk::Stats ();
-use Thruk::Utils ();
 use Thruk::Utils::APIKeys ();
-use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Views::JSONRenderer ();
-use Thruk::Views::ToolkitRenderer ();
 
 use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
 
@@ -81,7 +73,7 @@ sub new {
         config => $config,
         req    => $req,
         res    => $req->new_response(200),
-        stats  => $Thruk::Request::c ? $Thruk::Request::c->stats : Thruk::Stats->new(),
+        stats  => $Thruk::Globals::c ? $Thruk::Globals::c->stats : Thruk::Stats->new(),
         user   => undef,
         errors => [],
     };
@@ -90,7 +82,7 @@ sub new {
             'memory_begin'  => $memory_begin,
     });
     bless($self, $class);
-    weaken($self->{'app'}) unless Thruk::Base::mode_cli();
+    weaken($self->{'app'}) unless Thruk::Base->mode_cli();
     $self->stats->enable();
 
     # extract non-url encoded q= param from raw body parameters
@@ -327,7 +319,7 @@ sub authenticate {
     return unless $user;
     if(!$internal) {
         if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
-            _debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk->verbose;
+            _debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk::Base->verbose;
             $c->error("account is locked, please contact an administrator");
             return;
         }
@@ -335,11 +327,11 @@ sub authenticate {
     _set_stash_user($c, $user, $auth_src);
     $c->{'user'}->{'original_username'} = $original_username;
     $user->set_dynamic_attributes($c, $options{'skip_db_access'},$roles);
-    _debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk->verbose;
+    _debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk::Base->verbose;
 
     # set session id for all requests
     if(!$sessiondata && !$internal) {
-        if(!Thruk::Base::mode_cli()) {
+        if(!Thruk::Base->mode_cli()) {
             ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
             $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
         }
@@ -453,7 +445,7 @@ sub _request_username {
         $auth_src = "default_user_name";
     }
 
-    elsif(!defined $username && Thruk::Base::mode_cli()) {
+    elsif(!defined $username && Thruk::Base->mode_cli()) {
         $username = $c->config->{'default_cli_user_name'};
         $auth_src = "cli";
     }
@@ -668,7 +660,7 @@ sub sub_request {
     $method = uc($method);
     my $orig_url = $url;
     $c->stats->profile(begin => "sub_request: ".$method." ".$orig_url);
-    local $Thruk::Request::c = $c unless $Thruk::Request::c;
+    local $Thruk::Globals::c = $c unless $Thruk::Globals::c;
 
     $url = '/thruk'.$url;
     my $query;
@@ -712,7 +704,7 @@ sub sub_request {
     $c->stats->profile(end => $routename);
     Thruk::Action::AddDefaults::end($sub_c);
 
-    local $Thruk::Request::c = undef;
+    local $Thruk::Globals::c = undef;
     Thruk::Views::ToolkitRenderer::render_tt($sub_c) unless $sub_c->{'rendered'};
     $c->stats->profile(end => "sub_request: ".$method." ".$orig_url);
     return $sub_c if $rendered;

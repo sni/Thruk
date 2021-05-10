@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Authentication::User ();
-use Thruk::Utils ();
+use Thruk::Base ();
 
 =head1 NAME
 

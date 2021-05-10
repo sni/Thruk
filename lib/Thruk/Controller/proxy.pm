@@ -6,9 +6,7 @@ use HTTP::Request 6.12 ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::UserAgent ();
-use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Views::ToolkitRenderer ();
 
 =head1 NAME
 

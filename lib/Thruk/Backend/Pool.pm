@@ -5,12 +5,10 @@ use strict;
 use Carp qw/confess/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
-use Thruk ();
 use Thruk::Backend::Peer ();
 use Thruk::Backend::Provider::Livestatus ();
-use Thruk::Config;
+use Thruk::Base ();
 use Thruk::Constants qw/:add_defaults :peer_states/;
-use Thruk::Utils ();
 use Thruk::Utils::IO ();
 
 use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
@@ -69,7 +67,7 @@ sub new {
         chdir($ENV{'HOME'});
     }
 
-    my $config       = Thruk->config;
+    my $config       = Thruk::Base->config;
     my $peer_configs = Thruk::Base::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
     my $num_peers    = scalar @{$peer_configs};
     my $pool_size;
@@ -151,8 +149,8 @@ sub new {
             $peer_keys->{$peer->{'key'}} = 1;
             $self->peer_add($peer);
             if($peer_config->{'groups'} && !$config->{'deprecations_shown'}->{'backend_groups'}) {
-                $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
-                push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
+                $Thruk::Globals::deprecations_log = [] unless defined $Thruk::Globals::deprecations_log;
+                push @{$Thruk::Globals::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
         }

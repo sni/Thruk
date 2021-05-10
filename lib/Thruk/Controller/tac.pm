@@ -3,11 +3,8 @@ package Thruk::Controller::tac;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::Status ();
 
 =head1 NAME
 

@@ -66,7 +66,6 @@ use Getopt::Long ();
 
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

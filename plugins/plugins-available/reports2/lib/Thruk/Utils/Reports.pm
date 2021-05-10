@@ -23,15 +23,10 @@ use POSIX ();
 use Storable qw/dclone/;
 use Time::HiRes qw/sleep/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
 use Thruk::Utils::External ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Reports::Render ();
-use Thruk::Utils::Status ();
-use Thruk::Views::ToolkitRenderer ();
 
 ##########################################################
 
@@ -463,7 +458,7 @@ sub generate_report {
     set_waiting($c, $nr, 0);
 
     # don't run report twice per minute
-    if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::NODE_ID)) {
+    if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
         if($options->{'var'}->{'start_time'}) {
             if(POSIX::strftime("%Y-%m-%d %H:%M", localtime($options->{'var'}->{'start_time'})) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
                 return -2;
@@ -474,7 +469,7 @@ sub generate_report {
     set_running($c, $nr, $$, time()) unless $options->{'var'}->{'is_running'} > 0;
 
     # report is already beeing generated, check if the other process is alive
-    if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::NODE_ID)) {
+    if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::Globals::NODE_ID)) {
         # if started by cron, just exit, some other node is doing the report already
         return -2 if $ENV{'THRUK_CRON'};
 
@@ -1025,10 +1020,10 @@ sub set_running {
             $update->{'var'}->{'running_node'} = undef;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         } else {
-            $update->{'var'}->{'running_node'} = $Thruk::NODE_ID;
+            $update->{'var'}->{'running_node'} = $Thruk::Globals::NODE_ID;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => {
                                         is_running   => $val,
-                                        running_node => $Thruk::NODE_ID,
+                                        running_node => $Thruk::Globals::NODE_ID,
                                         is_waiting   => undef,
                                     }}, { pretty => 1, allow_empty => 1 });
         }
@@ -1209,7 +1204,7 @@ sub get_running_reports_number {
     for my $nr (keys %{$index}) {
         if($index->{$nr}->{'is_waiting'}) {
             $waiting++;
-        } elsif(($index->{$nr}->{'is_running'}//0) != 0 && ($index->{$nr}->{'running_node'}//'') eq $Thruk::NODE_ID) {
+        } elsif(($index->{$nr}->{'is_running'}//0) != 0 && ($index->{$nr}->{'running_node'}//'') eq $Thruk::Globals::NODE_ID) {
             $running++;
         }
     }
@@ -1436,8 +1431,8 @@ sub read_report_file {
     }
     if($ENV{'THRUK_REPORT_PARENT'} && $report->{'var'}->{'is_running'} == $ENV{'THRUK_REPORT_PARENT'}) {
         $report->{'var'}->{'is_running'} = $$;
-        $report->{'var'}->{'running_node'} = $Thruk::NODE_ID;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::NODE_ID, is_waiting => undef }}, { pretty => 1, allow_empty => 1 });
+        $report->{'var'}->{'running_node'} = $Thruk::Globals::NODE_ID;
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::Globals::NODE_ID, is_waiting => undef }}, { pretty => 1, allow_empty => 1 });
         $needs_save = 1;
     }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
@@ -1530,7 +1525,7 @@ sub _is_authorized_for_report {
         return 1;
     }
 
-    return 1 if Thruk->mode eq 'CLI';
+    return 1 if Thruk::Base->mode eq 'CLI';
 
     if(defined $c->stash->{'remote_user'}) {
         if(defined $report->{'user'} && $report->{'user'} eq $c->stash->{'remote_user'}) {
@@ -1849,7 +1844,7 @@ sub _report_die {
     $Thruk::Utils::Reports::error = $err;
     set_running($c, $nr, 0, undef, time()) if $nr;
     check_for_waiting_reports($c);
-    if($ENV{'THRUK_CRON'} || (Thruk->mode eq 'CLI')) {
+    if($ENV{'THRUK_CRON'} || (Thruk::Base->mode eq 'CLI')) {
         return;
     }
     return $c->detach('/error/index/13');

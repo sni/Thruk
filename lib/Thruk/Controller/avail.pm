@@ -4,12 +4,9 @@ use warnings;
 use strict;
 use Module::Load qw/load/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
-use Thruk::Utils::Status ();
 
 =head1 NAME
 

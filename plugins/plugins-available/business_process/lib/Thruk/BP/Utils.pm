@@ -6,14 +6,9 @@ use Carp;
 use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::BP::Components::BP ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::Crypt ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

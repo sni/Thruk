@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 
-use Thruk ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
@@ -116,13 +115,13 @@ sub set_dynamic_attributes {
 
     my $data;
     if($skip_db_access) {
-        _debug("using cached user data") if Thruk->verbose;
+        _debug("using cached user data") if Thruk::Base->verbose;
         $data = $c->cache->get->{'users'}->{$username} || {};
         if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
     } else {
-        _debug("fetching user data from livestatus") if Thruk->verbose;
+        _debug("fetching user data from livestatus") if Thruk::Base->verbose;
         $data = $self->get_dynamic_roles($c);
     }
 

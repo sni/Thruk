@@ -26,8 +26,8 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Getopt::Long ();
 use POSIX ();
 
-use Thruk ();
 use Thruk::Backend::Manager ();
+use Thruk::Base ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
@@ -88,7 +88,7 @@ sub _fetch_results {
             }
             elsif($url =~ m/^https?:/mx) {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
-                if(Thruk->verbose >= 2) {
+                if(Thruk::Base->verbose >= 2) {
                     _debug2("request:");
                     _debug2($res->request->as_string());
                     _debug2("response:");

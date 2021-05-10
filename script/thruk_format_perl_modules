@@ -45,7 +45,6 @@ use Thruk::Utils::Log qw/:all/;
 
 # TODO:
 # - move functions without module to T:Base
-# - check if a required module is already use'd
 
 my @files;
 my $options = {
@@ -213,6 +212,18 @@ sub _parse_file {
                 next;
             }
 
+            if($src eq 'require') {
+                for my $b (values %{$blocks}) {
+                    for my $u (@{$b->{'used'}}) {
+                        if(defined $u->{$mod}) {
+                            _error("%s: %s included multiple times", $file, $mod);
+                            $rc = 1;
+                            return;
+                        }
+                    }
+                }
+            }
+
             if(!$lastblock) {
                 $lastblock = _new_block('main');
                 $blocks->{'main'} = $lastblock;
@@ -231,7 +242,7 @@ sub _parse_file {
                 if($mod eq 'lib') {
                     for my $u (@{$lastblock->{'used'}}) {
                         if(defined $u->{$mod} && $u->{$mod} eq $line) {
-                            _error("%s included multiple times", $file, $line);
+                            _error("%s: %s included multiple times", $file, $mod);
                             $rc = 1;
                             return;
                         }

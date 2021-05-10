@@ -14,7 +14,6 @@ use warnings;
 use strict;
 use Carp;
 
-use Thruk ();
 use Thruk::Utils ();
 
 ##############################################
@@ -126,7 +125,7 @@ sub get_auth_filter {
         if($c->check_user_roles('authorized_for_all_hosts')) {
             push @filter, { 'service_description' => undef };
         } else {
-            if(Thruk->config->{'use_strict_host_authorization'}) {
+            if(Thruk::Base->config->{'use_strict_host_authorization'}) {
                 push @filter, '-and ' => [ 'host_contacts'       => { '>=' => $c->user->get('username') },
                                            'service_description' => undef,
                                          ];
@@ -173,7 +172,7 @@ sub get_auth_filter {
                           };
         }
         else {
-            if(Thruk->config->{'use_strict_host_authorization'}) {
+            if(Thruk::Base->config->{'use_strict_host_authorization'}) {
                 $log_filter->{'strict'} = 1;
                 # only allowed for the host itself, not the services
                 push @filter, { -and => [ 'current_host_contacts' => { '>=' => $c->user->get('username') }, { 'service_description' => undef }]};

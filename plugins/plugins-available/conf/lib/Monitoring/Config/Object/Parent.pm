@@ -9,7 +9,7 @@ use Storable qw(dclone);
 use Monitoring::Config ();
 use Monitoring::Config::Help ();
 use Monitoring::Config::Object ();
-use Thruk::Utils ();
+use Thruk::Base ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Crypt ();
 

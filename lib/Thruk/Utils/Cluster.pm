@@ -17,12 +17,9 @@ use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
-use Thruk ();
 use Thruk::Backend::Provider::HTTP ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils ();
-use Thruk::Utils::Crypt ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 my $context;
@@ -125,13 +122,13 @@ sub load_statefile {
     }
 
     $self->{'node'} = $self->_find_my_node();
-    $self->{'node'}->{'node_id'}     = $Thruk::NODE_ID;
-    $self->{'node'}->{'hostname'}    = $Thruk::HOSTNAME;
+    $self->{'node'}->{'node_id'}     = $Thruk::Globals::NODE_ID;
+    $self->{'node'}->{'hostname'}    = $Thruk::Globals::HOSTNAME;
     $self->{'node'}->{'pids'}->{$$}  = $now;
     if(!defined $self->{'node'}->{'maintenance'}) {
         # get status from registerfile
         $registered = Thruk::Utils::IO::json_lock_retrieve($self->{'registerfile'}) unless defined $registered;
-        $self->{'node'}->{'maintenance'} = $registered->{$Thruk::NODE_ID}->{'maintenance'} // 0;
+        $self->{'node'}->{'maintenance'} = $registered->{$Thruk::Globals::NODE_ID}->{'maintenance'} // 0;
     }
 
     # set defaults
@@ -170,7 +167,7 @@ sub register {
     # in dynamic clustering, we need to register ourself so others know about us
     if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
         Thruk::Utils::IO::json_lock_patch($self->{'registerfile'}, {
-            $Thruk::NODE_ID => {
+            $Thruk::Globals::NODE_ID => {
                 node_url    => $self->_build_node_url() || '',
                 last_update => time(),
             },
@@ -190,10 +187,10 @@ removes ourself from the cluster statefile
 =cut
 sub unregister {
     my($self) = @_;
-    return unless $Thruk::NODE_ID;
+    return unless $Thruk::Globals::NODE_ID;
     return unless -s $self->{'localstate'};
     Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
-        $Thruk::NODE_ID => {
+        $Thruk::Globals::NODE_ID => {
             pids => { $$ => undef },
         },
     }, { pretty => 1, allow_empty => 1 });
@@ -216,7 +213,7 @@ sub refresh {
     }
 
     Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
-        $Thruk::NODE_ID => {
+        $Thruk::Globals::NODE_ID => {
             pids => { $$ => $now },
         },
     }, { pretty => 1, allow_empty => 1 });
@@ -290,9 +287,9 @@ sub run_cluster {
         my $digest = Thruk::Utils::Crypt::hexdigest(sprintf("%s-%s-%s", POSIX::strftime("%Y-%m-%d %H:%M", localtime()), $sub, Dumper($args)));
         my $jobs_path = $c->config->{'var_path'}.'/cluster/jobs';
         Thruk::Utils::IO::mkdir_r($jobs_path);
-        Thruk::Utils::IO::write($jobs_path.'/'.$digest, $Thruk::NODE_ID."\n", undef, 1);
+        Thruk::Utils::IO::write($jobs_path.'/'.$digest, $Thruk::Globals::NODE_ID."\n", undef, 1);
         my $lock = [split(/\n/mx, Thruk::Utils::IO::read($jobs_path.'/'.$digest))]->[0];
-        if($lock ne $Thruk::NODE_ID) {
+        if($lock ne $Thruk::Globals::NODE_ID) {
             _debug(sprintf("run_cluster once: %s running on %s already", $sub, $lock));
             return(1);
         }
@@ -419,7 +416,7 @@ sub pong {
     $c->cluster->load_statefile();
     if($c->cluster->{'node'}->{'node_url'} && $c->cluster->{'node'}->{'node_url'} ne $url) {
         Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
-            $Thruk::NODE_ID => {
+            $Thruk::Globals::NODE_ID => {
                 node_url => $url,
             },
         }, { pretty => 1, allow_empty => 1 });
@@ -427,8 +424,8 @@ sub pong {
     }
     return({
         time        => time(),
-        node_id     => $Thruk::NODE_ID,
-        hostname    => $Thruk::HOSTNAME,
+        node_id     => $Thruk::Globals::NODE_ID,
+        hostname    => $Thruk::Globals::HOSTNAME,
         version     => $c->config->{'thrukversion'},
         maintenance => $c->cluster->{'node'}->{'maintenance'},
     });
@@ -445,13 +442,13 @@ returns true if this us
 =cut
 sub is_it_me {
     my($self, $n) = @_;
-    if(ref $n eq 'HASH' && $n->{'node_id'} && $n->{'node_id'} eq $Thruk::NODE_ID) {
+    if(ref $n eq 'HASH' && $n->{'node_id'} && $n->{'node_id'} eq $Thruk::Globals::NODE_ID) {
         return(1);
     }
-    if($n eq $Thruk::NODE_ID) {
+    if($n eq $Thruk::Globals::NODE_ID) {
         return(1);
     }
-    if($self->{'nodes_by_url'}->{$n} && $self->{'nodes_by_url'}->{$n}->{'key'} eq $Thruk::NODE_ID) {
+    if($self->{'nodes_by_url'}->{$n} && $self->{'nodes_by_url'}->{$n}->{'key'} eq $Thruk::Globals::NODE_ID) {
         return(1);
     }
     return(0);
@@ -512,9 +509,9 @@ sub heartbeat {
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
         next if(defined $node_id && $n->{'node_id'} ne $node_id);
-        _debug(sprintf("sending heartbeat: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("sending heartbeat: %s -> %s", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
         $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
-        _debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
     return($nodes);
 }
@@ -522,7 +519,7 @@ sub heartbeat {
 ##########################################################
 sub _build_node_url {
     my($self) = @_;
-    my $hostname = $Thruk::HOSTNAME;
+    my $hostname = $Thruk::Globals::HOSTNAME;
     my $url;
     if(scalar @{$self->{'config'}->{'cluster_nodes'}} == 1) {
         $url = $self->{'config'}->{'cluster_nodes'}->[0];
@@ -570,7 +567,7 @@ sub _cleanup_jobs_folder {
 ##########################################################
 sub _find_my_node {
     my($self) = @_;
-    my $node = $self->{'nodes_by_id'}->{$Thruk::NODE_ID};
+    my $node = $self->{'nodes_by_id'}->{$Thruk::Globals::NODE_ID};
     return $node if $node;
     my $my_url = $self->_build_node_url() || '';
     return({}) unless $my_url;

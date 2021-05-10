@@ -7,13 +7,7 @@ use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use POSIX ();
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
-use Thruk::Request ();
-use Thruk::Utils ();
-use Thruk::Utils::DateTime ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 use parent 'Thruk::Backend::Provider::Base';
@@ -426,11 +420,11 @@ sub get_logs {
     }
 
     # check compact timerange and set a warning flag
-    my $c =$Thruk::Request::c;
+    my $c =$Thruk::Globals::c;
     if($c) {
-        my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
+        my $compact_start_data = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
         # get time filter
-        my($start, $end) = Thruk::Backend::Manager::extract_time_filter($options{'filter'});
+        my($start, $end) = Thruk::Utils::extract_time_filter($options{'filter'});
         if($start && $start < $compact_start_data) {
             $c->stash->{'logs_from_compacted_zone'} = 1;
         }
@@ -470,7 +464,7 @@ sub get_logs {
     }
 
     # add performance related debug output
-    if(Thruk->verbose >= 3) {
+    if(Thruk::Base->verbose >= 3) {
         _trace($sql);
 
         _trace("EXPLAIN:");
@@ -1985,7 +1979,7 @@ sub _import_peer_logfiles {
         my $mend;
         if($mode eq 'import') {
             # it does not make sense to import more than we would clean immediatly again
-            $mend = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
+            $mend = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
         }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
@@ -2021,7 +2015,7 @@ sub _import_peer_logfiles {
         $dbh->do('SET unique_checks = 0');
         $dbh->do('ALTER TABLE `'.$prefix.'_log` DISABLE KEYS');
     }
-    my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
+    my $compact_start_data = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
     my $alertstore = {};
     my $last_day = "";
 

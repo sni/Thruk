@@ -5,9 +5,7 @@ use strict;
 use Cpanel::JSON::XS;
 use Exporter 'import';
 
-use Thruk::Backend::Manager ();
 use Thruk::Utils ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Panorama::Scripted ();
 

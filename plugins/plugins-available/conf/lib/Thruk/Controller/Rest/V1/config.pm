@@ -7,8 +7,8 @@ use Storable qw/dclone/;
 use Time::HiRes ();
 
 use Monitoring::Config::Object ();
+use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
-use Thruk::Utils ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 

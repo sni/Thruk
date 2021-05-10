@@ -10,23 +10,14 @@ use Storable qw/dclone/;
 
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
-use Thruk ();
 use Thruk::Action::AddDefaults ();
-use Thruk::Authentication::User ();
-use Thruk::Backend::Manager ();
-use Thruk::Backend::Peer ();
-use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Conf::Defaults ();
-use Thruk::Utils::Crypt ();
 use Thruk::Utils::External ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Plugin ();
 use Thruk::Utils::References ();
-use Thruk::Utils::Status ();
 
 #use Thruk::Timer qw/timing_breakpoint/;
 
