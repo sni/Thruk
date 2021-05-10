@@ -8,6 +8,7 @@ use utf8;
 
 use Thruk::Config 'noautoload';
 use Thruk::Context ();
+use Thruk::Utils::Encode ();
 use Thruk::Utils::Filter ();
 
 BEGIN {
@@ -220,25 +221,25 @@ is($replaced, $expected, 'macro replacement with empty args string');
 # utf8 encoding
 my $teststring = 'test';
 my $encoded    = $teststring;
-$encoded       = Thruk::Utils::ensure_utf8($encoded);
+$encoded       = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, $teststring, 'ensure utf8 test');
 ok(is_utf8($encoded), 'is_utf8 test');
 
 $teststring = 'testä';
 $encoded    = $teststring;
-$encoded    = Thruk::Utils::ensure_utf8($encoded);
+$encoded    = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, 'test'.chr(228), 'ensure utf8 testae');
 ok(is_utf8($encoded), 'is_utf8 testae');
 
 $teststring ='test€';
 $encoded    = $teststring;
-$encoded    = Thruk::Utils::ensure_utf8($encoded);
+$encoded    = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, "test\x{20ac}", 'ensure utf8 testeuro');
 ok(is_utf8($encoded), 'is_utf8 testeuro');
 
 $teststring = "test\x{20ac}";
 $encoded    = $teststring;
-$encoded    = Thruk::Utils::ensure_utf8($encoded);
+$encoded    = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, "test\x{20ac}", 'ensure utf8 test20ac');
 ok(is_utf8($encoded), 'is_utf8 test20ac');
 

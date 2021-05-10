@@ -2163,7 +2163,7 @@ sub _import_logcache_from_file {
             open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
             while(my $line = <$fh>) {
                 chomp($line);
-                &Thruk::Utils::decode_any($line);
+                &Thruk::Utils::Encode::decode_any($line);
                 my $original_line = $line;
                 my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
                 next unless($l && $l->{'time'});

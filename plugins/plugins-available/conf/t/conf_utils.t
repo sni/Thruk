@@ -406,7 +406,7 @@ for my $mergedir (qw/1/) {
     $file->set_backup();
     is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
     is(scalar @{$file->{'objects'}}, 2, "number of objects");
-    $file->update_objects_from_text(Thruk::Utils::decode_any(Thruk::Utils::IO::read("./t/xt/conf/data/merges/".$mergedir."/b.cfg")));
+    $file->update_objects_from_text(Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read("./t/xt/conf/data/merges/".$mergedir."/b.cfg")));
     is(scalar @{$file->{'parse_errors'}}, 0, "number of errors") or diag(Dumper($file->{'parse_errors'}));
     is(scalar @{$file->{'objects'}}, 2, "number of objects");
     $file->{'path'} = './t/xt/conf/data/merges/'.$mergedir.'/c.cfg';

@@ -186,7 +186,7 @@ sub request_url {
             result  => $response->decoded_content || $response->content,
             headers => {},
         };
-        $result->{'result'} = Thruk::Utils::decode_any($result->{'result'});
+        $result->{'result'} = Thruk::Utils::Encode::decode_any($result->{'result'});
         $result->{'result'} =~ s/^\x{FEFF}//mx; # remove BOM
         for my $field ($response->header_field_names()) {
             $result->{'headers'}->{$field} = $response->header($field);
@@ -348,7 +348,7 @@ sub _run {
     # fix encoding
     my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
     if($content_type =~ /^text/mx) {
-        $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
+        $result->{'output'} = encode_utf8(Thruk::Utils::Encode::decode_any($result->{'output'}));
     }
 
     local $ENV{'THRUK_QUIET'} = undef  if($ENV{'THRUK_CRON'} && ! $self->{'opt'}->{'quiet'});
@@ -871,7 +871,7 @@ sub _cmd_configtool {
         # changed and new files
         for my $f (@{$changed}) {
             my($path,$content, $mtime) = @{$f};
-            $content = encode_utf8(Thruk::Utils::decode_any($content));
+            $content = encode_utf8(Thruk::Utils::Encode::decode_any($content));
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             my $saved;

@@ -76,8 +76,8 @@ sub external_authentication {
                     $ua->default_header( $header => $login->{$header} );
                 }
             } else {
-                $login = encode_utf8(Thruk::Utils::ensure_utf8($login));
-                $pass  = encode_utf8(Thruk::Utils::ensure_utf8($pass));
+                $login = encode_utf8(Thruk::Utils::Encode::ensure_utf8($login));
+                $pass  = encode_utf8(Thruk::Utils::Encode::ensure_utf8($pass));
                 $ua->credentials( $netloc, $realm, $login, $pass );
             }
             $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;

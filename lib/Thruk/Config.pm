@@ -3,11 +3,8 @@ package Thruk::Config;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Class::Inspector ();
 use Cwd ();
-use Data::Dumper qw/Dumper/;
 use POSIX ();
-use Storable ();
 
 use Thruk::Base ();
 use Thruk::Utils::IO ();
@@ -32,7 +29,7 @@ Generic Access to Thruks Config
 our $VERSION = '2.42.2';
 
 our $config;
-my $project_root = home() || confess('could not determine project_root from inc: '.Dumper(\%INC));
+my $project_root = home() || confess('could not determine project_root from inc.');
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
@@ -292,12 +289,6 @@ $base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK
 if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $base_defaults->{'thruk_author'} = 1;
 }
-$base_defaults->{'thrukversion'} = &get_thruk_version();
-$base_defaults->{'hostname'}     = &hostname();
-if($config) {
-    $config->{'thrukversion'} = $base_defaults->{'thrukversion'};
-    $config->{'hostname'}     = $base_defaults->{'hostname'};
-}
 
 ######################################
 
@@ -325,6 +316,7 @@ sub import {
 =cut
 sub get_default_stash {
     my($c, $pre) = @_;
+    my $base_config = get_base_config();
     my $stash = {
         'total_backend_waited'      => 0,
         'total_render_waited'       => 0,
@@ -415,7 +407,10 @@ return basic config hash and sets environment
 sub set_config_env {
     my @files = @_;
 
-    my $configs = _load_config_files(\@files);
+    my $base_config = get_base_config();
+    my $configs     = _load_config_files(\@files);
+
+    require Storable;
     my $conf    = Storable::dclone($base_defaults);
 
     ###################################################
@@ -453,6 +448,8 @@ return basic config hash and sets environment, but does not read config again
 =cut
 sub set_default_config {
     my($config) = @_;
+
+    my $base_config = get_base_config();
 
     ###################################################
     # normalize lists / scalars and set defaults
@@ -771,6 +768,14 @@ return base config
 
 =cut
 sub get_base_config {
+    if(!defined $base_defaults->{'thrukversion'}) {
+        $base_defaults->{'thrukversion'} = &get_thruk_version();
+        $config->{'thrukversion'}        = $base_defaults->{'thrukversion'} if $config;
+    }
+    if(!defined $base_defaults->{'hostname'}) {
+        $base_defaults->{'hostname'} = &hostname();
+        $config->{'hostname'}        = $base_defaults->{'hostname'} if $config;
+    }
     return($base_defaults);
 }
 
@@ -830,6 +835,7 @@ sub get_toolkit_config {
     };
 
     # export filter functions
+    require Class::Inspector;
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
         $view_tt_settings->{'PRE_DEFINE'}->{$s} = \&{'Thruk::Utils::Filter::'.$s};
     }
@@ -1309,10 +1315,16 @@ sub merge_sub_config {
                     }
                     $add->{$key} = $hash;
                 }
-                if(ref $add->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}})); }
+                if(ref $add->{$key} ne 'HASH') {
+                    require Data::Dumper;
+                    confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             } else {
-                if(ref $add->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}})); }
+                if(ref $add->{$key} ne 'HASH') {
+                    require Data::Dumper;
+                    confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             }
         } else {

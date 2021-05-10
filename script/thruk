@@ -35,8 +35,6 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 
-use Thruk::Config 'noautoload';
-
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
     #&timing_breakpoint('./script/thruk');
@@ -90,6 +88,7 @@ if($options->{'help'}) {
     exit(3);
 }
 if($options->{'version'}) {
+    require Thruk::Config;
     print "thruk v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
 }
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
@@ -121,6 +120,7 @@ exit $cli->_run();
 
 ##############################################
 sub _print_modules {
+    require Thruk::Config;
     require Thruk::Utils;
     # read the config which puts our loaded addons into @INC and those cli modules will be found as well
     Thruk::Config::set_config_env();

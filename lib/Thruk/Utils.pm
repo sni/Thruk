@@ -15,7 +15,6 @@ use strict;
 use Carp qw/confess longmess/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Monday_of_Week Week_of_Year Today Add_Delta_Days/;
-use Encode qw/encode_utf8 decode is_utf8/;
 use File::Copy qw/copy/;
 use File::Temp qw/tempfile/;
 use MIME::Base64 ();
@@ -30,6 +29,7 @@ use Thruk::Utils::Cache ();
 use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Crypt ();
 use Thruk::Utils::DateTime ();
+use Thruk::Utils::Encode ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -609,7 +609,7 @@ sub read_ssi {
           }
         } elsif( -r "$dir/$inc" ) {
             my $content = Thruk::Utils::IO::read("$dir/$inc");
-            $content = Thruk::Utils::decode_any($content);
+            $content = Thruk::Utils::Encode::decode_any($content);
             unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
             $output .= $content;
         } else {
@@ -2551,38 +2551,6 @@ sub backup_data_file {
     }
 
     return;
-}
-
-##########################################################
-
-=head2 decode_any
-
-read and decode string from either utf-8 or iso-8859-1
-
-=cut
-sub decode_any {
-    eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
-    if($@) { # input was not utf8
-        return($_[0]) if $@ =~ m/\QCannot decode string with wide characters\E/mxo; # since Encode.pm 2.53 decode_utf8 no longer noops when utf8 is already on
-        return($_[0]) if $@ =~ m/\QWide character at\E/mxo;                         # since Encode.pm ~2.90 message changed
-        $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
-    }
-    return $_[0];
-}
-
-########################################
-
-=head2 ensure_utf8
-
-    ensure_utf8($str)
-
-makes sure the given string is utf8
-
-=cut
-sub ensure_utf8 {
-    $_[0] = decode_any($_[0]);
-    return($_[0]) if is_utf8($_[0]); # since Encode.pm 2.53 decode_utf8 no longer noops when utf8 is already on
-    return(encode_utf8($_[0]));
 }
 
 ########################################

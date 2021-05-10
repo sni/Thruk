@@ -6,6 +6,8 @@ use Encode qw/encode_utf8/;
 use Test::More;
 use utf8;
 
+use Thruk::Utils::Encode ();
+
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => 17;
@@ -25,7 +27,7 @@ my $c = TestUtils::get_c();
 for my $str ('abc', 'öäüß', 'test€') {
   my $orig = $str;
   my $test = $orig;
-  $test = Thruk::Utils::decode_any($test);
+  $test = Thruk::Utils::Encode::decode_any($test);
   is($test, $orig, 'decode_any '.encode_utf8($test));
 
   $test = $orig;

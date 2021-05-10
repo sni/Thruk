@@ -33,8 +33,8 @@ return new file object
 =cut
 sub new {
     my ( $class, $file, $readonlypattern, $coretype, $force, $remotepath ) = @_;
-    Thruk::Utils::decode_any($file);
-    Thruk::Utils::decode_any($remotepath);
+    Thruk::Utils::Encode::decode_any($file);
+    Thruk::Utils::Encode::decode_any($remotepath);
     my $self = {
         'path'         => $file,
         'display'      => $remotepath || $file,
@@ -104,7 +104,7 @@ sub update_objects {
     return unless $self->{'parsed'} == 0;
     return unless defined $self->{'hex'};
 
-    my $text = Thruk::Utils::decode_any(Thruk::Utils::IO::read($self->{'path'}));
+    my $text = Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($self->{'path'}));
     $self->update_objects_from_text($text);
     $self->{'changed'} = 0;
     $self->{'backup'}  = "";
@@ -498,7 +498,7 @@ sub diff {
     open(my $ph, '-|', $cmd);
     while(<$ph>) {
         my $line = $_;
-        Thruk::Utils::decode_any($line);
+        Thruk::Utils::Encode::decode_any($line);
         $diff .= $line;
     }
     unlink($filename);
@@ -533,7 +533,7 @@ sub get_new_file_content {
 
     return $new_content if $self->{'deleted'};
 
-    return encode_utf8(Thruk::Utils::decode_any(Thruk::Utils::IO::read($self->{'path'}))) unless $self->{'changed'};
+    return encode_utf8(Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($self->{'path'}))) unless $self->{'changed'};
 
     my $linenr = 1;
 
@@ -631,10 +631,10 @@ sub try_merge {
     $cmd = 'cd '.$tmpdir.' && patch -F 10 -p0 < patch 2>&1';
     my($rc2, $out) = Thruk::Utils::IO::cmd(undef, $cmd);
 
-    my $text = Thruk::Utils::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg'));
+    my $text = Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg'));
 
     my $rej;
-    $rej = ":\n".Thruk::Utils::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
+    $rej = ":\n".Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
 
     # cleanup
     unlink(glob($tmpdir.'/*'));

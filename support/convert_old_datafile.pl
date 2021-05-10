@@ -48,7 +48,7 @@ for my $filename (@ARGV) {
     $cont = Thruk::Utils::IO::untaint($cont);
 
     # ensure right encoding
-    Thruk::Utils::decode_any($cont);
+    Thruk::Utils::Encode::decode_any($cont);
 
     $cont =~ s/^\$VAR1\ =\ //mx;
 

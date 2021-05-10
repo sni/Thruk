@@ -2180,7 +2180,7 @@ sub serveraction {
 
     _debug('running server action: '.$action.' for user '.$c->stash->{'remote_user'});
 
-    my @args = map { Thruk::Utils::decode_any(uri_unescape($_)) } (split(/\//mx, $action));
+    my @args = map { Thruk::Utils::Encode::decode_any(uri_unescape($_)) } (split(/\//mx, $action));
     $action = shift @args;
     if(!defined $c->config->{'action_menu_actions'}->{$action}) {
         return(1, 'custom action '.$action.' is not defined');

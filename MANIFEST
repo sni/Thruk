@@ -144,6 +144,7 @@ lib/Thruk/Utils/Cluster.pm
 lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/Crypt.pm
 lib/Thruk/Utils/DateTime.pm
+lib/Thruk/Utils/Encode.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/IO.pm

@@ -2,7 +2,7 @@ package Thruk::Utils::IO;
 
 =head1 NAME
 
-Thruk::Utils - IO Utilities Collection for Thruk
+Thruk::Utils::IO - IO Utilities Collection for Thruk
 
 =head1 DESCRIPTION
 
@@ -85,7 +85,7 @@ sub mkdir_r {
         for my $part (split/(\/)/mx, $dirname) {
             $path .= $part;
             next if $path eq '';
-            Thruk::Utils::IO::mkdir($path) unless -d $path.'/.';
+            &mkdir($path) unless -d $path.'/.';
         }
     }
     return 1;
@@ -146,7 +146,7 @@ sub write {
     my $mode = $append ? '>>' : '>';
     open(my $fh, $mode, $path) or confess('cannot create file '.$path.': '.$!);
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $path) or confess("cannot close file ".$path.": ".$!);
+    &close($fh, $path) or confess("cannot close file ".$path.": ".$!);
     utime($mtime, $mtime, $path) if $mtime;
     return 1;
 }
@@ -396,7 +396,7 @@ sub json_store {
     if($options->{'skip_ensure_permissions'}) {
         CORE::close($fh) || confess("cannot close file ".$tmpfile.": ".$!);
     } else {
-        Thruk::Utils::IO::close($fh, $tmpfile) || confess("cannot close file ".$tmpfile.": ".$!);
+        &close($fh, $tmpfile) || confess("cannot close file ".$tmpfile.": ".$!);
     }
 
     if(!$options->{'skip_validate'}) {
@@ -608,7 +608,7 @@ sub cmd {
         return(0, "cmd started in background");
     }
 
-    require Thruk::Utils unless $no_decode;
+    require Thruk::Utils::Encode unless $no_decode;
 
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
@@ -644,7 +644,7 @@ sub cmd {
         $rc = $?;
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
-        $output = Thruk::Utils::decode_any($output) unless $no_decode;
+        $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
         # restore original array
         unshift @{$cmd}, $prog;
     } else {
@@ -661,7 +661,7 @@ sub cmd {
         }
 
         $output = `$cmd`;
-        $output = Thruk::Utils::decode_any($output) unless $no_decode;
+        $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if($rc == -1 && defined $SIG{CHLD} && $SIG{CHLD} eq 'IGNORE');
