@@ -7,8 +7,6 @@ use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 use threads ();
 
-use Thruk::Utils::IO ();
-
 our @EXPORT_OK = qw(timing_breakpoint);
 
 my $starttime   = [gettimeofday];
@@ -16,6 +14,7 @@ my $lasttime    = $starttime;
 my $lastmemory  = 0;
 my $has_threads = 0;
 my $has_memory  = 1;
+require Thruk::Utils::IO;
 
 # do not print column header during tests
 if(!$INC{'Test/More.pm'} && !$ENV{'THRUK_STRACE_DEBUG'}) {
