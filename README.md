@@ -19,7 +19,6 @@ Support
 -------
 
   * Ask a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/thruk)
-  * Discuss on the [Monitoring Portal](http://www.monitoring-portal.org/wbb/index.php?page=Board&boardID=106) (german / english).
   * Mailing list on [Google Groups](https://groups.google.com/group/thruk).
   * File a bug in [GitHub Issues](https://github.com/sni/Thruk/issues).
   * [Tweet](https://twitter.com/ThrukGUI/) us with other feedback.
