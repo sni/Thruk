@@ -72,7 +72,14 @@ for my $dir (@{$scenarios}) {
 
 # make simple normal final request since the tests kill existing lmd childs and upcoming
 # tests will fail if there is a startup message on stderr
-TestUtils::test_page( url => '/thruk/cgi-bin/extinfo.cgi?type=0', follow => 1);
+{
+    local $ENV{'TEST_ERROR'} = "";
+    TestUtils::test_page(
+        url     => '/thruk/cgi-bin/extinfo.cgi?type=0',
+        waitfor => 'Process\s+Commands',
+        like    => [ 'Process Information', 'Program Start Time' ],
+    );
+}
 
 done_testing();
 
