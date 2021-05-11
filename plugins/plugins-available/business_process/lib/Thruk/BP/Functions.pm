@@ -414,7 +414,7 @@ sub statusfilter {
     my($worst_host, $total_hosts, $good_hosts, $down_hosts) = (0,0,0,0);
     my $best_host = -1;
     if($type eq 'hosts' || $type eq 'both') {
-        my $data = $c->{'db'}->get_host_less_stats( filter => [ $hostfilter ]);
+        my $data = $c->db->get_host_less_stats( filter => [ $hostfilter ]);
         $data    = _statusfilter_apply_filter("host", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_hosts = $data->{'total'};
         $good_hosts  = $data->{'up'} + $data->{'pending'};
@@ -437,7 +437,7 @@ sub statusfilter {
     my $best_service = -1;
     my($worst_service, $total_services, $good_services, $down_services) = (0,0,0,0);
     if($type eq 'services' || $type eq 'both') {
-        my $data = $c->{'db'}->get_service_less_stats( filter => [ $servicefilter ]);
+        my $data = $c->db->get_service_less_stats( filter => [ $servicefilter ]);
         $data    = _statusfilter_apply_filter("service", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_services = $data->{'total'};
         $good_services  = $data->{'ok'}   + $data->{'pending'} + $data->{'warning'};
@@ -536,7 +536,7 @@ sub statusfilter {
         my $maximum_output = 10;
         my $num = 0;
         if($worst_host > 0) {
-            my $data = $c->{'db'}->get_hosts( filter => [ $hostfilter, { state => { '>' => 0 }} ], columns => [qw/name state plugin_output scheduled_downtime_depth acknowledged/]);
+            my $data = $c->db->get_hosts( filter => [ $hostfilter, { state => { '>' => 0 }} ], columns => [qw/name state plugin_output scheduled_downtime_depth acknowledged/]);
             for my $h (@{$data}) {
                 next if($ack_filter      && $h->{'acknowledged'});
                 next if($downtime_filter && $h->{'scheduled_downtime_depth'} > 0);
@@ -545,7 +545,7 @@ sub statusfilter {
             }
         }
         if($worst_service > 0) {
-            my $data = $c->{'db'}->get_services( filter => [ $servicefilter, { state => { '>' => 0 }} ], columns => [qw/host_name description state plugin_output scheduled_downtime_depth acknowledged/]);
+            my $data = $c->db->get_services( filter => [ $servicefilter, { state => { '>' => 0 }} ], columns => [qw/host_name description state plugin_output scheduled_downtime_depth acknowledged/]);
             for my $s (@{$data}) {
                 next if($ack_filter      && $s->{'acknowledged'});
                 next if($downtime_filter && $s->{'scheduled_downtime_depth'} > 0);

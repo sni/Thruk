@@ -18,7 +18,6 @@ use POSIX ();
 use Time::HiRes ();
 
 use Thruk::Utils ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 #use Thruk::Timer qw/timing_breakpoint/;
@@ -265,10 +264,7 @@ sub check_initial_start {
 
     local $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
     if($background) {
-        ## no critic
-        $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
-        ## use critic
-
+        require Thruk::Utils::External;
         Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::check_initial_start($c, $c->config, 0)', background => 1 });
         return;
     }
@@ -365,10 +361,11 @@ sub kill_if_not_responding {
     if($pid == -1) { die("fork failed: $!"); }
 
     if(!$pid) {
+        require Thruk::Utils::External;
         Thruk::Utils::External::do_child_stuff($c, 0, 0);
         alarm($lmd_timeout);
         eval {
-            $data = $c->{'db'}->lmd_peer->_raw_query("GET sites\n");
+            $data = $c->db->lmd_peer->_raw_query("GET sites\n");
         };
         my $err = $@;
         alarm(0);
@@ -445,26 +442,17 @@ sub write_lmd_config {
         $site_config .= "SkipSSLCheck = 1\n\n";
     }
 
-    my $lmd_version = get_lmd_version($config);
-    ## no critic
-    $ENV{'THRUK_LMD_VERSION'} = $lmd_version;
-    ## use critic
-    my $supports_section = 0;
-    if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
-        $supports_section = 1;
-    }
+    confess("got no peers") if scalar @{$c->db->peer_order} == 0;
 
-    confess("got no peers") if scalar @{$c->{'db'}->peer_order} == 0;
-
-    for my $key (@{$c->{'db'}->peer_order}) {
-        my $peer = $c->{'db'}->peers->{$key};
+    for my $key (@{$c->db->peer_order}) {
+        my $peer = $c->db->peers->{$key};
         next if $peer->{'federation'};
         $site_config .= "[[Connections]]\n";
         $site_config .= "name           = '".$peer->peer_name()."'\n";
         $site_config .= "id             = '".$key."'\n";
         $site_config .= "source         = ['".join("', '", @{$peer->peer_list()})."']\n";
         # section is supported starting with lmd 1.1.6
-        if($supports_section && $peer->{'section'} && $peer->{'section'} ne 'Default') {
+        if($peer->{'section'} && $peer->{'section'} ne 'Default') {
             $site_config .= "section = '".$peer->{'section'}."'\n";
         }
         $site_config .= "auth           = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'auth'};
@@ -509,7 +497,7 @@ returns lmd version
 =cut
 sub get_lmd_version {
     my($config) = @_;
-
+    return($config->{'lmd_version'}) if $config->{'lmd_version'};
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -version';
 

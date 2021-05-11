@@ -20,7 +20,7 @@ use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use File::Copy qw/move copy/;
 use IO::Select ();
 use IPC::Open3 qw/open3/;
-use POSIX ":sys_wait_h";
+use POSIX ();
 use Time::HiRes qw/sleep/;
 
 use Thruk::Utils::Log qw/:all/;
@@ -124,9 +124,7 @@ sub read_as_list {
     my($path) = @_;
     my @res;
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
-    while(my $line = <$fh>) {
-        push @res, $line;
-    }
+    @res = <$fh>;
     CORE::close($fh);
     return(@res);
 }

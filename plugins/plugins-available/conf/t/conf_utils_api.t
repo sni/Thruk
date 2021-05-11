@@ -173,7 +173,7 @@ is($c->stash->{'failed_backends'}->{'http'}, undef, 'test connection successful'
 ###########################################################
 # config backend intialized?
 is($c->config->{'var_path'}, $http_dir.'/var', 'got right var folder');
-my $rpeer = $c->{'db'}->get_peer_by_key('http');
+my $rpeer = $c->db->get_peer_by_key('http');
 isa_ok($rpeer, 'Thruk::Backend::Peer');
 isa_ok($c->{'obj_db'}, 'Monitoring::Config');
 is($c->{'obj_db'}->is_remote(), 1, 'got a remote peer');

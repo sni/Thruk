@@ -12,11 +12,11 @@ use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Authentication::User ();
-use Thruk::Backend::Manager ();
 use Thruk::Backend::Peer ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Conf::Defaults ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Plugin ();
@@ -56,10 +56,10 @@ sub index {
         # ok
     }
     elsif(!$c->check_user_roles("admin")) {
-        if(    !defined $c->{'db'}
-            || !defined $c->{'db'}->{'backends'}
-            || ref $c->{'db'}->{'backends'} ne 'ARRAY'
-            || scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+        if(    !defined $c->db()
+            || !defined $c->db->{'backends'}
+            || ref $c->db->{'backends'} ne 'ARRAY'
+            || scalar @{$c->db->{'backends'}} == 0 ) {
             # no backends configured or thruk config not possible
             if($c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'}) {
                 return $c->detach("/error/index/14");
@@ -710,7 +710,7 @@ sub _process_users_page {
         }
 
         $c->stash->{'has_contact'} = 0;
-        my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => $name ] );
+        my $contacts = $c->db->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => $name ] );
         if(defined $contacts and scalar @{$contacts} >= 1) {
             $c->stash->{'has_contact'}    = 1;
             $c->stash->{'contact'}        = $contacts->[0];
@@ -857,7 +857,7 @@ sub _process_backends_page {
             # add values from existing backend config
             my $savefile = $file;
             if(defined $backend->{'id'}) {
-                my $peer = $c->{'db'}->get_peer_by_key($backend->{'id'});
+                my $peer = $c->db->get_peer_by_key($backend->{'id'});
                 $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
                 $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
@@ -916,7 +916,7 @@ sub _process_backends_page {
     }
 
     my $backends = [];
-    my $peers    = $c->{'db'}->get_peers(1);
+    my $peers    = $c->db->get_peers(1);
     $peers = [{}] if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
         my $b = Thruk::Utils::dclone($p->{'peer_config'});
@@ -1299,7 +1299,7 @@ sub _apply_config_changes {
             Thruk::Utils::set_message( $c, 'fail_message', "reload is disabled in demo mode" );
             return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
         }
-        if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
+        if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
                                                message => 'please stand by while configuration is beeing reloaded...',
@@ -1952,7 +1952,7 @@ sub _object_disable {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] disabled %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
@@ -1976,7 +1976,7 @@ sub _object_enable {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] enabled %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
@@ -2029,7 +2029,7 @@ sub _object_delete {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] removed %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
@@ -2071,7 +2071,7 @@ sub _object_save {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] %s %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $new ? 'created' : 'changed',
                                 $obj->get_type(),
@@ -2136,7 +2136,7 @@ sub _object_move {
         $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
         push @{$c->{'obj_db'}->{'logs'}},
             sprintf("[config][%s][%s] moved %s '%s' to '%s'",
-                                    $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                    $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                     $c->stash->{'remote_user'},
                                     $obj->get_type(),
                                     $obj->get_name(),
@@ -2401,7 +2401,7 @@ sub _file_history {
 
     my $logs = _get_git_logs($c, $dir);
 
-    Thruk::Backend::Manager::page_data($c, $logs);
+    Thruk::Utils::page_data($c, $logs);
     $c->stash->{'logs'} = $logs;
     $c->stash->{'dir'}  = $dir;
     return;
@@ -2528,7 +2528,7 @@ sub _get_git_commit {
 ##########################################################
 sub _get_git_blame {
     my($c, $path, $line_start, $line_end) = @_;
-    my $dir = Thruk::Utils::dirname($path);
+    my $dir = Thruk::Base::dirname($path);
     my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."'";
     my $output = Thruk::Utils::IO::cmd($cmd);
     my $blame = {lines => [], commits => {}};
@@ -2716,13 +2716,13 @@ sub _config_reload {
     $c->stash->{'original_output'} = "";
     my $time = time();
     my $name = $c->stash->{'param_backend'};
-    my $peer = $c->{'db'}->get_peer_by_key($name);
+    my $peer = $c->db->get_peer_by_key($name);
     my $pkey = $peer->peer_key();
     my $wait = 1;
 
     my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
     if(!$last_reload) {
-        my $processinfo = $c->{'db'}->get_processinfo(backends => $pkey);
+        my $processinfo = $c->db->get_processinfo(backends => $pkey);
         $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time() - 1);
     }
 
@@ -2752,7 +2752,7 @@ sub _config_reload {
             'command' => sprintf("COMMAND [%d] RESTART_PROCESS", $time),
             'backend' => [ $pkey ],
         };
-        $c->{'db'}->send_command( %{$options} );
+        $c->db->send_command( %{$options} );
         $c->stash->{'output'} = 'config reloaded by external command.';
     }
     $c->stats->profile(comment => "reload command issued: ".time());
@@ -2863,7 +2863,7 @@ sub _get_non_config_tool_references {
             $all_hosts->{$host_name} = 1;
         }
         for my $hostgroup_name (@{$obj->{'conf'}->{'hostgroup_name'}}) {
-            my $groups = $c->{'db'}->get_hostgroups(filter => [{ name => $hostgroup_name }], backend => [$c->stash->{'param_backend'}], columns => [qw/name members/]);
+            my $groups = $c->db->get_hostgroups(filter => [{ name => $hostgroup_name }], backend => [$c->stash->{'param_backend'}], columns => [qw/name members/]);
             for my $group (@{$groups}) {
                 for my $host_name (@{$group->{'members'}}) {
                     $all_hosts->{$host_name} = 1;

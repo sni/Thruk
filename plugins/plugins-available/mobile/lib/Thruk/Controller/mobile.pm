@@ -61,7 +61,7 @@ sub index {
                             ],
             };
 
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter, $logfilter], pager => 1, sort => {'DESC' => 'time'});
+            $data = $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter, $logfilter], pager => 1, sort => {'DESC' => 'time'});
         }
         elsif($type eq 'alerts') {
             my($logfilter) = _extract_logfilter_from_param($c);
@@ -77,13 +77,13 @@ sub index {
                                 ],
                             }],
             };
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter, $logfilter], pager => 1, sort => {'DESC' => 'time'});
+            $data = $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter, $logfilter], pager => 1, sort => {'DESC' => 'time'});
         }
         elsif($type eq 'host_stats') {
-            $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+            $data = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         }
         elsif($type eq 'service_stats') {
-            $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+            $data = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         }
         elsif($type eq 'hosts') {
             if(defined $c->req->parameters->{'host'} || defined $c->req->parameters->{'filter'}) {
@@ -93,14 +93,14 @@ sub index {
                     $hostfilter    = { 'name' => { '~~' => $c->req->parameters->{'filter'} } };
                     $commentfilter = { 'host_name' => { '~~' => $c->req->parameters->{'filter'} } };
                 }
-                $comments   = $c->{'db'}->get_comments(
+                $comments   = $c->db->get_comments(
                                 filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), $commentfilter, { 'service_description' => undef } ],
                                 sort => { 'DESC' => 'id' } );
-                $downtimes  = $c->{'db'}->get_downtimes(
+                $downtimes  = $c->db->get_downtimes(
                                 filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), $commentfilter, { 'service_description' => undef } ],
                                 sort => { 'DESC' => 'id' } );
             }
-            $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
+            $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
             if(defined $c->req->parameters->{'host'} and defined $data->[0]) {
                 $pnp_url = Thruk::Utils::get_pnp_url($c, $data->[0]);
             }
@@ -118,14 +118,14 @@ sub index {
                                                 { 'host_name'          => { '~~' => $c->req->parameters->{'filter'} } },
                                               ]};
                 }
-                $comments      = $c->{'db'}->get_comments(
+                $comments      = $c->db->get_comments(
                                     filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $c->req->parameters->{'host'} }, { 'service_description' => $c->req->parameters->{'service'} } ],
                                     sort => { 'DESC' => 'id' } );
-                $downtimes     = $c->{'db'}->get_downtimes(
+                $downtimes     = $c->db->get_downtimes(
                                     filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $c->req->parameters->{'host'} }, { 'service_description' => $c->req->parameters->{'service'} } ],
                                     sort => { 'DESC' => 'id' } );
             }
-            $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => 1);
+            $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => 1);
             if(defined $c->req->parameters->{'host'} and defined $data->[0]) {
                 $pnp_url = Thruk::Utils::get_pnp_url($c, $data->[0]);
             }

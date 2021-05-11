@@ -5,7 +5,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 31;
+    plan tests => 32;
 
     use lib('t');
     require TestUtils;
@@ -15,6 +15,7 @@ BEGIN {
 use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::DateTime');
+use_ok('Thruk::Utils::Timezone');
 use Config;
 use Date::Calc qw/Localtime/;
 
@@ -22,11 +23,11 @@ my $c = TestUtils::get_c();
 
 #########################
 # test timezone detection
-my $tz = $c->app->_detect_timezone();
+my $tz = Thruk::Utils::Timezone::detect_timezone();
 ok($tz, "got a timezone: ".($tz || '<none>'));
 
 # tests need a fixed timezone
-$c->app->set_timezone("Europe/Berlin");
+Thruk::Utils::Timezone::set_timezone($c->config, "Europe/Berlin");
 
 my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
 

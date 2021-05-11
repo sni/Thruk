@@ -193,7 +193,7 @@ sub _rest_get_external_command {
         }
     }
 
-    my($backends) = $c->{'db'}->select_backends('send_command');
+    my($backends) = $c->db->select_backends('send_command');
     if(scalar @{$backends} > 1) {
         $backends= Thruk::Controller::cmd::get_affected_backends($c, $required_fields, $backends);
         if(scalar @{$backends} == 0) {
@@ -217,7 +217,7 @@ sub _rest_get_external_command {
             $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $name, service_description => $description ];
         }
         push @{$options->{'filter'}}, start_time => { '<=' => time() };
-        my $data = $c->{'db'}->get_downtimes(%{$options});
+        my $data = $c->db->get_downtimes(%{$options});
         for my $d (@{$data}) {
             $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
             if($d->{'service_description'}) {

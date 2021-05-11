@@ -47,7 +47,7 @@ use Thruk::Utils::Auth ();
 sub cmd {
     my($c) = @_;
     my $output = '';
-    for my $group (@{$c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' )], sort => {'ASC' => 'name'})}) {
+    for my $group (@{$c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' )], sort => {'ASC' => 'name'})}) {
         $output .= sprintf("%-30s %s\n", $group->{'name'}, join(', ', map({ join(";", @{$_}) } @{$group->{'members'}}) ) );
     }
     return($output, 0);

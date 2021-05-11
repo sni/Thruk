@@ -5,6 +5,7 @@ use strict;
 
 use Thruk ();
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Pool ();
 
 =head1 NAME
 

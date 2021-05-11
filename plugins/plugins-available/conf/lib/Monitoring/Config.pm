@@ -229,7 +229,7 @@ sub commit {
 
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
-        $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
+        $backend_name = $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
@@ -268,7 +268,7 @@ sub commit {
             # do some logging
             _audit_log("configtool",
                             sprintf("[config][%s][%s] %s file '%s'",
-                                        $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                        $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
                                         $file->{'display'},
@@ -289,7 +289,7 @@ sub commit {
             if($c && $f->{'deleted'}) {
                 _audit_log("configtool",
                                 sprintf("[config][%s][%s] deleted file '%s'",
-                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $f->{'display'},
                 )) if $c;
@@ -2206,7 +2206,7 @@ sub _check_references {
 
             if(defined $objects_by_name->{$link}->{$val}) {
                 return;
-            } elsif(Thruk::Utils::looks_like_regex($val)) {
+            } elsif(Thruk::Base::looks_like_regex($val)) {
                 # expand wildcards and regex
                 my $newval = Thruk::Utils::convert_wildcards_to_regex($val);
                 for my $tst (keys %{$objects_by_name->{$link}}) {
@@ -2754,7 +2754,7 @@ sub get_plugin_help {
     }
     my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
     my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
-    ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+    ($file)         = $c->db->_get_replaced_string($file, $user_macros);
     if(!-x $file) {
         return(sprintf("%s is not executable", $file));
     }
@@ -2799,7 +2799,7 @@ sub get_plugin_preview {
     my $cfg = $Monitoring::Config::save_options;
     $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
 
-    my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
+    my $macros = $c->db->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
     $macros    = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'}, $macros);
 
     if(defined $host and $host ne '') {
@@ -2822,7 +2822,7 @@ sub get_plugin_preview {
     }
 
     my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-    ($file) = $c->{'db'}->_get_replaced_string($file, $macros);
+    ($file) = $c->db->_get_replaced_string($file, $macros);
     if(!-x $file) {
         return(sprintf("%s is not executable", $file));
     }
@@ -2830,7 +2830,7 @@ sub get_plugin_preview {
     if($file !~ m%$pathspec%mx) {
         return(sprintf("%s does not match path spec: %s", $file, $pathspec));
     }
-    my($cmd, $rc) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
+    my($cmd, $rc) = $c->db->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
 
     if(!defined $cmd || !$rc) {
         return(sprintf("could not replace all macros in: %s", $file));

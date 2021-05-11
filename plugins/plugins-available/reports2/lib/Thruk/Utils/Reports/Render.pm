@@ -327,8 +327,8 @@ sub get_events {
     }
 
     my $total_filter = Thruk::Utils::combine_filter('-and', \@filter);
-    $c->{'db'}->renew_logcache($c, 1);
-    my $logs = $c->{'db'}->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
+    $c->db->renew_logcache($c, 1);
+    my $logs = $c->db->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
 
     if($c->req->parameters->{'reverse'}) {
         @{$logs} = reverse @{$logs};

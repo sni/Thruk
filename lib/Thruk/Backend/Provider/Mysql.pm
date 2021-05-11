@@ -988,12 +988,12 @@ sub _log_stats {
 
     $c->stats->profile(begin => "Mysql::_log_stats");
 
-    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
+    ($backends) = $c->db->select_backends('get_logs') unless defined $backends;
     $backends  = Thruk::Base::list($backends);
 
     my @result;
     for my $key (@{$backends}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         my $msg = "OK";
         my($index_size, $data_size, $items, $last_entry);
         my $status  = {};
@@ -1067,12 +1067,12 @@ sub _logcache_stats_types {
 
     $c->stats->profile(begin => "Mysql::_logcache_stats_types: ".$groupby);
 
-    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
+    ($backends) = $c->db->select_backends('get_logs') unless defined $backends;
     $backends  = Thruk::Base::list($backends);
 
     my @result;
     for my $key (@{$backends}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         next unless $peer->{'logcache'};
         $peer->logcache->reconnect();
         my $dbh  = $peer->logcache->_dbh();
@@ -1118,7 +1118,7 @@ sub _log_removeunused {
     # use first peers logcache
     my $peer;
     for my $key (@{$c->stash->{'backends'}}) {
-        $peer = $c->{'db'}->get_peer_by_key($key);
+        $peer = $c->db->get_peer_by_key($key);
         last if $peer->{'logcache'};
     }
     return "no logcache configured?" unless(defined $peer and defined $peer->{'logcache'});
@@ -1189,7 +1189,7 @@ sub _import_logs {
     $backends = Thruk::Base::list($backends);
     my @peer_keys;
     for my $key (@{$backends}) {
-        my $peer   = $c->{'db'}->get_peer_by_key($key);
+        my $peer   = $c->db->get_peer_by_key($key);
         next unless $peer->{'enabled'};
         push @peer_keys, $key;
     }
@@ -1202,7 +1202,7 @@ sub _import_logs {
     my $errors = [];
     for my $key (@{$backends}) {
         my $prefix = $key;
-        my $peer   = $c->{'db'}->get_peer_by_key($key);
+        my $peer   = $c->db->get_peer_by_key($key);
         next unless $peer->{'enabled'};
         next unless $peer->{'logcache'};
         $c->stats->profile(begin => "$key");

@@ -20,6 +20,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Backend::Provider::HTTP ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
 
 my $context;

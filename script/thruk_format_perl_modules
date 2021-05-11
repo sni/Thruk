@@ -229,7 +229,7 @@ sub _parse_file {
             if($src eq 'use') {
                 # ignore line with leading whitespace, might be BEGIN blocks
                 if($line =~ m/^\s+/mx) {
-                    $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 1;
+                    $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 2;
                     next;
                 }
                 next if $mod =~ m/^5/mx;
@@ -252,7 +252,7 @@ sub _parse_file {
                     $arg =~ s/'([^']*?)';?/$1/gmx;
                     _fatal("duplicate use %s %s in %s", $mod, $arg, $line) if defined $cur_used->{$mod};
                     $cur_used->{$mod} = $line;
-                    $lastblock->{'modules'}->{$arg} = 1;
+                    $lastblock->{'modules'}->{$arg} = 2;
                     next;
                 }
 
@@ -270,7 +270,7 @@ sub _parse_file {
                 }
             }
 
-            $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 1;
+            $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 2;
             next;
         }
 
@@ -283,14 +283,14 @@ sub _parse_file {
         # loaded by use_ok during tests
         if($test =~ m/use_ok(\s*\(|\s+)'?"?([^'"]+)'?"?/mx) {
             my $mod = $2;
-            $lastblock->{'modules'}->{$mod} = 1;
+            $lastblock->{'modules'}->{$mod} = 2;
             $test = "";
         }
 
         # loaded by eval "use..."
         if($test =~ m/eval\s+\{?\"?\'?\s*(?:use|require)\s+([A-Za-z0-9_:]+)/mx) {
             my $mod = $1;
-            $lastblock->{'modules'}->{$mod} = 1;
+            $lastblock->{'modules'}->{$mod} = 2;
             $test = "";
         }
 
@@ -535,7 +535,7 @@ sub _check_missing {
             if(!$found) {
                 $line =~ s/^\s*//gmx;
                 _log_change("%s: module '%s' missing in includes, referenced in: %s", $file, $m, $line);
-                $lastblock->{'modules'}->{$m} = 1; # fail only once
+                $lastblock->{'modules'}->{$m}++; # fail only once
                 $lastblock->{'used'}->[0]->{$m} = "";
                 if($m eq 'Thruk::Config') {
                     $lastblock->{'used'}->[0]->{$m} = "use Thruk::Config 'noautoload';";
@@ -548,6 +548,11 @@ sub _check_missing {
                 _log_change("%s: module '%s' is not used at all, consider removing it.", $file, $m);
                 for my $u (@{$b->{'used'}}) { delete $u->{$m}; }
             }
+            #if($b->{'modules'}->{$m} == 1) {
+            #    next if $m =~ m/^(strict|warnings|threads|Thruk::Base|Thruk::Action::AddDefaults)$/mx;
+            #    next if $file =~ m/^\.\/(t|script)\//mx;
+            #    _log_change("%s: module '%s' is used only once, consider replacing by require.", $file, $m);
+            #}
         }
         for my $m (qw/warnings strict/) {
             my $found;
@@ -584,9 +589,10 @@ sub _clean_used {
     }
 }
 
+##############################################
 sub _set_replaced_mods {
     my($used, $modules, $replacements, $mod) = @_;
-    $modules->{$mod} = 1;
+    $modules->{$mod} = 2;
     if($replacements->{$mod}) {
         for my $s (sort keys %{$replacements->{$mod}}) {
             if(!defined $modules->{$s}) {

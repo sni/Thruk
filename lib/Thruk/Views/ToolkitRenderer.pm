@@ -15,9 +15,14 @@ use strict;
 use Carp qw/confess/;
 use Template ();
 use Template::Provider ();
+use Template::Stash ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Base ();
+use Thruk::Config 'noautoload';
+
+# make private _ hash keys available
+$Template::Stash::PRIVATE = undef;
 
 my $template_provider_themes;
 my $template_provider_user;
@@ -30,7 +35,8 @@ my $template_provider_user;
 
 =cut
 sub register {
-    my($app, $settings) = @_;
+    my($app) = @_;
+    my $settings = Thruk::Config::get_toolkit_config();
 
     # set Template::Provider
     $settings->{'LOAD_TEMPLATES'} = [];
@@ -64,7 +70,7 @@ sub register {
 
     $app->{'tt'} = Template->new($settings);
     $app->config->{'strict_tt'} = $settings->{'STRICT'};
-    return;
+    return($app->{'tt'});
 }
 
 =head2 render_tt
@@ -96,7 +102,7 @@ sub render_tt {
 =cut
 sub render {
     my($c, $template, $stash, $output) = @_;
-    my $tt = $c->app->{'tt'};
+    my $tt = $c->app->{'tt'} || &register($c->app);
     confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
 

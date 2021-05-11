@@ -1141,6 +1141,7 @@ sub get_user_token {
     my $sessiondata = $c->{'session'};
     if(!$sessiondata->{'csrf_token'}) {
         # session but no token yet
+        require Thruk::Utils::CookieAuth;
         $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $sessiondata->{'private_key'}, $sessiondata);
     }
     return $sessiondata->{'csrf_token'};

@@ -268,7 +268,7 @@ sub check_recurring_downtime {
     my $details = "";
     if($downtime->{'target'} eq 'host') {
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->{'db'}->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name/], backend => $backends );
+            my $data = $c->db->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -278,7 +278,7 @@ sub check_recurring_downtime {
     elsif($downtime->{'target'} eq 'service') {
         # check if there are host which do not match a single service or do not exist at all
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->{'db'}->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name services/], backend => $backends );
+            my $data = $c->db->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name services/], backend => $backends );
             # does the host itself exist
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: host ".$hst." not found in recurring downtime ".$file."\n";
@@ -306,7 +306,7 @@ sub check_recurring_downtime {
 
         # check if each service matches at least one host
         for my $svc (@{$downtime->{'service'}}) {
-            my $data = $c->{'db'}->get_services(filter => [{ description => $svc } ], columns => [qw/host_name/], backend => $backends );
+            my $data = $c->db->get_services(filter => [{ description => $svc } ], columns => [qw/host_name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: service ".$svc." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -330,7 +330,7 @@ sub check_recurring_downtime {
     }
     elsif($downtime->{'target'} eq 'hostgroup') {
         for my $grp (@{$downtime->{$downtime->{'target'}}}) {
-            my $data = $c->{'db'}->get_hostgroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
+            my $data = $c->db->get_hostgroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -339,7 +339,7 @@ sub check_recurring_downtime {
     }
     elsif($downtime->{'target'} eq 'servicegroup') {
         for my $grp (@{$downtime->{$downtime->{'target'}}}) {
-            my $data = $c->{'db'}->get_servicegroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
+            my $data = $c->db->get_servicegroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -392,17 +392,17 @@ sub _lmd_checks  {
     $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
 
     my $total = 0;
-    for my $p (@{$c->{'db'}->get_peers()}) {
+    for my $p (@{$c->db->get_peers()}) {
         next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
         $total++;
     }
-    my $stats = $c->{'db'}->lmd_stats($c);
+    my $stats = $c->db->lmd_stats($c);
     my $online = 0;
     for my $stat (@{$stats}) {
         $online++ if $stat->{'status'} == 0;
     }
     $details .= sprintf("  - %i/%i backends online\n", $online, $total);
-    for my $peer ( @{ $c->{'db'}->get_peers() } ) {
+    for my $peer ( @{ $c->db->get_peers() } ) {
         my $key  = $peer->{'key'};
         my $name = $peer->{'name'};
         next unless $c->stash->{'failed_backends'}->{$key};

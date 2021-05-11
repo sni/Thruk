@@ -123,16 +123,16 @@ sub _show_step_2 {
 
     my $data;
     if($report_type eq 'hosts') {
-        $data = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
+        $data = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
     }
     elsif($report_type eq 'hostgroups') {
-        $data = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+        $data = $c->db->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     }
     elsif($report_type eq 'servicegroups') {
-        $data = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+        $data = $c->db->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
     }
     elsif($report_type eq 'services') {
-        my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+        my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
@@ -157,7 +157,7 @@ sub _show_step_3 {
 
     $c->stats->profile(begin => "_show_step_3()");
 
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{timeperiods} = $c->db->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
     $c->stash->{template}    = 'avail_step_3.tt';
 
     my($host,$service);

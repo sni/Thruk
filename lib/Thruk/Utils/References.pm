@@ -192,19 +192,19 @@ sub _add_livestatus_matches {
     my $matches;
     eval {
         if($type eq 'host') {
-            $matches = $c->{'db'}->get_hosts(filter => [{ name => $name }], backend => [$peer_key]);
+            $matches = $c->db->get_hosts(filter => [{ name => $name }], backend => [$peer_key]);
         }
         elsif($type eq 'hostgroup') {
-            $matches = $c->{'db'}->get_hostgroups(filter => [{ name => $name }], backend => [$peer_key]);
+            $matches = $c->db->get_hostgroups(filter => [{ name => $name }], backend => [$peer_key]);
         }
         elsif($type eq 'service') {
-            $matches = $c->{'db'}->get_services(filter => [{ host_name => $name2, description => $name }], backend => [$peer_key]);
+            $matches = $c->db->get_services(filter => [{ host_name => $name2, description => $name }], backend => [$peer_key]);
         }
         elsif($type eq 'servicegroup') {
-            $matches = $c->{'db'}->get_hostgroups(filter => [{ name => $name }], backend => [$peer_key]);
+            $matches = $c->db->get_hostgroups(filter => [{ name => $name }], backend => [$peer_key]);
         }
         elsif($type eq 'contact') {
-            $matches = $c->{'db'}->get_contacts(filter => [{ name => $name }], backend => [$peer_key]);
+            $matches = $c->db->get_contacts(filter => [{ name => $name }], backend => [$peer_key]);
         }
     };
     if($matches) {

@@ -152,7 +152,7 @@ sub cmd {
     }
 
     # set backends to default list, bp result should be deterministic
-    $c->{'db'}->enable_default_backends();
+    $c->db->enable_default_backends();
 
     my $t0     = [gettimeofday];
     my $ids    = [];
@@ -169,7 +169,7 @@ sub cmd {
 
     # update bp
     my $hosts = {};
-    for my $hst (@{$c->{'db'}->get_hosts( filter => [ { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ], columns => [qw/name custom_variable_names custom_variable_values/] )}) {
+    for my $hst (@{$c->db->get_hosts( filter => [ { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ], columns => [qw/name custom_variable_names custom_variable_values/] )}) {
         my $vars = Thruk::Utils::get_custom_vars($c, $hst, '', undef, 0);
         $hosts->{$hst->{'name'}}->{$vars->{'THRUK_BP_ID'}} = $hst->{'peer_key'};
     }

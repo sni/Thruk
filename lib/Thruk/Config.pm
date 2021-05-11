@@ -302,8 +302,10 @@ if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
 sub import {
     my($package, $args) = @_;
     return if $config;
-    $args   = Thruk::Base::array2hash(Thruk::Base::list($args));
-    $config = set_config_env() unless $args->{'noautoload'};
+    $args = Thruk::Base::array2hash(Thruk::Base::list($args));
+    if(!$args->{'noautoload'}) {
+        $config = set_config_env();
+    }
     return;
 }
 
@@ -819,7 +821,7 @@ sub get_toolkit_config {
                     'command_disabled'              => \&Thruk::Utils::command_disabled,
                     'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
                     'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
-                    'basename'                      => \&Thruk::Utils::basename,
+                    'basename'                      => \&Thruk::Base::basename,
                     'debug_details'                 => \&get_debug_details,
                     'format_date'                   => \&Thruk::Utils::format_date,
                     'format_cronentry'              => \&Thruk::Utils::format_cronentry,

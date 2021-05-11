@@ -159,6 +159,7 @@ lib/Thruk/Utils/References.pm
 lib/Thruk/Utils/Scripts.pm
 lib/Thruk/Utils/SelfCheck.pm
 lib/Thruk/Utils/Status.pm
+lib/Thruk/Utils/Timezone.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/Views/ExcelRenderer.pm
 lib/Thruk/Views/GDRenderer.pm

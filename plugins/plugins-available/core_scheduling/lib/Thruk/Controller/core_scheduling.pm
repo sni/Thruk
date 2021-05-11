@@ -71,7 +71,7 @@ sub core_scheduling_page {
     $grouped->{($now-$look_back )*1000} = { hosts => 0, services => 0, hosts_running => 0, services_running => 0 };
     $grouped->{($now+$look_ahead)*1000} = { hosts => 0, services => 0, hosts_running => 0, services_running => 0 };
 
-    my $data = $c->{'db'}->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
+    my $data = $c->db->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     for my $d (@{$data}) {
         next unless $d->{'check_interval'};
         next unless $d->{'has_been_checked'};
@@ -114,7 +114,7 @@ sub core_scheduling_page {
         push @{$queue->[3]->{'data'}}, [$time, $grouped->{$time}->{services}];
     }
 
-    my $perf_stats = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    my $perf_stats = $c->db->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
     if($c->req->parameters->{'json'}) {
         my $json = {
             queue    => $queue,
@@ -167,12 +167,12 @@ sub reschedule_everything {
 
     $c->stash->{scheduled} = 0;
     my $commands2send = {};
-    my($backends_list) = $c->{'db'}->select_backends('send_command');
+    my($backends_list) = $c->db->select_backends('send_command');
     for my $backend (@{$backends_list}) {
         my $cmds = _reschedule_backend($c, $backend, $hostfilter, $servicefilter);
         $commands2send->{$backend} = $cmds;
     }
-    $c->{'db'}->enable_backends($backends_list, 1);
+    $c->db->enable_backends($backends_list, 1);
 
     Thruk::Controller::cmd::bulk_send($c, $commands2send);
 
@@ -190,8 +190,8 @@ sub _reschedule_backend {
     my($c, $backend, $hostfilter, $servicefilter) = @_;
     my $cmds = [];
 
-    $c->{'db'}->enable_backends([$backend], 1);
-    my $data = $c->{'db'}->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
+    $c->db->enable_backends([$backend], 1);
+    my $data = $c->db->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     my $intervals = {};
     for my $d (@{$data}) {
         next unless $d->{'check_interval'};

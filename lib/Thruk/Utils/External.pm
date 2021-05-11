@@ -19,9 +19,10 @@ use POSIX ":sys_wait_h";
 use Storable qw/store retrieve/;
 use Time::HiRes ();
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::ToolkitRenderer ();
 
 ##############################################
 
@@ -114,8 +115,8 @@ sub perl {
        or ($c->stash->{job_id} && !$conf->{'background'}) # do not cascade jobs unless they should be forked to background
     ) {
         if(defined $conf->{'backends'}) {
-            $c->{'db'}->disable_backends();
-            $c->{'db'}->enable_backends($conf->{'backends'});
+            $c->db->disable_backends();
+            $c->db->enable_backends($conf->{'backends'});
         }
         ## no critic
         my $rc = eval($conf->{'expr'});
@@ -138,8 +139,8 @@ sub perl {
     }
 
     if(defined $conf->{'backends'}) {
-        $c->{'db'}->disable_backends();
-        $c->{'db'}->enable_backends($conf->{'backends'});
+        $c->db->disable_backends();
+        $c->db->enable_backends($conf->{'backends'});
     }
 
     my $err;
@@ -187,7 +188,7 @@ sub perl {
             Thruk::Action::AddDefaults::end($c);
             Thruk::Views::ToolkitRenderer::render_tt($c);
             my $res = $c->res->finalize;
-            Thruk::finalize_request($c, $res);
+            $c->finalize_request($res);
             Thruk::Utils::IO::write($dir."/result.dat", $res->[2]->[0]);
             $c->stash->{'file_name'}      = "result.dat";
             $c->stash->{'file_name_meta'} = {
@@ -756,7 +757,7 @@ sub do_child_stuff {
 
     delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
-    Thruk::restore_signal_handler();
+    Thruk::Base::restore_signal_handler();
 
     ## no critic
     $ENV{'THRUK_MODE'}               = 'CLI';
@@ -982,12 +983,15 @@ sub _is_running {
     # fetch status from remote node
     if(-s $dir."/hostname") {
         my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
-        my $cluster = $c ? $c->cluster : Thruk->cluster;
-        if($cluster->is_clustered() && $hosts[0] ne $Thruk::Globals::NODE_ID) {
+        chomp($hosts[0]);
+        if($hosts[0] ne $Thruk::Globals::NODE_ID) {
             confess('clustered _is_running requires $c') unless $c;
-            my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
-            if($res && exists $res->[0]) {
-                return($res->[0]);
+            my $cluster = $c->cluster;
+            if($cluster->is_clustered()) {
+                my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
+                if($res && exists $res->[0]) {
+                    return($res->[0]);
+                }
             }
             return(0);
         }
@@ -1097,8 +1101,8 @@ sub _clean_unstorable_refs {
 ##############################################
 sub _reconnect {
     my($c) = @_;
-    return unless $c->{'db'};
-    $c->{'db'}->reconnect() or do {
+    return unless $c->db();
+    $c->db->reconnect() or do {
         print STDERR "reconnect failed: ".$@;
         kill($$);
     };

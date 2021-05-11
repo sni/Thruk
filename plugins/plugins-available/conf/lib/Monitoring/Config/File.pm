@@ -9,6 +9,7 @@ use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object ();
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
+use Thruk::Utils::Crypt ();
 
 =head1 NAME
 

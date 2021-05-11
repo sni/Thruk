@@ -9,6 +9,8 @@ use Thruk::Authentication::User ();
 use Thruk::Controller::login ();
 use Thruk::UserAgent ();
 use Thruk::Utils ();
+use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

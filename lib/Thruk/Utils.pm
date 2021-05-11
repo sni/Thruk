@@ -16,25 +16,16 @@ use Carp qw/confess longmess/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Monday_of_Week Week_of_Year Today Add_Delta_Days/;
 use File::Copy qw/copy/;
-use File::Temp qw/tempfile/;
-use MIME::Base64 ();
 use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
-use URI::Escape ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Base qw/:compat/;
-use Thruk::Config 'noautoload';
-use Thruk::Utils::Cache ();
-use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::Crypt ();
 use Thruk::Utils::DateTime ();
 use Thruk::Utils::Encode ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::Status ();
-use Thruk::Views::ToolkitRenderer ();
 
 eval {
     require Clone;
@@ -916,14 +907,14 @@ sub set_custom_vars {
         my $cust_value = $custom_vars->{$cust_name};
         if(defined $host and defined $service) {
                 #($cust_value, $rc)...
-                ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                ($cust_value, undef) = $c->db->_replace_macros({
                     string  => $cust_value,
                     host    => $host,
                     service => $service,
                 });
         } elsif (defined $host) {
                 #($cust_value, $rc)...
-                ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                ($cust_value, undef) = $c->db->_replace_macros({
                     string  => $cust_value,
                     host    => $host,
                 });
@@ -1174,8 +1165,9 @@ save excel file by background job
 
 sub logs2xls {
     my($c, $type) = @_;
+    require Thruk::Utils::Status;
     Thruk::Utils::Status::set_selected_columns($c, [''], ($type || 'log'));
-    $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
+    $c->stash->{'data'} = $c->db->get_logs(%{$c->stash->{'log_filter'}});
     savexls($c);
     return;
 }
@@ -1197,10 +1189,11 @@ sub savexls {
 
     my $template = $c->stash->{'template'};
     require Thruk::Views::ExcelRenderer;
+    require File::Temp;
     my $output = Thruk::Views::ExcelRenderer::render($c, $template);
     if($c->config->{'no_external_job_forks'}) {
         #my($fh, $filename)...
-        my(undef, $filename)     = tempfile();
+        my(undef, $filename)     = File::Temp::tempfile();
         $c->stash->{'file_name'} = $filename;
         $c->stash->{job_dir}     = '';
         $c->stash->{cleanfile}   = 1;
@@ -1226,7 +1219,7 @@ sub proxifiy_url {
     if(!$c->config->{'http_backend_reverse_proxy'}) {
         return($url);
     }
-    my $peer = $c->{'db'}->get_peer_by_key($obj->{'peer_key'});
+    my $peer = $c->db->get_peer_by_key($obj->{'peer_key'});
     return($url) unless $peer;
     if($peer->{'type'} ne 'http') {
         return($url);
@@ -1273,7 +1266,7 @@ return url for remote thruk installation
 =cut
 sub get_remote_thruk_url {
     my($c, $id) = @_;
-    my $peer = $c->{'db'}->get_peer_by_key($id);
+    my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
     if($peer->{'fed_info'}) {
@@ -1437,7 +1430,7 @@ sub get_perf_image {
 
     my $custvars;
     if($options->{'service'}) {
-        my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $options->{'host'}, description => $options->{'service'} }]);
+        my $svcdata = $c->db->get_services(filter => [{ host_name => $options->{'host'}, description => $options->{'service'} }]);
         if(scalar @{$svcdata} == 0) {
             _error("no such service ".$options->{'service'}." on host ".$options->{'host'});
             return("");
@@ -1446,7 +1439,7 @@ sub get_perf_image {
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
         $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
     } else {
-        my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $options->{'host'}}]);
+        my $hstdata = $c->db->get_hosts(filter => [{ name => $options->{'host'}}]);
         if(scalar @{$hstdata} == 0) {
             _error("no such host ".$options->{'host'});
             return("");
@@ -1465,7 +1458,7 @@ sub get_perf_image {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $peer_id);
             if($proxyurl) {
                 if($options->{'follow'}) {
-                    return($c->{'db'}->rpc($peer_id, "Thruk::Utils::get_perf_image", [$c, $options]));
+                    return($c->db->rpc($peer_id, "Thruk::Utils::get_perf_image", [$c, $options]));
                 }
                 $c->{'rendered'} = 1;
                 return $c->redirect_to($proxyurl);
@@ -1494,6 +1487,8 @@ sub get_perf_image {
         }
         if($css) {
             # inject custom css into histou
+            require MIME::Base64;
+            require URI::Escape;
             $grafanaurl .= '&customCSSFile='.URI::Escape::uri_escape('data:text/css;base64,'.MIME::Base64::encode_base64($css));
         }
         $c->stash->{'last_graph_type'} = 'grafana';
@@ -1527,7 +1522,7 @@ sub get_perf_image {
             if($proxyurl) {
                 if($options->{'follow'}) {
                     if($options->{'service'} && $options->{'service'} eq '_HOST_') { $options->{'service'} = ""; }
-                    return($c->{'db'}->rpc($peer_id, "Thruk::Utils::get_perf_image", [$c, $options]));
+                    return($c->db->rpc($peer_id, "Thruk::Utils::get_perf_image", [$c, $options]));
                 }
                 $c->{'rendered'} = 1;
                 return $c->redirect_to($proxyurl);
@@ -1553,7 +1548,8 @@ sub get_perf_image {
         Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'});
     }
 
-    my($fh, $filename) = tempfile();
+    require File::Temp;
+    my($fh, $filename) = File::Temp::tempfile();
     CORE::close($fh);
     my $cmd = $exporter.' "'.$options->{'host'}.'" "'.$options->{'service'}.'" "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$options->{'source'}.'"';
     if($grafanaurl) {
@@ -1753,6 +1749,7 @@ sub get_fake_session {
             $sessiondata->{$key} = $extra->{$key};
         }
     }
+    require Thruk::Utils::CookieAuth;
     $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessiondata->{'private_key'};
     $c->stash->{'fake_session_file'} = $sessiondata->{'file'};
@@ -2008,9 +2005,10 @@ sub update_cron_file {
     # ensure proper cron.log permission
     open(my $fh, '>>', $errorlog);
 
+    require File::Temp;
     if($c->config->{'cron_pre_edit_cmd'}) {
         local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
-        my($fh2, $tmperror) = tempfile();
+        my($fh2, $tmperror) = File::Temp::tempfile();
         Thruk::Utils::IO::close($fh2, $tmperror);
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
         my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
@@ -2365,7 +2363,7 @@ sub wait_after_reload {
     my $procinfo = {};
     my $done     = 0;
     my $options = {};
-    if($ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.3')) {
+    if($ENV{'THRUK_USE_LMD'}) {
         $options = {
                 'header' => {
                     'WaitTimeout'   => 2000,
@@ -2379,8 +2377,8 @@ sub wait_after_reload {
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
             alarm(5);
-            $c->{'db'}->reset_failed_backends();
-            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey, options => $options);
+            $c->db->reset_failed_backends();
+            $procinfo = $c->db->get_processinfo(backend => $pkey, options => $options);
         };
         alarm(0);
         if($@) {
@@ -2544,6 +2542,7 @@ sub backup_data_file {
         }
     }
 
+    require Thruk::Utils::Crypt;
     my $old_hash = $last_backup ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($last_backup)) : '';
     my $new_hash = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
     if($force || $new_hash ne $old_hash) {
@@ -2631,6 +2630,7 @@ sub get_template_variable {
     $stash->{'var'}   = $var;
     my $default_time_locale = POSIX::setlocale(POSIX::LC_TIME);
     my $data;
+    require Thruk::Views::ToolkitRenderer;
     eval {
         Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', $stash, \$data);
     };
@@ -2673,7 +2673,7 @@ sub precompile_templates {
     }
 
     # no backends required
-    $c->{'db'}->disable_backends() if $c->{'db'};
+    $c->db->disable_backends() if $c->db();
 
     my $stderr_output;
     # First, save away STDERR
@@ -2910,8 +2910,8 @@ returns array of backend ids converted as list of hashes
 sub backends_list_to_hash {
     my($c, $backends) = @_;
     if(!defined $backends) {
-        confess("backends uninitialized") unless $c->{'db'};
-        ($backends) = $c->{'db'}->select_backends('get_status');
+        confess("backends uninitialized") unless $c->db();
+        ($backends) = $c->db->select_backends('get_status');
     }
     if(ref $backends eq 'HASH') {
         # expand first
@@ -2926,16 +2926,16 @@ sub backends_list_to_hash {
             $name    = $back->{$key};
             $back    = $key;
         }
-        my $backend = $c->{'db'}->get_peer_by_key($back);
+        my $backend = $c->db->get_peer_by_key($back);
         $name = $backend->{'name'} if $backend;
         push @{$backendslist}, { $back => $name };
     }
     my $hashlist = {
         backends => $backendslist,
     };
-    if($c->{'db'}->{'sections_depth'} >= 1) {
+    if($c->db->{'sections_depth'} >= 1) {
         # save original list
-        my($selected_backends) = $c->{'db'}->select_backends('get_hosts');
+        my($selected_backends) = $c->db->select_backends('get_hosts');
 
         # save completly enabled sections
         Thruk::Action::AddDefaults::update_site_panel_hashes($c, $backends);
@@ -2998,15 +2998,15 @@ sub backends_hash_to_list {
     # array format
     for my $b (@{Thruk::Base::list($hashlist)}) {
         if(ref $b eq '') {
-            confess("backends uninitialized") unless $c->{'db'};
-            my $backend = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
+            confess("backends uninitialized") unless $c->db();
+            my $backend = $c->db->get_peer_by_key($b) || $c->db->get_peer_by_name($b);
             push @{$backends}, ($backend ? $backend->peer_key() : $b);
         } else {
             for my $key (keys %{$b}) {
-                confess("backends uninitialized") unless $c->{'db'};
-                my $backend = $c->{'db'}->get_peer_by_key($key);
+                confess("backends uninitialized") unless $c->db();
+                my $backend = $c->db->get_peer_by_key($key);
                 if(!defined $backend && defined $b->{$key}) {
-                    $backend = $c->{'db'}->get_peer_by_key($b->{$key});
+                    $backend = $c->db->get_peer_by_key($b->{$key});
                 }
                 if($backend) {
                     push @{$backends}, $backend->peer_key();
@@ -3305,6 +3305,7 @@ sub get_timezone_data {
     my($c, $add_server) = @_;
 
     my $timezones = [];
+    require Thruk::Utils::Cache;
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
     my $data  = $cache->get('timezones');
     my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H:%M");
@@ -3464,85 +3465,12 @@ sub dump_params {
     local $Data::Dumper::Indent = 0 if $flat;
     my $dump = Dumper($params);
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
-    $dump    = clean_credentials_from_string($dump);
+    $dump    = Thruk::Base::clean_credentials_from_string($dump);
     if($max_length && $max_length > 3 && length($dump) > $max_length) {
         $dump    = substr($dump, 0, ($max_length-3)).'...';
     }
     $dump    =~ s%;$%%gmx;
     return($dump);
-}
-
-##############################################
-
-=head2 clean_credentials_from_string
-
-    clean_credentials_from_string($string)
-
-returns strings with potential credentials removed
-
-=cut
-sub clean_credentials_from_string {
-    my($str) = @_;
-
-    for my $key (qw/password credential credentials CSRFtoken/) {
-        $str    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx; # remove from json encoded data
-        $str    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx; # same, but with single quotes
-        $str    =~ s|(%22)($key)(%22%3A%22).*?(%22)|$1$2$3...$4|gmx;  # remove from url encoded data
-
-        $str    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
-        $str    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
-    }
-
-    return($str);
-}
-
-##############################################
-
-=head2 basename
-
-    basename($path)
-
-returns basename for given path
-
-=cut
-sub basename {
-    my($path) = @_;
-    my $basename = $path;
-    $basename    =~ s%^.*/%%gmx;
-    return($basename);
-}
-
-##############################################
-
-=head2 dirname
-
-    dirname($path)
-
-returns dirname for given path
-
-=cut
-sub dirname {
-    my($path) = @_;
-    my $dirname = $path;
-    $dirname    =~ s%/[^/]*$%%gmx;
-    return($dirname);
-}
-
-##############################################
-
-=head2 looks_like_regex
-
-    looks_like_regex($str)
-
-returns true if $string looks like a regular expression
-
-=cut
-sub looks_like_regex {
-    my($str) = @_;
-    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
-        return(1);
-    }
-    return;
 }
 
 ##############################################
@@ -3779,6 +3707,144 @@ sub scale_out {
     );
     $pool->add_bulk($opt{'jobs'});
     return($pool->remove_all($opt{'collect'}));
+}
+
+########################################
+
+=head2 page_data
+
+  page_data($c, $data, [$result_size], [$total_size])
+
+adds paged data set to the template stash.
+Data will be available as 'data'
+The pager itself as 'pager'
+
+=cut
+
+sub page_data {
+    my($c, $data, $default_result_size, $total_size) = @_;
+    $c    = $Thruk::Globals::c unless $c;
+    $data = [] unless $data;
+    return $data unless defined $c;
+    $default_result_size = $c->stash->{'default_page_size'} unless defined $default_result_size;
+
+    local $ENV{'THRUK_USE_LMD'} = undef;
+
+    # set some defaults
+    my $pager = { current_page => 1, total_entries => 0 };
+    $c->stash->{'pager'} = $pager;
+    $c->stash->{'pages'} = 0;
+    $c->stash->{'data'}  = $data;
+
+    # page only in html mode
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
+    return $data unless $view_mode eq 'html';
+    my $entries = $c->req->parameters->{'entries'} || $default_result_size;
+    return $data unless defined $entries;
+    return $data unless $entries =~ m/^(\d+|all)$/mx;
+    $c->stash->{'entries_per_page'} = $entries;
+
+    # we dont use paging at all?
+    unless($c->stash->{'use_pager'}) {
+        $pager->{'total_entries'} = ($total_size || scalar @{$data});
+        return $data;
+    }
+
+    if(defined $total_size) {
+        $pager->{'total_entries'} = $total_size;
+    } else {
+        $pager->{'total_entries'} = scalar @{$data};
+    }
+    if($entries eq 'all') { $entries = $pager->{'total_entries'}; }
+    my $pages = 0;
+    if($entries > 0) {
+        $pages = POSIX::ceil($pager->{'total_entries'} / $entries);
+    }
+    else {
+        $c->stash->{'data'} = $data;
+        return $data;
+    }
+    if($pager->{'total_entries'} == 0) {
+        $c->stash->{'data'} = $data;
+        return $data;
+    }
+
+    my $page = 1;
+    # current page set by get parameter
+    if(defined $c->req->parameters->{'page'}) {
+        $page = $c->req->parameters->{'page'};
+    }
+    # current page set by jump anchor
+    elsif(defined $c->req->parameters->{'jump'}) {
+        my $nr = 0;
+        my $jump = $c->req->parameters->{'jump'};
+        if(exists $data->[0]->{'description'}) {
+            for my $row (@{$data}) {
+                $nr++;
+                if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
+                    $page = POSIX::ceil($nr / $entries);
+                    last;
+                }
+            }
+        }
+        elsif(exists $data->[0]->{'name'}) {
+            for my $row (@{$data}) {
+                $nr++;
+                if(defined $row->{'name'} and $row->{'name'} eq $jump) {
+                    $page = POSIX::ceil($nr / $entries);
+                    last;
+                }
+            }
+        }
+    }
+
+    # last/first/prev or next button pressed?
+    if(   exists $c->req->parameters->{'next'}
+       or exists $c->req->parameters->{'next.x'} ) {
+        $page++;
+    }
+    elsif (   exists $c->req->parameters->{'previous'}
+           or exists $c->req->parameters->{'previous.x'} ) {
+        $page-- if $page > 1;
+    }
+    elsif (    exists $c->req->parameters->{'first'}
+            or exists $c->req->parameters->{'first.x'} ) {
+        $page = 1;
+    }
+    elsif (    exists $c->req->parameters->{'last'}
+            or exists $c->req->parameters->{'last.x'} ) {
+        $page = $pages;
+    }
+
+    if(!defined $page)      { $page = 1; }
+    if($page !~ m|^\d+$|mx) { $page = 1; }
+    if($page < 0)           { $page = 1; }
+    if($page > $pages)      { $page = $pages; }
+
+    $c->stash->{'current_page'} = $page;
+    $pager->{'current_page'}    = $page;
+
+    if($entries eq 'all') {
+        $c->stash->{'data'} = $data;
+    }
+    else {
+        if(!$ENV{'THRUK_USE_LMD'}) {
+            if($page == $pages) {
+                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
+            } else {
+                $data = [splice(@{$data}, $entries*($page-1), $entries)];
+            }
+        }
+        $c->stash->{'data'} = $data;
+    }
+
+    $c->stash->{'pages'} = $pages;
+
+    # set some variables to avoid undef values in templates
+    $c->stash->{'pager_previous_page'} = $page > 1      ? $page - 1 : 0;
+    $c->stash->{'pager_next_page'}     = $page < $pages ? $page + 1 : 0;
+
+    return $data;
 }
 
 ##############################################

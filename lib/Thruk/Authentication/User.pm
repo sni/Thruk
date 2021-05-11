@@ -189,8 +189,8 @@ sub get_dynamic_roles {
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data,$email);
-    confess("no db") unless $c->{'db'};
-    $data = $c->{'db'}->get_can_submit_commands($self->{'username'});
+    confess("no db") unless $c->db();
+    $data = $c->db->get_can_submit_commands($self->{'username'});
     if(defined $data) {
         for my $dat (@{$data}) {
             $alias = $dat->{'alias'} if defined $dat->{'alias'};
@@ -207,7 +207,7 @@ sub get_dynamic_roles {
 
     # add roles from groups in cgi.cfg
     my $roles  = [];
-    my $groups = [sort keys %{$c->{'db'}->get_contactgroups_by_contact($self->{'username'})}];
+    my $groups = [sort keys %{$c->db->get_contactgroups_by_contact($self->{'username'})}];
     my $groups_hash = Thruk::Base::array2hash($groups);
     my $roles_by_group = {};
     for my $key (@{$Thruk::Constants::possible_roles}) {
@@ -349,16 +349,16 @@ sub check_permissions {
 
     my $count = 0;
     if($type eq 'host') {
-        my $hosts = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), name => $value ]);
+        my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), name => $value ]);
         $count = 1 if defined $hosts and scalar @{$hosts} > 0;
     }
     elsif($type eq 'service') {
-        my $services = $c->{'db'}->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), description => $value, host_name => $value2 ]);
+        my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), description => $value, host_name => $value2 ]);
         $count = 1 if defined $services and scalar @{$services} > 0;
     }
     elsif($type eq 'hostgroup') {
-        my $hosts1 = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), groups => { '>=' => $value } ]);
-        my $hosts2 = $c->{'db'}->get_host_names(filter => [ groups => { '>=' => $value } ]);
+        my $hosts1 = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), groups => { '>=' => $value } ]);
+        my $hosts2 = $c->db->get_host_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of hosts is the same number as hosts with authorization
         if(defined $hosts1 and defined $hosts2 and scalar @{$hosts1} == scalar @{$hosts2} and scalar @{$hosts1} != 0) {
@@ -366,8 +366,8 @@ sub check_permissions {
         }
     }
     elsif($type eq 'servicegroup') {
-        my $services1 = $c->{'db'}->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), groups => { '>=' => $value } ]);
-        my $services2 = $c->{'db'}->get_service_names(filter => [ groups => { '>=' => $value } ]);
+        my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), groups => { '>=' => $value } ]);
+        my $services2 = $c->db->get_service_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of services is the same number as services with authorization
         if(defined $services1 and defined $services2 and scalar @{$services1} == scalar @{$services2} and scalar @{$services1} != 0) {

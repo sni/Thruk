@@ -53,7 +53,7 @@ sub cmd {
         $hostfilter = [{ host_name => $hostname }];
     }
     my $uniq = {};
-    for my $svc (@{$c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $hostfilter], sort => {'ASC' => [ 'host_name', 'description' ] })}) {
+    for my $svc (@{$c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $hostfilter], sort => {'ASC' => [ 'host_name', 'description' ] })}) {
         my $name;
         if($hostname) {
             $name = $svc->{'description'};

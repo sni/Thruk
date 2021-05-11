@@ -57,8 +57,8 @@ sub index {
             $hostfilter = [ { 'state'=> { '>' => 0 } }, {'has_been_checked' => 1} ];
             $servicefilter = [ { 'state'=> { '>' => 0 } }, {'has_been_checked' => 1} ];
     }
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
     $c->stash->{services}  = $services;
     $c->stash->{hosts}     = $hosts;
     $c->stash->{template}  = 'wml.tt';

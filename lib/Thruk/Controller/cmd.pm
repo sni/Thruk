@@ -7,6 +7,7 @@ use Data::Dumper;
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::ToolkitRenderer ();
 
 =head1 NAME
 
@@ -49,7 +50,7 @@ sub index {
         $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
     }
     if(!defined $c->req->parameters->{'backend'}) {
-        my($backends_list) = $c->{'db'}->select_backends('send_command');
+        my($backends_list) = $c->db->select_backends('send_command');
         $c->req->parameters->{'backend'} = $backends_list;
     }
 
@@ -185,7 +186,7 @@ sub index {
         # comments / downtimes quick commands
         for my $id (@idsdata) {
             my($typ, $id, $backend) = split(/_/m,$id, 3);
-            $c->{'db'}->enable_backends($backend, 1);
+            $c->db->enable_backends($backend, 1);
             if($typ eq 'hst' and defined $host_quick_commands->{$quick_command} ) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
             }
@@ -225,7 +226,7 @@ sub index {
             $c->stash->{'lasthost'}      = $host;
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
-            $c->{'db'}->enable_backends(\@backends, 1);
+            $c->db->enable_backends(\@backends, 1);
             if( $quick_command == 5 ) {
                 if($c->req->parameters->{'active_downtimes'}) {
                     _remove_all_downtimes( $c, $host, undef, 'active' );
@@ -271,7 +272,7 @@ sub index {
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
             $c->req->parameters->{'service'} = $service;
-            $c->{'db'}->enable_backends(\@backends, 1);
+            $c->db->enable_backends(\@backends, 1);
             if( $quick_command == 5 ) {
                 if($c->req->parameters->{'active_downtimes'}) {
                     _remove_all_downtimes( $c, $host, $service, 'active' );
@@ -338,7 +339,7 @@ sub _remove_all_downtimes {
     }
 
     # get list of all downtimes
-    my $data = $c->{'db'}->get_downtimes(%{$options});
+    my $data = $c->db->get_downtimes(%{$options});
     my @ids     = keys %{Thruk::Base::array2hash($data, 'id')};
     for my $id ( @ids ) {
         $c->req->parameters->{'down_id'} = $id;
@@ -378,8 +379,8 @@ sub _check_for_commands {
     else {
         # no command submited, view commands page (can be nonnumerical)
         if( $cmd_typ eq "55" or $cmd_typ eq "56" or $cmd_typ eq "86" ) {
-            $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
-            $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);
+            $c->stash->{'hostdowntimes'}    = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
+            $c->stash->{'servicedowntimes'} = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);
         }
 
         $c->stash->{'backend'} = $c->req->parameters->{'backend'} || '';
@@ -519,7 +520,7 @@ sub redirect_or_success {
                 eval { # this query is not critical, so it can safely fail
                     if(!defined $c->stash->{'lastservice'} || $c->stash->{'lastservice'} eq '') {
                         $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
-                        $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                        $c->db->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                            { 'name' => $c->stash->{'lasthost'} } ],
                                                 columns => [ 'name' ],
                                                 options => $options,
@@ -527,7 +528,7 @@ sub redirect_or_success {
                     }
                     if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
                         $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.$seperator.$c->stash->{'lastservice'};
-                        $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
+                        $c->db->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
                                                               { 'host_name'   => $c->stash->{'lasthost'} },
                                                               { 'description' => $c->stash->{'lastservice'} },
                                                              ],
@@ -747,7 +748,7 @@ sub do_send_command {
         }
     }
 
-    my($backends_list) = $c->{'db'}->select_backends('send_command');
+    my($backends_list) = $c->db->select_backends('send_command');
     for my $cmd_line ( split /\n/mx, $cmd ) {
         utf8::decode($cmd_line);
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
@@ -838,7 +839,7 @@ sub _bulk_send_backend {
 
     my @names;
     for my $b (@{$options->{'backend'}}) {
-        my $peer = $c->{'db'}->get_peer_by_key($b);
+        my $peer = $c->db->get_peer_by_key($b);
         push @names, (defined $peer ? $peer->peer_name() : $b);
     }
     my $backends_string = join(',', sort @names);
@@ -860,7 +861,7 @@ sub _bulk_send_backend {
     }
     if(!$testmode) {
         eval {
-            $c->{'db'}->send_command(%{$options});
+            $c->db->send_command(%{$options});
         };
         my $err = $@;
         if($err) {
@@ -931,7 +932,7 @@ sub _check_reschedule_alias {
     my $servicename = $c->req->parameters->{'service'};
     my $hostname    = $c->req->parameters->{'host'};
 
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
     return unless defined $services;
     my $service = $services->[0];
     return unless defined $service;
@@ -980,12 +981,12 @@ sub _set_host_service_from_down_com_ids {
 
     # for comment ids
     if( $c->req->parameters->{'com_id'} ) {
-        $data = $c->{'db'}->get_comments(filter => [ id => $c->req->parameters->{'com_id'} ]);
+        $data = $c->db->get_comments(filter => [ id => $c->req->parameters->{'com_id'} ]);
     }
 
     # for downtime ids
     if( $c->req->parameters->{'down_id'} ) {
-        $data = $c->{'db'}->get_downtimes(filter => [ id => $c->req->parameters->{'down_id'} ]);
+        $data = $c->db->get_downtimes(filter => [ id => $c->req->parameters->{'down_id'} ]);
     }
 
     if( defined $data->[0] ) {
@@ -1007,27 +1008,27 @@ sub get_affected_backends {
 
     my $data;
     if(defined $required_fields->{'hostgroup'}) {
-        $data = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), name => $required_fields->{'hostgroup'}],
+        $data = $c->db->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), name => $required_fields->{'hostgroup'}],
                                            columns => [qw/name/] );
     }
     elsif(defined $required_fields->{'servicegroup'}) {
-        $data = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $required_fields->{'servicegroup'}],
+        $data = $c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $required_fields->{'servicegroup'}],
                                               columns => [qw/name/] );
     }
     elsif(defined $required_fields->{'service'}) {
-        $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), description => $required_fields->{'service'}, host_name => $required_fields->{'host'}],
+        $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), description => $required_fields->{'service'}, host_name => $required_fields->{'host'}],
                                          columns => [qw/host_name description/] );
     }
     elsif(defined $required_fields->{'host'}) {
-        $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $required_fields->{'host'}],
+        $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $required_fields->{'host'}],
                                       columns => [qw/name/] );
     }
     elsif(defined $required_fields->{'contact'}) {
-        $data = $c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' ), name => $required_fields->{'contact'}],
+        $data = $c->db->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' ), name => $required_fields->{'contact'}],
                                       columns => [qw/name/] );
     }
     elsif(defined $required_fields->{'contactgroup'}) {
-        $data = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ), name => $required_fields->{'contactgroup'}],
+        $data = $c->db->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ), name => $required_fields->{'contactgroup'}],
                                       columns => [qw/name/] );
     }
 
@@ -1066,7 +1067,7 @@ sub add_remove_comments_commands_from_disabled_commands {
     return unless exists $cmds_for_type->{$cmd_typ};
 
     for my $cmd (@{$cmds_for_type->{$cmd_typ}}) {
-        for my $comm (@{$c->{'db'}->get_comments_by_pattern($c, $host, $service, $cmd)}) {
+        for my $comm (@{$c->db->get_comments_by_pattern($c, $host, $service, $cmd)}) {
             _debug("deleting comment with ID $comm->{'id'} on backend $comm->{'backend'}");
             if ($cmd =~ m/HOST/mx) {
                 push @{$list->{$comm->{'backend'}}},

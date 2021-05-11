@@ -6,6 +6,7 @@ use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
 use URI::Escape qw/uri_escape/;
 
+use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::CLI ();
@@ -16,6 +17,7 @@ my $c = Thruk::Utils::CLI->new()->get_c();
 Thruk::Utils::set_user($c, username => '(cli)', auth_src => "scripts", internal => 1, superuser => 1);
 $c->stash->{'is_admin'} = 1;
 $c->config->{'cluster_enabled'} = 1; # fake cluster
+Thruk::setup_cluster() unless defined $Thruk::Globals::NODE_ID;
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
 my $res = $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
@@ -27,6 +29,7 @@ my $host_name           = $test_svc->{'host_name'};
 my $service_description = $test_svc->{'description'};
 my $host_group          = $test_svc->{'host_groups'}->[0];
 my $service_group       = $test_svc->{'groups'}->[0];
+
 
 my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");

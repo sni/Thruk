@@ -82,8 +82,8 @@ sub index {
         }
         $sub = 'Thruk::Utils::Avail::calculate_availability' unless $sub;
         if($backends and ($c->req->parameters->{'backends_toggle'} or $c->req->parameters->{'report_backends_toggle'})) {
-            $c->{'db'}->disable_backends();
-            $c->{'db'}->enable_backends($backends);
+            $c->db->disable_backends();
+            $c->db->enable_backends($backends);
         }
         if($c->req->parameters->{'param'}) {
             my $req = Thruk::Request->new({ QUERY_STRING => $c->req->parameters->{'param'} });
@@ -508,7 +508,7 @@ sub _set_report_data {
     $c->stash->{'t2'} = $c->stash->{'t2'} - $c->stash->{'t2'}%60;
 
     $c->stash->{r}           = $r;
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{timeperiods} = $c->db->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
     $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
 
     Thruk::Utils::Reports::add_report_defaults($c, undef, $r);

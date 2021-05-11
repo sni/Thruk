@@ -197,7 +197,7 @@ sub update_status {
     my $t0 = [gettimeofday];
 
     # set backends to default list, bp result should be deterministic
-    $c->{'db'}->enable_default_backends();
+    $c->db->enable_default_backends();
 
     $type = 0 unless defined $type;
     my $last_state = $self->{'status'};
@@ -687,7 +687,7 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
+        my $data   = $c->db->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $hostdata  = Thruk::Base::array2hash($data, 'name');
     }
     if(scalar keys %{$servicefilter} > 0) {
@@ -723,7 +723,7 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
+        my $data   = $c->db->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Base::array2hash($data, 'host_name', 'description');
     }
     if(!$expand_groups) {
@@ -733,7 +733,7 @@ sub bulk_fetch_live_data {
                 push @filter, { name => $hostgroupname };
             }
             my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-            my $data   = $c->{'db'}->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
+            my $data   = $c->db->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
                                                                                      num_hosts_unreach num_hosts_up num_services num_services_crit
                                                                                      num_services_ok num_services_pending num_services_unknown
                                                                                      num_services_warn worst_service_state worst_host_state/]);
@@ -745,7 +745,7 @@ sub bulk_fetch_live_data {
                 push @filter, { name => $servicegroupname };
             }
             my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-            my $data   = $c->{'db'}->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
+            my $data   = $c->db->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
                                                                                            num_services_ok num_services_pending num_services_unknown
                                                                                            num_services_warn worst_service_state/]);
             $servicegroupdata  = Thruk::Base::array2hash($data, 'name');
@@ -845,7 +845,7 @@ sub _submit_results_to_core {
     }
     else {
         # if there is only on backend, use that
-        my $peers = $c->{'db'}->get_peers();
+        my $peers = $c->db->get_peers();
         if(scalar @{$peers} == 1) {
             $c->config->{'Thruk::Plugin::BP'}->{'result_backend'} = $peers->[0]->peer_key();
             return $self->_submit_results_to_core_backend($c, $results);
@@ -864,7 +864,7 @@ sub _submit_results_to_core_backend {
     my($self, $c, $results) = @_;
 
     my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-    my $peer = $c->{'db'}->get_peer_by_key($name);
+    my $peer = $c->db->get_peer_by_key($name);
     die("configured result_backend ".$name." does not exist.") unless $peer;
     my $pkey = $peer->peer_key();
 
@@ -874,7 +874,7 @@ sub _submit_results_to_core_backend {
             'command' => 'COMMAND '.join("\n\nCOMMAND ", @{$cmds}),
             'backend' => [ $pkey ],
         };
-        $c->{'db'}->send_command( %{$options} );
+        $c->db->send_command( %{$options} );
     }
 
     return;
@@ -928,11 +928,11 @@ sub _sync_ack_downtime_status {
     my $peer;
     if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
         my $b = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-        $peer = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
+        $peer = $c->db->get_peer_by_key($b) || $c->db->get_peer_by_name($b);
     }
     else {
         # if there is only on backend, use that
-        my $peers = $c->{'db'}->get_peers();
+        my $peers = $c->db->get_peers();
         if(scalar @{$peers} == 1) {
             $peer = $peers->[0];
         }
@@ -1027,7 +1027,7 @@ sub _sync_ack_downtime_status {
             'command' => 'COMMAND '.join("\n\nCOMMAND ", @{$cmds}),
             'backend' => [ $pkey ],
         };
-        $c->{'db'}->send_command( %{$options} );
+        $c->db->send_command( %{$options} );
     }
 
     return;
@@ -1173,7 +1173,7 @@ sub _list_failed_backends {
     $failed_backends = {} unless $failed_backends;
     for my $key (@{$previous_affected}) {
         next unless $failed_backends->{$key};
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         push @{$failed}, ($peer ? $peer->{'name'} : $key);
     }
     return $failed;

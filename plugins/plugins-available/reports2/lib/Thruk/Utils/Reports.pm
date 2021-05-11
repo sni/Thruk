@@ -27,6 +27,7 @@ use Thruk::Action::AddDefaults ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Reports::Render ();
+use Thruk::Views::ToolkitRenderer ();
 
 ##########################################################
 
@@ -322,7 +323,7 @@ sub report_send {
     if($report->{'var'}->{'json_file'} && -e $report->{'var'}->{'json_file'}) {
         $msg->attach(Type    => 'text/json',
                  Path        => $report->{'var'}->{'json_file'},
-                 Filename    => encode_utf8(Thruk::Utils::basename($report->{'var'}->{'json_file'})),
+                 Filename    => encode_utf8(Thruk::Base::basename($report->{'var'}->{'json_file'})),
                  Disposition => 'attachment',
                  Encoding    => 'base64',
         );
@@ -557,13 +558,13 @@ sub generate_report {
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 2, 'getting backends') if $ENV{'THRUK_JOB_DIR'};
 
     # check backend connections
-    my $processinfo = $c->{'db'}->get_processinfo();
+    my $processinfo = $c->db->get_processinfo();
     if($options->{'backends'}) {
         my @failed;
         for my $b (keys %{$disabled_backends}) {
             next unless $disabled_backends->{$b} == 0;
             if($c->stash->{'failed_backends'}->{$b}) {
-                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+                push @failed, $c->db->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
         }
         if($options->{'failed_backends'} eq 'cancel') {
@@ -651,7 +652,7 @@ sub generate_report {
         my @failed;
         for my $b (@{$options->{'backends'}}) {
             if($c->stash->{'failed_backends'}->{$b}) {
-                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+                push @failed, $c->db->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
         }
         if($options->{'failed_backends'} eq 'cancel' and scalar @failed > 0) {

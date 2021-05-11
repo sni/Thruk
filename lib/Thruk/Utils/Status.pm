@@ -15,7 +15,6 @@ use strict;
 use Carp qw/confess/;
 use URI::Escape qw/uri_unescape/;
 
-use Thruk::Backend::Manager ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
@@ -658,7 +657,7 @@ sub fill_totals_box {
         and $servicefilter
       ) {
         # set host status from service query
-        my $services = $c->{'db'}->get_hosts_by_servicequery( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        my $services = $c->db->get_hosts_by_servicequery( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
         $service_stats = {
             'pending'                => 0,
             'ok'                     => 0,
@@ -718,8 +717,8 @@ sub fill_totals_box {
             }
         }
     } else {
-        $host_stats    = $c->{'db'}->get_host_totals_stats(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    $hostfilter    ] );
-        $service_stats = $c->{'db'}->get_service_totals_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        $host_stats    = $c->db->get_host_totals_stats(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    $hostfilter    ] );
+        $service_stats = $c->db->get_service_totals_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
     }
     $c->stash->{'host_stats'}    = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
@@ -854,7 +853,7 @@ sub single_search {
 
         if($op eq '~~' || $op eq '!~~') {
             # regular expression filter are supported since LMD 1.3.4
-            if($ENV{'THRUK_LMD_VERSION'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4')) {
+            if($ENV{'THRUK_USE_LMD_VERSION'}) {
                 $listop = $op;
             }
         }
@@ -970,7 +969,7 @@ sub single_search {
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
-            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
+            if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'hostgroup');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
@@ -985,7 +984,7 @@ sub single_search {
             push @hostgroupfilter,     { name        => { $op     => $value } };
         }
         elsif ( $filter->{'type'} eq 'servicegroup' ) {
-            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
+            if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'servicegroup');
                 push @servicefilter,       $sfilter;
                 push @servicetotalsfilter, $sfilter;
@@ -997,7 +996,7 @@ sub single_search {
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
-            if(($op eq '~~' or $op eq '!~~') && (!$ENV{'THRUK_LMD_VERSION'} || !Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '1.3.4'))) {
+            if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'contacts');
                 push @hostfilter,          $hfilter;
                 push @hosttotalsfilter,    $hfilter;
@@ -1641,10 +1640,10 @@ sub get_comments_filter {
         }
     }
     else {
-        my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
+        my $comments     = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @comment_ids  = sort keys %{ Thruk::Base::array2hash([@{$comments}], 'id') };
 
-        my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
+        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @downtime_ids = sort keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
         $num             = scalar @downtime_ids + scalar @comment_ids;
         if(scalar @comment_ids == 0) { @comment_ids = (-1); }
@@ -1686,13 +1685,13 @@ sub get_groups_filter {
     if($c->stash->{'cache_groups_filter'}) {
         my $cache = $c->stash->{'cache_groups_filter'};
         if($type eq 'hostgroup') {
-            $cache->{$type} = $c->{'db'}->get_hostgroup_names() unless defined $cache->{$type};
+            $cache->{$type} = $c->db->get_hostgroup_names() unless defined $cache->{$type};
         }
         elsif($type eq 'servicegroup') {
-            $cache->{$type} = $c->{'db'}->get_servicegroup_names() unless defined $cache->{$type};
+            $cache->{$type} = $c->db->get_servicegroup_names() unless defined $cache->{$type};
         }
         elsif($type eq 'contacts') {
-            $cache->{$type} = $c->{'db'}->get_contact_names() unless defined $cache->{$type};
+            $cache->{$type} = $c->db->get_contact_names() unless defined $cache->{$type};
         }
         ## no critic
         @names = grep(/$value/i, @{$cache->{$type}});
@@ -1701,13 +1700,13 @@ sub get_groups_filter {
     } else {
         my $groups;
         if($type eq 'hostgroup') {
-            $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
+            $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
         }
         elsif($type eq 'servicegroup') {
-            $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
+            $groups = $c->db->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
         }
         elsif($type eq 'contacts') {
-            $groups = $c->{'db'}->get_contacts( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
+            $groups = $c->db->get_contacts( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
         }
         @names = sort keys %{ Thruk::Base::array2hash([@{$groups}], 'name') };
         if(scalar @names == 0) { @names = (''); }
@@ -1902,7 +1901,7 @@ sub get_downtimes_filter {
     }
     else {
         # Get all the downtimes
-        my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
+        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
         my @downtime_ids = sort keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
 
         # If no downtimes returned
@@ -2100,13 +2099,13 @@ sub get_service_matrix {
 
     if(defined $servicefilter) {
         # fetch hostnames first
-        my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
+        my $hostnames = $c->db->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
         for my $svc (@{$hostnames}) {
             $uniq_hosts->{$svc->{'host_name'}} = 1;
         }
     } else {
         # fetch hostnames first
-        my $hostnames = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'] );
+        my $hostnames = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'] );
 
         # get pages hosts
         for my $hst (@{$hostnames}) {
@@ -2115,7 +2114,7 @@ sub get_service_matrix {
     }
 
     my @keys = sort keys %{$uniq_hosts};
-    Thruk::Backend::Manager::page_data($c, \@keys);
+    Thruk::Utils::page_data($c, \@keys);
     @keys = (); # empty
     my $filter = [];
     for my $host_name (@{$c->stash->{'data'}}) {
@@ -2135,7 +2134,7 @@ sub get_service_matrix {
     }
 
     # get real services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter], extra_columns => $extra_columns );
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter], extra_columns => $extra_columns );
 
     # build matrix
     my $matrix        = {};
@@ -2201,21 +2200,21 @@ sub serveraction {
     if($host || $service) {
         my $objs;
         if($service) {
-            $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
+            $objs = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
         } else {
-            $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
+            $objs = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
         }
         $obj = $objs->[0];
         return(1, 'no such object') unless $obj;
     }
 
-    %{$macros} = (%{$macros}, %{$c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0})});
+    %{$macros} = (%{$macros}, %{$c->db->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0})});
     $macros->{'$REMOTE_USER$'}    = $c->stash->{'remote_user'};
     $macros->{'$DASHBOARD_ID$'}   = $c->req->parameters->{'dashboard'} if $c->req->parameters->{'dashboard'};
     $macros->{'$DASHBOARD_ICON$'} = $c->req->parameters->{'icon'}      if $c->req->parameters->{'icon'};
     for my $arg (@cmdline, @args) {
         my $rc;
-        ($arg, $rc) = $c->{'db'}->replace_macros($arg, {}, $macros);
+        ($arg, $rc) = $c->db->replace_macros($arg, {}, $macros);
     }
     _debug('parsed cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
 
@@ -2553,8 +2552,8 @@ sub set_comments_and_downtimes {
     my($c) = @_;
 
     # add comments and downtimes
-    my $comments  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
-    my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
+    my $comments  = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
+    my $downtimes = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
     my $comments_by_host         = {};
     my $comments_by_host_service = {};
     if($downtimes) {
@@ -2707,10 +2706,10 @@ sub get_custom_variable_names {
     # this leads to: Sorry, Operator  for custom variable lists not implemented.
     my($hosts, $services) = ([],[]);
     if($type eq 'host' || $type eq 'all') {
-        $hosts    = $c->{'db'}->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
+        $hosts    = $c->db->get_hosts(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),  ], columns => ['custom_variable_names'] );
     }
     if($type eq 'service' || $type eq 'all') {
-        $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
+        $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
     }
     for my $obj (@{$hosts}, @{$services}) {
         next unless ref $obj->{custom_variable_names} eq 'ARRAY';

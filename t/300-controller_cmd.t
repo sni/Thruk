@@ -24,7 +24,7 @@ my $servicegroup   = TestUtils::get_test_servicegroup();
 my $post           = { test_only => 1, cmd_mod => 2, host => $host, 'service' => $service, 'servicegroup' => $servicegroup, 'hostgroup' => $hostgroup };
 
 # test quick commands
-my $backends = $c->{'db'}->get_peers();
+my $backends = $c->db->get_peers();
 SKIP: {
     my $num = 21;
     skip "test is useless with only a single backend",                $num if (scalar @{$backends} <= 1);

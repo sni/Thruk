@@ -15,6 +15,7 @@ use strict;
 use File::Copy qw/move/;
 
 use Thruk::Utils ();
+use Thruk::Utils::Crypt ();
 
 my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
 my $private_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
@@ -41,7 +42,7 @@ sub get_keys {
     my $keys   = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
-        my $basename = Thruk::Utils::basename($file);
+        my $basename = Thruk::Base::basename($file);
         next unless $basename =~ $hashed_key_file_regex;
         next if $basename =~ /\.stats$/mx;
         if($filename && $basename ne $filename) {
@@ -204,7 +205,7 @@ sub remove_key {
 
     my $keys = get_keys($c, { user => $username, file => $file});
     for my $k (@{$keys}) {
-        if(Thruk::Utils::basename($k->{'file'}) eq $file) {
+        if(Thruk::Base::basename($k->{'file'}) eq $file) {
             unlink($k->{'file'});
             unlink($k->{'file'}.'.stats');
         }
@@ -212,7 +213,7 @@ sub remove_key {
     if($c->check_user_roles('admin')) {
         my $keys = get_superuser_keys($c, $file);
         for my $k (@{$keys}) {
-            if(Thruk::Utils::basename($k->{'file'}) eq $file) {
+            if(Thruk::Base::basename($k->{'file'}) eq $file) {
                 unlink($k->{'file'});
                 unlink($k->{'file'}.'.stats');
             }
@@ -235,7 +236,7 @@ sub read_key {
     my($config, $file) = @_;
     return unless -r $file;
     my $data       = Thruk::Utils::IO::json_lock_retrieve($file);
-    my $hashed_key = Thruk::Utils::basename($file);
+    my $hashed_key = Thruk::Base::basename($file);
     my $type;
     if($hashed_key =~ m%\.([^\.]+)$%gmx) {
         $type = $1;

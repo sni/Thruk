@@ -74,10 +74,10 @@ sub _process_outagespbimp {
     my ( $c ) = @_;
 
     # We want root problems only
-    my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+    my $hst_pbs = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     is_problem => 1,
                                                   ]);
-    my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+    my $srv_pbs = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     is_problem => 1,
                                                   ]);
 
@@ -89,14 +89,14 @@ sub _process_outagespbimp {
     # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
         my $hostcomments = {};
-        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+        my $tmp = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
         for my $com (@{$tmp}) {
             $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
             $hostcomments->{$com->{'host_name'}}++;
 
         }
 
-        my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $tmp2 = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
         my $all_hosts = Thruk::Base::array2hash($tmp2, 'name');
         for my $host (@{$hst_pbs}) {
 
@@ -186,8 +186,8 @@ sub _process_bothtypes_page {
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
     # get all services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
-    my $hosts    = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
+    my $hosts    = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
     if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'data'} } = reverse @{ $c->stash->{'data'} }; }
 
 
@@ -274,24 +274,24 @@ sub businessview_index {
     }
 
     # We want root problems only
-    my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+    my $hst_pbs = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     got_business_rule => 1,
                                                   ]);
-    my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+    my $srv_pbs = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     got_business_rule => 1,
                                                   ]);
 
     # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
         my $hostcomments = {};
-        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+        my $tmp = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
         for my $com (@{$tmp}) {
             $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
             $hostcomments->{$com->{'host_name'}}++;
 
         }
 
-        my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $tmp2 = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
         my $all_hosts = Thruk::Base::array2hash($tmp2, 'name');
         for my $host (@{$hst_pbs}) {
 
@@ -372,7 +372,7 @@ sub _link_parent_hosts_and_services {
                                       { host_name          => { '='     => $hname } },
                                     ];
 
-                my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+                my $tmp_services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
                 my $srv = $tmp_services->[0];
                 push(@{$elt->{'services_parents'}}, $srv);
                 # And call this on this parent too to build a tree
@@ -381,7 +381,7 @@ sub _link_parent_hosts_and_services {
                 my $host_search_filter = [ { name               => { '='     => $parent } },
                                          ];
 
-                my $tmp_hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $host_search_filter ] );
+                my $tmp_hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $host_search_filter ] );
                 # we only got one host
                 my $hst = $tmp_hosts->[0];
 

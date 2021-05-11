@@ -9,6 +9,7 @@ use File::Temp qw/tempfile/;
 use Thruk::Action::AddDefaults ();
 use Thruk::BP::Components::BP ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -63,7 +64,7 @@ sub load_bp_data {
     if($c->check_user_roles("admin")) {
         $is_admin = 1;
     } else {
-        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $svcfilter ], columns => ['custom_variable_names', 'custom_variable_values'] );
+        my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $svcfilter ], columns => ['custom_variable_names', 'custom_variable_values'] );
         for my $s (@{$services}) {
             my $vars = Thruk::Utils::get_custom_vars($c, $s);
             if($vars->{'THRUK_BP_ID'}) {
@@ -266,8 +267,8 @@ sub save_bp_objects {
         }
         my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
         if(!$result_backend) {
-            my $peer_key = $c->{'db'}->peer_order->[0];
-            $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
+            my $peer_key = $c->db->peer_order->[0];
+            $result_backend = $c->db->get_peer_by_key($peer_key)->peer_name;
         }
 
         if($skip_reload) {
@@ -278,7 +279,7 @@ sub save_bp_objects {
         my $time = time();
         my $pkey;
         if($result_backend) {
-            my $peer = $c->{'db'}->get_peer_by_key($result_backend);
+            my $peer = $c->db->get_peer_by_key($result_backend);
             if($peer) {
                 $pkey = $peer->peer_key();
                 if(!$c->stash->{'has_proc_info'} || !$c->stash->{'backend_detail'}->{$pkey}) {
@@ -302,7 +303,7 @@ sub save_bp_objects {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
                 'backend' => [ $pkey ],
             };
-            $c->{'db'}->send_command( %{$options} );
+            $c->db->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
             $reloaded = 1;
         }

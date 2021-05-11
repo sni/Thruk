@@ -70,12 +70,12 @@ sub index {
 
     $c->{'all_nodes'} = {};
 
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
 
     # do we need servicegroups?
     if($c->stash->{groupby} eq 'servicegroup') {
         my $new_hosts;
-        my $servicegroups = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, groups => { '!=' => undef }], columns => [qw/host_name groups/]);
+        my $servicegroups = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, groups => { '!=' => undef }], columns => [qw/host_name groups/]);
         my $servicegroupsbyhost = {};
         if(defined $servicegroups) {
             for my $data (@{$servicegroups}) {

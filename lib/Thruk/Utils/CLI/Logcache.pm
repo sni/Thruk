@@ -149,7 +149,7 @@ sub cmd {
         return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
     }
 
-    my($backends) = $c->{'db'}->select_backends('get_logs');
+    my($backends) = $c->db->select_backends('get_logs');
 
     if($mode eq 'import' && !$global_options->{'yes'}) {
         # check if tables already existing

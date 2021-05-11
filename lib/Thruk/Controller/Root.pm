@@ -6,7 +6,6 @@ use URI::Escape qw/uri_escape/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -280,6 +279,7 @@ page: /thruk/cgi-bin/job.cgi
 sub job_cgi {
     my( $c ) = @_;
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    require Thruk::Utils::External;
     return Thruk::Utils::External::job_page($c);
 }
 
@@ -305,7 +305,7 @@ sub parts_cgi {
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
     if($part eq '_host_comments') {
         my $host = $c->req->parameters->{'host'};
-        $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
+        $c->stash->{'comments'}  = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
         $c->stash->{'template'}  = '_parts_comments.tt';
         return;
@@ -313,7 +313,7 @@ sub parts_cgi {
 
     if($part eq '_host_downtimes') {
         my $host = $c->req->parameters->{'host'};
-        $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => '' } ] );
+        $c->stash->{'downtimes'} = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
         $c->stash->{'template'}  = '_parts_downtimes.tt';
         return;
@@ -322,7 +322,7 @@ sub parts_cgi {
     if($part eq '_service_comments') {
         my $host = $c->req->parameters->{'host'};
         my $svc  = $c->req->parameters->{'service'};
-        $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => $svc } ] );
+        $c->stash->{'comments'}  = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => $svc } ] );
         $c->stash->{'type'}      = 'service';
         $c->stash->{'template'}  = '_parts_comments.tt';
         return;
@@ -331,7 +331,7 @@ sub parts_cgi {
     if($part eq '_service_downtimes') {
         my $host = $c->req->parameters->{'host'};
         my $svc  = $c->req->parameters->{'service'};
-        $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => $svc } ] );
+        $c->stash->{'downtimes'} = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => $svc } ] );
         $c->stash->{'type'}      = 'service';
         $c->stash->{'template'}  = '_parts_downtimes.tt';
         return;
@@ -340,7 +340,7 @@ sub parts_cgi {
     if($part eq '_service_info_popup') {
         my $host     = $c->req->parameters->{'host'};
         my $svc      = $c->req->parameters->{'service'};
-        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $svc } ], extra_columns => [qw/long_plugin_output/] );
+        my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $svc } ], extra_columns => [qw/long_plugin_output/] );
         return $c->detach('/error/index/18') unless $services->[0];
         $c->stash->{'s'}         = $services->[0];
         $c->stash->{'template'}  = '_parts_service_info_popup.tt';

@@ -107,12 +107,12 @@ sub index {
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "showlog::updatecache");
-        $c->{'db'}->renew_logcache($c);
+        $c->db->renew_logcache($c);
         $c->stats->profile(end   => "showlog::updatecache");
 
         $c->stats->profile(begin => "showlog::fetch");
         $c->stash->{'logs_from_compacted_zone'} = 0;
-        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1, limit => 1000000); # not using a limit here, makes mysql not use an index
+        $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1, limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end   => "showlog::fetch");
     }
 

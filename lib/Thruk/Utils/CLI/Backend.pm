@@ -55,20 +55,20 @@ sub cmd {
 
     my $backends;
     if(!defined $opt->{'backends'} || scalar @{$opt->{'backends'}} == 0) {
-        $c->{'db'}->enable_backends();
+        $c->db->enable_backends();
     } else {
-        ($backends) = $c->{'db'}->select_backends();
+        ($backends) = $c->db->select_backends();
         $backends = Thruk::Base::array2hash($backends);
     }
     eval {
-        $c->{'db'}->get_processinfo();
+        $c->db->get_processinfo();
     };
     _debug($@) if $@;
     Thruk::Action::AddDefaults::set_possible_backends($c, {});
     my @data;
     for my $key (@{$c->stash->{'backends'}}) {
         next if($backends && !$backends->{$key});
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         my $addr = $c->stash->{'backend_detail'}->{$key}->{'addr'};
         $addr    =~ s|/cgi-bin/remote.cgi$||mx;
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';

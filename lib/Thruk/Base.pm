@@ -21,7 +21,7 @@ our @EXPORT_OK = qw(mode verbose quiet debug trace config);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 # functions imported by Utils.pm for backwards compatibility
-my @compat_functions = qw/list array_uniq array2hash/;
+my @compat_functions = qw/list array_uniq array2hash looks_like_regex/;
 push @EXPORT_OK, @compat_functions;
 $EXPORT_TAGS{compat} = \@compat_functions;
 
@@ -344,6 +344,96 @@ sub check_for_nasty_filename {
     my($name) = @_;
     confess("no name") unless defined $name;
     if($name =~ m/(\.\.|\/|\n)/mx) {
+        return(1);
+    }
+    return;
+}
+
+###################################################
+
+=head2 restore_signal_handler
+
+    reset all changed signals
+
+=cut
+sub restore_signal_handler {
+    ## no critic
+    $SIG{INT}  = 'DEFAULT';
+    $SIG{TERM} = 'DEFAULT';
+    $SIG{PIPE} = 'DEFAULT';
+    $SIG{ALRM} = 'DEFAULT';
+    ## use critic
+    return;
+}
+
+##############################################
+
+=head2 clean_credentials_from_string
+
+    clean_credentials_from_string($string)
+
+returns strings with potential credentials removed
+
+=cut
+sub clean_credentials_from_string {
+    my($str) = @_;
+
+    for my $key (qw/password credential credentials CSRFtoken/) {
+        $str    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx; # remove from json encoded data
+        $str    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx; # same, but with single quotes
+        $str    =~ s|(%22)($key)(%22%3A%22).*?(%22)|$1$2$3...$4|gmx;  # remove from url encoded data
+
+        $str    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
+        $str    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
+    }
+
+    return($str);
+}
+
+##############################################
+
+=head2 basename
+
+    basename($path)
+
+returns basename for given path
+
+=cut
+sub basename {
+    my($path) = @_;
+    my $basename = $path;
+    $basename    =~ s%^.*/%%gmx;
+    return($basename);
+}
+
+##############################################
+
+=head2 dirname
+
+    dirname($path)
+
+returns dirname for given path
+
+=cut
+sub dirname {
+    my($path) = @_;
+    my $dirname = $path;
+    $dirname    =~ s%/[^/]*$%%gmx;
+    return($dirname);
+}
+
+##############################################
+
+=head2 looks_like_regex
+
+    looks_like_regex($str)
+
+returns true if $string looks like a regular expression
+
+=cut
+sub looks_like_regex {
+    my($str) = @_;
+    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
         return(1);
     }
     return;

@@ -4,13 +4,11 @@ use warnings;
 use strict;
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
-use POSIX ();
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 #use Thruk::Timer qw/timing_breakpoint/;
@@ -511,7 +509,7 @@ sub get_scheduling_queue {
         push @{$queue}, @{$hosts};
     }
     $queue = $self->sort_result( $queue, $options{'sort'} ) if defined $options{'sort'};
-    $self->_page_data( $c, $queue ) if defined $options{'pager'};
+    Thruk::Utils::page_data($c, $queue) if defined $options{'pager'};
     return $queue;
 }
 
@@ -982,7 +980,7 @@ sub _renew_logcache {
     my $stats = $self->logcache_stats($c);
     my $backends2import = [];
     for my $key (@{$get_results_for}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         next unless($peer && $peer->{'logcache'});
         push @{$backends2import}, $key unless(defined $stats->{$key} && $stats->{$key}->{'cache_version'});
     }
@@ -993,6 +991,7 @@ sub _renew_logcache {
         if(scalar @{$backends2import} > 0) {
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
             local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
+            require Thruk::Utils::External;
             my $job = Thruk::Utils::External::cmd($c,
                                             { cmd        => $c->config->{'logcache_import_command'},
                                               message    => 'please stand by while your initial logfile cache will be created...',
@@ -1013,6 +1012,7 @@ sub _renew_logcache {
         my $type = '';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         if(scalar @{$backends2import} > 0) {
+            require Thruk::Utils::External;
             my $job = Thruk::Utils::External::perl($c,
                                              { expr       => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
                                                message    => 'please stand by while your initial logfile cache will be created...',
@@ -1043,7 +1043,7 @@ sub close_logcache_connections {
     my($c) = @_;
     # clean up connections
     for my $key (@{$c->stash->{'backends'}}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         $peer->logcache->_disconnect() if $peer->{'_logcache'};
     }
     return;
@@ -1062,6 +1062,7 @@ return lmd statistics
 sub lmd_stats {
     my($self, $c) = @_;
     return unless defined $c->config->{'use_lmd_core'};
+    require Thruk::Utils::LMD;
     $self->reset_failed_backends();
     my($backends) = $self->select_backends();
     my $stats = $self->get_sites( backend => $backends );
@@ -1434,6 +1435,7 @@ sub _do_on_peers {
             if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
                 die($err);
             }
+            require Thruk::Utils::LMD;
             Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
             sleep(1);
             # then retry again
@@ -1459,6 +1461,7 @@ sub _do_on_peers {
                 if(!$c->stash->{'lmd_ok'} && $code != 502) {
                     $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+                    require Thruk::Utils::External;
                     Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
                 }
                 die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
@@ -1597,7 +1600,7 @@ sub _do_on_peers {
 
         if( $arg{'pager'} ) {
             local $ENV{'THRUK_USE_LMD'} = undef if $must_resort;
-            $data = $self->_page_data(undef, $data, undef, $totalsize);
+            $data = Thruk::Utils::page_data($c, $data, undef, $totalsize);
         }
     }
 
@@ -1969,160 +1972,6 @@ sub remove_duplicates {
 
 ########################################
 
-=head2 page_data
-
-  page_data($c, $data)
-
-adds paged data set to the template stash.
-Data will be available as 'data'
-The pager itself as 'pager'
-
-=cut
-
-sub page_data {
-    local $ENV{'THRUK_USE_LMD'} = undef;
-    return(_page_data(undef, @_));
-}
-
-########################################
-
-=head2 _page_data
-
-  _page_data($c, $data, [$result_size], [$total_size])
-
-adds paged data set to the template stash.
-Data will be available as 'data'
-The pager itself as 'pager'
-
-=cut
-
-sub _page_data {
-    my $self                = shift;
-    my $c                   = shift || $Thruk::Globals::c;
-    my $data                = shift || [];
-    return $data unless defined $c;
-    my $default_result_size = shift || $c->stash->{'default_page_size'};
-    my $totalsize           = shift;
-
-    # set some defaults
-    my $pager = { current_page => 1, total_entries => 0 };
-    $c->stash->{'pager'} = $pager;
-    $c->stash->{'pages'} = 0;
-    $c->stash->{'data'}  = $data;
-
-    # page only in html mode
-    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
-    return $data unless $view_mode eq 'html';
-    my $entries = $c->req->parameters->{'entries'} || $default_result_size;
-    return $data unless defined $entries;
-    return $data unless $entries =~ m/^(\d+|all)$/mx;
-    $c->stash->{'entries_per_page'} = $entries;
-
-    # we dont use paging at all?
-    unless($c->stash->{'use_pager'}) {
-        $pager->{'total_entries'} = ($totalsize || scalar @{$data});
-        return $data;
-    }
-
-    if(defined $totalsize) {
-        $pager->{'total_entries'} = $totalsize;
-    } else {
-        $pager->{'total_entries'} = scalar @{$data};
-    }
-    if($entries eq 'all') { $entries = $pager->{'total_entries'}; }
-    my $pages = 0;
-    if($entries > 0) {
-        $pages = POSIX::ceil($pager->{'total_entries'} / $entries);
-    }
-    else {
-        $c->stash->{'data'} = $data;
-        return $data;
-    }
-    if($pager->{'total_entries'} == 0) {
-        $c->stash->{'data'} = $data;
-        return $data;
-    }
-
-    my $page = 1;
-    # current page set by get parameter
-    if(defined $c->req->parameters->{'page'}) {
-        $page = $c->req->parameters->{'page'};
-    }
-    # current page set by jump anchor
-    elsif(defined $c->req->parameters->{'jump'}) {
-        my $nr = 0;
-        my $jump = $c->req->parameters->{'jump'};
-        if(exists $data->[0]->{'description'}) {
-            for my $row (@{$data}) {
-                $nr++;
-                if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
-                    $page = POSIX::ceil($nr / $entries);
-                    last;
-                }
-            }
-        }
-        elsif(exists $data->[0]->{'name'}) {
-            for my $row (@{$data}) {
-                $nr++;
-                if(defined $row->{'name'} and $row->{'name'} eq $jump) {
-                    $page = POSIX::ceil($nr / $entries);
-                    last;
-                }
-            }
-        }
-    }
-
-    # last/first/prev or next button pressed?
-    if(   exists $c->req->parameters->{'next'}
-       or exists $c->req->parameters->{'next.x'} ) {
-        $page++;
-    }
-    elsif (   exists $c->req->parameters->{'previous'}
-           or exists $c->req->parameters->{'previous.x'} ) {
-        $page-- if $page > 1;
-    }
-    elsif (    exists $c->req->parameters->{'first'}
-            or exists $c->req->parameters->{'first.x'} ) {
-        $page = 1;
-    }
-    elsif (    exists $c->req->parameters->{'last'}
-            or exists $c->req->parameters->{'last.x'} ) {
-        $page = $pages;
-    }
-
-    if(!defined $page)      { $page = 1; }
-    if($page !~ m|^\d+$|mx) { $page = 1; }
-    if($page < 0)           { $page = 1; }
-    if($page > $pages)      { $page = $pages; }
-
-    $c->stash->{'current_page'} = $page;
-    $pager->{'current_page'}    = $page;
-
-    if($entries eq 'all') {
-        $c->stash->{'data'} = $data;
-    }
-    else {
-        if(!$ENV{'THRUK_USE_LMD'}) {
-            if($page == $pages) {
-                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
-            } else {
-                $data = [splice(@{$data}, $entries*($page-1), $entries)];
-            }
-        }
-        $c->stash->{'data'} = $data;
-    }
-
-    $c->stash->{'pages'} = $pages;
-
-    # set some variables to avoid undef values in templates
-    $c->stash->{'pager_previous_page'} = $page > 1      ? $page - 1 : 0;
-    $c->stash->{'pager_next_page'}     = $page < $pages ? $page + 1 : 0;
-
-    return $data;
-}
-
-########################################
-
 =head2 reset_failed_backends
 
   reset_failed_backends([ $c ])
@@ -2155,7 +2004,8 @@ redirects sub calls to out backends
 sub AUTOLOAD {
     my $self = shift;
     my $name = $AUTOLOAD;
-    my $type = ref($self) or confess "$self is not an object, called as (" . $name . ")";
+    my $type = ref($self) || confess "$self is not an object, called as (" . $name . ")";
+    confess("called $type instead of Thruk::Backend::Manager") if $type ne 'Thruk::Backend::Manager';
     $name =~ s/.*://mx;    # strip fully-qualified portion
     return $self->_do_on_peers( $name, \@_ );
 }
@@ -2884,6 +2734,20 @@ sub rpc {
     }
     _debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
     return($backend->{'class'}->rpc($c, $function, $args));
+}
+
+########################################
+
+=head2 page_data
+
+  page_data(...)
+
+wrapper for Thruk::Utils::page_data
+
+=cut
+
+sub page_data {
+    return(Thruk::Utils::page_data(@_));
 }
 
 ########################################

@@ -34,6 +34,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 
+use Thruk::Config;
 use Thruk::Utils ();
 use Thruk::Utils::IO ();
 

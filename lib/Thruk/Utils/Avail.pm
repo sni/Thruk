@@ -207,7 +207,7 @@ sub calculate_availability {
         $servicefilter = $params->{s_filter};
         $service       = 1;
         my $filter     = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
-        my $all_services = $c->{'db'}->get_services(filter => $filter );
+        my $all_services = $c->db->get_services(filter => $filter );
         _die_no_matches($c, 'service', 'filter', @{$filter}) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
@@ -246,7 +246,7 @@ sub calculate_availability {
         $hostfilter = $params->{h_filter};
 
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
-        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        my $host_data = $c->db->get_hosts(filter => $filter);
         _die_no_matches($c, 'host', 'filter', @{$filter}) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
@@ -292,7 +292,7 @@ sub calculate_availability {
             ]);
         }
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
-        $all_services = $c->{'db'}->get_services(filter => $filter);
+        $all_services = $c->db->get_services(filter => $filter);
         _die_no_matches($c, 'service', 'name: '.$host.' - '.$service, @{$filter}) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
@@ -307,7 +307,7 @@ sub calculate_availability {
         }
         $c->stash->{'services'} = $services_data;
         if(scalar @hostfilter == 0) {
-            my $tmphosts = $c->{'db'}->get_hosts_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+            my $tmphosts = $c->db->get_hosts_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
             # make uniq
             my %tmp;
             for my $host (@{$tmphosts}) {
@@ -338,7 +338,7 @@ sub calculate_availability {
         if($params->{'include_host_services'}) {
             # host availability page includes services too, so
             # calculate service availability for services on these hosts too
-            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+            my $service_data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
             for my $service (@{$service_data}) {
                 $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
                 push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
@@ -354,7 +354,7 @@ sub calculate_availability {
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
 
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
-        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        my $host_data = $c->db->get_hosts(filter => $filter);
         _die_no_matches($c, 'host', "name: ".$host, @{$filter}) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
@@ -370,7 +370,7 @@ sub calculate_availability {
     # all hosts
     elsif(defined $host and $host eq 'all') {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')] ];
-        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        my $host_data = $c->db->get_hosts(filter => $filter);
         _die_no_matches($c, 'host', undef, @{$filter}) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Base::array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
@@ -401,7 +401,7 @@ sub calculate_availability {
         }
 
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
-        my $host_data = $c->{'db'}->get_hosts(filter => $filter);
+        my $host_data = $c->db->get_hosts(filter => $filter);
         _die_no_matches($c, 'host', 'hostgroup:' .$hostgroup, @{$filter}) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Base::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
@@ -412,7 +412,7 @@ sub calculate_availability {
             }
             $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hosts_from_groups);
         }
-        my $groups = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $groupfilter ]);
+        my $groups = $c->db->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $groupfilter ]);
 
         # join our groups together
         my %joined_groups;
@@ -450,7 +450,7 @@ sub calculate_availability {
         if($params->{'include_host_services'}) {
             # some pages includes services too, so
             # calculate service availability for services on these hosts too
-            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+            my $service_data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
             for my $service (@{$service_data}) {
                 $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service;
                 push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
@@ -481,8 +481,8 @@ sub calculate_availability {
         $servicefilter        = Thruk::Utils::combine_filter('-or', \@servicefilter);
 
         my $filter       = [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], $servicefilter ];
-        my $all_services = $c->{'db'}->get_services(filter => $filter);
-        my $groups       = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
+        my $all_services = $c->db->get_services(filter => $filter);
+        my $groups       = $c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
 
         _die_no_matches($c, 'service', 'servicegroup: '.$servicegroup, @{$filter}) unless scalar @{$all_services} > 0;
 
@@ -620,7 +620,7 @@ sub calculate_availability {
     if ($c->config->{'report_update_logcache'} == 1) {
         $c->stats->profile(begin => "avail.pm updatecache");
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
-        $c->{'db'}->renew_logcache($c, 1);
+        $c->db->renew_logcache($c, 1);
         $c->stats->profile(end   => "avail.pm updatecache");
     }
 
@@ -633,7 +633,7 @@ sub calculate_availability {
     }
 
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
+    $logs = $c->db->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
     $file = fix_and_sort_logs($c, $logs, $file, $rpttimeperiod);
@@ -1172,10 +1172,10 @@ sub _die_no_matches {
     if($authfilter) {
         my $data;
         if($type eq 'host') {
-            $data = $c->{'db'}->get_hosts(filter => [$otherfilter]);
+            $data = $c->db->get_hosts(filter => [$otherfilter]);
         }
         elsif($type eq 'service') {
-            $data = $c->{'db'}->get_services(filter => [$otherfilter]);
+            $data = $c->db->get_services(filter => [$otherfilter]);
         }
         # found anything when not using authentication
         if($data && ref $data eq 'ARRAY' && scalar @{$data} > 0) {

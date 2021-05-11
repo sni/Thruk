@@ -2,9 +2,7 @@ package Thruk::Controller::remote;
 
 use warnings;
 use strict;
-use Cpanel::JSON::XS qw/encode_json/;
 use Data::Dumper;
-use Module::Load qw/load/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
@@ -29,17 +27,13 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
-    if(!$c->config->{'remote_modules_loaded'}) {
-        load Thruk::Utils::CLI;
-        $c->config->{'remote_modules_loaded'} = 1;
-    }
     Thruk::Utils::check_pid_file($c);
 
     $c->stash->{'navigation'} = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
-    $c->stash->{'text'}       = 'OK';
 
     if(defined $c->req->parameters->{'data'}) {
         $c->stash->{'inject_stats'} = 0;
+        require Thruk::Utils::CLI;
         my $res = Thruk::Utils::CLI::from_fcgi($c, $c->req->parameters->{'data'});
         if(defined $res->{'output'} && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/json/mx) {
             $c->res->body($res->{'output'});
@@ -49,18 +43,10 @@ sub index {
         if(ref $res eq 'HASH') {
             $res->{'version'} = $c->config->{'thrukversion'} unless defined $res->{'version'};
         }
-        my $res_json;
-        eval {
-            $res_json = encode_json($res);
-        };
-        if($@) {
-            die("ERROR - unable to encode to json: $@\n".Dumper($res));
-        }
-        $c->stash->{'text'} = $res_json;
+        return $c->render(json => $res);
     }
 
     # set template after the CLI call above, it might get lost otherwise
-    $c->stash->{'template'} = 'passthrough.tt';
 
     my $action = $c->req->uri->query || '';
 
@@ -69,20 +55,19 @@ sub index {
         if(!$c->config->{'started'}) {
             $c->config->{'started'} = 1;
             _debug("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
-            $c->stash->{'text'} = 'startup done';
+            return $c->render("text" => 'startup done');
         }
-        return;
+        return $c->render("text" => 'already started');
     }
 
     # compile request?
     if($action eq 'compile' or exists $c->req->parameters->{'compile'}) {
         if($c->config->{'precompile_templates'} == 2) {
-            $c->stash->{'text'} = 'already compiled';
-        } else {
-            $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
-            _info($c->stash->{'text'});
+            return $c->render("text" => 'already compiled');
         }
-        return;
+        my $text = Thruk::Utils::precompile_templates($c);
+        _info($text);
+        return $c->render("text" => $text);
     }
 
     # log requests?
@@ -95,28 +80,28 @@ sub index {
                     my $msg = Thruk::Utils::IO::read($file);
                     unlink($file);
                     _error($msg);
-                    return;
+                    return $c->render("text" => 'OK');
                 }
             }
             if(ref $body eq 'FileHandle') {
                 while(<$body>) {
                     _error($_);
                 }
-                return;
+                return $c->render("text" => 'OK');
             }
         }
         _error('log request without a file: '.Dumper($c->req));
-        return;
+        return $c->render("text" => '');
     }
 
     if($action eq 'lb_ping' or exists $c->req->parameters->{'lb_ping'}) {
         if($c->cluster->is_clustered() && $c->cluster->maint()) {
-            $c->stash->{'text'} = 'MAINTENANCE';
             $c->res->code(503); # Service Unavailable
+            return $c->render("text" => 'MAINTENANCE');
         }
     }
 
-    return;
+    return $c->render("text" => 'OK');
 }
 
 1;

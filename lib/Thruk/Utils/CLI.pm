@@ -13,7 +13,7 @@ structures and change config information.
 
 use warnings;
 use strict;
-use Carp;
+use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper qw/Dumper/;
 use Encode qw(encode_utf8);
@@ -25,7 +25,6 @@ use Thruk::Action::AddDefaults ();
 use Thruk::Config; # autoload config
 use Thruk::UserAgent ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -117,8 +116,7 @@ Return connection pool as a L<Thruk::Backend::Manager|Thruk::Backend::Manager> o
 =cut
 sub get_db {
     my($self) = @_;
-    my $c = $self->get_c();
-    return $c->{'db'};
+    return($self->get_c()->db());
 }
 
 ##############################################
@@ -700,7 +698,7 @@ sub _run_command_action {
             }
         }
         if(!defined $c->stash->{'defaults_added'} && !$skip_backends) {
-            Thruk::Action::AddDefaults::add_defaults($c, 2);
+            Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
             # set backends from options
             if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
@@ -721,6 +719,7 @@ sub _run_command_action {
     $c->stats->profile(end => "_run_command_action()");
 
     if($ENV{'THRUK_JOB_DIR'}) {
+        require Thruk::Utils::External;
         Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
         Thruk::Utils::IO::touch($ENV{'THRUK_JOB_DIR'}."/stdout");
     }
@@ -842,12 +841,14 @@ sub _cmd_configtool {
     }
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
+        require Thruk::Utils::External;
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
         die("starting configcheck failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
+        require Thruk::Utils::External;
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
         die("starting configreload failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
@@ -892,7 +893,7 @@ sub _cmd_configtool {
             # create log message
             if($saved && !$ENV{'THRUK_TEST_NO_STDOUT_LOG'}) {
                 _info(sprintf("[config][%s][%s][ext] %s file '%s'",
-                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $saved,
                                             $path,
@@ -908,7 +909,7 @@ sub _cmd_configtool {
 
                 # create log message
                 _info(sprintf("[config][%s][%s][ext] deleted file '%s'",
-                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $f,
                 ));
@@ -932,7 +933,7 @@ sub _cmd_raw {
     my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
-        Thruk::Action::AddDefaults::add_defaults($c, 1);
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     }
     my $key;
     # do we have a hint about remote peer?
@@ -943,7 +944,7 @@ sub _cmd_raw {
             }
             $opt->{'remote_name'} = $opt->{'remote_name'}->[0];
         }
-        my $peer = $c->{'db'}->get_peer_by_name($opt->{'remote_name'});
+        my $peer = $c->db->get_peer_by_name($opt->{'remote_name'});
         die('no such backend: '.$opt->{'remote_name'}) unless defined $peer;
         $key = $peer->peer_key();
     }
@@ -951,16 +952,16 @@ sub _cmd_raw {
         if(ref $opt->{'backends'} ne 'ARRAY' || scalar @{$opt->{'backends'}} != 1) {
             die('backends must be an array with a single value');
         }
-        my $peer = $c->{'db'}->get_peer_by_name($opt->{'backends'}->[0]);
+        my $peer = $c->db->get_peer_by_name($opt->{'backends'}->[0]);
         die('no such backend: '.$opt->{'backends'}->[0]) unless defined $peer;
         $key = $peer->peer_key();
     } else {
-        $key = $c->{'db'}->peer_order->[0];
+        $key = $c->db->peer_order->[0];
     }
     die("no backends...") unless $key;
 
     if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
-        my($stats) = $c->{'db'}->logcache_stats($c);
+        my($stats) = $c->db->logcache_stats($c);
         for my $key (sort keys %{$stats}) {
             my $s = $stats->{$key};
             if($s->{'mode'} eq 'import') {
@@ -971,7 +972,7 @@ sub _cmd_raw {
                 }));
             }
         }
-        $c->{'db'}->renew_logcache($c);
+        $c->db->renew_logcache($c);
     }
 
     # config tool commands
@@ -1027,7 +1028,7 @@ sub _cmd_raw {
 
     # passthrough livestatus results if possible (used by cascaded lmd setups)
     if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
-        my $peer = $c->{'db'}->lmd_peer;
+        my $peer = $c->db->lmd_peer;
         my $query = $opt->{'args'}->[0];
         chomp($query);
         $query .= "\nBackends: ".$key."\n";
@@ -1037,7 +1038,7 @@ sub _cmd_raw {
     }
 
     local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend
-    my @res = $c->{'db'}->pool->do_on_peer($key, $function, $opt->{'args'});
+    my @res = $c->db->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
     # add proxy version and config tool settings to processinfo
@@ -1046,7 +1047,7 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        my $tmp = $c->{'db'}->peers->{$key}->{'peer_config'}->{'configtool'};
+        my $tmp = $c->db->peers->{$key}->{'peer_config'}->{'configtool'};
         if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
             $res->[2]->{$key}->{'configtool'} = {
                 'core_type'      => $tmp->{'core_type'},
@@ -1070,6 +1071,8 @@ sub _cmd_ext_job {
     my $jobid       = $opt->{'args'};
     my $res         = "";
     my $last_error  = "";
+
+    require Thruk::Utils::External;
     if(Thruk::Utils::External::is_running($c, $jobid, $c->user->{'superuser'})) {
         $res = "jobid:".$jobid.":0";
     }
