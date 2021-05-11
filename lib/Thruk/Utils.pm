@@ -36,6 +36,13 @@ use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
 use Thruk::Views::ToolkitRenderer ();
 
+eval {
+    require Clone;
+};
+if($@) {
+    require Storable;
+}
+
 ##############################################
 =head1 METHODS
 
@@ -3453,7 +3460,7 @@ sub dump_params {
     my($params, $max_length, $flat) = @_;
     $max_length = 250 unless defined $max_length;
     $flat       = 1   unless defined $flat;
-    $params = dclone($params);
+    $params = dclone($params) if ref $params;
     local $Data::Dumper::Indent = 0 if $flat;
     my $dump = Dumper($params);
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
@@ -3555,7 +3562,6 @@ sub dclone {
     return(Clone::clone($obj)) if $INC{'Clone.pm'};
 
     # else use Storable
-    require Storable;
     return(Storable::dclone($obj));
 }
 

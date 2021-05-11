@@ -370,6 +370,8 @@ sub _dispatcher {
             $c->error($err);
             Thruk::Controller::error::index($c, 13);
             Thruk::Views::ToolkitRenderer::render_tt($c);
+        } else {
+            _warn($err);
         }
     }
 

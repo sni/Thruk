@@ -179,7 +179,6 @@ sub _parse_file {
         $test =~ s|=\s+"[^"]*"||gmx;        # ... = "Thruk::Context"
         $test =~ s|"better\ use\ [^"]*"||gmx; # "better use Time::HiRes::sleep directly"
         $test =~ s|\Q%Date::Manip::Zones::ZoneNames\E||gmx;
-        $test =~ s|\QClone::clone\E||gmx;
         $test =~ s|\QThruk::Config::VERSION\E|Thruk::Config|gmx;
         $test =~ s|"[^"]*\s*Template\s+[^"]*"||gmx;
         $test =~ s|'[^']*\s*Thruk\s+[^']*'||gmx;
