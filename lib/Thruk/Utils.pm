@@ -595,27 +595,26 @@ Otherwise the content of the ssi file is append to the ssi content.
 =cut
 sub read_ssi {
     my($c, $page, $type) = @_;
-    my $dir  = $c->config->{ssi_path};
-    my @files = sort grep { /\A${page}-${type}(-.*)?.ssi\z/mx } keys %{ $c->config->{ssi_includes} };
+    my @files = sort grep { /\/${page}-${type}(-.*)?.ssi\z/mx } keys %{$c->config->{ssi_includes}};
     my $output = "";
     for my $inc (@files) {
-        $output .= "\n<!-- BEGIN SSI $dir/$inc -->\n" if Thruk::Base->verbose;
-        if( -x "$dir/$inc" ) {
-          if(open(my $ph, '-|', "$dir/$inc 2>&1")) {
+        $output .= "\n<!-- BEGIN SSI $inc -->\n" if Thruk::Base->verbose;
+        if(-x $inc) {
+          if(open(my $ph, '-|', "$inc 2>&1")) {
             while(defined(my $line = <$ph>)) { $output .= $line; }
             CORE::close($ph);
           } else {
-            carp("cannot execute ssi $dir/$inc: $!");
+            carp("cannot execute ssi $inc: $!");
           }
-        } elsif( -r "$dir/$inc" ) {
-            my $content = Thruk::Utils::IO::read("$dir/$inc");
+        } elsif(-r $inc) {
+            my $content = Thruk::Utils::IO::read($inc);
             $content = Thruk::Utils::Encode::decode_any($content);
-            unless(defined $content) { carp("cannot open ssi $dir/$inc: $!") }
+            unless(defined $content) { carp("cannot open ssi $inc: $!") }
             $output .= $content;
         } else {
-            _warn("$dir/$inc is no longer accessible, please restart thruk to initialize ssi information");
+            _warn("$inc is no longer accessible, please restart thruk to initialize ssi information");
         }
-        $output .= "\n<!-- END SSI $dir/$inc -->\n" if Thruk::Base->verbose;
+        $output .= "\n<!-- END SSI $inc -->\n" if Thruk::Base->verbose;
     }
     return $output;
 }
