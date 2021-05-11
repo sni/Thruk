@@ -20,6 +20,11 @@ use Thruk::Utils::Log qw/:all/;
 our @EXPORT_OK = qw(mode verbose quiet debug trace config);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
+# functions imported by Utils.pm for backwards compatibility
+my @compat_functions = qw/list array_uniq array2hash/;
+push @EXPORT_OK, @compat_functions;
+$EXPORT_TAGS{compat} = \@compat_functions;
+
 ###################################################
 
 =head1 METHODS

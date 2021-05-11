@@ -23,7 +23,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use URI::Escape ();
 
 use Thruk::Action::AddDefaults ();
-use Thruk::Base ();
+use Thruk::Base qw/:compat/;
 use Thruk::Config 'noautoload';
 use Thruk::Utils::Cache ();
 use Thruk::Utils::CookieAuth ();
@@ -3727,6 +3727,19 @@ sub extract_time_filter {
         }
     }
     return($start, $end);
+}
+
+########################################
+
+=head2 find_files
+
+  find_files(...)
+
+alias for Thruk::Utils::IO::find_files
+
+=cut
+sub find_files {
+    return(Thruk::Utils::IO::find_files(@_));
 }
 
 ##############################################
