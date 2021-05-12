@@ -1997,17 +1997,17 @@ sub reset_failed_backends {
 
   AUTOLOAD()
 
-redirects sub calls to out backends
+redirects sub calls to our backends
 
 =cut
 
 sub AUTOLOAD {
-    my $self = shift;
+    my($self, @args) = @_;
     my $name = $AUTOLOAD;
-    my $type = ref($self) || confess "$self is not an object, called as (" . $name . ")";
+    my $type = ref($self) || confess("$self is not an object, called as (".$name.")");
     confess("called $type instead of Thruk::Backend::Manager") if $type ne 'Thruk::Backend::Manager';
-    $name =~ s/.*://mx;    # strip fully-qualified portion
-    return $self->_do_on_peers( $name, \@_ );
+    $name =~ s/.*://mx; # strip fully-qualified part
+    return(&_do_on_peers($self, $name, \@args));
 }
 
 ##########################################################

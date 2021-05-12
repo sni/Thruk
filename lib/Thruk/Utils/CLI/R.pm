@@ -16,6 +16,16 @@ use strict;
 use Thruk::Utils::CLI::Rest ();
 
 our $skip_backends = \&Thruk::Utils::CLI::Rest::_skip_backends;
+
+##############################################
+
+=head1 METHODS
+
+=head2 cmd
+
+    cmd([ $options ])
+
+=cut
 *cmd = *Thruk::Utils::CLI::Rest::cmd;
 
 ##############################################

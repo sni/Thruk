@@ -643,7 +643,7 @@ sub _compute_availability_line_by_line {
     while(my $line = <$fh>) {
         $count++;
         my $data;
-        &Monitoring::Availability::Logs::_decode_any($line);
+        &Monitoring::Availability::Logs::decode_any($line);
         chomp($line);
         if($xs) {
             $data = &Thruk::Utils::XS::parse_line($line);
@@ -698,7 +698,7 @@ sub _compute_availability_from_iterator {
     # logs should be sorted already
     while(my $data = $logs->next) {
         &_compute_for_data($self, $last_time,
-                                 &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
+                                 &Monitoring::Availability::Logs::parse_livestatus_entry($data),
                                  $result);
 
         # set timestamp of last log line
@@ -742,7 +742,7 @@ sub _compute_availability_on_the_fly {
                                          $result);
             } else {
                 &_compute_for_data($self, $last_time,
-                                         &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
+                                         &Monitoring::Availability::Logs::parse_livestatus_entry($data),
                                          $result);
             }
             # set timestamp of last log line

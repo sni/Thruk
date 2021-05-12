@@ -534,7 +534,7 @@ sub _check_missing {
             }
             if(!$found) {
                 $line =~ s/^\s*//gmx;
-                _log_change("%s: module '%s' missing in includes, referenced in: %s", $file, $m, $line);
+                _log_change("%s: module '%s' missing in includes, first use in: %s", $file, $m, $line);
                 $lastblock->{'modules'}->{$m}++; # fail only once
                 $lastblock->{'used'}->[0]->{$m} = "";
                 if($m eq 'Thruk::Config') {
