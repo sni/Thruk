@@ -40,6 +40,8 @@ my $base_defaults = {
     'image_path'                            => $project_root.'/root/thruk/images',
     'project_root'                          => $project_root,
     'home'                                  => $project_root,
+    'thruk_author'                          => (-f $project_root."/.author"    || $ENV{'THRUK_AUTHOR'})    ? 1 : 0,
+    'demo_mode'                             => (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0,
     'default_view'                          => 'TT',
     'base_templates_dir'                    => $project_root.'/templates',
     'cgi.cfg'                               => 'cgi.cfg',
@@ -282,13 +284,6 @@ my $base_defaults = {
                 'vendor/geoext2-2.0.2/src/GeoExt/panel/Map.js',
     ],
 };
-
-# set TT strict mode only for authors
-$base_defaults->{'thruk_author'} = 0;
-$base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
-if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
-    $base_defaults->{'thruk_author'} = 1;
-}
 
 ######################################
 

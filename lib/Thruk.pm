@@ -17,8 +17,6 @@ use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;    $Data::Dumper::Sortkeys = 1;
 use Module::Load qw/load/;
 
-use Thruk::Utils::Timezone ();
-
 ###################################################
 # load timing class
 #use Thruk::Timer qw/timing_breakpoint/;
@@ -45,6 +43,7 @@ use Thruk::Constants ':add_defaults';
 use Thruk::Utils::Cache qw/cache/;
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Timezone ();
 
 ###################################################
 our $cluster;

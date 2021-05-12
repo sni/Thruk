@@ -1605,7 +1605,7 @@ sub _do_on_peers {
     }
 
     # strict templates require icinga2 undef values to be replaced
-    if($c->config->{'strict_tt'}) {
+    if($c->config->{'thruk_author'}) {
         my $replace = 0;
         for my $key (@{$get_results_for}) {
             if($c->stash->{'pi_detail'}->{$key}->{'data_source_version'} && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'} =~ m/Livestatus\ r2\./mx) {

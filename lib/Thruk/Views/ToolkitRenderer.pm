@@ -21,9 +21,6 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
 
-# make private _ hash keys available
-$Template::Stash::PRIVATE = undef;
-
 my $template_provider_themes;
 my $template_provider_user;
 
@@ -69,7 +66,10 @@ sub register {
     push @{$settings->{'LOAD_TEMPLATES'}}, Template::Provider->new(\%base_settings);
 
     $app->{'tt'} = Template->new($settings);
-    $app->config->{'strict_tt'} = $settings->{'STRICT'};
+
+    # make private _ hash keys available
+    $Template::Stash::PRIVATE = undef;
+
     return($app->{'tt'});
 }
 
