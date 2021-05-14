@@ -299,13 +299,13 @@ sub get_search_from_param {
 
 =head2 do_filter
 
-  do_filter($c, $prefix)
+  do_filter($c, $prefix, [$params], [$skip_totals])
 
 returns filter from request parameter
 
 =cut
 sub do_filter {
-    my($c, $prefix, $params) = @_;
+    my($c, $prefix, $params, $skip_totals) = @_;
     $params = $c->req->parameters unless defined $params;
 
     my $hostfilter;
@@ -348,7 +348,7 @@ sub do_filter {
 
         # classic search
         my $search;
-        ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = classic_filter($c, $params);
+        ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = classic_filter($c, $params, $skip_totals);
 
         # convert that into a new search
         push @{$searches}, $search;
@@ -391,8 +391,8 @@ returns filter from request parameter
 
 =cut
 sub get_searches {
-    my($c, $prefix, $params) = @_;
-    my(undef, undef, undef, undef, undef, $searches) = do_filter($c, $prefix, $params);
+    my($c, $prefix, $params, $skip_totals) = @_;
+    my(undef, undef, undef, undef, undef, $searches) = do_filter($c, $prefix, $params, $skip_totals);
     return($searches);
 }
 
@@ -426,7 +426,7 @@ sub reset_filter {
 
 =head2 classic_filter
 
-  classic_filter($c)
+  classic_filter($c, [$params], [$skip_totals])
 
 returns filter for old style parameter
 

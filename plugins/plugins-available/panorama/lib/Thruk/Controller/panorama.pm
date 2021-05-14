@@ -3141,7 +3141,7 @@ sub _do_filter {
     Thruk::Utils::Status::reset_filter($c);
 
     if(!defined $c->req->parameters->{'filter'} || $c->req->parameters->{'filter'} eq '') {
-        my @f = Thruk::Utils::Status::do_filter($c);
+        my @f = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
         return @f;
     }
 
@@ -3193,7 +3193,7 @@ sub _do_filter {
         $nr++;
     }
 
-    my @f = Thruk::Utils::Status::do_filter($c);
+    my @f = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return @f;
 }
 

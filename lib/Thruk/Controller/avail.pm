@@ -205,7 +205,7 @@ sub _outages {
         $c->req->parameters->{'include_host_services'} = 1;
     }
 
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return 1 if $c->stash->{'has_error'};
     if($c->req->parameters->{'type'} eq "services" || $c->req->parameters->{'type'} eq 'both') {
         $c->req->parameters->{'s_filter'} = $servicefilter;

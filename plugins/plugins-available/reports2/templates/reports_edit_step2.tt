@@ -306,7 +306,7 @@
     [% paneprefix = sprintf('f%02d_', loop.index)  %]
     <input type="hidden" name="filter.[% key %]" value="[% paneprefix %]">
     <table id="[% paneprefix %]all_filter_table" class="filter_container" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
-    [% FOR search = get_searches(c, 'dfl_', value) %]
+    [% FOR search = get_searches(c, 'dfl_', value, 1) %]
     [% SET prefix = 's' _ loop.index %]
     [% IF loop.index > 0 && loop.index % 3 == 0 %]</tr><tr>[% END %]
     <td valign="top" class="filter_table">

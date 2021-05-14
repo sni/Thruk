@@ -180,7 +180,7 @@ sub _rest_outages {
         });
     }
 
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     if($c->stash->{'has_error'}) {
         return({
                 'message'     => 'error in filter',

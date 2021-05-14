@@ -57,7 +57,7 @@ sub core_scheduling_page {
     }
 
     # do the filtering
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return if $c->stash->{'has_error'};
 
     reschedule_everything($c, $hostfilter, $servicefilter) if $c->req->parameters->{'reschedule'};
