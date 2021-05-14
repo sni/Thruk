@@ -1140,16 +1140,17 @@ return list of incoming bp references
 
 =cut
 sub get_incoming_refs {
-    my($self, $c, $bps) = @_;
+    my($self, $c) = @_;
     $c->stats->profile(begin => "get_incoming_refs");
 
+    Thruk::BP::Utils::check_update_index($c);
+
     my $refs = [];
-    for my $bp (@{$bps}) {
-        for my $n (@{$bp->{'nodes'}}) {
-            if($n->{'bp_ref'} && $n->{'bp_ref'} == $self->{'id'}) {
-                push @{$refs}, $bp;
-            }
-        }
+    my $data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}.'/bp/.index');
+    return $refs unless $data->{$self->{'id'}};
+    for my $ref (@{$data->{$self->{'id'}}}) {
+        my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $ref->[0], backend => $ref->[1] });
+        push @{$refs}, $bps->[0] if $bps->[0];
     }
 
     $c->stats->profile(end => "get_incoming_refs");

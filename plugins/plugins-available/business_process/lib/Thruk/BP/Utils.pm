@@ -26,11 +26,11 @@ Helper for the business process addon
 
 ##########################################################
 
-=head1 load_bp_data
+=head2 load_bp_data
 
     load_bp_data($c, [$options])
 
-$options = {
+options => {
     edit:
         - 0/undef:    no edit mode
         - 1:          only edit mode
@@ -135,6 +135,10 @@ sub load_bp_data {
 
     # sort by name
     @{$bps} = sort { $a->{'name'} cmp $b->{'name'} } @{$bps};
+
+    if(!$num && !$opt->{'skip_runtime'}) {
+        check_update_index($c, $bps);
+    }
 
     return($bps);
 }
@@ -836,5 +840,44 @@ sub get_nodes_grouped_by_state {
     # nothing found
     return(3, [], {});
 }
+
+##########################################################
+
+=head2 check_update_index
+
+    check_update_index($c, [$bps])
+
+runs index update if neccessary.
+
+=cut
+sub check_update_index {
+    my($c, $bps) = @_;
+    if($ENV{'THRUK_CRON'} || !-s $c->config->{'var_path'}.'/bp/.index' || (stat(_))[9] < time()-300) {
+        _update_index($c, $bps);
+    }
+    return;
+}
+
+##########################################################
+sub _update_index {
+    my($c, $bps) = @_;
+    $c->stats->profile(begin => "_update_index");
+
+    my $index = {};
+    $bps = load_bp_data($c) unless $bps;
+    for my $bp (@{$bps}) {
+        for my $n (@{$bp->{'nodes'}}) {
+            if($n->{'bp_ref'}) {
+                push @{$index->{$n->{'bp_ref'}}}, [$bp->{'id'}, $n->{'bp_ref_peer'}];
+            }
+        }
+    }
+    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/bp/.index', $index, { pretty => 1 });
+
+    $c->stats->profile(end => "_update_index");
+    return;
+}
+
+##########################################################
 
 1;

@@ -432,7 +432,7 @@ returns filter for old style parameter
 
 =cut
 sub classic_filter {
-    my($c, $params) = @_;
+    my($c, $params, $skip_totals) = @_;
     $params = $c->req->parameters unless defined $params;
 
     # classic search
@@ -492,7 +492,7 @@ sub classic_filter {
     my $servicegroupfilter = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
 
     # fill the host/service totals box
-    unless($errors or $c->stash->{'minimal'}) {
+    if(!$skip_totals && !$errors && !$c->stash->{'minimal'}) {
         fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->stash;
     }
 

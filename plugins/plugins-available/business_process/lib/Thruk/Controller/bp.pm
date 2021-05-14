@@ -404,10 +404,9 @@ sub index {
                 return $c->render(json => $json);
             }
             $c->stash->{'outgoing_refs'}  = $bp->get_outgoing_refs($c);
-            my $bps = Thruk::BP::Utils::load_bp_data($c);
-            $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c, $bps);
+            $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c);
 
-            my($search) = Thruk::Utils::Status::classic_filter($c, { 'host' => 'all' });
+            my($search) = Thruk::Utils::Status::classic_filter($c, { 'host' => 'all' }, 1);
             $c->stash->{'search'}         = $search;
             $c->stash->{'substyle'}       = 'service';
             $c->stash->{'paneprefix'}     = 'dfl_';
