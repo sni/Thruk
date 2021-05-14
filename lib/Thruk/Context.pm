@@ -393,9 +393,8 @@ sub _request_username {
 
     # authenticate by secret.key from http header
     if($apikey) {
-        my $secret_key =Thruk::Config::secret_key();
-        $apikey =~ s/^\s+//mx;
-        $apikey =~ s/\s+$//mx;
+        my $secret_key = Thruk::Config::secret_key();
+        $apikey        = Thruk::Base::trim_whitespace($apikey);
         if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }

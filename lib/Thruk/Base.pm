@@ -439,7 +439,22 @@ sub looks_like_regex {
     return;
 }
 
-###################################################
+##############################################
+
+=head2 trim_whitespace
+
+    trim_whitespace()
+
+returns cleaned string
+
+=cut
+sub trim_whitespace {
+    $_[0] =~ s/^\s+//mxo;
+    $_[0] =~ s/\s+$//mxo;
+    return($_[0]);
+}
+
+##############################################
 
 =head1 SEE ALSO
 

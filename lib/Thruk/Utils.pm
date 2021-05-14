@@ -3260,9 +3260,7 @@ returns cleaned regular expression, ex.: removes trailing .*
 sub clean_regex {
     my($regex) = @_;
 
-    # trim leading and trailing whitespace
-    $regex =~ s/^\s+//mx;
-    $regex =~ s/\s+$//mx;
+    $regex = Thruk::Base::trim_whitespace($regex);
 
     return $regex if $regex eq '.*';
 
@@ -3271,25 +3269,6 @@ sub clean_regex {
     $regex =~ s/\.\*\??$//mx;
 
     return($regex);
-}
-
-##############################################
-
-=head2 trim_whitespace
-
-    trim_whitespace()
-
-returns cleaned string
-
-=cut
-sub trim_whitespace {
-    my($str) = @_;
-
-    # trim leading and trailing whitespace
-    $str =~ s/^\s+//mx;
-    $str =~ s/\s+$//mx;
-
-    return($str);
 }
 
 ##############################################

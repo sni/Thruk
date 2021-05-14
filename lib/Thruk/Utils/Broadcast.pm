@@ -308,16 +308,13 @@ sub _extract_front_matter_macros {
     if($tmp || !$frontmatter) {
         return;
     }
-    $b->{'text'} = $text;
-    $b->{'text'} =~ s/^\s+//gmx;
+    $b->{'text'} = Thruk::Base::trim_whitespace($text);
     for my $line (split(/\n+/mx, $frontmatter)) {
         my($key, $val) = split(/:/mx, $line, 2);
         next unless $key;
-        $key =~ s/^\s+//gmx;
-        $key =~ s/\s+$//gmx;
+        $key = Thruk::Base::trim_whitespace($key);
         if($val) {
-            $val =~ s/^\s+//gmx;
-            $val =~ s/\s+$//gmx;
+            $val = Thruk::Base::trim_whitespace($val);
         }
         $b->{'frontmatter'}->{$key} = $val;
     }

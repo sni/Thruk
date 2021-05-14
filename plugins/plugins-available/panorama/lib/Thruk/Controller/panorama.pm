@@ -921,8 +921,7 @@ sub _task_search {
     my($c) = @_;
 
     my $query = $c->req->parameters->{'value'} || '';
-    $query =~ s/^\s+//gmx;
-    $query =~ s/\s+$//gmx;
+    $query = Thruk::Base::trim_whitespace($query);
     $query =~ s/\s+/.*/gmx;
     my $json = { 'rc' => 0, 'data' => [] };
     _add_misc_details($c, undef, $json);

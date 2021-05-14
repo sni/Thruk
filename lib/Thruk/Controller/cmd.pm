@@ -669,8 +669,7 @@ sub do_send_command {
                 hostdowntimes             => '',
                 servicedowntimes          => '',
         }, \$cmd);
-        $cmd =~ s/^\s+//gmx;
-        $cmd =~ s/\s+$//gmx;
+        $cmd = Thruk::Base::trim_whitespace($cmd);
     };
     if($@) {
         if($@ =~ m/error\ \-\ (.*?)\ at\ /gmx) {

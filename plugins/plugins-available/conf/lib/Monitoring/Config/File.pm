@@ -142,9 +142,7 @@ sub update_objects_from_text {
     my $buffer = '';
     my @lines = split(/\n/mx, $text);
     while(@lines) {
-        my $line = shift @lines;
-        $line =~ s/\s+$//gmxo;
-        $line =~ s/^\s+//gmxo;
+        my $line = Thruk::Base::trim_whitespace(shift @lines);
         $linenr++;
         if(substr($line, -1) eq '\\') {
             $line = substr($line, 0, -1);

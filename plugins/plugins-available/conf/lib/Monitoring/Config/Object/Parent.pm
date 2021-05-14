@@ -568,8 +568,8 @@ sub get_data_from_param {
         $key =~ s/^obj\.//mx;
 
         # remove whitespace
-        $key   =~ s/^\s*(.*?)\s*$/$1/gmxo;
-        $value =~ s/^\s*(.*?)\s*$/$1/gmxo unless ref $value;
+        $key   = Thruk::Base::trim_whitespace($key);
+        $value = Thruk::Base::trim_whitespace($value) unless ref $value;
 
         $new_param->{$key} = $value;
     }

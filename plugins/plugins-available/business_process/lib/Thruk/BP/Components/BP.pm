@@ -88,7 +88,7 @@ sub new {
     }
     for my $key (qw/name template/) {
         next unless defined $self->{$key};
-        $self->{$key} = Thruk::Utils::trim_whitespace($self->{$key});
+        $self->{$key} = Thruk::Base::trim_whitespace($self->{$key});
     }
     $self->set_label($c, $self->{'name'});
 

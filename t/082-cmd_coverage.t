@@ -3,6 +3,7 @@ use strict;
 use Data::Dumper;
 use Test::More;
 
+use Thruk::Base ();
 use Thruk::Utils::IO ();
 
 BEGIN {
@@ -108,8 +109,7 @@ sub _parse_commands {
 ################################################################################
 sub _strip {
     my($str) = @_;
-    $str =~ s/^\s+//gmx;
-    $str =~ s/\s+$//gmx;
+    $str = Thruk::Base::trim_whitespace($str);
     $str =~ s/^"//gmx;
     $str =~ s/"$//gmx;
     return($str);
