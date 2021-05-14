@@ -60,10 +60,18 @@ failed_test: non_interactive_only
 			index=$$(( index + 1 )); \
 			echo "*** $${svc}_$${index}"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
+				echo "***"; \
 				echo "*** $${svc}_$${index} - apache/error_log"; \
+				echo "***"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/apache/error_log; \
+				echo "***"; \
 				echo "*** $${svc}_$${index} - thruk.log"; \
+				echo "***"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/thruk.log; \
+				echo "***"; \
+				echo "*** $${svc}_$${index} - naemon.log"; \
+				echo "***"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/naemon.log; \
 			fi; \
 		done; \
 	done
