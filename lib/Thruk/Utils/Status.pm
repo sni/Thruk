@@ -2746,4 +2746,16 @@ sub filter_to_param {
 
 ##############################################
 
+=head2 set_custom_title
+
+  set_custom_title(...)
+
+wrapper for Thruk::Action::AddDefaults::set_custom_title
+
+=cut
+sub set_custom_title {
+    require Thruk::Action::AddDefaults;
+    return(Thruk::Action::AddDefaults::set_custom_title(@_));
+}
+
 1;
