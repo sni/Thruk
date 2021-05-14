@@ -1329,11 +1329,21 @@ sub check_federation_peers {
             $row->{'parent'} = 'LMD' if(!$row->{'parent'} && $c->config->{'lmd_remote'});
             my $parent = $c->db->peers->{$row->{'parent'}};
             next unless $parent;
+            my $section = "";
+            if($c->config->{'lmd_remote'}) {
+                    $section = $row->{'section'};
+            } else {
+                if($row->{'section'}) {
+                    $section = $parent->peer_name().'/'.$row->{'section'};
+                } else {
+                    $section = $parent->peer_name();
+                }
+            }
             my $subpeerconfig = {
-                name => $row->{'name'},
-                id   => $key,
-                type => $parent->{'peer_config'}->{'type'},
-                section => $row->{'parent'} ? $row->{'section'} : ($row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name()),
+                name    => $row->{'name'},
+                id      => $key,
+                type    => $parent->{'peer_config'}->{'type'},
+                section => $section,
                 options => $parent->{'peer_config'}->{'type'} eq 'http' ? dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
