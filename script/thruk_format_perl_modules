@@ -152,6 +152,8 @@ sub _parse_file {
         chomp($line);
         my $test = $line;
 
+        last if $line =~ m/^__DATA__/;
+
         # remove comments
         $test =~ s/\#.*//gmx;
 
