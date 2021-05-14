@@ -43,9 +43,9 @@ Sven Nierlein, 2009-2015, <sven@nierlein.org>
 
 use warnings;
 use strict;
+use Cpanel::JSON::XS;
 use Getopt::Long;
 use POSIX ();
-use Cpanel::JSON::XS;
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 use Thruk::Utils::IO ();
