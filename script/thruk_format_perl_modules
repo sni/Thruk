@@ -536,7 +536,7 @@ sub _check_missing {
                 $line =~ s/^\s*//gmx;
                 _log_change("%s: module '%s' missing in includes, first use in: %s", $file, $m, $line);
                 $lastblock->{'modules'}->{$m}++; # fail only once
-                $lastblock->{'used'}->[0]->{$m} = "";
+                $lastblock->{'used'}->[scalar @{$lastblock->{'used'}} -1]->{$m} = "";
                 if($m eq 'Thruk::Config') {
                     $lastblock->{'used'}->[0]->{$m} = "use Thruk::Config 'noautoload';";
                 }
