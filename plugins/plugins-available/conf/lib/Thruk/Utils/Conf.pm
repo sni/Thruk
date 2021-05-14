@@ -925,8 +925,6 @@ sub get_backends_with_obj_config {
     my($c)       = @_;
     my $backends = {};
     my $firstpeer;
-    my $param_backend = $c->stash->{'param_backend'} || '';
-    $c->stash->{'param_backend'} = '';
 
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
 
@@ -965,6 +963,9 @@ sub get_backends_with_obj_config {
         }
     }
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
+
+    my $param_backend = $c->stash->{'param_backend'} || '';
+    $c->stash->{'param_backend'} = '';
 
     # first hide all of them
     my @peers = @{$c->db->get_peers(1)};
