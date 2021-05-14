@@ -22,7 +22,7 @@ for my $x (1..90)  {
     my $peer = $c->db->get_peers(1)->[0];
     my $res = [Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'})];
     if($res->[0] && $res->[0] > 0) {
-        ok(1, "got log start/end at retry: ".$x);
+        ok(1, sprintf("got log start/end ([%s,%s]) at retry: %d", $res->[0], $res->[1], $x));
         last;
     }
     ok(1, "log start/end retry: $x");
