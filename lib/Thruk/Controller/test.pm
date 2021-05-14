@@ -3,7 +3,6 @@ package Thruk::Controller::test;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Pool ();
 
@@ -27,7 +26,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    if(Thruk->mode ne 'TEST_LEAK' && Thruk->mode ne 'TEST' && !Thruk::Base->debug) {
+    if(Thruk::Base->mode ne 'TEST_LEAK' && Thruk::Base->mode ne 'TEST' && !Thruk::Base->debug) {
         die("test.cgi is disabled unless in test mode!");
     }
 

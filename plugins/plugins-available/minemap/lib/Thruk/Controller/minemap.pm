@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -63,7 +64,7 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }

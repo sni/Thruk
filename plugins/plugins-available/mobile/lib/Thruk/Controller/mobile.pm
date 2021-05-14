@@ -6,6 +6,7 @@ use strict;
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

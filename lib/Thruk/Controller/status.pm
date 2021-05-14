@@ -7,6 +7,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

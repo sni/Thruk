@@ -18,6 +18,7 @@ use Thruk::Utils::Cache ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Panorama qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

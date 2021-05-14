@@ -6,6 +6,7 @@ use Module::Load qw/load/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

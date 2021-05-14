@@ -27,16 +27,12 @@ use Thruk::Utils::Log qw/:all/;
 # use faster HTML::Escape if available
 eval {
     require HTML::Escape;
-    *html_escape = sub {
-        return HTML::Escape::escape_html(@_);
-    };
+    *html_escape = *HTML::Escape::escape_html;
 };
 if($@) {
     eval {
         require HTML::Entities;
-        *html_escape = sub {
-            return HTML::Entities::encode_entities(@_);
-        };
+        *html_escape = *HTML::Entities::encode_entities;
     };
 }
 if($@) {

@@ -1788,30 +1788,6 @@ sub set_selected_columns {
     return;
 }
 
-
-##############################################
-
-=head2 set_custom_title
-
-  set_custom_title($c)
-
-sets page title based on http parameters
-
-=cut
-sub set_custom_title {
-    my($c) = @_;
-    $c->stash->{custom_title} = '';
-    if( exists $c->req->parameters->{'title'} ) {
-        my $custom_title          = $c->req->parameters->{'title'};
-        if(ref $custom_title eq 'ARRAY') { $custom_title = pop @{$custom_title}; }
-        $custom_title             =~ s/\+/\ /gmx;
-        $c->stash->{custom_title} = Thruk::Utils::Filter::escape_html($custom_title);
-        $c->stash->{title}        = $custom_title;
-        return 1;
-    }
-    return;
-}
-
 ##############################################
 
 =head2 add_view
@@ -1830,9 +1806,9 @@ sub add_view {
     confess("value missing")   unless defined $options->{'value'};
     confess("url missing")     unless defined $options->{'url'};
 
-    $Thruk::Utils::Status::additional_views = {} unless defined $Thruk::Utils::Status::additional_views;
+    $Thruk::Globals::additional_views = {} unless defined $Thruk::Globals::additional_views;
 
-    my $group = $Thruk::Utils::Status::additional_views->{$options->{'group'}};
+    my $group = $Thruk::Globals::additional_views->{$options->{'group'}};
 
     $group = {
         'name'    => $options->{'group'},
@@ -1840,7 +1816,7 @@ sub add_view {
     } unless defined $group;
 
     $group->{'options'}->{$options->{'name'}} = $options;
-    $Thruk::Utils::Status::additional_views->{$options->{'group'}} = $group;
+    $Thruk::Globals::additional_views->{$options->{'group'}} = $group;
 
     return;
 }

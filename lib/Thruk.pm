@@ -69,6 +69,8 @@ sub startup {
 
     require Thruk::Context;
     require Thruk::Utils;
+    require Thruk::Utils::Menu;   # required for reading routes file
+    require Thruk::Utils::Status; # required for reading routes file
     require Thruk::Action::AddDefaults;
 
     my $app = $class->_build_app($pool);

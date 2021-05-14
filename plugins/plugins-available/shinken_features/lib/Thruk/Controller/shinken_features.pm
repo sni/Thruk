@@ -6,6 +6,7 @@ use strict;
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -220,7 +221,7 @@ sub _process_bothtypes_page {
     $c->stash->{'orderby'}     = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}    = $order;
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }

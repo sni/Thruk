@@ -14,6 +14,7 @@ use Thruk::BP::Components::Node ();
 use Thruk::BP::Utils ();
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

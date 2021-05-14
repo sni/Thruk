@@ -7,6 +7,7 @@ use Thruk::Action::AddDefaults ();
 use Thruk::BP::Components::BP ();
 use Thruk::BP::Components::Node ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

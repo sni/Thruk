@@ -27,6 +27,7 @@ use Thruk::Action::AddDefaults ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Reports::Render ();
+use Thruk::Utils::Status ();
 use Thruk::Views::ToolkitRenderer ();
 
 ##########################################################

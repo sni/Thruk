@@ -8,6 +8,7 @@ use Thruk::Backend::Manager ();
 use Thruk::UserAgent ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -96,7 +97,7 @@ sub index {
     $c->stash->{infoBoxTitle} = $infoBoxTitle;
     Thruk::Utils::ssi_include($c);
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }

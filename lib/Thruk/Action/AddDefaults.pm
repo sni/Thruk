@@ -21,7 +21,6 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Scalar::Util qw/weaken/;
-use Storable qw/dclone/;
 use URI::Escape qw/uri_escape/;
 
 use Thruk::Base ();
@@ -32,7 +31,6 @@ use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Menu ();
-use Thruk::Utils::Status ();
 use Thruk::Utils::Timezone ();
 
 my @stash_config_keys = qw/
@@ -154,7 +152,7 @@ sub begin {
     $c->stash->{'iframed'} = $c->req->parameters->{'iframed'} || 0;
 
     # additional views on status pages
-    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
+    $c->stash->{'additional_views'} = $Thruk::Globals::additional_views || {};
 
     # icon image path
     $c->stash->{'logo_path_prefix'}  = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/logos/';
@@ -327,7 +325,7 @@ sub end {
     # only if use_dynamic_titles is true
     # we haven't found a bookmark title
     # and a custom title wasn't set
-    if(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_dynamic_titles'} && $c->stash->{page}) {
+    if(!set_custom_title($c) && $c->stash->{'use_dynamic_titles'} && $c->stash->{page}) {
         # titles for status.cgi
         if($c->stash->{page} eq 'status' && $c->stash->{'real_page'} ne 'bp') {
             if($c->stash->{'hostgroup'}) {
@@ -461,15 +459,8 @@ sub add_defaults {
             }
         }
     }
-    ## no critic
-    if($timezone) {
-        # set users timezone
-        $ENV{'TZ'} = $timezone;
-        POSIX::tzset();
-    } else {
-        # set back to server timezone
-        Thruk::Utils::Timezone::set_timezone($c->config);
-    }
+    Thruk::Utils::Timezone::set_timezone($c->config, $timezone);
+
     ## use critic
     $c->stash->{'user_tz'} = $user_tz;
 
@@ -1344,7 +1335,7 @@ sub check_federation_peers {
                 id      => $key,
                 type    => $parent->{'peer_config'}->{'type'},
                 section => $section,
-                options => $parent->{'peer_config'}->{'type'} eq 'http' ? dclone($parent->{'peer_config'}->{'options'}) : {},
+                options => $parent->{'peer_config'}->{'type'} eq 'http' ? Thruk::Utils::dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};
@@ -1399,6 +1390,29 @@ sub check_federation_peers {
         }
     }
     return($processinfo, $cached_data);
+}
+
+########################################
+
+=head2 set_custom_title
+
+  set_custom_title($c)
+
+sets page title based on http parameters
+
+=cut
+sub set_custom_title {
+    my($c) = @_;
+    $c->stash->{custom_title} = '';
+    if( exists $c->req->parameters->{'title'} ) {
+        my $custom_title          = $c->req->parameters->{'title'};
+        if(ref $custom_title eq 'ARRAY') { $custom_title = pop @{$custom_title}; }
+        $custom_title             =~ s/\+/\ /gmx;
+        $c->stash->{custom_title} = Thruk::Utils::Filter::escape_html($custom_title);
+        $c->stash->{title}        = $custom_title;
+        return 1;
+    }
+    return;
 }
 
 ########################################

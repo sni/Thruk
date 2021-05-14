@@ -15,6 +15,7 @@ use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 

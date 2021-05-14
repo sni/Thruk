@@ -21,6 +21,7 @@ use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Plugin ();
 use Thruk::Utils::References ();
+use Thruk::Utils::Status ();
 
 #use Thruk::Timer qw/timing_breakpoint/;
 

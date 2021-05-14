@@ -7,6 +7,7 @@ use Module::Load qw/load/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -140,7 +141,7 @@ sub index {
     $c->stash->{template}      = 'statusmap.tt';
     $c->stash->{infoBoxTitle}  = 'Network Map';
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }
