@@ -329,7 +329,7 @@ sub end {
     # and a custom title wasn't set
     if(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_dynamic_titles'} && $c->stash->{page}) {
         # titles for status.cgi
-        if($c->stash->{page} eq 'status') {
+        if($c->stash->{page} eq 'status' && $c->stash->{'real_page'} ne 'bp') {
             if($c->stash->{'hostgroup'}) {
                 $c->stash->{'title'} = $c->stash->{'hostgroup'} eq 'all' ? 'All Hostgroups' : $c->stash->{'hostgroup'};
             }

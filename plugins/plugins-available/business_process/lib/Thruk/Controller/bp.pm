@@ -412,6 +412,7 @@ sub index {
             $c->stash->{'substyle'}       = 'service';
             $c->stash->{'paneprefix'}     = 'dfl_';
             $c->stash->{'prefix'}         = 's0';
+            $c->stash->{'title'}          = $bp->{'name'};
 
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
