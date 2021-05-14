@@ -26,8 +26,10 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Getopt::Long ();
 use POSIX ();
 
+use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
 use Thruk::Base ();
+use Thruk::Constants ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
