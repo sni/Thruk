@@ -2,6 +2,7 @@
 
 use warnings;
 use strict;
+use Data::Dumper qw/Dumper/;
 use Encode qw/is_utf8/;
 use Test::More;
 use utf8;
@@ -81,16 +82,16 @@ my $app = $c->app;
     isa_ok($c, 'Thruk::Context');
     my $res1 = $c->sub_request('/r/thruk');
     is(ref $res1, 'HASH', 'got hash from sub_request');
-    is($res1->{'rest_version'}, 1, 'got hash from sub_request with content');
+    is($res1->{'rest_version'}, 1, 'got hash from sub_request with content') || diag(Dumper($res1));
 
     my $res2 = $c->sub_request('/r/thruk/reports');
-    is(ref $res2, 'ARRAY', 'got array from sub_request');
+    is(ref $res2, 'ARRAY', 'got array from sub_request') || diag(Dumper($res2));
 
     my $res3 = $c->sub_request('/r/hosts?limit=1&columns=name');
     is(ref $res3, 'ARRAY', 'got array from sub_request');
     my $expect = -s 'thruk_local.conf' ? 1 : 0;
     is(scalar @{$res3}, $expect, 'sending url parameters worked');
-    is(scalar keys %{$res3->[0]}, $expect, 'sending url parameters worked');
+    is(scalar keys %{$res3->[0]}, $expect, 'sending url parameters worked') || diag(Dumper($res3));
 };
 
 #########################
