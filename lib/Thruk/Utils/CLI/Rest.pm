@@ -28,11 +28,7 @@ use POSIX ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
-use Thruk::Base ();
-use Thruk::Constants ();
 use Thruk::Utils::CLI ();
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 our $skip_backends = \&_skip_backends;
