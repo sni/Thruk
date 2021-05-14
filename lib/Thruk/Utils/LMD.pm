@@ -67,7 +67,7 @@ sub check_proc {
     my $startlock = $lmd_dir.'/startup';
     my($fh, $lock);
     eval {
-        ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock, 'ex');
+        ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock);
     };
     if($@) {
         _error("failed to get lmd startup lock: ". $@);

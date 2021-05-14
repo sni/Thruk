@@ -24,7 +24,7 @@ ok(-f $filename, "test file exists: $filename");
 is(Thruk::Utils::IO::read($filename), '{"a":0,"b":0,"c":0}', "test contains test content");
 
 # lock the file but don't do anything, just keep the lock open
-my($fh2, $lock_fh) = Thruk::Utils::IO::file_lock($filename, "ex");
+my($fh2, $lock_fh) = Thruk::Utils::IO::file_lock($filename);
 
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 2;
 is($Thruk::Utils::IO::MAX_LOCK_RETRIES, 2, "max retries reduced"); # also prevents perl from complain about: Name "Thruk::Utils::IO::MAX_LOCK_RETRIES" used only once: possible typo

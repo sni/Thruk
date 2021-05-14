@@ -40,7 +40,7 @@ return new business process
 =cut
 
 sub new {
-    my($class, $c, $file, $bpdata, $editmode) = @_;
+    my($class, $c, $file, $bpdata, $editmode, $skip_nodes, $skip_runtime) = @_;
 
     my $self = {
         'id'                 => undef,
@@ -73,16 +73,18 @@ sub new {
     };
     bless $self, $class;
     $self->set_file($c, $file);
-    if(!-e $file) {
-        $self->{'draft'} = 1;
-    }
 
-    if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
+    if($editmode && -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-s $file) {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
+    } else {
+        if(!-e $self->{'file'}) {
+            $self->{'draft'} = 1;
+        }
     }
+
     for my $key (@saved_keys) {
         $self->{$key} = $bpdata->{$key} if defined $bpdata->{$key};
     }
@@ -95,20 +97,26 @@ sub new {
     return unless $self->{'name'};
 
     # read in nodes
-    for my $n (@{Thruk::Base::list($bpdata->{'nodes'} || [])}) {
-        my $node = Thruk::BP::Components::Node->new($n);
-        $self->add_node($node, 1);
+    if(!$skip_nodes) {
+        for my $n (@{Thruk::Base::list($bpdata->{'nodes'} || [])}) {
+            my $node = Thruk::BP::Components::Node->new($n);
+            $self->add_node($node, 1);
+        }
     }
 
-    $self->load_runtime_data();
+    if(!$skip_runtime) {
+        $self->load_runtime_data();
+    }
 
     # add default filter
     $self->{'default_filter'} = Thruk::Base::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
 
     $self->save() if $self->{'need_save'};
 
-    for my $n (@{$self->{'nodes'}}) {
-        $n->update_parents($self);
+    if(!$skip_nodes) {
+        for my $n (@{$self->{'nodes'}}) {
+            $n->update_parents($self);
+        }
     }
 
     confess("status_text cannot be empty") unless defined $self->{'status_text'};
@@ -314,11 +322,11 @@ set file for this business process
 sub set_file {
     my($self, $c, $file) = @_;
     my $basename = $file;
-    $basename    =~ s/^.*\///mx;
-    $self->{'file'}     = Thruk::BP::Utils::bp_base_folder($c).'/'.$basename;
-    $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
-    $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
-    if($basename =~ m/(\d+).tbp/mx) {
+    $basename    =~ s/^.*\///mxo;
+    $self->{'file'}     = sprintf("%s/%s", Thruk::BP::Utils::bp_base_folder($c), $basename);
+    $self->{'datafile'} = sprintf("%s/bp/%s.runtime", $c->config->{'var_path'}, $basename);
+    $self->{'editfile'} = sprintf("%s/bp/%s.edit",    $c->config->{'var_path'}, $basename);
+    if($basename =~ m/^(\d+)\.tbp$/mxo) {
         $self->{'id'} = $1;
     } else {
         die("wrong file format in ".$basename);
@@ -1113,7 +1121,7 @@ sub get_outgoing_refs {
     my $refs = [];
     for my $n (@{$self->{'nodes'}}) {
         if($n->{'bp_ref'}) {
-            my $bps = Thruk::BP::Utils::load_bp_data($c, $n->{'bp_ref'}, undef, undef, $n->{'bp_ref_peer'});
+            my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $n->{'bp_ref'}, backend => $n->{'bp_ref_peer'} });
             push @{$refs}, $bps->[0] if $bps->[0];
         }
     }

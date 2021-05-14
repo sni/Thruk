@@ -77,7 +77,7 @@ sub store {
         $self->{'store'} = [];
         return;
     }
-    my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($self->{'file'}, 'ex');
+    my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($self->{'file'});
     $data = Thruk::Utils::IO::json_retrieve($self->{'file'}, $fh);
     $self->_apply_data($data);
     Thruk::Utils::IO::json_store($self->{'file'}, $data, { pretty => 1 });

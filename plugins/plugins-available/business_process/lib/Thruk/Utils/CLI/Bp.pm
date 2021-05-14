@@ -197,7 +197,7 @@ sub cmd {
         worker => sub {
             my($id) = @_;
             my $t1 = [gettimeofday];
-            my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
+            my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id });
             my $bp;
             if($bps && $bps->[0]) { $bp = $bps->[0]; }
             return unless $bp;

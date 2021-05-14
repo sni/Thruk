@@ -199,24 +199,66 @@ sub ensure_permissions {
 
 ##############################################
 
+=head2 file_rlock
+
+  file_rlock($file)
+
+locks given file in shared / readonly mode. Returns filehandle.
+
+=cut
+sub file_rlock {
+    my($file) = @_;
+    confess("no file") unless $file;
+
+    alarm(30);
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to shared flock: ".$file); };
+
+    my $fh;
+    my $retrys = 0;
+    my $err;
+    while($retrys < 5) {
+        undef $fh;
+        eval {
+            sysopen($fh, $file, O_RDONLY) or confess("cannot open file ".$file.": ".$!);
+            flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
+        };
+        $err = $@;
+        if(!$err && $fh) {
+            last;
+        }
+        $retrys++;
+        sleep(0.5);
+    }
+
+    if($err) {
+        die("failed to shared flock $file: $err");
+    }
+
+    if($retrys > 0) {
+        _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
+    }
+
+    alarm(0);
+    return($fh);
+}
+
+##############################################
+
 =head2 file_lock
 
-  file_lock($file, $mode)
+  file_lock($file)
 
-  $mode can be
-    - 'ex' exclusive
-    - 'sh' shared
-
-locks given file. Returns locked filehandle.
+locks given file in read/write mode. Returns locked filehandle and lock file handle.
 
 =cut
 
 sub file_lock {
     my($file, $mode) = @_;
     confess("no file") unless $file;
+    if($mode && $mode eq 'sh') { return file_rlock($file); }
 
     alarm(30);
-    local $SIG{'ALRM'} = sub { confess("timeout while trying to flock(".$mode."): ".$file); };
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to excl. flock: ".$file); };
 
     # we can only lock files in existing folders
     my $basename = $file;
@@ -228,76 +270,64 @@ sub file_lock {
 
     my $lock_file = $file.'.lock';
     my $lock_fh;
-    if($mode eq 'ex') {
-        my $locked    = 0;
-        my $old_inode = (stat($lock_file))[1];
-        my $retrys    = 0;
-        while(1) {
-            $old_inode = (stat($lock_file))[1] unless $old_inode;
-            if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
-                last;
-            }
-            # check for orphaned locks
-            if($!{EEXIST} && $old_inode) {
-                sleep(0.3);
-                if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
-                    my $new_inode = (stat($lock_fh))[1];
-                    if($new_inode && $new_inode == $old_inode) {
-                        $retrys++;
-                        if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
-                            # lock seems to be orphaned, continue normally unless in test mode
-                            confess("got orphaned lock") if $ENV{'TEST_RACE'};
-                            $locked = 1;
-                            _warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
-                            last;
-                        }
-                        next;
-                    }
-                    if($new_inode && $new_inode != $old_inode) {
-                        $retrys = 0;
-                        undef $old_inode;
-                    }
-                } else {
+    my $locked    = 0;
+    my $old_inode = (stat($lock_file))[1];
+    my $retrys    = 0;
+    while(1) {
+        $old_inode = (stat($lock_file))[1] unless $old_inode;
+        if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
+            last;
+        }
+        # check for orphaned locks
+        if($!{EEXIST} && $old_inode) {
+            sleep(0.3);
+            if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
+                my $new_inode = (stat($lock_fh))[1];
+                if($new_inode && $new_inode == $old_inode) {
                     $retrys++;
                     if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
-                        unlink($lock_file);
-                        # we have to move and copy the file itself, otherwise
-                        # the orphaned process may overwrite the file
-                        # and the later flock() might hang again
-                        copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
-                        move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
-                        move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
-                        unlink($file.'.orphaned');
-                        _warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
-                        $retrys = 0; # start over...
+                        # lock seems to be orphaned, continue normally unless in test mode
+                        confess("got orphaned lock") if $ENV{'TEST_RACE'};
+                        $locked = 1;
+                        _warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                        last;
                     }
+                    next;
+                }
+                if($new_inode && $new_inode != $old_inode) {
+                    $retrys = 0;
+                    undef $old_inode;
+                }
+            } else {
+                $retrys++;
+                if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
+                    unlink($lock_file);
+                    # we have to move and copy the file itself, otherwise
+                    # the orphaned process may overwrite the file
+                    # and the later flock() might hang again
+                    copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
+                    move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
+                    move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
+                    unlink($file.'.orphaned');
+                    _warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                    $retrys = 0; # start over...
                 }
             }
-            sleep(0.1);
         }
-        if(!$locked) {
-            flock($lock_fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
-        }
+        sleep(0.1);
     }
-    elsif($mode eq 'sh') {
-        # nothing to do
-    } else {
-        confess("unknown mode: ".$mode);
+    if(!$locked) {
+        flock($lock_fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
     }
 
     my $fh;
-    my $retrys = 0;
+    $retrys = 0;
     my $err;
     while($retrys < 5) {
         undef $fh;
         eval {
             sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
-            if($mode eq 'ex') {
-                flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
-            }
-            elsif($mode eq 'sh') {
-                flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
-            }
+            flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
         };
         $err = $@;
         if(!$err && $fh) {
@@ -314,9 +344,6 @@ sub file_lock {
     if($retrys > 0) {
         _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
-
-    seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
-    sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
     alarm(0);
     return($fh, $lock_fh);
@@ -426,7 +453,7 @@ stores data json encoded. options are passed to json_store.
 
 sub json_lock_store {
     my($file, $data, $options) = @_;
-    my($fh, $lock_fh) = file_lock($file, 'ex');
+    my($fh, $lock_fh) = file_lock($file);
     json_store($file, $data, $options);
     file_unlock($file, $fh, $lock_fh);
     return 1;
@@ -446,18 +473,20 @@ sub json_retrieve {
     my($file, $fh) = @_;
     confess("got no filehandle") unless defined $fh;
 
-    my $json = Cpanel::JSON::XS->new->utf8;
-    $json->relaxed();
+    our $jsonreader;
+    if(!$jsonreader) {
+        $jsonreader = Cpanel::JSON::XS->new->utf8;
+        $jsonreader->relaxed();
+    }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
-    sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
     my $data;
     my $content;
     eval {
         local $/ = undef;
         $content = scalar <$fh>;
-        $data    = $json->decode($content);
+        $data    = $jsonreader->decode($content);
     };
     my $err = $@;
     if($err) {
@@ -480,7 +509,7 @@ retrieve json data
 sub json_lock_retrieve {
     my($file) = @_;
     return unless -s $file;
-    my($fh) = file_lock($file, 'sh');
+    my($fh) = file_rlock($file);
     my $data = json_retrieve($file, $fh);
     flock($fh, LOCK_UN);
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
@@ -499,7 +528,7 @@ update json data with locking. options are passed to json_store.
 
 sub json_lock_patch {
     my($file, $patch_data, $options) = @_;
-    my($fh, $lock_fh) = file_lock($file, 'ex');
+    my($fh, $lock_fh) = file_lock($file);
     my $data = json_patch($file, $fh, $patch_data, $options);
     file_unlock($file, $fh, $lock_fh);
     return $data;

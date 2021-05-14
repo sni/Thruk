@@ -26,23 +26,46 @@ Helper for the business process addon
 
 ##########################################################
 
-=head2 load_bp_data
+=head1 load_bp_data
 
-    load_bp_data($c, [$num], [$editmode], [$drafts], [$backend_id])
+    load_bp_data($c, [$options])
 
-editmode:
-    - 0/undef:    no edit mode
-    - 1:          only edit mode
+$options = {
+    edit:
+        - 0/undef:    no edit mode
+        - 1:          only edit mode
 
-drafts:
-    - 0/undef:    skip drafts
-    - 1:          load drafts too
+    drafts:
+        - 0/undef:    skip drafts
+        - 1:          load drafts too
+
+    id:
+        - <id>:       load obly BPs which match given id
+
+    backend:
+        - <id>:       load only BPs which match given backend
+
+    skip_nodes:
+        - 0/undef:    load node data
+        - 1:          skip loading nodes
+
+    skip_runtime:
+        - 0/undef:    load runtime data
+        - 1:          skip loading runtime data
+}
 
 load all or specific business process
 
 =cut
 sub load_bp_data {
-    my($c, $num, $editmode, $drafts, $backend_id) = @_;
+    my($c, $opt) = @_;
+
+    if(defined $opt && ref $opt ne 'HASH') {
+        confess("load_bp_data options have been changed to hash.");
+    }
+
+    my $num        = $opt->{'id'};
+    my $backend_id = $opt->{'backend'};
 
     # make sure our folders exist
     my $base_folder = bp_base_folder($c);
@@ -79,7 +102,7 @@ sub load_bp_data {
         my $nr = $file;
         $nr =~ s|^.*/(\d+)\.tbp$|$1|mx;
         next if(!$is_admin && !$allowed->{$nr});
-        my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
+        my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $opt->{'edit'}, $opt->{'skip_nodes'}, $opt->{'skip_runtime'});
         if($bp) {
             if($backend_id) {
                 if(!$bp->{'bp_backend'} || $bp->{'bp_backend'} ne $backend_id) {
@@ -91,7 +114,7 @@ sub load_bp_data {
             $numbers->{$bp->{'id'}} = 1;
         }
     }
-    if($drafts) {
+    if($opt->{'drafts'}) {
         # load drafts too
         my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.edit');
         for my $file (@files) {
@@ -101,7 +124,7 @@ sub load_bp_data {
             next if(!$is_admin && !$allowed->{$nr});
             next if $num && $num != $nr;
             $file  = $base_folder.'/'.$nr.'.tbp';
-            my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
+            my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1, $opt->{'skip_nodes'}, $opt->{'skip_runtime'});
             if($bp) {
                 $bp->{'remote'} = 0;
                 push @{$bps}, $bp;
@@ -657,7 +680,10 @@ return base folder of business process files
 =cut
 sub bp_base_folder {
     my($c) = @_;
-    return(Thruk::Utils::base_folder($c).'/bp');
+    our $base_folder;
+    return($base_folder) if $base_folder;
+    $base_folder = Thruk::Utils::base_folder($c).'/bp';
+    return($base_folder);
 }
 
 ##########################################################

@@ -1337,7 +1337,7 @@ sub read_report_file {
         return $c->detach('/error/index/99');
     }
 
-    my($report_fh, $lock_fh) = Thruk::Utils::IO::file_lock($file, 'ex');
+    my($report_fh, $lock_fh) = Thruk::Utils::IO::file_lock($file);
     my $report = Thruk::Utils::IO::json_retrieve($file, $report_fh);
     $report->{'nr'} = $nr;
     $report = get_new_report($c, $report);

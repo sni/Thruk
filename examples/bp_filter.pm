@@ -166,7 +166,7 @@ sub _add_recursive_output_filter_recurse {
 
     # recurse into other business process
     if($node->{'bp_ref'}) {
-        my $link_bp = Thruk::BP::Utils::load_bp_data($c, $node->{'bp_ref'}, undef, undef, $node->{'bp_ref_peer'});
+        my $link_bp = Thruk::BP::Utils::load_bp_data($c, { id => $node->{'bp_ref'}, backend => $node->{'bp_ref_peer'}});
         if($link_bp->[0]) {
             # local bp
             my $first_node = $link_bp->[0]->{'nodes'}->[0];

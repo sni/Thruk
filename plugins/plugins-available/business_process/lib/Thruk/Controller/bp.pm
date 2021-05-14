@@ -133,7 +133,7 @@ sub index {
     # read / write actions
     if($id and $allowed_for_edit and ($action ne 'details' and $action ne 'refresh')) {
         $c->stash->{editmode} = 1;
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode}, undef, $bp_backend_id);
+        my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id, edit => $c->stash->{editmode}, backend => $bp_backend_id });
         if(scalar @{$bps} == 0) {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
             if($proxyurl) {
@@ -165,7 +165,7 @@ sub index {
                 } else {
                     Thruk::BP::Utils::update_cron_file($c); # check cronjob
                     Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' }) unless $rc != 0;
-                    my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
+                    my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id }); # load new process, otherwise we would update in edit mode
                     $bps->[0]->update_status($c);
                 }
             }
@@ -366,7 +366,7 @@ sub index {
     if($id) {
         $c->stash->{editmode} = $c->req->parameters->{'edit'} || 0;
         $c->stash->{editmode} = 0 unless $allowed_for_edit;
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode}, undef, $bp_backend_id);
+        my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id, edit => $c->stash->{editmode}, backend => $bp_backend_id });
         if(scalar @{$bps} == 0) {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
             if($proxyurl) {
@@ -509,7 +509,7 @@ sub _bp_start_page {
         $drafts_too = 0;
     }
     my $local_bps = [];
-    $local_bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
+    $local_bps = Thruk::BP::Utils::load_bp_data($c, { drafts => $drafts_too, skip_nodes => 1, skip_runtime => 1 });
 
     my $bps = [];
     if($type eq 'local' || $type eq 'all' || $type eq 'business process') {
@@ -525,6 +525,7 @@ sub _bp_start_page {
         }
     }
 
+    # search request from filter input
     if($c->req->parameters->{'format'} && $c->req->parameters->{'format'} eq 'search') {
         if($view_mode eq 'json') {
             my $data = [];
@@ -558,12 +559,16 @@ sub _bp_start_page {
     if($view_mode eq 'json') {
         my $data = {};
         for my $bp (@{$bps}) {
+            $bp->load_runtime_data() unless $bp->{'remote'};
             $data->{$bp->{'id'}} = $bp->TO_JSON();
         }
         return $c->render(json => $data);
     }
     elsif($view_mode eq 'xls') {
         Thruk::Utils::Status::set_selected_columns($c, [''], 'bp', $c->stash->{'excel_columns'});
+        for my $bp (@{$bps}) {
+            $bp->load_runtime_data() unless $bp->{'remote'};
+        }
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="bp.xls"' );
         $c->stash->{'data'}     = $bps;
         $c->stash->{'template'} = 'excel/bp.tt';
@@ -571,6 +576,9 @@ sub _bp_start_page {
     }
 
     Thruk::Utils::page_data($c, $bps);
+    for my $bp (@{$c->stash->{'data'}}) {
+        $bp->load_runtime_data() unless $bp->{'remote'};
+    }
 
     Thruk::Utils::ssi_include($c);
 
@@ -701,7 +709,7 @@ sub _bp_list_add_objects {
         }
     }
     for my $bp_id (sort keys %{$recursive_bps}) {
-        my $link_bp = Thruk::BP::Utils::load_bp_data($c, $bp_id);
+        my $link_bp = Thruk::BP::Utils::load_bp_data($c, { id => $bp_id });
         $bp_lookup->{$bp_id} = 1;
         if(scalar @{$link_bp} == 1) {
             ($params, $hst, $svc) = _bp_list_add_objects($c, $link_bp->[0], $params, $hst, $svc, $bp_lookup);
