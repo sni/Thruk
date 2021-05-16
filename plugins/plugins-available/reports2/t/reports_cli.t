@@ -155,6 +155,10 @@ for my $report (@{$test_pdf_reports}) {
         cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=update&report=9999"',
         like => ['/^OK - report scheduled for update$/'],
     });
+    TestUtils::test_command({
+        cmd  => $BIN.' report 9999',
+        like => [],
+    });
     SKIP: {
         skip("skip mail test with external server", 9) if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
