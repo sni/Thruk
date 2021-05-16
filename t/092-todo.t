@@ -6,17 +6,19 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $filter = $ARGV[0];
 my $cmds = [
-  "grep -nr 'TODO' script/. lib/. templates/. plugins/plugins-available/. root/. t/",
+  "grep -Inr 'TODO' script/. lib/. templates/. plugins/plugins-available/. root/. t/ 2>&1",
 ];
 
 # find all TODOs
 for my $cmd (@{$cmds}) {
-  open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
+  open(my $ph, '-|', $cmd) or die('cmd '.$cmd.' failed: '.$!);
   ok($ph, 'cmd started');
   while(<$ph>) {
     my $line = $_;
     chomp($line);
     next if($filter && $line !~ m%$filter%mx);
+
+    next if $line =~ m/\/phantomjs$/mx;
 
     # skip those
     if(   $line =~ m|/vendor/|mx
