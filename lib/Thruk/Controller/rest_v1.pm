@@ -267,9 +267,9 @@ sub _format_csv_output {
         $output .= "ERROR: failed to generate output, rerun with -v to get more details.\n";
     }
 
-    $c->res->headers->content_type('text/plain');
     return $c->render('text' => $output);
 }
+
 ##########################################################
 sub _escape_newlines {
     my($str) = @_;
@@ -292,7 +292,6 @@ sub _format_human_output {
         $data = $list;
     }
 
-    $c->res->headers->content_type('text/plain');
     return $c->render('text' => Thruk::Utils::text_table(data => $data));
 }
 
