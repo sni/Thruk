@@ -62,7 +62,7 @@ my $pages = [{
 ];
 
 for my $test (@{$pages}) {
-    $test->{'content_type'} = 'application/json;charset=UTF-8' unless $test->{'content_type'};
+    $test->{'content_type'} = 'application/json; charset=utf-8' unless $test->{'content_type'};
     $test->{'url'}          = '/thruk/r'.$test->{'url'};
     my $page = TestUtils::test_page(%{$test});
     if(!defined $original_report) {

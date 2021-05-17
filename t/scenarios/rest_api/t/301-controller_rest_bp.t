@@ -57,7 +57,7 @@ sub test_page {
     my($method, $url) = split(/\s+/mx, $test->{'url'}, 2);
     $test->{'url'}          = '/thruk/r'.$url;
     $test->{'method'}       = $method;
-    $test->{'content_type'} = 'application/json;charset=UTF-8';
+    $test->{'content_type'} = 'application/json; charset=utf-8';
     my $page = TestUtils::test_page(%{$test});
     if(!defined $original_bp) {
         my $data = decode_json($page->{'content'});

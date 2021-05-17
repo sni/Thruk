@@ -130,9 +130,9 @@ sub report_show {
             $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             if($report->{'var'}->{'ctype'}) {
                 if($report->{'var'}->{'ctype'} eq 'text/html') {
-                    $c->res->headers->content_type("text/html;charset=utf-8");
+                    $c->res->content_type("text/html; charset=utf-8");
                 } else {
-                    $c->res->headers->content_type($report->{'var'}->{'ctype'});
+                    $c->res->content_type($report->{'var'}->{'ctype'});
                 }
             }
             my $fh;
@@ -286,7 +286,7 @@ sub report_send {
         next if $key eq 'subject';
         $msg->add($key => $mailheader->{$key});
     }
-    $msg->attach(Type     => 'text/plain; charset=UTF-8',
+    $msg->attach(Type     => 'text/plain; charset=utf-8',
                  Data     => $mailbody,
     );
 

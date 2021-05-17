@@ -855,7 +855,7 @@ sub rest_request {
     $request->header('X-Thruk-Auth-Key' => $self->{'auth'});
     $request->header('Accept'           => 'application/json');
     if($parameters) {
-        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($parameters)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     }

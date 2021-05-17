@@ -46,7 +46,7 @@ for my $type (sort keys %{$cmds}) {
         next if $cmd =~ m/^shutdown_pro/mx;
         next if $cmd =~ m/^restart_pro/mx;
         my $test = {
-            'content_type' => 'application/json;charset=UTF-8',
+            'content_type' => 'application/json; charset=utf-8',
             'url'          => '/thruk/r/'.$type.$obj_path.'/cmd/'.$cmd,
             'like'         => ['Command successfully submitted', 'COMMAND \['],
             'unlike'       => ['sending command failed'],

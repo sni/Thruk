@@ -126,7 +126,7 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
 $tst = TestUtils::test_page(
     'url'           => '/thruk/cgi-bin/panorama.cgi?js=1',
     'like'          => 'BLANK_IMAGE_URL',
-    'content_type'  => 'text/javascript; charset=UTF-8',
+    'content_type'  => 'text/javascript; charset=utf-8',
 );
 ($fh, $filename) = tempfile();
 print $fh $tst->{'content'};

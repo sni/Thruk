@@ -430,11 +430,11 @@ sub test_page {
     }
     if($content_type =~ m|text/html| && !defined $return->{'content_type'}) {
         # test without having to change the test number in all tests
-        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+        fail("Content-Type should contain charset=utf-8") unless $content_type =~ m/\;\s*charset=utf\-8/mx;
     }
     if($content_type =~ m|application/json|) {
         # test without having to change the test number in all tests
-        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+        fail("Content-Type should contain charset=utf-8") unless $content_type =~ m/\;\s*charset=utf\-8/mx;
     }
     my $is_length  = length($request->content);
     my $got_length = $request->header('content-length');
@@ -921,7 +921,7 @@ sub _request {
         $post->{'CSRFtoken'} = $test_token if $test_token;
         $request = POST($url, {});
         $request->method(uc($method));
-        $request->header('Content-Type' => 'application/json; charset=utf-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     } else {
@@ -975,7 +975,7 @@ sub _external_request {
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));
-        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
         $request->header('X-Thruk-Auth-Key' => $ENV{'THRUK_TEST_AUTH_KEY'}) if $ENV{'THRUK_TEST_AUTH_KEY'};

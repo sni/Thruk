@@ -82,7 +82,7 @@ my $config = {};
 {
     my $page = TestUtils::test_page(
         'url'          => '/thruk/r/thruk/config',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
     );
     $config = decode_json($page->{'content'});
 }
@@ -93,7 +93,7 @@ for my $url (@{$list_pages}) {
 
         my $page = TestUtils::test_page(
             'url'          => '/thruk/r'.$url,
-            'content_type' => 'application/json;charset=UTF-8',
+            'content_type' => 'application/json; charset=utf-8',
         );
         my $data = decode_json($page->{'content'});
         is(ref $data, 'ARRAY', "json result is an array: ".$url);
@@ -103,7 +103,7 @@ for my $url (@{$list_pages}) {
 for my $url (@{$hash_pages}) {
     my $page = TestUtils::test_page(
         'url'          => '/thruk/r'.$url,
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is a hash: ".$url);
@@ -143,7 +143,7 @@ for my $registered (@{$Thruk::Controller::rest_v1::rest_paths}) {
 # make sure PUT requests are handled like POST
 TestUtils::test_page(
     'url'          => '/thruk/r/thruk/reports',
-    'content_type' => 'application/json;charset=UTF-8',
+    'content_type' => 'application/json; charset=utf-8',
     'method'       => 'PUT',
     'post'         => {},
     'like'         => ['invalid report template'],
@@ -175,7 +175,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/logs?q=***host_name = "test" AND time > 1 AND time < 10***',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['\[\]'],
     );
@@ -186,7 +186,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/logs?q=***host_name = "test" AND (time > 1 AND time < 10)***',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['\[\]'],
     );
@@ -197,7 +197,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&state[ne]=5',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['name'],
     );
@@ -208,7 +208,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&q=***state >= 0***',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['name'],
     );
@@ -219,7 +219,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name&state[gte]=0',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['name'],
     );
@@ -230,7 +230,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?q=***(groups>="does not exist")***&sort=_UNKNOWN_CUSTOM_VAR',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['\[\]'],
     );
@@ -241,7 +241,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?q=***(name != "does not exist")***',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['"state"'],
     );
@@ -252,7 +252,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?state=-1&columns=count(*)',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['count\(\*\)', '0'],
     );
@@ -263,7 +263,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/thruk/sessions?columns=count(*):renamed_label&active=-99',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['"renamed_label" : 0'],
     );
@@ -274,7 +274,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name:renamed_label&limit=1',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['"renamed_label"'],
     );
@@ -285,7 +285,7 @@ TestUtils::test_page(
 {
     TestUtils::test_page(
         'url'          => '/thruk/r/hosts?columns=name,contacts,UNKNOWN',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['"contacts"', '"UNKNOWN"'],
         'unlike'       => ['"contacts" : null,'],

@@ -136,7 +136,7 @@ for my $test (@{$pages}) {
     $url =~ s%/hosts?/<name>%/hosts/$host/%gmx;
     $test->{'url'}          = '/thruk/r'.$url;
     $test->{'method'}       = $method;
-    $test->{'content_type'} = 'application/json;charset=UTF-8';
+    $test->{'content_type'} = 'application/json; charset=utf-8';
     my $page = TestUtils::test_page(%{$test});
     #BAIL_OUT("failed") unless Test::More->builder->is_passing;
 }

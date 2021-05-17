@@ -393,7 +393,7 @@ sub _external_request {
     my $request = HTTP::Request->new($method, $url);
     $request->method(uc($method));
     if($postdata) {
-        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($postdata)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     }
