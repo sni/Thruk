@@ -608,6 +608,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
 
         next if $err_str =~ m/<IMG\ SRC=".*\/conf\/images\/obj_.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
+        next if $err_str =~ m/<IMG\ SRC=".*\/logo_thruk.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/<IMG\ SRC="[^"]*\.cgi[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/<IMG\ SRC="data:image[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "data\-[\w\-]+"\ for\ tag/imxo;
@@ -621,6 +622,8 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "sizes"\ for\ tag\ <link>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "charset"\ for\ tag\ <meta>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "required"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/<html>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<head>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<title>\ tag\ is\ required/imxo;
