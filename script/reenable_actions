@@ -32,11 +32,12 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 33
 
 ##############################################
-use strict;
 use warnings;
-use Pod::Usage;
+use strict;
 use Getopt::Long;
-use Thruk::Utils::CLI;
+use Pod::Usage;
+
+use Thruk::Utils::CLI ();
 
 my $SECONDS_PER_DAY = 86400;
 

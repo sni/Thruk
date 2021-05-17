@@ -1,7 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 

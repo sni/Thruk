@@ -13,16 +13,14 @@ to logout again.
 
 use warnings;
 use strict;
-use Thruk::UserAgent;
-use Thruk::Authentication::User;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::Utils::Crypt;
-use Data::Dumper;
-use Encode qw/encode_utf8/;
-use File::Slurp qw/read_file/;
 use Carp qw/confess/;
+use Encode qw/encode_utf8/;
 use File::Copy qw/move/;
+
+use Thruk::Authentication::User ();
+use Thruk::UserAgent ();
+use Thruk::Utils ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -79,8 +77,8 @@ sub external_authentication {
                     $ua->default_header( $header => $login->{$header} );
                 }
             } else {
-                $login = encode_utf8(Thruk::Utils::ensure_utf8($login));
-                $pass  = encode_utf8(Thruk::Utils::ensure_utf8($pass));
+                $login = encode_utf8(Thruk::Utils::Encode::ensure_utf8($login));
+                $pass  = encode_utf8(Thruk::Utils::Encode::ensure_utf8($pass));
                 $ua->credentials( $netloc, $realm, $login, $pass );
             }
             $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;
@@ -108,7 +106,7 @@ sub external_authentication {
             print STDERR 'auth: realm does not match, got ', $realm, "\n";
         }
     } else {
-        print STDERR 'auth: expected code 401, got ', $res->code, "\n", Dumper($res);
+        print STDERR 'auth: expected code 401, got ', $res->code, "\n", Thruk::Utils::dump_params($res);
     }
     return -1;
 }
@@ -327,7 +325,7 @@ sub store_session {
     $data->{'file'}        = $sessionfile;
     $data->{'hashed_key'}  = $hashed_key;
 
-    if(defined $Thruk::Request::c) {
+    if(defined $Thruk::Globals::c) {
         _audit_log("session", "session created", $data->{'username'}, $hashed_key, 0);
     }
 
@@ -361,7 +359,7 @@ sub retrieve_session {
     my $config = $args{'config'} or confess("missing config");
     my($digest_name, $hashed_key);
     if($args{'file'}) {
-        $sessionfile = Thruk::Utils::basename($args{'file'});
+        $sessionfile = Thruk::Base::basename($args{'file'});
         # REMOVE AFTER: 01.01.2022
         if($sessionfile =~ $hashed_key_file_regex) {
             $hashed_key  = $1;
@@ -373,7 +371,7 @@ sub retrieve_session {
             my($new_hashed_key, $newfile);
             ($new_hashed_key, $newfile, undef, $digest_name) = _upgrade_session_file($config, $hashed_key);
             if($newfile) {
-                $sessionfile = Thruk::Utils::basename($newfile);
+                $sessionfile = Thruk::Base::basename($newfile);
                 $hashed_key  = $new_hashed_key;
             }
         }
@@ -414,7 +412,7 @@ sub retrieve_session {
     # REMOVE AFTER: 01.01.2022
     my $needs_save;
     if(!$data) {
-        my $raw = scalar read_file($sessionfile);
+        my $raw = Thruk::Utils::IO::read($sessionfile);
         chomp($raw);
         my($auth,$ip,$username,$roles) = split(/~~~/mx, $raw, 4);
         return unless defined $username;

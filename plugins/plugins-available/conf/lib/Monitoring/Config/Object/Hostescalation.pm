@@ -1,7 +1,8 @@
 package Monitoring::Config::Object::Hostescalation;
 
-use strict;
 use warnings;
+use strict;
+
 use parent 'Monitoring::Config::Object::Parent';
 
 =head1 NAME

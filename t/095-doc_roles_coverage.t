@@ -1,7 +1,11 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
+use Test::More;
+
+use Thruk::Base ();
+use Thruk::Config 'noautoload';
+use Thruk::Constants ();
 
 use lib('t');
 use TestUtils;
@@ -14,8 +18,8 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 # read our config and enable everything
 my $c     = TestUtils::get_c();
 my $docs  = get_docs();
-my $roles = $Thruk::Authentication::User::possible_roles;
-my $hash  = Thruk::Config::array2hash($roles);
+my $roles = $Thruk::Constants::possible_roles;
+my $hash  = Thruk::Base::array2hash($roles);
 for my $role (@{$roles}) {
     is($docs->{$role}, 1, "documentation entry for: $role");
 }
@@ -23,7 +27,7 @@ for my $role (@{$roles}) {
 for my $role (`grep ^authorized_for_ cgi.cfg`) {
     $role =~ s/=.*$//gmx;
     chomp($role);
-    is($hash->{$role}, $role, "Thruk::Authentication::User::possible_roles entry for: $role");
+    is($hash->{$role}, $role, "Thruk::Constants::possible_roles entry for: $role");
 }
 
 done_testing();

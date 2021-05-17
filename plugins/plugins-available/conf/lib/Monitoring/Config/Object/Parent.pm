@@ -1,12 +1,17 @@
 package Monitoring::Config::Object::Parent;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
-use Storable qw(dclone);
 use Scalar::Util qw/weaken/;
-use Monitoring::Config::Help;
-use Monitoring::Config::Object;
+use Storable qw(dclone);
+
+use Monitoring::Config ();
+use Monitoring::Config::Help ();
+use Monitoring::Config::Object ();
+use Thruk::Base ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Crypt ();
 
 =head1 NAME
 
@@ -469,7 +474,7 @@ sub get_computed_config {
                         my $list           = dclone($tconf->{$key});
                         $tconf->{$key}->[0] =~ s/^\+//gmx;
                         $conf->{$key}->[0] = substr($conf->{$key}->[0], 1) if(substr($conf->{$key}->[0],0,1) eq '+');
-                        @{$conf->{$key}}   = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
+                        @{$conf->{$key}}   = sort @{Thruk::Base::array_uniq([@{$list}, @{$conf->{$key}}])};
                         $conf->{$key}->[0] = '+'.$conf->{$key}->[0];
                         $conf->{$key}->[0] =~ s/^\++/+/gmx;
                     }
@@ -563,8 +568,8 @@ sub get_data_from_param {
         $key =~ s/^obj\.//mx;
 
         # remove whitespace
-        $key   =~ s/^\s*(.*?)\s*$/$1/gmxo;
-        $value =~ s/^\s*(.*?)\s*$/$1/gmxo unless ref $value;
+        $key   = Thruk::Base::trim_whitespace($key);
+        $value = Thruk::Base::trim_whitespace($value) unless ref $value;
 
         $new_param->{$key} = $value;
     }

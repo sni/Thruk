@@ -1,13 +1,11 @@
 package Thruk::Controller::Rest::V1::cmd;
 
-use strict;
 use warnings;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
-use Storable qw/dclone/;
 
-use Thruk::Utils;
-use Thruk::Controller::rest_v1;
-use Thruk::Controller::cmd;
+use Thruk::Base ();
+use Thruk::Controller::rest_v1 ();
 
 =head1 NAME
 
@@ -43,6 +41,12 @@ Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(services?)/([^/]
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/(system|core|)/cmd/([^/]+)%mx,              \&_rest_get_external_command);
 sub _rest_get_external_command {
     my($c, undef, $type, @args) = @_;
+
+    require Thruk::Controller::cmd;
+    require Thruk::Utils::Auth;
+    require Thruk::Utils::Filter;
+    require Thruk::Utils;
+
     my $cmd_data = get_rest_external_command_data();
     my($cmd, $cmd_name, $name, $description, @cmd_args);
 
@@ -105,7 +109,7 @@ sub _rest_get_external_command {
         return({ 'message' => 'no such command', 'description' => 'there is no command '.$cmd_name.' for type '.$type, code => 404 });
     }
 
-    my $required = Thruk::Utils::array2hash($cmd->{'required'});
+    my $required = Thruk::Base::array2hash($cmd->{'required'});
     my $args = {};
     for my $arg (@{$cmd->{'args'}}) {
         my $val = $c->req->parameters->{$arg};
@@ -189,7 +193,7 @@ sub _rest_get_external_command {
         }
     }
 
-    my($backends) = $c->{'db'}->select_backends('send_command');
+    my($backends) = $c->db->select_backends('send_command');
     if(scalar @{$backends} > 1) {
         $backends= Thruk::Controller::cmd::get_affected_backends($c, $required_fields, $backends);
         if(scalar @{$backends} == 0) {
@@ -199,7 +203,7 @@ sub _rest_get_external_command {
 
     my $commands = {};
     for my $b (@{$backends}) {
-        $commands->{$b} = dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
+        $commands->{$b} = Thruk::Utils::dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
     }
 
     # handle custom commands
@@ -213,7 +217,7 @@ sub _rest_get_external_command {
             $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $name, service_description => $description ];
         }
         push @{$options->{'filter'}}, start_time => { '<=' => time() };
-        my $data = $c->{'db'}->get_downtimes(%{$options});
+        my $data = $c->db->get_downtimes(%{$options});
         for my $d (@{$data}) {
             $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
             if($d->{'service_description'}) {

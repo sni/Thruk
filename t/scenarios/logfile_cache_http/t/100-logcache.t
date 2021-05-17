@@ -1,7 +1,9 @@
-use strict;
 use warnings;
+use strict;
 use Data::Dumper;
 use Test::More;
+
+use Thruk::Backend::Provider::Base ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -17,10 +19,10 @@ BEGIN { use_ok 'Thruk::Controller::notifications' }
 my $c = TestUtils::get_c();
 # wait till our backend is up and has logs
 for my $x (1..90)  {
-    my $peer = $c->{'db'}->get_peers(1)->[0];
-    my $res = [Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'})];
+    my $peer = $c->db->get_peers(1)->[0];
+    my $res = [Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'})];
     if($res->[0] && $res->[0] > 0) {
-        ok(1, "got log start/end at retry: ".$x);
+        ok(1, sprintf("got log start/end ([%s,%s]) at retry: %d", $res->[0], $res->[1], $x));
         last;
     }
     ok(1, "log start/end retry: $x");
@@ -51,7 +53,7 @@ TestUtils::test_page(
 
 ################################################################################
 # check common import issues
-my $peer   = $c->{'db'}->get_peers(1)->[0]->{'class'}->{'_peer'};
+my $peer   = $c->db->get_peers(1)->[0]->{'class'}->{'_peer'};
 my $prefix = $peer->{'key'};
 my $dbh    = $peer->logcache()->_dbh();
 {

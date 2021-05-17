@@ -1,15 +1,18 @@
 package Monitoring::Config;
 
-use strict;
 use warnings;
-use Carp qw/cluck/;
-use Monitoring::Config::File;
-use Encode qw/decode_utf8/;
-use Data::Dumper;
+use strict;
 use Carp;
+use Data::Dumper;
+use Encode qw/decode_utf8/;
 use Storable qw/dclone/;
-use Thruk::Utils;
+
+use Monitoring::Config::File ();
+use Monitoring::Config::Object ();
+use Monitoring::Config::Object::Parent ();
 use Thruk::Config 'noautoload';
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -226,7 +229,7 @@ sub commit {
 
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
-        $backend_name = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
+        $backend_name = $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'};
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
@@ -265,7 +268,7 @@ sub commit {
             # do some logging
             _audit_log("configtool",
                             sprintf("[config][%s][%s] %s file '%s'",
-                                        $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                        $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
                                         $file->{'display'},
@@ -286,7 +289,7 @@ sub commit {
             if($c && $f->{'deleted'}) {
                 _audit_log("configtool",
                                 sprintf("[config][%s][%s] deleted file '%s'",
-                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $f->{'display'},
                 )) if $c;
@@ -1258,7 +1261,7 @@ sub clone_refs {
     my($self, $orig, $obj, $cloned_name, $new_name, $clone_refs, $test_mode) = @_;
 
     my $clone_refs_lookup = {};
-    $clone_refs_lookup = Thruk::Utils::array2hash($clone_refs) if $clone_refs;
+    $clone_refs_lookup = Thruk::Base::array2hash($clone_refs) if $clone_refs;
 
     my $clonables = {};
     # clone incoming references
@@ -1500,7 +1503,7 @@ sub get_files_root {
     # file root is empty when there are no files (yet)
     if($root eq '') {
         return $self->{'config'}->{'files_root'} if $self->{'config'}->{'files_root'};
-        my $dirs = Thruk::Utils::list($self->{'config'}->{'obj_dir'});
+        my $dirs = Thruk::Base::list($self->{'config'}->{'obj_dir'});
         if(defined $dirs->[0]) {
             $root = $dirs->[0];
         }
@@ -1559,8 +1562,8 @@ sub _set_config {
         if(defined $ENV{'OMD_ROOT'}
            && -d $ENV{'OMD_ROOT'}."/version/."
            && ! -s $core_conf
-           && scalar(@{Thruk::Utils::list($self->{'config'}->{'obj_dir'})})  == 0
-           && scalar(@{Thruk::Utils::list($self->{'config'}->{'obj_file'})}) == 0) {
+           && scalar(@{Thruk::Base::list($self->{'config'}->{'obj_dir'})})  == 0
+           && scalar(@{Thruk::Base::list($self->{'config'}->{'obj_file'})}) == 0) {
             my $newest = $self->_newest_file(
                                              $ENV{'OMD_ROOT'}.'/tmp/naemon/naemon.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
@@ -1826,7 +1829,7 @@ sub _get_files_names {
             my $path = $dir;
             $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
             for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
-                Thruk::Utils::decode_any($file);
+                Thruk::Utils::Encode::decode_any($file);
                 $file =~ s|/+|/|gmx;
                 $files->{$file} = 1;
             }
@@ -1849,7 +1852,7 @@ sub _get_files_names {
     # single files
     if(defined $config->{'obj_file'}) {
         for my $file ( ref $config->{'obj_file'} eq 'ARRAY' ? @{$config->{'obj_file'}} : ($config->{'obj_file'}) ) {
-            Thruk::Utils::decode_any($file);
+            Thruk::Utils::Encode::decode_any($file);
             if($self->{'config'}->{'localdir'}) {
                 my $display = $file;
                 $file       = $self->{'config'}->{'localdir'}.'/'.$file;
@@ -2203,7 +2206,7 @@ sub _check_references {
 
             if(defined $objects_by_name->{$link}->{$val}) {
                 return;
-            } elsif(Thruk::Utils::looks_like_regex($val)) {
+            } elsif(Thruk::Base::looks_like_regex($val)) {
                 # expand wildcards and regex
                 my $newval = Thruk::Utils::convert_wildcards_to_regex($val);
                 for my $tst (keys %{$objects_by_name->{$link}}) {
@@ -2419,7 +2422,7 @@ sub _remote_do {
                     });
     };
     if($@) {
-        warn($@) if Thruk->mode eq 'TEST';
+        warn($@) if Thruk::Base->mode eq 'TEST';
         my $msg = $@;
         _error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
@@ -2751,7 +2754,7 @@ sub get_plugin_help {
     }
     my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
     my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
-    ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+    ($file)         = $c->db->_get_replaced_string($file, $user_macros);
     if(!-x $file) {
         return(sprintf("%s is not executable", $file));
     }
@@ -2796,7 +2799,7 @@ sub get_plugin_preview {
     my $cfg = $Monitoring::Config::save_options;
     $Monitoring::Config::key_sort = Monitoring::Config::Object::Parent::sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
 
-    my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
+    my $macros = $c->db->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
     $macros    = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'}, $macros);
 
     if(defined $host and $host ne '') {
@@ -2819,7 +2822,7 @@ sub get_plugin_preview {
     }
 
     my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-    ($file) = $c->{'db'}->_get_replaced_string($file, $macros);
+    ($file) = $c->db->_get_replaced_string($file, $macros);
     if(!-x $file) {
         return(sprintf("%s is not executable", $file));
     }
@@ -2827,7 +2830,7 @@ sub get_plugin_preview {
     if($file !~ m%$pathspec%mx) {
         return(sprintf("%s does not match path spec: %s", $file, $pathspec));
     }
-    my($cmd, $rc) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
+    my($cmd, $rc) = $c->db->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
 
     if(!defined $cmd || !$rc) {
         return(sprintf("could not replace all macros in: %s", $file));

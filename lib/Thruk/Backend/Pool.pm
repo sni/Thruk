@@ -1,19 +1,21 @@
 package Thruk::Backend::Pool;
 
-use strict;
 use warnings;
+use strict;
+use Carp qw/confess/;
+use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::Backend::Peer ();
+use Thruk::Backend::Provider::Livestatus ();
+use Thruk::Base ();
+use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Utils::IO ();
+
+use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
 
 #use Thruk::Timer qw/timing_breakpoint/;
 #&timing_breakpoint('starting pool');
 
-use Carp qw/confess/;
-use Thruk::Backend::Peer ();
-use Thruk ();
-use Thruk::Config;
-use Thruk::Utils::IO ();
-use Thruk::Constants qw/:add_defaults :peer_states/;
-use Time::HiRes qw/gettimeofday tv_interval/;
-use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
 
 =head1 NAME
 
@@ -65,8 +67,8 @@ sub new {
         chdir($ENV{'HOME'});
     }
 
-    my $config       = Thruk->config;
-    my $peer_configs = Thruk::Config::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
+    my $config       = Thruk::Base->config;
+    my $peer_configs = Thruk::Base::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
     my $num_peers    = scalar @{$peer_configs};
     my $pool_size;
     if(defined $config->{'connection_pool_size'}) {
@@ -129,9 +131,11 @@ sub new {
             if($@) {
                 die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
             }
+            ## no lint
             if(!$Net::SSLeay::VERSION || $Net::SSLeay::VERSION < 1.43) {
                 die('Net::SSLeay (>=1.43) is required for multiple parallel https connections, you have '.($Net::SSLeay::VERSION ? $Net::SSLeay::VERSION : 'unknown'));
             }
+            ## use lint
             if($INC{'Crypt/SSLeay.pm'}) {
                 die('Crypt::SSLeay must not be loaded for multiple parallel https connections!');
             }
@@ -145,8 +149,8 @@ sub new {
             $peer_keys->{$peer->{'key'}} = 1;
             $self->peer_add($peer);
             if($peer_config->{'groups'} && !$config->{'deprecations_shown'}->{'backend_groups'}) {
-                $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
-                push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
+                $Thruk::Globals::deprecations_log = [] unless defined $Thruk::Globals::deprecations_log;
+                push @{$Thruk::Globals::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
         }
@@ -214,8 +218,8 @@ sub peer_remove {
     }
     delete $self->{'peers'}->{$key};
     delete $self->{'by_name'}->{$peer->{'name'}};
-    $self->{'peer_order'} = Thruk::Utils::array_remove($self->{'peer_order'}, $key);
-    $self->{'objects'}    = Thruk::Utils::array_remove($self->{'objects'}, $peer);
+    $self->{'peer_order'} = Thruk::Base::array_remove($self->{'peer_order'}, $key);
+    $self->{'objects'}    = Thruk::Base::array_remove($self->{'objects'}, $peer);
     return;
 }
 

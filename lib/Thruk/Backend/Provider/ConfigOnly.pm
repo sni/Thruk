@@ -1,7 +1,7 @@
 package Thruk::Backend::Provider::ConfigOnly;
 
-use strict;
 use warnings;
+use strict;
 
 =head1 NAME
 

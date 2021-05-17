@@ -1,9 +1,12 @@
 package Thruk::Controller::Rest::V1::outages;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+use Cpanel::JSON::XS ();
+
+use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -19,7 +22,6 @@ Thruk Controller
 
 =cut
 
-use Thruk::Utils::Avail ();
 
 ##########################################################
 # REST PATH: GET /hosts/outages
@@ -178,7 +180,7 @@ sub _rest_outages {
         });
     }
 
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     if($c->stash->{'has_error'}) {
         return({
                 'message'     => 'error in filter',

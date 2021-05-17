@@ -1,11 +1,14 @@
 package Thruk::Utils::Panorama;
 
-use strict;
 use warnings;
-use Thruk::Utils;
-use Thruk::Utils::Panorama::Scripted;
-use Thruk::Utils::Log qw/:all/;
+use strict;
 use Cpanel::JSON::XS;
+use Exporter 'import';
+
+use Thruk::Backend::Manager ();
+use Thruk::Utils ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Panorama::Scripted ();
 
 =head1 NAME
 
@@ -39,8 +42,8 @@ my @runtime_keys = qw/state stateHist stateDetails
                       currentPage pageSize totalCount
                     /;
 
-use base 'Exporter';
 our @EXPORT_OK = (qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/);
+our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 ##########################################################
 

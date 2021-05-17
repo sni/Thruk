@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Getopt::Long;
 use POSIX qw/strftime mktime/;
-use File::Slurp qw/read_file/;
 use Term::ReadKey;
 
 BEGIN {
@@ -12,7 +11,8 @@ BEGIN {
     push @INC, $ENV{'OMD_ROOT'}.'/share/thruk/lib/';
 }
 
-use Thruk::Utils;
+use Thruk::Utils ();
+use Thruk::Utils::DateTime ();
 
 END {
     ReadMode 0; # reset tty
@@ -46,7 +46,7 @@ if($options->{'help'}) {
 # read input source
 my $logs = [];
 print "reading ".$options->{'input_source'}." ...";
-for my $line (read_file($options->{'input_source'})) {
+for my $line (Thruk::Utils::IO::read_as_list($options->{'input_source'})) {
     $line =~ s/^\s*\[\d+\]\s*//gmx;
     push @{$logs}, $line;
 }

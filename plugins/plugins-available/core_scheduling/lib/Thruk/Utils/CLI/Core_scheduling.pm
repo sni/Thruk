@@ -33,6 +33,8 @@ The core_scheduling command smart reschedules hosts / services.
 use warnings;
 use strict;
 
+use Thruk::Utils::CLI ();
+
 ##############################################
 
 =head1 METHODS

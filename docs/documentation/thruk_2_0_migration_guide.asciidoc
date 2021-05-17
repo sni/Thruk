@@ -54,17 +54,17 @@ The `MyAction` decorator has been replaced with a direct call to add_defaults. T
 ----
   sub index {
     my ( $c ) = @_;
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
     ...
 ----
 
 There are 3 variants available:
 
-* Thruk::ADD_DEFAULTS +
+* Thruk::Constants::ADD_DEFAULTS +
   add connection but redirect to error page if no backends available
-* Thruk::ADD_SAFE_DEFAULTS +
+* Thruk::Constants::ADD_SAFE_DEFAULTS +
   add connection and just return for no backends
-* Thruk::ADD_CACHED_DEFAULTS +
+* Thruk::Constants::ADD_CACHED_DEFAULTS +
   add connection without requesting process info and backend status
 
 
@@ -162,4 +162,3 @@ determince the folder for Thruks configuration files.
   CATALYST_SERVER                      ->       PLACK_TEST_EXTERNALSERVER_URI
   CATALYST_CONFIG                      ->       THRUK_CONFIG
 ----
-

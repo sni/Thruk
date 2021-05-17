@@ -10,14 +10,16 @@ LMD Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
-use File::Slurp qw/read_file/;
-use Time::HiRes ();
-use File::Copy qw/copy move/;
+use strict;
 use Carp qw/confess/;
-use Thruk::Utils::External;
+use File::Copy qw/copy move/;
+use POSIX ();
+use Time::HiRes ();
+
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
@@ -65,7 +67,7 @@ sub check_proc {
     my $startlock = $lmd_dir.'/startup';
     my($fh, $lock);
     eval {
-        ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock, 'ex');
+        ($fh, $lock) = Thruk::Utils::IO::file_lock($startlock);
     };
     if($@) {
         _error("failed to get lmd startup lock: ". $@);
@@ -87,7 +89,7 @@ sub check_proc {
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config '.$lmd_dir.'/lmd.ini';
-    for my $cfg (@{Thruk::Utils::array_uniq(Thruk::Utils::list($config->{'lmd_core_config'}))}) {
+    for my $cfg (@{Thruk::Base::array_uniq(Thruk::Base::list($config->{'lmd_core_config'}))}) {
         $cmd .= ' -config '.$cfg;
     }
     if($config->{'lmd_options'}) {
@@ -149,7 +151,7 @@ sub status {
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
         $total_started++;
         $started = 1;
-        $pid     = read_file($lmd_dir.'/pid');
+        $pid     = Thruk::Utils::IO::read($lmd_dir.'/pid');
         chomp($pid);
         $start_time = (stat($lmd_dir.'/pid'))[10];
     }
@@ -202,7 +204,7 @@ sub reload {
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
     if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-        my $pid = read_file($lmd_dir.'/pid');
+        my $pid = Thruk::Utils::IO::read($lmd_dir.'/pid');
         chomp($pid);
         if(kill("SIGHUP", $pid)) {
             return(1);
@@ -227,7 +229,7 @@ sub shutdown_procs {
     my $pidfile = $lmd_dir.'/pid';
     my $pid;
     if(-s $pidfile) {
-        $pid = read_file($pidfile);
+        $pid = Thruk::Utils::IO::read($pidfile);
         kill(15, $pid);
     }
     delete $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
@@ -253,7 +255,7 @@ sub check_initial_start {
     my($c, $config, $background) = @_;
     return if(!$config->{'use_lmd_core'});
     if(!$ENV{'THRUK_JOB_ID'}) {
-        return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
+        return if(Thruk::Base->mode ne 'FASTCGI' && Thruk::Base->mode ne 'DEVSERVER');
     }
 
     return if $config->{'lmd_remote'};
@@ -262,10 +264,7 @@ sub check_initial_start {
 
     local $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
     if($background) {
-        ## no critic
-        $ENV{'THRUK_LMD_VERSION'} = get_lmd_version($config) unless $ENV{'THRUK_LMD_VERSION'};
-        ## use critic
-
+        require Thruk::Utils::External;
         Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::check_initial_start($c, $c->config, 0)', background => 1 });
         return;
     }
@@ -291,7 +290,7 @@ check if pidfile exists and contains a valid pid, returns zero or the actual pid
 sub check_pid {
     my($file) = @_;
     return 0 unless -s $file;
-    my $pid = read_file($file);
+    my $pid = Thruk::Utils::IO::read($file);
     if($pid =~ m/^(\d+)\s*$/mx) {
         $pid = $1;
         if(! -d '/proc/.') {
@@ -301,7 +300,7 @@ sub check_pid {
             }
         }
         elsif(-r '/proc/'.$pid.'/cmdline') {
-            my $cmd = read_file('/proc/'.$pid.'/cmdline');
+            my $cmd = Thruk::Utils::IO::read('/proc/'.$pid.'/cmdline');
             if($cmd && $cmd =~ m/lmd/mxi) {
                 return $pid;
             }
@@ -322,7 +321,7 @@ send sigusr1 to lmd to create a thread dump
 sub create_thread_dump {
     my($config) = @_;
     return if(!$config->{'use_lmd_core'});
-    return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
+    return if(Thruk::Base->mode ne 'FASTCGI' && Thruk::Base->mode ne 'DEVSERVER');
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
     my $pid_file = $lmd_dir.'/pid';
     my $pid = check_pid($pid_file);
@@ -362,10 +361,11 @@ sub kill_if_not_responding {
     if($pid == -1) { die("fork failed: $!"); }
 
     if(!$pid) {
+        require Thruk::Utils::External;
         Thruk::Utils::External::do_child_stuff($c, 0, 0);
         alarm($lmd_timeout);
         eval {
-            $data = $c->{'db'}->lmd_peer->_raw_query("GET sites\n");
+            $data = $c->db->lmd_peer->_raw_query("GET sites\n");
         };
         my $err = $@;
         alarm(0);
@@ -442,26 +442,17 @@ sub write_lmd_config {
         $site_config .= "SkipSSLCheck = 1\n\n";
     }
 
-    my $lmd_version = get_lmd_version($config);
-    ## no critic
-    $ENV{'THRUK_LMD_VERSION'} = $lmd_version;
-    ## use critic
-    my $supports_section = 0;
-    if($lmd_version && Thruk::Utils::version_compare($lmd_version, '1.1.6')) {
-        $supports_section = 1;
-    }
+    confess("got no peers") if scalar @{$c->db->peer_order} == 0;
 
-    confess("got no peers") if scalar @{$c->{'db'}->peer_order} == 0;
-
-    for my $key (@{$c->{'db'}->peer_order}) {
-        my $peer = $c->{'db'}->peers->{$key};
+    for my $key (@{$c->db->peer_order}) {
+        my $peer = $c->db->peers->{$key};
         next if $peer->{'federation'};
         $site_config .= "[[Connections]]\n";
         $site_config .= "name           = '".$peer->peer_name()."'\n";
         $site_config .= "id             = '".$key."'\n";
         $site_config .= "source         = ['".join("', '", @{$peer->peer_list()})."']\n";
         # section is supported starting with lmd 1.1.6
-        if($supports_section && $peer->{'section'} && $peer->{'section'} ne 'Default') {
+        if($peer->{'section'} && $peer->{'section'} ne 'Default') {
             $site_config .= "section = '".$peer->{'section'}."'\n";
         }
         $site_config .= "auth           = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'auth'};
@@ -485,7 +476,7 @@ sub write_lmd_config {
     die("could not create lmd ".$lmd_dir.': '.$@) if $@;
 
     if(-s $lmd_dir.'/lmd.ini') {
-        my $old = read_file($lmd_dir.'/lmd.ini');
+        my $old = Thruk::Utils::IO::read($lmd_dir.'/lmd.ini');
         if($old eq $site_config) {
             return(0);
         }
@@ -506,7 +497,7 @@ returns lmd version
 =cut
 sub get_lmd_version {
     my($config) = @_;
-
+    return($config->{'lmd_version'}) if $config->{'lmd_version'};
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -version';
 

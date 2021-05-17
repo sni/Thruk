@@ -1,9 +1,10 @@
 package Thruk::Utils::Conf::Defaults;
 
-use strict;
 use warnings;
-use Thruk::Utils::Conf;
-use Thruk::Authentication::User;
+use strict;
+
+use Thruk::Base ();
+use Thruk::Constants ();
 
 =head1 NAME
 
@@ -38,7 +39,7 @@ sub get_thruk_cfg {
                 documentation_link                      => ['STRING', ''],
                 all_problems_link                       => ['STRING', ''],
                 allowed_frame_links                     => ['STRING', ''],
-                default_theme                           => ['LIST',   'Thruk', Thruk::Utils::array2hash($c->config->{'themes'}) ],
+                default_theme                           => ['LIST',   'Thruk', Thruk::Base::array2hash($c->config->{'themes'}) ],
                 tmp_path                                => ['STRING', ''],
                 ssi_path                                => ['STRING', ''],
                 plugin_path                             => ['STRING', ''],
@@ -48,8 +49,8 @@ sub get_thruk_cfg {
                 group_paging_overview                   => ['ARRAY',  []],
                 group_paging_summary                    => ['ARRAY',  []],
                 group_paging_grid                       => ['ARRAY',  []],
-                show_long_plugin_output                 => ['LIST', 'popup', Thruk::Utils::array2hash([qw/popup inline off/]) ],
-                info_popup_event_type                   => ['LIST', 'onclick', Thruk::Utils::array2hash([qw/onclick onmouseover/]) ],
+                show_long_plugin_output                 => ['LIST', 'popup', Thruk::Base::array2hash([qw/popup inline off/]) ],
+                info_popup_event_type                   => ['LIST', 'onclick', Thruk::Base::array2hash([qw/onclick onmouseover/]) ],
                 info_popup_options                      => ['STRING', ''],
                 show_notification_number                => ['BOOL',   '1'],
                 show_backends_in_table                  => ['BOOL',   '0'],
@@ -118,7 +119,7 @@ sub get_cgi_cfg {
         'action_url_target'                         => ['STRING', ''],
         'notes_url_target'                          => ['STRING', ''],
     };
-    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+    for my $key (@{$Thruk::Constants::possible_roles}) {
         $conf->{$key} = ['MULTI_LIST', [], {} ];
         my $groupkey = $key;
         $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;

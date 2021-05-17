@@ -62,9 +62,11 @@ The graph command exports pnp/grafana graphs
 
 use warnings;
 use strict;
-use Thruk::Utils::Log qw/:all/;
 use Getopt::Long ();
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -125,7 +127,7 @@ sub cmd {
     if(-e $cache_file) {
         _debug("cache hit from ".$cache_file);
         $c->stats->profile(end => "_cmd_graph($action)");
-        return(scalar read_file($cache_file), 0);
+        return(Thruk::Utils::IO::read($cache_file), 0);
     }
 
     # create new image

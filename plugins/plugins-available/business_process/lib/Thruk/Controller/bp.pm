@@ -1,7 +1,13 @@
 package Thruk::Controller::bp;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::BP::Components::BP ();
+use Thruk::BP::Components::Node ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -23,7 +29,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'bp_modules_loaded'}) {
         require Data::Dumper;
@@ -66,7 +72,7 @@ sub index {
     if($id =~ m/^([^:]+):(\d+)$/mx) { $bp_backend_id = $1; $id = $2; }
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     # backend id is only relevant if there are multiple backends
-    if(scalar @{$c->{'db'}->get_peers} <= 1) { $bp_backend_id = undef; }
+    if(scalar @{$c->db->get_peers} <= 1) { $bp_backend_id = undef; }
     my $nodeid = $c->req->parameters->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
@@ -128,7 +134,7 @@ sub index {
     # read / write actions
     if($id and $allowed_for_edit and ($action ne 'details' and $action ne 'refresh')) {
         $c->stash->{editmode} = 1;
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode}, undef, $bp_backend_id);
+        my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id, edit => $c->stash->{editmode}, backend => $bp_backend_id });
         if(scalar @{$bps} == 0) {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
             if($proxyurl) {
@@ -154,13 +160,13 @@ sub index {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command failed\n".$msg });
             } else {
                 # check if new objects really exits
-                my $services = $c->{'db'}->get_services( filter => [ { 'host_name' => $bp->{'name'} } ], columns => [qw/description/] );
+                my $services = $c->db->get_services( filter => [ { 'host_name' => $bp->{'name'} } ], columns => [qw/description/] );
                 if(!$services || scalar @{$services} == 0) {
                     Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command succeeded, but services are missing" });
                 } else {
                     Thruk::BP::Utils::update_cron_file($c); # check cronjob
                     Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' }) unless $rc != 0;
-                    my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
+                    my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id }); # load new process, otherwise we would update in edit mode
                     $bps->[0]->update_status($c);
                 }
             }
@@ -273,14 +279,14 @@ sub index {
                                     'function' => $type,
                                     'depends'  => [],
                 });
-                die('could not create node: '.Data::Dumper($c->req->parameters)) unless $node;
-                die('got no parent'.Data::Dumper($c->req->parameters)) unless $parent;
+                die('could not create node: '.Data::Dumper::Dumper($c->req->parameters)) unless $node;
+                die('got no parent'.Data::Dumper::Dumper($c->req->parameters)) unless $parent;
                 $bp->add_node($node);
                 $parent->append_child($node);
             }
 
             # update children
-            $node->{'depends'} = Thruk::Utils::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
+            $node->{'depends'} = Thruk::Base::list($c->req->parameters->{'bp_'.$id.'_selected_nodes'} || []);
 
             # save object creating attributes
             for my $key (qw/host service template notification_period event_handler max_check_attempts/) {
@@ -361,7 +367,7 @@ sub index {
     if($id) {
         $c->stash->{editmode} = $c->req->parameters->{'edit'} || 0;
         $c->stash->{editmode} = 0 unless $allowed_for_edit;
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode}, undef, $bp_backend_id);
+        my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id, edit => $c->stash->{editmode}, backend => $bp_backend_id });
         if(scalar @{$bps} == 0) {
             my $proxyurl = Thruk::Utils::proxifiy_me($c, $bp_backend_id);
             if($proxyurl) {
@@ -380,7 +386,7 @@ sub index {
             }
         }
         # try to find this bp on any system
-        my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
+        my $hosts = $c->db->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
         $c->stash->{'bp_backend'} = '';
         for my $hst (@{$hosts}) {
             my $vars = Thruk::Utils::get_custom_vars($c, $hst);
@@ -399,14 +405,14 @@ sub index {
                 return $c->render(json => $json);
             }
             $c->stash->{'outgoing_refs'}  = $bp->get_outgoing_refs($c);
-            my $bps = Thruk::BP::Utils::load_bp_data($c);
-            $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c, $bps);
+            $c->stash->{'incoming_refs'}  = $bp->get_incoming_refs($c);
 
-            my($search) = Thruk::Utils::Status::classic_filter($c, { 'host' => 'all' });
+            my($search) = Thruk::Utils::Status::classic_filter($c, { 'host' => 'all' }, 1);
             $c->stash->{'search'}         = $search;
             $c->stash->{'substyle'}       = 'service';
             $c->stash->{'paneprefix'}     = 'dfl_';
             $c->stash->{'prefix'}         = 's0';
+            $c->stash->{'title'}          = $bp->{'name'};
 
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
@@ -503,7 +509,7 @@ sub _bp_start_page {
         $drafts_too = 0;
     }
     my $local_bps = [];
-    $local_bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
+    $local_bps = Thruk::BP::Utils::load_bp_data($c, { drafts => $drafts_too, skip_nodes => 1, skip_runtime => 1 });
 
     my $bps = [];
     if($type eq 'local' || $type eq 'all' || $type eq 'business process') {
@@ -512,13 +518,14 @@ sub _bp_start_page {
 
     # add remote business processes
     $c->stash->{'has_remote_bps'} = 0;
-    if(scalar @{$c->{'db'}->get_http_peers()} > 0) {
+    if(scalar @{$c->db->get_http_peers()} > 0) {
         $c->stash->{'has_remote_bps'} = 1;
         if($type eq 'remote' || $type eq 'all') {
             $bps = _add_remote_bps($c, $bps, $local_bps);
         }
     }
 
+    # search request from filter input
     if($c->req->parameters->{'format'} && $c->req->parameters->{'format'} eq 'search') {
         if($view_mode eq 'json') {
             my $data = [];
@@ -552,19 +559,26 @@ sub _bp_start_page {
     if($view_mode eq 'json') {
         my $data = {};
         for my $bp (@{$bps}) {
+            $bp->load_runtime_data() unless $bp->{'remote'};
             $data->{$bp->{'id'}} = $bp->TO_JSON();
         }
         return $c->render(json => $data);
     }
     elsif($view_mode eq 'xls') {
         Thruk::Utils::Status::set_selected_columns($c, [''], 'bp', $c->stash->{'excel_columns'});
+        for my $bp (@{$bps}) {
+            $bp->load_runtime_data() unless $bp->{'remote'};
+        }
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="bp.xls"' );
         $c->stash->{'data'}     = $bps;
         $c->stash->{'template'} = 'excel/bp.tt';
         return $c->render_excel();
     }
 
-    Thruk::Backend::Manager::page_data($c, $bps);
+    Thruk::Utils::page_data($c, $bps);
+    for my $bp (@{$c->stash->{'data'}}) {
+        $bp->load_runtime_data() unless $bp->{'remote'};
+    }
 
     Thruk::Utils::ssi_include($c);
 
@@ -576,7 +590,7 @@ sub _add_remote_bps {
     my($c, $bps, $local_bps) = @_;
 
     my $site_names = {};
-    for my $p (@{$c->{'db'}->get_peers(1)}) {
+    for my $p (@{$c->db->get_peers(1)}) {
         $site_names->{$p->{'key'}} = $p->{'name'};
     }
 
@@ -587,7 +601,7 @@ sub _add_remote_bps {
         next unless $bp->{'bp_backend'};
         $bp->{'site'} = $site_names->{$bp->{'bp_backend'}} // '';
     }
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ] );
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ] );
     for my $svc (@{$services}) {
         my $vars = Thruk::Utils::get_custom_vars($c, $svc);
         next unless $vars->{'THRUK_NODE_ID'} eq 'node1';
@@ -695,7 +709,7 @@ sub _bp_list_add_objects {
         }
     }
     for my $bp_id (sort keys %{$recursive_bps}) {
-        my $link_bp = Thruk::BP::Utils::load_bp_data($c, $bp_id);
+        my $link_bp = Thruk::BP::Utils::load_bp_data($c, { id => $bp_id });
         $bp_lookup->{$bp_id} = 1;
         if(scalar @{$link_bp} == 1) {
             ($params, $hst, $svc) = _bp_list_add_objects($c, $link_bp->[0], $params, $hst, $svc, $bp_lookup);

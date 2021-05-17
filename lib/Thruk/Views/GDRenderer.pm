@@ -10,9 +10,8 @@ GD file renderer
 
 =cut
 
-use strict;
 use warnings;
-use Carp qw/confess/;
+use strict;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 METHODS

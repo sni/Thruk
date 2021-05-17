@@ -10,13 +10,12 @@ Scripted Panorama Dashboards
 
 =cut
 
-use strict;
 use warnings;
-use Carp qw/confess/;
-use File::Slurp qw/read_file/;
-use Cpanel::JSON::XS qw/decode_json encode_json/;
+use strict;
+use Cpanel::JSON::XS qw/decode_json/;
 use Encode qw(decode_utf8);
-use Thruk::Utils::IO;
+
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -35,7 +34,7 @@ sub load_dashboard {
     $c->stats->profile(begin => "Utils::Panorama::Scripted::load_dashboard($file)");
 
     my $dashboard = {};
-    my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", read_file($file)), 2));
+    my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", Thruk::Utils::IO::read($file)), 2));
     if($code =~ m/^\{/mx) {
         _warn(sprintf("dashboard %s is executable but seems to be a normal json data file. Remove executable bit: chmod -x %s", $file, $file));
         return;
@@ -167,7 +166,7 @@ return hints about users screen
 
 =cut
 sub get_screen_data {
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     my $screen = {};
     return $screen unless $c;
     if($c->cookie('thruk_screen')) {

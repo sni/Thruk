@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS;
+use Test::More;
 
 BEGIN {
     use lib('t');

@@ -33,6 +33,8 @@ The contact command lists contacts from livestatus queries.
 use warnings;
 use strict;
 
+use Thruk::Utils::Auth ();
+
 ##############################################
 
 =head1 METHODS
@@ -46,7 +48,7 @@ sub cmd {
     my($c) = @_;
     my $output = '';
     my $uniq = {};
-    for my $contact (@{$c->{'db'}->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' )], sort => {'ASC' => 'name'})}) {
+    for my $contact (@{$c->db->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' )], sort => {'ASC' => 'name'})}) {
         $output .= $contact->{'name'}."\n" unless $uniq->{$contact->{'name'}};
         $uniq->{$contact->{'name'}} = 1;
     }

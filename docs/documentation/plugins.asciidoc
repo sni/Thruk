@@ -451,7 +451,7 @@ $routes->{'/thruk/cgi-bin/hello.cgi'} = 'Thruk::Controller::hello::index';
 Thruk::Utils::Menu::insert_item('System', {
                                 'href'  => '/thruk/cgi-bin/hello.cgi',
                                 'name'  => 'Hello World!',
-}); 
+});
 </pre>
 ++++
 
@@ -487,7 +487,7 @@ Hello World!.
 sub index {
         my ( $c ) = @_;
 
-        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
         $c->stash->{title}           = 'Hello World!';
         $c->stash->{'subtitle'}              = 'Hello World!';
@@ -565,7 +565,7 @@ You can also add some info boxes and your plugin will look like all the rest:
 	</body>
 </html>
 ----
-You can also protect your cgi page using the authorization settings from cgi.cfg. 
+You can also protect your cgi page using the authorization settings from cgi.cfg.
 
 Lets say you want to limit access to users with both the permissions
 'authorized_for_configuration_information' and 'authorized_for_system_commands'
@@ -579,7 +579,7 @@ to stop anyone from accessing your cgi without proper permissions:
 sub index {
         my ( $c ) = @_;
 
-        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+        return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
         if( !$c->check_user_roles("authorized_for_configuration_information") || !$c->check_user_roles("authorized_for_system_commands")) {
                 return $c->detach('/error/index/8');
         }

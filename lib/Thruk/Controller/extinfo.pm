@@ -1,7 +1,14 @@
 package Thruk::Controller::extinfo;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::UserAgent ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -19,13 +26,12 @@ Thruk Controller.
 
 =cut
 
-use Thruk::UserAgent ();
 
 ##########################################################
 sub index {
     my( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     my $type = $c->req->parameters->{'type'} || 0;
 
@@ -91,7 +97,7 @@ sub index {
     $c->stash->{infoBoxTitle} = $infoBoxTitle;
     Thruk::Utils::ssi_include($c);
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }
@@ -170,10 +176,10 @@ sub _process_comments_page {
     $c->stash->{'hst_orderdir'}   = $hst_order;
     $c->stash->{'sortoption_hst'} = $c->req->parameters->{'sortoption_hst'} || '';
 
-    $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ],
+    $c->stash->{'hostcomments'}    = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ],
                                                                sort   => { $hst_order => _get_comment_sort_option($hst_sortoption)->[0] },
                                                              );
-    $c->stash->{'servicecomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ],
+    $c->stash->{'servicecomments'} = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ],
                                                                sort   => { $svc_order => _get_comment_sort_option($svc_sortoption)->[0] },
                                                              );
 
@@ -219,10 +225,10 @@ sub _process_downtimes_page {
     $c->stash->{'hst_orderdir'}   = $hst_order;
     $c->stash->{'sortoption_hst'} = $c->req->parameters->{'sortoption_hst'} || '';
 
-    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ],
+    $c->stash->{'hostdowntimes'}    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ],
                                                                  sort   => { $hst_order => _get_downtime_sort_option($hst_sortoption)->[0] },
                                                                );
-    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ],
+    $c->stash->{'servicedowntimes'} = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ],
                                                                  sort   => { $svc_order => _get_downtime_sort_option($svc_sortoption)->[0] },
                                                                );
 
@@ -284,6 +290,7 @@ sub _process_recurring_downtimes_page {
             'fixed'         => exists $c->req->parameters->{'fixed'} ? $c->req->parameters->{'fixed'} : 1,
             'flex_range'    => $c->req->parameters->{'flex_range'}      || 720,
             'edited_by'     => $c->stash->{'remote_user'},
+            'last_changed'  => time(),
             'created_by'    => $c->stash->{'remote_user'},
         };
         for my $t (qw/host hostgroup servicegroup/) {
@@ -422,7 +429,7 @@ sub _process_host_page {
     my $hostname = $c->req->parameters->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output contacts/] );
+    my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output contacts/] );
 
     return $c->detach('/error/index/5') if(!defined $hosts || !defined $hosts->[0]);
 
@@ -466,7 +473,7 @@ sub _process_host_page {
     $c->stash->{'cmt_orderdir'}   = $cmt_order;
     $c->stash->{'sortoption_cmt'} = $c->req->parameters->{'sortoption_cmt'} || '';
 
-    $c->stash->{'comments'}  = $c->{'db'}->get_comments(
+    $c->stash->{'comments'}  = $c->db->get_comments(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
         sort => { $cmt_order => _get_comment_sort_option($cmt_sortoption)->[0] } );
 
@@ -480,7 +487,7 @@ sub _process_host_page {
     $c->stash->{'dtm_orderdir'}   = $dtm_order;
     $c->stash->{'sortoption_dtm'} = $c->req->parameters->{'sortoption_dtm'} || '';
 
-    $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes(
+    $c->stash->{'downtimes'} = $c->db->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
         sort => { $dtm_order => _get_comment_sort_option($dtm_sortoption)->[0] } );
 
@@ -503,7 +510,7 @@ sub _process_host_page {
     if($c->stash->{'show_full_commandline'} == 2 ||
        $c->stash->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
         if(defined $host) {
-            my $command            = $c->{'db'}->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
+            my $command            = $c->db->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
             $c->stash->{'command'} = $command;
         }
     }
@@ -542,7 +549,7 @@ sub _process_hostgroup_cmd_page {
     my $hostgroup = $c->req->parameters->{'hostgroup'};
     return $c->detach('/error/index/5') unless defined $hostgroup;
 
-    my $groups = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) , 'name' => $hostgroup ], limit => 1 );
+    my $groups = $c->db->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) , 'name' => $hostgroup ], limit => 1 );
     return $c->detach('/error/index/5') unless defined $groups->[0];
 
     $c->stash->{'hostgroup'}       = $groups->[0];
@@ -564,7 +571,7 @@ sub _process_service_page {
 
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
-    my $services = $c->{'db'}->get_services(
+    my $services = $c->db->get_services(
             filter        => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
                                { 'host_name' => $hostname },
                                { 'description' => $servicename },
@@ -611,7 +618,7 @@ sub _process_service_page {
     $c->stash->{'cmt_orderdir'}   = $cmt_order;
     $c->stash->{'sortoption_cmt'} = $c->req->parameters->{'sortoption_cmt'} || '';
 
-    $c->stash->{'comments'} = $c->{'db'}->get_comments(
+    $c->stash->{'comments'} = $c->db->get_comments(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
         sort => { $cmt_order => _get_comment_sort_option($cmt_sortoption)->[0] } );
 
@@ -625,7 +632,7 @@ sub _process_service_page {
     $c->stash->{'dtm_orderdir'}   = $dtm_order;
     $c->stash->{'sortoption_dtm'} = $c->req->parameters->{'sortoption_dtm'} || '';
 
-    $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes(
+    $c->stash->{'downtimes'} = $c->db->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
         sort => { $dtm_order => _get_comment_sort_option($dtm_sortoption)->[0] } );
 
@@ -647,7 +654,7 @@ sub _process_service_page {
     if($c->stash->{'show_full_commandline'} == 2 ||
        $c->stash->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
         if(defined $service) {
-            my $command            = $c->{'db'}->expand_command('host' => $service, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
+            my $command            = $c->db->expand_command('host' => $service, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
             $c->stash->{'command'} = $command;
         }
     }
@@ -686,7 +693,7 @@ sub _process_servicegroup_cmd_page {
     my $servicegroup = $c->req->parameters->{'servicegroup'};
     return $c->detach('/error/index/5') unless defined $servicegroup;
 
-    my $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $servicegroup ], limit => 1);
+    my $groups = $c->db->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $servicegroup ], limit => 1);
 
     return $c->detach('/error/index/5') unless defined $groups->[0];
 
@@ -714,7 +721,7 @@ sub _process_scheduling_page {
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    $c->{'db'}->get_scheduling_queue($c,  sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
+    $c->db->get_scheduling_queue($c,  sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
 
     $c->stash->{'order'}   = $order;
     $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
@@ -801,15 +808,15 @@ sub _process_perf_info_page {
         }
     }
 
-    $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-    $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    $c->stash->{'stats'}      = $c->db->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+    $c->stash->{'perf_stats'} = $c->db->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
     # add logfile cache statistics
     $c->stash->{'has_logcache'}   = 0;
     $c->stash->{'logcache_error'} = '';
     if($c->config->{'logcache'}) {
         eval {
-            $c->stash->{'logcache_stats'} = $c->{'db'}->logcache_stats($c, 1);
+            $c->stash->{'logcache_stats'} = $c->db->logcache_stats($c, 1);
             $c->stash->{'has_logcache'} = 1;
         };
         if($@) {
@@ -819,7 +826,7 @@ sub _process_perf_info_page {
     }
 
     # add lmd cache statistics
-    $c->stash->{'lmd_stats'} = $c->{'db'}->lmd_stats($c) if $c->stash->{'has_lmd'};
+    $c->stash->{'lmd_stats'} = $c->db->lmd_stats($c) if $ENV{'THRUK_USE_LMD'};
 
     return 1;
 }
@@ -888,7 +895,7 @@ sub _set_backend_selector {
     my %backends = map { $_ => 1 } @{$backends};
 
     my @backends;
-    my @possible_backends = $c->{'db'}->peer_key();
+    my @possible_backends = $c->db->peer_key();
     for my $back (@possible_backends) {
         next if !defined $backends{$back};
         push @backends, $back;
@@ -936,7 +943,7 @@ sub _process_perf_info_logcache_details {
     $c->stash->{'no_auto_reload'} = 1;
 
     my $peer_key = $c->req->parameters->{'logcachedetails'};
-    my $peer     = $c->{'db'}->get_peer_by_key($peer_key);
+    my $peer     = $c->db->get_peer_by_key($peer_key);
     if(!$peer) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such backend' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4");
@@ -968,7 +975,7 @@ sub _process_perf_info_logcache_details {
 
     return if Thruk::Utils::External::render_page_in_background($c);
 
-    my $logcache_stats = $c->{'db'}->logcache_stats($c, 1, [$peer_key]);
+    my $logcache_stats = $c->db->logcache_stats($c, 1, [$peer_key]);
     if(!$logcache_stats->{$peer_key}) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'failed to fetch logcache statistics' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4");
@@ -976,7 +983,8 @@ sub _process_perf_info_logcache_details {
     $c->stash->{'logcache_stats'} = $logcache_stats->{$peer_key};
     $c->stash->{'logcache_types'} = $peer->logcache()->_logcache_stats_types($c, "type", [$peer_key])->[0]->{'types'};
     $c->stash->{'logcache_class'} = $peer->logcache()->_logcache_stats_types($c, "class", [$peer_key])->[0]->{'types'};
-    my $db_classes = Thruk::Utils::hash_invert($Thruk::Backend::Provider::Mysql::db_classes);
+    require Thruk::Backend::Provider::Mysql;
+    my $db_classes = Thruk::Base::hash_invert($Thruk::Backend::Provider::Mysql::db_classes);
     for my $t (@{$c->stash->{'logcache_class'}}) {
         $t->{'param'} = $t->{'class'} // '';
         $t->{'type'}  = $db_classes->{$t->{'class'}} // $t->{'class'};

@@ -1,29 +1,26 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
-open(my $ph, '-|', 'bash -c "find ./script ./lib ./plugins/plugins-available/*/lib -type f" 2>&1') or die('find failed: '.$!);
-while(<$ph>) {
-    my $line = $_;
-    chomp($line);
-    check_private_subs($line);
+################################################################################
+my @files = Thruk::Utils::IO::all_perl_files("./script", "./lib", glob("./plugins/plugins-available/*/lib"));
+plan( tests => scalar @files);
+for my $file (@files) {
+    check_private_subs($file);
 }
-close($ph);
-done_testing();
+exit;
 
-
+################################################################################
 sub check_private_subs {
     my($file) = @_;
     my $now = time();
 
-    return if $file =~ m|/lib/Monitoring/|mx;
-    return if $file =~ m|script/phantomjs|mx;
-
     ok($file, $file);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     $content =~ s/^=head.*?^=cut//smgx;
     my $nr = 0;
     for my $line (split/\n/mx, $content) {
@@ -34,6 +31,7 @@ sub check_private_subs {
         $test =~ s/'[^']*?'//gmx;
         $test =~ s/\#.*//gmx;
         $test =~ s/Devel::Cycle::_//gmx;
+        next if $test =~ m/::_skip_backends/mx;
         if($test =~ m/::_/mx) {
             fail("private sub used in ".$file.":$nr ".$line);
         }

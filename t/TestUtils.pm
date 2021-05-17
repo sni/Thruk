@@ -1,6 +1,7 @@
-#!/usr/bin/env perl
-
 package TestUtils;
+
+use warnings;
+use strict;
 
 #########################
 # Test Utils
@@ -13,20 +14,20 @@ BEGIN {
 
 ###################################################
 use lib 'lib';
-use warnings;
-use strict;
+use Carp qw/confess/;
+use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
+use File::Temp qw/tempfile/;
+use HTTP::Cookies::Netscape;
+use HTTP::Request ();
+use HTTP::Request::Common 6.12 qw/GET POST/;
+use Plack::Test;
 use Test::More;
 use Time::HiRes qw/sleep/;
 use URI::Escape qw/uri_unescape/;
-use File::Slurp qw/read_file/;
-use HTTP::Request::Common 6.12 qw/GET POST/;
-use HTTP::Cookies::Netscape;
-use Thruk::UserAgent;
-use File::Temp qw/tempfile/;
-use Carp qw/confess/;
-use Plack::Test;
-use Cpanel::JSON::XS qw/encode_json decode_json/;
+
+use Thruk ();
+use Thruk::UserAgent ();
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -39,8 +40,6 @@ my $test_token = "";
 
 my $has_curl = 0; # does require newer curl, disabling for now (2020-06-09) # has_util("curl");
 
-use Thruk;
-use Thruk::Config;
 our $placktest;
 
 #########################
@@ -77,9 +76,9 @@ sub clear {
 sub ctx_request {
     my($url) = @_;
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
-    $Thruk::Request::c = undef;
+    $Thruk::Globals::c = undef;
     my $res = request($url);
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     return($res, $c);
 }
 
@@ -93,6 +92,7 @@ sub get_test_servicegroup {
         $group = $1;
     }
     isnt($group, undef, "got a servicegroup from config.cgi") or bail_out_req('got no test servicegroup, cannot test.', $request);
+    $group = uri_unescape($group);
     return($group);
 }
 
@@ -106,6 +106,7 @@ sub get_test_hostgroup {
         $group = $1;
     }
     isnt($group, undef, "got a hostgroup from config.cgi") or bail_out_req('got no test hostgroup, cannot test.', $request);
+    $group = uri_unescape($group);
     return($group);
 }
 
@@ -121,6 +122,7 @@ sub get_test_user {
         $user = $1;
     }
     isnt($user, undef, "got a user from status.cgi") or bail_out_req('got no test user, cannot test.', $request);
+    $user = uri_unescape($user);
     $remote_user_cache = $user;
     return($user);
 }
@@ -205,7 +207,7 @@ sub get_test_hostgroup_cli {
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
     my $test = { cmd  => $binary.' -a listhostgroups'.$auth };
-    TestUtils::test_command($test);
+    test_command($test);
     my @groups = split(/\n/mx, $test->{'stdout'});
     my $hostgroup;
     for my $group (@groups) {
@@ -428,11 +430,11 @@ sub test_page {
     }
     if($content_type =~ m|text/html| && !defined $return->{'content_type'}) {
         # test without having to change the test number in all tests
-        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+        fail("Content-Type should contain charset=utf-8") unless $content_type =~ m/\;\s*charset=utf\-8/mx;
     }
     if($content_type =~ m|application/json|) {
         # test without having to change the test number in all tests
-        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+        fail("Content-Type should contain charset=utf-8") unless $content_type =~ m/\;\s*charset=utf\-8/mx;
     }
     my $is_length  = length($request->content);
     my $got_length = $request->header('content-length');
@@ -451,7 +453,7 @@ sub test_page {
                 eval {
                     require HTML::Lint;
                     $use_html_lint = 1;
-                    $lint          = new HTML::Lint;
+                    $lint          = HTML::Lint->new();
                 };
             }
             if($use_html_lint == 0) {
@@ -855,14 +857,14 @@ sub test_command {
 
 #########################
 
-=head2 overrideConfig
+=head2 override_config
 
-    overrideConfig('key', 'value')
+    override_config('key', 'value')
 
   override config setting
 
 =cut
-sub overrideConfig {
+sub override_config {
     my($key, $value) = @_;
     my $c = get_c();
     $c->config->{$key} = $value;
@@ -919,7 +921,7 @@ sub _request {
         $post->{'CSRFtoken'} = $test_token if $test_token;
         $request = POST($url, {});
         $request->method(uc($method));
-        $request->header('Content-Type' => 'application/json; charset=utf-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     } else {
@@ -973,7 +975,7 @@ sub _external_request {
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));
-        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
         $request->header('X-Thruk-Auth-Key' => $ENV{'THRUK_TEST_AUTH_KEY'}) if $ENV{'THRUK_TEST_AUTH_KEY'};
@@ -1049,11 +1051,7 @@ sub bail_out_req {
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/\Qsubject=Thruk%20Error%20Report&amp;body=\E(.*?)">/smx) {
-        $error = $1;
-        eval {
-            require URI::Escape;
-            $error = URI::Escape::uri_unescape($error);
-        };
+        $error = URI::Escape::uri_unescape($1);
         diag($error);
         die($0.': '.$res->code.' '.$msg.' - '.$error) if $die;
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
@@ -1066,7 +1064,7 @@ sub bail_out_req {
     diag("\n\nresponse:\n");
     diag($res->as_string());
     diag("\n\norigin:\n");
-    diag(Carp::longmess);
+    diag(Carp::longmess());
     diag("\n######################################################\n");
     die($0.': '.$msg) if $die;
     BAIL_OUT($0.': '.$msg);
@@ -1076,7 +1074,7 @@ sub bail_out_req {
 #########################
 sub set_test_user_token {
     return if $test_token;
-    $test_token = TestUtils::get_current_user_token();
+    $test_token = get_current_user_token();
     return;
 }
 
@@ -1092,7 +1090,7 @@ sub _list {
 my $errors_js = 0;
 sub verify_js {
     my($file) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my $matches = _replace_with_marker($content);
     return unless $matches;
     _check_marker($file, $content) if $errors_js;
@@ -1112,7 +1110,7 @@ sub verify_html_js {
 # verify js syntax in templates
 sub verify_tt {
     my($file) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
     _check_marker($file, $content) if $errors_js;
     return;

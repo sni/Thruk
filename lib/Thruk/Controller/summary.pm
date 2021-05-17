@@ -1,7 +1,12 @@
 package Thruk::Controller::summary;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
 
 =head1 NAME
 
@@ -58,7 +63,7 @@ use constant {
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     # set defaults
     $c->stash->{title}            = 'Event Summary';
@@ -84,9 +89,9 @@ sub _show_step_1 {
     my ( $c ) = @_;
     $c->stats->profile(begin => "_show_step_1()");
 
-    $c->stash->{hosts}         = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
-    $c->stash->{hostgroups}    = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-    $c->stash->{servicegroups} = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+    $c->stash->{hosts}         = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
+    $c->stash->{hostgroups}    = $c->db->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+    $c->stash->{servicegroups} = $c->db->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
     $c->stash->{template}      = 'summary_step_1.tt';
 
     $c->stats->profile(end => "_show_step_1()");
@@ -200,7 +205,7 @@ sub _display_recent_alerts {
     $c->stats->profile(begin => "_display_recent_alerts()");
 
     my $sortedtotals = Thruk::Backend::Manager::sort_result($c, $alerts, { 'DESC' => 'time'});
-    Thruk::Backend::Manager::page_data($c, $sortedtotals, $c->req->parameters->{'limit'});
+    Thruk::Utils::page_data($c, $sortedtotals, $c->req->parameters->{'limit'});
 
     $c->stats->profile(end => "_display_recent_alerts()");
     return 1;
@@ -229,7 +234,7 @@ sub _display_top_alerts {
 
     my @totals = values %{$totals};
     my $sortedtotals = Thruk::Backend::Manager::sort_result($c, \@totals, { 'DESC' => 'alerts'});
-    Thruk::Backend::Manager::page_data($c, $sortedtotals, $c->req->parameters->{'limit'});
+    Thruk::Utils::page_data($c, $sortedtotals, $c->req->parameters->{'limit'});
 
     $c->stats->profile(end => "_display_top_alerts()");
     return 1;
@@ -248,21 +253,21 @@ sub _display_alert_totals {
     }
     elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Hostgroup';
-        my $tmp = $c->{'db'}->get_hostgroups();
-        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
+        my $tmp = $c->db->get_hostgroups();
+        $box_title_data = Thruk::Base::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Host';
-        my $tmp = $c->{'db'}->get_hosts(columns => [qw/name alias/]);
-        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
+        my $tmp = $c->db->get_hosts(columns => [qw/name alias/]);
+        $box_title_data = Thruk::Base::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Service';
     }
     elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Servicegroup';
-        my $tmp = $c->{'db'}->get_servicegroups();
-        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
+        my $tmp = $c->db->get_servicegroups();
+        $box_title_data = Thruk::Base::array2hash($tmp, 'name');
     }
 
     my $totals = {};
@@ -374,18 +379,18 @@ sub _get_alerts_from_log {
     my($hostlogs, $servicelogs);
 
     $c->stats->profile(begin => "summary::updatecache");
-    $c->{'db'}->renew_logcache($c);
+    $c->db->renew_logcache($c);
     $c->stats->profile(end   => "summary::updatecache");
 
     if($c->stash->{alerttypefilter} ne "Service") {
         $c->stats->profile(begin => "summary.pm fetch host logs");
-        $hostlogs = $c->{'db'}->get_logs(filter => [$hostfilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => 1000000); # not using a limit here, makes mysql not use an index
+        $hostlogs = $c->db->get_logs(filter => [$hostfilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end   => "summary.pm fetch host logs");
     }
 
     if($c->stash->{alerttypefilter} ne "Host") {
         $c->stats->profile(begin => "summary.pm fetch service logs");
-        $servicelogs = $c->{'db'}->get_logs(filter => [$servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => 1000000); # not using a limit here, makes mysql not use an index
+        $servicelogs = $c->db->get_logs(filter => [$servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end   => "summary.pm fetch service logs");
     }
 
@@ -451,8 +456,8 @@ sub _get_filter {
     my $host         = $c->req->parameters->{'host'};
     my $servicegroup = $c->req->parameters->{'servicegroup'};
     if(defined $hostgroup and $hostgroup ne 'all') {
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { groups => { '>=' => $hostgroup }} ]);
-        $host_data    = Thruk::Utils::array2hash($host_data, 'name');
+        my $host_data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { groups => { '>=' => $hostgroup }} ]);
+        $host_data    = Thruk::Base::array2hash($host_data, 'name');
         my @hosts_from_groups = ();
         for my $hostname (keys %{$host_data}) {
             push @hosts_from_groups, { host_name => $hostname };
@@ -467,7 +472,7 @@ sub _get_filter {
         push @servicefilter, { host_name => $host };
     }
     if(defined $servicegroup and $servicegroup ne 'all') {
-        my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { groups => { '>=' => $servicegroup }} ]);
+        my $service_data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { groups => { '>=' => $servicegroup }} ]);
         my @tmpfilter = ();
         for my $service (@{$service_data}) {
             push @tmpfilter, { host_name => $service->{'host_name'}, service_description => $service->{'description'} };

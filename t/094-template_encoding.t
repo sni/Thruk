@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 eval "use File::BOM";
 plan skip_all => 'File::BOM required' if $@;
@@ -10,37 +11,13 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $filter = $ARGV[0];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
-    check_templates($dir.'/');
+    for my $file (@{Thruk::Utils::IO::find_files($dir, '\.tt$')}) {
+        check_template($file);
+    }
 }
 done_testing();
 
-
-sub check_templates {
-    my $dir = shift;
-    my(@files, @folders);
-    opendir(my $dh, $dir) || die $!;
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        if($file =~ m/\.tt/mx) {
-            push @files, $dir.$file;
-        }
-        elsif(-d $dir.$file) {
-            push @folders, $dir.$file.'/';
-        }
-    }
-    closedir $dh;
-
-    for my $folder (sort @folders) {
-        check_templates($folder);
-    }
-    for my $file (sort @files) {
-        check_file($file);
-    }
-    return;
-}
-
-sub check_file {
+sub check_template {
     my($file) = @_;
     return if($filter && $file !~ m%$filter%mx);
     my $type;
@@ -51,7 +28,7 @@ sub check_file {
     print $@ if $@;
     is( $type, 'UTF-8' , $file.' is utf-8');
 
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     if($content =~ m/PROCESS\s+_header\.tt/mx && $content !~ m/PROCESS\s+_footer\.tt/mx) {
         fail($file." does not process _footer.tt");
     }

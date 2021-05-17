@@ -33,10 +33,10 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
+
 use Thruk::Config;
-use Thruk::Utils::IO;
-use Thruk::Utils;
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
 
 if(scalar @ARGV == 0) {
     print STDERR "usage: $0 <files...>\n";
@@ -45,11 +45,11 @@ if(scalar @ARGV == 0) {
 }
 
 for my $filename (@ARGV) {
-    my $cont = read_file($filename);
+    my $cont = Thruk::Utils::IO::read($filename);
     $cont = Thruk::Utils::IO::untaint($cont);
 
     # ensure right encoding
-    Thruk::Utils::decode_any($cont);
+    Thruk::Utils::Encode::decode_any($cont);
 
     $cont =~ s/^\$VAR1\ =\ //mx;
 

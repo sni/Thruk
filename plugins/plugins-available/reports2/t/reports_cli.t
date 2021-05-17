@@ -1,9 +1,8 @@
-use strict;
 use warnings;
+use strict;
+use File::Temp qw/tempfile/;
 use Test::More;
 use URI::Escape;
-use File::Slurp qw/read_file/;
-use File::Temp qw/tempfile/;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
@@ -156,6 +155,10 @@ for my $report (@{$test_pdf_reports}) {
         cmd  => $BIN.' "/thruk/cgi-bin/reports2.cgi?action=update&report=9999"',
         like => ['/^OK - report scheduled for update$/'],
     });
+    TestUtils::test_command({
+        cmd  => $BIN.' report 9999',
+        like => [],
+    });
     SKIP: {
         skip("skip mail test with external server", 9) if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
@@ -168,7 +171,7 @@ for my $report (@{$test_pdf_reports}) {
         });
         ok(-s $mailtestfile, 'mail testfile '.$mailtestfile.' does exist');
         if(-s $mailtestfile) {
-            my $mail = read_file($mailtestfile);
+            my $mail = Thruk::Utils::IO::read($mailtestfile);
             for my $like (@{$mail_like}) {
                 like($mail, $like, 'Mail contains: '.$like);
             }

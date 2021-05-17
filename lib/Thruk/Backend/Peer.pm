@@ -1,10 +1,13 @@
 package Thruk::Backend::Peer;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 use Scalar::Util qw/weaken/;
-use Thruk::Backend::Provider::Livestatus;
+
+## no lint
+use Thruk::Backend::Provider::Livestatus ();
+## use lint
 
 our $AUTOLOAD;
 
@@ -22,13 +25,13 @@ Manager of backend connections
 
 ##########################################################
 # use static list instead of slow module find
-$Thruk::Backend::Manager::Provider = [
+$Thruk::Backend::Peer::Provider = [
           'Thruk::Backend::Provider::Livestatus',
           'Thruk::Backend::Provider::ConfigOnly',
           'Thruk::Backend::Provider::HTTP',
           'Thruk::Backend::Provider::Mysql',
 ];
-$Thruk::Backend::Manager::ProviderLoaded = {
+$Thruk::Backend::Peer::ProviderLoaded = {
           'livestatus' => 'Thruk::Backend::Provider::Livestatus',
 };
 
@@ -123,12 +126,12 @@ sub _create_backend {
         # speed up things here, since this class is 99% of the use cases
         $class = 'Thruk::Backend::Provider::Livestatus';
     }
-    elsif($Thruk::Backend::Manager::ProviderLoaded->{$type}) {
-        $class = $Thruk::Backend::Manager::ProviderLoaded->{$type};
+    elsif($Thruk::Backend::Peer::ProviderLoaded->{$type}) {
+        $class = $Thruk::Backend::Peer::ProviderLoaded->{$type};
     } else {
-        my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
+        my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Peer::Provider};
         if(scalar @provider == 0) {
-            my $list = join(', ', @{$Thruk::Backend::Manager::Provider});
+            my $list = join(', ', @{$Thruk::Backend::Peer::Provider});
             $list =~ s/Thruk::Backend::Provider:://gmx;
             die('unknown type in peer configuration, choose from: '.$list);
         }
@@ -137,7 +140,7 @@ sub _create_backend {
         $require =~ s/::/\//gmx;
         require $require . ".pm";
         $class->import;
-        $Thruk::Backend::Manager::ProviderLoaded->{$type} = $class;
+        $Thruk::Backend::Peer::ProviderLoaded->{$type} = $class;
     }
 
     $peer_config->{'options'}->{'name'} = $name;
@@ -196,7 +199,7 @@ sub _initialise_peer {
 
     $self->{'class'}->peer_key($self->{'key'});
     $self->{'addr'} = $self->{'class'}->peer_addr();
-    if($thruk_config->{'backend_debug'} && Thruk->debug) {
+    if($thruk_config->{'backend_debug'} && Thruk::Base->debug) {
         $self->{'class'}->set_verbose(1);
     }
     $self->{'class'}->{'_peer'} = $self;
@@ -241,10 +244,10 @@ sub logcache {
     my($self) = @_;
     return($self->{'_logcache'}) if $self->{'_logcache'};
     if($self->{'logcache'}) {
-        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
+        if(!defined $Thruk::Backend::Peer::ProviderLoaded->{'Mysql'}) {
             require Thruk::Backend::Provider::Mysql;
             Thruk::Backend::Provider::Mysql->import;
-            $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
+            $Thruk::Backend::Peer::ProviderLoaded->{'Mysql'} = 1;
         }
         $self->{'_logcache'} = Thruk::Backend::Provider::Mysql->new({options => {
                                                 peer     => $self->{'logcache'},

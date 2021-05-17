@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -110,7 +110,7 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
@@ -162,9 +162,8 @@ for my $url (@{$outages}) {
 for my $url (@{$outages}) {
     my $page = TestUtils::test_page(
         'url'          => $url.'&view_mode=json',
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array: ".$url);
 }
-

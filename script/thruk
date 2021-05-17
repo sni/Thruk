@@ -32,15 +32,14 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 33
 
 ###################################################
-use strict;
 use warnings;
-use Thruk::Config 'noautoload';
+use strict;
 
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
     #&timing_breakpoint('./script/thruk');
 };
-use Getopt::Long qw//;
+use Getopt::Long ();
 
 my $options = {
     'verbose'        => 0,
@@ -51,7 +50,7 @@ my $options = {
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
 Getopt::Long::Configure('pass_through');
-Getopt::Long::GetOptions (
+Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
    "v|verbose"          => sub { $options->{'verbose'}++ },
    "q|quiet"            => \$options->{'quiet'},
@@ -89,6 +88,7 @@ if($options->{'help'}) {
     exit(3);
 }
 if($options->{'version'}) {
+    require Thruk::Config;
     print "thruk v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
 }
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
@@ -107,12 +107,20 @@ $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
 $ENV{'THRUK_VERBOSE'}    = 0 if$ENV{'THRUK_QUIET'};
 $ENV{'THRUK_MODE'}       = 'CLI_SETUID';
 
+# no need to load extra modules for bash completion
+my $action = $options->{'action'} || $options->{'commandoptions'}->[0] || '';
+if($action eq 'bash_complete') {
+    require Thruk::Utils::Bash;
+    exit(Thruk::Utils::Bash::complete());
+}
+
 require Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
 
 ##############################################
 sub _print_modules {
+    require Thruk::Config;
     require Thruk::Utils;
     # read the config which puts our loaded addons into @INC and those cli modules will be found as well
     Thruk::Config::set_config_env();

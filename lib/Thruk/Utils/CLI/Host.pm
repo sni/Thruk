@@ -33,6 +33,8 @@ The host command lists hosts from livestatus queries.
 use warnings;
 use strict;
 
+use Thruk::Utils::Auth ();
+
 ##############################################
 
 =head1 METHODS
@@ -46,7 +48,7 @@ sub cmd {
     my($c) = @_;
     my $output = '';
     my $uniq = {};
-    for my $host (@{$c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], sort => {'ASC' => 'name'})}) {
+    for my $host (@{$c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], sort => {'ASC' => 'name'})}) {
         $output .= $host->{'name'}."\n" unless $uniq->{$host->{'name'}};
         $uniq->{$host->{'name'}} = 1;
     }

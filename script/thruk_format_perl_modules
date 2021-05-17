@@ -1,0 +1,661 @@
+#!/bin/bash
+
+# read rc files if exist
+unset PROFILEDOTD
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+BASEDIR=$(dirname $0)/..
+
+# git version
+if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
+  export PERL5LIB="$BASEDIR/lib:$BASEDIR/plugins/plugins-available/conf/lib:$PERL5LIB";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+
+# omd
+elif [ "$OMD_ROOT" != "" ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+
+# pkg installation
+else
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@DATADIR@/plugins/plugins-available/conf/lib:@THRUKLIBS@;
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 33
+
+###################################################
+use warnings;
+use strict;
+
+use lib 'lib';
+use File::Copy qw/move/;
+use Getopt::Long;
+use Pod::Usage;
+
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
+
+my @files;
+my $options = {
+    'verbose'  => 0,
+    'dry'      => 0,
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::GetOptions(
+   "h|help"     => \$options->{'help'},
+   "v|verbose"  => sub { $options->{'verbose'}++ },
+   "n|dry-run"  => \$options->{'dry'},
+   "<>"         => sub { push @files, shift; },
+) or do {
+    print "usage: $0 [<options>]\n";
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+    exit 3;
+};
+if($options->{'help'}) {
+    print "usage: $0 [<options>]\n";
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+
+if(scalar @files == 0) {
+    @files = Thruk::Utils::IO::all_perl_files("./t", "./script", "./lib", glob("./plugins/plugins-available/*/lib"));
+} else {
+    @files = Thruk::Utils::IO::all_perl_files(@files);
+}
+
+$ENV{'THRUK_VERBOSE'} = $options->{'verbose'};
+
+## no lint
+my $replacements;
+my @replace = qw/
+    Thruk::Config
+    Thruk
+    Thruk::Utils
+    Thruk::Action::AddDefaults
+/;
+## use lint
+for my $r (reverse @replace) {
+    $replacements->{$r} = _get_used_mods($r, $replacements);
+}
+
+my $rc = 0;
+for my $file (@files) {
+    _check_file($file);
+}
+exit($rc);
+
+##############################################
+sub _check_file {
+    my($file) = @_;
+    if(-l $file) {
+        _debug("skipped %s, either not readable or symlink", $file);
+        return;
+    }
+    my $blocks = _check_modules($file);
+    if($blocks) {
+        _update_file($file, $blocks);
+    }
+}
+
+##############################################
+sub _new_block {
+    my($pkg) = @_;
+    return({
+        'package' => $pkg,
+        'used'    => [{}],
+        'missing' => [],
+        'modules' => {}
+    });
+}
+
+##############################################
+sub _check_modules {
+    my($file) = @_;
+    _debug("checking: %s", $file);
+
+    my($blocks, $lastblock) = _parse_file($file);
+
+    # cleanup modules
+    _clean_used($file, $blocks);
+
+    # check for missing modules, module might have been included now
+    _check_missing($file, $blocks, $lastblock);
+
+    return($blocks);
+}
+
+##############################################
+sub _parse_file {
+    my($file) = @_;
+
+    my $content = Thruk::Utils::IO::read($file);
+
+    # strip pod
+    $content =~ s/^=head.*?^=cut//smgx;
+
+    # strip no lints
+    $content =~ s/^\s*\#\#\ no\ lint.*?^\s*\#\#\ use\ lint//smgx;
+
+    my $blocks = {};
+    my $lastblock;
+    my $cur_used;
+
+    for my $line (split/\n/mx, $content) {
+        chomp($line);
+        my $test = $line;
+
+        last if $line =~ m/^__DATA__/;
+
+        # remove comments
+        $test =~ s/\#.*//gmx;
+
+        # remove known false positive matches
+        $test =~ s/(\->|\$)config\->\{'[^']*'\}//gmx;
+        $test =~ s|stats\->profile\([^\)]*"[^"]*"||gmx;
+        $test =~ s|stats'\}\->profile\([^\)]*"[^"]*"||gmx;
+        $test =~ s|\->detach\('[^']*'\)||gmx;
+        $test =~ s%(fail|is)\([^\)]*\)%%gmx;
+        $test =~ s|sprintf\("[^"]*"||gmx;
+        $test =~ s%/[^/]+/%%gmx;                # m/.../mx
+        $test =~ s/s\|[^\|]+\|[^\|]+\|//gmx;    # s|...|...|mx
+        $test =~ s/s\%[^\%]+\%[^\%]+\%//gmx;    # s%...%...%mx
+        $test =~ s/\|[^\|]+\|//gmx;             # m|...|mx
+        $test =~ s|"<Component[^"]*"||gmx;
+        $test =~ s|'<Component[^']*'||gmx;
+        $test =~ s|\`\s*grep.*\`||gmx;
+        $test =~ s|"\s*grep[^"]*\"||gmx;
+        $test =~ s|'[^']*'\s*=>\s*'[^']*'||gmx;       # '/'=> 'Thruk::Controller::Root::index',
+        $test =~ s|=>\s+'[^']*'||gmx;       # '/'=> 'Thruk::Controller::Root::index',
+        $test =~ s|,\s*'[^']*'||gmx;        # [ '^/thruk/r/v1.*' ,'Thruk::Controller::rest_v1::index' ],
+        $test =~ s|eq\s+'[^']*'||gmx;       # ref ... eq 'Thruk::Context'
+        $test =~ s|ne\s+'[^']*'||gmx;       # ... ne 'Thruk::Context'
+        $test =~ s|=\s+'[^']*'||gmx;        # ... = 'Thruk::Context'
+        $test =~ s|=\s+"[^"]*"||gmx;        # ... = "Thruk::Context"
+        $test =~ s|"better\ use\ [^"]*"||gmx; # "better use Time::HiRes::sleep directly"
+        $test =~ s|\Q%Date::Manip::Zones::ZoneNames\E||gmx;
+        $test =~ s|\QThruk::Config::VERSION\E|Thruk::Config|gmx;
+        $test =~ s|"[^"]*\s*Template\s+[^"]*"||gmx;
+        $test =~ s|'[^']*\s*Thruk\s+[^']*'||gmx;
+        $test =~ s%(die|confess)\("[^"]*"%%gmx;
+        $test =~ s%(die|confess)\('[^']*'%%gmx;
+
+        # split by BEGIN blocks, there might be a reason to load some modules after the BEGIN block
+        if($test =~ m/^BEGIN/mx && $lastblock) {
+            $cur_used = { 'BEGIN' => 1 };
+            push @{$lastblock->{'used'}}, $cur_used;
+        }
+
+        if($test =~ m/^\s*
+                      (use|load|package|require)
+                      \s+
+                      ([^\s;\(]+)       # pkg name
+                      \s*
+                      (.*)$             # import arguments
+                    /mx) {
+            my($src, $mod, $arg) = ($1, $2, $3);
+
+            if($src eq 'package') {
+                return if $mod eq 'Thruk::Template::Exception';
+                $lastblock = _new_block($mod);
+                $blocks->{$mod} = $lastblock;
+                $cur_used  = $lastblock->{'used'}->[0];
+                next;
+            }
+
+            if($src eq 'require') {
+                for my $b (values %{$blocks}) {
+                    for my $u (@{$b->{'used'}}) {
+                        if(defined $u->{$mod}) {
+                            _error("%s: %s included multiple times", $file, $mod);
+                            $rc = 1;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if(!$lastblock) {
+                $lastblock = _new_block('main');
+                $blocks->{'main'} = $lastblock;
+                $cur_used  = $lastblock->{'used'}->[0];
+            }
+
+            if($src eq 'use') {
+                # ignore line with leading whitespace, might be BEGIN blocks
+                if($line =~ m/^\s+/mx) {
+                    $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 2;
+                    next;
+                }
+                next if $mod =~ m/^5/mx;
+                next if $mod eq 'constant';
+
+                if($mod eq 'lib') {
+                    for my $u (@{$lastblock->{'used'}}) {
+                        if(defined $u->{$mod} && $u->{$mod} eq $line) {
+                            _error("%s: %s included multiple times", $file, $mod);
+                            $rc = 1;
+                            return;
+                        }
+                    }
+                    $cur_used = { 'lib' => $line };
+                    push @{$lastblock->{'used'}}, $cur_used;
+                    next;
+                }
+
+                if($mod eq 'parent' || $mod eq 'base') {
+                    $arg =~ s/'([^']*?)';?/$1/gmx;
+                    _fatal("duplicate use %s %s in %s", $mod, $arg, $line) if defined $cur_used->{$mod};
+                    $cur_used->{$mod} = $line;
+                    $lastblock->{'modules'}->{$arg} = 2;
+                    next;
+                }
+
+                for my $u (@{$lastblock->{'used'}}) {
+                    if(defined $u->{$mod}) {
+                        _log_change("%s: module '%s' included multiple times", $file, $mod);
+                        last;
+                    }
+                }
+
+                $cur_used->{$mod} = $line;
+                if(($arg eq ';' || $arg eq '();') && $mod =~ m/^(Thruk|Monitoring)/mx) {
+                    $cur_used->{$mod} = '';
+                    $arg = '();';
+                }
+            }
+
+            $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 2;
+            next;
+        }
+
+        if($test =~ m/Thruk::Utils::CLI::load_module\("?'?(.*?)"?'?\)/mx) {
+            my $mod = $1;
+            $lastblock->{'modules'}->{$mod} = 0;
+            $test =~ s/load_module\([^\)]+\)/load_module()/gmx;
+        }
+
+        # loaded by use_ok during tests
+        if($test =~ m/use_ok(\s*\(|\s+)'?"?([^'"]+)'?"?/mx) {
+            my $mod = $2;
+            $lastblock->{'modules'}->{$mod} = 2;
+            $test = "";
+        }
+
+        # loaded by eval "use..."
+        if($test =~ m/eval\s+\{?\"?\'?\s*(?:use|require)\s+([A-Za-z0-9_:]+)/mx) {
+            my $mod = $1;
+            $lastblock->{'modules'}->{$mod} = 2;
+            $test = "";
+        }
+
+        my @matches1 = ($test =~ m/(
+                            (?:\$|@|%|\&|) # variable prefix
+                            (?:            # module name
+                                Thruk
+                               |Template
+                               |Digest
+                               |[A-Z]+[a-zA-Z0-9_]+::[a-zA-Z0-9_:]+
+                            )
+                            (?: # function variable name
+                                [a-zA-Z0-9_\->]+(?:;|$|\(|\s)
+                               |\(
+                               |\)
+                               |\}
+                               |,
+                               |\s
+                               |$
+                               |;
+                            )
+                        )/gmx);
+        my @matches2 = ($test =~ m/\&\{'[A-Z]+[a-zA-Z0-9_]+::[a-zA-Z0-9_:]+'/gmx);
+        my @matches3 = ($test =~ m/(threads)\->/gmx);
+        for my $m (@matches1, @matches2, @matches3) {
+            $m =~ s/\s*$//gmx;
+            $m =~ s/\}$//gmx;
+            $m =~ s/::(true|false),?$//gmx;
+            $m =~ s/,$//gmx;
+            $m =~ s/^(\$|\@|%|\&)(.*)::[^:]+$/$2/gmx; # $Monitoring::Config::Object::Host::Defaults->... -> Monitoring::Config::Object::Host
+            $m =~ s/\->[^\(]+(\(|;|$)//gmx; # ...->new(
+            $m =~ s/::[^:]+\($//gmx;  # function calls
+            $m =~ s/::[^:]+;$//gmx;   # function calls with out () Thruk::config;
+            $m =~ s/;$//gmx;
+            $m =~ s/\)$//gmx;
+            $m =~ s/^\{'//gmx;
+            $m =~ s/(Thruk|Thruk::Constants|POSIX|Crypt::Rijndael|IO::Socket::UNIX|IO::Socket::IP|Encode)::[A-Z_]+$/$1/gmx; # known contants
+            next if $m eq 'CORE';
+            next if $m =~ '^CORE::';
+            next if $m eq 'SUPER';
+            next if $m =~ '^SUPER::';
+            next if $m eq 'UNIVERSAL';
+            next if $m eq 'Thruk::Utils::Conf::Tools'; # not a module, but collection of tools
+            next if $m eq 'Thruk::Utils::PDF';         # virtual module, does not exist
+            next if $m eq 'Thruk::Globals';            # virtual module, does not exist
+            if($file =~ m/thruk_format_perl_modules/mx) {
+                next if $m eq 'Thruk';
+                next if $m eq 'Digest';
+                next if $m eq 'threads';
+                next if $m eq 'Template';
+            }
+            if(!defined $lastblock->{'modules'}->{$m} && $m ne $lastblock->{'package'}) {
+                push @{$lastblock->{'missing'}}, [$m, $line];
+            } else {
+                $lastblock->{'modules'}->{$m}++;
+            }
+        }
+    }
+    return($blocks, $lastblock);
+}
+
+##############################################
+sub _update_file {
+    my($file, $blocks) = @_;
+    my $content = Thruk::Utils::IO::read($file);
+    my $newcont = '';
+    my $block   = 'main';
+    my $written;
+    my $keep = 1;
+    my $nolint;
+    my $begin;
+    for my $line (split/\n/mx, $content) {
+        if($line =~ m/^package\s+([^\s;]+)/mx) {
+            $block   = $1;
+            $written = 0;
+        }
+
+        if($line =~ m/^\s*\#\#\ no\ lint/mx) {
+            $newcont .= $line."\n";
+            $nolint = 1;
+            next;
+        }
+        if($line =~ m/^\s*\#\#\ no\ lint/mx) {
+            $newcont .= $line."\n";
+            $nolint = 0;
+            next;
+        }
+        if($nolint) {
+            $newcont .= $line."\n";
+            next;
+        }
+
+        # start replacing at start of first use
+        if($line =~ m/^use\s+/mx && $line !~ m/^use\s+constant/mx && $line !~ m/use_ok/mx) {
+            if(!$written) {
+                _fatal("%s: got no modules for block %s", $file, $block) unless defined $blocks->{$block}->{'used'};
+                while(my $mods = shift @{$blocks->{$block}->{'used'}}) {
+                    if($mods->{'BEGIN'}) {
+                        # delay insert until next BEGIN
+                        delete $mods->{'BEGIN'};
+                        unshift @{$blocks->{$block}->{'used'}}, $mods;
+                        $begin = 1;
+                        last;
+                    }
+
+                    # strict/warnings go first
+                    my $has_mods = 0;
+                    for my $m (qw/lib warnings strict/) {
+                        next unless defined $mods->{$m};
+                        $newcont .= ($mods->{$m} || 'use '.$m.';')."\n";
+                        $has_mods = 1;
+                    }
+
+                    # other 3rd party modules
+                    for my $m (sort keys %{$mods}) {
+                        next if $m =~ m/^(lib|strict|warnings|base|parent|Plack::Util::Accessor)$/mx;
+                        next if $m =~ m/^(Thruk|Monitoring)/mx;
+                        if($mods->{$m} eq '') {
+                            $newcont .= sprintf("use %s ();\n", $m);
+                        } else {
+                            $newcont .= $mods->{$m}."\n";
+                        }
+                        $has_mods = 1;
+                    }
+                    $newcont .= "\n" if $has_mods;
+
+                    # Thruk / Monitoring modules
+                    my $has_thruk = 0;
+                    for my $m (sort keys %{$mods}) {
+                        next if $m !~ m/^(Thruk|Monitoring)/mx;
+                        if($m eq 'Thruk::Config' && $mods->{$m} eq '') {
+                            $newcont .= sprintf("use %s;\n", $m);
+                        }
+                        elsif($mods->{$m} eq '') {
+                            $newcont .= sprintf("use %s ();\n", $m);
+                        } else {
+                            $newcont .= $mods->{$m}."\n";
+                        }
+                        $has_thruk = 1;
+                    }
+                    $newcont .= "\n" if $has_thruk;
+
+                    # use base/parents
+                    $has_mods = 0;
+                    for my $m (sort keys %{$mods}) {
+                        next if $m !~ m/^(base|parent|Plack::Util::Accessor)$/mx;
+                        if($mods->{$m} eq '') {
+                            $newcont .= sprintf("use %s ();\n", $m);
+                        } else {
+                            $newcont .= $mods->{$m}."\n";
+                        }
+                        $has_mods = 1 unless $mods->{$m} =~ m/Exporter/mx;
+                    }
+                    $newcont .= "\n" if $has_mods;
+                }
+                $written = 1;
+                $keep    = 0;
+                delete $blocks->{$block} unless $begin;
+            }
+            next;
+        }
+
+        if($line =~ m/^\Q\#use Thruk::Timer\E/mx) {
+            $newcont .= $line."\n";
+            next;
+        }
+
+        # remove everything until first line that is not empty line or an include
+        if(!$keep && ($line !~ m/^use\s+/mx || $line =~ m/^use\s+constant/mx || $line =~ m/use_ok/mx) && $line !~ m/^\s*$/mx) {
+            $keep = 1;
+        }
+
+        # wait for next begin block
+        if($begin) {
+            if($line =~ m/^BEGIN/mx) {
+                undef $begin;
+                $written = 0;
+            }
+        }
+
+        if($keep) {
+            $newcont .= $line."\n";
+        }
+    }
+
+    for my $b (sort keys %{$blocks}) {
+        my $failed = 0;
+        for my $u (@{$blocks->{$b}->{'used'}}) {
+            delete $u->{'BEGIN'};
+            $failed += scalar %{$u};
+        }
+        if($failed > 0) {
+            _error("%s: failed to replace block %s", $file, $b);
+            _error($blocks);
+            $rc = 1;
+        }
+    }
+
+    my $newfile = $file.".linted";
+    open(my $fh, '>', $newfile) || die('cannot create file '.$newfile.': '.$!);
+    print $fh $newcont;
+    CORE::close($fh) || die("cannot close file ".$newfile.": ".$!);
+    my($diffrc, $diff) = Thruk::Utils::IO::cmd(['diff', '-Nurhw', $file, $newfile]);
+    if($diffrc != 0) {
+        _log_change("%s: modules reordered", $file);
+        _debug($diff) if $diff;
+        if($options->{'dry'}) {
+            unlink($newfile);
+        } else {
+            my $perm = (stat($file))[2];
+            move($newfile, $file);
+            chmod($perm, $file);
+        }
+    } else {
+        unlink($newfile);
+    }
+}
+
+##############################################
+sub _log_change {
+    my($fmt, @args) = @_;
+    my($txt) = sprintf($fmt, @args);
+    if($options->{'dry'}) {
+        $txt = "dry run: ".$txt;
+    }
+    _info($txt);
+    $rc = 1;
+}
+##############################################
+sub _check_missing {
+    my($file, $blocks, $lastblock) = @_;
+    for my $b (values %{$blocks}) {
+        for my $f (@{$b->{'missing'}}) {
+            my($m, $line) = @{$f};
+            next if $m eq $b->{'package'}.'::Defaults';
+            my $found = 0;
+            for my $b (values %{$blocks}) {
+                if(defined $b->{'modules'}->{$m} || $m eq $b->{'package'}) {
+                    $found = 1;
+                }
+            }
+            if(!$found) {
+                $line =~ s/^\s*//gmx;
+                _log_change("%s: module '%s' missing in includes, first use in: %s", $file, $m, $line);
+                $lastblock->{'modules'}->{$m}++; # fail only once
+                $lastblock->{'used'}->[scalar @{$lastblock->{'used'}} -1]->{$m} = "";
+                if($m eq 'Thruk::Config') {
+                    $lastblock->{'used'}->[0]->{$m} = "use Thruk::Config 'noautoload';";
+                }
+            }
+        }
+
+        for my $m (sort keys %{$b->{'modules'}}) {
+            if($b->{'modules'}->{$m} == 0) {
+                _log_change("%s: module '%s' is not used at all, consider removing it.", $file, $m);
+                for my $u (@{$b->{'used'}}) { delete $u->{$m}; }
+            }
+            #if($b->{'modules'}->{$m} == 1) {
+            #    next if $m =~ m/^(strict|warnings|threads|Thruk::Base|Thruk::Action::AddDefaults)$/mx;
+            #    next if $file =~ m/^\.\/(t|script)\//mx;
+            #    _log_change("%s: module '%s' is used only once, consider replacing by require.", $file, $m);
+            #}
+        }
+        for my $m (qw/warnings strict/) {
+            my $found;
+            for my $u (@{$b->{'used'}}) {
+                $found = 1 if defined $u->{$m};
+            }
+            if(!$found) {
+                _log_change("%s: missing use %s.", $file, $m);
+                $b->{'used'}->[0]->{$m} = '';
+            }
+        }
+    }
+}
+
+##############################################
+sub _clean_used {
+    my($file, $blocks) = @_;
+    for my $name (sort keys %{$blocks}) {
+        next if defined $replacements->{$name};
+        my $b = $blocks->{$name};
+        for my $u (@{$b->{'used'}}) {
+            for my $r (@replace) {
+                if(defined $u->{$r} && $u->{$r} eq '') {
+                    for my $m (sort keys %{$replacements->{$r}}) {
+                        if(defined $u->{$m} && $u->{$m} eq '' && $m ne $r) {
+                            delete $u->{$m};
+                            _log_change("%s: module '%s' removed because of '%s'.", $file, $m, $r);
+                        }
+                        _set_replaced_mods($u, $b->{'modules'}, $replacements, $m);
+                    }
+                }
+            }
+        }
+    }
+}
+
+##############################################
+sub _set_replaced_mods {
+    my($used, $modules, $replacements, $mod) = @_;
+    $modules->{$mod} = 2;
+    if($replacements->{$mod}) {
+        for my $s (sort keys %{$replacements->{$mod}}) {
+            if(!defined $modules->{$s}) {
+                _set_replaced_mods($used, $modules, $replacements, $s);
+            }
+        }
+    }
+}
+
+##############################################
+sub _get_used_mods {
+    my($m, $replacements) = @_;
+    my $file = './lib/'.$m.'.pm';
+    $file =~ s|::|/|gmx;
+    my($blocks) = _parse_file($file);
+    my $used = {};
+    for my $b (values %{$blocks}) {
+        for my $u (@{$b->{'used'}}) {
+            for my $m (sort keys %{$u}) {
+                next unless $m =~ m/^Thruk/mx;
+                $used->{$m} = 1;
+                if($replacements->{$m}) {
+                    for my $s (sort keys %{$replacements->{$m}}) {
+                        $used->{$s} = 1;
+                    }
+                }
+            }
+        }
+    }
+    return($used);
+}
+
+##############################################
+
+1;
+__END__
+
+=head1 NAME
+
+thruk_format_perl_modules - Update perl module includes
+
+=head1 SYNOPSIS
+
+  Usage: thruk_format_perl_modules [options] [<files/folders>]
+
+  Globaloptions:
+    -h, --help                    Show this help message and exit
+    -v, --verbose                 Print verbose output
+    -n, --dry-run                 Print changes but don't change anything
+
+
+=head1 DESCRIPTION
+
+This script adds missing includes and removes unneeded ones.
+
+=head1 RETURN VALUE
+
+returns 0 on success and 1 otherwise
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-2021, <sven@nierlein.org>
+
+=cut

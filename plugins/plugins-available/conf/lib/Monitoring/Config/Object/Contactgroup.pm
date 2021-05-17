@@ -1,7 +1,8 @@
 package Monitoring::Config::Object::Contactgroup;
 
-use strict;
 use warnings;
+use strict;
+
 use parent 'Monitoring::Config::Object::Parent';
 
 =head1 NAME

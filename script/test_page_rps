@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 
 =head1 NAME
 
@@ -43,10 +43,12 @@ Sven Nierlein, 2009-2015, <sven@nierlein.org>
 
 use warnings;
 use strict;
-use JSON::XS;
-use File::Slurp qw/read_file/;
-use Time::HiRes qw/sleep gettimeofday tv_interval/;
+use Cpanel::JSON::XS;
 use Getopt::Long;
+use POSIX ();
+use Time::HiRes qw/sleep gettimeofday tv_interval/;
+
+use Thruk::Utils::IO ();
 
 my $started = 0;
 my $tags    = [];
@@ -55,7 +57,7 @@ my $options = {
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
-Getopt::Long::GetOptions (
+Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
    "w|write"            => \$options->{'write_file'},
    "u|update"           => \$options->{'update_only'},
@@ -85,7 +87,7 @@ my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
 my $results = {};
 if(-s $results_file && !$options->{'url'}) {
-    $results = JSON::XS::decode_json(read_file($results_file));
+    $results = Thruk::Utils::IO::json_lock_retrieve($results_file);
 }
 
 # clean non-existing git hashes
@@ -184,7 +186,7 @@ sub _safe_results {
     return if $options->{'url'};
     if(scalar keys %{$results}) {
         open(my $fh, '>', $results_file) or die("couldn't write results $results_file: $!");
-        print $fh JSON::XS->new->canonical(1)->encode($results);
+        print $fh Cpanel::JSON::XS->new->canonical(1)->encode($results);
         close($fh);
     }
     return;
@@ -339,7 +341,7 @@ sub _create_results_file {
         $template = join("", <DATA>);
     }
     my $copy = $template;
-    my $res  = JSON::XS::encode_json($results);
+    my $res  = Cpanel::JSON::XS::encode_json($results);
     $res    =~ s/},/},\n/gmx;
     $copy =~ s/\#\#\#DATA\#\#\#/$res/g;
     open(my $fh, '>', $result_html) or die("cannot write $result_html: $!");

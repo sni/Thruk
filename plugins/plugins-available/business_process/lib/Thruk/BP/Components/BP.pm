@@ -1,17 +1,20 @@
 package Thruk::BP::Components::BP;
 
-use strict;
 use warnings;
-use Data::Dumper;
+use strict;
 use Carp;
-use File::Temp;
-use File::Copy qw/move/;
+use Cpanel::JSON::XS ();
+use Data::Dumper;
 use Fcntl qw/:DEFAULT/;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::BP::Components::Node;
+use File::Copy qw/move/;
+use File::Temp;
 use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::BP::Components::Node ();
+use Thruk::BP::Utils ();
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -38,7 +41,7 @@ return new business process
 =cut
 
 sub new {
-    my($class, $c, $file, $bpdata, $editmode) = @_;
+    my($class, $c, $file, $bpdata, $editmode, $skip_nodes, $skip_runtime) = @_;
 
     my $self = {
         'id'                 => undef,
@@ -71,42 +74,50 @@ sub new {
     };
     bless $self, $class;
     $self->set_file($c, $file);
-    if(!-e $file) {
-        $self->{'draft'} = 1;
-    }
 
-    if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
+    if($editmode && -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-s $file) {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
+    } else {
+        if(!-e $self->{'file'}) {
+            $self->{'draft'} = 1;
+        }
     }
+
     for my $key (@saved_keys) {
         $self->{$key} = $bpdata->{$key} if defined $bpdata->{$key};
     }
     for my $key (qw/name template/) {
         next unless defined $self->{$key};
-        $self->{$key} = Thruk::Utils::trim_whitespace($self->{$key});
+        $self->{$key} = Thruk::Base::trim_whitespace($self->{$key});
     }
     $self->set_label($c, $self->{'name'});
 
     return unless $self->{'name'};
 
     # read in nodes
-    for my $n (@{Thruk::Utils::list($bpdata->{'nodes'} || [])}) {
-        my $node = Thruk::BP::Components::Node->new($n);
-        $self->add_node($node, 1);
+    if(!$skip_nodes) {
+        for my $n (@{Thruk::Base::list($bpdata->{'nodes'} || [])}) {
+            my $node = Thruk::BP::Components::Node->new($n);
+            $self->add_node($node, 1);
+        }
     }
 
-    $self->load_runtime_data();
+    if(!$skip_runtime) {
+        $self->load_runtime_data();
+    }
 
     # add default filter
-    $self->{'default_filter'} = Thruk::Utils::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
+    $self->{'default_filter'} = Thruk::Base::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
 
     $self->save() if $self->{'need_save'};
 
-    for my $n (@{$self->{'nodes'}}) {
-        $n->update_parents($self);
+    if(!$skip_nodes) {
+        for my $n (@{$self->{'nodes'}}) {
+            $n->update_parents($self);
+        }
     }
 
     confess("status_text cannot be empty") unless defined $self->{'status_text'};
@@ -143,7 +154,7 @@ return list of filters + default filter
 =cut
 sub filter {
     my($self) = @_;
-    return(Thruk::Utils::array_uniq([@{$self->{'default_filter'}}, @{$self->{'filter'}}]));
+    return(Thruk::Base::array_uniq([@{$self->{'default_filter'}}, @{$self->{'filter'}}]));
 }
 
 ##########################################################
@@ -195,7 +206,7 @@ sub update_status {
     my $t0 = [gettimeofday];
 
     # set backends to default list, bp result should be deterministic
-    $c->{'db'}->enable_default_backends();
+    $c->db->enable_default_backends();
 
     $type = 0 unless defined $type;
     my $last_state = $self->{'status'};
@@ -227,7 +238,7 @@ sub update_status {
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
 
-    $results = Thruk::Utils::array_uniq($results);
+    $results = Thruk::Base::array_uniq($results);
 
     # update last check time
     my $now = time();
@@ -312,11 +323,11 @@ set file for this business process
 sub set_file {
     my($self, $c, $file) = @_;
     my $basename = $file;
-    $basename    =~ s/^.*\///mx;
-    $self->{'file'}     = Thruk::BP::Utils::bp_base_folder($c).'/'.$basename;
-    $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
-    $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
-    if($basename =~ m/(\d+).tbp/mx) {
+    $basename    =~ s/^.*\///mxo;
+    $self->{'file'}     = sprintf("%s/%s", Thruk::BP::Utils::bp_base_folder($c), $basename);
+    $self->{'datafile'} = sprintf("%s/bp/%s.runtime", $c->config->{'var_path'}, $basename);
+    $self->{'editfile'} = sprintf("%s/bp/%s.edit",    $c->config->{'var_path'}, $basename);
+    if($basename =~ m/^(\d+)\.tbp$/mxo) {
         $self->{'id'} = $1;
     } else {
         die("wrong file format in ".$basename);
@@ -685,8 +696,8 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
-        $hostdata  = Thruk::Utils::array2hash($data, 'name');
+        my $data   = $c->db->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
+        $hostdata  = Thruk::Base::array2hash($data, 'name');
     }
     if(scalar keys %{$servicefilter} > 0) {
         my @filter;
@@ -721,8 +732,8 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
-        $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
+        my $data   = $c->db->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
+        $servicedata = Thruk::Base::array2hash($data, 'host_name', 'description');
     }
     if(!$expand_groups) {
         if(scalar keys %{$hostgroupfilter} > 0) {
@@ -731,11 +742,11 @@ sub bulk_fetch_live_data {
                 push @filter, { name => $hostgroupname };
             }
             my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-            my $data   = $c->{'db'}->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
+            my $data   = $c->db->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
                                                                                      num_hosts_unreach num_hosts_up num_services num_services_crit
                                                                                      num_services_ok num_services_pending num_services_unknown
                                                                                      num_services_warn worst_service_state worst_host_state/]);
-            $hostgroupdata  = Thruk::Utils::array2hash($data, 'name');
+            $hostgroupdata  = Thruk::Base::array2hash($data, 'name');
         }
         if(scalar keys %{$servicegroupfilter} > 0) {
             my @filter;
@@ -743,10 +754,10 @@ sub bulk_fetch_live_data {
                 push @filter, { name => $servicegroupname };
             }
             my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-            my $data   = $c->{'db'}->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
+            my $data   = $c->db->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
                                                                                            num_services_ok num_services_pending num_services_unknown
                                                                                            num_services_warn worst_service_state/]);
-            $servicegroupdata  = Thruk::Utils::array2hash($data, 'name');
+            $servicegroupdata  = Thruk::Base::array2hash($data, 'name');
         }
     }
 
@@ -843,7 +854,7 @@ sub _submit_results_to_core {
     }
     else {
         # if there is only on backend, use that
-        my $peers = $c->{'db'}->get_peers();
+        my $peers = $c->db->get_peers();
         if(scalar @{$peers} == 1) {
             $c->config->{'Thruk::Plugin::BP'}->{'result_backend'} = $peers->[0]->peer_key();
             return $self->_submit_results_to_core_backend($c, $results);
@@ -862,7 +873,7 @@ sub _submit_results_to_core_backend {
     my($self, $c, $results) = @_;
 
     my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-    my $peer = $c->{'db'}->get_peer_by_key($name);
+    my $peer = $c->db->get_peer_by_key($name);
     die("configured result_backend ".$name." does not exist.") unless $peer;
     my $pkey = $peer->peer_key();
 
@@ -872,7 +883,7 @@ sub _submit_results_to_core_backend {
             'command' => 'COMMAND '.join("\n\nCOMMAND ", @{$cmds}),
             'backend' => [ $pkey ],
         };
-        $c->{'db'}->send_command( %{$options} );
+        $c->db->send_command( %{$options} );
     }
 
     return;
@@ -926,11 +937,11 @@ sub _sync_ack_downtime_status {
     my $peer;
     if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
         my $b = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-        $peer = $c->{'db'}->get_peer_by_key($b) || $c->{'db'}->get_peer_by_name($b);
+        $peer = $c->db->get_peer_by_key($b) || $c->db->get_peer_by_name($b);
     }
     else {
         # if there is only on backend, use that
-        my $peers = $c->{'db'}->get_peers();
+        my $peers = $c->db->get_peers();
         if(scalar @{$peers} == 1) {
             $peer = $peers->[0];
         }
@@ -947,10 +958,10 @@ sub _sync_ack_downtime_status {
 
     # get all downtimes for this bp
     my $downtimes = $c->db->get_downtimes(filter => [{ 'host_custom_variables' => { '=' => 'THRUK_BP_ID '.$self->{'id'}}}, 'author' => $author ], backend => $pkey);
-    $downtimes = Thruk::Utils::array2hash($downtimes, "host_name", "service_description");
+    $downtimes = Thruk::Base::array2hash($downtimes, "host_name", "service_description");
 
     my $acks = $c->db->get_comments(filter => [{ 'host_custom_variables' => { '=' => 'THRUK_BP_ID '.$self->{'id'}}}, 'author' => $author ], backend => $pkey);
-    $acks = Thruk::Utils::array2hash($acks, "host_name", "service_description");
+    $acks = Thruk::Base::array2hash($acks, "host_name", "service_description");
 
     my $cmds = [];
     for my $id (@{$results}) {
@@ -1025,7 +1036,7 @@ sub _sync_ack_downtime_status {
             'command' => 'COMMAND '.join("\n\nCOMMAND ", @{$cmds}),
             'backend' => [ $pkey ],
         };
-        $c->{'db'}->send_command( %{$options} );
+        $c->db->send_command( %{$options} );
     }
 
     return;
@@ -1081,7 +1092,7 @@ sub FROM_JSON {
     return unless $self->{'name'};
 
     # read in nodes
-    for my $n (@{Thruk::Utils::list($nodes)}) {
+    for my $n (@{Thruk::Base::list($nodes)}) {
         my $node = Thruk::BP::Components::Node->new($n);
         $self->add_node($node, 1);
     }
@@ -1111,7 +1122,7 @@ sub get_outgoing_refs {
     my $refs = [];
     for my $n (@{$self->{'nodes'}}) {
         if($n->{'bp_ref'}) {
-            my $bps = Thruk::BP::Utils::load_bp_data($c, $n->{'bp_ref'}, undef, undef, $n->{'bp_ref_peer'});
+            my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $n->{'bp_ref'}, backend => $n->{'bp_ref_peer'} });
             push @{$refs}, $bps->[0] if $bps->[0];
         }
     }
@@ -1130,16 +1141,17 @@ return list of incoming bp references
 
 =cut
 sub get_incoming_refs {
-    my($self, $c, $bps) = @_;
+    my($self, $c) = @_;
     $c->stats->profile(begin => "get_incoming_refs");
 
+    Thruk::BP::Utils::check_update_index($c);
+
     my $refs = [];
-    for my $bp (@{$bps}) {
-        for my $n (@{$bp->{'nodes'}}) {
-            if($n->{'bp_ref'} && $n->{'bp_ref'} == $self->{'id'}) {
-                push @{$refs}, $bp;
-            }
-        }
+    my $data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}.'/bp/.index');
+    return $refs unless $data->{$self->{'id'}};
+    for my $ref (@{$data->{$self->{'id'}}}) {
+        my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $ref->[0], backend => $ref->[1] });
+        push @{$refs}, $bps->[0] if $bps->[0];
     }
 
     $c->stats->profile(end => "get_incoming_refs");
@@ -1171,7 +1183,7 @@ sub _list_failed_backends {
     $failed_backends = {} unless $failed_backends;
     for my $key (@{$previous_affected}) {
         next unless $failed_backends->{$key};
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         push @{$failed}, ($peer ? $peer->{'name'} : $key);
     }
     return $failed;

@@ -1,8 +1,7 @@
 package Monitoring::Availability::Logs;
 
-use 5.008;
-use strict;
 use warnings;
+use strict;
 use Carp;
 use Encode qw/decode/;
 
@@ -166,7 +165,7 @@ sub _store_logs_from_file {
     open(my $FH, '<', $file) or croak('cannot read file '.$file.': '.$!);
     binmode($FH);
     while(my $line = <$FH>) {
-        &_decode_any($line);
+        &decode_any($line);
         chomp($line);
         my $data = &parse_line($line);
         push @{$self->{'logs'}}, $data if defined $data;
@@ -197,14 +196,22 @@ sub _store_logs_from_livestatus {
     my($self, $log_array) = @_;
     return unless defined $log_array;
     for my $entry (@{$log_array}) {
-        my $data = &_parse_livestatus_entry($entry);
+        my $data = &parse_livestatus_entry($entry);
         push @{$self->{'logs'}}, $data if defined $data;
     }
     return 1;
 }
 
 ########################################
-sub _parse_livestatus_entry {
+
+=head2 parse_livestatus_entry
+
+    parse_livestatus_entry($entry)
+
+parses type and options for log entry
+
+=cut
+sub parse_livestatus_entry {
     my($entry) = @_;
 
     my $string = $entry->{'message'} || $entry->{'options'} || '';
@@ -328,7 +335,15 @@ sub _set_from_type {
 }
 
 ########################################
-sub _decode_any {
+
+=head2 decode_any
+
+    decode_any($str)
+
+returns decoded string
+
+=cut
+sub decode_any {
     eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
     if ( $@ ) { # input was not utf8
         $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );

@@ -1,10 +1,16 @@
 package Thruk::Utils::Trends;
 
-use strict;
 use warnings;
+use strict;
 use GD qw/gdSmallFont gdStyled gdTransparent/;
+use GD::Image ();
 use POSIX ();
+
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Avail ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -49,10 +55,10 @@ sub _show_step_2 {
 
     my $data;
     if($input eq 'gethost') {
-        $data = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
+        $data = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
     }
     elsif($input eq 'getservice') {
-        my $services = $c->{'db'}->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services')], columns => [qw/host_name description/]);
+        my $services = $c->db->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services')], columns => [qw/host_name description/]);
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
@@ -93,7 +99,7 @@ sub _show_step_3 {
 
     $c->stash->{host}        = $host    || '';
     $c->stash->{service}     = $service || '';
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1);
+    $c->stash->{timeperiods} = $c->db->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1);
 
     $c->stash->{template}   = 'trends_step_3.tt';
 

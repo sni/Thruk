@@ -28,8 +28,9 @@ The maintenance command performs regular maintenance jobs like
 
 use warnings;
 use strict;
+
+use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::CookieAuth;
 
 ##############################################
 

@@ -1,8 +1,10 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Encode qw/encode_utf8/;
+use Test::More;
+
+use Thruk::Config 'noautoload';
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -195,7 +197,7 @@ sub _test_json_page {
     delete $subs->{$taskurl};
     $url->{'post'}         = {} unless $url->{'post'};
     $url->{'post'}         = undef if($url->{'method'} && lc($url->{'method'}) eq 'get');
-    $url->{'content_type'} = 'application/json;charset=UTF-8' unless $url->{'content_type'};
+    $url->{'content_type'} = 'application/json; charset=utf-8' unless $url->{'content_type'};
 
     $url = _set_dynamic_url_parts($url);
 

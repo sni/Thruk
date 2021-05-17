@@ -1,16 +1,20 @@
 package Thruk::Utils::Conf;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
-use File::Slurp qw/read_file/;
-use Storable qw/store retrieve/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
+use Storable qw/store retrieve/;
 
-use Thruk::Utils::Log qw/:all/;
+use Thruk::Action::AddDefaults ();
 use Thruk::Constants qw/:peer_states/;
-use Thruk::Utils::Conf::Defaults;
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Conf::Defaults ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -38,7 +42,7 @@ sub set_object_model {
     my ( $c, $no_recursion ) = @_;
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
-    Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::ADD_CACHED_DEFAULTS
+    Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::Constants::ADD_CACHED_DEFAULTS
     $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
 
     # if this is no obj config yet, try updating process info which updates
@@ -58,7 +62,7 @@ sub set_object_model {
     delete $c->req->parameters->{'refreshdata'};
 
     $c->stats->profile(begin => "_update_objects_config()");
-    my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    my $peer_conftool = $c->db->get_peer_by_key($c->stash->{'param_backend'});
     get_default_peer_config($peer_conftool->{'configtool'});
     append_global_peer_config($c, $peer_conftool->{'configtool'});
     $c->stash->{'peer_conftool'} = $peer_conftool->{'configtool'};
@@ -86,7 +90,7 @@ sub set_object_model {
     else {
         # need to parse complete objects
         $c->stash->{set_object_model_err} = "configuration is beeing parsed right now, try again in a few moments";
-        if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
+        if(scalar keys %{$c->db->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
                                                message => 'please stand by while reading the configuration files...',
                                                forward => $c->req->url,
@@ -114,7 +118,7 @@ sub set_object_model {
         $c->stats->profile(end => "check_files_changed($refresh)");
     }
 
-    $c->{'obj_db'}->{'errors'} = Thruk::Utils::array_uniq(Thruk::Utils::list($c->{'obj_db'}->{'errors'}));
+    $c->{'obj_db'}->{'errors'} = Thruk::Base::array_uniq(Thruk::Base::list($c->{'obj_db'}->{'errors'}));
     my $errnum = scalar @{$c->{'obj_db'}->{'errors'}};
     if($errnum > 0) {
         my $error = $c->{'obj_db'}->{'errors'}->[0];
@@ -153,7 +157,7 @@ sub read_objects {
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->app->obj_db_model;
     confess('no model') unless $model;
-    my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    my $peer_conftool = $c->db->get_peer_by_key($c->stash->{'param_backend'});
     confess('no config tool') unless $peer_conftool;
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, undef, $c->{'stats'}, $peer_conftool);
     confess('no object database') unless $obj_db;
@@ -214,7 +218,7 @@ sub update_conf {
         for my $key (keys %{$data}) {
             $update_c->config->{$key} = $data->{$key};
             if($key eq 'server_timezone') {
-                $update_c->app->set_timezone($data->{$key});
+                Thruk::Utils::Timezone::set_timezone($update_c->config, $data->{$key});
             }
         }
     }
@@ -249,7 +253,7 @@ sub read_conf {
 
     return('', $data, '') unless -e $file;
 
-    my $content   = read_file($file);
+    my $content   = Thruk::Utils::IO::read($file);
     my $hexdigest = Thruk::Utils::Crypt::hexdigest($content);
     my $in_block = 0;
     for my $line (split/\n/mx, $content) {
@@ -384,7 +388,7 @@ sub get_component_as_string {
         $string .= "            peer          = ".$p."\n";
         }
         if($b->{'options'}->{'resource_file'}) {
-            for my $r (@{Thruk::Utils::list($b->{'options'}->{'resource_file'})}) {
+            for my $r (@{Thruk::Base::list($b->{'options'}->{'resource_file'})}) {
                 $string .= "            resource_file = ".$r."\n";
             }
         }
@@ -433,7 +437,7 @@ sub replace_block {
 
     my $content = "";
     if(-f $file) {
-        $content = read_file($file);
+        $content = Thruk::Utils::IO::read($file);
     }
 
     ## no critic
@@ -495,7 +499,7 @@ sub get_cgi_user_list {
     my($c) = @_;
 
     # get users from core contacts
-    my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
+    my $contacts = $c->db->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
                                              remove_duplicates => 1);
     my $all_contacts = {};
     for my $contact (@{$contacts}) {
@@ -551,7 +555,7 @@ sub get_cgi_group_list {
     my ( $c ) = @_;
 
     # get users from core contacts
-    my $groups = $c->{'db'}->get_contactgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ) ],
+    my $groups = $c->db->get_contactgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ) ],
                                                 remove_duplicates => 1);
     my $all_groups = {};
     for my $group (@{$groups}) {
@@ -591,7 +595,7 @@ sub read_htpasswd {
     my ( $file ) = @_;
     my $htpasswd = {};
     return $htpasswd unless -f $file;
-    my $content  = read_file($file);
+    my $content  = Thruk::Utils::IO::read($file);
     for my $line (split/\n/mx, $content) {
         my($user,$hash) = split/:/mx, $line;
         next unless defined $hash;
@@ -644,7 +648,7 @@ sub store_model_retention {
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
         $c->config->{'conf_retention_file'} = $file;
-        $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
+        $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
         _debug('saved object retention data');
     };
@@ -699,7 +703,7 @@ sub get_model_retention {
             return 1;
         }
         # cannot trust file timestamp in cluster mode since clocks might not be synchronous
-        my $hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($file));
+        my $hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file));
         if($c->config->{'conf_retention_hex'} eq $hex) {
             $c->stats->profile(end => "get_model_retention($backend)");
             return 1;
@@ -707,7 +711,7 @@ sub get_model_retention {
     }
     $c->config->{'conf_retention'}      = \@stat;
     $c->config->{'conf_retention_file'} = $file;
-    $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
+    $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
     # try to retrieve retention data
     eval {
@@ -850,11 +854,11 @@ append/merge global config tool settings
 =cut
 sub append_global_peer_config {
     my($c, $config) = @_;
-    $config->{'obj_readonly'} = Thruk::Utils::list($config->{'obj_readonly'});
+    $config->{'obj_readonly'} = Thruk::Base::list($config->{'obj_readonly'});
     if($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'}) {
         push @{$config->{'obj_readonly'}},
-            @{Thruk::Utils::list($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'})};
-        $config->{'obj_readonly'} = Thruk::Utils::array_uniq($config->{'obj_readonly'});
+            @{Thruk::Base::list($c->config->{'Thruk::Plugin::ConfigTool'}->{'obj_readonly'})};
+        $config->{'obj_readonly'} = Thruk::Base::array_uniq($config->{'obj_readonly'});
     }
     return;
 }
@@ -921,8 +925,6 @@ sub get_backends_with_obj_config {
     my($c)       = @_;
     my $backends = {};
     my $firstpeer;
-    my $param_backend = $c->stash->{'param_backend'} || '';
-    $c->stash->{'param_backend'} = '';
 
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
 
@@ -931,7 +933,7 @@ sub get_backends_with_obj_config {
         #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config II');
         eval {
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo a');
-            $c->{'db'}->get_processinfo(backend => $fetch);
+            $c->db->get_processinfo(backend => $fetch);
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
         };
 
@@ -939,7 +941,7 @@ sub get_backends_with_obj_config {
         $fetch = _get_peer_keys_without_configtool($c);
         for my $key (@{$fetch}) {
             if($c->stash->{'failed_backends'}->{$key}) {
-                my $peer = $c->{'db'}->get_peer_by_key($key);
+                my $peer = $c->db->get_peer_by_key($key);
                 delete $peer->{'configtool'}->{remote};
             } else {
                 push @{$new_fetch}, $key;
@@ -950,7 +952,7 @@ sub get_backends_with_obj_config {
         # when using lmd, do fetch the real config data now
         if(scalar @{$fetch} > 0 && $ENV{'THRUK_USE_LMD'}) {
             for my $key (@{$fetch}) {
-                my $peer = $c->{'db'}->get_peer_by_key($key);
+                my $peer = $c->db->get_peer_by_key($key);
                 delete $peer->{'configtool'}->{remote};
             }
             # make sure we have uptodate information about config section of http backends
@@ -962,8 +964,11 @@ sub get_backends_with_obj_config {
     }
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
 
+    my $param_backend = $c->stash->{'param_backend'} || '';
+    $c->stash->{'param_backend'} = '';
+
     # first hide all of them
-    my @peers = @{$c->{'db'}->get_peers(1)};
+    my @peers = @{$c->db->get_peers(1)};
     for my $peer (@peers) {
         my $min_key_size = 0;
         if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
@@ -1039,7 +1044,7 @@ sub get_backends_with_obj_config {
 ##########################################################
 sub _get_peer_keys_without_configtool {
     my($c) = @_;
-    my @peers = @{$c->{'db'}->get_peers(1)};
+    my @peers = @{$c->db->get_peers(1)};
     my @fetch;
     #&timing_breakpoint('_get_peer_keys_without_configtool');
     for my $peer (@peers) {

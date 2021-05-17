@@ -33,6 +33,8 @@ The servicegroup command lists hosts from livestatus queries.
 use warnings;
 use strict;
 
+use Thruk::Utils::Auth ();
+
 ##############################################
 
 =head1 METHODS
@@ -45,7 +47,7 @@ use strict;
 sub cmd {
     my($c) = @_;
     my $output = '';
-    for my $group (@{$c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' )], sort => {'ASC' => 'name'})}) {
+    for my $group (@{$c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' )], sort => {'ASC' => 'name'})}) {
         $output .= sprintf("%-30s %s\n", $group->{'name'}, join(', ', map({ join(";", @{$_}) } @{$group->{'members'}}) ) );
     }
     return($output, 0);

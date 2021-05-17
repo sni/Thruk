@@ -1,15 +1,16 @@
 package Thruk::Backend::Manager;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk ();
+
 use Thruk::Utils ();
-use Thruk::Utils::Filter ();
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;
@@ -508,7 +509,7 @@ sub get_scheduling_queue {
         push @{$queue}, @{$hosts};
     }
     $queue = $self->sort_result( $queue, $options{'sort'} ) if defined $options{'sort'};
-    $self->_page_data( $c, $queue ) if defined $options{'pager'};
+    Thruk::Utils::page_data($c, $queue) if defined $options{'pager'};
     return $queue;
 }
 
@@ -838,7 +839,7 @@ sub logcache_stats {
     } else {
         die("unknown type: ".$type);
     }
-    my $stats = Thruk::Utils::array2hash(\@stats, 'key');
+    my $stats = Thruk::Base::array2hash(\@stats, 'key');
 
     if($with_dates) {
         for my $key (keys %{$stats}) {
@@ -857,110 +858,6 @@ sub logcache_stats {
 
 ########################################
 
-=head2 get_expanded_start_date
-
-  get_expanded_start_date($c, $blocksize)
-
-returns start of day for expanded duration
-
-=cut
-sub get_expanded_start_date {
-    my($c, $blocksize) = @_;
-    # blocksize is given in days unless specified
-    if($blocksize !~ m/^\d+$/mx) {
-        $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
-    }
-    my $ts = Thruk::Utils::DateTime::start_of_day(time() - ($blocksize*86400));
-    return($ts);
-}
-
-########################################
-
-=head2 extract_time_filter
-
-  extract_time_filter($filter)
-
-returns start and end time filter from given query
-
-=cut
-sub extract_time_filter {
-    my($filter) = @_;
-    my($start, $end);
-    if(ref $filter eq 'ARRAY') {
-        for my $f (@{$filter}) {
-            if(ref $f eq 'HASH') {
-                my($s, $e) = extract_time_filter($f);
-                $start = $s if defined $s;
-                $end   = $e if defined $e;
-            }
-        }
-    }
-    if(ref $filter eq 'HASH') {
-        if($filter->{'-and'}) {
-            my($s, $e) = extract_time_filter($filter->{'-and'});
-            $start = $s if defined $s;
-            $end   = $e if defined $e;
-        } else {
-            if($filter->{'time'}) {
-                if(ref $filter->{'time'} eq 'HASH') {
-                    my $op  = (keys %{$filter->{'time'}})[0];
-                    my $val = $filter->{'time'}->{$op};
-                    if($op eq '>' || $op eq '>=') {
-                        $start = $val;
-                        return($start, $end);
-                    }
-                    if($op eq '<' || $op eq '<=') {
-                        $end = $val;
-                        return($start, $end);
-                    }
-                }
-            }
-        }
-    }
-    return($start, $end);
-}
-
-########################################
-
-=head2 can_use_logcache
-
-  can_use_logcache()
-
-returns true if query can use the logcache
-
-=cut
-sub can_use_logcache {
-    my($provider, $options) = @_;
-    return if $ENV{'THRUK_NOLOGCACHE'};
-    return if $options->{'nocache'};
-    return if !defined $provider->{'_peer'}->{'logcache'};
-    my $c = $Thruk::Request::c;
-    if($c) {
-        my $bypass = $c->config->{'logcache_auto_bypass'} // 0;
-        if($bypass == 0) {
-            return 1;
-        }
-        my $cleaned = get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
-        my($start, $end) = extract_time_filter($options->{'filter'});
-        return 1 if (!defined $start && !defined $end);
-        if($bypass == 1) {
-            if(($end//$start) >= $cleaned) {
-                return 1;
-            }
-            return;
-        }
-        if($bypass == 2) {
-            if(($start//$end) >= $cleaned) {
-                return 1;
-            }
-            return;
-        }
-    }
-    return 1;
-}
-
-########################################
-
 =head2 get_logs
 
   get_logs(@args)
@@ -970,7 +867,7 @@ retrieve logfiles
 =cut
 sub get_logs {
     my($self, @args) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     local $ENV{'THRUK_NOLOGCACHE'} = 1 if (defined $c->req->parameters->{'logcache'} && $c->req->parameters->{'logcache'} == 0);
 
@@ -1083,7 +980,7 @@ sub _renew_logcache {
     my $stats = $self->logcache_stats($c);
     my $backends2import = [];
     for my $key (@{$get_results_for}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         next unless($peer && $peer->{'logcache'});
         push @{$backends2import}, $key unless(defined $stats->{$key} && $stats->{$key}->{'cache_version'});
     }
@@ -1094,6 +991,7 @@ sub _renew_logcache {
         if(scalar @{$backends2import} > 0) {
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'import';
             local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends2import});
+            require Thruk::Utils::External;
             my $job = Thruk::Utils::External::cmd($c,
                                             { cmd        => $c->config->{'logcache_import_command'},
                                               message    => 'please stand by while your initial logfile cache will be created...',
@@ -1114,6 +1012,7 @@ sub _renew_logcache {
         my $type = '';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         if(scalar @{$backends2import} > 0) {
+            require Thruk::Utils::External;
             my $job = Thruk::Utils::External::perl($c,
                                              { expr       => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
                                                message    => 'please stand by while your initial logfile cache will be created...',
@@ -1144,57 +1043,10 @@ sub close_logcache_connections {
     my($c) = @_;
     # clean up connections
     for my $key (@{$c->stash->{'backends'}}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         $peer->logcache->_disconnect() if $peer->{'_logcache'};
     }
     return;
-}
-
-########################################
-
-=head2 get_logs_start_end_no_filter
-
-  get_logs_start_end_no_filter($peer)
-
-returns date of first and last log entry
-
-=cut
-sub get_logs_start_end_no_filter {
-    my($peer, $start_at) = @_;
-    my($start, $end);
-
-    my @steps = (86400*365, 86400*30, 86400*7, 86400);
-
-    my $time = time();
-    for my $step (reverse @steps) {
-        (undef, $end) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => time() - $step }}])};
-        last if $end;
-    }
-
-    # fetching logs without any filter is a terrible bad idea
-    # try to determine start date, simply requesting min/max without filter parses all logfiles
-    # so we try a very early date, since requests with an non-existing timerange are super fast
-    # (livestatus has an index on all files with start and end timestamp and only parses the file if it matches)
-
-    $time = $start_at // time() - 86400 * 365 * 10; # assume 10 years as earliest date we want to import, can be overridden by specifing a forcestart anyway
-    for my $step (@steps) {
-        while($time <= time()) {
-            my($data) = $peer->get_logs(nocache => 1, filter => [{ time => { '<=' => $time }}], columns => [qw/time/], options => { limit => 1 });
-            if($data && $data->[0]) {
-                $time  = $time - $step;
-                last;
-            }
-            $time = $time + $step;
-        }
-        if($time > time()) {
-            $time  = $time - $step;
-        }
-        $start = $time;
-    }
-    my($lstart, undef) = @{$peer->get_logs_start_end(nocache => 1, filter => [{ time => {'>=' => $start - 86400 }}, { time => {'<=' => $start + 86400 }}])};
-    $start = $lstart if $lstart;
-
-    return($start, $end);
 }
 
 ########################################
@@ -1210,6 +1062,7 @@ return lmd statistics
 sub lmd_stats {
     my($self, $c) = @_;
     return unless defined $c->config->{'use_lmd_core'};
+    require Thruk::Utils::LMD;
     $self->reset_failed_backends();
     my($backends) = $self->select_backends();
     my $stats = $self->get_sites( backend => $backends );
@@ -1418,7 +1271,7 @@ sub _get_obfuscated_string {
         };
     }
 
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     if($c->config->{'commandline_obfuscate_pattern'}) {
         for my $pattern (@{$c->config->{'commandline_obfuscate_pattern'}}) {
             ## no critic
@@ -1547,7 +1400,7 @@ returns a result for a function called for all peers
 
 sub _do_on_peers {
     my( $self, $function, $arg, $force_serial, $backends) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
@@ -1568,7 +1421,7 @@ sub _do_on_peers {
        && ($function =~ m/^get_/mx || $function eq 'send_command')
        && ($function ne 'get_logs' || !$c->config->{'logcache'})
        ) {
-        _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
+        _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
 
         eval {
             ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
@@ -1582,6 +1435,7 @@ sub _do_on_peers {
             if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
                 die($err);
             }
+            require Thruk::Utils::LMD;
             Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
             sleep(1);
             # then retry again
@@ -1607,6 +1461,7 @@ sub _do_on_peers {
                 if(!$c->stash->{'lmd_ok'} && $code != 502) {
                     $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+                    require Thruk::Utils::External;
                     Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
                 }
                 die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
@@ -1614,7 +1469,7 @@ sub _do_on_peers {
         }
     } else {
         $skip_lmd = 1;
-        _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk->debug;
+        _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
         ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
@@ -1745,12 +1600,12 @@ sub _do_on_peers {
 
         if( $arg{'pager'} ) {
             local $ENV{'THRUK_USE_LMD'} = undef if $must_resort;
-            $data = $self->_page_data(undef, $data, undef, $totalsize);
+            $data = Thruk::Utils::page_data($c, $data, undef, $totalsize);
         }
     }
 
     # strict templates require icinga2 undef values to be replaced
-    if($c->config->{'strict_tt'}) {
+    if($c->config->{'thruk_author'}) {
         my $replace = 0;
         for my $key (@{$get_results_for}) {
             if($c->stash->{'pi_detail'}->{$key}->{'data_source_version'} && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'} =~ m/Livestatus\ r2\./mx) {
@@ -1791,7 +1646,7 @@ select backends we want to run functions on
 
 sub select_backends {
     my($self, $function, $arg) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     confess("no context") unless $c;
 
     $function = 'get_' unless $function;
@@ -1857,18 +1712,18 @@ sub select_backends {
     for my $peer ( @{ $self->get_peers() } ) {
         if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
             if(!$ENV{'THRUK_USE_LMD'}) {
-                _debug("skipped peer (down): ".$peer->{'name'}) if Thruk->trace;
+                _debug("skipped peer (down): ".$peer->{'name'}) if Thruk::Base->trace;
                 next;
             }
         }
         if(defined $backends) {
             unless(defined $backends->{$peer->{'key'}}) {
-                _debug("skipped peer (undef): ".$peer->{'name'}) if Thruk->trace;
+                _debug("skipped peer (undef): ".$peer->{'name'}) if Thruk::Base->trace;
                 next;
             }
         }
         elsif($peer->{'enabled'} != 1) {
-            _debug("skipped peer (disabled): ".$peer->{'name'}) if Thruk->trace;
+            _debug("skipped peer (disabled): ".$peer->{'name'}) if Thruk::Base->trace;
             next;
         }
         push @{$get_results_for}, $peer->{'key'};
@@ -1917,7 +1772,7 @@ returns result for given function using lmd
 sub _get_result_lmd {
     my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0, []);
-    my $c  = $Thruk::Request::c;
+    my $c  = $Thruk::Globals::c;
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_lmd($function)");
 
@@ -2006,7 +1861,7 @@ returns result for given function
 sub _get_result_serial {
     my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
-    my $c  = $Thruk::Request::c;
+    my $c  = $Thruk::Globals::c;
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_serial($function)");
 
@@ -2049,7 +1904,7 @@ returns result for given function and args using the worker pool
 sub _get_result_parallel {
     my($self, $peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     $c->stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")");
 
@@ -2098,175 +1953,21 @@ removes duplicate entries from a array of hashes
 
 sub remove_duplicates {
     my($data) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
     if($data && $data->[0] && ref($data->[0]) eq 'HASH') {
-        $data = Thruk::Utils::array_uniq_obj($data);
+        $data = Thruk::Base::array_uniq_obj($data);
     }
     elsif($data && $data->[0] && ref($data->[0]) eq 'ARRAY') {
-        $data = Thruk::Utils::array_uniq_list($data);
+        $data = Thruk::Base::array_uniq_list($data);
     } else {
-        $data = Thruk::Utils::array_uniq($data);
+        $data = Thruk::Base::array_uniq($data);
     }
 
     $c->stats->profile( end => "Utils::remove_duplicates()" );
     return($data);
-}
-
-########################################
-
-=head2 page_data
-
-  page_data($c, $data)
-
-adds paged data set to the template stash.
-Data will be available as 'data'
-The pager itself as 'pager'
-
-=cut
-
-sub page_data {
-    local $ENV{'THRUK_USE_LMD'} = undef;
-    return(_page_data(undef, @_));
-}
-
-########################################
-
-=head2 _page_data
-
-  _page_data($c, $data, [$result_size], [$total_size])
-
-adds paged data set to the template stash.
-Data will be available as 'data'
-The pager itself as 'pager'
-
-=cut
-
-sub _page_data {
-    my $self                = shift;
-    my $c                   = shift || $Thruk::Request::c;
-    my $data                = shift || [];
-    return $data unless defined $c;
-    my $default_result_size = shift || $c->stash->{'default_page_size'};
-    my $totalsize           = shift;
-
-    # set some defaults
-    my $pager = { current_page => 1, total_entries => 0 };
-    $c->stash->{'pager'} = $pager;
-    $c->stash->{'pages'} = 0;
-    $c->stash->{'data'}  = $data;
-
-    # page only in html mode
-    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
-    return $data unless $view_mode eq 'html';
-    my $entries = $c->req->parameters->{'entries'} || $default_result_size;
-    return $data unless defined $entries;
-    return $data unless $entries =~ m/^(\d+|all)$/mx;
-    $c->stash->{'entries_per_page'} = $entries;
-
-    # we dont use paging at all?
-    unless($c->stash->{'use_pager'}) {
-        $pager->{'total_entries'} = ($totalsize || scalar @{$data});
-        return $data;
-    }
-
-    if(defined $totalsize) {
-        $pager->{'total_entries'} = $totalsize;
-    } else {
-        $pager->{'total_entries'} = scalar @{$data};
-    }
-    if($entries eq 'all') { $entries = $pager->{'total_entries'}; }
-    my $pages = 0;
-    if($entries > 0) {
-        $pages = POSIX::ceil($pager->{'total_entries'} / $entries);
-    }
-    else {
-        $c->stash->{'data'} = $data;
-        return $data;
-    }
-    if($pager->{'total_entries'} == 0) {
-        $c->stash->{'data'} = $data;
-        return $data;
-    }
-
-    my $page = 1;
-    # current page set by get parameter
-    if(defined $c->req->parameters->{'page'}) {
-        $page = $c->req->parameters->{'page'};
-    }
-    # current page set by jump anchor
-    elsif(defined $c->req->parameters->{'jump'}) {
-        my $nr = 0;
-        my $jump = $c->req->parameters->{'jump'};
-        if(exists $data->[0]->{'description'}) {
-            for my $row (@{$data}) {
-                $nr++;
-                if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
-                    $page = POSIX::ceil($nr / $entries);
-                    last;
-                }
-            }
-        }
-        elsif(exists $data->[0]->{'name'}) {
-            for my $row (@{$data}) {
-                $nr++;
-                if(defined $row->{'name'} and $row->{'name'} eq $jump) {
-                    $page = POSIX::ceil($nr / $entries);
-                    last;
-                }
-            }
-        }
-    }
-
-    # last/first/prev or next button pressed?
-    if(   exists $c->req->parameters->{'next'}
-       or exists $c->req->parameters->{'next.x'} ) {
-        $page++;
-    }
-    elsif (   exists $c->req->parameters->{'previous'}
-           or exists $c->req->parameters->{'previous.x'} ) {
-        $page-- if $page > 1;
-    }
-    elsif (    exists $c->req->parameters->{'first'}
-            or exists $c->req->parameters->{'first.x'} ) {
-        $page = 1;
-    }
-    elsif (    exists $c->req->parameters->{'last'}
-            or exists $c->req->parameters->{'last.x'} ) {
-        $page = $pages;
-    }
-
-    if(!defined $page)      { $page = 1; }
-    if($page !~ m|^\d+$|mx) { $page = 1; }
-    if($page < 0)           { $page = 1; }
-    if($page > $pages)      { $page = $pages; }
-
-    $c->stash->{'current_page'} = $page;
-    $pager->{'current_page'}    = $page;
-
-    if($entries eq 'all') {
-        $c->stash->{'data'} = $data;
-    }
-    else {
-        if(!$ENV{'THRUK_USE_LMD'}) {
-            if($page == $pages) {
-                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
-            } else {
-                $data = [splice(@{$data}, $entries*($page-1), $entries)];
-            }
-        }
-        $c->stash->{'data'} = $data;
-    }
-
-    $c->stash->{'pages'} = $pages;
-
-    # set some variables to avoid undef values in templates
-    $c->stash->{'pager_previous_page'} = $page > 1      ? $page - 1 : 0;
-    $c->stash->{'pager_next_page'}     = $page < $pages ? $page + 1 : 0;
-
-    return $data;
 }
 
 ########################################
@@ -2284,7 +1985,7 @@ twice per request.
 
 sub reset_failed_backends {
     my($self, $c) = @_;
-    $c = $Thruk::Request::c unless $c;
+    $c = $Thruk::Globals::c unless $c;
     confess("no c") unless $c;
     $c->stash->{'failed_backends'} = {};
     return;
@@ -2296,16 +1997,17 @@ sub reset_failed_backends {
 
   AUTOLOAD()
 
-redirects sub calls to out backends
+redirects sub calls to our backends
 
 =cut
 
 sub AUTOLOAD {
-    my $self = shift;
+    my($self, @args) = @_;
     my $name = $AUTOLOAD;
-    my $type = ref($self) or confess "$self is not an object, called as (" . $name . ")";
-    $name =~ s/.*://mx;    # strip fully-qualified portion
-    return $self->_do_on_peers( $name, \@_ );
+    my $type = ref($self) || confess("$self is not an object, called as (".$name.")");
+    confess("called $type instead of Thruk::Backend::Manager") if $type ne 'Thruk::Backend::Manager';
+    $name =~ s/.*://mx; # strip fully-qualified part
+    return(&_do_on_peers($self, $name, \@args));
 }
 
 ##########################################################
@@ -2327,7 +2029,7 @@ sub _merge_answer {
     if($ENV{'THRUK_USE_LMD'}) {
         return($data);
     }
-    my $c      = $Thruk::Request::c;
+    my $c      = $Thruk::Globals::c;
     my $return = [];
     if( defined $type and $type eq 'hash' ) {
         $return = {};
@@ -2380,7 +2082,7 @@ sub _merge_answer {
 # merge hostgroups and merge 'members' of matching groups
 sub _merge_hostgroup_answer {
     my($self, $data) = @_;
-    my $c      = $Thruk::Request::c;
+    my $c      = $Thruk::Globals::c;
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_hostgroup_answer()" );
@@ -2423,7 +2125,7 @@ sub _merge_hostgroup_answer {
 # merge servicegroups and merge 'members' of matching groups
 sub _merge_servicegroup_answer {
     my($self, $data) = @_;
-    my $c      = $Thruk::Request::c;
+    my $c      = $Thruk::Globals::c;
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_servicegroup_answer()" );
@@ -2465,7 +2167,7 @@ sub _merge_servicegroup_answer {
 ##########################################################
 sub _merge_stats_answer {
     my($self, $data) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     my $return;
 
     $c->stats->profile( begin => "_merge_stats_answer()" );
@@ -2606,7 +2308,7 @@ sort a array of hashes by hash keys
 
 sub sort_result {
     my($self, $data, $sortby) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     my( @sorted, $key, $order );
 
     $c->stats->profile( begin => "sort_result()" ) if $c;
@@ -2805,7 +2507,7 @@ sub _set_user_macros {
     my $self   = shift;
     my $args   = shift;
     my $macros = shift || {};
-    my $c      = $Thruk::Request::c or confess("Thruk::Request::c undefined");
+    my $c      = $Thruk::Globals::c or confess("Thruk::Request::c undefined");
 
     my $search = $args->{'search'} || 'expand_user_macros';
     my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 1;
@@ -3020,7 +2722,7 @@ returns remote call result
 
 sub rpc {
     my($self, $backend, $function, $args) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     if(ref $backend eq '') {
         $backend = $self->get_peer_by_key($backend);
     }
@@ -3032,6 +2734,20 @@ sub rpc {
     }
     _debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
     return($backend->{'class'}->rpc($c, $function, $args));
+}
+
+########################################
+
+=head2 page_data
+
+  page_data(...)
+
+wrapper for Thruk::Utils::page_data
+
+=cut
+
+sub page_data {
+    return(Thruk::Utils::page_data(@_));
 }
 
 ########################################

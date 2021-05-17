@@ -1,8 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
-use File::Slurp qw/read_file/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -20,10 +21,10 @@ my($fh, $filename) = tempfile();
 close($fh);
 Thruk::Utils::IO::json_lock_store($filename, { a => 0, b => 0, c => 0 });
 ok(-f $filename, "test file exists: $filename");
-is(read_file($filename), '{"a":0,"b":0,"c":0}', "test contains test content");
+is(Thruk::Utils::IO::read($filename), '{"a":0,"b":0,"c":0}', "test contains test content");
 
 # lock the file but don't do anything, just keep the lock open
-my($fh2, $lock_fh) = Thruk::Utils::IO::file_lock($filename, "ex");
+my($fh2, $lock_fh) = Thruk::Utils::IO::file_lock($filename);
 
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 2;
 is($Thruk::Utils::IO::MAX_LOCK_RETRIES, 2, "max retries reduced"); # also prevents perl from complain about: Name "Thruk::Utils::IO::MAX_LOCK_RETRIES" used only once: possible typo
@@ -34,7 +35,7 @@ Thruk::Utils::IO::json_lock_patch($filename, { b => 1 });
 # now remove the lock
 Thruk::Utils::IO::file_unlock($filename, $fh2, $lock_fh);
 
-is(read_file($filename), '{"a":0,"b":1,"c":0}', "test contains test content");
+is(Thruk::Utils::IO::read($filename), '{"a":0,"b":1,"c":0}', "test contains test content");
 
 unlink($filename);
 ok(!-f $filename, "test file removed");

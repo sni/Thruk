@@ -20,10 +20,9 @@ This program is free software; you can redistribute it and/or modify it under th
 
 package Thruk::Utils::PanoramaCpuStats;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw(croak);
-use Thruk::Utils::IO;
 
 =head1 METHODS
 

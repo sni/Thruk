@@ -1,6 +1,6 @@
-use strict;
 use warnings;
-use Test::More tests => 37;
+use strict;
+use Test::More tests => 29;
 
 BEGIN {
     use lib('t');
@@ -34,4 +34,3 @@ TestUtils::test_page(
     'like'         => 'OK',
     'skip_doctype' => 1,
 );
-

@@ -22,9 +22,13 @@ The rest command is a cli interface to the rest api.
 
 use warnings;
 use strict;
-use Getopt::Long ();
 use Cpanel::JSON::XS qw/decode_json/;
-use Thruk::Utils::Filter ();
+use Getopt::Long ();
+use POSIX ();
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
 our $skip_backends = \&_skip_backends;
@@ -82,7 +86,7 @@ sub _fetch_results {
             }
             elsif($url =~ m/^https?:/mx) {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
-                if(Thruk->verbose >= 2) {
+                if(Thruk::Base->verbose >= 2) {
                     _debug2("request:");
                     _debug2($res->request->as_string());
                     _debug2("response:");
@@ -591,6 +595,7 @@ sub _get_value {
 # determines if command requires backends or not
 sub _skip_backends {
     my($c, $opts) = @_;
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     return unless $opts->{'commandoptions'};
     my $cmds = _parse_args($opts->{'commandoptions'});
     $opts->{'_parsed_args'} = $cmds;

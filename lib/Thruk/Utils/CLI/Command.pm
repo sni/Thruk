@@ -27,6 +27,8 @@ The command command displays the expanded command for a given host or service
 use warnings;
 use strict;
 
+use Thruk::Utils::CLI ();
+
 ##############################################
 
 =head1 METHODS
@@ -52,7 +54,7 @@ sub cmd {
     my $backend = $global_options->{'backends'}->[0] || '';
     my($host, $service);
 
-    my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $hostname } ] );
+    my $hosts = $c->db->get_hosts( filter => [ { 'name' => $hostname } ] );
     $host = $hosts->[0];
     # we have more and backend param is used
     if( scalar @{$hosts} == 1 and defined $backend ) {
@@ -68,7 +70,7 @@ sub cmd {
     }
 
     if($description) {
-        my $services = $c->{'db'}->get_services( filter => [{ 'host_name' => $hostname }, { 'description' => $description }, ] );
+        my $services = $c->db->get_services( filter => [{ 'host_name' => $hostname }, { 'description' => $description }, ] );
         $service = $services->[0];
         # we have more and backend param is used
         if( scalar @{$services} == 1 and defined $services ) {
@@ -84,7 +86,7 @@ sub cmd {
         }
     }
 
-    my $command = $c->{'db'}->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
+    my $command = $c->db->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
     my $msg;
     $msg .= 'Note:             '.$command->{'note'}."\n" if $command->{'note'};
     $msg .= 'Check Command:    '.$command->{'line'}."\n";

@@ -10,11 +10,16 @@ TT template renderer
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Template ();
+use Template::Provider ();
+use Template::Stash ();
 use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::Base ();
+use Thruk::Config 'noautoload';
 
 my $template_provider_themes;
 my $template_provider_user;
@@ -27,15 +32,16 @@ my $template_provider_user;
 
 =cut
 sub register {
-    my($app, $settings) = @_;
+    my($app) = @_;
+    my $settings = Thruk::Config::get_toolkit_config();
 
     # set Template::Provider
     $settings->{'LOAD_TEMPLATES'} = [];
 
     if($app->config->{'thruk_author'}) {
         $settings->{'STRICT'}     = 1;
-        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || Thruk->mode eq 'TEST');
-        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || Thruk->mode eq 'TEST');
+        $settings->{'CACHE_SIZE'} = 0 unless($app->config->{'demo_mode'} || Thruk::Base->mode eq 'TEST');
+        $settings->{'STAT_TTL'}   = 1 unless($app->config->{'demo_mode'} || Thruk::Base->mode eq 'TEST');
     }
 
     # user template provider
@@ -60,8 +66,11 @@ sub register {
     push @{$settings->{'LOAD_TEMPLATES'}}, Template::Provider->new(\%base_settings);
 
     $app->{'tt'} = Template->new($settings);
-    $app->config->{'strict_tt'} = $settings->{'STRICT'};
-    return;
+
+    # make private _ hash keys available
+    $Template::Stash::PRIVATE = undef;
+
+    return($app->{'tt'});
 }
 
 =head2 render_tt
@@ -93,7 +102,7 @@ sub render_tt {
 =cut
 sub render {
     my($c, $template, $stash, $output) = @_;
-    my $tt = $c->app->{'tt'};
+    my $tt = $c->app->{'tt'} || &register($c->app);
     confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
 

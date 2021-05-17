@@ -1,19 +1,14 @@
 package Thruk::Config;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Cwd ();
-use File::Slurp qw/read_file/;
-use Data::Dumper qw/Dumper/;
 use POSIX ();
-use Storable ();
-use Class::Inspector ();
 
 use Thruk::Base ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-
-use 5.008000;
 
 =head1 NAME
 
@@ -34,19 +29,19 @@ Generic Access to Thruks Config
 our $VERSION = '2.42.2';
 
 our $config;
-my $project_root = home() || confess('could not determine project_root from inc: '.Dumper(\%INC));
+my $project_root = home() || confess('could not determine project_root from inc.');
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
-    'thrukversion'                          => &get_thruk_version(),
     'fileversion'                           => $VERSION,
     'released'                              => 'April 26, 2021',
-    'hostname'                              => &hostname(),
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
     'project_root'                          => $project_root,
     'home'                                  => $project_root,
+    'thruk_author'                          => (-f $project_root."/.author"    || $ENV{'THRUK_AUTHOR'})    ? 1 : 0,
+    'demo_mode'                             => (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0,
     'default_view'                          => 'TT',
     'base_templates_dir'                    => $project_root.'/templates',
     'cgi.cfg'                               => 'cgi.cfg',
@@ -290,13 +285,6 @@ my $base_defaults = {
     ],
 };
 
-# set TT strict mode only for authors
-$base_defaults->{'thruk_author'} = 0;
-$base_defaults->{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
-if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
-    $base_defaults->{'thruk_author'} = 1;
-}
-
 ######################################
 
 =head1 METHODS
@@ -308,8 +296,11 @@ if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
 =cut
 sub import {
     my($package, $args) = @_;
-    $args = array2hash(list($args));
-    $config = set_config_env() if(!$config && !$args->{'noautoload'});
+    return if $config;
+    $args = Thruk::Base::array2hash(Thruk::Base::list($args));
+    if(!$args->{'noautoload'}) {
+        $config = set_config_env();
+    }
     return;
 }
 
@@ -322,6 +313,7 @@ sub import {
 =cut
 sub get_default_stash {
     my($c, $pre) = @_;
+    my $base_config = get_base_config();
     my $stash = {
         'total_backend_waited'      => 0,
         'total_render_waited'       => 0,
@@ -329,7 +321,7 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'thrukversion'              => &get_thruk_version(),
+        'thrukversion'              => $base_config->{'thrukversion'},
         'fileversion'               => $VERSION,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
@@ -412,8 +404,11 @@ return basic config hash and sets environment
 sub set_config_env {
     my @files = @_;
 
-    my $configs = _load_config_files(\@files);
-    my $conf    = Storable::dclone($base_defaults);
+    my $base_config = get_base_config();
+    my $configs     = _load_config_files(\@files);
+
+    require Storable;
+    my $conf    = Storable::dclone($base_config);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
@@ -451,19 +446,21 @@ return basic config hash and sets environment, but does not read config again
 sub set_default_config {
     my($config) = @_;
 
+    my $base_config = get_base_config();
+
     ###################################################
     # normalize lists / scalars and set defaults
-    for my $key (keys %{$base_defaults}) {
-        $config->{$key} = $base_defaults->{$key} unless exists $config->{$key};
+    for my $key (keys %{$base_config}) {
+        $config->{$key} = $base_config->{$key} unless exists $config->{$key};
 
         # convert lists to scalars if the default is a scalar value
-        if(ref $base_defaults->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
+        if(ref $base_config->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
             my $l = scalar (@{$config->{$key}});
             $config->{$key} = $config->{$key}->[$l-1];
         }
 
         # convert scalars to lists if the default is a list
-        if(ref $base_defaults->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
+        if(ref $base_config->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
             $config->{$key} = [$config->{$key}];
         }
     }
@@ -547,7 +544,7 @@ sub set_default_config {
         $config->{'extra_version_link'} = 'https://labs.consol.de/omd/';
     }
     elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
-        $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
+        $config->{'extra_version'}      = Thruk::Utils::IO::read($config->{'project_root'}.'/naemon-version');
         $config->{'extra_version_link'} = 'https://www.naemon.org';
         chomp($config->{'extra_version'});
     }
@@ -651,7 +648,7 @@ sub set_default_config {
         for my $item (ref $config->{'expand_user_macros'} eq 'ARRAY' ? @{$config->{'expand_user_macros'}} : ($config->{'expand_user_macros'})) {
             next unless $item;
             if($item =~ m/^USER([\d\-]+$)/mx) {
-                my $list = expand_numeric_list($1);
+                my $list = Thruk::Base::expand_numeric_list($1);
                 for my $nr (@{$list}) {
                     push @{$new_expand_user_macros}, 'USER'.$nr;
                 }
@@ -664,7 +661,7 @@ sub set_default_config {
 
     # expand action_menu_items_folder
     my $action_menu_items_folder = $config->{'action_menu_items_folder'} || $config->{etc_path}."/action_menus";
-    for my $folder (@{list($action_menu_items_folder)}) {
+    for my $folder (@{Thruk::Base::list($action_menu_items_folder)}) {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*');
         for my $file (@files) {
@@ -768,6 +765,14 @@ return base config
 
 =cut
 sub get_base_config {
+    if(!defined $base_defaults->{'thrukversion'}) {
+        $base_defaults->{'thrukversion'} = &get_thruk_version();
+        $config->{'thrukversion'}        = $base_defaults->{'thrukversion'} if $config;
+    }
+    if(!defined $base_defaults->{'hostname'}) {
+        $base_defaults->{'hostname'} = &hostname();
+        $config->{'hostname'}        = $base_defaults->{'hostname'} if $config;
+    }
     return($base_defaults);
 }
 
@@ -779,8 +784,10 @@ return template toolkit config
 
 =cut
 sub get_toolkit_config {
-    require Thruk::Utils::Filter;
+    require Thruk::Utils;
     require Thruk::Utils::Broadcast;
+    require Thruk::Utils::Filter;
+    require Thruk::Utils::Status;
 
     my $view_tt_settings = {
         'TEMPLATE_EXTENSION'                    => '.tt',
@@ -809,7 +816,7 @@ sub get_toolkit_config {
                     'command_disabled'              => \&Thruk::Utils::command_disabled,
                     'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
                     'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
-                    'basename'                      => \&Thruk::Utils::basename,
+                    'basename'                      => \&Thruk::Base::basename,
                     'debug_details'                 => \&get_debug_details,
                     'format_date'                   => \&Thruk::Utils::format_date,
                     'format_cronentry'              => \&Thruk::Utils::format_cronentry,
@@ -825,6 +832,7 @@ sub get_toolkit_config {
     };
 
     # export filter functions
+    require Class::Inspector;
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
         $view_tt_settings->{'PRE_DEFINE'}->{$s} = \&{'Thruk::Utils::Filter::'.$s};
     }
@@ -862,17 +870,17 @@ sub _get_git_info {
         return $git_info;
     }
 
-    my $branch = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
+    my(undef, $branch) = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
     if(!$branch) {
         $git_info = '';
         return $git_info;
     }
     if(!$hash) {
-        $hash = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2>/dev/null');
+        (undef, $hash) = _cmd('cd '.$project_root.' && git log -1 --no-color --pretty=format:%h 2>/dev/null');
     }
 
-    my $commits = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
+    my(undef, $commits) = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
 
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
@@ -906,7 +914,7 @@ sub get_debug_details {
         my $release = "";
         for my $f (qw|/etc/redhat-release /etc/issue|) {
             if(-e $f) {
-                $release = read_file($f);
+                $release = Thruk::Utils::IO::read($f);
                 last;
             }
         }
@@ -959,72 +967,9 @@ sub secret_key {
     my $config      = &get_config();
     my $secret_file = $config->{'var_path'}.'/secret.key';
     return unless -s $secret_file;
-    my $secret_key  = read_file($secret_file);
+    my $secret_key  = Thruk::Utils::IO::read($secret_file);
     chomp($secret_key);
     return($secret_key);
-}
-
-########################################
-
-=head2 expand_numeric_list
-
-  expand_numeric_list($txt, $c)
-
-return expanded list.
-ex.: converts '3,7-9,15' -> [3,7,8,9,15]
-
-=cut
-
-sub expand_numeric_list {
-    my($txt, $c) = @_;
-    my $list = {};
-    return [] unless defined $txt;
-
-    for my $item (@{list($txt)}) {
-        for my $block (split/\s*,\s*/mx, $item) {
-            if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
-                for my $nr ($1..$2) {
-                    $list->{$nr} = 1;
-                }
-            } elsif($block =~ m/^(\d+)$/gmx) {
-                    $list->{$1} = 1;
-            } else {
-                _error("'$block' is not a valid number or range") if defined $c;
-            }
-        }
-    }
-
-    my @arr = sort keys %{$list};
-    return \@arr;
-}
-
-########################################
-
-=head2 array2hash
-
-  array2hash($data, [ $key, [ $key2 ]])
-
-create a hash by key
-
-=cut
-sub array2hash {
-    my($data, $key, $key2) = @_;
-
-    return {} unless defined $data;
-    confess("not an array") unless ref $data eq 'ARRAY';
-
-    my %hash;
-    if(defined $key2) {
-        for my $d (@{$data}) {
-            $hash{$d->{$key}}->{$d->{$key2}} = $d;
-        }
-    } elsif(defined $key) {
-        %hash = map { $_->{$key} => $_ } @{$data};
-    } else {
-        %hash = map { $_ => $_ } @{$data};
-    }
-
-    return \%hash;
 }
 
 ######################################
@@ -1076,47 +1021,11 @@ sub get_user {
 }
 
 ########################################
-
-=head2 list
-
-  list($ref)
-
-return list of ref unless it is already a list
-
-=cut
-
-sub list {
-    my($d) = @_;
-    return [] unless defined $d;
-    return $d if ref $d eq 'ARRAY';
-    return([$d]);
-}
-
-######################################
-
-=head2 array_uniq
-
-  array_uniq($array)
-
-return uniq elements of array
-
-=cut
-
-sub array_uniq {
-    my($array) = @_;
-
-    my %seen = ();
-    my @unique = grep { ! $seen{ $_ }++ } @{$array};
-
-    return \@unique;
-}
-
-########################################
 # splits lists of comma separated values into list
 sub _comma_separated_list {
     my($val) = @_;
-    $val = [split(/\s*,\s*/mx, join(",", @{list($val)}))];
-    return(array_uniq($val));
+    $val = [split(/\s*,\s*/mx, join(",", @{Thruk::Base::list($val)}))];
+    return(Thruk::Base::array_uniq($val));
 }
 
 ########################################
@@ -1131,7 +1040,7 @@ return parsed config file
 
 sub read_config_file {
     my($files) = @_;
-    $files = list($files);
+    $files = Thruk::Base::list($files);
     my $conf = {};
     for my $f (@{$files}) {
         _debug2("reading config file: ".$f);
@@ -1361,7 +1270,7 @@ sub parse_omd_site_config {
     my($file) = @_;
     $file = $ENV{'OMD_ROOT'}."/etc/omd/site.conf" unless $file;
     my $site_config = {};
-    for my $line (read_file($file)) {
+    for my $line (Thruk::Utils::IO::read_as_list($file)) {
         if($line =~ m/^(CONFIG_.*?)='([^']*)'$/mx) {
             $site_config->{$1} = $2;
         }
@@ -1391,8 +1300,8 @@ sub merge_sub_config {
         if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
             if($key eq 'Thruk::Backend') {
                 # merge all backends
-                for my $peer (@{list($add->{$key})}) {
-                    $config->{$key}->{'peer'} = [ @{list($config->{$key}->{'peer'})}, @{list($peer->{'peer'})} ];
+                for my $peer (@{Thruk::Base::list($add->{$key})}) {
+                    $config->{$key}->{'peer'} = [ @{Thruk::Base::list($config->{$key}->{'peer'})}, @{Thruk::Base::list($peer->{'peer'})} ];
                 }
             }
             elsif($key =~ '^Thruk::Plugin::') {
@@ -1403,10 +1312,16 @@ sub merge_sub_config {
                     }
                     $add->{$key} = $hash;
                 }
-                if(ref $add->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}})); }
+                if(ref $add->{$key} ne 'HASH') {
+                    require Data::Dumper;
+                    confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             } else {
-                if(ref $add->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}})); }
+                if(ref $add->{$key} ne 'HASH') {
+                    require Data::Dumper;
+                    confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             }
         } else {
@@ -1479,15 +1394,6 @@ sub _get_orig_cmd_line {
     return($^X, @cmd);
 }
 
-########################################
-sub _cmd {
-    my($cmd) = @_;
-    my $out = `$cmd`;
-    my $rc  = $?>>8;
-    chomp($out);
-    return($rc, $out);
-}
-
 ##############################################
 
 =head2 hostname
@@ -1500,7 +1406,7 @@ return system hostname
 
 sub hostname {
     our $hostname;
-    $hostname = _cmd("hostname") unless $hostname;
+    (undef, $hostname) = _cmd("hostname") unless $hostname;
     return($hostname);
 }
 
@@ -1520,6 +1426,14 @@ sub get_thruk_version {
         return($VERSION.$git_info);
     }
     return($VERSION);
+}
+
+###################################################
+sub _cmd {
+    my($cmd) = @_;
+    my($rc, $out) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
+    chomp($out);
+    return($rc, $out);
 }
 
 ###################################################

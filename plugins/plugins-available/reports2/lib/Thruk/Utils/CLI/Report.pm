@@ -26,9 +26,10 @@ The report command creates reports from the command line.
 
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
-use Thruk::Utils::IO;
-use Thruk::Utils::External;
+
+use Thruk::Utils::CLI ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -150,10 +151,10 @@ sub _cmd_report {
         return("report is running on another node already\n", 0);
     } elsif(defined $report_file and -f $report_file) {
         $c->res->headers->content_type('application/octet-stream');
-        return(scalar read_file($report_file), 0);
+        return(Thruk::Utils::IO::read($report_file), 0);
     }
     my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
-    my $errors  = read_file($logfile);
+    my $errors  = Thruk::Utils::IO::read($logfile);
     return("generating report failed:\n".$errors, 1);
 }
 

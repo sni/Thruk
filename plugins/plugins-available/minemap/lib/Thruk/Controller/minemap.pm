@@ -1,7 +1,10 @@
 package Thruk::Controller::minemap;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -25,7 +28,7 @@ minemap index page
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
@@ -61,7 +64,7 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }

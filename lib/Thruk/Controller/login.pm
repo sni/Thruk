@@ -1,8 +1,11 @@
 package Thruk::Controller::login;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
+use Cpanel::JSON::XS ();
+
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

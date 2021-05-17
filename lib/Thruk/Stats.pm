@@ -2,9 +2,12 @@ package Thruk::Stats;
 
 use warnings;
 use strict;
+use Carp qw/confess longmess/;
 use Data::Dumper;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Carp qw/confess longmess/;
+
+use Thruk::Base ();
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
@@ -83,7 +86,7 @@ sub _result {
             } else {
                 # found no start
                 print STDERR "no start found for: ".$entry->{'name'}."\n";
-                confess("no start found for: ".Dumper($entry)) if Thruk->debug;
+                confess("no start found for: ".Dumper($entry)) if Thruk::Base->debug;
             }
         }
         elsif($key eq 'comment') {

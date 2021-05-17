@@ -1,7 +1,11 @@
 package Thruk::Controller::outages;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils::Auth ();
 
 =head1 NAME
 
@@ -24,24 +28,24 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
-    my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+    my $outages = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     state => 1,
                                                     childs => { '!=' => undef },
                                                   ]);
 
     if(defined $outages and scalar @{$outages} > 0) {
         my $hostcomments = {};
-        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+        my $tmp = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
         for my $com (@{$tmp}) {
             $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
             $hostcomments->{$com->{'host_name'}}++;
 
         }
 
-        my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
-        my $all_hosts = Thruk::Utils::array2hash($tmp2, 'name');
+        my $tmp2 = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $all_hosts = Thruk::Base::array2hash($tmp2, 'name');
         for my $host (@{$outages}) {
 
             # get number of comments

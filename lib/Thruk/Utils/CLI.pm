@@ -13,21 +13,19 @@ structures and change config information.
 
 use warnings;
 use strict;
-use Carp;
+use Carp qw/confess/;
+use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper qw/Dumper/;
-use Cpanel::JSON::XS qw/encode_json decode_json/;
-use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
-use Time::HiRes qw/gettimeofday tv_interval/;
 use HTTP::Request 6.12 ();
 use Module::Load qw/load/;
+use Time::HiRes ();
 
-use Thruk ();
+use Thruk::Action::AddDefaults ();
 use Thruk::Config; # autoload config
-use Thruk::Utils ();
-use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::IO ();
 use Thruk::UserAgent ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
@@ -69,7 +67,7 @@ sub new {
     ## no critic
     $ENV{'THRUK_MODE'}       = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
-    Thruk->config->{'no_external_job_forks'} = 1;
+    Thruk::Base->config->{'no_external_job_forks'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}   = join(';', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}    = $ENV{'THRUK_VERBOSE'} // $options->{'verbose'} // 0;
@@ -95,7 +93,7 @@ return L<Thruk::Context> context object
 =cut
 sub get_c {
     my($self) = @_;
-    return $Thruk::Request::c if defined $Thruk::Request::c;
+    return $Thruk::Globals::c if defined $Thruk::Globals::c;
     my($c, undef, undef) = _dummy_c();
     confess("internal request failed") unless $c;
     $c->stats->enable(1);
@@ -118,8 +116,7 @@ Return connection pool as a L<Thruk::Backend::Manager|Thruk::Backend::Manager> o
 =cut
 sub get_db {
     my($self) = @_;
-    my $c = $self->get_c();
-    return $c->{'db'};
+    return($self->get_c()->db());
 }
 
 ##############################################
@@ -187,7 +184,7 @@ sub request_url {
             result  => $response->decoded_content || $response->content,
             headers => {},
         };
-        $result->{'result'} = Thruk::Utils::decode_any($result->{'result'});
+        $result->{'result'} = Thruk::Utils::Encode::decode_any($result->{'result'});
         $result->{'result'} =~ s/^\x{FEFF}//mx; # remove BOM
         for my $field ($response->header_field_names()) {
             $result->{'headers'}->{$field} = $response->header($field);
@@ -312,7 +309,7 @@ sub _run {
     }
 
     my $log_timestamps = 0;
-    if($ENV{'THRUK_CRON'} || Thruk->verbose) {
+    if($ENV{'THRUK_CRON'} || Thruk::Base->verbose) {
         $log_timestamps = 1;
     }
 
@@ -339,7 +336,7 @@ sub _run {
     _debug("_run(): building local response done, exit code ".$result->{'rc'});
     my $response = $c->res;
 
-    _debug("".$c->stats->report) if Thruk->verbose >= 3;
+    _debug("".$c->stats->report) if Thruk::Base->verbose >= 3;
 
     # no output?
     if(!defined $result->{'output'}) {
@@ -349,7 +346,7 @@ sub _run {
     # fix encoding
     my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
     if($content_type =~ /^text/mx) {
-        $result->{'output'} = encode_utf8(Thruk::Utils::decode_any($result->{'output'}));
+        $result->{'output'} = encode_utf8(Thruk::Utils::Encode::decode_any($result->{'output'}));
     }
 
     local $ENV{'THRUK_QUIET'} = undef  if($ENV{'THRUK_CRON'} && ! $self->{'opt'}->{'quiet'});
@@ -396,7 +393,7 @@ sub _external_request {
     my $request = HTTP::Request->new($method, $url);
     $request->method(uc($method));
     if($postdata) {
-        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($postdata)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     }
@@ -414,7 +411,7 @@ sub _external_request {
         _debug2(" -> success");
         return($response);
     }
-    if(Thruk->verbose >= 2) {
+    if(Thruk::Base->verbose >= 2) {
         _debug(" -> external request failed:");
         _debug($response->request->as_string());
         _debug(" -> response:");
@@ -449,7 +446,7 @@ sub _internal_request {
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
     my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
-    my $c      = $Thruk::Request::c;
+    my $c      = $Thruk::Globals::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
     _debug2("_internal_request() done");
     return($c, $failed, $res);
@@ -701,7 +698,7 @@ sub _run_command_action {
             }
         }
         if(!defined $c->stash->{'defaults_added'} && !$skip_backends) {
-            Thruk::Action::AddDefaults::add_defaults($c, 2);
+            Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
             # set backends from options
             if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
@@ -722,6 +719,7 @@ sub _run_command_action {
     $c->stats->profile(end => "_run_command_action()");
 
     if($ENV{'THRUK_JOB_DIR'}) {
+        require Thruk::Utils::External;
         Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
         Thruk::Utils::IO::touch($ENV{'THRUK_JOB_DIR'}."/stdout");
     }
@@ -796,6 +794,7 @@ sub _cmd_configtool {
     $c->req->parameters->{'backend'} = $peerkey;
 
     require Thruk::Utils::Conf;
+    require Monitoring::Config::File;
     if(!Thruk::Utils::Conf::set_object_model($c)) {
         if($c->stash->{set_object_model_err}) {
             return("failed to set objects model: ".$c->stash->{set_object_model_err}, 1);
@@ -817,7 +816,7 @@ sub _cmd_configtool {
             if(   !defined $remotefiles->{$f->{'display'}}
                || !defined $remotefiles->{$f->{'display'}}->{'mtime'}
                || $f->{'mtime'} != $remotefiles->{$f->{'display'}}->{'mtime'}) {
-                $transfer->{$f->{'display'}}->{'content'} = read_file($f->{'path'});
+                $transfer->{$f->{'display'}}->{'content'} = Thruk::Utils::IO::read($f->{'path'});
             }
         }
         $res = $transfer;
@@ -842,12 +841,14 @@ sub _cmd_configtool {
     }
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
+        require Thruk::Utils::External;
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
         die("starting configcheck failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
+        require Thruk::Utils::External;
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
         die("starting configreload failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
@@ -871,7 +872,7 @@ sub _cmd_configtool {
         # changed and new files
         for my $f (@{$changed}) {
             my($path,$content, $mtime) = @{$f};
-            $content = encode_utf8(Thruk::Utils::decode_any($content));
+            $content = encode_utf8(Thruk::Utils::Encode::decode_any($content));
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             my $saved;
@@ -892,7 +893,7 @@ sub _cmd_configtool {
             # create log message
             if($saved && !$ENV{'THRUK_TEST_NO_STDOUT_LOG'}) {
                 _info(sprintf("[config][%s][%s][ext] %s file '%s'",
-                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $saved,
                                             $path,
@@ -908,7 +909,7 @@ sub _cmd_configtool {
 
                 # create log message
                 _info(sprintf("[config][%s][%s][ext] deleted file '%s'",
-                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                             $c->stash->{'remote_user'},
                                             $f,
                 ));
@@ -932,7 +933,7 @@ sub _cmd_raw {
     my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
-        Thruk::Action::AddDefaults::add_defaults($c, 1);
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     }
     my $key;
     # do we have a hint about remote peer?
@@ -943,7 +944,7 @@ sub _cmd_raw {
             }
             $opt->{'remote_name'} = $opt->{'remote_name'}->[0];
         }
-        my $peer = $c->{'db'}->get_peer_by_name($opt->{'remote_name'});
+        my $peer = $c->db->get_peer_by_name($opt->{'remote_name'});
         die('no such backend: '.$opt->{'remote_name'}) unless defined $peer;
         $key = $peer->peer_key();
     }
@@ -951,16 +952,16 @@ sub _cmd_raw {
         if(ref $opt->{'backends'} ne 'ARRAY' || scalar @{$opt->{'backends'}} != 1) {
             die('backends must be an array with a single value');
         }
-        my $peer = $c->{'db'}->get_peer_by_name($opt->{'backends'}->[0]);
+        my $peer = $c->db->get_peer_by_name($opt->{'backends'}->[0]);
         die('no such backend: '.$opt->{'backends'}->[0]) unless defined $peer;
         $key = $peer->peer_key();
     } else {
-        $key = $c->{'db'}->peer_order->[0];
+        $key = $c->db->peer_order->[0];
     }
     die("no backends...") unless $key;
 
     if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
-        my($stats) = $c->{'db'}->logcache_stats($c);
+        my($stats) = $c->db->logcache_stats($c);
         for my $key (sort keys %{$stats}) {
             my $s = $stats->{$key};
             if($s->{'mode'} eq 'import') {
@@ -971,7 +972,7 @@ sub _cmd_raw {
                 }));
             }
         }
-        $c->{'db'}->renew_logcache($c);
+        $c->db->renew_logcache($c);
     }
 
     # config tool commands
@@ -1027,7 +1028,7 @@ sub _cmd_raw {
 
     # passthrough livestatus results if possible (used by cascaded lmd setups)
     if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
-        my $peer = $c->{'db'}->lmd_peer;
+        my $peer = $c->db->lmd_peer;
         my $query = $opt->{'args'}->[0];
         chomp($query);
         $query .= "\nBackends: ".$key."\n";
@@ -1037,7 +1038,7 @@ sub _cmd_raw {
     }
 
     local $ENV{'THRUK_USE_LMD'} = ""; # don't try to do LMD stuff since we directly access the real backend
-    my @res = $c->{'db'}->pool->do_on_peer($key, $function, $opt->{'args'});
+    my @res = $c->db->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
     # add proxy version and config tool settings to processinfo
@@ -1046,7 +1047,7 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        my $tmp = $c->{'db'}->peers->{$key}->{'peer_config'}->{'configtool'};
+        my $tmp = $c->db->peers->{$key}->{'peer_config'}->{'configtool'};
         if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
             $res->[2]->{$key}->{'configtool'} = {
                 'core_type'      => $tmp->{'core_type'},
@@ -1070,6 +1071,8 @@ sub _cmd_ext_job {
     my $jobid       = $opt->{'args'};
     my $res         = "";
     my $last_error  = "";
+
+    require Thruk::Utils::External;
     if(Thruk::Utils::External::is_running($c, $jobid, $c->user->{'superuser'})) {
         $res = "jobid:".$jobid.":0";
     }
@@ -1257,7 +1260,7 @@ sub _extract_queries {
     my($raw_queries) = @_;
     my $queries = [];
     my $current = "";
-    for my $raw (@{Thruk::Utils::list($raw_queries)}) {
+    for my $raw (@{Thruk::Base::list($raw_queries)}) {
         for my $line (split(/\n/mx, $raw)) {
             chomp($line);
             if($line eq '') {

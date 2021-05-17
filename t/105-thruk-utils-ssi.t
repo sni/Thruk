@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 
 BEGIN {
@@ -15,10 +15,19 @@ BEGIN {
 }
 
 use_ok('Thruk::Utils::IO');
-die("cannot test, ssi file exists already") if -f 'ssi/login-header.ssi';
-die("cannot test, ssi file exists already") if -f 'ssi/login-header-foo.ssi';
-die("cannot test, ssi file exists already") if -f 'ssi/login-footer.ssi';
-die("cannot test, ssi file exists already") if -f 'ssi/login-footer-foo.ssi';
+my $files_created = 0;
+my @ssis = qw/login-header.ssi login-header-foo.ssi login-footer.ssi login-footer-foo.ssi/;
+for my $file (@ssis) {
+    die("cannot test, ssi ssi/".$file." exists already") if -f 'ssi/'.$file;
+}
+$files_created = 1;
+END {
+    if($files_created) {
+        for my $file (@ssis) {
+            unlink("ssi/".$file);
+        }
+    }
+}
 
 my($res, $c) = ctx_request('/thruk/side.html');
 my $rand = rand();

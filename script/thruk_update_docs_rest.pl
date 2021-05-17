@@ -2,14 +2,14 @@
 
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
-use URI::Escape qw/uri_escape/;
 use Data::Dumper;
+use URI::Escape qw/uri_escape/;
 
-use Thruk::Utils::CLI;
-use Thruk::Controller::rest_v1;
-use Thruk::Utils::IO;
+use Thruk ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
 ################################################################################
@@ -17,6 +17,7 @@ my $c = Thruk::Utils::CLI->new()->get_c();
 Thruk::Utils::set_user($c, username => '(cli)', auth_src => "scripts", internal => 1, superuser => 1);
 $c->stash->{'is_admin'} = 1;
 $c->config->{'cluster_enabled'} = 1; # fake cluster
+Thruk::setup_cluster() unless defined $Thruk::Globals::NODE_ID;
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
 my $res = $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
@@ -28,6 +29,7 @@ my $host_name           = $test_svc->{'host_name'};
 my $service_description = $test_svc->{'description'};
 my $host_group          = $test_svc->{'host_groups'}->[0];
 my $service_group       = $test_svc->{'groups'}->[0];
+
 
 my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc");
@@ -41,7 +43,7 @@ exit 0;
 sub _update_cmds {
     my($c) = @_;
     my $output_file = "lib/Thruk/Controller/Rest/V1/cmd.pm";
-    my $content = read_file($output_file);
+    my $content = Thruk::Utils::IO::read($output_file);
     $content =~ s/^__DATA__\n.*$/__DATA__\n/gsmx;
 
     my $input_files = [glob(join(" ", (
@@ -141,7 +143,7 @@ sub _update_cmds {
         if($file =~ m/cmd_typ_(\d+)\./gmx) {
             $nr = $1;
         }
-        my $template = read_file($file);
+        my $template = Thruk::Utils::IO::read($file);
         next if $template =~ m/enable_shinken_features/gmx;
         my @matches = $template =~ m%^\s*([A-Z_]+)\s*(;|$|)(.*sprintf.*|$)%gmx;
         die("got no command in ".$file) if scalar @matches == 0;
@@ -218,7 +220,7 @@ sub _update_cmds {
             $cmd->{'args'}     = \@args;
             $cmd->{'required'} = \@required_args;
             # sanity check, there should not be any required parameters which cannot be found in the args list
-            my $args_hash = Thruk::Utils::array2hash(\@args);
+            my $args_hash = Thruk::Base::array2hash(\@args);
             for my $r (@required_args) {
                 die("cannot find required $r in args list for file: ".$file) unless $args_hash->{$r};
             }
@@ -246,7 +248,7 @@ sub _update_cmds {
             }
             if(scalar @{$cmd->{'args'}} > 0) {
                 my $optional = [];
-                my $required = Thruk::Utils::array2hash($cmd->{'required'});
+                my $required = Thruk::Base::array2hash($cmd->{'required'});
                 for my $a (@{$cmd->{'args'}}) {
                     next if $required->{$a};
                     push @{$optional}, $a;
@@ -309,6 +311,7 @@ sub _update_docs {
     # create fake outages
     if($output_file =~ m/rest.asciidoc/mx) {
         local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
+        local $ENV{'THRUK_TEST_NO_LOG'}       = "";
         my $host         = uri_escape($host_name);
         my $service      = uri_escape($service_description);
         my $hostgroup    = uri_escape($host_group);
@@ -321,9 +324,12 @@ sub _update_docs {
         sleep(1);
         Thruk::Controller::rest_v1::process_rest_request($c, "/hosts/".$host."/cmd/schedule_forced_host_check", "POST");
         Thruk::Controller::rest_v1::process_rest_request($c, "/services/".$host."/".$service."/cmd/schedule_forced_svc_check", "POST");
+        sleep(1);
+        # run logcache update if applicable
+        Thruk::Controller::rest_v1::process_rest_request($c, "/thruk/logcache/update", "POST") if $c->config->{'logcache'};
     };
 
-    my $content    = read_file($output_file);
+    my $content    = Thruk::Utils::IO::read($output_file);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
@@ -415,7 +421,7 @@ sub _update_docs {
 ################################################################################
 sub _update_cmds_list {
     my($c, $file, $cmds) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     $content =~ s/^<\!\-\-DATA\-\->\n.*$/<!--DATA-->\n/gsmx;
 
     $content .= "<tbody>\n";
@@ -468,7 +474,7 @@ sub _fetch_keys {
     _info("fetching keys for %s", $url);
     my $tst_url = $url;
     $tst_url =~ s|<nr>|9999|gmx;
-    $tst_url =~ s|<id>|$Thruk::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
+    $tst_url =~ s|<id>|$Thruk::Globals::NODE_ID|gmx if $tst_url =~ m%/cluster/%mx;
     $tst_url =~ s|/hostgroups/<name>|/hostgroups/$hostgroup|gmx;
     $tst_url =~ s|/servicegroups/<name>|/servicegroups/$servicegroup|gmx;
     $tst_url =~ s|<name>|$host|gmx;

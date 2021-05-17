@@ -1,7 +1,11 @@
 package Thruk::Controller::notifications;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
 
 =head1 NAME
 
@@ -24,7 +28,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     return if Thruk::Utils::External::render_page_in_background($c);
 
@@ -94,11 +98,11 @@ sub index {
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c, "notification")', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "notifications::updatecache");
-        $c->{'db'}->renew_logcache($c);
+        $c->db->renew_logcache($c);
         $c->stats->profile(end   => "notifications::updatecache");
 
         $c->stats->profile(begin => "notifications::fetch");
-        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1, limit => 1000000); # not using a limit here, makes mysql not use an index
+        $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1, limit => 1000000); # not using a limit here, makes mysql not use an index
         $c->stats->profile(end => "notifications::fetch");
     }
 

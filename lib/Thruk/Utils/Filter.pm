@@ -10,31 +10,29 @@ Filter Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess cluck carp/;
-use Date::Calc qw/Localtime Today/;
-use URI::Escape qw/uri_escape/;
 use Cpanel::JSON::XS ();
-use Encode qw/decode_utf8/;
-use File::Slurp qw/read_file/;
 use Data::Dumper ();
+use Date::Calc qw/Localtime Today/;
+use Encode qw/decode_utf8/;
+use POSIX ();
+use URI::Escape qw/uri_escape/;
+
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 # use faster HTML::Escape if available
 eval {
     require HTML::Escape;
-    *html_escape = sub {
-        return HTML::Escape::escape_html(@_);
-    };
+    *html_escape = *HTML::Escape::escape_html;
 };
 if($@) {
     eval {
         require HTML::Entities;
-        *html_escape = sub {
-            return HTML::Entities::encode_entities(@_);
-        };
+        *html_escape = *HTML::Entities::encode_entities;
     };
 }
 if($@) {
@@ -210,7 +208,7 @@ wrapper around the internal sprintf
 =cut
 sub sprintf {
     my $format = shift;
-    local $SIG{__WARN__} = sub { Carp::cluck(@_); };
+    local $SIG{__WARN__} = sub { cluck(@_); };
     return CORE::sprintf $format, @_;
 }
 
@@ -569,7 +567,7 @@ sub get_action_menu {
                 $c->stash->{'checked_action_menus'}->{$menu} = { err => $err };
                 return($c->stash->{'checked_action_menus'}->{$menu});
             }
-            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(read_file($sourcefile));
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(Thruk::Utils::IO::read($sourcefile));
         } else {
             $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = $c->config->{'action_menu_items'}->{$menu};
         }
@@ -606,9 +604,10 @@ sub get_action_menu {
         # workaround for images beeing placed by js document.write later
         my $image_data = {};
         my $items = Cpanel::JSON::XS->new->decode($menu);
-        for my $item (@{Thruk::Utils::list($items)}) {
+        for my $item (@{Thruk::Base::list($items)}) {
             $image_data->{$item->{'icon'}} = '' if $item->{'icon'};
         }
+        require Thruk::Utils::Reports::Render;
         return({err => $err, type => 'json', data => $menu, icons => Thruk::Utils::Reports::Render::set_action_image_data_urls($c, $image_data)});
     }
     return({err => $err, type => 'json', data => $menu });
@@ -1138,6 +1137,7 @@ sub get_user_token {
     my $sessiondata = $c->{'session'};
     if(!$sessiondata->{'csrf_token'}) {
         # session but no token yet
+        require Thruk::Utils::CookieAuth;
         $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $sessiondata->{'private_key'}, $sessiondata);
     }
     return $sessiondata->{'csrf_token'};
@@ -1256,7 +1256,6 @@ returns string from object
 =cut
 sub dump2str {
     my($any, $max_length, $flat) = @_;
-    return($any) if ref $any eq "";
     return(Thruk::Utils::dump_params($any, $max_length, $flat));
 }
 
@@ -1273,7 +1272,7 @@ sub peer_name {
     my($row) = @_;
     return($row->{'peer_name'}) if $row->{'peer_name'};
 
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     if($row->{'peer_key'}) {
         if(ref $row->{'peer_key'} eq 'ARRAY') {
             my $names = [];
@@ -1516,7 +1515,7 @@ return list of exposed custom variable names
 =cut
 sub get_exposed_custom_vars {
     my($skip_wildcards) = @_;
-    my $c = $Thruk::Request::c or die("not initialized!");
+    my $c = $Thruk::Globals::c or die("not initialized!");
     return(Thruk::Utils::get_exposed_custom_vars($c->config, $skip_wildcards));
 }
 

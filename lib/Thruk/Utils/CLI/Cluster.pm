@@ -37,6 +37,8 @@ Show information about a Thruk cluster
 use warnings;
 use strict;
 
+use Thruk::Utils::CLI ();
+
 our $skip_backends = 1;
 
 ##############################################
@@ -119,10 +121,10 @@ sub cmd {
         }
     } elsif($mode eq 'maint' || $mode eq 'maintenance') {
         $c->cluster->maint($c->cluster->{'node'}, 1);
-        $output = sprintf("OK - node %s set into maintenance mode\n", $Thruk::HOSTNAME);
+        $output = sprintf("OK - node %s set into maintenance mode\n", $Thruk::Globals::HOSTNAME);
     } elsif($mode eq 'activate' || $mode eq 'unmaint') {
         $c->cluster->maint($c->cluster->{'node'}, 0);
-        $output = sprintf("OK - removed maintenance mode for node %s.\n", $Thruk::HOSTNAME);
+        $output = sprintf("OK - removed maintenance mode for node %s.\n", $Thruk::Globals::HOSTNAME);
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }

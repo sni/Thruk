@@ -1,7 +1,9 @@
-use strict;
 use warnings;
+use strict;
 use Test::More 0.96;
-use File::Slurp qw/read_file/;
+
+use Thruk::Config 'noautoload';
+use Thruk::Utils::IO ();
 
 BEGIN {
   plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -65,7 +67,7 @@ for my $p (@{$plugins}) {
     # run plugin test files
     TestUtils::clear();
     for my $testfile (glob("plugins/plugins-available/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
-        my $testsource = read_file($testfile);
+        my $testsource = Thruk::Utils::IO::read($testfile);
         Thruk::Config::set_config_env();
         subtest $testfile => sub {
             # required for ex.: t/092-todo.t

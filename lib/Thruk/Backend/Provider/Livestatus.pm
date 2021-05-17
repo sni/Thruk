@@ -1,13 +1,18 @@
 package Thruk::Backend::Provider::Livestatus;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
+use POSIX ();
 use Storable qw/dclone/;
-#use Thruk::Timer qw/timing_breakpoint/;
+
 use Monitoring::Livestatus::Class::Lite ();
-use parent 'Thruk::Backend::Provider::Base';
+use Thruk::Utils::IO ();
+
+use base 'Thruk::Backend::Provider::Base';
+
+#use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -824,7 +829,7 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
-    if(Thruk::Backend::Manager::can_use_logcache($self, \%options)) {
+    if(Thruk::Backend::Provider::Base::can_use_logcache($self, \%options)) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
@@ -1660,7 +1665,7 @@ sub _get_logs_start_end {
     }
     if(!$options{'filter'} || scalar @{$options{'filter'}} == 0) {
         # not a good idea, try to assume earliest date without parsing all logfiles
-        my($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($self);
+        my($start, $end) = Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($self);
         return([$start, $end]);
     }
 

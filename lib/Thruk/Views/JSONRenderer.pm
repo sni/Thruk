@@ -10,9 +10,8 @@ JSON data renderer
 
 =cut
 
-use strict;
 use warnings;
-use Carp qw/confess/;
+use strict;
 use Cpanel::JSON::XS ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -39,7 +38,7 @@ sub render_json {
     my $encoder = $c->app->{'jsonencoder'} || _get_encoder($c);
     my $output = $encoder->encode($data);
     $c->{'rendered'} = 1;
-    $c->res->content_type('application/json;charset=UTF-8');
+    $c->res->content_type('application/json; charset=utf-8');
     $c->res->body($output);
     $c->stats->profile(end => "render_json");
     my $elapsed = tv_interval($t1);

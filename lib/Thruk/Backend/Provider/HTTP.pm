@@ -1,13 +1,17 @@
 package Thruk::Backend::Provider::HTTP;
 
-use strict;
 use warnings;
-use Data::Dumper;
+use strict;
 use Carp qw/confess/;
-use Module::Load qw/load/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
+use Data::Dumper;
+use HTTP::Request ();
+
+use Thruk::UserAgent ();
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
-use parent 'Thruk::Backend::Provider::Base';
+
+use base 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
 
@@ -21,7 +25,6 @@ connection provider for http connections
 
 =cut
 
-use Thruk::UserAgent ();
 
 ##########################################################
 
@@ -150,9 +153,6 @@ sub reconnect {
         my $con_proxy = $self->{'proxy'};
         $con_proxy =~ s#^(http|https)://#connect://#mx;
         $self->{'ua'}->proxy('https', $con_proxy);
-    }
-    if($self->{'addr'} =~ m/^https:/mx) {
-        require IO::Socket::SSL;
     }
     return($self->{'ua'});
 }
@@ -490,7 +490,7 @@ sub get_logs {
     my($self, @options) = @_;
 
     my %options = @options;
-    if(Thruk::Backend::Manager::can_use_logcache($self, \%options)) {
+    if(Thruk::Backend::Provider::Base::can_use_logcache($self, \%options)) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
@@ -842,7 +842,7 @@ returns result for given request
 =cut
 sub rest_request {
     my($self, $restpath, $method, $parameters) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     $restpath =~ s%^/%%gmx;
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
@@ -855,7 +855,7 @@ sub rest_request {
     $request->header('X-Thruk-Auth-Key' => $self->{'auth'});
     $request->header('Accept'           => 'application/json');
     if($parameters) {
-        $request->header('Content-Type' => 'application/json;charset=UTF-8');
+        $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($parameters)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
     }
@@ -890,7 +890,7 @@ returns result for given request
 sub _req {
     my($self, $sub, $args, $options, $redirects) = @_;
     $redirects = 0 unless defined $redirects;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
 
     # clean code refs
     _clean_code_refs($args);
@@ -974,7 +974,7 @@ sub _req {
 sub _debug_log_request_response {
     my($c, $response) = @_;
     return unless $c;
-    return unless Thruk->debug;
+    return unless Thruk::Base->debug;
 
     _debug("request:");
     _debug($response->request->as_string());
@@ -995,7 +995,7 @@ return http response but ensure timeout on request.
 
 sub _ua_post_with_timeout {
     my($ua, $url, $data, $redirects) = @_;
-    my $c = $Thruk::Request::c;
+    my $c = $Thruk::Globals::c;
     $redirects = 0 unless $redirects;
     if($redirects >= 7) {
       die("too many redirects on url: ".$url);

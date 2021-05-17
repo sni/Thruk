@@ -1,7 +1,10 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Copy;
+use Test::More;
+
+use Thruk::Utils::Log ();
+
 use lib('t');
 
 my $log4perl_created;

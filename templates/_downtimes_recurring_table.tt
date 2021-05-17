@@ -52,7 +52,7 @@
       <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
       <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
       <td class='[% class %]' align='left'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-      <td class='[% class %]' align='center'>[% d.edited_by | html %]</td>
+      <td class='[% class %]' align='center' title="last changed [% date_format(c, d.last_changed) %]">[% d.edited_by | html %]</td>
       <td class='[% class %]' align='center'><a href="extinfo.cgi?type=6&amp;nr=[% d.file | uri %]&amp;recurring=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
     </tr>
     [% IF d.exists('error') %]

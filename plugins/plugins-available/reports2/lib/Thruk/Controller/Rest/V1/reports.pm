@@ -1,7 +1,10 @@
 package Thruk::Controller::Rest::V1::reports;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 

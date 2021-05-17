@@ -1,8 +1,10 @@
 package Thruk::Controller::user;
 
-use strict;
 use warnings;
-use Thruk::Utils::APIKeys;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::APIKeys ();
 
 =head1 NAME
 
@@ -41,7 +43,7 @@ sub index {
         return $c->redirect_to($url);
     }
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};
@@ -91,14 +93,14 @@ sub index {
                 $data->{'site_panel_bookmarks'} = [] unless $data->{'site_panel_bookmarks'};
                 push @{$data->{'site_panel_bookmarks'}}, {
                     name     => $c->req->parameters->{'name'},
-                    backends => Thruk::Utils::list($c->req->parameters->{'backends[]'} || []),
-                    sections => Thruk::Utils::list($c->req->parameters->{'sections[]'} || []),
+                    backends => Thruk::Base::list($c->req->parameters->{'backends[]'} || []),
+                    sections => Thruk::Base::list($c->req->parameters->{'sections[]'} || []),
                 };
                 Thruk::Utils::store_user_data($c, $data);
             }
             if($c->req->parameters->{'reorder'}) {
                 my $data = Thruk::Utils::get_user_data($c);
-                my $neworder = Thruk::Utils::list($c->req->parameters->{'order[]'});
+                my $neworder = Thruk::Base::list($c->req->parameters->{'order[]'});
                 my $bookmarks = [];
                 for my $index (@{$neworder}) {
                     push @{$bookmarks}, $data->{'site_panel_bookmarks'}->[$index];
@@ -152,7 +154,7 @@ sub user_page {
     $c->stash->{profile_user}    = $c->user;
     $c->stash->{api_keys}        = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
     $c->stash->{superuser_keys}  = $c->check_user_roles('admin') ? Thruk::Utils::APIKeys::get_superuser_keys($c) : [];
-    $c->stash->{available_roles} = $Thruk::Authentication::User::possible_roles;
+    $c->stash->{available_roles} = $Thruk::Constants::possible_roles;
     $c->stash->{template}        = 'user_profile.tt';
 
     return 1;

@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::Log ();
 
 BEGIN {
     eval "use Devel::Cycle";

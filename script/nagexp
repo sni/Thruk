@@ -32,8 +32,8 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 33
 
 ##############################################
-use strict;
 use warnings;
+use strict;
 
 my $nagexp = Thruk::nagexp->new();
 exit $nagexp->run();
@@ -137,14 +137,15 @@ Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 package Thruk::nagexp;
 
-use strict;
 use warnings;
-use Getopt::Long;
-use Pod::Usage;
-use Data::Dumper;
-use POSIX qw( strftime );
-use File::Temp qw(tempdir);
+use strict;
 use Cwd;
+use Data::Dumper;
+use File::Temp qw(tempdir);
+use Getopt::Long;
+use POSIX qw( strftime );
+use Pod::Usage;
+
 use Thruk::Config 'noautoload';
 
 ##############################################

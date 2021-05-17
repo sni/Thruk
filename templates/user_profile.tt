@@ -179,9 +179,9 @@
       <td class='dataVar'>Debug Profiles</td>
     <td class='dataVal'>
       <img src="[% url_prefix %]themes/[% theme %]/images/detail.gif" alt="debug profiles" width=16 height=16 style="vertical-align:top;">
-      <input type="radio" name="submit" value="0" onClick="cookieRemove('thruk_profiling'); thruk_message(0, 'profiling disabled');" [% IF !user_profiling %] checked[% END %]> Off
-      <input type="radio" name="submit" value="1" onClick="cookieSave('thruk_profiling', 1, 0); thruk_message(0, 'profiling enabled');" [% IF user_profiling == 1 %] checked[% END %] style="margin-left: 20px;"> On
-      <input type="radio" name="submit" value="2" onClick="cookieSave('thruk_profiling', 2, 0); thruk_message(0, 'profiling enabled with stacktraces');" [% IF user_profiling == 2 %] checked[% END %] style="margin-left: 20px;"> Incl. Stacktrace
+      <input type="radio" name="submit" value="0" id="profile_off" onClick="cookieRemove('thruk_profiling'); thruk_message(0, 'profiling disabled');" [% IF !user_profiling %] checked[% END %]><label for="profile_off">Off</label>
+      <input type="radio" name="submit" value="1" id="profile_on" onClick="cookieSave('thruk_profiling', 1, 0); thruk_message(0, 'profiling enabled');" [% IF user_profiling == 1 %] checked[% END %] style="margin-left: 20px;"><label for="profile_on">On</label>
+      <input type="radio" name="submit" value="2" id="profile_stack" onClick="cookieSave('thruk_profiling', 2, 0); thruk_message(0, 'profiling enabled with stacktraces');" [% IF user_profiling == 2 %] checked[% END %] style="margin-left: 20px;"><label for="profile_stack">Incl. Stacktrace</label>
       <br>(current browser session only)
       </td>
     </tr>

@@ -36,8 +36,11 @@ The find command looks for references for given objects
 
 use warnings;
 use strict;
-use Thruk::Utils::References;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::References ();
 
 ##############################################
 
@@ -57,9 +60,9 @@ sub cmd {
     }
 
     # collect all available backends
-    $c->{'db'}->enable_backends();
+    $c->db->enable_backends();
     eval {
-        $c->{'db'}->get_processinfo();
+        $c->db->get_processinfo();
     };
     _debug($@) if $@;
     Thruk::Action::AddDefaults::set_possible_backends($c, {});

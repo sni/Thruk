@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -51,7 +52,7 @@ for my $cmd (@{$cmds}) {
     my $line = $_;
     $line =~ m/^(.*):/mx;
     my $file = $1;
-    my $data = read_file($file);
+    my $data = Thruk::Utils::IO::read($file);
     if($data !~ m/(wait\(|waitpid\()/mx && $data !~ m/SIG.*CHLD.*IGNORE/mx) {
       fail("file $file uses fork() but misses a wait/waipid or CHLD=ignore");
     }

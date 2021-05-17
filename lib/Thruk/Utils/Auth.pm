@@ -10,10 +10,11 @@ Authorization Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 
+use Thruk::Utils ();
 
 ##############################################
 =head1 METHODS
@@ -35,7 +36,7 @@ sub get_auth_filter {
 
     return if $type eq 'status';
 
-    confess("no backend!") unless defined $c->{'db'};
+    confess("no backend!") unless defined $c->db();
 
     # if authentication is completly disabled
     if($c->config->{'use_authentication'} == 0 and $c->config->{'use_ssl_authentication'} == 0) {
@@ -124,7 +125,7 @@ sub get_auth_filter {
         if($c->check_user_roles('authorized_for_all_hosts')) {
             push @filter, { 'service_description' => undef };
         } else {
-            if(Thruk->config->{'use_strict_host_authorization'}) {
+            if(Thruk::Base->config->{'use_strict_host_authorization'}) {
                 push @filter, '-and ' => [ 'host_contacts'       => { '>=' => $c->user->get('username') },
                                            'service_description' => undef,
                                          ];
@@ -171,7 +172,7 @@ sub get_auth_filter {
                           };
         }
         else {
-            if(Thruk->config->{'use_strict_host_authorization'}) {
+            if(Thruk::Base->config->{'use_strict_host_authorization'}) {
                 $log_filter->{'strict'} = 1;
                 # only allowed for the host itself, not the services
                 push @filter, { -and => [ 'current_host_contacts' => { '>=' => $c->user->get('username') }, { 'service_description' => undef }]};

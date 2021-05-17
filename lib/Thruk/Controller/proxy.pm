@@ -1,7 +1,13 @@
 package Thruk::Controller::proxy;
 
-use strict;
 use warnings;
+use strict;
+use HTTP::Request 6.12 ();
+
+use Thruk::Action::AddDefaults ();
+use Thruk::UserAgent ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::ToolkitRenderer ();
 
 =head1 NAME
 
@@ -17,9 +23,6 @@ Thruk Controller
 
 =cut
 
-use HTTP::Request 6.12 ();
-use Thruk::UserAgent ();
-use Thruk::Utils::Log qw/:all/;
 
 ##########################################################
 sub index {
@@ -42,11 +45,11 @@ sub index {
         return $c->redirect_to($url);
     }
 
-    my $peer = $c->{'db'}->get_peer_by_key($site);
+    my $peer = $c->db->get_peer_by_key($site);
     if(!$peer) {
         # might be a not yet be populated federated backend
         Thruk::Action::AddDefaults::add_defaults($c);
-        $peer = $c->{'db'}->get_peer_by_key($site);
+        $peer = $c->db->get_peer_by_key($site);
         die("no such peer: ".$site) unless $peer;
     }
     if($peer->{'type'} ne 'http') {

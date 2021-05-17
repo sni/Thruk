@@ -56,8 +56,10 @@ The bp command provides all business process related cli commands.
 use warnings;
 use strict;
 use Getopt::Long ();
-use Time::HiRes qw/gettimeofday tv_interval sleep/;
-use Thruk::Utils;
+use Time::HiRes qw/gettimeofday tv_interval/;
+
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Pidfile ();
 
@@ -150,7 +152,7 @@ sub cmd {
     }
 
     # set backends to default list, bp result should be deterministic
-    $c->{'db'}->enable_default_backends();
+    $c->db->enable_default_backends();
 
     my $t0     = [gettimeofday];
     my $ids    = [];
@@ -161,13 +163,13 @@ sub cmd {
             my $local_ids = Thruk::BP::Utils::get_bp_ids($c, $id);
             push @{$ids}, @{$local_ids};
         }
-        $ids = Thruk::Utils::array_uniq($ids);
+        $ids = Thruk::Base::array_uniq($ids);
     }
     my $num_bp = scalar @{$ids};
 
     # update bp
     my $hosts = {};
-    for my $hst (@{$c->{'db'}->get_hosts( filter => [ { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ], columns => [qw/name custom_variable_names custom_variable_values/] )}) {
+    for my $hst (@{$c->db->get_hosts( filter => [ { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ], columns => [qw/name custom_variable_names custom_variable_values/] )}) {
         my $vars = Thruk::Utils::get_custom_vars($c, $hst, '', undef, 0);
         $hosts->{$hst->{'name'}}->{$vars->{'THRUK_BP_ID'}} = $hst->{'peer_key'};
     }
@@ -195,7 +197,7 @@ sub cmd {
         worker => sub {
             my($id) = @_;
             my $t1 = [gettimeofday];
-            my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
+            my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id });
             my $bp;
             if($bps && $bps->[0]) { $bp = $bps->[0]; }
             return unless $bp;
@@ -227,7 +229,7 @@ sub cmd {
     );
 
     my $elapsed = tv_interval($t0);
-    if(!defined $id) {
+    if($id eq 'all') {
         $c->metrics->set('business_process_duration_seconds', $elapsed, "business process calculation duration in seconds");
         $c->metrics->set('business_process_last_update', time(), "timestamp of last business process calculation");
         $c->metrics->set('business_process_total', $num_bp, "total number of business processes");

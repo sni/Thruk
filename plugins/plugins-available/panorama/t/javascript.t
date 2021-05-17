@@ -1,10 +1,13 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
-use File::Slurp qw/read_file/;
+use Log::Log4perl ();
+use Test::More;
+
+use Thruk ();
 
 use lib('t');
+
 require TestUtils;
 import TestUtils;
 
@@ -115,7 +118,7 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
     $file =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     ok($content =~ m/\n$/s, "file $file must end with a newline");
 }
 #################################################
@@ -123,7 +126,7 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
 $tst = TestUtils::test_page(
     'url'           => '/thruk/cgi-bin/panorama.cgi?js=1',
     'like'          => 'BLANK_IMAGE_URL',
-    'content_type'  => 'text/javascript; charset=UTF-8',
+    'content_type'  => 'text/javascript; charset=utf-8',
 );
 ($fh, $filename) = tempfile();
 print $fh $tst->{'content'};
@@ -133,7 +136,7 @@ js_eval_ok($filename) && unlink($filename);
 #################################################
 # tests from javascript_tests file
 Log::Log4perl::get_logger("JavaScript::SpiderMonkey")->level("ERROR"); # JavaScript::SpiderMonkey uses DEBUG, so set loglevel to error
-my @functions = read_file('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+my @functions = Thruk::Utils::IO::read_as_list('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/xt/panorama/javascript_tests.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");

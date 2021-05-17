@@ -1,13 +1,14 @@
 package Monitoring::Availability;
 
-use 5.008;
-use strict;
 use warnings;
-use Data::Dumper qw/Dumper/;
+use strict;
 use Carp qw/croak/;
-use POSIX ();
+use Data::Dumper qw/Dumper/;
 use File::Temp qw/tempfile/;
+use POSIX ();
+
 use Monitoring::Availability::Logs ();
+use Thruk::Utils::External ();
 
 our $VERSION = '0.48';
 
@@ -642,7 +643,7 @@ sub _compute_availability_line_by_line {
     while(my $line = <$fh>) {
         $count++;
         my $data;
-        &Monitoring::Availability::Logs::_decode_any($line);
+        &Monitoring::Availability::Logs::decode_any($line);
         chomp($line);
         if($xs) {
             $data = &Thruk::Utils::XS::parse_line($line);
@@ -697,7 +698,7 @@ sub _compute_availability_from_iterator {
     # logs should be sorted already
     while(my $data = $logs->next) {
         &_compute_for_data($self, $last_time,
-                                 &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
+                                 &Monitoring::Availability::Logs::parse_livestatus_entry($data),
                                  $result);
 
         # set timestamp of last log line
@@ -741,7 +742,7 @@ sub _compute_availability_on_the_fly {
                                          $result);
             } else {
                 &_compute_for_data($self, $last_time,
-                                         &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
+                                         &Monitoring::Availability::Logs::parse_livestatus_entry($data),
                                          $result);
             }
             # set timestamp of last log line
@@ -1656,8 +1657,8 @@ sub _calculate_log {
 
         # convert time format
         if($self->{'report_options'}->{'timeformat'} ne '%s') {
-            $log->{'end'}   = POSIX::strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'end'});
-            $log->{'start'} = POSIX::strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'start'});
+            $log->{'end'}   = POSIX::strftime($self->{'report_options'}->{'timeformat'}, localtime($log->{'end'}));
+            $log->{'start'} = POSIX::strftime($self->{'report_options'}->{'timeformat'}, localtime($log->{'start'}));
         }
 
         push @{$self->{'log_output'}}, $log unless defined $log_entry->{'full_only'};

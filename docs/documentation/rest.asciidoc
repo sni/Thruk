@@ -376,10 +376,15 @@ JSON is the default output format.
 
 === CSV
 
-CSV output is available via `/csv/` path prefix.
+CSV output is available via `/csv/` path prefix. Column names will be automatically
+added as first (commented) line. This can be disabled with the `headers=0` parameter.
 
 ------
   %> thruk r /csv/hosts?columns=name,state
+------
+
+------
+  %> thruk r '/csv/hosts?columns=name,state&headers=0'
 ------
 
 ------
@@ -1811,6 +1816,10 @@ lists logcache statistics
 |===========================================
 
 
+=== POST /thruk/logcache/update
+
+runs the logcache delta update.
+
 === GET /thruk/metrics
 
 alias for /thruk/stats
@@ -1873,6 +1882,7 @@ lists recurring downtimes.
 |flex_range                        | range in minutes for flexible downtimes
 |host                              | list of hostnames
 |hostgroup                         | list of hostgroups
+|last_changed                      | unix timestamp of last change
 |schedule                          | list of schedules
 |service                           | list of services
 |servicegroup                      | list of servicegroups

@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/ tempfile /;
+use Test::More;
 
 if(scalar @ARGV == 0) { plan(tests => 183); }
 

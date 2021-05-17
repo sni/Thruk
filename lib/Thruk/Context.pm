@@ -3,23 +3,25 @@ package Thruk::Context;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
+use Cpanel::JSON::XS ();
+use Plack::Util ();
 use Scalar::Util qw/weaken/;
-use Time::HiRes qw/gettimeofday/;
-use Module::Load qw/load/;
+use Time::HiRes qw/tv_interval gettimeofday/;
 use URI::Escape qw/uri_escape uri_unescape/;
-use File::Slurp qw/read_file/;
 
-use Thruk::Authentication::User;
-use Thruk::Controller::error;
-use Thruk::Request;
-use Thruk::Request::Cookie;
-use Thruk::Stats;
-use Thruk::Utils;
-use Thruk::Utils::IO;
-use Thruk::Utils::CookieAuth;
-use Thruk::Utils::APIKeys;
+use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Config 'noautoload';
+use Thruk::Controller::error ();
+use Thruk::Request ();
+use Thruk::Request::Cookie ();
+use Thruk::Stats ();
+use Thruk::Utils::APIKeys ();
+use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::JSONRenderer ();
+
+use Plack::Util::Accessor qw(app req res stash config user stats obj_db env);
 
 =head1 NAME
 
@@ -69,12 +71,11 @@ sub new {
     my $req = Thruk::Request->new($env);
     my $self = {
         app    => $app,
-        db     => $app->{'db'},
         env    => $env,
         config => $config,
         req    => $req,
         res    => $req->new_response(200),
-        stats  => $Thruk::Request::c ? $Thruk::Request::c->stats : Thruk::Stats->new(),
+        stats  => $Thruk::Globals::c ? $Thruk::Globals::c->stats : Thruk::Stats->new(),
         user   => undef,
         errors => [],
     };
@@ -83,7 +84,7 @@ sub new {
             'memory_begin'  => $memory_begin,
     });
     bless($self, $class);
-    weaken($self->{'app'}) unless Thruk::Base::mode_cli();
+    weaken($self->{'app'}) unless Thruk::Base->mode_cli();
     $self->stats->enable();
 
     # extract non-url encoded q= param from raw body parameters
@@ -146,6 +147,15 @@ return cluster object
 =cut
 sub cluster {
     return($_[0]->app->cluster);
+}
+
+=head2 db
+
+return db manager
+
+=cut
+sub db {
+    return($_[0]->{'db'} ||= $_[0]->app->db);
 }
 
 =head2 metrics
@@ -227,7 +237,7 @@ sub get_tt_template_paths {
         reverse @{$c->config->{'plugin_templates_paths'}}, # last plugin overrides template
           $c->config->{'base_templates_dir'},
     );
-    return(Thruk::Utils::array_uniq($list));
+    return(Thruk::Base::array_uniq($list));
 }
 
 =head2 render
@@ -237,8 +247,14 @@ detach to other controller
 =cut
 sub render {
     my($c, %args) = @_;
-    if($args{'json'}) {
+    if(defined $args{'json'}) {
         return(Thruk::Views::JSONRenderer::render_json($c, $args{'json'}));
+    }
+    if(defined $args{'text'}) {
+        $c->res->content_type('text/plain; charset=utf-8') unless $c->res->content_type();
+        $c->res->body($args{'text'});
+        $c->{'rendered'} = 1;
+        return;
     }
     confess("unknown renderer");
 }
@@ -320,7 +336,7 @@ sub authenticate {
     return unless $user;
     if(!$internal) {
         if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
-            _debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk->verbose;
+            _debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk::Base->verbose;
             $c->error("account is locked, please contact an administrator");
             return;
         }
@@ -328,11 +344,11 @@ sub authenticate {
     _set_stash_user($c, $user, $auth_src);
     $c->{'user'}->{'original_username'} = $original_username;
     $user->set_dynamic_attributes($c, $options{'skip_db_access'},$roles);
-    _debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk->verbose;
+    _debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk::Base->verbose;
 
     # set session id for all requests
     if(!$sessiondata && !$internal) {
-        if(!Thruk::Base::mode_cli()) {
+        if(!Thruk::Base->mode_cli()) {
             ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
             $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
         }
@@ -378,9 +394,8 @@ sub _request_username {
 
     # authenticate by secret.key from http header
     if($apikey) {
-        my $secret_key =Thruk::Config::secret_key();
-        $apikey =~ s/^\s+//mx;
-        $apikey =~ s/\s+$//mx;
+        my $secret_key = Thruk::Config::secret_key();
+        $apikey        = Thruk::Base::trim_whitespace($apikey);
         if($apikey !~ m/^[a-zA-Z0-9_]+$/mx) {
             return $c->detach_error({msg => "wrong authentication key", code => 403, log => 1});
         }
@@ -446,7 +461,7 @@ sub _request_username {
         $auth_src = "default_user_name";
     }
 
-    elsif(!defined $username && Thruk::Base::mode_cli()) {
+    elsif(!defined $username && Thruk::Base->mode_cli()) {
         $username = $c->config->{'default_cli_user_name'};
         $auth_src = "cli";
     }
@@ -661,7 +676,7 @@ sub sub_request {
     $method = uc($method);
     my $orig_url = $url;
     $c->stats->profile(begin => "sub_request: ".$method." ".$orig_url);
-    local $Thruk::Request::c = $c unless $Thruk::Request::c;
+    local $Thruk::Globals::c = $c unless $Thruk::Globals::c;
 
     $url = '/thruk'.$url;
     my $query;
@@ -705,8 +720,11 @@ sub sub_request {
     $c->stats->profile(end => $routename);
     Thruk::Action::AddDefaults::end($sub_c);
 
-    local $Thruk::Request::c = undef;
-    Thruk::Views::ToolkitRenderer::render_tt($sub_c) unless $sub_c->{'rendered'};
+    local $Thruk::Globals::c = undef;
+    if(!$sub_c->{'rendered'}) {
+        require Thruk::Views::ToolkitRenderer;
+        Thruk::Views::ToolkitRenderer::render_tt($sub_c);
+    }
     $c->stats->profile(end => "sub_request: ".$method." ".$orig_url);
     return $sub_c if $rendered;
     return $rc;
@@ -766,5 +784,153 @@ compat wrapper for accessing logger
 sub log {
     return(Thruk::Utils::Log::log());
 }
+
+###################################################
+
+=head2 finalize_request
+
+    register_cron_entries($c, $res)
+
+finalize request data by adding profile and headers
+
+=cut
+sub finalize_request {
+    my($c, $res) = @_;
+    $c->stats->profile(begin => "finalize_request");
+
+    if($c->stash->{'extra_headers'}) {
+        push @{$res->[1]}, @{$c->stash->{'extra_headers'}};
+    }
+
+    # restore timezone setting
+    Thruk::Utils::Timezone::set_timezone($c->config, $c->config->{'_server_timezone'});
+
+    if($ENV{THRUK_LEAK_CHECK}) {
+        eval {
+            require Devel::Cycle;
+            $Devel::Cycle::FORMATTING = "cooked";
+        };
+        print STDERR $@ if $@ && Thruk::Base->debug;
+        unless($@) {
+            my $counter = 0;
+            $Devel::Cycle::already_warned{'GLOB'}++;
+            Devel::Cycle::find_cycle($c, sub {
+                my($path) = @_;
+                $counter++;
+                _error("found leaks:") if $counter == 1;
+                _error("Cycle ($counter):");
+                foreach (@{$path}) {
+                    my($type,$index,$ref,$value,$is_weak) = @{$_};
+                    _error(sprintf "\t%30s => %-30s\n",($is_weak ? 'w-> ' : '').Devel::Cycle::_format_reference($type,$index,$ref,0),Devel::Cycle::_format_reference(undef,undef,$value,1));
+                }
+            });
+        }
+    }
+
+    my $elapsed = tv_interval($c->stash->{'time_begin'});
+    $c->stats->profile(end => "finalize_request");
+    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
+    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
+    $c->stash->{'time_total'} = $elapsed;
+
+    my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
+        # inject stats into html page
+        require Thruk::Views::ToolkitRenderer;
+        require Thruk::Template::Context;
+        unshift @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $Thruk::Globals::tt_profiling;
+        unshift @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
+        my $stats = "";
+        Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
+        $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';
+        Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
+    }
+    # slow pages log
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0 && $elapsed > $c->config->{'slow_page_log_threshold'}) {
+        _warn("***************************");
+        _warn(sprintf("slow_page_log_threshold (%ds) hit, page took %.1fs to load.", $c->config->{'slow_page_log_threshold'}, $elapsed));
+        _warn(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
+        _warn(sprintf("params:  %s\n", Thruk::Utils::dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+        _warn(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+        _warn(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+        _warn($c->stash->{errorDetails}) if $c->stash->{errorDetails}; # might contain hints about the current dashboard
+        _warn($c->stats->report());
+    }
+
+    my $content_length = _set_content_length($res);
+
+    # last possible time to report/save profile
+    if($ENV{'THRUK_JOB_DIR'}) {
+        require Thruk::Utils::External;
+        Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'});
+    }
+
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'memory_begin'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
+        $c->stash->{'memory_end'} = Thruk::Utils::IO::get_memory_usage();
+        $url     = $c->req->url unless $url;
+        $url     =~ s|^https?://[^/]+/|/|mxo;
+        $url     =~ s/^cgi\-bin\///mxo;
+        if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
+        if(!$url) { $url = $c->req->url; }
+        my $waited = [];
+        push @{$waited}, $c->stash->{'total_backend_waited'} ? sprintf("%.3fs", $c->stash->{'total_backend_waited'}) : '-';
+        push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("%.3fs", $c->stash->{'total_render_waited'}) : '-';
+        _info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
+                                $$,
+                                $Thruk::Globals::COUNT,
+                                $c->stash->{'memory_end'},
+                                sprintf("%.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
+                                sprintf("%.3f", $elapsed),
+                                '('.join('/', @{$waited}).')',
+                                defined $content_length ? sprintf("%.3f kb", $content_length/1024) : '----',
+                                $res->[0],
+                                $url,
+                    ));
+    }
+    _debug($c->stats->report()) if Thruk::Base->debug;
+    $c->stats->clear() unless $ENV{'THRUK_KEEP_CONTEXT'};
+
+    # save metrics to disk
+    $c->app->{_metrics}->store() if $c->app->{_metrics};
+
+    # show deprecations
+    if($Thruk::Globals::deprecations_log) {
+        if(Thruk::Base->mode() ne 'TEST' && Thruk::Base->mode() ne 'CLI') {
+            for my $warning (@{$Thruk::Globals::deprecations_log}) {
+                _info($warning);
+            }
+        }
+        undef $Thruk::Globals::deprecations_log;
+    }
+
+    # does this process need a restart?
+    if(Thruk::Base->mode() eq 'FASTCGI') {
+        if($c->config->{'max_process_memory'}) {
+            Thruk::Utils::check_memory_usage($c);
+        }
+    }
+
+    return;
+}
+
+###################################################
+sub _set_content_length {
+    my($res) = @_;
+
+    my $content_length;
+    my $h = Plack::Util::headers($res->[1]);
+    if (!Plack::Util::status_with_no_entity_body($res->[0]) &&
+        !$h->exists('Content-Length') &&
+        !$h->exists('Transfer-Encoding') &&
+        defined($content_length = Plack::Util::content_length($res->[2])))
+    {
+        $h->push('Content-Length' => $content_length);
+    }
+    $h->push('Cache-Control', 'no-store');
+    $h->push('Expires', '0');
+    return($content_length);
+}
+
+###################################################
 
 1;

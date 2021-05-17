@@ -1,7 +1,10 @@
 package Thruk::Controller::test;
 
-use strict;
 use warnings;
+use strict;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Pool ();
 
 =head1 NAME
 
@@ -23,11 +26,11 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    if(Thruk->mode ne 'TEST_LEAK' && Thruk->mode ne 'TEST' && !Thruk->debug) {
+    if(Thruk::Base->mode ne 'TEST_LEAK' && Thruk::Base->mode ne 'TEST' && !Thruk::Base->debug) {
         die("test.cgi is disabled unless in test mode!");
     }
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     $c->stash->{'template'} = 'main.tt';
 

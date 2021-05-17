@@ -3,6 +3,7 @@ export THRUK_CONFIG=$(shell pwd)
 export TEST_AUTHOR=1
 THRUK=cd ../../.. && ./script/thruk
 STARTUPWAIT=300
+ERROR_TAIL=50
 EXPECTED_BACKENDS=1
 INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
 ifdef INTERACTIVE
@@ -54,13 +55,23 @@ failed_test: non_interactive_only
 	-docker ps
 	-docker-compose logs --tail=30 --no-color -t | sort
 	for svc in $$(docker-compose config --services | sort); do \
-		for index in $$(seq 1 $$(docker-compose ps -q $$svc | wc -l)); do \
+		index=0; \
+		for container in $$(docker-compose ps -q $$svc); do \
+			index=$$(( index + 1 )); \
 			echo "*** $${svc}_$${index}"; \
-			if docker-compose exec  --user root --index $$index $$svc test -d /opt/omd/sites/demo; then \
+			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
+				echo "***"; \
 				echo "*** $${svc}_$${index} - apache/error_log"; \
-				docker-compose exec $(DOCKER_COMPOSE_TTY) --user root --index $$index $$svc tail -20 /opt/omd/sites/demo/var/log/apache/error_log; \
+				echo "***"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/apache/error_log; \
+				echo "***"; \
 				echo "*** $${svc}_$${index} - thruk.log"; \
-				docker-compose exec $(DOCKER_COMPOSE_TTY) --user root --index $$index $$svc tail -20 /opt/omd/sites/demo/var/log/thruk.log; \
+				echo "***"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/thruk.log; \
+				echo "***"; \
+				echo "*** $${svc}_$${index} - naemon.log"; \
+				echo "***"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/naemon.log; \
 			fi; \
 		done; \
 	done

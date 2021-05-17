@@ -1,7 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -38,7 +39,7 @@ my $config = Thruk::Config::get_config();
 my $files = ['root/thruk/startup.html'];
 for my $file (@{$files}) {
     next if($filter && $file !~ m%$filter%mx);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my @jquery = grep/jquery-\d+.*\.js$/, @{$config->{'all_in_one_javascript'}};
     is(scalar @jquery, 1, 'found jquery in config');
     like($content, qr/$jquery[0]/, 'found jquery in '.$file);

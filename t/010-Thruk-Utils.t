@@ -2,9 +2,15 @@
 
 use warnings;
 use strict;
-use utf8;
-use Test::More;
+use Data::Dumper qw/Dumper/;
 use Encode qw/is_utf8/;
+use Test::More;
+use utf8;
+
+use Thruk::Config 'noautoload';
+use Thruk::Context ();
+use Thruk::Utils::Encode ();
+use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -76,16 +82,16 @@ my $app = $c->app;
     isa_ok($c, 'Thruk::Context');
     my $res1 = $c->sub_request('/r/thruk');
     is(ref $res1, 'HASH', 'got hash from sub_request');
-    is($res1->{'rest_version'}, 1, 'got hash from sub_request with content');
+    is($res1->{'rest_version'}, 1, 'got hash from sub_request with content') || diag(Dumper($res1));
 
     my $res2 = $c->sub_request('/r/thruk/reports');
-    is(ref $res2, 'ARRAY', 'got array from sub_request');
+    is(ref $res2, 'ARRAY', 'got array from sub_request') || diag(Dumper($res2));
 
     my $res3 = $c->sub_request('/r/hosts?limit=1&columns=name');
     is(ref $res3, 'ARRAY', 'got array from sub_request');
     my $expect = -s 'thruk_local.conf' ? 1 : 0;
     is(scalar @{$res3}, $expect, 'sending url parameters worked');
-    is(scalar keys %{$res3->[0]}, $expect, 'sending url parameters worked');
+    is(scalar keys %{$res3->[0]}, $expect, 'sending url parameters worked') || diag(Dumper($res3));
 };
 
 #########################
@@ -120,13 +126,13 @@ is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
 
 #########################
 SKIP: {
-    skip 'external tests', 16 if Thruk->config->{'no_external_job_forks'};
+    skip 'external tests', 16 if Thruk::Base->config->{'no_external_job_forks'};
 
     my($res, $c) = ctx_request('/thruk/side.html');
-    my $contactgroups = $c->{'db'}->get_contactgroups_by_contact('thrukadmin');
+    my $contactgroups = $c->db->get_contactgroups_by_contact('thrukadmin');
     is(ref $contactgroups, 'HASH', 'get_contactgroups_by_contact(thrukadmin)');
 
-    $contactgroups = $c->{'db'}->get_contactgroups_by_contact('nonexistant');
+    $contactgroups = $c->db->get_contactgroups_by_contact('nonexistant');
     is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(nonexistant)');
 
     #########################
@@ -216,25 +222,25 @@ is($replaced, $expected, 'macro replacement with empty args string');
 # utf8 encoding
 my $teststring = 'test';
 my $encoded    = $teststring;
-$encoded       = Thruk::Utils::ensure_utf8($encoded);
+$encoded       = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, $teststring, 'ensure utf8 test');
 ok(is_utf8($encoded), 'is_utf8 test');
 
 $teststring = 'testä';
 $encoded    = $teststring;
-$encoded    = Thruk::Utils::ensure_utf8($encoded);
+$encoded    = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, 'test'.chr(228), 'ensure utf8 testae');
 ok(is_utf8($encoded), 'is_utf8 testae');
 
 $teststring ='test€';
 $encoded    = $teststring;
-$encoded    = Thruk::Utils::ensure_utf8($encoded);
+$encoded    = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, "test\x{20ac}", 'ensure utf8 testeuro');
 ok(is_utf8($encoded), 'is_utf8 testeuro');
 
 $teststring = "test\x{20ac}";
 $encoded    = $teststring;
-$encoded    = Thruk::Utils::ensure_utf8($encoded);
+$encoded    = Thruk::Utils::Encode::ensure_utf8($encoded);
 is($encoded, "test\x{20ac}", 'ensure utf8 test20ac');
 ok(is_utf8($encoded), 'is_utf8 test20ac');
 

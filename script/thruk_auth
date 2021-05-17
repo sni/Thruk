@@ -40,13 +40,12 @@ BEGIN {
     ## use critic
 }
 
-use File::Slurp;
 use Time::HiRes qw( gettimeofday tv_interval );
+
 use Thruk::Config;
+use Thruk::Utils::APIKeys ();
+use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Log qw( _audit_log );
-use Thruk::Utils::CookieAuth;
-use Thruk::Utils::IO;
-use Thruk::Utils::APIKeys;
 
 $| = 1;
 
@@ -121,7 +120,7 @@ sub process {
 
     # direct login by secret/api key
     if($extra->[2] && $extra->[2] =~ m/[a-zA-Z0-9_]+/mx) {
-        my $secret_key  = read_file($secret_file) if -s $secret_file;
+        my $secret_key  = Thruk::Utils::IO::read($secret_file) if -s $secret_file;
         chomp($secret_key) if $secret_key;
         if($secret_key && $extra->[3] && $extra->[2] eq $secret_key) {
             my $user = $extra->[3];

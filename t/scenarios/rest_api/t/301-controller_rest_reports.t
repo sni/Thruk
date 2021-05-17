@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
 
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
@@ -62,7 +62,7 @@ my $pages = [{
 ];
 
 for my $test (@{$pages}) {
-    $test->{'content_type'} = 'application/json;charset=UTF-8' unless $test->{'content_type'};
+    $test->{'content_type'} = 'application/json; charset=utf-8' unless $test->{'content_type'};
     $test->{'url'}          = '/thruk/r'.$test->{'url'};
     my $page = TestUtils::test_page(%{$test});
     if(!defined $original_report) {

@@ -1,11 +1,11 @@
 package Thruk::BP::Components::Node;
 
-use strict;
 use warnings;
-use Thruk::Utils;
-use Thruk::BP::Functions;
-use Thruk::BP::Utils;
-use Thruk::Utils::Filter;
+use strict;
+
+use Thruk::BP::Functions ();
+use Thruk::BP::Utils ();
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -38,7 +38,7 @@ sub new {
         'label'                     => $data->{'label'},
         'function'                  => '',
         'function_args'             => [],
-        'depends'                   => Thruk::Utils::list($data->{'depends'} || []),
+        'depends'                   => Thruk::Base::list($data->{'depends'} || []),
         'parents'                   => $data->{'parents'}       || [],
         'host'                      => $data->{'host'}          || '',
         'service'                   => $data->{'service'}       || '',
@@ -75,7 +75,7 @@ sub new {
 
     for my $key (qw/id label template/) {
         next unless defined $self->{$key};
-        $self->{$key} = Thruk::Utils::trim_whitespace($self->{$key});
+        $self->{$key} = Thruk::Base::trim_whitespace($self->{$key});
     }
 
     $self->_set_function($data);
@@ -447,10 +447,10 @@ sub _set_function {
         # fix operator
         if($self->{'service'}) {
             my $op = $self->{'function_args'}->[2] // '=';
-            if($op eq '=' && Thruk::Utils::looks_like_regex($self->{'service'})) {
+            if($op eq '=' && Thruk::Base::looks_like_regex($self->{'service'})) {
                 $op = "~";
             }
-            elsif($op eq '!=' && Thruk::Utils::looks_like_regex($self->{'service'})) {
+            elsif($op eq '!=' && Thruk::Base::looks_like_regex($self->{'service'})) {
                 $op = "!~";
             }
             if($op eq "~" || $op eq '!~') {

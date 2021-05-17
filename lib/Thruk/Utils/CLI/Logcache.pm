@@ -47,12 +47,13 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
 
 use warnings;
 use strict;
-use Time::HiRes qw/gettimeofday tv_interval/;
 use Getopt::Long ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Manager ();
 use Thruk::Utils ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Pool::Simple ();
 
 ##############################################
 
@@ -148,7 +149,7 @@ sub cmd {
         return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
     }
 
-    my($backends) = $c->{'db'}->select_backends('get_logs');
+    my($backends) = $c->db->select_backends('get_logs');
 
     if($mode eq 'import' && !$global_options->{'yes'}) {
         # check if tables already existing

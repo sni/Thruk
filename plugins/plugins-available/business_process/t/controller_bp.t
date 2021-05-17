@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -36,7 +36,7 @@ my $json_pages = [
 for my $url (@{$json_pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array: ".$url);
@@ -51,7 +51,7 @@ my $json_hash_pages = [
 for my $url (@{$json_hash_pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json;charset=UTF-8',
+        'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
@@ -74,7 +74,7 @@ for my $url (@{$xls_pages}) {
 # clean up
 my $page = TestUtils::test_page(
     'url'          => "/thruk/r/thruk/bp?name=New%20Test%20Business%20Process&columns=id",
-    'content_type' => 'application/json;charset=UTF-8',
+    'content_type' => 'application/json; charset=utf-8',
 );
 my $data = decode_json($page->{'content'});
 is(ref $data, 'ARRAY', "json result is an array");
@@ -82,6 +82,6 @@ is(ref $data, 'ARRAY', "json result is an array");
 $page = TestUtils::test_page(
     'url'          => "/thruk/r/thruk/bp/".$data->[0]->{'id'},
     'method'       => "DELETE",
-    'content_type' => 'application/json;charset=UTF-8',
+    'content_type' => 'application/json; charset=utf-8',
     'like'         => ['business process sucessfully removed'],
 );

@@ -2,7 +2,7 @@ package Thruk::Utils::IO;
 
 =head1 NAME
 
-Thruk::Utils - IO Utilities Collection for Thruk
+Thruk::Utils::IO - IO Utilities Collection for Thruk
 
 =head1 DESCRIPTION
 
@@ -10,20 +10,21 @@ IO Utilities Collection for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess longmess/;
+use Cpanel::JSON::XS ();
+use Cwd qw/abs_path/;
 use Errno qw(EEXIST);
 use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
-use Cpanel::JSON::XS ();
-use POSIX ":sys_wait_h";
-use IPC::Open3 qw/open3/;
-use IO::Select ();
-use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
-use Cwd qw/abs_path/;
+use IO::Select ();
+use IPC::Open3 qw/open3/;
+use POSIX ();
 use Time::HiRes qw/sleep/;
+
 use Thruk::Utils::Log qw/:all/;
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
@@ -84,7 +85,7 @@ sub mkdir_r {
         for my $part (split/(\/)/mx, $dirname) {
             $path .= $part;
             next if $path eq '';
-            Thruk::Utils::IO::mkdir($path) unless -d $path.'/.';
+            &mkdir($path) unless -d $path.'/.';
         }
     }
     return 1;
@@ -102,8 +103,30 @@ read file and return content
 
 sub read {
     my($path) = @_;
-    my $content = read_file($path);
+    open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
+    local $/ = undef;
+    my $content = <$fh>;
+    CORE::close($fh);
     return($content);
+}
+
+##############################################
+
+=head2 read_as_list
+
+  read_as_list($path)
+
+read file and return content as array
+
+=cut
+
+sub read_as_list {
+    my($path) = @_;
+    my @res;
+    open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
+    @res = <$fh>;
+    CORE::close($fh);
+    return(@res);
 }
 
 ##############################################
@@ -121,7 +144,7 @@ sub write {
     my $mode = $append ? '>>' : '>';
     open(my $fh, $mode, $path) or confess('cannot create file '.$path.': '.$!);
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $path) or confess("cannot close file ".$path.": ".$!);
+    &close($fh, $path) or confess("cannot close file ".$path.": ".$!);
     utime($mtime, $mtime, $path) if $mtime;
     return 1;
 }
@@ -176,24 +199,66 @@ sub ensure_permissions {
 
 ##############################################
 
+=head2 file_rlock
+
+  file_rlock($file)
+
+locks given file in shared / readonly mode. Returns filehandle.
+
+=cut
+sub file_rlock {
+    my($file) = @_;
+    confess("no file") unless $file;
+
+    alarm(30);
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to shared flock: ".$file); };
+
+    my $fh;
+    my $retrys = 0;
+    my $err;
+    while($retrys < 5) {
+        undef $fh;
+        eval {
+            sysopen($fh, $file, O_RDONLY) or confess("cannot open file ".$file.": ".$!);
+            flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
+        };
+        $err = $@;
+        if(!$err && $fh) {
+            last;
+        }
+        $retrys++;
+        sleep(0.5);
+    }
+
+    if($err) {
+        die("failed to shared flock $file: $err");
+    }
+
+    if($retrys > 0) {
+        _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
+    }
+
+    alarm(0);
+    return($fh);
+}
+
+##############################################
+
 =head2 file_lock
 
-  file_lock($file, $mode)
+  file_lock($file)
 
-  $mode can be
-    - 'ex' exclusive
-    - 'sh' shared
-
-locks given file. Returns locked filehandle.
+locks given file in read/write mode. Returns locked filehandle and lock file handle.
 
 =cut
 
 sub file_lock {
     my($file, $mode) = @_;
     confess("no file") unless $file;
+    if($mode && $mode eq 'sh') { return file_rlock($file); }
 
     alarm(30);
-    local $SIG{'ALRM'} = sub { confess("timeout while trying to flock(".$mode."): ".$file); };
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to excl. flock: ".$file); };
 
     # we can only lock files in existing folders
     my $basename = $file;
@@ -205,76 +270,64 @@ sub file_lock {
 
     my $lock_file = $file.'.lock';
     my $lock_fh;
-    if($mode eq 'ex') {
-        my $locked    = 0;
-        my $old_inode = (stat($lock_file))[1];
-        my $retrys    = 0;
-        while(1) {
-            $old_inode = (stat($lock_file))[1] unless $old_inode;
-            if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
-                last;
-            }
-            # check for orphaned locks
-            if($!{EEXIST} && $old_inode) {
-                sleep(0.3);
-                if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
-                    my $new_inode = (stat($lock_fh))[1];
-                    if($new_inode && $new_inode == $old_inode) {
-                        $retrys++;
-                        if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
-                            # lock seems to be orphaned, continue normally unless in test mode
-                            confess("got orphaned lock") if $ENV{'TEST_RACE'};
-                            $locked = 1;
-                            _warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
-                            last;
-                        }
-                        next;
-                    }
-                    if($new_inode && $new_inode != $old_inode) {
-                        $retrys = 0;
-                        undef $old_inode;
-                    }
-                } else {
+    my $locked    = 0;
+    my $old_inode = (stat($lock_file))[1];
+    my $retrys    = 0;
+    while(1) {
+        $old_inode = (stat($lock_file))[1] unless $old_inode;
+        if(sysopen($lock_fh, $lock_file, O_RDWR|O_EXCL|O_CREAT, 0660)) {
+            last;
+        }
+        # check for orphaned locks
+        if($!{EEXIST} && $old_inode) {
+            sleep(0.3);
+            if(sysopen($lock_fh, $lock_file, O_RDWR, 0660) && flock($lock_fh, LOCK_EX|LOCK_NB)) {
+                my $new_inode = (stat($lock_fh))[1];
+                if($new_inode && $new_inode == $old_inode) {
                     $retrys++;
                     if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
-                        unlink($lock_file);
-                        # we have to move and copy the file itself, otherwise
-                        # the orphaned process may overwrite the file
-                        # and the later flock() might hang again
-                        copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
-                        move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
-                        move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
-                        unlink($file.'.orphaned');
-                        _warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
-                        $retrys = 0; # start over...
+                        # lock seems to be orphaned, continue normally unless in test mode
+                        confess("got orphaned lock") if $ENV{'TEST_RACE'};
+                        $locked = 1;
+                        _warn("recovered orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                        last;
                     }
+                    next;
+                }
+                if($new_inode && $new_inode != $old_inode) {
+                    $retrys = 0;
+                    undef $old_inode;
+                }
+            } else {
+                $retrys++;
+                if($retrys > $Thruk::Utils::IO::MAX_LOCK_RETRIES) {
+                    unlink($lock_file);
+                    # we have to move and copy the file itself, otherwise
+                    # the orphaned process may overwrite the file
+                    # and the later flock() might hang again
+                    copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
+                    move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
+                    move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
+                    unlink($file.'.orphaned');
+                    _warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
+                    $retrys = 0; # start over...
                 }
             }
-            sleep(0.1);
         }
-        if(!$locked) {
-            flock($lock_fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
-        }
+        sleep(0.1);
     }
-    elsif($mode eq 'sh') {
-        # nothing to do
-    } else {
-        confess("unknown mode: ".$mode);
+    if(!$locked) {
+        flock($lock_fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
     }
 
     my $fh;
-    my $retrys = 0;
+    $retrys = 0;
     my $err;
     while($retrys < 5) {
         undef $fh;
         eval {
             sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
-            if($mode eq 'ex') {
-                flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
-            }
-            elsif($mode eq 'sh') {
-                flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
-            }
+            flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
         };
         $err = $@;
         if(!$err && $fh) {
@@ -291,9 +344,6 @@ sub file_lock {
     if($retrys > 0) {
         _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
-
-    seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
-    sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
     alarm(0);
     return($fh, $lock_fh);
@@ -326,10 +376,13 @@ sub file_unlock {
 stores data json encoded
 
 $options can be {
-    pretty       => 0/1,       # don't write json into a single line and use human readable intendation
-    tmpfile      => <filename> # use this tmpfile while writing new contents
-    changed_only => 0/1,       # only write the file if it has changed
-    compare_data => "...",     # use this string to compare for changed content
+    pretty                  => 0/1,         # don't write json into a single line and use human readable intendation
+    tmpfile                 => <filename>   # use this tmpfile while writing new contents
+    changed_only            => 0/1,         # only write the file if it has changed
+    compare_data            => "...",       # use this string to compare for changed content
+    skip_ensure_permissions => 0/1          # skip running ensure_permissions after write
+    skip_validate           => 0/1          # skip file validation (author only)
+    skip_config             => 0/1          # skip all steps which reqire thruk config
 }
 
 =cut
@@ -339,6 +392,11 @@ sub json_store {
 
     if(defined $options && ref $options ne 'HASH') {
         confess("json_store options have been changed to hash.");
+    }
+
+    if($options->{'skip_config'}) {
+        $options->{'skip_ensure_permissions'} = 1;
+        $options->{'skip_validate'}           = 1;
     }
 
     my $json = Cpanel::JSON::XS->new->utf8;
@@ -352,23 +410,29 @@ sub json_store {
             return 1 if $options->{'compare_data'} eq $write_out;
         }
         elsif(-f $file) {
-            my $old = read_file($file);
+            my $old = &read($file);
             return 1 if $old eq $write_out;
         }
     }
 
     my $tmpfile = $options->{'tmpfile'} // $file.'.new';
-    open(my $fh2, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
-    print $fh2 ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
-    Thruk::Utils::IO::close($fh2, $tmpfile) or confess("cannot close file ".$tmpfile.": ".$!);
+    open(my $fh, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
+    print $fh ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
+    if($options->{'skip_ensure_permissions'}) {
+        CORE::close($fh) || confess("cannot close file ".$tmpfile.": ".$!);
+    } else {
+        &close($fh, $tmpfile) || confess("cannot close file ".$tmpfile.": ".$!);
+    }
 
-    require Thruk::Config;
-    my $config = Thruk::Config::get_config();
-    if($config->{'thruk_author'}) {
-        eval {
-            my $test = $json->decode(scalar read_file($tmpfile));
-        };
-        confess("json_store failed to write a valid file: ".$@) if $@;
+    if(!$options->{'skip_validate'}) {
+        require Thruk::Config;
+        my $config = Thruk::Config::get_config();
+        if($config->{'thruk_author'}) {
+            eval {
+                my $test = $json->decode(&read($tmpfile));
+            };
+            confess("json_store failed to write a valid file: ".$@) if $@;
+        }
     }
 
 
@@ -389,7 +453,7 @@ stores data json encoded. options are passed to json_store.
 
 sub json_lock_store {
     my($file, $data, $options) = @_;
-    my($fh, $lock_fh) = file_lock($file, 'ex');
+    my($fh, $lock_fh) = file_lock($file);
     json_store($file, $data, $options);
     file_unlock($file, $fh, $lock_fh);
     return 1;
@@ -409,18 +473,20 @@ sub json_retrieve {
     my($file, $fh) = @_;
     confess("got no filehandle") unless defined $fh;
 
-    my $json = Cpanel::JSON::XS->new->utf8;
-    $json->relaxed();
+    our $jsonreader;
+    if(!$jsonreader) {
+        $jsonreader = Cpanel::JSON::XS->new->utf8;
+        $jsonreader->relaxed();
+    }
 
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
-    sysseek($fh, 0, SEEK_SET) or die "Cannot sysseek ".$file.": $!\n";
 
     my $data;
     my $content;
     eval {
         local $/ = undef;
         $content = scalar <$fh>;
-        $data    = $json->decode($content);
+        $data    = $jsonreader->decode($content);
     };
     my $err = $@;
     if($err) {
@@ -443,7 +509,7 @@ retrieve json data
 sub json_lock_retrieve {
     my($file) = @_;
     return unless -s $file;
-    my($fh) = file_lock($file, 'sh');
+    my($fh) = file_rlock($file);
     my $data = json_retrieve($file, $fh);
     flock($fh, LOCK_UN);
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
@@ -462,7 +528,7 @@ update json data with locking. options are passed to json_store.
 
 sub json_lock_patch {
     my($file, $patch_data, $options) = @_;
-    my($fh, $lock_fh) = file_lock($file, 'ex');
+    my($fh, $lock_fh) = file_lock($file);
     my $data = json_patch($file, $fh, $patch_data, $options);
     file_unlock($file, $fh, $lock_fh);
     return $data;
@@ -569,7 +635,7 @@ sub cmd {
         return(0, "cmd started in background");
     }
 
-    require Thruk::Utils;
+    require Thruk::Utils::Encode unless $no_decode;
 
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
@@ -605,7 +671,7 @@ sub cmd {
         $rc = $?;
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
-        $output = Thruk::Utils::decode_any($output) unless $no_decode;
+        $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
         # restore original array
         unshift @{$cmd}, $prog;
     } else {
@@ -622,7 +688,7 @@ sub cmd {
         }
 
         $output = `$cmd`;
-        $output = Thruk::Utils::decode_any($output) unless $no_decode;
+        $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if($rc == -1 && defined $SIG{CHLD} && $SIG{CHLD} eq 'IGNORE');
@@ -791,6 +857,94 @@ sub get_memory_usage {
     }
     CORE::close($ph);
     return($rsize);
+}
+
+###################################################
+
+=head2 find_files
+
+  find_files($folder, $pattern)
+
+return list of files for folder and pattern (symlinks will be skipped)
+
+=cut
+
+sub find_files {
+    my($dir, $match) = @_;
+    my @files;
+    $dir =~ s/\/$//gmxo;
+
+    # symlinks
+    if(-l $dir) {
+        return([]);
+    }
+    # not a directory?
+    if(!-d $dir) {
+        if(defined $match) {
+            return([]) unless $dir =~ m/$match/mx;
+        }
+        return([$dir]);
+    }
+
+    my @tmpfiles;
+    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
+    while(my $file = readdir $dh) {
+        next if $file eq '.';
+        next if $file eq '..';
+        push @tmpfiles, $file;
+    }
+    closedir $dh;
+
+    for my $file (@tmpfiles) {
+        # follow sub directories
+        if(-d sprintf("%s/%s/.", $dir, $file)) {
+            push @files, @{find_files($dir."/".$file, $match)};
+        } else {
+            # if its a file, make sure it matches our pattern
+            if(defined $match) {
+                my $test = $dir."/".$file;
+                next unless $test =~ m/$match/mx;
+            }
+
+            push @files, $dir."/".$file;
+        }
+    }
+
+    return \@files;
+}
+
+##############################################
+
+=head2 all_perl_files
+
+  all_perl_files(@dirs)
+
+return list of all perl files for given folders
+
+=cut
+sub all_perl_files {
+    my(@dirs) = @_;
+    my @files;
+    for my $dir (@dirs) {
+        my $files = find_files($dir);
+        for my $file (@{$files}) {
+            if($file =~ m/\.(pl|pm)$/mx) {
+                push @files, $file;
+                next;
+            }
+            my $content = &read($file);
+
+            if($content =~ m%\#\!(/usr|)/bin/perl%mx || $content =~ m|\Qexec perl -x\E|mx) {
+                push @files, $file;
+                next;
+            }
+            if($file =~ m/\.t$/mx && $content =~ m|^\s*use\s+strict|mx) {
+                push @files, $file;
+                next;
+            }
+        }
+    }
+    return(@files);
 }
 
 ##############################################

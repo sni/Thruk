@@ -38,7 +38,9 @@ The lmd command controls the LMD process.
 use warnings;
 use strict;
 use Time::HiRes ();
-use Thruk::Utils::LMD;
+
+use Thruk::Utils::CLI ();
+use Thruk::Utils::LMD ();
 
 our $skip_backends = 1;
 

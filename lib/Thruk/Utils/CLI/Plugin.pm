@@ -39,9 +39,12 @@ The cache handles thruk plugins itself.
 use warnings;
 use strict;
 use Data::Dumper;
-use File::Temp qw/tempdir/;
 use File::Copy qw/move/;
-use Thruk::Utils::Log qw/_error _warn _info _debug _trace/;
+use File::Temp qw/tempdir/;
+
+use Thruk::Utils ();
+use Thruk::Utils::CLI ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 # no backends required for this command

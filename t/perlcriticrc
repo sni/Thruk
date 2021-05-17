@@ -4,7 +4,7 @@
 # use this as your own, or make modifications.
 ##############################################################################
 
-theme    = pbp || security || bugs || pulp
+theme    = pbp || security || bugs || pulp || maintenance
 severity = 4
 
 [Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData]
@@ -344,3 +344,12 @@ allow_delegation_to = new Data::Dumper
 [Perl::Critic::Policy::ValuesAndExpressions::ProhibitConstantPragma]
 severity   = 1
 
+[Perl::Critic::Policy::BuiltinFunctions::ProhibitUniversalIsa]
+severity   = 1
+
+[TooMuchCode::ProhibitUnusedImport]
+severity   = 5
+ignored_modules = Plack::Util::Accessor
+
+[TooMuchCode::ProhibitUnusedInclude]
+severity   = 5

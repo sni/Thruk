@@ -1,7 +1,11 @@
 package Thruk::Controller::broadcast;
 
-use strict;
 use warnings;
+use strict;
+use POSIX ();
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Broadcast ();
 
 =head1 NAME
 
@@ -21,7 +25,7 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(defined $c->req->parameters->{'action'}) {
         my $action = $c->req->parameters->{'action'};

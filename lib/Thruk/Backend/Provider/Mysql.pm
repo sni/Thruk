@@ -1,15 +1,18 @@
 package Thruk::Backend::Provider::Mysql;
 
-use strict;
 use warnings;
-#use Thruk::Timer qw/timing_breakpoint/;
+use strict;
+use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
-use parent 'Thruk::Backend::Provider::Base';
+use POSIX ();
+
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
-use Carp qw/confess/;
-use POSIX ();
+
+use parent 'Thruk::Backend::Provider::Base';
+
+#use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -417,11 +420,11 @@ sub get_logs {
     }
 
     # check compact timerange and set a warning flag
-    my $c =$Thruk::Request::c;
+    my $c =$Thruk::Globals::c;
     if($c) {
-        my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
+        my $compact_start_data = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
         # get time filter
-        my($start, $end) = Thruk::Backend::Manager::extract_time_filter($options{'filter'});
+        my($start, $end) = Thruk::Utils::extract_time_filter($options{'filter'});
         if($start && $start < $compact_start_data) {
             $c->stash->{'logs_from_compacted_zone'} = 1;
         }
@@ -461,7 +464,7 @@ sub get_logs {
     }
 
     # add performance related debug output
-    if(Thruk->verbose >= 3) {
+    if(Thruk::Base->verbose >= 3) {
         _trace($sql);
 
         _trace("EXPLAIN:");
@@ -985,12 +988,12 @@ sub _log_stats {
 
     $c->stats->profile(begin => "Mysql::_log_stats");
 
-    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
-    $backends  = Thruk::Utils::list($backends);
+    ($backends) = $c->db->select_backends('get_logs') unless defined $backends;
+    $backends  = Thruk::Base::list($backends);
 
     my @result;
     for my $key (@{$backends}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         my $msg = "OK";
         my($index_size, $data_size, $items, $last_entry);
         my $status  = {};
@@ -1064,12 +1067,12 @@ sub _logcache_stats_types {
 
     $c->stats->profile(begin => "Mysql::_logcache_stats_types: ".$groupby);
 
-    ($backends) = $c->{'db'}->select_backends('get_logs') unless defined $backends;
-    $backends  = Thruk::Utils::list($backends);
+    ($backends) = $c->db->select_backends('get_logs') unless defined $backends;
+    $backends  = Thruk::Base::list($backends);
 
     my @result;
     for my $key (@{$backends}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $peer = $c->db->get_peer_by_key($key);
         next unless $peer->{'logcache'};
         $peer->logcache->reconnect();
         my $dbh  = $peer->logcache->_dbh();
@@ -1115,7 +1118,7 @@ sub _log_removeunused {
     # use first peers logcache
     my $peer;
     for my $key (@{$c->stash->{'backends'}}) {
-        $peer = $c->{'db'}->get_peer_by_key($key);
+        $peer = $c->db->get_peer_by_key($key);
         last if $peer->{'logcache'};
     }
     return "no logcache configured?" unless(defined $peer and defined $peer->{'logcache'});
@@ -1180,13 +1183,12 @@ sub _import_logs {
     my $log_count     = 0;
 
     if(!defined $backends) {
-        Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
-        $backends = $c->stash->{'backends'};
+        ($backends) = $c->db->select_backends('get_logs');
     }
-    $backends = Thruk::Utils::list($backends);
+    $backends = Thruk::Base::list($backends);
     my @peer_keys;
     for my $key (@{$backends}) {
-        my $peer   = $c->{'db'}->get_peer_by_key($key);
+        my $peer   = $c->db->get_peer_by_key($key);
         next unless $peer->{'enabled'};
         push @peer_keys, $key;
     }
@@ -1199,7 +1201,7 @@ sub _import_logs {
     my $errors = [];
     for my $key (@{$backends}) {
         my $prefix = $key;
-        my $peer   = $c->{'db'}->get_peer_by_key($key);
+        my $peer   = $c->db->get_peer_by_key($key);
         next unless $peer->{'enabled'};
         next unless $peer->{'logcache'};
         $c->stats->profile(begin => "$key");
@@ -1976,11 +1978,11 @@ sub _import_peer_logfiles {
         my $mend;
         if($mode eq 'import') {
             # it does not make sense to import more than we would clean immediatly again
-            $mend = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
+            $mend = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
         }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
-        ($start, $end) = Thruk::Backend::Manager::get_logs_start_end_no_filter($peer->{'class'}, $mend);
+        ($start, $end) = Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'}, $mend);
         if(defined $mend && $start < $mend) {
             $start = $mend;
         }
@@ -2004,7 +2006,7 @@ sub _import_peer_logfiles {
 
     # add import filter again, even if it should have been filtered in the logs query already, but it seems like not all backends handle them correctly
     my $import_filter = [];
-    for my $f (@{Thruk::Utils::list($c->config->{'logcache_import_exclude'})}) {
+    for my $f (@{Thruk::Base::list($c->config->{'logcache_import_exclude'})}) {
         push @{$import_filter}, { message => { '!~~' => $f } }
     }
     if($mode eq 'import') {
@@ -2012,7 +2014,7 @@ sub _import_peer_logfiles {
         $dbh->do('SET unique_checks = 0');
         $dbh->do('ALTER TABLE `'.$prefix.'_log` DISABLE KEYS');
     }
-    my $compact_start_data = Thruk::Backend::Manager::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
+    my $compact_start_data = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
     my $alertstore = {};
     my $last_day = "";
 
@@ -2114,11 +2116,11 @@ sub _enable_index {
 ##########################################################
 sub _get_exclude_filter {
     my($config) = @_;
-    if(scalar @{Thruk::Utils::list($config->{'logcache_import_exclude'})} == 0) {
+    if(scalar @{Thruk::Base::list($config->{'logcache_import_exclude'})} == 0) {
         return;
     }
     my $import_filter;
-    my $f = join('|', @{Thruk::Utils::list($config->{'logcache_import_exclude'})});
+    my $f = join('|', @{Thruk::Base::list($config->{'logcache_import_exclude'})});
     ## no critic
     $import_filter = qr/($f)/i;
     ## use critic
@@ -2160,7 +2162,7 @@ sub _import_logcache_from_file {
             open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
             while(my $line = <$fh>) {
                 chomp($line);
-                &Thruk::Utils::decode_any($line);
+                &Thruk::Utils::Encode::decode_any($line);
                 my $original_line = $line;
                 my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
                 next unless($l && $l->{'time'});

@@ -9,8 +9,7 @@ if ( not $ENV{TEST_AUTHOR} ) {
     plan( skip_all => $msg );
 }
 
-eval { require Test::Vars; };
-
+eval "use Test::Vars;";
 if($@) {
    my $msg = 'Test::Vars required for this test';
    plan( skip_all => $msg );
@@ -18,7 +17,7 @@ if($@) {
 
 Test::Vars->import();
 # required for some constants
-use Thruk;
+eval "use Thruk;";
 all_vars_ok(ignore_vars => [qw($sec $min $hour $wday $yday $isdst $dow $doy $dst
                                $dev $ino $mode $nlink $uid $gid $rdev $size
                                $atime $mtime $ctime $blksize $blocks

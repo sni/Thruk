@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use Cpanel::JSON::XS;
+use Test::More;
 
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
@@ -25,15 +25,15 @@ my $pages = [{
         url          => '/csv/services?q=***description ~ http and description !~ cert***&columns=description',
         like         => ['Https'],
         unlike       => ['Cert'],
-        content_type => 'text/plain; charset=UTF-8',
+        content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/csv/services/totals?q=***description ~ http and description !~ cert***&columns=total',
         like         => ['total;2'],
-        content_type => 'text/plain; charset=UTF-8',
+        content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/csv/services?columns=count(*):num,host_name&sort=-count(*)',
         like         => ['localhost;8'],
-        content_type => 'text/plain; charset=UTF-8',
+        content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/services/'.$host.'/'.$service.'/cmd/schedule_svc_downtime',
         post         => { 'start_time' => 'now', 'end_time' => '+60m', 'comment_data' => 'test comment' },
@@ -110,7 +110,7 @@ my $pages = [{
 ];
 
 for my $test (@{$pages}) {
-    $test->{'content_type'} = 'application/json;charset=UTF-8' unless $test->{'content_type'};
+    $test->{'content_type'} = 'application/json; charset=utf-8' unless $test->{'content_type'};
     $test->{'url'}          = '/thruk/r'.$test->{'url'};
     my $page = TestUtils::test_page(%{$test});
 }

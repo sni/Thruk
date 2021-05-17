@@ -13,19 +13,20 @@ The r command is an alias for the rest command.
 use warnings;
 use strict;
 
+use Thruk::Utils::CLI::Rest ();
+
+our $skip_backends = \&Thruk::Utils::CLI::Rest::_skip_backends;
+
 ##############################################
 
 =head1 METHODS
 
 =head2 cmd
 
-    cmd(...)
+    cmd([ $options ])
 
 =cut
-sub cmd {
-    require Thruk::Utils::CLI::Rest;
-    return(Thruk::Utils::CLI::Rest::cmd(@_));
-}
+*cmd = *Thruk::Utils::CLI::Rest::cmd;
 
 ##############################################
 

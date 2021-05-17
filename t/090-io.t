@@ -1,8 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/tempfile/;
-use File::Slurp qw/read_file/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -22,6 +23,7 @@ my $cmds = [
   "grep -nr  'chown\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::ensure_permissions",
   "grep -nr  'chmod\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::ensure_permissions",
   "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/*/lib",  "better use Time::HiRes::sleep directly",
+  "grep -nr  'File::Slurp' t/ lib/ plugins/plugins-available/*/lib",   "better use Thruk::Utils::IO::read",
 ];
 
 # find all close / mkdirs not ensuring permissions
@@ -81,7 +83,7 @@ like($output, '/^$/', "false returned nothing");
 my($tfh, $tmpfilename) = tempfile();
 $rc = Thruk::Utils::IO::json_lock_store($tmpfilename, {'a' => 'b' });
 is($rc, 1, "json_lock_store succeeded on tmpfile");
-my $content = read_file($tmpfilename);
+my $content = Thruk::Utils::IO::read($tmpfilename);
 like($content, '/{"a":"b"}/', 'file contains json');
 unlink($tmpfilename);
 

@@ -1,8 +1,13 @@
 package Thruk::Controller::avail;
 
-use strict;
 use warnings;
+use strict;
 use Module::Load qw/load/;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -25,7 +30,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     if(!$c->config->{'avail_modules_loaded'}) {
         load Monitoring::Availability;
@@ -119,16 +124,16 @@ sub _show_step_2 {
 
     my $data;
     if($report_type eq 'hosts') {
-        $data = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
+        $data = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
     }
     elsif($report_type eq 'hostgroups') {
-        $data = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+        $data = $c->db->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     }
     elsif($report_type eq 'servicegroups') {
-        $data = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+        $data = $c->db->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
     }
     elsif($report_type eq 'services') {
-        my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+        my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
@@ -153,7 +158,7 @@ sub _show_step_3 {
 
     $c->stats->profile(begin => "_show_step_3()");
 
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{timeperiods} = $c->db->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
     $c->stash->{template}    = 'avail_step_3.tt';
 
     my($host,$service);
@@ -201,7 +206,7 @@ sub _outages {
         $c->req->parameters->{'include_host_services'} = 1;
     }
 
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return 1 if $c->stash->{'has_error'};
     if($c->req->parameters->{'type'} eq "services" || $c->req->parameters->{'type'} eq 'both') {
         $c->req->parameters->{'s_filter'} = $servicefilter;

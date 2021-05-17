@@ -10,15 +10,19 @@ Utilities to run background processes
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use Time::HiRes ();
-use File::Slurp qw/read_file/;
-use Storable qw/store retrieve/;
+use IO::Handle ();
 use POSIX ":sys_wait_h";
+use Storable qw/store retrieve/;
+use Time::HiRes ();
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Views::ToolkitRenderer ();
 
 ##############################################
 
@@ -111,8 +115,8 @@ sub perl {
        or ($c->stash->{job_id} && !$conf->{'background'}) # do not cascade jobs unless they should be forked to background
     ) {
         if(defined $conf->{'backends'}) {
-            $c->{'db'}->disable_backends();
-            $c->{'db'}->enable_backends($conf->{'backends'});
+            $c->db->disable_backends();
+            $c->db->enable_backends($conf->{'backends'});
         }
         ## no critic
         my $rc = eval($conf->{'expr'});
@@ -135,8 +139,8 @@ sub perl {
     }
 
     if(defined $conf->{'backends'}) {
-        $c->{'db'}->disable_backends();
-        $c->{'db'}->enable_backends($conf->{'backends'});
+        $c->db->disable_backends();
+        $c->db->enable_backends($conf->{'backends'});
     }
 
     my $err;
@@ -184,7 +188,7 @@ sub perl {
             Thruk::Action::AddDefaults::end($c);
             Thruk::Views::ToolkitRenderer::render_tt($c);
             my $res = $c->res->finalize;
-            Thruk::finalize_request($c, $res);
+            $c->finalize_request($res);
             Thruk::Utils::IO::write($dir."/result.dat", $res->[2]->[0]);
             $c->stash->{'file_name'}      = "result.dat";
             $c->stash->{'file_name_meta'} = {
@@ -206,7 +210,7 @@ sub perl {
         _clean_unstorable_refs($c->stash);
         store(\%{$c->stash}, $dir."/stash");
 
-        if(Thruk->debug) {
+        if(Thruk::Base->debug) {
             open(my $fh, '>', $dir."/stash.dump");
             print $fh Dumper($c->stash);
             CORE::close($fh);
@@ -246,7 +250,7 @@ sub render_page_in_background {
     return if $ENV{'THRUK_JOB_DIR'};
 
     # render page if not running inside a webserver
-    return if(Thruk->mode ne 'FASTCGI' && Thruk->mode ne 'DEVSERVER');
+    return if(Thruk::Base->mode ne 'FASTCGI' && Thruk::Base->mode ne 'DEVSERVER');
 
     return if exists $c->req->parameters->{'noexternalforks'};
     return if $ENV{'THRUK_NO_BACKGROUND_PAGES'};
@@ -275,7 +279,7 @@ sub is_running {
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
-        my $user = read_file($dir."/user");
+        my $user = Thruk::Utils::IO::read($dir."/user");
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
@@ -300,7 +304,7 @@ sub cancel {
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
-        my $user = read_file($dir."/user");
+        my $user = Thruk::Utils::IO::read($dir."/user");
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
@@ -310,14 +314,14 @@ sub cancel {
     if(-f $pidfile) {
         # is it running on this node?
         if(-s $dir."/hostname") {
-            my @hosts = split(/\n/mx, read_file($dir."/hostname"));
-            if($hosts[0] ne $Thruk::NODE_ID) {
+            my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
+            if($hosts[0] ne $Thruk::Globals::NODE_ID) {
                 $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::cancel', [$c, $id, $nouser]);
                 return _is_running($c, $dir);
             }
         }
 
-        my $pid = read_file($pidfile);
+        my $pid = Thruk::Utils::IO::read($pidfile);
         chomp($pid);
         update_status($dir, 99.9, 'canceled');
         CORE::kill(15, $pid);
@@ -352,13 +356,13 @@ sub read_job {
 
     my $start = -e $job_dir.'/start'    ? (stat($job_dir.'/start'))[9] : 0;
     my $end   = -e $job_dir.'/rc'       ? (stat($job_dir.'/rc'))[9]    : 0;
-    my $rc    = -e $job_dir.'/rc'       ? read_file($job_dir.'/rc')  : '';
-    my $res   = -e $job_dir.'/perl_res' ? read_file($job_dir.'/perl_res')  : '';
-    my $out   = -e $job_dir.'/stdout'   ? read_file($job_dir.'/stdout')  : '';
-    my $err   = -e $job_dir.'/stderr'   ? read_file($job_dir.'/stderr')  : '';
-    my $host  = -e $job_dir.'/hostname' ? read_file($job_dir.'/hostname')  : '';
-    my $cmd   = -e $job_dir.'/start'    ? read_file($job_dir.'/start')  : '';
-    my $pid   = -e $job_dir.'/pid'      ? read_file($job_dir.'/pid')  : '';
+    my $rc    = -e $job_dir.'/rc'       ? Thruk::Utils::IO::read($job_dir.'/rc')  : '';
+    my $res   = -e $job_dir.'/perl_res' ? Thruk::Utils::IO::read($job_dir.'/perl_res')  : '';
+    my $out   = -e $job_dir.'/stdout'   ? Thruk::Utils::IO::read($job_dir.'/stdout')  : '';
+    my $err   = -e $job_dir.'/stderr'   ? Thruk::Utils::IO::read($job_dir.'/stderr')  : '';
+    my $host  = -e $job_dir.'/hostname' ? Thruk::Utils::IO::read($job_dir.'/hostname')  : '';
+    my $cmd   = -e $job_dir.'/start'    ? Thruk::Utils::IO::read($job_dir.'/start')  : '';
+    my $pid   = -e $job_dir.'/pid'      ? Thruk::Utils::IO::read($job_dir.'/pid')  : '';
     if($cmd) {
         $cmd =~ s%^\d+\n%%gmx;
         $cmd =~ s%^\$VAR1\s*=\s*%%gmx;
@@ -414,7 +418,7 @@ sub get_status {
 
     my $user = '';
     if( -f $dir."/user" ) {
-        $user = read_file($dir."/user");
+        $user = Thruk::Utils::IO::read($dir."/user");
         chomp($user);
         if(!defined $c->stash->{'remote_user'} || $user ne $c->stash->{'remote_user'}) {
             if(!$c->check_user_roles('admin')) {
@@ -437,18 +441,18 @@ sub get_status {
         $end[9]  = time() unless defined $end[9];
         $time    = $end[9] - $start[9];
     } elsif(-f $dir."/status") {
-        $percent = read_file($dir."/status");
+        $percent = Thruk::Utils::IO::read($dir."/status");
         chomp($percent);
     }
 
     my $message;
     if(-f $dir."/message") {
-        $message = read_file($dir."/message");
+        $message = Thruk::Utils::IO::read($dir."/message");
         chomp($message);
     }
     my $forward;
     if(-f $dir."/forward") {
-        $forward = read_file($dir."/forward");
+        $forward = Thruk::Utils::IO::read($dir."/forward");
         chomp($forward);
     }
 
@@ -512,7 +516,7 @@ sub get_result {
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user") {
-        my $user = read_file($dir."/user");
+        my $user = Thruk::Utils::IO::read($dir."/user");
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
@@ -523,8 +527,8 @@ sub get_result {
     }
 
     my($out, $err) = ('', '');
-    $out = read_file($dir."/stdout") if -f $dir."/stdout";
-    $err = read_file($dir."/stderr") if -f $dir."/stderr";
+    $out = Thruk::Utils::IO::read($dir."/stdout") if -f $dir."/stdout";
+    $err = Thruk::Utils::IO::read($dir."/stderr") if -f $dir."/stderr";
 
     # remove known harmless errors
     $err =~ s|Warning:.*?during\ global\ destruction\.\n||gmx;
@@ -565,23 +569,23 @@ sub get_result {
     $stash = retrieve($dir."/stash") if -f $dir."/stash";
 
     my $rc = -1;
-    $rc = read_file($dir."/rc") if -f $dir."/rc";
+    $rc = Thruk::Utils::IO::read($dir."/rc") if -f $dir."/rc";
     chomp($rc);
 
     my $perl_res;
     if(-f $dir."/perl_res") {
-        $perl_res = read_file($dir."/perl_res");
+        $perl_res = Thruk::Utils::IO::read($dir."/perl_res");
         chomp($perl_res);
     }
 
     my $profiles = [];
     for my $p (glob($dir."/profile.log*")) {
-        my $text = read_file($p);
+        my $text = Thruk::Utils::IO::read($p);
         chomp($text);
         my $htmlfile = $p;
         $htmlfile =~ s/\.log\./.html./gmx;
         if(-e $htmlfile) {
-            my $html = read_file($htmlfile);
+            my $html = Thruk::Utils::IO::read($htmlfile);
             push @{$profiles}, [$html, $text];
         } else {
             push @{$profiles}, $text;
@@ -753,7 +757,7 @@ sub do_child_stuff {
 
     delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
-    Thruk::restore_signal_handler();
+    Thruk::Base::restore_signal_handler();
 
     ## no critic
     $ENV{'THRUK_MODE'}               = 'CLI';
@@ -835,7 +839,7 @@ sub do_parent_stuff {
     # write hostname file
     my $hostfile = $dir."/hostname";
     open($fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
-    print $fh $Thruk::NODE_ID, "\n", $Thruk::HOSTNAME, "\n";
+    print $fh $Thruk::Globals::NODE_ID, "\n", $Thruk::Globals::HOSTNAME, "\n";
     Thruk::Utils::IO::close($fh, $hostfile);
 
     # write start file
@@ -978,13 +982,16 @@ sub _is_running {
 
     # fetch status from remote node
     if(-s $dir."/hostname") {
-        my @hosts = split(/\n/mx, read_file($dir."/hostname"));
-        my $cluster = $c ? $c->cluster : Thruk->cluster;
-        if($cluster->is_clustered() && $hosts[0] ne $Thruk::NODE_ID) {
+        my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
+        chomp($hosts[0]);
+        if($hosts[0] ne $Thruk::Globals::NODE_ID) {
             confess('clustered _is_running requires $c') unless $c;
-            my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
-            if($res && exists $res->[0]) {
-                return($res->[0]);
+            my $cluster = $c->cluster;
+            if($cluster->is_clustered()) {
+                my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
+                if($res && exists $res->[0]) {
+                    return($res->[0]);
+                }
             }
             return(0);
         }
@@ -993,7 +1000,7 @@ sub _is_running {
     # reap pending zombies
     waitpid(-1, WNOHANG);
 
-    my $pid = read_file($dir."/pid");
+    my $pid = Thruk::Utils::IO::read($dir."/pid");
     $pid = Thruk::Utils::IO::untaint($pid);
     waitpid($pid, WNOHANG);
     if(kill(0, $pid) > 0) {
@@ -1094,8 +1101,8 @@ sub _clean_unstorable_refs {
 ##############################################
 sub _reconnect {
     my($c) = @_;
-    return unless $c->{'db'};
-    $c->{'db'}->reconnect() or do {
+    return unless $c->db();
+    $c->db->reconnect() or do {
         print STDERR "reconnect failed: ".$@;
         kill($$);
     };

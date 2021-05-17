@@ -1,11 +1,12 @@
 package Thruk::Request;
-use strict;
 use warnings;
-use Plack 1.0046;
-use parent qw/Plack::Request/;
-use Encode qw/find_encoding/;
+use strict;
+use Encode ();
 use Hash::MultiValue;
+use Plack 1.0046;
 use URI::Escape qw/uri_unescape/;
+
+use parent qw/Plack::Request/;
 
 use constant KEY_BASE_NAME    => 'thruk.request';
 use constant DEFAULT_ENCODING => 'utf-8';

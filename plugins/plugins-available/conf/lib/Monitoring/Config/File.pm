@@ -1,15 +1,15 @@
 package Monitoring::Config::File;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
+use Encode qw(encode_utf8);
 use File::Temp qw/ tempfile /;
-use Monitoring::Config::Object;
-use File::Slurp qw/read_file/;
-use Encode qw(encode_utf8 decode);
-use Thruk::Utils;
-use Thruk::Utils::Conf;
-use Thruk::Utils::IO;
+
+use Monitoring::Config::Object ();
+use Thruk::Utils ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Crypt ();
 
 =head1 NAME
 
@@ -34,8 +34,8 @@ return new file object
 =cut
 sub new {
     my ( $class, $file, $readonlypattern, $coretype, $force, $remotepath ) = @_;
-    Thruk::Utils::decode_any($file);
-    Thruk::Utils::decode_any($remotepath);
+    Thruk::Utils::Encode::decode_any($file);
+    Thruk::Utils::Encode::decode_any($remotepath);
     my $self = {
         'path'         => $file,
         'display'      => $remotepath || $file,
@@ -105,7 +105,7 @@ sub update_objects {
     return unless $self->{'parsed'} == 0;
     return unless defined $self->{'hex'};
 
-    my $text = Thruk::Utils::decode_any(scalar read_file($self->{'path'}));
+    my $text = Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($self->{'path'}));
     $self->update_objects_from_text($text);
     $self->{'changed'} = 0;
     $self->{'backup'}  = "";
@@ -142,9 +142,7 @@ sub update_objects_from_text {
     my $buffer = '';
     my @lines = split(/\n/mx, $text);
     while(@lines) {
-        my $line = shift @lines;
-        $line =~ s/\s+$//gmxo;
-        $line =~ s/^\s+//gmxo;
+        my $line = Thruk::Base::trim_whitespace(shift @lines);
         $linenr++;
         if(substr($line, -1) eq '\\') {
             $line = substr($line, 0, -1);
@@ -408,7 +406,7 @@ sub get_meta_data {
     }
 
     # hex digest
-    $meta->{'hex'} = Thruk::Utils::Crypt::hexdigest(scalar read_file($self->{'path'}));
+    $meta->{'hex'} = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($self->{'path'}));
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -499,7 +497,7 @@ sub diff {
     open(my $ph, '-|', $cmd);
     while(<$ph>) {
         my $line = $_;
-        Thruk::Utils::decode_any($line);
+        Thruk::Utils::Encode::decode_any($line);
         $diff .= $line;
     }
     unlink($filename);
@@ -534,7 +532,7 @@ sub get_new_file_content {
 
     return $new_content if $self->{'deleted'};
 
-    return encode_utf8(Thruk::Utils::decode_any(scalar read_file($self->{'path'}))) unless $self->{'changed'};
+    return encode_utf8(Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($self->{'path'}))) unless $self->{'changed'};
 
     my $linenr = 1;
 
@@ -575,7 +573,7 @@ sub set_backup {
     return if $self->{'backup'};
     return if $self->{'is_new_file'};
     # read file from disk
-    $self->{'backup'}  = scalar read_file($self->{'path'});
+    $self->{'backup'}  = Thruk::Utils::IO::read($self->{'path'});
     return;
 }
 
@@ -632,10 +630,10 @@ sub try_merge {
     $cmd = 'cd '.$tmpdir.' && patch -F 10 -p0 < patch 2>&1';
     my($rc2, $out) = Thruk::Utils::IO::cmd(undef, $cmd);
 
-    my $text = Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg'));
+    my $text = Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg'));
 
     my $rej;
-    $rej = ":\n".Thruk::Utils::decode_any(scalar read_file($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
+    $rej = ":\n".Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg.rej')) if -e $tmpdir.'/file1.cfg.rej';
 
     # cleanup
     unlink(glob($tmpdir.'/*'));

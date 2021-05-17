@@ -1,8 +1,11 @@
 package Thruk::Controller::Root;
 
-use strict;
 use warnings;
+use strict;
 use URI::Escape qw/uri_escape/;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -73,7 +76,7 @@ sub thruk_index {
     }
 
     # custom start page?
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     $c->stash->{'start_page'} = $c->stash->{'url_prefix'}.'main.html' unless defined $c->stash->{'start_page'};
     if( CORE::index($c->stash->{'start_page'}, $c->stash->{'url_prefix'}) != 0 ) {
 
@@ -103,7 +106,7 @@ page: /thruk/index.html
 sub thruk_index_html {
     my( $c ) = @_;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     if(!$c->stash->{'use_frames'}) {
         return(thruk_main_html($c));
     }
@@ -134,7 +137,7 @@ page: /thruk/side.html
 
 sub thruk_side_html {
     my( $c ) = @_;
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     Thruk::Utils::check_pid_file($c);
     Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
 
@@ -159,7 +162,7 @@ page: /thruk/frame.html
 sub thruk_frame_html {
     my( $c ) = @_;
     # allowed links to be framed
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = $c->config->{'allowed_frame_links'};
     if( defined $additional_links ) {
@@ -209,7 +212,7 @@ sub thruk_main_html {
     my( $c ) = @_;
 
     $c->stash->{'hide_backends_chooser'}   = 1;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';
     $c->stash->{'page'}                    = 'splashpage';
     $c->stash->{'template'}                = 'main.tt';
@@ -230,7 +233,7 @@ page: /thruk/changes.html
 sub thruk_changes_html {
     my( $c ) = @_;
     $c->stash->{'hide_backends_chooser'} = 1;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     $c->stash->{infoBoxTitle}            = 'Change Log';
     $c->stash->{'title'}                 = 'Change Log';
     $c->stash->{'no_auto_reload'}        = 1;
@@ -253,7 +256,7 @@ page: /thruk/docs/
 sub thruk_docs  {
     my( $c ) = @_;
     $c->stash->{'hide_backends_chooser'} = 1;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     $c->stash->{infoBoxTitle}            = 'Documentation';
     $c->stash->{'title'}                 = 'Documentation';
     $c->stash->{'no_auto_reload'}        = 1;
@@ -275,7 +278,8 @@ page: /thruk/cgi-bin/job.cgi
 
 sub job_cgi {
     my( $c ) = @_;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    require Thruk::Utils::External;
     return Thruk::Utils::External::job_page($c);
 }
 
@@ -293,15 +297,15 @@ sub parts_cgi {
     return $c->detach('/error/index/25') unless $part;
 
     if($part eq '_header_prefs') {
-        Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
         $c->stash->{'template'} = '_header_prefs.tt';
         return;
     }
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
     if($part eq '_host_comments') {
         my $host = $c->req->parameters->{'host'};
-        $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
+        $c->stash->{'comments'}  = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
         $c->stash->{'template'}  = '_parts_comments.tt';
         return;
@@ -309,7 +313,7 @@ sub parts_cgi {
 
     if($part eq '_host_downtimes') {
         my $host = $c->req->parameters->{'host'};
-        $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => '' } ] );
+        $c->stash->{'downtimes'} = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => '' } ] );
         $c->stash->{'type'}      = 'host';
         $c->stash->{'template'}  = '_parts_downtimes.tt';
         return;
@@ -318,7 +322,7 @@ sub parts_cgi {
     if($part eq '_service_comments') {
         my $host = $c->req->parameters->{'host'};
         my $svc  = $c->req->parameters->{'service'};
-        $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => $svc } ] );
+        $c->stash->{'comments'}  = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => $svc } ] );
         $c->stash->{'type'}      = 'service';
         $c->stash->{'template'}  = '_parts_comments.tt';
         return;
@@ -327,7 +331,7 @@ sub parts_cgi {
     if($part eq '_service_downtimes') {
         my $host = $c->req->parameters->{'host'};
         my $svc  = $c->req->parameters->{'service'};
-        $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => $svc } ] );
+        $c->stash->{'downtimes'} = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => $svc } ] );
         $c->stash->{'type'}      = 'service';
         $c->stash->{'template'}  = '_parts_downtimes.tt';
         return;
@@ -336,7 +340,7 @@ sub parts_cgi {
     if($part eq '_service_info_popup') {
         my $host     = $c->req->parameters->{'host'};
         my $svc      = $c->req->parameters->{'service'};
-        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $svc } ], extra_columns => [qw/long_plugin_output/] );
+        my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $svc } ], extra_columns => [qw/long_plugin_output/] );
         return $c->detach('/error/index/18') unless $services->[0];
         $c->stash->{'s'}         = $services->[0];
         $c->stash->{'template'}  = '_parts_service_info_popup.tt';

@@ -1,9 +1,13 @@
 package Thruk::Controller::statusmap;
 
-use strict;
 use warnings;
+use strict;
 use Carp;
 use Module::Load qw/load/;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -25,7 +29,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
     if(!$c->config->{'statusmap_modules_loaded'}) {
         load Data::Dumper, qw/Dumper/;
@@ -67,12 +71,12 @@ sub index {
 
     $c->{'all_nodes'} = {};
 
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
 
     # do we need servicegroups?
     if($c->stash->{groupby} eq 'servicegroup') {
         my $new_hosts;
-        my $servicegroups = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, groups => { '!=' => undef }], columns => [qw/host_name groups/]);
+        my $servicegroups = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, groups => { '!=' => undef }], columns => [qw/host_name groups/]);
         my $servicegroupsbyhost = {};
         if(defined $servicegroups) {
             for my $data (@{$servicegroups}) {
@@ -137,7 +141,7 @@ sub index {
     $c->stash->{template}      = 'statusmap.tt';
     $c->stash->{infoBoxTitle}  = 'Network Map';
 
-    Thruk::Utils::Status::set_custom_title($c);
+    Thruk::Action::AddDefaults::set_custom_title($c);
 
     return 1;
 }

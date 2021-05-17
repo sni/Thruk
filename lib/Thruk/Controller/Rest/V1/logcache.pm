@@ -1,8 +1,10 @@
 package Thruk::Controller::Rest::V1::logcache;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+
+use Thruk::Backend::Manager ();
+use Thruk::Controller::rest_v1 ();
 
 =head1 NAME
 
@@ -23,6 +25,37 @@ Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/logcache/sta
 sub _rest_get_thruk_logcache_stats {
     my($c) = @_;
 
+    my $pre = _check_prereqs($c);
+    return($pre) if $pre;
+
+    my @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
+    Thruk::Backend::Manager::close_logcache_connections($c);
+    return(\@stats);
+}
+
+##########################################################
+# REST PATH: POST /thruk/logcache/update
+# runs the logcache delta update.
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/logcache/update$%mx, \&_rest_get_thruk_logcache_update);
+sub _rest_get_thruk_logcache_update {
+    my($c) = @_;
+
+    my $pre = _check_prereqs($c);
+    return($pre) if $pre;
+
+    my($backends_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, 'update');
+    Thruk::Backend::Manager::close_logcache_connections($c);
+    return({
+        'errors'       => $errors,
+        'message'      => 'logcache update finished.',
+        'insert_count' => $log_count,
+        'code'         => scalar @{$errors} == 0 ? 200 : 500,
+    });
+}
+
+##########################################################
+sub _check_prereqs {
+    my($c) = @_;
     if(!$c->config->{'logcache'}) {
         return({
             'message' => 'logcache is disabled',
@@ -47,12 +80,7 @@ sub _rest_get_thruk_logcache_stats {
             'code'    => 500,
         });
     }
-
-    my @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
-    Thruk::Backend::Manager::close_logcache_connections($c);
-    return(\@stats);
+    return;
 }
-
-##########################################################
 
 1;

@@ -1,10 +1,11 @@
 package Thruk::Utils::Conf::Tools::CombineIdenticalServices;
 
-use strict;
 use warnings;
+use strict;
 use Storable qw/dclone/;
-use Encode qw/encode_utf8/;
-use Thruk::Utils::Conf;
+
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Crypt ();
 
 =head1 NAME
 

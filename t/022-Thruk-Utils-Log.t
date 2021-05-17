@@ -3,7 +3,8 @@
 use warnings;
 use strict;
 use Test::More;
-use File::Slurp qw/read_file/;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -23,7 +24,7 @@ sub check_logger {
     ok($file, $file);
     return if $file =~ m|/Monitoring/Livestatus.pm$|gmx;
     return if $file =~ m|/Thruk/Utils/Log.pm$|gmx;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     if($content =~ m/(_debug|_error|_warn|_info|_audit_log)\(/gmx && $content !~ m/\Quse Thruk::Utils::Log\E/gmx) {
         unless($content =~ m/\Quse Thruk::Utils::Log\E/gmx) {
             fail($file." uses logger but misses 'use Thruk::Utils::Log'");

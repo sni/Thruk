@@ -1,8 +1,13 @@
 package Thruk::Controller::reports2;
 
-use strict;
 use warnings;
+use strict;
 use Module::Load qw/load/;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Request ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -25,7 +30,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->check_user_roles('authorized_for_reports')) {
         return $c->detach('/error/index/26');
@@ -77,8 +82,8 @@ sub index {
         }
         $sub = 'Thruk::Utils::Avail::calculate_availability' unless $sub;
         if($backends and ($c->req->parameters->{'backends_toggle'} or $c->req->parameters->{'report_backends_toggle'})) {
-            $c->{'db'}->disable_backends();
-            $c->{'db'}->enable_backends($backends);
+            $c->db->disable_backends();
+            $c->db->enable_backends($backends);
         }
         if($c->req->parameters->{'param'}) {
             my $req = Thruk::Request->new({ QUERY_STRING => $c->req->parameters->{'param'} });
@@ -503,7 +508,7 @@ sub _set_report_data {
     $c->stash->{'t2'} = $c->stash->{'t2'} - $c->stash->{'t2'}%60;
 
     $c->stash->{r}           = $r;
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{timeperiods} = $c->db->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
     $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
 
     Thruk::Utils::Reports::add_report_defaults($c, undef, $r);

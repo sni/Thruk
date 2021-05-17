@@ -1,7 +1,7 @@
 package Monitoring::Config::Multi;
 
-use strict;
 use warnings;
+use strict;
 use Module::Load qw/load/;
 
 =head1 NAME

@@ -10,12 +10,12 @@ UserAgent wrapper for Thruk
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
-use File::Temp qw/tempfile/;
-use HTTP::Response ();
 use HTTP::Request::Common;
+use HTTP::Response ();
+
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
@@ -329,7 +329,8 @@ sub request {
     my $tempfile;
     if($content ne "") {
         if(length($content) > 100) {
-            (undef, $tempfile) = tempfile(TEMPLATE => 'postdataXXXXX', UNLINK => 1);
+            require File::Temp;
+            (undef, $tempfile) = File::Temp::tempfile(TEMPLATE => 'postdataXXXXX', UNLINK => 1);
             Thruk::Utils::IO::write($tempfile, $content);
             push @{$cmd}, '--data-binary', '@'.$tempfile;
         } else {

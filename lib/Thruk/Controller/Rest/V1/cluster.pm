@@ -1,8 +1,9 @@
 package Thruk::Controller::Rest::V1::cluster;
 
-use strict;
 use warnings;
-use Thruk::Controller::rest_v1;
+use strict;
+
+use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -75,10 +76,10 @@ sub _rest_get_thruk_cluster_restart {
     my $nodes = {};
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
-        _debug(sprintf("restarting node: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("restarting node: %s -> %s", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
         # run stop on all nodes, apache will start them again automatically
         $c->cluster->run_cluster($n, "Thruk::Utils::stop_all", [$c]);
-        _debug(sprintf("restarting node: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("restarting node: %s -> %s: done", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
 
     sleep(1);
@@ -86,9 +87,9 @@ sub _rest_get_thruk_cluster_restart {
     # ping nodes to start at least one process
     for my $n (@{$c->cluster->{'nodes'}}) {
         next if $c->cluster->is_it_me($n);
-        _debug(sprintf("sending heartbeat: %s -> %s", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("sending heartbeat: %s -> %s", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
         $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
-        _debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
+        _debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
 
     alarm(0);

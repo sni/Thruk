@@ -1,8 +1,9 @@
-use strict;
 use warnings;
-use Test::More;
-use File::Slurp qw/read_file/;
+use strict;
 use File::Temp qw/tempfile/;
+use Test::More;
+
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 eval "use Test::JavaScript";
@@ -46,7 +47,7 @@ js_eval_ok($jsfiles[0]);
 
 #################################################
 # tests from javascript_tests file
-my @functions = read_file('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+my @functions = Thruk::Utils::IO::read_as_list('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/data/javascript_tests.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");
@@ -59,7 +60,7 @@ js_ok("var location = '';"         , "defined location fake object");
 js_ok("window.location = '';"      , "defined window.location fake object");
 js_ok("function cookieRemoveAll() {};" , "override cookie function");
 _eval_extracted_js('templates/login.tt');
-@functions = read_file('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\w+)/gmx;
+@functions = Thruk::Utils::IO::read_as_list('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/data/javascript_tests_login_tt.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");
@@ -75,7 +76,7 @@ done_testing();
 sub _eval_extracted_js {
     my($file) = @_;
     ok(1, "extracting from ".$file);
-    my $cont = read_file($file);
+    my $cont = Thruk::Utils::IO::read($file);
     my @codes = $cont =~ m/<script[^>]*text\/javascript.*?>(.*?)<\/script>/gsmxi;
     my $jscode = join("\n", @codes);
     $jscode =~ s/\[\%\s*product_prefix\s*\%\]/thruk/gmx;

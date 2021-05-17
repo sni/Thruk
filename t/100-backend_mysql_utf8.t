@@ -1,6 +1,8 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
+
+use Thruk::Base ();
 
 plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
@@ -34,10 +36,10 @@ my $blocksize   = undef;
 # create tables
 Thruk::Action::AddDefaults::set_possible_backends($c, {});
 my $backends = $c->stash->{'backends'};
-$backends    = Thruk::Utils::list($backends);
+$backends    = Thruk::Base::list($backends);
 my $prefix   = $backends->[0];
 isnt($prefix, undef, 'got peer key: '.$prefix) or BAIL_OUT("got no peer key, cannot test");
-my $peer     = $c->{'db'}->get_peer_by_key($prefix);
+my $peer     = $c->db->get_peer_by_key($prefix);
 isnt($peer, undef, 'got backend by key');
 $peer->{'_logcache'} = $m;
 $m->{'_peer'} = $m;

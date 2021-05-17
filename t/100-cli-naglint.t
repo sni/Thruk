@@ -1,7 +1,7 @@
-use strict;
 use warnings;
-use Test::More;
+use strict;
 use File::Temp qw/ tempfile /;
+use Test::More;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;

@@ -2,9 +2,11 @@ package Thruk::Timer;
 
 use warnings;
 use strict;
-use File::Slurp qw/read_file/;
-use Time::HiRes qw/gettimeofday tv_interval/;
 use Exporter 'import';
+use POSIX ();
+use Time::HiRes qw/gettimeofday tv_interval/;
+use threads ();
+
 our @EXPORT_OK = qw(timing_breakpoint);
 
 my $starttime   = [gettimeofday];
@@ -12,6 +14,7 @@ my $lasttime    = $starttime;
 my $lastmemory  = 0;
 my $has_threads = 0;
 my $has_memory  = 1;
+require Thruk::Utils::IO;
 
 # do not print column header during tests
 if(!$INC{'Test/More.pm'} && !$ENV{'THRUK_STRACE_DEBUG'}) {
@@ -31,7 +34,7 @@ sub timing_breakpoint {
     my $memory   = '';
     my $deltamem = '';
     if($has_memory) {
-        my $status   = read_file('/proc/'.$$.'/status');
+        my $status   = Thruk::Utils::IO::read('/proc/'.$$.'/status');
         if($status     =~ m/^VmRSS:\s*(\d+)\s+kB/smxo) {
             $memory     = $1;
             $deltamem   = $memory - $lastmemory;

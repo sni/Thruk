@@ -1,11 +1,11 @@
 package Thruk::Utils::RecurringDowntimes;
 
-use strict;
 use warnings;
+use strict;
 use File::Copy qw/move/;
 
-use Thruk::Utils;
-use Thruk::Utils::Auth;
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
 
 =head1 NAME
 
@@ -95,26 +95,26 @@ sub get_downtimes_list {
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
     if($host || $service) {
-        my $host_data    = $c->{'db'}->get_hosts(filter => \@hostfilter,    columns => [qw/name groups/]);
-        $hosts    = Thruk::Utils::array2hash($host_data, 'name');
+        my $host_data    = $c->db->get_hosts(filter => \@hostfilter,    columns => [qw/name groups/]);
+        $hosts    = Thruk::Base::array2hash($host_data, 'name');
         undef $host_data;
-        my $service_data = $c->{'db'}->get_services(filter => \@servicefilter, columns => [qw/host_name description host_groups groups/] );
-        $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
+        my $service_data = $c->db->get_services(filter => \@servicefilter, columns => [qw/host_name description host_groups groups/] );
+        $services = Thruk::Base::array2hash($service_data,  'host_name', 'description');
         undef $service_data;
     }
 
     if($service) {
-        $hostgroups    = Thruk::Utils::array2hash($services->{$host}->{$service}->{'host_groups'});
-        $servicegroups = Thruk::Utils::array2hash($services->{$host}->{$service}->{'groups'});
+        $hostgroups    = Thruk::Base::array2hash($services->{$host}->{$service}->{'host_groups'});
+        $servicegroups = Thruk::Base::array2hash($services->{$host}->{$service}->{'groups'});
     }
     elsif($host) {
-        $hostgroups    = Thruk::Utils::array2hash($hosts->{$host}->{'groups'});
+        $hostgroups    = Thruk::Base::array2hash($hosts->{$host}->{'groups'});
     }
 
     # which objects is the user allowed to see
     my($authhosts, $authservices, $authhostgroups, $authservicegroups) = ({},{},{},{});
     if($auth) {
-        my $host_data = $c->{'db'}->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name groups/]);
+        my $host_data = $c->db->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name groups/]);
         for my $h (@{$host_data}) {
             $authhosts->{$h->{'name'}} = 1;
             for my $g (@{$h->{'groups'}}) {
@@ -122,7 +122,7 @@ sub get_downtimes_list {
             }
         }
         undef $host_data;
-        my $service_data = $c->{'db'}->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services')], columns => [qw/host_name description host_groups groups/]);
+        my $service_data = $c->db->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services')], columns => [qw/host_name description host_groups groups/]);
         for my $s (@{$service_data}) {
             $authservices->{$s->{'host_name'}}->{$s->{'description'}} = 1;
             for my $g (@{$s->{'host_groups'}}) {
@@ -211,6 +211,8 @@ sub read_downtime {
     $d->{'file'} = $dfile;
     $d->{'file'} =~ s|^.*/||gmx;
     $d->{'file'} =~ s|\.tsk$||gmx;
+    my @stat = stat(_);
+    $d->{'last_changed'} = $stat[9] unless $d->{'last_changed'};
 
     # set fallback target
     if(!$d->{'target'}) {
@@ -294,7 +296,7 @@ sub read_downtime {
     }
 
     # backend filter?
-    my $backends = Thruk::Utils::list($d->{'backends'});
+    my $backends = Thruk::Base::list($d->{'backends'});
     if(!$backendfilter && scalar @{$backends} > 0) {
         my $found = 0;
         $found = 1 if $backends->[0] eq ''; # no backends at all
@@ -402,8 +404,8 @@ sub get_default_recurring_downtime {
     push @{$default_rd->{'hostgroup'}},    $hostgroup    if $hostgroup;
     if($c->req->parameters->{'backend'}) {
         $default_rd->{'backends'} = [split/\s*,\s*/mx, $c->req->parameters->{'backend'}];
-    } elsif($c->{'db'}) {
-        $default_rd->{'backends'} = $c->{'db'}->peer_key();
+    } elsif($c->db()) {
+        $default_rd->{'backends'} = $c->db->peer_key();
     }
     return($default_rd);
 }
@@ -424,9 +426,9 @@ sub get_downtime_backends {
     my $backends = ref $downtime->{'backends'} eq 'ARRAY' ? $downtime->{'backends'} : [$downtime->{'backends'}];
     my $choose_backends = 0;
     my $cmd_typ;
-    if(scalar @{$backends} == 0 and @{$c->{'db'}->get_peers()} > 1) {
+    if(scalar @{$backends} == 0 and @{$c->db->get_peers()} > 1) {
         $choose_backends = 1;
-        $c->{'db'}->enable_backends();
+        $c->db->enable_backends();
     }
     if(!$downtime->{'target'}) {
         $downtime->{'target'} = 'host';
@@ -436,29 +438,29 @@ sub get_downtime_backends {
     if($downtime->{'target'} eq 'host') {
         $cmd_typ = 55;
         if($choose_backends) {
-            my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $downtime->{'host'} } ], columns => [qw/name/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+            my $data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $downtime->{'host'} } ], columns => [qw/name/] );
+            $backends = [keys %{Thruk::Base::array2hash($data, 'peer_key')}];
         }
     }
     elsif($downtime->{'target'} eq 'service') {
         $cmd_typ = 56;
         if($choose_backends) {
-            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $downtime->{'host'}, 'description' => $downtime->{'service'} } ], columns => [qw/description/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+            my $data = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $downtime->{'host'}, 'description' => $downtime->{'service'} } ], columns => [qw/description/] );
+            $backends = [keys %{Thruk::Base::array2hash($data, 'peer_key')}];
         }
     }
     elsif($downtime->{'target'} eq 'hostgroup') {
         $cmd_typ = 84;
         if($choose_backends) {
-            my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'groups' => { '>=' => $downtime->{'hostgroup'} }} ], columns => [qw/name/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+            my $data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'groups' => { '>=' => $downtime->{'hostgroup'} }} ], columns => [qw/name/] );
+            $backends = [keys %{Thruk::Base::array2hash($data, 'peer_key')}];
         }
     }
     elsif($downtime->{'target'} eq 'servicegroup') {
         $cmd_typ = 122;
         if($choose_backends) {
-            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'groups' => { '>=' => $downtime->{'servicegroup'} }} ], columns => [qw/description/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+            my $data = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'groups' => { '>=' => $downtime->{'servicegroup'} }} ], columns => [qw/description/] );
+            $backends = [keys %{Thruk::Base::array2hash($data, 'peer_key')}];
         }
     }
 

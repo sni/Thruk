@@ -13,25 +13,22 @@ Utilities Collection for Reporting
 use warnings;
 use strict;
 use Carp;
-use Data::Dumper;
 use Class::Inspector;
-use File::Slurp;
-use Thruk::Utils;
-use Thruk::Utils::CLI;
-use Thruk::Utils::IO;
-use Thruk::Utils::Reports::Render;
-use Thruk::Views::ToolkitRenderer;
-use Thruk::Utils::External;
-use Thruk::Action::AddDefaults;
-use Thruk::Utils::Log qw/:all/;
-use MIME::Lite;
-use File::Copy;
-use Encode qw(encode_utf8 decode_utf8 encode);
-use Storable qw/dclone/;
-use File::Temp qw/tempfile/;
 use Cwd ();
-use Time::HiRes qw/sleep/;
+use Data::Dumper;
+use Encode qw(encode_utf8 decode_utf8 encode);
+use File::Copy;
+use MIME::Lite;
 use POSIX ();
+use Storable qw/dclone/;
+use Time::HiRes qw/sleep/;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Reports::Render ();
+use Thruk::Utils::Status ();
+use Thruk::Views::ToolkitRenderer ();
 
 ##########################################################
 
@@ -121,7 +118,7 @@ sub report_show {
             if(!-e $html_file) {
                 $html_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
             }
-            my $report_text = decode_utf8(read_file($html_file));
+            my $report_text = decode_utf8(Thruk::Utils::IO::read($html_file));
             $report_text    =~ s/^<body>/<body class="preview">/mx;
             $report_text    =~ s/^<html>/<html class="preview">/mx;
             $c->stash->{'text'} = $report_text;
@@ -133,9 +130,9 @@ sub report_show {
             $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             if($report->{'var'}->{'ctype'}) {
                 if($report->{'var'}->{'ctype'} eq 'text/html') {
-                    $c->res->headers->content_type("text/html;charset=utf-8");
+                    $c->res->content_type("text/html; charset=utf-8");
                 } else {
-                    $c->res->headers->content_type($report->{'var'}->{'ctype'});
+                    $c->res->content_type($report->{'var'}->{'ctype'});
                 }
             }
             my $fh;
@@ -289,7 +286,7 @@ sub report_send {
         next if $key eq 'subject';
         $msg->add($key => $mailheader->{$key});
     }
-    $msg->attach(Type     => 'text/plain; charset=UTF-8',
+    $msg->attach(Type     => 'text/plain; charset=utf-8',
                  Data     => $mailbody,
     );
 
@@ -327,7 +324,7 @@ sub report_send {
     if($report->{'var'}->{'json_file'} && -e $report->{'var'}->{'json_file'}) {
         $msg->attach(Type    => 'text/json',
                  Path        => $report->{'var'}->{'json_file'},
-                 Filename    => encode_utf8(Thruk::Utils::basename($report->{'var'}->{'json_file'})),
+                 Filename    => encode_utf8(Thruk::Base::basename($report->{'var'}->{'json_file'})),
                  Disposition => 'attachment',
                  Encoding    => 'base64',
         );
@@ -343,7 +340,7 @@ sub report_send {
             @send_args = ($send_type);
             my $send_scalar_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_args};
             if($send_scalar_args) {
-                push @send_args, @{Thruk::Utils::list($send_scalar_args)};
+                push @send_args, @{Thruk::Base::list($send_scalar_args)};
             }
             my $send_named_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_named_args};
             if($send_named_args) {
@@ -463,7 +460,7 @@ sub generate_report {
     set_waiting($c, $nr, 0);
 
     # don't run report twice per minute
-    if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::NODE_ID)) {
+    if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
         if($options->{'var'}->{'start_time'}) {
             if(POSIX::strftime("%Y-%m-%d %H:%M", localtime($options->{'var'}->{'start_time'})) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
                 return -2;
@@ -474,7 +471,7 @@ sub generate_report {
     set_running($c, $nr, $$, time()) unless $options->{'var'}->{'is_running'} > 0;
 
     # report is already beeing generated, check if the other process is alive
-    if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::NODE_ID)) {
+    if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::Globals::NODE_ID)) {
         # if started by cron, just exit, some other node is doing the report already
         return -2 if $ENV{'THRUK_CRON'};
 
@@ -562,13 +559,13 @@ sub generate_report {
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 2, 'getting backends') if $ENV{'THRUK_JOB_DIR'};
 
     # check backend connections
-    my $processinfo = $c->{'db'}->get_processinfo();
+    my $processinfo = $c->db->get_processinfo();
     if($options->{'backends'}) {
         my @failed;
         for my $b (keys %{$disabled_backends}) {
             next unless $disabled_backends->{$b} == 0;
             if($c->stash->{'failed_backends'}->{$b}) {
-                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+                push @failed, $c->db->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
         }
         if($options->{'failed_backends'} eq 'cancel') {
@@ -647,7 +644,7 @@ sub generate_report {
 
     # set error if not already set
     if(!-f $attachment && !$Thruk::Utils::Reports::error) {
-        $Thruk::Utils::Reports::error = read_file($logfile);
+        $Thruk::Utils::Reports::error = Thruk::Utils::IO::read($logfile);
     }
     _error($Thruk::Utils::Reports::error);
 
@@ -656,7 +653,7 @@ sub generate_report {
         my @failed;
         for my $b (@{$options->{'backends'}}) {
             if($c->stash->{'failed_backends'}->{$b}) {
-                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+                push @failed, $c->db->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
         }
         if($options->{'failed_backends'} eq 'cancel' and scalar @failed > 0) {
@@ -865,7 +862,7 @@ sub get_report_data_from_param {
     my $nested_keys = {};
     for my $key (keys %{$params}) {
         next unless $key =~ m/^params\.([\w]+)\.([\w]+)$/mx;
-        $p->{$1}->{$2} = Thruk::Utils::list($params->{$key});
+        $p->{$1}->{$2} = Thruk::Base::list($params->{$key});
         $nested_keys->{$1} = 1;
     }
     for my $key (sort keys %{$nested_keys}) {
@@ -1025,10 +1022,10 @@ sub set_running {
             $update->{'var'}->{'running_node'} = undef;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         } else {
-            $update->{'var'}->{'running_node'} = $Thruk::NODE_ID;
+            $update->{'var'}->{'running_node'} = $Thruk::Globals::NODE_ID;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => {
                                         is_running   => $val,
-                                        running_node => $Thruk::NODE_ID,
+                                        running_node => $Thruk::Globals::NODE_ID,
                                         is_waiting   => undef,
                                     }}, { pretty => 1, allow_empty => 1 });
         }
@@ -1209,7 +1206,7 @@ sub get_running_reports_number {
     for my $nr (keys %{$index}) {
         if($index->{$nr}->{'is_waiting'}) {
             $waiting++;
-        } elsif(($index->{$nr}->{'is_running'}//0) != 0 && ($index->{$nr}->{'running_node'}//'') eq $Thruk::NODE_ID) {
+        } elsif(($index->{$nr}->{'is_running'}//0) != 0 && ($index->{$nr}->{'running_node'}//'') eq $Thruk::Globals::NODE_ID) {
             $running++;
         }
     }
@@ -1341,7 +1338,7 @@ sub read_report_file {
         return $c->detach('/error/index/99');
     }
 
-    my($report_fh, $lock_fh) = Thruk::Utils::IO::file_lock($file, 'ex');
+    my($report_fh, $lock_fh) = Thruk::Utils::IO::file_lock($file);
     my $report = Thruk::Utils::IO::json_retrieve($file, $report_fh);
     $report->{'nr'} = $nr;
     $report = get_new_report($c, $report);
@@ -1436,8 +1433,8 @@ sub read_report_file {
     }
     if($ENV{'THRUK_REPORT_PARENT'} && $report->{'var'}->{'is_running'} == $ENV{'THRUK_REPORT_PARENT'}) {
         $report->{'var'}->{'is_running'} = $$;
-        $report->{'var'}->{'running_node'} = $Thruk::NODE_ID;
-        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::NODE_ID, is_waiting => undef }}, { pretty => 1, allow_empty => 1 });
+        $report->{'var'}->{'running_node'} = $Thruk::Globals::NODE_ID;
+        Thruk::Utils::IO::json_lock_patch($index_file, { $nr => { is_running => $$, running_node => $Thruk::Globals::NODE_ID, is_waiting => undef }}, { pretty => 1, allow_empty => 1 });
         $needs_save = 1;
     }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
@@ -1470,7 +1467,7 @@ sub read_report_file {
     # failed?
     $report->{'failed'} = 0;
     if(-s $log) {
-        $report->{'error'} = read_file($log);
+        $report->{'error'} = Thruk::Utils::IO::read($log);
 
         # strip performance debug output
         $report->{'error'}  =~ s%^\[.*INFO.*Req:.*$%%gmx;
@@ -1530,7 +1527,7 @@ sub _is_authorized_for_report {
         return 1;
     }
 
-    return 1 if Thruk->mode eq 'CLI';
+    return 1 if Thruk::Base->mode eq 'CLI';
 
     if(defined $c->stash->{'remote_user'}) {
         if(defined $report->{'user'} && $report->{'user'} eq $c->stash->{'remote_user'}) {
@@ -1585,7 +1582,7 @@ sub _get_report_cmd {
     if($niceval > 0) {
         $thruk_bin = $nice.' -n '.$niceval.' '.$thruk_bin;
     }
-    $numbers = Thruk::Utils::list($numbers);
+    $numbers = Thruk::Base::list($numbers);
     my $cmd = sprintf("cd %s && %s '%s report \"%s\"' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
@@ -1738,7 +1735,7 @@ sub _convert_to_pdf {
 
     # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
-        my $error = read_file($logfile);
+        my $error = Thruk::Utils::IO::read($logfile);
         if($error eq "") { $error = $out; }
         if($error =~ m/QPainter::begin/mx) {
             $out = Thruk::Utils::IO::cmd($cmd);
@@ -1849,7 +1846,7 @@ sub _report_die {
     $Thruk::Utils::Reports::error = $err;
     set_running($c, $nr, 0, undef, time()) if $nr;
     check_for_waiting_reports($c);
-    if($ENV{'THRUK_CRON'} || (Thruk->mode eq 'CLI')) {
+    if($ENV{'THRUK_CRON'} || (Thruk::Base->mode eq 'CLI')) {
         return;
     }
     return $c->detach('/error/index/13');
@@ -1871,7 +1868,7 @@ sub apply_report_parameters {
 
     for my $p (keys %{$from}) {
         if($p eq 'filter') {
-            my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, $from->{$p});
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, $from->{$p}, 1);
             if($from->{'filter_type'} eq 'Both') {
                 $to->{'s_filter'} = $servicefilter;
                 $to->{'include_host_services'} = 1;

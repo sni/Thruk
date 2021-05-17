@@ -1,14 +1,15 @@
 package Thruk::BP::Utils;
 
-use strict;
 use warnings;
-use File::Temp qw/tempfile/;
-use File::Copy qw/move/;
-use File::Slurp qw/read_file/;
+use strict;
 use Carp;
+use File::Copy qw/move/;
+use File::Temp qw/tempfile/;
 
-use Thruk::Utils::Filter;
-use Thruk::BP::Components::BP;
+use Thruk::Action::AddDefaults ();
+use Thruk::BP::Components::BP ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -27,21 +28,44 @@ Helper for the business process addon
 
 =head2 load_bp_data
 
-    load_bp_data($c, [$num], [$editmode], [$drafts], [$backend_id])
+    load_bp_data($c, [$options])
 
-editmode:
-    - 0/undef:    no edit mode
-    - 1:          only edit mode
+options => {
+    edit:
+        - 0/undef:    no edit mode
+        - 1:          only edit mode
 
-drafts:
-    - 0/undef:    skip drafts
-    - 1:          load drafts too
+    drafts:
+        - 0/undef:    skip drafts
+        - 1:          load drafts too
+
+    id:
+        - <id>:       load obly BPs which match given id
+
+    backend:
+        - <id>:       load only BPs which match given backend
+
+    skip_nodes:
+        - 0/undef:    load node data
+        - 1:          skip loading nodes
+
+    skip_runtime:
+        - 0/undef:    load runtime data
+        - 1:          skip loading runtime data
+}
 
 load all or specific business process
 
 =cut
 sub load_bp_data {
-    my($c, $num, $editmode, $drafts, $backend_id) = @_;
+    my($c, $opt) = @_;
+
+    if(defined $opt && ref $opt ne 'HASH') {
+        confess("load_bp_data options have been changed to hash.");
+    }
+
+    my $num        = $opt->{'id'};
+    my $backend_id = $opt->{'backend'};
 
     # make sure our folders exist
     my $base_folder = bp_base_folder($c);
@@ -63,7 +87,7 @@ sub load_bp_data {
     if($c->check_user_roles("admin")) {
         $is_admin = 1;
     } else {
-        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $svcfilter ], columns => ['custom_variable_names', 'custom_variable_values'] );
+        my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $svcfilter ], columns => ['custom_variable_names', 'custom_variable_values'] );
         for my $s (@{$services}) {
             my $vars = Thruk::Utils::get_custom_vars($c, $s);
             if($vars->{'THRUK_BP_ID'}) {
@@ -78,7 +102,7 @@ sub load_bp_data {
         my $nr = $file;
         $nr =~ s|^.*/(\d+)\.tbp$|$1|mx;
         next if(!$is_admin && !$allowed->{$nr});
-        my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
+        my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $opt->{'edit'}, $opt->{'skip_nodes'}, $opt->{'skip_runtime'});
         if($bp) {
             if($backend_id) {
                 if(!$bp->{'bp_backend'} || $bp->{'bp_backend'} ne $backend_id) {
@@ -90,7 +114,7 @@ sub load_bp_data {
             $numbers->{$bp->{'id'}} = 1;
         }
     }
-    if($drafts) {
+    if($opt->{'drafts'}) {
         # load drafts too
         my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.edit');
         for my $file (@files) {
@@ -100,7 +124,7 @@ sub load_bp_data {
             next if(!$is_admin && !$allowed->{$nr});
             next if $num && $num != $nr;
             $file  = $base_folder.'/'.$nr.'.tbp';
-            my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
+            my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1, $opt->{'skip_nodes'}, $opt->{'skip_runtime'});
             if($bp) {
                 $bp->{'remote'} = 0;
                 push @{$bps}, $bp;
@@ -111,6 +135,10 @@ sub load_bp_data {
 
     # sort by name
     @{$bps} = sort { $a->{'name'} cmp $b->{'name'} } @{$bps};
+
+    if(!$num && !$opt->{'skip_runtime'}) {
+        check_update_index($c, $bps);
+    }
 
     return($bps);
 }
@@ -255,8 +283,8 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = Thruk::Utils::Crypt::hexdigest(scalar read_file($filename));
-    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(scalar read_file($file)) : '';
+    my $new_hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
+    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
     # check if something changed
     if($new_hex ne $old_hex) {
@@ -266,8 +294,8 @@ sub save_bp_objects {
         }
         my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
         if(!$result_backend) {
-            my $peer_key = $c->{'db'}->peer_order->[0];
-            $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
+            my $peer_key = $c->db->peer_order->[0];
+            $result_backend = $c->db->get_peer_by_key($peer_key)->peer_name;
         }
 
         if($skip_reload) {
@@ -278,11 +306,11 @@ sub save_bp_objects {
         my $time = time();
         my $pkey;
         if($result_backend) {
-            my $peer = $c->{'db'}->get_peer_by_key($result_backend);
+            my $peer = $c->db->get_peer_by_key($result_backend);
             if($peer) {
                 $pkey = $peer->peer_key();
                 if(!$c->stash->{'has_proc_info'} || !$c->stash->{'backend_detail'}->{$pkey}) {
-                    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+                    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
                 }
                 if(!defined $c->stash->{'backend_detail'}->{$pkey} || !$c->stash->{'backend_detail'}->{$pkey}->{'running'}) {
                     return(0, "reload skipped, backend offline");
@@ -302,7 +330,7 @@ sub save_bp_objects {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
                 'backend' => [ $pkey ],
             };
-            $c->{'db'}->send_command( %{$options} );
+            $c->db->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
             $reloaded = 1;
         }
@@ -656,7 +684,10 @@ return base folder of business process files
 =cut
 sub bp_base_folder {
     my($c) = @_;
-    return(Thruk::Utils::base_folder($c).'/bp');
+    our $base_folder;
+    return($base_folder) if $base_folder;
+    $base_folder = Thruk::Utils::base_folder($c).'/bp';
+    return($base_folder);
 }
 
 ##########################################################
@@ -809,5 +840,44 @@ sub get_nodes_grouped_by_state {
     # nothing found
     return(3, [], {});
 }
+
+##########################################################
+
+=head2 check_update_index
+
+    check_update_index($c, [$bps])
+
+runs index update if neccessary.
+
+=cut
+sub check_update_index {
+    my($c, $bps) = @_;
+    if($ENV{'THRUK_CRON'} || !-s $c->config->{'var_path'}.'/bp/.index' || (stat(_))[9] < time()-300) {
+        _update_index($c, $bps);
+    }
+    return;
+}
+
+##########################################################
+sub _update_index {
+    my($c, $bps) = @_;
+    $c->stats->profile(begin => "_update_index");
+
+    my $index = {};
+    $bps = load_bp_data($c) unless $bps;
+    for my $bp (@{$bps}) {
+        for my $n (@{$bp->{'nodes'}}) {
+            if($n->{'bp_ref'}) {
+                push @{$index->{$n->{'bp_ref'}}}, [$bp->{'id'}, $n->{'bp_ref_peer'}];
+            }
+        }
+    }
+    Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/bp/.index', $index, { pretty => 1 });
+
+    $c->stats->profile(end => "_update_index");
+    return;
+}
+
+##########################################################
 
 1;

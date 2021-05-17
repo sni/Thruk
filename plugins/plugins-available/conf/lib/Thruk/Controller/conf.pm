@@ -1,21 +1,28 @@
 package Thruk::Controller::conf;
 
-use strict;
 use warnings;
-use Monitoring::Config;
-use Socket qw/inet_ntoa/;
-use File::Copy;
-use Cpanel::JSON::XS;
-use Storable qw/dclone/;
+use strict;
 use Data::Dumper qw/Dumper/;
-use File::Slurp qw/read_file/;
 use Encode qw/decode_utf8 encode_utf8/;
-use Thruk::Utils::References;
-use Thruk::Utils::Conf;
-use Thruk::Utils::Conf::Defaults;
-use Thruk::Utils::Plugin;
-use Thruk::Authentication::User;
+use File::Copy;
+use Socket qw/inet_ntoa/;
+use Storable qw/dclone/;
+
+use Monitoring::Config::File ();
+use Monitoring::Config::Object ();
+use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
+use Thruk::Backend::Peer ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Conf ();
+use Thruk::Utils::Conf::Defaults ();
+use Thruk::Utils::Crypt ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Plugin ();
+use Thruk::Utils::References ();
+use Thruk::Utils::Status ();
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -39,7 +46,7 @@ sub index {
     my($c) = @_;
 
     # Safe Defaults required for changing backends
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     #&timing_breakpoint('index start');
 
     my $subcat = $c->req->parameters->{'sub'}    || '';
@@ -50,10 +57,10 @@ sub index {
         # ok
     }
     elsif(!$c->check_user_roles("admin")) {
-        if(    !defined $c->{'db'}
-            || !defined $c->{'db'}->{'backends'}
-            || ref $c->{'db'}->{'backends'} ne 'ARRAY'
-            || scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+        if(    !defined $c->db()
+            || !defined $c->db->{'backends'}
+            || ref $c->db->{'backends'} ne 'ARRAY'
+            || scalar @{$c->db->{'backends'}} == 0 ) {
             # no backends configured or thruk config not possible
             if($c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'}) {
                 return $c->detach("/error/index/14");
@@ -175,7 +182,7 @@ sub _process_json_page {
     if($type eq 'icon') {
         my $objects = [];
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'home'}."/themes";
-        my $icon_dirs  = Thruk::Utils::list($c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos");
+        my $icon_dirs  = Thruk::Base::list($c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos");
         for my $dir (@{$icon_dirs}) {
             $dir =~ s/\/$//gmx;
             next unless -d $dir.'/.';
@@ -229,7 +236,7 @@ sub _process_json_page {
             if(defined $c->req->parameters->{'plugin'} and $c->req->parameters->{'plugin'} ne '') {
                 my $help = $c->{'obj_db'}->get_plugin_help($c, $c->req->parameters->{'plugin'});
                 my @options = $help =~ m/(\-[\w\d]|\-\-[\d\w\-_]+)[=|,|\s|\$]/gmx;
-                push @{$json}, { 'name' => 'arguments', 'data' => Thruk::Utils::array_uniq(\@options) } if scalar @options > 0;
+                push @{$json}, { 'name' => 'arguments', 'data' => Thruk::Base::array_uniq(\@options) } if scalar @options > 0;
             }
         }
         return $c->render(json => $json);
@@ -289,7 +296,7 @@ sub _process_json_page {
             }
         }
         my $json = [{ 'name' => $type.'s',
-                      'data' => [ sort @{Thruk::Utils::array_uniq($members)} ],
+                      'data' => [ sort @{Thruk::Base::array_uniq($members)} ],
                    }];
         return $c->render(json => $json);
     }
@@ -317,7 +324,7 @@ sub _process_json_page {
             }
         }
         my $json = [{ 'name' => $type.'s',
-                      'data' => [ sort @{Thruk::Utils::array_uniq($descriptions)} ],
+                      'data' => [ sort @{Thruk::Base::array_uniq($descriptions)} ],
                    }];
         return $c->render(json => $json);
     }
@@ -327,12 +334,12 @@ sub _process_json_page {
         my $for  = $c->req->parameters->{'obj'};
         my $attr = $c->{'obj_db'}->get_default_keys($for, { no_alias => 1 });
         if($c->stash->{conf_config}->{'extra_custom_var_'.$for}) {
-            for my $extra (@{Thruk::Utils::list($c->stash->{conf_config}->{'extra_custom_var_'.$for})}) {
+            for my $extra (@{Thruk::Base::list($c->stash->{conf_config}->{'extra_custom_var_'.$for})}) {
                 my @extras = split/\s*,\s*/mx, $extra;
                 push @{$attr}, @extras;
             }
         }
-        $attr = [ sort @{Thruk::Utils::array_uniq($attr)} ];
+        $attr = [ sort @{Thruk::Base::array_uniq($attr)} ];
 
         # add existing custom variables from this type
         my $vars = Thruk::Utils::Status::get_custom_variable_names($c, $for, 0);
@@ -387,10 +394,10 @@ sub _process_json_page {
             }
         }
         $json = [ { 'name' => $type.'s',
-                    'data' => [ sort @{Thruk::Utils::array_uniq($objects)} ],
+                    'data' => [ sort @{Thruk::Base::array_uniq($objects)} ],
                   },
                   { 'name' => $type.' templates',
-                    'data' => [ sort @{Thruk::Utils::array_uniq($templates)} ],
+                    'data' => [ sort @{Thruk::Base::array_uniq($templates)} ],
                   },
                 ];
     }
@@ -477,7 +484,7 @@ sub _process_cgi_page {
         lock_author_names
     /];
     my $authgroupkeys = [];
-    for my $key (@{$Thruk::Authentication::User::possible_roles}) {
+    for my $key (@{$Thruk::Constants::possible_roles}) {
         push @{$authkeys}, $key;
         my $groupkey = $key;
         $groupkey =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
@@ -648,7 +655,7 @@ sub _process_users_page {
             Thruk::Utils::store_user_data($c, $userdata, $name);
         }
         if($send eq 'remove user profile data') {
-            if(!Thruk::Utils::check_for_nasty_filename($name)) {
+            if(!Thruk::Base::check_for_nasty_filename($name)) {
                 unlink($profile_file);
                 Thruk::Utils::set_message( $c, 'success_message', 'profile removed successfully' );
             }
@@ -687,7 +694,7 @@ sub _process_users_page {
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'hex'}        = $hex;
         $c->stash->{'roles'}      = {};
-        my $roles = $Thruk::Authentication::User::possible_roles;
+        my $roles = $Thruk::Constants::possible_roles;
         $c->stash->{'role_keys'}  = $roles;
         for my $role (@{$roles}) {
             $c->stash->{'roles'}->{$role} = 0;
@@ -704,7 +711,7 @@ sub _process_users_page {
         }
 
         $c->stash->{'has_contact'} = 0;
-        my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => $name ] );
+        my $contacts = $c->db->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => $name ] );
         if(defined $contacts and scalar @{$contacts} >= 1) {
             $c->stash->{'has_contact'}    = 1;
             $c->stash->{'contact'}        = $contacts->[0];
@@ -748,7 +755,7 @@ sub _process_plugins_page {
         $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
         if(-e $path) {
-            $c->stash->{'text'} = read_file($path);
+            $c->stash->{'text'} = Thruk::Utils::IO::read($path);
         }
         $c->stash->{'template'} = 'passthrough.tt';
         return 1;
@@ -840,7 +847,7 @@ sub _process_backends_page {
             next unless $backend->{'name'};
             delete $backend->{'id'} if $backend->{'id'} eq '';
 
-            $backend->{'options'}->{'peer'} = Thruk::Utils::list($backend->{'options'}->{'peer'});
+            $backend->{'options'}->{'peer'} = Thruk::Base::list($backend->{'options'}->{'peer'});
 
             for my $p (@{$backend->{'options'}->{'peer'}}) {
                 if($backend->{'type'} eq 'livestatus' and $p =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
@@ -851,7 +858,7 @@ sub _process_backends_page {
             # add values from existing backend config
             my $savefile = $file;
             if(defined $backend->{'id'}) {
-                my $peer = $c->{'db'}->get_peer_by_key($backend->{'id'});
+                my $peer = $c->db->get_peer_by_key($backend->{'id'});
                 $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
                 $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
@@ -910,7 +917,7 @@ sub _process_backends_page {
     }
 
     my $backends = [];
-    my $peers    = $c->{'db'}->get_peers(1);
+    my $peers    = $c->db->get_peers(1);
     $peers = [{}] if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
         my $b = Thruk::Utils::dclone($p->{'peer_config'});
@@ -991,7 +998,7 @@ sub _process_objects_page {
 
     # get object from params
     $c->stash->{cloned}    = 0;
-    $c->stash->{clone_ref} = Thruk::Utils::list($c->req->parameters->{'clone_ref'} || []);
+    $c->stash->{clone_ref} = Thruk::Base::list($c->req->parameters->{'clone_ref'} || []);
     my $obj = _get_context_object($c);
     if(defined $obj) {
 
@@ -1170,7 +1177,7 @@ sub _process_objects_page {
             my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
             my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
             my($content, $data, $hex) = Thruk::Utils::Conf::read_conf($file, $defaults);
-            my $roles = $Thruk::Authentication::User::possible_roles;
+            my $roles = $Thruk::Constants::possible_roles;
             $c->stash->{'hex'}       = $hex;
             $c->stash->{'role_keys'} = $roles;
             for my $role (@{$roles}) {
@@ -1293,7 +1300,7 @@ sub _apply_config_changes {
             Thruk::Utils::set_message( $c, 'fail_message', "reload is disabled in demo mode" );
             return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
         }
-        if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
+        if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
                                                message => 'please stand by while configuration is beeing reloaded...',
@@ -1887,7 +1894,7 @@ sub _set_files_stash {
 
     # file root is empty when there are no files (yet)
     if($files_root eq '') {
-        my $dirs = Thruk::Utils::list($c->{'obj_db'}->{'config'}->{'obj_dir'});
+        my $dirs = Thruk::Base::list($c->{'obj_db'}->{'config'}->{'obj_dir'});
         if(defined $dirs->[0]) {
             $files_root = $dirs->[0];
             $files_root =~ s/\/*$//gmx;
@@ -1946,7 +1953,7 @@ sub _object_disable {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] disabled %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
@@ -1970,7 +1977,7 @@ sub _object_enable {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] enabled %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
@@ -1994,7 +2001,7 @@ sub _object_delete {
 
     if($c->req->parameters->{'ref'}) {
         my $name        = $obj->get_name();
-        my $refs_delete = Thruk::Utils::list($c->req->parameters->{'ref'});
+        my $refs_delete = Thruk::Base::list($c->req->parameters->{'ref'});
         for my $id (@{$refs_delete}) {
             for my $type (keys %{$refs}) {
                 if($refs->{$type}->{$id}) {
@@ -2023,7 +2030,7 @@ sub _object_delete {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] removed %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $obj->get_type(),
                                 $obj->get_name(),
@@ -2065,7 +2072,7 @@ sub _object_save {
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
     push @{$c->{'obj_db'}->{'logs'}},
         sprintf("[config][%s][%s] %s %s '%s'",
-                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                 $c->stash->{'remote_user'},
                                 $new ? 'created' : 'changed',
                                 $obj->get_type(),
@@ -2130,7 +2137,7 @@ sub _object_move {
         $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
         push @{$c->{'obj_db'}->{'logs'}},
             sprintf("[config][%s][%s] moved %s '%s' to '%s'",
-                                    $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                    $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
                                     $c->stash->{'remote_user'},
                                     $obj->get_type(),
                                     $obj->get_name(),
@@ -2353,7 +2360,7 @@ sub _file_editor {
         $c->stash->{'line'}          = $c->req->parameters->{'line'} || 1;
         $c->stash->{'file_content'}  = '';
         if(-f $filename) {
-            my $content                  = read_file($filename);
+            my $content                  = Thruk::Utils::IO::read($filename);
             $c->stash->{'file_content'}  = decode_utf8($content);
         }
         $c->stash->{'template'}      = $c->config->{'use_feature_editor'} ? 'conf_objects_fancyeditor.tt' : 'conf_objects_fileeditor.tt';
@@ -2395,7 +2402,7 @@ sub _file_history {
 
     my $logs = _get_git_logs($c, $dir);
 
-    Thruk::Backend::Manager::page_data($c, $logs);
+    Thruk::Utils::page_data($c, $logs);
     $c->stash->{'logs'} = $logs;
     $c->stash->{'dir'}  = $dir;
     return;
@@ -2522,7 +2529,7 @@ sub _get_git_commit {
 ##########################################################
 sub _get_git_blame {
     my($c, $path, $line_start, $line_end) = @_;
-    my $dir = Thruk::Utils::dirname($path);
+    my $dir = Thruk::Base::dirname($path);
     my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."'";
     my $output = Thruk::Utils::IO::cmd($cmd);
     my $blame = {lines => [], commits => {}};
@@ -2710,13 +2717,13 @@ sub _config_reload {
     $c->stash->{'original_output'} = "";
     my $time = time();
     my $name = $c->stash->{'param_backend'};
-    my $peer = $c->{'db'}->get_peer_by_key($name);
+    my $peer = $c->db->get_peer_by_key($name);
     my $pkey = $peer->peer_key();
     my $wait = 1;
 
     my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
     if(!$last_reload) {
-        my $processinfo = $c->{'db'}->get_processinfo(backends => $pkey);
+        my $processinfo = $c->db->get_processinfo(backends => $pkey);
         $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time() - 1);
     }
 
@@ -2746,7 +2753,7 @@ sub _config_reload {
             'command' => sprintf("COMMAND [%d] RESTART_PROCESS", $time),
             'backend' => [ $pkey ],
         };
-        $c->{'db'}->send_command( %{$options} );
+        $c->db->send_command( %{$options} );
         $c->stash->{'output'} = 'config reloaded by external command.';
     }
     $c->stats->profile(comment => "reload command issued: ".time());
@@ -2826,7 +2833,7 @@ sub _gather_references {
 ##########################################################
 sub _is_extra_file {
     my($filename, $edit_files) = @_;
-    $edit_files = Thruk::Utils::list($edit_files);
+    $edit_files = Thruk::Base::list($edit_files);
     for my $file (@{$edit_files}) {
         # direct match
         if($file eq $filename) {
@@ -2857,7 +2864,7 @@ sub _get_non_config_tool_references {
             $all_hosts->{$host_name} = 1;
         }
         for my $hostgroup_name (@{$obj->{'conf'}->{'hostgroup_name'}}) {
-            my $groups = $c->{'db'}->get_hostgroups(filter => [{ name => $hostgroup_name }], backend => [$c->stash->{'param_backend'}], columns => [qw/name members/]);
+            my $groups = $c->db->get_hostgroups(filter => [{ name => $hostgroup_name }], backend => [$c->stash->{'param_backend'}], columns => [qw/name members/]);
             for my $group (@{$groups}) {
                 for my $host_name (@{$group->{'members'}}) {
                     $all_hosts->{$host_name} = 1;

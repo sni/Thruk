@@ -1,13 +1,12 @@
 package Monitoring::Livestatus;
 
-use 5.006;
-use strict;
 use warnings;
-use Data::Dumper qw/Dumper/;
+use strict;
 use Carp qw/carp confess/;
 use Cpanel::JSON::XS ();
-use Storable qw/dclone/;
+use Data::Dumper qw/Dumper/;
 use IO::Select ();
+use Storable qw/dclone/;
 
 use Monitoring::Livestatus::INET ();
 use Monitoring::Livestatus::UNIX ();
@@ -68,7 +67,6 @@ path to the UNIX socket of check_mk livestatus
 
 =item server
 
-uses this server for a TCP connection
 
 =item peer
 
@@ -1003,7 +1001,6 @@ adds the peers name, addr and key to the result set:
 =head2 Backend
 
 send the query only to some specific backends. Only
-useful when using multiple backends.
 
  my $hosts = $ml->selectall_arrayref(
    "GET hosts\nColumns: name alias state",

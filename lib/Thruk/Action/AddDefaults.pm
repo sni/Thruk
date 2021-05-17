@@ -15,19 +15,23 @@ creates backend manager
 =cut
 
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use Cpanel::JSON::XS qw/encode_json/;
-use Scalar::Util qw/weaken/;
 use POSIX ();
-use Storable qw/dclone/;
+use Scalar::Util qw/weaken/;
 use URI::Escape qw/uri_escape/;
-use Thruk::Utils::Filter ();
-use Thruk::Utils::LMD ();
+
+use Thruk::Base ();
+use Thruk::Config 'noautoload';
 use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Utils ();
+use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Menu ();
+use Thruk::Utils::Timezone ();
 
 my @stash_config_keys = qw/
     url_prefix product_prefix title_prefix use_pager start_page documentation_link
@@ -104,7 +108,7 @@ sub begin {
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
-    my $available_themes = Thruk::Utils::array2hash($c->config->{'themes'});
+    my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
 
@@ -148,13 +152,10 @@ sub begin {
     $c->stash->{'iframed'} = $c->req->parameters->{'iframed'} || 0;
 
     # additional views on status pages
-    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
+    $c->stash->{'additional_views'} = $Thruk::Globals::additional_views || {};
 
     # icon image path
     $c->stash->{'logo_path_prefix'}  = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/logos/';
-
-    # make private _ hash keys available
-    $Template::Stash::PRIVATE = undef;
 
     # view mode must be a scalar
     for my $key (qw/view_mode hidesearch hidetop style/) {
@@ -183,10 +184,10 @@ sub begin {
         my $product_prefix = $c->config->{'product_prefix'};
         # if changed, adjust thruk_auth as well
         if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
-            _debug($1.".cgi does not require authentication") if Thruk->debug;
+            _debug($1.".cgi does not require authentication") if Thruk::Base->debug;
         } else {
             if(!$c->authenticate(skip_db_access => 1)) {
-                _debug("user authentication failed") if Thruk->verbose;
+                _debug("user authentication failed") if Thruk::Base->verbose;
                 return $c->detach('/error/index/10');
             }
         }
@@ -304,8 +305,8 @@ sub end {
                 }
                 # there will be new scalars from time to time
                 delete $res->{'SCALAR'} if $res->{'SCALAR'} and $res->{'SCALAR'} < 10;
-                if($Thruk::COUNT >= 2 && scalar keys %{$res} > 0) {
-                    _info("request: ".$Thruk::COUNT." (".$c->req->path."):");
+                if($Thruk::Globals::COUNT >= 2 && scalar keys %{$res} > 0) {
+                    _info("request: ".$Thruk::Globals::COUNT." (".$c->req->path."):");
                     for my $key (sort { ($res->{$b} <=> $res->{$a}) } keys %{$res}) {
                         _info(sprintf("+%-10i %30s  -  total %10i\n", $res->{$key}, $key, $c->config->{'arena'}->{$key}));
                     }
@@ -317,16 +318,16 @@ sub end {
                 }
             }
         };
-        print STDERR $@ if $@ && Thruk->debug;
+        print STDERR $@ if $@ && Thruk::Base->debug;
     }
 
     # figure out intelligent titles
     # only if use_dynamic_titles is true
     # we haven't found a bookmark title
     # and a custom title wasn't set
-    if(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_dynamic_titles'} && $c->stash->{page}) {
+    if(!set_custom_title($c) && $c->stash->{'use_dynamic_titles'} && $c->stash->{page}) {
         # titles for status.cgi
-        if($c->stash->{page} eq 'status') {
+        if($c->stash->{page} eq 'status' && $c->stash->{'real_page'} ne 'bp') {
             if($c->stash->{'hostgroup'}) {
                 $c->stash->{'title'} = $c->stash->{'hostgroup'} eq 'all' ? 'All Hostgroups' : $c->stash->{'hostgroup'};
             }
@@ -424,7 +425,9 @@ sub add_defaults {
             Thruk::Config::set_default_config($c->config);
             set_configs_stash($c);
             if($backends_changed) {
+                require Thruk::Backend::Pool;
                 my $pool = Thruk::Backend::Pool->new($c->config->{'Thruk::Backend'}->{'peer'});
+                require Thruk::Backend::Manager;
                 $c->{'db'} = Thruk::Backend::Manager->new($pool);
             }
             add_defaults($c, $safe, 1);
@@ -456,15 +459,8 @@ sub add_defaults {
             }
         }
     }
-    ## no critic
-    if($timezone) {
-        # set users timezone
-        $ENV{'TZ'} = $timezone;
-        POSIX::tzset();
-    } else {
-        # set back to server timezone
-        $c->app->set_timezone();
-    }
+    Thruk::Utils::Timezone::set_timezone($c->config, $timezone);
+
     ## use critic
     $c->stash->{'user_tz'} = $user_tz;
 
@@ -477,7 +473,7 @@ sub add_defaults {
 
     ###############################
     # redirect to error page unless we have a connection
-    if(!$c->{'db'} || scalar @{$c->{'db'}->peer_order} == 0 ) {
+    if(!$c->db() || scalar @{$c->db->peer_order} == 0 ) {
 
         return 1 if $c->{'errored'};
 
@@ -511,7 +507,7 @@ sub add_defaults {
 
     ###############################
     # no backend?
-    return unless $c->{'db'};
+    return unless $c->db();
 
     ###############################
     # read cached data
@@ -533,7 +529,7 @@ sub add_defaults {
         my $err;
         for my $x (1..$retries) {
             # reset failed states, otherwise retry would be useless
-            $c->{'db'}->reset_failed_backends($c);
+            $c->db->reset_failed_backends($c);
 
             eval {
                 $last_program_restart = set_processinfo($c, $safe, $cached_data);
@@ -547,7 +543,7 @@ sub add_defaults {
         if($err) {
             # side.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
-            if(Thruk->debug) {
+            if(Thruk::Base->debug) {
                 _warn("data source error: $err");
             } else {
                 _debug("data source error: $err");
@@ -559,7 +555,7 @@ sub add_defaults {
 
         ###############################
         # disable backends by groups
-        if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
+        if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->db()) {
             $disabled_backends = _disable_backends_by_group($c, $disabled_backends);
         }
         set_possible_backends($c, $disabled_backends);
@@ -571,7 +567,7 @@ sub add_defaults {
         if(   !$c->stash->{'last_program_restart'}
            || !$c->user->{'timestamp'}
            || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
-           || Thruk::Base::mode_cli()
+           || Thruk::Base->mode_cli()
            || ($c->user->{'timestamp'} < (time() - 600))
         ) {
             # refresh dynamic roles and groups
@@ -620,7 +616,7 @@ sub add_defaults {
     $c->stash->{'show_config_edit_buttons'} = 0;
     if($c->config->{'use_feature_configtool'} && $c->check_user_roles("admin")) {
         # get backends with object config
-        for my $peer (@{$c->{'db'}->get_peers(1)}) {
+        for my $peer (@{$c->db->get_peers(1)}) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $c->stash->{'show_config_edit_buttons'} = $c->config->{'show_config_edit_buttons'};
                 $c->stash->{'backends_with_obj_config'}->{$peer->{'key'}} = 1;
@@ -642,13 +638,7 @@ sub add_defaults {
         }
     }
 
-    $c->stash->{'has_lmd'} = 0;
-    if($c->config->{'use_lmd_core'}) {
-        $c->stash->{'has_lmd'}   = 1;
-        ## no critic
-        $ENV{'THRUK_LMD_VERSION'} = Thruk::Utils::LMD::get_lmd_version($c->config) unless $ENV{'THRUK_LMD_VERSION'};
-        ## use critic
-    }
+    $c->stash->{'has_lmd'} = $c->config->{'use_lmd_core'} ? 1 : 0;
 
     ###############################
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
@@ -677,7 +667,7 @@ sub add_safe_defaults {
     eval {
         add_defaults($c, ADD_SAFE_DEFAULTS);
     };
-    print STDERR $@ if($@ && Thruk->debug);
+    print STDERR $@ if($@ && Thruk::Base->debug);
     return;
 }
 
@@ -745,7 +735,7 @@ sub set_possible_backends {
     my ($c,$disabled_backends) = @_;
 
     my @possible_backends;
-    for my $b (@{$c->{'db'}->get_peers($c->stash->{'config_backends_only'} || 0)}) {
+    for my $b (@{$c->db->get_peers($c->stash->{'config_backends_only'} || 0)}) {
         push @possible_backends, $b->{'key'};
     }
 
@@ -754,12 +744,12 @@ sub set_possible_backends {
 
     for my $back (@possible_backends) {
         if(defined $disabled_backends->{$back} && $disabled_backends->{$back} == DISABLED_AUTH) {
-            $c->{'db'}->disable_backend($back);
+            $c->db->disable_backend($back);
             next;
         }
-        my $peer = $c->{'db'}->get_peer_by_key($back);
+        my $peer = $c->db->get_peer_by_key($back);
         if($peer->{disabled} && $peer->{disabled} == HIDDEN_LMD_PARENT) {
-            $c->{'db'}->disable_backend($back);
+            $c->db->disable_backend($back);
             next;
         }
         $backend_detail{$back} = {
@@ -812,7 +802,7 @@ sub update_site_panel_hashes {
 
     # create flat list of backend hashes used in javascript
     for my $back (@{$backends}) {
-        my $peer = $c->{'db'}->get_peer_by_key($back);
+        my $peer = $c->db->get_peer_by_key($back);
         $initial_backends->{$back} = {
             key              => $back,
             name             => $peer->{'name'} || 'unknown',
@@ -833,8 +823,8 @@ sub update_site_panel_hashes {
     }
 
     # create sections and subsection for site panel
-    $c->{'db'}->update_sections(); # need to recalculate, using the config tool removes sections without config backends
-    _calculate_section_totals($c, $c->{'db'}->{'sections'}, $backend_detail, $initial_backends);
+    $c->db->update_sections(); # need to recalculate, using the config tool removes sections without config backends
+    _calculate_section_totals($c, $c->db->{'sections'}, $backend_detail, $initial_backends);
 
     my $show_sitepanel = 'list';
        if($c->config->{'sitepanel'} eq 'list')      { $show_sitepanel = 'list'; }
@@ -843,16 +833,16 @@ sub update_site_panel_hashes {
     elsif($c->config->{'sitepanel'} eq 'tree')      { $show_sitepanel = 'tree'; }
     elsif($c->config->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
     elsif($c->config->{'sitepanel'} eq 'auto') {
-        if($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 100)   { $show_sitepanel = 'tree'; }
-        elsif($c->{'db'}->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
-        elsif($c->{'db'}->{'sections'}->{'sub'} || scalar @{$backends} >= 10)  { $show_sitepanel = 'panel'; }
+        if($c->db->{'sections_depth'} > 1 || scalar @{$backends} >= 100)   { $show_sitepanel = 'tree'; }
+        elsif($c->db->{'sections_depth'} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
+        elsif($c->db->{'sections'}->{'sub'} || scalar @{$backends} >= 10)  { $show_sitepanel = 'panel'; }
         elsif(scalar @{$backends} == 1) { $show_sitepanel = 'off'; }
         else { $show_sitepanel = 'list'; }
     }
 
     $c->stash->{'initial_backends'} = $initial_backends;
     $c->stash->{'show_sitepanel'}   = $show_sitepanel;
-    $c->stash->{'sites'}            = $c->{'db'}->{'sections'};
+    $c->stash->{'sites'}            = $c->db->{'sections'};
 
     # merge all panel in a Default section
     if($c->stash->{'show_sitepanel'} eq 'panel') {
@@ -891,7 +881,7 @@ sub _calculate_section_totals {
             $class = 'DOWN' if $c->stash->{'failed_backends'}->{$pd};
             $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_USER;
             $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
-            $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Utils::list($c->stash->{'param_backend'})});
+            $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Base::list($c->stash->{'param_backend'})});
             $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
             $class = 'UP'   if($backend_detail->{$pd}->{'disabled'} == UP_CONF && $class ne 'DOWN');
             $backend_detail->{$pd}->{'class'} = $class;
@@ -919,8 +909,8 @@ sub _calculate_section_totals {
 sub _disable_backends_by_group {
     my ($c,$disabled_backends) = @_;
 
-    my $contactgroups = Thruk::Utils::array2hash($c->user->{'groups'});
-    for my $peer (@{$c->{'db'}->get_peers()}) {
+    my $contactgroups = Thruk::Base::array2hash($c->user->{'groups'});
+    for my $peer (@{$c->db->get_peers()}) {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
                 if(defined $contactgroups->{$group}) {
@@ -977,7 +967,7 @@ sub set_processinfo {
     my $processinfo;
     $cached_data->{'processinfo'} = {} unless defined $cached_data->{'processinfo'};
     my $fetch = 0;
-    my($selected) = $c->{'db'}->select_backends('get_status');
+    my($selected) = $c->db->select_backends('get_status');
     if($safe) { # cached or safe
         $processinfo = $cached_data->{'processinfo'};
         for my $key (@{$selected}) {
@@ -995,7 +985,7 @@ sub set_processinfo {
 
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
-        $processinfo = $c->{'db'}->get_processinfo() unless $c->config->{'lmd_remote'};
+        $processinfo = $c->db->get_processinfo() unless $c->config->{'lmd_remote'};
         if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0) {
             # may happen when no backends are selected or the current selected backends comes from a federation http
             $processinfo = {};
@@ -1023,7 +1013,7 @@ sub set_processinfo {
         for my $backend (keys %{$processinfo}) {
             next if !defined $processinfo->{$backend}->{'program_start'};
             $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
-            $c->{'db'}->{'last_program_starts'}->{$backend} = $processinfo->{$backend}->{'program_start'};
+            $c->db->{'last_program_starts'}->{$backend} = $processinfo->{$backend}->{'program_start'};
         }
     }
 
@@ -1058,8 +1048,8 @@ sub set_enabled_backends {
     my($c, $backends) = @_;
 
     # first all backends are enabled
-    if(defined $c->{'db'}) {
-        $c->{'db'}->enable_backends();
+    if(defined $c->db()) {
+        $c->db->enable_backends();
     }
 
     if($c->req->parameters->{'backend'} && $c->req->parameters->{'backends'}) {
@@ -1068,27 +1058,27 @@ sub set_enabled_backends {
     my $backend  = $c->req->parameters->{'backend'} || $c->req->parameters->{'backends'};
     $c->stash->{'param_backend'} = $backend || '';
     my $disabled_backends = {};
-    my $num_backends      = @{$c->{'db'}->get_peers()};
+    my $num_backends      = @{$c->db->get_peers()};
     $c->stash->{'num_backends'} = $num_backends;
 
     ###############################
     # by args
     if(defined $backends) {
-        _debug('set_enabled_backends() by args') if Thruk->debug;
+        _debug('set_enabled_backends() by args') if Thruk::Base->debug;
         # reset
-        for my $peer (@{$c->{'db'}->get_peers()}) {
+        for my $peer (@{$c->db->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
-        for my $str (@{Thruk::Utils::list($backends)}) {
+        for my $str (@{Thruk::Base::list($backends)}) {
             for my $b (split(/\s*,\s*/mx, $str)) {
                 # peer key can be name too
                 if($b eq 'ALL') {
-                    for my $peer (@{$c->{'db'}->get_peers()}) {
+                    for my $peer (@{$c->db->get_peers()}) {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     }
                 }
                 elsif($b eq 'LOCAL') {
-                    for my $peer (@{$c->{'db'}->get_local_peers()}) {
+                    for my $peer (@{$c->db->get_local_peers()}) {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     }
                 }
@@ -1097,7 +1087,7 @@ sub set_enabled_backends {
                         _warn(sprintf("no backend found for section: %s", $b));
                     }
                 } else {
-                    my $peer = $c->{'db'}->get_peer_by_key($b);
+                    my $peer = $c->db->get_peer_by_key($b);
                     if($peer) {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     } else {
@@ -1112,20 +1102,20 @@ sub set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        _debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk->debug;
+        _debug('set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'})) if Thruk::Base->debug;
         # reset
-        for my $peer (@{$c->{'db'}->get_peers()}) {
+        for my $peer (@{$c->db->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
         for my $b (split(/;/mx, $ENV{'THRUK_BACKENDS'})) {
             # peer key can be name too
             if($b eq 'ALL') {
-                for my $peer (@{$c->{'db'}->get_peers()}) {
+                for my $peer (@{$c->db->get_peers()}) {
                     $disabled_backends->{$peer->{'key'}} = 0;
                 }
             }
             elsif($b eq 'LOCAL') {
-                for my $peer (@{$c->{'db'}->get_local_peers()}) {
+                for my $peer (@{$c->db->get_local_peers()}) {
                     $disabled_backends->{$peer->{'key'}} = 0;
                 }
             }
@@ -1134,7 +1124,7 @@ sub set_enabled_backends {
                     _warn(sprintf("no backend found for section: %s", $b));
                 }
             } else {
-                my $peer = $c->{'db'}->get_peer_by_key($b);
+                my $peer = $c->db->get_peer_by_key($b);
                 if($peer) {
                     $disabled_backends->{$peer->{'key'}} = 0;
                 } else {
@@ -1151,14 +1141,14 @@ sub set_enabled_backends {
     ###############################
     # by param
     elsif($num_backends > 1 and defined $backend) {
-        _debug('set_enabled_backends() by param') if Thruk->debug;
+        _debug('set_enabled_backends() by param') if Thruk::Base->debug;
         # reset
-        for my $peer (@{$c->{'db'}->get_peers()}) {
+        for my $peer (@{$c->db->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
         }
         if($backend eq 'ALL') {
             my @keys;
-            for my $peer (@{$c->{'db'}->get_peers()}) {
+            for my $peer (@{$c->db->get_peers()}) {
                 $disabled_backends->{$peer->{'key'}} = 0;
                 push @keys, $peer->{'key'};
             }
@@ -1166,7 +1156,7 @@ sub set_enabled_backends {
         }
         elsif($backend eq 'LOCAL') {
             my @keys;
-            for my $peer (@{$c->{'db'}->get_local_peers()}) {
+            for my $peer (@{$c->db->get_local_peers()}) {
                 $disabled_backends->{$peer->{'key'}} = 0;
                 push @keys, $peer->{'key'};
             }
@@ -1186,33 +1176,33 @@ sub set_enabled_backends {
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
-        _debug('set_enabled_backends() by cookie') if Thruk->debug;
+        _debug('set_enabled_backends() by cookie') if Thruk::Base->debug;
         for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
             $disabled_backends->{$key} = $value;
         }
     }
-    elsif(defined $c->{'db'}) {
-        _debug('set_enabled_backends() using defaults') if Thruk->debug;
+    elsif(defined $c->db()) {
+        _debug('set_enabled_backends() using defaults') if Thruk::Base->debug;
         my $display_too = 0;
         if(defined $c->req->header('user-agent') and $c->req->header('user-agent') !~ m/thruk/mxi) {
             $display_too = 1;
         }
-        $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends, $display_too);
+        $disabled_backends = $c->db->disable_hidden_backends($disabled_backends, $display_too);
     }
 
     ###############################
     # groups affected?
     my $has_groups = 0;
-    if(defined $c->{'db'}) {
-        for my $peer (@{$c->{'db'}->get_peers()}) {
+    if(defined $c->db()) {
+        for my $peer (@{$c->db->get_peers()}) {
             if(defined $peer->{'groups'}) {
                 $has_groups = 1;
                 $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
             }
         }
-        $c->{'db'}->disable_backends($disabled_backends);
+        $c->db->disable_backends($disabled_backends);
     }
     _debug("backend groups filter enabled") if $has_groups;
 
@@ -1220,7 +1210,7 @@ sub set_enabled_backends {
     if(defined $backends) {
         set_possible_backends($c, $disabled_backends);
     }
-    _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk->debug;
+    _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk::Base->debug;
     return($disabled_backends, $has_groups);
 }
 
@@ -1230,7 +1220,7 @@ sub _set_disabled_by_section {
     $backend =~ s/\/$//gmx;
     $backend = $backend.'/';
     my $found;
-    for my $peer (@{$c->{'db'}->get_peers()}) {
+    for my $peer (@{$c->db->get_peers()}) {
         my $test = $peer->{'section'}.'/';
         if($test =~ m|^\Q$backend\E|mx) {
             $disabled_backends->{$peer->{'key'}} = 0;
@@ -1307,7 +1297,7 @@ sub check_federation_peers {
     return($processinfo, $cached_data) if $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
     my $all_sites_info;
     eval {
-        $all_sites_info = $c->{'db'}->get_sites(backend => ["ALL"], sort => {'ASC' => 'peer_name'});
+        $all_sites_info = $c->db->get_sites(backend => ["ALL"], sort => {'ASC' => 'peer_name'});
     };
     if($@) {
         # may fail for older lmd releases which don't have parent or section information
@@ -1326,55 +1316,66 @@ sub check_federation_peers {
     for my $row (@{$all_sites_info}) {
         my $key = $row->{'key'};
         $existing->{$key} = 1;
-        if(!$c->{'db'}->peers->{$key}) {
+        if(!$c->db->peers->{$key}) {
             $row->{'parent'} = 'LMD' if(!$row->{'parent'} && $c->config->{'lmd_remote'});
-            my $parent = $c->{'db'}->peers->{$row->{'parent'}};
+            my $parent = $c->db->peers->{$row->{'parent'}};
             next unless $parent;
+            my $section = "";
+            if($c->config->{'lmd_remote'}) {
+                    $section = $row->{'section'};
+            } else {
+                if($row->{'section'}) {
+                    $section = $parent->peer_name().'/'.$row->{'section'};
+                } else {
+                    $section = $parent->peer_name();
+                }
+            }
             my $subpeerconfig = {
-                name => $row->{'name'},
-                id   => $key,
-                type => $parent->{'peer_config'}->{'type'},
-                section => $row->{'parent'} ? $row->{'section'} : ($row->{'section'} ? $parent->peer_name().'/'.$row->{'section'} : $parent->peer_name()),
-                options => $parent->{'peer_config'}->{'type'} eq 'http' ? dclone($parent->{'peer_config'}->{'options'}) : {},
+                name    => $row->{'name'},
+                id      => $key,
+                type    => $parent->{'peer_config'}->{'type'},
+                section => $section,
+                options => $parent->{'peer_config'}->{'type'} eq 'http' ? Thruk::Utils::dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};
             $subpeerconfig->{'options'}->{'peer'} = $row->{'addr'};
             $subpeerconfig->{'options'}->{'remote_name'} = $row->{'name'};
+            require Thruk::Backend::Peer;
             my $subpeer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
             $subpeer->{'federation'} = $parent->{'key'};
             $subpeer->{'fed_info'} = {
-                key        => [$parent->{'key'}, @{Thruk::Utils::list($row->{'federation_key'})}],
-                name       => [$parent->{'name'}, @{Thruk::Utils::list($row->{'federation_name'})}],
-                addr       => [$parent->{'addr'}, @{Thruk::Utils::list($row->{'federation_addr'})}],
-                type       => [$parent->{'type'}, @{Thruk::Utils::list($row->{'federation_type'})}],
+                key        => [$parent->{'key'}, @{Thruk::Base::list($row->{'federation_key'})}],
+                name       => [$parent->{'name'}, @{Thruk::Base::list($row->{'federation_name'})}],
+                addr       => [$parent->{'addr'}, @{Thruk::Base::list($row->{'federation_addr'})}],
+                type       => [$parent->{'type'}, @{Thruk::Base::list($row->{'federation_type'})}],
             };
             # inherit disabled configtool from parent
             if($parent->{'peer_config'}->{'configtool'}->{'disable'}) {
                 $subpeer->{'peer_config'}->{'configtool'}->{'disable'} = 1;
             }
-            $c->{'db'}->pool->peer_add($subpeer);
+            $c->db->pool->peer_add($subpeer);
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;
             $changed++;
         }
     }
     # remove exceeding backends
-    for my $key (@{$c->{'db'}->peer_order}) {
-        my $peer = $c->{'db'}->peers->{$key};
+    for my $key (@{$c->db->peer_order}) {
+        my $peer = $c->db->peers->{$key};
         if(!$peer->{'federation'}) {
             next;
         }
         if(!$existing->{$key}) {
             delete $cached_data->{'processinfo'}->{$key};
-            $c->{'db'}->pool->peer_remove($key);
+            $c->db->pool->peer_remove($key);
             $changed++;
             next;
         }
     }
     if($changed || !$processinfo) {
-        $c->{'db'}->update_sections();
+        $c->db->update_sections();
         # fetch missing processinfo
-        $processinfo = $c->{'db'}->get_processinfo();
+        $processinfo = $c->db->get_processinfo();
         for my $key (keys %{$processinfo}) {
             $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
         }
@@ -1382,13 +1383,36 @@ sub check_federation_peers {
     # set a few extra infos
     for my $d (@{$all_sites_info}) {
         my $key = $d->{'key'};
-        my $peer = $c->{'db'}->peers->{$key};
+        my $peer = $c->db->peers->{$key};
         next unless $peer;
         for my $col (qw/last_online last_update last_error/) {
             $peer->{$col} = $d->{$col};
         }
     }
     return($processinfo, $cached_data);
+}
+
+########################################
+
+=head2 set_custom_title
+
+  set_custom_title($c)
+
+sets page title based on http parameters
+
+=cut
+sub set_custom_title {
+    my($c) = @_;
+    $c->stash->{custom_title} = '';
+    if( exists $c->req->parameters->{'title'} ) {
+        my $custom_title          = $c->req->parameters->{'title'};
+        if(ref $custom_title eq 'ARRAY') { $custom_title = pop @{$custom_title}; }
+        $custom_title             =~ s/\+/\ /gmx;
+        $c->stash->{custom_title} = Thruk::Utils::Filter::escape_html($custom_title);
+        $c->stash->{title}        = $custom_title;
+        return 1;
+    }
+    return;
 }
 
 ########################################

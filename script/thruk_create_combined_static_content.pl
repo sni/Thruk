@@ -12,8 +12,11 @@ BEGIN {
 };
 use warnings;
 use strict;
+
 use lib 'lib';
+
 use lib 'plugins/plugins-available/panorama/lib';
+
 use Thruk::Config 'noautoload';
 
 my($dos2unix);

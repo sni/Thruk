@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 
 BEGIN {
@@ -30,4 +30,3 @@ TestUtils::test_command({
     cmd  => $curl.' -L https://127.0.0.1/demo/thruk/r/thruk/whoami',
     like => ['/no or invalid credentials used/'],
 });
-

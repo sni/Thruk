@@ -1,9 +1,10 @@
 package Thruk::Utils::Conf::Tools::SuggestPossibleTemplates;
 
-use strict;
 use warnings;
+use strict;
 use Storable qw/dclone/;
-use Thruk::Utils::Conf;
+
+use Thruk::Utils::Conf ();
 
 =head1 NAME
 

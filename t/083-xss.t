@@ -1,13 +1,14 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
-use Thruk::Utils;
-use File::Slurp qw/read_file/;
+
+use Thruk::Base ();
+use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $filter = $ARGV[0];
-my $whitelist_vars = Thruk::Utils::array2hash([qw/
+my $whitelist_vars = Thruk::Base::array2hash([qw/
     theme url_prefix logo_path_prefix filebranch thrukversion fileversion extjs_version
     date.now pd referer cs j js jsfiles page class statusclass statusClass rowclass hostclass serviceclass
     loopclass body_class param.breakdown url defaults.$key.link
@@ -52,45 +53,22 @@ my $whitelist_regex = [
 ];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
-    check_templates($dir.'/');
+    for my $file (@{Thruk::Utils::IO::find_files($dir, '\.tt$')}) {
+        check_templates($file);
+    }
 }
 @dirs = glob("./lib ./plugins/plugins-available/*/lib");
-for my $dir (@dirs) {
-    check_libs($dir.'/');
+for my $file (Thruk::Utils::IO::all_perl_files(@dirs) ) {
+    check_libs($file);
 }
 done_testing();
 
 sub check_templates {
-    my($dir) = @_;
-    my(@files, @folders);
-    opendir(my $dh, $dir) || die $!;
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        if($file =~ m/\.tt/mx) {
-            push @files, $dir.$file;
-        }
-        elsif(-d $dir.$file) {
-            push @folders, $dir.$file.'/';
-        }
-    }
-    closedir $dh;
-
-    for my $folder (sort @folders) {
-        check_templates($folder);
-    }
-    for my $file (sort @files) {
-        check_templates_file($file);
-    }
-    return;
-}
-
-sub check_templates_file {
     my($file) = @_;
     return if($filter && $file !~ m%$filter%mx);
     return if($file =~ m%templates/excel%mx);
     return if($file =~ m%templates/.*csv.*%mx);
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my $failed = 0;
     my $escaped_keys = {};
 
@@ -133,6 +111,7 @@ sub check_templates_file {
                                     |short_uri\(
                                     |uri_with\(
                                     |base_url\(
+                                    |date_format\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
@@ -196,33 +175,8 @@ sub check_templates_file {
 }
 
 sub check_libs {
-    my($dir) = @_;
-    my(@files, @folders);
-    opendir(my $dh, $dir) || die $!;
-    while(my $file = readdir $dh) {
-        next if $file eq '.';
-        next if $file eq '..';
-        if($file =~ m/\.p(l|m)$/mx) {
-            push @files, $dir.$file;
-        }
-        elsif(-d $dir.$file) {
-            push @folders, $dir.$file.'/';
-        }
-    }
-    closedir $dh;
-
-    for my $folder (sort @folders) {
-        check_libs($folder);
-    }
-    for my $file (sort @files) {
-        check_libs_file($file);
-    }
-    return;
-}
-
-sub check_libs_file {
     my($file) = @_;
-    my $content = read_file($file);
+    my $content = Thruk::Utils::IO::read($file);
     my $failed = 0;
 
     return if($filter && $file !~ m%$filter%mx);

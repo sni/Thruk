@@ -1,9 +1,11 @@
 package Thruk::Controller::error;
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess longmess/;
-use Time::HiRes qw/tv_interval/;
+use Cpanel::JSON::XS ();
+
+use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -57,7 +59,7 @@ sub index {
     $c->{'errored'} = 1;
 
     Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
     $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
 
@@ -121,7 +123,7 @@ sub index {
             'code' => 403, # forbidden
         },
         '4'  => {
-            'mess' => 'Error: Could not open CGI config file \''.Thruk->config->{'cgi.cfg'}.'\' for reading!',
+            'mess' => 'Error: Could not open CGI config file \''.Thruk::Base->config->{'cgi.cfg'}.'\' for reading!',
             'dscr' => 'Here are some things you should check in order to resolve this error:<br><ol><li>Make sure you\'ve installed a CGI config file in its proper location.  See the error message about for details on where the CGI is expecting to find the configuration file. A CGI configuration file (named <b>cgi.cfg</b>) is shipped with your Thruk distribution. </li></ol>',
             'code' => 500, # internal server error
         },
@@ -269,7 +271,7 @@ sub index {
         }
     }
 
-    if(Thruk->debug) {
+    if(Thruk::Base->debug) {
         $c->stash->{errorDetails} .= $errorDetails;
     }
 
@@ -309,7 +311,7 @@ sub index {
 
     # return error as json for rest api calls
     if($c->want_json_response()) {
-        if(Thruk->verbose >= 2) {
+        if(Thruk::Base->verbose >= 2) {
             Carp::cluck($c->stash->{errorMessage});
         }
         my $json = {
@@ -322,12 +324,12 @@ sub index {
         return $c->render(json => $json);
     }
 
-    if(Thruk::Base::mode_cli() && (!defined $log_req || $log_req)) {
+    if(Thruk::Base->mode_cli() && (!defined $log_req || $log_req)) {
         _error($c->stash->{errorMessage});
         _error($c->stash->{errorDescription});
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
         _error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
-        if(Thruk->verbose) {
+        if(Thruk::Base->verbose) {
             Carp::cluck($c->stash->{errorMessage});
         }
     }

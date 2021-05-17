@@ -1,15 +1,14 @@
-use strict;
 use warnings;
+use strict;
 use Carp;
-use utf8;
-use Test::More;
 use Data::Dumper;
-use IO::Socket::UNIX;
-use IO::Socket::INET;
-use File::Temp qw/tempdir/;
 use File::Copy qw/copy/;
-use File::Slurp qw/read_file/;
+use File::Temp qw/tempdir/;
+use IO::Socket::INET;
+use IO::Socket::UNIX;
 use Storable qw/dclone/;
+use Test::More;
+use utf8;
 
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
@@ -94,7 +93,7 @@ my $now = time();
     local $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
     $httppid = fork();
     if(!$httppid) {
-        exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
+        exec($cmd) or fail(Thruk::Utils::IO::read($http_dir.'/tmp/server.log'));
         exit 1;
     }
     ok($httppid, "http server started with pid: ".$httppid);
@@ -106,7 +105,7 @@ my $now = time();
         last unless -d "/proc/$httppid";
         sleep(1);
     }
-    bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
+    bail_out_with_kill('server did not start: '.Thruk::Utils::IO::read($http_dir.'/tmp/server.log')) unless $connected;
     ok($httppid, 'test server started: '.$httppid);
     sleep(2);
     alarm(30);
@@ -174,7 +173,7 @@ is($c->stash->{'failed_backends'}->{'http'}, undef, 'test connection successful'
 ###########################################################
 # config backend intialized?
 is($c->config->{'var_path'}, $http_dir.'/var', 'got right var folder');
-my $rpeer = $c->{'db'}->get_peer_by_key('http');
+my $rpeer = $c->db->get_peer_by_key('http');
 isa_ok($rpeer, 'Thruk::Backend::Peer');
 isa_ok($c->{'obj_db'}, 'Monitoring::Config');
 is($c->{'obj_db'}->is_remote(), 1, 'got a remote peer');

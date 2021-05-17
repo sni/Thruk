@@ -10,13 +10,20 @@ basic helpers without dependencies
 
 =cut
 
-use strict;
 use warnings;
+use strict;
 use Carp qw/confess/;
-
 use Exporter 'import';
+
+use Thruk::Utils::Log qw/:all/;
+
 our @EXPORT_OK = qw(mode verbose quiet debug trace config);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
+
+# functions imported by Utils.pm for backwards compatibility
+my @compat_functions = qw/list array_uniq array2hash looks_like_regex/;
+push @EXPORT_OK, @compat_functions;
+$EXPORT_TAGS{compat} = \@compat_functions;
 
 ###################################################
 
@@ -30,7 +37,9 @@ returns current configuration
 
 =cut
 sub config {
+    ## no lint
     my $config = $Thruk::Config::config;
+    ## use lint
     confess("uninitialized, no global config") unless $config;
     return($config);
 }
@@ -113,7 +122,339 @@ sub quiet {
     return($ENV{'THRUK_QUIET'} // 0);
 }
 
+########################################
+
+=head2 list
+
+  list($ref)
+
+return list of ref unless it is already a list
+
+=cut
+
+sub list {
+    my($d) = @_;
+    return [] unless defined $d;
+    return $d if ref $d eq 'ARRAY';
+    return([$d]);
+}
+
+########################################
+
+=head2 array_uniq
+
+  array_uniq($array)
+
+return uniq elements of array
+
+=cut
+
+sub array_uniq {
+    my($array) = @_;
+
+    my %seen = ();
+    my @unique = grep { ! $seen{ $_ }++ } @{$array};
+
+    return \@unique;
+}
+
+
+########################################
+
+=head2 array_uniq_obj
+
+  array_uniq_obj($array_of_hashes)
+
+return uniq elements of array, examining all hash keys except peer_key
+
+=cut
+
+sub array_uniq_obj {
+    my($array) = @_;
+
+    my @unique;
+    my %seen;
+    my $x = 0;
+    for my $el (@{$array}) {
+        my $values = [];
+        for my $key (sort keys %{$el}) {
+            if($key =~ /^peer_(key|addr|name)$/mx) {
+                $el->{$key} = list($el->{$key});
+                next;
+            }
+            push @{$values}, ($el->{$key} // "");
+        }
+        my $ident = join(";", @{$values});
+        if(defined $seen{$ident}) {
+            # join peer_* information
+            for my $key (qw/peer_key peer_addr peer_name/) {
+                next unless $el->{$key};
+                push @{$unique[$seen{$ident}]->{$key}}, @{$el->{$key}};
+            }
+            next;
+        }
+        $seen{$ident} = $x;
+        push @unique, $el;
+        $x++;
+    }
+
+    return \@unique;
+}
+
+########################################
+
+=head2 array_uniq_list
+
+  array_uniq_list($array_of_lists)
+
+return uniq elements of array, examining all list members
+
+=cut
+
+sub array_uniq_list {
+    my($array) = @_;
+
+    my @unique;
+    my %seen;
+    for my $el (@{$array}) {
+        my $ident = join(";", @{$el});
+        next if $seen{$ident};
+        $seen{$ident} = 1;
+        push @unique, $el;
+    }
+
+    return \@unique;
+}
+
+########################################
+
+=head2 array_remove
+
+  array_remove($array, $element)
+
+removes element from array
+
+=cut
+
+sub array_remove {
+    my($array, $remove) = @_;
+    my @list;
+    for my $e (@{$array}) {
+        next if $e eq $remove;
+        push @list, $e;
+    }
+    return \@list;
+}
+
+########################################
+
+=head2 array2hash
+
+  array2hash($data, [ $key, [ $key2 ]])
+
+create a hash by key
+
+=cut
+sub array2hash {
+    my($data, $key, $key2) = @_;
+
+    return {} unless defined $data;
+    confess("not an array") unless ref $data eq 'ARRAY';
+
+    my %hash;
+    if(defined $key2) {
+        for my $d (@{$data}) {
+            $hash{$d->{$key}}->{$d->{$key2}} = $d;
+        }
+    } elsif(defined $key) {
+        %hash = map { $_->{$key} => $_ } @{$data};
+    } else {
+        %hash = map { $_ => $_ } @{$data};
+    }
+
+    return \%hash;
+}
+########################################
+
+=head2 hash_invert
+
+  hash_invert($hash)
+
+return hash with keys and values inverted
+
+=cut
+
+sub hash_invert {
+    my($hash) = @_;
+
+    my %invert;
+    for my $k (sort keys %{$hash}) {
+        my $v = $hash->{$k};
+        $invert{$v} = $k;
+    }
+
+    return \%invert;
+}
+
+
+########################################
+
+=head2 expand_numeric_list
+
+  expand_numeric_list($txt, $c)
+
+return expanded list.
+ex.: converts '3,7-9,15' -> [3,7,8,9,15]
+
+=cut
+
+sub expand_numeric_list {
+    my($txt, $c) = @_;
+    my $list = {};
+    return [] unless defined $txt;
+
+    for my $item (@{list($txt)}) {
+        for my $block (split/\s*,\s*/mx, $item) {
+            if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
+                for my $nr ($1..$2) {
+                    $list->{$nr} = 1;
+                }
+            } elsif($block =~ m/^(\d+)$/gmx) {
+                    $list->{$1} = 1;
+            } else {
+                _error("'$block' is not a valid number or range") if defined $c;
+            }
+        }
+    }
+
+    my @arr = sort keys %{$list};
+    return \@arr;
+}
+
+##############################################
+
+=head2 check_for_nasty_filename
+
+    check_for_nasty_filename($filename)
+
+returns true if nasty characters have been found and the filename is NOT safe for use
+
+=cut
+sub check_for_nasty_filename {
+    my($name) = @_;
+    confess("no name") unless defined $name;
+    if($name =~ m/(\.\.|\/|\n)/mx) {
+        return(1);
+    }
+    return;
+}
+
 ###################################################
+
+=head2 restore_signal_handler
+
+    reset all changed signals
+
+=cut
+sub restore_signal_handler {
+    ## no critic
+    $SIG{INT}  = 'DEFAULT';
+    $SIG{TERM} = 'DEFAULT';
+    $SIG{PIPE} = 'DEFAULT';
+    $SIG{ALRM} = 'DEFAULT';
+    ## use critic
+    return;
+}
+
+##############################################
+
+=head2 clean_credentials_from_string
+
+    clean_credentials_from_string($string)
+
+returns strings with potential credentials removed
+
+=cut
+sub clean_credentials_from_string {
+    my($str) = @_;
+
+    for my $key (qw/password credential credentials CSRFtoken/) {
+        $str    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx; # remove from json encoded data
+        $str    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx; # same, but with single quotes
+        $str    =~ s|(%22)($key)(%22%3A%22).*?(%22)|$1$2$3...$4|gmx;  # remove from url encoded data
+
+        $str    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
+        $str    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
+    }
+
+    return($str);
+}
+
+##############################################
+
+=head2 basename
+
+    basename($path)
+
+returns basename for given path
+
+=cut
+sub basename {
+    my($path) = @_;
+    my $basename = $path;
+    $basename    =~ s%^.*/%%gmx;
+    return($basename);
+}
+
+##############################################
+
+=head2 dirname
+
+    dirname($path)
+
+returns dirname for given path
+
+=cut
+sub dirname {
+    my($path) = @_;
+    my $dirname = $path;
+    $dirname    =~ s%/[^/]*$%%gmx;
+    return($dirname);
+}
+
+##############################################
+
+=head2 looks_like_regex
+
+    looks_like_regex($str)
+
+returns true if $string looks like a regular expression
+
+=cut
+sub looks_like_regex {
+    my($str) = @_;
+    if($str =~ m%[\^\|\*\{\}\[\]]%gmx) {
+        return(1);
+    }
+    return;
+}
+
+##############################################
+
+=head2 trim_whitespace
+
+    trim_whitespace()
+
+returns cleaned string
+
+=cut
+sub trim_whitespace {
+    $_[0] =~ s/^\s+//mxo;
+    $_[0] =~ s/\s+$//mxo;
+    return($_[0]);
+}
+
+##############################################
 
 =head1 SEE ALSO
 

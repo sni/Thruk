@@ -1,16 +1,24 @@
 package Thruk::Controller::panorama;
 
-use strict;
 use warnings;
-use Data::Dumper qw/Dumper/;
-use Cpanel::JSON::XS qw/decode_json encode_json/;
-use File::Slurp qw/read_file/;
-use File::Copy qw/move copy/;
-use Encode qw(decode_utf8 encode_utf8);
-use Module::Load qw/load/;
+use strict;
 use Carp qw/confess/;
-use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER DASHBOARD_FILE_VERSION SOFT_STATE HARD_STATE/;
+use Cpanel::JSON::XS qw/decode_json/;
+use Data::Dumper qw/Dumper/;
+use Encode qw(encode_utf8);
+use File::Copy qw/move copy/;
+use IO::Socket::INET ();
+use Module::Load qw/load/;
+
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Broadcast ();
+use Thruk::Utils::Cache ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Panorama qw/:all/;
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
@@ -35,7 +43,7 @@ sub index {
     my ( $c ) = @_;
 
     #&timing_breakpoint('panorama::index');
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'panorama_modules_loaded'}) {
         load URI::Escape, qw/uri_unescape/;
@@ -277,7 +285,7 @@ sub _js {
         $c->stash->{title}        = $dashboard->{'tab'}->{'xdata'}->{'title'};
     } elsif(defined $c->req->parameters->{'maps'}) {
         $open_tabs = [];
-        for my $name (@{Thruk::Utils::list($c->req->parameters->{'maps'})}) {
+        for my $name (@{Thruk::Base::list($c->req->parameters->{'maps'})}) {
             my $dashboard = _get_dashboard_by_name($c, $name);
             if($dashboard) {
                 push @{$open_tabs}, $dashboard->{'nr'};
@@ -302,7 +310,7 @@ sub _js {
         tabbar => $user_data,
     };
     my $shapes = {};
-    my $open_tabs_hash = Thruk::Utils::array2hash($open_tabs);
+    my $open_tabs_hash = Thruk::Base::array2hash($open_tabs);
     for my $nr (@{$open_tabs}) {
         _add_initial_dashboard($c, $nr, $extstate, $shapes, $open_tabs_hash);
     }
@@ -358,7 +366,7 @@ sub _js {
     $c->stash->{default_state_order} = [split(/\s*,\s*/mx, $default_state_order)];
 
     unless($only_data) {
-        $c->res->headers->content_type('text/javascript; charset=UTF-8');
+        $c->res->content_type('text/javascript; charset=utf-8');
         $c->stash->{template} = 'panorama_js.tt';
     }
     return 1;
@@ -521,7 +529,7 @@ sub _task_status {
         $c->req->parameters->{'json'}        = 1;
         $c->req->parameters->{'service'}     = '';
         if(scalar keys %{$types->{'hosts'}} == 1) {
-            my $hosts  = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
+            my $hosts  = $c->db->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
                                                columns => [qw/name/]);
             if(scalar @{$hosts} == 1) {
                 $c->req->parameters->{'cmd_typ'} = 96;
@@ -532,7 +540,7 @@ sub _task_status {
             }
         }
         elsif(scalar keys %{$types->{'services'}} == 1) {
-            my $services = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
+            my $services = $c->db->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
                                                     columns => [qw/host_name description/]);
             if(scalar @{$services} == 1) {
                 $c->req->parameters->{'cmd_typ'} = 7;
@@ -582,7 +590,7 @@ sub _task_status {
                           last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
                          /];
         push @{$columns}, "long_plugin_output" if $types->{'has_long_plugin_output'};
-        $data->{'hosts'} = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
+        $data->{'hosts'} = $c->db->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
                                                  columns => $columns,
                                                 );
         if($c->config->{'shown_inline_pnp'}) {
@@ -596,7 +604,7 @@ sub _task_status {
                           plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
                          /];
         push @{$columns}, "long_plugin_output" if $types->{'has_long_plugin_output'};
-        $data->{'services'} = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
+        $data->{'services'} = $c->db->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
                                                        columns => $columns,
                                                       );
         if($c->config->{'shown_inline_pnp'}) {
@@ -756,7 +764,7 @@ sub _task_uploadecho {
         return;
     }
 
-    my $content = read_file($upload->{'tempname'});
+    my $content = Thruk::Utils::IO::read($upload->{'tempname'});
     unlink($upload->{'tempname'});
 
     # must be text/html result, otherwise extjs form result handler dies
@@ -829,7 +837,7 @@ sub _task_save_dashboard {
     for my $image (sort keys %{$images}) {
         my $file = $images->{$image};
         next unless -r $file;
-        $data->{'usercontent'}->{$image} = MIME::Base64::encode_base64("".read_file($file));
+        $data->{'usercontent'}->{$image} = MIME::Base64::encode_base64("".Thruk::Utils::IO::read($file));
     }
     $c->stash->{'template'} = 'passthrough.tt';
     my $text = "";
@@ -860,7 +868,7 @@ sub _task_load_dashboard {
         return;
     }
 
-    my $content = read_file($upload->{'tempname'});
+    my $content = Thruk::Utils::IO::read($upload->{'tempname'});
     unlink($upload->{'tempname'});
 
     $content =~ s/^\#.*$//gmx;
@@ -914,8 +922,7 @@ sub _task_search {
     my($c) = @_;
 
     my $query = $c->req->parameters->{'value'} || '';
-    $query =~ s/^\s+//gmx;
-    $query =~ s/\s+$//gmx;
+    $query = Thruk::Base::trim_whitespace($query);
     $query =~ s/\s+/.*/gmx;
     my $json = { 'rc' => 0, 'data' => [] };
     _add_misc_details($c, undef, $json);
@@ -925,10 +932,10 @@ sub _task_search {
 
     # search names and aliases
     my $search = {
-        'host'         => $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
-        'hostgroup'    => $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
-        'service'      => $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { '-or' => [ { description => { '~~' => $query } }, { display_name => { '~~' => $query } } ] } ], columns => [qw/description display_name/]),
-        'servicegroup' => $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
+        'host'         => $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
+        'hostgroup'    => $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
+        'service'      => $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { '-or' => [ { description => { '~~' => $query } }, { display_name => { '~~' => $query } } ] } ], columns => [qw/description display_name/]),
+        'servicegroup' => $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { '-or' => [ { name => { '~~' => $query } }, { alias => { '~~' => $query } } ] } ], columns => [qw/name alias/]),
     };
 
     # normalize services
@@ -1447,7 +1454,7 @@ sub _avail_calc {
 sub _task_stats_core_metrics {
     my($c) = @_;
 
-    my $data = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    my $data = $c->db->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
     my $json = {
         columns => [
             { 'header' => 'Type',  dataIndex => 'type',  flex  => 1 },
@@ -1472,7 +1479,7 @@ sub _task_stats_core_metrics {
 sub _task_stats_check_metrics {
     my($c) = @_;
 
-    my $data = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+    my $data = $c->db->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
 
     my $json = {
         columns => [
@@ -1530,7 +1537,7 @@ sub _task_server_stats {
     }
 
     if($show_load eq 'true') {
-        my @load = split(/\s+/mx,(read_file('/proc/loadavg')));
+        my @load = split(/\s+/mx,(Thruk::Utils::IO::read('/proc/loadavg')));
         push @{$json->{'data'}},
             { cat => 'Load',    type => 'load 1',   value => $load[0],            'warn' => $cpucount*2.5, crit => $cpucount*5.0, max => $cpucount*3, graph => '' },
             { cat => 'Load',    type => 'load 5',   value => $load[1],            'warn' => $cpucount*2.0, crit => $cpucount*3.0, max => $cpucount*3, graph => '' },
@@ -1546,7 +1553,7 @@ sub _task_server_stats {
     if($show_memory eq 'true') {
         # gather system statistics
         my $mem = {};
-        for my $line (split/\n/mx,(read_file('/proc/meminfo'))) {
+        for my $line (split/\n/mx,(Thruk::Utils::IO::read('/proc/meminfo'))) {
             my($name,$val,$unit) = split(/\s+/mx,$line,3);
             next unless defined $unit;
             $name =~ s/:$//gmx;
@@ -1623,8 +1630,8 @@ sub _task_show_logs {
         push @{$filter}, { message => { '!~~' => Thruk::Utils::clean_regex($exclude_pattern) }};
     }
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
-    $c->{'db'}->renew_logcache($c);
-    my $data = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
+    $c->db->renew_logcache($c);
+    my $data = $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 
     my $json = {
         columns => [
@@ -1724,7 +1731,7 @@ sub _task_hosts {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    my $data = $c->{'db'}->get_hosts(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
+    my $data = $c->db->get_hosts(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
                                      pager         => 1,
                                      extra_columns => [qw/long_plugin_output/],
                                      sort          => _append_sort($c->req->parameters->{'sort'}, { ASC => [ 'name' ] }),
@@ -1822,7 +1829,7 @@ sub _task_services {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
-    $c->{'db'}->get_services(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
+    $c->db->get_services(filter        => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
                              pager         => 1,
                              extra_columns => [qw/long_plugin_output/],
                              sort          => _append_sort($c->req->parameters->{'sort'}, { ASC => [ 'host_name',   'description' ] }),
@@ -1948,7 +1955,7 @@ sub _task_squares_data {
     my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
 
     if($source eq 'services' || $source eq 'both') {
-        my $services = $c->{'db'}->get_services(
+        my $services = $c->db->get_services(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
                                     columns => [qw/host_name description state acknowledged scheduled_downtime_depth has_been_checked last_state_change/, $c->req->parameters->{'service_label'} ? qw/host_alias custom_variable_names custom_variable_values host_custom_variable_names host_custom_variable_values/ : ()],
                                     sort    => { ASC => [ 'host_name',   'description' ] },
@@ -1970,7 +1977,7 @@ sub _task_squares_data {
     }
 
     if($source eq 'hosts' || $source eq 'both') {
-        my $hosts = $c->{'db'}->get_hosts(
+        my $hosts = $c->db->get_hosts(
                                     filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
                                     columns => [qw/name state acknowledged scheduled_downtime_depth has_been_checked last_state_change/, $c->req->parameters->{'host_label'} ? qw/alias custom_variable_names custom_variable_values/ : ()],
                                     sort    => { ASC => [ 'name' ] },
@@ -1998,7 +2005,7 @@ sub _task_squares_data {
 
     # apply group by
     if($c->req->parameters->{'groupby'}) {
-        my $groupby = Thruk::Utils::list($c->req->parameters->{'groupby'});
+        my $groupby = Thruk::Base::list($c->req->parameters->{'groupby'});
         if(scalar @{$groupby} == 2 && $groupby->[0] eq 'host_name' && $groupby->[1] eq 'description') {
             # nothing todo
         }
@@ -2163,7 +2170,7 @@ sub _task_hosts_pie {
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
+    my $data = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
 
     my $json = {
         columns => [
@@ -2200,7 +2207,7 @@ sub _task_services_pie {
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
+    my $data = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
 
     my $json = {
         columns => [
@@ -2324,7 +2331,7 @@ sub _task_show_comments {
     }
 
     if($hostfilter && ($source eq 'hosts' || $source eq 'both')) {
-        my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], columns => [qw/name/]);
+        my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], columns => [qw/name/]);
         my $host_comments_filter = [{ host_name => ''}]; # add useless filter, so the -or will not match on empty hostlists
         for my $hst (@{$hosts}) {
             push @{$host_comments_filter}, { host_name => $hst->{'name'}};
@@ -2333,7 +2340,7 @@ sub _task_show_comments {
     }
 
     if($servicefilter && ($source eq 'services' || $source eq 'both')) {
-        my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], columns => [qw/host_name description/]);
+        my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], columns => [qw/host_name description/]);
         my $svc_comments_filter = [{ host_name => ''}]; # add useless filter, so the -or will not match on empty servicelists
         for my $svc (@{$services}) {
             push @{$svc_comments_filter}, [{ host_name => $svc->{'host_name'}}, { service_description => $svc->{'service_description'}}];
@@ -2341,7 +2348,7 @@ sub _task_show_comments {
         push @{$generalfilter}, Thruk::Utils::combine_filter( '-or', $svc_comments_filter );
     }
 
-    my $types = Thruk::Utils::list($c->req->parameters->{'type'});
+    my $types = Thruk::Base::list($c->req->parameters->{'type'});
     my $commentfilter = [];
     my $typesfilter   = [];
     my $add_downtimes = 0;
@@ -2356,7 +2363,7 @@ sub _task_show_comments {
 
     my $data = [];
     if($add_comments) {
-        $data = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), $generalfilter, $commentfilter ]);
+        $data = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), $generalfilter, $commentfilter ]);
         # move some fields to match downtimes
         for my $d (@{$data}) {
             $d->{'start_time'} = $d->{'entry_time'};
@@ -2365,7 +2372,7 @@ sub _task_show_comments {
     }
 
     if($add_downtimes) {
-        my $downtimes = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), $generalfilter ]);
+        my $downtimes = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), $generalfilter ]);
         for my $d (@{$downtimes}) {
             $d->{'entry_type'} = 2;
         }
@@ -2401,7 +2408,7 @@ sub _task_show_comments {
     $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
     $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
     $data = [sort { $a->{'host_name'} cmp $b->{'host_name'} || $a->{'service_description'} cmp $b->{'service_description'} } @{$data}];
-    Thruk::Backend::Manager::page_data($c, $data);
+    Thruk::Utils::page_data($c, $data);
     my $json = {
         columns => [
             { 'header' => 'Hostname',               width => 120, dataIndex => 'host_name',           renderer => 'TP.render_service_host' },
@@ -2432,7 +2439,7 @@ sub _task_pnp_graphs {
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     my $search = $c->req->parameters->{'query'};
     my $graphs = [];
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
         my $text = $hst->{'name'}.';_HOST_';
         next if($search and $text !~ m/$search/mxi);
@@ -2445,7 +2452,7 @@ sub _task_pnp_graphs {
         }
     }
 
-    $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
     for my $svc (@{$data}) {
         my $text = $svc->{'host_name'}.';'.$svc->{'description'};
         next if($search and $text !~ m/$search/mxi);
@@ -2458,7 +2465,7 @@ sub _task_pnp_graphs {
         }
     }
     $graphs = Thruk::Backend::Manager::sort_result({}, $graphs, 'text');
-    Thruk::Backend::Manager::page_data($c, $graphs);
+    Thruk::Utils::page_data($c, $graphs);
 
     my $json = {
         data        => $c->stash->{'data'},
@@ -2480,7 +2487,7 @@ sub _task_grafana_graphs {
     my $search2 = $c->req->parameters->{'query2'}; # current selected graph should always be returned, otherwise text/alias replacement does not work on paging
     my $graphs = [];
     my $current;
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $hst, 1);
         if($url ne '') {
@@ -2502,7 +2509,7 @@ sub _task_grafana_graphs {
         }
     }
 
-    $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
     for my $svc (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $svc, 1);
         if($url ne '') {
@@ -2524,7 +2531,7 @@ sub _task_grafana_graphs {
         }
     }
     $graphs = Thruk::Backend::Manager::sort_result({}, $graphs, 'text');
-    Thruk::Backend::Manager::page_data($c, $graphs);
+    Thruk::Utils::page_data($c, $graphs);
 
     # make sure current graph is always part of the result
     push @{$c->stash->{'data'}}, $current if $current;
@@ -2545,7 +2552,7 @@ sub _task_userdata_backgroundimages {
     my $folder = $c->stash->{'usercontent_folder'}.'/backgrounds/';
     my $query  = $c->req->parameters->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
+    my $files = Thruk::Utils::IO::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
@@ -2564,7 +2571,7 @@ sub _task_userdata_backgroundimages {
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif',  image => 'none'};
     }
-    Thruk::Backend::Manager::page_data($c, $images);
+    Thruk::Utils::page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
@@ -2580,7 +2587,7 @@ sub _task_userdata_images {
     my $folder = $c->stash->{'usercontent_folder'}.'/images/';
     my $query  = $c->req->parameters->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
+    my $files = Thruk::Utils::IO::find_files($folder, '\.(png|gif|jpg|jpeg|svg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
@@ -2598,7 +2605,7 @@ sub _task_userdata_images {
     if(!$query) {
         unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s2.gif', image => '&lt;upload new image&gt;'};
     }
-    Thruk::Backend::Manager::page_data($c, $images);
+    Thruk::Utils::page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
@@ -2697,7 +2704,7 @@ sub _task_userdata_shapes {
         $name    =~ s/\.shape$//gmx;
         push @{$shapes}, {
             name  => $name,
-            data  => scalar read_file($file),
+            data  => Thruk::Utils::IO::read($file),
         };
     }
     $shapes = Thruk::Backend::Manager::sort_result({}, $shapes, 'name');
@@ -2710,7 +2717,7 @@ sub _task_userdata_shapes {
 sub _task_host_list {
     my($c) = @_;
 
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name/]);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name/]);
     my $data = [];
     for my $hst (@{$hosts}) {
         push @{$data}, { name => $hst->{'name'} };
@@ -2727,8 +2734,8 @@ sub _task_host_detail {
 
     my $host        = $c->req->parameters->{'host'}    || '';
     my $json      = {};
-    my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }], extra_columns => [qw/long_plugin_output/]);
-    my $downtimes = $c->{'db'}->get_downtimes(
+    my $hosts     = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }], extra_columns => [qw/long_plugin_output/]);
+    my $downtimes = $c->db->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
         sort => { 'DESC' => 'id' },
     );
@@ -2748,7 +2755,7 @@ sub _task_service_list {
     my($c) = @_;
 
     my $host     = $c->req->parameters->{'host'} || '';
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }], columns => [qw/description/]);
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }], columns => [qw/description/]);
     my $data = [];
     for my $svc (@{$services}) {
         push @{$data}, { description => $svc->{'description'} };
@@ -2766,8 +2773,8 @@ sub _task_service_detail {
     my $host        = $c->req->parameters->{'host'}    || '';
     my $description = $c->req->parameters->{'service'} || '';
     my $json        = {};
-    my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }], extra_columns => [qw/long_plugin_output/]);
-    my $downtimes = $c->{'db'}->get_downtimes(
+    my $services    = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }], extra_columns => [qw/long_plugin_output/]);
+    my $downtimes = $c->db->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
         sort => { 'DESC' => 'id' },
     );
@@ -2809,9 +2816,9 @@ sub _task_dashboard_save_states {
 sub _task_dashboard_data {
     my($c) = @_;
     my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
-    $nr = Thruk::Utils::array_uniq(Thruk::Utils::list($nr));
+    $nr = Thruk::Base::array_uniq(Thruk::Base::list($nr));
 
-    my $open_tabs_hash = Thruk::Utils::array2hash(Thruk::Utils::list($c->req->parameters->{'recursive'}));
+    my $open_tabs_hash = Thruk::Base::array2hash(Thruk::Base::list($c->req->parameters->{'recursive'}));
     if(scalar @{$nr} > 1) {
         my $json;
         my $data = {};
@@ -2948,7 +2955,7 @@ sub _task_dashboard_list {
 
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} // 'all';
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
-    Thruk::Backend::Manager::page_data($c, $dashboards);
+    Thruk::Utils::page_data($c, $dashboards);
     my $json = {
         columns     => $columns,
         data        => $c->stash->{'data'},
@@ -3099,7 +3106,7 @@ sub _get_gearman_stats {
         PeerPort => $port,
     )
     or do {
-        _warn("can't connect to port $port on $host: $!") unless(Thruk->mode eq 'TEST');
+        _warn("can't connect to port $port on $host: $!") unless(Thruk::Base->mode eq 'TEST');
         return $data;
     };
     $handle->autoflush(1);
@@ -3135,7 +3142,7 @@ sub _do_filter {
     Thruk::Utils::Status::reset_filter($c);
 
     if(!defined $c->req->parameters->{'filter'} || $c->req->parameters->{'filter'} eq '') {
-        my @f = Thruk::Utils::Status::do_filter($c);
+        my @f = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
         return @f;
     }
 
@@ -3187,7 +3194,7 @@ sub _do_filter {
         $nr++;
     }
 
-    my @f = Thruk::Utils::Status::do_filter($c);
+    my @f = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return @f;
 }
 
@@ -3220,11 +3227,11 @@ sub _summarize_hostgroup_query {
     my($c, $type_groups, $state_type) = @_;
 
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ name => { '=' => $_ }}} keys %{$type_groups}]);
-    my $details = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $filter ], columns => [qw/name alias/]);
-    $details = Thruk::Utils::array2hash($details, 'name');
+    my $details = $c->db->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $filter ], columns => [qw/name alias/]);
+    $details = Thruk::Base::array2hash($details, 'name');
 
     $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $hostgroups = {};
     for my $hst (@{$hosts}) {
         for my $grp (@{$hst->{'groups'}}) {
@@ -3275,7 +3282,7 @@ sub _summarize_hostgroup_query {
         }
     }
     $filter      = Thruk::Utils::combine_filter('-or', [map {{ host_groups => { '>=' => $_ }}} keys %{$type_groups}]);
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     for my $svc (@{$services}) {
         for my $grp (@{$svc->{'host_groups'}}) {
             next unless defined $type_groups->{$grp};
@@ -3321,11 +3328,11 @@ sub _summarize_servicegroup_query {
     my($c, $type_groups, $state_type) = @_;
 
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ name => { '=' => $_ }}} keys %{$type_groups}]);
-    my $details = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $filter ], columns => [qw/name alias/]);
-    $details = Thruk::Utils::array2hash($details, 'name');
+    my $details = $c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $filter ], columns => [qw/name alias/]);
+    $details = Thruk::Base::array2hash($details, 'name');
 
     $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state state_type last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $servicegroups = {};
     for my $svc (@{$services}) {
         for my $grp (@{$svc->{'groups'}}) {
@@ -3394,9 +3401,9 @@ sub _summarize_query {
     if($incl_hst) {
         my $host_sum;
         if(!$has_service_filter) {
-            $host_sum = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+            $host_sum = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         } else {
-            $host_sum = $c->{'db'}->get_host_stats_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+            $host_sum = $c->db->get_host_stats_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         }
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k} = $host_sum->{$k};
@@ -3410,7 +3417,7 @@ sub _summarize_query {
         }
     }
     if($incl_svc) {
-        my $service_sum = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        my $service_sum = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         for my $k (qw/ok warning critical unknown pending/) {
             $sum->{'services'}->{$k} = $service_sum->{$k};
             $sum->{'services'}->{'plain_'.$k} = $service_sum->{'plain_'.$k};
@@ -3475,7 +3482,7 @@ sub _add_recursive_dashboards {
             my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
             if(defined $shapes && $shape && !exists $shapes->{$shape}) {
                 if(-e $c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js') {
-                    $shapes->{$shape} = scalar read_file($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
+                    $shapes->{$shape} = Thruk::Utils::IO::read($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
                 } else {
                     $shapes->{$shape} = undef;
                 }
@@ -3594,7 +3601,7 @@ sub _get_available_fonts {
                   'message-box', 'monospace', 'sans-serif', 'serif', 'small-caption',
     ];
     if($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'}) {
-        for my $font (@{Thruk::Utils::list($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'})}) {
+        for my $font (@{Thruk::Base::list($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'})}) {
             my @extra = split/\s*,\s*/mx, $font;
             push @{$fonts}, @extra;
         }

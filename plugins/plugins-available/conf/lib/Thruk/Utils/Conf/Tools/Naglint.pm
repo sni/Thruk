@@ -1,8 +1,9 @@
 package Thruk::Utils::Conf::Tools::Naglint;
 
-use strict;
 use warnings;
-use Thruk::Utils::Conf;
+use strict;
+
+use Thruk::Utils::Conf ();
 
 =head1 NAME
 

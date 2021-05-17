@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 
 BEGIN {
@@ -37,4 +37,3 @@ for my $url (@{$pages}) {
 
 # restore default
 `cd plugins/plugins-enabled && rm -f wml`;
-

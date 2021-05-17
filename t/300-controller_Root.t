@@ -1,5 +1,5 @@
-use strict;
 use warnings;
+use strict;
 use Test::More;
 
 BEGIN {
@@ -48,7 +48,7 @@ for my $url (@{$pages}) {
     TestUtils::test_page(%{$test});
 }
 
-is($Thruk::Request::c, undef, "Request object is now empty");
+is($Thruk::Globals::c, undef, "Request object is now empty");
 
 SKIP: {
     skip 'external tests', 11 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
