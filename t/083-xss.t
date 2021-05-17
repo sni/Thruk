@@ -111,7 +111,6 @@ sub check_templates {
                                     |short_uri\(
                                     |uri_with\(
                                     |base_url\(
-                                    |date_format\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
@@ -135,6 +134,7 @@ sub check_templates {
                                     |name2id\(
                                     |encode_json_obj\(
                                     |json_encode\(
+                                    |date_format\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
