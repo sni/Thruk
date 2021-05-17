@@ -92,6 +92,7 @@ sub get_test_servicegroup {
         $group = $1;
     }
     isnt($group, undef, "got a servicegroup from config.cgi") or bail_out_req('got no test servicegroup, cannot test.', $request);
+    $group = uri_unescape($group);
     return($group);
 }
 
@@ -105,6 +106,7 @@ sub get_test_hostgroup {
         $group = $1;
     }
     isnt($group, undef, "got a hostgroup from config.cgi") or bail_out_req('got no test hostgroup, cannot test.', $request);
+    $group = uri_unescape($group);
     return($group);
 }
 
@@ -120,6 +122,7 @@ sub get_test_user {
         $user = $1;
     }
     isnt($user, undef, "got a user from status.cgi") or bail_out_req('got no test user, cannot test.', $request);
+    $user = uri_unescape($user);
     $remote_user_cache = $user;
     return($user);
 }
