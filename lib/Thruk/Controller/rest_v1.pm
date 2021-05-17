@@ -255,6 +255,14 @@ sub _format_csv_output {
                 $output .= ';' unless $x == 0;
                 if(ref($d->{$col}) eq 'ARRAY') {
                     $output .= _escape_newlines(join(',', @{$d->{$col}}));
+                }
+                elsif(ref($d->{$col}) eq 'HASH') {
+                    my @list;
+                    for my $k (sort keys %{$d->{$col}}) {
+                        my $v = $d->{$col}->{$k};
+                        push @list, sprintf("%s:%s", $k, $v);
+                    }
+                    $output .= _escape_newlines(join(',', @list));
                 } else {
                     $output .= _escape_newlines($d->{$col} // '');
                 }
@@ -283,7 +291,9 @@ sub _escape_newlines {
 sub _format_human_output {
     my($c, $data) = @_;
 
+    my $hash_columns;
     if(ref $data eq 'HASH') {
+        $hash_columns = [qw/key value/];
         my $list = [];
         my $columns = [sort keys %{$data}];
         for my $col (@{$columns}) {
@@ -292,7 +302,12 @@ sub _format_human_output {
         $data = $list;
     }
 
-    return $c->render('text' => Thruk::Utils::text_table(data => $data));
+    my $columns;
+    if(ref $data eq 'ARRAY') {
+        $columns = $hash_columns || get_request_columns($c, ALIAS);
+    }
+
+    return $c->render('text' => Thruk::Utils::text_table(keys => $columns, data => $data));
 }
 
 ##########################################################

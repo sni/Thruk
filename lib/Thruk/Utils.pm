@@ -3553,6 +3553,17 @@ sub text_table {
                     $val = sprintf($col->{'format'}, $val);
                 }
             }
+            if(ref($val) eq 'ARRAY') {
+                $val = join(',', @{$val});
+            }
+            elsif(ref($val) eq 'HASH') {
+                my @list;
+                for my $k (sort keys %{$val}) {
+                    my $v = $val->{$k};
+                    push @list, sprintf("%s:%s", $k, $v);
+                }
+                $val = join(',', @list);
+            }
             my $l = length($val);
             if($l > $maxsize) { $maxsize = $l; }
             push @{$col->{'data'}}, $val;
