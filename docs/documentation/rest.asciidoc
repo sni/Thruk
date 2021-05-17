@@ -1882,6 +1882,7 @@ lists recurring downtimes.
 |flex_range                        | range in minutes for flexible downtimes
 |host                              | list of hostnames
 |hostgroup                         | list of hostgroups
+|last_changed                      | unix timestamp of last change
 |schedule                          | list of schedules
 |service                           | list of services
 |servicegroup                      | list of servicegroups

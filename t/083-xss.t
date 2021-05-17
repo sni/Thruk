@@ -111,6 +111,7 @@ sub check_templates {
                                     |short_uri\(
                                     |uri_with\(
                                     |base_url\(
+                                    |date_format\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;

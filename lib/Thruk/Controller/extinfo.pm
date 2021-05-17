@@ -290,6 +290,7 @@ sub _process_recurring_downtimes_page {
             'fixed'         => exists $c->req->parameters->{'fixed'} ? $c->req->parameters->{'fixed'} : 1,
             'flex_range'    => $c->req->parameters->{'flex_range'}      || 720,
             'edited_by'     => $c->stash->{'remote_user'},
+            'last_changed'  => time(),
             'created_by'    => $c->stash->{'remote_user'},
         };
         for my $t (qw/host hostgroup servicegroup/) {

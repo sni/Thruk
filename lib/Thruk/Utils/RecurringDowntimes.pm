@@ -211,6 +211,8 @@ sub read_downtime {
     $d->{'file'} = $dfile;
     $d->{'file'} =~ s|^.*/||gmx;
     $d->{'file'} =~ s|\.tsk$||gmx;
+    my @stat = stat(_);
+    $d->{'last_changed'} = $stat[9] unless $d->{'last_changed'};
 
     # set fallback target
     if(!$d->{'target'}) {
