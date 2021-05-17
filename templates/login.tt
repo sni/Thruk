@@ -4,82 +4,88 @@
   <head>
     <title>Thruk Monitoring Webinterface</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    [% PROCESS _common_css.tt use_frames=1 %]
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_js_files.tt %]
-    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
+<style>
+*,::after,::before{box-sizing:border-box}
+html{-moz-tab-size:4;-o-tab-size:4;tab-size:4}
+html{line-height:1.15;-webkit-text-size-adjust:100%}
+body{margin:0}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji'}
+button,input{font-family:inherit;font-size:100%;line-height:1.15;margin:0}
+button{text-transform:none}
+[type=button],[type=submit],button{-webkit-appearance:button}
+button{background-color:transparent;background-image:none}
+html{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";line-height:1.5}
+body{font-family:inherit;line-height:inherit}
+*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
+img{border-style:solid}
+input::-moz-placeholder{opacity:1;color:#9ca3af}
+input:-ms-input-placeholder{opacity:1;color:#9ca3af}
+input::placeholder{opacity:1;color:#9ca3af}
+button{cursor:pointer}
+table{border-collapse:collapse}
+a{color:inherit;text-decoration:inherit}
+button,input{padding:0;line-height:inherit;color:inherit}
+img{display:block;vertical-align:middle}
+img{max-width:100%;height:auto}
+*{--tw-shadow:0 0 #0000}
+*{--tw-ring-inset:var(--tw-empty, );/*!*//*!*/--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59, 130, 246, 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000}
+body{--tw-bg-opacity:1;background-color:rgba(236,238,240,var(--tw-bg-opacity));font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:.875rem;line-height:1.25rem;line-height:1.5;--tw-text-opacity:1;color:rgba(59,77,90,var(--tw-text-opacity));letter-spacing:0}
+BUTTON,INPUT[type=submit]{--tw-bg-opacity:1;background-color:rgba(229,231,235,var(--tw-bg-opacity))}
+BUTTON:hover,INPUT[type=submit]:hover{--tw-bg-opacity:1;background-color:rgba(156,163,175,var(--tw-bg-opacity))}
+BUTTON,INPUT[type=submit]{--tw-border-opacity:1;border-color:rgba(0,0,0,var(--tw-border-opacity));border-radius:.125rem;border-width:1px;font-weight:500;padding:.25rem;--tw-shadow:0 1px 3px 0 rgba(0, 0, 0, 0.1),0 1px 2px 0 rgba(0, 0, 0, 0.06);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow);--tw-text-opacity:1;color:rgba(0,0,0,var(--tw-text-opacity))}
+BODY.loginpage{display:flex;flex-direction:column;height:100vh;text-align:center;width:100vw;background:#f1f1f1;background:radial-gradient(ellipse at center,#f1f1f1 0,#eee 65%,#b0bec5 100%)}
+BODY.loginpage DIV.loginmask{--tw-bg-opacity:1;background-color:rgba(229,231,235,var(--tw-bg-opacity));border-radius:.25rem;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:3.5rem;margin-left:auto;margin-right:auto;padding-top:1.5rem;padding-bottom:1.5rem;padding-left:2.5rem;padding-right:2.5rem;--tw-shadow:0 3px 6px 0 rgba(0, 0, 0, 0.36);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}
+BODY.loginpage DIV.loginmask FORM{margin-top:1rem;margin-bottom:1rem}
+BODY.loginpage DIV.loginmask FORM DIV{margin-bottom:1rem}
+BODY.loginpage DIV.loginmask FORM BUTTON{--tw-bg-opacity:1;background-color:rgba(107,114,128,var(--tw-bg-opacity))}
+BODY.loginpage DIV.loginmask FORM BUTTON:hover{--tw-bg-opacity:1;background-color:rgba(75,85,99,var(--tw-bg-opacity))}
+BODY.loginpage DIV.loginmask FORM BUTTON{font-weight:700;padding-top:.75rem;padding-bottom:.75rem;--tw-text-opacity:1;color:rgba(255,255,255,var(--tw-text-opacity));width:100%}
+BODY.loginpage DIV.loginmask FORM INPUT{--tw-border-opacity:1;border-color:rgba(156,163,175,var(--tw-border-opacity));border-radius:.25rem;border-style:solid;border-width:1px;padding-left:.5rem;padding-right:.5rem;padding-top:.75rem;padding-bottom:.75rem}
+BODY.loginpage DIV.loginmask DIV.version{font-weight:700}
+DIV.thruk_dev_panel{display:none}
+</style>
   </head>
   <body class='[% page %] loginpage' id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
-  <!-- Produced by Thruk (http://www.thruk.org).
-       Copyright (c) 2009-present Thruk Developer Team.
-       Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
-       Copyright (c) 1999-2009 Ethan Galstad.
-  -->
   [% PROCESS _header_broadcast.tt %]
-  <br><br>
-  <br><br>
   [% PROCESS _message.tt %]
-  <div align="center">
-    <div id="mainlogo"><a href="[% c.config.home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
-    <div class="loginmask">
-      <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
-          <input type="hidden" name="referer" value="" id="referer">
-          <table class="infoBox">
-            <tr><td class="infoBox">
-              <div class="infoBoxTitle" align="center">Thruk Monitoring Webinterface</div>
-              <table width="100%">
-                [% IF c.config.basic_auth_enabled %]
-                <tr>
-                  <th>Username</th>
-                  <td><input type="text" name="login" class="logininput" id='loginuser'></td>
-                </tr>
-                <tr>
-                  <th>Password</th>
-                  <td><input type="password" name="password" class="logininput"></td>
-                </tr>
-                [% END %]
-                [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
-                <tr>
-                  [% IF c.config.basic_auth_enabled %]
-                  <td>&nbsp;</td>
-                  [% END %]
-                  <td align="center">
-                    [% IF c.config.basic_auth_enabled %]
-                    <input type="submit" name="submit" value="Login" class="loginbutton">
-                    [% END %]
-                    [% FOREACH auth = c.config.auth_oauth.provider %]
-                    <table>
-                      [% IF c.config.basic_auth_enabled || !loop.first %]
-                      <tr>
-                        <td width="40%"><hr></td>
-                        <td align="center">or</td>
-                        <td width="40%"><hr></td>
-                      </tr>
-                      [% END %]
-                      <tr>
-                        <td colspan="3" align="center">
-                          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
-                        </td>
-                      </tr>
-                    </table>
-                    [% END %]
-                  </td>
-                </tr>
-                [% END %]
-              </table>
-            </td></tr>
-          </table>
-      </form>
+
+  <div class="loginmask">
+    <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
+    <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
+      <input type="hidden" name="referer" value="" id="referer">
+      [% IF c.config.basic_auth_enabled %]
+        <div>
+          <input type="text" name="user" placeholder="User" id="loginuser" required />
+        </div>
+        <div>
+          <input type="password" name="password" placeholder="Password" required />
+        </div>
+        <button type="submit">Sign in</button>
+      [% END %]
+      [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
+        [% FOREACH auth = c.config.auth_oauth.provider %]
+          [% IF c.config.basic_auth_enabled || !loop.first %]
+          <div>
+            or
+          </div>
+          [% END %]
+        <div>
+          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
+        </div>
+        [% END %]
+      [% END %]
+    </form>
+    <div class="currentversioninfo">
+      <div class="version"><a href="https://www.thruk.org/" target="_blank">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</a></div>
     </div>
-    <br>
-    <br>
-    <div id="currentversioninfo">
-    <div class="version">Version [% thrukversion %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
-    <div class="releasedate">[% c.config.released %]</div>
-    </div>
-    [% PROCESS _disclaimer.tt %]
   </div>
+
   <script type="text/javascript">
   <!--
     function clean_ref(ref, keepflag) {
@@ -103,7 +109,6 @@
         cleanSessionCookies();
         // set test cookie again, it may be removed already when logged into in another tab
         cookieSave('thruk_test', '****', 0, '[% cookie_domain %]');
-        jQuery('body').addClass('submitting');
         return(true);
     }
 
@@ -133,11 +138,10 @@
         breakFrame();
     } catch(err) { console.log(err); }
 
-    cleanSessionCookies();
-
     jQuery('#loginuser').focus();
   -->
   </script>
+
   [% IF ssi_footer; ssi_footer | evaltt; END %]
   </body>
 </html>
