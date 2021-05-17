@@ -311,6 +311,7 @@ sub _update_docs {
     # create fake outages
     if($output_file =~ m/rest.asciidoc/mx) {
         local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
+        local $ENV{'THRUK_TEST_NO_LOG'}       = "";
         my $host         = uri_escape($host_name);
         my $service      = uri_escape($service_description);
         my $hostgroup    = uri_escape($host_group);

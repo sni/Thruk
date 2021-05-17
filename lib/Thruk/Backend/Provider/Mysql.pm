@@ -7,7 +7,7 @@ use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use POSIX ();
 
-use Thruk::Action::AddDefaults ();
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 use parent 'Thruk::Backend::Provider::Base';
@@ -1183,8 +1183,7 @@ sub _import_logs {
     my $log_count     = 0;
 
     if(!defined $backends) {
-        Thruk::Action::AddDefaults::set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
-        $backends = $c->stash->{'backends'};
+        ($backends) = $c->db->select_backends('get_logs');
     }
     $backends = Thruk::Base::list($backends);
     my @peer_keys;
