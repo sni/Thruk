@@ -3283,11 +3283,12 @@ returns list of available timezones
 sub get_timezone_data {
     my($c, $add_server) = @_;
 
+    $c->stats->profile(begin => "get_timezone_data");
     my $timezones = [];
     require Thruk::Utils::Cache;
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
     my $data  = $cache->get('timezones');
-    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H:%M");
+    my $timestamp = Thruk::Utils::format_date(int(time()/600)*600, "%Y-%m-%d %H:%M");
     if(defined $data && $data->{'timestamp'} eq $timestamp) {
         $timezones = $data->{'timezones'};
     } else {
@@ -3329,6 +3330,8 @@ sub get_timezone_data {
             offset => 0,
         };
     }
+
+    $c->stats->profile(end => "get_timezone_data");
     return($timezones);
 }
 
