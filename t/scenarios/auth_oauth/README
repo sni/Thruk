@@ -1,7 +1,6 @@
-== Kerberos Setup
+== OAuth Setup
 
-to manually reproduce things here you need to:
+to manually reproduce things here you can:
 
-  - connect by vnc to localhost:5901 (password is "vncpassword")
-  - open firefox and connect to: https://omd.test.local/demo/
+  - open firefox and connect to: https://192.168.105.2/demo/
 
