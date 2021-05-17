@@ -251,6 +251,7 @@ sub render {
         return(Thruk::Views::JSONRenderer::render_json($c, $args{'json'}));
     }
     if(defined $args{'text'}) {
+        $c->res->content_type('text/plain') unless $c->res->content_type();
         $c->res->body($args{'text'});
         $c->{'rendered'} = 1;
         return;
