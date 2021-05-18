@@ -8,6 +8,8 @@
       <td width="50" align="left" valign="top">
         <a href="#" onclick="toggleElement('message_details', 'message_details_icon');return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id="message_details_icon" alt="show details" width="13" height="12" class="close_button" style="margin-left: 4px;"></a>
       </td>
+      [% ELSE %]
+      <td width="50"></td>
       [% END %]
       <td align="center">
         <span class="[% message.0 | html %]">[% message.1 %]</span>

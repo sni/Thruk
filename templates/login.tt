@@ -47,6 +47,14 @@ BODY.loginpage DIV.loginmask FORM BUTTON{font-weight:700;padding-top:.75rem;padd
 BODY.loginpage DIV.loginmask FORM INPUT{--tw-border-opacity:1;border-color:rgba(156,163,175,var(--tw-border-opacity));border-radius:.25rem;border-style:solid;border-width:1px;padding-left:.5rem;padding-right:.5rem;padding-top:.75rem;padding-bottom:.75rem}
 BODY.loginpage DIV.loginmask DIV.version{font-weight:700}
 DIV.thruk_dev_panel{display:none}
+div.thruk_message table { margin-left:auto; margin-right:auto; text-align: center; font-weight: bold; }
+div.thruk_message img { display: inherit; margin-left: 3px; }
+.close_button { vertical-align: baseline; }
+.success_message { color: #008000; }
+.fail_message { color: #FF0000; }
+.shadowcontent { border: 0px none; box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36); background-color: #fff; color: #000; }
+.shadowcontent, .shadow { position: relative; bottom: 6px; right: 6px; }
+.shadow { background-color: rgba(0, 0, 0, 0.3); }
 </style>
   </head>
   <body class='[% page %] loginpage' id='[% page %]'>
@@ -71,9 +79,7 @@ DIV.thruk_dev_panel{display:none}
       [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
         [% FOREACH auth = c.config.auth_oauth.provider %]
           [% IF c.config.basic_auth_enabled || !loop.first %]
-          <div>
-            or
-          </div>
+          <div>or</div>
           [% END %]
         <div>
           <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
@@ -137,8 +143,6 @@ DIV.thruk_dev_panel{display:none}
     try {
         breakFrame();
     } catch(err) { console.log(err); }
-
-    jQuery('#loginuser').focus();
   -->
   </script>
 
