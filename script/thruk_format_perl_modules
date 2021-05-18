@@ -196,7 +196,7 @@ sub _parse_file {
         if($test =~ m/^\s*
                       (use|load|package|require)
                       \s+
-                      ([^\s;\(]+)       # pkg name
+                      ([^\s;\(,]+)       # pkg name
                       \s*
                       (.*)$             # import arguments
                     /mx) {
@@ -210,7 +210,7 @@ sub _parse_file {
                 next;
             }
 
-            if($src eq 'require') {
+            if($src eq 'require' || $src eq 'load') {
                 for my $b (values %{$blocks}) {
                     for my $u (@{$b->{'used'}}) {
                         if(defined $u->{$mod}) {
@@ -279,7 +279,7 @@ sub _parse_file {
         if($test =~ m/Thruk::Utils::CLI::load_module\("?'?(.*?)"?'?\)/mx) {
             my $mod = $1;
             $lastblock->{'modules'}->{$mod} = 0;
-            $test =~ s/load_module\([^\)]+\)/load_module()/gmx;
+            $test =~ s/load_module\([^\)]+\)/load_module()/mx;
         }
 
         # loaded by use_ok during tests
@@ -296,9 +296,18 @@ sub _parse_file {
             $test = "";
         }
 
+        if($test =~ m/Dumper\(/mx) {
+            my $mod = 'Data::Dumper';
+            if(!defined $lastblock->{'modules'}->{$mod}) {
+                push @{$lastblock->{'missing'}}, [$mod, $line];
+            } else {
+                $lastblock->{'modules'}->{$mod}++;
+            }
+        }
+
         my @matches1 = ($test =~ m/(
-                            (?:\$|@|%|\&|) # variable prefix
-                            (?:            # module name
+                            (?:\$|\@|%|\&|) # variable prefix
+                            (?:             # module name
                                 Thruk
                                |Template
                                |Digest
