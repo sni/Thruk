@@ -274,6 +274,7 @@ sub array2hash {
 
     return \%hash;
 }
+
 ########################################
 
 =head2 hash_invert
@@ -283,7 +284,6 @@ sub array2hash {
 return hash with keys and values inverted
 
 =cut
-
 sub hash_invert {
     my($hash) = @_;
 
@@ -296,6 +296,20 @@ sub hash_invert {
     return \%invert;
 }
 
+########################################
+
+=head2 comma_separated_list
+
+  comma_separated_list($string)
+
+splits lists of comma separated values into list
+
+=cut
+sub comma_separated_list {
+    my($val) = @_;
+    $val = [split(/\s*,\s*/mx, join(",", @{&list($val)}))];
+    return(&array_uniq($val));
+}
 
 ########################################
 

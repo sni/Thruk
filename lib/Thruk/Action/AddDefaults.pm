@@ -514,7 +514,7 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
-    my($disabled_backends,$has_groups) = set_enabled_backends($c);
+    my $disabled_backends = set_enabled_backends($c);
 
     ###############################
     # add program status
@@ -553,11 +553,6 @@ sub add_defaults {
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
 
-        ###############################
-        # disable backends by groups
-        if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->db()) {
-            $disabled_backends = _disable_backends_by_group($c, $disabled_backends);
-        }
         set_possible_backends($c, $disabled_backends);
         $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
@@ -906,36 +901,6 @@ sub _calculate_section_totals {
 }
 
 ########################################
-sub _disable_backends_by_group {
-    my ($c,$disabled_backends) = @_;
-
-    my $contactgroups = Thruk::Base::array2hash($c->user->{'groups'});
-    for my $peer (@{$c->db->get_peers()}) {
-        if(defined $peer->{'groups'}) {
-            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
-                if(defined $contactgroups->{$group}) {
-                    _debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
-                    # delete old completly hidden state
-                    delete $disabled_backends->{$peer->{'key'}};
-                    # but disabled by cookie?
-                    if(defined $c->cookie('thruk_backends')) {
-                        for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
-                            my($key, $value) = split/=/mx, $val;
-                            if(defined $value and $key eq $peer->{'key'}) {
-                                $disabled_backends->{$key} = $value;
-                            }
-                        }
-                    }
-                    last;
-                }
-            }
-        }
-    }
-
-    return $disabled_backends;
-}
-
-########################################
 sub _any_backend_enabled {
     my ($c) = @_;
     for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
@@ -1194,24 +1159,30 @@ sub set_enabled_backends {
 
     ###############################
     # groups affected?
-    my $has_groups = 0;
     if(defined $c->db()) {
         for my $peer (@{$c->db->get_peers()}) {
             if(defined $peer->{'groups'}) {
-                $has_groups = 1;
-                $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
+                my $access = 0;
+                for my $grp (Thruk::Base::comma_separated_list($peer->{'groups'})) {
+                    if($c->user->has_group($grp)) {
+                        $access = 1;
+                        last;
+                    }
+                }
+                if(!$access) {
+                    $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
+                }
             }
         }
         $c->db->disable_backends($disabled_backends);
     }
-    _debug("backend groups filter enabled") if $has_groups;
 
     # when set by args, update
     if(defined $backends) {
         set_possible_backends($c, $disabled_backends);
     }
     _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk::Base->debug;
-    return($disabled_backends, $has_groups);
+    return($disabled_backends);
 }
 
 ########################################

@@ -467,7 +467,7 @@ sub set_default_config {
 
     # ensure comma separated lists
     for my $key (qw/csrf_allowed_hosts show_custom_vars expose_custom_vars/) {
-        $config->{$key} = _comma_separated_list($config->{$key});
+        $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
     }
 
     ###################################################
@@ -1018,14 +1018,6 @@ sub get_user {
         push @groups, $stat[5];
     }
     return($uid, \@groups);
-}
-
-########################################
-# splits lists of comma separated values into list
-sub _comma_separated_list {
-    my($val) = @_;
-    $val = [split(/\s*,\s*/mx, join(",", @{Thruk::Base::list($val)}))];
-    return(Thruk::Base::array_uniq($val));
 }
 
 ########################################
