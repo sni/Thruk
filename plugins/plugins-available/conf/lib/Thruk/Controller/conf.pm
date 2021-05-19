@@ -2650,8 +2650,8 @@ sub _object_tree_objects {
     @{$objs} = sort {uc($a->get_name()) cmp uc($b->get_name())} @{$objs};
 
     $c->stash->{'tree_objects_layout'} = 'table';
-    if(defined $c->cookie('thruk_obj_layout')) {
-        $c->stash->{'tree_objects_layout'} = $c->cookie('thruk_obj_layout')->value();
+    if($c->cookies('thruk_obj_layout')) {
+        $c->stash->{'tree_objects_layout'} = $c->cookies('thruk_obj_layout');
     }
 
     my $all_files  = $c->{'obj_db'}->get_files();

@@ -14,7 +14,6 @@ use Thruk::Authentication::User ();
 use Thruk::Config 'noautoload';
 use Thruk::Controller::error ();
 use Thruk::Request ();
-use Thruk::Request::Cookie ();
 use Thruk::Stats ();
 use Thruk::Utils::APIKeys ();
 use Thruk::Utils::CookieAuth ();
@@ -350,7 +349,7 @@ sub authenticate {
     if(!$sessiondata && !$internal) {
         if(!Thruk::Base->mode_cli()) {
             ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
-            $c->res->cookies->{'thruk_auth'} = {value => $sessionid, path => $c->stash->{'cookie_path'}, httponly => 1 };
+            $c->cookie('thruk_auth', $sessionid, { httponly => 1 });
         }
     }
     if($sessiondata) {
@@ -389,7 +388,7 @@ sub _request_username {
     my($username, $auth_src, $superuser, $internal, $roles, $sessiondata);
     my $env       = $c->env;
     $apikey       = $c->req->header('X-Thruk-Auth-Key') unless defined $apikey;
-    my $sessionid = $c->req->cookies->{'thruk_auth'};
+    my $sessionid = $c->cookies('thruk_auth');
     $sessiondata  = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $sessionid) if $sessionid;
 
     # authenticate by secret.key from http header
@@ -548,9 +547,9 @@ sub cache {
 
 $c->cookie($name, [$value], [$options])
 
-retrieves a cookie_path
+returns cookie from current request.
 
-sets a cookie if value is defined
+sets a cookie for current response if value is defined.
 
 options are available as descrbed here: L<Plack::Response/cookies>
 
@@ -564,25 +563,29 @@ sub cookie {
     }
     if(defined $value) {
         $options->{'samesite'} = 'lax' unless $options->{'samesite'};
+        $options->{'path'}     = $c->stash->{'cookie_path'} unless $options->{'path'};
+        $options->{'secure'}   = 1 if _is_ssl_request($c);
         $c->res->cookies->{$name} = { value => $value, %{$options}};
         return;
     }
-    my $cookie = $c->req->cookies->{$name};
-    return unless defined $cookie;
-    return(Thruk::Request::Cookie->new($cookie));
+    return($c->cookies($name));
 }
 
 =head2 cookies
 
-$c->cookies()
+$c->cookies($name)
+
+returns cookie from current request.
 
 =cut
 sub cookies {
     my($c, $name) = @_;
-    my $cookie = $c->req->cookies->{$name};
-    return unless defined $cookie;
-    my $vars = [split/&/mx, $cookie];
-    return(Thruk::Request::Cookie->new($vars));
+    if(wantarray) {
+        my $val  = $c->req->cookies->{$name};
+        return unless $val;
+        return([split/&/mx, $val]);
+    }
+    return($c->req->cookies->{$name});
 }
 
 =head2 redirect_to
@@ -788,6 +791,29 @@ sub log {
 
 ###################################################
 
+=head2 get_cookie_domain
+
+$c->get_cookie_domain
+
+return domain used for cookies
+
+=cut
+sub get_cookie_domain {
+    my($c) = @_;
+    my $domain = $c->config->{'cookie_auth_domain'};
+    return "" unless $domain;
+    my $http_host = $c->req->env->{'HTTP_HOST'};
+    # remove port
+    $http_host =~ s/:\d+$//gmx;
+    $domain =~ s/\.$//gmx;
+    if($http_host !~ m/\Q$domain\E$/mx) {
+        return($http_host);
+    }
+    return $domain;
+}
+
+###################################################
+
 =head2 finalize_request
 
     register_cron_entries($c, $res)
@@ -930,6 +956,25 @@ sub _set_content_length {
     $h->push('Cache-Control', 'no-store');
     $h->push('Expires', '0');
     return($content_length);
+}
+
+###################################################
+# returns true if request is using ssl/tls
+sub _is_ssl_request {
+    my($c) = @_;
+
+    # plack url scheme
+    if($c->env->{'psgi.url_scheme'} && lc($c->env->{'psgi.url_scheme'}) eq 'https') {
+        return(1);
+    }
+
+    # X-Forwarded-Proto header
+    my $forward_proto = $c->req->header('X-Forwarded-Proto');
+    if($forward_proto && lc($forward_proto) eq 'https') {
+        return(1);
+    }
+
+    return;
 }
 
 ###################################################

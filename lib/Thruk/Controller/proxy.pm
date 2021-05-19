@@ -56,7 +56,7 @@ sub index {
         die("peer has type: ".$peer->{'type'});
     }
 
-    my $session_id  = $c->req->cookies->{'thruk_auth'} || $peer->{'class'}->propagate_session_file($c);
+    my $session_id  = $c->cookies('thruk_auth') || $peer->{'class'}->propagate_session_file($c);
     my $request_url = Thruk::Utils::absolute_url($peer->{'addr'}, $url, 1);
 
     # federated peers forward to the next hop
@@ -101,8 +101,8 @@ sub index {
     }
 
     # in case we don't have a cookie yet, set the last session_id, so it can be reused
-    if(!$c->req->cookies->{'thruk_auth'}) {
-        $c->res->cookies->{'thruk_auth'} = {value => $session_id, path => $c->stash->{'cookie_path'}, 'httponly' => 1 };
+    if(!$c->cookies('thruk_auth')) {
+        $c->cookie('thruk_auth', $session_id, { 'httponly' => 1 });
     }
 
     _cleanup_response($c, $peer, $url, $res);

@@ -103,9 +103,9 @@ sub begin {
     if( $c->req->parameters->{'theme'} ) {
         $param_theme = $c->req->parameters->{'theme'};
     }
-    elsif( defined $c->cookie('thruk_theme') ) {
-        my $theme_cookie = $c->cookie('thruk_theme');
-        $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
+    elsif($c->cookies('thruk_theme') ) {
+        my $theme_cookie = $c->cookies('thruk_theme');
+        $cookie_theme = $theme_cookie if defined $theme_cookie and grep $theme_cookie, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
     my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
@@ -134,8 +134,9 @@ sub begin {
         $key =~ s/\ /_/gmx;
         $menu_states->{$key} = $val;
     }
-    if($c->cookie('thruk_side') ) {
-        for my $state (@{$c->cookies('thruk_side')->{'value'}}) {
+    if($c->cookies('thruk_side') ) {
+        my @states = $c->cookies('thruk_side');
+        for my $state (@states) {
             my($k,$v) = split(/=/mx,$state,2);
             $k = lc($k // '');
             $k =~ s/\ /_/gmx;
@@ -203,24 +204,24 @@ sub begin {
     }
 
     # sound cookie set?
-    if(defined $c->cookie('thruk_sounds')) {
-        my $sound_cookie = $c->cookie('thruk_sounds');
-        if(defined $sound_cookie->value and $sound_cookie->value eq 'off') {
+    if(defined $c->cookies('thruk_sounds')) {
+        my $sound_cookie = $c->cookies('thruk_sounds');
+        if($sound_cookie && $sound_cookie eq 'off') {
             $c->stash->{'play_sounds'} = 0;
         }
-        if(defined $sound_cookie->value and $sound_cookie->value eq 'on') {
+        if($sound_cookie && $sound_cookie eq 'on') {
             $c->stash->{'play_sounds'} = 1;
         }
     }
 
     # favicon cookie set?
     $c->stash->{'fav_counter'} = 0;
-    if(defined $c->cookie('thruk_favicon')) {
-        my $favicon_cookie = $c->cookie('thruk_favicon');
-        if(defined $favicon_cookie->value and $favicon_cookie->value eq 'off') {
+    if(defined $c->cookies('thruk_favicon')) {
+        my $favicon_cookie = $c->cookies('thruk_favicon');
+        if($favicon_cookie && $favicon_cookie eq 'off') {
             $c->stash->{'fav_counter'} = 0;
         }
-        if(defined $favicon_cookie->value and $favicon_cookie->value eq 'on') {
+        if($favicon_cookie && $favicon_cookie eq 'on') {
             $c->stash->{'fav_counter'} = 1;
         }
     }
@@ -445,7 +446,7 @@ sub add_defaults {
     my $timezone;
     if($user_tz ne 'Server Setting') {
         if($user_tz eq 'Local Browser') {
-            $timezone = $c->req->cookies->{'thruk_tz'};
+            $timezone = $c->cookies('thruk_tz');
         } else {
             $timezone = $user_tz;
         }
@@ -1140,9 +1141,10 @@ sub set_enabled_backends {
 
     ###############################
     # by cookie
-    elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
+    elsif($num_backends > 1 && defined $c->cookies('thruk_backends')) {
         _debug('set_enabled_backends() by cookie') if Thruk::Base->debug;
-        for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
+        my @cookie_backends = $c->cookies('thruk_backends');
+        for my $val (@cookie_backends) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
             $disabled_backends->{$key} = $value;

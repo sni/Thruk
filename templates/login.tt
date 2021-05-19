@@ -65,7 +65,7 @@ div.thruk_message img { display: inherit; margin-left: 3px; }
 
   <div class="loginmask">
     <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
-    <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
+    <form method="POST" action="login.cgi">
       <input type="hidden" name="referer" value="" id="referer">
       [% IF c.config.basic_auth_enabled %]
         <div>
@@ -98,24 +98,17 @@ div.thruk_message img { display: inherit; margin-left: 3px; }
         ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         if(keepflag == undefined || keepflag == false) {
-            ref = ref.replace(/^\?(expired|invalid|problem|nocookie|locked)\&/, '?');
-            ref = ref.replace(/^\?(expired|invalid|problem|nocookie|locked)$/,  '');
+            ref = ref.replace(/^\?(expired|invalid|problem|locked)\&/, '?');
+            ref = ref.replace(/^\?(expired|invalid|problem|locked)$/,  '');
         }
         ref = ref.replace(/^\?/, '/');
         ref = ref.replace(/^\/+/, '/');
         ref = ref.replace(/^\?/, '/');
-        ref = ref.replace(/^\/(expired|invalid|problem|nocookie|locked)\&/,  '$1&/');
+        ref = ref.replace(/^\/(expired|invalid|problem|locked)\&/,  '$1&/');
         ref = ref.replace(/_=\d+/, '');
         ref = ref.replace(/\?$/, '');
         ref = ref.replace(/\#side.html$/, '');
         return(ref);
-    }
-
-    function onLogin() {
-        cleanSessionCookies();
-        // set test cookie again, it may be removed already when logged into in another tab
-        cookieSave('thruk_test', '****', 0, '[% cookie_domain %]');
-        return(true);
     }
 
     function breakFrame() {
@@ -133,11 +126,6 @@ div.thruk_message img { display: inherit; margin-left: 3px; }
             if(el) { el.value = ref; }
         }
         return;
-    }
-
-    // remove session cookies which interfere with current set cookie domain
-    function cleanSessionCookies() {
-      cookieRemoveAll("thruk_auth");
     }
 
     try {

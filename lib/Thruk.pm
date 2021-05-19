@@ -254,8 +254,8 @@ sub _dispatcher {
     my $c = Thruk::Context->new($thruk, $env);
     $c->{'stage'} = 'pre';
     my $enable_profiles = 0;
-    if($c->req->cookies->{'thruk_profiling'}) {
-        $enable_profiles = $c->req->cookies->{'thruk_profiling'};
+    if($c->cookies('thruk_profiling')) {
+        $enable_profiles = $c->cookies('thruk_profiling');
         $c->stash->{'user_profiling'} = $enable_profiles;
     }
     local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $enable_profiles;

@@ -917,8 +917,8 @@ sub _apache_status {
     Thruk::UserAgent::disable_verify_hostname($ua);
     $ua->max_redirect(0);
     # pass through authentication
-    my $cookie = $c->cookie('thruk_auth');
-    $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value.'; HttpOnly') if $cookie;
+    my $cookie = $c->cookies('thruk_auth');
+    $ua->default_header('Cookie' => 'thruk_auth='.$cookie.'; HttpOnly') if $cookie;
     $ua->default_header('Authorization' => $c->req->header('authorization')) if $c->req->header('authorization');
     my $res = $ua->get($url);
     if($res->code == 200) {

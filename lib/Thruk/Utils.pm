@@ -519,7 +519,7 @@ sub set_message {
     }
 
     # cookie does not get escaped, it will be escaped upon read
-    $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });
+    $c->cookie('thruk_message', $style.'~~'.$message, { httponly => 0 });
     # use escaped data if possible, but store original data as well
     $c->stash->{'thruk_message'}         = $style.'~~'.($escaped_message // $message);
     $c->stash->{'thruk_message_details'} = $escaped_details // $details;
@@ -1964,9 +1964,8 @@ sub choose_mobile {
     return unless $found;
 
     my $choose_mobile;
-    if(defined $c->cookie('thruk_mobile')) {
-        my $cookie = $c->cookie('thruk_mobile');
-        $choose_mobile = $cookie->value;
+    if(defined $c->cookies('thruk_mobile')) {
+        $choose_mobile = $c->cookies('thruk_mobile');
         return if $choose_mobile == 0;
     }
 

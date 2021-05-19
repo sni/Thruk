@@ -286,7 +286,7 @@ is($args, 'blah%3D%26blub%22', 'as_url_arg');
 #########################
 Thruk::Utils::set_message($c, 'fail_message', "test_error");
 
-my $exp_cookie = {'value' => 'fail_message~~test_error', 'path' => '/thruk/', 'samesite' => 'lax'};
+my $exp_cookie = {'value' => 'fail_message~~test_error', 'path' => '/thruk/', 'samesite' => 'lax', 'httponly' => 0 };
 is_deeply($c->res->{'cookies'}->{'thruk_message'}, $exp_cookie, 'get_message cookie');
 
 my @msg = Thruk::Utils::Filter::get_message($c);

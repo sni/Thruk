@@ -169,9 +169,9 @@ sub get_screen_data {
     my $c = $Thruk::Globals::c;
     my $screen = {};
     return $screen unless $c;
-    if($c->cookie('thruk_screen')) {
+    if($c->cookies('thruk_screen')) {
         eval {
-            $screen = decode_json($c->cookie('thruk_screen')->value);
+            $screen = decode_json($c->cookies('thruk_screen'));
         };
         if($screen->{'height'}) {
             $screen->{'height'} = $c->stash->{one_tab_only} ? $screen->{'height'} : ($screen->{'height'} - 25);

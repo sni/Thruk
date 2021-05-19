@@ -789,16 +789,13 @@ sub get_message {
     my $has_details = 0;
 
     # message from cookie?
-    if(defined $c->cookie('thruk_message')) {
-        my $cookie = $c->cookie('thruk_message');
-        $c->cookie('thruk_message' => '', {
-            expires => 0,
-            path    => $c->stash->{'cookie_path'},
-        });
+    if(defined $c->cookies('thruk_message')) {
+        my $cookie = $c->cookies('thruk_message');
+        $c->cookie('thruk_message', '', { expires => 0 });
         # sometimes the cookie is empty, so delete it in every case
         # and show it if it contains data
-        if(defined $cookie and $cookie->value) {
-            my($style,$message) = split(/~~/mx, $cookie->value, 2);
+        if($cookie) {
+            my($style,$message) = split(/~~/mx, $cookie, 2);
             return '' unless $message;
             $message = &escape_html($message);
             my @msg = split(/\n/mx, $message);
