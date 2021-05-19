@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add new config option: cookie_secure_only
           - Business Process:
             - performance improvements
 

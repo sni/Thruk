@@ -564,7 +564,7 @@ sub cookie {
     if(defined $value) {
         $options->{'samesite'} = 'lax' unless $options->{'samesite'};
         $options->{'path'}     = $c->stash->{'cookie_path'} unless $options->{'path'};
-        $options->{'secure'}   = 1 if _is_ssl_request($c);
+        $options->{'secure'}   = 1 if $c->config->{'cookie_secure_only'} || _is_ssl_request($c);
         $c->res->cookies->{$name} = { value => $value, %{$options}};
         return;
     }

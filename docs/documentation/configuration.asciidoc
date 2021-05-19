@@ -2442,6 +2442,13 @@ ex.:
   cookie_path = /
 
 
+=== cookie_secure_only
+
+Sets all cookies with secure=1 if enabled.
+
+ex.:
+
+  cookie_secure_only = 1
 
 
 
