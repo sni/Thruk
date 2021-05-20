@@ -509,7 +509,7 @@ function cookieSave(name, value, expires, domain) {
     cookieStr += ";domain="+domain;
   }
 
-  cookieStr += ";samesite=lax";
+  cookieStr += "; samesite=lax";
 
   // cleanup befor we set new cookie
   cookieRemoveAll(name);
@@ -543,7 +543,7 @@ function cookieRemoveAll(name) {
             domain = hostpart+"."+domain;
         }
         jQuery.each(document.location.hostname.split(".").reverse(), function(key2, path) {
-            document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+            document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
         });
     });
 }
