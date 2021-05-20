@@ -72,7 +72,7 @@ BODY.loginpage DIV.loginmask DIV.version{font-weight:700}
           <div>or</div>
           [% END %]
         <div>
-          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
+          <button name="oauth" value="[% loop.index %]">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
         </div>
         [% END %]
       [% END %]
