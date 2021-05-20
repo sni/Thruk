@@ -431,7 +431,7 @@ sub json_store {
             eval {
                 my $test = $json->decode(&read($tmpfile));
             };
-            confess("json_store failed to write a valid file: ".$@) if $@;
+            confess("json_store failed to write a valid file $tmpfile: ".$@) if $@;
         }
     }
 
