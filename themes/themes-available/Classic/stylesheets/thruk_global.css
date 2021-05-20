@@ -1558,6 +1558,9 @@ input[type=text], input[type=password] {
 .thruk_dev_panel TABLE TH {
   text-align: left;
 }
+.thruk_dev_panel TABLE TD {
+  text-align: left;
+}
 
 .thruk_dev_panel DIV.profiles TR:hover {
   background: #cecece;

@@ -108,7 +108,7 @@ sub report_html {
     my($self) = @_;
     my $result = $self->_result();
     my $report = "Profile:\n";
-    $report .= "<table style='border: 1px solid black; width: 800px;'>";
+    $report .= "<table style='border: 1px solid black; width: 800px;' class='stats_profile'>";
     $self->{'total_time'} = _row_elapsed($result->[0]);
     $self->{'total_time'} =~ s/s$//gmx if $self->{'total_time'};
     $self->{'total_time'} =~ s/^~//gmx if $self->{'total_time'};

@@ -4,14 +4,16 @@
   <head>
     <title>Thruk Monitoring Webinterface</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    [% PROCESS _common_css.tt use_frames=1 %]
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_js_files.tt %]
 <style>
+input[type="text"], input[type="password"] { margin-right: inherit; border-width: inherit; height: inherit; }
 *,::after,::before{box-sizing:border-box}
 html{-moz-tab-size:4;-o-tab-size:4;tab-size:4}
-html{line-height:1.15;-webkit-text-size-adjust:100%}
+html{line-height:1.15;-webkit-text-size-adjust:100%; overflow-y: inherit; overflow-x: inherit;}
 body{margin:0}
 body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji'}
 button,input{font-family:inherit;font-size:100%;line-height:1.15;margin:0}
@@ -29,11 +31,8 @@ button{cursor:pointer}
 table{border-collapse:collapse}
 a{color:inherit;text-decoration:inherit}
 button,input{padding:0;line-height:inherit;color:inherit}
-img{display:block;vertical-align:middle}
-img{max-width:100%;height:auto}
-*{--tw-shadow:0 0 #0000}
-*{--tw-ring-inset:var(--tw-empty, );/*!*//*!*/--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59, 130, 246, 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000}
-body{--tw-bg-opacity:1;background-color:rgba(236,238,240,var(--tw-bg-opacity));font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:.875rem;line-height:1.25rem;line-height:1.5;--tw-text-opacity:1;color:rgba(59,77,90,var(--tw-text-opacity));letter-spacing:0}
+img{max-width:100%;height:auto; vertical-align: baseline;}
+body{background-color:rgba(236,238,240,var(--tw-bg-opacity));font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:.875rem;line-height:1.25rem;line-height:1.5;--tw-text-opacity:1;color:rgba(59,77,90,var(--tw-text-opacity));letter-spacing:0}
 BUTTON,INPUT[type=submit]{--tw-bg-opacity:1;background-color:rgba(229,231,235,var(--tw-bg-opacity))}
 BUTTON:hover,INPUT[type=submit]:hover{--tw-bg-opacity:1;background-color:rgba(156,163,175,var(--tw-bg-opacity))}
 BUTTON,INPUT[type=submit]{--tw-border-opacity:1;border-color:rgba(0,0,0,var(--tw-border-opacity));border-radius:.125rem;border-width:1px;font-weight:500;padding:.25rem;--tw-shadow:0 1px 3px 0 rgba(0, 0, 0, 0.1),0 1px 2px 0 rgba(0, 0, 0, 0.06);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow);--tw-text-opacity:1;color:rgba(0,0,0,var(--tw-text-opacity))}
@@ -46,15 +45,6 @@ BODY.loginpage DIV.loginmask FORM BUTTON:hover{--tw-bg-opacity:1;background-colo
 BODY.loginpage DIV.loginmask FORM BUTTON{font-weight:700;padding-top:.75rem;padding-bottom:.75rem;--tw-text-opacity:1;color:rgba(255,255,255,var(--tw-text-opacity));width:100%}
 BODY.loginpage DIV.loginmask FORM INPUT{--tw-border-opacity:1;border-color:rgba(156,163,175,var(--tw-border-opacity));border-radius:.25rem;border-style:solid;border-width:1px;padding-left:.5rem;padding-right:.5rem;padding-top:.75rem;padding-bottom:.75rem}
 BODY.loginpage DIV.loginmask DIV.version{font-weight:700}
-DIV.thruk_dev_panel{display:none}
-div.thruk_message table { margin-left:auto; margin-right:auto; text-align: center; font-weight: bold; }
-div.thruk_message img { display: inherit; margin-left: 3px; }
-.close_button { vertical-align: baseline; }
-.success_message { color: #008000; }
-.fail_message { color: #FF0000; }
-.shadowcontent { border: 0px none; box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.36); background-color: #fff; color: #000; }
-.shadowcontent, .shadow { position: relative; bottom: 6px; right: 6px; }
-.shadow { background-color: rgba(0, 0, 0, 0.3); }
 </style>
   </head>
   <body class='[% page %] loginpage' id='[% page %]'>
