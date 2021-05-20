@@ -968,6 +968,10 @@ sub _is_ssl_request {
         return(1);
     }
 
+    if($c->env->{'HTTP_ORIGIN'} && $c->env->{'HTTP_ORIGIN'} =~ m/^https/mx) {
+        return(1);
+    }
+
     # X-Forwarded-Proto header
     my $forward_proto = $c->req->header('X-Forwarded-Proto');
     if($forward_proto && lc($forward_proto) eq 'https') {
