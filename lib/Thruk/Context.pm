@@ -583,7 +583,7 @@ sub cookies {
     if(wantarray) {
         my $val  = $c->req->cookies->{$name};
         return unless $val;
-        return([split/&/mx, $val]);
+        return(split/&/mx, $val);
     }
     return($c->req->cookies->{$name});
 }
