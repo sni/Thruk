@@ -295,12 +295,12 @@ sub _invalidate_current_session {
 
     for my $path (@{$paths}) {
         # without domain
-        my $cookie = sprintf("thruk_auth=; path=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly", $path);
+        my $cookie = sprintf("thruk_auth=; path=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; samesite=lax;", $path);
         push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
 
         # for all sub domains
         for my $domain (@{$domains}) {
-            my $cookie = sprintf("thruk_auth=; path=%s;domain=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly", $path, $domain);
+            my $cookie = sprintf("thruk_auth=; path=%s;domain=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; samesite=lax;", $path, $domain);
             push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
         }
     }
