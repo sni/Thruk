@@ -272,6 +272,7 @@ sub _process_recurring_downtimes_page {
     $default_rd->{'target'} = $target;
 
     if($task eq 'save') {
+        return unless Thruk::Utils::check_csrf($c);
         my $backends = [];
         if($c->req->parameters->{'d_backends'}) {
             $backends = ref $c->req->parameters->{'d_backends'} eq 'ARRAY' ? $c->req->parameters->{'d_backends'} : [$c->req->parameters->{'d_backends'}];
@@ -348,6 +349,7 @@ sub _process_recurring_downtimes_page {
         return if _process_recurring_downtimes_page_edit($c, $nr, $default_rd);
     }
     elsif($task eq 'remove') {
+        return unless Thruk::Utils::check_csrf($c);
         my $numbers = [];
         if($c->req->parameters->{'selected_ids'}) {
             $numbers = [map({
@@ -955,6 +957,7 @@ sub _process_perf_info_logcache_details {
 
     my $action = $c->req->parameters->{'submit'};
     if($action) {
+        return unless Thruk::Utils::check_csrf($c);
         if($action eq 'update' || $action eq 'clean' || $action eq 'compact') {
             return(Thruk::Utils::External::cmd($c, {
                 cmd            => $c->config->{'thruk_bin'}." logcache $action -v --local -b $peer_key 2>&1",

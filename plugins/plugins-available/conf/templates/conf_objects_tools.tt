@@ -1,12 +1,9 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
-<form action="conf.cgi" method="POST">
-<input type="hidden" name="sub" value="objects">
-  <table border="0" class='data conftoolobj'>
-    [% PROCESS _conf_objects_menu.tt type="tools" %]
-  </table>
-</form>
+<table border="0" class='data conftoolobj'>
+  [% PROCESS _conf_objects_menu.tt type="tools" %]
+</table>
 <br><br>
 <table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
 <tr>

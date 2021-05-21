@@ -371,7 +371,6 @@ sub _check_for_commands {
     }
 
     # command commited?
-    $c->stash->{'use_csrf'} = 1;
     if( $cmd_mod == 2 and do_send_command($c) ) {
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
         redirect_or_success( $c, -2 );
@@ -581,9 +580,7 @@ send commands based on request parameters
 sub do_send_command {
     my($c) = @_;
 
-    if($c->stash->{'use_csrf'}) {
-        return unless Thruk::Utils::check_csrf($c);
-    }
+    return unless Thruk::Utils::check_csrf($c);
 
     my $cmd_typ = $c->req->parameters->{'cmd_typ'};
     return $c->detach('/error/index/6') unless defined $cmd_typ;

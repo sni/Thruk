@@ -72,6 +72,19 @@ sub check_templates {
     my $failed = 0;
     my $escaped_keys = {};
 
+    while($content =~ m/<form[^>]*post[^>]*>.*?<\/form>/gsmxi) {
+        my $tag = substr($content, $-[0], $+[0]-$-[0]);
+
+        next if $file =~ m%/login\.tt$%mx;
+        next if $file =~ m%/_status_column_select\.tt$%mx;
+        next if $tag =~ m%/login\.cgi%mx;
+
+        my $linenr = 1 + substr($content,0,$-[0]) =~ y/\n//;
+        if($tag !~ m/CSRFtoken/mx) {
+            fail("$file uses post form without csrf token starting on line $linenr");
+        }
+    }
+
     # extract all tags
     $content =~ s/\[%\+?\s*(ELSIF|IF|UNLESS|FOREACH)\s*([^;%]*?)\s*;/[% /gmx;
     $content =~ s/\[%\+?\s*(ELSIF|IF|UNLESS|FOREACH)\s*([^;%]*?)\s*\+?%\]//gmx;

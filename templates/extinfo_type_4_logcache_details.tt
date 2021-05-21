@@ -63,6 +63,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
               <button name="submit" value="update" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run update</button>
             </form>
           </td>
@@ -80,6 +81,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
               <button name="submit" value="compact" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run compact ([% c.config.logcache_compact_duration %])</button>
             </form>
           </td>
@@ -97,6 +99,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
               <button name="submit" value="optimize" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run optimize</button>
             </form>
           </td>
@@ -114,6 +117,7 @@
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
               <button name="submit" value="clean" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run clean ([% c.config.logcache_clean_duration %])</button>
             </form>
           </td>

@@ -5,6 +5,7 @@
   <input type="hidden" name="referer" value="[% short_uri(c) %]" id="form_cmd_referer">
   <input type="hidden" name="selected_services" id="selected_services" value="">
   <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">
+  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
   <table class="cmd_pane" border=1 width="400">
     <tr>
       <th colspan=2 class="status cmd_pane" style="text-align: right">

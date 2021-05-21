@@ -551,7 +551,6 @@ sub _task_status {
                 Thruk::Utils::set_message($c, 'fail_message', 'Found '.(scalar @{$services}).' services. Cannot send reschedule command.');
             }
         }
-        $c->stash->{'use_csrf'} = 0;
         if($params->{'cmd_typ'}) {
             require Thruk::Controller::cmd;
             if(Thruk::Controller::cmd::do_send_command($c)) {
