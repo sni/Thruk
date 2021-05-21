@@ -79,6 +79,8 @@ sub index {
             return 1;
         }
         if($action eq 'delete') {
+            return unless Thruk::Utils::check_csrf($c);
+
             my $id = $c->req->parameters->{'id'};
             if($id =~ m/^[\.\/]+/mx) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Broadcast cannot be removed with that name' );
@@ -89,6 +91,8 @@ sub index {
             return $c->redirect_to('broadcast.cgi');
         }
         if($action eq 'save') {
+            return unless Thruk::Utils::check_csrf($c);
+
             # don't store in demo mode
             if($c->config->{'demo_mode'}) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'saving broadcasts is disabled in demo mode');
