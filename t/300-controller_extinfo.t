@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 240;
+    plan tests => 242;
 }
 
 BEGIN {
@@ -18,6 +18,8 @@ BEGIN { use_ok 'Thruk::Controller::extinfo' }
 my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
 my($host,$service) = TestUtils::get_test_service();
+
+TestUtils::set_test_user_token();
 
 my $pages = [
     '/thruk/cgi-bin/extinfo.cgi',
@@ -32,10 +34,40 @@ my $pages = [
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=add',
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=edit&target=host&host='.$host,
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=edit&target=service&host='.$host.'&service='.$service,
-    { url => '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=save&target=host&host='.$host.'&comment=automatic+downtime&send_type_1=month&send_day_1=1&week_day_1=&send_hour_1=0&send_minute_1=0&duration=120&childoptions=0&nr=999', 'redirect' => 1, location => 'extinfo.cgi', like => 'This item has moved' },
+    { url  => '/thruk/cgi-bin/extinfo.cgi',
+      post => {
+        'type'          => 6,
+        'recurring'     => 'save',
+        'target'        => 'host',
+        'host'          => $host,
+        'comment'       => 'automatic downtime',
+        'send_type_1'   => 'month',
+        'send_day_1'    => 1,
+        'week_day_1'    => 0,
+        'send_hour_1'   => 0,
+        'send_minute_1' => 0,
+        'duration'      => 120,
+        'childoptions'  => 0,
+        'nr'            => 999,
+       },
+      redirect => 1,
+      location => 'extinfo.cgi',
+      like     => 'This item has moved',
+    },
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring',
     '/thruk/cgi-bin/extinfo.cgi?type=6&nr=999&recurring=edit',
-    { url => '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=remove&target=host&host='.$host.'&nr=999', 'redirect' => 1, location => 'extinfo.cgi', like => 'This item has moved' },
+    { url  => '/thruk/cgi-bin/extinfo.cgi',
+      post => {
+        'type'      => 6,
+        'recurring' => 'remove',
+        'target'    => 'host',
+        'host'      => $host,
+        'nr'        => 999,
+      },
+      redirect => 1,
+      location => 'extinfo.cgi',
+      like     => 'This item has moved',
+    },
     '/thruk/cgi-bin/extinfo.cgi?type=7',
     '/thruk/cgi-bin/extinfo.cgi?type=8&servicegroup='.$servicegroup,
 ];
