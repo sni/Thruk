@@ -3702,7 +3702,7 @@ sub scale_out {
 
 =head2 page_data
 
-  page_data($c, $data, [$result_size], [$total_size])
+  page_data($c, $data, [$result_size], [$total_size], [$already_paged])
 
 adds paged data set to the template stash.
 Data will be available as 'data'
@@ -3711,13 +3711,11 @@ The pager itself as 'pager'
 =cut
 
 sub page_data {
-    my($c, $data, $default_result_size, $total_size) = @_;
+    my($c, $data, $default_result_size, $total_size, $already_paged) = @_;
     $c    = $Thruk::Globals::c unless $c;
     $data = [] unless $data;
     return $data unless defined $c;
     $default_result_size = $c->stash->{'default_page_size'} unless defined $default_result_size;
-
-    local $ENV{'THRUK_USE_LMD'} = undef;
 
     # set some defaults
     my $pager = { current_page => 1, total_entries => 0 };
@@ -3817,7 +3815,7 @@ sub page_data {
         $c->stash->{'data'} = $data;
     }
     else {
-        if(!$ENV{'THRUK_USE_LMD'}) {
+        if(!$already_paged) {
             if($page == $pages) {
                 $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
             } else {
