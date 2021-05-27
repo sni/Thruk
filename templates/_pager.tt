@@ -40,7 +40,7 @@
       [% IF cur_page == current_page %]
         [% class = "pager_direct_link_current" %]
       [% END %]
-      <a class="[% class %]" href="[% uri_with(c, 'page' => cur_page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef') %]">[% cur_page %]</a>
+      <a class="[% class %]" href="[% uri_with(c, 'page' => cur_page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef', 'total_pages' => 'undef') %]">[% cur_page %]</a>
       [% cur_page  = cur_page + 1 %]
     [% END %]
   [% ELSE %]
@@ -56,7 +56,7 @@
       [% IF cur_page == current_page %]
         [% class = "pager_direct_link_current" %]
       [% END %]
-      <a class="[% class %]" href="[% uri_with(c, 'page' => cur_page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef') %]">[% cur_page %]</a>
+      <a class="[% class %]" href="[% uri_with(c, 'page' => cur_page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef', 'total_pages' => 'undef') %]">[% cur_page %]</a>
       [% cur_page  = cur_page + 1 %]
     [% END %]
     [% IF lastpage < pages - 1 %]...[% END %]
