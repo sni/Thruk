@@ -45,6 +45,7 @@ my $op_translation_words      = {
     'gte'    => '>=',
     'lt'     => '<',
     'lte'    => '<=',
+    'notin'  => '!>=',
 };
 
 use constant {
@@ -2250,7 +2251,7 @@ sub _compare {
             return;
         }
     }
-    elsif($op eq '<=') {
+    elsif($op eq '<=' || $op eq '!>=') {
         if(ref $data eq 'ARRAY') {
             my $found = 0;
             for my $v (@{$data}) {

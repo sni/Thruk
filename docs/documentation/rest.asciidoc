@@ -173,17 +173,18 @@ Possible operators with their alias:
 
 [options="header",halign="center"]
 |==========================
-|Operator  |Alias    |Description
-| =        | eq      |Equal match
-| !=       | ne      |Not equal match
-| ~        |         |Regular expression match (case-sensitive)
-| !~       |         |Negated regular expression match (case-sensitive)
-| ~~       | regex   |Regular expression match (case-insensitive)
-| !~       | nregex  |Negated regular expression match (case-insensitive)
-| >        | gt      |Greater than numeric comparisson
-| <        | lt      |Lower than numeric comparisson
-| >=       | gte     |Greater or equal numeric comparisson. `contains` in list context
-| <=       | lte     |Lower or equal numeric comparisson. `contains not` in list context
+|Operator    |Alias    |Description
+| `=`        | eq      |Equal match
+| `!=`       | ne      |Not equal match
+| `~`        |         |Regular expression match (case-sensitive)
+| `!~`       |         |Negated regular expression match (case-sensitive)
+| `~~`       | regex   |Regular expression match (case-insensitive)
+| `!~`       | nregex  |Negated regular expression match (case-insensitive)
+| `>`        | gt      |Greater than numeric comparisson
+| `<`        | lt      |Lower than numeric comparisson
+| `>=`       | gte     |Greater or equal numeric comparisson. `contains` in list context
+| `<=`       | lte     |Lower or equal numeric comparisson. `contains not` in list context
+| `!>=`      | notin   |`contains not` in list context
 |==========================
 
 You can use the alias name to workaround urlencoding issues.
@@ -2080,4 +2081,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
