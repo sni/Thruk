@@ -498,7 +498,7 @@ sub generate_report {
         Thruk::Utils::set_user($c,
             username => $options->{'user'},
             auth_src => "report",
-            force    => 1,
+            internal => 1,
         );
     }
 
@@ -811,7 +811,7 @@ sub generate_report_background {
         Thruk::Utils::set_user($c,
             username => $report->{'user'},
             auth_src => "report",
-            force    => 1,
+            internal => 1,
         );
     }
 

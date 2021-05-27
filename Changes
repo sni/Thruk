@@ -5,6 +5,8 @@ next:
           - add new config option: cookie_secure_only
           - Business Process:
             - performance improvements
+          - Reporting:
+            - fix switching user when updating report
 
 2.42-2   Mon Apr 26 10:02:54 CEST 2021
           - Reporting:
