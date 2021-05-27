@@ -19,7 +19,7 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     get_user_token(c) object.get_id() object.get_id object.get_type() svc.get_id()
     obj_id start end servicelink l.url plugin.url r.link link action_url n.node_url
     c.config.use_feature_core_scheduling prefix paneprefix style counter service_comment_count
-    sites.up sites.disabled sites.down pb_options.lineheight par desc refresh_rate imgsize
+    sites.up sites.disabled sites.down pb_options.lineheight desc refresh_rate imgsize
     h.current_notification_number s.current_notification_number how_far_back audiofile
     host.$host_icon_image_alt host_comment_count param_name state_color last_col
     crit.text crit.value icon pic pnpdata onchange
