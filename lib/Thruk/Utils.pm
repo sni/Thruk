@@ -1786,11 +1786,27 @@ sub get_action_url {
         return($action_url);
     }
     elsif($action_url =~ m/\/histou\.js\?/mx) {
+        my $custvars;
+        if($svc) {
+            my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $host, description => $svc }]);
+            if(scalar @{$svcdata} == 0) {
+                _error("no such service ".$svc." on host ".$host);
+                return("");
+            }
+            $custvars = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
+        } else {
+            my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $host}]);
+            if(scalar @{$hstdata} == 0) {
+                _error("no such host ".$host);
+                return("");
+            }
+            $custvars = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
+        }
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $popup_url .= '&amp;panelId='.$c->config->{'grafana_default_panelId'};
+        $popup_url .= '&amp;panelId='.($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1');
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
