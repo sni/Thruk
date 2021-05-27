@@ -44,6 +44,9 @@ sub _decode_parameters {
     my @flatten  = $stuff->flatten;
     my @decoded;
     while(my($k, $v) = splice(@flatten, 0, 2)) {
+        # skip all request parameters with illegal characters in their name
+        next if $k !~ m/^[a-zA-Z0-9\/\.:,;\+\-_]+$/mx;
+
         my $v_decoded;
         if (ref $v eq 'ARRAY') {
             foreach (@{$v}) {
