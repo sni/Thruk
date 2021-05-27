@@ -1367,18 +1367,12 @@ sub get_graph_url {
         }
     }
 
-    if(defined $obj->{'name'}) {
-        #host obj
-        return get_action_url($c, 1, 0, $action_url, $obj->{'name'});
-    }
-    elsif(defined $obj->{'host_name'} && defined $obj->{'description'}) {
-        #service obj
-        return get_action_url($c, 1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
-    }
-    else {
+    if(!defined $obj->{'name'} && !defined $obj->{'host_name'}) {
         #unknown host
         return '';
     }
+
+    return get_action_url($c, 1, 0, $action_url, $obj);
 }
 
 ##########################################################
@@ -1437,7 +1431,7 @@ sub get_perf_image {
         }
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
-        $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
+        $custvars   = get_custom_vars($c, $svcdata->[0]);
     } else {
         my $hstdata = $c->db->get_hosts(filter => [{ name => $options->{'host'}}]);
         if(scalar @{$hstdata} == 0) {
@@ -1447,7 +1441,7 @@ sub get_perf_image {
         $pnpurl                = get_pnp_url($c, $hstdata->[0], 1);
         $grafanaurl            = get_histou_url($c, $hstdata->[0], 1);
         $options->{'service'}  = '_HOST_' if $pnpurl;
-        $custvars              = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
+        $custvars              = get_custom_vars($c, $hstdata->[0]);
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
@@ -1495,7 +1489,7 @@ sub get_perf_image {
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
         delete $options->{'source'} if(defined $options->{'source'} && $options->{'source'} eq 'null');
-        $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $options->{'source'};
+        $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1') unless defined $options->{'source'};
         $grafanaurl .= '&panelId='.$options->{'source'};
         if($options->{'resize_grafana'}) {
             $options->{'width'}  = $options->{'width'} * 1.3;
@@ -1761,7 +1755,7 @@ sub get_fake_session {
 
 =head2 get_action_url
 
-  get_action_url($c, $escape_fun, $remove_render, $action_url, $host, $svc)
+  get_action_url($c, $escape_fun, $remove_render, $action_url, $obj)
 
 return action_url modified for object (host/service) if we use graphite
 escape_fun is use to escape special char (html or quotes)
@@ -1770,7 +1764,7 @@ remove_render remove /render in action url
 =cut
 
 sub get_action_url {
-    my($c, $escape_fun, $remove_render, $action_url, $host, $svc) = @_;
+    my($c, $escape_fun, $remove_render, $action_url, $obj, $obj_prefix) = @_;
 
     my $new_action_url = $action_url;
     my $graph_word = $c->config->{'graph_word'};
@@ -1786,32 +1780,19 @@ sub get_action_url {
         return($action_url);
     }
     elsif($action_url =~ m/\/histou\.js\?/mx) {
-        my $custvars;
-        if($svc) {
-            my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $host, description => $svc }]);
-            if(scalar @{$svcdata} == 0) {
-                _error("no such service ".$svc." on host ".$host);
-                return("");
-            }
-            $custvars = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
-        } else {
-            my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $host}]);
-            if(scalar @{$hstdata} == 0) {
-                _error("no such host ".$host);
-                return("");
-            }
-            $custvars = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
-        }
+        my $custvars = get_custom_vars($c, $obj, $obj_prefix);
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $popup_url .= '&amp;panelId='.($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1');
+        $popup_url .= '&amp;panelId='.($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1');
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
 
     if ($graph_word) {
+        my $host = $obj->{'host_name'} // $obj->{'host_name'};
+        my $svc  = $obj->{'description'};
         for my $regex (@{Thruk::Base::list($graph_word)}) {
             if ($action_url =~ m|$regex|mx){
                 my $new_host = $host;
