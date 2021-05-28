@@ -168,7 +168,7 @@ for my $test (@{$pages}) {
         fail => 1,
     );
     my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
-    is(ref $tstdata, 'HASH', "got error result");
+    is(ref $tstdata, 'HASH', "got error result") or TestUtils::bail_out_req("expected HASH result", $page->{'response'}, 1);
     is($tstdata->{'failed'}, Cpanel::JSON::XS::true, "query should fail");
     like($tstdata->{'description'}, qr(alias column names cannot be used in filter), "query should fail");
 };
