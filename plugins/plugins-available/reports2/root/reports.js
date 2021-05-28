@@ -110,6 +110,7 @@ function reports_view(typ) {
 }
 
 /* collect total number of affected hosts and services */
+var reports_update_affected_sla_objects_running = "";
 function reports_update_affected_sla_objects(input) {
     var form = jQuery(input).closest('FORM');
 
@@ -120,8 +121,6 @@ function reports_update_affected_sla_objects(input) {
 
     var span1 = form.find('TR.report_type_affected_sla_objects SPAN.name');
     var span2 = form.find('TR.report_type_affected_sla_objects SPAN.value');
-    showElement('reports_waiting');
-    hideElement(span2[0].id);
     var backends = form.find('SELECT[name=report_backends]').val();
     try {
         // only get all backends if using the _backend_select_multi.tt
@@ -134,15 +133,23 @@ function reports_update_affected_sla_objects(input) {
     } catch(e) {
         console.log(e);
     }
+    var data = {
+        action:         'check_affected_objects',
+        template:        form.find('SELECT[name=template]').val(),
+        backends:        backends,
+        backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
+        param:           form.serialize()
+    };
+    var dataStr = JSON.stringify(data);
+    if(reports_update_affected_sla_objects_running == dataStr) {
+        return;
+    }
+    reports_update_affected_sla_objects_running = dataStr;
+    showElement('reports_waiting');
+    hideElement(span2[0].id);
     jQuery.ajax({
         url:  'reports2.cgi',
-        data: {
-                action:         'check_affected_objects',
-                template:        form.find('SELECT[name=template]').val(),
-                backends:        backends,
-                backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
-                param:           form.serialize()
-        },
+        data: data,
         type: 'POST',
         cache: false,
         success: function(data) {
@@ -170,16 +177,14 @@ function reports_update_affected_sla_objects(input) {
                 span2.attr('title', 'too many objects, please use more specific filter');
             }
             if(data['error']) {
-                //hideElement('reports_waiting');
-                //showElement(span2[0].id);
-                //thruk_message(1, 'getting affected objects failed: - ' + data['error']);
                 console.log('getting affected objects failed: - ' + data['error']);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             hideElement('reports_waiting');
             showElement(span2[0].id);
-            thruk_message(1, 'getting affected objects failed: - ' + jqXHR.status + ' ' + errorThrown);
+            span2.html("&nbsp;");
+            console.log('getting affected objects failed: - ' + jqXHR.status + ' ' + errorThrown);
         }
     });
 }
