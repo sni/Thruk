@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.44     Fri May 28 17:55:32 CEST 2021
           - rework login mask to be more mobile friendly
           - add new config option: cookie_secure_only
           - add missing services in host availability reports (#1098)
