@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - rework login mask
           - add new config option: cookie_secure_only
+          - add missing services in host availability reports (#1098)
           - Business Process:
             - performance improvements
           - Reporting:
