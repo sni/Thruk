@@ -1231,7 +1231,7 @@ sub _authorize_raw_query {
         }
 
         _warn(sprintf("rejected unknown query for user %s: %s", $c->user->{'username'}, $q));
-        return("permission denied - unnown query.");
+        return("permission denied - unknown query.");
     }
 
     # OK
