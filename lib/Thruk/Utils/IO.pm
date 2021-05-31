@@ -265,7 +265,14 @@ sub file_lock {
     if($basename !~ m|^[\.\/]|mx) { $basename = './'.$basename; }
     $basename    =~ s%/[^/]*$%%gmx;
     if(!-d $basename.'/.') {
-        confess("cannot lock $file in non-existing folder: ".$!);
+        require Thruk::Config;
+        my $config = Thruk::Config::get_config();
+        my $match = sprintf("^(\Q%s\E|\Q%s\E)", $config->{'var_path'}, $config->{'tmp_path'});
+        if($basename =~ m/$match/mx) {
+            mkdir_r($basename);
+        } else {
+            confess("cannot lock $file in non-existing folder: ".$!);
+        }
     }
 
     my $lock_file = $file.'.lock';
