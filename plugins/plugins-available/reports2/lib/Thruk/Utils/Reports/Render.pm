@@ -372,9 +372,14 @@ sub get_url {
         return "";
     }
 
+    # strip host part if url points to thruk and do not use frame index page
+    $url =~ s|^.*/\Q$product_prefix\E/\#?cgi\-bin/||mx;
+
+    # short urls like: tac.cgi
     if($url =~ m|^\w+\.cgi|gmx) {
         $url = '/'.$product_prefix.'/cgi-bin/'.$url;
     }
+
     if($url !~ m/^https?:/mx) {
         if(defined $c->stash->{'param'}->{'theme'}) {
             $url = $url.'&theme='.$c->stash->{'param'}->{'theme'};
