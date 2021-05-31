@@ -136,7 +136,7 @@ sub _cmd_report {
         my $sent = Thruk::Utils::Reports::report_send($c, $nr);
         _debug("finished sending report by email, exit code ".$sent);
         if($sent && $sent eq "-2") {
-            return("report is running on another node already\n", 0);
+            return($Thruk::Utils::Reports::error // "report is running on another node already\n", 0);
         } elsif($sent && $sent eq "2") {
             return("mail not sent, threshold not reached\n", 0);
         } elsif($sent) {
@@ -148,9 +148,9 @@ sub _cmd_report {
     my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
     _debug("finished creating report");
     if(defined $report_file and $report_file eq '-2') {
-        return("report is running on another node already\n", 0);
+        return($Thruk::Utils::Reports::error // "report is running on another node already\n", 0);
     } elsif(defined $report_file and -f $report_file) {
-        return("", 0) if $ENV{'THRUK_CRON'}; # avoid pdf being printed to logfile
+        return("report ".$nr." calculated successfully", 0) if $ENV{'THRUK_CRON'}; # avoid pdf being printed to logfile
         $c->res->headers->content_type('application/octet-stream');
         return(Thruk::Utils::IO::read($report_file), 0);
     }

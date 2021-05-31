@@ -463,6 +463,7 @@ sub generate_report {
     if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
         if($options->{'var'}->{'start_time'}) {
             if(POSIX::strftime("%Y-%m-%d %H:%M", localtime($options->{'var'}->{'start_time'})) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
+                $Thruk::Utils::Reports::error = 'report is finished on another node already';
                 return -2;
             }
         }
@@ -473,7 +474,10 @@ sub generate_report {
     # report is already beeing generated, check if the other process is alive
     if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::Globals::NODE_ID)) {
         # if started by cron, just exit, some other node is doing the report already
-        return -2 if $ENV{'THRUK_CRON'};
+        if($ENV{'THRUK_CRON'}) {
+            $Thruk::Utils::Reports::error = 'report is running on another node ('.$options->{'var'}->{'running_node'}.') already';
+            return -2;
+        }
 
         # just wait till its finished and return
         while($options->{'var'}->{'is_running'}) {
