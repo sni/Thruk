@@ -405,6 +405,12 @@ sub _get_file_logger {
         $config->{'log4perl_logfile_in_use'} = $1;
     }
     $log4perl_conf =~ s/\.Threshold=INFO/.Threshold=DEBUG/gmx if Thruk::Base->debug();
+    if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'}) {
+        my $format = '[%d{yyyy/MM/dd} %d{ABSOLUTE}][%p][%-30Z]%U %m{chomp}%n';
+        Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
+        Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
+        $log4perl_conf =~ s/\.ConversionPattern=.*/.ConversionPattern=$format/gmx;
+    }
     Log::Log4perl::init(\$log4perl_conf);
     $filelogger = Log::Log4perl::get_logger("thruk.log");
     return($filelogger);
