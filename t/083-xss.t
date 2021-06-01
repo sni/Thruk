@@ -75,6 +75,7 @@ sub check_templates {
     while($content =~ m/<form[^>]*post[^>]*>.*?<\/form>/gsmxi) {
         my $tag = substr($content, $-[0], $+[0]-$-[0]);
 
+        next if $file =~ m%/_blocks\.tt$%mx;
         next if $file =~ m%/login\.tt$%mx;
         next if $file =~ m%/_status_column_select\.tt$%mx;
         next if $tag =~ m%/login\.cgi%mx;

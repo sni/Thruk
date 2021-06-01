@@ -1,4 +1,5 @@
 ﻿[% WRAPPER _bp_frame.tt subtitle=bp.name %]
+[% PROCESS _blocks.tt %]
 
 [% UNLESS no_menu %]
 [% PROCESS _bp_context_menu.tt %]
@@ -8,7 +9,11 @@
   <table border="0" class="optBox bp" style="position: absolute; right: 30px; top: 55px;">
     <tr>
       <td>
-        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;CSRFtoken=' _ get_user_token(c); button(link, 'save changes', 'bp_save_button', 'return bp_on_save_click(this)') %]
+        [% PROCESS _button btn = {
+          form   => { action => 'bp.cgi', },
+          data   => { action => 'commit', bp => bp.id, CSRFtoken => get_user_token(c), },
+          button => { class => 'bp_save_button', onclick => 'return bp_on_save_click(this)', text => 'save changes', },
+        }%]
       </td>
     </tr>
   </table>

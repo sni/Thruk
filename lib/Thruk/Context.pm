@@ -595,6 +595,12 @@ $c->redirect_to(<url>)
 =cut
 sub redirect_to {
     my($c, $url) = @_;
+
+    # do not redirect json post requests, for ex.: from send_form_in_background_and_reload()
+    if($c->req->method eq 'POST' && want_json_response($c)) {
+        return($c->render(json => { OK => 1 }));
+    }
+
     $c->res->content_type('text/html; charset=utf-8');
     $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);

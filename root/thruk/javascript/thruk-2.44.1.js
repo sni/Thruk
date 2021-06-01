@@ -3438,6 +3438,28 @@ function refreshNavSections(id) {
     return(false);
 }
 
+function send_form_in_background_and_reload(btn) {
+    var form = jQuery(btn).parents('FORM');
+    var data = jQuery(form).serializeArray();
+    var url  = jQuery(form).attr("action");
+    jQuery(btn).addClass("refreshing");
+    jQuery.ajax({
+        url:   url,
+        data: data,
+        type: 'POST',
+        headers: {
+            'Accept': "application/json; charset=utf-8"
+        },
+        success: function(data, textStatus, jqXHR) {
+            reloadPage();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            thruk_message(1, 'request failed: ' + textStatus);
+        }
+    });
+    return(false);
+}
+
 function broadcast_show_list(incr) {
     var broadcasts = jQuery(".broadcast_panel_container div.broadcast");
     var curIdx = 0;

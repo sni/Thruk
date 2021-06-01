@@ -1,5 +1,6 @@
 ﻿[% PROCESS _header.tt css="plugins/reports2/reports.css" js="plugins/reports2/reports.js" %]
 [% PROCESS _message.tt %]
+[% PROCESS _blocks.tt %]
 [% USE date %]
 
 <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
@@ -113,45 +114,56 @@
     </td>
     <td class="status [% rowclass %]" nowrap align="left">
       [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
-        <input type="button" name="submit" value="" class="thruk_btn cancel_button small" onClick="window.location='reports2.cgi?report=[% r.nr %]&amp;action=cancel'; return false;" title='Cancel Report'>
+        [% PROCESS _button btn = {
+          form   => { action => 'reports2.cgi', },
+          data   => { report => r.nr, action => 'cancel', CSRFtoken => get_user_token(c), },
+          button => { class => 'thruk_btn_img_only cancel_button small', onclick => 'return send_form_in_background_and_reload(this)', title => 'Cancel Report', },
+        }%]
       [% ELSE %]
-        <input type="button" name="submit" value="" class="thruk_btn update_button small" onClick="window.location='reports2.cgi?report=[% r.nr %]&amp;action=update'; return false;" title='Regenerate Report'>
+        [% PROCESS _button btn = {
+          form   => { action => 'reports2.cgi', },
+          data   => { report => r.nr, action => 'update', CSRFtoken => get_user_token(c), },
+          button => { class => 'thruk_btn_img_only update_button small', onclick => 'return send_form_in_background_and_reload(this)', title => 'Regenerate Report' },
+        }%]
         [% IF debug %]
-        <input type="button" name="submit" value="" class="thruk_btn wand_button small" onClick="window.location='reports2.cgi?report=[% r.nr %]&amp;action=update&amp;debug=1'; return false;" title='Regenerate Report in Debug Mode'>
+          [% PROCESS _button btn = {
+            form   => { action => 'reports2.cgi', },
+            data   => { report => r.nr, action => 'update', debug => 1, CSRFtoken => get_user_token(c), },
+            button => { class => 'thruk_btn_img_only wand_button small', onclick => 'return send_form_in_background_and_reload(this)', title => 'Regenerate Report in Debug Mode' },
+          }%]
         [% IF r.var.exists("debug_file") %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_debug" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='Download Debug Report' title='Download Debug Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_debug" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='Download Debug Report' title='Download Debug Report' width=16 height=16 style="vertical-align: text-bottom;"></a>
         [% END %]
         [% END %]
       [% END %]
     </td>
     <td class="status [% rowclass %]">
       [% IF ! r.readonly %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16 style="vertical-align: text-bottom;"></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]" nowrap align="left">
       [% IF r.var.file_exists && r.var.is_running == 0 %]
         [% PROCESS _reports_icon.tt r=r %]
         [% IF r.var.ctype == 'html2pdf' %]
-          <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
+          <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16 style="vertical-align: text-bottom;"></a>
         [% ELSE %]
           <img style="padding-left: 3px;" src='[% url_prefix %]themes/[% theme %]/images/empty.gif' border="0" alt='' width=16 height=16>
         [% END %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16 style="vertical-align: text-bottom;"></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16 style="vertical-align: text-bottom;"></a>
         [% IF r.var.exists("json_file") %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Download JSON raw data' title='Download JSON raw data' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Download JSON raw data' title='Download JSON raw data' width=16 height=16 style="vertical-align: text-bottom;"></a>
         [% END %]
       [% END %]
     </td>
     <td class="status [% rowclass %]">
       [% IF ! r.readonly %]
-        <form action="reports2.cgi" method="POST">
-        <input type="hidden" name="report" value="[% r.nr %]">
-        <input type="hidden" name="action" value="remove">
-        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-        <input type="image" name="submit" value="remove" src="[% url_prefix %]themes/[% theme %]/images/delete.png" style="width:16px; height: 16px;" onclick="return confirm('really remove?')" alt="remove report">
-        </form>
+        [% PROCESS _button btn = {
+          form   => { action => 'reports2.cgi', },
+          data   => { report => r.nr, action => 'remove', CSRFtoken => get_user_token(c), },
+          button => { class => 'thruk_btn_img_only delete_button small', onclick => "if(confirm('really remove?')) { send_form_in_background_and_reload(this); }; return false;", title => 'Delete Report', value => '', },
+        }%]
       [% END %]
     </td>
   </tr>

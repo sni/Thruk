@@ -764,9 +764,15 @@ function conf_tool_cleanup(btn, link, hide) {
         var hiding  = Number(oldText.match(/\ (\d+)\ /)[1]) + 1;
         jQuery('#hiding_entries').html("hiding "+hiding+" entries.").show();
     }
+    var data = {};
+    if(link == "") {
+        var form = jQuery(btn).parents('FORM');
+        data = jQuery(form).serializeArray();
+        link  = jQuery(form).attr("action");
+    }
     jQuery.ajax({
         url:   link,
-        data:  {},
+        data:  data,
         type: 'POST',
         success: function(data) {
             jQuery(btn).button({

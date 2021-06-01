@@ -219,3 +219,17 @@ perf_table([% write %], [% state %], data[0], data[1], data[2], pnp_url, [% IF s
 [% ELSE                                           %][% SET pic = "info.png"          desc = "Informational Message" %][% SET has_type = 0 %]
 [% END %]
 [% END %]
+
+
+[% BLOCK _button %]
+[% UNLESS btn.defined('skipform') && btn.skipform %]
+<form [% IF !btn.form.defined("method") %]method="POST"[% END %][% FOREACH k = btn.form.keys %] [% k | html %]="[% btn.form.$k | html %]"[% END %]>
+[% END %]
+[% IF btn.defined("data") %]
+[% FOREACH k = btn.data.keys %]
+<input type="hidden" name="[% k | html %]" value="[% btn.data.$k | html %]">
+[% END %]
+[% END %]
+<button[% FOREACH k = btn.button.keys; IF k == "value"; NEXT; END %] [% k | html %]="[% btn.button.$k | html %]"[% END %]>[% IF btn.button.defined('text'); btn.button.text | html; END %]</button>
+[% UNLESS btn.defined('skipform') && btn.skipform %]</form>[% END %]
+[% END %]
