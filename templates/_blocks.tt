@@ -230,6 +230,6 @@ perf_table([% write %], [% state %], data[0], data[1], data[2], pnp_url, [% IF s
 <input type="hidden" name="[% k | html %]" value="[% btn.data.$k | html %]">
 [% END %]
 [% END %]
-<button[% FOREACH k = btn.button.keys; IF k == "value"; NEXT; END %] [% k | html %]="[% btn.button.$k | html %]"[% END %]>[% IF btn.button.defined('text'); btn.button.text | html; END %]</button>
+<button[% FOREACH k = btn.button.keys; IF k == "text"; NEXT; END %] [% k | html %]="[% btn.button.$k | html %]"[% END %]>[% IF btn.button.defined('text'); btn.button.text | html; END %]</button>
 [% UNLESS btn.defined('skipform') && btn.skipform %]</form>[% END %]
 [% END %]
