@@ -6,7 +6,7 @@ cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mloca
 
 # newer version are broken when using symlinks
 cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
-./.build/install_javascript_spidermonkey.sh
+./.ci/install_javascript_spidermonkey.sh
 cpanm -q -f --installdeps --notest --no-man-pages .
 
 # required for plugins test
