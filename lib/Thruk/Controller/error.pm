@@ -299,7 +299,7 @@ sub index {
     $c->stash->{'infoBoxTitle'} = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
 
     $c->stash->{'navigation'}  = "";
-    if($c->config->{'use_frames'} == 0) {
+    if($c->stash->{'use_frames'} == 0) {
         Thruk::Utils::Menu::read_navigation($c);
     }
 

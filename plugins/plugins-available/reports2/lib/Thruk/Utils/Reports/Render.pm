@@ -390,6 +390,9 @@ sub get_url {
         if(defined $c->stash->{'param'}->{'nav'} and lc($c->stash->{'param'}->{'nav'}) eq 'no') {
             $url = $url.'&nav=0';
         }
+        if(defined $c->stash->{'param'}->{'nav'} and lc($c->stash->{'param'}->{'nav'}) eq 'yes') {
+            $url = $url.'&nav=1';
+        }
     }
     if($url !~ m/\?/mx) { $url =~ s/\&/?/mx; }
 
@@ -878,12 +881,14 @@ sub _replace_img {
 
 ##########################################################
 sub _replace_css {
-    my($baseurl, $report_base_url, $url) = @_;
+    my($baseurl, $report_base_url, $url, $skip_style_tag) = @_;
     my $css = _read_static_content_file($baseurl, $report_base_url, $url);
+    $css =~ s/\@import\s*url\s*\(("|')([^'"]*\.css[^"']*)("|')/&_replace_css($url, $report_base_url,$2, 1)/gemxi;
     $css =~ s/(url\()
               ([^)]*)
               (\))
              /&_replace_css_img($baseurl, $report_base_url, $url,$1,$2,$3)/gemx;
+    return $css if $skip_style_tag;
     my $text = "<style type='text/css'>\n<!--\n";
     $text .= $css;
     $text .= "\n-->\n</style>\n";
@@ -920,7 +925,7 @@ sub _replace_css_img {
 
     return($pre.$post) unless $css;
     if($file =~ m|^data:|mx) {
-        return($file);
+        return "$pre$aa$file$bb$post";
     }
 
     $file =~ s/^('|")//gmx;
@@ -931,6 +936,7 @@ sub _replace_css_img {
     elsif($file =~ m/\.(\w+)$/mx) {
         $css         = _absolutize_url($baseurl, $css);
         my @res      = _read_static_content_file($css, $report_base_url, $file);
+        #croak("_replace_css_img($baseurl, ".($report_base_url||'').", $css) $file: cannot read file: ".$res[0]) if($res[0] != 200 && $ENV{'TEST_AUTHOR'});
         return($pre.$post) if $res[0] != 200;
         my $data     = $res[1]->{'result'};
         my $datatype = $res[1]->{'headers'}->{'content-type'} || $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
@@ -1069,16 +1075,22 @@ sub _get_datatype {
     return unless $suffix;
     my $datatype = "image/".$suffix;
     if($suffix eq 'eot') {
-        $datatype = "font/eot";
+        $datatype = "application/x-font-eot";
     }
     if($suffix eq 'woff') {
-        $datatype = "font/woff";
+        $datatype = "application/x-font-woff";
+    }
+    if($suffix eq 'woff2') {
+        $datatype = "application/x-font-woff2";
     }
     if($suffix eq 'ttf') {
-        $datatype = "font/ttf";
+        $datatype = "application/x-font-ttf";
     }
     if($suffix eq 'svg') {
         $datatype = "font/svg";
+    }
+    if($suffix eq 'css') {
+        $datatype = "text/css";
     }
     return($datatype);
 }

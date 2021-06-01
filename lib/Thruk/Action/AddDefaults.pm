@@ -21,7 +21,6 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Scalar::Util qw/weaken/;
-use URI::Escape qw/uri_escape/;
 
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
@@ -192,15 +191,6 @@ sub begin {
                 return $c->detach('/error/index/10');
             }
         }
-    }
-
-    # when adding nav=1 to a url in frame mode, redirect to frame.html with this url
-    if( defined $c->req->parameters->{'nav'}
-            and $c->req->parameters->{'nav'} eq '1'
-            and $c->config->{'use_frames'} == 1 ) {
-        my $path = $c->req->uri->path_query;
-        $path =~ s/nav=1//gmx;
-        return $c->redirect_to($c->stash->{'url_prefix'}."frame.html?link=".uri_escape($path));
     }
 
     # sound cookie set?
@@ -604,7 +594,7 @@ sub add_defaults {
                                        or $c->stash->{'enable_shinken_features'};
 
     $c->stash->{'navigation'} = "";
-    if( $c->config->{'use_frames'} == 0 ) {
+    if( $c->stash->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
