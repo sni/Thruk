@@ -528,6 +528,8 @@ sub set_message {
     $c->stash->{'thruk_message_details_raw'} = $details;
     $c->res->code($code) if defined $code;
 
+    _debug(sprintf("set_message: %s - %s", $style, $message));
+    _debug(sprintf("set_message: %s", $details)) if $details;
     return 1;
 }
 
