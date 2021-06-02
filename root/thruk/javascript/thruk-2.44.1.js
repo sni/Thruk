@@ -901,7 +901,7 @@ function create_site_panel_popup_panel() {
     panel  = '<div class="site_panel_sections" style="overflow: auto;">';
     panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
     panel += '  <tr>';
-    if(sites["sub"] && keys(sites["sub"]).length > 1) {
+    if(sites["sub"] && keys(sites["sub"]).length > 1 || !sites["sub"]["Default"]) {
         jQuery(keys(sites["sub"]).sort()).each(function(i, subsection) {
             if(sites["sub"][subsection].total == 0) { return; }
             panel += '<th class="site_panel '+(i==0 ? '' : "notfirst")+'">';

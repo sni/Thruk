@@ -836,6 +836,7 @@ sub update_site_panel_hashes {
         if(!$sites->{'sub'} || !$sites->{'sub'}->{'Default'}) {
             $sites->{'sub'}->{'Default'} = { peers => delete $sites->{'peers'} || [] };
         }
+        delete $sites->{'sub'}->{'Default'} if scalar @{$sites->{'sub'}->{'Default'}->{'peers'}} == 0;
     }
 
     return;
