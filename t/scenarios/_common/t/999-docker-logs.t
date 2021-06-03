@@ -4,6 +4,7 @@ use Cwd;
 use Test::More;
 
 use lib Cwd::cwd().'/lib';
+
 use_ok("Thruk::Utils::IO");
 
 my @logs = qw(
