@@ -16,6 +16,11 @@ my @errors = (
     qr/\Qsyntax error near unexpected\E/mx,
     qr/\QBEGIN failed--compilation aborted\E/mx,
     qr/\s+at\s+[\w\/\.\-]+\s+line/mx,
+    qr/\[ERROR\]/mx,
+);
+
+my @exceptions = (
+    qr/\QThruk::Utils::Cluster::pong failed on\E/mx,
 );
 
 # get running container
@@ -33,8 +38,17 @@ for my $svc (split/\n/mx, $services) {
             ok(1, sprintf("  %s", $logfile));
             for my $err (@errors) {
                 if($log =~ $err) {
-                    fail(sprintf("%s matches %s", $logfile, $err));
-                    diag($log);
+                    my $ok = 0;
+                    for my $ex (@exceptions) {
+                        if($log =~ $ex) {
+                            $ok = 1;
+                            last;
+                        }
+                    }
+                    if(!$ok) {
+                        fail(sprintf("%s_%d: %s matches %s", $svc, $index, $logfile, $err));
+                        diag($log);
+                    }
                 }
             }
         }
