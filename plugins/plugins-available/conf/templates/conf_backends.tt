@@ -142,9 +142,9 @@ Note: some options are not accessible here for security reasons.
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
+          thruk_xhr_error('connection test unknown: ', '', textStatus, jqXHR, errorThrown);
           img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
           img.title = 'connection test unknown';
-          thruk_message(1, 'connection test unknown: - ' + jqXHR.status + ' ' + errorThrown);
         }
     });
   }

@@ -24,7 +24,8 @@
       if(has_graphs) {
         jQuery('#pnp_source_select').show();
       }
-    }
+    },
+    error: ajax_xhr_error_logonly
   });
 </script>
 <table>

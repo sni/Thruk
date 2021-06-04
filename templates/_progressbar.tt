@@ -72,6 +72,7 @@
                 [% END %]
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
                 [% IF c.req.uri.match("job.cgi") %]
                 window.history.go(-1);
                 [% ELSE %]
@@ -125,6 +126,7 @@
                     }
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
                 is_loading_[% pb_options.id %] = false;
                 last_time_[% pb_options.id %]++;
             }

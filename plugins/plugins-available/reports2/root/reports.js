@@ -181,10 +181,10 @@ function reports_update_affected_sla_objects(input) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
+            thruk_xhr_error('getting affected objects failed: ', '', textStatus, jqXHR, errorThrown, true);
             hideElement('reports_waiting');
             showElement(span2[0].id);
             span2.html("&nbsp;");
-            console.log('getting affected objects failed: - ' + jqXHR.status + ' ' + errorThrown);
         }
     });
 }

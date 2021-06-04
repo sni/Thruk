@@ -55,7 +55,7 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
     var ts = new Date().getTime();
     is_refreshing = true;
     var url = 'bp.cgi?_='+ts+'&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1)+"&testmode="+testmode+"&no_menu="+bp_no_menu;
-    jQuery('#bp'+bp_id).load(url, testmodes, function(responseText, textStatus, XMLHttpRequest) {
+    jQuery('#bp'+bp_id).load(url, testmodes, function(responseText, textStatus, jqXHR) {
         is_refreshing = false;
         if(!minimal) {
             hideElement('bp_status_waiting');
@@ -81,13 +81,7 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
         }
         if(callback) { callback(textStatus == 'success' ? true : false); }
         if(textStatus != 'success') {
-            var msg = readCookie('thruk_message');
-            if(msg) {
-                cookieRemove('thruk_message');
-                thruk_message(1, 'refreshing failed: ' + msg);
-            } else {
-                thruk_message(1, 'refreshing failed: ' + textStatus);
-            }
+            thruk_xhr_error('refreshing failed: ', responseText, textStatus, jqXHR);
         }
     });
     return true;
@@ -242,7 +236,7 @@ function bp_post_and_refresh(url, data, node_id) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            thruk_message(1, errorThrown);
+            thruk_xhr_error('request failed: ', '', textStatus, jqXHR, errorThrown);
         }
     });
     return;

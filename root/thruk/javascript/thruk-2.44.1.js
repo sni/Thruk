@@ -2669,6 +2669,7 @@ function load_jquery_ui(callback) {
             callback(script, textStatus, jqXHR);
             ui_loading = false;
         },
+        error:     ajax_xhr_error_logonly,
         cache:     true
     });
 }
@@ -2850,10 +2851,46 @@ function load_overlib_content(id, url, add_pre) {
                 el.innerHTML = data.data;
             }
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.log(textStatus);
-        }
+        error: ajax_xhr_error_logonly
     });
+}
+
+function ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown) {
+    thruk_xhr_error('request failed: ', '', textStatus, jqXHR, errorThrown, true);
+}
+
+function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, logOnly, closeTimeout) {
+    var cookie = readCookie('thruk_message');
+    var matches;
+    var msg;
+    if(!cookie && responseText && responseText.match) {
+        matches = responseText.match(/<\!\-\-error:(.*):error\-\->/m);
+        if(matches && matches[1]) {
+            msg = matches[1];
+            msg = msg.replace("\n", '<br>');
+        }
+    }
+
+    if(cookie) {
+        cookieRemove('thruk_message');
+        msg = cookie;
+    }
+    else if(msg) {}
+    else if(errorThrown && jqXHR && textStatus) {
+        msg = jqXHR.status + " - " + errorThrown + " - " + textStatus;
+    }
+    else if(jqXHR && textStatus) {
+        msg = jqXHR.status + " - " + jqXHR.statusText + " - " + textStatus;
+    }
+    else {
+        msg = textStatus;
+    }
+
+    if(logOnly) {
+        console.log(prefix + msg);
+    } else {
+        thruk_message(1, prefix + msg, closeTimeout);
+    }
 }
 
 /* update permanent link of excel export */
@@ -3404,7 +3441,7 @@ function setDefaultColumns(type, pane_prefix, value) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            thruk_message(1, 'setting default failed: '+ textStatus);
+            thruk_xhr_error('setting default failed: ', '', textStatus, jqXHR, errorThrown);
         }
     });
     return(false);
@@ -3432,7 +3469,7 @@ function refreshNavSections(id) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            thruk_message(1, 'fetching side nav sections failed: '+ textStatus);
+            thruk_xhr_error('fetching side nav sections failed: ', '', textStatus, jqXHR, errorThrown);
         }
     });
     return(false);
@@ -3453,9 +3490,7 @@ function send_form_in_background_and_reload(btn) {
         success: function(data, textStatus, jqXHR) {
             reloadPage();
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-            thruk_message(1, 'request failed: ' + textStatus);
-        }
+        error: ajax_xhr_error_logonly
     });
     return(false);
 }
@@ -3493,7 +3528,7 @@ function broadcast_dismiss() {
         type: 'POST',
         success: function(data) {},
         error: function(jqXHR, textStatus, errorThrown) {
-            thruk_message(1, 'marking broadcast as read failed: '+ textStatus);
+            thruk_xhr_error('marking broadcast as read failed: ', '', textStatus, jqXHR, errorThrown);
         }
     });
     return(false);
@@ -3715,7 +3750,7 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                thruk_message(1, 'could not replace macros: '+ textStatus);
+                thruk_xhr_error('could not replace macros: ', '', textStatus, jqXHR, errorThrown);
             }
         });
     } else {
@@ -3982,7 +4017,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                         if(callback) { callback(data); }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        thruk_message(1, 'server action failed: '+ textStatus, config.close_timeout);
+                        thruk_xhr_error('server action failed: ', '', textStatus, jqXHR, errorThrown, false, config.close_timeout);
                         if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
                         reset_action_menu_icons();
                         jQuery(link).find('IMG').attr('src', oldSrc);
@@ -4046,7 +4081,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    thruk_message(1, 'could not replace macros: '+ textStatus);
+                    thruk_xhr_error('could not replace macros: ', '', textStatus, jqXHR, errorThrown);
                 }
             });
             return(false);
