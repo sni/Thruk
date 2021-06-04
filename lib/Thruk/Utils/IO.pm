@@ -124,7 +124,7 @@ sub read_as_list {
     my($path) = @_;
     my @res;
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
-    @res = <$fh>;
+    chomp(@res = <$fh>);
     CORE::close($fh);
     return(@res);
 }
