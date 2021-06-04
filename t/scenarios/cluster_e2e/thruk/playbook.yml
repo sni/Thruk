@@ -4,6 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
+    - role: ssh_site_login
   tasks:
   - shell: "crond"
   - shell: omd config demo set APACHE_MODE own
@@ -72,6 +73,9 @@
     wait_for:
       host: omd
       port: 6557
+  - name: wait for ssh config to become available
+    wait_for:
+      path: /mnt/etc/.ssh
   - shell: sudo su - demo -c "thruk bp commit --local"
   - shell: sudo su - demo -c "thruk cron install --local"
   #- shell: yum -y install strace

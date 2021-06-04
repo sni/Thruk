@@ -1967,6 +1967,7 @@ t/scenarios/_common/ansible/roles/grafana_node_puppeteer/tasks/main.yml
 t/scenarios/_common/ansible/roles/grafana_node_puppeteer/vars/main.yml
 t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
 t/scenarios/_common/ansible/roles/service_sshd/tasks/main.yml
+t/scenarios/_common/ansible/roles/ssh_site_login/tasks/main.yml
 t/scenarios/_common/ansible/roles/test-config-generator/tasks/main.yml
 t/scenarios/_common/ansible/roles/test-config-generator/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml
