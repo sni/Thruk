@@ -951,6 +951,7 @@ sub _req {
                 my $err = $data->{'output'}->[3];
                 $err =~ s/^ERROR:\s*//gmx;
                 $err =~ s/^\Qhttp backend error: \E//gmx;
+                $err =~ s/,\s*<GEN\d+>\s+line\s+1\.//gmx;
                 _debug_log_request_response($c, $response);
                 die("http backend error: ".$err);
             }
