@@ -1398,7 +1398,17 @@ return system hostname
 
 sub hostname {
     our $hostname;
-    (undef, $hostname) = _cmd("hostname") unless $hostname;
+
+    # use hostname from env if available
+    if(!$hostname) {
+        $hostname = $ENV{'HOSTNAME'} if $ENV{'HOSTNAME'};
+    }
+
+    # still no hostname yet, try hostname command
+    if(!$hostname) {
+        (undef, $hostname) = _cmd("hostname") unless $hostname;
+    }
+
     return($hostname);
 }
 
