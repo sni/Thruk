@@ -45,6 +45,7 @@ BODY.loginpage DIV.loginmask FORM BUTTON:hover{--tw-bg-opacity:1;background-colo
 BODY.loginpage DIV.loginmask FORM BUTTON{font-weight:700;padding-top:.75rem;padding-bottom:.75rem;--tw-text-opacity:1;color:rgba(255,255,255,var(--tw-text-opacity));width:100%}
 BODY.loginpage DIV.loginmask FORM INPUT{--tw-border-opacity:1;border-color:rgba(156,163,175,var(--tw-border-opacity));border-radius:.25rem;border-style:solid;border-width:1px;padding-left:.5rem;padding-right:.5rem;padding-top:.75rem;padding-bottom:.75rem}
 BODY.loginpage DIV.loginmask DIV.version{font-weight:700}
+BODY.loginpage DIV.loginmask DIV.separator{margin-bottom:0.3rem; margin-top:0.3rem}
 </style>
   </head>
   <body class='[% page %] loginpage' id='[% page %]'>
@@ -69,7 +70,7 @@ BODY.loginpage DIV.loginmask DIV.version{font-weight:700}
       [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
         [% FOREACH auth = c.config.auth_oauth.provider %]
           [% IF c.config.basic_auth_enabled || !loop.first %]
-          <div>or</div>
+          <div class="separator">or</div>
           [% END %]
         <div>
           <button name="oauth" value="[% loop.index %]">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
