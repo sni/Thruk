@@ -851,9 +851,9 @@ sub single_search {
         if( $filter->{'op'} eq '>=' ) { $op = '>='; $rop = '<='; $dateop = '>='; }
         if( $filter->{'op'} eq '<=' ) { $op = '<='; $rop = '>='; $dateop = '<='; }
 
-        if($op eq '~~' || $op eq '!~~') {
-            # regular expression filter are supported since LMD 1.3.4
-            if($ENV{'THRUK_USE_LMD_VERSION'}) {
+        # regular expression filter are supported in LMD
+        if($ENV{'THRUK_USE_LMD'}) {
+            if($op eq '~~' || $op eq '!~~' || $op eq '~' || $op eq '!~') {
                 $listop = $op;
             }
         }

@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix group filter when using lmd
+
 2.44-2   Fri Jun  4 18:07:58 CEST 2021
           - Config Tool:
             - fix internal error when saving thruk config
