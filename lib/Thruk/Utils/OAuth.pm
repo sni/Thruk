@@ -160,7 +160,7 @@ sub _cleanup_oauth_files {
 sub _get_json {
     my($c, $res) = @_;
 
-    my $body = Thruk::Utils::Encode::decode_any($res->decoded_content || $res->content);
+    my $body = $res->decoded_content || $res->content;
     if($body && $body =~ m/^\s*\{/gmx) {
         my $data = decode_json($body);
         if($data && $data->{'error'}) {
