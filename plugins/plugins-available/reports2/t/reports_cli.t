@@ -17,6 +17,8 @@ BEGIN {
     import TestUtils;
 }
 
+require Thruk::Utils::IO;
+
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 $BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 

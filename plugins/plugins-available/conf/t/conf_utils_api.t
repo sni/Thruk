@@ -20,6 +20,8 @@ BEGIN {
     $ENV{'THRUK_TEST_CONF_NO_LOG'}   = 1;
 }
 
+require Thruk::Utils::IO;
+
 ###########################################################
 my $testport = 50000;
 {
