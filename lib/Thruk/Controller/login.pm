@@ -95,7 +95,7 @@ sub index {
         }
         if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
             _invalidate_current_session($c, $cookie_path, "user locked");
-            Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
+            Thruk::Utils::set_message($c, { 'style' => 'fail_message', 'msg' => $c->config->{'locked_message'}, 'escape'  => 0 });
         }
         if($keywords =~ /^setsession\&(.*)$/mx or $keywords eq 'setsession') {
             $c->authenticate();

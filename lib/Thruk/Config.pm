@@ -180,6 +180,7 @@ my $base_defaults = {
     'cookie_auth_session_timeout'           => 86400,
     'cookie_auth_session_cache_timeout'     => 5,
     'cookie_auth_domain'                    => '',
+    'locked_message'                        => 'account is locked, please contact an administrator',
     'perf_bar_mode'                         => 'match',
     'sitepanel'                             => 'auto',
     'ssl_verify_hostnames'                  => 1,

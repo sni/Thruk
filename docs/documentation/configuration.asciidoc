@@ -1820,6 +1820,15 @@ ex.:
   cookie_auth_disable_after_failed_logins = 3
 
 
+=== locked_message
+{% include new_since.ad version="2.46" %}
+The error message when an account is locked, may contain html.
+
+ex.:
+
+    locked_message = account is locked, please contact an administrator
+
+
 === cookie_auth_verbose
 {% include new_since.ad version="2.32" %}
 Increase logging of cookie authentication related things. This usually
