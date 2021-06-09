@@ -882,7 +882,7 @@ sub find_files {
     $dir =~ s/\/$//gmxo;
 
     # symlinks
-    if(!$skip_symlinks && -l $dir) {
+    if($skip_symlinks && -l $dir) {
         return([]);
     }
     # not a directory?
