@@ -143,8 +143,8 @@
   <tr>
     <td class="dataEven" align="center" colspan=3>
       [% IF rd.file %]
-      <button name="recurring" value="remove" class="remove_button button" style="width: 80px;">Delete</button>[% END %]
-      <button name="recurring" value="save" class="save_button button" style="width: 160px;"[% IF !can_edit %] disabled[% END %]>Save</button>
+      <button name="recurring" value="remove" class="remove_button button" style="width: 90px;">Delete</button>[% END %]
+      <button name="recurring" value="save" class="save_button button" style="width: 180px;"[% IF !can_edit %] disabled[% END %]>Save</button>
     </td>
   </tr>
 </table>
