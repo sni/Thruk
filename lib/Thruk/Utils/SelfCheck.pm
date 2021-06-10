@@ -31,6 +31,7 @@ my $available_checks = {
     'recurring_downtimes' => \&_reccuring_downtime_checks,
     'lmd'                 => \&_lmd_checks,
     'logcache'            => \&_logcache_checks,
+    'backends'            => \&_backends_checks,
 };
 
 ##############################################
@@ -500,6 +501,45 @@ sub _logcache_checks  {
     my $msg = sprintf('Logcache %s', $rc_codes->{$rc});
     return({sub => 'logcache', rc => $rc, msg => $msg, details => $details});
 }
+
+##############################################
+
+=head2 _backends_checks
+
+    _backends_checks($c)
+
+verify errors in backend connections
+
+=cut
+sub _backends_checks  {
+    my($c) = @_;
+    my $details = "Backends:\n";
+
+    my $rc      = 0;
+    my $errors  = 0;
+
+    for my $pd (sort keys %{$c->stash->{'backend_detail'}}) {
+        next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
+        my $err = ($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '');
+        next unless $err;
+        $details .= sprintf("  - %s: %s (%s)\n",
+                                ($c->stash->{'backend_detail'}->{$pd}->{'name'} // $pd),
+                                $err,
+                                ($c->stash->{'backend_detail'}->{$pd}->{'addr'} || ''),
+        );
+        $errors++;
+    }
+
+    if($errors == 0) {
+        $details .= "  - no errors in ".(scalar keys %{$c->stash->{'backend_detail'}})." backends\n";
+    } else {
+        $rc = 2;
+    }
+
+    my $msg = sprintf('Backends %s', $rc_codes->{$rc});
+    return({sub => 'backends', rc => $rc, msg => $msg, details => $details});
+}
+
 ##############################################
 
 1;

@@ -31,6 +31,7 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
     - recurring_downtimes       runs recurring downtimes checks
     - reports                   runs reporting checks
     - logcache                  runs logcache checks
+    - backends                  runs backend connection checks
 
 =back
 
