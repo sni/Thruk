@@ -10,7 +10,7 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] selfcheck <checktype>
+  Usage: thruk [globaloptions] selfcheck <checktype[s]>...
 
 =head1 OPTIONS
 
@@ -56,10 +56,8 @@ sub cmd {
         return("ERROR - authorized_for_admin role required", 1);
     }
 
-    my $type = shift @{$commandoptions} || 'all';
-
     require Thruk::Utils::SelfCheck;
-    my($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, $type);
+    my($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, $commandoptions);
     $data->{'all_stdout'} = 1;
 
     $c->stats->profile(end => "_cmd_selfcheck($action)");
@@ -73,6 +71,14 @@ sub cmd {
 Run all selfchecks
 
   %> thruk selfcheck all
+
+Run all selfchecks except filesystem
+
+  %> thruk selfcheck 'all,!filesystem'
+
+Run lmd and filesystem selfcheck
+
+  %> thruk selfcheck 'lmd,filesystem'
 
 =cut
 

@@ -2,10 +2,12 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add option to configure error message for locked accounts
-          - recurring downtimes self check validate cron entries
-          - reports self check validate cron entries
           - fix group filter when using lmd
           - fix oauth login containing umlauts
+          - self check:
+            - recurring downtimes self check validate cron entries
+            - reports self check validate cron entries
+            - support negated type selection
 
 2.44-2   Fri Jun  4 18:07:58 CEST 2021
           - Config Tool:

@@ -24,6 +24,15 @@ my $rc_codes = {
     '3'     => 'UNKNOWN',
 };
 
+my $available_checks = {
+    'filesystem'          => \&_filesystem_checks,
+    'logfiles'            => \&_logfile_checks,
+    'reports'             => \&_report_checks,
+    'recurring_downtimes' => \&_reccuring_downtime_checks,
+    'lmd'                 => \&_lmd_checks,
+    'logcache'            => \&_logcache_checks,
+};
+
 ##############################################
 
 =head1 METHODS
@@ -52,25 +61,28 @@ sub self_check {
     my($self, $c, $type) = @_;
     my($rc, $msg, $details);
     my $results = [];
+    my($selected, $dont) = ({}, {});
+    for my $t (@{Thruk::Base::comma_separated_list($type)}) {
+        if($t =~ m/^\!(.*)$/mx) {
+            $dont->{$1} = 1;
+        } else {
+            $selected->{$t} = 1;
+        }
+    }
+    if(scalar keys %{$selected} == 0 || $selected->{'all'}) {
+        for my $t (sort keys %{$available_checks}) {
+            $selected->{$t} = 1;
+        }
+        $selected->{'all'} = 1;
+    }
+    for my $t (sort keys %{$dont}) {
+        delete $selected->{$t};
+    }
 
     # run checks
-    if($type eq 'all' or $type eq 'filesystem') {
-        push @{$results}, _filesystem_checks($c);
-    }
-    if($type eq 'all' or $type eq 'logfiles') {
-        push @{$results}, _logfile_checks($c);
-    }
-    if($type eq 'all' or $type eq 'reports') {
-        push @{$results}, _report_checks($c);
-    }
-    if($type eq 'all' or $type eq 'recurring_downtimes') {
-        push @{$results}, _reccuring_downtime_checks($c);
-    }
-    if($type eq 'all' or $type eq 'lmd') {
-        push @{$results}, _lmd_checks($c);
-    }
-    if($type eq 'all' or $type eq 'logcache') {
-        push @{$results}, _logcache_checks($c);
+    for my $t (sort keys %{$selected}) {
+        next if $t eq 'all';
+        push @{$results}, &{$available_checks->{$t}}($c);
     }
 
     # aggregate results
@@ -97,7 +109,7 @@ sub self_check {
     }
 
     # append performance data from /thruk/metrics
-    if($type eq 'all') {
+    if($selected->{'all'}) {
         require Thruk::Utils::CLI::Rest;
         my $res = Thruk::Utils::CLI::Rest::cmd($c, undef, ['-o', ' ', '/thruk/metrics']);
         if($res->{'rc'} == 0 && $res->{'output'}) {
