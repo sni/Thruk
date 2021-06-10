@@ -14,8 +14,7 @@ use warnings;
 use strict;
 
 use Thruk::Constants ':peer_states';
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
+use Thruk::Utils ();
 use Thruk::Utils::RecurringDowntimes ();
 
 my $rc_codes = {
@@ -205,6 +204,13 @@ sub _report_checks  {
             $details .= sprintf(" report failed: #%d - %s\n", $r->{'nr'}, $r->{'name'});
             $errors++;
         }
+        for my $cr (@{$r->{'schedule'}}) {
+            my $time = Thruk::Utils::get_cron_time_entry($cr);
+            if(!defined $time) {
+                $details .= sprintf(" report cannot expand cron entry: #%d - %s\n", $r->{'nr'}, $r->{'name'});
+                $errors++;
+            }
+        }
     }
     if($errors == 0) {
         $details .= "  - no errors in ".(scalar @{$reports})." reports\n";
@@ -346,6 +352,15 @@ sub check_recurring_downtime {
             }
         }
     }
+
+    for my $cr (@{$downtime->{'schedule'}}) {
+        my $time = Thruk::Utils::get_cron_time_entry($cr);
+        if(!defined $time) {
+            $details .= "  - ERROR: cannot expand cron entry in recurring downtime ".$file."\n";
+            $errors++;
+        }
+    }
+
     return($errors, $details);
 }
 
