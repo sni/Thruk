@@ -6,6 +6,7 @@ use File::Copy qw/move/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
 
@@ -43,6 +44,10 @@ sub update_cron_file {
         next unless scalar @{$d->{'schedule'}} > 0;
         for my $cr (@{$d->{'schedule'}}) {
             my $time = Thruk::Utils::get_cron_time_entry($cr);
+            if(!defined $time) {
+                _warn(sprintf("could not expand cron entry for downtime id: %s", $d->{'file'}));
+                next;
+            }
             $combined_entries->{$time} = [] unless $combined_entries->{$time};
             push @{$combined_entries->{$time}}, $d->{'file'};
         }
