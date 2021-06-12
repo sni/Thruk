@@ -1034,7 +1034,8 @@ sub get_backends_with_obj_config {
     }
 
     # save value in the cookie, so later pages will show the same selected backend
-    $c->cookie('thruk_conf', $c->stash->{'param_backend'}, { httponly => 1 });
+    # will be changed from the site panel, so cannot be httponly
+    $c->cookie('thruk_conf', $c->stash->{'param_backend'}, { httponly => 0 });
 
     $c->stash->{'backend_chooser'} = 'switch';
 
