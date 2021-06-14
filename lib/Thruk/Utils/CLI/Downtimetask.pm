@@ -56,7 +56,9 @@ sub cmd {
     require Thruk::Utils::RecurringDowntimes;
 
     # this function must be run on one cluster node only
-    return("command send to cluster\n", 0) if $c->cluster->run_cluster("once", "cmd: $action ".join(" ",@{$commandoptions}));
+    if(my $msg = $c->cluster->run_cluster("once", "cmd: $action ".join(" ",@{$commandoptions}))) {
+        return($msg, 0);
+    }
 
     my $files = [split(/\|/mx, shift @{$commandoptions})];
 

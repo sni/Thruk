@@ -463,7 +463,7 @@ sub generate_report {
     if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
         if($options->{'var'}->{'start_time'}) {
             if(POSIX::strftime("%Y-%m-%d %H:%M", localtime($options->{'var'}->{'start_time'})) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
-                $Thruk::Utils::Reports::error = '['.$nr.'.rpt] report is finished on another node already';
+                $Thruk::Utils::Reports::error = '['.$nr.'.rpt] report has been calculated on '.$c->cluster->node_name($options->{'var'}->{'running_node'}).' already';
                 return -2;
             }
         }
@@ -475,7 +475,7 @@ sub generate_report {
     if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::Globals::NODE_ID)) {
         # if started by cron, just exit, some other node is doing the report already
         if($ENV{'THRUK_CRON'}) {
-            $Thruk::Utils::Reports::error = 'report is running on another node ('.$options->{'var'}->{'running_node'}.') already';
+            $Thruk::Utils::Reports::error = '['.$nr.'.rpt] report is running on '.$c->cluster->node_name($options->{'var'}->{'running_node'}).' already';
             return -2;
         }
 
@@ -1023,7 +1023,6 @@ sub set_running {
         my $index_file = $c->config->{'var_path'}.'/reports/.index';
         $update->{'var'}->{'is_running'} = $val;
         if($val == 0) {
-            $update->{'var'}->{'running_node'} = undef;
             Thruk::Utils::IO::json_lock_patch($index_file, { $nr => undef }, { pretty => 1, allow_empty => 1 });
         } else {
             $update->{'var'}->{'running_node'} = $Thruk::Globals::NODE_ID;
@@ -1503,10 +1502,6 @@ sub read_report_file {
         for my $key (keys %{$rdata}) {
             $report->{$key} = $rdata->{$key};
         }
-    }
-
-    if($report->{'var'}->{'is_running'} == 0) {
-        delete $report->{'var'}->{'running_node'};
     }
 
     store_report_data($c, $nr, $report) if $needs_save;

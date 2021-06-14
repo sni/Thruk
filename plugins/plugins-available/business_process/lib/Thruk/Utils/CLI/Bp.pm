@@ -114,7 +114,9 @@ sub cmd {
 
     # this function must be run on one cluster node only
     if($id eq 'all') {
-        return("command send to cluster\n", 0) if $c->cluster->run_cluster("once", "cmd: bp all");
+        if(my $msg = $c->cluster->run_cluster("once", "cmd: bp all")) {
+            return($msg, 0);
+        }
     }
 
     if($mode eq 'commit') {

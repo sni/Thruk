@@ -263,7 +263,7 @@ run something on our cluster
     - sub: class / sub name
     - args: arguments
 
-returns 0 if no cluster is in use and caller can continue locally
+returns 0 if no cluster is in use and/or caller can continue locally
 returns 1 if a 'once' job runs somewhere already
 returns list of results for each specified node
 
@@ -291,8 +291,9 @@ sub run_cluster {
         Thruk::Utils::IO::write($jobs_path.'/'.$digest, $Thruk::Globals::NODE_ID."\n", undef, 1);
         my $lock = [split(/\n/mx, Thruk::Utils::IO::read($jobs_path.'/'.$digest))]->[0];
         if($lock ne $Thruk::Globals::NODE_ID) {
-            _debug(sprintf("run_cluster once: %s running on %s already", $sub, $lock));
-            return(1);
+            my $msg = sprintf("action '%s' is running on node %s already", $sub, $self->node_name($lock));
+            _debug($msg);
+            return($msg);
         }
         $self->_cleanup_jobs_folder();
         _debug(sprintf("run_cluster once: %s starting on %s", $sub, $lock));
@@ -604,6 +605,24 @@ sub expand_node_ids {
         }
     }
     return($expanded);
+}
+
+##########################################################
+
+=head2 node_name
+
+  node_name($self, $id)
+
+return node name (node_url) for given id
+
+=cut
+sub node_name {
+    my($self, $id) = @_;
+    if(!$id) { $id = $Thruk::Globals::NODE_ID; }
+    if($self->{'nodes_by_id'}->{$id}) {
+        return($self->{'nodes_by_id'}->{$id}->{'node_url'});
+    }
+    return($id);
 }
 
 ##########################################################
