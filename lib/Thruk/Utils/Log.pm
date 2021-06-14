@@ -185,6 +185,7 @@ sub _log {
     }
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth+2;
     for my $l (split/\n/mx, $line) {
+        $l = '[cron] '.$l if $ENV{'THRUK_CRON'};
         if(   $lvl == ERROR)   { $log->error($l); }
         elsif($lvl == WARNING) { $log->warn($l);  }
         elsif($lvl == INFO)    { $log->info($l);  }

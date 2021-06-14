@@ -463,7 +463,7 @@ sub generate_report {
     if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
         if($options->{'var'}->{'start_time'}) {
             if(POSIX::strftime("%Y-%m-%d %H:%M", localtime($options->{'var'}->{'start_time'})) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
-                $Thruk::Utils::Reports::error = 'report is finished on another node already';
+                $Thruk::Utils::Reports::error = '['.$nr.'.rpt] report is finished on another node already';
                 return -2;
             }
         }
