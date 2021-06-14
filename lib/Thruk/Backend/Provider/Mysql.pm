@@ -1452,7 +1452,7 @@ sub check_global_lock {
                 _info(sprintf("WARNING: logcache import currently running with pid %d", $pid));
                 return;
             }
-            _warn("WARNING: removing stale lock file");
+            _warn("WARNING: removing stale lock file: ".$c->config->{'tmp_path'}."/logcache_import.lock");
             unlink($c->config->{'tmp_path'}."/logcache_import.lock");
         }
     }
