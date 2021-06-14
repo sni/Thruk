@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 30;
+plan tests => 34;
 
 ###########################################################
 # test thruks script path
@@ -28,6 +28,12 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd    => '/usr/bin/env omd start lmd',
         like   => ['/Starting LMD.*OK/'],
+    });
+
+    # wait till backends are online
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk -l',
+        waitfor => 'backend1.*OK\s+',
     });
 
     # do some tests
