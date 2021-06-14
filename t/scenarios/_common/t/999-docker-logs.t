@@ -31,6 +31,7 @@ for my $svc (split/\n/mx, $services) {
     my $index = 0;
     for my $cont (split/\n/mx, $container) {
         $index++;
+        my $logfiles_printed = {};
         ok(1, sprintf("%s_%d - %s", $svc, $index, $cont));
         for my $logfile (@logs) {
             my($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont cat $logfile");
@@ -47,7 +48,12 @@ for my $svc (split/\n/mx, $services) {
                     }
                     if(!$ok) {
                         fail(sprintf("%s_%d: %s matches %s", $svc, $index, $logfile, $err));
-                        diag($log);
+                        if($logfiles_printed->{$logfile}) {
+                            diag("* logfile already shown *");
+                        } else {
+                            diag($log);
+                            $logfiles_printed->{$logfile} = 1;
+                        }
                     }
                 }
             }
