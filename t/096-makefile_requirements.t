@@ -47,6 +47,7 @@ for my $file (@{$files}) {
     next if _is_core_module($mod);
     $all_used->{$mod} = 1;
     next if $mod eq 'IO::Socket::SSL'; # optional
+    next if $mod eq 'Net::SSLeay';     # optional
     next if $mod eq 'Mozilla::CA';     # optional
     next if $mod eq 'Clone';           # optional
     next if $mod eq 'DBI' and defined $reqs->{'mysql_support'}->{$mod};

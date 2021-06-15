@@ -123,13 +123,19 @@ sub new {
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-        if($https_count > 2 && $pool_size > 1) {
+        if($https_count > 1) {
+            # https://metacpan.org/pod/Net::SSLeay#Using-Net::SSLeay-in-multi-threaded-applications
             eval {
+                use threads ();
+                require Net::SSLeay;
                 require IO::Socket::SSL;
-                IO::Socket::SSL->import();
+
+                Net::SSLeay::load_error_strings();
+                Net::SSLeay::SSLeay_add_ssl_algorithms();
+                Net::SSLeay::randomize();
             };
             if($@) {
-                die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
+                die('IO::Socket::SSL and Net::SSLeay (>=1.43) is required for multiple parallel https connections: '.$@);
             }
             ## no lint
             if(!$Net::SSLeay::VERSION || $Net::SSLeay::VERSION < 1.43) {

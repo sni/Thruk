@@ -556,14 +556,10 @@ sub _check_missing {
 
         for my $m (sort keys %{$b->{'modules'}}) {
             if($b->{'modules'}->{$m} == 0) {
+                next if $m eq 'threads';
                 _log_change("%s: module '%s' is not used at all, consider removing it.", $file, $m);
                 for my $u (@{$b->{'used'}}) { delete $u->{$m}; }
             }
-            #if($b->{'modules'}->{$m} == 1) {
-            #    next if $m =~ m/^(strict|warnings|threads|Thruk::Base|Thruk::Action::AddDefaults)$/mx;
-            #    next if $file =~ m/^\.\/(t|script)\//mx;
-            #    _log_change("%s: module '%s' is used only once, consider replacing by require.", $file, $m);
-            #}
         }
         for my $m (qw/warnings strict/) {
             my $found;
