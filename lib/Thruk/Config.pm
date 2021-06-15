@@ -5,6 +5,7 @@ use strict;
 use Carp qw/confess/;
 use Cwd ();
 use POSIX ();
+use Storable ();
 
 use Thruk::Base ();
 use Thruk::Utils::IO ();
@@ -408,8 +409,7 @@ sub set_config_env {
     my $base_config = get_base_config();
     my $configs     = _load_config_files(\@files);
 
-    require Storable;
-    my $conf    = Storable::dclone($base_config);
+    my $conf = Storable::dclone($base_config);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
