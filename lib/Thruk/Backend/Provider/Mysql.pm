@@ -433,6 +433,17 @@ sub get_logs {
         }
     }
 
+    my $extra_columns = '';
+    if($options{'extra_columns'}) {
+        $extra_columns = ',
+            (CASE
+                WHEN l.type = "HOST NOTIFICATION"    THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 4), ";", -1)
+                WHEN l.type = "SERVICE NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 5), ";", -1)
+                ELSE ""
+            END) as command_name
+        ';
+    }
+
     my $sql = '
     SELECT
         l.time as time,
@@ -445,6 +456,7 @@ sub get_logs {
         IFNULL(c.name, "") as contact_name,
         l.message as message,
         "'.$prefix.'" as peer_key
+        '.$extra_columns.'
     FROM
         `'.$prefix.'_log` l
         LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id

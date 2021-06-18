@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Rest
+            - add command_name to /notifications
+
 2.44-3   Thu Jun 10 19:22:57 CEST 2021
           - add option to configure error message for locked accounts
           - fix group filter when using lmd

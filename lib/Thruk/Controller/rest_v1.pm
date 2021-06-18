@@ -1991,7 +1991,7 @@ sub _rest_get_livestatus_logs {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}));
+    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
 }
 
 ##########################################################
@@ -2003,7 +2003,7 @@ sub _rest_get_livestatus_notifications {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}));
+    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
 }
 
 ##########################################################
@@ -2015,7 +2015,7 @@ sub _rest_get_livestatus_host_notifications {
     my($c, undef, $host) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}));
+    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
 }
 
 ##########################################################
