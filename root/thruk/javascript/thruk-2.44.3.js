@@ -6711,6 +6711,10 @@ var ajax_search = {
         var appended_value;
         if(append_value_of) {
             var el = document.getElementById(append_value_of);
+            if(!el) {
+                el = jQuery(append_value_of).first();
+                if(el) { el = el[0]; }
+            }
             if(el) {
                 ajax_search.cur_search_url = ajax_search.cur_search_url + el.value;
                 appended_value = el.value;

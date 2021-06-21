@@ -92,4 +92,21 @@
       Failure to supply all required values will result in an error.
     </div>
 
+<script type="text/javascript">
+jQuery(document).ready(function() {
+  jQuery(["host", "hostgroup", "servicegroup"]).each(function(i, type) {
+    jQuery("INPUT[name="+type+"]").each(function(i, el) {
+      jQuery(el).on("click focus", function(input) {
+        ajax_search.init(input.target, type, { autosubmit:false });
+      });
+    });
+  });
+  jQuery("INPUT[name=service]").each(function(i, el) {
+    jQuery(el).on("click focus", function(input) {
+      ajax_search.init(input.target, "service", { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'INPUT[name=host]' });
+    });
+  });
+})
+</script>
+
 [% PROCESS _footer.tt %]
