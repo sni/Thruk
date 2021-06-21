@@ -19,6 +19,7 @@ if($0 =~ m/scenario\-(.*)\.t$/mx) {
 
 use_ok("Thruk::Utils");
 use_ok("Thruk::Utils::IO");
+use_ok("Thruk::Config");
 
 my $verbose   = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
 my $pwd       = cwd();
