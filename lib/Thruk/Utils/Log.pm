@@ -241,7 +241,7 @@ sub _audit_log {
 
     $msg = sprintf("[%s][%s][%s] %s", $category, $user, $sessionid, $msg);
     if($ENV{'THRUK_TEST_NO_AUDIT_LOG'}) {
-        $ENV{'THRUK_TEST_NO_AUDIT_LOG'} .= "\n".$msg;
+        $ENV{'THRUK_TEST_NO_AUDIT_LOG'} .= "\n".Thruk::Utils::Encode::encode_utf8($msg);
         return;
     }
 
