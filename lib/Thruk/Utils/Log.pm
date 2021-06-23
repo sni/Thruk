@@ -18,6 +18,7 @@ use Time::HiRes ();
 use threads ();
 
 use Thruk::Base ();
+use Thruk::Utils::Encode ();
 
 use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc

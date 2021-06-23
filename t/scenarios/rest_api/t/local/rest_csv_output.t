@@ -1,7 +1,7 @@
 use warnings;
 use strict;
-use utf8;
 use Test::More;
+use utf8;
 
 BEGIN {
     use lib('t');
