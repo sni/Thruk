@@ -64,7 +64,7 @@ sub cmd {
         && (!$result->[0]->{'critical'} || scalar @{$result->[0]->{'critical'}} == 0 )
         && (!$result->[0]->{'rename'}   || scalar @{$result->[0]->{'rename'}}   == 0 )
     ) {
-        return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, all_stdout => 1});
+        return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, content_type => $result->[0]->{'content_type'}, all_stdout => 1});
     }
 
     my($output, $rc) = _create_output($c, $opts, $result);
@@ -129,8 +129,9 @@ sub _fetch_results {
         my $sub_c = $c->sub_request('/r/v1/'.$url, uc($opt->{'method'}), $opt->{'postdata'}, 1);
         $c->stats->profile(end => "_cmd_rest($url)");
 
-        $opt->{'result'} = $sub_c->res->body;
-        $opt->{'rc'}     = ($sub_c->res->code == 200 ? 0 : 3);
+        $opt->{'content_type'} = $sub_c->res->content_type;
+        $opt->{'result'}       = $sub_c->res->body;
+        $opt->{'rc'}           = ($sub_c->res->code == 200 ? 0 : 3);
         _debug2("json data:");
         _debug2($opt->{'result'});
     }
