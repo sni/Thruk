@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Reporting:
+            - add missing host unavailable box for sla reports
           - Rest
             - add command_name to /notifications
 
