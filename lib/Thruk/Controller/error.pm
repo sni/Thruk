@@ -234,6 +234,11 @@ sub index {
             'dscr'    => 'It seems like you are using an non-existing or invalid API key.',
             'code'    => 403, # forbidden
         },
+        '28'  => {
+            'mess'    => 'Authentication by secret key requires X-Thruk-Auth-User header',
+            'dscr'    => 'When authenticating by the secret key via X-Thruk-Auth-Key, you need to set the X-Thruk-Auth-User header as well.',
+            'code'    => 400, # bad request
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
