@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 9;
+plan tests => 8;
 
 ###########################################################
 # test thruks script path
@@ -18,10 +18,11 @@ TestUtils::test_command({
 }) or BAIL_OUT("wrong thruk path");
 
 ###########################################################
-# misc rest pages
+# rest requests with remote url
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r /hosts/totals /services/totals',
-        like => ['/"critical_and_unhandled"/', '/"down_and_unhandled"/'],
+        cmd     => "/thruk/script/thruk -k rest https://localhost/demo/thruk/r/",
+        like    => ["/login required/"],
+        exit    => 3,
     });
 };
