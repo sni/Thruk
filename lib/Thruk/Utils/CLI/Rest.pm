@@ -58,7 +58,12 @@ sub cmd {
 
     my $result = _fetch_results($c, $opts, $opt);
     # return here for simple requests
-    if(scalar @{$result} == 1 && !$result->[0]->{'output'} && !$result->[0]->{'warning'} && !$result->[0]->{'critical'} && !$result->[0]->{'rename'}) {
+    if(scalar @{$result} == 1
+        && !$result->[0]->{'output'}
+        && (!$result->[0]->{'warning'}  || scalar @{$result->[0]->{'warning'}}  == 0 )
+        && (!$result->[0]->{'critical'} || scalar @{$result->[0]->{'critical'}} == 0 )
+        && (!$result->[0]->{'rename'}   || scalar @{$result->[0]->{'rename'}}   == 0 )
+    ) {
         return({output => $result->[0]->{'result'}, rc => $result->[0]->{'rc'}, all_stdout => 1});
     }
 

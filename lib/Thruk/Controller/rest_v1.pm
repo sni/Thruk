@@ -276,6 +276,7 @@ sub _format_csv_output {
         $output .= "ERROR: failed to generate output, rerun with -v to get more details.\n";
     }
 
+    $output = Thruk::Utils::Encode::encode_utf8($output);
     return $c->render('text' => $output);
 }
 
@@ -331,7 +332,7 @@ sub _format_xls_output {
         $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
-                $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
+                $row->{$key} = Thruk::Utils::Filter::escape_xml(join(", ", @{Thruk::Base::list($row->{$key})}));
             }
         }
     }
