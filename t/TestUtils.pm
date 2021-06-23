@@ -2,6 +2,7 @@ package TestUtils;
 
 use warnings;
 use strict;
+use utf8;
 
 #########################
 # Test Utils
@@ -10,6 +11,8 @@ BEGIN {
   $ENV{'THRUK_MODE'} = 'TEST';
   $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
   $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ s#/$##gmx if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+  binmode(STDOUT, ":encoding(UTF-8)");
+  binmode(STDERR, ":encoding(UTF-8)");
 }
 
 ###################################################
@@ -28,6 +31,7 @@ use URI::Escape qw/uri_unescape/;
 
 use Thruk ();
 use Thruk::UserAgent ();
+use Thruk::Utils::Encode ();
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -293,7 +297,7 @@ sub test_page {
     }
 
     # wait for something?
-    $return->{'content'} = $request->content;
+    $return->{'content'} = $request->decoded_content || $request->content;
     if(defined $opts->{'waitfor'}) {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
@@ -340,7 +344,7 @@ sub test_page {
             # text that should appear
             if(defined $opts->{'like'}) {
                 for my $like (@{_list($opts->{'like'})}) {
-                    like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
+                    like($return->{'content'}, qr/$like/, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) or diag($opts->{'url'});
                 }
             }
         }
@@ -394,7 +398,7 @@ sub test_page {
     if(defined $opts->{'like'}) {
         for my $like (@{_list($opts->{'like'})}) {
             use Carp;
-            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
+            like($return->{'content'}, qr/$like/, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
         }
     }
 
@@ -745,14 +749,14 @@ sub wait_for_job {
 =cut
 sub test_command {
     my $test = shift;
-    my($rc, $stderr) = ( -1, '') ;
+    my($rc, $stdout, $stderr) = ( -1, '', '') ;
     my $return = 1;
 
     require Test::Cmd;
     Test::Cmd->import();
 
     # run the command
-    isnt($test->{'cmd'}, undef, "running cmd: ".$test->{'cmd'}) or $return = 0;
+    isnt($test->{'cmd'}, undef, "running cmd: ".Thruk::Utils::Encode::encode_utf8($test->{'cmd'})) or $return = 0;
 
     if($test->{'env'}) {
         for my $key (%{$test->{'env'}}) {
@@ -781,16 +785,17 @@ sub test_command {
                 $t->run(args => $arg, stdin => $test->{'stdin'});
             };
             alarm(0);
+            $stdout = Thruk::Utils::Encode::decode_any(scalar $t->stdout);
 
             if($waitfor =~ m/^\!/) {
                 $expr =~ s/^\!//mx;
-                if($t->stdout !~ m/$expr/mx) {
+                if($stdout !~ m/$expr/mx) {
                     ok(1, "content ".$expr." disappeared after ".($now - $start)."seconds");
                     $found = 1;
                     last;
                 }
             }
-            elsif($t->stdout =~ m/$waitfor/mx) {
+            elsif($stdout =~ m/$waitfor/mx) {
                 ok(1, "content ".$expr." found after ".($now - $start)."seconds");
                 $found = 1;
                 last;
@@ -800,7 +805,7 @@ sub test_command {
         }
         if(!$found) {
             fail("content ".$expr." did not occur within 120 seconds");
-            diag("command waitfor failed:\n".$t->stdout."\n"._caller_info());
+            diag("command waitfor failed:\n".$stdout."\n"._caller_info());
         }
     }
 
@@ -813,27 +818,28 @@ sub test_command {
     if($@) {
         $stderr = $@;
     } else {
-        $stderr = $t->stderr;
+        $stderr = Thruk::Utils::Encode::decode_any(scalar $t->stderr);
     }
+    $stdout = Thruk::Utils::Encode::decode_any(scalar $t->stdout);
     alarm(0);
 
     # exit code?
     $test->{'exit'} = 0 unless exists $test->{'exit'};
     if(defined $test->{'exit'} and $test->{'exit'} != -1) {
-        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".$t->stdout."\n"._caller_info()); $return = 0 };
+        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".$stdout."\n"._caller_info()); $return = 0 };
     }
 
     # matches on stdout?
     if(defined $test->{'like'}) {
         for my $expr (ref $test->{'like'} eq 'ARRAY' ? @{$test->{'like'}} : $test->{'like'} ) {
-            like($t->stdout, $expr, "stdout like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
+            like($stdout, $expr, "stdout like ".Thruk::Utils::Encode::encode_utf8($expr)) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
         }
     }
 
     # unlike matches on stdout?
     if(defined $test->{'unlike'}) {
         for my $expr (ref $test->{'unlike'} eq 'ARRAY' ? @{$test->{'unlike'}} : $test->{'unlike'} ) {
-            unlike($t->stdout, $expr, "stdout unlike ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
+            unlike($stdout, $expr, "stdout unlike ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
         }
     }
 
@@ -851,8 +857,8 @@ sub test_command {
     }
 
     # set some values
-    $test->{'stdout'} = $t->stdout;
-    $test->{'stderr'} = $t->stderr;
+    $test->{'stdout'} = $stdout;
+    $test->{'stderr'} = $stderr;
     $test->{'exit'}   = $rc;
 
     return $return;
@@ -981,13 +987,15 @@ sub _external_request {
         $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
         $request->header('Content-Length' => undef);
-        $request->header('X-Thruk-Auth-Key' => $ENV{'THRUK_TEST_AUTH_KEY'}) if $ENV{'THRUK_TEST_AUTH_KEY'};
+        $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
+        $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
         $cookie_jar->add_cookie_header($request) if $cookie_jar;
         $req = $ua->request($request);
     } else {
         my $request = GET($url);
         $cookie_jar->add_cookie_header($request) if $cookie_jar;
-        $request->header('X-Thruk-Auth-Key' => $ENV{'THRUK_TEST_AUTH_KEY'}) if $ENV{'THRUK_TEST_AUTH_KEY'};
+        $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
+        $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
         $req = $ua->request($request);
     }
 
