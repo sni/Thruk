@@ -49,7 +49,7 @@ sub index {
     if(!defined $arg1 && defined $c->stash->{'err'}) {
         $arg1 = $c->stash->{'err'};
     }
-    if(!defined $arg1 && defined $c->req->parameters->{'error'}) {
+    if((!defined $arg1 || $arg1 eq '/thruk/cgi-bin/error.cgi' ) && defined $c->req->parameters->{'error'}) {
         $arg1 = $c->req->parameters->{'error'};
     }
     if(!defined $c) {
@@ -236,7 +236,7 @@ sub index {
         },
         '28'  => {
             'mess'    => 'Authentication by secret key requires X-Thruk-Auth-User header',
-            'dscr'    => 'When authenticating by the secret key via X-Thruk-Auth-Key, you need to set the X-Thruk-Auth-User header as well.',
+            'dscr'    => 'When authenticating by the secret key via X-Thruk-Auth-Key header, you need to set the X-Thruk-Auth-User header as well.',
             'code'    => 400, # bad request
         },
     };

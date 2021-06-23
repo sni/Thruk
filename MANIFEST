@@ -2354,6 +2354,7 @@ t/scenarios/rest_api/t/local/rest.t
 t/scenarios/rest_api/t/local/rest_check_thruk_rest.t
 t/scenarios/rest_api/t/local/rest_configtool.t
 t/scenarios/rest_api/t/local/rest_csv_output.t
+t/scenarios/rest_api/t/local/rest_errors.t
 t/scenarios/rest_api/t/local/rest_remote_urls.t
 t/scenarios/rest_api/t/local/rest_xls_output.t
 t/scenarios/rest_api/t/local/testuser.t
