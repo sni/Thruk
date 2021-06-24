@@ -1144,12 +1144,13 @@ sub _read_socket_do {
     my($self, $sock, $statement) = @_;
     my($recv,$header);
 
+    my $s = IO::Select->new();
+    $s->add($sock);
+
     # COMMAND statements might return a error message
     if($statement && $statement =~ m/^COMMAND/mx) {
         shutdown($sock, 1);
-        my $s = IO::Select->new();
-        $s->add($sock);
-        if($s->can_read(0.5)) {
+        if($s->can_read(3)) {
             $recv = <$sock>;
         }
         if($recv) {
@@ -1162,6 +1163,12 @@ sub _read_socket_do {
         return('200', $self->_get_error(200), undef);
     }
 
+    # status requests should not take longer than 20 seconds
+    if($statement && $statement =~ m/^GET\s+status/mx) {
+        if(!$s->can_read(20)) {
+            return($self->_socket_error($statement, 'cannot read from socket socket'.($! ? ': '.$! : '')));
+        }
+    }
     $sock->read($header, 16) || return($self->_socket_error($statement, 'reading header from socket failed'.($! ? ': '.$! : '')));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
