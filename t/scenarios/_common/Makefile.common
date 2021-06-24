@@ -8,8 +8,10 @@ EXPECTED_BACKENDS=1
 INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
 ifdef INTERACTIVE
   DOCKER_COMPOSE_TTY=
+  DOCKER_COMPOSE_LOGS=
 else
   DOCKER_COMPOSE_TTY=-T
+  DOCKER_COMPOSE_LOGS=--no-color
 endif
 
 wait_start:
@@ -26,7 +28,7 @@ wait_start_failed: non_interactive_only
 	-echo "ERROR: startup failed"
 	-test -e thruk.conf && $(THRUK) -vvv -l
 	-docker ps
-	-docker-compose logs --tail=30 --no-color -t | sort
+	-docker-compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
 	$(MAKE) wait_start_failed_extra
 
 wait_start_failed_extra:
@@ -55,7 +57,7 @@ failed_test: non_interactive_only
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
 	-docker ps
-	-docker-compose logs --tail=30 --no-color -t | sort
+	-docker-compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
 	for svc in $$(docker-compose config --services | sort); do \
 		index=0; \
 		for container in $$(docker-compose ps -q $$svc); do \
@@ -103,7 +105,7 @@ prepare:
 	docker-compose build
 	docker-compose up --remove-orphans -d
 	docker ps
-	@docker-compose logs -f | while read LOGLINE; do \
+	@docker-compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
 		echo "$${LOGLINE}"; \
 		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ docker-compose && exit 0; \
 		[[ "$${LOGLINE}" == *"ERROR"* ]] && pkill -P $$$$ docker-compose && exit 1; \
