@@ -1111,14 +1111,15 @@ sub _send_socket {
             }
         }
     };
-    if($@) {
-        $self->{'logger'}->debug("try 1 failed: $@") if $self->{'verbose'};
-        if(defined $@ and $@ =~ /broken\ pipe/mx) {
+    my $err = $@;
+    if($err) {
+        $self->{'logger'}->debug("try 1 failed: $err") if $self->{'verbose'};
+        if($err =~ /broken\ pipe/mx) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
             return(&_read_socket_do($self, $sock, $statement));
         }
-        confess($@) if $self->{'errors_are_fatal'};
+        confess($err) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
