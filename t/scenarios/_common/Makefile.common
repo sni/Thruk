@@ -41,7 +41,7 @@ test: wait_start
 	$(MAKE) extra_test \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/../_common/t/999*.t
+	$(MAKE) test_docker_logs
 
 test_verbose: wait_start
 	@echo "### $@: $$(date "+%FT%T.%N")"
@@ -51,6 +51,12 @@ test_verbose: wait_start
 	$(MAKE) extra_test_verbose \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
+	$(MAKE) test_docker_logs_verbose
+
+test_docker_logs:
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/../_common/t/999*.t
+
+test_docker_logs_verbose:
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/../_common/t/999*.t
 
 failed_test: non_interactive_only
