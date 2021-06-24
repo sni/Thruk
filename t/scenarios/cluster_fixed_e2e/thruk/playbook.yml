@@ -76,5 +76,6 @@
   - name: wait for ssh config to become available
     wait_for:
       path: /mnt/etc/.ssh
-  - shell: sudo su - demo -c "thruk bp commit --local"
-  - shell: sudo su - demo -c "thruk cron install --local"
+  - name: "thruk bp commit"
+    shell: sudo su - demo -c "test -s /mnt/var/thruk_bp_generated.cfg || thruk bp commit"
+  - shell: sudo su - demo -c "thruk cron install"
