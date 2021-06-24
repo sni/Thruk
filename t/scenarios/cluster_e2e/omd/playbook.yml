@@ -4,6 +4,7 @@
     - role: common
     - role: service_sshd
     - role: ssh_site_login
+    - role: thruk_developer
   tasks:
   - shell: "chown demo: /mnt/etc/"
   - shell: sudo su - demo -c "cp -rp .ssh /mnt/etc/"
