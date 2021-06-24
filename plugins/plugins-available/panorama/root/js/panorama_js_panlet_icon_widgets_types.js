@@ -431,10 +431,10 @@ Ext.define('TP.HostServicesStatusIcon', {
         return(this.xdata.general.host);
     },
     applyXdata: function(xdata) {
-        this.callParent([xdata]);
+        this.setFilter();
         this.xdata.general.incl_hst = true;
         this.xdata.general.incl_svc = true;
-        this.setFilter();
+        this.callParent([xdata]);
     },
     setFilter: function() {
         this.xdata.general.filter = Ext.JSON.encode([{
