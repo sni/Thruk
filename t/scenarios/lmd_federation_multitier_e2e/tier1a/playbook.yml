@@ -4,6 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
+    - role: thruk_plugin_editor
   tasks:
   - shell: "omd config demo set MYSQL on"
   - shell: "omd config demo set THRUK_LOGCACHE on"

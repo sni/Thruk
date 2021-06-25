@@ -1972,6 +1972,8 @@ t/scenarios/_common/ansible/roles/test-config-generator/tasks/main.yml
 t/scenarios/_common/ansible/roles/test-config-generator/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/vars/main.yml
+t/scenarios/_common/ansible/roles/thruk_plugin_editor/tasks/main.yml
+t/scenarios/_common/ansible/roles/thruk_plugin_editor/vars/main.yml
 t/scenarios/_common/Makefile.common
 t/scenarios/_common/t/999-docker-logs.t
 t/scenarios/auth/docker-compose.yml
