@@ -81,6 +81,7 @@ sub cmd {
     }
     elsif($command eq 'enable') {
         my $name = shift @{$commandoptions};
+        return("Plugin name missing.\n", 1) unless $name;
         eval {
             Thruk::Utils::Plugin::enable_plugin($c, $name);
         };
@@ -91,6 +92,7 @@ sub cmd {
     }
     elsif($command eq 'disable') {
         my $name = shift @{$commandoptions};
+        return("Plugin name missing.\n", 1) unless $name;
         eval {
             Thruk::Utils::Plugin::disable_plugin($c, $name);
         };
