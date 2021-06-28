@@ -410,10 +410,8 @@ return basic config hash and sets environment
 sub set_config_env {
     my @files = @_;
 
-    my $base_config = get_base_config();
-    my $configs     = _load_config_files(\@files);
-
-    my $conf = Storable::dclone($base_config);
+    my $conf    = Storable::dclone(get_base_config());
+    my $configs = _load_config_files(\@files);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
@@ -510,7 +508,7 @@ sub set_default_config {
     ## use critic
 
     if(Thruk::Base->mode eq 'CLI_SETUID') {
-        if(defined $uid and $> == 0) {
+        if(defined $uid && $> == 0) {
             switch_user($uid, $groups);
             _fatal("re-exec with uid $uid did not work");
         }
@@ -541,7 +539,7 @@ sub set_default_config {
     $config->{'cookie_path'} =~ s|/*$||mx; # remove trailing slash, chrome doesn't seem to like them
     $config->{'cookie_path'} = $config->{'cookie_path'}.'/'; # seems like the above comment is not valid anymore and chrome now requires the trailing slash
 
-    if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
+    if(defined $ENV{'OMD_ROOT'} && -s $ENV{'OMD_ROOT'}."/version") {
         my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
         $omdlink    =~ s/.*?\///gmx;
         $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
@@ -1014,7 +1012,7 @@ sub get_user {
         if($name) {
             @groups = ( $gid );
             while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-                $users =~ /\b$name\b/mx and push @groups, $gid;
+                $users =~ /\b$name\b/mx && push @groups, $gid;
             }
         }
     }
@@ -1289,7 +1287,7 @@ sub merge_sub_config {
         if($key =~ '^Thruk::Plugin::' && !defined $config->{$key}) {
             $config->{$key} = {};
         }
-        if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
+        if(defined $config->{$key} && ref $config->{$key} eq 'HASH') {
             if($key eq 'Thruk::Backend') {
                 # merge all backends
                 for my $peer (@{Thruk::Base::list($add->{$key})}) {
