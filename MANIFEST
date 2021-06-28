@@ -1899,6 +1899,7 @@ t/data/broken_config/b.conf
 t/data/broken_config2/a.conf
 t/data/check_thruk_rest/kibana.json
 t/data/check_thruk_rest/nested.json
+t/data/editor_config/thruk.conf
 t/data/javascript_tests.js
 t/data/javascript_tests_login_tt.js
 t/data/log4perl.conf

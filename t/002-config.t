@@ -149,6 +149,25 @@ if(!$@) {
     is_deeply($c->config->{'Thruk::Plugin::Panorama'}, $exp, "parsing test user value from thruk_local.d");
 };
 
+
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/editor_config';
+    my $config = Thruk::Config::set_config_env();
+    my $exp = [{ 'files' => { 'action' => 'perl_editor_menu', 'filter' => '\\.pm$', 'folder' => 'etc/thruk/bp/', 'syntax' => 'perl' }, 'name' => 'BP Functions' },
+               { 'files' => { 'filter' => '\\.tbp$', 'folder' => 'etc/thruk/bp/' }, 'name' => 'BP Files' }];
+    is_deeply($config->{'editor'}, $exp, "parsing value from thruk_local.d");
+
+    my $adm = [{ 'files' => { 'action' => 'perl_editor_menu', 'filter' => '\\.pm$', 'folder' => 'etc/thruk/bp/', 'syntax' => 'perl' }, 'name' => 'Admin BP1' },
+               { 'files' => { 'filter' => '\\.tbp$', 'folder' => 'etc/thruk/bp/' }, 'name' => 'Admin BP2' } ];
+    my $c = TestUtils::get_c();
+    local $c->stash->{'remote_user'} = "test";
+    local $c->{'config'} = $config;
+    Thruk::Action::AddDefaults::add_safe_defaults($c);
+
+    is_deeply($c->config->{'editor'}, $adm, "parsing test user value from thruk_local.d");
+};
+
 ####################################################
 
 done_testing();

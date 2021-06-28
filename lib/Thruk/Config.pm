@@ -194,6 +194,10 @@ my $base_defaults = {
     'perf_bar_pnp_popup'                    => 1,
     'status_color_background'               => 0,
     'apache_status'                         => {},
+    'initial_menu_state'                    => {},
+    'action_menu_items'                     => {},
+    'action_menu_actions'                   => {},
+    'action_menu_apply'                     => {},
     'disable_user_password_change'          => 0,
     'user_password_min_length'              => 5,
     'grafana_default_panelId'               => 1,
@@ -1103,12 +1107,7 @@ sub _parse_rows {
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
                     push @{$conf->{$k}}, $next;
                 } else {
-                    # merge top level hashes
-                    if(!$until && ref($conf->{$k}) eq 'HASH' && ref($next) eq 'HASH') {
-                        $conf->{$k} = { %{$conf->{$k}}, %{$next} };
-                    } else {
-                        $conf->{$k} = [$conf->{$k}, $next];
-                    }
+                    $conf->{$k} = [$conf->{$k}, $next];
                 }
                 next;
             }
@@ -1311,11 +1310,17 @@ sub merge_sub_config {
                 }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             } else {
-                if(ref $add->{$key} ne 'HASH') {
-                    require Data::Dumper;
-                    confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                if(ref $add->{$key} eq 'HASH') {
+                    $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
                 }
-                $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
+                elsif(ref $add->{$key} eq 'ARRAY') {
+                    for my $h (values @{$add->{$key}}) {
+                        $config->{$key} = { %{$config->{$key}}, %{$h} };
+                    }
+                } else {
+                    require Data::Dumper;
+                    confess("tried to merge unsupported structure into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                }
             }
         } else {
             $config->{$key} = $add->{$key};
