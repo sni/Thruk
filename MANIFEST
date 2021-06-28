@@ -1938,6 +1938,9 @@ t/data/nested_config/thruk.conf
 t/data/nested_config/thruk_local.conf
 t/data/nested_config/thruk_local.d/a.conf
 t/data/nested_config/thruk_local.d/b.conf
+t/data/nested_hash/thruk.conf
+t/data/nested_hash/thruk_local.d/more.conf
+t/data/nested_hash/thruk_local.d/unnamed.conf
 t/data/number_lists/thruk.conf
 t/data/number_lists/thruk_local.conf
 t/data/remove_duplicates/core.cfg

@@ -684,7 +684,7 @@ sub set_default_config {
             $p = $p->{$name};
             $p->{'id'} = $name;
         } else {
-            $p->{'id'} = "oauth";
+            $p->{'id'} = "oauth" unless $p->{'id'};
         }
     }
 
@@ -1292,6 +1292,24 @@ sub merge_sub_config {
                 # merge all backends
                 for my $peer (@{Thruk::Base::list($add->{$key})}) {
                     $config->{$key}->{'peer'} = [ @{Thruk::Base::list($config->{$key}->{'peer'})}, @{Thruk::Base::list($peer->{'peer'})} ];
+                }
+            }
+            elsif($key eq 'auth_oauth') {
+                # merge all provider
+                $config->{$key}->{'provider'} = Thruk::Base::list($config->{$key}->{'provider'});
+                for my $entry (@{Thruk::Base::list($add->{$key})}) {
+                    next unless $entry->{'provider'};
+                    if(ref $entry->{'provider'}) {
+                        if($entry->{'provider'}->{'client_id'}) {
+                            push @{$config->{$key}->{'provider'}}, $entry->{'provider'};
+                        } else {
+                            for my $k (sort keys %{$entry->{'provider'}}) {
+                                my $p = $entry->{'provider'}->{$k};
+                                $p->{'id'} = $k;
+                                push @{$config->{$key}->{'provider'}}, $p;
+                            }
+                        }
+                    }
                 }
             }
             elsif($key =~ '^Thruk::Plugin::') {
