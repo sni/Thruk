@@ -98,3 +98,4 @@ t/scenarios/pentest_arachni/results/
 ^.ci/
 .github/
 ^continue$
+plugins/plugins-available/editor

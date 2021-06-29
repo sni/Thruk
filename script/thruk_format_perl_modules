@@ -70,6 +70,7 @@ if(scalar @files == 0) {
 } else {
     @files = Thruk::Utils::IO::all_perl_files(@files);
 }
+@files = grep(!/\.git\//, @files);
 
 $ENV{'THRUK_VERBOSE'} = $options->{'verbose'};
 
