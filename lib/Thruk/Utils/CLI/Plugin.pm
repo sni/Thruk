@@ -287,7 +287,7 @@ sub _do_plugin_install {
         my $existing = Thruk::Utils::Plugin::read_plugin_details($plugin_available_dir.'/'.$plugin->{'dir'});
         if(Thruk::Utils::version_compare($existing->{'version'}, $plugin->{'version'})) {
             Thruk::Utils::IO::cmd("rm -rf $tmpdir");
-            return("ERROR: plugin does update existing installed ".$existing->{'dir'}." (".$existing->{'version'}.")"." plugin, use --force to reinstall.\n", 1);
+            return("ERROR: command would overwrite existing installed ".$existing->{'dir'}." (".$existing->{'version'}.")"." plugin, use --force to reinstall or run 'thruk plugin enable' to enable the existing plugin.\n", 1);
         }
     }
 
