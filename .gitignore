@@ -74,3 +74,7 @@ t/scenarios/*/panorama/
 tmp_*
 action_menus/*.js
 plugins/plugins-available/editor
+plugins/plugins-available/omd
+plugins/plugins-available/pansnaps
+plugins/plugins-available/status-dashboard
+plugins/plugins-available/woshsh

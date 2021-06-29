@@ -99,3 +99,7 @@ t/scenarios/pentest_arachni/results/
 .github/
 ^continue$
 plugins/plugins-available/editor
+plugins/plugins-available/omd
+plugins/plugins-available/pansnaps
+plugins/plugins-available/status-dashboard
+plugins/plugins-available/woshsh
