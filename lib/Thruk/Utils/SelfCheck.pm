@@ -389,8 +389,9 @@ verify errors in lmd
 sub _lmd_checks  {
     my($c) = @_;
     return unless $c->config->{'use_lmd_core'};
-
+    my $rc      = 0;
     my $details = "LMD:\n";
+
     if($c->config->{'lmd_core_bin'} && $c->config->{'lmd_core_bin'} ne 'lmd') {
         my($lmd_core_bin) = glob($c->config->{'lmd_core_bin'});
         if(!$lmd_core_bin || ! -x $lmd_core_bin) {
@@ -402,10 +403,10 @@ sub _lmd_checks  {
 
     # try to run
     my $cmd = ($c->config->{'lmd_core_bin'} || 'lmd').' --version 2>&1';
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    my(undef, $output) = Thruk::Utils::IO::cmd($c, $cmd);
     if($output !~ m/\Qlmd - version \E/mx) {
         $details .= sprintf("  - cannot execute lmd: %s\n", $output);
-        return({sub => 'lmd', rc => 2, msg => "LMD WARNING", details => $details });
+        return({sub => 'lmd', rc => 2, msg => "LMD CRITICAL", details => $details });
     }
 
     require Thruk::Utils::LMD;
@@ -413,31 +414,48 @@ sub _lmd_checks  {
     my $pid = $status->[0]->{'pid'};
     if(!$pid) {
         $details .= "  - lmd not running\n";
-        return({sub => 'lmd', rc => 1, msg => "LMD WARNING", details => $details });
+        $rc = 1 unless $rc > 1;
+    } else {
+        my $start_time = $status->[0]->{'start_time'};
+        $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
+
+        my $total = 0;
+        for my $p (@{$c->db->get_peers()}) {
+            next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
+            $total++;
+        }
+        my $stats = $c->db->lmd_stats($c);
+        my $online = 0;
+        for my $stat (@{$stats}) {
+            $online++ if $stat->{'status'} == 0;
+        }
+        $details .= sprintf("  - %i/%i backends online\n", $online, $total);
+        for my $peer ( @{ $c->db->get_peers() } ) {
+            my $key  = $peer->{'key'};
+            my $name = $peer->{'name'};
+            next unless $c->stash->{'failed_backends'}->{$key};
+            $details .= sprintf("    - %s: %s\n", $name, $c->stash->{'failed_backends'}->{$key});
+        }
+        if($online != $total) {
+            $rc = 1 unless $rc > 1;
+        }
     }
 
-    my $start_time = $status->[0]->{'start_time'};
-    $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
-
-    my $total = 0;
-    for my $p (@{$c->db->get_peers()}) {
-        next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
-        $total++;
-    }
-    my $stats = $c->db->lmd_stats($c);
-    my $online = 0;
-    for my $stat (@{$stats}) {
-        $online++ if $stat->{'status'} == 0;
-    }
-    $details .= sprintf("  - %i/%i backends online\n", $online, $total);
-    for my $peer ( @{ $c->db->get_peers() } ) {
-        my $key  = $peer->{'key'};
-        my $name = $peer->{'name'};
-        next unless $c->stash->{'failed_backends'}->{$key};
-        $details .= sprintf("    - %s: %s\n", $name, $c->stash->{'failed_backends'}->{$key});
+    for my $log ($c->config->{'tmp_path'}.'/lmd/lmd.log') {
+        next unless -e $log; # may not exist either
+        # count errors
+        my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'Panic:' $log"));
+        $details .= sprintf("  - %s: ", $log);
+        if(scalar @out == 0) {
+            $details .= "no errors\n";
+        } else {
+            $details .= (scalar @out)." errors found\n";
+            $rc = 1 unless $rc > 1;
+        }
     }
 
-    return({sub => 'lmd', rc => 0, msg => "LMD OK", details => $details });
+    my $msg = sprintf('LMD %s', $rc_codes->{$rc});
+    return({sub => 'lmd', rc => $rc, msg => $msg, details => $details});
 }
 
 ##############################################
