@@ -3,6 +3,7 @@ package Thruk::Backend::Pool;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cwd ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Backend::Peer ();
@@ -62,6 +63,7 @@ sub new {
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
         ## no critic
+        $ENV{'OLDPWD'} = Cwd::getcwd();
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
         ## use critic
         chdir($ENV{'HOME'});
@@ -293,7 +295,6 @@ sub do_on_peer {
                 my $inc;
                 my $code = $arg->[$x+1];
                 if(ref($code) eq 'HASH') {
-                    require Cwd;
                     for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : Cwd::getcwd().'/plugins/plugins-available/')) {
                         if(-e $path.'/'.$code->{'inc'}) {
                             $inc  = $path.'/'.$code->{'inc'};
