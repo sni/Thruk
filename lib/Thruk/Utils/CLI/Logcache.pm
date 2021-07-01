@@ -372,9 +372,9 @@ Run delta update with logfiles retrieved by livestatus
 
 Run update from given files.
 
-  %> thruk logcache import /var/log/naemon/archive/2017-07-*.log
+  %> thruk logcache update /var/log/naemon/archive/2017-07-*.log
 
-Run import from archive.
+Run initial import from archive.
 
   %> thruk logcache import /var/log/naemon/archive/ /var/log/naemon/naemon.log
 
