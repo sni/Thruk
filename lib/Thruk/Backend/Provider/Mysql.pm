@@ -2165,7 +2165,10 @@ sub _import_logcache_from_file {
             $expanded = [glob($p)];
         }
         for my $f (@{$expanded}) {
-            next unless -f $f;
+            if(!-f $f) {
+                _debug("skipping $f: $!");
+                next;
+            }
             _infos($f);
             my $duplicate_lookup  = {};
             my $last_duplicate_ts = 0;
