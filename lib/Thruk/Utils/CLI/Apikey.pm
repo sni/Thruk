@@ -93,13 +93,13 @@ sub cmd {
         elsif(!$data) {
             push @{$res}, { 'name' => 'info',  'value' => "unable to read key: unknown reason" };
         } else {
-            push @{$res}, { 'name' => 'super user',     'value' => $data->{'superuser'} ? 'yes' : 'no' };
-            push @{$res}, { 'name' => 'user',           'value' => $data->{'user'} // 'any user' };
-            push @{$res}, { 'name' => 'roles',          'value' => $data->{'roles'}     ? join(", ", @{$data->{'roles'}}) : '' };
-            push @{$res}, { 'name' => 'create date',    'value' => $data->{'created'}   ? scalar localtime($data->{'created'}) : 'unknown' };
-            push @{$res}, { 'name' => 'last used date', 'value' => $data->{'last_used'} ? scalar localtime($data->{'last_used'}) : 'never' };
-            push @{$res}, { 'name' => 'last used from', 'value' => $data->{'last_from'} ? $data->{'last_from'} : '' };
-            push @{$res}, { 'name' => 'comment',        'value' => $data->{'comment'} };
+            push @{$res}, { 'name' => 'super user',       'value' => $data->{'superuser'} ? 'yes' : 'no' };
+            push @{$res}, { 'name' => 'user',             'value' => $data->{'user'} // 'any user' };
+            push @{$res}, { 'name' => 'role restriction', 'value' => $data->{'roles'}     ? join(", ", @{$data->{'roles'}}) : 'no restrictions' };
+            push @{$res}, { 'name' => 'create date',      'value' => $data->{'created'}   ? scalar localtime($data->{'created'}) : 'unknown' };
+            push @{$res}, { 'name' => 'last used date',   'value' => $data->{'last_used'} ? scalar localtime($data->{'last_used'}) : 'never' };
+            push @{$res}, { 'name' => 'last used from',   'value' => $data->{'last_from'} ? $data->{'last_from'} : '' };
+            push @{$res}, { 'name' => 'comment',          'value' => $data->{'comment'} };
         }
         $output = Thruk::Utils::text_table(
             noheader => 1,
