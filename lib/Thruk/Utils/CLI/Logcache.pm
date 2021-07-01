@@ -151,6 +151,11 @@ sub cmd {
 
     my($backends) = $c->db->select_backends('get_logs');
 
+    if(scalar @{$backends} > 1 && scalar @{$opt->{'files'}} > 0) {
+        _error("you must specify a backend (-b) when importing files.");
+        return("", 1);
+    }
+
     if($mode eq 'import' && !$global_options->{'yes'}) {
         # check if tables already existing
         my $exist = 0;
