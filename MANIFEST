@@ -117,6 +117,7 @@ lib/Thruk/Utils/Bash.pm
 lib/Thruk/Utils/Broadcast.pm
 lib/Thruk/Utils/Cache.pm
 lib/Thruk/Utils/CLI.pm
+lib/Thruk/Utils/CLI/Apikey.pm
 lib/Thruk/Utils/CLI/Backend.pm
 lib/Thruk/Utils/CLI/Cache.pm
 lib/Thruk/Utils/CLI/Cluster.pm

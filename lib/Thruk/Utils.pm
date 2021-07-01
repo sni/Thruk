@@ -3477,7 +3477,7 @@ sub dclone {
 
 =head2 text_table
 
-    text_table( keys => [keys], data => <list of hashes> )
+    text_table( keys => [keys], data => <list of hashes>, [noheader => 1] )
 
     a key can be:
 
@@ -3574,8 +3574,11 @@ sub text_table {
     }
     $rowformat .= "|\n";
     $separator .= "+\n";
-    my $output = $separator;
-    $output .= sprintf($rowformat, @{$colnames});
+    my $output = "";
+    if(!$opt{'noheader'}) {
+        $output .= $separator;
+        $output .= sprintf($rowformat, @{$colnames});
+    }
     $output .= $separator;
     for my $rownum (0 .. scalar @{$data} - 1) {
         my @values;

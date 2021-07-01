@@ -1313,6 +1313,46 @@ sub _authorize_command {
 
 ##############################################
 
+=head2 read_stdin_password
+
+    read_stdin_password()
+
+read password from stdin
+
+=cut
+sub read_stdin_password {
+    my($msg) = @_;
+    ## no critic
+    if(!-t 0) {
+        return;
+    }
+    ## use critic
+    my $has_readkey = 0;
+    eval {
+        require Term::ReadKey;
+        Term::ReadKey->import();
+        $has_readkey = 1;
+    };
+    _debug("has readkey support: ".$has_readkey);
+
+    my $key;
+    print $msg;
+    if($has_readkey) {
+        ReadMode('noecho');
+        my $key = ReadLine(0);
+        ReadMode(0);
+        chomp ($key);
+        return($key);
+    }
+
+    # no readkey support, will echo the password
+    $key =  <>;
+    chomp ($key);
+    return($key);
+}
+
+##############################################
+
 =head1 EXAMPLES
 
 there are some cli scripting examples in the examples subfolder of the source
