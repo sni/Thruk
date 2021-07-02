@@ -2240,6 +2240,11 @@ sub _import_logcache_from_file {
         _info("it is recommended to run logcacheoptimize after importing logfiles.");
     }
 
+    # restore old working dir
+    if($ENV{'OLDPWD'}) {
+        chdir($ENV{'HOME'});
+    }
+
     return $log_count;
 }
 
