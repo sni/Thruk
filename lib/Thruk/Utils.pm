@@ -2673,34 +2673,27 @@ sub precompile_templates {
     # no backends required
     $c->db->disable_backends() if $c->db();
 
-    my $stderr_output;
-    # First, save away STDERR
-    open my $savestderr, ">&STDERR";
-    eval {
-        # breaks on fastcgi server with strange error
-        close STDERR;
-        open(STDERR, ">", \$stderr_output);
-    };
-    _error($@) if $@;
-
     my $num = 0;
-    for my $file (keys %{$uniq}) {
-        next if $file eq 'error.tt';
-        next if $file =~ m|^cmd/cmd_typ_|mx;
-        eval {
-            $c->view("TT")->render($c, $file);
-        };
-        $num++;
-    }
-    # Now close and restore STDERR to original condition.
-    eval {
-        # breaks on fastcgi server with strange error
-        close STDERR;
+    my $stderr_output;
+    do {
         ## no critic
-        open STDERR, ">&".$savestderr;
+        local *STDERR;
         ## use critic
+        eval {
+            open(STDERR, ">>", \$stderr_output);
+        };
+        _error($@) if $@;
+
+        for my $file (keys %{$uniq}) {
+            next if $file eq 'error.tt';
+            next if $file =~ m|^cmd/cmd_typ_|mx;
+            eval {
+                $c->view("TT")->render($c, $file);
+            };
+            $num++;
+        }
     };
-    _error($@) if $@;
+    _debug($stderr_output) if $stderr_output;
 
     $c->config->{'precompile_templates'} = 2;
     my $elapsed = tv_interval ( $t0 );
