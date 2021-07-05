@@ -37,6 +37,12 @@ TestUtils::test_page(
     'skip_doctype' => 1,
 );
 
+# make sure we have a secret key
+if(!-s $config->{'var_path'}.'/secret.key') {
+    require Thruk;
+    local $ENV{'THRUK_MODE'} = 'CLI';
+    Thruk::_create_secret_file();
+}
 TestUtils::test_page(
     'url'          => '/thruk/cgi-bin/remote.cgi',
     'post'         => { data => '{"options":{"action": "raw", "sub":"get_processinfo"},"credential":"'.Thruk::Config::secret_key().'"}' },
