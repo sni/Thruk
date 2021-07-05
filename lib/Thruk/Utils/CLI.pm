@@ -566,7 +566,7 @@ sub _run_commands {
     }
 
     # first unknown option is the command
-    if(scalar @actions == 0 and scalar @{$opt->{'commandoptions'}} > 0) {
+    if(scalar @actions == 0 && defined $opt->{'commandoptions'} && scalar @{$opt->{'commandoptions'}} > 0) {
         my $newcommandoptions = [];
         for my $action (@{$opt->{'commandoptions'}}) {
             if(scalar @actions == 0 && $action !~ m/^\-/gmx) {
