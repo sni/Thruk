@@ -76,6 +76,14 @@
   - name: wait for ssh config to become available
     wait_for:
       path: /mnt/etc/.ssh
+  - name: "wait for http://omd/demo/ to come up"
+    uri:
+      url: "http://omd/demo/thruk/cgi-bin/remote.cgi"
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1
   - name: "thruk bp commit"
     shell: sudo su - demo -c "test -s /mnt/var/thruk_bp_generated.cfg || thruk bp commit"
   - shell: sudo su - demo -c "thruk cron install"
