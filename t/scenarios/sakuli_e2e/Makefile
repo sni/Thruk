@@ -4,6 +4,7 @@ wait_start:
 	-mkdir -p _run
 	-chmod 777 _run
 	for x in $$(seq $(STARTUPWAIT)); do \
+	   if [ $$(docker-compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	   curl http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi >/dev/null 2>&1; \
 	   if [ $$? -eq 0 ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
