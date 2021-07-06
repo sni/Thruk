@@ -38,10 +38,9 @@ TestUtils::test_page(
 );
 
 # make sure we have a secret key
-my $config = Thruk::Config::get_config();
-if(!-s $config->{'var_path'}.'/secret.key') {
+if(!Thruk::Config::secret_key()) {
     require Thruk;
-    local $ENV{'THRUK_MODE'} = 'CLI';
+    local $ENV{'THRUK_MODE'} = 'FASTCGI';
     Thruk::_create_secret_file();
 }
 TestUtils::test_page(
