@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Test::More tests => 36;
+use Test::More tests => 37;
 
 BEGIN {
     use lib('t');
@@ -38,6 +38,7 @@ TestUtils::test_page(
 );
 
 # make sure we have a secret key
+my $config = Thruk::Config::get_config();
 if(!-s $config->{'var_path'}.'/secret.key') {
     require Thruk;
     local $ENV{'THRUK_MODE'} = 'CLI';
