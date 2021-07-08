@@ -1,6 +1,7 @@
 use warnings;
 use strict;
 use Test::More;
+use utf8;
 
 BEGIN {
     use lib('t');
@@ -35,7 +36,7 @@ TestUtils::test_page(
 ###############################################################################
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/tac.cgi',
-    'like'    => ['Logged in as <i>client1</i>'],
+    'like'    => ['Logged in as <i>clientö</i>'],
 );
 
 ###############################################################################

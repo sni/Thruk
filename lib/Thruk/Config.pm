@@ -5,6 +5,7 @@ use strict;
 use Carp qw/confess/;
 use Cwd ();
 use POSIX ();
+use Storable ();
 
 use Thruk::Base ();
 use Thruk::Utils::IO ();
@@ -26,7 +27,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.42.2';
+our $VERSION = '2.44.3';
 
 our $config;
 my $project_root = home() || confess('could not determine project_root from inc.');
@@ -34,7 +35,7 @@ my $project_root = home() || confess('could not determine project_root from inc.
 my $base_defaults = {
     'name'                                  => 'Thruk',
     'fileversion'                           => $VERSION,
-    'released'                              => 'April 26, 2021',
+    'released'                              => 'June 10, 2021',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
@@ -180,6 +181,7 @@ my $base_defaults = {
     'cookie_auth_session_timeout'           => 86400,
     'cookie_auth_session_cache_timeout'     => 5,
     'cookie_auth_domain'                    => '',
+    'locked_message'                        => 'account is locked, please contact an administrator',
     'perf_bar_mode'                         => 'match',
     'sitepanel'                             => 'auto',
     'ssl_verify_hostnames'                  => 1,
@@ -192,6 +194,10 @@ my $base_defaults = {
     'perf_bar_pnp_popup'                    => 1,
     'status_color_background'               => 0,
     'apache_status'                         => {},
+    'initial_menu_state'                    => {},
+    'action_menu_items'                     => {},
+    'action_menu_actions'                   => {},
+    'action_menu_apply'                     => {},
     'disable_user_password_change'          => 0,
     'user_password_min_length'              => 5,
     'grafana_default_panelId'               => 1,
@@ -404,11 +410,8 @@ return basic config hash and sets environment
 sub set_config_env {
     my @files = @_;
 
-    my $base_config = get_base_config();
-    my $configs     = _load_config_files(\@files);
-
-    require Storable;
-    my $conf    = Storable::dclone($base_config);
+    my $conf    = Storable::dclone(get_base_config());
+    my $configs = _load_config_files(\@files);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
@@ -467,7 +470,7 @@ sub set_default_config {
 
     # ensure comma separated lists
     for my $key (qw/csrf_allowed_hosts show_custom_vars expose_custom_vars/) {
-        $config->{$key} = _comma_separated_list($config->{$key});
+        $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
     }
 
     ###################################################
@@ -505,7 +508,7 @@ sub set_default_config {
     ## use critic
 
     if(Thruk::Base->mode eq 'CLI_SETUID') {
-        if(defined $uid and $> == 0) {
+        if(defined $uid && $> == 0) {
             switch_user($uid, $groups);
             _fatal("re-exec with uid $uid did not work");
         }
@@ -536,7 +539,7 @@ sub set_default_config {
     $config->{'cookie_path'} =~ s|/*$||mx; # remove trailing slash, chrome doesn't seem to like them
     $config->{'cookie_path'} = $config->{'cookie_path'}.'/'; # seems like the above comment is not valid anymore and chrome now requires the trailing slash
 
-    if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
+    if(defined $ENV{'OMD_ROOT'} && -s $ENV{'OMD_ROOT'}."/version") {
         my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
         $omdlink    =~ s/.*?\///gmx;
         $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
@@ -681,7 +684,7 @@ sub set_default_config {
             $p = $p->{$name};
             $p->{'id'} = $name;
         } else {
-            $p->{'id'} = "oauth";
+            $p->{'id'} = "oauth" unless $p->{'id'};
         }
     }
 
@@ -1009,7 +1012,7 @@ sub get_user {
         if($name) {
             @groups = ( $gid );
             while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-                $users =~ /\b$name\b/mx and push @groups, $gid;
+                $users =~ /\b$name\b/mx && push @groups, $gid;
             }
         }
     }
@@ -1018,14 +1021,6 @@ sub get_user {
         push @groups, $stat[5];
     }
     return($uid, \@groups);
-}
-
-########################################
-# splits lists of comma separated values into list
-sub _comma_separated_list {
-    my($val) = @_;
-    $val = [split(/\s*,\s*/mx, join(",", @{Thruk::Base::list($val)}))];
-    return(Thruk::Base::array_uniq($val));
 }
 
 ########################################
@@ -1110,12 +1105,7 @@ sub _parse_rows {
                 } elsif(ref $conf->{$k} eq 'ARRAY') {
                     push @{$conf->{$k}}, $next;
                 } else {
-                    # merge top level hashes
-                    if(!$until && ref($conf->{$k}) eq 'HASH' && ref($next) eq 'HASH') {
-                        $conf->{$k} = { %{$conf->{$k}}, %{$next} };
-                    } else {
-                        $conf->{$k} = [$conf->{$k}, $next];
-                    }
+                    $conf->{$k} = [$conf->{$k}, $next];
                 }
                 next;
             }
@@ -1297,11 +1287,29 @@ sub merge_sub_config {
         if($key =~ '^Thruk::Plugin::' && !defined $config->{$key}) {
             $config->{$key} = {};
         }
-        if(defined $config->{$key} and ref $config->{$key} eq 'HASH') {
+        if(defined $config->{$key} && ref $config->{$key} eq 'HASH') {
             if($key eq 'Thruk::Backend') {
                 # merge all backends
                 for my $peer (@{Thruk::Base::list($add->{$key})}) {
                     $config->{$key}->{'peer'} = [ @{Thruk::Base::list($config->{$key}->{'peer'})}, @{Thruk::Base::list($peer->{'peer'})} ];
+                }
+            }
+            elsif($key eq 'auth_oauth') {
+                # merge all provider
+                $config->{$key}->{'provider'} = Thruk::Base::list($config->{$key}->{'provider'});
+                for my $entry (@{Thruk::Base::list($add->{$key})}) {
+                    next unless $entry->{'provider'};
+                    if(ref $entry->{'provider'}) {
+                        if($entry->{'provider'}->{'client_id'}) {
+                            push @{$config->{$key}->{'provider'}}, $entry->{'provider'};
+                        } else {
+                            for my $k (sort keys %{$entry->{'provider'}}) {
+                                my $p = $entry->{'provider'}->{$k};
+                                $p->{'id'} = $k;
+                                push @{$config->{$key}->{'provider'}}, $p;
+                            }
+                        }
+                    }
                 }
             }
             elsif($key =~ '^Thruk::Plugin::') {
@@ -1318,11 +1326,17 @@ sub merge_sub_config {
                 }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             } else {
-                if(ref $add->{$key} ne 'HASH') {
-                    require Data::Dumper;
-                    confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                if(ref $add->{$key} eq 'HASH') {
+                    $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
                 }
-                $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
+                elsif(ref $add->{$key} eq 'ARRAY') {
+                    for my $h (values @{$add->{$key}}) {
+                        $config->{$key} = { %{$config->{$key}}, %{$h} };
+                    }
+                } else {
+                    require Data::Dumper;
+                    confess("tried to merge unsupported structure into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
+                }
             }
         } else {
             $config->{$key} = $add->{$key};
@@ -1406,7 +1420,17 @@ return system hostname
 
 sub hostname {
     our $hostname;
-    (undef, $hostname) = _cmd("hostname") unless $hostname;
+
+    # use hostname from env if available
+    if(!$hostname) {
+        $hostname = $ENV{'HOSTNAME'} if $ENV{'HOSTNAME'};
+    }
+
+    # still no hostname yet, try hostname command
+    if(!$hostname) {
+        (undef, $hostname) = _cmd("hostname") unless $hostname;
+    }
+
     return($hostname);
 }
 

@@ -274,6 +274,7 @@ sub array2hash {
 
     return \%hash;
 }
+
 ########################################
 
 =head2 hash_invert
@@ -283,7 +284,6 @@ sub array2hash {
 return hash with keys and values inverted
 
 =cut
-
 sub hash_invert {
     my($hash) = @_;
 
@@ -296,6 +296,20 @@ sub hash_invert {
     return \%invert;
 }
 
+########################################
+
+=head2 comma_separated_list
+
+  comma_separated_list($string)
+
+splits lists of comma separated values into list
+
+=cut
+sub comma_separated_list {
+    my($val) = @_;
+    $val = [split(/\s*,\s*/mx, join(",", @{&list($val)}))];
+    return(&array_uniq($val));
+}
 
 ########################################
 
@@ -380,6 +394,7 @@ sub clean_credentials_from_string {
 
     for my $key (qw/password credential credentials CSRFtoken/) {
         $str    =~ s%("|')($key)("|'):"[^"]+"(,?)%$1$2$3:"..."$4%gmx; # remove from json encoded data
+        $str    =~ s%\\("|')($key)\\("|'):\\"[^"]+"(,?)%\\$1$2\\$3:\\"..."$4%gmx; # remove from json encoded data printed by data::dumper
         $str    =~ s%("|')($key)("|'):'[^"]+'(,?)%$1$2$3:'...'$4%gmx; # same, but with single quotes
         $str    =~ s|(%22)($key)(%22%3A%22).*?(%22)|$1$2$3...$4|gmx;  # remove from url encoded data
 

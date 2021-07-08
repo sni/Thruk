@@ -1,4 +1,6 @@
 /* Thruk3.css */
+@import '../../Thruk2/stylesheets/thruk_global.css';
+@import '../../Thruk2/stylesheets/Thruk2.css';
 @import '@fortawesome/fontawesome-free/css/all.css';
 
 @tailwind base;

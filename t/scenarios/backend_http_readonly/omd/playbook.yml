@@ -14,3 +14,12 @@
       dest: /omd/sites/demo/etc/thruk/thruk_local.conf
       mode: 0644
       owner: demo
+  - name: "wait for backend to come up"
+    uri:
+      url: "http://backend1/demo/thruk/cgi-bin/remote.cgi"
+      validate_certs: False
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1

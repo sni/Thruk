@@ -17,9 +17,9 @@
 
 <form action="extinfo.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
-<input type="hidden" name="recurring" value="save">
 <input type="hidden" name="nr" value="[% rd.file | html %]">
 <input type="hidden" name="type" value="6">
+<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 <table border="1" class='data recurring_downtimes'>
   <tr>
     <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
@@ -142,8 +142,9 @@
   </tr>
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      [% IF rd.file %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;nr=[% rd.file | uri %]" class="remove_button button" style="width: 80px; height: 16px;">Delete</a>[% END %]
-      <button class="save_button button" style="width: 160px;"[% IF !can_edit %] disabled[% END %]>Save</button>
+      [% IF rd.file %]
+      <button name="recurring" value="remove" class="remove_button button" style="width: 90px;">Delete</button>[% END %]
+      <button name="recurring" value="save" class="save_button button" style="width: 180px;"[% IF !can_edit %] disabled[% END %]>Save</button>
     </td>
   </tr>
 </table>

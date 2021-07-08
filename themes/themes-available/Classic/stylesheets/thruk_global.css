@@ -31,6 +31,11 @@ body {
   margin-left: 5px;
 }
 
+BODY.iframed {
+  margin: 0;
+  margin-left: 0;
+}
+
 a img {
     border: none;
 }
@@ -1431,7 +1436,7 @@ TABLE.broadcast_panel_container span.preview {
   opacity: 0.7;
 }
 
-INPUT.thruk_btn {
+BUTTON.thruk_btn {
   border: none;
   background-color: transparent;
   background-repeat: no-repeat;
@@ -1440,13 +1445,13 @@ INPUT.thruk_btn {
   line-height: 1px;
 }
 
-BUTTON.thruk_btn {
+INPUT.thruk_btn, BUTTON.thruk_btn_img_only {
   border: none;
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
-  line-height: 1px;
+  vertical-align: text-bottom;
 }
 
 BUTTON.filter_button {
@@ -1484,6 +1489,9 @@ BUTTON.add_bookmark {
 }
 .wand_button {
   background-image: url('../images/wand.png');
+}
+.delete_button {
+  background-image: url('../images/delete.png');
 }
 
 BUTTON.small, INPUT.small {
@@ -1556,6 +1564,9 @@ input[type=text], input[type=password] {
 }
 
 .thruk_dev_panel TABLE TH {
+  text-align: left;
+}
+.thruk_dev_panel TABLE TD {
   text-align: left;
 }
 

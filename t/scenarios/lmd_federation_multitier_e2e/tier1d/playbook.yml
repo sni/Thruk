@@ -24,3 +24,12 @@
       mode: 0600
       owner: demo
       group: demo
+  - name: "wait for tier2d to come up"
+    uri:
+      url: "https://tier2d.test.local/demo/thruk/cgi-bin/remote.cgi"
+      validate_certs: False
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1

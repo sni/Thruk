@@ -106,6 +106,7 @@ $ENV{'THRUK_VERBOSE'}    = $ENV{'THRUK_VERBOSE'} // $options->{'verbose'} // 0;
 $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
 $ENV{'THRUK_VERBOSE'}    = 0 if$ENV{'THRUK_QUIET'};
 $ENV{'THRUK_MODE'}       = 'CLI_SETUID';
+$ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} = 999 if $ENV{'THRUK_VERBOSE'} >= 4;
 
 # no need to load extra modules for bash completion
 my $action = $options->{'action'} || $options->{'commandoptions'}->[0] || '';

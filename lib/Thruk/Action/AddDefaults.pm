@@ -21,7 +21,6 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Scalar::Util qw/weaken/;
-use URI::Escape qw/uri_escape/;
 
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
@@ -103,9 +102,9 @@ sub begin {
     if( $c->req->parameters->{'theme'} ) {
         $param_theme = $c->req->parameters->{'theme'};
     }
-    elsif( defined $c->cookie('thruk_theme') ) {
-        my $theme_cookie = $c->cookie('thruk_theme');
-        $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
+    elsif($c->cookies('thruk_theme') ) {
+        my $theme_cookie = $c->cookies('thruk_theme');
+        $cookie_theme = $theme_cookie if defined $theme_cookie and grep $theme_cookie, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
     my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
@@ -134,8 +133,9 @@ sub begin {
         $key =~ s/\ /_/gmx;
         $menu_states->{$key} = $val;
     }
-    if($c->cookie('thruk_side') ) {
-        for my $state (@{$c->cookies('thruk_side')->{'value'}}) {
+    if($c->cookies('thruk_side') ) {
+        my @states = $c->cookies('thruk_side');
+        for my $state (@states) {
             my($k,$v) = split(/=/mx,$state,2);
             $k = lc($k // '');
             $k =~ s/\ /_/gmx;
@@ -193,34 +193,25 @@ sub begin {
         }
     }
 
-    # when adding nav=1 to a url in frame mode, redirect to frame.html with this url
-    if( defined $c->req->parameters->{'nav'}
-            and $c->req->parameters->{'nav'} eq '1'
-            and $c->config->{'use_frames'} == 1 ) {
-        my $path = $c->req->uri->path_query;
-        $path =~ s/nav=1//gmx;
-        return $c->redirect_to($c->stash->{'url_prefix'}."frame.html?link=".uri_escape($path));
-    }
-
     # sound cookie set?
-    if(defined $c->cookie('thruk_sounds')) {
-        my $sound_cookie = $c->cookie('thruk_sounds');
-        if(defined $sound_cookie->value and $sound_cookie->value eq 'off') {
+    if(defined $c->cookies('thruk_sounds')) {
+        my $sound_cookie = $c->cookies('thruk_sounds');
+        if($sound_cookie && $sound_cookie eq 'off') {
             $c->stash->{'play_sounds'} = 0;
         }
-        if(defined $sound_cookie->value and $sound_cookie->value eq 'on') {
+        if($sound_cookie && $sound_cookie eq 'on') {
             $c->stash->{'play_sounds'} = 1;
         }
     }
 
     # favicon cookie set?
     $c->stash->{'fav_counter'} = 0;
-    if(defined $c->cookie('thruk_favicon')) {
-        my $favicon_cookie = $c->cookie('thruk_favicon');
-        if(defined $favicon_cookie->value and $favicon_cookie->value eq 'off') {
+    if(defined $c->cookies('thruk_favicon')) {
+        my $favicon_cookie = $c->cookies('thruk_favicon');
+        if($favicon_cookie && $favicon_cookie eq 'off') {
             $c->stash->{'fav_counter'} = 0;
         }
-        if(defined $favicon_cookie->value and $favicon_cookie->value eq 'on') {
+        if($favicon_cookie && $favicon_cookie eq 'on') {
             $c->stash->{'fav_counter'} = 1;
         }
     }
@@ -445,7 +436,7 @@ sub add_defaults {
     my $timezone;
     if($user_tz ne 'Server Setting') {
         if($user_tz eq 'Local Browser') {
-            $timezone = $c->req->cookies->{'thruk_tz'};
+            $timezone = $c->cookies('thruk_tz');
         } else {
             $timezone = $user_tz;
         }
@@ -514,7 +505,7 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
-    my($disabled_backends,$has_groups) = set_enabled_backends($c);
+    my $disabled_backends = set_enabled_backends($c);
 
     ###############################
     # add program status
@@ -553,11 +544,6 @@ sub add_defaults {
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
 
-        ###############################
-        # disable backends by groups
-        if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->db()) {
-            $disabled_backends = _disable_backends_by_group($c, $disabled_backends);
-        }
         set_possible_backends($c, $disabled_backends);
         $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
@@ -608,7 +594,7 @@ sub add_defaults {
                                        or $c->stash->{'enable_shinken_features'};
 
     $c->stash->{'navigation'} = "";
-    if( $c->config->{'use_frames'} == 0 ) {
+    if( $c->stash->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
@@ -850,6 +836,7 @@ sub update_site_panel_hashes {
         if(!$sites->{'sub'} || !$sites->{'sub'}->{'Default'}) {
             $sites->{'sub'}->{'Default'} = { peers => delete $sites->{'peers'} || [] };
         }
+        delete $sites->{'sub'}->{'Default'} if scalar @{$sites->{'sub'}->{'Default'}->{'peers'}} == 0;
     }
 
     return;
@@ -903,36 +890,6 @@ sub _calculate_section_totals {
         }
     }
     return;
-}
-
-########################################
-sub _disable_backends_by_group {
-    my ($c,$disabled_backends) = @_;
-
-    my $contactgroups = Thruk::Base::array2hash($c->user->{'groups'});
-    for my $peer (@{$c->db->get_peers()}) {
-        if(defined $peer->{'groups'}) {
-            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
-                if(defined $contactgroups->{$group}) {
-                    _debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
-                    # delete old completly hidden state
-                    delete $disabled_backends->{$peer->{'key'}};
-                    # but disabled by cookie?
-                    if(defined $c->cookie('thruk_backends')) {
-                        for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
-                            my($key, $value) = split/=/mx, $val;
-                            if(defined $value and $key eq $peer->{'key'}) {
-                                $disabled_backends->{$key} = $value;
-                            }
-                        }
-                    }
-                    last;
-                }
-            }
-        }
-    }
-
-    return $disabled_backends;
 }
 
 ########################################
@@ -1175,9 +1132,10 @@ sub set_enabled_backends {
 
     ###############################
     # by cookie
-    elsif($num_backends > 1 and defined $c->cookie('thruk_backends')) {
+    elsif($num_backends > 1 && defined $c->cookies('thruk_backends')) {
         _debug('set_enabled_backends() by cookie') if Thruk::Base->debug;
-        for my $val (@{$c->cookies('thruk_backends')->{'value'}}) {
+        my @cookie_backends = $c->cookies('thruk_backends');
+        for my $val (@cookie_backends) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
             $disabled_backends->{$key} = $value;
@@ -1194,24 +1152,30 @@ sub set_enabled_backends {
 
     ###############################
     # groups affected?
-    my $has_groups = 0;
     if(defined $c->db()) {
         for my $peer (@{$c->db->get_peers()}) {
             if(defined $peer->{'groups'}) {
-                $has_groups = 1;
-                $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
+                my $access = 0;
+                for my $grp (Thruk::Base::comma_separated_list($peer->{'groups'})) {
+                    if($c->user->has_group($grp)) {
+                        $access = 1;
+                        last;
+                    }
+                }
+                if(!$access) {
+                    $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
+                }
             }
         }
         $c->db->disable_backends($disabled_backends);
     }
-    _debug("backend groups filter enabled") if $has_groups;
 
     # when set by args, update
     if(defined $backends) {
         set_possible_backends($c, $disabled_backends);
     }
     _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk::Base->debug;
-    return($disabled_backends, $has_groups);
+    return($disabled_backends);
 }
 
 ########################################

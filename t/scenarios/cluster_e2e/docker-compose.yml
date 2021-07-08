@@ -18,6 +18,7 @@ services:
     volumes:
         - ../../../:/thruk:ro
         - shared_var:/mnt/var
+        - shared_etc:/mnt/etc
   thruk:
     build: thruk/
     scale: 3

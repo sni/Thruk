@@ -91,14 +91,20 @@ sub index {
             Thruk::Utils::Reports::apply_report_parameters($c, $c->req->parameters, $params->{'params' });
         }
         eval {
-            eval {
-                require Thruk::Utils::Reports::CustomRender;
-            };
+            require Thruk::Utils::Reports::CustomRender;
+        };
+        _debug($@) if $@;
+        eval {
             @res = &{\&{$sub}}($c);
         };
+        my $err = $@;
+        # detached from $c-> detach_error
+        if($c->{'detached'} && $c->stash->{'error_data'} && $c->stash->{'error_data'}->{'msg'}) {
+            $err = $c->stash->{'error_data'}->{'msg'};
+        }
         my $json;
-        if($@ or scalar @res == 0) {
-            $json        = { 'hosts' => 0, 'services' => 0, 'error' => $@ };
+        if($err or scalar @res == 0) {
+            $json        = { 'hosts' => 0, 'services' => 0, 'error' => $err };
         } else {
             my $total    = $res[0] + $res[1];
             my $too_many = $total > $c->config->{'report_max_objects'} ? 1 : 0;

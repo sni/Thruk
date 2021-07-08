@@ -12,6 +12,7 @@ API keys for Thruk
 
 use warnings;
 use strict;
+use Carp qw/confess/;
 use File::Copy qw/move/;
 
 use Thruk::Utils ();
@@ -76,14 +77,14 @@ sub get_superuser_keys {
 
 ##############################################
 
-=head2 get_key_by_private_key
+=head2 get_keyinfo_by_private_key
 
-    get_key_by_private_key($config, $privatekey)
+    get_keyinfo_by_private_key($config, $privatekey)
 
 returns key for given private key
 
 =cut
-sub get_key_by_private_key {
+sub get_keyinfo_by_private_key {
     my($config, $privatekey) = @_;
     my $nr;
     if($privatekey =~ $private_key_regex) {
@@ -103,6 +104,24 @@ sub get_key_by_private_key {
         }
     }
     my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($privatekey, $nr);
+    return($hashed_key, $digest_nr, $digest_name);
+}
+
+##############################################
+
+=head2 get_key_by_private_key
+
+    get_key_by_private_key($config, $privatekey)
+
+returns key for given private key
+
+=cut
+sub get_key_by_private_key {
+    my($config, $privatekey) = @_;
+
+    my($hashed_key, $digest_nr, $digest_name) = get_keyinfo_by_private_key($config, $privatekey);
+    return unless $hashed_key;
+
     my $folder = $config->{'var_path'}.'/api_keys';
     my $file   = $folder.'/'.$hashed_key.'.'.$digest_name;
     return(read_key($config, $file));
@@ -234,6 +253,7 @@ return key for given file
 =cut
 sub read_key {
     my($config, $file) = @_;
+    confess("no file") unless $file;
     return unless -r $file;
     my $data       = Thruk::Utils::IO::json_lock_retrieve($file);
     my $hashed_key = Thruk::Base::basename($file);

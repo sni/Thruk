@@ -8,42 +8,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_css.tt use_frames=1 %]
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_js_files.tt %]
-    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
   <body class='[% page %] loginpage' id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
-  <!-- Produced by Thruk (http://www.thruk.org).
-       Copyright (c) 2009-present Thruk Developer Team.
-       Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
-       Copyright (c) 1999-2009 Ethan Galstad.
-  -->
   [% PROCESS _header_broadcast.tt %]
   [% PROCESS _message.tt %]
 
   <div class="loginmask">
     <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
-    <form method="POST" action="login.cgi" onsubmit="onLogin(); return true;">
+    <form method="POST" action="login.cgi">
       <input type="hidden" name="referer" value="" id="referer">
       [% IF c.config.basic_auth_enabled %]
         <div>
-          <input type="text" name="user" placeholder="User" required />
+          <input type="text" name="login" placeholder="User" id="loginuser"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] />
         </div>
         <div>
-          <input type="password" name="password" placeholder="Password" required />
+          <input type="password" name="password" placeholder="Password"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] />
         </div>
         <button type="submit">Sign in</button>
       [% END %]
       [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
         [% FOREACH auth = c.config.auth_oauth.provider %]
           [% IF c.config.basic_auth_enabled || !loop.first %]
-          <div>
-            or
-          </div>
+          <div class="separator">or</div>
           [% END %]
         <div>
-          <button name="oauth" value="[% loop.index %]" class="loginbutton">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
+          <button name="oauth" value="[% loop.index %]">[% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]</button>
         </div>
         [% END %]
       [% END %]
@@ -59,25 +54,17 @@
         ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         if(keepflag == undefined || keepflag == false) {
-            ref = ref.replace(/^\?(expired|invalid|problem|nocookie|locked)\&/, '?');
-            ref = ref.replace(/^\?(expired|invalid|problem|nocookie|locked)$/,  '');
+            ref = ref.replace(/^\?(expired|invalid|problem|locked)\&/, '?');
+            ref = ref.replace(/^\?(expired|invalid|problem|locked)$/,  '');
         }
         ref = ref.replace(/^\?/, '/');
         ref = ref.replace(/^\/+/, '/');
         ref = ref.replace(/^\?/, '/');
-        ref = ref.replace(/^\/(expired|invalid|problem|nocookie|locked)\&/,  '$1&/');
+        ref = ref.replace(/^\/(expired|invalid|problem|locked)\&/,  '$1&/');
         ref = ref.replace(/_=\d+/, '');
         ref = ref.replace(/\?$/, '');
         ref = ref.replace(/\#side.html$/, '');
         return(ref);
-    }
-
-    function onLogin() {
-        cleanSessionCookies();
-        // set test cookie again, it may be removed already when logged into in another tab
-        cookieSave('thruk_test', '****', 0, '[% cookie_domain %]');
-        jQuery('body').addClass('submitting');
-        return(true);
     }
 
     function breakFrame() {
@@ -97,18 +84,9 @@
         return;
     }
 
-    // remove session cookies which interfere with current set cookie domain
-    function cleanSessionCookies() {
-      cookieRemoveAll("thruk_auth");
-    }
-
     try {
         breakFrame();
     } catch(err) { console.log(err); }
-
-    cleanSessionCookies();
-
-    jQuery('#loginuser').focus();
   -->
   </script>
 

@@ -1,8 +1,55 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add thruk apikey info command
+          - Reporting:
+            - add missing host unavailable box for sla reports
+          - Rest
+            - add command_name to /notifications
+
+2.44-3   Thu Jun 10 19:22:57 CEST 2021
+          - add option to configure error message for locked accounts
+          - fix group filter when using lmd
+          - fix oauth login containing umlauts
+          - self check:
+            - recurring downtimes self check validate cron entries
+            - reports self check validate cron entries
+            - support negated type selection
+            - add backends selfcheck
+
+2.44-2   Fri Jun  4 18:07:58 CEST 2021
+          - Config Tool:
+            - fix internal error when saving thruk config
+          - Reporting:
+            - keep current view when starting report update
+            - fix logging raw pdf output
+
+2.44     Fri May 28 17:55:32 CEST 2021
+          - rework login mask to be more mobile friendly
+          - add new config option: cookie_secure_only
+          - add missing services in host availability reports (#1098)
+          - recurring downtimes show last author and date
+          - fix oauth not honoring redirect after login
+          - fix paging hosts/services when using LMD
+          - fix using graph_source in popups (#1106, #1086, #1104)
+          - fix hiding backends with groups attribute (#1102)
+          - Security
+            - fix xss issue with quick commands
+            - set samesite attribute for all cookies
+            - set secure attribute for all cookies if applicable
+            - add config option `cookie_secure_only`
+            - use csrf token for all forms
           - Business Process:
             - performance improvements
+          - Logcache:
+            - scale out worker for parallel update
+          - Reporting:
+            - fix switching user when updating report
+          - Rest
+            - add support for !>= and <= operator on lists
+            - add /thruk/logcache/update
+            - add option to suppress column headers
+            - fix column order on text output
 
 2.42-2   Mon Apr 26 10:02:54 CEST 2021
           - Reporting:

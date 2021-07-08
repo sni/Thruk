@@ -2,7 +2,14 @@
 - hosts: all
   roles:
     - role: common
+    - role: service_sshd
+    - role: ssh_site_login
+    - role: thruk_developer
   tasks:
+  - shell: "chown demo: /mnt/etc/"
+  - shell: sudo su - demo -c "cp -rp .ssh /mnt/etc/"
+  - shell: "cp -p /omd/sites/demo/.ssh/config /mnt/etc/.ssh"
+  - shell: "chown -R demo: /mnt/etc/"
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set PNP4NAGIOS off
   - shell: omd config demo set LIVESTATUS_TCP on

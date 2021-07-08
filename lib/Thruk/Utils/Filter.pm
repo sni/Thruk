@@ -789,16 +789,13 @@ sub get_message {
     my $has_details = 0;
 
     # message from cookie?
-    if(defined $c->cookie('thruk_message')) {
-        my $cookie = $c->cookie('thruk_message');
-        $c->cookie('thruk_message' => '', {
-            expires => 0,
-            path    => $c->stash->{'cookie_path'},
-        });
+    if(defined $c->cookies('thruk_message')) {
+        my $cookie = $c->cookies('thruk_message');
+        $c->cookie('thruk_message', '', { expires => 0 });
         # sometimes the cookie is empty, so delete it in every case
         # and show it if it contains data
-        if(defined $cookie and $cookie->value) {
-            my($style,$message) = split(/~~/mx, $cookie->value, 2);
+        if($cookie) {
+            my($style,$message) = split(/~~/mx, $cookie, 2);
             return '' unless $message;
             $message = &escape_html($message);
             my @msg = split(/\n/mx, $message);
@@ -995,42 +992,6 @@ sub has_business_process {
     }
     return 0;
 }
-
-########################################
-
-=head2 button
-
-  my $html = button($link, $value, $class, [$onclick], [$formstyle], [$keeplink], [$skipform])
-
-returns button html source
-
-=cut
-sub button {
-    my($link, $value, $class, $onclick, $formstyle, $keeplink, $skipform) = @_;
-
-    my($page, $args);
-    if($keeplink) {
-        $page = $link;
-        $args = "";
-    } else {
-        ($page, $args) = split(/\?/mx, $link, 2);
-        $args =~ s/&amp;/&/gmx if defined $args;
-    }
-
-    my $html = '';
-    $html = '<form action="'.$page.'" method="POST"'.($formstyle ? 'style="'.$formstyle.'"' : '').'>' unless $skipform;
-    $args = '' unless defined $args;
-    for my $a (split/\&/mx, $args) {
-        my($k,$v) = split(/=/mx,$a,2);
-        $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
-    }
-    $html   .= '<button class="'.$class.'"';
-    $html   .= ' onclick="'.$onclick.'"' if $onclick;
-    $html   .= '>'.$value.'</button>';
-    $html   .= '</form>' unless $skipform;
-    return $html;
-}
-
 
 ########################################
 

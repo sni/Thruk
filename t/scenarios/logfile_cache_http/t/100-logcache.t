@@ -14,14 +14,23 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-BEGIN { use_ok 'Thruk::Controller::notifications' }
+
+use_ok 'Thruk::Controller::notifications';
+use_ok 'Thruk::Backend::Provider::Mysql';
 
 my $c = TestUtils::get_c();
 # wait till our backend is up and has logs
 for my $x (1..90)  {
     my $peer = $c->db->get_peers(1)->[0];
+
+    # run fresh import, if backend was provisioned after the frontend, the update would not import old data and stay empty
+    {
+        local $ENV{THRUK_QUIET} = 1;
+        Thruk::Backend::Provider::Mysql->_import_logs($c, 'import', $peer->{'key'});
+    };
+
     my $res = [Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'})];
-    if($res->[0] && $res->[0] > 0) {
+    if($res->[0] && $res->[0] > 0 && $res->[1]) {
         ok(1, sprintf("got log start/end ([%s,%s]) at retry: %d", $res->[0], $res->[1], $x));
         last;
     }

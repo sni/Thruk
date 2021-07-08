@@ -98,7 +98,10 @@ if (system.args.length < 3) {
             page.evaluate(function() {
                 // see https://github.com/ariya/phantomjs/issues/12685
                 // and http://stackoverflow.com/questions/24525561/phantomjs-fit-content-to-a4-page
-                document.querySelector('body').style.zoom = "0.55";
+                var el = document.querySelector('body');
+                if(el) {
+                    el.style.zoom = "0.55";
+                }
             });
         }
         if (status !== 'success') {

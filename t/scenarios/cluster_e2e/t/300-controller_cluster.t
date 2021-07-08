@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 42;
+    plan tests => 53;
 
     use lib('t');
     require TestUtils;
@@ -33,4 +33,9 @@ for my $x (1..3) {
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4&cluster=1',
     'like'    => ['Performance Information', 'Cluster Status', 'accept.png'],
+);
+
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/proxy.cgi/e0364/demo/thruk/cgi-bin/tac.cgi',
+    'like'    => ['Tactical Monitoring Overview'],
 );

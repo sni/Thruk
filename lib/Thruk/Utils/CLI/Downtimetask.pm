@@ -56,7 +56,9 @@ sub cmd {
     require Thruk::Utils::RecurringDowntimes;
 
     # this function must be run on one cluster node only
-    return("command send to cluster\n", 0) if $c->cluster->run_cluster("once", "cmd: $action ".join(" ",@{$commandoptions}));
+    if(my $msg = $c->cluster->run_cluster("once", "cmd: $action ".join(" ",@{$commandoptions}))) {
+        return($msg, 0);
+    }
 
     my $files = [split(/\|/mx, shift @{$commandoptions})];
 
@@ -90,6 +92,7 @@ sub _handle_file {
     my $retries;
     my $total_retries = 5;
 
+    my $nr         = $file;
     $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     my $downtime   = Thruk::Utils::read_data_file($file);
     my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c);
@@ -198,10 +201,11 @@ sub _handle_file {
 
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
+    $output = '['.$nr.'.tsk]';
     if($downtime->{'service'} && scalar @{$downtime->{'service'}} > 0) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.join(', ', @{$downtime->{'service'}}).'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
+        $output .= ' scheduled'.$flexible.' downtime for service \''.join(', ', @{$downtime->{'service'}}).'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
     } else {
-        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
+        $output .= ' scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
     }
     $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")";
     $output .= " (after $retries retries)\n" if $retries;

@@ -60,6 +60,12 @@
     <span class="wait" id="reports_waiting" style="display: none;"><img class="notclickable" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="getting expected objects" title="getting expected objects" border="0" height="11" width="11"></span>
     <span class="value" id="reports_expected_objects">&nbsp;</span>
     <span class="name">expected objects:</span>
+    <script type="text/javascript">
+      window.setInterval(function() {
+        var input = jQuery("#reports_waiting");
+        reports_update_affected_sla_objects(input[0]);
+      }, 500);
+    </script>
   [% ELSIF type == 'rptimeperiod' %]
     [% t1=date.now; IF r.params.defined("t1"); t1 = r.params.t1; END %]
     [% t2=date.now; IF r.params.defined("t2"); t2 = r.params.t2; END %]

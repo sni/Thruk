@@ -3,6 +3,7 @@ package Thruk::Backend::Pool;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cwd ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Backend::Peer ();
@@ -62,6 +63,7 @@ sub new {
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
         ## no critic
+        $ENV{'OLDPWD'} = Cwd::getcwd();
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
         ## use critic
         chdir($ENV{'HOME'});
@@ -123,13 +125,19 @@ sub new {
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-        if($https_count > 2 && $pool_size > 1) {
+        if($https_count > 1) {
+            # https://metacpan.org/pod/Net::SSLeay#Using-Net::SSLeay-in-multi-threaded-applications
             eval {
+                use threads ();
+                require Net::SSLeay;
                 require IO::Socket::SSL;
-                IO::Socket::SSL->import();
+
+                Net::SSLeay::load_error_strings();
+                Net::SSLeay::SSLeay_add_ssl_algorithms();
+                Net::SSLeay::randomize();
             };
             if($@) {
-                die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
+                die('IO::Socket::SSL and Net::SSLeay (>=1.43) is required for multiple parallel https connections: '.$@);
             }
             ## no lint
             if(!$Net::SSLeay::VERSION || $Net::SSLeay::VERSION < 1.43) {
@@ -287,7 +295,6 @@ sub do_on_peer {
                 my $inc;
                 my $code = $arg->[$x+1];
                 if(ref($code) eq 'HASH') {
-                    require Cwd;
                     for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : Cwd::getcwd().'/plugins/plugins-available/')) {
                         if(-e $path.'/'.$code->{'inc'}) {
                             $inc  = $path.'/'.$code->{'inc'};

@@ -23,7 +23,8 @@
                         form.edit_started = true;
                     }
                 },
-                error: function() {
+                error: function(jqXHR, textStatus, errorThrown) {
+                    ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
                     form.edit_started = false;
                 }
             });

@@ -3,6 +3,7 @@
   roles:
     - role: common
     - role: thruk_developer
+    - role: thruk_plugin_editor
   tasks:
   - shell: "omd config demo set MYSQL on"
   - shell: "omd config demo set THRUK_LOGCACHE on"
@@ -31,3 +32,21 @@
     with_fileglob:
     - /root/*.tbp
   - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
+  - name: "wait for tier3a to come up"
+    uri:
+      url: "https://tier3a.test.local/demo/thruk/cgi-bin/remote.cgi"
+      validate_certs: False
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1
+  - name: "wait for tier3b to come up"
+    uri:
+      url: "https://tier3b.test.local/demo/thruk/cgi-bin/remote.cgi"
+      validate_certs: False
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1

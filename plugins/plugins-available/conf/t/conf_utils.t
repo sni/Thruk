@@ -7,7 +7,6 @@ use Test::More;
 use utf8;
 
 use Thruk::Utils ();
-use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});

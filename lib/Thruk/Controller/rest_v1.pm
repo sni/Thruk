@@ -45,6 +45,7 @@ my $op_translation_words      = {
     'gte'    => '>=',
     'lt'     => '<',
     'lte'    => '<=',
+    'notin'  => '!>=',
 };
 
 use constant {
@@ -275,6 +276,7 @@ sub _format_csv_output {
         $output .= "ERROR: failed to generate output, rerun with -v to get more details.\n";
     }
 
+    $output = Thruk::Utils::Encode::encode_utf8($output);
     return $c->render('text' => $output);
 }
 
@@ -330,7 +332,7 @@ sub _format_xls_output {
         $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         for my $row (@{$data}) {
             for my $key (keys %{$row}) {
-                $row->{$key} = Thruk::Utils::Filter::escape_xml($row->{$key});
+                $row->{$key} = Thruk::Utils::Filter::escape_xml(join(", ", @{Thruk::Base::list($row->{$key})}));
             }
         }
     }
@@ -1990,7 +1992,7 @@ sub _rest_get_livestatus_logs {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}));
+    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
 }
 
 ##########################################################
@@ -2002,7 +2004,7 @@ sub _rest_get_livestatus_notifications {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}));
+    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
 }
 
 ##########################################################
@@ -2014,7 +2016,7 @@ sub _rest_get_livestatus_host_notifications {
     my($c, undef, $host) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}));
+    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
 }
 
 ##########################################################
@@ -2250,7 +2252,7 @@ sub _compare {
             return;
         }
     }
-    elsif($op eq '<=') {
+    elsif($op eq '<=' || $op eq '!>=') {
         if(ref $data eq 'ARRAY') {
             my $found = 0;
             for my $v (@{$data}) {

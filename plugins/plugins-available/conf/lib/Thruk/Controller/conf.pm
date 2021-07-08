@@ -863,6 +863,7 @@ sub _process_backends_page {
                 $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
+                $backend->{'logcache_fetchlogs_command'} = $peer->{'peer_config'}->{'logcache_fetchlogs_command'} if defined $peer->{'peer_config'}->{'logcache_fetchlogs_command'};
                 $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
             }
             $has_new = 1 if $x == 1;
@@ -2650,8 +2651,8 @@ sub _object_tree_objects {
     @{$objs} = sort {uc($a->get_name()) cmp uc($b->get_name())} @{$objs};
 
     $c->stash->{'tree_objects_layout'} = 'table';
-    if(defined $c->cookie('thruk_obj_layout')) {
-        $c->stash->{'tree_objects_layout'} = $c->cookie('thruk_obj_layout')->value();
+    if($c->cookies('thruk_obj_layout')) {
+        $c->stash->{'tree_objects_layout'} = $c->cookies('thruk_obj_layout');
     }
 
     my $all_files  = $c->{'obj_db'}->get_files();

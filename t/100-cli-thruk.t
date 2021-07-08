@@ -198,6 +198,22 @@ TestUtils::test_command({
     errlike => ['/Filesystem:/', '/screen logging initialized with loglevel 2/'],
 });
 
+# self check with multiple
+TestUtils::test_command({
+    cmd    => $BIN.' selfcheck logfiles,filesystem',
+    like   => ['/Logfiles:/', '/Filesystem:/'],
+    unlike => ['/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    exit   => undef,
+});
+
+# self check
+TestUtils::test_command({
+    cmd    => $BIN.' -a selfcheck "all,!filesystem"',
+    like   => ['/Logfiles:/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    unlike => ['/Filesystem:/', '/is writable/'],
+    exit   => undef,
+});
+
 # panorama cleanup
 TestUtils::test_command({
     cmd  => $BIN.' -a clean_dashboards',

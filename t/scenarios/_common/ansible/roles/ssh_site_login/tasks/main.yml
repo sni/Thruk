@@ -1,0 +1,13 @@
+- yum:
+    name:
+      - passwd
+    state: present
+- shell: sudo su - {{ site }} -c "mkdir .ssh && chmod 700 .ssh && ssh-keygen -t rsa -f .ssh/id_rsa -N '' && cp .ssh/id_rsa.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys"
+- name: create .ssh/config
+  copy:
+    content: "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n  LogLevel QUIET\n"
+    dest: /omd/sites/{{ site }}/.ssh/config
+    owner: "{{ site }}"
+    group: "{{ site }}"
+    mode: 0600
+- shell: "echo 'demo' | passwd --stdin {{ site }}"

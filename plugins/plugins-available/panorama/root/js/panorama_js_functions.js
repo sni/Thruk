@@ -1368,7 +1368,8 @@ var TP = {
             update_proc: TP.setUpdateProcInfo(),
             current_tab: tab.id,
             reschedule:  reschedule ? 1 : '',
-            state_type:  tab.xdata.state_type
+            state_type:  tab.xdata.state_type,
+            CSRFtoken:   CSRFtoken
         };
         TP.iconUpdateRunning[tab.id] = true;
         var subReqs = {};

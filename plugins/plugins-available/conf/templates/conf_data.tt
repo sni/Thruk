@@ -86,8 +86,8 @@
     [% END %]
     <tr>
       <td colspan=2 class="data dataSubmit">
-        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi'">
-        <input type="submit" name="send" value="save" style="width:80px"[% IF readonly %] disabled[% END %]>
+        <button class="conf_back_button" name="cancel" value="cancel" style="width:90px" onclick="window.location='conf.cgi'">cancel</button>
+        <button class="conf_save_button" name="send" value="save" style="width:140px"[% IF readonly %] disabled[% END %]>save</button>
       </td>
     </tr>
   </table>

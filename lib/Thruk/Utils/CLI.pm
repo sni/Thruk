@@ -566,7 +566,7 @@ sub _run_commands {
     }
 
     # first unknown option is the command
-    if(scalar @actions == 0 and scalar @{$opt->{'commandoptions'}} > 0) {
+    if(scalar @actions == 0 && defined $opt->{'commandoptions'} && scalar @{$opt->{'commandoptions'}} > 0) {
         my $newcommandoptions = [];
         for my $action (@{$opt->{'commandoptions'}}) {
             if(scalar @actions == 0 && $action !~ m/^\-/gmx) {
@@ -1231,7 +1231,7 @@ sub _authorize_raw_query {
         }
 
         _warn(sprintf("rejected unknown query for user %s: %s", $c->user->{'username'}, $q));
-        return("permission denied - unnown query.");
+        return("permission denied - unknown query.");
     }
 
     # OK
@@ -1309,6 +1309,46 @@ sub _authorize_command {
         }
     }
     return;
+}
+
+##############################################
+
+=head2 read_stdin_password
+
+    read_stdin_password()
+
+read password from stdin
+
+=cut
+sub read_stdin_password {
+    my($msg) = @_;
+    ## no critic
+    if(!-t 0) {
+        return;
+    }
+    ## use critic
+    my $has_readkey = 0;
+    eval {
+        require Term::ReadKey;
+        Term::ReadKey->import();
+        $has_readkey = 1;
+    };
+    _debug("has readkey support: ".$has_readkey);
+
+    my $key;
+    print $msg;
+    if($has_readkey) {
+        ReadMode('noecho');
+        my $key = ReadLine(0);
+        ReadMode(0);
+        chomp ($key);
+        return($key);
+    }
+
+    # no readkey support, will echo the password
+    $key =  <>;
+    chomp ($key);
+    return($key);
 }
 
 ##############################################

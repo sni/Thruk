@@ -19,11 +19,13 @@ if($0 =~ m/scenario\-(.*)\.t$/mx) {
 
 use_ok("Thruk::Utils");
 use_ok("Thruk::Utils::IO");
+use_ok("Thruk::Config");
 
-my $verbose = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
-my $pwd  = cwd();
-my $make = $ENV{'MAKE'} || 'make';
+my $verbose   = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
+my $pwd       = cwd();
+my $make      = $ENV{'MAKE'} || 'make';
 my $scenarios = [map($_ =~ s/\/\.$//gmx && $_, split/\n/mx, `ls -1d t/scenarios/*/.`)];
+my $config    = Thruk::Config::get_config();
 
 for my $dir (@{$scenarios}) {
     next if $filter && $filter ne $dir;
@@ -72,7 +74,7 @@ for my $dir (@{$scenarios}) {
 
 # make simple normal final request since the tests kill existing lmd childs and upcoming
 # tests will fail if there is a startup message on stderr
-{
+if($config->{'use_lmd'}) {
     local $ENV{'TEST_ERROR'} = "";
     TestUtils::test_page(
         url     => '/thruk/cgi-bin/extinfo.cgi?type=0',

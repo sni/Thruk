@@ -983,7 +983,6 @@ sub _is_running {
     # fetch status from remote node
     if(-s $dir."/hostname") {
         my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
-        chomp($hosts[0]);
         if($hosts[0] ne $Thruk::Globals::NODE_ID) {
             confess('clustered _is_running requires $c') unless $c;
             my $cluster = $c->cluster;

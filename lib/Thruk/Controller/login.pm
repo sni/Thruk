@@ -41,7 +41,7 @@ sub index {
     my $product_prefix            = $c->config->{'product_prefix'};
 
     my $cookie_path   = $c->stash->{'cookie_path'};
-    my $cookie_domain = _get_cookie_domain($c);
+    my $cookie_domain = $c->get_cookie_domain();
 
     my $keywords = $c->req->uri->query;
     my $logoutref;
@@ -59,7 +59,6 @@ sub index {
     my $submit  = $c->req->parameters->{'submit'}   || '';
     my $referer = $c->req->parameters->{'referer'}  || '';
     $referer    =~ s#^//#/#gmx;         # strip double slashes
-    $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
     $referer    = $c->stash->{'url_prefix'} unless $referer;
     # append slash for omd sites, IE and chrome wont send the login cookie otherwise
     if(($ENV{'OMD_SITE'} and $referer eq '/'.$ENV{'OMD_SITE'})
@@ -81,13 +80,6 @@ sub index {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
         }
 
-        if($keywords eq 'nocookie') {
-            my $hint = '';
-            if($cookie_domain) {
-                $hint = ' (cookie domain is set to: '.$cookie_domain.')';
-            }
-            Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies'.$hint );
-        }
         if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
             _invalidate_current_session($c, $cookie_path, "session expired");
             Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
@@ -103,7 +95,7 @@ sub index {
         }
         if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
             _invalidate_current_session($c, $cookie_path, "user locked");
-            Thruk::Utils::set_message( $c, 'fail_message', 'account is locked, please contact an administrator' );
+            Thruk::Utils::set_message($c, { 'style' => 'fail_message', 'msg' => $c->config->{'locked_message'}, 'escape'  => 0 });
         }
         if($keywords =~ /^setsession\&(.*)$/mx or $keywords eq 'setsession') {
             $c->authenticate();
@@ -128,11 +120,6 @@ sub index {
 
     Thruk::Utils::ssi_include($c, 'login');
 
-    # set test cookie
-    $c->cookie('thruk_test' => '****', {
-        path    => $cookie_path,
-        domain  => $cookie_domain,
-    });
     if($c->config->{'cookie_auth_domain'} && $cookie_domain ne $c->config->{'cookie_auth_domain'}) {
         Thruk::Utils::set_message( $c, 'warn_message', 'using '.$cookie_domain.' instead of the configured cookie_auth_domain '.$c->config->{'cookie_auth_domain'});
     }
@@ -165,17 +152,6 @@ sub _handle_basic_login {
     # make lowercase username
     $login = lc($login) if $c->config->{'make_auth_user_lowercase'};
 
-    my $testcookie = $c->cookie('thruk_test');
-    $c->cookie('thruk_test' => '', {
-        expires => 0,
-        path    => $cookie_path,
-        domain  => $cookie_domain,
-    });
-    if(   (!defined $testcookie || !$testcookie->value)
-        && (!defined $c->req->header('user-agent') || $c->req->header('user-agent') !~ m/wget/mix)) {
-        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
-    }
-
     my $userdata = Thruk::Utils::get_user_data($c, $login);
     if($userdata->{'login'}->{'locked'}) {
         _audit_log("login", sprintf("login attempt for locked account %s on %s from %s%s",
@@ -198,7 +174,7 @@ sub _handle_basic_login {
         if($c->config->{'cookie_auth_login_hook'}) {
             Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
         }
-        return(login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain, "password"));
+        return(login_successful($c, $login, $session, $referer, $cookie_domain, "password"));
     }
 
     _audit_log("login", sprintf("login failed for %s on %s from %s%s",
@@ -239,22 +215,18 @@ sub _handle_basic_login {
 
 =head2 login_successful
 
-    login_successful($c, $login, $session, $referer, $cookie_path, $cookie_domain)
+    login_successful($c, $login, $session, $referer, $cookie_domain)
 
 redirects to $referer and sets sessions cookie
 
 =cut
 sub login_successful {
-    my($c, $login, $session, $referer, $cookie_path, $cookie_domain, $type) = @_;
+    my($c, $login, $session, $referer, $cookie_domain, $type) = @_;
 
     $c->stash->{'remote_user'} = $login;
     confess("no session") unless $session;
     $c->{'session'} = $session;
-    $c->cookie('thruk_auth' => $session->{'private_key'}, {
-        path     => $cookie_path,
-        domain   => $cookie_domain,
-        httponly => 1,
-    });
+    $c->cookie('thruk_auth', $session->{'private_key'}, { domain => $cookie_domain, httponly => 1 });
 
     # clean failed logins
     my $userdata = Thruk::Utils::get_user_data($c, $login);
@@ -281,12 +253,12 @@ sub login_successful {
 sub _invalidate_current_session {
     my($c, $cookie_path, $hint) = @_;
     $hint = "session invalidated" unless $hint;
-    my $cookie = $c->cookie('thruk_auth');
-    if(defined $cookie and defined $cookie->value) {
-        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie->value);
+    my $cookie = $c->cookies('thruk_auth');
+    if($cookie) {
+        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie);
 
         my $sessionid = $session_data->{'hashed_key'};
-        $sessionid = (Thruk::Utils::CookieAuth::private2hashed($cookie->value))[0] unless $sessionid; # try to reconstruct the session id for already removed session files
+        $sessionid = (Thruk::Utils::CookieAuth::private2hashed($cookie))[0] unless $sessionid; # try to reconstruct the session id for already removed session files
         _audit_log("logout", "session ended, ".$hint, $session_data->{'username'}, $sessionid);
 
         if($session_data && $session_data->{'file'}) {
@@ -294,12 +266,7 @@ sub _invalidate_current_session {
         }
     }
 
-    $c->cookie('thruk_auth' => '', {
-        expires  => 0,
-        path     => $cookie_path,
-        domain   => _get_cookie_domain($c),
-        httponly => 1,
-    });
+    $c->cookie('thruk_auth', '', { expires  => 0, httponly => 1 });
 
     # remove session cookie for all path and domain variations
     my $domains = [];
@@ -328,32 +295,17 @@ sub _invalidate_current_session {
 
     for my $path (@{$paths}) {
         # without domain
-        my $cookie = sprintf("thruk_auth=; path=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly", $path);
+        my $cookie = sprintf("thruk_auth=; path=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; samesite=lax;", $path);
         push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
 
         # for all sub domains
         for my $domain (@{$domains}) {
-            my $cookie = sprintf("thruk_auth=; path=%s;domain=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly", $path, $domain);
+            my $cookie = sprintf("thruk_auth=; path=%s;domain=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; samesite=lax;", $path, $domain);
             push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
         }
     }
 
     return;
-}
-
-##########################################################
-sub _get_cookie_domain {
-    my($c) = @_;
-    my $domain = $c->config->{'cookie_auth_domain'};
-    return "" unless $domain;
-    my $http_host = $c->req->env->{'HTTP_HOST'};
-    # remove port
-    $http_host =~ s/:\d+$//gmx;
-    $domain =~ s/\.$//gmx;
-    if($http_host !~ m/\Q$domain\E$/mx) {
-        return($http_host);
-    }
-    return $domain;
 }
 
 ##########################################################

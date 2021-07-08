@@ -4,6 +4,7 @@
 %]
 [% PROCESS _message.tt %]
 [% PROCESS _overdiv.tt %]
+[% PROCESS _blocks.tt %]
 
 [% IF thruk_author && !c.config.demo_mode && c.config.exists('conf_retention_file') %]
 <div style="top: 3px; right: 200px;" class="thruk_dev_panel">
@@ -50,7 +51,11 @@
                   </form>
                   <div style="position: relative; top: 5px; height: 10px;">
                   [% IF last_changed || needs_commit || show_save_reload %]
-                    [% link = 'conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes&amp;CSRFtoken=' _ get_user_token(c); button(link, 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(this, \'' _ show_save_reload _ '\')') %]
+                    [% PROCESS _button btn = {
+                      form   => { action => 'conf.cgi', },
+                      data   => { sub => 'objects', 'apply' => 'yes', save_and_reload => 'yes', CSRFtoken => get_user_token(c), },
+                      button => { class => 'conf_save_reload_button', onclick => "return save_reload_apply(this, '" _ show_save_reload _ "')", text => 'save & reload' },
+                    }%]
                   [% END %]
                   </div>
                 </td>

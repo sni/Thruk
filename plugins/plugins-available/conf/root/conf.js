@@ -200,7 +200,8 @@ function init_conf_tool_buttons() {
             type: 'POST',
             success: function(data) {
                 jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
-            }
+            },
+            error: ajax_xhr_error_logonly
         });
         return false;
     });
@@ -328,7 +329,8 @@ function update_command_line(id) {
             updateCommandLine(id, data[0].cmd_line, args);
             close_accordion();
         },
-        error: function() {
+        error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             hideElement(id + 'wait');
             document.getElementById(id + 'command_line').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
@@ -527,7 +529,8 @@ function load_plugin_help(id, plugin) {
             document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap; height:400px; overflow: scoll;" id="'+id+'plugin_help_pre"><\/pre>';
             jQuery('#' + id + 'plugin_help_pre').text(plugin_help);
         },
-        error: function() {
+        error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             hideElement(id + 'wait_help');
             document.getElementById(id + 'plugin_help').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
@@ -570,7 +573,8 @@ function check_plugin_exec(id) {
             document.getElementById(id + 'plugin_exec_output').innerHTML = '<pre style="white-space: pre-wrap; max-height:300px; overflow: scoll;" id="'+id+'plugin_output_pre"><\/pre>';
             jQuery('#' + id + 'plugin_output_pre').text(plugin_output);
         },
-        error: function(transport) {
+        error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             hideElement(id + 'wait_run');
             document.getElementById(id + 'plugin_exec_output').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
@@ -678,6 +682,7 @@ function save_plugins(btn) {
             }, 1300);
         },
         error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             jQuery(btn).button({
                 icons:   {primary: 'ui-error-button'},
                 label:   'failed',
@@ -764,9 +769,15 @@ function conf_tool_cleanup(btn, link, hide) {
         var hiding  = Number(oldText.match(/\ (\d+)\ /)[1]) + 1;
         jQuery('#hiding_entries').html("hiding "+hiding+" entries.").show();
     }
+    var data = {};
+    if(link == "") {
+        var form = jQuery(btn).parents('FORM');
+        data = jQuery(form).serializeArray();
+        link  = jQuery(form).attr("action");
+    }
     jQuery.ajax({
         url:   link,
-        data:  {},
+        data:  data,
         type: 'POST',
         success: function(data) {
             jQuery(btn).button({
@@ -786,6 +797,7 @@ function conf_tool_cleanup(btn, link, hide) {
             if(continue_cb) { continue_cb(); }
         },
         error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             jQuery(btn).button({
                 icons:   {primary: 'ui-error-button'},
                 label:   'failed',

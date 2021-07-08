@@ -1006,8 +1006,9 @@ sub get_backends_with_obj_config {
     }
 
     # from cookie setting?
-    if(defined $c->cookie('thruk_conf')) {
-        for my $val (@{$c->cookies('thruk_conf')->{'value'}}) {
+    if($c->cookies('thruk_conf')) {
+        my @cookie_val = $c->cookies('thruk_conf');
+        for my $val (@cookie_val) {
             next unless defined $c->stash->{'backend_detail'}->{$val};
             $c->stash->{'param_backend'} = $val;
         }
@@ -1033,7 +1034,8 @@ sub get_backends_with_obj_config {
     }
 
     # save value in the cookie, so later pages will show the same selected backend
-    $c->cookie('thruk_conf' => $c->stash->{'param_backend'}, { path  => $c->stash->{'cookie_path'} });
+    # will be changed from the site panel, so cannot be httponly
+    $c->cookie('thruk_conf', $c->stash->{'param_backend'}, { httponly => 0 });
 
     $c->stash->{'backend_chooser'} = 'switch';
 

@@ -124,7 +124,7 @@ sub read_as_list {
     my($path) = @_;
     my @res;
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
-    @res = <$fh>;
+    chomp(@res = <$fh>);
     CORE::close($fh);
     return(@res);
 }
@@ -265,7 +265,14 @@ sub file_lock {
     if($basename !~ m|^[\.\/]|mx) { $basename = './'.$basename; }
     $basename    =~ s%/[^/]*$%%gmx;
     if(!-d $basename.'/.') {
-        confess("cannot lock $file in non-existing folder: ".$!);
+        require Thruk::Config;
+        my $config = Thruk::Config::get_config();
+        my $match = sprintf("^(\Q%s\E|\Q%s\E)", $config->{'var_path'}, $config->{'tmp_path'});
+        if($basename =~ m/$match/mx) {
+            mkdir_r($basename);
+        } else {
+            confess("cannot lock $file in non-existing folder: ".$!);
+        }
     }
 
     my $lock_file = $file.'.lock';
@@ -431,7 +438,7 @@ sub json_store {
             eval {
                 my $test = $json->decode(&read($tmpfile));
             };
-            confess("json_store failed to write a valid file: ".$@) if $@;
+            confess("json_store failed to write a valid file $tmpfile: ".$@) if $@;
         }
     }
 
@@ -863,23 +870,23 @@ sub get_memory_usage {
 
 =head2 find_files
 
-  find_files($folder, $pattern)
+  find_files($folder, $pattern, $skip_symlinks)
 
 return list of files for folder and pattern (symlinks will be skipped)
 
 =cut
 
 sub find_files {
-    my($dir, $match) = @_;
+    my($dir, $match, $skip_symlinks) = @_;
     my @files;
     $dir =~ s/\/$//gmxo;
 
     # symlinks
-    if(-l $dir) {
+    if($skip_symlinks && -l $dir) {
         return([]);
     }
     # not a directory?
-    if(!-d $dir) {
+    if(!-d $dir."/.") {
         if(defined $match) {
             return([]) unless $dir =~ m/$match/mx;
         }
@@ -887,7 +894,7 @@ sub find_files {
     }
 
     my @tmpfiles;
-    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
+    opendir(my $dh, $dir."/.") or confess("cannot open directory $dir: $!");
     while(my $file = readdir $dh) {
         next if $file eq '.';
         next if $file eq '..';
@@ -898,7 +905,7 @@ sub find_files {
     for my $file (@tmpfiles) {
         # follow sub directories
         if(-d sprintf("%s/%s/.", $dir, $file)) {
-            push @files, @{find_files($dir."/".$file, $match)};
+            push @files, @{find_files($dir."/".$file, $match, $skip_symlinks)};
         } else {
             # if its a file, make sure it matches our pattern
             if(defined $match) {

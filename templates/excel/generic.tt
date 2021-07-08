@@ -35,13 +35,16 @@
               <cell>[% state %]</cell>
             </format>
         [% ELSE %]
-          <cell>
-            [% IF col_tr.exists(col); %]
-              [% tr = col_tr.$col; d.$tr %]
-            [% ELSIF d.exists(col) %]
-              [% d.$col %]
-            [% END %]
-          </cell>
+          <cell>[%-
+            value = "";
+            IF col_tr.exists(col);
+              tr = col_tr.$col;
+              value = d.$tr;
+            ELSIF d.exists(col);
+              value = d.$col;
+            END;
+            value.list.join(', ');
+          -%]</cell>
         [% END %]
       [% END %]
     </row>

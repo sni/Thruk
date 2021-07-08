@@ -55,6 +55,8 @@ feature     ('plugin_reports2',
 # https backends support
 feature     ('https_backends_support',
   -default                                        => 0,
+  'Net::SSLeay'                                   => 0,     # required by Thruk::Backend::Pool
+  'IO::Socket::SSL'                               => 0,     # required by Thruk::Backend::Pool
   'LWP::Protocol::https'                          => 0,     # required by Thruk::Backend::Provider::HTTP
   'LWP::Protocol::connect'                        => 0,     # required by Thruk::Backend::Provider::HTTP
   'Mozilla::CA'                                   => 0,     # required by Thruk::UserAgent

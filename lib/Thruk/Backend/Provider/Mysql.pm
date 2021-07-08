@@ -433,6 +433,17 @@ sub get_logs {
         }
     }
 
+    my $extra_columns = '';
+    if($options{'extra_columns'}) {
+        $extra_columns = ',
+            (CASE
+                WHEN l.type = "HOST NOTIFICATION"    THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 4), ";", -1)
+                WHEN l.type = "SERVICE NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 5), ";", -1)
+                ELSE ""
+            END) as command_name
+        ';
+    }
+
     my $sql = '
     SELECT
         l.time as time,
@@ -445,6 +456,7 @@ sub get_logs {
         IFNULL(c.name, "") as contact_name,
         l.message as message,
         "'.$prefix.'" as peer_key
+        '.$extra_columns.'
     FROM
         `'.$prefix.'_log` l
         LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id
@@ -1452,7 +1464,7 @@ sub check_global_lock {
                 _info(sprintf("WARNING: logcache import currently running with pid %d", $pid));
                 return;
             }
-            _warn("WARNING: removing stale lock file");
+            _warn("WARNING: removing stale lock file: ".$c->config->{'tmp_path'}."/logcache_import.lock");
             unlink($c->config->{'tmp_path'}."/logcache_import.lock");
         }
     }
@@ -2143,6 +2155,11 @@ sub _import_logcache_from_file {
 
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
+    # make import with relative paths work (thruk chdirs into OMD at start)
+    if($ENV{'OLDPWD'}) {
+        chdir($ENV{'OLDPWD'});
+    }
+
     for my $p (@{$files}) {
         my $expanded = [];
         if(-f $p) {
@@ -2153,7 +2170,10 @@ sub _import_logcache_from_file {
             $expanded = [glob($p)];
         }
         for my $f (@{$expanded}) {
-            next unless -f $f;
+            if(!-f $f) {
+                _debug("skipping $f: $!");
+                next;
+            }
             _infos($f);
             my $duplicate_lookup  = {};
             my $last_duplicate_ts = 0;
@@ -2218,6 +2238,11 @@ sub _import_logcache_from_file {
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         _release_write_locks($dbh);
         _info("it is recommended to run logcacheoptimize after importing logfiles.");
+    }
+
+    # restore old working dir
+    if($ENV{'OLDPWD'}) {
+        chdir($ENV{'HOME'});
     }
 
     return $log_count;

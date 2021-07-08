@@ -4,6 +4,7 @@
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - git-core
+      - make
     state: present
 - name: "glibc-langpack-en when rhel >= 8"
   yum:

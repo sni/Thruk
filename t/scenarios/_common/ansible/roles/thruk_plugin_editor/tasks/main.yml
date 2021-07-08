@@ -1,0 +1,64 @@
+- name: "thruk plugin enable editor"
+  shell: "sudo su - {{ site }} -c 'thruk plugin enable editor'"
+- name: "Create etc/thruk/action_menus"
+  file:
+    path: "/omd/sites/{{ site }}/etc/thruk/action_menus"
+    state: directory
+    owner: "{{ site }}"
+    group: "{{ site }}"
+- name: "create etc/thruk/action_menus/perl_editor_menu.json"
+  copy:
+    dest: "/omd/sites/{{ site }}/etc/thruk/action_menus/perl_editor_menu.json"
+    owner: "{{ site }}"
+    group: "{{ site }}"
+    content: |
+      [
+        "-",
+        {"icon":"/demo/thruk/themes/{{"{{theme}}"}}/images/package_go.png",
+        "label":"Syntax Check",
+        "action":"server://perlsyntax/$TMPFILENAME$"
+        },
+      ]
+- name: "create etc/thruk/action_menus/json_editor_menu.json"
+  copy:
+    dest: "/omd/sites/{{ site }}/etc/thruk/action_menus/json_editor_menu.json"
+    owner: "{{ site }}"
+    group: "{{ site }}"
+    content: |
+      [
+        "-",
+        {"icon":"/demo/thruk/themes/{{"{{theme}}"}}/images/package_go.png",
+        "label":"Syntax Check",
+        "action":"server://jsonsyntax/$TMPFILENAME$"
+        },
+      ]
+
+- name: "create etc/thruk/thruk_local.d/editor.conf"
+  copy:
+    dest: "/omd/sites/{{ site }}/etc/thruk/thruk_local.d/editor.conf"
+    owner: "{{ site }}"
+    group: "{{ site }}"
+    content: |
+      <editor>
+        name   = BP Functions
+        <files>
+          folder = etc/thruk/bp/
+          filter = \.pm$
+          syntax = perl
+          action = perl_editor_menu
+        </files>
+      </editor>
+      <editor>
+        name   = BP Files
+        <files>
+          folder = etc/thruk/bp/
+          filter = \.tbp$
+          syntax = json
+          action = json_editor_menu
+        </files>
+      </editor>
+      <action_menu_actions>
+        perlsyntax   = /usr/bin/perl -Mstrict -wc
+        jsonsyntax   = /usr/bin/python3 -m json.tool
+      </action_menu_actions>
+

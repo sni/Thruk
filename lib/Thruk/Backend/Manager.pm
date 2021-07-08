@@ -1598,9 +1598,9 @@ sub _do_on_peers {
             }
         }
 
-        if( $arg{'pager'} ) {
-            local $ENV{'THRUK_USE_LMD'} = undef if $must_resort;
-            $data = Thruk::Utils::page_data($c, $data, undef, $totalsize);
+        if($arg{'pager'}) {
+            my $already_paged = $ENV{'THRUK_USE_LMD'} ? 1 : 0;
+            $data = Thruk::Utils::page_data($c, $data, undef, $totalsize, $already_paged);
         }
     }
 

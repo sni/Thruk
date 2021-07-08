@@ -4,6 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
+    - role: ssh_site_login
   tasks:
   - shell: "crond"
   - shell: omd config demo set APACHE_MODE own
@@ -72,5 +73,17 @@
     wait_for:
       host: omd
       port: 6557
-  - shell: sudo su - demo -c "thruk bp commit --local"
-  - shell: sudo su - demo -c "thruk cron install --local"
+  - name: wait for ssh config to become available
+    wait_for:
+      path: /mnt/etc/.ssh
+  - name: "wait for http://omd/demo/ to come up"
+    uri:
+      url: "http://omd/demo/thruk/cgi-bin/remote.cgi"
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1
+  - name: "thruk bp commit"
+    shell: sudo su - demo -c "test -s /mnt/var/thruk_bp_generated.cfg || thruk bp commit"
+  - shell: sudo su - demo -c "thruk cron install"

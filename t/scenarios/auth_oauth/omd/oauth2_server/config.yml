@@ -8,9 +8,9 @@ plugins:
   "OAuth2::Server":
     state_required: 1
     clients:
-      client1:
+      clientö:
         client_secret: secret
         scopes:
           openid: 1
           profile: "profile"
-          email: "email"
+          email: "email@öäüß€"

@@ -790,7 +790,7 @@ function send_ajax_cmd(link) {
             location.reload();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.log(textStatus);
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             jQuery.mobile.loading('hide');
         }
     });

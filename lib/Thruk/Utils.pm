@@ -519,7 +519,7 @@ sub set_message {
     }
 
     # cookie does not get escaped, it will be escaped upon read
-    $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });
+    $c->cookie('thruk_message', $style.'~~'.$message, { httponly => 0 });
     # use escaped data if possible, but store original data as well
     $c->stash->{'thruk_message'}         = $style.'~~'.($escaped_message // $message);
     $c->stash->{'thruk_message_details'} = $escaped_details // $details;
@@ -528,6 +528,8 @@ sub set_message {
     $c->stash->{'thruk_message_details_raw'} = $details;
     $c->res->code($code) if defined $code;
 
+    _debug(sprintf("set_message: %s - %s", $style, $message));
+    _debug(sprintf("set_message: %s", $details)) if $details;
     return 1;
 }
 
@@ -1367,18 +1369,12 @@ sub get_graph_url {
         }
     }
 
-    if(defined $obj->{'name'}) {
-        #host obj
-        return get_action_url($c, 1, 0, $action_url, $obj->{'name'});
-    }
-    elsif(defined $obj->{'host_name'} && defined $obj->{'description'}) {
-        #service obj
-        return get_action_url($c, 1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
-    }
-    else {
+    if(!defined $obj->{'name'} && !defined $obj->{'host_name'}) {
         #unknown host
         return '';
     }
+
+    return get_action_url($c, 1, 0, $action_url, $obj);
 }
 
 ##########################################################
@@ -1437,7 +1433,7 @@ sub get_perf_image {
         }
         $pnpurl     = get_pnp_url($c, $svcdata->[0], 1);
         $grafanaurl = get_histou_url($c, $svcdata->[0], 1);
-        $custvars   = Thruk::Utils::get_custom_vars($c, $svcdata->[0]);
+        $custvars   = get_custom_vars($c, $svcdata->[0]);
     } else {
         my $hstdata = $c->db->get_hosts(filter => [{ name => $options->{'host'}}]);
         if(scalar @{$hstdata} == 0) {
@@ -1447,7 +1443,7 @@ sub get_perf_image {
         $pnpurl                = get_pnp_url($c, $hstdata->[0], 1);
         $grafanaurl            = get_histou_url($c, $hstdata->[0], 1);
         $options->{'service'}  = '_HOST_' if $pnpurl;
-        $custvars              = Thruk::Utils::get_custom_vars($c, $hstdata->[0]);
+        $custvars              = get_custom_vars($c, $hstdata->[0]);
     }
 
     $c->stash->{'last_graph_type'} = 'pnp';
@@ -1495,7 +1491,7 @@ sub get_perf_image {
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
         delete $options->{'source'} if(defined $options->{'source'} && $options->{'source'} eq 'null');
-        $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} || $c->config->{'grafana_default_panelId'} || '1') unless defined $options->{'source'};
+        $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1') unless defined $options->{'source'};
         $grafanaurl .= '&panelId='.$options->{'source'};
         if($options->{'resize_grafana'}) {
             $options->{'width'}  = $options->{'width'} * 1.3;
@@ -1761,7 +1757,7 @@ sub get_fake_session {
 
 =head2 get_action_url
 
-  get_action_url($c, $escape_fun, $remove_render, $action_url, $host, $svc)
+  get_action_url($c, $escape_fun, $remove_render, $action_url, $obj)
 
 return action_url modified for object (host/service) if we use graphite
 escape_fun is use to escape special char (html or quotes)
@@ -1770,7 +1766,7 @@ remove_render remove /render in action url
 =cut
 
 sub get_action_url {
-    my($c, $escape_fun, $remove_render, $action_url, $host, $svc) = @_;
+    my($c, $escape_fun, $remove_render, $action_url, $obj, $obj_prefix) = @_;
 
     my $new_action_url = $action_url;
     my $graph_word = $c->config->{'graph_word'};
@@ -1786,16 +1782,19 @@ sub get_action_url {
         return($action_url);
     }
     elsif($action_url =~ m/\/histou\.js\?/mx) {
+        my $custvars = get_custom_vars($c, $obj, $obj_prefix);
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
-        $popup_url .= '&amp;panelId='.$c->config->{'grafana_default_panelId'};
+        $popup_url .= '&amp;panelId='.($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1');
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
 
     if ($graph_word) {
+        my $host = $obj->{'host_name'} // $obj->{'host_name'};
+        my $svc  = $obj->{'description'};
         for my $regex (@{Thruk::Base::list($graph_word)}) {
             if ($action_url =~ m|$regex|mx){
                 my $new_host = $host;
@@ -1964,9 +1963,8 @@ sub choose_mobile {
     return unless $found;
 
     my $choose_mobile;
-    if(defined $c->cookie('thruk_mobile')) {
-        my $cookie = $c->cookie('thruk_mobile');
-        $choose_mobile = $cookie->value;
+    if(defined $c->cookies('thruk_mobile')) {
+        $choose_mobile = $c->cookies('thruk_mobile');
         return if $choose_mobile == 0;
     }
 
@@ -2675,34 +2673,27 @@ sub precompile_templates {
     # no backends required
     $c->db->disable_backends() if $c->db();
 
-    my $stderr_output;
-    # First, save away STDERR
-    open my $savestderr, ">&STDERR";
-    eval {
-        # breaks on fastcgi server with strange error
-        close STDERR;
-        open(STDERR, ">", \$stderr_output);
-    };
-    _error($@) if $@;
-
     my $num = 0;
-    for my $file (keys %{$uniq}) {
-        next if $file eq 'error.tt';
-        next if $file =~ m|^cmd/cmd_typ_|mx;
-        eval {
-            $c->view("TT")->render($c, $file);
-        };
-        $num++;
-    }
-    # Now close and restore STDERR to original condition.
-    eval {
-        # breaks on fastcgi server with strange error
-        close STDERR;
+    my $stderr_output;
+    do {
         ## no critic
-        open STDERR, ">&".$savestderr;
+        local *STDERR;
         ## use critic
+        eval {
+            open(STDERR, ">>", \$stderr_output);
+        };
+        _error($@) if $@;
+
+        for my $file (keys %{$uniq}) {
+            next if $file eq 'error.tt';
+            next if $file =~ m|^cmd/cmd_typ_|mx;
+            eval {
+                $c->view("TT")->render($c, $file);
+            };
+            $num++;
+        }
     };
-    _error($@) if $@;
+    _debug($stderr_output) if $stderr_output;
 
     $c->config->{'precompile_templates'} = 2;
     my $elapsed = tv_interval ( $t0 );
@@ -3479,7 +3470,7 @@ sub dclone {
 
 =head2 text_table
 
-    text_table( keys => [keys], data => <list of hashes> )
+    text_table( keys => [keys], data => <list of hashes>, [noheader => 1] )
 
     a key can be:
 
@@ -3576,8 +3567,11 @@ sub text_table {
     }
     $rowformat .= "|\n";
     $separator .= "+\n";
-    my $output = $separator;
-    $output .= sprintf($rowformat, @{$colnames});
+    my $output = "";
+    if(!$opt{'noheader'}) {
+        $output .= $separator;
+        $output .= sprintf($rowformat, @{$colnames});
+    }
     $output .= $separator;
     for my $rownum (0 .. scalar @{$data} - 1) {
         my @values;
@@ -3706,7 +3700,7 @@ sub scale_out {
 
 =head2 page_data
 
-  page_data($c, $data, [$result_size], [$total_size])
+  page_data($c, $data, [$result_size], [$total_size], [$already_paged])
 
 adds paged data set to the template stash.
 Data will be available as 'data'
@@ -3715,13 +3709,11 @@ The pager itself as 'pager'
 =cut
 
 sub page_data {
-    my($c, $data, $default_result_size, $total_size) = @_;
+    my($c, $data, $default_result_size, $total_size, $already_paged) = @_;
     $c    = $Thruk::Globals::c unless $c;
     $data = [] unless $data;
     return $data unless defined $c;
     $default_result_size = $c->stash->{'default_page_size'} unless defined $default_result_size;
-
-    local $ENV{'THRUK_USE_LMD'} = undef;
 
     # set some defaults
     my $pager = { current_page => 1, total_entries => 0 };
@@ -3821,7 +3813,7 @@ sub page_data {
         $c->stash->{'data'} = $data;
     }
     else {
-        if(!$ENV{'THRUK_USE_LMD'}) {
+        if(!$already_paged) {
             if($page == $pages) {
                 $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
             } else {

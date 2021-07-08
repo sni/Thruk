@@ -151,6 +151,11 @@ sub cmd {
 
     my($backends) = $c->db->select_backends('get_logs');
 
+    if(scalar @{$backends} > 1 && scalar @{$opt->{'files'}} > 0) {
+        _error("you must specify a backend (-b) when importing files.");
+        return("", 1);
+    }
+
     if($mode eq 'import' && !$global_options->{'yes'}) {
         # check if tables already existing
         my $exist = 0;
@@ -367,9 +372,9 @@ Run delta update with logfiles retrieved by livestatus
 
 Run update from given files.
 
-  %> thruk logcache import /var/log/naemon/archive/2017-07-*.log
+  %> thruk logcache update /var/log/naemon/archive/2017-07-*.log
 
-Run import from archive.
+Run initial import from archive.
 
   %> thruk logcache import /var/log/naemon/archive/ /var/log/naemon/naemon.log
 

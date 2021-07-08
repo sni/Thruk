@@ -121,7 +121,7 @@ if(!$@) {
         a    => 1,
         b    => 1,
     };
-    is_deeply($config->{'Thruk::Plugin::test'}, $expected, "parsing multiple plugin sections");
+    is_deeply($config->{'Thruk::Plugin::test'}, $expected, "parsing multiple plugin sections from t/data/split_plugins/");
 };
 
 ####################################################
@@ -129,24 +129,56 @@ if(!$@) {
     local $ENV{'THRUK_CONFIG'} = 't/data/number_lists';
     my $config = Thruk::Config::set_config_env();
     my $exp = [ '3', '0-4,11-12' ];
-    is_deeply($config->{'command_disabled'}, $exp, "parsing cookie domain from thruk_local.d");
+    is_deeply($config->{'command_disabled'}, $exp, "parsing config from t/data/number_lists/");
 };
 
 ####################################################
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/user_overrides';
     my $config = Thruk::Config::set_config_env();
-    is_deeply($config->{'user_password_min_length'}, 5, "parsing value from thruk_local.d");
+    is_deeply($config->{'user_password_min_length'}, 5, "parsing value from t/data/user_overrides/");
     my $exp = { readonly => 1 };
-    is_deeply($config->{'Thruk::Plugin::Panorama'}, $exp, "parsing value from thruk_local.d");
+    is_deeply($config->{'Thruk::Plugin::Panorama'}, $exp, "parsing value from t/data/user_overrides/");
 
     my $c = TestUtils::get_c();
     local $c->stash->{'remote_user'} = "test";
     Thruk::Action::AddDefaults::add_safe_defaults($c);
 
-    is_deeply($c->config->{'user_password_min_length'}, 10, "parsing test user value from thruk_local.d");
+    is_deeply($c->config->{'user_password_min_length'}, 10, "parsing test user value from t/data/user_overrides/");
     $exp = { readonly => 0 };
-    is_deeply($c->config->{'Thruk::Plugin::Panorama'}, $exp, "parsing test user value from thruk_local.d");
+    is_deeply($c->config->{'Thruk::Plugin::Panorama'}, $exp, "parsing test user value from t/data/user_overrides/");
+};
+
+
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/editor_config';
+    my $config = Thruk::Config::set_config_env();
+    my $exp = [{ 'files' => { 'action' => 'perl_editor_menu', 'filter' => '\\.pm$', 'folder' => 'etc/thruk/bp/', 'syntax' => 'perl' }, 'name' => 'BP Functions' },
+               { 'files' => { 'filter' => '\\.tbp$', 'folder' => 'etc/thruk/bp/' }, 'name' => 'BP Files' }];
+    is_deeply($config->{'editor'}, $exp, "parsing value from thruk_local.d");
+
+    my $adm = [{ 'files' => { 'action' => 'perl_editor_menu', 'filter' => '\\.pm$', 'folder' => 'etc/thruk/bp/', 'syntax' => 'perl' }, 'name' => 'Admin BP1' },
+               { 'files' => { 'filter' => '\\.tbp$', 'folder' => 'etc/thruk/bp/' }, 'name' => 'Admin BP2' } ];
+    my $c = TestUtils::get_c();
+    local $c->stash->{'remote_user'} = "test";
+    local $c->{'config'} = $config;
+    Thruk::Action::AddDefaults::add_safe_defaults($c);
+
+    is_deeply($c->config->{'editor'}, $adm, "parsing test user value from t/data/editor_config/");
+};
+
+####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/nested_hash';
+    my $config = Thruk::Config::set_config_env();
+    my $exp = [
+        { 'login' => 'l1', 'client_id' => 'c1', 'id' => 'p1' },
+        { 'login' => 'l2', 'client_id' => 'c2', 'id' => 'p2' },
+        { 'login' => 'l3', 'client_id' => 'c3', 'id' => 'p3' },
+        { 'login' => 'l4', 'client_id' => 'c4', 'id' => 'oauth' },
+    ];
+    is_deeply($config->{'auth_oauth'}->{'provider'}, $exp, "parsing value from t/data/nested_hash/");
 };
 
 ####################################################

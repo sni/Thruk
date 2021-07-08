@@ -1,5 +1,6 @@
 use warnings;
 use strict;
+use Cwd ();
 use Test::More;
 
 use Thruk::Base ();
@@ -27,7 +28,7 @@ isa_ok($m, 'Thruk::Backend::Provider::Mysql');
 
 my($res, $c)    = ctx_request('/thruk/side.html');
 my $mode        = 'update';
-my $files       = ['t/data/mysql/archive.log'];
+my $files       = [Cwd::getcwd().'/t/data/mysql/archive.log'];
 my $verbose     = 1;
 my $dbh         = $m->_dbh;
 my $blocksize   = undef;

@@ -19,7 +19,7 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     get_user_token(c) object.get_id() object.get_id object.get_type() svc.get_id()
     obj_id start end servicelink l.url plugin.url r.link link action_url n.node_url
     c.config.use_feature_core_scheduling prefix paneprefix style counter service_comment_count
-    sites.up sites.disabled sites.down pb_options.lineheight par desc refresh_rate imgsize
+    sites.up sites.disabled sites.down pb_options.lineheight desc refresh_rate imgsize
     h.current_notification_number s.current_notification_number how_far_back audiofile
     host.$host_icon_image_alt host_comment_count param_name state_color last_col
     crit.text crit.value icon pic pnpdata onchange
@@ -72,6 +72,20 @@ sub check_templates {
     my $failed = 0;
     my $escaped_keys = {};
 
+    while($content =~ m/<form[^>]*post[^>]*>.*?<\/form>/gsmxi) {
+        my $tag = substr($content, $-[0], $+[0]-$-[0]);
+
+        next if $file =~ m%/_blocks\.tt$%mx;
+        next if $file =~ m%/login\.tt$%mx;
+        next if $file =~ m%/_status_column_select\.tt$%mx;
+        next if $tag =~ m%/login\.cgi%mx;
+
+        my $linenr = 1 + substr($content,0,$-[0]) =~ y/\n//;
+        if($tag !~ m/CSRFtoken/mx) {
+            fail("$file uses post form without csrf token starting on line $linenr");
+        }
+    }
+
     # extract all tags
     $content =~ s/\[%\+?\s*(ELSIF|IF|UNLESS|FOREACH)\s*([^;%]*?)\s*;/[% /gmx;
     $content =~ s/\[%\+?\s*(ELSIF|IF|UNLESS|FOREACH)\s*([^;%]*?)\s*\+?%\]//gmx;
@@ -111,7 +125,6 @@ sub check_templates {
                                     |short_uri\(
                                     |uri_with\(
                                     |base_url\(
-                                    |date_format\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
@@ -135,6 +148,7 @@ sub check_templates {
                                     |name2id\(
                                     |encode_json_obj\(
                                     |json_encode\(
+                                    |date_format\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;

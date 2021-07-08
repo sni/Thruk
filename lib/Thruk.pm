@@ -30,6 +30,9 @@ BEGIN {
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 3) {
         $ENV{'THRUK_PERFORMANCE_DEBUG'} = 3;
     }
+    if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 4) {
+        $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} = 999;
+    }
     use Time::HiRes qw/gettimeofday tv_interval/;
     eval "use Thruk::Template::Context;" if $ENV{'THRUK_PERFORMANCE_DEBUG'};
     eval "use Thruk::Template::Exception;" if $ENV{'TEST_AUTHOR'};
@@ -254,8 +257,8 @@ sub _dispatcher {
     my $c = Thruk::Context->new($thruk, $env);
     $c->{'stage'} = 'pre';
     my $enable_profiles = 0;
-    if($c->req->cookies->{'thruk_profiling'}) {
-        $enable_profiles = $c->req->cookies->{'thruk_profiling'};
+    if($c->cookies('thruk_profiling')) {
+        $enable_profiles = $c->cookies('thruk_profiling');
         $c->stash->{'user_profiling'} = $enable_profiles;
     }
     local $ENV{'THRUK_PERFORMANCE_DEBUG'}  = 1 if $enable_profiles;

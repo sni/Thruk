@@ -3,6 +3,7 @@
   roles:
     - role: common
     - role: thruk_developer
+    - role: thruk_plugin_editor
   tasks:
   - copy:
       src: "/root/thruk_local.conf"

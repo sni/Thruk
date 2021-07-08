@@ -15,9 +15,11 @@ my $scripthash  = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($0).Thru
 sub save_cache {
     return if scalar keys %{$cache} == 0;
     Thruk::Utils::IO::json_lock_store($cachefile, $cache, { skip_config => 1 });
-    exit;
 }
-$SIG{'INT'} = 'save_cache';
+$SIG{'INT'} = sub {
+    save_cache();
+    exit;
+};
 END {
     save_cache();
 }
@@ -30,12 +32,13 @@ if(-e $cachefile) {
 }
 
 ################################################################################
-my @files = Thruk::Utils::IO::all_perl_files("./t", "./script", "./lib", glob("./plugins/plugins-available/*/lib"));
+my @files = Thruk::Utils::IO::all_perl_files($ARGV[0] ? $ARGV[0] : ("./t", "./script", "./lib", glob("./plugins/plugins-available/*/lib")));
+@files = grep(!/\.git\//, @files);
+@files = grep(!/\/vendor\//, @files);
 plan( tests => scalar @files);
 for my $file (@files) {
     check_modules($file);
 }
-exit;
 
 ################################################################################
 sub check_modules {

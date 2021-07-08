@@ -14,8 +14,7 @@ use warnings;
 use strict;
 
 use Thruk::Constants ':peer_states';
-use Thruk::Utils::Filter ();
-use Thruk::Utils::IO ();
+use Thruk::Utils ();
 use Thruk::Utils::RecurringDowntimes ();
 
 my $rc_codes = {
@@ -23,6 +22,16 @@ my $rc_codes = {
     '1'     => 'WARNING',
     '2'     => 'CRITICAL',
     '3'     => 'UNKNOWN',
+};
+
+my $available_checks = {
+    'filesystem'          => \&_filesystem_checks,
+    'logfiles'            => \&_logfile_checks,
+    'reports'             => \&_report_checks,
+    'recurring_downtimes' => \&_reccuring_downtime_checks,
+    'lmd'                 => \&_lmd_checks,
+    'logcache'            => \&_logcache_checks,
+    'backends'            => \&_backends_checks,
 };
 
 ##############################################
@@ -53,25 +62,28 @@ sub self_check {
     my($self, $c, $type) = @_;
     my($rc, $msg, $details);
     my $results = [];
+    my($selected, $dont) = ({}, {});
+    for my $t (@{Thruk::Base::comma_separated_list($type)}) {
+        if($t =~ m/^\!(.*)$/mx) {
+            $dont->{$1} = 1;
+        } else {
+            $selected->{$t} = 1;
+        }
+    }
+    if(scalar keys %{$selected} == 0 || $selected->{'all'}) {
+        for my $t (sort keys %{$available_checks}) {
+            $selected->{$t} = 1;
+        }
+        $selected->{'all'} = 1;
+    }
+    for my $t (sort keys %{$dont}) {
+        delete $selected->{$t};
+    }
 
     # run checks
-    if($type eq 'all' or $type eq 'filesystem') {
-        push @{$results}, _filesystem_checks($c);
-    }
-    if($type eq 'all' or $type eq 'logfiles') {
-        push @{$results}, _logfile_checks($c);
-    }
-    if($type eq 'all' or $type eq 'reports') {
-        push @{$results}, _report_checks($c);
-    }
-    if($type eq 'all' or $type eq 'recurring_downtimes') {
-        push @{$results}, _reccuring_downtime_checks($c);
-    }
-    if($type eq 'all' or $type eq 'lmd') {
-        push @{$results}, _lmd_checks($c);
-    }
-    if($type eq 'all' or $type eq 'logcache') {
-        push @{$results}, _logcache_checks($c);
+    for my $t (sort keys %{$selected}) {
+        next if $t eq 'all';
+        push @{$results}, &{$available_checks->{$t}}($c);
     }
 
     # aggregate results
@@ -98,7 +110,7 @@ sub self_check {
     }
 
     # append performance data from /thruk/metrics
-    if($type eq 'all') {
+    if($selected->{'all'}) {
         require Thruk::Utils::CLI::Rest;
         my $res = Thruk::Utils::CLI::Rest::cmd($c, undef, ['-o', ' ', '/thruk/metrics']);
         if($res->{'rc'} == 0 && $res->{'output'}) {
@@ -204,6 +216,13 @@ sub _report_checks  {
         if($r->{'failed'}) {
             $details .= sprintf(" report failed: #%d - %s\n", $r->{'nr'}, $r->{'name'});
             $errors++;
+        }
+        for my $cr (@{$r->{'schedule'}}) {
+            my $time = Thruk::Utils::get_cron_time_entry($cr);
+            if(!defined $time) {
+                $details .= sprintf(" report cannot expand cron entry: #%d - %s\n", $r->{'nr'}, $r->{'name'});
+                $errors++;
+            }
         }
     }
     if($errors == 0) {
@@ -346,6 +365,15 @@ sub check_recurring_downtime {
             }
         }
     }
+
+    for my $cr (@{$downtime->{'schedule'}}) {
+        my $time = Thruk::Utils::get_cron_time_entry($cr);
+        if(!defined $time) {
+            $details .= "  - ERROR: cannot expand cron entry in recurring downtime ".$file."\n";
+            $errors++;
+        }
+    }
+
     return($errors, $details);
 }
 
@@ -361,8 +389,9 @@ verify errors in lmd
 sub _lmd_checks  {
     my($c) = @_;
     return unless $c->config->{'use_lmd_core'};
-
+    my $rc      = 0;
     my $details = "LMD:\n";
+
     if($c->config->{'lmd_core_bin'} && $c->config->{'lmd_core_bin'} ne 'lmd') {
         my($lmd_core_bin) = glob($c->config->{'lmd_core_bin'});
         if(!$lmd_core_bin || ! -x $lmd_core_bin) {
@@ -374,10 +403,10 @@ sub _lmd_checks  {
 
     # try to run
     my $cmd = ($c->config->{'lmd_core_bin'} || 'lmd').' --version 2>&1';
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    my(undef, $output) = Thruk::Utils::IO::cmd($c, $cmd);
     if($output !~ m/\Qlmd - version \E/mx) {
         $details .= sprintf("  - cannot execute lmd: %s\n", $output);
-        return({sub => 'lmd', rc => 2, msg => "LMD WARNING", details => $details });
+        return({sub => 'lmd', rc => 2, msg => "LMD CRITICAL", details => $details });
     }
 
     require Thruk::Utils::LMD;
@@ -385,31 +414,48 @@ sub _lmd_checks  {
     my $pid = $status->[0]->{'pid'};
     if(!$pid) {
         $details .= "  - lmd not running\n";
-        return({sub => 'lmd', rc => 1, msg => "LMD WARNING", details => $details });
+        $rc = 1 unless $rc > 1;
+    } else {
+        my $start_time = $status->[0]->{'start_time'};
+        $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
+
+        my $total = 0;
+        for my $p (@{$c->db->get_peers()}) {
+            next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
+            $total++;
+        }
+        my $stats = $c->db->lmd_stats($c);
+        my $online = 0;
+        for my $stat (@{$stats}) {
+            $online++ if $stat->{'status'} == 0;
+        }
+        $details .= sprintf("  - %i/%i backends online\n", $online, $total);
+        for my $peer ( @{ $c->db->get_peers() } ) {
+            my $key  = $peer->{'key'};
+            my $name = $peer->{'name'};
+            next unless $c->stash->{'failed_backends'}->{$key};
+            $details .= sprintf("    - %s: %s\n", $name, $c->stash->{'failed_backends'}->{$key});
+        }
+        if($online != $total) {
+            $rc = 1 unless $rc > 1;
+        }
     }
 
-    my $start_time = $status->[0]->{'start_time'};
-    $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
-
-    my $total = 0;
-    for my $p (@{$c->db->get_peers()}) {
-        next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
-        $total++;
-    }
-    my $stats = $c->db->lmd_stats($c);
-    my $online = 0;
-    for my $stat (@{$stats}) {
-        $online++ if $stat->{'status'} == 0;
-    }
-    $details .= sprintf("  - %i/%i backends online\n", $online, $total);
-    for my $peer ( @{ $c->db->get_peers() } ) {
-        my $key  = $peer->{'key'};
-        my $name = $peer->{'name'};
-        next unless $c->stash->{'failed_backends'}->{$key};
-        $details .= sprintf("    - %s: %s\n", $name, $c->stash->{'failed_backends'}->{$key});
+    for my $log ($c->config->{'tmp_path'}.'/lmd/lmd.log') {
+        next unless -e $log; # may not exist either
+        # count errors
+        my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'Panic:' $log"));
+        $details .= sprintf("  - %s: ", $log);
+        if(scalar @out == 0) {
+            $details .= "no errors\n";
+        } else {
+            $details .= (scalar @out)." errors found\n";
+            $rc = 1 unless $rc > 1;
+        }
     }
 
-    return({sub => 'lmd', rc => 0, msg => "LMD OK", details => $details });
+    my $msg = sprintf('LMD %s', $rc_codes->{$rc});
+    return({sub => 'lmd', rc => $rc, msg => $msg, details => $details});
 }
 
 ##############################################
@@ -473,6 +519,45 @@ sub _logcache_checks  {
     my $msg = sprintf('Logcache %s', $rc_codes->{$rc});
     return({sub => 'logcache', rc => $rc, msg => $msg, details => $details});
 }
+
+##############################################
+
+=head2 _backends_checks
+
+    _backends_checks($c)
+
+verify errors in backend connections
+
+=cut
+sub _backends_checks  {
+    my($c) = @_;
+    my $details = "Backends:\n";
+
+    my $rc      = 0;
+    my $errors  = 0;
+
+    for my $pd (sort keys %{$c->stash->{'backend_detail'}}) {
+        next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
+        my $err = ($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '');
+        next unless $err;
+        $details .= sprintf("  - %s: %s (%s)\n",
+                                ($c->stash->{'backend_detail'}->{$pd}->{'name'} // $pd),
+                                $err,
+                                ($c->stash->{'backend_detail'}->{$pd}->{'addr'} || ''),
+        );
+        $errors++;
+    }
+
+    if($errors == 0) {
+        $details .= "  - no errors in ".(scalar keys %{$c->stash->{'backend_detail'}})." backends\n";
+    } else {
+        $rc = 2;
+    }
+
+    my $msg = sprintf('Backends %s', $rc_codes->{$rc});
+    return({sub => 'backends', rc => $rc, msg => $msg, details => $details});
+}
+
 ##############################################
 
 1;

@@ -83,6 +83,7 @@ sub cmd {
             }
             elsif($c->cluster->is_it_me($n)) {
                 $status = 'OK';
+                $n->{'version'} = $c->config->{'thrukversion'};
                 $ok++;
             }
             elsif($n->{'last_contact'} <= 0) {
@@ -97,7 +98,7 @@ sub cmd {
                 $status,
                 $n->{'hostname'},
                 $n->{'node_url'},
-                $n->{'response_time'} ? sprintf("%.2fs", $n->{'response_time'}) : '',
+                $n->{'response_time'} ? sprintf("%.2fs", $n->{'response_time'}) : '-----',
                 $n->{'version'},
             );
         }

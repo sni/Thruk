@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 76;
+plan tests => 84;
 
 ###########################################################
 # test thruks script path
@@ -45,6 +45,11 @@ for my $site (qw/local/) {
         cmd  => '/usr/bin/env curl -s -b "thruk_auth=test" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/login.cgi\?expired/'],
     });
+    `/usr/bin/printf "export THRUK_TEST_NO_LOG=.\n" >> .thruk`; # do not errors for the next requests
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env omd reload apache',
+        like => ['/Reloading dedicated Apache/'],
+    });
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/wrong authentication key/'],
@@ -56,6 +61,11 @@ for my $site (qw/local/) {
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/r/thruk/whoami"',
         like => ['/wrong authentication key/'],
+    });
+    `>.thruk`; # clear skipping log
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env omd reload apache',
+        like => ['/Reloading dedicated Apache/'],
     });
 };
 

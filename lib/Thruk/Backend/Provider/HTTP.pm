@@ -783,7 +783,7 @@ propagate local session to remote site
 =cut
 sub propagate_session_file {
     my($self, $c) = @_;
-    my $session_id = $c->req->cookies->{'thruk_auth'};
+    my $session_id = $c->cookies('thruk_auth');
     confess("no user") unless $c->user_exists();
     my $r = $self->_req("Thruk::Utils::get_fake_session", ["Thruk::Context", $session_id, $c->stash->{'remote_user'}, $c->user->{'roles'}], { auth => $c->stash->{'remote_user'}, keep_su => 1 } );
     $session_id = $r->[0] if $r && ref($r) eq 'ARRAY';
@@ -951,6 +951,7 @@ sub _req {
                 my $err = $data->{'output'}->[3];
                 $err =~ s/^ERROR:\s*//gmx;
                 $err =~ s/^\Qhttp backend error: \E//gmx;
+                $err =~ s/,\s*<GEN\d+>\s+line\s+1\.//gmx;
                 _debug_log_request_response($c, $response);
                 die("http backend error: ".$err);
             }

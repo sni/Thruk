@@ -353,3 +353,4 @@ ignored_modules = Plack::Util::Accessor
 
 [TooMuchCode::ProhibitUnusedInclude]
 severity   = 5
+ignore     = IO::Socket::SSL

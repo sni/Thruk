@@ -1,4 +1,5 @@
 ﻿[% WRAPPER _conf_objects_frame.tt %]
+[% PROCESS _blocks.tt %]
 
 [% IF force_delete %]
 <form action="conf.cgi" method="POST">
@@ -11,10 +12,11 @@
   <tr>
     <td class='dataVar' style="text-align:center" colspan=2>
       <br>
-      [% link = "conf.cgi?sub=objects&action=delete&force=1&data.id=" _ object.get_id() _ "&CSRFtoken=" _ get_user_token(c) %]
-      [% text = object.get_type() | ucfirst %]
-      [% text = "Delete this " _ text _ " and remove it from the selected references" %]
-      [% button(link, text, 'conf_delete_button', '', '', '', 1) %]
+      [% PROCESS _button btn = {
+        skipform => 1,
+        data     => { sub => 'objects', 'data.id' => object.get_id(), force => 1, action => "delete", CSRFtoken => get_user_token(c) },
+        button   => { class => 'conf_delete_button', text => "Delete this " _ object.get_type().ucfirst _ " and remove it from the selected references" },
+      }%]
       <br>
       <br>
     </td>
@@ -107,12 +109,11 @@
   <tr>
     <td class='dataVar' style="text-align:center" colspan=2>
       <br>
-      <form>
-      [% link = "conf.cgi?sub=objects&data.id=" _ object.get_id() %]
-      [% text = object.get_type() | ucfirst %]
-      [% text = "Continue editing " _ text %]
-      [% button(link, text, 'conf_button', '', '', '', 1) %]
-      </form>
+      [% PROCESS _button btn = {
+        form   => { action => 'conf.cgi', method => 'GET' },
+        data   => { sub => 'objects', 'data.id' => object.get_id() },
+        button => { class => 'conf_button', text => "Continue editing " _ object.get_type().ucfirst },
+      }%]
       <br>
       <br>
     </td>

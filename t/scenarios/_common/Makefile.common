@@ -8,13 +8,16 @@ EXPECTED_BACKENDS=1
 INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
 ifdef INTERACTIVE
   DOCKER_COMPOSE_TTY=
+  DOCKER_COMPOSE_LOGS=
 else
   DOCKER_COMPOSE_TTY=-T
+  DOCKER_COMPOSE_LOGS=--no-color
 endif
 
 wait_start:
 	$(THRUK) cache clean
 	for x in $$(seq $(STARTUPWAIT)); do \
+	   if [ $$(docker-compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	   if [ $$($(THRUK) -l 2>&1 | grep -v ^Def | grep -v ^- | grep -v ERROR | grep OK | wc -l) -eq $(EXPECTED_BACKENDS) ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
@@ -26,7 +29,7 @@ wait_start_failed: non_interactive_only
 	-echo "ERROR: startup failed"
 	-test -e thruk.conf && $(THRUK) -vvv -l
 	-docker ps
-	-docker-compose logs --tail=30 --no-color -t | sort
+	-docker-compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
 	$(MAKE) wait_start_failed_extra
 
 wait_start_failed_extra:
@@ -39,6 +42,7 @@ test: wait_start
 	$(MAKE) extra_test \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
+	$(MAKE) test_docker_logs
 
 test_verbose: wait_start
 	@echo "### $@: $$(date "+%FT%T.%N")"
@@ -48,12 +52,19 @@ test_verbose: wait_start
 	$(MAKE) extra_test_verbose \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
+	$(MAKE) test_docker_logs_verbose
+
+test_docker_logs:
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/../_common/t/999*.t
+
+test_docker_logs_verbose:
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/../_common/t/999*.t
 
 failed_test: non_interactive_only
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
 	-docker ps
-	-docker-compose logs --tail=30 --no-color -t | sort
+	-docker-compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
 	for svc in $$(docker-compose config --services | sort); do \
 		index=0; \
 		for container in $$(docker-compose ps -q $$svc); do \
@@ -101,7 +112,7 @@ prepare:
 	docker-compose build
 	docker-compose up --remove-orphans -d
 	docker ps
-	@docker-compose logs -f | while read LOGLINE; do \
+	@docker-compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
 		echo "$${LOGLINE}"; \
 		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ docker-compose && exit 0; \
 		[[ "$${LOGLINE}" == *"ERROR"* ]] && pkill -P $$$$ docker-compose && exit 1; \

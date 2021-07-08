@@ -95,6 +95,11 @@ t/scenarios/*/panorama/
 action_menus/*.js
 t/scenarios/pentest_skipfish/results/\d+
 t/scenarios/pentest_arachni/results/
-.build/
+^.ci/
 .github/
 ^continue$
+plugins/plugins-available/editor
+plugins/plugins-available/omd
+plugins/plugins-available/pansnaps
+plugins/plugins-available/status-dashboard
+plugins/plugins-available/woshsh

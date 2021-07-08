@@ -1,7 +1,3 @@
-- yum:
-    name:
-      - passwd
-    state: present
 - shell: "/usr/libexec/openssh/sshd-keygen ecdsa"
 - shell: "/usr/libexec/openssh/sshd-keygen rsa"
 - shell: "/usr/libexec/openssh/sshd-keygen ed25519"

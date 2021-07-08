@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 58;
+plan tests => 72;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -83,3 +83,18 @@ TestUtils::test_command({
     cmd  => $curl.' --data "comment_data=testDowntime" https://127.0.0.1/demo/thruk/r/sites/ALL/hosts/test/cmd/schedule_host_downtime',
     like => ['/Command successfully submitted/', '/SCHEDULE_HOST_DOWNTIME/'],
 });
+
+###########################################################
+$test = {
+    cmd  => '/usr/bin/env thruk apikey info '.$data->{'private_key'},
+    like => ['/comment/', '/digest/', '/\.SHA\-256/', '/super user/'],
+};
+TestUtils::test_command($test);
+
+$test = {
+    cmd  => '/usr/bin/env thruk apikey info '.$data->{'file'},
+    like => ['/comment/', '/digest/', '/\.SHA\-256/', '/super user/'],
+};
+TestUtils::test_command($test);
+
+###########################################################

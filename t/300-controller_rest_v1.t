@@ -7,7 +7,7 @@ use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 519;
+    plan tests => 531;
 }
 
 BEGIN {
@@ -289,6 +289,30 @@ TestUtils::test_page(
         'method'       => 'GET',
         'like'         => ['"contacts"', '"UNKNOWN"'],
         'unlike'       => ['"contacts" : null,'],
+    );
+};
+
+################################################################################
+# csv output
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/csv/hosts?columns=name,contacts',
+        'content_type' => 'text/plain; charset=utf-8',
+        'method'       => 'GET',
+        'like'         => ['name;contacts'],
+        'unlike'       => ['ARRAY'],
+    );
+};
+
+################################################################################
+# csv output
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/xls/hosts?columns=name,contacts',
+        'content_type' => 'application/x-msexcel',
+        'method'       => 'GET',
+        'like'         => ['Arial1'],
+        'unlike'       => ['ARRAY'],
     );
 };
 

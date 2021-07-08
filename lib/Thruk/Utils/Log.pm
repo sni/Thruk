@@ -18,6 +18,7 @@ use Time::HiRes ();
 use threads ();
 
 use Thruk::Base ();
+use Thruk::Utils::Encode ();
 
 use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc
@@ -185,6 +186,7 @@ sub _log {
     }
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth+2;
     for my $l (split/\n/mx, $line) {
+        $l = '[cron] '.$l if $ENV{'THRUK_CRON'};
         if(   $lvl == ERROR)   { $log->error($l); }
         elsif($lvl == WARNING) { $log->warn($l);  }
         elsif($lvl == INFO)    { $log->info($l);  }
@@ -240,7 +242,7 @@ sub _audit_log {
 
     $msg = sprintf("[%s][%s][%s] %s", $category, $user, $sessionid, $msg);
     if($ENV{'THRUK_TEST_NO_AUDIT_LOG'}) {
-        $ENV{'THRUK_TEST_NO_AUDIT_LOG'} .= "\n".$msg;
+        $ENV{'THRUK_TEST_NO_AUDIT_LOG'} .= "\n".Thruk::Utils::Encode::encode_utf8($msg);
         return;
     }
 
@@ -405,6 +407,12 @@ sub _get_file_logger {
         $config->{'log4perl_logfile_in_use'} = $1;
     }
     $log4perl_conf =~ s/\.Threshold=INFO/.Threshold=DEBUG/gmx if Thruk::Base->debug();
+    if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'}) {
+        my $format = '[%d{yyyy/MM/dd} %d{ABSOLUTE}][%p][%-30Z]%U %m{chomp}%n';
+        Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
+        Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
+        $log4perl_conf =~ s/\.ConversionPattern=.*/.ConversionPattern=$format/gmx;
+    }
     Log::Log4perl::init(\$log4perl_conf);
     $filelogger = Log::Log4perl::get_logger("thruk.log");
     return($filelogger);

@@ -1,12 +1,10 @@
 ﻿[% WRAPPER _conf_frame.tt %]
+[% PROCESS _blocks.tt %]
 
 <div align="center">
-<form action="conf.cgi" method="POST">
-<input type="hidden" name="sub" value="objects">
-  <table border="0" class='data conftoolobj'>
-    [% PROCESS _conf_objects_menu.tt type="tools" %]
-  </table>
-</form>
+<table border="0" class='data conftoolobj'>
+  [% PROCESS _conf_objects_menu.tt type="tools" %]
+</table>
 <br><br>
 <table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
 <tr>
@@ -22,9 +20,16 @@
       [% IF results.size > 1 %]
         <div align="right" style="position: absolute; right: 15px; top: 30px;">
           [% IF toolobj.defined("fix_all_serial") && toolobj.defined("fix_all_serial") %]
-            [% button('#', toolobj.fixlink _ " all", 'conf_cut_button conf_cleanup_button width_100', 'return conf_tool_cleanup(this, \'fix_all_serial\')', "padding-left: 3px;") %]
+            [% PROCESS _button btn = {
+              form   => { action => "#", style => "padding-left: 3px;" },
+              button => { class => 'conf_cut_button conf_cleanup_button width_100', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", text => toolobj.fixlink _ " all" },
+            }%]
           [% ELSE %]
-            [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;cleanup=1&amp;ident=all"; button(link, toolobj.fixlink _ " all", 'conf_cleanup_button') %]
+            [% PROCESS _button btn = {
+              form   => { action => "conf.cgi" },
+              data   => { sub => 'objects', tools => tool, cleanup => 1, ident => 'all' },
+              button => { class => 'conf_cleanup_button', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", text => toolobj.fixlink _ " all" },
+            }%]
           [% END %]
         </div>
       [% END %]
@@ -43,11 +48,19 @@
         <td nowrap>[% IF r.id %][% link_obj(r.obj) %][% END %]</td>
         <td nowrap>[% r.message %]</td>
         <td nowrap>
-          [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;ignore=1&amp;ident=" _ r.ident; button(link, 'ignore', 'conf_cut_button conf_cleanup_button width_100', 'return conf_tool_cleanup(this, \'' _ link _ '\', true)', "padding-left: 3px;") %]
+          [% PROCESS _button btn = {
+            form   => { action => "conf.cgi", style => "padding-left: 3px;" },
+            data   => { sub => 'objects', tools => tool, ignore => 1, ident => r.ident },
+            button => { class => 'conf_cut_button conf_cleanup_button width_100', onclick => "return conf_tool_cleanup(this, '', true)", text => "ignore" },
+          }%]
           [% IF r.id  && r.obj.file.readonly %]
             file is read-only
           [% ELSIF r.cleanable %]
-            [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;cleanup=1&amp;ident=" _ r.ident; button(link, toolobj.fixlink, 'conf_cleanup_button width_100 conf_cleanup_button_fix', 'return conf_tool_cleanup(this, \'' _ link _ '\')') %]
+            [% PROCESS _button btn = {
+              form   => { action => "conf.cgi" },
+              data   => { sub => 'objects', tools => tool, cleanup => 1, ident => r.ident },
+              button => { class => 'conf_cleanup_button width_100 conf_cleanup_button_fix', onclick => "return conf_tool_cleanup(this, '')", text => toolobj.fixlink },
+            }%]
           [% END %]
         </td>
       </tr>

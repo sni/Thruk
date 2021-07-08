@@ -1368,6 +1368,9 @@ button.refreshing, button.thruk_btn.top_refresh_button.refreshing {
   background-position: center;
   background-repeat: no-repeat;
 }
+button.refreshing.small {
+  background-size: contain;
+}
 button.thruk_btn.top_refresh_button {
   background-image: none;
   top: inherit;
@@ -1591,7 +1594,6 @@ input[type=text], input[type=password] {
   margin-right: 3px;
   border-width: 1px;
   height: 17px;
-  border-width: 1px;
 }
 
 .loginbutton {

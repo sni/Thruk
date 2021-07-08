@@ -47,8 +47,12 @@ if(-e $cachefile) {
 }
 
 if(scalar @ARGV > 0) {
-    plan( tests => scalar @ARGV);
-    for my $file (@ARGV) {
+    my @files = Thruk::Utils::IO::all_perl_files(@ARGV);
+    @files = grep(!/\.git\//, @files);
+    @files = grep(!/\/vendor\//, @files);
+    @files = grep(!/\/t\//, @files);
+    plan( tests => scalar @files);
+    for my $file (@files) {
         critic_ok($file);
     }
 }

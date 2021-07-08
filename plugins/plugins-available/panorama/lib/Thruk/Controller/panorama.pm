@@ -292,10 +292,10 @@ sub _js {
             }
         }
         $user_data->{'activeTab'} = scalar @{$open_tabs} > 0 ? $open_tabs->[0] : "";
-    } elsif($c->cookie('thruk_panorama_tabs')) {
-        $open_tabs = [split(/\s*:\s*/mx, $c->cookie('thruk_panorama_tabs')->value)];
-        if($c->cookie('thruk_panorama_active')) {
-            $user_data->{'activeTab'} = $c->cookie('thruk_panorama_active')->value;
+    } elsif($c->cookies('thruk_panorama_tabs')) {
+        $open_tabs = [split(/\s*:\s*/mx, $c->cookies('thruk_panorama_tabs'))];
+        if($c->cookies('thruk_panorama_active')) {
+            $user_data->{'activeTab'} = $c->cookies('thruk_panorama_active');
         }
     }
 
@@ -551,7 +551,6 @@ sub _task_status {
                 Thruk::Utils::set_message($c, 'fail_message', 'Found '.(scalar @{$services}).' services. Cannot send reschedule command.');
             }
         }
-        $c->stash->{'use_csrf'} = 0;
         if($params->{'cmd_typ'}) {
             require Thruk::Controller::cmd;
             if(Thruk::Controller::cmd::do_send_command($c)) {
@@ -3521,8 +3520,8 @@ sub _get_default_tab_xdata {
 ##########################################################
 sub _add_json_dashboard_timestamps {
     my($c, $json, $tab) = @_;
-    if(!defined $tab && $c->cookie('thruk_panorama_active')) {
-        $tab = $c->cookie('thruk_panorama_active')->value;
+    if(!defined $tab && $c->cookies('thruk_panorama_active')) {
+        $tab = $c->cookies('thruk_panorama_active');
     }
     if($tab) {
         my $nr = $tab;

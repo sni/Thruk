@@ -78,6 +78,9 @@ TP.host_reschedule_menu = function() {
 TP.cmd_form_handler = function() {
     var menu  = this.up('menu');
     var panel = menu.up('panel').up('panel');
+    if(panel.panel && panel.panel.tab) {
+        panel = panel.panel;
+    }
     var tab   = panel.tab;
     var form  = this.up('menu').down('form').getForm();
     if(form.isValid()) {
