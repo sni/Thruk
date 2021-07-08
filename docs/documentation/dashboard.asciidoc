@@ -12,7 +12,7 @@ is a super flexible dashboard framework which allows you to place icons and widg
 on a canvas to design all types of dashboards.
 
 ++++
-A demo is available at <a href="http://demo.thruk.org/thruk/cgi-bin/panorama.cgi" target="_blank">demo.thruk.org</a>.
+A demo is available at <a href="https://demo.thruk.org/demo/thruk/cgi-bin/panorama.cgi" target="_blank">demo.thruk.org</a>.
 <br style="clear: both;"><br>
 ++++
 
