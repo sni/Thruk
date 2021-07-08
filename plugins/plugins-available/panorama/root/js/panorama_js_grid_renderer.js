@@ -308,7 +308,7 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
         action_menu = item.raw.THRUK_ACTION_MENU;
     }
     if(action_menu) {
-        icons += TP.addActionIconsFromMenu(action_menu, d.name);
+        icons += TP.addActionIconsFromMenu(action_menu, d.name, undefined, view);
     }
     return icons;
 }
@@ -343,7 +343,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
     if(action_menu) {
-        icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description);
+        icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description, view);
     }
     return icons;
 }
@@ -559,9 +559,16 @@ function action_icon(o, action_icon) {
     return action_icon;
 }
 
-TP.addActionIconsFromMenu = function(action_menu_name, host, service) {
+TP.addActionIconsFromMenu = function(action_menu_name, host, service, view) {
+    var panel, parent;
+    while(parent = view.up("panel")) {
+        if(parent.xdata && parent.tab) {
+            panel = parent;
+        }
+        view = parent;
+    }
     var icons = "";
-    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', '', '', {}, true);
+    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', panel, '', {}, true);
     if(menuData === false) {
         return(icons);
     }
