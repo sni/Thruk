@@ -1044,6 +1044,8 @@ sub _cmd_raw {
     # add proxy version and config tool settings to processinfo
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'thrukversion'}.')';
+        $res->[2]->{$key}->{'thruk_version'}        = $c->config->{'thrukversion'};
+        $res->[2]->{$key}->{'extra_version'}        = $c->config->{'extra_version'};
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
