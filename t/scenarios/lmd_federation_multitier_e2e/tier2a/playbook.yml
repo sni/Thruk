@@ -34,7 +34,7 @@
   - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
   - name: "wait for tier3a to come up"
     uri:
-      url: "https://tier3a.test.local/demo/thruk/cgi-bin/remote.cgi"
+      url: "https://tier3a.tier3.test.local/demo/thruk/cgi-bin/remote.cgi"
       validate_certs: False
       status_code: 200
     register: result
@@ -43,7 +43,7 @@
     delay: 1
   - name: "wait for tier3b to come up"
     uri:
-      url: "https://tier3b.test.local/demo/thruk/cgi-bin/remote.cgi"
+      url: "https://tier3b.tier3.test.local/demo/thruk/cgi-bin/remote.cgi"
       validate_certs: False
       status_code: 200
     register: result

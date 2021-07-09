@@ -26,7 +26,7 @@
       group: demo
   - name: "wait for tier2d to come up"
     uri:
-      url: "https://tier2d.test.local/demo/thruk/cgi-bin/remote.cgi"
+      url: "https://tier2d.tier2.test.local/demo/thruk/cgi-bin/remote.cgi"
       validate_certs: False
       status_code: 200
     register: result

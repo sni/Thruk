@@ -1,7 +1,9 @@
 version: '2'
 
 networks:
-  test.local:
+  tier1.test.local:
+  tier2.test.local:
+  tier3.test.local:
 
 services:
   tier1a:
@@ -16,11 +18,12 @@ services:
         - ../../../:/thruk:ro
         - .:/test:ro
     networks:
-      test.local:
+      tier2.test.local:
+      tier1.test.local:
         aliases:
-          - tier1a.test.local
+          - tier1a.tier1.test.local
     hostname: tier1a
-    domainname: test.local
+    domainname: tier1.test.local
 
   tier1b:
     build: tier1b/
@@ -33,11 +36,11 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier1.test.local:
         aliases:
-          - tier1b.test.local
+          - tier1b.tier1.test.local
     hostname: tier1b
-    domainname: test.local
+    domainname: tier1.test.local
 
   tier1c:
     build: tier1c/
@@ -50,11 +53,11 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier1.test.local:
         aliases:
-          - tier1c.test.local
+          - tier1c.tier1.test.local
     hostname: tier1c
-    domainname: test.local
+    domainname: tier1.test.local
 
   tier1d:
     build: tier1d/
@@ -67,11 +70,12 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier2.test.local:
+      tier1.test.local:
         aliases:
-          - tier1d.test.local
+          - tier1d.tier1.test.local
     hostname: tier1d
-    domainname: test.local
+    domainname: tier1.test.local
 
 
   tier2a:
@@ -82,11 +86,12 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier3.test.local:
+      tier2.test.local:
         aliases:
-          - tier2a.test.local
+          - tier2a.tier2.test.local
     hostname: tier2a
-    domainname: test.local
+    domainname: tier2.test.local
 
   tier2b:
     build: tier2b/
@@ -96,11 +101,11 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier2.test.local:
         aliases:
-          - tier2b.test.local
+          - tier2b.tier2.test.local
     hostname: tier2b
-    domainname: test.local
+    domainname: tier2.test.local
 
   tier2c:
     build: tier2c/
@@ -110,11 +115,11 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier2.test.local:
         aliases:
-          - tier2c.test.local
+          - tier2c.tier2.test.local
     hostname: tier2c
-    domainname: test.local
+    domainname: tier2.test.local
 
   tier2d:
     build: tier2d/
@@ -124,11 +129,11 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier2.test.local:
         aliases:
-          - tier2d.test.local
+          - tier2d.tier2.test.local
     hostname: tier2d
-    domainname: test.local
+    domainname: tier2.test.local
 
   tier3a:
     build: tier3a/
@@ -138,11 +143,11 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier3.test.local:
         aliases:
-          - tier3a.test.local
+          - tier3a.tier3.test.local
     hostname: tier3a
-    domainname: test.local
+    domainname: tier3.test.local
 
   tier3b:
     build: tier3b/
@@ -152,8 +157,8 @@ services:
         - .:/scenario:ro
         - ../../../:/thruk:ro
     networks:
-      test.local:
+      tier3.test.local:
         aliases:
-          - tier3b.test.local
+          - tier3b.tier3.test.local
     hostname: tier3b
-    domainname: test.local
+    domainname: tier3.test.local
