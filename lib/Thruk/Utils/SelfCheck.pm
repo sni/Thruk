@@ -419,11 +419,10 @@ sub _lmd_checks  {
         my $start_time = $status->[0]->{'start_time'};
         $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
 
-        my $total = 0;
-        for my $p (@{$c->db->get_peers()}) {
-            next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
-            $total++;
-        }
+        $c->db->reset_failed_backends();
+        my($backends) = $c->db->select_backends();
+
+        my $total = scalar @{$backends};
         my $stats = $c->db->lmd_stats($c);
         my $online = 0;
         for my $stat (@{$stats}) {
