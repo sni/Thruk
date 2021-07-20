@@ -8,6 +8,10 @@ next:
             - add command_name to /notifications
           - Config Tool:
             - fix listing some dependencies as false duplicates
+          - Panorama:
+            - fix creating action menu in host/services panel
+          - self check:
+            - check for lmd errors
 
 2.44-3   Thu Jun 10 19:22:57 CEST 2021
           - add option to configure error message for locked accounts
