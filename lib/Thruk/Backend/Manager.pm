@@ -1815,7 +1815,7 @@ sub _get_result_lmd {
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
         if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
-            die("did not get a valid response for at least any site");
+            return $c->detach('/error/index/9');
         }
     }
 

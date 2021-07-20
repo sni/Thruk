@@ -361,8 +361,20 @@ sub _get_connection_details {
         return "lmd error - ".$c->stash->{'lmd_error'};
     }
 
+    my $listed = {};
+    for my $pd (sort keys %{$c->stash->{'failed_backends'}}) {
+        my $peer = $c->db->get_peer_by_key($pd);
+        my $name = $pd;
+        if($peer) {
+            $name = $peer->{'name'};
+        }
+        $listed->{$pd} = 1;
+        $detail .= $name.': '.($c->stash->{'failed_backends'}->{$pd}//'')." (".$peer->{'addr'}."))\n";
+    }
+
     for my $pd (sort keys %{$c->stash->{'backend_detail'}}) {
         next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
+        next if $listed->{$pd};
         $detail .= ($c->stash->{'backend_detail'}->{$pd}->{'name'} // $pd).': '
                     .($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '')
                     .' ('.($c->stash->{'backend_detail'}->{$pd}->{'addr'} || '').")\n";
