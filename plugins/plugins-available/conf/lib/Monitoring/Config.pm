@@ -1343,8 +1343,8 @@ sub gather_references {
                 }
                 if($count == 0) {
                     $r2 =~ s/^\+//gmx;
-                    $r2 =~ s/^\!//gmx;
                 }
+                $r2 =~ s/^\!//gmx;
                 next if $r2 eq '';
                 $outgoing->{$type}->{$r2} = '';
                 $count++;
