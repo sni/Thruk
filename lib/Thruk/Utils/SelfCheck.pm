@@ -449,6 +449,14 @@ sub _lmd_checks  {
             $details .= "no errors\n";
         } else {
             $details .= (scalar @out)." errors found\n";
+            my $x = 0;
+            for my $last_err (reverse @out) {
+                chomp($last_err);
+                $last_err = substr(0, 67)."..." if length($last_err) > 70;
+                $details .= sprintf("    * %s\n", $last_err);
+                $x++;
+                last if $x >= 3;
+            }
             $rc = 1 unless $rc > 1;
         }
     }
