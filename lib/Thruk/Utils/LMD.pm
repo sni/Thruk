@@ -345,7 +345,7 @@ sub kill_if_not_responding {
 
     return if $config->{'lmd_remote'};
 
-    my $lmd_timeout = $config->{'lmd_timeout'} // 5;
+    my $lmd_timeout = $config->{'lmd_timeout'} // 15;
     return if $lmd_timeout <= 0;
     my $lmd_dir  = $config->{'tmp_path'}.'/lmd';
     my $pid_file = $lmd_dir.'/pid';
@@ -370,7 +370,8 @@ sub kill_if_not_responding {
         my $err = $@;
         alarm(0);
         if($err) {
-            _warn("lmd not responding, killing with force: err - ".$err);
+            _error("lmd not responding, killing with force: err - ".$err);
+            _error($data);
             kill('USR1', $lmd_pid);
             sleep(1);
             kill(2, $lmd_pid);
@@ -381,14 +382,15 @@ sub kill_if_not_responding {
     }
 
     my $waited = 0;
+    my $extra  = 5;
     my $rc = -1;
-    while($waited++ <= $lmd_timeout && $rc != 0) {
+    while($waited++ <= ($lmd_timeout+$extra) && $rc != 0) {
         POSIX::waitpid($pid, POSIX::WNOHANG);
         $rc = $?;
         sleep(1);
     }
     if($rc != 0) {
-        _warn("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
+        _error("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
         kill('USR1', $lmd_pid);
         kill(2, $pid);
         sleep(1);
