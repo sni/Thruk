@@ -1479,6 +1479,7 @@ sub _do_on_peers {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
         _debug($err);
+        $c->stash->{'backend_error'} = 1;
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
         }
@@ -1505,7 +1506,7 @@ sub _do_on_peers {
             # multiple backends and all fail
             # die with a small error for know, usually an empty result means that
             # none of our backends were reachable
-            die('undefined result, all backends down?');
+            die("did not get a valid response for at least any site");
             #local $Data::Dumper::Deepcopy = 1;
             #my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
             #for my $b (@{$get_results_for}) {
@@ -1815,7 +1816,8 @@ sub _get_result_lmd {
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
         if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
-            return $c->detach('/error/index/9');
+            $c->stash->{'backend_error'} = 1;
+            die("did not get a valid response for at least any site");
         }
     }
 

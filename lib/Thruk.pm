@@ -327,7 +327,11 @@ sub _dispatcher {
         if($err && !$c->{'detached'}) { # prevent overriding previously detached errors
             _error("Error path_info: ".$path_info) unless $c->req->url;
             $c->error($err);
-            Thruk::Controller::error::index($c, 13);
+            if($c->stash->{'backend_error'}) {
+                Thruk::Controller::error::index($c, 9);
+            } else {
+                Thruk::Controller::error::index($c, 13);
+            }
         }
     }
     $c->{'stage'} = 'post';

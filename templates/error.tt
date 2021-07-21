@@ -13,7 +13,7 @@
     </tr>
   </table><br>
   [% IF errorMessage %]
-  <div class='errorMessage'>[% errorMessage %]</div>
+  <div class='errorMessage'><b>[% errorMessage %]</b></div>
   <div class='errorDescription'>[% dump2str(errorDescription, 0, 0) | nl2br %]</div>
   [% ELSE %]
   [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
@@ -25,7 +25,7 @@
   [% IF errorDetails %]
   <br>
   <div class='errorDescription' style="text-align: left">
-  Details:<br>
+  <b>Details:</b><br>
   [% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]
   </div><br>
   [% END %]

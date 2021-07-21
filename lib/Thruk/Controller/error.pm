@@ -277,6 +277,7 @@ sub index {
     }
 
     if(Thruk::Base->debug) {
+        $c->stash->{errorDetails} .= "\n" if $c->stash->{errorDetails};
         $c->stash->{errorDetails} .= $errorDetails;
     }
 
