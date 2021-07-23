@@ -1024,7 +1024,7 @@ sub _log_stats {
                 $status     = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
                 (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
                 if($status->{'lock_mode'}->{'value'}) {
-                    $msg = "running ".$status->{'lock_mode'}->{'value'}." since ".scalar localtime($status->{'last_update'}->{'value'});
+                    $msg = sprintf("running %s since %s (pid: %s)", $status->{'lock_mode'}->{'value'}, scalar localtime($status->{'last_update'}->{'value'}), $status->{'update_pid'}->{'value'});
                 }
             }
         }
