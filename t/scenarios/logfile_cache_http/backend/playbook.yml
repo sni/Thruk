@@ -24,3 +24,5 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
+  - name: "create logcache before apache starts first time"
+    shell: sudo su - demo -c "omd start mysql && omd start core && thruk logcache -y -f import && omd stop mysql && omd stop core"
