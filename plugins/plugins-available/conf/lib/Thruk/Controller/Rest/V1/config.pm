@@ -581,12 +581,19 @@ sub _set_object_model {
     delete $c->{'obj_db'};
     Thruk::Utils::Conf::set_object_model($c);
     delete $c->req->parameters->{'refreshdata'};
-    if($c->{'obj_db'}) {
-        return if $c->stash->{'param_backend'} ne $peer_key; # make sure we did not fallback on some default backend
-        die("failed to initialize objects of peer ".$peer_key) if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0);
-        return 1;
+    if(!$c->{'obj_db'}) {
+        _debug("backend %s has no config tool settings", $peer_key);
+        return;
     }
-    return;
+    # make sure we did not fallback on some default backend
+    if($c->stash->{'param_backend'} ne $peer_key) {
+        _debug("backend %s has no config tool settings", $peer_key);
+        return;
+    }
+    if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0) {
+        die("failed to initialize objects of peer ".$peer_key);
+    }
+    return 1;
 }
 ##########################################################
 sub _add_object {
