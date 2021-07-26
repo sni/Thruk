@@ -958,11 +958,11 @@ sub _req {
             $self->_replace_peer_key($data->{'output'}->[2]);
 
             if($options->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
-                return $self->_wait_for_remote_job($1);
+                $data = $self->_wait_for_remote_job($1);
             }
 
             return $data if $options->{'want_data'};
-            return $data->{'output'};
+            return $data->{'out'}//$data->{'output'};
         }
         _debug_log_request_response($c, $response);
         die("not an array ref, got ".ref($data->{'output'}));
@@ -1047,12 +1047,7 @@ sub _wait_for_remote_job {
         }
         last;
     }
-    my $last_error = "";
-    return([undef,
-            1,
-           [$res->[2]->{'rc'}, $res->[2]->{'out'}],
-            $last_error]
-    );
+    return($res);
 }
 
 ##########################################################

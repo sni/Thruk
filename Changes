@@ -8,6 +8,7 @@ next:
             - add command_name to /notifications
           - Config Tool:
             - fix listing some dependencies as false duplicates
+            - fix federated config tool over multiple relays
           - Panorama:
             - fix creating action menu in host/services panel
           - self check:

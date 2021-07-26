@@ -2445,12 +2445,17 @@ sub _remote_do_bg {
                         sub      => $sub,
                         args     => $args,
                    }, {
-                        auth     => $c->stash->{'remote_user'},
-                        keep_su  => 1,
-                        wait     => 1,
+                        auth      => $c->stash->{'remote_user'},
+                        keep_su   => 1,
+                        wait      => 1,
+                        want_data => 1,
                    });
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
-    return $res->[2];
+    my $data = $res->[2];
+    if(ref $data eq 'HASH') {
+        return($data->{'rc'}, $data->{'err'}||$data->{'out'});
+    }
+    die("bogus result: ".Dumper($res));
 }
 
 ##########################################################
@@ -2552,7 +2557,7 @@ do config check on remote site
 sub remote_config_check {
     my($self, $c) = @_;
     return unless $self->is_remote();
-    my($rc, $output) = @{$self->_remote_do_bg($c, 'configcheck')};
+    my($rc, $output) = $self->_remote_do_bg($c, 'configcheck');
     $c->stash->{'output'} = $output;
     return !$rc;
 }
@@ -2569,7 +2574,7 @@ do a config reload on remote site
 sub remote_config_reload {
     my($self, $c) = @_;
     return unless $self->is_remote();
-    my($rc, $output) = @{$self->_remote_do_bg($c, 'configreload')};
+    my($rc, $output) = $self->_remote_do_bg($c, 'configreload');
     $c->stash->{'output'} = $output;
     return !$rc;
 }

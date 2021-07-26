@@ -226,6 +226,9 @@ sub perl {
             print $fh "ERROR: perl eval failed:\n";
             print $fh $err;
             Thruk::Utils::IO::close($fh, $dir."/stderr");
+            open($fh, '>', $dir."/rc");
+            print $fh 1;
+            Thruk::Utils::IO::close($fh, $dir."/rc");
         };
         # calling _exit skips running END blocks
         exit(1);
@@ -1091,6 +1094,9 @@ sub _clean_unstorable_refs {
     for my $key (keys %{$var}) {
         my $ref = ref $var->{$key};
         if($ref ne '' && $ref ne 'HASH' && $ref ne 'ARRAY') {
+            delete $var->{$key};
+        }
+        if($key eq 'model_init') {
             delete $var->{$key};
         }
     }

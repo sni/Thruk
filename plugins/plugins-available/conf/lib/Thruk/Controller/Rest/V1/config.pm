@@ -476,7 +476,7 @@ sub _rest_get_config_check {
         my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $job);
         push @{$check}, {
             'peer_key' => $peer_key,
-            'output'   => $stash->{'original_output'},
+            'output'   => $err || $stash->{'original_output'},
             'failed'   => $rc == 0 ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
         };
     }

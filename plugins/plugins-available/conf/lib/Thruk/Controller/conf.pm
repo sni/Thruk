@@ -2693,21 +2693,26 @@ sub _config_check {
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
     my $rc = 0;
-    if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
-        $rc = 1;
-    }
-    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
-        $rc = 1;
+    if($c->{'obj_db'}->is_remote()) {
+        if($c->{'obj_db'}->remote_config_check($c)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+            $rc = 1;
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+        }
     } else {
-        Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+        if(_cmd($c, $obj_check_cmd)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+            $rc = 1;
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+        }
     }
     _nice_check_output($c);
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    return $rc;
+    return($rc, $c->stash->{'original_output'});
 }
 
 ##########################################################
@@ -2771,7 +2776,7 @@ sub _config_reload {
     $c->stash->{'reload_nav'} = 1;
 
     $c->stats->profile(end => "conf::_config_reload");
-    return 1;
+    return(1, $c->stash->{'original_output'});
 }
 
 ##########################################################

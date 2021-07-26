@@ -842,14 +842,20 @@ sub _cmd_configtool {
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_check($c)',
+                                                       message    => 'please stand by while configuration is beeing checked...',
+                                                       background => 1,
+                                });
         die("starting configcheck failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_reload($c)',
+                                                       message    => 'please stand by while configuration is beeing reloaded...',
+                                                       background => 1,
+                                });
         die("starting configreload failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
@@ -1049,7 +1055,8 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        my $tmp = $c->db->peers->{$key}->{'peer_config'}->{'configtool'};
+        my $peer = $c->db->get_peer_by_key($key);
+        my $tmp  = $peer->{'configtool'} // $peer->{'peer_config'}->{'configtool'} || $peer->{'configtool'};
         if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
             $res->[2]->{$key}->{'configtool'} = {
                 'core_type'      => $tmp->{'core_type'},
@@ -1082,7 +1089,7 @@ sub _cmd_ext_job {
         #my($out,$err,$time,$dir,$stash,$rc)
         my @res = Thruk::Utils::External::get_result($c, $jobid, $c->user->{'superuser'});
         $res = {
-            'out'   => $res[0],
+            'out'   => $res[9]//$res[0],
             'err'   => $res[1],
             'time'  => $res[2],
             'dir'   => $res[3],
