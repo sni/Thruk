@@ -2493,7 +2493,7 @@ sub remote_file_sync {
         return $c->detach_error({msg => "syncing remote configuration files failed", code => 500, log => 1});
     }
 
-    my $localdir = $c->config->{'tmp_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
+    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
     $self->{'config'}->{'localdir'} = $localdir;
     $self->{'config'}->{'obj_dir'}  = '/';
     Thruk::Utils::IO::mkdir_r($localdir);
