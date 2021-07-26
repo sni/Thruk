@@ -1828,6 +1828,7 @@ sub _get_files_names {
         for my $dir ( ref $config->{'obj_dir'} eq 'ARRAY' ? @{$config->{'obj_dir'}} : ($config->{'obj_dir'}) ) {
             my $path = $dir;
             $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
+            next unless -e $path;
             for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
                 Thruk::Utils::Encode::decode_any($file);
                 $file =~ s|/+|/|gmx;
@@ -2481,6 +2482,15 @@ sub remote_file_sync {
     return unless $self->is_remote();
     $c->stats->profile(begin => "remote_file_sync");
     my $files = {};
+
+    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
+    $self->{'config'}->{'localdir'} = $localdir;
+    $self->{'config'}->{'obj_dir'}  = '/';
+
+    if(!$self->{'files'} || scalar @{$self->{'files'}} == 0) {
+        $self->_set_files();
+    }
+
     for my $f (@{$self->{'files'}}) {
         next unless -f $f->{'path'};
         $files->{$f->{'display'}} = {
@@ -2493,9 +2503,6 @@ sub remote_file_sync {
         return $c->detach_error({msg => "syncing remote configuration files failed", code => 500, log => 1});
     }
 
-    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
-    $self->{'config'}->{'localdir'} = $localdir;
-    $self->{'config'}->{'obj_dir'}  = '/';
     Thruk::Utils::IO::mkdir_r($localdir);
     for my $path (keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
