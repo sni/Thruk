@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 32;
+plan tests => 52;
 
 ###########################################################
 # test thruks script path
@@ -44,4 +44,16 @@ for my $site (qw/tier1a tier2a tier3a/) {
 TestUtils::test_command({
     cmd    => '/usr/bin/env thruk r -d "" /config/check',
     like    => [qr%\QRead object config files okay\E%, qr%\Q"failed" : false\E%],
+});
+
+for my $site (qw/tier1a tier2a tier3a/) {
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env thruk r -d "" /sites/'.$site.'/config/reload',
+        like    => [qr%\QReloading naemon configuration\E%, qr%\Q"failed" : false\E%],
+    });
+}
+
+TestUtils::test_command({
+    cmd    => '/usr/bin/env thruk r -d "" /config/reload',
+    like    => [qr%\QReloading naemon configuration\E%, qr%\Q"failed" : false\E%],
 });

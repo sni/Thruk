@@ -2355,7 +2355,10 @@ sub wait_after_reload {
     $c->stats->profile(begin => "wait_after_reload ($time)");
     $pkey = $c->stash->{'param_backend'} unless $pkey;
     my $start = time();
-    if(!$pkey && !$time) { sleep 3; }
+    if(!$pkey && !$time) {
+        _debug('no peer key and time, waiting 3 seconds');
+        sleep 3;
+    }
 
     # wait until core responds again
     my $procinfo = {};
@@ -2393,6 +2396,7 @@ sub wait_after_reload {
                 $c->stats->profile(comment => "core program_start: ".$procinfo->{$pkey}->{'program_start'});
                 if($procinfo->{$pkey}->{'program_start'} > $time) {
                     $done = 1;
+                    _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
                     last;
                 } else {
                     _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
@@ -2417,7 +2421,7 @@ sub wait_after_reload {
             $done = 1;
             last;
         }
-        if(time() - $start <= 5) {
+        if((time() - $start) <= 5) {
             Time::HiRes::sleep(0.3);
         } else {
             sleep(1);
