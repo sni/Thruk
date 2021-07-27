@@ -70,18 +70,12 @@ sub cmd {
     my($id,$dir) = init_external($c);
     return unless $id;
 
-    my $pid = fork();
-    die "fork() failed: $!" unless defined $pid;
+    my $parent_res = _fork_twice($c, $id, $dir, $conf);
+    return $parent_res if $parent_res;
 
-    if($pid) {
-        return do_parent_stuff($c, $dir, $pid, $id, $conf);
-    } else {
-        do_child_stuff($c, $dir, $id);
-
-        $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
-
-        exec($cmd) or exit(1); # just to be sure
-    }
+    do_child_stuff($c, $dir, $id);
+    $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
+    exec($cmd) or exit(1); # just to be sure
 }
 
 
@@ -131,12 +125,8 @@ sub perl {
     my ($id,$dir) = init_external($c);
     return unless $id;
 
-    my $pid = fork();
-    die "fork() failed: $!" unless defined $pid;
-
-    if($pid) {
-        return do_parent_stuff($c, $dir, $pid, $id, $conf);
-    }
+    my $parent_res = _fork_twice($c, $id, $dir, $conf);
+    return $parent_res if $parent_res;
 
     if(defined $conf->{'backends'}) {
         $c->db->disable_backends();
@@ -420,8 +410,7 @@ sub get_status {
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
-    # reap pending zombies
-    waitpid(-1, WNOHANG);
+    _reap_pending_childs();
 
     my $user = '';
     if( -f $dir."/user" ) {
@@ -436,7 +425,6 @@ sub get_status {
 
     my $is_running = _is_running($c, $dir);
     my $percent    = 0;
-    # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start      = stat($dir.'/start');
     if(!defined $start[9]) {
         return($is_running,0,$percent,"not started",undef,undef,$user);
@@ -753,9 +741,10 @@ do all child things after a fork
 sub do_child_stuff {
     my($c, $dir, $id, $keep_stdout_err) = @_;
 
-    POSIX::setsid() or die "Can't start a new session: $!";
-
     confess("no c") unless $c;
+
+    _decouple_fcgid();
+
     $c->stats->clear();
     $c->stash->{'total_backend_waited'} = 0;
     $c->stash->{'total_render_waited'}  = 0;
@@ -781,17 +770,6 @@ sub do_child_stuff {
     ## use critic
 
     $c->{'app'}->{'pool'}->shutdown_threads() if $c->{'app'}->{'pool'};
-
-    # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
-    for my $fd (0..10) {
-        my $io = IO::Handle->new_from_fd($fd,"r");
-        if(defined $io && -S $io) {
-            POSIX::close($fd);
-        }
-    }
-
-    # connect stdin to dev/null
-    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     unless($keep_stdout_err) {
@@ -826,26 +804,19 @@ sub do_child_stuff {
 
 =head2 do_parent_stuff
 
-  do_parent_stuff($c, $dir, $pid, $id, $conf)
+  do_parent_stuff($c, $dir, $id, $conf)
 
 do all parent things after a fork
 
 =cut
 sub do_parent_stuff {
-    my($c, $dir, $pid, $id, $conf) = @_;
+    my($c, $dir, $id, $conf) = @_;
 
     confess("got no id") unless $id;
 
-    # write pid file
-    my $pidfile = $dir."/pid";
-    open(my $fh, '>', $pidfile) or die("cannot write pid $pidfile: $!");
-    print $fh $pid;
-    print $fh "\n";
-    Thruk::Utils::IO::close($fh, $pidfile);
-
     # write hostname file
     my $hostfile = $dir."/hostname";
-    open($fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
+    open(my $fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
     print $fh $Thruk::Globals::NODE_ID, "\n", $Thruk::Globals::HOSTNAME, "\n";
     Thruk::Utils::IO::close($fh, $hostfile);
 
@@ -892,7 +863,7 @@ sub do_parent_stuff {
         Thruk::Utils::IO::close($fh, $dir."/show_output");
     }
 
-    _debug2(($conf->{'background'} ? "background" : "")." job $id started with pid ".$pid);
+    _debug2(($conf->{'background'} ? "background" : "")." job $id started");
 
     $c->stash->{'job_id'} = $id;
     if(!$conf->{'background'}) {
@@ -1003,12 +974,10 @@ sub _is_running {
         }
     }
 
-    # reap pending zombies
-    waitpid(-1, WNOHANG);
+    _reap_pending_childs();
 
     my $pid = Thruk::Utils::IO::read($dir."/pid");
     $pid = Thruk::Utils::IO::untaint($pid);
-    waitpid($pid, WNOHANG);
     if(kill(0, $pid) > 0) {
         return 1;
     }
@@ -1115,6 +1084,59 @@ sub _reconnect {
         print STDERR "reconnect failed: ".$@;
         kill($$);
     };
+    return;
+}
+
+##############################################
+# fork twice and return parent initial stuff or exit
+# if it doesn't return anything, you are the child
+sub _fork_twice {
+    my($c, $id, $dir, $conf) = @_;
+
+    my $pid = fork();
+    die "fork() failed: $!" unless defined $pid;
+
+    if($pid) {
+        my $parent_res = do_parent_stuff($c, $dir, $id, $conf);
+        waitpid($pid, 0);
+        return $parent_res;
+    }
+
+    # fork twice to completly detach
+    my $pid2 = fork();
+    die "fork() failed: $!" unless defined $pid2;
+    if($pid2) {
+        Thruk::Utils::IO::write($dir."/pid", $pid2);
+        _decouple_fcgid();
+        exit;
+    }
+
+    return;
+}
+
+##############################################
+# close stdin and fcgid communication socket
+sub _decouple_fcgid {
+    POSIX::setsid() or die "Can't start a new session: $!";
+    # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
+    for my $fd (0..10) {
+        my $io = IO::Handle->new_from_fd($fd,"r");
+        if(defined $io && -S $io) {
+            POSIX::close($fd);
+        }
+    }
+
+    # connect stdin to dev/null
+    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
+
+    return;
+}
+
+##############################################
+# reap all finished child processes
+sub _reap_pending_childs {
+    while(waitpid(-1, WNOHANG) > 0) {
+    }
     return;
 }
 

@@ -36,6 +36,7 @@ $log4perl_created = 1;
 require TestUtils;
 import TestUtils;
 TestUtils::get_c();
+my $mainpid = $$;
 
 $ENV{'THRUK_VERBOSE'} = 1;
 $ENV{'THRUK_MODE'}    = 'FASTCGI'; # otherwise logging is set to screen
@@ -72,7 +73,7 @@ ok(unlink('/tmp/thruk_test_debug.log'), 'unlink test debug file');
 done_testing();
 
 END {
-    if($log4perl_created && !$ENV{'THRUK_JOB_ID'}) {
+    if($log4perl_created && $mainpid == $$) {
         unlink("log4perl.conf");
         unlink('/tmp/thruk_test_error.log');
         unlink('/tmp/thruk_test_debug.log');
