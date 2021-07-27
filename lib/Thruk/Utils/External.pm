@@ -261,7 +261,7 @@ sub render_page_in_background {
     my @caller = caller(1);
     return(
         Thruk::Utils::External::perl($c, { expr    => $caller[3].'($c)',
-                                           message => 'please stand by while page is beeing rendered...',
+                                           message => 'please stand by while page is being rendered...',
                                            clean   => 1,
                                            render  => 1,
     }));
