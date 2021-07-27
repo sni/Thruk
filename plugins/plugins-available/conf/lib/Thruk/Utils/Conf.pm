@@ -83,13 +83,13 @@ sub set_object_model {
     }
     # currently parsing
     elsif($jobid && Thruk::Utils::External::is_running($c, $jobid, 1)) {
-        $c->stash->{set_object_model_err} = "configuration is beeing parsed right now, try again in a few moments";
+        $c->stash->{set_object_model_err} = "configuration is being parsed right now, try again in a few moments";
         $c->redirect_to("job.cgi?job=".$jobid);
         return 0;
     }
     else {
         # need to parse complete objects
-        $c->stash->{set_object_model_err} = "configuration is beeing parsed right now, try again in a few moments";
+        $c->stash->{set_object_model_err} = "configuration is being parsed right now, try again in a few moments";
         if(scalar keys %{$c->db->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
                                                message => 'please stand by while reading the configuration files...',
