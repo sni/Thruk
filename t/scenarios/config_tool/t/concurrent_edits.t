@@ -24,7 +24,6 @@ my $other_user_id   = Thruk::Utils::Crypt::hexdigest($other_user);
 
 ###########################################################
 # cleanup
-my $var_path = $c->config->{'var_path'};
 unlink(glob($c->config->{'var_path'}.'/obj_retention.test.*'));
 
 ###########################################################
