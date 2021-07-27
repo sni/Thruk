@@ -843,7 +843,7 @@ sub _cmd_configtool {
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         require Thruk::Utils::External;
         my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_check($c)',
-                                                       message    => 'please stand by while configuration is beeing checked...',
+                                                       message    => 'please stand by while configuration is being checked...',
                                                        background => 1,
                                 });
         die("starting configcheck failed, check your logfiles") unless $jobid;
@@ -853,7 +853,7 @@ sub _cmd_configtool {
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         require Thruk::Utils::External;
         my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_reload($c)',
-                                                       message    => 'please stand by while configuration is beeing reloaded...',
+                                                       message    => 'please stand by while configuration is being reloaded...',
                                                        background => 1,
                                 });
         die("starting configreload failed, check your logfiles") unless $jobid;
