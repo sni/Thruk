@@ -1285,7 +1285,7 @@ sub _apply_config_changes {
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_check($c)',
-                                               message => 'please stand by while configuration is beeing checked...',
+                                               message => 'please stand by while configuration is being checked...',
                                         });
             return;
         } else {
@@ -1304,7 +1304,7 @@ sub _apply_config_changes {
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
-                                               message => 'please stand by while configuration is beeing reloaded...',
+                                               message => 'please stand by while configuration is being reloaded...',
                                         });
             return;
         } else {
