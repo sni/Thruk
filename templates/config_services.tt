@@ -19,7 +19,7 @@
     <th class='data'>Contact Groups</th>
     <th class='data'>Max. Check Attempts</th>
     <th class='data'>Normal Check Interval</th>
-    <th class='data'>Retry Check Interal</th>
+    <th class='data'>Retry Check Interval</th>
     <th class='data'>Check Command</th>
     <th class='data'>Check Period</th>
 <!--
