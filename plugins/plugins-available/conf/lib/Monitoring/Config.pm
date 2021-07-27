@@ -2493,7 +2493,7 @@ sub remote_file_sync {
     $self->{'config'}->{'obj_dir'}  = '/';
 
     if(!$self->{'files'} || scalar @{$self->{'files'}} == 0) {
-        $self->_set_files();
+        $self->update();
     }
 
     for my $f (@{$self->{'files'}}) {
