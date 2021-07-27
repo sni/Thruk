@@ -601,7 +601,7 @@ sub get_action_menu {
         _error("error in action menu".($sourcefile ? " (from file ".$sourcefile.")" : "").": ".$err."\nsource:\n".$menu);
     }
     if($ENV{THRUK_REPORT} && !$err) {
-        # workaround for images beeing placed by js document.write later
+        # workaround for images being placed by js document.write later
         my $image_data = {};
         my $items = Cpanel::JSON::XS->new->decode($menu);
         for my $item (@{Thruk::Base::list($items)}) {
