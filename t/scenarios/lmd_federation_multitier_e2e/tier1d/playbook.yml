@@ -4,8 +4,6 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - shell: "omd config demo set MYSQL on"
-  - shell: "omd config demo set THRUK_LOGCACHE on"
   - shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - copy:
       src: "/root/thruk_local.conf"
@@ -33,3 +31,5 @@
     until: result.status == 200
     retries: 180
     delay: 1
+  - include_role:
+      name: thruk_logcache_mysql

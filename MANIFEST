@@ -1977,6 +1977,8 @@ t/scenarios/_common/ansible/roles/test-config-generator/tasks/main.yml
 t/scenarios/_common/ansible/roles/test-config-generator/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_developer/vars/main.yml
+t/scenarios/_common/ansible/roles/thruk_logcache_mysql/tasks/main.yml
+t/scenarios/_common/ansible/roles/thruk_logcache_mysql/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_plugin_editor/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_plugin_editor/vars/main.yml
 t/scenarios/_common/Makefile.common

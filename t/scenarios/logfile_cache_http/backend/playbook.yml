@@ -6,8 +6,6 @@
     - role: thruk_developer
   tasks:
   - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set MYSQL on
-  - shell: omd config demo set THRUK_LOGCACHE on
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
@@ -24,5 +22,5 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
-  - name: "create logcache before apache starts first time"
-    shell: sudo su - demo -c "omd start mysql && omd start core && thruk logcache -y -f import && omd stop mysql && omd stop core"
+  - include_role:
+      name: thruk_logcache_mysql
