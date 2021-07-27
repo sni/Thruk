@@ -1,30 +1,30 @@
 ﻿[%+ UNLESS all_in_one_css %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/common.css' />
-[% IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END %]
-[% END %]
-[% IF !all_in_one_css || thruk_author %]
+[%- IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END -%]
+[% END +%]
+[%- IF !all_in_one_css || thruk_author %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css' />
 [%+ END %]
-[% UNLESS use_frames %]
-  [% IF !all_in_one_css || thruk_author %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes.css' />
-  [%+ END %]
-[% END %]
-[% IF !all_in_one_css || thruk_author %]
+[%- UNLESS use_frames -%]
+[%- IF !all_in_one_css || thruk_author -%]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes.css' />
+[%+ END %]
+[%- END -%]
+[%- IF !all_in_one_css || thruk_author -%]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
 [%+ END %]
-[% IF all_in_one_css && !thruk_author %]
-  [% IF use_frames %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-[% fileversion %].css' />
-  [%+ ELSE %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-noframes-[% fileversion %].css' />
-  [%+ END %]
-[% END %]
+[%- IF all_in_one_css && !thruk_author -%]
+[%- IF use_frames -%]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-[% fileversion %].css' />
+[%+ ELSE %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-noframes-[% fileversion %].css' />
+[%+ END %]
+[%- END -%]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/daterangepicker-3.0.5/daterangepicker.css' />
-[% IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css' />[% END %]
-[% IF css.list.size > 0 %][% FOREACH cs = css.list %]
+[%+ IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css' />[% END %]
+[%+ IF css.list.size > 0 %][% FOREACH cs = css.list -%]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %][% cs %]' />
 [% END %][% END %]
-[% IF show_sitepanel == 'tree' %]
+[%- IF show_sitepanel == 'tree' -%]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jstree-3.3.8/themes/default/style.min.css' />
-[% END %]
+[%+ END -%]
