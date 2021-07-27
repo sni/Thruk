@@ -621,6 +621,7 @@ sub cmd {
         $cmd = $c;
         $c = undef;
     }
+    $c->stats->profile(begin => "IO::cmd") if $c;
 
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
@@ -639,6 +640,7 @@ sub cmd {
         confess("array cmd not supported for detached commands") if ref $cmd eq 'ARRAY';
         require Thruk::Utils::External;
         Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
+        $c->stats->profile(end => "IO::cmd") if $c;
         return(0, "cmd started in background");
     }
 
@@ -695,8 +697,8 @@ sub cmd {
         }
 
         $output = `$cmd`;
+        $rc     = $?;
         $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
-        $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if($rc == -1 && defined $SIG{CHLD} && $SIG{CHLD} eq 'IGNORE');
     }
@@ -708,6 +710,7 @@ sub cmd {
     _debug( "rc:     ". $rc )     if $c;
     _debug( "output: ". $output ) if $c;
     #&timing_breakpoint('IO::cmd done');
+    $c->stats->profile(end => "IO::cmd") if $c;
     return($rc, $output) if wantarray;
     return($output);
 }

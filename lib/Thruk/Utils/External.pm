@@ -149,9 +149,11 @@ sub perl {
         $c->stats->profile(begin => 'External::perl');
 
         do {
+            $c->stats->profile(begin => 'External::perl eval');
             ## no critic
             my $rc = eval($conf->{'expr'});
             ## use critic
+            $c->stats->profile(end => 'External::perl eval');
 
             $err = $@;
             if($err) {
@@ -231,8 +233,10 @@ sub perl {
             Thruk::Utils::IO::close($fh, $dir."/rc");
         };
         # calling _exit skips running END blocks
+        unlink($dir."/pid"); # signal parent we are done
         exit(1);
     }
+    unlink($dir."/pid"); # signal parent we are done
     exit(0);
 }
 

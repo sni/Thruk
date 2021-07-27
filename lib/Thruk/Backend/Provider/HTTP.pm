@@ -6,6 +6,7 @@ use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 use Data::Dumper;
 use HTTP::Request ();
+use Time::HiRes ();
 
 use Thruk::UserAgent ();
 use Thruk::Utils ();
@@ -1038,15 +1039,25 @@ wait till remote job is finished and return that data
 =cut
 sub _wait_for_remote_job {
     my($self, $jobid) = @_;
+    my $c = $Thruk::Globals::c;
+    $c->stats->profile(begin => "http::_wait_for_remote_job:$jobid");
     my $res;
+    my $start = time();
     while(1) {
         $res = $self->_req('job', $jobid);
         if($res->[2] =~ m/jobid:([^:]+):0/mx) {
-            sleep(1);
+            my $duration = time()-$start;
+            if(   $duration <   5) { Time::HiRes::sleep(0.5); }
+            elsif($duration <  15) { sleep(1);  }
+            elsif($duration <  60) { sleep(2);  }
+            elsif($duration < 120) { sleep(5);  }
+            else                   { sleep(15); }
             next;
         }
         last;
     }
+    $c->stats->profile(comment => "http::_wait_for_remote_job waited ".(time() - $start)."s for $jobid");
+    $c->stats->profile(end => "http::_wait_for_remote_job:$jobid");
     return($res);
 }
 

@@ -2690,6 +2690,7 @@ sub _list_references {
 ##########################################################
 sub _config_check {
     my($c) = @_;
+    $c->stats->profile(begin => "conf::_config_check");
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
     my $rc = 0;
@@ -2712,6 +2713,7 @@ sub _config_check {
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
+    $c->stats->profile(end => "conf::_config_check");
     return($rc, $c->stash->{'original_output'});
 }
 

@@ -2439,6 +2439,7 @@ sub _remote_do {
 # do something on remote site in background
 sub _remote_do_bg {
     my($self, $c, $sub, $args) = @_;
+    $c->stats->profile(begin => "conf::_remote_do_bg: $sub");
     my $res = $self->{'remotepeer'}
                    ->{'class'}
                    ->request('configtool', {
@@ -2450,6 +2451,7 @@ sub _remote_do_bg {
                         wait      => 1,
                         want_data => 1,
                    });
+    $c->stats->profile(end => "conf::_remote_do_bg: $sub");
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
     my $data = $res->[2];
     if(ref $data eq 'HASH') {
