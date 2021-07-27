@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 52;
+plan tests => 57;
 
 ###########################################################
 # test thruks script path
@@ -23,21 +23,21 @@ TestUtils::test_command({
 # local files should be fetched on the first call
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk r -d "" /sites/tier3a/config/check -v',
-    errlike => [qr%\Qupdating file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%, qr%\Q"failed" : false\E%],
+    errlike => [qr%\Qupdating file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%, qr%\Q"failed" : false\E%, qr%\QThings look okay\E%],
     like    => [],
 });
 
 # local files should be checked on consecutive calls
 TestUtils::test_command({
     cmd    => '/usr/bin/env thruk r -d "" /sites/tier3a/config/check -v',
-    errlike => [qr%\Qkeeping file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%, qr%\Q"failed" : false\E%],
+    errlike => [qr%\Qkeeping file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%, qr%\Q"failed" : false\E%, qr%\QThings look okay\E%],
     like    => [],
 });
 
 for my $site (qw/tier1a tier2a tier3a/) {
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk r -d "" /sites/'.$site.'/config/check',
-        like    => [qr%\QRead object config files okay\E%, qr%\Q"failed" : false\E%],
+        like    => [qr%\QRead object config files okay\E%, qr%\Q"failed" : false\E%, qr%\QThings look okay\E%],
     });
 }
 
