@@ -620,7 +620,7 @@ Ext.define('TP.SmallWidget', {
                     panel.noMoreMoves = false;
                     panel.fireEvent("move", panel, undefined, undefined);
 
-                    // unset selected icons, otherwise dd with shift ends up with icon beeing selected
+                    // unset selected icons, otherwise dd with shift ends up with icon being selected
                     panel.preventNextSelect = true;
                 }
                 TP.isShift = false;
