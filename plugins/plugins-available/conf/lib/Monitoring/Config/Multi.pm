@@ -95,7 +95,7 @@ sub cache_exists {
 
 =head2 currently_parsing
 
-returns job id if config is currently beeing parsed
+returns job id if config is currently being parsed
 
 =cut
 sub currently_parsing {
