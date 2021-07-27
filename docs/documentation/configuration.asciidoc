@@ -1100,7 +1100,7 @@ ex.:
 === commandline_obfuscate_pattern
 {% include new_since.ad version="2.18" %}
 Replace pattern for expanded command lines. Could be used to replace
-sensitive information from beeing displayed in the gui.
+sensitive information from being displayed in the gui.
 The pattern is a simple perl regular substitute expression in the form of
 '/pattern/replacement/'
 
