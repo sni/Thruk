@@ -83,6 +83,15 @@ sub self_check {
     # run checks
     for my $t (sort keys %{$selected}) {
         next if $t eq 'all';
+        if(!defined $available_checks->{$t}) {
+            push @{$results}, {
+                sub     => $t,
+                rc      => 3,
+                msg     => 'UNKNOW - unknown subcheck type',
+                details => "available subcheck types are: ".join(", ", (sort keys %{$available_checks})),
+            };
+            next;
+        }
         push @{$results}, &{$available_checks->{$t}}($c);
     }
 
