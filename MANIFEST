@@ -2495,7 +2495,6 @@ t/scenarios/sakuli_e2e/omd/playbook.yml
 t/scenarios/sakuli_e2e/omd/test.cfg
 t/scenarios/sakuli_e2e/omd/thruk_extra.conf
 t/scenarios/sakuli_e2e/print2unittest
-t/scenarios/sakuli_e2e/sakuli/Dockerfile
 t/scenarios/sakuli_e2e/start_dashboard.sh
 t/scenarios/sakuli_e2e/test.sh
 t/scenarios/site_menu_multi_tier_e2e/docker-compose.yml
