@@ -10,7 +10,7 @@ The downtimetask command executes recurring downtimes tasks.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] downtimetask <nr>
+  Usage: thruk [globaloptions] downtimetask [options] <nr>
 
 =head1 OPTIONS
 
@@ -19,6 +19,10 @@ The downtimetask command executes recurring downtimes tasks.
 =item B<help>
 
     print help and exit
+
+=item B<-t / --test>
+
+    do not send commands but display what would be send
 
 =back
 
@@ -50,6 +54,19 @@ sub cmd {
     if(!$commandoptions || scalar @{$commandoptions} == 0) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
+
+    # parse options
+    my $opt = {};
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptionsFromArray($commandoptions,
+       "t|test"         => \$opt->{'testmode'},
+    ) or do {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    };
+
+    $ENV{'THRUK_NO_COMMANDS'} = "" if $opt->{'testmode'};
 
     $c->stats->profile(begin => "_cmd_downtimetask($action)");
     require URI::Escape;
@@ -273,7 +290,11 @@ sub set_downtime {
 
 Runs the downtime task for file '1'
 
-  %> thruk command downtimetask 1
+  %> thruk downtimetask 1
+
+Same but in test mode:
+
+  %> thruk downtimetask 1 --test
 
 =cut
 
