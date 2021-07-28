@@ -149,26 +149,19 @@ sub perl {
             if($err) {
                 undef $rc;
                 if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
-                    open(my $fh, '>', $dir."/forward");
                     if(ref $c->stash->{'last_redirect_to'} || $c->stash->{'last_redirect_to'} =~ m/ARRAY\(/mx) {
                         confess("invalid redirect url: ".Dumper($c->stash->{'last_redirect_to'}));
                     }
-                    print $fh $c->stash->{'last_redirect_to'},"\n";
-                    Thruk::Utils::IO::close($fh, $dir."/forward");
+                    Thruk::Utils::IO::write($dir."/forward", $c->stash->{'last_redirect_to'}."\n");
                     $err = undef;
                     $rc  = 0;
                 }
             }
 
-            open(my $fh, '>', $dir."/rc");
             # invert rc to match exit code style
-            print $fh ($rc ? 0 : 1);
-            Thruk::Utils::IO::close($fh, $dir."/rc");
-            open($fh, '>>', $dir."/perl_res");
-            if(defined $rc && ref $rc eq '') {
-                print $fh $rc;
-            }
-            Thruk::Utils::IO::close($fh, $dir."/perl_res");
+            Thruk::Utils::IO::write($dir."/rc", ($rc ? 0 : 1));
+            Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? $rc : "", undef, 1);
+
             CORE::close(STDERR);
             CORE::close(STDOUT);
         };
@@ -203,9 +196,7 @@ sub perl {
         store(\%{$c->stash}, $dir."/stash");
 
         if(Thruk::Base->debug) {
-            open(my $fh, '>', $dir."/stash.dump");
-            print $fh Dumper($c->stash);
-            CORE::close($fh);
+            Thruk::Utils::IO::write($dir."/stash.dump", Dumper($c->stash));
         }
         die($err) if $err; # die again after cleanup
     };
@@ -214,13 +205,8 @@ sub perl {
     save_profile($c, $dir);
     if($err) {
         eval {
-            open(my $fh, '>>', $dir."/stderr");
-            print $fh "ERROR: perl eval failed:\n";
-            print $fh $err;
-            Thruk::Utils::IO::close($fh, $dir."/stderr");
-            open($fh, '>', $dir."/rc");
-            print $fh 1;
-            Thruk::Utils::IO::close($fh, $dir."/rc");
+            Thruk::Utils::IO::write($dir."/stderr", "ERROR: perl eval failed:\n".$err, undef, 1);
+            Thruk::Utils::IO::write($dir."/rc", "1\n");
         };
         # calling _exit skips running END blocks
         unlink($dir."/pid"); # signal parent we are done
@@ -683,9 +669,7 @@ sub update_status {
     my $statusfile = $dir."/status";
     my $text = $percent." ".$remaining_seconds." ".$status;
     _debug("update_status: ".$text);
-    open(my $fh, '>', $statusfile) or die("cannot write status $statusfile: $!");
-    print $fh $text, "\n";
-    Thruk::Utils::IO::close($fh, $statusfile);
+    Thruk::Utils::IO::write($statusfile, $text."\n");
     return;
 }
 
@@ -710,21 +694,19 @@ sub save_profile {
     $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
     $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
 
-    my $file = $dir.'/profile.log.'.$nr;
-    open(my $fh, '>>', $file) or die("cannot write $file: $!");
+    my $profile = "";
     eval {
-        print $fh $c->stats->report(),"\n";
+        $profile = $c->stats->report()."\n";
     };
-    print $fh $@,"\n" if $@;
-    CORE::close($fh);
+    $profile = $@."\n" if $@;
+    Thruk::Utils::IO::write($dir.'/profile.log.'.$nr, $profile);
 
-    $file = $dir.'/profile.html.'.$nr;
-    open($fh, '>>', $file) or die("cannot write $file: $!");
+    $profile = "";
     eval {
-        print $fh $c->stats->report_html();
+        $profile = $c->stats->report_html();
     };
-    print $fh $@,"\n" if $@;
-    CORE::close($fh);
+    $profile = $@."\n" if $@;
+    Thruk::Utils::IO::write($dir.'/profile.html.'.$nr, $profile);
 
     return;
 }
@@ -815,33 +797,20 @@ sub do_parent_stuff {
     confess("got no id") unless $id;
 
     # write hostname file
-    my $hostfile = $dir."/hostname";
-    open(my $fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
-    print $fh $Thruk::Globals::NODE_ID, "\n", $Thruk::Globals::HOSTNAME, "\n";
-    Thruk::Utils::IO::close($fh, $hostfile);
+    Thruk::Utils::IO::write($dir."/hostname", $Thruk::Globals::NODE_ID."\n".$Thruk::Globals::HOSTNAME."\n");
 
     # write start file
-    my $startfile = $dir."/start";
-    open($fh, '>', $startfile) or die("cannot write start $startfile: $!");
-    print $fh time(),"\n";
-    print $fh Dumper($conf);
-    print $fh "\n";
+    Thruk::Utils::IO::write($dir."/start", time()."\n".Dumper($conf)."\n");
 
     # write user file
     if(!defined $conf->{'allow'} || defined $conf->{'allow'} eq 'user') {
         confess("no remote_user") unless defined $c->stash->{'remote_user'};
-        open($fh, '>', $dir."/user") or die("cannot write user: $!");
-        print $fh $c->stash->{'remote_user'};
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/user");
+        Thruk::Utils::IO::write($dir."/user", $c->stash->{'remote_user'}."\n");
     }
 
     # write message file
     if(defined $conf->{'message'}) {
-        open($fh, '>', $dir."/message") or die("cannot write message: $!");
-        print $fh $conf->{'message'};
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/message");
+        Thruk::Utils::IO::write($dir."/message", $conf->{'message'}."\n");
     }
 
     # write forward file
@@ -849,18 +818,12 @@ sub do_parent_stuff {
         if(ref $conf->{'forward'}) {
             confess("invalid redirect url: ".Dumper($conf->{'forward'}));
         }
-        open($fh, '>', $dir."/forward") or die("cannot write forward: $!");
-        print $fh $conf->{'forward'};
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/forward");
+        Thruk::Utils::IO::write($dir."/forward", $conf->{'forward'}."\n");
     }
 
     # write show_output file
     if(defined $conf->{'show_output'}) {
-        open($fh, '>', $dir."/show_output") or die("cannot write show_output: $!");
-        print $fh "1";
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/show_output");
+        Thruk::Utils::IO::write($dir."/show_output", "1\n");
     }
 
     _debug2(($conf->{'background'} ? "background" : "")." job $id started");
@@ -1008,7 +971,7 @@ sub _finished_job_page {
             binmode $fh;
             local $/ = undef;
             $c->res->body(<$fh>);
-            Thruk::Utils::IO::close($fh, $file);
+            CORE::close($file);
             unlink($file) if defined $c->stash->{cleanfile};
             $c->{'rendered'} = 1;
             $c->res->code($stash->{'file_name_meta'}->{'code'}) if defined $stash->{'file_name_meta'}->{'code'};
