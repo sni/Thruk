@@ -422,7 +422,7 @@ sub get_default_recurring_downtime {
 
     get_downtime_backends($c, $downtime)
 
-return default recurring downtime
+return backends used to set this downtime
 
 =cut
 sub get_downtime_backends {

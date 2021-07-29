@@ -30,6 +30,7 @@ The downtimetask command executes recurring downtimes tasks.
 
 use warnings;
 use strict;
+use Getopt::Long ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::CLI ();
@@ -66,7 +67,7 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
-    $ENV{'THRUK_NO_COMMANDS'} = "" if $opt->{'testmode'};
+    local $ENV{'THRUK_NO_COMMANDS'} = "" if $opt->{'testmode'};
 
     $c->stats->profile(begin => "_cmd_downtimetask($action)");
     require URI::Escape;
