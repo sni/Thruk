@@ -110,9 +110,17 @@ sub _handle_file {
     my $retries;
     my $total_retries = 5;
 
-    my $nr         = $file;
-    $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
+    my $nr = $file;
+    $file  = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
+    if(!-s $file) {
+        _error("cannot read %s: %s", $file, $!);
+        return("", 1);
+    }
     my $downtime   = Thruk::Utils::read_data_file($file);
+    if(!$downtime) {
+        _error("cannot read %s", $file);
+        return("", 1);
+    }
     my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c);
     for my $key (keys %{$default_rd}) {
         $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
