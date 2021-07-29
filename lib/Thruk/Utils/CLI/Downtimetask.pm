@@ -259,28 +259,26 @@ set downtime.
 sub set_downtime {
     my($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes) = @_;
 
-    # convert to normal url request
     my $product = $c->config->{'product_prefix'} || 'thruk';
-    my $url = sprintf('/'.$product.'/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
-                      $cmd_typ,
-                      URI::Escape::uri_escape_utf8($downtime->{'comment'}),
-                      URI::Escape::uri_escape_utf8(defined $downtime->{'author'} ? $downtime->{'author'} : '(cron)'),
-                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
-                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
-                      $downtime->{'fixed'},
-                      $hours,
-                      $minutes,
-                      join(',', @{$backends}),
-                      defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape_utf8($downtime->{'host'}) : '',
-                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape_utf8($downtime->{'service'}) : '',
-                      (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape_utf8($downtime->{'hostgroup'}) : '',
-                      (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
-                     );
-    my $old = $c->config->{'lock_author_names'};
-    $c->config->{'lock_author_names'} = 0;
-    my @res = Thruk::Utils::CLI::request_url($c, $url);
-    $c->config->{'lock_author_names'} = $old;
+    local $c->config->{'lock_author_names'} = 0;
+    my @res = Thruk::Utils::CLI::request_url($c, '/'.$product.'/cgi-bin/cmd.cgi', undef, 'POST', {
+        cmd_mod         => 2,
+        cmd_typ         => $cmd_typ,
+        com_data        => $downtime->{'comment'},
+        com_author      => defined $downtime->{'author'} ? $downtime->{'author'} : '(cron)',
+        trigger         => 0,
+        start_time      => $start,
+        end_time        => $end,
+        fixed           => $downtime->{'fixed'},
+        hours           => $hours,
+        minutes         => $minutes,
+        backend         => join(',', @{$backends}),
+        childoptions    => $downtime->{'childoptions'},
+        host            => $downtime->{'host'},
+        service         => $downtime->{'service'},
+        hostgroup       => $downtime->{'hostgroup'},
+        servicegroup    => $downtime->{'servicegroup'},
+    });
     return 0 if $res[0] != 200; # error is already printed
     return 1;
 }
