@@ -480,6 +480,10 @@ sub is_authorized_for_dashboard {
             my $name = (keys %{$user})[0];
             next unless $name eq $username;
             my $lvl  = $user->{$name} eq 'read-write' ? ACCESS_READWRITE : ACCESS_READONLY;
+            if($name eq '*') {
+                $access = $lvl if $lvl > $access;
+                next;
+            }
             $access = $lvl;
             last;
         }
