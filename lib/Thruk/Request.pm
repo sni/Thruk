@@ -76,13 +76,37 @@ sub _url {
 sub uri {
     my($self) = @_;
     my $uri = $self->SUPER::uri(@_);
-    $uri->scheme($self->{'env'}->{'HTTP_X_FORWARDED_PROTO'}) if $self->{'env'}->{'HTTP_X_FORWARDED_PROTO'};
-    $uri->host($self->{'env'}->{'HTTP_X_FORWARDED_HOST'}) if $self->{'env'}->{'HTTP_X_FORWARDED_HOST'};
-    my $port = $self->{'env'}->{'HTTP_X_FORWARDED_PORT'};
-    if($port && $port != $uri->port) {
+
+    my $scheme = $self->{'env'}->{'HTTP_X_FORWARDED_PROTO'};  # from X-FORWARDED-PROTO http header
+    $scheme =~ s/\s*,.*$//mx if $scheme; # use first in list
+    if($scheme && $scheme =~ m/^https?$/mx) {
+        $uri->scheme($scheme);
+    }
+
+    my $host = $self->{'env'}->{'HTTP_X_FORWARDED_HOST'}; # from X-FORWARDED-HOST http header
+    $host =~ s/\s*,.*$//mx if $host; # use first in list
+    if($host && _is_valid_hostname($host)) {
+        $uri->host($host);
+    }
+
+    my $port = $self->{'env'}->{'HTTP_X_FORWARDED_PORT'}; # from X-FORWARDED-PORT http header
+    $port =~ s/\s*,.*$//mx if $port; # use first in list
+    if($port && $port != $uri->port && $port =~ m/^\d+$/mx) {
         $uri->port($port);
     }
     return($uri);
+}
+
+sub _is_valid_hostname {
+    my($host) = @_;
+    # from https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch08s10.html
+    if($host =~ m/^
+        ([a-z0-9\-._~%]+                    # Named or IPv4 host
+        |\[[a-z0-9\-._~%!$&'()*+,;=:]+\])   # IPv6+ host
+        $/mx) {
+        return 1;
+    }
+    return;
 }
 
 1;
