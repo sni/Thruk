@@ -101,8 +101,8 @@ sub _is_valid_hostname {
     my($host) = @_;
     # from https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch08s10.html
     if($host =~ m/^
-        ([a-z0-9\-._~%]+                    # Named or IPv4 host
-        |\[[a-z0-9\-._~%!$&'()*+,;=:]+\])   # IPv6+ host
+        ([a-z0-9\-._~%]+     # Named host
+        |\[[a-f0-9:.]+\])    # IPv6 host
         $/mx) {
         return 1;
     }
