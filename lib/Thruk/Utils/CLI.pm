@@ -345,7 +345,7 @@ sub _run {
 
     # fix encoding
     my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
-    if($content_type =~ /^text/mx) {
+    if($content_type =~ /^text/mx && !$log_timestamps) {
         $result->{'output'} = encode_utf8(Thruk::Utils::Encode::decode_any($result->{'output'}));
     }
 
@@ -430,7 +430,9 @@ sub _dummy_c {
 ##############################################
 sub _internal_request {
     my($url, $method, $postdata, $user) = @_;
-    $method = 'GET' unless $method;
+    if(!defined $method) {
+        $method = $postdata ? "POST" : "GET";
+    }
 
     _debug(sprintf("_internal_request('%s', '%s')", $url, $method));
     delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -445,7 +447,15 @@ sub _internal_request {
     delete $Thruk::thruk->{'TRANSFER_USER'} if $app->{'thruk'};
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
-    my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
+    my $request = HTTP::Request->new($method, $url);
+    $request->method(uc($method));
+    if($postdata) {
+        $request->content_type('application/json; charset=utf-8');
+        $request->content(Cpanel::JSON::XS->new->utf8->encode($postdata)); # internal requests must use utf8
+        $request->header('Content-Length' => undef);
+    }
+
+    my $res    = $app->request($request);
     my $c      = $Thruk::Globals::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
     _debug2("_internal_request() done");
