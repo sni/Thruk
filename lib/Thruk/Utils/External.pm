@@ -160,7 +160,7 @@ sub perl {
 
             # invert rc to match exit code style
             Thruk::Utils::IO::write($dir."/rc", ($rc ? 0 : 1));
-            Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? $rc : "", undef, 1);
+            Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? Thruk::Utils::Encode::encode_utf8($rc) : "", undef, 1);
 
             CORE::close(STDERR);
             CORE::close(STDOUT);
