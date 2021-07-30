@@ -142,9 +142,11 @@ creates file and ensure permissions
 sub write {
     my($path,$content,$mtime,$append) = @_;
     my $mode = $append ? '>>' : '>';
-    open(my $fh, $mode, $path) or confess('cannot create file '.$path.': '.$!);
+    use bytes;
+    open(my $fh, $mode.':raw', $path) or confess('cannot create file '.$path.': '.$!);
     print $fh $content;
     &close($fh, $path) or confess("cannot close file ".$path.": ".$!);
+    no bytes;
     utime($mtime, $mtime, $path) if $mtime;
     return 1;
 }
