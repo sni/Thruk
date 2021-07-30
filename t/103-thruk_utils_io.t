@@ -56,9 +56,11 @@ is($hostname3, $hostname, "hostnames are equal");
 # write utf8
 for my $teststr (@{$testdata->{'data'}}) {
     next if ref $teststr;
-    use Encode;
-    my $rc = Thruk::Utils::IO::write($file, $teststr);
-    is($rc, 1, "write succeeded");
+    {
+        local $SIG{__WARN__} = sub { };
+        my $rc = Thruk::Utils::IO::write($file, $teststr);
+        is($rc, 1, "write succeeded");
+    };
 
     my $str = Thruk::Utils::IO::read($file);
     $str = Thruk::Utils::Encode::decode_any($str);
