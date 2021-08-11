@@ -20,7 +20,7 @@ if [ ! -e "root/thruk/javascript/thruk-${OLDFILEVERSION}.js" ]; then
     yes 'n' | perl Makefile.PL >/dev/null 2>&1
 fi
 if [ ! -e "root/thruk/javascript/thruk-${OLDFILEVERSION}.js" ]; then echo "Makefile was out of date, please run make again."; exit 1; fi
-if [ "$NEWVERSION" = "" ]; then NEWVERSION=$(dialog --stdout --inputbox "New Version (v2.40 / 2.40-2):" 0 35 "${LAST_GIT_TAG}"); else NEWVERSION="$NEWVERSION"; fi
+if [ "$NEWVERSION" = "" ]; then NEWVERSION=$(dialog --stdout --inputbox "New Version (v2.40 / 2.40.2):" 0 35 "${LAST_GIT_TAG}"); else NEWVERSION="$NEWVERSION"; fi
 
 if [ "x$DEBEMAIL" = "x" ]; then
     export DEBEMAIL="Thruk Development Team <devel@thruk.org>"
@@ -34,7 +34,8 @@ set -u
 
 # NEWVERSION can be:
 # 2.40             release without minor release
-# 2.40-2           release with minor release
+# 2.40-2           release with minor release (not used anymore)
+# 2.40.2           release with minor release
 # 2.41 2021-02-15  daily version with timestamp
 DAILY=`echo "$NEWVERSION" | awk '{ print $2 }'`
 NEWVERSION=`echo "$NEWVERSION" | awk '{ print $1 }'`
@@ -45,7 +46,10 @@ else
     RPMVERSION=$(echo "${NEWVERSION}"   | tr '-' '.')
     # append -1 if no minor release is set
     if [ $(echo "$NEWVERSION" | grep -Fc "-") -eq 0 ]; then
-        RPMVERSION="${RPMVERSION}.1"
+        # but only if there are less than 2 dots
+        if [ $(echo "$NEWVERSION" | tr -dc '.' | wc -m) -eq 0 ]; then
+            RPMVERSION="${RPMVERSION}.1"
+        fi
     fi
 fi
 FILEVERSION="$RPMVERSION"
