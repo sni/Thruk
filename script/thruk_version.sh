@@ -70,7 +70,7 @@ if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
                 -i root/thruk/startup.html  \
                 -i .gitignore
     sed -r "s/^next.*/$CHANGESHEADER/" -i Changes
-    sed -r "s/${OLDFILEVERSION}/$FILEVERSION/" -i dist.ini
+    sed -r "s/^version.*/version    = $FILEVERSION/" -i dist.ini
 
     git mv plugins/plugins-available/mobile/root/mobile-${OLDFILEVERSION}.css plugins/plugins-available/mobile/root/mobile-$FILEVERSION.css
     git mv plugins/plugins-available/mobile/root/mobile-${OLDFILEVERSION}.js plugins/plugins-available/mobile/root/mobile-$FILEVERSION.js
