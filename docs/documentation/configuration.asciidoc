@@ -20,7 +20,7 @@ thruk_local.conf or into separate files below thruk_local.d/
 
 === Config file merge order
 
-Single key/value settings are overriden in the order above. Nested key/value
+Single key/value settings are overridden in the order above. Nested key/value
 pairs like Backends are merged.
 
 ex.:
@@ -83,7 +83,7 @@ example:
 
 === thruk_local.conf
 
-The thruk_local.conf should contain all settings which are locally overriden.
+The thruk_local.conf should contain all settings which are locally overridden.
 Keep the default settings in the thruk.conf and only put local overrides in
 either the thruk_local.conf or into conf file below thruk_local.d/.
 
@@ -143,7 +143,7 @@ ex.:
 
 Uses more descriptive page titles.
 Bookmark titles take precedence and
-can be overriden by adding the title
+can be overridden by adding the title
 parameter on most pages
 
 ex.:
@@ -235,7 +235,7 @@ The link:rest.html[rest api] is enabled by default, disabling it would break Thr
 {% include new_since.ad version="2.24" %}
 Using api keys can be disabled by setting this to 0.
 
-Note: this value cannot be overriden on a per user/group basis because it is
+Note: this value cannot be overridden on a per user/group basis because it is
 used on pre-authentication stage. If you want users to create new keys, use
 `max_api_keys_per_user`.
 
@@ -247,7 +247,7 @@ ex.:
 === max_api_keys_per_user
 {% include new_since.ad version="2.32" %}
 Limit amount of keys a user may create.
-Set to 0 to disable creating new keys completly
+Set to 0 to disable creating new keys completely
 
 ex.:
 
@@ -1228,7 +1228,7 @@ header.
 
 === default_state_order
 Defines the order to determine the worst/best states. Used in business processes
-and the panorama dashboard. Can be overriden in those plugins.
+and the panorama dashboard. Can be overridden in those plugins.
 
 ex.:
 
@@ -2675,7 +2675,7 @@ If not all config folders are managed by git, then you can specify a
 directory which is used to display the history. Should point to a
 directory which is part of a git repository. This config setting is
 only used for the history support in the configuration tool. The
-'git_base_dir' may be overriden by an per backend value.
+'git_base_dir' may be overridden by an per backend value.
 
 === show_summary_prompt
 Thruk will show a prompt to input a change summary if a 'post_obj_save_cmd' is
