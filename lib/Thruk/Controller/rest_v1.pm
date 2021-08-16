@@ -254,16 +254,9 @@ sub _format_csv_output {
             my $x = 0;
             for my $col (@{$columns}) {
                 $output .= ';' unless $x == 0;
-                if(ref($d->{$col}) eq 'ARRAY') {
-                    $output .= _escape_newlines(join(',', @{$d->{$col}}));
-                }
-                elsif(ref($d->{$col}) eq 'HASH') {
-                    my @list;
-                    for my $k (sort keys %{$d->{$col}}) {
-                        my $v = $d->{$col}->{$k};
-                        push @list, sprintf("%s:%s", $k, $v);
-                    }
-                    $output .= _escape_newlines(join(',', @list));
+                if(ref($d->{$col}) ne '') {
+                    require Thruk::Views::JSONRenderer;
+                    $output .= _escape_newlines(Thruk::Views::JSONRenderer::encode_json($c, $d->{$col}));
                 } else {
                     $output .= _escape_newlines($d->{$col} // '');
                 }
