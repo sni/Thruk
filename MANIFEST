@@ -2250,6 +2250,7 @@ t/scenarios/lmd_federation_multitier_e2e/Makefile
 t/scenarios/lmd_federation_multitier_e2e/objects.cfg
 t/scenarios/lmd_federation_multitier_e2e/README
 t/scenarios/lmd_federation_multitier_e2e/t/100-lmd_federation_multitier.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/backends.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/configtool.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/logcache.t
 t/scenarios/lmd_federation_multitier_e2e/t/local_test.sh

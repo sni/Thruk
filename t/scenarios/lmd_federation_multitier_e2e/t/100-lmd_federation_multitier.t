@@ -204,5 +204,44 @@ TestUtils::test_page(
     'follow' => 1,
 );
 
+###########################################################
+# backend selection by section
+{
+    my $test = {
+        cmd    => './script/thruk -l',
+        like   => ['/tier1a/', '/tier2b/', '/tier2c/'],
+    };
+    TestUtils::test_command($test);
+    is(scalar(split/\n/, $test->{'stdout'}), 14, "output number of lines ok");
+
+    $test = {
+        cmd    => './script/thruk -l -b tier1a/tier2a',
+        like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
+    };
+    TestUtils::test_command($test);
+    is(scalar(split/\n/, $test->{'stdout'}), 7, "output number of lines ok");
+
+    $test = {
+        cmd    => './script/thruk -l -b /tier1a/tier2a',
+        like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
+    };
+    TestUtils::test_command($test);
+    is(scalar(split/\n/, $test->{'stdout'}), 7, "output number of lines ok");
+
+    $test = {
+        cmd    => './script/thruk -l -b /tier1a/tier2a/',
+        like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
+    };
+    TestUtils::test_command($test);
+    is(scalar(split/\n/, $test->{'stdout'}), 7, "output number of lines ok");
+
+    $test = {
+        cmd    => './script/thruk -l -b /tier1a',
+        like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
+    };
+    TestUtils::test_command($test);
+    is(scalar(split/\n/, $test->{'stdout'}), 10, "output number of lines ok");
+};
+
 ###############################################################################
 done_testing();
