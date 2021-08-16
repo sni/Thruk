@@ -505,6 +505,12 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
+    if(!$c->config->{'_lmd_federtion_checked'} && ($ENV{'THRUK_USE_LMD'} || $c->config->{'lmd_remote'})) {
+        # required on first run to expand federation peers
+        eval {
+            set_processinfo($c, ADD_SAFE_DEFAULTS, $cached_data);
+        };
+    }
     my $disabled_backends = set_enabled_backends($c);
 
     ###############################
@@ -1182,10 +1188,11 @@ sub set_enabled_backends {
 sub _set_disabled_by_section {
     my($c, $backend, $disabled_backends) = @_;
     $backend =~ s/\/$//gmx;
-    $backend = $backend.'/';
+    $backend =~ s/^\///gmx;
+    $backend = '/'.$backend.'/';
     my $found;
     for my $peer (@{$c->db->get_peers()}) {
-        my $test = $peer->{'section'}.'/';
+        my $test = '/'.$peer->{'section'}.'/';
         if($test =~ m|^\Q$backend\E|mx) {
             $disabled_backends->{$peer->{'key'}} = 0;
             $found++;
@@ -1353,6 +1360,7 @@ sub check_federation_peers {
             $peer->{$col} = $d->{$col};
         }
     }
+    $c->config->{'_lmd_federtion_checked'} = time();
     return($processinfo, $cached_data);
 }
 
