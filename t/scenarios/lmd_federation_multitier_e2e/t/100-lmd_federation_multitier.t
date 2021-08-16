@@ -241,6 +241,18 @@ TestUtils::test_page(
     };
     TestUtils::test_command($test);
     is(scalar(split/\n/, $test->{'stdout'}), 10, "output number of lines ok");
+
+    $test = TestUtils::test_page(
+        'url'    => '/thruk/r/csv/processinfo?columns=peer_name&backends=/tier1d',
+        'like'   => [ 'tier1d', 'tier2d' ],
+    );
+    is(scalar(split/\n/, $test->{'content'}), 3, "output number of lines ok");
+
+    $test = TestUtils::test_page(
+        'url'    => '/thruk/r/csv/processinfo?columns=peer_name&backends=tier1a/tier2a',
+        'like'   => [ 'tier2a', 'tier3a' ],
+    );
+    is(scalar(split/\n/, $test->{'content'}), 4, "output number of lines ok");
 };
 
 ###############################################################################
