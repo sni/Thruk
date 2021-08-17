@@ -26,6 +26,8 @@
           <td class='dataVar' nowrap>Perfdata</td>
           <td class='dataVar' nowrap>Data Source</td>
           <td class='dataVar' nowrap>Data Source Version</td>
+          <td class='dataVar' nowrap>Thruk Version</td>
+          <td class='dataVar' nowrap>OMD Version</td>
         </tr>
 
 
@@ -137,7 +139,7 @@
             [% END %]
           </td>
           [% END %]
-          <td class='dataVal dataSource' style="white-space: nowrap;">
+          <td class='dataVal dataSource' style="white-space: nowrap; text-align: left;">
             [% IF backend_detail.$pd.exists('fed_info') %]
             <span title="[% FOREACH addr IN backend_detail.$pd.fed_info.addr %][% addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]&#013;[% END %]">
             [% END %]
@@ -149,6 +151,16 @@
           <td class='dataVal dataValBackendVersion' style="white-space: nowrap;">
             [% IF backend_detail.$pd.running %]
               [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF pi_detail.$pd.exists("thruk") && pi_detail.$pd.thruk.exists("thruk_version") %]
+              [% pi_detail.$pd.thruk.thruk_version %]
+            [% END %]
+          </td>
+          <td class='dataVal'>
+            [% IF pi_detail.$pd.exists("thruk") && pi_detail.$pd.thruk.exists("extra_version") %]
+              [% v = pi_detail.$pd.thruk.extra_version; v.replace('^OMD\s+').replace('-labs-edition$') %]
             [% END %]
           </td>
         </tr>

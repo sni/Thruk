@@ -1528,20 +1528,22 @@ sub _do_on_peers {
         for my $key (keys %{$result}) {
             my $res;
             $res = $result->{$key}->{$key};
-            if($result->{$key}->{'configtool'}) {
+            if($result->{$key}->{'configtool'} || $result->{$key}->{'thruk'}) {
                 $res = $result->{$key};
             }
-            if($res && $res->{'configtool'}) {
+            if($res && ($res->{'configtool'} || ($res->{'thruk'} && $res->{'thruk'}->{'configtool'}))) {
                 my $peer = $self->get_peer_by_key($key);
                 next if $peer->{'configtool'}->{'disable'};
-                next if $res->{'configtool'}->{'disable'};
+                my $configtool = $res->{'configtool'} // $res->{'thruk'}->{'configtool'};
+                next if $configtool->{'disable'};
                 # do not overwrite local configuration with remote configtool settings
                 # only use remote if the local one is empty
                 next if(scalar keys %{$peer->{'configtool'}} != 0 && !$peer->{'configtool'}->{'remote'});
                 $peer->{'configtool'} = { remote => 1 };
-                for my $attr (keys %{$res->{'configtool'}}) {
-                    $peer->{'configtool'}->{$attr} = $res->{'configtool'}->{$attr};
+                for my $attr (keys %{$configtool}) {
+                    $peer->{'configtool'}->{$attr} = $configtool->{$attr};
                 }
+                $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
             }
         }
     }

@@ -1057,28 +1057,32 @@ sub _cmd_raw {
     my @res = $c->db->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
-    # add proxy version and config tool settings to processinfo
+    # inject/add proxy version and config tool settings to processinfo result
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
-        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'thrukversion'}.')';
-        $res->[2]->{$key}->{'thruk_version'}        = $c->config->{'thrukversion'};
-        $res->[2]->{$key}->{'extra_version'}        = $c->config->{'extra_version'};
+        $res->[2]->{$key}->{'thruk'} = {
+            'thruk_version'         => $c->config->{'thrukversion'},
+            'extra_version'         => $c->config->{'extra_version'},
+            'data_source_version'   => $res->[2]->{$key}->{'data_source_version'},
+        };
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
+        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'thrukversion'}.')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
         my $peer = $c->db->get_peer_by_key($key);
         my $tmp  = $peer->{'configtool'} // $peer->{'peer_config'}->{'configtool'} || $peer->{'configtool'};
+        my $configtool = {
+            'disable' => 1,
+        };
         if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
-            $res->[2]->{$key}->{'configtool'} = {
+            $configtool = {
                 'core_type'      => $tmp->{'core_type'},
                 'obj_readonly'   => $tmp->{'obj_readonly'},
                 'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
                 'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
             };
-        } else {
-            $res->[2]->{$key}->{'configtool'} = {
-                'disable'        => 1,
-            };
         }
+        $res->[2]->{$key}->{'configtool'} = $configtool;            # old variant
+        $res->[2]->{$key}->{'thruk'}->{'configtool'} = $configtool; # new way, put everyting into a single thruk hash
     }
 
     return($res, 0);

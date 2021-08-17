@@ -258,6 +258,7 @@ sub get_processinfo {
                 push @{$options{'columns'}}, @{$options{'extra_columns'}};
             }
             if($ENV{'THRUK_USE_LMD'}) {
+                push @{$options{'columns'}}, 'thruk';
                 push @{$options{'columns'}}, 'configtool';
                 push @{$options{'columns'}}, 'peer_name';
                 push @{$options{'columns'}}, 'peer_addr';
