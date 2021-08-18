@@ -2029,6 +2029,7 @@ sub _import_peer_logfiles {
     my $compact_start_data = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
     my $alertstore = {};
     my $last_day = "";
+    my $consecutive_errors = 0;
 
     my @columns = qw/class time type state host_name service_description message state_type contact_name/;
     my $reordered = 0;
@@ -2077,7 +2078,13 @@ sub _import_peer_logfiles {
                 die($err);
             } else {
                 print($err);
+                $consecutive_errors++;
+                if($consecutive_errors >= 3) {
+                    die("failed to update 3 times in a row, bailing out: ".$err);
+                }
             }
+        } else {
+            $consecutive_errors = 0;
         }
 
         $time = $time + $blocksize;
