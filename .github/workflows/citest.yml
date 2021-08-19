@@ -2,11 +2,9 @@ name: citest
 
 on:
   push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
   pull_request:
+  schedule:
+    - cron: '30 4 * * 1'
 
 jobs:
   citest:
