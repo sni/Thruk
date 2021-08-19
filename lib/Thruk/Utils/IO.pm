@@ -163,14 +163,15 @@ sub ensure_permissions {
     my($mode, $path) = @_;
     return if defined $ENV{'THRUK_NO_TOUCH_PERM'};
 
+    require Thruk::Config;
+    my $config = Thruk::Config::get_config();
+
     confess("need a path") unless defined $path;
     return unless -e $path;
 
-    my @stat = stat($path);
+    my @stat = stat(_);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
-    require Thruk::Config;
-    my $config = Thruk::Config::get_config();
     # set modes
     if($mode eq 'file') {
         if($cur ne $config->{'mode_file'}) {
