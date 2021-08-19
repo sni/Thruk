@@ -184,11 +184,11 @@ sub check_downtime {
     }
     if($err) {
         $rd->{'error'} = $detail;
-        Thruk::Utils::write_data_file($file, $rd);
+        Thruk::Utils::RecurringDowntimes::write_downtime($c, $file, $rd);
     }
     if($err == 0 && $rd->{'error'}) {
         delete $rd->{'error'};
-        Thruk::Utils::write_data_file($file, $rd);
+        Thruk::Utils::RecurringDowntimes::write_downtime($c, $file, $rd);
     }
     return($err, $detail);
 }
@@ -231,6 +231,8 @@ sub read_downtime {
         $d->{$t} = [split/\s*,\s*/mx,$d->{$t}] unless ref $d->{$t} eq 'ARRAY';
         $d->{$t} = [sort @{$d->{$t}}];
     }
+
+    $d->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $d->{'backends'});
 
     # apply auth filter
     if($auth) {
@@ -301,7 +303,7 @@ sub read_downtime {
     }
 
     # backend filter?
-    my $backends = Thruk::Base::list($d->{'backends'});
+    my $backends = $d->{'backends'};
     if(!$backendfilter && scalar @{$backends} > 0) {
         my $found = 0;
         $found = 1 if $backends->[0] eq ''; # no backends at all
@@ -313,10 +315,28 @@ sub read_downtime {
     }
 
     # set some defaults
+    $default_rd = get_default_recurring_downtime($c) unless defined $default_rd;
     for my $key (keys %{$default_rd}) {
         $d->{$key} = $default_rd->{$key} unless defined $d->{$key};
     }
     return $d;
+}
+
+##########################################################
+
+=head2 write_downtime
+
+    write_downtime($file, $downtime)
+
+=cut
+sub write_downtime {
+    my($c, $file, $rd) = @_;
+    my $downtime = {%{$rd}};
+    $downtime->{'edited_by'}    = $c->stash->{'remote_user'};
+    $downtime->{'last_changed'} = time();
+    $downtime->{'backends'}     = Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'});
+    Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
+    return(Thruk::Utils::write_data_file($file, $downtime));
 }
 
 ##########################################################
@@ -428,7 +448,7 @@ return backends used to set this downtime
 sub get_downtime_backends {
     my($c, $downtime) = @_;
 
-    my $backends = ref $downtime->{'backends'} eq 'ARRAY' ? $downtime->{'backends'} : [$downtime->{'backends'}];
+    my $backends = Thruk::Utils::backends_hash_to_list($c, $downtime->{'backends'});
     my $choose_backends = 0;
     my $cmd_typ;
     if(scalar @{$backends} == 0 and @{$c->db->get_peers()} > 1) {

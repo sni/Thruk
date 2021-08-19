@@ -63,8 +63,7 @@ sub _rest_get_thruk_downtimes {
         }
         $rd->{'edited_by'}    = $c->stash->{'remote_user'};
         $rd->{'last_changed'} = time();
-        Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
-        Thruk::Utils::IO::json_lock_store($file, $rd, { pretty => 1, changed_only => 1 });
+        Thruk::Utils::RecurringDowntimes::write_downtime($c, $file, $rd);
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
         return({
             'message' => 'successfully saved 1 downtime.',

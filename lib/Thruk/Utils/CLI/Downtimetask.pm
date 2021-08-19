@@ -116,26 +116,11 @@ sub _handle_file {
         _error("cannot read %s: %s", $file, $!);
         return("", 1);
     }
-    my $downtime   = Thruk::Utils::read_data_file($file);
+    my $downtime = Thruk::Utils::RecurringDowntimes::read_downtime($c, $file, undef, undef, undef, undef, undef, undef, undef, 0);
     if(!$downtime) {
         _error("cannot read %s", $file);
         return("", 1);
     }
-    my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c);
-    for my $key (keys %{$default_rd}) {
-        $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
-    }
-
-    my $output     = '';
-    if(!$downtime->{'target'}) {
-        $downtime->{'target'} = 'host';
-        $downtime->{'target'} = 'service' if $downtime->{'service'};
-    }
-
-    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
-    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
-    $downtime->{'service'}      = [$downtime->{'service'}]      unless ref $downtime->{'service'}      eq 'ARRAY';
-    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
     # do quick self check
     Thruk::Utils::RecurringDowntimes::check_downtime($c, $downtime, $file);
@@ -227,6 +212,7 @@ sub _handle_file {
 
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
+    my $output = '';
     $output = '['.$nr.'.tsk]';
     if($downtime->{'service'} && scalar @{$downtime->{'service'}} > 0) {
         $output .= ' scheduled'.$flexible.' downtime for service \''.join(', ', @{$downtime->{'service'}}).'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
