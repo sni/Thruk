@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - uses:  abbbi/github-actions-tune@v1
       - name: perl -V
         run: perl -V
       #- name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
