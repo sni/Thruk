@@ -824,6 +824,7 @@ returns result for given request
         keep_su   => change username on remotesite, but keep superuser permissions
         want_data => return raw data result
         wait      => wait for remote job to complete
+        timeout   => timeout for http(s) request
     }
 
 =cut
@@ -904,6 +905,7 @@ sub _req {
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->timeout($self->{'logs_timeout'}) if $sub =~ m/logs/gmx;
+    $self->{'ua'}->timeout($options->{'timeout'}) if $options->{'timeout'};
     my $postdata;
     eval {
         $postdata = encode_json({
