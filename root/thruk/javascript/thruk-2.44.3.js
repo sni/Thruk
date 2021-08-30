@@ -781,6 +781,13 @@ function updateUrl() {
     try {
         history.replaceState({}, "", newUrl);
     } catch(err) { console.log(err) }
+
+    // parent window should reflect current changes as well
+    if(window.parent) {
+        try {
+            save_url_in_parents_hash();
+        } catch(err) { console.log(err); }
+    }
 }
 
 /* reloads the current page and adds some parameter from a hash */
@@ -3613,6 +3620,11 @@ function removeClass(el, cls) {
 }
 function toggleClass(el, cls) {
     jQuery(el).toggleClass(cls);
+}
+
+function updateExportLink(input) {
+    var newUrl = getCurrentUrl(false);
+    input.value = newUrl;
 }
 
 /*******************************************************************************
