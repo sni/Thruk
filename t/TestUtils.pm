@@ -693,7 +693,7 @@ sub wait_for_job {
                 eval {
                     $data = decode_json($r->decoded_content);
                 };
-                last if($data && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
+                last if($data && defined $data->{'is_running'} && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
                 sleep(0.1);
             }
         };
