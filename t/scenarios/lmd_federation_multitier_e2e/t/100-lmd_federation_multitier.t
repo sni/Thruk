@@ -74,6 +74,7 @@ for my $name (qw/tier1a tier2a/) {
                     'Effective Roles',
                     'authorized_for_admin',
                     'User Profile',
+                    qr"var cookie_path = '/thruk/cgi-bin/proxy.cgi/$id/demo/'",
                 ],
     );
 }

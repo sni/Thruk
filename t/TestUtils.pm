@@ -344,7 +344,8 @@ sub test_page {
             # text that should appear
             if(defined $opts->{'like'}) {
                 for my $like (@{_list($opts->{'like'})}) {
-                    like($return->{'content'}, qr/$like/, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) or diag($opts->{'url'});
+                    my $regex = ref $like ? $like : qr/$like/;
+                    like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) or diag($opts->{'url'});
                 }
             }
         }
@@ -398,7 +399,8 @@ sub test_page {
     if(defined $opts->{'like'}) {
         for my $like (@{_list($opts->{'like'})}) {
             use Carp;
-            like($return->{'content'}, qr/$like/, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
+            my $regex = ref $like ? $like : qr/$like/;
+            like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($regex)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
         }
     }
 

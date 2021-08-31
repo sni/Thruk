@@ -167,7 +167,7 @@ sub _cleanup_response {
                 $body =~ s/<\/body>/$header<\/body>/gmx;
             }
             # fix cookie path
-            $body =~ s%^var\s+cookie_path\s*=\s+'([^']+)';%var cookie_path = '$proxy_prefix$1';%gmx;
+            $body =~ s%^\s*var\s+cookie_path\s*=\s+'([^']+)';%var cookie_path = '$proxy_prefix$1';%gmx;
         }
 
         # send other links to our proxy
