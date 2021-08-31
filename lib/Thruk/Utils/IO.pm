@@ -112,6 +112,25 @@ sub read {
 
 ##############################################
 
+=head2 saferead
+
+  saferead($path)
+
+read file and return content or undef in case it cannot be read
+
+=cut
+
+sub saferead {
+    my($path) = @_;
+    open(my $fh, '<', $path) || return;
+    local $/ = undef;
+    my $content = <$fh>;
+    CORE::close($fh);
+    return($content);
+}
+
+##############################################
+
 =head2 read_as_list
 
   read_as_list($path)
@@ -124,6 +143,25 @@ sub read_as_list {
     my($path) = @_;
     my @res;
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
+    chomp(@res = <$fh>);
+    CORE::close($fh);
+    return(@res);
+}
+
+##############################################
+
+=head2 saferead_as_list
+
+  saferead_as_list($path)
+
+read file and return content as array, return empty list if open fails
+
+=cut
+
+sub saferead_as_list {
+    my($path) = @_;
+    my @res;
+    open(my $fh, '<', $path) || return(@res);
     chomp(@res = <$fh>);
     CORE::close($fh);
     return(@res);

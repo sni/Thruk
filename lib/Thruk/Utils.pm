@@ -640,9 +640,8 @@ sub read_resource_file {
     my $lastcomment = "";
     $macros         = {} unless defined $macros;
     for my $file (@{$files}) {
-        next unless -f $file;
-        open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
-        while(my $line = <$fh>) {
+        my @lines = Thruk::Utils::IO::saferead_as_list($file);
+        for my $line (@lines) {
             if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
                 $macros->{$1}   = $2;
                 $comments->{$1} = $lastcomment;
@@ -655,7 +654,6 @@ sub read_resource_file {
                 $lastcomment = '';
             }
         }
-        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     }
     return($macros) unless $with_comments;
     return($macros, $comments);
@@ -2300,9 +2298,10 @@ sub check_pid_file {
     my($c) = @_;
     my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
     if(Thruk::Base->mode eq 'FASTCGI' && ! -f $pidfile) {
-        open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
-        print $fh $$."\n";
-        Thruk::Utils::IO::close($fh, $pidfile);
+        eval {
+            Thruk::Utils::IO::write($pidfile, $$."\n");
+        };
+        warn("cannot write $pidfile: $@") if $@;
     }
     return;
 }

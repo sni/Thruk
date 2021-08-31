@@ -581,8 +581,8 @@ sub _remove_pid {
     local $SIG{PIPE} = 'IGNORE';
     if(Thruk::Base->mode() eq 'FASTCGI') {
         my $remaining = [];
-        if($pidfile && -f $pidfile) {
-            my $pids = [split(/\s/mx, Thruk::Utils::IO::read($pidfile))];
+        if($pidfile) {
+            my $pids = [split(/\s/mx, Thruk::Utils::IO::saferead($pidfile)//'')];
             for my $pid (@{$pids}) {
                 next unless($pid and $pid =~ m/^\d+$/mx);
                 next if $pid == $$;
@@ -592,9 +592,7 @@ sub _remove_pid {
             if(scalar @{$remaining} == 0) {
                 unlink($pidfile);
             } else {
-                open(my $fh, '>', $pidfile);
-                print $fh join("\n", @{$remaining}),"\n";
-                CORE::close($fh);
+                Thruk::Utils::IO::write($pidfile, join("\n", @{$remaining})."\n");
             }
             undef $pidfile;
         }
