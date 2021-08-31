@@ -90,7 +90,9 @@ sub check_proc {
               .' -pidfile '.$lmd_dir.'/pid'
               .' -config "'.$lmd_dir.'/lmd.ini"';
     for my $cfg (@{Thruk::Base::array_uniq(Thruk::Base::list($config->{'lmd_core_config'}))}) {
-        $cmd .= ' -config "'.$cfg.'"';
+        for my $file (glob($cfg)) {
+            $cmd .= ' -config "'.$file.'"';
+        }
     }
     if($config->{'lmd_options'}) {
         $cmd .= ' '.$config->{'lmd_options'}.' ';
