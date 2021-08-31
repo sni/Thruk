@@ -410,7 +410,7 @@ sub _rest_get_config_diff {
             push @{$diff}, {
                 'peer_key' => $peer_key,
                 'output'   => $file->diff($ignore_whitespace_changes),
-                'file'     => $file->{'path'},
+                'file'     => $file->{'display'},
             };
         }
     }
@@ -611,7 +611,7 @@ sub _add_object {
     }
     $conf->{':ID'}        = $o->{'id'};
     $conf->{':TYPE'}      = $o->{'type'};
-    $conf->{':FILE'}      = $o->{'file'}->{'path'}.':'.$o->{'line'};
+    $conf->{':FILE'}      = $o->{'file'}->{'display'}.':'.$o->{'line'};
     $conf->{':READONLY'}  = $o->{'file'}->readonly() ? 1 : 0;
     $conf->{':PEER_KEY'}  = $peer_key;
     $conf->{':PEER_NAME'} = $peer_name;
@@ -638,7 +638,7 @@ sub _update_object {
         if($o->{'file'}->readonly) {
             $c->detach_error({
                 code  => 403,
-                msg   => 'cannot change readonly file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'cannot change readonly file '.$o->{'file'}->{'display'}.'.',
                 descr => 'attempt to change readonly file.',
             });
         }
@@ -647,7 +647,7 @@ sub _update_object {
         } else {
             $c->detach_error({
                 code  => 403,
-                msg   => 'failed to patch object in file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'failed to patch object in file '.$o->{'file'}->{'display'}.'.',
             });
         }
     }
@@ -668,7 +668,7 @@ sub _update_object {
         if($o->{'file'}->readonly) {
             $c->detach_error({
                 code  => 403,
-                msg   => 'cannot change readonly file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'cannot change readonly file '.$o->{'file'}->{'display'}.'.',
                 descr => 'attempt to change readonly file.',
             });
         }
@@ -677,7 +677,7 @@ sub _update_object {
         } else {
             $c->detach_error({
                 code  => 403,
-                msg   => 'failed to patch object in file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'failed to patch object in file '.$o->{'file'}->{'display'}.'.',
             });
         }
     }
