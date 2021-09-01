@@ -1299,15 +1299,21 @@ sub merge_sub_config {
                 $config->{$key}->{'provider'} = Thruk::Base::list($config->{$key}->{'provider'});
                 for my $entry (@{Thruk::Base::list($add->{$key})}) {
                     next unless $entry->{'provider'};
-                    if(ref $entry->{'provider'}) {
+                    if(ref $entry->{'provider'} eq 'HASH') {
                         if($entry->{'provider'}->{'client_id'}) {
                             push @{$config->{$key}->{'provider'}}, $entry->{'provider'};
                         } else {
                             for my $k (sort keys %{$entry->{'provider'}}) {
                                 my $p = $entry->{'provider'}->{$k};
-                                $p->{'id'} = $k;
+                                $p->{'id'} = $k unless $p->{'id'};
                                 push @{$config->{$key}->{'provider'}}, $p;
                             }
+                        }
+                    }
+                    if(ref $entry->{'provider'} eq 'ARRAY') {
+                        for my $p (@{$entry->{'provider'}}) {
+                            $p->{'id'} = $p->{'login'} unless $p->{'id'};
+                            push @{$config->{$key}->{'provider'}}, $p;
                         }
                     }
                 }
