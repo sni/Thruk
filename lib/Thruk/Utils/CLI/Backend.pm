@@ -79,11 +79,12 @@ sub cmd {
             Name    => $c->stash->{'backend_detail'}->{$key}->{'name'},
             Enabled => (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? 'Yes' : 'No',
             Address => $addr,
+            Version => $c->stash->{'pi_detail'}->{$key}->{'thruk'}->{'thruk_version'} // $c->stash->{'pi_detail'}->{$key}->{'data_source_version'},
             Status  => $error || 'OK',
         };
     }
     my $output = Thruk::Utils::text_table(
-        keys => ['Name', 'Section', 'Key', 'Enabled', 'Address', 'Status'],
+        keys => ['Name', 'Section', 'Key', 'Enabled', 'Address', 'Version', 'Status'],
         data => \@data,
     );
     return($output, 0);
