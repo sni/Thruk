@@ -1,0 +1,69 @@
+---
+layout: docs
+title: OAuth2
+breadcrumb: [ "advanced.html", "Advanced" ]
+lightbox: true
+---
+
+== OAuth2
+{% include new_since.ad version="2.36" %}
+OAuth2 is a way to use external services for authentication. Here are some
+examples for known popular oauth2 providers.
+
+Configuration details can be found here: link:configuration.html#_oauth2-authentication-settings[Configuration].
+
+=== Github
+
+You need to create a new OAuth2 application here: https://github.com/settings/developers
+```
+<auth_oauth>
+  <provider>
+    login = "Login with GitHub"
+    client_id = ...
+    client_secret = ...
+    scopes = openid profile email groups
+    auth_url = https://github.com/login/oauth/authorize
+    token_url = https://github.com/login/oauth/access_token
+    api_url = https://api.github.com/user
+    login_field = login
+  </provider>
+</auth_oauth>
+```
+
+
+=== Google
+
+You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.google.com/apis/credentials
+
+```
+<auth_oauth>
+  <provider>
+    login = "Google Account Login"
+    client_id = ...
+    client_secret = ...
+    scopes = openid profile email
+    auth_url = https://accounts.google.com/o/oauth2/v2/auth
+    token_url = https://oauth2.googleapis.com/token
+    api_url = https://openidconnect.googleapis.com/v1/userinfo
+    login_field = email
+  </provider>
+</auth_oauth>
+```
+
+=== Okta
+
+
+```
+<auth_oauth>
+  <provider>
+    login = "Login with Okta"
+    client_id = ...
+    client_secret = ...
+    scopes = openid profile email groups
+    auth_url = https://dev-....okta.com/oauth2/v1/authorize
+    token_url = https://dev-....okta.com/oauth2/v1/token
+    api_url = https://dev-....okta.com/oauth2/v1/userinfo
+    login_field = email
+  </provider>
+</auth_oauth>
+```

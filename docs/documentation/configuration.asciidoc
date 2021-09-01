@@ -1844,6 +1844,8 @@ ex.:
 == OAuth2 Authentication Settings
 {% include new_since.ad version="2.36" %}
 
+See some example configurations here: link:oauth2.html[OAuth2 Examples].
+
 When the oauth provider needs to configure an allowed callback url, set the url of the login page, ex.:
 
 https://<fqdn>/<omdsite>/thruk/cgi-bin/login.cgi
