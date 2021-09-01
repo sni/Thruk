@@ -49,7 +49,8 @@ sub _rest_get_thruk_cluster_heartbeat {
         while(time() - $start < 60) {
             my $now = time();
             _rest_get_thruk_cluster_heartbeat($c);
-            sleep($c->config->{'cluster_heartbeat_interval'} - (time() - $now));
+            my $wait = $c->config->{'cluster_heartbeat_interval'} - (time() - $now);
+            sleep($wait) if $wait > 0;
         }
         return;
     }
