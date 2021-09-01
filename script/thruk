@@ -52,7 +52,7 @@ Getopt::Long::Configure('bundling');
 Getopt::Long::Configure('pass_through');
 Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
-   "v|verbose"          => sub { $options->{'verbose'}++ },
+   "v|verbose"          => sub { $ENV{'THRUK_VERBOSE_ARG_SET'}=1; $options->{'verbose'}++ },
    "q|quiet"            => \$options->{'quiet'},
    "V|version"          => \$options->{'version'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
