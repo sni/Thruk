@@ -45,11 +45,12 @@ sub _rest_get_thruk_cluster_heartbeat {
     # cron mode: cron starts heartbeat every minute, if heartbeat interval is less than a minute, do multiple checks and sleep meanwhile
     if($ENV{'THRUK_CRON'} && $c->config->{'cluster_heartbeat_interval'} > 0 && $c->config->{'cluster_heartbeat_interval'} < 60) {
         local $ENV{'THRUK_CRON'} = undef;
-        my $start = time();
-        while(time() - $start < 60) {
-            my $now = time();
+        my $end = time() + 60;
+        while(time() < $end) {
+            my $t1 = time();
             _rest_get_thruk_cluster_heartbeat($c);
-            my $wait = $c->config->{'cluster_heartbeat_interval'} - (time() - $now);
+            my $duration = time() - $t1;
+            my $wait = $c->config->{'cluster_heartbeat_interval'} - $duration;
             sleep($wait) if $wait > 0;
         }
         return;
