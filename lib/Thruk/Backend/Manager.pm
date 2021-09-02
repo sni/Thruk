@@ -720,6 +720,7 @@ runs reconnect on all peers
 
 sub reconnect {
     my($self, @args) = @_;
+    return 1 unless $Thruk::Globals::c;
     eval {
         $self->_do_on_peers( 'reconnect', \@args);
     };
@@ -1401,6 +1402,7 @@ returns a result for a function called for all peers
 sub _do_on_peers {
     my( $self, $function, $arg, $force_serial, $backends) = @_;
     my $c = $Thruk::Globals::c;
+    confess("no context") unless $c;
 
     $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
