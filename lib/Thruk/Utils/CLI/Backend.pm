@@ -79,7 +79,7 @@ sub cmd {
             Name    => $c->stash->{'backend_detail'}->{$key}->{'name'},
             Enabled => (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? 'Yes' : 'No',
             Address => $addr,
-            Version => $c->stash->{'pi_detail'}->{$key}->{'thruk'}->{'thruk_version'} // $c->stash->{'pi_detail'}->{$key}->{'data_source_version'},
+            Version => _get_peer_version($c, $key),
             Status  => $error || 'OK',
         };
     }
@@ -88,6 +88,20 @@ sub cmd {
         data => \@data,
     );
     return($output, 0);
+}
+
+##############################################
+sub _get_peer_version {
+    my($c, $key) = @_;
+    if($c->stash->{'pi_detail'}->{$key}
+       && $c->stash->{'pi_detail'}->{$key}->{'thruk'}
+       && $c->stash->{'pi_detail'}->{$key}->{'thruk'}->{'thruk_version'}) {
+       return($c->stash->{'pi_detail'}->{$key}->{'thruk'}->{'thruk_version'});
+    }
+    if($c->stash->{'pi_detail'}->{$key} && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'}) {
+        return($c->stash->{'pi_detail'}->{$key}->{'data_source_version'});
+    }
+    return("");
 }
 
 ##############################################
