@@ -25,7 +25,7 @@ The cache handles the internal thruk cache.
     Available commands are:
 
         - dump                  displays the internal cache
-        - clean                 drop the internal cache
+        - clean [all]           drop the internal cache (complete tmp folder with 'all')
 
 =back
 
@@ -36,6 +36,7 @@ use strict;
 use Cpanel::JSON::XS ();
 
 use Thruk::Utils::CLI ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -84,8 +85,16 @@ sub cmd {
     }
     elsif($command eq 'clear' || $command eq 'clean' || $command eq 'drop') {
         $data->{'rc'} = 0;
-        unlink($c->config->{'tmp_path'}.'/thruk.cache');
-        $data->{'output'} = "cache cleared\n";
+        if($commandoptions &&  $commandoptions->[0] && $commandoptions->[0] eq 'all') {
+            $data->{'output'} = "tmp folder ".$c->config->{'tmp_path'}." removed\n";
+        } else {
+            my($rc, $out) = Thruk::Utils::IO::cmd('rm -rf '.$c->config->{'tmp_path'});
+            if($rc) {
+                $data->{'output'} = "failed to remove ".$c->config->{'tmp_path'}.": ".$out;
+            } else {
+                $data->{'output'} = "cache cleared\n";
+            }
+        }
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }

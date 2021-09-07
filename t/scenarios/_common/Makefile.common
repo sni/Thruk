@@ -128,6 +128,7 @@ clean:
 	docker-compose kill -s INT
 	docker-compose kill
 	docker-compose rm -f
+	-test -e thruk.conf && $(THRUK) cache clean all
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_clean
 	@echo "### $@: $$(date "+%FT%T.%N")"
