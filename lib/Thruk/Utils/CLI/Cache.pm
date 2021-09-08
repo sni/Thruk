@@ -85,15 +85,16 @@ sub cmd {
     }
     elsif($command eq 'clear' || $command eq 'clean' || $command eq 'drop') {
         $data->{'rc'} = 0;
-        if($commandoptions &&  $commandoptions->[0] && $commandoptions->[0] eq 'all') {
-            $data->{'output'} = "tmp folder ".$c->config->{'tmp_path'}." removed\n";
-        } else {
+        if($commandoptions && $commandoptions->[0] && $commandoptions->[0] eq 'all') {
             my($rc, $out) = Thruk::Utils::IO::cmd('rm -rf '.$c->config->{'tmp_path'});
             if($rc) {
                 $data->{'output'} = "failed to remove ".$c->config->{'tmp_path'}.": ".$out;
             } else {
-                $data->{'output'} = "cache cleared\n";
+                $data->{'output'} = "tmp folder ".$c->config->{'tmp_path'}." removed\n";
             }
+        } else {
+            unlink($c->config->{'tmp_path'}.'/thruk.cache');
+            $data->{'output'} = "cache cleared\n";
         }
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
