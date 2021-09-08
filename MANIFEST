@@ -2250,7 +2250,13 @@ t/scenarios/lmd_federation_multitier_e2e/lmd.ini
 t/scenarios/lmd_federation_multitier_e2e/Makefile
 t/scenarios/lmd_federation_multitier_e2e/objects.cfg
 t/scenarios/lmd_federation_multitier_e2e/README
-t/scenarios/lmd_federation_multitier_e2e/t/100-lmd_federation_multitier.t
+t/scenarios/lmd_federation_multitier_e2e/t/100-basic.t
+t/scenarios/lmd_federation_multitier_e2e/t/101-proxies.t
+t/scenarios/lmd_federation_multitier_e2e/t/102-roles.t
+t/scenarios/lmd_federation_multitier_e2e/t/103-logcache.t
+t/scenarios/lmd_federation_multitier_e2e/t/104-bp.t
+t/scenarios/lmd_federation_multitier_e2e/t/105-config-tool.t
+t/scenarios/lmd_federation_multitier_e2e/t/106-sections.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/backends.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/configtool.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/logcache.t
