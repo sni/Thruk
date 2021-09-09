@@ -150,12 +150,10 @@ sub status {
     return($status, $total_started, $start_time) unless $config->{'use_lmd_core'};
 
     my $lmd_dir = $config->{'tmp_path'}.'/lmd';
-    if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
+    if(-e $lmd_dir.'/live.sock' && ($pid = check_pid($lmd_dir.'/pid'))) {
         $total_started++;
         $started = 1;
-        $pid     = Thruk::Utils::IO::read($lmd_dir.'/pid');
-        chomp($pid);
-        $start_time = (stat($lmd_dir.'/pid'))[10];
+        $start_time = (stat(_))[10];
     }
     push @{$status}, { status => $started, pid => $pid, start_time => $start_time };
     return($status, $total_started);
