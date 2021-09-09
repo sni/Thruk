@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 60;
+plan tests => 69;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -31,8 +31,13 @@ TestUtils::test_command({
 });
 
 TestUtils::test_command({
-    cmd  => '/bin/bash -c "thruk cron uninstall 2>&1"',
-    like => ['/cron entries removed/'],
+    cmd  => '/bin/bash -c "omd stop demo crontab 2>&1"',
+    like => ['/Removing Crontab/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "omd stop demo 2>&1"',
+    like => ['/Removing Crontab/'],
 });
 
 TestUtils::test_command({
@@ -77,6 +82,11 @@ TestUtils::test_command({
 });
 
 TestUtils::test_command({
-    cmd  => '/bin/bash -c "thruk cron install 2>&1"',
-    like => ['/updated cron entries/'],
+    cmd  => '/bin/bash -c "thruk --local -vv lmd stop 2>&1"',
+    like => ['/switching to uid: 1000/', '/STOPPED - 0 lmd running/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "omd start demo 2>&1"',
+    like => ['/Initializing Crontab/'],
 });
