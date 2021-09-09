@@ -713,6 +713,14 @@ have max_check_attempts=3 to max_check_attempts=5 with this command:
 
   thruk r -m PATCH -d max_check_attempts=5 '/config/objects?:TYPE=host&max_check_attempts=3'
 
+=== DELETE /config/objects
+
+Delete objects based on filters.
+This is a very powerful url, without filter, all objects would be removed.
+Ex.: remove all contacts matching a name:
+
+  thruk r -m DELETE '/config/objects?contact_name=test'
+
 === POST /config/objects/<id>
 
 Replace object configuration completely.
@@ -2081,3 +2089,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

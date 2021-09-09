@@ -2452,6 +2452,9 @@ sub _remote_do_bg {
                         want_data => 1,
                    });
     $c->stats->profile(end => "conf::_remote_do_bg: $sub");
+    if(ref $res eq 'HASH' && defined $res->{'rc'} && defined $res->{'output'}) {
+        return($res->{'rc'}, $res->{'output'});
+    }
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
     my $data = $res->[2];
     if(ref $data eq 'HASH') {

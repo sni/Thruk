@@ -361,6 +361,43 @@ sub _rest_get_config_objects_patch {
 }
 
 ##########################################################
+# REST PATH: DELETE /config/objects
+# Delete objects based on filters.
+# This is a very powerful url, without filter, all objects would be removed.
+# Ex.: remove all contacts matching a name:
+#
+#   thruk r -m DELETE '/config/objects?contact_name=test'
+Thruk::Controller::rest_v1::register_rest_path_v1('DELETE', qr%^/config/objects?$%mx, \&_rest_get_config_objects_delete, ["admin"]);
+sub _rest_get_config_objects_delete {
+    my($c) = @_;
+    require Thruk::Utils::Conf;
+    my($backends) = $c->db->select_backends();
+    local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends}); # required for sub requests
+    my $changed = 0;
+    if(scalar keys %{$c->req->query_parameters} == 0) {
+        $c->detach_error({
+            code  => 400,
+            msg   => 'delete without any parameter would remove all objects, must specify at least one filter.',
+        });
+    }
+    my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
+    for my $conf (@{$objs}) {
+        my $peer_key = $conf->{':PEER_KEY'};
+        _set_object_model($c, $peer_key) || next;
+        my $o = $c->{'obj_db'}->get_object_by_id($conf->{':ID'});
+        next unless $o;
+        if(_update_object($c, 'DELETE', $o)) {
+            $changed++;
+            Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+        }
+    }
+    return({
+        'message' => sprintf('removed %d objects successfully.', $changed),
+        'count'   => $changed,
+    });
+}
+
+##########################################################
 # REST PATH: PATCH /config/objects/<id>
 # Update object configuration partially.
 # REST PATH: POST /config/objects/<id>
@@ -579,7 +616,7 @@ sub _set_object_model {
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};
-    Thruk::Utils::Conf::set_object_model($c);
+    Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
     delete $c->req->parameters->{'refreshdata'};
     if(!$c->{'obj_db'}) {
         _debug("backend %s has no config tool settings", $peer_key);

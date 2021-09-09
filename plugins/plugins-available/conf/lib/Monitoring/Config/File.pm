@@ -452,8 +452,9 @@ sub save {
     if($self->{'deleted'}) {
         unlink($self->{'path'}) or do {
             push @{$self->{'errors'}}, "cannot delete ".$self->{'path'}.": ".$!;
+            return;
         };
-        return;
+        return 1;
     }
 
     my $content = $self->get_new_file_content(1);

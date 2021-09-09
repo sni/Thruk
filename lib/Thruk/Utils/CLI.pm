@@ -814,8 +814,15 @@ sub _cmd_configtool {
     if($peerkey ne $c->stash->{'param_backend'}) {
         return(sprintf("failed to set objects model, got configtool section for wrong backend '%s' ne '%s'",$peerkey, $c->stash->{'param_backend'}), 1);
     }
+
+    # forward request if its a remote config tool
+    if($c->{'obj_db'}->is_remote() && $opt->{'args'}->{'sub'} ne 'configcheck' && $opt->{'args'}->{'sub'} ne 'configreload') {
+        my($rc, $output) = $c->{'obj_db'}->_remote_do_bg($c, $opt->{'args'}->{'sub'}, $opt->{'args'}->{'args'});
+        return($output, $rc);
+    }
+
     # outgoing file sync
-    elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
+    if($opt->{'args'}->{'sub'} eq 'syncfiles') {
         $c->{'obj_db'}->check_files_changed();
         my $transfer    = {};
         my $remotefiles = $opt->{'args'}->{'args'}->{'files'};

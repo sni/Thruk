@@ -6,6 +6,7 @@ next:
             - add missing host unavailable box for sla reports
           - Rest
             - add command_name to /notifications
+            - add delete method for /config/objects
           - Config Tool:
             - fix listing some dependencies as false duplicates
             - fix federated config tool over multiple relays

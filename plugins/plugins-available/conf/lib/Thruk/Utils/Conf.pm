@@ -39,7 +39,9 @@ returns 1 on success, 0 if you have to wait and it redirects or -1 on errors
 
 =cut
 sub set_object_model {
-    my ( $c, $no_recursion ) = @_;
+    my ( $c, $no_recursion, $peer_key ) = @_;
+    $c->stash->{'param_backend'} = $peer_key if $peer_key;
+    $peer_key = $c->stash->{'param_backend'} if $c->stash->{'param_backend'};
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::Constants::ADD_CACHED_DEFAULTS
@@ -47,12 +49,19 @@ sub set_object_model {
 
     # if this is no obj config yet, try updating process info which updates
     # configuration information from http backends
-    if(!$c->stash->{has_obj_conf}) {
-        Thruk::Action::AddDefaults::set_processinfo($c);
+    if(!$c->stash->{has_obj_conf} || (defined $peer_key && $peer_key ne $c->stash->{'param_backend'})) {
+        $c->stash->{'param_backend'} = $peer_key;
+        Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
         $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
     }
 
     if(!$c->stash->{has_obj_conf}) {
+        delete $c->{'obj_db'};
+        $c->stash->{set_object_model_err} = "backend has no configtool section";
+        return -1;
+    }
+
+    if(defined $peer_key && $peer_key ne $c->stash->{'param_backend'}) {
         delete $c->{'obj_db'};
         $c->stash->{set_object_model_err} = "backend has no configtool section";
         return -1;
@@ -822,7 +831,7 @@ sub init_cached_config {
         return 0;
     }
 
-    _debug("cached config object loaded");
+    _debug("cached config object loaded: ".$c->stash->{'param_backend'});
     $c->stats->profile(end => "init_cached_config()");
     return 1;
 }
@@ -1006,7 +1015,7 @@ sub get_backends_with_obj_config {
     }
 
     # from cookie setting?
-    if($c->cookies('thruk_conf')) {
+    if($c->cookies('thruk_conf') && !$param_backend) {
         my @cookie_val = $c->cookies('thruk_conf');
         for my $val (@cookie_val) {
             next unless defined $c->stash->{'backend_detail'}->{$val};
