@@ -378,8 +378,6 @@ __DATA__
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_active_host_downtimes.html for details.
-
 # REST PATH: POST /hosts/<name>/cmd/del_all_host_comments
 # Sends the DEL_ALL_HOST_COMMENTS command.
 #
@@ -802,8 +800,6 @@ __DATA__
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_active_service_downtimes.html for details.
-
 # REST PATH: POST /services/<host>/<service>/cmd/del_all_svc_comments
 # Sends the DEL_ALL_SVC_COMMENTS command.
 #
@@ -1616,7 +1612,7 @@ __DATA__
   "change_max_host_check_attempts":{"args":["interval"],"docs":"Changes the maximum number of check attempts (retries) for a particular host.","name":"change_max_host_check_attempts","nr":-1,"required":["interval"]},
   "change_normal_host_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular host.","name":"change_normal_host_check_interval","nr":-1,"required":["interval"]},
   "change_retry_host_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular host.","name":"change_retry_host_check_interval","nr":-1,"required":["interval"]},
-  "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","nr":-1,"required":[]},
+  "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_host_comments":{"args":[],"name":"del_all_host_comments","nr":"20","required":[]},
   "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","nr":"10","required":["notification_time"]},
   "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","nr":"27","required":[]},
@@ -1679,7 +1675,7 @@ __DATA__
   "change_svc_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular service to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_command","nr":-1,"required":["checkcommand"]},
   "change_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_event_handler","nr":-1,"required":["eventhandler"]},
   "change_svc_modattr":{"args":[],"name":"change_svc_modattr","nr":"155","required":[]},
-  "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":-1,"required":[]},
+  "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
   "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
   "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","nr":"40","required":[]},

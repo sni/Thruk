@@ -74,7 +74,7 @@ sub _update_cmds {
             'DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS'     => {"docs" => "Disables host notifications for all contacts in a particular contactgroup."},
         },
         'hosts' => {
-            'DEL_ACTIVE_HOST_DOWNTIMES'                   => {"docs" => "Removes all currently active downtimes for this host."},
+            'DEL_ACTIVE_HOST_DOWNTIMES'                   => {"docs" => "Removes all currently active downtimes for this host.", "thrukcmd" => 1 },
             'SET_HOST_NOTIFICATION_NUMBER'                => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state."},
             'CHANGE_RETRY_HOST_CHECK_INTERVAL'            => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the retry check interval for a particular host."},
             'CHANGE_NORMAL_HOST_CHECK_INTERVAL'           => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the normal (regularly scheduled) check interval for a particular host."},
@@ -93,7 +93,7 @@ sub _update_cmds {
             'DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS'       => {"docs" => "Disables passive checks for all hosts in a particular hostgroup."},
         },
         'services' => {
-            'DEL_ACTIVE_SERVICE_DOWNTIMES'                => {"docs" => "Removes all currently active downtimes for this service."},
+            'DEL_ACTIVE_SERVICE_DOWNTIMES'                => {"docs" => "Removes all currently active downtimes for this service.", "thrukcmd" => 1 },
             'SET_SVC_NOTIFICATION_NUMBER'                 => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state."},
             # segfaults
             #'CHANGE_SVC_NOTIFICATION_TIMEPERIOD'          => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the service notification timeperiod to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
@@ -266,8 +266,10 @@ sub _update_cmds {
                 $content .= "# This command does not require any arguments.\n";
             }
             $content .= "#\n";
-            $content .= "# See http://www.naemon.org/documentation/developer/externalcommands/$name.html for details.\n";
-            $content .= "\n";
+            if(!$cmd->{'thrukcmd'}) {
+                $content .= "# See http://www.naemon.org/documentation/developer/externalcommands/$name.html for details.\n";
+                $content .= "\n";
+            }
         }
     }
 
