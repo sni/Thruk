@@ -63,7 +63,7 @@ sub new {
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
         ## no critic
-        $ENV{'OLDPWD'} = Cwd::getcwd();
+        $ENV{'THRUKOLDPWD'} = Cwd::getcwd();
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
         ## use critic
         chdir($ENV{'HOME'});

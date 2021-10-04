@@ -2163,8 +2163,8 @@ sub _import_logcache_from_file {
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
     # make import with relative paths work (thruk chdirs into OMD at start)
-    if($ENV{'OLDPWD'}) {
-        chdir($ENV{'OLDPWD'});
+    if($ENV{'THRUKOLDPWD'}) {
+        chdir($ENV{'THRUKOLDPWD'});
     }
 
     for my $p (@{$files}) {
@@ -2248,7 +2248,7 @@ sub _import_logcache_from_file {
     }
 
     # restore old working dir
-    if($ENV{'OLDPWD'}) {
+    if($ENV{'THRUKOLDPWD'}) {
         chdir($ENV{'HOME'});
     }
 
