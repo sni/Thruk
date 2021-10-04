@@ -1701,7 +1701,7 @@ sub renew_logcache {
     return unless defined $self->{'_peer'}->{'logcache'};
     # renew cache?
     if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
-        $self->{'_peer'}->logcache->_import_logs($c, 'update', 0, $self->peer_key());
+        $self->{'_peer'}->logcache->_import_logs($c, 'update', $self->peer_key());
         $self->{'lastcacheupdate'} = time();
     }
     return;

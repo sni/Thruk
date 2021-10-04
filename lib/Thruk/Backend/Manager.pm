@@ -904,8 +904,9 @@ sub renew_logcache {
     $noforks = 0 unless defined $noforks;
     return 1 unless defined $c->config->{'logcache'};
     # set to import only to get faster initial results
+    local $c->config->{'logcache_delta_updates'} = 1 if $c->req->parameters->{'logcache_update'};
     local $c->config->{'logcache_delta_updates'} = 2 unless $c->config->{'logcache_delta_updates'};
-    return 1 if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
+    return 1 if !$c->config->{'logcache_delta_updates'};
     my $rc;
     eval {
         $rc = $self->_renew_logcache($c, $noforks);
