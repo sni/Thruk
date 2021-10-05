@@ -14,7 +14,7 @@ sub new {
 sub config {
     my $this = shift;
 
-    my $config = { map({ $_ => $this->{user} } @{$this->{roles}}) };
+    my $config = { map({ $_ => [$this->{user}] } @{$this->{roles}}) };
     $config->{var_path} = ".";
     return($config);
 }

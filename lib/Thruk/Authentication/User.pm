@@ -110,6 +110,7 @@ sub set_dynamic_attributes {
         $data->{'email'}               = $email               if defined $email;
         $data->{'can_submit_commands'} = $can_submit_commands if defined $can_submit_commands;
         $data->{'contactgroups'}       = $groups              if defined $groups;
+        $data->{'timestamp'}           = time();
     }
 
     $self->_apply_user_data($c, $data);
@@ -261,7 +262,6 @@ sub _apply_user_data {
     $data->{'roles'}               = Thruk::Base::array_uniq($roles);
     $data->{'can_submit_commands'} = $can_submit_commands;
     $data->{'roles_by_group'}      = $roles_by_group;
-    $data->{'timestamp'}           = time();
 
     return;
 }

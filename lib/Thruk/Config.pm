@@ -711,6 +711,8 @@ sub set_default_config {
         $config->{'omd_apache_proto'} = $proto;
     }
 
+    _normalize_auth_config($config);
+
     return $config;
 }
 
@@ -1247,15 +1249,21 @@ sub merge_cgi_cfg {
         $c->config->{$key} = $cfg->{$key};
     }
 
-    ###################################################
-    # normalize authorized_for_* lists
+    _normalize_auth_config($c->config);
+
+    return;
+}
+
+########################################
+# normalize authorized_for_* lists
+sub _normalize_auth_config {
+    my($config) = @_;
     for my $key (keys %{$config}) {
         if($key =~ m/^(authorized_for|authorized_contactgroup_for_)/mx) {
             $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
             next;
         }
     }
-
     return;
 }
 
