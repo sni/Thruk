@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add thruk apikey info command
+          - support wildcards in cgi.cfg authorized_for_* settings
           - Reporting:
             - add missing host unavailable box for sla reports
           - Rest

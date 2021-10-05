@@ -460,11 +460,13 @@ sub set_default_config {
         if(ref $base_config->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
             my $l = scalar (@{$config->{$key}});
             $config->{$key} = $config->{$key}->[$l-1];
+            next;
         }
 
         # convert scalars to lists if the default is a list
         if(ref $base_config->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
             $config->{$key} = [$config->{$key}];
+            next;
         }
     }
 
@@ -1244,6 +1246,16 @@ sub merge_cgi_cfg {
     for my $key (sort keys %{$cfg}) {
         $c->config->{$key} = $cfg->{$key};
     }
+
+    ###################################################
+    # normalize authorized_for_* lists
+    for my $key (keys %{$config}) {
+        if($key =~ m/^(authorized_for|authorized_contactgroup_for_)/mx) {
+            $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
+            next;
+        }
+    }
+
     return;
 }
 

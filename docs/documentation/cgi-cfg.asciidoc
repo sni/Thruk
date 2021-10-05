@@ -98,6 +98,10 @@ role can also be assigned with the coresponding contact_group option `authorized
 
 You can use the the `*` asterix to assign everyone to a certain role.
 
+Starting with Thruk v2.46 you can use full wildcard support and so something like:
+
+  authorized_for_admin = *admin
+
 === authorized_for_admin
 List of usernames who have privileged access to everything. These contacts will
 receive all other roles except the read_only role.
