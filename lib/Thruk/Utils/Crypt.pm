@@ -134,6 +134,7 @@ sub hexdigest {
         confess("unsupported digest type: ".$nr);
     }
     my $digest = Digest->new($digest_name);
+    $data = encode_utf8($data);
     $digest->add($data);
     my $hash = $digest->hexdigest();
     if(length($hash) != 64) { die("creating hexdigest failed.") }
