@@ -63,11 +63,11 @@ To change the logo of the login page and add some help text, you could create a 
 <!--
   var note = "<span style='color: #EE6E00; font-size: 25px;'>Test Server</span>";
   jQuery(document).ready(function() {
-    jQuery("IMG.mainlogo")
+    jQuery("DIV.loginmask IMG")
       .attr('src', '../usercontent/images/company.png')
       .attr('width', '50%')
       .attr('height', '50%');
-    jQuery("<br><b><div align='center'>"+note+"</div></b>").insertAfter("IMG.mainlogo");
+    jQuery("DIV.loginmask A").first().after("<br><b><div align='center'>"+note+"</div></b>");
   });
 -->
 </script>
