@@ -945,31 +945,6 @@ sub get_backends_with_obj_config {
             $c->db->get_processinfo(backend => $fetch);
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
         };
-
-        my $new_fetch = [];
-        $fetch = _get_peer_keys_without_configtool($c);
-        for my $key (@{$fetch}) {
-            if($c->stash->{'failed_backends'}->{$key}) {
-                my $peer = $c->db->get_peer_by_key($key);
-                delete $peer->{'configtool'}->{remote};
-            } else {
-                push @{$new_fetch}, $key;
-            }
-        }
-        $fetch = $new_fetch;
-
-        # when using lmd, do fetch the real config data now
-        if(scalar @{$fetch} > 0 && $ENV{'THRUK_USE_LMD'}) {
-            for my $key (@{$fetch}) {
-                my $peer = $c->db->get_peer_by_key($key);
-                delete $peer->{'configtool'}->{remote};
-            }
-            # make sure we have uptodate information about config section of http backends
-            local $ENV{'THRUK_USE_LMD'}    = 0;
-            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III a');
-            get_backends_with_obj_config($c);
-            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III b');
-        }
     }
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
 
