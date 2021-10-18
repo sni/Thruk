@@ -10,6 +10,7 @@ use Storable qw/dclone/;
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
 use Monitoring::Config::Object::Parent ();
+use Thruk::Backend::Manager ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
@@ -139,8 +140,18 @@ initialize configs
 sub init {
     my($self, $config, $stats, $remotepeer) = @_;
     delete $self->{'remotepeer'};
-    if(defined $remotepeer and lc($remotepeer->{'type'}) eq 'http') {
-        $self->{'remotepeer'} = $remotepeer;
+    if(defined $remotepeer) {
+        if(lc($remotepeer->{'type'}) eq 'http') {
+            $self->{'remotepeer'} = $remotepeer;
+        } else {
+            # check if there is any http source set
+            for my $src (@{$remotepeer->{'peer_list'}}) {
+                if($src =~ m/^https?:/mx) {
+                    $self->{'remotepeer'} = Thruk::Backend::Manager::fork_http_peer($remotepeer, $src);
+                    last;
+                }
+            }
+        }
     }
     $self->{'stats'} = $stats if defined $stats;
 

@@ -86,7 +86,7 @@ sub set_object_model {
     my $model = $c->app->obj_db_model;
     my $jobid = $model->currently_parsing($c->stash->{'param_backend'});
     if(    Thruk::Utils::Conf::get_model_retention($c, $c->stash->{'param_backend'})
-       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
+       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model, $peer_conftool)
     ) {
         # objects initialized
     }
@@ -162,7 +162,7 @@ read objects and store them as storable
 
 =cut
 sub read_objects {
-    my $c             = shift;
+    my($c) = @_;
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->app->obj_db_model;
     confess('no model') unless $model;
@@ -733,7 +733,8 @@ sub get_model_retention {
             my $model_configs = $data->{'configs'};
             for my $backend (keys %{$model_configs}) {
                 if(defined $c->stash->{'backend_detail'}->{$backend}) {
-                    $model->init($backend, undef, $model_configs->{$backend}, $c->stats);
+                    my $peer_conftool = $c->db->get_peer_by_key($backend);
+                    $model->init($backend, undef, $model_configs->{$backend}, $c->stats, $peer_conftool);
                     _debug('restored object retention data for '.$backend);
                 }
             }
@@ -815,11 +816,11 @@ set current obj_db from cached config
 
 =cut
 sub init_cached_config {
-    my($c, $peer_conftool, $model) = @_;
+    my($c, $peer_conftool, $model, $peer) = @_;
 
     $c->stats->profile(begin => "init_cached_config()");
 
-    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'});
+    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'}, $peer);
     $c->{'obj_db'}->{'cached'} = 1;
 
     unless(_compare_configs($peer_conftool, $c->{'obj_db'}->{'config'})) {

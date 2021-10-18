@@ -7,6 +7,7 @@ use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Peer ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
@@ -2755,6 +2756,25 @@ wrapper for Thruk::Utils::page_data
 
 sub page_data {
     return(Thruk::Utils::page_data(@_));
+}
+
+########################################
+
+=head2 fork_http_peer
+
+  fork_http_peer($peer, $httpsrc)
+
+create http backend based on livestatus backend which has multiple sources including http ones
+
+=cut
+
+sub fork_http_peer {
+    my($peer, $httpsrc) = @_;
+    my $options = Thruk::Utils::dclone($peer->{'peer_config'});
+    $options->{'options'}->{'peer'} = $httpsrc;
+    $options->{'type'}              = 'http';
+    $peer = Thruk::Backend::Peer->new($options, $peer->{'thruk_config'}, {});
+    return $peer;
 }
 
 ########################################

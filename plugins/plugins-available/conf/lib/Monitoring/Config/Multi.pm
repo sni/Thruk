@@ -59,7 +59,7 @@ sub init {
     load Monitoring::Config;
     if(defined $self->{'configs'}->{$key}) {
         $self->{'configs'}->{$key}->{'cached'} = 1;
-        $self->{'configs'}->{$key}->init($config, $stats) if defined $config;
+        $self->{'configs'}->{$key}->init($config, $stats, $remotepeer) if defined $config;
         $stats->profile(end => "M::C::M::init()") if defined $stats;
         return $self->{'configs'}->{$key};
     }
