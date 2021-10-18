@@ -1874,7 +1874,6 @@ sub _get_result_serial {
     $c->stats->profile( begin => "_get_result_serial($function)");
 
     for my $key (@{$peers}) {
-        my $peer = $self->get_peer_by_key($key);
         # skip already failed peers for this request
         next if $c->stash->{'failed_backends'}->{$key};
 
@@ -1889,6 +1888,7 @@ sub _get_result_serial {
         }
         #&timing_breakpoint('_get_result_serial fetched: '.$key);
         $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
+        my $peer = $self->get_peer_by_key($key);
         $peer->{'last_error'} = $last_error;
     }
 

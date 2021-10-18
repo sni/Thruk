@@ -939,11 +939,11 @@ sub get_backends_with_obj_config {
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
 
     my $fetch = _get_peer_keys_without_configtool($c);
-    if(scalar @{$fetch} > 0) {
+    if(scalar @{$fetch} > 0 && !$ENV{'THRUK_USE_LMD'}) {
         #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config II');
         eval {
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo a');
-            $c->db->get_processinfo(backend => $fetch);
+            $c->db->get_processinfo(backend => $fetch, force_type => 'http');
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
         };
     }

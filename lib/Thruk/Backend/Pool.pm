@@ -6,6 +6,7 @@ use Carp qw/confess/;
 use Cwd ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Manager ();
 use Thruk::Backend::Peer ();
 use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Base ();
@@ -289,8 +290,10 @@ sub do_on_peer {
     my($self, $key, $function, $arg) = @_;
 
     # make it possible to run code in thread context
+    my $arg_hash = {};
     if(ref $arg eq 'ARRAY') {
-        for(my $x = 0; $x <= scalar @{$arg}; $x++) {
+        for(my $x = 0; $x < scalar @{$arg}; $x += 2) {
+            $arg_hash->{$arg->[$x]} = $arg->[$x+1];
             if($arg->[$x] and $arg->[$x] eq 'eval') {
                 my $inc;
                 my $code = $arg->[$x+1];
@@ -319,6 +322,16 @@ sub do_on_peer {
 
     my $peer = $self->{'peers'}->{$key};
     confess("no peer for key: $key, got: ".join(', ', keys %{$self->{'peers'}})) unless defined $peer;
+    if($arg_hash->{'force_type'} && $arg_hash->{'force_type'} eq 'http') {
+        if(lc($peer->{'type'}) ne 'http') {
+            for my $src (@{$peer->{'peer_list'}}) {
+                if($src =~ m/^https?:/mx) {
+                    $peer = Thruk::Backend::Manager::fork_http_peer($peer, $src);
+                    last;
+                }
+            }
+        }
+    }
     my($type, $size, $data, $last_error);
     my $errors = 0;
     while($errors < 3) {
