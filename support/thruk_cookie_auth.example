@@ -15,3 +15,5 @@ RewriteRule ^/loginok/([^/]+)/(.*)$  /$2 [NS,PT,L,E=REMOTE_USER:$1]
 <LocationMatch ^/thruk(?!/cgi-bin/restricted.cgi)>
   Require all granted
 </LocationMatch>
+
+AllowEncodedSlashes NoDecode
