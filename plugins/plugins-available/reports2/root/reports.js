@@ -135,6 +135,7 @@ function reports_update_affected_sla_objects(input) {
     }
     var data = {
         action:         'check_affected_objects',
+        emptyok:        '1',
         template:        form.find('SELECT[name=template]').val(),
         backends:        backends,
         backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
@@ -177,7 +178,7 @@ function reports_update_affected_sla_objects(input) {
                 span2.attr('title', 'too many objects, please use more specific filter');
             }
             if(data['error']) {
-                console.log('getting affected objects failed: - ' + data['error']);
+                console.log('getting affected objects failed: ' + data['error']);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {

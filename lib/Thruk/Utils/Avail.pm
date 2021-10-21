@@ -1182,7 +1182,7 @@ sub _die_no_matches {
             $c->detach_error({
                 msg               => sprintf("insufficient permissions for user %s", $c->stash->{'remote_user'}//'?'),
                 descr             => sprintf("user %s has no permissions for any %s%s: %s", $c->stash->{'remote_user'}//'?', $type, $name ? " by ".$name : "", $filter),
-                code              => 400,
+                code              => $c->req->parameters->{'emptyok'} ? 200 : 400,
                 debug_information => [$authfilter, $otherfilter],
             });
         }
@@ -1190,7 +1190,7 @@ sub _die_no_matches {
     $c->detach_error({
         msg               => sprintf("found no %s%s", $type, $name ? " by ".$name : ""),
         descr             => sprintf("%s query%s returned no objects: %s", $type, $name ? " by ".$name : "", $filter),
-        code              => 400,
+        code              => $c->req->parameters->{'emptyok'} ? 200 : 400,
         debug_information => [$authfilter, $otherfilter],
     });
     return;
