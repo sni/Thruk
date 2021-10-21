@@ -1005,7 +1005,7 @@ sub update_object {
     return unless defined $obj;
 
     my $file = $obj->{'file'};
-    return if(defined $file && $file->readonly());
+    return if(defined $file && $file->{'readonly'});
 
     my $oldchanged = $obj->{'file'}->{'changed'};
     my $oldcommit  = $self->{'needs_commit'};

@@ -1785,7 +1785,7 @@ sub get_context_file {
     $fullpath      =~ s|\/+|\/|gmx;
     my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
     if(defined $file) {
-        if(defined $file and $file->readonly()) {
+        if($file->readonly()) {
             Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
             $c->stash->{'new_file'} = '/'.$new_file;
             return;
