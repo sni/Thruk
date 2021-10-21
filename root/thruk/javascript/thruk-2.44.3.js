@@ -88,6 +88,10 @@ function init_page() {
         });
     }
 
+    jQuery(".fittext").each(function(i, el) {
+        fitText(el);
+    });
+
     var newUrl = window.location.href;
     var scroll = newUrl.match(/(\?|\&)scrollTo=([\d\.]+)/);
     if(scroll) {
@@ -3625,6 +3629,16 @@ function toggleClass(el, cls) {
 function updateExportLink(input) {
     var newUrl = getCurrentUrl(false);
     input.value = newUrl;
+}
+
+function fitText(el) {
+    el = jQuery(el);
+    var boxWidth  = el.width();
+    var textWidth = el[0].scrollWidth;
+    if(textWidth > boxWidth) {
+        var size = parseInt(el.css("font-size"), 10);
+        el.css("font-size", ""+Math.floor(size * (boxWidth/textWidth))+"px");
+    }
 }
 
 /*******************************************************************************
