@@ -9,7 +9,8 @@
 [% END %]
 
 [% BLOCK field %]
-  [% fh = normalize_required_field(f) %]
+  [% fh = normalize_required_field(c, f) %]
+  [% IF fh.defined("hidden") && fh.hidden; NEXT; END %]
   <tr class="report_options report_type_[% fh.type | html %]">
     <td class="dataEven" align="center" valign="top"><b>[% fh.desc %]</b>[% IF fh.required %]<span class="required">*</span>[% END %][% IF fh.details != '' %]<br><font size='-2'>[% fh.details %]</font>[% END %]</td>
     <td class="dataOdd" align="left" colspan=2>
@@ -231,6 +232,13 @@
     <select name='params.[% key %]'>
       [% FOR t = c.config.themes %]
       <option value="[% t | html %]"[% IF t == value %] selected[% END %]>[% t | html %]</option>
+      [% END %]
+    </select>
+  [% ELSIF type == 'report_theme' %]
+    <select name='params.[% key %]'>
+      <option value="default">default</option>
+      [% FOR t = report_themes %]
+      <option value="[% t.name | html %]"[% IF t.name == value %] selected[% END %]>[% t.name | html %]</option>
       [% END %]
     </select>
   [% ELSIF type == 'language' %]

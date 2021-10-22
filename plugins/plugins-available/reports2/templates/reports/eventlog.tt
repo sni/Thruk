@@ -3,6 +3,7 @@
   [%
     required_fields = [
         { 'language'                => [ 'Language',          'language',     'en',          '', 1 ] },
+        { 'report_theme'            => [ 'Theme',             'report_theme'                       ] },
         { 'timeperiod'              => [ 'Timeperiod',        'rptimeperiod', 'last24hours', '', 1 ] },
         { 'reverse'                 => [ 'Reverse Logs',      'option',       0             ] },
         { 'pattern'                 => [ 'Pattern',           'pattern',      ''            ] },

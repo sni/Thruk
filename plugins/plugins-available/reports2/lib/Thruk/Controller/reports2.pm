@@ -220,7 +220,8 @@ sub report_edit {
         }
     }
 
-    $c->stash->{templates} = Thruk::Utils::Reports::get_report_templates($c);
+    $c->stash->{templates}     = Thruk::Utils::Reports::get_report_templates($c);
+    $c->stash->{report_themes} = Thruk::Utils::Reports::get_report_themes($c);
     _set_report_data($c, $r);
 
     Thruk::Utils::ssi_include($c);
@@ -254,6 +255,7 @@ sub report_edit_step2 {
 
     $c->stash->{template} = 'reports_edit_step2.tt';
     $c->stash->{'normalize_required_field'} = \&Thruk::Utils::Reports::normalize_required_field;
+    $c->stash->{report_themes} = Thruk::Utils::Reports::get_report_themes($c);
     return;
 }
 

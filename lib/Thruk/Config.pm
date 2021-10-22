@@ -610,7 +610,8 @@ sub set_default_config {
 
     _debug2("using themes: ".$themes_dir);
 
-    $config->{'themes'} = \@themes;
+    $config->{'themes'}     = \@themes;
+    $config->{'themes_dir'} = $themes_dir;
 
     ###################################################
     # use uid to make tmp dir more uniq

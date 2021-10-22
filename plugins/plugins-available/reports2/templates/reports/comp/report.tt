@@ -8,6 +8,15 @@
   [% PROCESS _common_js_files.tt show_error_reports=0 %]
   <script language="javascript" type="text/javascript" src="[% url_prefix %]vendor/flot-d7c58b5/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]vendor/flot-d7c58b5/jquery.flot.time.js"></script>
+  [% IF r.params.defined("report_theme") && r.params.report_theme != "default" %]
+    [% FOR t = report_themes %]
+      [% IF t.name == r.params.report_theme %]
+        [% FOR s = t.reportstyles %]
+        <link rel="stylesheet" type="text/css" href="[% url_prefix %]themes/[% t.name | html %]/[% s | html %]" />
+        [% END %]
+      [% END %]
+    [% END %]
+  [% END %]
   [% PROCESS 'reports/style/custom.tt' %]
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/reports_render.js"></script>
 </head>
