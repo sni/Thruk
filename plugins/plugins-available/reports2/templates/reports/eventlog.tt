@@ -87,7 +87,7 @@
     [% ELSE %]
       [% counter = 0 %]
       [% WHILE logs.size > 0 %]
-        [% logblock = logs.splice(0, 14) %][%# Items per page #%]
+        [% logblock = logs.splice(0, 22) %][%# Items per page #%]
         [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc('Events') %]
             [% FOREACH l = logblock %]
               [% PROCESS _logs_line %]
@@ -101,7 +101,7 @@
                    options = options.substr(l.type.length + 2);
                  END;
               %]
-              <div class="logoptions">[% options.substr(0, 130) %]</div>
+              <div class="logoptions fittext">[% options.substr(0, 130) %]</div>
             [% END %]
         [% END %]
         [% counter = counter + 1 %]

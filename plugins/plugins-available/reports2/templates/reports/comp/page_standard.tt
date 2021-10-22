@@ -10,7 +10,7 @@
     </tr>
     <tr>
       <td>
-        <div class="subtitle">[% pagetitle %]</div>
+        <div class="subtitle fittext">[% pagetitle %]</div>
         <div class="content">[% content %]</div>
       </td>
     </tr>
