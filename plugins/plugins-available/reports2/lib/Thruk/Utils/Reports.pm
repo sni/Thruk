@@ -1921,7 +1921,7 @@ sub get_report_themes {
             path         => $dir,
             name         => $name,
             reportstyles => \@files,
-        }
+        };
     }
     return($report_themes);
 }
