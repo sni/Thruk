@@ -1889,6 +1889,7 @@ t/610-scenario-lmd_federation_multitier_e2e.t
 t/610-scenario-logfile_cache_http.t
 t/610-scenario-logfile_cache_icinga2_ido_e2e.t
 t/610-scenario-report_mails_e2e.t
+t/610-scenario-reports.t
 t/610-scenario-rest_api.t
 t/610-scenario-sakuli_e2e.t
 t/610-scenario-site_menu_multi_tier_e2e.t
@@ -2360,6 +2361,14 @@ t/scenarios/report_mails_e2e/omd/test.cfg
 t/scenarios/report_mails_e2e/omd/test.sh
 t/scenarios/report_mails_e2e/thruk.conf
 t/scenarios/report_mails_e2e/thruk_local.conf
+t/scenarios/reports/docker-compose.yml
+t/scenarios/reports/Makefile
+t/scenarios/reports/omd/1.rpt
+t/scenarios/reports/omd/2.rpt
+t/scenarios/reports/omd/Dockerfile
+t/scenarios/reports/omd/playbook.yml
+t/scenarios/reports/omd/test.cfg
+t/scenarios/reports/t/100-reports.t
 t/scenarios/rest_api/docker-compose.yml
 t/scenarios/rest_api/Makefile
 t/scenarios/rest_api/omd/1.rpt

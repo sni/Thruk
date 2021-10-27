@@ -1009,7 +1009,7 @@ sub _cmd_raw {
     }
 
     elsif($function =~ /^cmd:\s+(\w+)\s*(.*)/mx) {
-        if(!$c->check_user_roles('authorized_for_admin')) {
+        if(!$c->check_user_roles('authorized_for_admin') && !_is_allowed_user_function($function)) {
             return("admin privileges required to run ".$function, 1);
         }
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
@@ -1021,7 +1021,7 @@ sub _cmd_raw {
 
     # run code
     elsif($function =~ /::/mx) {
-        if(!$c->check_user_roles('authorized_for_admin') && $function ne 'Thruk::Utils::get_fake_session') {
+        if(!$c->check_user_roles('authorized_for_admin') && !_is_allowed_user_function($function)) {
             return("admin privileges required to run ".$function, 1);
         }
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
@@ -1379,6 +1379,14 @@ sub read_stdin_password {
     $key =  <>;
     chomp ($key);
     return($key);
+}
+
+##############################################
+sub _is_allowed_user_function {
+    my($function) = @_;
+    return 1 if $function eq 'Thruk::Utils::get_fake_session';
+    return 1 if $function eq 'Thruk::Utils::get_perf_image';
+    return;
 }
 
 ##############################################
