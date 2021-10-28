@@ -303,7 +303,6 @@ sub test_page {
     if(defined $opts->{'waitfor'}) {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
-           $waitfor = m/$waitfor/mx unless ref $waitfor eq 'Regexp';
         my $found   = 0;
         while($now < $start + $waitmax) {
             # text that shouldn't appear
