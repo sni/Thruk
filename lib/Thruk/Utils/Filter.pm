@@ -1298,6 +1298,7 @@ return string for given numerical state
 =cut
 sub state2text {
     my($nr) = @_;
+    return unless defined $nr;
     if($nr == 0) { return 'OK'; }
     if($nr == 1) { return 'WARNING'; }
     if($nr == 2) { return 'CRITICAL'; }
@@ -1317,6 +1318,7 @@ return string for given numerical host state
 =cut
 sub hoststate2text {
     my($nr) = @_;
+    return unless defined $nr;
     if($nr == 0) { return 'UP'; }
     if($nr == 1) { return 'DOWN'; }
     if($nr == 2) { return 'UNREACHABLE'; }
@@ -1336,6 +1338,7 @@ return numerical state for given text state
 =cut
 sub text2state {
     my($txt) = @_;
+    return unless defined $txt;
     $txt = uc($txt);
     if($txt eq 'OK')       { return(0); }
     if($txt eq 'WARNING')  { return(1); }
