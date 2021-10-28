@@ -290,7 +290,9 @@ sub test_page {
         ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request, 1);
     }
 
-    if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
+    my $cleaned_content = $request->content;
+    $cleaned_content =~ s/<script.*?<\/script>//sgmx;
+    if($cleaned_content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
         my $msg = $1;
         fail('Request '.$opts->{'url'}.' had error message: '.$msg) unless $opts->{'fail_message_ok'};
         fail('Request '.$opts->{'url'}.' error message contains escaped html: '.$msg) if $msg =~ m/&lt;.*&gt;/mx;
@@ -301,6 +303,7 @@ sub test_page {
     if(defined $opts->{'waitfor'}) {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
+           $waitfor = m/$waitfor/mx unless ref $waitfor eq 'Regexp';
         my $found   = 0;
         while($now < $start + $waitmax) {
             # text that shouldn't appear
@@ -313,7 +316,7 @@ sub test_page {
                 }
             }
 
-            if($return->{'content'} =~ m/$waitfor/mx) {
+            if($return->{'content'} =~ $waitfor) {
                 ok(1, "content ".$waitfor." found after ".($now - $start)."seconds");
                 $found = 1;
                 last;
@@ -339,7 +342,7 @@ sub test_page {
         }
 
         if(!$found) {
-            fail("content did not occur within $waitmax seconds") or diag($opts->{'url'});
+            fail("content did not match $waitfor within $waitmax seconds") or diag($opts->{'url'});
         } else {
             # text that should appear
             if(defined $opts->{'like'}) {
