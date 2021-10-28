@@ -1,0 +1,10 @@
+site:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - ../../../:/thruk:ro
+        - ./:/test:ro
