@@ -296,6 +296,7 @@ options are: {
     superuser      => flag wether this user should be a superuser
     internal       => flag wether this user is an internal technical user
     roles          => limit roles to this set
+    keep_session   => do not update current session cookie
 }
 
 =cut
@@ -352,7 +353,9 @@ sub authenticate {
     if(!$sessiondata && !$internal) {
         if(!Thruk::Base->mode_cli()) {
             ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
-            $c->cookie('thruk_auth', $sessionid, { httponly => 1 });
+            if(!$options{'keep_session'}) {
+                $c->cookie('thruk_auth', $sessionid, { httponly => 1 });
+            }
         }
     }
     if($sessiondata) {

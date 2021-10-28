@@ -500,9 +500,10 @@ sub generate_report {
     # report should always run in the report owner context
     if(!$c->user_exists || ($options->{'user'} ne $c->user->{'username'})) {
         Thruk::Utils::set_user($c,
-            username => $options->{'user'},
-            auth_src => "report",
-            internal => 1,
+            username     => $options->{'user'},
+            auth_src     => "report",
+            force        => 1,
+            keep_session => 1,
         );
     }
 
@@ -813,9 +814,10 @@ sub generate_report_background {
     # report should always run in the report owner context
     if(!$c->user_exists || ($report->{'user'} ne $c->user->{'username'})) {
         Thruk::Utils::set_user($c,
-            username => $report->{'user'},
-            auth_src => "report",
-            internal => 1,
+            username     => $report->{'user'},
+            auth_src     => "report",
+            force        => 1,
+            keep_session => 1,
         );
     }
 

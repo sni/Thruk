@@ -2190,12 +2190,13 @@ sub get_cron_time_entry {
 set and authenticate a user
 
 options are: {
-    username  => username of the resulting user
-    auth_src  => hint about where this user came from
-    superuser => superuser can change to other user names, roles will not exceed initial role set
-    internal  => internal technical user can change into any user and has admin roles
-    force     => force setting new user, even if already authenticated
-    roles     => maximum set of roles
+    username     => username of the resulting user
+    auth_src     => hint about where this user came from
+    superuser    => superuser can change to other user names, roles will not exceed initial role set
+    internal     => internal technical user can change into any user and has admin roles
+    force        => force setting new user, even if already authenticated
+    roles        => maximum set of roles
+    keep_session => do not update current session cookie
 }
 
 =cut
@@ -2208,22 +2209,23 @@ sub set_user {
     if($c->user_exists) {
         if($c->user->{'internal'} || $options{'force'}) {
             # ok
+            delete $c->{'user'};
+            delete $c->stash->{'remote_user'};
+            delete $c->{'session'};
         } elsif($c->user->{'superuser'}) {
             return(change_user($c, $options{'username'}, $options{'auth_src'}));
         } else {
             # not allowed
-            return;
+            confess('changing user not allowed');
         }
-        delete $c->{'user'};
-        delete $c->stash->{'remote_user'};
-        delete $c->{'session'};
     }
     $c->authenticate(
-            username  => $options{'username'},
-            superuser => $options{'superuser'},
-            internal  => $options{'internal'},
-            auth_src  => $options{'auth_src'},
-            roles     => $options{'roles'},
+            username     => $options{'username'},
+            superuser    => $options{'superuser'},
+            internal     => $options{'internal'},
+            auth_src     => $options{'auth_src'},
+            roles        => $options{'roles'},
+            keep_session => $options{'keep_session'},
     );
     confess("no user") unless $c->user_exists;
     $c->user->{'auth_src'} = $options{'auth_src'};
