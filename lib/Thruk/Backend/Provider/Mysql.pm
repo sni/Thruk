@@ -1457,16 +1457,14 @@ returns true if no global lock exists
 sub check_global_lock {
     my($c) = @_;
     # import locks all other operations
-    if(-e $c->config->{'tmp_path'}."/logcache_import.lock") {
-        my $pid = Thruk::Utils::IO::read($c->config->{'tmp_path'}."/logcache_import.lock");
-        if($pid && $pid != $$) {
-            if($pid && kill(0, $pid)) {
-                _info(sprintf("WARNING: logcache import currently running with pid %d", $pid));
-                return;
-            }
-            _warn("WARNING: removing stale lock file: ".$c->config->{'tmp_path'}."/logcache_import.lock");
-            unlink($c->config->{'tmp_path'}."/logcache_import.lock");
+    my $pid = Thruk::Utils::IO::saferead($c->config->{'tmp_path'}."/logcache_import.lock");
+    if($pid && $pid != $$) {
+        if($pid && kill(0, $pid)) {
+            _info(sprintf("WARNING: logcache import currently running with pid %d", $pid));
+            return;
         }
+        _warn("WARNING: removing stale lock file: ".$c->config->{'tmp_path'}."/logcache_import.lock");
+        unlink($c->config->{'tmp_path'}."/logcache_import.lock");
     }
     return(1);
 }
