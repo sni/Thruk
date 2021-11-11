@@ -499,7 +499,20 @@ sub from_local {
         );
     }
 
-    return _run_commands($c, $options, 'local');
+    my $res;
+    eval {
+        $res = _run_commands($c, $options, 'local');
+    };
+    my $err = $@;
+    if($err) {
+        if($c->{'detached'}) {
+            _debug($err);
+        } else {
+            _error($err);
+        }
+        exit(1);
+    }
+    return $res;
 }
 
 ##############################################

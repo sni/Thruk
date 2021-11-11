@@ -269,6 +269,7 @@ sub index {
         }
         elsif((!defined $log_req || $log_req) && ($code >= 500 || $errors->{$arg1}->{'log_req'} || $log_req)) {
             Thruk::Utils::log_error_with_details($c, $c->stash->{errorMessage}, $c->stash->{errorDescription}, $c->stash->{errorDetails}, $errorDetails, $c->stash->{errorDebugInfo});
+            $log_req = 0; # do not log twice
         } else {
             _debug($errors->{$arg1}->{'mess'} || $c->stash->{errorMessage});
             _debug($c->stash->{errorDescription}) if $c->stash->{errorDescription};
@@ -336,7 +337,7 @@ sub index {
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
         _error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
         if(Thruk::Base->verbose) {
-            Carp::cluck($c->stash->{errorMessage});
+            Carp::cluck("stacktrace:");
         }
     }
 
