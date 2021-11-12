@@ -617,6 +617,11 @@ sub _set_object_model {
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};
     Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
+    if($c->stash->{set_object_model_err}) {
+        _warnf("backend %s returned error: %s", $peer_key, $c->stash->{set_object_model_err});
+        delete $c->stash->{set_object_model_err};
+        return;
+    }
     delete $c->req->parameters->{'refreshdata'};
     if(!$c->{'obj_db'}) {
         _debug("backend %s has no config tool settings", $peer_key);
