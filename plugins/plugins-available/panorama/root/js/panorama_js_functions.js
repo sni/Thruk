@@ -1001,11 +1001,11 @@ var TP = {
                         // dashboard has been closed already
                         return;
                     }
-                    if(data.dashboard_ts[tab_id] != tab.ts) {
+                    if(data.dashboard_ts[key] != tab.ts) {
                         var old = tab.ts ? tab.ts : '';
-                        tab.ts = data.dashboard_ts[tab.id];
+                        tab.ts = data.dashboard_ts[key];
                         if((no_ts == undefined || no_ts == false) && old < tab.ts) {
-                            TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
+                            TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[key]);
                             if(tab.rendered) {
                                 TP.renewDashboard(tab);
                             } else {
