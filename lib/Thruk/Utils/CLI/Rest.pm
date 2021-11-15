@@ -601,7 +601,7 @@ sub _get_value {
 # determines if command requires backends or not
 sub _skip_backends {
     my($c, $opts) = @_;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless $c->stash->{'processinfo_time'};
     return unless $opts->{'commandoptions'};
     my $cmds = _parse_args($opts->{'commandoptions'});
     $opts->{'_parsed_args'} = $cmds;
