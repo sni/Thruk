@@ -99,21 +99,18 @@ sub index {
             }
         }
     }
+    Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS) if $ENV{'THRUK_USE_LMD'}; # required for the first request on federated backends
     if(scalar @{$backends} > 0) {
-        Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS) if $ENV{'THRUK_USE_LMD'}; # required for the first request on federated backends
         Thruk::Action::AddDefaults::set_enabled_backends($c, $backends);
     }
     elsif($c->req->parameters->{'backend'}) {
-        Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS) if $ENV{'THRUK_USE_LMD'}; # required for the first request on federated backends
         Thruk::Action::AddDefaults::set_enabled_backends($c, $c->req->parameters->{'backend'});
         delete $c->req->parameters->{'backend'};
     }
     elsif($c->req->parameters->{'backends'}) {
-        Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS) if $ENV{'THRUK_USE_LMD'}; # required for the first request on federated backends
         Thruk::Action::AddDefaults::set_enabled_backends($c, $c->req->parameters->{'backends'});
         delete $c->req->parameters->{'backends'};
     } else {
-        Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS) if $ENV{'THRUK_USE_LMD'}; # required for the first request on federated backends
         my($disabled_backends) = Thruk::Action::AddDefaults::set_enabled_backends($c);
         Thruk::Action::AddDefaults::set_possible_backends($c, $disabled_backends);
     }
