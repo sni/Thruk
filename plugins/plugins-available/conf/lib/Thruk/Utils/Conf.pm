@@ -44,7 +44,7 @@ sub set_object_model {
     $peer_key = $c->stash->{'param_backend'} if $c->stash->{'param_backend'};
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
-    Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::Constants::ADD_CACHED_DEFAULTS
+    Thruk::Action::AddDefaults::set_processinfo($c, 2) unless $c->stash->{'processinfo_time'}; # Thruk::Constants::ADD_CACHED_DEFAULTS
     $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c, $peer_key)};
 
     # if this is no obj config yet, try updating process info which updates
