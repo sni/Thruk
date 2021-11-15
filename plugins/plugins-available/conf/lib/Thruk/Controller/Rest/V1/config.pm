@@ -616,10 +616,9 @@ sub _set_object_model {
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};
-    Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
-    if($c->stash->{set_object_model_err}) {
-        _warnf("backend %s returned error: %s", $peer_key, $c->stash->{set_object_model_err});
-        delete $c->stash->{set_object_model_err};
+    my $rc = Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
+    if($rc == 0 && $c->stash->{set_object_model_err}) {
+        _warn("backend %s returned error: %s", $peer_key, $c->stash->{set_object_model_err});
         return;
     }
     delete $c->req->parameters->{'refreshdata'};
