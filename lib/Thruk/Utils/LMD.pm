@@ -271,7 +271,7 @@ sub check_initial_start {
     }
 
     check_proc($config, $c, 0);
-    _check_changed_lmd_config($c, $config);
+    check_changed_lmd_config($c, $config);
 
     #&timing_breakpoint("lmd check_initial_start done");
 
@@ -408,14 +408,14 @@ sub kill_if_not_responding {
 
 ########################################
 
-=head2 _check_changed_lmd_config
+=head2 check_changed_lmd_config
 
-  _check_changed_lmd_config($c, $config)
+  check_changed_lmd_config($c, $config)
 
 check if the backends have changed and send a sighup to lmd if so
 
 =cut
-sub _check_changed_lmd_config {
+sub check_changed_lmd_config {
     my($c, $config) = @_;
     # return if it has not changed
     return unless write_lmd_config($c, $config);

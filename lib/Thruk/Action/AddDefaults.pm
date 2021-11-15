@@ -1282,6 +1282,7 @@ sub check_federation_peers {
     return($processinfo, $cached_data) unless $all_sites_info;
 
     # add sub federated backends
+    my $check_lmd_config;
     my $existing =  {};
     my $changed  = 0;
     for my $row (@{$all_sites_info}) {
@@ -1290,7 +1291,10 @@ sub check_federation_peers {
         if(!$c->db->peers->{$key}) {
             $row->{'parent'} = 'LMD' if(!$row->{'parent'} && $c->config->{'lmd_remote'});
             my $parent = $c->db->peers->{$row->{'parent'}};
-            next unless $parent;
+            if(!$parent) {
+                $check_lmd_config = 1; # got unknown peer key, recheck lmd config
+                next;
+            }
             my $section = "";
             if($c->config->{'lmd_remote'}) {
                     $section = $row->{'section'};
@@ -1334,6 +1338,9 @@ sub check_federation_peers {
     for my $key (@{$c->db->peer_order}) {
         my $peer = $c->db->peers->{$key};
         if(!$peer->{'federation'}) {
+            if(!$existing->{$key}) {
+                $check_lmd_config = 1; # got unknown peer key, recheck lmd config
+            }
             next;
         }
         if(!$existing->{$key}) {
@@ -1361,6 +1368,11 @@ sub check_federation_peers {
         }
     }
     $c->config->{'_lmd_federtion_checked'} = time();
+
+    if($check_lmd_config) {
+        require Thruk::Utils::LMD;
+        Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
+    }
     return($processinfo, $cached_data);
 }
 
