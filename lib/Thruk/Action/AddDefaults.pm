@@ -1288,10 +1288,12 @@ sub check_federation_peers {
     for my $row (@{$all_sites_info}) {
         my $key = $row->{'key'};
         $existing->{$key} = 1;
+        $existing->{$row->{'parent'}} = 1 if $row->{'parent'};
         if(!$c->db->peers->{$key}) {
             $row->{'parent'} = 'LMD' if(!$row->{'parent'} && $c->config->{'lmd_remote'});
             my $parent = $c->db->peers->{$row->{'parent'}};
             if(!$parent) {
+                _warn("got unknown peer key, recheck lmd config: %s(%s)", $row->{'name'}, $row->{'peer_key'});
                 $check_lmd_config = 1; # got unknown peer key, recheck lmd config
                 next;
             }
@@ -1339,6 +1341,7 @@ sub check_federation_peers {
         my $peer = $c->db->peers->{$key};
         if(!$peer->{'federation'}) {
             if(!$existing->{$key}) {
+                _warn("peer key not found, recheck lmd config: %s(%s)", $peer->{'name'}, $key);
                 $check_lmd_config = 1; # got unknown peer key, recheck lmd config
             }
             next;
@@ -1369,7 +1372,7 @@ sub check_federation_peers {
     }
     $c->config->{'_lmd_federtion_checked'} = time();
 
-    if($check_lmd_config) {
+    if($check_lmd_config && !$c->config->{'lmd_remote'}) {
         require Thruk::Utils::LMD;
         Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
     }
