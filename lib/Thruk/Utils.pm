@@ -2433,7 +2433,7 @@ sub wait_after_reload {
         # clean up cached groups which may have changed
         $c->cache->clear();
     } else {
-        _error('waiting for core reload failed');
+        _error('waiting for core reload failed (%s)', $pkey // 'all sites');
         return(0);
     }
     return(1);
