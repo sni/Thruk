@@ -1089,16 +1089,18 @@ sub _send_socket {
     # https://riptutorial.com/posix/example/17424/handle-sigpipe-generated-by-write---in-a-thread-safe-manner
     local $SIG{PIPE} = 'IGNORE';
 
+    my $maxretries = $ENV{'LIVESTATUS_RETRIES'} // $self->{'retries_on_connection_error'};
+
     # try to avoid connection errors
     eval {
-        if($self->{'retries_on_connection_error'} <= 0) {
+        if($maxretries <= 0) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             return($status, $msg, $recv);
         }
 
-        while((!defined $status || ($status == 491 || $status == 497 || $status == 500)) && $retries < $self->{'retries_on_connection_error'}) {
+        while((!defined $status || ($status == 491 || $status == 497 || $status == 500)) && $retries < $maxretries) {
             $retries++;
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
@@ -1107,7 +1109,7 @@ sub _send_socket {
             if($status == 491 or $status == 497 or $status == 500) {
                 $self->{'logger'}->debug('got status '.$status.' retrying in '.$self->{'retry_interval'}.' seconds') if $self->{'verbose'};
                 $self->_close();
-                sleep($self->{'retry_interval'}) if $retries < $self->{'retries_on_connection_error'};
+                sleep($self->{'retry_interval'}) if $retries < $maxretries;
             }
         }
     };

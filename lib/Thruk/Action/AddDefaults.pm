@@ -522,6 +522,7 @@ sub add_defaults {
         my $last_program_restart = 0;
         my $retries = 3;
         $retries = 1 if $safe; # but only once on safe/cached pages
+        local $ENV{'LIVESTATUS_RETRIES'} = 0 if $safe; # skip default retries
 
         my $err;
         for my $x (1..$retries) {
