@@ -292,6 +292,11 @@ sub _update_cmds {
 sub _update_docs {
     my($c, $output_file) = @_;
 
+    if($ENV{'THRUK_USE_LMD'}) {
+        require Thruk::Utils::LMD;
+        Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
+    }
+
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
     `mkdir -p bp;            cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
     `mkdir -p panorama;      cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
