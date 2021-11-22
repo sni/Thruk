@@ -1651,10 +1651,10 @@ sub _update_logcache_auth {
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
     my $count = 0;
     for my $host (@{$hosts}) {
-        my $host_id    = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
+        my $host_id = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
         my @values;
-        for my $contact (@{$host->{'contacts'}}) {
-            my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
+        for my $contact (@{Thruk::Base::array_uniq($host->{'contacts'})}) {
+            my $contact_id = &_contact_lookup($contact_lookup, $contact, $dbh, $prefix);
             push @values, '('.$contact_id.','.$host_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
@@ -1673,8 +1673,8 @@ sub _update_logcache_auth {
         my $service_id = &_service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
         next unless $service_id;
         my @values;
-        for my $contact (@{$service->{'contacts'}}) {
-            my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
+        for my $contact (@{Thruk::Base::array_uniq($service->{'contacts'})}) {
+            my $contact_id = &_contact_lookup($contact_lookup, $contact, $dbh, $prefix);
             push @values, '('.$contact_id.','.$service_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
