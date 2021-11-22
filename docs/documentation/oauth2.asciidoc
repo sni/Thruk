@@ -67,3 +67,24 @@ You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.goog
   </provider>
 </auth_oauth>
 ```
+
+=== Microsoft AD FS
+
+You need to create a new Application Group in the AD FS Management Console, and configure it with Issuance Transformation Rules that release User-Principal-Name.
+
+```
+<auth_oauth>
+  <provider>
+    login = "Login with AD FS"
+    client_id = ...
+    client_secret = ...
+    scopes = openid profile
+    auth_url = https://fs.contoso.com/adfs/oauth2/authorize/?resource=urn:microsoft:userinfo
+    token_url = https://fs.contoso.com/adfs/oauth2/token/
+    jwks_url = https://fs.contoso.com/adfs/discovery/keys
+    # You can also configure explicit key trust for the JWK signing key:
+    # jwk_key = {"kty":"RSA","n":"0vx7agoebG...L6tSoc_BJECP","e":"AQAB"}
+    login_field = upn
+  </provider>
+</auth_oauth>
+```
