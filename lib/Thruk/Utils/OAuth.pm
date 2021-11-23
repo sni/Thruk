@@ -94,8 +94,14 @@ sub handle_oauth_login {
             }
         } else {
             # AD FS puts the claims in the id_token rather than in userinfo
+            eval {
+                require Crypt::JWT;
+                Crypt::JWT->import('decode_jwt');
+            };
+            if ($@) {
+                die("Crypt::JWT is required when user id assertions not fetched from api_url");
+            }
             _debug(sprintf("oauth login step2: api_url not set, looking for user id in id_token")) if Thruk::Base->debug;
-            use Crypt::JWT qw(decode_jwt);
             my $id_token;
             if ($auth->{'jwks_url'}) {
                 _debug(sprintf("oauth login step2: get jwks from: %s", $auth->{'jwks_url'})) if Thruk::Base->debug;
