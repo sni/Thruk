@@ -300,6 +300,21 @@ sub load_module {
 # INTERNAL SUBS
 ##############################################
 sub _run {
+    my($self, @args) = @_;
+    my $rc;
+    eval {
+        $rc = $self->_run_do(@args);
+    };
+    my $err = $@;
+    if($err) {
+        _error($err);
+        exit(255);
+    }
+    return($rc);
+}
+
+##############################################
+sub _run_do {
     my($self) = @_;
 
     my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0] || '';
