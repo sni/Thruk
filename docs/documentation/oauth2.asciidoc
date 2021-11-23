@@ -70,7 +70,10 @@ You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.goog
 
 === Microsoft AD FS
 
-You need to create a new Application Group in the AD FS Management Console, and configure it with Issuance Transformation Rules that release User-Principal-Name.
+You need to create a new Application Group in the AD FS Management Console,
+and configure it with Issuance Transformation Rules that release
+User-Principal-Name. Using AD FS introduces a dependency on Crypt::JWT to
+decode and validate the attribute assertions.
 
 ```
 <auth_oauth>
