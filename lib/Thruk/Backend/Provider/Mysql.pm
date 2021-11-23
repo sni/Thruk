@@ -1703,13 +1703,10 @@ sub _update_logcache_optimize {
     }
     my $start = time();
 
-    eval {
-        _infos("update logs table order...");
-        $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
-        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-        _info("done");
-    };
-    _warn($@) if $@;
+    _infos("update logs table order...");
+    $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    _info("done");
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         # remove temp files from previously repair attempt if filesystem was full
