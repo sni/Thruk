@@ -1715,7 +1715,11 @@ sub _update_logcache_optimize {
         # remove temp files from previously repair attempt if filesystem was full
         if($ENV{'OMD_ROOT'}) {
             my $root = $ENV{'OMD_ROOT'};
-            Thruk::Utils::IO::cmd("rm -f $root/var/mysql/thruk_log_cache/*.TMD");
+            my @old = glob(sprintf("%s/var/mysql/thruk_log_cache/%s_*.TMD", $root, $prefix));
+            if(scalar @old > 0) {
+                _warn("removing old logcache tmp files: ".join(", ", @old));
+                unlink(@old);
+            }
         }
         # repair / optimize tables
         _debug("optimizing / repairing tables");
