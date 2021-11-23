@@ -1651,10 +1651,10 @@ sub _update_logcache_auth {
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
     my $count = 0;
     for my $host (@{$hosts}) {
-        my $host_id    = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
+        my $host_id = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
         my @values;
-        for my $contact (@{$host->{'contacts'}}) {
-            my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
+        for my $contact (@{Thruk::Base::array_uniq($host->{'contacts'})}) {
+            my $contact_id = &_contact_lookup($contact_lookup, $contact, $dbh, $prefix);
             push @values, '('.$contact_id.','.$host_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
@@ -1673,8 +1673,8 @@ sub _update_logcache_auth {
         my $service_id = &_service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
         next unless $service_id;
         my @values;
-        for my $contact (@{$service->{'contacts'}}) {
-            my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
+        for my $contact (@{Thruk::Base::array_uniq($service->{'contacts'})}) {
+            my $contact_id = &_contact_lookup($contact_lookup, $contact, $dbh, $prefix);
             push @values, '('.$contact_id.','.$service_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
@@ -1703,19 +1703,20 @@ sub _update_logcache_optimize {
     }
     my $start = time();
 
-    eval {
-        _infos("update logs table order...");
-        $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
-        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-        _info("done");
-    };
-    _warn($@) if $@;
+    _infos("update logs table order...");
+    $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    _info("done");
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         # remove temp files from previously repair attempt if filesystem was full
         if($ENV{'OMD_ROOT'}) {
             my $root = $ENV{'OMD_ROOT'};
-            Thruk::Utils::IO::cmd("rm -f $root/var/mysql/thruk_log_cache/*.TMD");
+            my @old = glob(sprintf("%s/var/mysql/thruk_log_cache/%s_*.TMD", $root, $prefix));
+            if(scalar @old > 0) {
+                _warn("removing old logcache tmp files: ".join(", ", @old));
+                unlink(@old);
+            }
         }
         # repair / optimize tables
         _debug("optimizing / repairing tables");

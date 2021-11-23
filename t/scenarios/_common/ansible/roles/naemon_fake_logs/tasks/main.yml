@@ -1,0 +1,4 @@
+- name: "make sure site {{ site }} is stopped"
+  shell: "sudo su - {{ site }} -c 'omd stop'"
+- name: "run fake log archive generator"
+  shell: "sudo su - {{ site }} -c '/thruk/support/fake_log_archive.pl --logs_per_day=100000 -f'"

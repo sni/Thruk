@@ -2374,6 +2374,7 @@ sub wait_after_reload {
                 },
         };
     }
+    my $msg;
     while($start > time() - 30) {
         $procinfo = {};
         eval {
@@ -2385,11 +2386,13 @@ sub wait_after_reload {
         alarm(0);
         if($@) {
             $c->stats->profile(comment => "get_processinfo: ".$@);
-            _debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
+            $msg = 'still waiting for core reload for '.(time()-$start).'s: '.$@;
+            _debug($msg);
         }
         elsif($pkey && $c->stash->{'failed_backends'}->{$pkey}) {
             $c->stats->profile(comment => "get_processinfo: ".$c->stash->{'failed_backends'}->{$pkey});
-            _debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
+            $msg = 'still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey};
+            _debug($msg);
         }
         elsif($pkey and $time) {
             # not yet restarted
@@ -2400,7 +2403,8 @@ sub wait_after_reload {
                     _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
                     last;
                 } else {
-                    _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+                    $msg = 'still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'}));
+                    _debug($msg);
                 }
             }
         }
@@ -2415,7 +2419,8 @@ sub wait_after_reload {
                     $done = 1;
                     last;
                 } else {
-                    _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core)));
+                    $msg = 'still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core));
+                    _debug($msg);
                 }
             }
         } else {
@@ -2434,6 +2439,7 @@ sub wait_after_reload {
         $c->cache->clear();
     } else {
         _error('waiting for core reload failed (%s)', $pkey // 'all sites');
+        _error("details: %s", $msg) if $msg;
         return(0);
     }
     return(1);

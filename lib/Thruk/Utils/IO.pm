@@ -509,14 +509,14 @@ sub json_lock_store {
 
 =head2 json_retrieve
 
-  json_retrieve($file, $fh)
+  json_retrieve($file, $fh, [$lock_fh])
 
 retrieve json data
 
 =cut
 
 sub json_retrieve {
-    my($file, $fh) = @_;
+    my($file, $fh, $lock_fh) = @_;
     confess("got no filehandle") unless defined $fh;
 
     our $jsonreader;
@@ -536,6 +536,13 @@ sub json_retrieve {
     };
     my $err = $@;
     if($err) {
+        # try to unlock
+        flock($fh, LOCK_UN);
+        if($lock_fh) {
+            eval {
+                file_unlock($file, $fh, $lock_fh);
+            };
+        }
         confess("error while reading $file: ".$err);
     }
     return($data, $content) if wantarray;
@@ -575,6 +582,7 @@ update json data with locking. options are passed to json_store.
 sub json_lock_patch {
     my($file, $patch_data, $options) = @_;
     my($fh, $lock_fh) = file_lock($file);
+    $options->{'lock_fh'} = $lock_fh;
     my $data = json_patch($file, $fh, $patch_data, $options);
     file_unlock($file, $fh, $lock_fh);
     return $data;
@@ -598,7 +606,7 @@ sub json_patch {
     confess("got no filehandle") unless defined $fh;
     my($data, $content);
     if(-s $file) {
-        ($data, $content) = json_retrieve($file, $fh);
+        ($data, $content) = json_retrieve($file, $fh, $options->{'lock_fh'});
     } else {
         if(!$options->{'allow_empty'}) {
             confess("attempt to patch empty file without allow_empty option: $file");

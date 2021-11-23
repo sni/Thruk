@@ -162,8 +162,8 @@ sub perl {
             Thruk::Utils::IO::write($dir."/rc", ($rc ? 0 : 1));
             Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? Thruk::Utils::Encode::encode_utf8($rc) : "", undef, 1);
 
-            CORE::close(STDERR);
-            CORE::close(STDOUT);
+            open(*STDERR, '>>', '/dev/null') or _warn("cannot redirect stderr to /dev/null");
+            open(*STDOUT, '>>', '/dev/null') or _warn("cannot redirect stdout to /dev/null");
         };
 
         # unrendered output from template and stash
@@ -1034,7 +1034,7 @@ sub _reconnect {
     my($c) = @_;
     return unless $c->db();
     $c->db->reconnect() or do {
-        print STDERR "reconnect failed: ".$@;
+        _error("reconnect failed: %s", $@);
         kill($$);
     };
     return;
