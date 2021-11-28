@@ -245,7 +245,7 @@ sub _format_csv_output {
     }
 
 
-    my $output;
+    my $output = "";
     if(ref $data eq 'ARRAY') {
         my $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
         if(!defined $c->req->parameters->{'headers'} || $c->req->parameters->{'headers'}) {
@@ -266,7 +266,7 @@ sub _format_csv_output {
             $output .= "\n";
         }
     }
-    if(!defined $output) {
+    if($output eq '' && scalar @{$data} > 0) {
         $output .= "ERROR: failed to generate output, rerun with -v to get more details.\n";
     }
 
