@@ -244,6 +244,7 @@ sub _format_csv_output {
         $data = $list;
     }
 
+    my $encoder = Cpanel::JSON::XS->new->ascii->canonical->allow_blessed->allow_nonref;
 
     my $output = "";
     if(ref $data eq 'ARRAY') {
@@ -255,9 +256,17 @@ sub _format_csv_output {
             my $x = 0;
             for my $col (@{$columns}) {
                 $output .= ';' unless $x == 0;
-                if(ref($d->{$col}) ne '') {
-                    require Thruk::Views::JSONRenderer;
-                    $output .= _escape_newlines(Thruk::Views::JSONRenderer::encode_json($c, $d->{$col}));
+                if(ref($d->{$col}) eq 'ARRAY') {
+                    # try to create a csv list for lists of simple scalars
+                    if(scalar @{$d->{$col}} == 0 || ref $d->{$col}->[0] eq '') {
+                        $output .= join(",", @{$d->{$col}});
+                    } else {
+                        # fallback to json encode
+                        $output .= _escape_newlines($encoder->encode($d->{$col}));
+                    }
+                }
+                elsif(ref($d->{$col}) ne '') {
+                    $output .= _escape_newlines($encoder->encode($d->{$col}));
                 } else {
                     $output .= _escape_newlines($d->{$col} // '');
                 }

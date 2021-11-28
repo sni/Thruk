@@ -380,6 +380,10 @@ JSON is the default output format.
 CSV output is available via `/csv/` path prefix. Column names will be automatically
 added as first (commented) line. This can be disabled with the `headers=0` parameter.
 
+.Escaping and nested objects
+[CAUTION]
+Support for nested objects and escaping of semicolons is limited. Nested Objects will fallback to json encoding. If possible, use json format which is faster and more reliable.
+
 ------
   %> thruk r /csv/hosts?columns=name,state
 ------
@@ -2089,4 +2093,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
