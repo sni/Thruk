@@ -80,10 +80,9 @@ sub new {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
-    } else {
-        if(!-e $self->{'file'}) {
-            $self->{'draft'} = 1;
-        }
+    }
+    if(!-e $self->{'file'}) {
+        $self->{'draft'} = 1;
     }
 
     for my $key (@saved_keys) {
