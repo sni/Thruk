@@ -899,6 +899,10 @@ sub single_search {
                 undef $hfilter;
                 undef $sfilter;
             }
+            if($num >= 1000) {
+                $errors++;
+                Thruk::Utils::set_message($c, 'fail_message', "filter found too many comments/downtimes, be more specific.");
+            }
 
             my $host_search_filter = [ { name               => { $op     => $value } },
                                        { display_name       => { $op     => $value } },
@@ -1119,9 +1123,14 @@ sub single_search {
             push @servicefilter, { criticity => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
-            my($hfilter, $sfilter) = get_comments_filter($c, $op, $value);
-            push @hostfilter,          $hfilter;
-            push @servicefilter,       $sfilter;
+            my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
+            if($num >= 1000) {
+                $errors++;
+                Thruk::Utils::set_message($c, 'fail_message', "filter found too many comments/downtimes, be more specific.");
+            } else {
+                push @hostfilter,          $hfilter;
+                push @servicefilter,       $sfilter;
+            }
         }
         elsif ( $filter->{'type'} eq 'check period' ) {
             push @hostfilter,    { check_period => { $op => $value } };
@@ -1640,13 +1649,13 @@ sub get_comments_filter {
         }
     }
     else {
-        my $comments     = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
-        my @comment_ids  = sort keys %{ Thruk::Base::array2hash([@{$comments}], 'id') };
+        my $comments     = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id'] );
+        my @comment_ids  = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$comments}], 'id') };
 
-        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
-        my @downtime_ids = sort keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
+        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id'] );
+        my @downtime_ids = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
         $num             = scalar @downtime_ids + scalar @comment_ids;
-        if(scalar @comment_ids == 0) { @comment_ids = (-1); }
+        if(scalar @comment_ids  == 0) { @comment_ids  = (-1); }
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
 
         my $comment_op = '!>=';
