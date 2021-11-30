@@ -225,6 +225,16 @@ sub _apply_user_data {
         $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
 
         next unless defined $c->config->{$role};
+
+        # make group=* work, even if contact does not have any group
+        for my $testgroup (@{$c->config->{$role}}) {
+            if($testgroup eq '*') {
+                push @{$roles_by_group->{$key}}, '*';
+                push @{$roles}, $key;
+            }
+        }
+
+        # check groups against roles
         for my $contactgroup (@{$data->{'contactgroups'}}) {
             for my $testgroup (@{$c->config->{$role}}) {
                 if(Thruk::Base::wildcard_match($contactgroup, $testgroup)) {
