@@ -899,7 +899,7 @@ sub single_search {
                 undef $hfilter;
                 undef $sfilter;
             }
-            if($num >= 1000) {
+            if($num && $num >= 1000) {
                 $errors++;
                 Thruk::Utils::set_message($c, 'fail_message', "filter found too many comments/downtimes, be more specific.");
             }
@@ -1124,7 +1124,7 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
             my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
-            if($num >= 1000) {
+            if($num && $num >= 1000) {
                 $errors++;
                 Thruk::Utils::set_message($c, 'fail_message', "filter found too many comments/downtimes, be more specific.");
             } else {
