@@ -1709,18 +1709,6 @@ sub _update_logcache_optimize {
     _info("done");
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
-        # remove temp files from previously repair attempt if filesystem was full
-        if($ENV{'OMD_ROOT'}) {
-            my @old = glob(sprintf("%s/var/mysql/thruk_log_cache/%s_*.TMD", $ENV{'OMD_ROOT'}, $prefix));
-            my $ts  = time() - (3*86400);
-            for my $file (@old) {
-                my @stat = stat($file);
-                if($stat[9] && $stat[9] < $ts) {
-                    _warn("removing old logcache tmp file: ".$file);
-                    unlink($file);
-                }
-            }
-        }
         # repair / optimize tables
         _debug("optimizing / repairing tables");
         for my $table (@Thruk::Backend::Provider::Mysql::tables) {
