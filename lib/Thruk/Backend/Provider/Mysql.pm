@@ -2100,11 +2100,6 @@ sub _import_peer_logfiles {
         #&timing_breakpoint('_import_peer_logfiles enable index done');
     }
 
-    # update index statistics
-    if($log_count > 0) {
-        _check_index($c, $dbh, $prefix);
-    }
-
     return $log_count;
 }
 
