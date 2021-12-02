@@ -1620,3 +1620,23 @@ input[type=text], input[type=password] {
   position:relative;
   top:1px;
 }
+
+DIV.togglePassword I {
+  margin-left: -34px;
+  margin-top: 4px;
+  cursor: pointer;
+  display: inline-block;
+  position: absolute;
+  font-family: "Material Icons";
+  font-style: normal;
+  font-size: 24px;
+  opacity: 0.3;
+}
+
+I.togglePassword.eye-slash::before {
+  content: "visibility_off";
+}
+
+I.togglePassword.eye::before {
+  content: "visibility";
+}

@@ -62,8 +62,9 @@ BODY.loginpage DIV.loginmask DIV.separator{margin-bottom:0.3rem; margin-top:0.3r
         <div>
           <input type="text" name="login" placeholder="User" id="loginuser"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] />
         </div>
-        <div>
+        <div class="togglePassword">
           <input type="password" name="password" placeholder="Password"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] />
+          <i class="eye-slash togglePassword"></i>
         </div>
         <button type="submit">Sign in</button>
       [% END %]

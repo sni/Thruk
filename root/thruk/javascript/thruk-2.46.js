@@ -133,6 +133,9 @@ function init_page() {
     jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_clear").on("click", show_cal);
     jQuery("IMG.cal_popup").on("click", show_cal).addClass("clickable");
 
+    /* toggle passwords */
+    jQuery("I.togglePassword").on("click", togglePasswordVisibility).addClass("clickable");
+
     cleanUnderscoreUrl();
 }
 
@@ -3638,6 +3641,17 @@ function fitText(el) {
     if(textWidth > boxWidth) {
         var size = parseInt(el.css("font-size"), 10);
         el.css("font-size", ""+Math.floor(size * (boxWidth/textWidth))+"px");
+    }
+}
+
+function togglePasswordVisibility(ev) {
+    if(!ev || !ev.target) { return; }
+    var el = jQuery(ev.target);
+    el.toggleClass("eye");
+    if(el.hasClass("eye")) {
+        jQuery("DIV.togglePassword INPUT").attr('type', 'text');
+    } else {
+        jQuery("DIV.togglePassword INPUT").attr('type', 'password');
     }
 }
 

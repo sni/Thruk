@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add password visibility switch to login page
           - fix cgi.cfg entries authorized_contactgroup_for...=* when contact does not have any group
           - Business Process:
             - fix listing business process drafts
