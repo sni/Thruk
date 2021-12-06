@@ -337,6 +337,8 @@ Ext.define('TP.SmallWidget', {
         } else {
             animated.to = {x:x, y:y};
         }
+        animated.to.x = Math.round(animated.to.x);
+        animated.to.y = Math.round(animated.to.y);
         panel.animate(animated);
     },
     /* apply z-index */
@@ -866,6 +868,7 @@ Ext.define('TP.IconWidget', {
         if(panel.xdata.state != undefined && oldState.state != panel.xdata.state) {
             if(panel.locked && panel.el && (oldState.state != 4 && oldState.state != undefined)) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
+                panel.saveIconsStates(); // should only flicker once
             }
         }
         if(tab.map) {

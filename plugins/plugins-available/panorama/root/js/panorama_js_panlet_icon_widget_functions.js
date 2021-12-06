@@ -852,7 +852,9 @@ TP.iconMoveHandler = function(icon, x, y) {
     if(icon.dragEl2) { icon.dragEl2.resetDragEl(); }
 
     icon.updateMapLonLat();
-    icon.saveState();
+    if(icon.stateful) {
+        icon.saveState();
+    }
 }
 
 TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {

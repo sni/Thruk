@@ -436,6 +436,11 @@ Ext.define('TP.HostServicesStatusIcon', {
         this.xdata.general.incl_svc = true;
         this.callParent([xdata]);
     },
+    refreshHandler: function(newStatus) {
+        this.xdata.general.incl_hst = true;
+        this.xdata.general.incl_svc = true;
+        this.callParent([newStatus]);
+    },
     setFilter: function() {
         this.xdata.general.filter = Ext.JSON.encode([{
             hoststatustypes:    15,

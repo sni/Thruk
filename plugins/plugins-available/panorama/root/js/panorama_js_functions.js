@@ -1437,10 +1437,14 @@ var TP = {
                         TP.insertStatusResponseData(subReqs[key].tab, data.data.sub[key], subReqs[key].ref);
                     }
                     // then calculate own status
-                    TP.insertStatusResponseData(tab, data.data, ref);
+                    if(!tab.renewInProgress) {
+                        TP.insertStatusResponseData(tab, data.data, ref);
+                    }
                 }
 
-                TP.checkSoundAlerts(tab);
+                if(!tab.renewInProgress) {
+                    TP.checkSoundAlerts(tab);
+                }
 
                 /* run callback */
                 if(callback) { callback(); }
