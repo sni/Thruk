@@ -892,17 +892,10 @@ sub get_timeperiods {
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
+        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+            push @{$options{'columns'}}, qw/exclusions/;
+        }
     }
-
-    # fill in values not provided by livestatus
-    $options{'options'}->{'callbacks'}->{'exclusion'} = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'sunday'}    = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'monday'}    = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'tuesday'}   = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'wednesday'} = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'thursday'}  = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'friday'}    = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'saturday'}  = sub { return ''; };
 
     return $self->_get_table('timeperiods', \%options);
 }
