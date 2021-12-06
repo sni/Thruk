@@ -107,11 +107,12 @@ sub get_online_plugins {
     for my $url (@{$c->config->{'plugin_registry_url'}}) {
         my $data = $cache->{$url}->{'data'};
         for my $plugin (@{$data}) {
-            $plugin->{'repository'} = $url;
-            $plugin->{'dir'}        = $plugin->{'name'};
-            $plugin->{'name'}       = nice_addon_name($plugin->{'name'});
-            $plugin->{'version'}    =~ s/^v//gmx if $plugin->{'version'};
-            $plugin->{'installed'}  = 0;
+            $plugin->{'repository'}  = $url;
+            $plugin->{'dir'}         = $plugin->{'name'};
+            $plugin->{'name'}        = nice_addon_name($plugin->{'name'});
+            $plugin->{'version'}     =~ s/^v//gmx if $plugin->{'version'};
+            $plugin->{'installed'}   = 0;
+            $plugin->{'description'} = '(no description available.)' unless defined $plugin->{'description'};
         }
         push @{$plugins}, @{$data};
     }
