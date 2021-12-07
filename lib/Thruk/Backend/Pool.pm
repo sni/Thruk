@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cwd ();
+use Scalar::Util qw/weaken/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Backend::Manager ();
@@ -174,6 +175,7 @@ sub new {
                 size    => $pool_size,
                 handler => sub { $self->_do_thread(@_) },
             );
+            weaken($self->{'thread_pool'}->{'handler'});
             printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
         } else {
             printf(STDERR "mem:% 7s MB without pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
