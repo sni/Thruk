@@ -113,7 +113,7 @@ sub get_test_user {
     my $request = _request('/thruk/r/thruk/whoami?columns=id');
     ok( $request->is_success, 'get_test_user() request succeeded' ) or diag(Dumper($request));
     my $data       = decode_json($request->decoded_content || $request->content);
-    my $name       = $data->[0]->{'id'};
+    my $name       = $data->{'id'};
     isnt($name, undef, "got a user from the rest api") or bail_out_req('got no test object, cannot test.', $request);
     $remote_user_cache = $name;
     return($name);
