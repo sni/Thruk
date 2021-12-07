@@ -340,6 +340,7 @@ sub _parse_file {
             $m =~ s/\)$//gmx;
             $m =~ s/^\{'//gmx;
             $m =~ s/(Thruk|Thruk::Constants|POSIX|Crypt::Rijndael|IO::Socket::UNIX|IO::Socket::IP|Encode)::[A-Z_]+$/$1/gmx; # known contants
+            $m =~ s/^(Cpanel::JSON::XS)(::true|::false)/$1/gmx; # known contants
             next if $m eq 'CORE';
             next if $m =~ '^CORE::';
             next if $m eq 'SUPER';
