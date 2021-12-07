@@ -1452,7 +1452,7 @@ sub _rest_get_thruk_sessions {
         next unless $session_data;
         if($session_data->{'active'} > $min5) {
             $total_5min++;
-            $uniq->{$session_data->{'username'}} = 1;
+            $uniq5min->{$session_data->{'username'}} = 1;
         }
         $uniq->{$session_data->{'username'}} = 1;
 
