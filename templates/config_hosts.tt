@@ -4,6 +4,9 @@
 
 <table border="0" class='data' id="configtable">
   <tr>
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <th class='data'></th>
+    [% END %]
     [% IF backends.size > 1 %]
       <th class='data'>Backend</th>
     [% END %]
@@ -75,6 +78,11 @@
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]' id="[% name2id(d.name, 'host') %]">
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <td class='[% class %]'>
+      <a href="conf.cgi?sub=objects&amp;type=host&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]"><img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="configure this host" width="16" height="16" border="0"></a>
+    </td>
+    [% END %]
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.peer_key.size < backends.size %]
@@ -84,9 +92,9 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'>[% d.name %]</td>
-    <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% d.address %]</td>
+    <td class='[% class %]'>[% d.name | html %]</td>
+    <td class='[% class %]'>[% d.alias | html %]</td>
+    <td class='[% class %]'>[% d.address | html %]</td>
     <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts&amp;jump=[% parent | uri %]#[% parent | uri %]">[% parent | html %]</a>[% END %]</td>
     <td class='[% class %]'>[% FOREACH contact = d.contacts.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact | html %]</a>[% END %]</td>
     <td class='[% class %]'>[% FOREACH contact_group = d.contact_groups.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contactgroups&amp;jump=[% contact_group | uri %]#[% contact_group | uri %]">[% contact_group | html %]</a>[% END %]</td>

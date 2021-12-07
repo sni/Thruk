@@ -6,6 +6,8 @@ next:
           - fix cgi.cfg entries authorized_contactgroup_for...=* when contact does not have any group
           - Business Process:
             - fix listing business process drafts
+          - Configuration:
+            - add link to config tool from configuration pages
 
 2.46     Wed Nov  3 21:46:44 CET 2021
           - drop apache 2.2 support from example apache configuration

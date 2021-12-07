@@ -10,6 +10,9 @@
     <th class='data' colspan="2">Service</th>
   </tr>
   <tr>
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <th class='data'></th>
+    [% END %]
     [% IF backends.size > 1 %]
       <th class='data'>Backend</th>
     [% END %]
@@ -76,6 +79,11 @@
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.host_name _ "_" _ d.description %]
   <tr class='[% class %]' id="[% name2id(d.host_name _ "_" _ d.description, 'service') %]">
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <td class='[% class %]'>
+      <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=[% d.description | uri %]&amp;data.name2=ho:[% d.host_name |uri %]&amp;backend=[% d.peer_key.join(",") %]"><img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="configure this service" width="16" height="16" border="0"></a>
+    </td>
+    [% END %]
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.peer_key.size < backends.size %]
@@ -86,7 +94,7 @@
       </td>
     [% END %]
     <td class='[% class %]'><a href="config.cgi?type=hosts&amp;jump=[% d.host_name | uri %]#[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
-    <td class='[% class %]'>[% d.description %]</td>
+    <td class='[% class %]'>[% d.description | html %]</td>
     <td class='[% class %]'>[% FOREACH contact = d.contacts.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact | html %]</a>[% END %]</td>
     <td class='[% class %]'>[% FOREACH contact_group = d.contact_groups.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contactgroups&amp;jump=[% contact_group | uri %]#[% contact_group | uri %]">[% contact_group | html %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
