@@ -115,6 +115,7 @@ sub render {
         ($stash || $c->stash),
         $output,
     ) || do {
+        $c->stats->profile(end => "render: ".$template);
         die($tt->error.' on '.$template);
     };
     $c->stats->profile(end => "render: ".$template);

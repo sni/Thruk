@@ -1151,7 +1151,10 @@ sub _log_removeunused {
     for my $key (@{$c->stash->{'backends'}}) {
         delete $backends->{$key};
     }
-    return($backends) if $print_only;
+    if($print_only) {
+        $c->stats->profile(end => "Mysql::_log_removeunused");
+        return($backends);
+    }
 
     my $removed = 0;
     my $tables  = 0;
@@ -1165,9 +1168,9 @@ sub _log_removeunused {
     }
     $dbh->commit || confess $dbh->errstr;
 
+    $c->stats->profile(end => "Mysql::_log_removeunused");
     return "no old tables found in logcache" if $removed == 0;
 
-    $c->stats->profile(end => "Mysql::_log_removeunused");
     return $removed." old backends removed (".$tables." tables) from logcache";
 }
 

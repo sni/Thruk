@@ -1434,6 +1434,7 @@ register_rest_path_v1('GET', qr%^/thruk/jobs?/([^/]+)$%mx, \&_rest_get_thruk_job
 register_rest_path_v1('GET', qr%^/thruk/sessions?$%mx, \&_rest_get_thruk_sessions);
 sub _rest_get_thruk_sessions {
     my($c, undef, $id) = @_;
+    $c->stats->profile(begin => "_rest_get_thruk_sessions");
     my $is_admin = 0;
     if($c->check_user_roles('admin')) {
         $is_admin = 1;
@@ -1464,6 +1465,7 @@ sub _rest_get_thruk_sessions {
         delete $session_data->{'current_roles'}; # for internal use
         push @{$data}, $session_data;
     }
+    $c->stats->profile(end => "_rest_get_thruk_sessions");
     if($id) {
         if(!$data->[0]) {
             return({ 'message' => 'no such session', code => 404 });
@@ -1489,7 +1491,8 @@ register_rest_path_v1('GET', qr%^/thruk/sessions?/([^/]+)$%mx, \&_rest_get_thruk
 # lists thruk user profiles.
 register_rest_path_v1('GET', qr%^/thruk/users?$%mx, \&_rest_get_thruk_users);
 sub _rest_get_thruk_users {
-    my($c, undef, $id) = @_;
+    my($c, undef, $id, $statsonly) = @_;
+    $c->stats->profile(begin => "_rest_get_thruk_users");
     my $is_admin = 0;
     if($c->check_user_roles('admin')) {
         $is_admin = 1;
@@ -1498,7 +1501,7 @@ sub _rest_get_thruk_users {
         return({ 'message' => 'config tool plugin is disabled', code => 400 });
     }
 
-    if(!defined $id) {
+    if(!defined $id && !$statsonly) {
         # prefill contacts / groups cache
         $c->db->fill_get_can_submit_commands_cache();
         $c->db->fill_get_contactgroups_by_contact_cache();
@@ -1508,17 +1511,25 @@ sub _rest_get_thruk_users {
     my $total_locked = 0;
     require Thruk::Utils::Conf;
     my $users = Thruk::Utils::Conf::get_cgi_user_list($c);
-    delete $users->{'*'};
     $users = [sort keys %{$users}];
     my $data = [];
     for my $name (@{$users}) {
+        next if $name =~ m/\*/gmx;
         next unless($is_admin || $name eq $c->stash->{"remote_user"});
         next if(defined $id && $id ne $name);
+        if($statsonly) {
+            my $userdata = Thruk::Utils::get_user_data($c, $name);
+            $total_locked++ if(defined $userdata->{'locked'} && $userdata->{'locked'} == Cpanel::JSON::XS::true);
+            $total_number++;
+            next;
+        }
         my $userdata = _get_userdata($c, $name);
         $total_locked++ if $userdata->{'locked'} == Cpanel::JSON::XS::true;
         $total_number++;
         push @{$data}, $userdata;
     }
+    $c->stats->profile(end => "_rest_get_thruk_users");
+
     if($id) {
         if(!$data->[0]) {
             return({ 'message' => 'no such user', code => 404 });
@@ -1529,7 +1540,6 @@ sub _rest_get_thruk_users {
 
     $c->metrics->set('users_total', $total_number, "total number of thruk users");
     $c->metrics->set('users_locked_total', $total_locked, "total number of locked thruk users");
-
     return($data);
 }
 
@@ -1586,7 +1596,7 @@ sub _rest_get_thruk_stats {
         &_rest_get_thruk_sessions($c);
 
         # gather user metrics
-        &_rest_get_thruk_users($c);
+        &_rest_get_thruk_users($c, undef, undef, 1);
     }
 
     my $data = $c->metrics->get_all();
