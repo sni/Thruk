@@ -1796,12 +1796,16 @@ ex.:
 
 === cookie_auth_login_hook
 
-Hook script which is called on every successful login. The REMOTE_USER
+Hook script which is called on every successful login. The `REMOTE_USER`
 environment variable will be set to the username of the current logged
-in user. Useful to do magic stuff on each login. The REMOTE_USER_GROUPS
+in user. Useful to do magic stuff on each login. The `REMOTE_USER_GROUPS`
 environment variable contains semicolon separated list of contactgroups.
+`THRUK_REQ_URL` contains the current url.
 Available standard environment variables are listed on the
 link:cli.html#_environment-variables[CLI Environment] page.
+
+The login has to wait for the hook to finish, so if some sync jobs should be
+started in the background the hook needs to take care of this itself.
 
 ex.:
 

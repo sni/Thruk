@@ -681,6 +681,7 @@ sub cmd {
     local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
     local $ENV{REMOTE_USER_EMAIL} = $c->user->{'email'} if $c && $c->user;
     local $ENV{REMOTE_USER_ALIAS} = $c->user->{'alias'} if $c && $c->user;
+    local $ENV{THRUK_REQ_URL}     = "".$c->req->uri if $c;
 
     if($detached) {
         confess("stdin not supported for detached commands") if $stdin;
