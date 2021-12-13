@@ -11,6 +11,8 @@ next:
           - Logcache:
             - performance improvements
             - fix inserting duplicate values
+          - Reporting:
+            - fix using alias / displayname or custom variables
 
 2.46     Wed Nov  3 21:46:44 CET 2021
           - drop apache 2.2 support from example apache configuration

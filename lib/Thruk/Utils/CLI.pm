@@ -705,11 +705,11 @@ sub _run_command_action {
             last unless $err;
 
             if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx && $err !~ m/Compilation\ failed\ in\ require\ at/mx) {
-                _debug($@);
+                _debug($err);
                 $data->{'output'} = "FAILED - no such command: ".$action.".\n".
                                     "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
             } elsif($err) {
-                _error($@);
+                _error($err);
                 $data->{'output'} = "FAILED - to load command module: ".$action.".\n";
             }
         }

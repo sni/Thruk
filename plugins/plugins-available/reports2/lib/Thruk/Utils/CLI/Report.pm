@@ -63,6 +63,7 @@ sub cmd {
         require Thruk::Utils::Reports;
     };
     if($@) {
+        _debug($@);
         return("reports plugin is not enabled.\n", 1);
     }
 

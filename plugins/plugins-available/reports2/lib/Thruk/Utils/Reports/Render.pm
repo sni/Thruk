@@ -1112,10 +1112,10 @@ sub _hst {
         return($hostname);
     }
     if($src eq 'hostalias') {
-        return($c->stash->{'hosts'}->{$hostname}->{'alias'});
+        return($c->stash->{'hosts'}->{$hostname}->{'alias'} // $hostname);
     }
     if($src eq 'hostdisplayname') {
-        return($c->stash->{'hosts'}->{$hostname}->{'display_name'});
+        return($c->stash->{'hosts'}->{$hostname}->{'display_name'} // $hostname);
     }
     if($src eq 'hostcustom') {
         my $key = $c->stash->{'param'}->{'hostnameformat_cust'};
@@ -1134,7 +1134,7 @@ sub _svc {
         return($servicename);
     }
     if($src eq 'servicedisplayname') {
-        return($c->stash->{'services'}->{$hostname}->{$servicename}->{'display_name'});
+        return($c->stash->{'services'}->{$hostname}->{$servicename}->{'display_name'} // $servicename);
     }
     if($src eq 'servicecustom') {
         my $key = $c->stash->{'param'}->{'servicenameformat_cust'};
