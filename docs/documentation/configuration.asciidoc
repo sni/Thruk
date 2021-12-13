@@ -1804,12 +1804,28 @@ environment variable contains semicolon separated list of contactgroups.
 Available standard environment variables are listed on the
 link:cli.html#_environment-variables[CLI Environment] page.
 
-The login has to wait for the hook to finish, so if some sync jobs should be
-started in the background the hook needs to take care of this itself.
-
 ex.:
 
   cookie_auth_login_hook = ./bin/hook.sh
+
+[TIP]
+.background job
+=======
+The login page will wait for the hook to finish, so if some sync jobs should be
+started in the background the hook itself needs to take care of this.
+
+If it's a shell script, you could add something this this to the head of the script:
+
+```
+# start in background when started from thruk as login hook
+if [ "$THRUK_REQ_URL" != "" ]; then
+    unset THRUK_REQ_URL
+    $0 "$@" >/dev/null 2>&1 &
+    disown
+    exit 0
+fi
+```
+=======
 
 
 === cookie_auth_disable_after_failed_logins
