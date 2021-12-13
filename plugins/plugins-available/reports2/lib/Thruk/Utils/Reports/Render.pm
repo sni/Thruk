@@ -1111,15 +1111,16 @@ sub _hst {
     if($src eq 'hostname') {
         return($hostname);
     }
+    my $data = defined $c->stash->{'host_extra_data'} ? $c->stash->{'host_extra_data'} : $c->stash->{'hosts'};
     if($src eq 'hostalias') {
-        return($c->stash->{'hosts'}->{$hostname}->{'alias'} // $hostname);
+        return($data->{$hostname}->{'alias'} // $hostname);
     }
     if($src eq 'hostdisplayname') {
-        return($c->stash->{'hosts'}->{$hostname}->{'display_name'} // $hostname);
+        return($data->{$hostname}->{'display_name'} // $hostname);
     }
     if($src eq 'hostcustom') {
         my $key = $c->stash->{'param'}->{'hostnameformat_cust'};
-        my $vars = Thruk::Utils::get_custom_vars($c, $c->stash->{'hosts'}->{$hostname});
+        my $vars = Thruk::Utils::get_custom_vars($c, $data->{$hostname});
         return($vars->{$key}) if defined $vars->{$key};
     }
     return($hostname);

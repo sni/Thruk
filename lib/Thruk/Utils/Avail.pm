@@ -241,8 +241,11 @@ sub calculate_availability {
         }
 
         # required to use alias or custom variables in report pages (hostnameformat)
-        my $host_data = $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], [Thruk::Utils::combine_filter('-or', \@hostfilter)] ], columns => [qw/name state alias display_name custom_variables/]);
-        $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
+        my $src = $c->stash->{'param'}->{'hostnameformat'};
+        if($src && $src ne 'hostname') {
+            my $host_data = $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], [Thruk::Utils::combine_filter('-or', \@hostfilter)] ], columns => [qw/name state alias display_name custom_variables/]);
+            $c->stash->{'host_extra_data'} = Thruk::Base::array2hash($host_data, 'name');
+        }
     }
 
     elsif(exists $params->{h_filter}) {
@@ -324,8 +327,11 @@ sub calculate_availability {
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
 
         # required to use alias or custom variables in report pages (hostnameformat)
-        my $host_data = $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], [Thruk::Utils::combine_filter('-or', \@hostfilter)] ], columns => [qw/name state alias display_name custom_variables/]);
-        $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
+        my $src = $c->stash->{'param'}->{'hostnameformat'};
+        if($src && $src ne 'hostname') {
+            my $host_data = $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], [Thruk::Utils::combine_filter('-or', \@hostfilter)] ], columns => [qw/name state alias display_name custom_variables/]);
+            $c->stash->{'host_extra_data'} = Thruk::Base::array2hash($host_data, 'name');
+        }
     }
 
     # single/multiple hosts
@@ -553,12 +559,15 @@ sub calculate_availability {
         }
 
         # required to use alias or custom variables in report pages (hostnameformat)
-        my @hostfilter;
-        for my $host (sort keys %{$c->stash->{'services'}}) {
-            push @hostfilter, { 'host_name' => $host };
+        my $src = $c->stash->{'param'}->{'hostnameformat'};
+        if($src && $src ne 'hostname') {
+            my @hostfilter;
+            for my $host (sort keys %{$c->stash->{'services'}}) {
+                push @hostfilter, { 'host_name' => $host };
+            }
+            my $host_data = $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], [Thruk::Utils::combine_filter('-or', \@hostfilter)] ], columns => [qw/name state alias display_name custom_variables/]);
+            $c->stash->{'host_extra_data'} = Thruk::Base::array2hash($host_data, 'name');
         }
-        my $host_data = $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], [Thruk::Utils::combine_filter('-or', \@hostfilter)] ], columns => [qw/name state alias display_name custom_variables/]);
-        $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
     } else {
         croak("unknown report type: ".Dumper($params));
     }
