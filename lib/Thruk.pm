@@ -539,22 +539,24 @@ sub _check_exit_reason {
     my $url = $c->req->url;
 
     # print stacktrace
-    if($request_runtime >= 10 && $sig eq 'TERM') {
+    my $log = \&_error;
+    if($request_runtime >= 20 && $sig eq 'TERM') {
         _error("got signal %s while handling request, possible timeout in %s\n", $sig, $url);
     } else {
-        _error("got signal %s while handling request in %s\n", $sig, $url);
+        _warn("got signal %s while handling request in %s\n", $sig, $url);
+        $log = \&_warn;
     }
-    _error("User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
-    _error("Runtime:    %1.fs\n", $request_runtime);
-    _error("Timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
-    _error("Address:    %s\n", $c->req->address) if $c->req->address;
-    _error("Parameters: %s\n", Thruk::Utils::dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    &{$log}("User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
+    &{$log}("Runtime:    %1.fs\n", $request_runtime);
+    &{$log}("Timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
+    &{$log}("Address:    %s\n", $c->req->address) if $c->req->address;
+    &{$log}("Parameters: %s\n", Thruk::Utils::dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
     if($c->stash->{errorDetails}) {
         for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
-            _error("%s\n", $row);
+            &{$log}("%s\n", $row);
         }
     }
-    _error("Stacktrace: \n%s", $reason);
+    &{$log}("Stacktrace: \n%s", $reason);
 
     # send sigusr1 to lmd to create a backtrace as well
     if($c->config->{'use_lmd_core'}) {
