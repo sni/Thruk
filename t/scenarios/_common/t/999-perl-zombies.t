@@ -19,6 +19,14 @@ for my $svc (split/\n/mx, $services) {
         ok(1, sprintf("%s_%d - %s", $svc, $index, $cont));
         my($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps auxww");
         next unless $rc == 0;
+
+        if($log =~ m/^(.*?)perl.*defunct/mx) {
+            # found zombies, wait 3 seconds to disappear
+            sleep(3);
+            ($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps auxww");
+            next unless $rc == 0;
+        }
+
         if($log =~ m/^(.*?)perl.*defunct/mx) {
             my($usr, $pid) = split(/\s+/, $1);
             fail(sprintf("%s_%d: has perl zombies", $svc, $index));
