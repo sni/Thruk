@@ -8,6 +8,9 @@ next:
             - fix listing business process drafts
           - Configuration:
             - add link to config tool from configuration pages
+          - Logcache:
+            - performance improvements
+            - fix inserting duplicate values
 
 2.46     Wed Nov  3 21:46:44 CET 2021
           - drop apache 2.2 support from example apache configuration
