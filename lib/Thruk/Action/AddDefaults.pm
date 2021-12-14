@@ -1024,6 +1024,7 @@ sub set_enabled_backends {
     my $disabled_backends = {};
     my $num_backends      = @{$c->db->get_peers()};
     $c->stash->{'num_backends'} = $num_backends;
+    my $cookie_src = $c->stash->{'backend_cookie_src'} // 'thruk_backends';
 
     ###############################
     # by args
@@ -1139,9 +1140,9 @@ sub set_enabled_backends {
 
     ###############################
     # by cookie
-    elsif($num_backends > 1 && defined $c->cookies('thruk_backends')) {
-        _debug('set_enabled_backends() by cookie') if Thruk::Base->debug;
-        my @cookie_backends = $c->cookies('thruk_backends');
+    elsif($num_backends > 1 && defined $c->cookies($cookie_src)) {
+        _debug('set_enabled_backends() by cookie (%s)', $cookie_src) if Thruk::Base->debug;
+        my @cookie_backends = $c->cookies($cookie_src);
         for my $val (@cookie_backends) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;

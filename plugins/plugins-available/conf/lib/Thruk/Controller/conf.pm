@@ -45,6 +45,9 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
+    # set backend from this cookie
+    $c->stash->{'backend_cookie_src'} = 'thruk_conf';
+
     # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     #&timing_breakpoint('index start');
@@ -104,10 +107,11 @@ sub index {
     # workaround for when specified more than once in the url...
     $subcat = shift @{$subcat} if ref $subcat eq 'ARRAY';
 
-    $c->stash->{sub}          = $subcat;
-    $c->stash->{action}       = $action;
-    $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
-    $c->stash->{has_obj_conf} = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
+    $c->stash->{sub}             = $subcat;
+    $c->stash->{action}          = $action;
+    $c->stash->{conf_config}     = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
+    $c->stash->{has_obj_conf}    = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
+    $c->stash->{backend_chooser} = 'switch';
 
     #&timing_breakpoint('index starting subs');
     # set default
