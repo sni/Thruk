@@ -1,5 +1,6 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
+<main>
     <div id="mainbrandsplash">
       <div id="mainlogo"><a href="[% c.config.home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     </div>
@@ -16,5 +17,5 @@
     </div>
     <div id="updateversioninfo"></div>
     [% PROCESS _disclaimer.tt %]
-
+<main>
 [% PROCESS _footer.tt %]

@@ -24,26 +24,72 @@
   <body class='navbar'>
   [% PROCESS _common_js.tt bodyonload=0 %]
 [% END %]
-    <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
+    <a class="app-logo" href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" /></a>
+
+
+<div class="sidebar">
+<ul>
+
+	<div style="display:none;">
+	<li class="">
+		<a class="" href="#">Level 1</a>
+	</li>
+	
+	<li class="">
+		<a class="" href="#">Level 1 mit sub <svg fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 justify-self-end ml-auto"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></a>
+	</li>
+	
+	<li class="active">
+		<a class="" href="#">Level 1 Aktiv <svg fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 justify-self-end ml-auto transform  rotate-180"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></a>
+		
+		<ul class="sub">
+			<li>
+				<a class="" href="#">Level 2</a>
+			</li>
+			<li class="active">
+				<a class="" href="#">Level 2 Aktiv <svg fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 justify-self-end ml-auto transform  rotate-180"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></a>
+				
+				<ul class="sub">
+					<li>
+						<a class="" href="#">Level 3</a>
+					</li>
+					<li>
+						<a class="p" href="#">Level 3</a>
+					</li>
+				</ul>
+				
+			</li>
+			<li>
+				<a class="" href="#">Level 2 mit sub <svg fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 justify-self-end ml-auto"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></a>
+			</li>
+			<li>
+				<a class="" href="#">Level 2</a>
+			</li>
+		</ul>
+	</li>
+	</div>
+	
+	
+
 
     [% FOREACH section = navigation %]
     [% cookie_section_name = section.name.replace(' ', '_') | lower %]
-    <div class="navsection">
-      <div class="navsectiontitle clickable">[% section.name | html %]</div>
-      <div class="navsectionlinks"[% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
-      [%+ FOREACH link = section.links %]
-        <ul class="navsectionlinks">
+	
+	<li class="active" [% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] class="active"[% END %]>
+		<a href="javascript:;"><span>[% section.name | html %]</span> <i style="font-size: 0.625rem;" class="fas fa-chevron-down justify-self-end ml-auto"></i></a>
+		
+		<ul [% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
+		[%+ FOREACH link = section.links %]
           [%+ IF link.href %]
-          <li><a href="[% escape_html(link.href) %]" target="[% link.target %]">[% link.name | html %]</a>[% IF link.defined("html") %][% link.html %][% END %]
+          <li><a href="[% escape_html(link.href) %]" target="[% link.target %]">[% link.name | html %] [% IF link.links.size > 0 %]<i style="font-size: 0.625rem;" class="fas fa-chevron-down"></i>[%+ END %]</a>[% IF link.defined("html") %][% link.html %][% END %]
             [% IF link.links.size > 0 %]
             <ul>
             [% FOREACH sublink = link.links %]
               [% IF sublink.defined("href") && sublink.href %]
-                <li><a href="[% escape_html(sublink.href) %]" target="[% sublink.target %]">[% sublink.name | html %]</a>[% IF sublink.defined("html") %][% sublink.html %][% END %]
-                [% FOREACH addlink = sublink.links %]
-                  (<a href="[% escape_html(addlink.href) %]" target="[% addlink.target %]">[% addlink.name | html %]</a>)
+                <li><a href="[% escape_html(sublink.href) %]" target="[% sublink.target %]">[% sublink.name | html %]</a>[% IF sublink.defined("html") %][% sublink.html %][% END %]</li>
+				[% FOREACH addlink = sublink.links %]
+                  <li><a href="[% escape_html(addlink.href) %]" target="[% addlink.target %]">[% sublink.name | html %] ([% addlink.name | html %])</a></li>
                 [% END %]
-                </li>
               [%+ ELSIF sublink.defined("html") %]
                 <li>[% sublink.html %]</li>
               [% END %]
@@ -68,12 +114,13 @@
           [%+ ELSIF link.defined("html") %]
             <li>[% link.html %]</li>
           [%+ END %]
-        </ul>
-      [%+ END %]
-      </div>
-      <div class="navsectionfooter"></div>
-    </div>
+		[%+ END %]
+		</ul>
+	</li>
     [% END %]
+	
+</ul>
+</div>
 
 [% PROCESS _ajax_search.tt %]
 

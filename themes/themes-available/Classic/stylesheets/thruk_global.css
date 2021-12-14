@@ -60,18 +60,17 @@ body.navbar {
 
 
 /* shadow definition */
-.shadowcontent, .shadow {
+.shadowcontent {
   position: relative;
   bottom: 6px;
   right: 6px;
-}
-.shadow {
-  background-color: rgba(0, 0, 0, 0.3);
 }
 .shadowcontent {
   background-color: #fff;
   color: #000;
 }
+
+
 
 
 /* preferences pane */
@@ -435,8 +434,8 @@ body.summary table.data {
 }
 TD.tableRowHover, TH.tableRowHover, TABLE.hoverable TR:hover TD {
   filter: alpha(opacity = 70); /* IE 6, 7, 8 */
-  -ms-filter: "alpha(opacity = 70)"; /* ab IE 8 zus√§tzlich m√∂glich */
-  opacity: .70; /* alle anderen Browser einschlie√ülich IE 9 */
+  -ms-filter: "alpha(opacity = 70)"; /* ab IE 8 zus‰tzlich mˆglich */
+  opacity: .70; /* alle anderen Browser einschlieﬂlich IE 9 */
 }
 TD.tableRowSelected, TH.tableRowSelected {
   cursor: pointer;

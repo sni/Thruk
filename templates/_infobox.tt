@@ -1,21 +1,71 @@
 ﻿[% USE date %]
-<table class='infoBox' border="1" cellspacing="0" cellpadding="0">
-  <tr>
-    <td class='infoBox'>
-      <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
-      [% IF show_last_update %]Last Update: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span id="refresh_label" title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]<br />[% END %]
-      <a href='http://www.thruk.org' target='_blank' class='homepageURL'>Thruk [% thrukversion %]</a>[% IF c.config.extra_version %]<span class="infoboxlinks"> - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a></span>[% END %]<br />
-      [% IF c.user_exists %]
-      Logged in as <i>[% remote_user %]</i><br />
-      [% IF has_proc_info %]
-      [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
-      [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partially disabled</div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partially disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='infoBoxBadProcStatus'> - Host checks are disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partially disabled </div>[% END %]
-      [% END %]
-      [% END %]
-    </td>
-  </tr>
-</table>
+<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2">
+  <div class="px-2 py-3 sm:px-4 flex-auto">
+    <h3 class="text-lg leading-6 font-semibold text-gray-900">
+      [% infoBoxTitle %]
+    </h3>
+  </div>
+  <div class="px-2 py-3 sm:px-4 flex-auto border-t border-gray-200">
+  
+	[% IF show_last_update %]
+	<div class="flex flex-nowrap">
+		<div class="flex-initial text-sm font-medium text-gray-500 pr-4">Last Update:</div>
+		<div class="flex-initial text-sm text-gray-900">
+			<span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span id="refresh_label" title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]
+		</div>
+	</div>
+	[% END %]
+	
+	<div class="flex flex-nowrap">
+		<div class="flex-initial text-sm text-gray-900">
+			<a href='http://www.thruk.org' target='_blank' class='homepageURL'>Thruk [% thrukversion %]</a>
+			[% IF c.config.extra_version %]<span class="infoboxlinks"> - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a></span>[% END %]
+		</div>
+	</div>
+	
+	[% IF c.user_exists %]
+	<div class="flex flex-nowrap">
+		<div class="flex-initial text-sm font-medium text-gray-500 pr-4">Logged in as:</div>
+		<div class="flex-initial text-sm text-gray-900">
+			[% remote_user %]
+		</div>
+	</div>
+  
+	[% IF has_proc_info %]
+	<div class="flex flex-nowrap">
+		<div class="flex-initial text-sm text-gray-900">
+			[% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
+			[% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partially disabled</div>[% END %]
+			[% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
+			[% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partially disabled </div>[% END %]
+			[% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='infoBoxBadProcStatus'> - Host checks are disabled </div>[% END %]
+			[% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partially disabled </div>[% END %]
+		</div>
+	</div>
+    [% END %]
+    [% END %]
+	  
+  </div>
+</div>
+
+
+<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2" style="display:none">
+  <div class="px-2 py-3 sm:px-4 flex-auto">
+    <h3 class="text-lg leading-6 font-semibold text-gray-900">
+      Card Headline
+    </h3>
+    <p class="max-w-2xl text-sm text-gray-600">
+      Personal details and application.
+    </p>
+  </div>
+  <div class="px-2 py-3 sm:px-4 flex-auto border-t border-gray-200">
+      <div class="bg-gray-50 sm:grid sm:grid-cols-3">
+        <div class="text-sm font-medium text-gray-500">
+          Full name
+        </div>
+        <div class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          Margot Foster
+        </div>
+      </div>
+  </div>
+</div>

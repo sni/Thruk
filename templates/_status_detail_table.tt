@@ -6,6 +6,309 @@
     [% IF show_backends_in_table == 1 || show_backends_in_table == 2 %]
       [% start_with = start_with + 1 %]
     [% END %]
+	
+	
+	
+	
+	
+<!-- table v1 START -->
+
+      <div class="card overflow-x-auto rounded-lg bg-white">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-white">
+            <tr>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort-up ml-auto float-right"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort-down ml-auto float-right"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort ml-auto float-right text-gray-400"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort ml-auto float-right text-gray-400"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-gray-300">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort ml-auto text-gray-400"></i></a>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr class="bg-gray-200">
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 text-center hover:no-underline hover:text-black hover:bg-gray-100"">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border border-white hover:bg-gray-100">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400 hover:border-truegray-500">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 text-center hover:no-underline hover:text-black hover:bg-gray-100">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-white">
+					<a href="#" class="block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border border-white hover:bg-gray-100">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400 hover:border-truegray-500">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+            <tr class="bg-gray-200">
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 text-center hover:no-underline hover:text-black hover:bg-gray-100">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border border-white hover:bg-gray-100">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400 hover:border-truegray-500">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 text-center hover:no-underline hover:text-black hover:bg-gray-100">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border border-white">
+					<a href="#" class="block px-1.5 py-0.5 hover:no-underline hover:text-black hover:bg-gray-100">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border border-white hover:bg-gray-100">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400 hover:border-truegray-500">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!-- /table v1 -->
+	
+<br><br>
+	
+<!-- table v2 START -->
+
+      <div class="card overflow-x-auto rounded-lg bg-white">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-white">
+            <tr>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort-up text-gray-800"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort-down text-gray-800"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort text-gray-400"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider border-solid border-0 border-r border-gray-200">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort text-gray-400"></i></a>
+              </th>
+              <th scope="col" class="whitespace-nowrap p-0.5 text-left text-xs font-semibold text-gray-800 tracking-wider">
+                <a class="flex px-1 py-1 hover:bg-gray-100 hover:no-underline items-center" href="#">Name <i class="fa fa-fw fa-sort text-gray-400"></i></a>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr class="bg-warmgray-100">
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block hover:bg-gray-100 px-1.5 py-0.5">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5 text-center">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border-0">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block hover:bg-gray-100 px-1.5 py-0.5">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5 text-center">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border-0">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+            <tr class="bg-warmgray-100">
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block hover:bg-gray-100 px-1.5 py-0.5">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5 text-center">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border-0">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+
+				<div class="flex items-center">
+					<a href="#" class="flex-1 block hover:bg-gray-100 px-1.5 py-0.5">localhost</a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="clickable" src="/mon/thruk/themes/Thruk3/images/action.gif" alt="Perform Extra Host Actions" width="20" height="20" border="0"></a>
+					<a href="#" class="flex-initial flex-shrink-0 block hover:bg-gray-100 px-1.5 py-0.5"><img class="notclickable" src="/mon/logos/linux40.png" alt="" title="" width="20" height="20" border="0"></a>
+				</div>
+
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5 text-center">21d 4h 5m 17s</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block bg-green-500 hover:bg-green-400 text-white hover:no-underline text-center px-1.5 py-0.5">OK</a>
+              </td>
+              <td class="whitespace-nowrap p-0 border-solid border-0 border-r border-gray-200">
+					<a href="#" class="block hover:bg-gray-100 px-1.5 py-0.5">OK - Certificate 'rocky-8-4.monitoring.consol.de' will expire on Wed Jul 13 12:25:20 2022 +0000.</a>
+              </td>
+              <td class="whitespace-nowrap p-0 px-1.5 border-solid border-0">
+				<a href="#" class="relative block">
+				  <div class="overflow-hidden h-5 text-xs flex rounded bg-truegray-300 border border-truegray-400">
+					<div style="width: 15%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 border-r border-green-700"></div>
+					<div style="width: 10%; margin-right:5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 border-l border-r border-yellow-700"></div>
+					<div style="width: 5%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 border-l border-r border-red-700"></div>
+				  </div>
+				</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!-- /table v2 -->
+	
+<br><br>
+	
+	
+	
     <table border="0" width="100%" class='status servicestatus [% paneprefix %]_table statusTable' onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
       <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
         <th class='status col_host_name' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>

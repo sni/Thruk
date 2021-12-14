@@ -79,7 +79,7 @@
           </div>
           [% END %]
         </td>
-        <td valign="bottom" align="right" width="10%" nowrap>
+        <td valign="bottom" align="right" width="10%" nowrap>XXXXX
           [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
           [% PROCESS _json_export.tt %]

@@ -33,3 +33,70 @@
     </td>
   </tr>
 </table>
+
+
+<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2">
+  <div class="px-2 py-3 sm:px-4 flex-auto">
+	<h3 class="text-lg leading-6 font-semibold text-gray-900">
+	  Host Status Totals
+	</h3>
+  </div>
+  <div class="flex-auto border-t border-gray-200 overflow-x-auto">
+  
+	<div class="flex">
+		<table class="table-padding-0 flex-1">
+			<tr>
+			  <th class="font-semibold"><a href='[% uri_with(c, hoststatustypes => 2) %]' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>Up</a></th>
+			</tr>
+			<tr>
+				<td><span class='[% IF !has_error && host_stats.up > 0 %]truncate bg-lime-500 px-4 py-1 block text-white[% ELSE %]truncate px-4 py-1 block[% END %]'>91</span></td>
+			</tr>
+		</table>
+		<table class="table-padding-0 flex-1">
+			<tr>
+			  <th><a href='[% uri_with(c, hoststatustypes => 4) %]' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>Down</a></th>
+			</tr>
+			<tr>
+				<td><span class='[% IF !has_error && host_stats.down > 0 %]truncate bg-red-400 px-4 py-1 block text-white[% ELSE %]truncate px-4 py-1 block[% END %]'>[% IF !has_error && host_stats.down %][% host_stats.down %][% ELSE %]0[% END %]</span></td>
+			</tr>
+		</table>
+		<table class="table-padding-0 flex-1">
+			<tr>
+			  <th><a href='[% uri_with(c, hoststatustypes => 8) %]' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>Unreachable</a></th>
+			</tr>
+			<tr>
+				<td><span class='[% IF !has_error && host_stats.unreachable > 0 %]truncate bg-red-400 px-4 py-1 block text-white[% ELSE %]truncate px-4 py-1 block[% END %]'>[% IF !has_error && host_stats.unreachable %][% host_stats.unreachable %][% ELSE %]0[% END %]</span></td>
+			</tr>
+		</table>
+		<table class="table-padding-0 flex-1">
+			<tr>
+			  <th><a href='[% uri_with(c, hoststatustypes => 1) %]' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>Pending</a></th>
+			</tr>
+			<tr>
+				<td>
+				<span class='[% IF !has_error && host_stats.pending > 0 %]truncate bg-truegray-400 px-4 py-1 block text-white[% ELSE %]truncate px-4 py-1 block[% END %]'>[% IF !has_error && host_stats.pending %][% host_stats.pending %][% ELSE %]0[% END %]</span>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="flex">
+		<table class="table-padding-0 flex-1">
+			<tr>
+			  <th><a href='[% uri_with(c, hoststatustypes => 12) %]' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>All Problems</a></th>
+			</tr>
+			<tr>
+				<td><span class='[% IF !has_error && host_stats.down + host_stats.unreachable > 0 %]truncate bg-yellow-200 px-4 py-1 block[% ELSE %]truncate  px-4 py-1 block[% END %]'>[% IF !has_error && host_stats.down + host_stats.unreachable > 0 %][% host_stats.down + host_stats.unreachable %][% ELSE %]0[% END %]</span></td>
+			</tr>
+		</table>
+		<table class="table-padding-0 flex-1 ">
+			<tr>
+			  <th><a href='[% uri_with(c, hoststatustypes => 16) %]' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>All types</a></th>
+			</tr>
+			<tr>
+				<td><span class='truncate px-4 py-1 block'>[% IF !has_error && host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %][% host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %][% ELSE %]0[% END %]</span></td>
+			</tr>
+		</table>
+	</div>
+
+  </div>
+</div>

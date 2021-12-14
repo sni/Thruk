@@ -3,76 +3,326 @@
 [% PROCESS _sounds.tt %]
 [% SET empty = 0 %]
 [% SET empty = 1 UNLESS host_stats %]
-    <table border="0" align="left" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="50%">
-            [% PROCESS _infobox.tt %]
-            <div align="left" style="padding-left: 5px;">
-            [% PROCESS _json_export.tt %]
-            </div>
-        </td>
-        <td align="right" valign="bottom" width="50%">
-          <table border="0" cellspacing="0">
-            <tr>
-              <td valign="bottom" align="right">
-              [% PROCESS _help.tt topic = "tac" %]
-              </td>
-              <td>
-                <table border="0" cellspacing="4" class="perfTitleTable">
-                  <tr>
-                    <td class='perfTitle'>&nbsp;<a href='extinfo.cgi?type=4' class='perfTitle'>Monitoring Performance</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <table border="0" cellspacing="0" class="perfBox">
-                        <tr>
-                          <td class='perfBox'>
-                            <table border="0" cellspacing="4">
-                              <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Execution Time:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services_execution_time_min) %] / [% sprintf('%.2f',stats.services_execution_time_max) %] / [% sprintf('%.3f',stats.services_execution_time_avg) %] sec</a></td>
-                              </tr>
-                              <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Latency:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services_latency_min) %] / [% sprintf('%.2f',stats.services_latency_max) %] / [% sprintf('%.3f',stats.services_latency_avg) %] sec</a></td>
-                              </tr>
-                              <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Execution Time:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts_execution_time_min) %] / [% sprintf('%.2f',stats.hosts_execution_time_max) %] / [% sprintf('%.3f',stats.hosts_execution_time_avg) %] sec</a></td>
-                              </tr>
-                              <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Latency:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts_latency_min) %] / [% sprintf('%.2f',stats.hosts_latency_max) %] / [% sprintf('%.3f',stats.hosts_latency_avg) %] sec</a></td>
-                              </tr>
-                              <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a></td>
-                                <td valign="top" class='perfValue' nowrap>
-                                  <a href='status.cgi?hostgroup=all&amp;hostprops=131072&amp;style=hostdetail' class='perfValue'>[% IF !empty %][% host_stats.total_active %][% ELSE %]0[% END %]</a> / <a href='status.cgi?host=all&amp;serviceprops=131072' class='perfValue'>[% IF !empty %][% service_stats.total_active %][% ELSE %]0[% END %]</a>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=65536' class='perfItem'># Passive Host / Service Checks:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='status.cgi?hostgroup=all&amp;hostprops=65536&amp;style=hostdetail' class='perfValue'>[% IF !empty %][% host_stats.total_passive %][% ELSE %]0[% END %]</a> / <a href='status.cgi?host=all&amp;serviceprops=65536' class='perfValue'>[% IF !empty %][% service_stats.total_passive %][% ELSE %]0[% END %]</a></td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
+<main>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+	<div>[% PROCESS _infobox.tt %]</div>
+	<div></div>
+	<div>[% PROCESS _json_export.tt %]</div>
+	<div>
+		<div class="flex flex-nowrap">
+			<div class="flex-initial">[% PROCESS _help.tt topic = "tac" %]</div>
+			<div class="flex-1">
+
+				<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2">
+				  <div class="px-2 py-3 sm:px-4 flex-auto">
+					<h3 class="text-lg leading-6 font-semibold text-gray-900">
+					  <a href='extinfo.cgi?type=4'>Monitoring Performance</a>
+					</h3>
+				  </div>
+				  <div class="px-2 py-3 sm:px-4 flex-auto border-t border-gray-200">
+
+					<table class="table-auto table-in-card">
+					  <tr>
+						<td><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Execution Time:</a></td>
+						<td><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services_execution_time_min) %] / [% sprintf('%.2f',stats.services_execution_time_max) %] / [% sprintf('%.3f',stats.services_execution_time_avg) %] sec</a></td>
+					  </tr>
+					  <tr>
+						<td><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Latency:</a></td>
+						<td><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services_latency_min) %] / [% sprintf('%.2f',stats.services_latency_max) %] / [% sprintf('%.3f',stats.services_latency_avg) %] sec</a></td>
+					  </tr>
+					  <tr>
+						<td><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Execution Time:</a></td>
+						<td><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts_execution_time_min) %] / [% sprintf('%.2f',stats.hosts_execution_time_max) %] / [% sprintf('%.3f',stats.hosts_execution_time_avg) %] sec</a></td>
+					  </tr>
+					  <tr>
+						<td><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Latency:</a></td>
+						<td><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts_latency_min) %] / [% sprintf('%.2f',stats.hosts_latency_max) %] / [% sprintf('%.3f',stats.hosts_latency_avg) %] sec</a></td>
+					  </tr>
+					  <tr>
+						<td><a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a></td>
+						<td><a href='status.cgi?hostgroup=all&amp;hostprops=131072&amp;style=hostdetail' class='perfValue'>[% IF !empty %][% host_stats.total_active %][% ELSE %]0[% END %]</a> / <a href='status.cgi?host=all&amp;serviceprops=131072' class='perfValue'>[% IF !empty %][% service_stats.total_active %][% ELSE %]0[% END %]</a>
+						</td>
+					  </tr>
+					  <tr>
+						<td><a href='status.cgi?host=all&amp;serviceprops=65536' class='perfItem'># Passive Host / Service Checks:</a></td>
+						<td><a href='status.cgi?hostgroup=all&amp;hostprops=65536&amp;style=hostdetail' class='perfValue'>[% IF !empty %][% host_stats.total_passive %][% ELSE %]0[% END %]</a> / <a href='status.cgi?host=all&amp;serviceprops=65536' class='perfValue'>[% IF !empty %][% service_stats.total_passive %][% ELSE %]0[% END %]</a></td>
+					  </tr>
+					</table>
+
+				  </div>
+				</div>
+
+			</div>
+		</div>
+	
+	</div>
+	<div>
+	
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+	<div>
+	
+		<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2">
+		  <div class="px-2 py-3 sm:px-4 flex-auto">
+			<h3 class="text-lg leading-6 font-semibold text-gray-900">
+			  <a href='extinfo.cgi?type=4'>Network Outages</a>
+			</h3>
+		  </div>
+		  <div class="flex-auto border-t border-gray-200">
+		  
+                <table class="table-padding-0 w-full">
+					<tr>
+					  <th><a href='outages.cgi' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>[% host_stats.outages %] Outages</a></th>
+					</tr>
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-red-600 hover:bg-red-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
                 </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-    <br clear="all">
-    <br>
-    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+		  
+		  </div>
+		</div>
+	
+	</div>
+	<div>
+	
+		<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2">
+		  <div class="px-2 py-3 sm:px-4 flex-auto">
+			<h3 class="text-lg leading-6 font-semibold text-gray-900">
+			  <a href='extinfo.cgi?type=4'>Network Health</a>
+			</h3>
+		  </div>
+		  <div class="px-2 py-3 sm:px-4 flex-auto border-t border-gray-200">
+		  
+			<div class="relative pt-1">
+			  <div class="flex mb-2 items-center justify-between">
+				<div>
+				  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">
+					Host Health
+				  </span>
+				</div>
+				<div class="text-right">
+				  <span class="text-xs font-semibold inline-block text-red-600">
+					10%
+				  </span>
+				</div>
+			  </div>
+			  <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-red-200">
+				<div style="width:10%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+			  </div>
+			</div>
+			<div class="relative pt-1">
+			  <div class="flex mb-2 items-center justify-between">
+				<div>
+				  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-orange-600 bg-orange-200">
+					Host Health
+				  </span>
+				</div>
+				<div class="text-right">
+				  <span class="text-xs font-semibold inline-block text-orange-600">
+					50%
+				  </span>
+				</div>
+			  </div>
+			  <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-orange-200">
+				<div style="width:50%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500"></div>
+			  </div>
+			</div>
+			<div class="relative pt-1">
+			  <div class="flex mb-2 items-center justify-between">
+				<div>
+				  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-200">
+					Host Health
+				  </span>
+				</div>
+				<div class="text-right">
+				  <span class="text-xs font-semibold inline-block text-yellow-600">
+					50%
+				  </span>
+				</div>
+			  </div>
+			  <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-yellow-200">
+				<div style="width:50%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500"></div>
+			  </div>
+			</div>
+			<div class="relative pt-1">
+			  <div class="flex mb-2 items-center justify-between">
+				<div>
+				  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">
+					Host Health
+				  </span>
+				</div>
+				<div class="text-right">
+				  <span class="text-xs font-semibold inline-block text-green-600">
+					90%
+				  </span>
+				</div>
+			  </div>
+			  <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+				<div style="width:90%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+			  </div>
+			</div>
+			<div class="relative pt-1">
+			  <div class="flex mb-2 items-center justify-between">
+				<div>
+				  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-truegray-600 bg-truegray-200">
+					Service Health
+				  </span>
+				</div>
+				<div class="text-right">
+				  <span class="text-xs font-semibold inline-block text-truegray-600">
+					0%
+				  </span>
+				</div>
+			  </div>
+			  <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-truegray-200">
+			  </div>
+			</div>
+		  
+		  </div>
+		</div>
+	
+	</div>
+</div>
+	
+	</div>
+	<div>
+	
+		<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-2 mb-2">
+		  <div class="px-2 py-3 sm:px-4 flex-auto">
+			<h3 class="text-lg leading-6 font-semibold text-gray-900">
+			  <a href='extinfo.cgi?type=4'>Hosts</a>
+			</h3>
+		  </div>
+		  <div class="flex-auto border-t border-gray-200 overflow-x-auto">
+		  
+			<div class="flex">
+                <table class="table-padding-0 flex-1 ">
+					<tr>
+					  <th><a href='outages.cgi' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>[% host_stats.outages %] Outages</a></th>
+					</tr>
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-red-600 hover:bg-red-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+                <table class="table-padding-0 flex-1 ">
+					<tr>
+					  <th><a href='outages.cgi' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>[% host_stats.outages %] Outages</a></th>
+					</tr>
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-red-500 hover:bg-red-400 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+                <table class="table-padding-0 flex-1 ">
+					<tr>
+					  <th><a href='outages.cgi' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>[% host_stats.outages %] Outages</a></th>
+					</tr>
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-orange-600 hover:bg-orange-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+                <table class="table-padding-0 flex-1 ">
+					<tr>
+					  <th><a href='outages.cgi' class='font-semibold px-4 py-1 block hover:bg-gray-200 hover:bg-opacity-25'>[% host_stats.outages %] Outages</a></th>
+					</tr>
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-lime-600 hover:bg-lime-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+			</div>
+
+			<div class="flex border-t border-white">
+                <table class="table-padding-0 flex-1 ">
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-red-600 hover:bg-red-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+                <table class="table-padding-0 flex-1 ">
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-red-500 hover:bg-red-400 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+                <table class="table-padding-0 flex-1 ">
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-orange-600 hover:bg-orange-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+                <table class="table-padding-0 flex-1 ">
+					[% IF !empty && host_stats.outages > 0 %]
+					<tr>
+						<td><a href='outages.cgi' class='truncate bg-lime-600 hover:bg-lime-500 float-none px-4 py-1 block text-white hover:text-white'>[% host_stats.outages %] Blocking Outages</a></td>
+					</tr>
+					[% ELSE %]
+					<tr>
+						<td>No outages</td>
+					</tr>
+					[% END %]
+                </table>
+			</div>
+
+		  
+		  </div>
+		</div>
+	
+	</div>
+</div>
+
+
+
+
+
+
+
+    <table class="border-collapse border border-green-900">
       <tr>
-        <td valign="top" align="left" width="50%">
-          <table class='tac' width="125" cellspacing="4" cellpadding="0" border="0">
+        <td valign="top" align="left" width="50%" class="border border-green-900">
+          <table class='tac border-collapse border border-green-600' width="125" cellspacing="4" cellpadding="0" border="0">
             <tr>
               <td colspan="1" height="20" class='outageTitle'>&nbsp;Network Outages</td>
             </tr>
@@ -98,7 +348,7 @@
             </tr>
           </table>
         </td>
-        <td valign="top" align="right" width="50%">
+        <td valign="top" align="right" width="50%" class="border border-green-900">
           <table border="0" cellspacing="0">
             <tr>
               <td>
@@ -165,7 +415,7 @@
         </td>
       </tr>
     </table>
-    <table class='tac' width="516" cellspacing="4" cellpadding="0" border="0">
+    <table class='tac' width="516" cellspacing="4" cellpadding="0" border="0" class="border border-green-900">
       <tr>
         <td colspan="4" height="20" class='hostTitle'>&nbsp;Hosts</td>
       </tr>
@@ -583,4 +833,5 @@
         </td>
       </tr>
     </table>
+</main>
 [% PROCESS _footer.tt %]

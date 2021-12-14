@@ -1,35 +1,47 @@
 ﻿[% PROCESS _header.tt use_frames=1 show_nav_button=0 %]
 
-<table border="0" width="100%" class="infoboxrow">
-   <tr>
-      <td align="left" valign="top" width="33%">
-         [% PROCESS _infobox.tt %]
-      </td>
-      <td align="center" valign="middle" width="33%"></td>
-      <td align="right" valign="bottom" width="33%"></td>
-    </tr>
-</table>
-<br>
+<div class="grid grid-cols-1 md:grid-cols-2">
+	<div>[% PROCESS _infobox.tt %]</div>
+	<div></div>
+	<div>
+	
+		<div class="card text-left bg-white overflow-hidden rounded-lg flex flex-col mt-4 mb-4">
+			<div class="px-2 py-3 sm:px-4 flex-auto">
+				<h3 class="text-lg leading-6 font-semibold text-gray-900">Thruk Documentation</h3>
+			</div>
+			<div class="px-2 py-3 sm:px-4 flex-auto border-t border-gray-200">
+				<div class="flex flex-nowrap">
+					<div class="flex-initial text-sm text-gray-900">
+						Thruks documentation itself is available online at <a class="font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank">www.thruk.org/documentation/</a>.<br>
+						<br>
+						To replace this link with the documentation of your monitoring tool add a <i>documentation_link</i> config item to your thruk_local.conf.<br>
+						<br>
+						If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
+						<br>
+						For installation information and general Thruk help look at the <a class="font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank">online documentation</a>.<br>
+						<br>
+						<br>
+						<a class="inline-block hover:no-underline bg-amber-500 hover:bg-amber-400 text-white font-bold py-1 px-2 rounded" href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a>
+					</div>
+				</div>
+			</div>
+		</div>
 
-<table border="0" width="800">
-   <tr>
-     <td>
-      <h2>Thruk Documentation</h2>
-      <br>
-      Thruks documentation itself is available online at <a href="http://www.thruk.org/documentation/" target="_blank">www.thruk.org/documentation/</a>.<br>
-      <br>
-      To replace this link with the documentation of your monitoring tool<br>
-      add a <i>documentation_link</i> config item to your thruk_local.conf.<br>
-      <br>
-      If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
-      <br>
-      For installation information and general Thruk help look at the <a href="http://www.thruk.org/documentation/" target="_blank">online documentation</a>.
-      <br>
-      <br>
-      <br>
-      <font size="+1"><a href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a></font>
-    </td>
-  </tr>
-</table>
+	</div>
+	<div></div>
+</div>
+        
+
+
+
+
+
+
+
+
+
+
+
+
 
 [% PROCESS _footer.tt %]

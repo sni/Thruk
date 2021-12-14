@@ -1,4 +1,7 @@
+const colors = require('tailwindcss/colors')
+
 module.exports = {
+ /*  mode: 'jit', */
   purge: [
      '../../../templates/*.tt',
      '../../../plugins/plugins-available/*/templates/*.tt'
@@ -6,6 +9,8 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
+		backgroundColor: ['odd'],
+		backgroundColor: ['even'],
       colors: {
         // generated with https://javisperez.github.io/tailwindcolorshades/?havelock-blue=6688cc
         'thruk3': {
@@ -31,7 +36,23 @@ module.exports = {
             '700': '#32414b',
             '800': '#28343c',
             '900': '#202a31'
-        }
+        },
+        'amber': {
+            '50': '#FFFBEB',
+            '100': '#FEF3C7',
+            '200': '#FDE68A',
+            '300': '#FCD34D',
+            '400': '#FBBF24',
+            '500': '#F59E0B',
+            '600': '#D97706',
+            '700': '#B45309',
+            '800': '#92400E',
+            '900': '#78350F'
+        },
+		'truegray': colors.trueGray,
+		'warmgray': colors.warmGray,
+		'orange': colors.orange,
+		'lime': colors.lime,
       },
       boxShadow: {
         float: '0 3px 6px 0 rgba(0, 0, 0, 0.36)',

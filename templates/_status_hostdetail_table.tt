@@ -9,6 +9,21 @@
       [% IF show_host_attempts %]
         [% start_with = start_with + 1 %]
       [% END %]
+	  
+	  
+	  
+
+
+
+
+
+
+
+
+
+
+
+
       <table border="0" class='status [% paneprefix %]_table hoststatusTable' width="100%" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
         <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'hoststatusTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()" onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()">
           [% IF show_backends_in_table == 2 %]

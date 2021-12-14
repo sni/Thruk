@@ -58,38 +58,37 @@
 </div>
 [% END %]
 [% UNLESS minimal %]
-<table border="0" cellpadding=0 cellspacing=0 class="top_nav" style="position: relative;">
-  <tr>
-    <td class="noprint " [% IF !show_home_button %]style="display:none;"[% END %]>
-      <form action="[% show_home_button %]" target='_top' style="margin:0; padding: 0;">
-      <button class="noprint top_nav_logout_button thruk_btn big primary home"> startpage</button>
-      </form>
-    </td>
-    <td width="100%" valign="top">[% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %][% PROCESS _header_broadcast.tt %]</td>
-    <td class="hidden noprint" id="bug_report">
-      [% IF show_error_reports%]
-      <a href="#" id="bug_report-btnEl">
-      <button class="thruk_btn big primary bugs"></button>
-      </a>
-      [% END %]
-    </td>
-    <td>
-      <button class="noprint big primary round" onClick="refresh_button(this)"><i class="fas fa-sync"></i></button>
-    </td>
-    [% IF c.user_exists %]
-    <td>
-      <button class="noprint big primary round" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="fas fa-cog"></i></button>
-    </td>
-    [% IF cookie_auth && show_logout_button %]
-    <td>
-      <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
-      <button class="noprint top_nav_logout_button thruk_btn big primary logout" title="logout">logout</button>
-      </form>
-    </td>
-    [% END %]
-    [% END %]
-  </tr>
-</table>
+<header>
+<div class="header flex items-center">
+	<div [% IF !show_home_button %]style="display:none;"[% END %]>
+		<form action="[% show_home_button %]" target='_top' style="margin:0; padding: 0;">
+		<button class="noprint top_nav_logout_button thruk_btn big primary home"> startpage</button>
+		</form>
+	</div>
+	<div>
+		[% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %][% PROCESS _header_broadcast.tt %]
+	</div>
+	<div class="hidden" id="bug_report">
+		[% IF show_error_reports%]
+		<a href="#" id="bug_report-btnEl">
+		<button class="thruk_btn big primary bugs"></button>
+		</a>
+		[% END %]
+	</div>
+	<div class="flex-grow"></div>
+	<div>
+		<button class="noprint big primary round" onClick="refresh_button(this)"><i class="fas fa-sync"></i></button>
+		[% IF c.user_exists %]
+		<button class="noprint big primary round" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="fas fa-cog"></i></button>
+		[% IF cookie_auth && show_logout_button %]
+		<form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
+		<button class="noprint top_nav_logout_button thruk_btn big primary logout" title="logout">logout</button>
+		</form>
+		[% END %]
+		[% END %]
+	</div>
+</div>
+</header>
 [% IF show_top_pane %]
 <img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane clickable" id="btn_toggle_top_pane" alt="toggle header" onClick="toggleTopPane(); return false;">
 [% END %]

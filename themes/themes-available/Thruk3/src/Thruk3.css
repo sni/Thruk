@@ -1,7 +1,9 @@
 /* Thruk3.css */
 @import '../../Thruk2/stylesheets/thruk_global.css';
-@import '../../Thruk2/stylesheets/Thruk2.css';
-@import '@fortawesome/fontawesome-free/css/all.css';
+@import '../../Thruk2/stylesheets/Thruk2.css'; 
+@import '@fortawesome/fontawesome-free/css/all.css'; 
+
+
 
 @tailwind base;
 @tailwind components;
@@ -17,8 +19,23 @@ body {
     text-river-bed-600
     text-sm
     leading-normal tracking-normal
+	bg-none
   ;
 }
+
+header {
+  @apply
+    sticky top-0 z-50 px-4 card bg-white
+  ;
+}
+.header {height: 50px;}
+
+main {
+  @apply
+    relative px-4 pt-2 pb-4
+  ;
+}
+	
 
 @media print {
   .noprint {
@@ -35,23 +52,198 @@ body {
   vertical-align: middle;
 }
 
+/*******************************************************************************
+ * sidebar 
+ */
+ 
+.app-logo {
+  @apply
+    block sticky top-0 z-50 px-2 card bg-white;
+	height: 50px;
+}
+.app-logo > img {
+	display: block;
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+
+
+
+
+
+.sidebar {
+  @apply
+    mb-6 text-left bg-gray-900 text-gray-500
+  ;
+}
+.sidebar > ul {
+  @apply
+    block flex-wrap list-none pl-0 mb-0 mt-0
+  ;
+}
+.sidebar > ul > li {
+}
+.sidebar > ul > li > a {
+  @apply
+    text-gray-300 hover:bg-gray-800 hover:text-gray-200  pt-1 pb-1.5 pl-4 pr-4 text-sm block no-underline hover:no-underline font-semibold flex flex-row items-start border-t border-b border-solid border-gray-600
+  ;
+}
+.sidebar > ul > li.active {
+  @apply
+    bg-gray-700
+  ;
+}
+.sidebar > ul > li.active > a {
+  @apply
+    text-gray-200 hover:bg-gray-600 hover:text-gray-200 pt-1 pb-1.5 pl-4 pr-2 text-sm no-underline hover:no-underline font-semibold flex flex-row items-center
+  ;
+}
+.sidebar > ul > li > ul {
+  @apply
+    flex-wrap list-none pl-0 mb-0 mt-0
+  ;
+}
+.sidebar > ul > li > ul > li > a {
+  @apply
+    pt-0.5 pb-1 pl-4 text-gray-200 hover:bg-gray-600 hover:text-gray-200 border-l border-solid border-gray-600 text-sm block no-underline hover:no-underline
+  ;
+}
+.sidebar > ul > li > ul > li.active > a {
+  @apply
+    pt-0.5 pb-1 pl-4 pr-2 text-gray-200 hover:bg-gray-500 hover:text-gray-200 border-l border-solid border-gray-600 text-sm flex flex-row items-start no-underline hover:no-underline
+  ;
+}
+.sidebar > ul > li > ul > li:last-child > a {
+  @apply
+    mb-4
+  ;
+}
+
+
+.sidebar > ul > li.active > ul > li.active {
+  @apply
+    bg-gray-600
+  ;
+}
+
+
+.sidebar > ul > li > ul > li > ul {
+  @apply
+    flex-wrap list-none pl-0 mb-0 mt-0
+  ;
+}
+.sidebar > ul > li > ul > li > ul > li > a {
+  @apply
+    pt-0.5 pb-0.5 pl-8 text-gray-200 hover:bg-gray-600 hover:text-gray-200 border-l border-solid border-gray-600 text-sm block no-underline hover:no-underline
+  ;
+}
+.sidebar > ul > li > ul > li > ul > li:last-child > a {
+  @apply
+    mb-2
+  ;
+}
+
+.sidebar div.navbarsearch form fieldset {
+  @apply
+    p-2
+  ;
+}
+.sidebar input.NavBarSearchItem {
+  @apply
+    block appearance-none border border-gray-900 rounded-md w-full py-3 px-4 text-gray-900 leading-5 focus:outline-none focus:ring-2 focus:ring-gray-500
+  ;
+}
+.sidebar span.deleteicon span {
+    top: 50%;
+    transform: translate(-50%, -50%);
+    right: 0;
+}
+
+/*******************************************************************************
+ * Cards
+ */
+.card {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.table-in-card th {
+	@apply px-2 py-1;
+}
+.table-in-card td {
+	@apply px-2;
+}
+.table-in-card th:first-child,
+.table-in-card td:first-child {
+	@apply pl-0;
+}
+.table-in-card th:last-child,
+.table-in-card td:last-child {
+	@apply pr-0;
+}
+.table-in-card td .perfValue {
+	@apply text-gray-900;
+}
+.table-in-card td .perfItem {
+	@apply font-semibold;
+}
+
+.table-padding th {
+	@apply px-2 py-1 font-semibold;
+}
+.table-padding td {
+	@apply px-2;
+}
+.table-padding th:first-child,
+.table-padding td:first-child {
+	@apply pl-4;
+}
+.table-padding th:last-child,
+.table-padding td:last-child {
+	@apply pr-4;
+}
+
+.table-padding-0 {
+	@apply px-0 py-0;
+}
+.table-padding-0 th {
+	@apply px-0 py-0 font-semibold;
+}
+.table-padding-0 td {
+	@apply px-0 py-0;
+}
+
+.table-padding-test {
+	@apply px-0 py-0 ;
+
+}
+.table-padding-test th {
+	@apply px-0 py-0 font-semibold;
+
+}
+.table-padding-test td {
+	@apply px-0 py-0;
+
+}
 
 /*******************************************************************************
  * buttons
  */
 BUTTON, INPUT[type=submit] {
-    @apply bg-gray-200 border rounded-sm border-black font-medium p-1 shadow text-black hover:bg-gray-400;
+    @apply bg-gray-200 border rounded-sm border-black font-medium p-1 text-black hover:bg-gray-400;
 }
 
 BUTTON.primary {
-    @apply bg-yellow-300 hover:bg-yellow-400
+    @apply bg-yellow-400 hover:bg-yellow-300 
 }
 
 BUTTON.round {
-    @apply w-8 h-2 rounded-full shadow-float border-none
+    @apply w-8 h-2 rounded-full border-none
 }
 BUTTON.round.big {
-    @apply w-11 h-11 text-2xl
+    @apply w-10 h-10 text-xl my-1 mx-0.5
 }
 .button_peerUP {
     @apply bg-green-500 !important;
@@ -294,10 +486,41 @@ th.cmd_pane a, th.cmd_pane {
 /*******************************************************************************
  * site panel / backends
  */
-DIV.backend {
-    @apply float-left;
+TABLE.site_panel_container {
+     @apply m-0 p-0;
+}
+div.backend {
+    @apply float-left -ml-1;
 
     INPUT {
-        @apply bg-gray-200 border rounded-sm border-black font-medium p-0 shadow text-black hover:bg-gray-400 w-20 text-xs;
+        @apply bg-gray-200 border border-black border-opacity-50 font-medium p-0 text-black hover:bg-gray-400 w-20 text-xs;
     }
+	input.button_peerUP {
+		@apply bg-green-500 hover:bg-green-700 py-1 px-2;
+	}
+	input.button_peerDOWN {
+		@apply bg-red-500 hover:bg-red-700 py-1 px-2;
+	}
+	input.button_peerDIS {
+		@apply py-1 px-2;
+	}
 }
+div.backend:first-child {
+	input {
+		@apply rounded-l;
+	}
+}
+div.backend:last-child {
+	input {
+		@apply rounded-r;
+	}
+}
+
+
+/*******************************************************************************
+ * Overwrite old classes
+ */
+
+
+
+
