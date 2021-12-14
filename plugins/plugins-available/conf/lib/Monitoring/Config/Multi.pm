@@ -59,7 +59,7 @@ sub init {
     load Monitoring::Config;
     if(defined $self->{'configs'}->{$key}) {
         $self->{'configs'}->{$key}->{'cached'} = 1;
-        $self->{'configs'}->{$key}->init($config, $stats) if defined $config;
+        $self->{'configs'}->{$key}->init($config, $stats, $remotepeer) if defined $config;
         $stats->profile(end => "M::C::M::init()") if defined $stats;
         return $self->{'configs'}->{$key};
     }
@@ -95,7 +95,7 @@ sub cache_exists {
 
 =head2 currently_parsing
 
-returns job id if config is currently beeing parsed
+returns job id if config is currently being parsed
 
 =cut
 sub currently_parsing {

@@ -91,7 +91,7 @@ We will log into Thruk on each site and create service check for the localhost.
 Within Thruk:
 
 `Config Tool > Object Settings > Create a new host > `
-Using the below as an example, create a simple check for each site.
+Using the following as an example, create a simple check for each site.
 Be sure to hit `apply` and then `save & reload` when you are finished.
 
 [source]

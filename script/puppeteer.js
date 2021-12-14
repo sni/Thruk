@@ -29,7 +29,7 @@ var sessionid = process.argv[6];
   page.setViewport({width: Number(width), height: Number(height)});
   await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
   await page.goto(url);
-  if(url.match(/histou\.js\?/) || url.match(/grafana\/dashboard/)) {
+  if(url.match(/histou\.js\?/) || url.match(/\/grafana\//)) {
     await Promise.race([
       page.waitForSelector('#loginuser').then(() => {
         console.error("login window present, export failed");

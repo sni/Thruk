@@ -300,6 +300,21 @@ sub load_module {
 # INTERNAL SUBS
 ##############################################
 sub _run {
+    my($self, @args) = @_;
+    my $rc;
+    eval {
+        $rc = $self->_run_do(@args);
+    };
+    my $err = $@;
+    if($err) {
+        _error($err);
+        exit(255);
+    }
+    return($rc);
+}
+
+##############################################
+sub _run_do {
     my($self) = @_;
 
     my $action = $self->{'opt'}->{'action'} || $self->{'opt'}->{'commandoptions'}->[0] || '';
@@ -313,7 +328,7 @@ sub _run {
         $log_timestamps = 1;
     }
 
-    local $ENV{'THRUK_QUIET'}        = 1 if  $ENV{'THRUK_CRON'};
+    local $ENV{'THRUK_QUIET'}        = 1 if  ($ENV{'THRUK_CRON'} && !$ENV{'THRUK_VERBOSE_ARG_SET'});
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1 if !$ENV{'THRUK_CRON'};
 
     my $c = $self->get_c();
@@ -345,7 +360,7 @@ sub _run {
 
     # fix encoding
     my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
-    if($content_type =~ /^text/mx) {
+    if($content_type =~ /^text/mx && !$log_timestamps) {
         $result->{'output'} = encode_utf8(Thruk::Utils::Encode::decode_any($result->{'output'}));
     }
 
@@ -430,7 +445,9 @@ sub _dummy_c {
 ##############################################
 sub _internal_request {
     my($url, $method, $postdata, $user) = @_;
-    $method = 'GET' unless $method;
+    if(!defined $method) {
+        $method = $postdata ? "POST" : "GET";
+    }
 
     _debug(sprintf("_internal_request('%s', '%s')", $url, $method));
     delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
@@ -445,7 +462,15 @@ sub _internal_request {
     delete $Thruk::thruk->{'TRANSFER_USER'} if $app->{'thruk'};
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
-    my $res    = $app->request(HTTP::Request->new($method, $url, [], $postdata));
+    my $request = HTTP::Request->new($method, $url);
+    $request->method(uc($method));
+    if($postdata) {
+        $request->content_type('application/json; charset=utf-8');
+        $request->content(Cpanel::JSON::XS->new->utf8->encode($postdata)); # internal requests must use utf8
+        $request->header('Content-Length' => undef);
+    }
+
+    my $res    = $app->request($request);
     my $c      = $Thruk::Globals::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
     _debug2("_internal_request() done");
@@ -489,7 +514,20 @@ sub from_local {
         );
     }
 
-    return _run_commands($c, $options, 'local');
+    my $res;
+    eval {
+        $res = _run_commands($c, $options, 'local');
+    };
+    my $err = $@;
+    if($err) {
+        if($c->{'detached'}) {
+            _debug($err);
+        } else {
+            _error($err);
+        }
+        exit(1);
+    }
+    return $res;
 }
 
 ##############################################
@@ -667,11 +705,11 @@ sub _run_command_action {
             last unless $err;
 
             if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx && $err !~ m/Compilation\ failed\ in\ require\ at/mx) {
-                _debug($@);
+                _debug($err);
                 $data->{'output'} = "FAILED - no such command: ".$action.".\n".
                                     "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
             } elsif($err) {
-                _error($@);
+                _error($err);
                 $data->{'output'} = "FAILED - to load command module: ".$action.".\n";
             }
         }
@@ -804,8 +842,15 @@ sub _cmd_configtool {
     if($peerkey ne $c->stash->{'param_backend'}) {
         return(sprintf("failed to set objects model, got configtool section for wrong backend '%s' ne '%s'",$peerkey, $c->stash->{'param_backend'}), 1);
     }
+
+    # forward request if its a remote config tool
+    if($c->{'obj_db'}->is_remote() && $opt->{'args'}->{'sub'} ne 'configcheck' && $opt->{'args'}->{'sub'} ne 'configreload') {
+        my($rc, $output) = $c->{'obj_db'}->_remote_do_bg($c, $opt->{'args'}->{'sub'}, $opt->{'args'}->{'args'});
+        return($output, $rc);
+    }
+
     # outgoing file sync
-    elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
+    if($opt->{'args'}->{'sub'} eq 'syncfiles') {
         $c->{'obj_db'}->check_files_changed();
         my $transfer    = {};
         my $remotefiles = $opt->{'args'}->{'args'}->{'files'};
@@ -842,14 +887,20 @@ sub _cmd_configtool {
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_check($c)',
+                                                       message    => 'please stand by while configuration is being checked...',
+                                                       background => 1,
+                                });
         die("starting configcheck failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_reload($c)',
+                                                       message    => 'please stand by while configuration is being reloaded...',
+                                                       background => 1,
+                                });
         die("starting configreload failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
@@ -986,7 +1037,7 @@ sub _cmd_raw {
     }
 
     elsif($function =~ /^cmd:\s+(\w+)\s*(.*)/mx) {
-        if(!$c->check_user_roles('authorized_for_admin')) {
+        if(!$c->check_user_roles('authorized_for_admin') && !_is_allowed_user_function($function)) {
             return("admin privileges required to run ".$function, 1);
         }
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
@@ -998,7 +1049,7 @@ sub _cmd_raw {
 
     # run code
     elsif($function =~ /::/mx) {
-        if(!$c->check_user_roles('authorized_for_admin') && $function ne 'Thruk::Utils::get_fake_session') {
+        if(!$c->check_user_roles('authorized_for_admin') && !_is_allowed_user_function($function)) {
             return("admin privileges required to run ".$function, 1);
         }
         local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
@@ -1041,25 +1092,32 @@ sub _cmd_raw {
     my @res = $c->db->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
-    # add proxy version and config tool settings to processinfo
+    # inject/add proxy version and config tool settings to processinfo result
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
-        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'thrukversion'}.')';
+        $res->[2]->{$key}->{'thruk'} = {
+            'thruk_version'         => $c->config->{'thrukversion'},
+            'extra_version'         => $c->config->{'extra_version'},
+            'data_source_version'   => $res->[2]->{$key}->{'data_source_version'},
+        };
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
+        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'thrukversion'}.')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
-        my $tmp = $c->db->peers->{$key}->{'peer_config'}->{'configtool'};
+        my $peer = $c->db->get_peer_by_key($key);
+        my $tmp  = $peer->{'configtool'} // $peer->{'peer_config'}->{'configtool'} || $peer->{'configtool'};
+        my $configtool = {
+            'disable' => 1,
+        };
         if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
-            $res->[2]->{$key}->{'configtool'} = {
+            $configtool = {
                 'core_type'      => $tmp->{'core_type'},
                 'obj_readonly'   => $tmp->{'obj_readonly'},
                 'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
                 'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
             };
-        } else {
-            $res->[2]->{$key}->{'configtool'} = {
-                'disable'        => 1,
-            };
         }
+        $res->[2]->{$key}->{'configtool'} = $configtool;            # old variant
+        $res->[2]->{$key}->{'thruk'}->{'configtool'} = $configtool; # new way, put everyting into a single thruk hash
     }
 
     return($res, 0);
@@ -1080,7 +1138,7 @@ sub _cmd_ext_job {
         #my($out,$err,$time,$dir,$stash,$rc)
         my @res = Thruk::Utils::External::get_result($c, $jobid, $c->user->{'superuser'});
         $res = {
-            'out'   => $res[0],
+            'out'   => $res[9]//$res[0],
             'err'   => $res[1],
             'time'  => $res[2],
             'dir'   => $res[3],
@@ -1349,6 +1407,14 @@ sub read_stdin_password {
     $key =  <>;
     chomp ($key);
     return($key);
+}
+
+##############################################
+sub _is_allowed_user_function {
+    my($function) = @_;
+    return 1 if $function eq 'Thruk::Utils::get_fake_session';
+    return 1 if $function eq 'Thruk::Utils::get_perf_image';
+    return;
 }
 
 ##############################################

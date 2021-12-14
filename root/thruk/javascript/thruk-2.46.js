@@ -88,6 +88,10 @@ function init_page() {
         });
     }
 
+    jQuery(".fittext").each(function(i, el) {
+        fitText(el);
+    });
+
     var newUrl = window.location.href;
     var scroll = newUrl.match(/(\?|\&)scrollTo=([\d\.]+)/);
     if(scroll) {
@@ -128,6 +132,9 @@ function init_page() {
     /* show calendar popups for these */
     jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_clear").on("click", show_cal);
     jQuery("IMG.cal_popup").on("click", show_cal).addClass("clickable");
+
+    /* toggle passwords */
+    jQuery("I.togglePassword").on("click", togglePasswordVisibility).addClass("clickable");
 
     cleanUnderscoreUrl();
 }
@@ -781,6 +788,13 @@ function updateUrl() {
     try {
         history.replaceState({}, "", newUrl);
     } catch(err) { console.log(err) }
+
+    // parent window should reflect current changes as well
+    if(window.parent) {
+        try {
+            save_url_in_parents_hash();
+        } catch(err) { console.log(err); }
+    }
 }
 
 /* reloads the current page and adds some parameter from a hash */
@@ -3613,6 +3627,32 @@ function removeClass(el, cls) {
 }
 function toggleClass(el, cls) {
     jQuery(el).toggleClass(cls);
+}
+
+function updateExportLink(input) {
+    var newUrl = getCurrentUrl(false);
+    input.value = newUrl;
+}
+
+function fitText(el) {
+    el = jQuery(el);
+    var boxWidth  = el.width();
+    var textWidth = el[0].scrollWidth;
+    if(textWidth > boxWidth) {
+        var size = parseInt(el.css("font-size"), 10);
+        el.css("font-size", ""+Math.floor(size * (boxWidth/textWidth))+"px");
+    }
+}
+
+function togglePasswordVisibility(ev) {
+    if(!ev || !ev.target) { return; }
+    var el = jQuery(ev.target);
+    el.toggleClass("eye");
+    if(el.hasClass("eye")) {
+        jQuery("DIV.togglePassword INPUT").attr('type', 'text');
+    } else {
+        jQuery("DIV.togglePassword INPUT").attr('type', 'password');
+    }
 }
 
 /*******************************************************************************

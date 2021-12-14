@@ -1266,13 +1266,10 @@ function bp_plump(containerId, sourceId, targetId, edge) {
             bp_draw_edge(edge_container, edge_id, tarX, srcY+35, tarX, tarY);
             return;
         }
-        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
-        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
 
         // complicated layout
         var x1 = srcX, y1 = srcY;
         jQuery.each(edge.points, function(nr, p) {
-            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
             bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
             x1 = p.x; y1 = p.y;
         });
@@ -1293,7 +1290,6 @@ function bp_plump(containerId, sourceId, targetId, edge) {
         bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX+75, srcY);
         var x1 = srcX+75, y1 = srcY;
         jQuery.each(edge.points, function(nr, p) {
-            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
             bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
             x1 = p.x; y1 = p.y;
         });

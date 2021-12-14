@@ -4,6 +4,9 @@
 
 <table border="0" class='data' id="configtable">
   <tr>
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <th class='data'></th>
+    [% END %]
     [% IF backends.size > 1 %]
       <th class='data'>Backend</th>
     [% END %]
@@ -20,6 +23,11 @@
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]' id="[% name2id(d.name, 'hostgroup') %]">
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <td class='[% class %]'>
+      <a href="conf.cgi?sub=objects&amp;type=hostgroup&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]"><img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="configure this hostgroup" width="16" height="16" border="0"></a>
+    </td>
+    [% END %]
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.peer_key.size < backends.size %]
@@ -29,12 +37,12 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'>[% d.name %]</td>
-    <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% FOREACH host = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts&amp;jump=[% host | uri %]#[% host | uri %]">[% host | uri %]</a>[% END %]</td>
-    <td class='[% class %]'>[% d.notes %]</td>
-    <td class='[% class %]'>[% d.notes_url %]</td>
-    <td class='[% class %]'>[% d.action_url %]</td>
+    <td class='[% class %]'>[% d.name | html %]</td>
+    <td class='[% class %]'>[% d.alias | html %]</td>
+    <td class='[% class %]'>[% FOREACH host = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts&amp;jump=[% host | uri %]#[% host | uri %]">[% host | html %]</a>[% END %]</td>
+    <td class='[% class %]'>[% d.notes | html %]</td>
+    <td class='[% class %]'>[% d.notes_url | html %]</td>
+    <td class='[% class %]'>[% d.action_url | html %]</td>
   </tr>
   [% END %]
 </table>

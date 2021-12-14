@@ -35,8 +35,7 @@ sub render_json {
     my($c, $data) = @_;
     my $t1 = [gettimeofday];
     $c->stats->profile(begin => "render_json");
-    my $encoder = $c->app->{'jsonencoder'} || _get_encoder($c);
-    my $output = $encoder->encode($data);
+    my $output = encode_json($c, $data);
     $c->{'rendered'} = 1;
     $c->res->content_type('application/json; charset=utf-8');
     $c->res->body($output);
@@ -44,6 +43,17 @@ sub render_json {
     my $elapsed = tv_interval($t1);
     $c->stash->{'total_render_waited'} += $elapsed;
     return($output);
+}
+
+=head2 encode_json
+
+    $c->encode_json($data)
+
+=cut
+sub encode_json {
+    my($c, $data) = @_;
+    my $encoder = $c->app->{'jsonencoder'} || _get_encoder($c);
+    return($encoder->encode($data));
 }
 
 sub _get_encoder {

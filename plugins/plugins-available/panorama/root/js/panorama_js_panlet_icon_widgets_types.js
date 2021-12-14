@@ -368,7 +368,23 @@ Ext.define('TP.FilterStatusIcon', {
         this.callParent([newStatus]);
     },
     getName: function() {
-        return(this.xdata.general.name);
+        if(this.xdata.general.name != "") {
+            return(this.xdata.general.name);
+        }
+        // try to get name from filter
+        if(this.name) {
+            return(this.name);
+        }
+        if(this.xdata.general.filter) {
+            var filter;
+            try {
+                filter = JSON.parse(this.xdata.general.filter);
+            } catch(e) {}
+            if(filter && Ext.isArray(filter)) {
+                this.name = filter[0].value;
+            }
+        }
+        return("");
     },
     getDetails: function() {
         var panel = this;
@@ -435,6 +451,11 @@ Ext.define('TP.HostServicesStatusIcon', {
         this.xdata.general.incl_hst = true;
         this.xdata.general.incl_svc = true;
         this.callParent([xdata]);
+    },
+    refreshHandler: function(newStatus) {
+        this.xdata.general.incl_hst = true;
+        this.xdata.general.incl_svc = true;
+        this.callParent([newStatus]);
     },
     setFilter: function() {
         this.xdata.general.filter = Ext.JSON.encode([{

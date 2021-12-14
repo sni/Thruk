@@ -27,7 +27,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.44.3';
+our $VERSION = '2.46';
 
 our $config;
 my $project_root = home() || confess('could not determine project_root from inc.');
@@ -35,7 +35,7 @@ my $project_root = home() || confess('could not determine project_root from inc.
 my $base_defaults = {
     'name'                                  => 'Thruk',
     'fileversion'                           => $VERSION,
-    'released'                              => 'June 10, 2021',
+    'released'                              => 'November 03, 2021',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
@@ -209,7 +209,7 @@ my $base_defaults = {
     'slow_page_log_threshold'               => 15,
     'use_lmd_core'                          => 0,
     'lmd_core_bin'                          => "",
-    'lmd_timeout'                           => 5,
+    'lmd_timeout'                           => 15,
     'audit_logs'                            => {
                 'login'                         => 1,
                 'logout'                        => 1,
@@ -460,11 +460,13 @@ sub set_default_config {
         if(ref $base_config->{$key} eq "" && ref $config->{$key} eq "ARRAY") {
             my $l = scalar (@{$config->{$key}});
             $config->{$key} = $config->{$key}->[$l-1];
+            next;
         }
 
         # convert scalars to lists if the default is a list
         if(ref $base_config->{$key} eq "ARRAY" && ref $config->{$key} ne "ARRAY") {
             $config->{$key} = [$config->{$key}];
+            next;
         }
     }
 
@@ -608,7 +610,8 @@ sub set_default_config {
 
     _debug2("using themes: ".$themes_dir);
 
-    $config->{'themes'} = \@themes;
+    $config->{'themes'}     = \@themes;
+    $config->{'themes_dir'} = $themes_dir;
 
     ###################################################
     # use uid to make tmp dir more uniq
@@ -708,6 +711,8 @@ sub set_default_config {
         }
         $config->{'omd_apache_proto'} = $proto;
     }
+
+    _normalize_auth_config($config);
 
     return $config;
 }
@@ -1244,6 +1249,22 @@ sub merge_cgi_cfg {
     for my $key (sort keys %{$cfg}) {
         $c->config->{$key} = $cfg->{$key};
     }
+
+    _normalize_auth_config($c->config);
+
+    return;
+}
+
+########################################
+# normalize authorized_for_* lists
+sub _normalize_auth_config {
+    my($config) = @_;
+    for my $key (keys %{$config}) {
+        if($key =~ m/^(authorized_for|authorized_contactgroup_for_)/mx) {
+            $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
+            next;
+        }
+    }
     return;
 }
 
@@ -1299,15 +1320,21 @@ sub merge_sub_config {
                 $config->{$key}->{'provider'} = Thruk::Base::list($config->{$key}->{'provider'});
                 for my $entry (@{Thruk::Base::list($add->{$key})}) {
                     next unless $entry->{'provider'};
-                    if(ref $entry->{'provider'}) {
+                    if(ref $entry->{'provider'} eq 'HASH') {
                         if($entry->{'provider'}->{'client_id'}) {
                             push @{$config->{$key}->{'provider'}}, $entry->{'provider'};
                         } else {
                             for my $k (sort keys %{$entry->{'provider'}}) {
                                 my $p = $entry->{'provider'}->{$k};
-                                $p->{'id'} = $k;
+                                $p->{'id'} = $k unless $p->{'id'};
                                 push @{$config->{$key}->{'provider'}}, $p;
                             }
+                        }
+                    }
+                    if(ref $entry->{'provider'} eq 'ARRAY') {
+                        for my $p (@{$entry->{'provider'}}) {
+                            $p->{'id'} = $p->{'login'} unless $p->{'id'};
+                            push @{$config->{$key}->{'provider'}}, $p;
                         }
                     }
                 }

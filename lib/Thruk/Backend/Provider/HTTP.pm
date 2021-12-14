@@ -6,6 +6,7 @@ use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json encode_json/;
 use Data::Dumper;
 use HTTP::Request ();
+use Time::HiRes ();
 
 use Thruk::UserAgent ();
 use Thruk::Utils ();
@@ -188,7 +189,7 @@ sub renew_logcache {
     # renew cache?
     if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
         $self->{'lastcacheupdate'} = time();
-        $self->{'_peer'}->logcache->_import_logs($c, 'update', 0, $self->peer_key());
+        $self->{'_peer'}->logcache->_import_logs($c, 'update', $self->peer_key());
     }
     return;
 }
@@ -823,6 +824,7 @@ returns result for given request
         keep_su   => change username on remotesite, but keep superuser permissions
         want_data => return raw data result
         wait      => wait for remote job to complete
+        timeout   => timeout for http(s) request
     }
 
 =cut
@@ -903,6 +905,7 @@ sub _req {
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->timeout($self->{'logs_timeout'}) if $sub =~ m/logs/gmx;
+    $self->{'ua'}->timeout($options->{'timeout'}) if $options->{'timeout'};
     my $postdata;
     eval {
         $postdata = encode_json({
@@ -958,11 +961,11 @@ sub _req {
             $self->_replace_peer_key($data->{'output'}->[2]);
 
             if($options->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
-                return $self->_wait_for_remote_job($1);
+                $data = $self->_wait_for_remote_job($1);
             }
 
             return $data if $options->{'want_data'};
-            return $data->{'output'};
+            return $data->{'out'}//$data->{'output'};
         }
         _debug_log_request_response($c, $response);
         die("not an array ref, got ".ref($data->{'output'}));
@@ -1038,21 +1041,26 @@ wait till remote job is finished and return that data
 =cut
 sub _wait_for_remote_job {
     my($self, $jobid) = @_;
+    my $c = $Thruk::Globals::c;
+    $c->stats->profile(begin => "http::_wait_for_remote_job:$jobid");
     my $res;
+    my $start = time();
     while(1) {
         $res = $self->_req('job', $jobid);
         if($res->[2] =~ m/jobid:([^:]+):0/mx) {
-            sleep(1);
+            my $duration = time()-$start;
+            if(   $duration <   5) { Time::HiRes::sleep(0.5); }
+            elsif($duration <  15) { sleep(1);  }
+            elsif($duration <  60) { sleep(2);  }
+            elsif($duration < 120) { sleep(5);  }
+            else                   { sleep(15); }
             next;
         }
         last;
     }
-    my $last_error = "";
-    return([undef,
-            1,
-           [$res->[2]->{'rc'}, $res->[2]->{'out'}],
-            $last_error]
-    );
+    $c->stats->profile(comment => "http::_wait_for_remote_job waited ".(time() - $start)."s for $jobid");
+    $c->stats->profile(end => "http::_wait_for_remote_job:$jobid");
+    return($res);
 }
 
 ##########################################################

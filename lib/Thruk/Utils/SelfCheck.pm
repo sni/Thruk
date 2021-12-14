@@ -83,6 +83,15 @@ sub self_check {
     # run checks
     for my $t (sort keys %{$selected}) {
         next if $t eq 'all';
+        if(!defined $available_checks->{$t}) {
+            push @{$results}, {
+                sub     => $t,
+                rc      => 3,
+                msg     => 'UNKNOW - unknown subcheck type',
+                details => "available subcheck types are: ".join(", ", (sort keys %{$available_checks})),
+            };
+            next;
+        }
         push @{$results}, &{$available_checks->{$t}}($c);
     }
 
@@ -419,11 +428,10 @@ sub _lmd_checks  {
         my $start_time = $status->[0]->{'start_time'};
         $details .= sprintf("  - lmd running with pid %s since %s\n", $pid, Thruk::Utils::Filter::date_format($c, $start_time));
 
-        my $total = 0;
-        for my $p (@{$c->db->get_peers()}) {
-            next if (defined $p->{'disabled'} && $p->{'disabled'} == HIDDEN_LMD_PARENT);
-            $total++;
-        }
+        $c->db->reset_failed_backends();
+        my($backends) = $c->db->select_backends();
+
+        my $total = scalar @{$backends};
         my $stats = $c->db->lmd_stats($c);
         my $online = 0;
         for my $stat (@{$stats}) {
@@ -450,6 +458,13 @@ sub _lmd_checks  {
             $details .= "no errors\n";
         } else {
             $details .= (scalar @out)." errors found\n";
+            my $x = 0;
+            for my $last_err (reverse @out) {
+                $last_err = substr($last_err, 0, 97)."..." if length($last_err) > 100;
+                $details .= sprintf("    * %s\n", $last_err);
+                $x++;
+                last if $x >= 3;
+            }
             $rc = 1 unless $rc > 1;
         }
     }

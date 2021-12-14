@@ -273,10 +273,7 @@ sub _process_recurring_downtimes_page {
 
     if($task eq 'save') {
         return unless Thruk::Utils::check_csrf($c);
-        my $backends = [];
-        if($c->req->parameters->{'d_backends'}) {
-            $backends = ref $c->req->parameters->{'d_backends'} eq 'ARRAY' ? $c->req->parameters->{'d_backends'} : [$c->req->parameters->{'d_backends'}];
-        }
+        my $backends = Thruk::Base::list($c->req->parameters->{'d_backends'} // []);
         my $rd = {
             'target'        => $target,
             'host'          => [split/\s*,\s*/mx,$host],
@@ -321,7 +318,6 @@ sub _process_recurring_downtimes_page {
             $failed = 1;
         }
 
-        Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
         my $old_file;
         if($nr && !$failed) {
             $old_file  = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
@@ -336,7 +332,7 @@ sub _process_recurring_downtimes_page {
         }
         return _process_recurring_downtimes_page_edit($c, $nr, $default_rd, $rd) if $failed;
         my $file = $old_file || Thruk::Utils::RecurringDowntimes::get_data_file_name($c);
-        Thruk::Utils::write_data_file($file, $rd);
+        Thruk::Utils::RecurringDowntimes::write_downtime($c, $file, $rd);
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
 
         # do quick self check
@@ -393,7 +389,7 @@ sub _process_recurring_downtimes_page_edit {
     if($nr) {
         my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
         if(-s $file) {
-            $c->stash->{rd} = Thruk::Utils::read_data_file($file);
+            $c->stash->{rd} = Thruk::Utils::RecurringDowntimes::read_downtime($c, $file, undef, undef, undef, undef, undef, undef, undef, 0);
             my $perms = Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $c->stash->{rd});
             # check cmd permission for this downtime
             if($perms == 1) {

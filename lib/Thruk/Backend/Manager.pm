@@ -7,6 +7,7 @@ use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Peer ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
@@ -720,6 +721,7 @@ runs reconnect on all peers
 
 sub reconnect {
     my($self, @args) = @_;
+    return 1 unless $Thruk::Globals::c;
     eval {
         $self->_do_on_peers( 'reconnect', \@args);
     };
@@ -903,8 +905,9 @@ sub renew_logcache {
     $noforks = 0 unless defined $noforks;
     return 1 unless defined $c->config->{'logcache'};
     # set to import only to get faster initial results
+    local $c->config->{'logcache_delta_updates'} = 1 if $c->req->parameters->{'logcache_update'};
     local $c->config->{'logcache_delta_updates'} = 2 unless $c->config->{'logcache_delta_updates'};
-    return 1 if !$c->config->{'logcache_delta_updates'} && !$c->req->parameters->{'logcache_update'};
+    return 1 if !$c->config->{'logcache_delta_updates'};
     my $rc;
     eval {
         $rc = $self->_renew_logcache($c, $noforks);
@@ -1401,6 +1404,7 @@ returns a result for a function called for all peers
 sub _do_on_peers {
     my( $self, $function, $arg, $force_serial, $backends) = @_;
     my $c = $Thruk::Globals::c;
+    confess("no context") unless $c;
 
     $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
@@ -1479,6 +1483,7 @@ sub _do_on_peers {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
         _debug($err);
+        $c->stash->{'backend_error'} = 1;
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
         }
@@ -1505,7 +1510,7 @@ sub _do_on_peers {
             # multiple backends and all fail
             # die with a small error for know, usually an empty result means that
             # none of our backends were reachable
-            die('undefined result, all backends down?');
+            die("did not get a valid response for at least any site");
             #local $Data::Dumper::Deepcopy = 1;
             #my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
             #for my $b (@{$get_results_for}) {
@@ -1527,20 +1532,22 @@ sub _do_on_peers {
         for my $key (keys %{$result}) {
             my $res;
             $res = $result->{$key}->{$key};
-            if($result->{$key}->{'configtool'}) {
+            if($result->{$key}->{'configtool'} || $result->{$key}->{'thruk'}) {
                 $res = $result->{$key};
             }
-            if($res && $res->{'configtool'}) {
+            if($res && ($res->{'configtool'} || ($res->{'thruk'} && $res->{'thruk'}->{'configtool'}))) {
                 my $peer = $self->get_peer_by_key($key);
                 next if $peer->{'configtool'}->{'disable'};
-                next if $res->{'configtool'}->{'disable'};
+                my $configtool = $res->{'configtool'} // $res->{'thruk'}->{'configtool'};
+                next if $configtool->{'disable'};
                 # do not overwrite local configuration with remote configtool settings
                 # only use remote if the local one is empty
                 next if(scalar keys %{$peer->{'configtool'}} != 0 && !$peer->{'configtool'}->{'remote'});
                 $peer->{'configtool'} = { remote => 1 };
-                for my $attr (keys %{$res->{'configtool'}}) {
-                    $peer->{'configtool'}->{$attr} = $res->{'configtool'}->{$attr};
+                for my $attr (keys %{$configtool}) {
+                    $peer->{'configtool'}->{$attr} = $configtool->{$attr};
                 }
+                $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
             }
         }
     }
@@ -1815,6 +1822,7 @@ sub _get_result_lmd {
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
         if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
+            $c->stash->{'backend_error'} = 1;
             die("did not get a valid response for at least any site");
         }
     }
@@ -1866,7 +1874,6 @@ sub _get_result_serial {
     $c->stats->profile( begin => "_get_result_serial($function)");
 
     for my $key (@{$peers}) {
-        my $peer = $self->get_peer_by_key($key);
         # skip already failed peers for this request
         next if $c->stash->{'failed_backends'}->{$key};
 
@@ -1881,6 +1888,7 @@ sub _get_result_serial {
         }
         #&timing_breakpoint('_get_result_serial fetched: '.$key);
         $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
+        my $peer = $self->get_peer_by_key($key);
         $peer->{'last_error'} = $last_error;
     }
 
@@ -2748,6 +2756,25 @@ wrapper for Thruk::Utils::page_data
 
 sub page_data {
     return(Thruk::Utils::page_data(@_));
+}
+
+########################################
+
+=head2 fork_http_peer
+
+  fork_http_peer($peer, $httpsrc)
+
+create http backend based on livestatus backend which has multiple sources including http ones
+
+=cut
+
+sub fork_http_peer {
+    my($peer, $httpsrc) = @_;
+    my $options = Thruk::Utils::dclone($peer->{'peer_config'});
+    $options->{'options'}->{'peer'} = $httpsrc;
+    $options->{'type'}              = 'http';
+    $peer = Thruk::Backend::Peer->new($options, $peer->{'thruk_config'}, {});
+    return $peer;
 }
 
 ########################################

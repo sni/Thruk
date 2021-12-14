@@ -2,17 +2,16 @@ name: citest
 
 on:
   push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
   pull_request:
+  schedule:
+    - cron: '30 4 * * 1'
 
 jobs:
   citest:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - uses:  abbbi/github-actions-tune@v1
       - name: perl -V
         run: perl -V
       #- name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate

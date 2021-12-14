@@ -66,3 +66,4 @@ These are the standard variables available:
     ** `REMOTE_USER_GROUPS`   contact groups of the current user
     ** `REMOTE_USER_ALIAS`    contact alias name (if available)
     ** `REMOTE_USER_EMAIL`    contact email address (if available)
+    ** `THRUK_REQ_URL`        contains the current url

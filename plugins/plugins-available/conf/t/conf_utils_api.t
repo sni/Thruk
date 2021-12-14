@@ -191,7 +191,7 @@ is_deeply($settings,
 ###########################################################
 # config mirror created?
 TestUtils::test_command({
-    cmd   => '/usr/bin/diff -ru '.$http_dir.'/tmp/localconfcache/http'.$local_dir.'/'.$input_dir.'/'.
+    cmd   => '/usr/bin/diff -ru '.$http_dir.'/var/localconfcache/http'.$local_dir.'/'.$input_dir.'/'.
                                 ' plugins/plugins-available/conf/t/data/local/'.$input_dir.'/',
     like => ['/^$/'],
 });

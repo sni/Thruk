@@ -77,18 +77,48 @@ sub handle_oauth_login {
         } else {
             $ua->default_header(Authorization => "token ".$token->{"access_token"});
         }
-        _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk::Base->debug;
-        $res = $ua->get($auth->{'api_url'});
-        my $userinfo = _get_json($c, $res);
-        if(!$userinfo) {
-            return $c->detach_error({msg => "cannot fetch oauth user details", code => 500, debug_information => { res => $res }});
-        }
-        _debug(sprintf("oauth login step2: got user details:")) if Thruk::Base->debug;
-        _debug(Dumper($userinfo)) if Thruk::Base->debug;
-        # get username from response hash
-        my $login = $auth->{'login_field'} ? $userinfo->{$auth->{'login_field'}} : ($userinfo->{'login'} || $userinfo->{'email'});
-        if(!defined $login) {
-            return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
+        my $login;
+        if ($auth->{'api_url'}) {
+            _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk::Base->debug;
+            $res = $ua->get($auth->{'api_url'});
+            my $userinfo = _get_json($c, $res);
+            if(!$userinfo) {
+                return $c->detach_error({msg => "cannot fetch oauth user details", code => 500, debug_information => { res => $res }});
+            }
+            _debug(sprintf("oauth login step2: got user details:")) if Thruk::Base->debug;
+            _debug(Dumper($userinfo)) if Thruk::Base->debug;
+            # get username from response hash
+            $login = $auth->{'login_field'} ? $userinfo->{$auth->{'login_field'}} : ($userinfo->{'login'} || $userinfo->{'email'});
+            if(!defined $login) {
+                return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
+            }
+        } else {
+            # AD FS puts the claims in the id_token rather than in userinfo
+            eval {
+                require Crypt::JWT;
+                Crypt::JWT->import('decode_jwt');
+            };
+            if ($@) {
+                die("Crypt::JWT is required when user id assertions not fetched from api_url");
+            }
+            _debug(sprintf("oauth login step2: api_url not set, looking for user id in id_token")) if Thruk::Base->debug;
+            my $id_token;
+            if ($auth->{'jwks_url'}) {
+                _debug(sprintf("oauth login step2: get jwks from: %s", $auth->{'jwks_url'})) if Thruk::Base->debug;
+                $res = $ua->get($auth->{'jwks_url'});
+                my $jwks = _get_json($c, $res);
+                $id_token = decode_jwt(token => $token->{'id_token'}, kid_keys => $jwks);
+            } elsif ($auth->{'jwk_key'}) {
+                $id_token = decode_jwt(token => $token->{'id_token'}, keys => $auth->{'jwk_key'});
+            } else {
+                _debug("oauth login step2: WARNING insecure JWT decode");
+                $id_token = decode_jwt(token => $token->{'id_token'}, ignore_signature => 1);
+            }
+            _debug(Dumper($id_token)) if Thruk::Base->debug;
+            $login = $auth->{'login_field'} ? $id_token->{$auth->{'login_field'}} : ($id_token->{'login'} || $id_token->{'email'});
+            if(!defined $login) {
+                return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { token => $token, id_token => $id_token }});
+            }
         }
         _debug(sprintf("oauth login step2: got user id: %s", $login)) if Thruk::Base->debug;
         $login = Thruk::Authentication::User::transform_username($c->config, $login);
@@ -97,7 +127,7 @@ sub handle_oauth_login {
                                                                     username   => $login,
         });
         if($c->config->{'cookie_auth_login_hook'}) {
-            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
+            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
         }
         _debug(sprintf("oauth login step2: login succesful as user: %s", $login)) if Thruk::Base->verbose;
         return(Thruk::Controller::login::login_successful($c, $login, $session, ($data->{'referer'}//$referer), $cookie_domain, "oauth: ".($auth->{'id'}//$auth->{'login'}//$auth->{'name'})));

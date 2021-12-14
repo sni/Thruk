@@ -432,7 +432,6 @@ Removes all currently active downtimes for this host.
 
 This command does not require any arguments.
 
-See http://www.naemon.org/documentation/developer/externalcommands/del_active_host_downtimes.html for details.
 
 === POST /hosts/<name>/cmd/del_all_host_comments
 
@@ -1035,7 +1034,6 @@ Removes all currently active downtimes for this service.
 
 This command does not require any arguments.
 
-See http://www.naemon.org/documentation/developer/externalcommands/del_active_service_downtimes.html for details.
 
 === POST /services/<host>/<service>/cmd/del_all_svc_comments
 

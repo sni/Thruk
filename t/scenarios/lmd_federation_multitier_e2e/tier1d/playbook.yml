@@ -4,8 +4,6 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - shell: "omd config demo set MYSQL on"
-  - shell: "omd config demo set THRUK_LOGCACHE on"
   - shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - copy:
       src: "/root/thruk_local.conf"
@@ -26,10 +24,12 @@
       group: demo
   - name: "wait for tier2d to come up"
     uri:
-      url: "https://tier2d.test.local/demo/thruk/cgi-bin/remote.cgi"
+      url: "https://tier2d.tier2.test.local/demo/thruk/cgi-bin/remote.cgi"
       validate_certs: False
       status_code: 200
     register: result
     until: result.status == 200
     retries: 180
     delay: 1
+  - include_role:
+      name: thruk_logcache_mysql

@@ -51,6 +51,7 @@ for my $file (@{$files}) {
     next if $mod eq 'Mozilla::CA';     # optional
     next if $mod eq 'Clone';           # optional
     next if $mod eq 'Term::ReadKey';   # optional
+    next if $mod eq 'Crypt::JWT';      # optional
     next if $mod eq 'DBI' and defined $reqs->{'mysql_support'}->{$mod};
     next if $mod eq 'HTML::Escape' and defined $reqs->{'performance_tweaking'}->{$mod};
     $mod = $replace->{$mod} if defined $replace->{$mod};

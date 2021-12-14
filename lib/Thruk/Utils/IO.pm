@@ -112,6 +112,25 @@ sub read {
 
 ##############################################
 
+=head2 saferead
+
+  saferead($path)
+
+read file and return content or undef in case it cannot be read
+
+=cut
+
+sub saferead {
+    my($path) = @_;
+    open(my $fh, '<', $path) || return;
+    local $/ = undef;
+    my $content = <$fh>;
+    CORE::close($fh);
+    return($content);
+}
+
+##############################################
+
 =head2 read_as_list
 
   read_as_list($path)
@@ -124,6 +143,25 @@ sub read_as_list {
     my($path) = @_;
     my @res;
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
+    chomp(@res = <$fh>);
+    CORE::close($fh);
+    return(@res);
+}
+
+##############################################
+
+=head2 saferead_as_list
+
+  saferead_as_list($path)
+
+read file and return content as array, return empty list if open fails
+
+=cut
+
+sub saferead_as_list {
+    my($path) = @_;
+    my @res;
+    open(my $fh, '<', $path) || return(@res);
     chomp(@res = <$fh>);
     CORE::close($fh);
     return(@res);
@@ -163,14 +201,15 @@ sub ensure_permissions {
     my($mode, $path) = @_;
     return if defined $ENV{'THRUK_NO_TOUCH_PERM'};
 
+    require Thruk::Config;
+    my $config = Thruk::Config::get_config();
+
     confess("need a path") unless defined $path;
     return unless -e $path;
 
-    my @stat = stat($path);
+    my @stat = stat(_);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
-    require Thruk::Config;
-    my $config = Thruk::Config::get_config();
     # set modes
     if($mode eq 'file') {
         if($cur ne $config->{'mode_file'}) {
@@ -470,14 +509,14 @@ sub json_lock_store {
 
 =head2 json_retrieve
 
-  json_retrieve($file, $fh)
+  json_retrieve($file, $fh, [$lock_fh])
 
 retrieve json data
 
 =cut
 
 sub json_retrieve {
-    my($file, $fh) = @_;
+    my($file, $fh, $lock_fh) = @_;
     confess("got no filehandle") unless defined $fh;
 
     our $jsonreader;
@@ -497,6 +536,13 @@ sub json_retrieve {
     };
     my $err = $@;
     if($err) {
+        # try to unlock
+        flock($fh, LOCK_UN);
+        if($lock_fh) {
+            eval {
+                file_unlock($file, $fh, $lock_fh);
+            };
+        }
         confess("error while reading $file: ".$err);
     }
     return($data, $content) if wantarray;
@@ -536,6 +582,7 @@ update json data with locking. options are passed to json_store.
 sub json_lock_patch {
     my($file, $patch_data, $options) = @_;
     my($fh, $lock_fh) = file_lock($file);
+    $options->{'lock_fh'} = $lock_fh;
     my $data = json_patch($file, $fh, $patch_data, $options);
     file_unlock($file, $fh, $lock_fh);
     return $data;
@@ -559,7 +606,7 @@ sub json_patch {
     confess("got no filehandle") unless defined $fh;
     my($data, $content);
     if(-s $file) {
-        ($data, $content) = json_retrieve($file, $fh);
+        ($data, $content) = json_retrieve($file, $fh, $options->{'lock_fh'});
     } else {
         if(!$options->{'allow_empty'}) {
             confess("attempt to patch empty file without allow_empty option: $file");
@@ -621,6 +668,7 @@ sub cmd {
         $cmd = $c;
         $c = undef;
     }
+    $c->stats->profile(begin => "IO::cmd") if $c;
 
     local $SIG{INT}  = 'DEFAULT';
     local $SIG{TERM} = 'DEFAULT';
@@ -633,12 +681,14 @@ sub cmd {
     local $ENV{REMOTE_USER_GROUPS} = join(';', @{$groups}) if $c;
     local $ENV{REMOTE_USER_EMAIL} = $c->user->{'email'} if $c && $c->user;
     local $ENV{REMOTE_USER_ALIAS} = $c->user->{'alias'} if $c && $c->user;
+    local $ENV{THRUK_REQ_URL}     = "".$c->req->uri if $c;
 
     if($detached) {
         confess("stdin not supported for detached commands") if $stdin;
         confess("array cmd not supported for detached commands") if ref $cmd eq 'ARRAY';
         require Thruk::Utils::External;
         Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
+        $c->stats->profile(end => "IO::cmd") if $c;
         return(0, "cmd started in background");
     }
 
@@ -695,8 +745,8 @@ sub cmd {
         }
 
         $output = `$cmd`;
+        $rc     = $?;
         $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
-        $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if($rc == -1 && defined $SIG{CHLD} && $SIG{CHLD} eq 'IGNORE');
     }
@@ -708,6 +758,7 @@ sub cmd {
     _debug( "rc:     ". $rc )     if $c;
     _debug( "output: ". $output ) if $c;
     #&timing_breakpoint('IO::cmd done');
+    $c->stats->profile(end => "IO::cmd") if $c;
     return($rc, $output) if wantarray;
     return($output);
 }

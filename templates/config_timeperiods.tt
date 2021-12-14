@@ -4,20 +4,26 @@
 
 <table border="0" class='data' id="configtable">
   <tr>
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <th class='data'></th>
+    [% END %]
     [% IF backends.size > 1 %]
       <th class='data'>Backend</th>
     [% END %]
     <th class='data'>Name</th>
     <th class='data'>Alias/Description</th>
     <th class='data'>Exclusions</th>
-    <th class='data'>Days/Dates</th>
-    <th class='data'>Times</th>
   </tr>
   [% FOREACH d = data %]
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]' id="[% name2id(d.name, 'timeperiod') %]">
+    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+    <td class='[% class %]'>
+      <a href="conf.cgi?sub=objects&amp;type=timeperiod&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]"><img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="configure this timeperiod" width="16" height="16" border="0"></a>
+    </td>
+    [% END %]
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.peer_key.size < backends.size %]
@@ -27,25 +33,10 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'>[% d.name %]</td>
-    <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% d.exclusion %]</td>
-
-    [% has_days = 0 %]
-    [% FOREACH day IN [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ] %]
-      [% IF d.$day %]
-        [% IF has_days == 1 %]
-          <tr>
-            <td colspan='[% IF backends.size > 1 %]4[% ELSE %]3[% END %]'></td>
-        [% END %]
-          <td class='[% class %]'>[% day %]</td>
-        <td class='[% class %]'>[% d.$day %]&nbsp;</td>
-      </tr>
-      [% END %]
-    [% END %]
-    [% IF has_days == 0 %]
+    <td class='[% class %]'>[% d.name | html %]</td>
+    <td class='[% class %]'>[% d.alias | html %]</td>
+    <td class='[% class %]'>[% IF d.defined("exclusions"); FOREACH ex = d.exclusions %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=timeperiods&amp;jump=[% ex | uri %]#[% ex | uri %]">[% ex | html %]</a>[% END; END %]</td>
   </tr>
-    [% END %]
   [% END %]
 </table>
 

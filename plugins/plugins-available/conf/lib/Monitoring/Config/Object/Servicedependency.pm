@@ -51,7 +51,7 @@ $Monitoring::Config::Object::Servicedependency::Defaults = {
     'notification_failure_options'  => { type => 'ALIAS', 'name' => 'notification_failure_criteria' },
 };
 
-$Monitoring::Config::Object::Servicedependency::primary_keys = [ 'dependent_service_description', [ 'dependent_host_name', 'dependent_hostgroup_name', 'dependent_servicegroup_name' ] ];
+$Monitoring::Config::Object::Servicedependency::primary_keys = [ 'dependent_service_description', [ 'host_name', 'dependent_host_name', 'dependent_hostgroup_name', 'dependent_servicegroup_name' ] ];
 $Monitoring::Config::Object::Servicedependency::Defaults::standard_keys = [ 'dependent_host_name', 'dependent_service_description', 'host_name', 'service_description', 'execution_failure_criteria', 'notification_failure_criteria' ];
 
 ##########################################################

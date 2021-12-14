@@ -1,11 +1,36 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add password visibility switch to login page
+          - show timeperiod information in host/service extinfo
+          - fix cgi.cfg entries authorized_contactgroup_for...=* when contact does not have any group
+          - Business Process:
+            - fix listing business process drafts
+          - Configuration:
+            - add link to config tool from configuration pages
+          - Logcache:
+            - performance improvements
+            - fix inserting duplicate values
+          - Reporting:
+            - fix using alias / displayname or custom variables
+
+2.46     Wed Nov  3 21:46:44 CET 2021
+          - drop apache 2.2 support from example apache configuration
           - add thruk apikey info command
+          - support wildcards in cgi.cfg authorized_for_* settings
           - Reporting:
             - add missing host unavailable box for sla reports
           - Rest
             - add command_name to /notifications
+            - add delete method for /config/objects
+          - Config Tool:
+            - fix listing some dependencies as false duplicates
+            - fix federated config tool over multiple relays
+          - Panorama:
+            - fix creating action menu in host/services panel
+          - self check:
+            - check for lmd errors
+          - fix input parameter validation (CVE-2021-35488)
 
 2.44-3   Thu Jun 10 19:22:57 CEST 2021
           - add option to configure error message for locked accounts

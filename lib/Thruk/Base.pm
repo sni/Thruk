@@ -469,6 +469,28 @@ sub trim_whitespace {
     return($_[0]);
 }
 
+
+########################################
+
+=head2 wildcard_match
+
+    wildcard_match($str, $pattern)
+
+returns true if string matches given wildcard pattern
+
+=cut
+sub wildcard_match {
+    my($str, $pattern) = @_;
+    return 1 if $pattern eq '*';
+    return 1 if $str eq $pattern;
+    if($pattern =~ m/\*/mx) {
+        $pattern =~ s/\.*/*/gmx;
+        $pattern =~ s/\*/.*/gmx;
+        return 1 if $str =~ m/^$pattern$/mx;
+    }
+    return;
+}
+
 ##############################################
 
 =head1 SEE ALSO

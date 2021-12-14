@@ -1,0 +1,29 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - yum:
+      name: sendmail
+      state: present
+  - shell: omd config demo set APACHE_MODE own
+  - shell: omd config demo set LIVESTATUS_TCP on
+  - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
+  - shell: ln -s /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
+  - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/1.rpt
+      dest: /omd/sites/demo/var/thruk/reports/
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/2.rpt
+      dest: /omd/sites/demo/var/thruk/reports/
+      owner: demo
+      group: demo
+  - shell: sudo su - demo -c "htpasswd -b etc/htpasswd test_contact test"

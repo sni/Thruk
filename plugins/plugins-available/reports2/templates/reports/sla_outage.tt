@@ -3,9 +3,10 @@
   [%
     required_fields = [
         { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1    ] },
+        { 'report_theme'                 => [ 'Theme',                      'report_theme'                                     ] },
         { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                         ] },
         { 'filter_type'                  => [ 'Objects',                    'radio',           'Both'                ,'', 1, ['Services', 'Hosts', 'Both']  ] },
-        { 'filter'                       => [ 'Filter',                     'filter',          { 'host' => 'all' }             ] },
+        { 'filter'                       => [ 'Filter',                     'filter',          { 'host' => 'please select something' }             ] },
 
         { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'lastweek'                      ] },
         { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'days'                          ] },

@@ -1,12 +1,5 @@
 # put the RewriteLock outside your virtual hosts
-# apache 2.2 lock
-<IfModule !mod_authz_core.c>
-  RewriteLock "/var/cache/thruk/apache_rewrite.lock"
-</IfModule>
-# apache 2.4 lock
-<IfModule mod_authz_core.c>
-  Mutex file:/var/cache/thruk/ rewrite-map
-</IfModule>
+Mutex file:/var/cache/thruk/ rewrite-map
 
 # put everything else inside your vhost
 RewriteMap  thruk_users prg:/usr/share/thruk/thruk_auth
@@ -20,14 +13,7 @@ RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]
 RewriteRule ^/loginok/([^/]+)/(.*)$  /$2 [NS,PT,L,E=REMOTE_USER:$1]
 
 <LocationMatch ^/thruk(?!/cgi-bin/restricted.cgi)>
-    # apache 2.2
-    <IfModule !mod_authz_core.c>
-      Order allow,deny
-      Allow from all
-      Satisfy any
-    </IfModule>
-    # apache 2.4
-    <IfModule mod_authz_core.c>
-      Require all granted
-    </IfModule>
+  Require all granted
 </LocationMatch>
+
+AllowEncodedSlashes NoDecode

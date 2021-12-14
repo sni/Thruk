@@ -88,47 +88,35 @@ sub ctx_request {
 
 #########################
 sub get_test_servicegroup {
-    my $request = _request('/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview');
-    ok( $request->is_success, 'get_test_servicegroup() needs a proper config page' ) or diag(Dumper($request));
-    my $page = $request->content;
-    my $group;
-    if($page =~ m/extinfo\.cgi\?type=8&amp;servicegroup=(.*?)">(.*?)<\/a>/mxo) {
-        $group = $1;
-    }
-    isnt($group, undef, "got a servicegroup from config.cgi") or bail_out_req('got no test servicegroup, cannot test.', $request);
-    $group = uri_unescape($group);
-    return($group);
+    my $request = _request('/thruk/r/servicegroups?columns=name&limit=1');
+    ok( $request->is_success, 'get_test_servicegroup() request succeeded' ) or diag(Dumper($request));
+    my $data       = decode_json($request->decoded_content || $request->content);
+    my $name       = $data->[0]->{'name'};
+    isnt($name, undef, "got a servicegroup from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    return($name);
 }
 
 #########################
 sub get_test_hostgroup {
-    my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=overview');
-    ok( $request->is_success, 'get_test_hostgroup() needs a proper config page' ) or diag(Dumper($request));
-    my $page = $request->content;
-    my $group;
-    if($page =~ m/"extinfo\.cgi\?type=5&amp;hostgroup=(.*?)">(.*?)<\/a>/mxo) {
-        $group = $1;
-    }
-    isnt($group, undef, "got a hostgroup from config.cgi") or bail_out_req('got no test hostgroup, cannot test.', $request);
-    $group = uri_unescape($group);
-    return($group);
+    my $request = _request('/thruk/r/hostgroups?columns=name&limit=1');
+    ok( $request->is_success, 'get_test_hostgroup() request succeeded' ) or diag(Dumper($request));
+    my $data       = decode_json($request->decoded_content || $request->content);
+    my $name       = $data->[0]->{'name'};
+    isnt($name, undef, "got a hostgroup from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    return($name);
 }
 
 #########################
 sub get_test_user {
     our $remote_user_cache;
     return $remote_user_cache if $remote_user_cache;
-    my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
-    ok( $request->is_success, 'get_test_user() needs a proper status page' ) or diag(Dumper($request));
-    my $page = $request->content;
-    my $user;
-    if($page =~ m/Logged\ in\ as\ <i>(.*?)<\/i>/mxo) {
-        $user = $1;
-    }
-    isnt($user, undef, "got a user from status.cgi") or bail_out_req('got no test user, cannot test.', $request);
-    $user = uri_unescape($user);
-    $remote_user_cache = $user;
-    return($user);
+    my $request = _request('/thruk/r/thruk/whoami?columns=id');
+    ok( $request->is_success, 'get_test_user() request succeeded' ) or diag(Dumper($request));
+    my $data       = decode_json($request->decoded_content || $request->content);
+    my $name       = $data->{'id'};
+    isnt($name, undef, "got a user from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    $remote_user_cache = $name;
+    return($name);
 }
 
 #########################
@@ -136,7 +124,7 @@ sub get_current_user_token {
     our $remote_user_token;
     return $remote_user_token if $remote_user_token;
     my $request = _request('/thruk/cgi-bin/user.cgi');
-    ok( $request->is_success, 'get_current_user_token() needs a proper user profile page' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_current_user_token() request succeeded' ) or diag(Dumper($request));
     my $page = $request->content;
     my $token;
     if($page =~ m/name="CSRFtoken"\s+value="([^"]+)"/mxo) {
@@ -150,41 +138,24 @@ sub get_current_user_token {
 #########################
 sub get_test_service {
     my $backend = shift;
-    my $request = _request('/thruk/cgi-bin/status.cgi?style=hostdetail&dfl_s0_type=number+of+services&dfl_s0_val_pre=&dfl_s0_op=>%3D&dfl_s0_value=1'.(defined $backend ? '&backend='.$backend : ''));
-    ok( $request->is_success, 'get_test_service() needs a proper status page' ) or diag(Dumper($request));
-    my $page = $request->content;
-    my($host,$service);
-    if($page =~ m/extinfo\.cgi\?type=1&amp;host=(.*?)&amp;backend/mxo) {
-        $host = $1;
-    }
-    isnt($host, undef, "got a host from status.cgi") or bail_out_req('got no test host, cannot test.', $request);
-
-    $request = _request('/thruk/cgi-bin/status.cgi?host='.$host.(defined $backend ? '&backend='.$backend : ''));
-    $page = $request->content;
-    if($page =~ m/extinfo\.cgi\?type=2&amp;host=(.*?)&amp;service=(.*?)&/mxo) {
-        $host    = $1;
-        $service = $2;
-    }
-    isnt($service, undef, "got a service from status.cgi") or bail_out_req('got no test service, cannot test.', $request);
-    $service = uri_unescape($service);
-    $host    = uri_unescape($host);
-
+    my $request = _request('/thruk/r/services?columns=host_name,description&limit=1'.(defined $backend ? '&backend='.$backend : ''));
+    ok( $request->is_success, 'get_test_service() request succeeded' ) or diag(Dumper($request));
+    my $data    = decode_json($request->decoded_content || $request->content);
+    my $host    = $data->[0]->{'host_name'};
+    my $service = $data->[0]->{'description'};
+    isnt($host, undef, "got a host from the rest api") or bail_out_req('got no test host, cannot test.', $request);
+    isnt($service, undef, "got a service from the rest api") or bail_out_req('got no test service, cannot test.', $request);
     return($host, $service);
 }
 
 #########################
 sub get_test_timeperiod {
-    my $request = _request('/thruk/cgi-bin/config.cgi?type=timeperiods');
-    ok( $request->is_success, 'get_test_timeperiod() needs a proper config page' ) or diag(Dumper($request));
-    my $page = $request->content;
-    my $timeperiod;
-    if($page =~ m/id="timeperiod_.*?">\s*(<td[^>]+>\s*<i>all<\/i>\s*<\/td>|)\s*<td\ class='dataOdd'>([^<]+)<\/td>/gmxo) {
-        $timeperiod = $2;
-    }
-    isnt($timeperiod, undef, "got a timeperiod from config.cgi") or bail_out_req('got no test config, cannot test.', $request);
-    $timeperiod =~ s|^\s*||gmx;
-    $timeperiod =~ s|\s*$||gmx;
-    return($timeperiod);
+    my $request = _request('/thruk/r/timeperiods?columns=name&limit=1');
+    ok( $request->is_success, 'get_test_timeperiod() request succeeded' ) or diag(Dumper($request));
+    my $data       = decode_json($request->decoded_content || $request->content);
+    my $name       = $data->[0]->{'name'};
+    isnt($name, undef, "got a timeperiod from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    return($name);
 }
 
 #########################
@@ -290,7 +261,9 @@ sub test_page {
         ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request, 1);
     }
 
-    if($request->content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
+    my $cleaned_content = $request->content;
+    $cleaned_content =~ s/<script.*?<\/script>//sgmx;
+    if($cleaned_content =~ m/<span\ class="fail_message">(.*?)<\/span>/msxo) {
         my $msg = $1;
         fail('Request '.$opts->{'url'}.' had error message: '.$msg) unless $opts->{'fail_message_ok'};
         fail('Request '.$opts->{'url'}.' error message contains escaped html: '.$msg) if $msg =~ m/&lt;.*&gt;/mx;
@@ -313,7 +286,7 @@ sub test_page {
                 }
             }
 
-            if($return->{'content'} =~ m/$waitfor/mx) {
+            if($return->{'content'} =~ $waitfor) {
                 ok(1, "content ".$waitfor." found after ".($now - $start)."seconds");
                 $found = 1;
                 last;
@@ -339,12 +312,13 @@ sub test_page {
         }
 
         if(!$found) {
-            fail("content did not occur within $waitmax seconds") or diag($opts->{'url'});
+            fail("content did not match $waitfor within $waitmax seconds") or diag($opts->{'url'});
         } else {
             # text that should appear
             if(defined $opts->{'like'}) {
                 for my $like (@{_list($opts->{'like'})}) {
-                    like($return->{'content'}, qr/$like/, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) or diag($opts->{'url'});
+                    my $regex = ref $like ? $like : qr/$like/;
+                    like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) or diag($opts->{'url'});
                 }
             }
         }
@@ -398,7 +372,8 @@ sub test_page {
     if(defined $opts->{'like'}) {
         for my $like (@{_list($opts->{'like'})}) {
             use Carp;
-            like($return->{'content'}, qr/$like/, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($like)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
+            my $regex = ref $like ? $like : qr/$like/;
+            like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($regex)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
         }
     }
 
@@ -693,7 +668,7 @@ sub wait_for_job {
                 eval {
                     $data = decode_json($r->decoded_content);
                 };
-                last if($data && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
+                last if($data && defined $data->{'is_running'} && $data->{'is_running'} == 0 && $data->{'end'} && $data->{'end'} > 0);
                 sleep(0.1);
             }
         };

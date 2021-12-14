@@ -70,18 +70,12 @@ sub cmd {
     my($id,$dir) = init_external($c);
     return unless $id;
 
-    my $pid = fork();
-    die "fork() failed: $!" unless defined $pid;
+    my $parent_res = _fork_twice($c, $id, $dir, $conf);
+    return $parent_res if $parent_res;
 
-    if($pid) {
-        return do_parent_stuff($c, $dir, $pid, $id, $conf);
-    } else {
-        do_child_stuff($c, $dir, $id);
-
-        $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
-
-        exec($cmd) or exit(1); # just to be sure
-    }
+    do_child_stuff($c, $dir, $id);
+    $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
+    exec($cmd) or exit(1); # just to be sure
 }
 
 
@@ -131,12 +125,8 @@ sub perl {
     my ($id,$dir) = init_external($c);
     return unless $id;
 
-    my $pid = fork();
-    die "fork() failed: $!" unless defined $pid;
-
-    if($pid) {
-        return do_parent_stuff($c, $dir, $pid, $id, $conf);
-    }
+    my $parent_res = _fork_twice($c, $id, $dir, $conf);
+    return $parent_res if $parent_res;
 
     if(defined $conf->{'backends'}) {
         $c->db->disable_backends();
@@ -149,36 +139,31 @@ sub perl {
         $c->stats->profile(begin => 'External::perl');
 
         do {
+            $c->stats->profile(begin => 'External::perl eval');
             ## no critic
             my $rc = eval($conf->{'expr'});
             ## use critic
+            $c->stats->profile(end => 'External::perl eval');
 
             $err = $@;
             if($err) {
                 undef $rc;
                 if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
-                    open(my $fh, '>', $dir."/forward");
                     if(ref $c->stash->{'last_redirect_to'} || $c->stash->{'last_redirect_to'} =~ m/ARRAY\(/mx) {
                         confess("invalid redirect url: ".Dumper($c->stash->{'last_redirect_to'}));
                     }
-                    print $fh $c->stash->{'last_redirect_to'},"\n";
-                    Thruk::Utils::IO::close($fh, $dir."/forward");
+                    Thruk::Utils::IO::write($dir."/forward", $c->stash->{'last_redirect_to'}."\n");
                     $err = undef;
                     $rc  = 0;
                 }
             }
 
-            open(my $fh, '>', $dir."/rc");
             # invert rc to match exit code style
-            print $fh ($rc ? 0 : 1);
-            Thruk::Utils::IO::close($fh, $dir."/rc");
-            open($fh, '>>', $dir."/perl_res");
-            if(defined $rc && ref $rc eq '') {
-                print $fh $rc;
-            }
-            Thruk::Utils::IO::close($fh, $dir."/perl_res");
-            CORE::close(STDERR);
-            CORE::close(STDOUT);
+            Thruk::Utils::IO::write($dir."/rc", ($rc ? 0 : 1));
+            Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? Thruk::Utils::Encode::encode_utf8($rc) : "", undef, 1);
+
+            open(*STDERR, '>>', '/dev/null') or _warn("cannot redirect stderr to /dev/null");
+            open(*STDOUT, '>>', '/dev/null') or _warn("cannot redirect stdout to /dev/null");
         };
 
         # unrendered output from template and stash
@@ -211,9 +196,7 @@ sub perl {
         store(\%{$c->stash}, $dir."/stash");
 
         if(Thruk::Base->debug) {
-            open(my $fh, '>', $dir."/stash.dump");
-            print $fh Dumper($c->stash);
-            CORE::close($fh);
+            Thruk::Utils::IO::write($dir."/stash.dump", Dumper($c->stash));
         }
         die($err) if $err; # die again after cleanup
     };
@@ -222,14 +205,14 @@ sub perl {
     save_profile($c, $dir);
     if($err) {
         eval {
-            open(my $fh, '>>', $dir."/stderr");
-            print $fh "ERROR: perl eval failed:\n";
-            print $fh $err;
-            Thruk::Utils::IO::close($fh, $dir."/stderr");
+            Thruk::Utils::IO::write($dir."/stderr", "ERROR: perl eval failed:\n".$err, undef, 1);
+            Thruk::Utils::IO::write($dir."/rc", "1\n");
         };
         # calling _exit skips running END blocks
+        unlink($dir."/pid"); # signal parent we are done
         exit(1);
     }
+    unlink($dir."/pid"); # signal parent we are done
     exit(0);
 }
 
@@ -258,7 +241,7 @@ sub render_page_in_background {
     my @caller = caller(1);
     return(
         Thruk::Utils::External::perl($c, { expr    => $caller[3].'($c)',
-                                           message => 'please stand by while page is beeing rendered...',
+                                           message => 'please stand by while page is being rendered...',
                                            clean   => 1,
                                            render  => 1,
     }));
@@ -311,7 +294,10 @@ sub cancel {
     }
 
     my $pidfile = $dir."/pid";
-    if(-f $pidfile) {
+    my $pid = Thruk::Utils::IO::saferead($pidfile);
+    if(defined $pid) {
+        chomp($pid);
+
         # is it running on this node?
         if(-s $dir."/hostname") {
             my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
@@ -321,8 +307,6 @@ sub cancel {
             }
         }
 
-        my $pid = Thruk::Utils::IO::read($pidfile);
-        chomp($pid);
         update_status($dir, 99.9, 'canceled');
         CORE::kill(15, $pid);
         CORE::kill(-15, $pid);
@@ -354,15 +338,15 @@ sub read_job {
 
     my $job_dir = $c->config->{'var_path'}.'/jobs/'.$id;
 
-    my $start = -e $job_dir.'/start'    ? (stat($job_dir.'/start'))[9] : 0;
-    my $end   = -e $job_dir.'/rc'       ? (stat($job_dir.'/rc'))[9]    : 0;
-    my $rc    = -e $job_dir.'/rc'       ? Thruk::Utils::IO::read($job_dir.'/rc')  : '';
-    my $res   = -e $job_dir.'/perl_res' ? Thruk::Utils::IO::read($job_dir.'/perl_res')  : '';
-    my $out   = -e $job_dir.'/stdout'   ? Thruk::Utils::IO::read($job_dir.'/stdout')  : '';
-    my $err   = -e $job_dir.'/stderr'   ? Thruk::Utils::IO::read($job_dir.'/stderr')  : '';
-    my $host  = -e $job_dir.'/hostname' ? Thruk::Utils::IO::read($job_dir.'/hostname')  : '';
-    my $cmd   = -e $job_dir.'/start'    ? Thruk::Utils::IO::read($job_dir.'/start')  : '';
-    my $pid   = -e $job_dir.'/pid'      ? Thruk::Utils::IO::read($job_dir.'/pid')  : '';
+    my $start = -e $job_dir.'/start'    ? (stat(_))[9] : 0;
+    my $end   = -e $job_dir.'/rc'       ? (stat(_))[9] : 0;
+    my $rc    =  Thruk::Utils::IO::saferead($job_dir.'/rc')       // '';
+    my $res   =  Thruk::Utils::IO::saferead($job_dir.'/perl_res') // '';
+    my $out   =  Thruk::Utils::IO::saferead($job_dir.'/stdout')   // '';
+    my $err   =  Thruk::Utils::IO::saferead($job_dir.'/stderr')   // '';
+    my $host  =  Thruk::Utils::IO::saferead($job_dir.'/hostname') // '';
+    my $cmd   =  Thruk::Utils::IO::saferead($job_dir.'/start')    // '';
+    my $pid   =  Thruk::Utils::IO::saferead($job_dir.'/pid')      // '';
     if($cmd) {
         $cmd =~ s%^\d+\n%%gmx;
         $cmd =~ s%^\$VAR1\s*=\s*%%gmx;
@@ -413,12 +397,10 @@ sub get_status {
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
-    # reap pending zombies
-    waitpid(-1, WNOHANG);
+    _reap_pending_childs();
 
-    my $user = '';
-    if( -f $dir."/user" ) {
-        $user = Thruk::Utils::IO::read($dir."/user");
+    my $user = Thruk::Utils::IO::saferead($dir."/user");
+    if(defined $user) {
         chomp($user);
         if(!defined $c->stash->{'remote_user'} || $user ne $c->stash->{'remote_user'}) {
             if(!$c->check_user_roles('admin')) {
@@ -429,7 +411,6 @@ sub get_status {
 
     my $is_running = _is_running($c, $dir);
     my $percent    = 0;
-    # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start      = stat($dir.'/start');
     if(!defined $start[9]) {
         return($is_running,0,$percent,"not started",undef,undef,$user);
@@ -445,16 +426,11 @@ sub get_status {
         chomp($percent);
     }
 
-    my $message;
-    if(-f $dir."/message") {
-        $message = Thruk::Utils::IO::read($dir."/message");
-        chomp($message);
-    }
-    my $forward;
-    if(-f $dir."/forward") {
-        $forward = Thruk::Utils::IO::read($dir."/forward");
-        chomp($forward);
-    }
+    my $message = Thruk::Utils::IO::saferead($dir."/message");
+    chomp($message) if defined $message;
+
+    my $forward = Thruk::Utils::IO::saferead($dir."/forward");
+    chomp($forward) if defined $forward;
 
     my $show_output;
     if(-f $dir."/show_output") {
@@ -526,9 +502,8 @@ sub get_result {
         return('', 'no such job: '.$id, 0, $dir, undef, 1, undef);
     }
 
-    my($out, $err) = ('', '');
-    $out = Thruk::Utils::IO::read($dir."/stdout") if -f $dir."/stdout";
-    $err = Thruk::Utils::IO::read($dir."/stderr") if -f $dir."/stderr";
+    my $out = Thruk::Utils::IO::saferead($dir."/stdout") // '';
+    my $err = Thruk::Utils::IO::saferead($dir."/stderr") // '';
 
     # remove known harmless errors
     $err =~ s|Warning:.*?during\ global\ destruction\.\n||gmx;
@@ -568,15 +543,11 @@ sub get_result {
     my $stash;
     $stash = retrieve($dir."/stash") if -f $dir."/stash";
 
-    my $rc = -1;
-    $rc = Thruk::Utils::IO::read($dir."/rc") if -f $dir."/rc";
+    my $rc = Thruk::Utils::IO::saferead($dir."/rc") // -1;
     chomp($rc);
 
-    my $perl_res;
-    if(-f $dir."/perl_res") {
-        $perl_res = Thruk::Utils::IO::read($dir."/perl_res");
-        chomp($perl_res);
-    }
+    my $perl_res = Thruk::Utils::IO::saferead($dir."/perl_res");
+    chomp($perl_res) if defined $perl_res;
 
     my $profiles = [];
     for my $p (glob($dir."/profile.log*")) {
@@ -688,9 +659,7 @@ sub update_status {
     my $statusfile = $dir."/status";
     my $text = $percent." ".$remaining_seconds." ".$status;
     _debug("update_status: ".$text);
-    open(my $fh, '>', $statusfile) or die("cannot write status $statusfile: $!");
-    print $fh $text, "\n";
-    Thruk::Utils::IO::close($fh, $statusfile);
+    Thruk::Utils::IO::write($statusfile, $text."\n");
     return;
 }
 
@@ -715,21 +684,19 @@ sub save_profile {
     $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
     $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
 
-    my $file = $dir.'/profile.log.'.$nr;
-    open(my $fh, '>>', $file) or die("cannot write $file: $!");
+    my $profile = "";
     eval {
-        print $fh $c->stats->report(),"\n";
+        $profile = $c->stats->report()."\n";
     };
-    print $fh $@,"\n" if $@;
-    CORE::close($fh);
+    $profile = $@."\n" if $@;
+    Thruk::Utils::IO::write($dir.'/profile.log.'.$nr, $profile);
 
-    $file = $dir.'/profile.html.'.$nr;
-    open($fh, '>>', $file) or die("cannot write $file: $!");
+    $profile = "";
     eval {
-        print $fh $c->stats->report_html();
+        $profile = $c->stats->report_html();
     };
-    print $fh $@,"\n" if $@;
-    CORE::close($fh);
+    $profile = $@."\n" if $@;
+    Thruk::Utils::IO::write($dir.'/profile.html.'.$nr, $profile);
 
     return;
 }
@@ -746,9 +713,10 @@ do all child things after a fork
 sub do_child_stuff {
     my($c, $dir, $id, $keep_stdout_err) = @_;
 
-    POSIX::setsid() or die "Can't start a new session: $!";
-
     confess("no c") unless $c;
+
+    _decouple_fcgid();
+
     $c->stats->clear();
     $c->stash->{'total_backend_waited'} = 0;
     $c->stash->{'total_render_waited'}  = 0;
@@ -774,17 +742,6 @@ sub do_child_stuff {
     ## use critic
 
     $c->{'app'}->{'pool'}->shutdown_threads() if $c->{'app'}->{'pool'};
-
-    # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
-    for my $fd (0..10) {
-        my $io = IO::Handle->new_from_fd($fd,"r");
-        if(defined $io && -S $io) {
-            POSIX::close($fd);
-        }
-    }
-
-    # connect stdin to dev/null
-    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     unless($keep_stdout_err) {
@@ -819,51 +776,31 @@ sub do_child_stuff {
 
 =head2 do_parent_stuff
 
-  do_parent_stuff($c, $dir, $pid, $id, $conf)
+  do_parent_stuff($c, $dir, $id, $conf)
 
 do all parent things after a fork
 
 =cut
 sub do_parent_stuff {
-    my($c, $dir, $pid, $id, $conf) = @_;
+    my($c, $dir, $id, $conf) = @_;
 
     confess("got no id") unless $id;
 
-    # write pid file
-    my $pidfile = $dir."/pid";
-    open(my $fh, '>', $pidfile) or die("cannot write pid $pidfile: $!");
-    print $fh $pid;
-    print $fh "\n";
-    Thruk::Utils::IO::close($fh, $pidfile);
-
     # write hostname file
-    my $hostfile = $dir."/hostname";
-    open($fh, '>', $hostfile) or die("cannot write pid $hostfile: $!");
-    print $fh $Thruk::Globals::NODE_ID, "\n", $Thruk::Globals::HOSTNAME, "\n";
-    Thruk::Utils::IO::close($fh, $hostfile);
+    Thruk::Utils::IO::write($dir."/hostname", $Thruk::Globals::NODE_ID."\n".$Thruk::Globals::HOSTNAME."\n");
 
     # write start file
-    my $startfile = $dir."/start";
-    open($fh, '>', $startfile) or die("cannot write start $startfile: $!");
-    print $fh time(),"\n";
-    print $fh Dumper($conf);
-    print $fh "\n";
+    Thruk::Utils::IO::write($dir."/start", time()."\n".Dumper($conf)."\n");
 
     # write user file
     if(!defined $conf->{'allow'} || defined $conf->{'allow'} eq 'user') {
         confess("no remote_user") unless defined $c->stash->{'remote_user'};
-        open($fh, '>', $dir."/user") or die("cannot write user: $!");
-        print $fh $c->stash->{'remote_user'};
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/user");
+        Thruk::Utils::IO::write($dir."/user", $c->stash->{'remote_user'}."\n");
     }
 
     # write message file
     if(defined $conf->{'message'}) {
-        open($fh, '>', $dir."/message") or die("cannot write message: $!");
-        print $fh $conf->{'message'};
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/message");
+        Thruk::Utils::IO::write($dir."/message", $conf->{'message'}."\n");
     }
 
     # write forward file
@@ -871,21 +808,15 @@ sub do_parent_stuff {
         if(ref $conf->{'forward'}) {
             confess("invalid redirect url: ".Dumper($conf->{'forward'}));
         }
-        open($fh, '>', $dir."/forward") or die("cannot write forward: $!");
-        print $fh $conf->{'forward'};
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/forward");
+        Thruk::Utils::IO::write($dir."/forward", $conf->{'forward'}."\n");
     }
 
     # write show_output file
     if(defined $conf->{'show_output'}) {
-        open($fh, '>', $dir."/show_output") or die("cannot write show_output: $!");
-        print $fh "1";
-        print $fh "\n";
-        Thruk::Utils::IO::close($fh, $dir."/show_output");
+        Thruk::Utils::IO::write($dir."/show_output", "1\n");
     }
 
-    _debug2(($conf->{'background'} ? "background" : "")." job $id started with pid ".$pid);
+    _debug2(($conf->{'background'} ? "background" : "")." job $id started");
 
     $c->stash->{'job_id'} = $id;
     if(!$conf->{'background'}) {
@@ -978,7 +909,9 @@ sub _is_running {
     confess("no dir") unless $dir;
     $dir = Thruk::Utils::IO::untaint($dir);
 
-    return 0 unless -s $dir."/pid";
+    my $pid = Thruk::Utils::IO::saferead($dir."/pid");
+    return 0 unless defined $pid;
+    $pid = Thruk::Utils::IO::untaint($pid);
 
     # fetch status from remote node
     if(-s $dir."/hostname") {
@@ -996,12 +929,8 @@ sub _is_running {
         }
     }
 
-    # reap pending zombies
-    waitpid(-1, WNOHANG);
+    _reap_pending_childs();
 
-    my $pid = Thruk::Utils::IO::read($dir."/pid");
-    $pid = Thruk::Utils::IO::untaint($pid);
-    waitpid($pid, WNOHANG);
     if(kill(0, $pid) > 0) {
         return 1;
     }
@@ -1032,7 +961,7 @@ sub _finished_job_page {
             binmode $fh;
             local $/ = undef;
             $c->res->body(<$fh>);
-            Thruk::Utils::IO::close($fh, $file);
+            CORE::close($file);
             unlink($file) if defined $c->stash->{cleanfile};
             $c->{'rendered'} = 1;
             $c->res->code($stash->{'file_name_meta'}->{'code'}) if defined $stash->{'file_name_meta'}->{'code'};
@@ -1093,6 +1022,9 @@ sub _clean_unstorable_refs {
         if($ref ne '' && $ref ne 'HASH' && $ref ne 'ARRAY') {
             delete $var->{$key};
         }
+        if($key eq 'model_init') {
+            delete $var->{$key};
+        }
     }
     return $var;
 }
@@ -1102,9 +1034,62 @@ sub _reconnect {
     my($c) = @_;
     return unless $c->db();
     $c->db->reconnect() or do {
-        print STDERR "reconnect failed: ".$@;
+        _error("reconnect failed: %s", $@);
         kill($$);
     };
+    return;
+}
+
+##############################################
+# fork twice and return parent initial stuff or exit
+# if it doesn't return anything, you are the child
+sub _fork_twice {
+    my($c, $id, $dir, $conf) = @_;
+
+    my $pid = fork();
+    die "fork() failed: $!" unless defined $pid;
+
+    if($pid) {
+        my $parent_res = do_parent_stuff($c, $dir, $id, $conf);
+        waitpid($pid, 0);
+        return $parent_res;
+    }
+
+    # fork twice to completly detach
+    my $pid2 = fork();
+    die "fork() failed: $!" unless defined $pid2;
+    if($pid2) {
+        Thruk::Utils::IO::write($dir."/pid", $pid2);
+        _decouple_fcgid();
+        exit;
+    }
+
+    return;
+}
+
+##############################################
+# close stdin and fcgid communication socket
+sub _decouple_fcgid {
+    POSIX::setsid() or die "Can't start a new session: $!";
+    # close the fcgid communication socket when running as fcgid process (close all filehandles from 3 to 10 which are sockets)
+    for my $fd (0..10) {
+        my $io = IO::Handle->new_from_fd($fd,"r");
+        if(defined $io && -S $io) {
+            POSIX::close($fd);
+        }
+    }
+
+    # connect stdin to dev/null
+    open(*STDIN, "+<", "/dev/null") || die "can't reopen stdin to /dev/null: $!";
+
+    return;
+}
+
+##############################################
+# reap all finished child processes
+sub _reap_pending_childs {
+    while(waitpid(-1, WNOHANG) > 0) {
+    }
     return;
 }
 

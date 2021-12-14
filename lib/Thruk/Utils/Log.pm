@@ -284,7 +284,7 @@ sub _audit_log {
 =head2 wrap_stdout2log
 
     wrap stdout to info logger. everything printed to stdout will be logged
-    with info level to stderr.
+    with info level to stdout.
 
 =cut
 sub wrap_stdout2log {

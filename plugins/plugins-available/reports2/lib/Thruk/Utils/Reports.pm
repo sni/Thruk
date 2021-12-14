@@ -500,9 +500,10 @@ sub generate_report {
     # report should always run in the report owner context
     if(!$c->user_exists || ($options->{'user'} ne $c->user->{'username'})) {
         Thruk::Utils::set_user($c,
-            username => $options->{'user'},
-            auth_src => "report",
-            internal => 1,
+            username     => $options->{'user'},
+            auth_src     => "report",
+            force        => 1,
+            keep_session => 1,
         );
     }
 
@@ -813,9 +814,10 @@ sub generate_report_background {
     # report should always run in the report owner context
     if(!$c->user_exists || ($report->{'user'} ne $c->user->{'username'})) {
         Thruk::Utils::set_user($c,
-            username => $report->{'user'},
-            auth_src => "report",
-            internal => 1,
+            username     => $report->{'user'},
+            auth_src     => "report",
+            force        => 1,
+            keep_session => 1,
         );
     }
 
@@ -1170,7 +1172,7 @@ sub add_report_defaults {
     my($c, $fields, $report) = @_;
     $fields = _get_required_fields($c, $report) unless defined $fields;
     for my $f (@{$fields}) {
-        $f = normalize_required_field($f);
+        $f = normalize_required_field($c, $f);
         my $key = $f->{'name'};
         # fill in default
         if($f->{'required'} && $f->{'default'} ne '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ /^\s*$/mx)) {
@@ -1601,7 +1603,7 @@ sub _get_required_fields {
     return unless(defined $fields && ref $fields eq 'ARRAY');
     # normalize fields
     for my $f (@{$fields}) {
-        normalize_required_field($f);
+        normalize_required_field($c, $f);
     }
     return $fields;
 }
@@ -1610,18 +1612,18 @@ sub _get_required_fields {
 
 =head2 normalize_required_field
 
-  normalize_required_field($field)
+  normalize_required_field($c, $field)
 
 returns normalized field structure, convert old array list into hash structure
 
 =cut
 sub normalize_required_field {
-    my($f) = @_;
+    my($c, $f) = @_;
     if(ref $f eq 'HASH' && $f->{'type'}) {
         # already normalized hash form
         if($f->{'childs'}) {
-            for my $c (@{$f->{'childs'}}) {
-                normalize_required_field($c);
+            for my $child (@{$f->{'childs'}}) {
+                normalize_required_field($c, $child);
             }
         }
         _set_required_field_defaults($f);
@@ -1642,6 +1644,13 @@ sub normalize_required_field {
             extra    => $extra,
         };
         _set_required_field_defaults($f);
+
+        # remove report themes from required_fields if there is none to select
+        $c->stash->{'report_themes'} = get_report_themes($c) unless $c->stash->{'report_themes'};
+        if($type eq 'report_theme' && scalar @{$c->stash->{'report_themes'}} <= 0) {
+            $f->{'hidden'} = 1;
+        }
+
         return($f);
     }
     confess("unknown form of required field: ".Dumper($f));
@@ -1674,7 +1683,7 @@ sub _verify_fields {
     add_report_defaults($c, $fields, $report);
 
     for my $d (@{$fields}) {
-        my $f = normalize_required_field($d);
+        my $f = normalize_required_field($c, $d);
         my $key = $f->{'name'};
 
         # required fields
@@ -1763,6 +1772,7 @@ sub _initialize_report_templates {
     $c->stash->{'param'}              = $options->{'params'};
     $c->stash->{'r'}                  = $options;
     $c->stash->{'show_empty_outages'} = 1;
+    $c->stash->{'report_themes'}      = get_report_themes($c) unless $c->stash->{'report_themes'};
     apply_report_parameters($c, $c->req->parameters, $options->{'params'});
 
     # set some render helper
@@ -1802,6 +1812,7 @@ sub _initialize_report_templates {
             }
         }
     }
+
     return;
 }
 
@@ -1887,5 +1898,34 @@ sub apply_report_parameters {
 }
 
 ##########################################################
+
+=head2 get_report_themes
+
+  get_report_themes($c)
+
+returns list of themes which have a 'stylesheets/*reports.css' file.
+
+=cut
+sub get_report_themes {
+    my($c) = @_;
+
+    my $report_themes = [];
+    for my $dir (sort glob($c->config->{'themes_dir'})) {
+        my @files = glob($dir.'/stylesheets/*reports.css');
+        next if scalar @files == 0;
+        my $name = $dir;
+        $name =~ s/\/$//gmx;
+        $name =~ s/^.*\///gmx;
+        for my $f (@files) {
+            $f =~ s|^$dir/?||gmx;
+        }
+        push @{$report_themes}, {
+            path         => $dir,
+            name         => $name,
+            reportstyles => \@files,
+        };
+    }
+    return($report_themes);
+}
 
 1;

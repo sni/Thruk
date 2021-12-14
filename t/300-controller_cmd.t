@@ -48,6 +48,7 @@ SKIP: {
     like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[1]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got second command');
 
     $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
+    $ENV{'THRUK_TEST_NO_LOG'}       = "";
     TestUtils::test_page(
         'url'      => '/thruk/cgi-bin/cmd.cgi',
         'post'     => {

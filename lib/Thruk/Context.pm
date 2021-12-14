@@ -296,6 +296,7 @@ options are: {
     superuser      => flag wether this user should be a superuser
     internal       => flag wether this user is an internal technical user
     roles          => limit roles to this set
+    keep_session   => do not update current session cookie
 }
 
 =cut
@@ -352,7 +353,9 @@ sub authenticate {
     if(!$sessiondata && !$internal) {
         if(!Thruk::Base->mode_cli()) {
             ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
-            $c->cookie('thruk_auth', $sessionid, { httponly => 1 });
+            if(!$options{'keep_session'}) {
+                $c->cookie('thruk_auth', $sessionid, { httponly => 1 });
+            }
         }
     }
     if($sessiondata) {
@@ -872,6 +875,7 @@ sub finalize_request {
     $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
     $c->stash->{'time_total'} = $elapsed;
 
+    my $h = Plack::Util::headers($res->[1]);
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
         # inject stats into html page
@@ -883,6 +887,7 @@ sub finalize_request {
         Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
         $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';
         Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
+        $h->remove("Content-Length");
     }
     # slow pages log
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0 && $elapsed > $c->config->{'slow_page_log_threshold'}) {
@@ -896,7 +901,16 @@ sub finalize_request {
         _warn($c->stats->report());
     }
 
-    my $content_length = _set_content_length($res);
+    my $content_length;
+    if (!Plack::Util::status_with_no_entity_body($res->[0]) &&
+        !$h->exists('Content-Length') &&
+        !$h->exists('Transfer-Encoding') &&
+        defined($content_length = Plack::Util::content_length($res->[2])))
+    {
+        $h->push('Content-Length' => $content_length);
+    }
+    $h->push('Cache-Control', 'no-store');
+    $h->push('Expires', '0');
 
     # last possible time to report/save profile
     if($ENV{'THRUK_JOB_DIR'}) {
@@ -950,24 +964,6 @@ sub finalize_request {
     }
 
     return;
-}
-
-###################################################
-sub _set_content_length {
-    my($res) = @_;
-
-    my $content_length;
-    my $h = Plack::Util::headers($res->[1]);
-    if (!Plack::Util::status_with_no_entity_body($res->[0]) &&
-        !$h->exists('Content-Length') &&
-        !$h->exists('Transfer-Encoding') &&
-        defined($content_length = Plack::Util::content_length($res->[2])))
-    {
-        $h->push('Content-Length' => $content_length);
-    }
-    $h->push('Cache-Control', 'no-store');
-    $h->push('Expires', '0');
-    return($content_length);
 }
 
 ###################################################

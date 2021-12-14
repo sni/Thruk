@@ -380,6 +380,10 @@ JSON is the default output format.
 CSV output is available via `/csv/` path prefix. Column names will be automatically
 added as first (commented) line. This can be disabled with the `headers=0` parameter.
 
+.Escaping and nested objects
+[CAUTION]
+Support for nested objects and escaping of semicolons is limited. Nested Objects will fallback to json encoding. If possible, use json format which is faster and more reliable.
+
 ------
   %> thruk r /csv/hosts?columns=name,state
 ------
@@ -712,6 +716,14 @@ This is a very powerful url, for example you could change all hosts which
 have max_check_attempts=3 to max_check_attempts=5 with this command:
 
   thruk r -m PATCH -d max_check_attempts=5 '/config/objects?:TYPE=host&max_check_attempts=3'
+
+=== DELETE /config/objects
+
+Delete objects based on filters.
+This is a very powerful url, without filter, all objects would be removed.
+Ex.: remove all contacts matching a name:
+
+  thruk r -m DELETE '/config/objects?contact_name=test'
 
 === POST /config/objects/<id>
 

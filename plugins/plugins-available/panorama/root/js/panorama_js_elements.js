@@ -691,9 +691,14 @@ Ext.define('Ext.ux.SearchCombobox', {
         // will be set and not expanded.
         me.addListener('collapse',  function() {
             var val = me.getValue();
-            var num = me.store.find("text", val);
+            var num = me.store.findExact("value", val);
             if(num != -1) {
                 val = me.store.getAt(num).get("value");
+            } else {
+                num = me.store.find("text", val);
+                if(num != -1) {
+                    val = me.store.getAt(num).get("value");
+                }
             }
             me.setRawValue(val);
         });

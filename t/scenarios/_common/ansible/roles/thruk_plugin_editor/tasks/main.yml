@@ -1,5 +1,5 @@
 - name: "thruk plugin enable editor"
-  shell: "sudo su - {{ site }} -c 'thruk plugin enable editor'"
+  shell: "sudo su - {{ site }} -c 'rm -f /omd/sites/{{ site }}/etc/thruk/plugins-enabled/editor; thruk plugin enable editor'"
 - name: "Create etc/thruk/action_menus"
   file:
     path: "/omd/sites/{{ site }}/etc/thruk/action_menus"

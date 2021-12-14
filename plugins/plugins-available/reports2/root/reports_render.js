@@ -5,6 +5,10 @@
 
 var page_renumber_required = 0;
 function reports_body_end() {
+    jQuery(".fittext").each(function(i, el) {
+        fitText(el);
+    });
+
     set_vertical_header();
     split_paged_tables();
 

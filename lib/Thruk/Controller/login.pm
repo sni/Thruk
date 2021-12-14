@@ -172,7 +172,7 @@ sub _handle_basic_login {
     elsif($session) {
         # call a script hook after successful login?
         if($c->config->{'cookie_auth_login_hook'}) {
-            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &');
+            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
         }
         return(login_successful($c, $login, $session, $referer, $cookie_domain, "password"));
     }
@@ -200,9 +200,8 @@ sub _handle_basic_login {
             $userdata->{'login'}->{'locked'} = 1;
         }
 
-        # only update user data if already exist, otherwise we would end up with a new file for each failed login
-        my $file = $c->config->{'var_path'}."/users/".$login;
-        Thruk::Utils::store_user_data($c, $userdata, $login) if -s $file;
+        Thruk::Utils::store_user_data($c, $userdata, $login);
+        _clean_failed_logins($c);
 
         if($userdata->{'login'}->{'locked'}) {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
@@ -303,6 +302,40 @@ sub _invalidate_current_session {
             my $cookie = sprintf("thruk_auth=; path=%s;domain=%s;expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; samesite=lax;", $path, $domain);
             push @{$c->stash->{'extra_headers'}}, "Set-Cookie", $cookie;
         }
+    }
+
+    return;
+}
+
+##########################################################
+sub _clean_failed_logins {
+    my($c) = @_;
+
+    my $dir = $c->config->{'var_path'}.'/users';
+    my $cookie_auth_session_timeout = $c->config->{'cookie_auth_session_timeout'};
+    if($cookie_auth_session_timeout <= 0) {
+        # clean old unused sessions after one year, even if they don't expire
+        $cookie_auth_session_timeout = 365 * 86400;
+    }
+    my $timeout = time() - (30 * 86400);
+    Thruk::Utils::IO::mkdir($dir);
+    opendir( my $dh, $dir) or die "can't opendir '$dir': $!";
+    for my $entry (readdir($dh)) {
+        next if $entry eq '.' or $entry eq '..';
+        my $file = $dir.'/'.$entry;
+        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size, $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+        next unless $mtime;
+        next if $mtime > $timeout;
+
+        # only remove if this user file only contains the failed login and noting else
+        my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+        next if !$data;
+        next if scalar keys %{$data} != 1; # contains a single item: login
+        next if !$data->{'login'};
+        next if scalar keys %{$data->{'login'}} != 2; # contains failed and last_failed
+        next if !$data->{'login'}->{'failed'};
+
+        unlink($file);
     }
 
     return;

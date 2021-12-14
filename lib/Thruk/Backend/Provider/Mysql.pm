@@ -1024,7 +1024,7 @@ sub _log_stats {
                 $status     = $dbh->selectall_hashref("SELECT name, value FROM `".$key."_status`", 'name');
                 (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
                 if($status->{'lock_mode'}->{'value'}) {
-                    $msg = "running ".$status->{'lock_mode'}->{'value'}." since ".scalar localtime($status->{'last_update'}->{'value'});
+                    $msg = sprintf("running %s since %s (pid: %s)", $status->{'lock_mode'}->{'value'}, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $status->{'update_pid'}->{'value'}//'?');
                 }
             }
         }
@@ -1151,7 +1151,10 @@ sub _log_removeunused {
     for my $key (@{$c->stash->{'backends'}}) {
         delete $backends->{$key};
     }
-    return($backends) if $print_only;
+    if($print_only) {
+        $c->stats->profile(end => "Mysql::_log_removeunused");
+        return($backends);
+    }
 
     my $removed = 0;
     my $tables  = 0;
@@ -1165,9 +1168,9 @@ sub _log_removeunused {
     }
     $dbh->commit || confess $dbh->errstr;
 
+    $c->stats->profile(end => "Mysql::_log_removeunused");
     return "no old tables found in logcache" if $removed == 0;
 
-    $c->stats->profile(end => "Mysql::_log_removeunused");
     return $removed." old backends removed (".$tables." tables) from logcache";
 }
 
@@ -1457,16 +1460,14 @@ returns true if no global lock exists
 sub check_global_lock {
     my($c) = @_;
     # import locks all other operations
-    if(-e $c->config->{'tmp_path'}."/logcache_import.lock") {
-        my $pid = Thruk::Utils::IO::read($c->config->{'tmp_path'}."/logcache_import.lock");
-        if($pid && $pid != $$) {
-            if($pid && kill(0, $pid)) {
-                _info(sprintf("WARNING: logcache import currently running with pid %d", $pid));
-                return;
-            }
-            _warn("WARNING: removing stale lock file: ".$c->config->{'tmp_path'}."/logcache_import.lock");
-            unlink($c->config->{'tmp_path'}."/logcache_import.lock");
+    my $pid = Thruk::Utils::IO::saferead($c->config->{'tmp_path'}."/logcache_import.lock");
+    if($pid && $pid != $$) {
+        if($pid && kill(0, $pid)) {
+            _info(sprintf("WARNING: logcache import currently running with pid %d", $pid));
+            return;
         }
+        _warn("WARNING: removing stale lock file: ".$c->config->{'tmp_path'}."/logcache_import.lock");
+        unlink($c->config->{'tmp_path'}."/logcache_import.lock");
     }
     return(1);
 }
@@ -1653,10 +1654,10 @@ sub _update_logcache_auth {
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
     my $count = 0;
     for my $host (@{$hosts}) {
-        my $host_id    = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
+        my $host_id = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
         my @values;
-        for my $contact (@{$host->{'contacts'}}) {
-            my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
+        for my $contact (@{Thruk::Base::array_uniq($host->{'contacts'})}) {
+            my $contact_id = &_contact_lookup($contact_lookup, $contact, $dbh, $prefix);
             push @values, '('.$contact_id.','.$host_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
@@ -1675,8 +1676,8 @@ sub _update_logcache_auth {
         my $service_id = &_service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
         next unless $service_id;
         my @values;
-        for my $contact (@{$service->{'contacts'}}) {
-            my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
+        for my $contact (@{Thruk::Base::array_uniq($service->{'contacts'})}) {
+            my $contact_id = &_contact_lookup($contact_lookup, $contact, $dbh, $prefix);
             push @values, '('.$contact_id.','.$service_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
@@ -1705,20 +1706,12 @@ sub _update_logcache_optimize {
     }
     my $start = time();
 
-    eval {
-        _infos("update logs table order...");
-        $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
-        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-        _info("done");
-    };
-    _warn($@) if $@;
+    _infos("update logs table order...");
+    $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    _info("done");
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
-        # remove temp files from previously repair attempt if filesystem was full
-        if($ENV{'OMD_ROOT'}) {
-            my $root = $ENV{'OMD_ROOT'};
-            Thruk::Utils::IO::cmd("rm -f $root/var/mysql/thruk_log_cache/*.TMD");
-        }
         # repair / optimize tables
         _debug("optimizing / repairing tables");
         for my $table (@Thruk::Backend::Provider::Mysql::tables) {
@@ -2029,6 +2022,7 @@ sub _import_peer_logfiles {
     my $compact_start_data = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_compact_duration'});
     my $alertstore = {};
     my $last_day = "";
+    my $consecutive_errors = 0;
 
     my @columns = qw/class time type state host_name service_description message state_type contact_name/;
     my $reordered = 0;
@@ -2077,7 +2071,13 @@ sub _import_peer_logfiles {
                 die($err);
             } else {
                 print($err);
+                $consecutive_errors++;
+                if($consecutive_errors >= 3) {
+                    die("failed to update 3 times in a row, bailing out: ".$err);
+                }
             }
+        } else {
+            $consecutive_errors = 0;
         }
 
         $time = $time + $blocksize;
@@ -2101,11 +2101,6 @@ sub _import_peer_logfiles {
         }
         _debug("done");
         #&timing_breakpoint('_import_peer_logfiles enable index done');
-    }
-
-    # update index statistics
-    if($log_count > 0) {
-        _check_index($c, $dbh, $prefix);
     }
 
     return $log_count;
@@ -2156,8 +2151,8 @@ sub _import_logcache_from_file {
     my $stm = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,message) VALUES";
 
     # make import with relative paths work (thruk chdirs into OMD at start)
-    if($ENV{'OLDPWD'}) {
-        chdir($ENV{'OLDPWD'});
+    if($ENV{'THRUKOLDPWD'}) {
+        chdir($ENV{'THRUKOLDPWD'});
     }
 
     for my $p (@{$files}) {
@@ -2241,7 +2236,7 @@ sub _import_logcache_from_file {
     }
 
     # restore old working dir
-    if($ENV{'OLDPWD'}) {
+    if($ENV{'THRUKOLDPWD'}) {
         chdir($ENV{'HOME'});
     }
 

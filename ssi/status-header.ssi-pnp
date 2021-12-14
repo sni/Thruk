@@ -1,6 +1,8 @@
 <script type="text/javascript">
 function resizeGraphIFrame(obj) {
-  obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+  try {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+  } catch(e) {}
 }
 jQuery(document).ready(function() {
   jQuery("a.histou_tips, a.tips").hover(

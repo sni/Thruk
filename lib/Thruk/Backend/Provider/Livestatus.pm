@@ -258,6 +258,7 @@ sub get_processinfo {
                 push @{$options{'columns'}}, @{$options{'extra_columns'}};
             }
             if($ENV{'THRUK_USE_LMD'}) {
+                push @{$options{'columns'}}, 'thruk';
                 push @{$options{'columns'}}, 'configtool';
                 push @{$options{'columns'}}, 'peer_name';
                 push @{$options{'columns'}}, 'peer_addr';
@@ -891,17 +892,10 @@ sub get_timeperiods {
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
+        if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+            push @{$options{'columns'}}, qw/exclusions/;
+        }
     }
-
-    # fill in values not provided by livestatus
-    $options{'options'}->{'callbacks'}->{'exclusion'} = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'sunday'}    = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'monday'}    = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'tuesday'}   = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'wednesday'} = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'thursday'}  = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'friday'}    = sub { return ''; };
-    $options{'options'}->{'callbacks'}->{'saturday'}  = sub { return ''; };
 
     return $self->_get_table('timeperiods', \%options);
 }
@@ -1700,7 +1694,7 @@ sub renew_logcache {
     return unless defined $self->{'_peer'}->{'logcache'};
     # renew cache?
     if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
-        $self->{'_peer'}->logcache->_import_logs($c, 'update', 0, $self->peer_key());
+        $self->{'_peer'}->logcache->_import_logs($c, 'update', $self->peer_key());
         $self->{'lastcacheupdate'} = time();
     }
     return;

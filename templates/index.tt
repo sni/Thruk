@@ -52,6 +52,7 @@
         var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
+            newloc = newloc.replace(/^\#+/, '');
             if(history.pushState) {
                 history.pushState({}, "", '#'+newloc);
             } else {
@@ -68,7 +69,7 @@
     function set_framesrc_from_hash() {
         var framesrc = "[% IF main %][% main %][% ELSE %][% c.config.start_page %][% END %]";
         var newurl = new String(window.location.hash);
-        newurl     = newurl.replace(/^#/, '');
+        newurl     = newurl.replace(/^#+/, '');
         var oldurl = new String(window.location);
         oldurl     = oldurl.replace(/#.*$/, '');
         if(window.location.pathname.match(/\/[% product_prefix %]\/$/) && newurl != 'main.html' && newurl != '') {
@@ -95,9 +96,11 @@
         return;
       }
       var newurl = e.newURL;
-      newurl     = newurl.replace(/^.*?#/, '');
-      window.frames[1].location.replace(newurl);
-      skipHashChange = 0;
+      if(newurl.match(/#/)) { // breaks pressing back right after login otherwise
+          newurl     = newurl.replace(/^.*?#/, '');
+          window.frames[1].location.replace(newurl);
+          skipHashChange = 0;
+      }
     };
 
     document.addEventListener('DOMContentLoaded', function(){

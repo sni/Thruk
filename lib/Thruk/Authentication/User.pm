@@ -43,9 +43,12 @@ sub new {
 
     # add roles from cgi_conf
     for my $role (@{$Thruk::Constants::possible_roles}) {
-        if(defined $c->config->{$role}) {
-            my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{$role};
-            push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
+        next unless defined $c->config->{$role};
+        for my $member (@{$c->config->{$role}}) {
+            if(Thruk::Base::wildcard_match($username, $member)) {
+                push @{$self->{'roles'}}, $role;
+                last;
+            }
         }
     }
     $self->{'roles_from_cgi_cfg'} = Thruk::Base::array2hash($self->{'roles'});
@@ -102,8 +105,15 @@ sub set_dynamic_attributes {
         }
     } else {
         _debug("fetching user data from livestatus") if Thruk::Base->verbose;
-        $data = $self->get_dynamic_roles($c);
+        my($alias, $email, $can_submit_commands, $groups) = $self->_fetch_user_data($c);
+        $data->{'alias'}               = $alias               if defined $alias;
+        $data->{'email'}               = $email               if defined $email;
+        $data->{'can_submit_commands'} = $can_submit_commands if defined $can_submit_commands;
+        $data->{'contactgroups'}       = $groups              if defined $groups;
+        $data->{'timestamp'}           = time();
     }
+
+    $self->_apply_user_data($c, $data);
 
     $self->{'alias'}               = $data->{'alias'} // $self->{'alias'};
     $self->{'email'}               = $data->{'email'} // $self->{'email'};
@@ -176,21 +186,13 @@ sub clean_roles {
 }
 
 ########################################
-
-=head2 get_dynamic_roles
-
-  get_dynamic_roles($c)
-
-gets the authorized_for_read_only role and group based roles
-
-=cut
-sub get_dynamic_roles {
+sub _fetch_user_data {
     my($self, $c) = @_;
 
     # is the contact allowed to send commands?
-    my($can_submit_commands,$alias,$data,$email);
+    my($can_submit_commands,$alias,$email);
     confess("no db") unless $c->db();
-    $data = $c->db->get_can_submit_commands($self->{'username'});
+    my $data = $c->db->get_can_submit_commands($self->{'username'});
     if(defined $data) {
         for my $dat (@{$data}) {
             $alias = $dat->{'alias'} if defined $dat->{'alias'};
@@ -201,25 +203,45 @@ sub get_dynamic_roles {
         }
     }
 
+    # add roles from groups in cgi.cfg
+    my $groups = [sort keys %{$c->db->get_contactgroups_by_contact($self->{'username'})}];
+
+    return($alias, $email, $can_submit_commands, $groups);
+}
+
+########################################
+sub _apply_user_data {
+    my($self, $c, $data) = @_;
+
+    my $can_submit_commands = $data->{'can_submit_commands'};
     if(!defined $can_submit_commands) {
         $can_submit_commands = $c->config->{'can_submit_commands'} || 0;
     }
 
-    # add roles from groups in cgi.cfg
     my $roles  = [];
-    my $groups = [sort keys %{$c->db->get_contactgroups_by_contact($self->{'username'})}];
-    my $groups_hash = Thruk::Base::array2hash($groups);
     my $roles_by_group = {};
     for my $key (@{$Thruk::Constants::possible_roles}) {
         my $role = $key;
         $role =~ s/^authorized_for_/authorized_contactgroup_for_/gmx;
-        if(defined $c->config->{$role}) {
-            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{$role};
-            for my $contactgroup (keys %contactgroups) {
-                if(defined $groups_hash->{$contactgroup} or $contactgroup eq '*' ) {
+
+        next unless defined $c->config->{$role};
+
+        # make group=* work, even if contact does not have any group
+        for my $testgroup (@{$c->config->{$role}}) {
+            if($testgroup eq '*') {
+                push @{$roles_by_group->{$key}}, '*';
+                push @{$roles}, $key;
+            }
+        }
+
+        # check groups against roles
+        for my $contactgroup (@{$data->{'contactgroups'}}) {
+            for my $testgroup (@{$c->config->{$role}}) {
+                if(Thruk::Base::wildcard_match($contactgroup, $testgroup)) {
                     $roles_by_group->{$key} = [] unless defined $roles_by_group->{$key};
                     push @{$roles_by_group->{$key}}, $contactgroup;
                     push @{$roles}, $key;
+                    last;
                 }
             }
         }
@@ -247,15 +269,11 @@ sub get_dynamic_roles {
         }
     }
 
-    return({
-        roles               => Thruk::Base::array_uniq($roles),
-        can_submit_commands => $can_submit_commands,
-        alias               => $alias,
-        roles_by_group      => $roles_by_group,
-        email               => $email,
-        contactgroups       => $groups,
-        timestamp           => time(),
-    });
+    $data->{'roles'}               = Thruk::Base::array_uniq($roles);
+    $data->{'can_submit_commands'} = $can_submit_commands;
+    $data->{'roles_by_group'}      = $roles_by_group;
+
+    return;
 }
 
 =head2 get
@@ -542,6 +560,5 @@ sub has_group {
     }
     return(1);
 }
-
 
 1;

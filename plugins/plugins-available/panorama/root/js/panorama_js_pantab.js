@@ -331,7 +331,7 @@ Ext.define('TP.Pantab', {
                 };
                 found++;
             }
-            if(found) {
+            if(Object.keys(saveData).length > 0) {
                 allStates[panel.id] = saveData;
             }
         }

@@ -505,6 +505,12 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
+    if(!$c->config->{'_lmd_federtion_checked'} && ($ENV{'THRUK_USE_LMD'} || $c->config->{'lmd_remote'})) {
+        # required on first run to expand federation peers
+        eval {
+            set_processinfo($c, ADD_SAFE_DEFAULTS, $cached_data);
+        };
+    }
     my $disabled_backends = set_enabled_backends($c);
 
     ###############################
@@ -516,6 +522,7 @@ sub add_defaults {
         my $last_program_restart = 0;
         my $retries = 3;
         $retries = 1 if $safe; # but only once on safe/cached pages
+        local $ENV{'LIVESTATUS_RETRIES'} = 0 if $safe; # skip default retries
 
         my $err;
         for my $x (1..$retries) {
@@ -1017,6 +1024,7 @@ sub set_enabled_backends {
     my $disabled_backends = {};
     my $num_backends      = @{$c->db->get_peers()};
     $c->stash->{'num_backends'} = $num_backends;
+    my $cookie_src = $c->stash->{'backend_cookie_src'} // 'thruk_backends';
 
     ###############################
     # by args
@@ -1132,9 +1140,9 @@ sub set_enabled_backends {
 
     ###############################
     # by cookie
-    elsif($num_backends > 1 && defined $c->cookies('thruk_backends')) {
-        _debug('set_enabled_backends() by cookie') if Thruk::Base->debug;
-        my @cookie_backends = $c->cookies('thruk_backends');
+    elsif($num_backends > 1 && defined $c->cookies($cookie_src)) {
+        _debug('set_enabled_backends() by cookie (%s)', $cookie_src) if Thruk::Base->debug;
+        my @cookie_backends = $c->cookies($cookie_src);
         for my $val (@cookie_backends) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -1182,10 +1190,11 @@ sub set_enabled_backends {
 sub _set_disabled_by_section {
     my($c, $backend, $disabled_backends) = @_;
     $backend =~ s/\/$//gmx;
-    $backend = $backend.'/';
+    $backend =~ s/^\///gmx;
+    $backend = '/'.$backend.'/';
     my $found;
     for my $peer (@{$c->db->get_peers()}) {
-        my $test = $peer->{'section'}.'/';
+        my $test = '/'.$peer->{'section'}.'/';
         if($test =~ m|^\Q$backend\E|mx) {
             $disabled_backends->{$peer->{'key'}} = 0;
             $found++;
@@ -1275,15 +1284,21 @@ sub check_federation_peers {
     return($processinfo, $cached_data) unless $all_sites_info;
 
     # add sub federated backends
+    my $check_lmd_config;
     my $existing =  {};
     my $changed  = 0;
     for my $row (@{$all_sites_info}) {
         my $key = $row->{'key'};
         $existing->{$key} = 1;
+        $existing->{$row->{'parent'}} = 1 if $row->{'parent'};
         if(!$c->db->peers->{$key}) {
             $row->{'parent'} = 'LMD' if(!$row->{'parent'} && $c->config->{'lmd_remote'});
             my $parent = $c->db->peers->{$row->{'parent'}};
-            next unless $parent;
+            if(!$parent) {
+                _warn("got unknown peer key, recheck lmd config: %s(%s)", $row->{'name'}, $row->{'peer_key'});
+                $check_lmd_config = 1; # got unknown peer key, recheck lmd config
+                next;
+            }
             my $section = "";
             if($c->config->{'lmd_remote'}) {
                     $section = $row->{'section'};
@@ -1327,6 +1342,10 @@ sub check_federation_peers {
     for my $key (@{$c->db->peer_order}) {
         my $peer = $c->db->peers->{$key};
         if(!$peer->{'federation'}) {
+            if(!$existing->{$key}) {
+                _warn("peer key not found, recheck lmd config: %s(%s)", $peer->{'name'}, $key);
+                $check_lmd_config = 1; # got unknown peer key, recheck lmd config
+            }
             next;
         }
         if(!$existing->{$key}) {
@@ -1352,6 +1371,12 @@ sub check_federation_peers {
         for my $col (qw/last_online last_update last_error/) {
             $peer->{$col} = $d->{$col};
         }
+    }
+    $c->config->{'_lmd_federtion_checked'} = time();
+
+    if($check_lmd_config && !$c->config->{'lmd_remote'}) {
+        require Thruk::Utils::LMD;
+        Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
     }
     return($processinfo, $cached_data);
 }

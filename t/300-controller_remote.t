@@ -43,9 +43,15 @@ if(!Thruk::Config::secret_key()) {
     local $ENV{'THRUK_MODE'} = 'FASTCGI';
     Thruk::_create_secret_file();
 }
-TestUtils::test_page(
-    'url'          => '/thruk/cgi-bin/remote.cgi',
-    'post'         => { data => '{"options":{"action": "raw", "sub":"get_processinfo"},"credential":"'.Thruk::Config::secret_key().'"}' },
-    'like'         => ['version', 'configtool', 'data_source_version'],
-    'unlike'       => ['ARRAY'],
-);
+# backends required for this test
+my $c        = TestUtils::get_c();
+my $backends = $c->db->get_peers();
+SKIP: {
+    skip "backends required", 7 if (scalar @{$backends} == 0);
+    TestUtils::test_page(
+        'url'          => '/thruk/cgi-bin/remote.cgi',
+        'post'         => { data => '{"options":{"action": "raw", "sub":"get_processinfo"},"credential":"'.Thruk::Config::secret_key().'"}' },
+        'like'         => ['version', 'configtool', 'data_source_version'],
+        'unlike'       => ['ARRAY'],
+    );
+};

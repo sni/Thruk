@@ -40,6 +40,9 @@ DIV.subtitle {
   padding-top: 20px;
   padding-bottom: 5px;
   font-size: 20px;
+  overflow: hidden;
+  width: 535px;
+  white-space: nowrap;
 }
 
 
@@ -119,14 +122,25 @@ TABLE.legendtable TH.totals {
 TABLE.legendtable TD.img {
   text-align: center;
 }
+
+DIV.logdate {
+  font-size: 10px;
+}
+DIV.logdate IMG {
+  vertical-align: bottom;
+  padding-right: 5px;
+  width: 12px;
+  height: 12px;
+}
 DIV.logoptions {
-  font-size: 14px;
+  font-size: 10px;
   height: 14px;
   line-height: 14px;
   overflow: hidden;
-  padding-bottom: 10px;
-  padding-top: 2px;
+  padding-bottom: 4px;
+  padding-top: 1px;
   white-space: nowrap;
+  width: 535px;
 }
 SPAN.logtype {
   width: 220px;
@@ -134,11 +148,6 @@ SPAN.logtype {
   float: right;
   overflow: hidden;
 }
-DIV.logdate IMG {
-  vertical-align: bottom;
-  padding-right: 5px;
-}
-
 
 /* SLA Report */
 DIV.output {

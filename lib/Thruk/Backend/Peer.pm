@@ -92,7 +92,7 @@ return peer address list
 sub peer_list {
     my($self) = @_;
     if($self->{'peer_list'}) {
-        my $list = [@{$self->{'peer_list'}}];
+        my $list = [@{$self->{'peer_list'}}]; # create clone of list
         if($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
             push @{$list}, $self->{'class'}->{'config'}->{'options'}->{'fallback_peer'};
         }

@@ -10,6 +10,7 @@ use Storable qw/dclone/;
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
 use Monitoring::Config::Object::Parent ();
+use Thruk::Backend::Manager ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
@@ -139,8 +140,18 @@ initialize configs
 sub init {
     my($self, $config, $stats, $remotepeer) = @_;
     delete $self->{'remotepeer'};
-    if(defined $remotepeer and lc($remotepeer->{'type'}) eq 'http') {
-        $self->{'remotepeer'} = $remotepeer;
+    if(defined $remotepeer) {
+        if(lc($remotepeer->{'type'}) eq 'http') {
+            $self->{'remotepeer'} = $remotepeer;
+        } else {
+            # check if there is any http source set
+            for my $src (@{$remotepeer->{'peer_list'}}) {
+                if($src =~ m/^https?:/mx) {
+                    $self->{'remotepeer'} = Thruk::Backend::Manager::fork_http_peer($remotepeer, $src);
+                    last;
+                }
+            }
+        }
     }
     $self->{'stats'} = $stats if defined $stats;
 
@@ -994,7 +1005,7 @@ sub update_object {
     return unless defined $obj;
 
     my $file = $obj->{'file'};
-    return if(defined $file && $file->readonly());
+    return if(defined $file && $file->{'readonly'});
 
     my $oldchanged = $obj->{'file'}->{'changed'};
     my $oldcommit  = $self->{'needs_commit'};
@@ -1343,8 +1354,8 @@ sub gather_references {
                 }
                 if($count == 0) {
                     $r2 =~ s/^\+//gmx;
-                    $r2 =~ s/^\!//gmx;
                 }
+                $r2 =~ s/^\!//gmx;
                 next if $r2 eq '';
                 $outgoing->{$type}->{$r2} = '';
                 $count++;
@@ -1828,6 +1839,7 @@ sub _get_files_names {
         for my $dir ( ref $config->{'obj_dir'} eq 'ARRAY' ? @{$config->{'obj_dir'}} : ($config->{'obj_dir'}) ) {
             my $path = $dir;
             $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
+            next unless -e $path;
             for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
                 Thruk::Utils::Encode::decode_any($file);
                 $file =~ s|/+|/|gmx;
@@ -2438,18 +2450,28 @@ sub _remote_do {
 # do something on remote site in background
 sub _remote_do_bg {
     my($self, $c, $sub, $args) = @_;
+    $c->stats->profile(begin => "conf::_remote_do_bg: $sub");
     my $res = $self->{'remotepeer'}
                    ->{'class'}
                    ->request('configtool', {
                         sub      => $sub,
                         args     => $args,
                    }, {
-                        auth     => $c->stash->{'remote_user'},
-                        keep_su  => 1,
-                        wait     => 1,
+                        auth      => $c->stash->{'remote_user'},
+                        keep_su   => 1,
+                        wait      => 1,
+                        want_data => 1,
                    });
+    $c->stats->profile(end => "conf::_remote_do_bg: $sub");
+    if(ref $res eq 'HASH' && defined $res->{'rc'} && defined $res->{'output'}) {
+        return($res->{'rc'}, $res->{'output'});
+    }
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
-    return $res->[2];
+    my $data = $res->[2];
+    if(ref $data eq 'HASH') {
+        return($data->{'rc'}, $data->{'err'}||$data->{'out'});
+    }
+    die("bogus result: ".Dumper($res));
 }
 
 ##########################################################
@@ -2481,6 +2503,15 @@ sub remote_file_sync {
     return unless $self->is_remote();
     $c->stats->profile(begin => "remote_file_sync");
     my $files = {};
+
+    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
+    $self->{'config'}->{'localdir'} = $localdir;
+    $self->{'config'}->{'obj_dir'}  = '/';
+
+    if(!$self->{'files'} || scalar @{$self->{'files'}} == 0) {
+        $self->update();
+    }
+
     for my $f (@{$self->{'files'}}) {
         next unless -f $f->{'path'};
         $files->{$f->{'display'}} = {
@@ -2493,9 +2524,6 @@ sub remote_file_sync {
         return $c->detach_error({msg => "syncing remote configuration files failed", code => 500, log => 1});
     }
 
-    my $localdir = $c->config->{'tmp_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
-    $self->{'config'}->{'localdir'} = $localdir;
-    $self->{'config'}->{'obj_dir'}  = '/';
     Thruk::Utils::IO::mkdir_r($localdir);
     for my $path (keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
@@ -2545,7 +2573,7 @@ do config check on remote site
 sub remote_config_check {
     my($self, $c) = @_;
     return unless $self->is_remote();
-    my($rc, $output) = @{$self->_remote_do_bg($c, 'configcheck')};
+    my($rc, $output) = $self->_remote_do_bg($c, 'configcheck');
     $c->stash->{'output'} = $output;
     return !$rc;
 }
@@ -2562,7 +2590,7 @@ do a config reload on remote site
 sub remote_config_reload {
     my($self, $c) = @_;
     return unless $self->is_remote();
-    my($rc, $output) = @{$self->_remote_do_bg($c, 'configreload')};
+    my($rc, $output) = $self->_remote_do_bg($c, 'configreload');
     $c->stash->{'output'} = $output;
     return !$rc;
 }

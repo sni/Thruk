@@ -321,6 +321,7 @@
                               [% ELSE %]
                               <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
                               [% END %]
+                              &nbsp;(<a href="config.cgi?type=timeperiods&jump=[% service.check_period | uri %]">[% service.check_period | html %]</a>)
                             </td>
                           </tr>
                           <tr>
@@ -331,6 +332,7 @@
                               [% ELSE %]
                               <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
                               [% END %]
+                              &nbsp;(<a href="config.cgi?type=timeperiods&jump=[% service.notification_period | uri %]">[% service.notification_period | html %]</a>)
                             </td>
                           </tr>
                           <tr>

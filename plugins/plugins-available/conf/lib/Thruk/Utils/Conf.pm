@@ -39,20 +39,29 @@ returns 1 on success, 0 if you have to wait and it redirects or -1 on errors
 
 =cut
 sub set_object_model {
-    my ( $c, $no_recursion ) = @_;
+    my ( $c, $no_recursion, $peer_key ) = @_;
+    $c->stash->{'param_backend'} = $peer_key if $peer_key;
+    $peer_key = $c->stash->{'param_backend'} if $c->stash->{'param_backend'};
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
-    Thruk::Action::AddDefaults::set_processinfo($c, 2); # Thruk::Constants::ADD_CACHED_DEFAULTS
-    $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
+    Thruk::Action::AddDefaults::set_processinfo($c, 2) unless $c->stash->{'processinfo_time'}; # Thruk::Constants::ADD_CACHED_DEFAULTS
+    $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c, $peer_key)};
 
     # if this is no obj config yet, try updating process info which updates
     # configuration information from http backends
-    if(!$c->stash->{has_obj_conf}) {
-        Thruk::Action::AddDefaults::set_processinfo($c);
-        $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
+    if(!$c->stash->{has_obj_conf} || (defined $peer_key && $peer_key ne $c->stash->{'param_backend'})) {
+        $c->stash->{'param_backend'} = $peer_key;
+        Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
+        $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c, $peer_key)};
     }
 
     if(!$c->stash->{has_obj_conf}) {
+        delete $c->{'obj_db'};
+        $c->stash->{set_object_model_err} = "backend has no configtool section";
+        return -1;
+    }
+
+    if(defined $peer_key && $peer_key ne $c->stash->{'param_backend'}) {
         delete $c->{'obj_db'};
         $c->stash->{set_object_model_err} = "backend has no configtool section";
         return -1;
@@ -77,19 +86,19 @@ sub set_object_model {
     my $model = $c->app->obj_db_model;
     my $jobid = $model->currently_parsing($c->stash->{'param_backend'});
     if(    Thruk::Utils::Conf::get_model_retention($c, $c->stash->{'param_backend'})
-       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
+       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model, $peer_conftool)
     ) {
         # objects initialized
     }
     # currently parsing
     elsif($jobid && Thruk::Utils::External::is_running($c, $jobid, 1)) {
-        $c->stash->{set_object_model_err} = "configuration is beeing parsed right now, try again in a few moments";
+        $c->stash->{set_object_model_err} = "configuration is being parsed right now, try again in a few moments";
         $c->redirect_to("job.cgi?job=".$jobid);
         return 0;
     }
     else {
         # need to parse complete objects
-        $c->stash->{set_object_model_err} = "configuration is beeing parsed right now, try again in a few moments";
+        $c->stash->{set_object_model_err} = "configuration is being parsed right now, try again in a few moments";
         if(scalar keys %{$c->db->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
                                                message => 'please stand by while reading the configuration files...',
@@ -153,7 +162,7 @@ read objects and store them as storable
 
 =cut
 sub read_objects {
-    my $c             = shift;
+    my($c) = @_;
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->app->obj_db_model;
     confess('no model') unless $model;
@@ -724,7 +733,8 @@ sub get_model_retention {
             my $model_configs = $data->{'configs'};
             for my $backend (keys %{$model_configs}) {
                 if(defined $c->stash->{'backend_detail'}->{$backend}) {
-                    $model->init($backend, undef, $model_configs->{$backend}, $c->stats);
+                    my $peer_conftool = $c->db->get_peer_by_key($backend);
+                    $model->init($backend, undef, $model_configs->{$backend}, $c->stats, $peer_conftool);
                     _debug('restored object retention data for '.$backend);
                 }
             }
@@ -806,11 +816,11 @@ set current obj_db from cached config
 
 =cut
 sub init_cached_config {
-    my($c, $peer_conftool, $model) = @_;
+    my($c, $peer_conftool, $model, $peer) = @_;
 
     $c->stats->profile(begin => "init_cached_config()");
 
-    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'});
+    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'}, $peer);
     $c->{'obj_db'}->{'cached'} = 1;
 
     unless(_compare_configs($peer_conftool, $c->{'obj_db'}->{'config'})) {
@@ -822,7 +832,7 @@ sub init_cached_config {
         return 0;
     }
 
-    _debug("cached config object loaded");
+    _debug("cached config object loaded: ".$c->stash->{'param_backend'});
     $c->stats->profile(end => "init_cached_config()");
     return 1;
 }
@@ -916,51 +926,27 @@ sub link_obj {
 
 =head2 get_backends_with_obj_config
 
-    get_backends_with_obj_config($c);
+    get_backends_with_obj_config($c, [$peerfilter]);
 
 returns all backends which do have a objects configuration
 
 =cut
 sub get_backends_with_obj_config {
-    my($c)       = @_;
+    my($c, $peerfilter) = @_;
     my $backends = {};
     my $firstpeer;
 
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
 
     my $fetch = _get_peer_keys_without_configtool($c);
-    if(scalar @{$fetch} > 0) {
+    $fetch = [grep(/^$peerfilter$/mx, @{$fetch})] if $peerfilter;
+    if(scalar @{$fetch} > 0 && !$ENV{'THRUK_USE_LMD'}) {
         #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config II');
         eval {
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo a');
-            $c->db->get_processinfo(backend => $fetch);
+            $c->db->get_processinfo(backend => $fetch, force_type => 'http');
             #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
         };
-
-        my $new_fetch = [];
-        $fetch = _get_peer_keys_without_configtool($c);
-        for my $key (@{$fetch}) {
-            if($c->stash->{'failed_backends'}->{$key}) {
-                my $peer = $c->db->get_peer_by_key($key);
-                delete $peer->{'configtool'}->{remote};
-            } else {
-                push @{$new_fetch}, $key;
-            }
-        }
-        $fetch = $new_fetch;
-
-        # when using lmd, do fetch the real config data now
-        if(scalar @{$fetch} > 0 && $ENV{'THRUK_USE_LMD'}) {
-            for my $key (@{$fetch}) {
-                my $peer = $c->db->get_peer_by_key($key);
-                delete $peer->{'configtool'}->{remote};
-            }
-            # make sure we have uptodate information about config section of http backends
-            local $ENV{'THRUK_USE_LMD'}    = 0;
-            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III a');
-            get_backends_with_obj_config($c);
-            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config III b');
-        }
     }
     #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
 
@@ -1006,7 +992,7 @@ sub get_backends_with_obj_config {
     }
 
     # from cookie setting?
-    if($c->cookies('thruk_conf')) {
+    if($c->cookies('thruk_conf') && !$param_backend) {
         my @cookie_val = $c->cookies('thruk_conf');
         for my $val (@cookie_val) {
             next unless defined $c->stash->{'backend_detail'}->{$val};

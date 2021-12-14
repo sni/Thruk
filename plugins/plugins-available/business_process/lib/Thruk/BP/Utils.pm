@@ -84,7 +84,7 @@ sub load_bp_data {
     # check permissions
     my $is_admin = 0;
     my $allowed  = {};
-    if($c->check_user_roles("admin")) {
+    if($c->check_user_roles("authorized_for_business_processes")) {
         $is_admin = 1;
     } else {
         my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $svcfilter ], columns => ['custom_variable_names', 'custom_variable_values'] );
@@ -154,7 +154,7 @@ returns list of bp ids
 =cut
 sub get_bp_ids {
     my($c, $id) = @_;
-    die("requires admin permissions") unless $c->check_user_roles("admin");
+    die("requires admin permissions") unless $c->check_user_roles("authorized_for_business_processes");
 
     my $base_folder = bp_base_folder($c);
     my $bps       = [];

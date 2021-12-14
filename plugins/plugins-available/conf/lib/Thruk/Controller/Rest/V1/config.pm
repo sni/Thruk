@@ -361,6 +361,43 @@ sub _rest_get_config_objects_patch {
 }
 
 ##########################################################
+# REST PATH: DELETE /config/objects
+# Delete objects based on filters.
+# This is a very powerful url, without filter, all objects would be removed.
+# Ex.: remove all contacts matching a name:
+#
+#   thruk r -m DELETE '/config/objects?contact_name=test'
+Thruk::Controller::rest_v1::register_rest_path_v1('DELETE', qr%^/config/objects?$%mx, \&_rest_get_config_objects_delete, ["admin"]);
+sub _rest_get_config_objects_delete {
+    my($c) = @_;
+    require Thruk::Utils::Conf;
+    my($backends) = $c->db->select_backends();
+    local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends}); # required for sub requests
+    my $changed = 0;
+    if(scalar keys %{$c->req->query_parameters} == 0) {
+        $c->detach_error({
+            code  => 400,
+            msg   => 'delete without any parameter would remove all objects, must specify at least one filter.',
+        });
+    }
+    my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
+    for my $conf (@{$objs}) {
+        my $peer_key = $conf->{':PEER_KEY'};
+        _set_object_model($c, $peer_key) || next;
+        my $o = $c->{'obj_db'}->get_object_by_id($conf->{':ID'});
+        next unless $o;
+        if(_update_object($c, 'DELETE', $o)) {
+            $changed++;
+            Thruk::Utils::Conf::store_model_retention($c, $peer_key);
+        }
+    }
+    return({
+        'message' => sprintf('removed %d objects successfully.', $changed),
+        'count'   => $changed,
+    });
+}
+
+##########################################################
 # REST PATH: PATCH /config/objects/<id>
 # Update object configuration partially.
 # REST PATH: POST /config/objects/<id>
@@ -410,7 +447,7 @@ sub _rest_get_config_diff {
             push @{$diff}, {
                 'peer_key' => $peer_key,
                 'output'   => $file->diff($ignore_whitespace_changes),
-                'file'     => $file->{'path'},
+                'file'     => $file->{'display'},
             };
         }
     }
@@ -459,7 +496,7 @@ sub _rest_get_config_check {
         _set_object_model($c, $peer_key) || next;
         my $job = Thruk::Utils::External::perl($c, {
                                                     expr       => 'Thruk::Controller::conf::_config_check($c)',
-                                                    message    => 'please stand by while configuration is beeing checked...',
+                                                    message    => 'please stand by while configuration is being checked...',
                                                     background => 1,
         });
         push @{$jobs}, [$job, $peer_key];
@@ -476,7 +513,7 @@ sub _rest_get_config_check {
         my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $job);
         push @{$check}, {
             'peer_key' => $peer_key,
-            'output'   => $stash->{'original_output'},
+            'output'   => $err || $stash->{'original_output'},
             'failed'   => $rc == 0 ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
         };
     }
@@ -521,7 +558,7 @@ sub _rest_get_config_reload {
         _set_object_model($c, $peer_key) || next;
         my $job = Thruk::Utils::External::perl($c, {
                                                     expr       => 'Thruk::Controller::conf::_config_reload($c)',
-                                                    message    => 'please stand by while configuration is beeing reloaded...',
+                                                    message    => 'please stand by while configuration is being reloaded...',
                                                     background => 1,
         });
         push @{$jobs}, [$job, $peer_key];
@@ -579,14 +616,25 @@ sub _set_object_model {
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};
-    Thruk::Utils::Conf::set_object_model($c);
-    delete $c->req->parameters->{'refreshdata'};
-    if($c->{'obj_db'}) {
-        return if $c->stash->{'param_backend'} ne $peer_key; # make sure we did not fallback on some default backend
-        die("failed to initialize objects of peer ".$peer_key) if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0);
-        return 1;
+    my $rc = Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
+    if($rc == 0 && $c->stash->{set_object_model_err}) {
+        _warn("backend %s returned error: %s", $peer_key, $c->stash->{set_object_model_err});
+        return;
     }
-    return;
+    delete $c->req->parameters->{'refreshdata'};
+    if(!$c->{'obj_db'}) {
+        _debug("backend %s has no config tool settings", $peer_key);
+        return;
+    }
+    # make sure we did not fallback on some default backend
+    if($c->stash->{'param_backend'} ne $peer_key) {
+        _debug("backend %s has no config tool settings", $peer_key);
+        return;
+    }
+    if($c->{'obj_db'}->{'errors'} && scalar @{$c->{'obj_db'}->{'errors'}} > 0) {
+        die("failed to initialize objects of peer ".$peer_key);
+    }
+    return 1;
 }
 ##########################################################
 sub _add_object {
@@ -604,7 +652,7 @@ sub _add_object {
     }
     $conf->{':ID'}        = $o->{'id'};
     $conf->{':TYPE'}      = $o->{'type'};
-    $conf->{':FILE'}      = $o->{'file'}->{'path'}.':'.$o->{'line'};
+    $conf->{':FILE'}      = $o->{'file'}->{'display'}.':'.$o->{'line'};
     $conf->{':READONLY'}  = $o->{'file'}->readonly() ? 1 : 0;
     $conf->{':PEER_KEY'}  = $peer_key;
     $conf->{':PEER_NAME'} = $peer_name;
@@ -631,7 +679,7 @@ sub _update_object {
         if($o->{'file'}->readonly) {
             $c->detach_error({
                 code  => 403,
-                msg   => 'cannot change readonly file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'cannot change readonly file '.$o->{'file'}->{'display'}.'.',
                 descr => 'attempt to change readonly file.',
             });
         }
@@ -640,7 +688,7 @@ sub _update_object {
         } else {
             $c->detach_error({
                 code  => 403,
-                msg   => 'failed to patch object in file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'failed to patch object in file '.$o->{'file'}->{'display'}.'.',
             });
         }
     }
@@ -661,7 +709,7 @@ sub _update_object {
         if($o->{'file'}->readonly) {
             $c->detach_error({
                 code  => 403,
-                msg   => 'cannot change readonly file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'cannot change readonly file '.$o->{'file'}->{'display'}.'.',
                 descr => 'attempt to change readonly file.',
             });
         }
@@ -670,7 +718,7 @@ sub _update_object {
         } else {
             $c->detach_error({
                 code  => 403,
-                msg   => 'failed to patch object in file '.$o->{'file'}->{'path'}.'.',
+                msg   => 'failed to patch object in file '.$o->{'file'}->{'display'}.'.',
             });
         }
     }

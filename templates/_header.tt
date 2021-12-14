@@ -8,12 +8,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    [% SET page = 'status' IF page == '' %]
-    [% PROCESS _common_css.tt %]
-    [% PROCESS _common_js_files.tt %]
-    [% PROCESS extra_headers.tt %]
-    [% IF extra_header %][% extra_header %][% END %]
-    [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
+    [%- SET page = 'status' IF page == '' -%]
+    [%- PROCESS _common_css.tt %]
+    [%- PROCESS _common_js_files.tt -%]
+    [%- PROCESS extra_headers.tt -%]
+    [%- IF extra_header %][% extra_header %][% END -%]
+    [%- IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END -%]
   </head>
 
   <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class="[% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>

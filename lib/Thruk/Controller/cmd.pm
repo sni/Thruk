@@ -851,7 +851,11 @@ sub _bulk_send_backend {
                                 $cmd,
                                 ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
                             );
-        _audit_log("external_command", $logstr);
+        if($testmode) {
+            _info($logstr);
+        } else {
+            _audit_log("external_command", $logstr);
+        }
         $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
         push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
     }

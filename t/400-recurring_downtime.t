@@ -19,6 +19,8 @@ my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 $BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 $BIN    = $BIN.' --remote-url="'.$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.'"' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
+################################################################################
+
 # get test host
 my $host = TestUtils::get_test_host_cli($BIN);
 
@@ -90,6 +92,21 @@ for my $downtime (@{$test_downtime}) {
     }
 }
 
+################################################################################
+# run downtime from cli
+TestUtils::test_command({
+    cmd  => $BIN.' downtimetask 9999',
+    like => ['/scheduled downtime/'],
+});
+
+# run downtime in test mode
+TestUtils::test_command({
+    cmd     => $BIN.' downtimetask 9999 -t',
+    like    => ['/scheduled downtime/'],
+    errlike => ['/TESTMODE:/'],
+});
+
+################################################################################
 # remove downtime
 TestUtils::test_command({
     cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=9999"',

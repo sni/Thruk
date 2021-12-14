@@ -640,9 +640,8 @@ sub read_resource_file {
     my $lastcomment = "";
     $macros         = {} unless defined $macros;
     for my $file (@{$files}) {
-        next unless -f $file;
-        open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
-        while(my $line = <$fh>) {
+        my @lines = Thruk::Utils::IO::saferead_as_list($file);
+        for my $line (@lines) {
             if($line =~ m/^\s*(\$[A-Z0-9_]+\$)\s*=\s*(.*)$/mx) {
                 $macros->{$1}   = $2;
                 $comments->{$1} = $lastcomment;
@@ -655,7 +654,6 @@ sub read_resource_file {
                 $lastcomment = '';
             }
         }
-        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     }
     return($macros) unless $with_comments;
     return($macros, $comments);
@@ -2192,12 +2190,13 @@ sub get_cron_time_entry {
 set and authenticate a user
 
 options are: {
-    username  => username of the resulting user
-    auth_src  => hint about where this user came from
-    superuser => superuser can change to other user names, roles will not exceed initial role set
-    internal  => internal technical user can change into any user and has admin roles
-    force     => force setting new user, even if already authenticated
-    roles     => maximum set of roles
+    username     => username of the resulting user
+    auth_src     => hint about where this user came from
+    superuser    => superuser can change to other user names, roles will not exceed initial role set
+    internal     => internal technical user can change into any user and has admin roles
+    force        => force setting new user, even if already authenticated
+    roles        => maximum set of roles
+    keep_session => do not update current session cookie
 }
 
 =cut
@@ -2210,22 +2209,23 @@ sub set_user {
     if($c->user_exists) {
         if($c->user->{'internal'} || $options{'force'}) {
             # ok
+            delete $c->{'user'};
+            delete $c->stash->{'remote_user'};
+            delete $c->{'session'};
         } elsif($c->user->{'superuser'}) {
             return(change_user($c, $options{'username'}, $options{'auth_src'}));
         } else {
             # not allowed
-            return;
+            confess('changing user not allowed');
         }
-        delete $c->{'user'};
-        delete $c->stash->{'remote_user'};
-        delete $c->{'session'};
     }
     $c->authenticate(
-            username  => $options{'username'},
-            superuser => $options{'superuser'},
-            internal  => $options{'internal'},
-            auth_src  => $options{'auth_src'},
-            roles     => $options{'roles'},
+            username     => $options{'username'},
+            superuser    => $options{'superuser'},
+            internal     => $options{'internal'},
+            auth_src     => $options{'auth_src'},
+            roles        => $options{'roles'},
+            keep_session => $options{'keep_session'},
     );
     confess("no user") unless $c->user_exists;
     $c->user->{'auth_src'} = $options{'auth_src'};
@@ -2300,9 +2300,10 @@ sub check_pid_file {
     my($c) = @_;
     my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
     if(Thruk::Base->mode eq 'FASTCGI' && ! -f $pidfile) {
-        open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
-        print $fh $$."\n";
-        Thruk::Utils::IO::close($fh, $pidfile);
+        eval {
+            Thruk::Utils::IO::write($pidfile, $$."\n");
+        };
+        warn("cannot write $pidfile: $@") if $@;
     }
     return;
 }
@@ -2355,7 +2356,10 @@ sub wait_after_reload {
     $c->stats->profile(begin => "wait_after_reload ($time)");
     $pkey = $c->stash->{'param_backend'} unless $pkey;
     my $start = time();
-    if(!$pkey && !$time) { sleep 3; }
+    if(!$pkey && !$time) {
+        _debug('no peer key and time, waiting 3 seconds');
+        sleep 3;
+    }
 
     # wait until core responds again
     my $procinfo = {};
@@ -2370,6 +2374,7 @@ sub wait_after_reload {
                 },
         };
     }
+    my $msg;
     while($start > time() - 30) {
         $procinfo = {};
         eval {
@@ -2381,11 +2386,13 @@ sub wait_after_reload {
         alarm(0);
         if($@) {
             $c->stats->profile(comment => "get_processinfo: ".$@);
-            _debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
+            $msg = 'still waiting for core reload for '.(time()-$start).'s: '.$@;
+            _debug($msg);
         }
         elsif($pkey && $c->stash->{'failed_backends'}->{$pkey}) {
             $c->stats->profile(comment => "get_processinfo: ".$c->stash->{'failed_backends'}->{$pkey});
-            _debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
+            $msg = 'still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey};
+            _debug($msg);
         }
         elsif($pkey and $time) {
             # not yet restarted
@@ -2393,9 +2400,11 @@ sub wait_after_reload {
                 $c->stats->profile(comment => "core program_start: ".$procinfo->{$pkey}->{'program_start'});
                 if($procinfo->{$pkey}->{'program_start'} > $time) {
                     $done = 1;
+                    _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
                     last;
                 } else {
-                    _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+                    $msg = 'still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'}));
+                    _debug($msg);
                 }
             }
         }
@@ -2410,14 +2419,15 @@ sub wait_after_reload {
                     $done = 1;
                     last;
                 } else {
-                    _debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core)));
+                    $msg = 'still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core));
+                    _debug($msg);
                 }
             }
         } else {
             $done = 1;
             last;
         }
-        if(time() - $start <= 5) {
+        if((time() - $start) <= 5) {
             Time::HiRes::sleep(0.3);
         } else {
             sleep(1);
@@ -2428,7 +2438,8 @@ sub wait_after_reload {
         # clean up cached groups which may have changed
         $c->cache->clear();
     } else {
-        _error('waiting for core reload failed');
+        _error('waiting for core reload failed (%s)', $pkey // 'all sites');
+        _error("details: %s", $msg) if $msg;
         return(0);
     }
     return(1);
@@ -3436,7 +3447,7 @@ sub dump_params {
     $flat       = 1   unless defined $flat;
     $params = dclone($params) if ref $params;
     local $Data::Dumper::Indent = 0 if $flat;
-    my $dump = Dumper($params);
+    my $dump = ref $params ? Dumper($params) : $params;
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = Thruk::Base::clean_credentials_from_string($dump);
     if($max_length && $max_length > 3 && length($dump) > $max_length) {

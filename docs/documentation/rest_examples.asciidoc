@@ -90,3 +90,16 @@ List sessions which had been active within the last 10minutes:
 ------
   %> thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
 ------
+
+==== Create new Host Object
+
+To create objects via the config tool you can use the generic /config/objects
+endpoint like this:
+
+------
+    %> curl -H "X-Thruk-Auth-Key: ****" \
+            -X POST \
+            --header "Content-Type: application/json" \
+            -d '{":TYPE": "host", ":FILE":"testhosts.cfg","name":"testhost123"}' \
+            http://localhost/thruk/r/config/objects
+------

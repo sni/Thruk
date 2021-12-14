@@ -49,6 +49,11 @@ sub cmd {
         return("ERROR - authorized_for_admin role required", 1);
     }
 
+    # sleep random number of seconds to avoid cluster conflicts with already removed sessions
+    if($ENV{'THRUK_CRON'}) {
+        sleep(int(rand(10)));
+    }
+
     Thruk::Utils::CookieAuth::clean_session_files($c);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");

@@ -24,6 +24,7 @@ my $options = {
   output_dir   => $ENV{'OMD_ROOT'}.'/var/naemon/archive',
   start        => "-7d",
   end          => "-1d",
+  force        => 0,
 };
 
 Getopt::Long::GetOptions (
@@ -33,6 +34,7 @@ Getopt::Long::GetOptions (
    "output_dir=s"       => \$options->{'output_dir'},
    "start=s"            => \$options->{'start'},
    "end=s"              => \$options->{'end'},
+   "f|force"            => \$options->{'force'},
 )  or do {
     print "usage: $0 [<options>]\nsee --help for detailed help.\n";
     exit 3;
@@ -48,6 +50,7 @@ my $logs = [];
 print "reading ".$options->{'input_source'}." ...";
 for my $line (Thruk::Utils::IO::read_as_list($options->{'input_source'})) {
     $line =~ s/^\s*\[\d+\]\s*//gmx;
+    chomp($line);
     push @{$logs}, $line;
 }
 my $length = scalar @{$logs};
@@ -63,10 +66,12 @@ my $file_num = int(($end - $start) / 86400);
 my $input_size = (stat($options->{'input_source'}))[7];
 printf("creating %d logfiles with %d entries each file.\n", $file_num, $options->{'logs_per_day'});
 printf("this will result in roughly %.1f%s of logfiles.\n", Thruk::Utils::reduce_number($file_num * $options->{'logs_per_day'} * ($input_size / scalar @{$logs}), "B", 1024));
-printf("press any key to continue or ctrl+c to abort.\n");
-ReadMode('cbreak');
-ReadKey(0);
-ReadMode 0; # reset tty
+if(!$options->{'force'}) {
+    printf("press any key to continue or ctrl+c to abort.\n");
+    ReadMode('cbreak');
+    ReadKey(0);
+    ReadMode 0; # reset tty
+}
 
 while(1) {
   my $file = $options->{'output_dir'}.'/'.strftime("%d-%m-%Y", localtime($start)).".log";
@@ -79,7 +84,7 @@ while(1) {
   my $ts = $ts_daystart;
   for my $i (1..$options->{'logs_per_day'}) {
     my $line = $logs->[int(rand($length - 1))];
-    printf($fh "[%d] %s", int($ts), $line);
+    printf($fh "[%d] %s\n", int($ts), $line);
     $ts += $step;
   }
   close($fh);
@@ -107,6 +112,7 @@ fake_log_archive.pl - Create Random Logfile Archive
     --output_dir=<folder>         Set archive folder.                                 Default: var/naemon/archive/
     --start=<time definition>     Set start date.                                     Default: -7d
     --end=<time definition>       Set end date.                                       Default: -1d
+    --force                       Don't ask for user confirmation
 
 =head1 DESCRIPTION
 

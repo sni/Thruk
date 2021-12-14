@@ -10,7 +10,7 @@ The downtimetask command executes recurring downtimes tasks.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] downtimetask <nr>
+  Usage: thruk [globaloptions] downtimetask [options] <nr>
 
 =head1 OPTIONS
 
@@ -20,12 +20,17 @@ The downtimetask command executes recurring downtimes tasks.
 
     print help and exit
 
+=item B<-t / --test>
+
+    do not send commands but display what would be send
+
 =back
 
 =cut
 
 use warnings;
 use strict;
+use Getopt::Long ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::CLI ();
@@ -50,6 +55,19 @@ sub cmd {
     if(!$commandoptions || scalar @{$commandoptions} == 0) {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
+
+    # parse options
+    my $opt = {};
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptionsFromArray($commandoptions,
+       "t|test"         => \$opt->{'testmode'},
+    ) or do {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    };
+
+    local $ENV{'THRUK_NO_COMMANDS'} = "" if $opt->{'testmode'};
 
     $c->stats->profile(begin => "_cmd_downtimetask($action)");
     require URI::Escape;
@@ -92,24 +110,17 @@ sub _handle_file {
     my $retries;
     my $total_retries = 5;
 
-    my $nr         = $file;
-    $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
-    my $downtime   = Thruk::Utils::read_data_file($file);
-    my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c);
-    for my $key (keys %{$default_rd}) {
-        $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
+    my $nr = $file;
+    $file  = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
+    if(!-s $file) {
+        _error("cannot read %s: %s", $file, $!);
+        return("", 1);
     }
-
-    my $output     = '';
-    if(!$downtime->{'target'}) {
-        $downtime->{'target'} = 'host';
-        $downtime->{'target'} = 'service' if $downtime->{'service'};
+    my $downtime = Thruk::Utils::RecurringDowntimes::read_downtime($c, $file, undef, undef, undef, undef, undef, undef, undef, 0);
+    if(!$downtime) {
+        _error("cannot read %s", $file);
+        return("", 1);
     }
-
-    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
-    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
-    $downtime->{'service'}      = [$downtime->{'service'}]      unless ref $downtime->{'service'}      eq 'ARRAY';
-    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
     # do quick self check
     Thruk::Utils::RecurringDowntimes::check_downtime($c, $downtime, $file);
@@ -201,6 +212,7 @@ sub _handle_file {
 
     return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
+    my $output = '';
     $output = '['.$nr.'.tsk]';
     if($downtime->{'service'} && scalar @{$downtime->{'service'}} > 0) {
         $output .= ' scheduled'.$flexible.' downtime for service \''.join(', ', @{$downtime->{'service'}}).'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
@@ -241,28 +253,26 @@ set downtime.
 sub set_downtime {
     my($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes) = @_;
 
-    # convert to normal url request
     my $product = $c->config->{'product_prefix'} || 'thruk';
-    my $url = sprintf('/'.$product.'/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
-                      $cmd_typ,
-                      URI::Escape::uri_escape_utf8($downtime->{'comment'}),
-                      URI::Escape::uri_escape_utf8(defined $downtime->{'author'} ? $downtime->{'author'} : '(cron)'),
-                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
-                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
-                      $downtime->{'fixed'},
-                      $hours,
-                      $minutes,
-                      join(',', @{$backends}),
-                      defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape_utf8($downtime->{'host'}) : '',
-                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape_utf8($downtime->{'service'}) : '',
-                      (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape_utf8($downtime->{'hostgroup'}) : '',
-                      (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
-                     );
-    my $old = $c->config->{'lock_author_names'};
-    $c->config->{'lock_author_names'} = 0;
-    my @res = Thruk::Utils::CLI::request_url($c, $url);
-    $c->config->{'lock_author_names'} = $old;
+    local $c->config->{'lock_author_names'} = 0;
+    my @res = Thruk::Utils::CLI::request_url($c, '/'.$product.'/cgi-bin/cmd.cgi', undef, 'POST', {
+        cmd_mod         => 2,
+        cmd_typ         => $cmd_typ,
+        com_data        => $downtime->{'comment'},
+        com_author      => defined $downtime->{'author'} ? $downtime->{'author'} : '(cron)',
+        trigger         => 0,
+        start_time      => $start,
+        end_time        => $end,
+        fixed           => $downtime->{'fixed'},
+        hours           => $hours,
+        minutes         => $minutes,
+        backend         => join(',', @{$backends}),
+        childoptions    => $downtime->{'childoptions'},
+        host            => $downtime->{'host'},
+        service         => $downtime->{'service'},
+        hostgroup       => $downtime->{'hostgroup'},
+        servicegroup    => $downtime->{'servicegroup'},
+    });
     return 0 if $res[0] != 200; # error is already printed
     return 1;
 }
@@ -273,7 +283,11 @@ sub set_downtime {
 
 Runs the downtime task for file '1'
 
-  %> thruk command downtimetask 1
+  %> thruk downtimetask 1
+
+Same but in test mode:
+
+  %> thruk downtimetask 1 --test
 
 =cut
 

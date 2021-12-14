@@ -436,14 +436,8 @@ sub _set_function {
         $self->set_status(3, 'Unknown function: '.$fname);
     }
     if($fname eq 'status') {
-        $self->{'host'}                 = $self->{'function_args'}->[0] || '';
-        $self->{'service'}              = $self->{'function_args'}->[1] || '';
-        $self->{'template'}             = '';
-        $self->{'contacts'}             = [];
-        $self->{'contactgroups'}        = [];
-        $self->{'notification_period'}  = '';
-        $self->{'max_check_attempts'}   = '';
-        $self->{'event_handler'}        = '';
+        $self->{'host'}    = $self->{'function_args'}->[0] || '';
+        $self->{'service'} = $self->{'function_args'}->[1] || '';
         # fix operator
         if($self->{'service'}) {
             my $op = $self->{'function_args'}->[2] // '=';
@@ -466,7 +460,6 @@ sub _set_function {
         } else {
             $self->{'servicegroup'} = $self->{'function_args'}->[1] || '';
         }
-        $self->{'template'} = '';
     }
     return;
 }

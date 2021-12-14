@@ -45,6 +45,9 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
+    # set backend from this cookie
+    $c->stash->{'backend_cookie_src'} = 'thruk_conf';
+
     # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     #&timing_breakpoint('index start');
@@ -104,10 +107,11 @@ sub index {
     # workaround for when specified more than once in the url...
     $subcat = shift @{$subcat} if ref $subcat eq 'ARRAY';
 
-    $c->stash->{sub}          = $subcat;
-    $c->stash->{action}       = $action;
-    $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
-    $c->stash->{has_obj_conf} = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
+    $c->stash->{sub}             = $subcat;
+    $c->stash->{action}          = $action;
+    $c->stash->{conf_config}     = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
+    $c->stash->{has_obj_conf}    = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
+    $c->stash->{backend_chooser} = 'switch';
 
     #&timing_breakpoint('index starting subs');
     # set default
@@ -1285,7 +1289,7 @@ sub _apply_config_changes {
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_check($c)',
-                                               message => 'please stand by while configuration is beeing checked...',
+                                               message => 'please stand by while configuration is being checked...',
                                         });
             return;
         } else {
@@ -1304,7 +1308,7 @@ sub _apply_config_changes {
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
-                                               message => 'please stand by while configuration is beeing reloaded...',
+                                               message => 'please stand by while configuration is being reloaded...',
                                         });
             return;
         } else {
@@ -1785,7 +1789,7 @@ sub get_context_file {
     $fullpath      =~ s|\/+|\/|gmx;
     my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
     if(defined $file) {
-        if(defined $file and $file->readonly()) {
+        if($file->readonly()) {
             Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
             $c->stash->{'new_file'} = '/'.$new_file;
             return;
@@ -2690,24 +2694,31 @@ sub _list_references {
 ##########################################################
 sub _config_check {
     my($c) = @_;
+    $c->stats->profile(begin => "conf::_config_check");
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
     my $rc = 0;
-    if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
-        $rc = 1;
-    }
-    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $obj_check_cmd)) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
-        $rc = 1;
+    if($c->{'obj_db'}->is_remote()) {
+        if($c->{'obj_db'}->remote_config_check($c)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+            $rc = 1;
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+        }
     } else {
-        Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+        if(_cmd($c, $obj_check_cmd)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+            $rc = 1;
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+        }
     }
     _nice_check_output($c);
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    return $rc;
+    $c->stats->profile(end => "conf::_config_check");
+    return($rc, $c->stash->{'original_output'});
 }
 
 ##########################################################
@@ -2771,7 +2782,7 @@ sub _config_reload {
     $c->stash->{'reload_nav'} = 1;
 
     $c->stats->profile(end => "conf::_config_reload");
-    return 1;
+    return(1, $c->stash->{'original_output'});
 }
 
 ##########################################################
