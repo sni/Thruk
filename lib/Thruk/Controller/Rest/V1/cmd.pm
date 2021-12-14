@@ -78,7 +78,7 @@ sub _rest_get_external_command {
     if($type =~ m/^(host|hostgroup|servicegroup|contact|contactgroup)$/mx) {
         $name     = shift @args;
         $cmd_name = shift @args;
-        $cmd      = $cmd_data->{$type.'s'}->{$cmd_name};
+        $cmd      = $cmd_data->{$type.'s'}->{$cmd_name} // $cmd_data->{$type.'s'}->{lc($cmd_name)};
         push @cmd_args, $name;
         $required_fields->{$type} = $name;
 
@@ -90,7 +90,7 @@ sub _rest_get_external_command {
         $name        = shift @args;
         $description = shift @args;
         $cmd_name    = shift @args;
-        $cmd         = $cmd_data->{$type.'s'}->{$cmd_name};
+        $cmd         = $cmd_data->{$type.'s'}->{$cmd_name} // $cmd_data->{$type.'s'}->{lc($cmd_name)};
         $required_fields->{'host'} = $name;
         $required_fields->{$type} = $description;
         push @cmd_args, $name;
@@ -100,7 +100,7 @@ sub _rest_get_external_command {
         }
     } else {
         $cmd_name = shift @args;
-        $cmd      = $cmd_data->{$type}->{$cmd_name};
+        $cmd      = $cmd_data->{$type}->{$cmd_name} // $cmd_data->{$type}->{lc($cmd_name)};
         if(!$c->check_cmd_permissions('system')) {
             return({ 'message' => 'you are not allowed to run system commands', 'description' => 'you don\' have the system_commands role', code => 403 });
         }
