@@ -1,9 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.46-2   Tue Dec 14 14:01:30 CET 2021
           - add password visibility switch to login page
           - show timeperiod information in host/service extinfo
           - fix cgi.cfg entries authorized_contactgroup_for...=* when contact does not have any group
+          - login page will wait for cookie_auth_login_hook to complete
           - Business Process:
             - fix listing business process drafts
           - Configuration:
