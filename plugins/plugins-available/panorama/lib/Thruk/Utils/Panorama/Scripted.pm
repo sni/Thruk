@@ -75,6 +75,7 @@ sub load_dashboard {
         $Thruk::Utils::Panorama::Scripted::meta = $meta;
 
         ## no critic
+        no warnings qw(redefine);
         eval("#line 1 $file\n".$code);
         ## use critic
         if($@) {
