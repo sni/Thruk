@@ -208,13 +208,21 @@ sub clean_session_files {
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
         if($mtime) {
             if($mtime < $timeout) {
-                my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                my $data;
+                eval {
+                    $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                };
+                _warn($@) if $@;
                 _audit_log("session", "session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                 unlink($file);
             }
             elsif($mtime < $fake_session_timeout) {
                 eval {
-                    my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                    my $data;
+                    eval {
+                        $data = Thruk::Utils::IO::json_lock_retrieve($file);
+                    };
+                    _warn($@) if $@;
                     if($data && $data->{'fake'}) {
                         _audit_log("session", "short session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                         unlink($file);
