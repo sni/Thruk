@@ -249,15 +249,16 @@ sub file_rlock {
     my($file) = @_;
     confess("no file") unless $file;
 
-    alarm(30);
-    local $SIG{'ALRM'} = sub { confess("timeout while trying to shared flock: ".$file); };
+    alarm(10);
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to shared flock: ".$file."\n"._fuser($file)); };
 
     my $fh;
     my $retrys = 0;
     my $err;
-    while($retrys < 5) {
+    while($retrys < 3) {
         undef $fh;
         eval {
+            alarm(10);
             sysopen($fh, $file, O_RDONLY) or confess("cannot open file ".$file.": ".$!);
             flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
         };
@@ -296,8 +297,8 @@ sub file_lock {
     confess("no file") unless $file;
     if($mode && $mode eq 'sh') { return file_rlock($file); }
 
-    alarm(30);
-    local $SIG{'ALRM'} = sub { confess("timeout while trying to excl. flock: ".$file); };
+    alarm(20);
+    local $SIG{'ALRM'} = sub { confess("timeout while trying to excl. flock: ".$file."\n"._fuser($file)); };
 
     # we can only lock files in existing folders
     my $basename = $file;
@@ -363,17 +364,18 @@ sub file_lock {
         sleep(0.1);
     }
     if(!$locked) {
-        flock($lock_fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
+        flock($lock_fh, LOCK_EX) || confess('Cannot lock_ex '.$lock_file.': '.$!."\n"._fuser($lock_file));
     }
 
     my $fh;
     $retrys = 0;
     my $err;
-    while($retrys < 5) {
+    while($retrys < 3) {
+        alarm(10);
         undef $fh;
         eval {
-            sysopen($fh, $file, O_RDWR|O_CREAT) or confess("cannot open file ".$file.": ".$!);
-            flock($fh, LOCK_EX) or confess 'Cannot lock_ex '.$lock_file.': '.$!;
+            sysopen($fh, $file, O_RDWR|O_CREAT) || confess("cannot open file ".$file.": ".$!);
+            flock($fh, LOCK_EX) || confess('Cannot lock_ex '.$file.': '.$!."\n"._fuser($file));
         };
         $err = $@;
         if(!$err && $fh) {
@@ -1003,6 +1005,13 @@ sub all_perl_files {
         }
     }
     return(@files);
+}
+
+##############################################
+sub _fuser {
+    my($file) = @_;
+    my $out = cmd(['fuser', '-v', $file]);
+    return($out);
 }
 
 ##############################################
