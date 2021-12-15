@@ -45,7 +45,7 @@ use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
 use Thruk::Utils::APIKeys ();
 use Thruk::Utils::CookieAuth ();
-use Thruk::Utils::Log qw( _audit_log );
+use Thruk::Utils::Log qw/:all/;
 
 $| = 1;
 
@@ -69,6 +69,15 @@ my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|cache|vend
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $last_cache_clean    = 0;
 
+# initialize stderr logger
+if($verbose) {
+    ## no critic
+    $ENV{'THRUK_VERBOSE'} = $verbose if(!defined $ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $verbose);
+    ## use critic
+    Thruk::Utils::Log::set_screen_logger($config, 1, "[thruk_auth] ");
+    _debug("thruk auth started");
+}
+
 ##########################################################
 while (<STDIN>) {
     chomp(my $in = $_);
@@ -77,19 +86,19 @@ while (<STDIN>) {
     select STDERR;
 
     my $t0 = [gettimeofday];
-    print STDERR "thruk_auth: url '$in' " if $verbose > 1;
+    _debug("url: '$in' ") if $verbose;
     eval {
         my $res = process($in);
-        print STDERR "\nthruk_auth:  -> $res" if $verbose > 1;
+        _debug("  -> $res") if $verbose > 1;
         print STDOUT $res;
     };
     my $err = $@;
     if($err) {
         print STDOUT $loginurl."?problem\n";
-        print STDERR "thruk_auth error: ".$err;
+        _error($err);
     }
     my $elapsed = tv_interval ( $t0 );
-    printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
+    _debug("(took %.3f sec)\n",$elapsed) if $verbose > 1;
 }
 
 ##########################################################
@@ -101,7 +110,7 @@ sub process {
         ($cookies, $extra, $path) = ($1, $2, $3);
     } else {
         # everything else redirects to login
-        print STDERR "thruk_auth: unknown url ".$in if $verbose;
+        _debug("unknown url ".$in) if $verbose;
         return $loginurl."\n";
     }
 
@@ -114,7 +123,7 @@ sub process {
 
     # some urls must pass
     if($path =~ $pass_regex) {
-        print STDERR "thruk_auth: pass $path" if $verbose;
+        _debug("pass $path") if $verbose;
         return "/pass/$path\n";
     }
 
@@ -146,20 +155,20 @@ sub process {
 
     # direct access with basic auth
     if($extra->[1]) {
-        print STDERR "thruk_auth: script bypass cookie auth for $path" if $verbose;
+        _debug("trying basic auth from header for $path") if $verbose;
         my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
         if(ref $session eq 'HASH' && $session->{'private_key'}) {
-            print STDERR "thruk_auth: script login successful" if $verbose;
+            _debug("basic auth login successful") if $verbose;
             unlink($session->{'file'});
             return "/loginok/".$session->{'username'}."/".$path."\n";
         } else {
-            print STDERR "thruk_auth: script login failed" if $verbose;
+            _debug("basic auth login failed") if $verbose;
         }
     }
 
     # did we get a cookie
     if($cookies eq '' or $cookies !~ $cookie_regex) {
-        print STDERR "thruk_auth: no cookie $path" if $verbose;
+        _debug("no cookie $path") if $verbose;
         return "/loginok/".$guest."/".$path."\n" if $guest;
         return $loginurl."?".$path."\n";
     }
@@ -168,15 +177,15 @@ sub process {
     # use session cache for a few seconds
     my $now = time();
     if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} > $now - $sessioncachetimeout) {
-        print STDERR "thruk_auth: login by cache hit: ".$sessioncache->{$auth}->{'login'} if $verbose;
+        _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
         return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
     }
 
     # does our sessionfile exist?
-    print STDERR "thruk_auth: id => ".$auth."\n" if $verbose;
+    _debug("id => ".$auth) if $verbose;
     my $session = Thruk::Utils::CookieAuth::retrieve_session(config => $config, id => $auth);
     if(!$session) {
-        print STDERR "thruk_auth: session expired: ".($sessioncache->{$auth}->{'login'} || '?') if $verbose;
+        _debug("session expired: ".($sessioncache->{$auth}->{'login'} || '?')) if $verbose;
         delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
         return "/loginok/".$guest."/".$path."\n" if $guest;
         return $loginurl."?expired&".$path."\n";
@@ -194,7 +203,7 @@ sub process {
 
     # session timeout reached?
     if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
-        print STDERR "thruk_auth: session timeout: ".$sessioncache->{$auth}->{'login'} if $verbose;
+        _debug("session timeout: ".$sessioncache->{$auth}->{'login'}) if $verbose;
         _audit_log("session", "session timeout hit, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
         unlink($session->{'file'});
         delete $sessioncache->{$auth};
@@ -206,7 +215,7 @@ sub process {
     my $basicauth = $session->{'hash'};
     if($sessioncachetimeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
-        print STDERR "thruk_auth: session ok (not revalidated)" if $verbose;
+        _debug("session ok (not revalidated)") if $verbose;
         # uptime mtime of sessionfile
         utime($now, $now, $session->{'file'});
     }
@@ -218,17 +227,18 @@ sub process {
             alarm($login_timeout);
             $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1);
         };
+        my $err = $@;
         alarm(0);
-        if($@ || $rc == -1) {
-            print STDERR "thruk_auth: technical problem during login for ".$user if $verbose;
-            print STDERR "thruk_auth: ".$@ if $@;
+        if($err || $rc == -1) {
+            _debug("technical problem during login for ".$user) if $verbose;
+            _error($err) if $err;
             _audit_log("session", "technical issue during session revalidation, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
             return $loginurl."?problem&".$path."\n";
         }
         if($rc == 0) {
-            print STDERR "thruk_auth: basic auth verify failed for ".$user if $verbose;
+            _debug("basic auth verify failed for ".$user) if $verbose;
             _audit_log("session", "session revalidation failed, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
@@ -246,13 +256,13 @@ sub process {
             'login' => $user,
             'time'  => $now,
     };
-    print STDERR 'thruk_auth: basic auth ok for '.$user if $verbose;
+    _debug('basic auth ok for '.$user) if $verbose;
     return "/loginok/".$user."/".$path."\n";
 }
 
 ##########################################################
 sub clean_session_cache {
-    print STDERR "thruk_auth: session cache house keeping" if $verbose;
+    _debug("session cache house keeping") if $verbose;
     $last_cache_clean = time();
     my $clean_before  = time() - $sessiontimeout - $sessioncachetimeout;
     for my $key (keys %{$sessioncache}) {

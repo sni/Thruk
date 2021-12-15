@@ -138,23 +138,23 @@ sub verify_basic_auth {
     # bypass ssl host verfication on localhost
     Thruk::UserAgent::disable_verify_hostname_by_url($ua, $authurl);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
-    printf(STDERR "thruk_auth: basic auth request for %s to %s\n", $login, $authurl) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
+    _debug("basic auth request for %s to %s\n", $login, $authurl) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
     my $res = $ua->post($authurl);
     if($res->code == 302 && $authurl =~ m|^http:|mx) {
         (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
         if($res->{'_headers'}->{'location'} eq $authurl_https) {
-            printf(STDERR "thruk_auth: basic auth redirects to %s\n", $authurl_https) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
+            _debug("basic auth redirects to %s\n", $authurl_https) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
             $config->{'cookie_auth_restricted_url'} = $authurl_https;
             return(verify_basic_auth($config, $basic_auth, $login));
         }
     }
-    printf(STDERR "thruk_auth: basic auth code: %d\n", $res->code) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 2);
+    _debug("basic auth code: %d\n", $res->code) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 2);
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
         if($1 eq Thruk::Authentication::User::transform_username($config, $login)) {
             return 1;
         }
     }
-    printf(STDERR "thruk_auth: basic auth result: %s\n", $res->decoded_content) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
+    _debug("basic auth result: %s\n", $res->decoded_content) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
     if($res->code == 500 && $res->decoded_content =~ m/(\Qtimeout during auth check\E|\Qread timeout at\E)/mx) {
         return -1;
     }

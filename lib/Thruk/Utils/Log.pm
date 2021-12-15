@@ -377,7 +377,7 @@ sub _init_logging {
         $log = _get_file_logger($log4perl_conf, $config);
         $target = "file";
     } else {
-        $log = _get_screen_logger($config);
+        $log = get_screen_logger($config);
         $target = "screen";
     }
 
@@ -419,10 +419,29 @@ sub _get_file_logger {
 }
 
 ###################################################
-sub _get_screen_logger {
-    my($config) = @_;
+
+=head2 set_screen_logger
+
+    set stderr logger as default logger
+
+=cut
+sub set_screen_logger {
+    $logger = get_screen_logger(@_);
+    return;
+}
+
+###################################################
+
+=head2 get_screen_logger
+
+    return stderr logger
+
+=cut
+sub get_screen_logger {
+    my($config, $withdate, $prefix) = @_;
     return($screenlogger) if $screenlogger;
 
+    require Log::Log4perl;
     require Log::Log4perl::Layout::PatternLayout;
 
     STDERR->autoflush(1);
@@ -436,9 +455,11 @@ sub _get_screen_logger {
         $use_color = 0 if $@;
     }
 
-    my $format = '[%d{ABSOLUTE}][%p] %m{chomp}';
+    my $timeformat = $withdate ? '%d{yyyy/MM/dd} %d{ABSOLUTE}' : '%d{ABSOLUTE}';
+    $prefix = " " unless $prefix;
+    my $format = '['.$timeformat.'][%p]'.$prefix.'%m{chomp}';
     if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base->debug()) {
-        $format = '[%d{ABSOLUTE}]['.($use_color ? '%p{1}' : '%p').'][%-30Z]%U %m{chomp}';
+        $format = '['.$timeformat.']['.($use_color ? '%p{1}' : '%p').'][%-30Z]%U'.$prefix.'%m{chomp}';
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
     }
