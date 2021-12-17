@@ -79,26 +79,40 @@ if($verbose) {
 }
 
 ##########################################################
-while (<STDIN>) {
-    chomp(my $in = $_);
-
-    # do not accidentally print to stdout
-    select STDERR;
-
-    my $t0 = [gettimeofday];
-    _debug("url: '$in' ") if $verbose;
+while(1) {
+    my $rc;
     eval {
-        my $res = process($in);
-        _debug("  -> $res") if $verbose > 1;
-        print STDOUT $res;
+        $rc = read_stdin();
     };
-    my $err = $@;
-    if($err) {
-        print STDOUT $loginurl."?problem\n";
-        _error($err);
+    _error($@) if $@;
+    exit($rc) if defined $rc;
+    sleep(1);
+}
+exit(1);
+
+##########################################################
+sub read_stdin {
+    while (<STDIN>) {
+        chomp(my $in = $_);
+
+        # do not accidentally print to stdout
+        select STDERR;
+
+        my $t0 = [gettimeofday];
+        _debug("url: '$in' ") if $verbose;
+        eval {
+            my $res = process($in);
+            my $elapsed = tv_interval ( $t0 );
+            _debug("  -> $res (took %.3f sec)",$elapsed) if $verbose > 1;
+            print STDOUT $res;
+        };
+        my $err = $@;
+        if($err) {
+            print STDOUT $loginurl."?problem\n";
+            _error($err);
+        }
     }
-    my $elapsed = tv_interval ( $t0 );
-    _debug("(took %.3f sec)\n",$elapsed) if $verbose > 1;
+    return 0;
 }
 
 ##########################################################

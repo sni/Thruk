@@ -263,12 +263,14 @@ sub file_rlock {
             flock($fh, LOCK_SH) or confess 'Cannot lock_sh '.$file.': '.$!;
         };
         $err = $@;
+        alarm(0);
         if(!$err && $fh) {
             last;
         }
         $retrys++;
         sleep(0.5);
     }
+    alarm(0);
 
     if($err) {
         die("failed to shared flock $file: $err");
@@ -278,7 +280,6 @@ sub file_rlock {
         _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
-    alarm(0);
     return($fh);
 }
 
@@ -378,12 +379,14 @@ sub file_lock {
             flock($fh, LOCK_EX) || confess('Cannot lock_ex '.$file.': '.$!."\n"._fuser($file));
         };
         $err = $@;
+        alarm(0);
         if(!$err && $fh) {
             last;
         }
         $retrys++;
         sleep(0.5);
     }
+    alarm(0);
 
     if($err) {
         die("failed to lock $file: $err");
@@ -393,7 +396,6 @@ sub file_lock {
         _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
-    alarm(0);
     return($fh, $lock_fh);
 }
 
