@@ -13,7 +13,6 @@ API keys for Thruk
 use warnings;
 use strict;
 use Carp qw/confess/;
-use File::Copy qw/move/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Crypt ();
@@ -92,17 +91,7 @@ sub get_keyinfo_by_private_key {
     } else {
         return;
     }
-    if(!$nr) {
-        # REMOVE AFTER: 01.01.2022
-        if(length($privatekey) < 64) {
-            _upgrade_key($config, $privatekey);
-            $nr = 1;
-        }
-        # /REMOVE AFTER
-        else {
-            return;
-        }
-    }
+    return unless $nr;
     my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($privatekey, $nr);
     return($hashed_key, $digest_nr, $digest_name);
 }
@@ -261,16 +250,6 @@ sub read_key {
     if($hashed_key =~ m%\.([^\.]+)$%gmx) {
         $type = $1;
     }
-    # REMOVE AFTER: 01.01.2022
-    if(!$type && length($hashed_key) < 64) {
-        my($newkey, $newfile, $digest_name) = _upgrade_key($config, $hashed_key);
-        if($newkey) {
-            $hashed_key = $newkey;
-            $file       = $newfile;
-            $type       = $digest_name;
-        }
-    }
-    # /REMOVE AFTER
     $hashed_key =~ s%\.([^\.]+)$%%gmx;
     $data->{'hashed_key'} = $hashed_key;
     $data->{'file'}       = $file;
@@ -281,19 +260,6 @@ sub read_key {
         $data = { %{$stats}, %{$data} };
     }
     return($data);
-}
-
-##############################################
-# migrate key from old md5hex to current format
-# REMOVE AFTER: 01.01.2022
-sub _upgrade_key {
-    my($config, $key) = @_;
-    my $folder = $config->{'var_path'}.'/api_keys';
-    return unless -e $folder.'/'.$key;
-    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($key);
-    my $newfile = $folder.'/'.$hashed_key.'.'.$digest_name;
-    move($folder.'/'.$key, $newfile);
-    return($hashed_key, $newfile, $digest_name);
 }
 
 ##############################################

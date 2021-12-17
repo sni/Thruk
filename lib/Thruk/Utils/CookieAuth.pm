@@ -15,7 +15,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Encode qw/encode_utf8/;
-use File::Copy qw/move/;
 
 use Thruk::Authentication::User ();
 use Thruk::UserAgent ();
@@ -368,7 +367,6 @@ sub retrieve_session {
     my($digest_name, $hashed_key);
     if($args{'file'}) {
         $sessionfile = Thruk::Base::basename($args{'file'});
-        # REMOVE AFTER: 01.01.2022
         if($sessionfile =~ $hashed_key_file_regex) {
             $hashed_key  = $1;
             $digest_name = substr($2, 1) if $2;
@@ -376,12 +374,7 @@ sub retrieve_session {
             return;
         }
         if(!$digest_name && length($hashed_key) < 64) {
-            my($new_hashed_key, $newfile);
-            ($new_hashed_key, $newfile, undef, $digest_name) = _upgrade_session_file($config, $hashed_key);
-            if($newfile) {
-                $sessionfile = Thruk::Base::basename($newfile);
-                $hashed_key  = $new_hashed_key;
-            }
+            return;
         }
     } else {
         my $digest_nr;
@@ -391,16 +384,7 @@ sub retrieve_session {
         } else {
             return;
         }
-        if(!$digest_nr) {
-            # REMOVE AFTER: 01.01.2022
-            if(length($sessionid) < 64) {
-                (undef, undef, $digest_nr, $digest_name) = _upgrade_session_file($config, $sessionid);
-            }
-            # /REMOVE AFTER
-            else {
-                return;
-            }
-        }
+        return unless $digest_nr;
         $digest_name = Thruk::Utils::Crypt::digest_name($digest_nr) unless $digest_name;
     }
     return unless $digest_name;
@@ -417,23 +401,8 @@ sub retrieve_session {
     eval {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };
-    # REMOVE AFTER: 01.01.2022
-    my $needs_save;
-    if(!$data) {
-        my $raw = Thruk::Utils::IO::read($sessionfile);
-        chomp($raw);
-        my($auth,$ip,$username,$roles) = split(/~~~/mx, $raw, 4);
-        return unless defined $username;
-        my @roles = defined $roles ? split(/,/mx,$roles) : ();
-        $data = {
-            address  => $ip,
-            username => $username,
-            hash     => $auth,
-            roles    => \@roles,
-        };
-        $needs_save = 1;
-    }
-    # /REMOVE
+    my $err = $@;
+    _warn("failed to read sessionfile: $sessionfile: $err") if $err;
 
     return unless defined $data;
 
@@ -449,23 +418,7 @@ sub retrieve_session {
     $data->{roles}       = [] unless $data->{roles};
     $data->{private_key} = $sessionid if $sessionid;
 
-    # REMOVE AFTER: 01.01.2022
-    store_session($config, $sessionid, $data) if($needs_save && $sessionid);
-    # /REMOVE
     return($data);
-}
-
-##############################################
-# migrate session from old md5hex to current format
-# REMOVE AFTER: 01.01.2022
-sub _upgrade_session_file {
-    my($config, $sessionid) = @_;
-    my $folder = $config->{'var_path'}.'/sessions';
-    my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($sessionid);
-    my $newfile = $folder.'/'.$hashed_key.'.'.$digest_name;
-    return($hashed_key, $newfile, $digest_nr, $digest_name) unless -e $folder.'/'.$sessionid;
-    move($folder.'/'.$sessionid, $newfile);
-    return($hashed_key, $newfile, $digest_nr, $digest_name);
 }
 
 ##############################################
