@@ -1386,7 +1386,7 @@ sub get_performance_stats {
         $options{'filter'} = $options{$type.'_filter'};
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} };
+        $data = { %{$data}, %{$rows->[0]} } if($rows && $rows->[0]);
 
         # add stats for active checks
         $stats = [
@@ -1406,7 +1406,7 @@ sub get_performance_stats {
         $rows = $class
                     ->filter([ check_type => 0, has_been_checked => 1 ])
                     ->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} } if $rows->[0];
+        $data = { %{$data}, %{$rows->[0]} } if($rows && $rows->[0]);
 
         # add stats for passive checks
         $stats = [
@@ -1417,7 +1417,7 @@ sub get_performance_stats {
         $class = $self->_get_class($type, \%options);
         $rows  = $class->filter([ check_type => 1, has_been_checked => 1 ])
                        ->stats($stats)->hashref_array();
-        $data  = { %{$data}, %{$rows->[0]} } if $rows->[0];
+        $data  = { %{$data}, %{$rows->[0]} } if($rows && $rows->[0]);
     }
 
     unless(wantarray) {
