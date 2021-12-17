@@ -56,7 +56,7 @@
       owner: demo
       group: demo
       mode: 0770
-  - shell: "echo '{ \"user\" : \"omdadmin\" }' > /omd/sites/demo/var/thruk/api_keys/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; chown demo: /omd/sites/demo/var/thruk/api_keys/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  - shell: "echo '{ \"user\" : \"omdadmin\" }' > /omd/sites/demo/var/thruk/api_keys/e90f647f602519d946bc877c908194ab97cf08c8ad6add4122adebd1b46fbe21.SHA-256; chown demo: /omd/sites/demo/var/thruk/api_keys/e90f647f602519d946bc877c908194ab97cf08c8ad6add4122adebd1b46fbe21.SHA-256"
   - name: create api key folder
     file:
       path: /omd/sites/demo/var/thruk/sessions
@@ -64,7 +64,7 @@
       owner: demo
       group: demo
       mode: 0770
-  - shell: "echo '{\"fake\":1,\"hash\":\"none\",\"username\":\"omdadmin\"}' > /omd/sites/demo/var/thruk/sessions/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb; chown demo: /omd/sites/demo/var/thruk/sessions/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  - shell: "echo '{\"fake\":1,\"hash\":\"none\",\"username\":\"omdadmin\"}' > /omd/sites/demo/var/thruk/sessions/6c00acbf83ec24ca10c04878eeac2aea956fb3224e82cf772f16b6758c1e3192.SHA-256; chown demo: /omd/sites/demo/var/thruk/sessions/6c00acbf83ec24ca10c04878eeac2aea956fb3224e82cf772f16b6758c1e3192.SHA-256"
   - name: create krb folder
     file:
       path: /omd/sites/demo/etc/krb

@@ -72,15 +72,15 @@ for my $site (qw/local/) {
 {
     # these should work
     TestUtils::test_command({
-        cmd  => '/usr/bin/env curl -s -b "thruk_auth=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
+        cmd  => '/usr/bin/env curl -s -b "thruk_auth=bec648c310a161e8610bd62d66c4d9eeb2caff68ee5a3a98910d29e0389013cd_1" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/Logged in as <i>omdadmin<\/i>/', '/Tactical Monitoring Overview/'],
     });
     TestUtils::test_command({
-        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
+        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: ff8cde7bc92c261a260a180ef4d35c456853b70d955c3eb1c41098d0d561268b_1" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/Logged in as <i>omdadmin<\/i>/', '/Tactical Monitoring Overview/'],
     });
     TestUtils::test_command({
-        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "http://omd.test.local/demo/thruk/r/thruk/whoami"',
+        cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: ff8cde7bc92c261a260a180ef4d35c456853b70d955c3eb1c41098d0d561268b_1" "http://omd.test.local/demo/thruk/r/thruk/whoami"',
         like => ['/has_thruk_profile/'],
     });
     TestUtils::test_command({

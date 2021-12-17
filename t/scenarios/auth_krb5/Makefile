@@ -1,7 +1,7 @@
 include ../_common/Makefile.common
 
 export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/
-export THRUK_TEST_AUTH_KEY           = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+export THRUK_TEST_AUTH_KEY           = ff8cde7bc92c261a260a180ef4d35c456853b70d955c3eb1c41098d0d561268b_1
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
