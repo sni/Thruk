@@ -723,6 +723,7 @@ sub get_model_retention {
     $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
     # try to retrieve retention data
+    my $rc = 1;
     eval {
         my $data = retrieve($file);
         if(defined $data->{'release_date'}
@@ -742,6 +743,8 @@ sub get_model_retention {
             # old or unknown file
             _debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
             unlink($file);
+            undef $rc;
+            return;
         }
     };
     if($@) {
@@ -754,7 +757,7 @@ sub get_model_retention {
     _debug('model retention file '.$file.' loaded.');
 
     $c->stats->profile(end => "get_model_retention($backend)");
-    return 1;
+    return($rc);
 }
 
 ##########################################################
