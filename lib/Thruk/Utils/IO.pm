@@ -503,9 +503,14 @@ stores data json encoded. options are passed to json_store.
 
 sub json_lock_store {
     my($file, $data, $options) = @_;
-    my($fh, $lock_fh) = file_lock($file);
-    json_store($file, $data, $options);
-    file_unlock($file, $fh, $lock_fh);
+    my($fh, $lock_fh);
+    eval {
+        ($fh, $lock_fh) = file_lock($file);
+        json_store($file, $data, $options);
+    };
+    my $err = $@;
+    file_unlock($file, $fh, $lock_fh) if($fh || $lock_fh);
+    confess($err) if $err;
     return 1;
 }
 
@@ -566,10 +571,16 @@ retrieve json data
 sub json_lock_retrieve {
     my($file) = @_;
     return unless -s $file;
-    my($fh) = file_rlock($file);
-    my $data = json_retrieve($file, $fh);
-    flock($fh, LOCK_UN);
-    CORE::close($fh) or die("cannot close file ".$file.": ".$!);
+    my($data, $fh);
+    eval {
+        $fh   = file_rlock($file);
+        $data = json_retrieve($file, $fh);
+        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
+        undef $fh; # closing the file removes the lock
+    };
+    my $err = $@;
+    flock($fh, LOCK_UN) if $fh;
+    confess($err) if $err;
     return $data;
 }
 
@@ -585,10 +596,15 @@ update json data with locking. options are passed to json_store.
 
 sub json_lock_patch {
     my($file, $patch_data, $options) = @_;
-    my($fh, $lock_fh) = file_lock($file);
-    $options->{'lock_fh'} = $lock_fh;
-    my $data = json_patch($file, $fh, $patch_data, $options);
-    file_unlock($file, $fh, $lock_fh);
+    my($fh, $lock_fh, $data);
+    eval {
+        ($fh, $lock_fh) = file_lock($file);
+        $options->{'lock_fh'} = $lock_fh;
+        $data = json_patch($file, $fh, $patch_data, $options);
+    };
+    my $err = $@;
+    file_unlock($file, $fh, $lock_fh) if($fh || $lock_fh);
+    confess($err) if $err;
     return $data;
 }
 

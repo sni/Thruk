@@ -74,55 +74,57 @@ sub check_proc {
         return;
     }
 
-    # now that we have the lock, check pid again, it might have been restarted meanwhile
-    if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-        if($fh) {
-            Thruk::Utils::IO::file_unlock($startlock, $fh, $lock);
-            unlink($startlock);
+    eval {
+        # now that we have the lock, check pid again, it might have been restarted meanwhile
+        if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
+            return;
         }
-        return;
-    }
 
-    write_lmd_config($c, $config);
+        write_lmd_config($c, $config);
 
-    _info("lmd not running, starting up...") if $log_missing;
-    my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
-              .' -pidfile '.$lmd_dir.'/pid'
-              .' -config "'.$lmd_dir.'/lmd.ini"';
-    for my $cfg (@{Thruk::Base::array_uniq(Thruk::Base::list($config->{'lmd_core_config'}))}) {
-        for my $file (glob($cfg)) {
-            $cmd .= ' -config "'.$file.'"';
-        }
-    }
-    if($config->{'lmd_options'}) {
-        $cmd .= ' '.$config->{'lmd_options'}.' ';
-    }
-    $cmd .= ' >/dev/null 2>&1 &';
-
-    _debug("start cmd: ". $cmd);
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
-    if($rc != 0) {
-        _error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
-    } else {
-        # wait up to 5 seconds for pid file
-        my $pid;
-        my $retries = 0;
-        while(!$pid) {
-            $pid = check_pid($lmd_dir.'/pid');
-            if($pid || $retries >= 50) {
-                last;
+        _info("lmd not running, starting up...") if $log_missing;
+        my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
+                .' -pidfile '.$lmd_dir.'/pid'
+                .' -config "'.$lmd_dir.'/lmd.ini"';
+        for my $cfg (@{Thruk::Base::array_uniq(Thruk::Base::list($config->{'lmd_core_config'}))}) {
+            for my $file (glob($cfg)) {
+                $cmd .= ' -config "'.$file.'"';
             }
-            $retries++;
-            Time::HiRes::sleep(0.1);
         }
-        if($pid) {
-            _debug(sprintf('lmd started with pid %d', $pid));
+        if($config->{'lmd_options'}) {
+            $cmd .= ' '.$config->{'lmd_options'}.' ';
+        }
+        $cmd .= ' >/dev/null 2>&1 &';
+
+        _debug("start cmd: ". $cmd);
+        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
+        if($rc != 0) {
+            _error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
         } else {
-            _warn(sprintf('lmd failed to start, you may find details in the lmd.log file.'));
+            # wait up to 5 seconds for pid file
+            my $pid;
+            my $retries = 0;
+            while(!$pid) {
+                $pid = check_pid($lmd_dir.'/pid');
+                if($pid || $retries >= 50) {
+                    last;
+                }
+                $retries++;
+                Time::HiRes::sleep(0.1);
+            }
+            if($pid) {
+                _debug(sprintf('lmd started with pid %d', $pid));
+            } else {
+                _warn(sprintf('lmd failed to start, you may find details in the lmd.log file.'));
+            }
         }
-    }
+    };
+    my $err = $@;
 
     Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
+    unlink($startlock);
+
+    confess($err) if $err;
 
     #&timing_breakpoint('check_proc');
     return;

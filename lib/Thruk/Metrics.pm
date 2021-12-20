@@ -2,6 +2,7 @@ package Thruk::Metrics;
 
 use warnings;
 use strict;
+use Carp;
 
 use Thruk::Utils::IO ();
 
@@ -77,12 +78,17 @@ sub store {
         $self->{'store'} = [];
         return;
     }
-    my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($self->{'file'});
-    $data = Thruk::Utils::IO::json_retrieve($self->{'file'}, $fh);
-    $self->_apply_data($data);
-    Thruk::Utils::IO::json_store($self->{'file'}, $data, { pretty => 1 });
-    Thruk::Utils::IO::file_unlock($self->{'file'}, $fh, $lock_fh);
-    $self->{'store'} = [];
+    my($fh, $lock_fh);
+    eval {
+        ($fh, $lock_fh) = Thruk::Utils::IO::file_lock($self->{'file'});
+        $data = Thruk::Utils::IO::json_retrieve($self->{'file'}, $fh);
+        $self->_apply_data($data);
+        Thruk::Utils::IO::json_store($self->{'file'}, $data, { pretty => 1 });
+        $self->{'store'} = [];
+    };
+    my $err = $@;
+    Thruk::Utils::IO::file_unlock($self->{'file'}, $fh, $lock_fh) if($fh || $lock_fh);
+    confess($err) if $err;
     return;
 }
 
