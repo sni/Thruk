@@ -9,7 +9,9 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 72;
+plan tests => 78;
+
+use_ok('Thruk::Utils::IO');
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -96,5 +98,23 @@ $test = {
     like => ['/comment/', '/digest/', '/\.SHA\-256/', '/super user/'],
 };
 TestUtils::test_command($test);
+
+###########################################################
+# test old md5 api keys (files have been migrated, but private key not)
+{
+    my $md5key = "d8e8fca2dc0f896fd7cb4cb0031ba249";
+    my $curl   = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$md5key.'"';
+
+    Thruk::Utils::IO::write("./var/thruk/api_keys/7eff66561fc5e3d39c13f675c02e762310479f4df951f0f9caa4769749fa7232.SHA-256", '{
+    "comment" : "testing md5 key",
+    "created" : '.time().',
+    "user" : "md5user"
+    }');
+
+    TestUtils::test_command({
+        cmd  => $curl.' https://127.0.0.1/demo/thruk/r/thruk/whoami',
+        like => ['/"auth_src" : "api_key",/', '/"id" : "md5user",/'],
+    });
+};
 
 ###########################################################
