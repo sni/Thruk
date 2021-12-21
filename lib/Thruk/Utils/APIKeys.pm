@@ -87,6 +87,7 @@ sub get_keyinfo_by_private_key {
     my($config, $privatekey) = @_;
     my $nr;
     if($privatekey =~ $private_key_regex) {
+        $nr = 1;
         $nr = substr($2, 1) if $2;
     } else {
         return;
