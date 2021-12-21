@@ -48,6 +48,7 @@ sub _rest_get_thruk_api_keys {
             });
         }
         if(unlink($keys->[0]->{'file'})) {
+            unlink($keys->[0]->{'file'}.'.stats');
             return({
                 'message' => 'successfully removed 1 api key.',
             });

@@ -422,6 +422,7 @@ sub _update_docs {
     unlink('var/downtimes/9999.tsk');
     unlink('var/reports/9999.rpt');
     unlink($api_key->{'file'});
+    unlink($api_key->{'file'}.'.stats');
     unlink($system_api_key->{'file'});
 }
 
