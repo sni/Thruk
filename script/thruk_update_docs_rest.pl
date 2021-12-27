@@ -20,6 +20,7 @@ $c->config->{'cluster_enabled'} = 1; # fake cluster
 Thruk::setup_cluster() unless defined $Thruk::Globals::NODE_ID;
 $c->app->cluster->register($c);
 $c->app->cluster->load_statefile();
+unlink(glob($c->{'config'}->{'var_path'}.'/obj_retention.*'));
 my $res = $c->sub_request('/r/config/objects', 'POST', {':TYPE' => 'host', ':FILE' => 'docs-update-test.cfg', 'name' => 'docs-update-test'});
 die("request failed: ".Dumper($res)) unless(ref $res eq 'HASH' && $res->{'message'} && $res->{'message'} =~ m/objects\ successfully/mx);
 
