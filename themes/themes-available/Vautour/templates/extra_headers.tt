@@ -1,2 +1,0 @@
-﻿<link rel="stylesheet" type="text/css" href="[% url_prefix %]themes/[% theme %]/stylesheets/interface/menu.css" media="screen, projection" />
-<link rel="stylesheet" type="text/css" href="[% url_prefix %]themes/[% theme %]/stylesheets/interface/common.css" media="screen, projection" />
