@@ -59,7 +59,7 @@
 <div class="shadow" style="display: none; margin: 15px;" id="error_report_text"><div class="shadowcontent" style="padding: 10px;">
 <pre style="text-align: left;">
 <b>Please report this issue by mail to: <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">[% bug_email_rcpt %]</a></b><br>
-[% PROCESS _error_report.tt %]
+[% PROCESS _error_report.tt | html %]
 </pre>
 </div></div>
 [% END %]

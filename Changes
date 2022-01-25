@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix html escaping error details
+
 2.46-2   Tue Dec 14 14:01:30 CET 2021
           - add password visibility switch to login page
           - show timeperiod information in host/service extinfo
