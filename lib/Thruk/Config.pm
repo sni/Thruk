@@ -27,7 +27,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '2.46.2';
+our $VERSION = '2.46.3';
 
 our $config;
 my $project_root = home() || confess('could not determine project_root from inc.');
@@ -35,7 +35,7 @@ my $project_root = home() || confess('could not determine project_root from inc.
 my $base_defaults = {
     'name'                                  => 'Thruk',
     'fileversion'                           => $VERSION,
-    'released'                              => 'December 14, 2021',
+    'released'                              => 'January 25, 2022',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
