@@ -814,7 +814,8 @@ sub _process_perf_info_page {
     $c->stash->{'logcache_error'} = '';
     if($c->config->{'logcache'}) {
         eval {
-            $c->stash->{'logcache_stats'} = $c->db->logcache_stats($c, 1);
+            my $stats = [sort { $a->{'name'} cmp $b->{'name'} } values %{$c->db->logcache_stats($c, 1)}];
+            $c->stash->{'logcache_stats'} = $stats;
             $c->stash->{'has_logcache'} = 1;
         };
         if($@) {
