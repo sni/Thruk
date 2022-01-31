@@ -271,7 +271,7 @@ my $base_defaults = {
                     'Thruk2.css',
                 ],
     },
-    'jquery_ui'                             => '1.12.1',
+    'jquery_ui'                             => '1.13.1',
     'all_in_one_javascript_panorama'        => [
                 'vendor/jquery-3.5.1.min.js',
                 'javascript/thruk-'.$VERSION.'.js',

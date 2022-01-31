@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - updated jquery-ui to 1.13.1
+
 2.46-3   Tue Jan 25 15:05:00 CET 2022
           - fix html escaping error details (CVE-2022-23961)
           - fix support for old api keys
