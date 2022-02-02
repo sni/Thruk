@@ -91,6 +91,10 @@ for my $url (@{$list_pages}) {
     SKIP: {
         skip "skipped, logcache is disabled ", 8 if ($url =~ m/logcache/mx && !$config->{'logcache'});
 
+        if($url =~ m/logs/mx) {
+            $url = $url.'?limit=100';
+        }
+
         my $page = TestUtils::test_page(
             'url'          => '/thruk/r'.$url,
             'content_type' => 'application/json; charset=utf-8',
