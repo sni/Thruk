@@ -8,6 +8,7 @@
         <td align="left" valign="top" width="50%">
             [% PROCESS _infobox.tt %]
             <div align="left" style="padding-left: 5px;">
+            [% PROCESS _status_filter.tt %]
             [% PROCESS _json_export.tt %]
             </div>
         </td>
@@ -45,14 +46,14 @@
                                 <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts_latency_min) %] / [% sprintf('%.2f',stats.hosts_latency_max) %] / [% sprintf('%.3f',stats.hosts_latency_avg) %] sec</a></td>
                               </tr>
                               <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 131072 }) %]' class='perfItem'># Active Host / Service Checks:</a></td>
                                 <td valign="top" class='perfValue' nowrap>
-                                  <a href='status.cgi?hostgroup=all&amp;hostprops=131072&amp;style=hostdetail' class='perfValue'>[% IF !empty %][% host_stats.total_active %][% ELSE %]0[% END %]</a> / <a href='status.cgi?host=all&amp;serviceprops=131072' class='perfValue'>[% IF !empty %][% service_stats.total_active %][% ELSE %]0[% END %]</a>
+                                  <a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 131072 }) %]' class='perfValue'>[% IF !empty %][% host_stats.total_active %][% ELSE %]0[% END %]</a> / <a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 131072 }) %]' class='perfValue'>[% IF !empty %][% service_stats.total_active %][% ELSE %]0[% END %]</a>
                                 </td>
                               </tr>
                               <tr>
-                                <td align="left" valign="middle" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=65536' class='perfItem'># Passive Host / Service Checks:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='status.cgi?hostgroup=all&amp;hostprops=65536&amp;style=hostdetail' class='perfValue'>[% IF !empty %][% host_stats.total_passive %][% ELSE %]0[% END %]</a> / <a href='status.cgi?host=all&amp;serviceprops=65536' class='perfValue'>[% IF !empty %][% service_stats.total_passive %][% ELSE %]0[% END %]</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 65536 }) %]' class='perfItem'># Passive Host / Service Checks:</a></td>
+                                <td valign="top" class='perfValue' nowrap><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 65536 }) %]' class='perfValue'>[% IF !empty %][% host_stats.total_passive %][% ELSE %]0[% END %]</a> / <a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 65536 }) %]' class='perfValue'>[% IF !empty %][% service_stats.total_passive %][% ELSE %]0[% END %]</a></td>
                               </tr>
                             </table>
                           </td>
@@ -77,7 +78,7 @@
               <td colspan="1" height="20" class='outageTitle'>&nbsp;Network Outages</td>
             </tr>
             <tr>
-              <td class='outageHeader' width="125"><a href='outages.cgi' class='outageHeader'>[% host_stats.outages %] Outages</a></td>
+              <td class='outageHeader' width="125"><a href='[% uri_with(c, { _page => "outages.cgi" }) %]' class='outageHeader'>[% host_stats.outages %] Outages</a></td>
             </tr>
             <tr>
               <td valign="top">
@@ -88,7 +89,7 @@
                     <td valign="top" width="100%">
                       <table border="0" width="100%">
                       [% IF !empty && host_stats.outages > 0 %]
-                      <tr><td width="100%" class='outageImportantProblem'><a href='outages.cgi'>[% host_stats.outages %] Blocking Outages</a></td></tr>
+                      <tr><td width="100%" class='outageImportantProblem'><a href='[% uri_with(c, { _page => "outages.cgi" }) %]'>[% host_stats.outages %] Blocking Outages</a></td></tr>
                       [% END %]
                       </table>
                     </td>
@@ -170,10 +171,10 @@
         <td colspan="4" height="20" class='hostTitle'>&nbsp;Hosts</td>
       </tr>
       <tr>
-        <td class='hostHeader' width="125"><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4' class='hostHeader'>[% host_stats.down %] Down</a></td>
-        <td class='hostHeader' width="125"><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8' class='hostHeader'>[% host_stats.unreachable %] Unreachable</a></td>
-        <td class='hostHeader' width="125"><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2' class='hostHeader'>[% host_stats.up %] Up</a></td>
-        <td class='hostHeader' width="125"><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1' class='hostHeader'>[% host_stats.pending %] Pending</a></td>
+        <td class='hostHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4 }) %]' class='hostHeader'>[% host_stats.down %] Down</a></td>
+        <td class='hostHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8 }) %]' class='hostHeader'>[% host_stats.unreachable %] Unreachable</a></td>
+        <td class='hostHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 2 }) %]' class='hostHeader'>[% host_stats.up %] Up</a></td>
+        <td class='hostHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 1 }) %]' class='hostHeader'>[% host_stats.pending %] Pending</a></td>
       </tr>
       <tr>
         <td valign="top">
@@ -183,14 +184,14 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && host_stats.down_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=10">[% host_stats.down_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
-                  [% IF !empty && host_stats.down_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=1">[% host_stats.down_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
-                  [% IF !empty && host_stats.down_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=4">[% host_stats.down_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.down_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4, hostprops => 10 }) %]">[% host_stats.down_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.down_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4, hostprops => 1 }) %]">[% host_stats.down_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.down_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4, hostprops => 4 }) %]">[% host_stats.down_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && host_stats.down_and_disabled_active > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=131088">[% host_stats.down_and_disabled_active %] Disabled</a></td></tr></tbody>[% END %]
-                    [% IF !empty && host_stats.down_and_disabled_passive > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=65552">[% host_stats.down_and_disabled_passive %] Passive</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.down_and_disabled_active > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4, hostprops => 131088 }) %]">[% host_stats.down_and_disabled_active %] Disabled</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.down_and_disabled_passive > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4, hostprops => 65552 }) %]">[% host_stats.down_and_disabled_passive %] Passive</a></td></tr></tbody>[% END %]
                   [% ELSE %]
-                    [% IF !empty && host_stats.down_and_disabled_active + host_stats.down_and_disabled_passive> 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=16">[% host_stats.down_and_disabled_active + host_stats.down_and_disabled_passive %] Disabled</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.down_and_disabled_active + host_stats.down_and_disabled_passive> 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 4, hostprops => 16 }) %]">[% host_stats.down_and_disabled_active + host_stats.down_and_disabled_passive %] Disabled</a></td></tr></tbody>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -204,14 +205,14 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && host_stats.unreachable_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=10">[% host_stats.unreachable_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
-                  [% IF !empty && host_stats.unreachable_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=1">[% host_stats.unreachable_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
-                  [% IF !empty && host_stats.unreachable_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=4">[% host_stats.unreachable_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.unreachable_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8, hostprops => 10 }) %]">[% host_stats.unreachable_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.unreachable_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8, hostprops => 1 }) %]">[% host_stats.unreachable_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.unreachable_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8, hostprops => 4 }) %]">[% host_stats.unreachable_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && host_stats.unreachable_and_disabled_active > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=131088">[% host_stats.unreachable_and_disabled_active %] Disabled</a></td></tr></tbody>[% END %]
-                    [% IF !empty && host_stats.unreachable_and_disabled_passive > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=65552">[% host_stats.unreachable_and_disabled_passive %] Passive</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.unreachable_and_disabled_active > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8, hostprops => 131088 }) %]">[% host_stats.unreachable_and_disabled_active %] Disabled</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.unreachable_and_disabled_passive > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8, hostprops => 65552 }) %]">[% host_stats.unreachable_and_disabled_passive %] Passive</a></td></tr></tbody>[% END %]
                   [% ELSE %]
-                    [% IF !empty && host_stats.unreachable_and_disabled_active + host_stats.unreachable_and_disabled_passive> 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=16">[% host_stats.unreachable_and_disabled_active + host_stats.unreachable_and_disabled_passive %] Disabled</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.unreachable_and_disabled_active + host_stats.unreachable_and_disabled_passive> 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 8, hostprops => 16 }) %]">[% host_stats.unreachable_and_disabled_active + host_stats.unreachable_and_disabled_passive %] Disabled</a></td></tr></tbody>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -225,12 +226,11 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && host_stats.up_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=1">[% host_stats.up_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.up_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 2, hostprops => 1 }) %]">[% host_stats.up_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && host_stats.up_and_disabled_active > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=131088">[% host_stats.up_and_disabled_active %] Disabled</a></td></tr></tbody>[% END %]
-                    <!--[% IF !empty && host_stats.up_and_disabled_passive > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=65552">[% host_stats.up_and_disabled_passive %] Passive</a></td></tr></tbody>[% END %]-->
+                    [% IF !empty && host_stats.up_and_disabled_active > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 2, hostprops => 131088 }) %]">[% host_stats.up_and_disabled_active %] Disabled</a></td></tr></tbody>[% END %]
                   [% ELSE %]
-                    [% IF !empty && host_stats.up_and_disabled_active + host_stats.up_and_disabled_passive> 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=16">[% host_stats.up_and_disabled_active + host_stats.up_and_disabled_passive %] Disabled</a></td></tr></tbody>[% END %]
+                    [% IF !empty && host_stats.up_and_disabled_active + host_stats.up_and_disabled_passive> 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 2, hostprops => 16 }) %]">[% host_stats.up_and_disabled_active + host_stats.up_and_disabled_passive %] Disabled</a></td></tr></tbody>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -244,8 +244,8 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && host_stats.pending_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1&amp;hostprops=1">[% host_stats.pending_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
-                  [% IF !empty && host_stats.pending_and_disabled > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1&amp;hostprops=16">[% host_stats.pending_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.pending_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 1, hostprops => 1 }) %]">[% host_stats.pending_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF !empty && host_stats.pending_and_disabled > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hoststatustypes => 1, hostprops => 16 }) %]">[% host_stats.pending_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
                 </table>
               </td>
             </tr>
@@ -258,11 +258,11 @@
         <td colspan="5" height="20" class='serviceTitle'>&nbsp;Services</td>
       </tr>
       <tr>
-        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=16' class='serviceHeader'>[% service_stats.critical %] Critical</a></td>
-        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=4' class='serviceHeader'>[% service_stats.warning %] Warning</a></td>
-        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=8' class='serviceHeader'>[% service_stats.unknown %] Unknown</a></td>
-        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=2' class='serviceHeader'>[% service_stats.ok %] OK</a></td>
-        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=1' class='serviceHeader'>[% service_stats.pending %] Pending</a></td>
+        <td class='serviceHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16 }) %]' class='serviceHeader'>[% service_stats.critical %] Critical</a></td>
+        <td class='serviceHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4 }) %]' class='serviceHeader'>[% service_stats.warning %] Warning</a></td>
+        <td class='serviceHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8 }) %]' class='serviceHeader'>[% service_stats.unknown %] Unknown</a></td>
+        <td class='serviceHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 2 }) %]' class='serviceHeader'>[% service_stats.ok %] OK</a></td>
+        <td class='serviceHeader' width="125"><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 1 }) %]' class='serviceHeader'>[% service_stats.pending %] Pending</a></td>
       </tr>
       <tr>
         <td valign="top">
@@ -272,15 +272,15 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.critical_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=10'>[% service_stats.critical_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.critical_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=12'>[% service_stats.critical_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.critical_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=1'>[% service_stats.critical_and_scheduled %] Scheduled</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.critical_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=4'>[% service_stats.critical_and_ack %] Acknowledged</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.critical_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, hoststatustypes => 3, serviceprops => 10 }) %]'>[% service_stats.critical_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.critical_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, hoststatustypes => 12 }) %]'>[% service_stats.critical_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.critical_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, serviceprops => 1 }) %]'>[% service_stats.critical_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.critical_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, serviceprops => 4 }) %]'>[% service_stats.critical_and_ack %] Acknowledged</a></td></tr>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && service_stats.critical_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=131088'>[% service_stats.critical_and_disabled_active %] Disabled</a></td></tr>[% END %]
-                    [% IF !empty && service_stats.critical_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=65552'>[% service_stats.critical_and_disabled_passive %] Passive</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.critical_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, serviceprops => 131088 }) %]'>[% service_stats.critical_and_disabled_active %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.critical_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, serviceprops => 65552 }) %]'>[% service_stats.critical_and_disabled_passive %] Passive</a></td></tr>[% END %]
                   [% ELSE %]
-                    [% IF !empty && service_stats.critical_and_disabled_active + service_stats.critical_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=16'>[% service_stats.critical_and_disabled_active + service_stats.critical_and_disabled_passive %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.critical_and_disabled_active + service_stats.critical_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 16, serviceprops => 16 }) %]'>[% service_stats.critical_and_disabled_active + service_stats.critical_and_disabled_passive %] Disabled</a></td></tr>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -294,15 +294,15 @@
               <td width="10">&nbsp; </td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.warning_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=10'>[% service_stats.warning_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.warning_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=12'>[% service_stats.warning_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.warning_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=1'>[% service_stats.warning_and_scheduled %] Scheduled</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.warning_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=4'>[% service_stats.warning_and_ack %] Acknowledged</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.warning_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, hoststatustypes => 3, serviceprops => 10 }) %]'>[% service_stats.warning_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.warning_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 12 }) %]'>[% service_stats.warning_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.warning_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 1 }) %]'>[% service_stats.warning_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.warning_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 4 }) %]'>[% service_stats.warning_and_ack %] Acknowledged</a></td></tr>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && service_stats.warning_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=131088'>[% service_stats.warning_and_disabled_active %] Disabled</a></td></tr>[% END %]
-                    [% IF !empty && service_stats.warning_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=65552'>[% service_stats.warning_and_disabled_passive %] Passive</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.warning_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 131088 }) %]'>[% service_stats.warning_and_disabled_active %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.warning_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 65552 }) %]'>[% service_stats.warning_and_disabled_passive %] Passive</a></td></tr>[% END %]
                   [% ELSE %]
-                    [% IF !empty && service_stats.warning_and_disabled_active + service_stats.warning_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=16'>[% service_stats.warning_and_disabled_active + service_stats.warning_and_disabled_passive %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.warning_and_disabled_active + service_stats.warning_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 16 }) %]'>[% service_stats.warning_and_disabled_active + service_stats.warning_and_disabled_passive %] Disabled</a></td></tr>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -316,15 +316,15 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.unknown_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=10'>[% service_stats.unknown_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.unknown_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=12'>[% service_stats.unknown_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.unknown_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=1'>[% service_stats.unknown_and_scheduled %] Scheduled</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.unknown_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=4'>[% service_stats.unknown_and_ack %] Acknowledged</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.unknown_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, hoststatustypes => 3, serviceprops => 10 }) %]'>[% service_stats.unknown_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.unknown_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 12 }) %]'>[% service_stats.unknown_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.unknown_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 1 }) %]'>[% service_stats.unknown_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.unknown_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 4 }) %]'>[% service_stats.unknown_and_ack %] Acknowledged</a></td></tr>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && service_stats.unknown_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=131088'>[% service_stats.unknown_and_disabled_active %] Disabled</a></td></tr>[% END %]
-                    [% IF !empty && service_stats.unknown_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=65552'>[% service_stats.unknown_and_disabled_passive %] Passive</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.unknown_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 131088 }) %]'>[% service_stats.unknown_and_disabled_active %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.unknown_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 65552 }) %]'>[% service_stats.unknown_and_disabled_passive %] Passive</a></td></tr>[% END %]
                   [% ELSE %]
-                    [% IF !empty && service_stats.unknown_and_disabled_active + service_stats.unknown_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=16'>[% service_stats.unknown_and_disabled_active + service_stats.unknown_and_disabled_passive %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.unknown_and_disabled_active + service_stats.unknown_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 16 }) %]'>[% service_stats.unknown_and_disabled_active + service_stats.unknown_and_disabled_passive %] Disabled</a></td></tr>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -338,12 +338,11 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.ok_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=2&amp;serviceprops=1'>[% service_stats.ok_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.ok_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 2, serviceprops => 1 }) %]'>[% service_stats.ok_and_scheduled %] Scheduled</a></td></tr>[% END %]
                   [% IF strict_passive_mode %]
-                    [% IF !empty && service_stats.ok_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=2&amp;serviceprops=131088'>[% service_stats.ok_and_disabled_active %] Disabled</a></td></tr>[% END %]
-                    <!--[% IF !empty && service_stats.ok_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=2&amp;serviceprops=65552'>[% service_stats.ok_and_disabled_passive %] Passive</a></td></tr>[% END %]-->
+                    [% IF !empty && service_stats.ok_and_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 2, serviceprops => 131088 }) %]'>[% service_stats.ok_and_disabled_active %] Disabled</a></td></tr>[% END %]
                   [% ELSE %]
-                    [% IF !empty && service_stats.ok_and_disabled_active + service_stats.ok_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=2&amp;serviceprops=16'>[% service_stats.ok_and_disabled_active + service_stats.ok_and_disabled_passive %] Disabled</a></td></tr>[% END %]
+                    [% IF !empty && service_stats.ok_and_disabled_active + service_stats.ok_and_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 2, serviceprops => 16 }) %]'>[% service_stats.ok_and_disabled_active + service_stats.ok_and_disabled_passive %] Disabled</a></td></tr>[% END %]
                   [% END %]
                 </table>
               </td>
@@ -357,8 +356,8 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF !empty && service_stats.pending_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=1&amp;serviceprops=1'>[% service_stats.pending_and_scheduled %] Scheduled</a></td></tr>[% END %]
-                  [% IF !empty && service_stats.pending_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=1&amp;serviceprops=16'>[% service_stats.pending_and_disabled %] Disabled</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.pending_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 1, serviceprops => 1 }) %]'>[% service_stats.pending_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF !empty && service_stats.pending_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 1, serviceprops => 16 }) %]'>[% service_stats.pending_and_disabled %] Disabled</a></td></tr>[% END %]
                 </table>
               </td>
             </tr>
@@ -399,12 +398,12 @@
                     [% IF empty || service_stats.flapping_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledServiceFlapDetection'>All Services Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledServiceFlapDetection'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=512'>[% service_stats.flapping_disabled %] Service Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledServiceFlapDetection'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 512 }) %]'>[% service_stats.flapping_disabled %] Service Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>
                     [% IF !empty && service_stats.flapping > 0 %]
-                    <td width="100%" class='featureItemServicesFlapping'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=1024'>[% service_stats.flapping %] Services Flapping</a></td>
+                    <td width="100%" class='featureItemServicesFlapping'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 1024 }) %]'>[% service_stats.flapping %] Services Flapping</a></td>
                     [% ELSE %]
                     <td width="100%" class='featureItemServicesNotFlapping'>No Services Flapping</td>
                     [% END %]
@@ -413,12 +412,12 @@
                     [% IF empty || host_stats.flapping_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostFlapDetection'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledHostFlapDetection'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=256'>[% host_stats.flapping_disabled %] Host Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledHostFlapDetection'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 256 }) %]'>[% host_stats.flapping_disabled %] Host Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>
                     [% IF host_stats.flapping %]
-                    <td width="100%" class='featureItemHostsFlapping'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=1024'>[% host_stats.flapping %] Hosts Flapping</a></td>
+                    <td width="100%" class='featureItemHostsFlapping'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 1024 }) %]'>[% host_stats.flapping %] Hosts Flapping</a></td>
                     [% ELSE %]
                     <td width="100%" class='featureItemHostsNotFlapping'>No Hosts Flapping</td>
                     [% END %]
@@ -449,14 +448,14 @@
                     [% IF empty || service_stats.notifications_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledServiceNotifications'>All Services Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledServiceNotifications'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=4096'>[% service_stats.notifications_disabled %] Services Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledServiceNotifications'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicveprops => 4096 }) %]'>[% service_stats.notifications_disabled %] Services Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>
                     [% IF empty || host_stats.notifications_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostNotifications'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledHostNotifications'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=4096'>[% host_stats.notifications_disabled %] Host Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledHostNotifications'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 4096 }) %]'>[% host_stats.notifications_disabled %] Host Disabled</a></td>
                     [% END %]
                   </tr>
                 </table>
@@ -486,14 +485,14 @@
                     [% IF empty || service_stats.eventhandler_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledServiceHandlers'>All Services Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledServiceHandlers'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=64'>[% service_stats.eventhandler_disabled %] Service Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledServiceHandlers'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 64 }) %]'>[% service_stats.eventhandler_disabled %] Service Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>
                     [% IF empty || host_stats.eventhandler_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostHandlers'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledHostHandlers'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=64'>[% host_stats.eventhandler_disabled %] Hosts Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledHostHandlers'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 64 }) %]'>[% host_stats.eventhandler_disabled %] Hosts Disabled</a></td>
                     [% END %]
                   </tr>
                 </table>
@@ -522,10 +521,10 @@
                   <tr><td width="100%" class='featureItemEnabledActiveServiceChecks'>All Services Enabled</td></tr>
                   [% ELSE %]
                     [% IF strict_passive_mode %]
-                      [% IF service_stats.active_checks_disabled_active > 0 %]<tr><td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=131088'>[% service_stats.active_checks_disabled_active %] Services Disabled</a></td></tr>[% END %]
-                      [% IF service_stats.active_checks_disabled_passive > 0 %]<tr><td width="100%" class='featureItemEnabledActiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=65552'>[% service_stats.active_checks_disabled_passive %] Services Passive</a></td></tr>[% END %]
+                      [% IF service_stats.active_checks_disabled_active > 0 %]<tr><td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 131088 }) %]'>[% service_stats.active_checks_disabled_active %] Services Disabled</a></td></tr>[% END %]
+                      [% IF service_stats.active_checks_disabled_passive > 0 %]<tr><td width="100%" class='featureItemEnabledActiveServiceChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 65552 }) %]'>[% service_stats.active_checks_disabled_passive %] Services Passive</a></td></tr>[% END %]
                     [% ELSE %]
-                      <tr><td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=16'>[% service_stats.active_checks_disabled_active + service_stats.active_checks_disabled_passive %] Services Disabled</a></td></tr>
+                      <tr><td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 16 }) %]'>[% service_stats.active_checks_disabled_active + service_stats.active_checks_disabled_passive %] Services Disabled</a></td></tr>
                     [% END %]
                   [% END %]
 
@@ -533,10 +532,10 @@
                   <tr><td width="100%" class='featureItemEnabledActiveHostChecks'>All Hosts Enabled</td></tr>
                   [% ELSE %]
                     [% IF strict_passive_mode %]
-                      [% IF host_stats.active_checks_disabled_active > 0 %]<tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=131088'>[% host_stats.active_checks_disabled_active %] Hosts Disabled</a></td></tr>[% END %]
-                      [% IF host_stats.active_checks_disabled_passive > 0 %]<tr><td width="100%" class='featureItemEnabledActiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=65552'>[% host_stats.active_checks_disabled_passive %] Hosts Passive</a></td></tr>[% END %]
+                      [% IF host_stats.active_checks_disabled_active > 0 %]<tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 131088 }) %]'>[% host_stats.active_checks_disabled_active %] Hosts Disabled</a></td></tr>[% END %]
+                      [% IF host_stats.active_checks_disabled_passive > 0 %]<tr><td width="100%" class='featureItemEnabledActiveHostChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 65552 }) %]'>[% host_stats.active_checks_disabled_passive %] Hosts Passive</a></td></tr>[% END %]
                     [% ELSE %]
-                      <tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=16'>[% host_stats.active_checks_disabled_active + host_stats.active_checks_disabled_passive %] Hosts Disabled</a></td></tr>
+                      <tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 16 }) %]'>[% host_stats.active_checks_disabled_active + host_stats.active_checks_disabled_passive %] Hosts Disabled</a></td></tr>
                     [% END %]
                   [% END %]
                 </table>
@@ -565,14 +564,14 @@
                     [% IF empty || service_stats.passive_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledPassiveServiceChecks'>All Services Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledPassiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=16384'>[% service_stats.passive_checks_disabled %] Service Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledPassiveServiceChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 16384 }) %]'>[% service_stats.passive_checks_disabled %] Service Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>
                     [% IF empty || host_stats.passive_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledPassiveHostChecks'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledPassiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=16384'>[% host_stats.passive_checks_disabled %] Host Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledPassiveHostChecks'><a href='[% uri_with(c, { _page => "status.cgi", style => "hostdetail", hostprops => 16384 }) %]'>[% host_stats.passive_checks_disabled %] Host Disabled</a></td>
                     [% END %]
                   </tr>
                 </table>

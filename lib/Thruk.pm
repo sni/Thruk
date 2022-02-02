@@ -189,6 +189,12 @@ sub _build_app {
         [ '^/thruk/cgi-bin/proxy.cgi/.*'     ,'Thruk::Controller::proxy::index' ],
     ];
 
+    Thruk::Utils::Status::add_view({'group' => 'Tac',
+                                    'name'  => 'Tactical Overview',
+                                    'value' => 'tac',
+                                    'url'   => 'tac.cgi',
+    });
+
     ###################################################
     # load routes dynamically from plugins
     $config->{'routes_already_loaded'} = {} unless defined $config->{'routes_already_loaded'};

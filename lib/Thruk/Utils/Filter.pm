@@ -404,6 +404,7 @@ sub uri_with {
     my @new_param;
     while(my $k = shift @old_param) {
         my $v = shift @old_param;
+        next if $k eq '_'; # skip reload timestamp
         if(exists $data->{$k}) {
             if(!defined $data->{$k} || $data->{$k} eq 'undef') {
                 next;
@@ -415,9 +416,19 @@ sub uri_with {
         }
     }
     for my $k (sort keys %{$data}) {
+        next if $k eq '_page'; # skip new base url
         push(@new_param, $k, $data->{$k}) if(defined $data->{$k} && $data->{$k} ne 'undef');
     }
     $uri->query_form(@new_param);
+    if($data->{'_page'}) {
+        if($data->{'_page'} =~ m/\//mx) {
+            $uri->path($data->{'_page'});
+        } else {
+            my $new_path = $uri->path();
+            $new_path =~ s|^(.*)/.*$|$1/$data->{'_page'}|gmx;
+            $uri->path($new_path);
+        }
+    }
     $uri = $uri->as_string;
     unless($keep_absolute) {
         $uri =~ s/^(http|https):\/\/.*?\//\//gmx;

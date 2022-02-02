@@ -124,6 +124,10 @@ html.minimal body {
   top:-3px;
 }
 
+.page_tac BUTTON.filter_button {
+  top: inherit;
+}
+
 .hostUNREACHABLE {
   background-color:#e12d56;
 }

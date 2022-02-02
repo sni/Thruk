@@ -1,4 +1,4 @@
-﻿<button class="filter_button thruk_btn big filter [% IF show_filter_table %]primary[% ELSE %]secondary[% END %]" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
+﻿<button class="filter_button thruk_btn [% IF style == "tac" %]small[% ELSE %]big[% END %] filter [% IF show_filter_table %]primary[% ELSE %]secondary[% END %]" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
 [% IF show_form %]
 <form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this));">
 [%# make sure IE can submit form by pressing enter #%]
@@ -50,6 +50,9 @@
                 [% ELSE %]
                 <option value="perfmap" disabled>Performancedata</option>
                 [% END %]
+              </optgroup>
+              <optgroup label="Tac">
+                <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
               </optgroup>
               [% FOREACH groupname = additional_views.keys.sort %]
               <optgroup label="[% groupname | html %]">
