@@ -970,10 +970,11 @@ Ext.define('TP.Pantab', {
     setLock: function(val) {
         var tab = this;
         var panels = TP.getAllPanel(tab);
+        var changed = false;
         if(tab.locked != val) {
             tab.addMask((val ? "" : "un")+"locking dashboard...");
+            changed = true;
         }
-        var changed = (tab.xdata.locked != val);
         tab.xdata.locked   = val;
         tab.locked         = val;
         TP.suppressIconTip = !val;
@@ -995,8 +996,15 @@ Ext.define('TP.Pantab', {
             tab.disableMapControls();
         }
         /* schedule update, which also remove the mask from above */
+        var removeMaskTimer = window.setTimeout(function() {
+            if(TP.iconUpdateRunning[tab.id]) { return; }
+            tab.removeMask();
+        }, 3000);
         if(changed) { /* leads to double status update on inital page render */
-            TP.updateAllIcons(tab);
+            TP.updateAllIcons(tab, null, null, null, function() {
+                window.clearTimeout(removeMaskTimer);
+                tab.removeMask();
+            });
         }
     },
     contextmenu: function(evt, hidePasteAndNew, showClose) {
