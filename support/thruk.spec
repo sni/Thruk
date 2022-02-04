@@ -75,6 +75,12 @@ Requires: httpd mod_fcgid cronie
 Requires: perl-LWP-Protocol-https
 %endif
 
+# rhel6 requirements
+%if 0%{?el6}
+BuildRequires: perl(ExtUtils::MakeMaker) httpd
+Requires: httpd mod_fcgid cronie
+%endif
+
 %description base
 This package contains the base files for thruk.
 
