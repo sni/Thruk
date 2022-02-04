@@ -1357,7 +1357,7 @@ sub merge_sub_config {
                     $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
                 }
                 elsif(ref $add->{$key} eq 'ARRAY') {
-                    for my $h (values @{$add->{$key}}) {
+                    for my $h (@{$add->{$key}}) {
                         $config->{$key} = { %{$config->{$key}}, %{$h} };
                     }
                 } else {
