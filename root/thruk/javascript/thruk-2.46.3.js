@@ -4273,8 +4273,11 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
 /* figures out where warning/critical values should go
  * on the perfbars
  */
-function plot_point(value, max, size) {
-    return(Math.round((Math.abs(value) / max * 100) / 100 * size));
+function plot_point(value, min, max, size) {
+    diff  = max   - min;
+    value = value - min;
+    //console.log(Math.round(value * size / diff));
+    return(Math.round(value * size / diff));
 }
 
 /* return human readable perfdata */
@@ -4282,44 +4285,79 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var size   = 75;
     var result = [];
     var worst_graphs = {};
+    var min = '';
+    var max = '';
     for(var nr=0; nr<perfdata.length; nr++) {
         var d = perfdata[nr];
-        if(d.max  == '' && d.unit == '%')     { d.max = 100;        }
-        if(d.max  == '' && d.crit_max != '')  { d.max = d.crit_max; }
-        if(d.max  == '' && d.warn_max != '')  { d.max = d.warn_max; }
-        if(d.val !== '' && d.max  !== '')  {
-            var perc       = (Math.abs(d.val) / (d.max-d.min) * 100).toFixed(2);
-            if(perc < 5)   { perc = 5;   }
-            if(perc > 100) { perc = 100; }
+
+        if (d.max !== '') { max = d.max; }
+        if (d.min !== '') { min = d.min; }
+
+        if(max  == '' && d.unit == '%')     { max = 100;        }
+        if(max  == '' && d.crit_max != '')  { max = d.crit_max+0.15*(d.crit_max-d.crit_min); }
+        if(max  == '' && d.warn_max != '')  { max = d.warn_max+0.15*(d.crit_max-d.crit_min); }
+        if(min  == '' && d.unit == '%')     { min = 0;          }
+        if(min  == '' && d.crit_min != '')  { min = d.crit_min-0.15*(d.crit_max-d.crit_min); }
+        if(min  == '' && d.warn_min != '')  { min = d.warn_min-0.15*(d.crit_max-d.crit_min); }
+
+        if(d.val !== '' && max  !== '')  {
+            var perc       = plot_point(d.val, min, max, size);
+            //console.log(JSON.stringify(d));
+
             var pic = 'thermok.png';
-            if(state == 1) { var pic = 'thermwarn.png'; }
-            if(state == 2) { var pic = 'thermcrit.png'; }
-            if(state == 4) { var pic = 'thermgrey.png'; }
-            perc = Math.round(perc / 100 * size);
+
+            if (d.crit_max && d.crit_min && d.warn_max && d.warn_min) { /* range */
+                if (d.crit_max > d.warn_max) {                          /* alert if outside range */
+                    if (d.val <= d.warn_min) { var pic = 'thermwarn.png'; }
+                    if (d.val <= d.crit_min) { var pic = 'thermcrit.png'; }
+                    if (d.val >= d.warn_max) { var pic = 'thermwarn.png'; }
+                    if (d.val >= d.crit_max) { var pic = 'thermcrit.png'; }
+                }
+                if (d.crit_max < d.warn_max) {                          /* alert if inside range */
+                    if (d.val >= d.warn_min) { var pic = 'thermwarn.png'; }
+                    if (d.val >= d.crit_min) { var pic = 'thermcrit.png'; }
+                    if (d.val <= d.warn_max) { var pic = 'thermwarn.png'; }
+                    if (d.val <= d.crit_max) { var pic = 'thermcrit.png'; }
+                }
+            }
+            if (d.crit_max && !d.crit_min && d.warn_max && !d.warn_min) {
+                if (d.crit_max > d.warn_max) {                          /* alert if above threshold */
+                    if (d.val >= d.warn_max) { var pic = 'thermwarn.png'; }
+                    if (d.val >= d.crit_max) { var pic = 'thermcrit.png'; }
+                }
+                if (d.crit_max < d.warn_max) {                          /* alert if below threshold */
+                    if (d.val <= d.warn_max) { var pic = 'thermwarn.png'; }
+                    if (d.val <= d.crit_max) { var pic = 'thermcrit.png'; }
+                }
+            }
+
+            if(perc <= 3)    { perc = 3; }
+            if(perc >= size-3) { perc = size-3; }
+
             var warn_perc_min = null;
-            if(d.warn_min != '' && d.warn_min > d.min) {
-                warn_perc_min = plot_point(d.warn_min, d.max, size);
+            if(d.warn_min != '' && d.warn_min > min) {
+                warn_perc_min = plot_point(d.warn_min, min, max, size);
                 if(warn_perc_min == 0) {warn_perc_min = null;}
             }
             var crit_perc_min = null;
-            if(d.crit_min != '' && d.crit_min > d.min) {
-                crit_perc_min = plot_point(d.crit_min, d.max, size);
+            if(d.crit_min != '' && d.crit_min > min) {
+                crit_perc_min = plot_point(d.crit_min, min, max, size)
                 if(crit_perc_min == 0) {crit_perc_min = null;}
                 if(crit_perc_min == warn_perc_min) {warn_perc_min = null;}
             }
             var warn_perc_max = null;
-            if(d.warn_max != '' && d.warn_max < d.max) {
-                warn_perc_max = plot_point(d.warn_max, d.max, size);
+            if(d.warn_max != '' && d.warn_max < max) {
+                warn_perc_max = plot_point(d.warn_max, min, max, size);
                 if(warn_perc_max == size) {warn_perc_max = null;}
             }
             var crit_perc_max = null;
-            if(d.crit_max != '' && d.crit_max < d.max) {
-                crit_perc_max = plot_point(d.crit_max, d.max, size);
+            if(d.crit_max != '' && d.crit_max < max) {
+                crit_perc_max = plot_point(d.crit_max, min, max, size)
                 if(crit_perc_max == size) {crit_perc_max = null;}
                 if(crit_perc_max == warn_perc_max) {warn_perc_max = null;}
             }
             var graph = {
-                title:          d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
+                title:          d.key + ': ' + perf_reduce(d.val, d.unit) + ((d.max) ? ' of ' + perf_reduce(d.max, d.unit) : ''),
                 div_width:      size,
                 img_width:      perc,
                 pic:            pic,
