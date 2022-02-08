@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add filter to tactical overview page
+          - fix hostgroup overview totals when using LMD
           - updated jquery-ui to 1.13.1
 
 2.46-3   Tue Jan 25 15:05:00 CET 2022
