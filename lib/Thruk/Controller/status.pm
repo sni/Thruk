@@ -698,21 +698,20 @@ sub _process_overview_page {
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
-    my $tmp_host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address alias has_been_checked name state num_services_pending num_services_ok num_services_warn num_services_unknown num_services_crit display_name custom_variable_names custom_variable_values/ ] );
+    my $tmp_host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                           columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address alias has_been_checked name state display_name custom_variable_names custom_variable_values/ ] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
         }
     }
 
-    if( $c->stash->{substyle} eq 'service' ) {
-        # we have to sort in all services and states
-        my $tmp_services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description has_been_checked state host_name display_name custom_variable_names custom_variable_values/ ] );
-        if( defined $tmp_services ) {
-            for my $service ( @{$tmp_services} ) {
-                next if $service->{'description'} eq '';
-                $services_data->{ $service->{'host_name'} }->{ $service->{'description'} } = $service;
-            }
+    # we have to sort in all services and states
+    my $tmp_services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description has_been_checked state host_name display_name custom_variable_names custom_variable_values/ ] );
+    if( defined $tmp_services ) {
+        for my $service ( @{$tmp_services} ) {
+            next if $service->{'description'} eq '';
+            $services_data->{ $service->{'host_name'} }->{ $service->{'description'} } = $service;
         }
     }
 
@@ -756,11 +755,26 @@ sub _process_overview_page {
                     $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
                     $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
                 }
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}  += $host_data->{$hostname}->{'num_services_pending'};
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}       += $host_data->{$hostname}->{'num_services_ok'};
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}  += $host_data->{$hostname}->{'num_services_warn'};
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  += $host_data->{$hostname}->{'num_services_unknown'};
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} += $host_data->{$hostname}->{'num_services_crit'};
+
+                for my $servicename (keys %{$services_data->{$hostname}}) {
+                    my $state            = $services_data->{$hostname}->{$servicename}->{'state'};
+                    my $has_been_checked = $services_data->{$hostname}->{$servicename}->{'has_been_checked'};
+                    if( !$has_been_checked ) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}++;
+                    }
+                    elsif ( $state == 0 ) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}++;
+                    }
+                    elsif ( $state == 1 ) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}++;
+                    }
+                    elsif ( $state == 2 ) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'}++;
+                    }
+                    elsif ( $state == 3 ) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}++;
+                    }
+                }
             }
         }
         else {
