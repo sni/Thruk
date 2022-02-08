@@ -2368,7 +2368,7 @@ sub sort_result {
     
     # when sort descending, only sort the first key descending, except for sorting by state,
     # then sort the first two keys descending ('has_been_checked' and 'state_order')
-    my $honor_sort_order = (defined(@keys[0]) && @keys[0] eq 'has_been_checked') ? 2 : 1;
+    my $honor_sort_order = (defined($keys[0]) && $keys[0] eq 'has_been_checked') ? 2 : 1;
     my $key_index = 0;
 
     for my $key (@keys) {
