@@ -7,9 +7,9 @@ Ext.onReady(function() {
         target:    Ext.getBody(),
         delegate: 'A.tooltipTarget', // the cell class in which the tooltip has to be triggered
         dismissDelay:    0,
-        width:         500,
+        width:         700,
         manageHeight: false,
-        maxWidth:      500,
+        maxWidth:      700,
         hideDelay:     300,
         closable:     true,
         showDelay:     500,
@@ -77,7 +77,7 @@ Ext.onReady(function() {
             show: function(This) {
                 if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.doLayout(); }
                 var size = This.getSize();
-                if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150}; }
+                if(size.width <= 1 || size.height <= 1) { size = {width: 700, height: 150}; }
 
                 var position = "automatic";
                 if(TP.iconTipTarget && TP.iconTipTarget.xdata.popup && TP.iconTipTarget.xdata.popup.popup_position != "" && TP.iconTipTarget.xdata.popup.popup_position != "automatic") {
@@ -322,7 +322,7 @@ Ext.onReady(function() {
                 html:     ' ',
                 border:     0,
                 minHeight: 40,
-                width:     480
+                width:     "100%"
             });
             TP.iconTip.detailsTarget.body.mask("loading");
             if(link == TP.iconTip.lastUrl && TP.iconTip.lastData) {
@@ -479,7 +479,7 @@ TP.renderTipDetails = function(data) {
     }
     else if(!TP.iconSettingsWindow) {
         var size      = TP.iconTip.getSize();
-        if(size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150}; }
+        if(size.width <= 1 || size.height <= 1) { size = {width: 700, height: 150}; }
         var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
         TP.iconTip.showAt(showAtPos);
     } else {
