@@ -836,8 +836,39 @@ TP.iconShowEditDialog = function(panel) {
                             unit:         'px',
                             disabled:      true,
                             listeners:   { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } }
+                        }, {
+                            xtype:        'label',
+                            text:         'width',
+                            margins:      {top: 3, right: 2, bottom: 0, left: 15}
+                        }, {
+                            xtype:        'numberunit',
+                            allowDecimals: false,
+                            name:         'popup_width',
+                            id:           'popup_witdh',
+                            width:         60,
+                            unit:         'px',
+                            listeners:   { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() }, keyup: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } }
                         }]
-                    },{
+                    }, {
+                        xtype:        'fieldcontainer',
+                        fieldLabel:   'Font',
+                        layout:      { type: 'hbox', align: 'stretch' },
+                        defaults:    { listeners: { change: function() { TP.iconSettingsGlobals.popupPreviewUpdate() } } },
+                        items:        [{
+                            name:         'popup_fontfamily',
+                            xtype:        'fontcbo',
+                            value:        '',
+                            flex:          1,
+                            editable:      false
+                        }, {
+                            xtype:        'numberunit',
+                            allowDecimals: false,
+                            name:         'popup_fontsize',
+                            width:         60,
+                            unit:         'px',
+                            margins:      {top: 0, right: 0, bottom: 0, left: 3}
+                        }]
+                    }, {
                         fieldLabel:     'Popup',
                         xtype:          'combobox',
                         name:           'type',
@@ -875,7 +906,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:           'content',
                         id:             'popup_textfield',
                         autoScroll:      true,
-                        height:          220,
+                        height:          170,
                         disabled:       (panel.xdata.popup && panel.xdata.popup.type == "custom") ? false : true,
                         fieldStyle:     { 'whiteSpace': 'pre' },
                         value:          TP.getPanelDetailsHeader(panel, true),
@@ -1226,8 +1257,13 @@ TP.iconShowEditDialog = function(panel) {
             panel.locked = true;
             TP.iconTipTarget = panel;
 
+            var xdata = TP.get_icon_form_xdata(settingsWindow);
+            var prevX = panel.xdata.popup;
+            panel.xdata.popup = xdata.popup;
+
             TP.tipRenderer({ target: panel, stopEvent: function() {} }, panel, undefined, true);
 
+            TP.iconTip.forceHide();
             TP.iconTip.show();
             window.clearTimeout(TP.iconTip.hideTimer);
             delete TP.iconTip.hideTimer;
@@ -1236,6 +1272,7 @@ TP.iconShowEditDialog = function(panel) {
             TP.suppressIconTip = true;
 
             TP.iconTip.alignToSettingsWindow();
+            panel.xdata.popup = prevX;
         }, 100);
     };
 
@@ -1297,7 +1334,7 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     // clean up
     if(xdata.label.labeltext == '')   { delete xdata.label; }
     if(xdata.link.link == '')         { delete xdata.link;  }
-    if(xdata.popup && xdata.popup.type == 'default' && xdata.popup.popup_position == 'automatic') { delete xdata.popup; }
+    if(xdata.popup && xdata.popup.type == 'default' && xdata.popup.popup_position == 'automatic' && xdata.popup.popup_fontfamily == '' && xdata.popup.popup_fontsize == 14 && xdata.popup.popup_width == 500) { delete xdata.popup; }
     if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
     Ext.getCmp('appearance_types').store.each(function(data, i) {
         var t = data.data.value;

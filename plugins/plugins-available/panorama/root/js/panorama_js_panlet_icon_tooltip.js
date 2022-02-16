@@ -57,6 +57,17 @@ Ext.onReady(function() {
                 if(!tab || !tab.locked && !TP.iconSettingsWindow) {
                     return(false);
                 }
+                if(TP.iconTipTarget.xdata && TP.iconTipTarget.xdata.popup) {
+                    This.setWidth(TP.iconTipTarget.xdata.popup.popup_width || 700);
+                    This.maxWidth = TP.iconTipTarget.xdata.popup.popup_width || 700;
+                    This.setBodyStyle("font-family", TP.iconTipTarget.xdata.popup.popup_fontfamily);
+                    This.setBodyStyle("font-size", (TP.iconTipTarget.xdata.popup.popup_fontsize || 14)+"px");
+                } else {
+                    This.setWidth(700);
+                    This.maxWidth = 700;
+                    This.setBodyStyle("font-family", undefined);
+                    This.setBodyStyle("font-size", undefined);
+                }
                 if(!TP.iconSettingsWindow) {
                     // check if the mouse is still over the icon after the showDelay
                     if(!TP.iconTipTarget || !TP.iconTipTarget.el) {
@@ -115,10 +126,18 @@ Ext.onReady(function() {
                 if(TP.iconSettingsWindow
                    && TP.iconSettingsWindow.items.getAt(0)
                    && TP.iconSettingsWindow.items.getAt(0).getActiveTab().title == "Popup"
+                   && !This.forceHideFlag
                 ) { return(false); }
+                delete This.forceHideFlag;
                 This.hidden = true;
             },
             destroy: function(This) { delete TP.iconTip; delete TP.iconTipTarget; }
+        },
+        forceHide: function() {
+            var This = this;
+            This.forceHideFlag = true;
+            This.hide();
+            delete This.forceHideFlag;
         },
         alignToSettingsWindow: function() {
             var position = "automatic";
@@ -289,7 +308,7 @@ Ext.onReady(function() {
         TP.iconTip.update(details);
         var size;
         if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
-        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 500, height: 150}; }
+        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 700, height: 150}; }
         TP.suppressIconTipForce = false;
         if(xdata.popup && xdata.popup.popup_position == "relative position") {
             TP.iconTip.setFixedOffsetPosition(img, xdata.popup.popup_x, xdata.popup.popup_y);
@@ -408,7 +427,7 @@ TP.renderTipDetails = function(data) {
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:host_object});
             var detail  = '<tr>';
             detail += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
-            detail += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
+            detail += '<td class="state '+statename.toUpperCase()+'"><div class="extinfostate">'+statename.toUpperCase()+'<\/div><\/td>';
             detail += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
             detail += '<\/tr>';
             if(data.length > 10 && (num_shown >= 10 || (panel.xdata.state != 0 && d[prefix+'state'] == 0))) {
@@ -453,7 +472,7 @@ TP.renderTipDetails = function(data) {
                 details += '<td class="emptyhost"><\/td>';
             }
             details += '<td class="descr"><table class="icons"><tr><td>'+d['description']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
-            details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
+            details += '<td class="state '+statename.toUpperCase()+'"><div class="extinfostate">'+statename.toUpperCase()+'<\/div><\/td>';
             details += '<td class="plugin_output">'+d['plugin_output']+'<\/td>';
             details += '<\/tr>';
             last_host = d['host_name'];

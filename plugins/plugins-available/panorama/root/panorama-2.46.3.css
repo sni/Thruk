@@ -623,6 +623,10 @@ DIV.iconlabel, A.iconlabel {
   vertical-align: top;
 }
 
+#tipdetails .x-panel-body-default {
+  font-size: inherit;
+  font-family: inherit;
+}
 
 TABLE.TipDetails {
   width: 100%;
@@ -644,11 +648,9 @@ TABLE.TipDetails TD {
   text-align: left;
   border: 0;
   padding: 0 2px 0 2px;
-  font-size: 10px;
   border-top: 1px solid #AAAAAA;
   border-left: 1px solid #AAAAAA;
   border-bottom: 1px solid #AAAAAA;
-  line-height: 10px;
 }
 TABLE.TipDetails TD.emptyhost {
   border-bottom: 0;
@@ -666,11 +668,15 @@ TABLE.TipDetails TD.descr, TABLE.TipDetails TD.host {
 }
 TABLE.TipDetails TD.state {
   padding: 0;
-  width: 65px;
+  min-width: 65px;
 }
 TABLE.TipDetails DIV.extinfostate {
-  width: 65px;
-  height: 22px;
+  width: 100%;
+  min-width: 65px;
+  height: 100%;
+  min-height: 22px;
+  padding-right: 3px;
+  padding-left: 3px;
 }
 TABLE.TipDetails TABLE.icons {
   width: 100%;
