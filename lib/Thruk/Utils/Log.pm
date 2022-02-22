@@ -451,7 +451,10 @@ sub get_screen_logger {
     my $use_color = -t STDERR;
     ## use critic
     if($use_color) {
-        require Term::ANSIColor;
+        eval {
+            require Term::ANSIColor;
+            Term::ANSIColor::colorvalid("GREY14");
+        };
         $use_color = 0 if $@;
     }
 
