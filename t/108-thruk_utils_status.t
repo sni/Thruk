@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 24;
+plan tests => 25;
 
 BEGIN {
     use lib('t');
@@ -32,10 +32,11 @@ _test_filter("name = 'te(st)'", 'Filter: name = te(st)');
 _test_filter("host_name = \"test\" or host_name = \"localhost\" and status = 0", "Filter: host_name = test\nFilter: host_name = localhost\nOr: 2\nFilter: status = 0\nAnd: 2");
 _test_filter(' name ~~  "test"  ', 'Filter: name ~~ test');
 _test_filter('host = "localhost" AND time > 1 AND time < 10', "Filter: host = localhost\nFilter: time > 1\nFilter: time < 10\nAnd: 3");
-_test_filter('host = "localhost" AND (time > 1 AND time < 10)', "Filter: host = localhost\nFilter: time > 1\nFilter: time < 10\nAnd: 2");
+_test_filter('host = "localhost" AND (time > 1 AND time < 10)', "Filter: host = localhost\nFilter: time > 1\nFilter: time < 10\nAnd: 2\nAnd: 2");
 _test_filter('last_check <= "-7d"', 'Filter: last_check <= '.(time() - 86400*7));
 _test_filter('last_check <= "now + 2h"', 'Filter: last_check <= '.(time() + 7200));
 _test_filter('last_check <= "lastyear"', 'Filter: last_check <= '.Thruk::Utils::_expand_timestring("lastyear"));
+_test_filter('(host_groups ~~ "g1" AND host_groups ~~ "g2")  OR (host_name = "h1" and display_name ~~ ".*dn.*")', "Filter: host_groups ~~ g1\nFilter: host_groups ~~ g2\nAnd: 2\nFilter: host_name = h1\nFilter: display_name ~~ .*dn.*\nAnd: 2\nOr: 2");
 
 sub _test_filter {
     my($filter, $expect) = @_;

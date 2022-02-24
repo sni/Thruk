@@ -2653,24 +2653,35 @@ sub parse_lexical_filter {
                 undef $key;
                 undef $op;
                 undef $val;
-                if($combine) {
-                    my $prev1 = pop @{$filter};
-                    my $prev2 = pop @{$filter};
-                    if(ref $prev2 eq 'HASH' && $prev2->{'-'.$combine}) {
-                        push @{$prev2->{'-'.$combine}},  $prev1;
-                        push @{$filter}, $prev2;
-                    } else {
-                        push @{$filter}, { '-'.$combine => [$prev2, $prev1]};
-                    }
+                if(defined $combine) {
+                    $filter = _lexical_combine($combine, $filter);
+                    undef $combine;
                 }
-                undef $combine;
                 next;
             }
         } else {
             die("parse error at ".${$string});
         }
     }
+    if($combine) {
+        $filter = _lexical_combine($combine, $filter);
+        undef $combine;
+    }
     return $filter;
+}
+
+##############################################
+sub _lexical_combine {
+    my($combine, $filter) = @_;
+    my $prev1 = pop @{$filter};
+    my $prev2 = pop @{$filter};
+    if(ref $prev2 eq 'HASH' && $prev2->{'-'.$combine}) {
+        push @{$prev2->{'-'.$combine}},  $prev1;
+        push @{$filter}, $prev2;
+    } else {
+        push @{$filter}, { '-'.$combine => [$prev2, $prev1]};
+    }
+    return($filter);
 }
 
 ##############################################
