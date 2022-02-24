@@ -77,7 +77,9 @@ Requires: perl-LWP-Protocol-https
 
 # rhel6 requirements
 %if 0%{?el6}
-BuildRequires: perl(ExtUtils::MakeMaker) httpd
+BuildRequires: httpd
+BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl(Time::HiRes)
 Requires: perl(Time::HiRes)
 Requires: httpd mod_fcgid cronie
 %endif
