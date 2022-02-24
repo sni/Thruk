@@ -36,6 +36,7 @@ local_auto_install:
 	dh_auto_install
 	# enable su logrotate, available since ubuntu 13.04 and debian 6
 	sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base
+	test -f debian/usr/share/thruk/root/thruk/cache/thruk-panorama-*.js || exit 1
 
 fix_phantomjs_location:
 	# fix location of phantomjs

@@ -158,6 +158,8 @@ fi
 rm %{buildroot}%{_initrddir}/thruk
 %endif
 
+test -f %{buildroot}/usr/share/thruk/root/thruk/cache/thruk-panorama-*.js || exit 1
+
 
 %clean
 %{__rm} -rf %{buildroot}
