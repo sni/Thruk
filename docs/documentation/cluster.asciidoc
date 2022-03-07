@@ -72,4 +72,4 @@ Remove the maintenance mode with the command:
 
     - Try to get Thruk working without cluster mode first. If that works, enable clustering.
     - You might run into issues with relative symlinks when moving etc and var onto shares. Eventually you have to link some folders to the share to make relative symlinks work again.
-    - Run the command `thruk r /thruk/cluster` and `thruk r /thruk/cluster/heartbeat` to see if cluster nodes are detected correctly.
+    - Run the command `thruk r /thruk/cluster` and `thruk r -d "" /thruk/cluster/heartbeat` to see if cluster nodes are detected correctly.
