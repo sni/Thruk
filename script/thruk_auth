@@ -130,7 +130,7 @@ sub process {
 
     # clean old session cache every couple of minutes
     my $now = time();
-    clean_session_cache() if($last_cache_clean < $now - ($sessioncachetimeout ? $sessioncachetimeout*2 : 120)));
+    clean_session_cache() if($last_cache_clean < $now - ($sessioncachetimeout ? $sessioncachetimeout*2 : 120));
 
     # %{REMOTE_ADDR}~~%{HTTP:Authorization}~~%{HTTP:X-Thruk-Auth-Key}~~%{HTTP:X-Thruk-Auth-User}
     $extra = [split(/~~/mx, $extra)];
