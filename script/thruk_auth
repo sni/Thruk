@@ -175,7 +175,7 @@ sub process {
     if($extra->[1]) {
         my $auth = $extra->[1];
         # use session cache for a few seconds
-        if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
+        if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
             _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
             return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
         }
@@ -196,7 +196,7 @@ sub process {
     }
 
     # did we get a cookie
-    if($cookies eq '' or $cookies !~ $cookie_regex) {
+    if($cookies eq '' || $cookies !~ $cookie_regex) {
         _debug("no cookie $path") if $verbose;
         return "/loginok/".$guest."/".$path."\n" if $guest;
         return $loginurl."?".$path."\n";
@@ -204,7 +204,7 @@ sub process {
     my $auth = $1;
 
     # use session cache for a few seconds
-    if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
+    if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
         _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
         return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
     }
