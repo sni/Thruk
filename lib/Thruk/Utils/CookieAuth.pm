@@ -32,9 +32,11 @@ my $session_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
 
 =head2 external_authentication
 
-    external_authentication($config, $login, $pass, $address)
+    external_authentication($config, $login, $pass, $address, [$stats], [$create_session_file])
 
-verify authentication by external login into external url
+verify authentication by external login into external url.
+
+set $create_session_file to 0 to disabled creating a session file and only return session data itself.
 
 return:
 
@@ -44,7 +46,7 @@ return:
 
 =cut
 sub external_authentication {
-    my($config, $login, $pass, $address, $stats) = @_;
+    my($config, $login, $pass, $address, $stats, $create_session_file) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
     my $sdir     = $config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
@@ -93,7 +95,7 @@ sub external_authentication {
                         hash       => $hash,
                         address    => $address,
                         username   => $login,
-                    });
+                    }, $create_session_file);
                     return $session;
                 }
             } else {
@@ -287,14 +289,14 @@ sub get_netloc {
 
 =head2 store_session
 
-  store_session($config, $sessionid, $data)
+  store_session($config, $sessionid, $data, [$create_session_file])
 
 store session data
 
 =cut
 
 sub store_session {
-    my($config, $sessionid, $data) = @_;
+    my($config, $sessionid, $data, $create_session_file) = @_;
 
     # store session key hashed
     my($hashed_key, $digest_name);
@@ -319,11 +321,13 @@ sub store_session {
         }
     }
 
-    my $sdir = $config->{'var_path'}.'/sessions';
     die("only letters and numbers allowed") if $sessionid !~ m/^[a-z0-9_]+$/mx;
+    my $sdir = $config->{'var_path'}.'/sessions';
     my $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
-    Thruk::Utils::IO::mkdir_r($sdir);
-    Thruk::Utils::IO::json_lock_store($sessionfile, $data);
+    if(!defined $create_session_file || $create_session_file) {
+        Thruk::Utils::IO::mkdir_r($sdir);
+        Thruk::Utils::IO::json_lock_store($sessionfile, $data);
+    }
 
     # restore some keys which should not be stored
     $data->{'private_key'} = $sessionid;

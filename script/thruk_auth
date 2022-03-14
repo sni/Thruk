@@ -128,6 +128,10 @@ sub process {
         return $loginurl."\n";
     }
 
+    # clean old session cache every couple of minutes
+    my $now = time();
+    clean_session_cache() if($last_cache_clean < $now - ($sessioncachetimeout ? $sessioncachetimeout*2 : 120)));
+
     # %{REMOTE_ADDR}~~%{HTTP:Authorization}~~%{HTTP:X-Thruk-Auth-Key}~~%{HTTP:X-Thruk-Auth-User}
     $extra = [split(/~~/mx, $extra)];
 
@@ -159,7 +163,7 @@ sub process {
                 if($data->{'superuser'}) {
                     $user = (defined $extra->[3] && $extra->[3] ne '') ? $extra->[3] : '(api)';
                 }
-                Thruk::Utils::IO::json_lock_store($data->{'file'}.'.stats', { last_used => time(), last_from => $extra->[0]//'' }, { pretty => 1 });
+                Thruk::Utils::IO::json_lock_store($data->{'file'}.'.stats', { last_used => $now, last_from => $extra->[0]//'' }, { pretty => 1 });
                 return "/loginok/".$user."/".$path."\n" if defined $user;
                 return "/pass/".$path."\n";
             }
@@ -169,11 +173,22 @@ sub process {
 
     # direct access with basic auth
     if($extra->[1]) {
+        my $auth = $extra->[1];
+        # use session cache for a few seconds
+        if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
+            _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
+            return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
+        }
+
         _debug("trying basic auth from header for $path") if $verbose;
-        my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $extra->[1]}, undef, $extra->[0]);
+        my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $auth}, undef, $extra->[0], undef, 0);
         if(ref $session eq 'HASH' && $session->{'private_key'}) {
             _debug("basic auth login successful") if $verbose;
-            unlink($session->{'file'});
+            $sessioncache->{$auth} = {
+                    'login' => $session->{'username'},
+                    'time'  => $now,
+            };
+            #unlink($session->{'file'}); # session file never got created
             return "/loginok/".$session->{'username'}."/".$path."\n";
         } else {
             _debug("basic auth login failed") if $verbose;
@@ -189,7 +204,6 @@ sub process {
     my $auth = $1;
 
     # use session cache for a few seconds
-    my $now = time();
     if($sessioncachetimeout > 0 and defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
         _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
         return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
@@ -205,13 +219,12 @@ sub process {
         return $loginurl."?expired&".$path."\n";
     }
 
-    # fill sessioncache from mtime initially, so we don't have to revalidate new sessions immediately
+    # fill sessioncache, so we don't have to revalidate new sessions immediately
     my $user = $session->{'username'};
     if(!$sessioncache->{$auth}) {
-        my @stat = stat($session->{'file'});
         $sessioncache->{$auth} = {
                 'login' => $user,
-                'time'  => $stat[9],
+                'time'  => $now,
         };
     }
 
@@ -260,9 +273,6 @@ sub process {
 
     # update mtime of sessionfile
     utime($now, $now, $session->{'file'});
-
-    # clean old session cache every hour
-    clean_session_cache() if($last_cache_clean < $now - 3600);
 
     # grant access
     $sessioncache->{$auth} = {
