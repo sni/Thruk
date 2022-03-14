@@ -1745,6 +1745,7 @@ support/0003-thruk_data_scripts.patch
 support/0004-fcgish.patch
 support/0005-logrotate.patch
 support/apache_fcgid.conf
+support/apache_fcgid.conf.apache22
 support/convert_old_datafile.pl
 support/fake_log_archive.pl
 support/fcgid_env.sh
@@ -1764,8 +1765,11 @@ support/thruk.spec
 support/thruk_authd.pl
 support/thruk_bash_completion
 support/thruk_cookie_auth.example
+support/thruk_cookie_auth.example.apache22
 support/thruk_cookie_auth.include
+support/thruk_cookie_auth.include.apache22
 support/thruk_cookie_auth_vhost.conf
+support/thruk_cookie_auth_vhost.conf.apache22
 support/thruk_local.conf.example
 support/thruk_templates.cfg
 support/thruk_templates_icinga2.conf

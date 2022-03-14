@@ -135,6 +135,12 @@ sed -e 's%/usr/bin/env perl%/usr/bin/perl%' -i \
 # this plugin is shipped separatly
 rm plugins/plugins-enabled/reports2
 
+%if 0%{?rhel} == 6
+cp support/apache_fcgid.conf.apache22            support/apache_fcgid.conf
+cp support/thruk_cookie_auth.example.apache22    support/thruk_cookie_auth.example
+cp support/thruk_cookie_auth.include.apache22    support/thruk_cookie_auth.include
+cp support/thruk_cookie_auth_vhost.conf.apache22 support/thruk_cookie_auth_vhost.conf
+%endif
 
 %install
 %{__rm} -rf %{buildroot}

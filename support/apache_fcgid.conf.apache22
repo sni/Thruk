@@ -1,0 +1,63 @@
+<IfModule mod_fcgid.c>
+  <Location /thruk/>
+    AddHandler fcgid-script .sh
+  </Location>
+  IPCCommTimeout 120
+
+  # uncomment these lines to increase the default timeout
+  #FcgidCmdOptions /usr/share/thruk/fcgid_env.sh \
+  #  IOTimeout 120
+
+  <Directory /usr/share/thruk>
+    Options FollowSymLinks
+    AllowOverride All
+    order allow,deny
+    allow from all
+  </Directory>
+  <Directory /etc/thruk/themes>
+    Options FollowSymLinks
+    allow from all
+  </Directory>
+  <Directory /etc/thruk/plugins>
+    Options FollowSymLinks
+    allow from all
+  </Directory>
+
+  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
+  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
+  AliasMatch ^/thruk/(.*\.cgi|.*\.html|r/).* /usr/share/thruk/fcgid_env.sh/thruk/$1
+  AliasMatch ^/thruk/plugins/(.*?)/(.*)$     /etc/thruk/plugins/plugins-enabled/$1/root/$2
+  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
+  Alias /thruk /usr/share/thruk/root/thruk
+
+  <Location /thruk/>
+    Options ExecCGI FollowSymLinks
+    AuthName "Thruk Monitoring"
+    AuthType Basic
+    AuthUserFile /etc/thruk/htpasswd
+    Require valid-user
+  </Location>
+  <Location /thruk/cgi-bin/remote.cgi>
+    allow from all
+  </Location>
+  <Location /thruk/r/>
+    Order Deny,Allow
+    Allow from all
+    Satisfy any
+  </Location>
+</IfModule>
+
+# use compressed output if available
+<IfModule mod_deflate.c>
+  <Location /thruk/>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+  </Location>
+</IfModule>
+
+<IfModule mod_headers.c>
+  <Location /thruk/>
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src *; style-src 'self' data: 'unsafe-inline'; img-src * data:; media-src * data:; frame-src *; font-src * data:; connect-src *"
+  </Location>
+</IfModule>
+
+AllowEncodedSlashes NoDecode
