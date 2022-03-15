@@ -99,12 +99,12 @@ sub read_stdin {
         select STDERR;
 
         my $t0 = [gettimeofday];
-        _debug("url: '$in' ") if $verbose;
+        _debug("url: '%s' ", _clean_credentials($in)) if $verbose > 1;
         eval {
-            my $res = process($in);
+            chomp(my $res = process($in));
             my $elapsed = tv_interval ( $t0 );
-            _debug("  -> $res (took %.3f sec)",$elapsed) if $verbose > 1;
-            print STDOUT $res;
+            _debug("%s -> %s (took %.3f sec)", _clean_credentials($in), $res, $elapsed) if $verbose;
+            print STDOUT $res,"\n";
         };
         my $err = $@;
         if($err) {
@@ -125,7 +125,7 @@ sub process {
     } else {
         # everything else redirects to login
         _debug("unknown url ".$in) if $verbose;
-        return $loginurl."\n";
+        return $loginurl;
     }
 
     # clean old session cache every couple of minutes
@@ -141,8 +141,8 @@ sub process {
 
     # some urls must pass
     if($path =~ $pass_regex) {
-        _debug("pass $path") if $verbose;
-        return "/pass/$path\n";
+        _debug("pass $path") if $verbose > 1;
+        return "/pass/$path";
     }
 
     # direct login by secret/api key
@@ -151,10 +151,10 @@ sub process {
         chomp($secret_key) if $secret_key;
         if($secret_key && $extra->[2] eq $secret_key) {
             if(!$extra->[3]) {
-                return "/pass/".$prefix."cgi-bin/error.cgi?error=28\n";
+                return "/pass/".$prefix."cgi-bin/error.cgi?error=28";
             }
             my $user = $extra->[3];
-            return "/loginok/".$user."/".$path."\n";
+            return "/loginok/".$user."/".$path;
         }
         if($config->{'api_keys_enabled'}) {
             my $data = Thruk::Utils::APIKeys::get_key_by_private_key($config, $extra->[2]);
@@ -164,11 +164,11 @@ sub process {
                     $user = (defined $extra->[3] && $extra->[3] ne '') ? $extra->[3] : '(api)';
                 }
                 Thruk::Utils::IO::json_lock_store($data->{'file'}.'.stats', { last_used => $now, last_from => $extra->[0]//'' }, { pretty => 1 });
-                return "/loginok/".$user."/".$path."\n" if defined $user;
-                return "/pass/".$path."\n";
+                return "/loginok/".$user."/".$path if defined $user;
+                return "/pass/".$path;
             }
         }
-        return "/pass/".$prefix."cgi-bin/error.cgi?error=27\n";
+        return "/pass/".$prefix."cgi-bin/error.cgi?error=27";
     }
 
     # direct access with basic auth
@@ -176,20 +176,20 @@ sub process {
         my $auth = $extra->[1];
         # use session cache for a few seconds
         if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
-            _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
-            return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
+            _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
+            return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
         }
 
-        _debug("trying basic auth from header for $path") if $verbose;
+        _debug("trying basic auth from auth header for $path") if $verbose > 1;
         my $session = Thruk::Utils::CookieAuth::external_authentication($config, {'Authorization' => $auth}, undef, $extra->[0], undef, 0);
         if(ref $session eq 'HASH' && $session->{'private_key'}) {
-            _debug("basic auth login successful") if $verbose;
+            _debug("basic auth login successful for user %s", $session->{'username'}) if $verbose > 1;
             $sessioncache->{$auth} = {
                     'login' => $session->{'username'},
                     'time'  => $now,
             };
             #unlink($session->{'file'}); # session file never got created
-            return "/loginok/".$session->{'username'}."/".$path."\n";
+            return "/loginok/".$session->{'username'}."/".$path;
         } else {
             _debug("basic auth login failed") if $verbose;
         }
@@ -198,15 +198,15 @@ sub process {
     # did we get a cookie
     if($cookies eq '' || $cookies !~ $cookie_regex) {
         _debug("no cookie $path") if $verbose;
-        return "/loginok/".$guest."/".$path."\n" if $guest;
-        return $loginurl."?".$path."\n";
+        return "/loginok/".$guest."/".$path if $guest;
+        return $loginurl."?".$path;
     }
     my $auth = $1;
 
     # use session cache for a few seconds
     if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
-        _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose;
-        return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path."\n";
+        _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
+        return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
     }
 
     # does our sessionfile exist?
@@ -215,8 +215,8 @@ sub process {
     if(!$session) {
         _debug("session expired: ".($sessioncache->{$auth}->{'login'} || '?')) if $verbose;
         delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
-        return "/loginok/".$guest."/".$path."\n" if $guest;
-        return $loginurl."?expired&".$path."\n";
+        return "/loginok/".$guest."/".$path if $guest;
+        return $loginurl."?expired&".$path;
     }
 
     # fill sessioncache, so we don't have to revalidate new sessions immediately
@@ -234,15 +234,15 @@ sub process {
         _audit_log("session", "session timeout hit, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
         unlink($session->{'file'});
         delete $sessioncache->{$auth};
-        return "/loginok/".$guest."/".$path."\n" if $guest;
-        return $loginurl."?expired&".$path."\n";
+        return "/loginok/".$guest."/".$path if $guest;
+        return $loginurl."?expired&".$path;
     }
 
     # revalidation disabled
     my $basicauth = $session->{'hash'};
     if($sessioncachetimeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
-        _debug("session ok (not revalidated)") if $verbose;
+        _debug("session ok (not revalidated)") if $verbose > 1;
     }
     else {
         # revalidate session data
@@ -260,14 +260,14 @@ sub process {
             _audit_log("session", "technical issue during session revalidation, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
-            return $loginurl."?problem&".$path."\n";
+            return $loginurl."?problem&".$path;
         }
         if($rc == 0) {
             _debug("basic auth verify failed for ".$user) if $verbose;
             _audit_log("session", "session revalidation failed, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
-            return $loginurl."?invalid&".$path."\n";
+            return $loginurl."?invalid&".$path;
         }
     }
 
@@ -279,17 +279,29 @@ sub process {
             'login' => $user,
             'time'  => $now,
     };
-    _debug('basic auth ok for '.$user) if $verbose;
-    return "/loginok/".$user."/".$path."\n";
+    _debug('basic auth ok for '.$user) if $verbose > 1;
+    return "/loginok/".$user."/".$path;
 }
 
 ##########################################################
 sub clean_session_cache {
-    _debug("session cache house keeping") if $verbose;
+    _debug("session cache house keeping") if $verbose > 1;
     $last_cache_clean = time();
     my $clean_before  = time() - $sessiontimeout - $sessioncachetimeout;
     for my $key (keys %{$sessioncache}) {
         delete $sessioncache->{$key} if $sessioncache->{$key}->{'time'} < $clean_before;
     }
     return;
+}
+
+##########################################################
+sub _clean_credentials {
+    my($str) = @_;
+    return($str) if $verbose > 2;
+    if($str =~ m/~~Basic\s+/mx) {
+        $str =~ s/~~Basic\s+([^~]{4})[^~]+~~/~~Basic $1...~~/gmx;
+    } else {
+        $str =~ s/~~([^~]{4})[^~]+~~/~~$1...~~/gmx;
+    }
+    return($str);
 }

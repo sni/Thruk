@@ -58,21 +58,21 @@ sub new {
     # ca settings
     if($thruk_config->{ssl_ca_path}) {
         $self->{'ssl_opts'}->{'SSL_ca_path'} = $thruk_config->{ssl_ca_path};
-        _debug(sprintf("using SSL_ca_path: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_path'}));
+        _trace("using SSL_ca_path: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_path'});
     } elsif($thruk_config->{ssl_ca_file}) {
         $self->{'ssl_opts'}->{'SSL_ca_file'} = $thruk_config->{ssl_ca_file};
-        _debug(sprintf("using SSL_ca_file: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_file'}));
+        _trace("using SSL_ca_file: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_file'});
     } else {
         ## no critic
         eval "use Mozilla::CA;";
         ## use critic
         if($@) {
-            _trace(sprintf("failed to load Mozilla::CA: %s", $@));
+            _trace("failed to load Mozilla::CA: %s", $@);
             $self->{'ssl_opts'}->{'SSL_ca_path'} = "/etc/ssl/certs";
-            _debug(sprintf("using default SSL_ca_path: %s (no Mozilla::CA module installed)", $self->{'ssl_opts'}->{'SSL_ca_path'}));
+            _trace("using default SSL_ca_path: %s (no Mozilla::CA module installed)", $self->{'ssl_opts'}->{'SSL_ca_path'});
         } else {
             $self->{'ssl_opts'}->{'SSL_ca_file'} = Mozilla::CA::SSL_ca_file();
-            _debug(sprintf("using SSL_ca_file: %s (from Mozilla::CA::SSL_ca_file)", $self->{'ssl_opts'}->{'SSL_ca_file'}));
+            _trace("using SSL_ca_file: %s (from Mozilla::CA::SSL_ca_file)", $self->{'ssl_opts'}->{'SSL_ca_file'});
         }
     }
 
