@@ -60,10 +60,10 @@ sub weighted_state_function {
         $output = "UNKNOWN - no children nodes defined";
     }
 
-    if($warn =~ m/^(\d+)%$/mx) { $warn = $total / 100 * $1; }
+    if($warn =~ m/^(\d+|\d+\.\d+)%$/mx) { $warn = $total / 100 * $1; }
     if($warn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - warning threshold must be numeric"; }
 
-    if($crit =~ m/^(\d+)%$/mx) { $crit = $total / 100 * $1; }
+    if($crit =~ m/^(\d+|\d+\.\d+)%$/mx) { $crit = $total / 100 * $1; }
     if($crit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - critical threshold must be numeric"; }
 
     return($status, $output, $output, {}) if $status > 0;

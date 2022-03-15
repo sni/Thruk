@@ -154,7 +154,7 @@ sub groupstatus {
     if(lc($grouptype) eq 'hostgroup') {
         if(defined $hostwarn and $hostwarn ne '') {
             $have_threshold = 1;
-            if($hostwarn =~ m/^(\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
+            if($hostwarn =~ m/^(\d+|\d+\.\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
             if($hostwarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host warning threshold must be numeric"; }
             if($down_hosts >= $hostwarn) {
                 $status = 1;
@@ -162,7 +162,7 @@ sub groupstatus {
         }
         if(defined $hostcrit and $hostcrit ne '') {
             $have_threshold = 1;
-            if($hostcrit =~ m/^(\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
+            if($hostcrit =~ m/^(\d+|\d+\.\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
             if($hostcrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host critical threshold must be numeric"; }
             if($down_hosts >= $hostcrit) {
                 $status = 2;
@@ -171,7 +171,7 @@ sub groupstatus {
     }
     if(defined $servicewarn and $servicewarn ne '') {
         $have_threshold = 1;
-        if($servicewarn =~ m/^(\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
+        if($servicewarn =~ m/^(\d+|\d+\.\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
         if($servicewarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service warning threshold must be numeric"; }
         if($down_services >= $servicewarn) {
             $status = 1 unless $status > 1;
@@ -179,7 +179,7 @@ sub groupstatus {
     }
     if(defined $servicecrit and $servicecrit ne '') {
         $have_threshold = 1;
-        if($servicecrit =~ m/^(\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
+        if($servicecrit =~ m/^(\d+|\d+\.\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
         if($servicecrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service critical threshold must be numeric"; }
         if($down_services >= $servicecrit) {
             $status = 2;
@@ -467,14 +467,14 @@ sub statusfilter {
     my $output = "";
     if($type eq 'hosts' || $type eq 'both') {
         if(defined $hostwarn and $hostwarn ne '') {
-            if($hostwarn =~ m/^(\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
+            if($hostwarn =~ m/^(\d+|\d+\.\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
             if($hostwarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host warning threshold must be numeric"; }
             if($down_hosts >= $hostwarn) {
                 $status = 1;
             }
         }
         if(defined $hostcrit and $hostcrit ne '') {
-            if($hostcrit =~ m/^(\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
+            if($hostcrit =~ m/^(\d+|\d+\.\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
             if($hostcrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host critical threshold must be numeric"; }
             if($down_hosts >= $hostcrit) {
                 $status = 2;
@@ -483,14 +483,14 @@ sub statusfilter {
     }
     if($type eq 'services' || $type eq 'both') {
         if(defined $servicewarn and $servicewarn ne '') {
-            if($servicewarn =~ m/^(\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
+            if($servicewarn =~ m/^(\d+|\d+\.\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
             if($servicewarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service warning threshold must be numeric"; }
             if($down_services >= $servicewarn) {
                 $status = 1 unless $status > 1;
             }
         }
         if(defined $servicecrit and $servicecrit ne '') {
-            if($servicecrit =~ m/^(\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
+            if($servicecrit =~ m/^(\d+|\d+\.\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
             if($servicecrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service critical threshold must be numeric"; }
             if($down_services >= $servicecrit) {
                 $status = 2;
