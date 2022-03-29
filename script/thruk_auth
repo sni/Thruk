@@ -175,7 +175,7 @@ sub process {
     if($extra->[1]) {
         my $auth = $extra->[1];
         # use session cache for a few seconds
-        if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
+        if(defined $sessioncache->{$auth} && ($sessioncachetimeout == 0 || ($sessioncachetimeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout))) {
             _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
             return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
         }
@@ -204,7 +204,7 @@ sub process {
     my $auth = $1;
 
     # use session cache for a few seconds
-    if($sessioncachetimeout > 0 && defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout) {
+    if(defined $sessioncache->{$auth} && ($sessioncachetimeout == 0 || ($sessioncachetimeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout))) {
         _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
         return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
     }
