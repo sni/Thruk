@@ -2365,28 +2365,35 @@ sub sort_result {
     }
 
     my @compares;
+    
+    # when sort descending, only sort the first key descending, except for sorting by state,
+    # then sort the first two keys descending ('has_been_checked' and 'state_order')
+    my $honor_sort_order = (defined($keys[0]) && $keys[0] eq 'has_been_checked') ? 2 : 1;
+    my $key_index = 0;
+
     for my $key (@keys) {
 
         # sort numeric
         if( defined $data->[0]->{$key} and looks_like_number($data->[0]->{$key}) ) {
-            push @compares, '$a->{"'.$key.'"} <=> $b->{"'.$key.'"}';
-        }
-
+            if ($key_index++ < $honor_sort_order && uc $order eq 'DESC') {
+                push @compares, '$b->{"'.$key.'"} <=> $a->{"'.$key.'"}';
+            } else {
+                push @compares, '$a->{"'.$key.'"} <=> $b->{"'.$key.'"}';
+            }
         # sort alphanumeric
-        else {
-            push @compares, '$a->{"'.$key.'"} cmp $b->{"'.$key.'"}';
+        } else {
+            if ($key_index++ < $honor_sort_order && uc $order eq 'DESC') {
+                push @compares, '$b->{"'.$key.'"} cmp $a->{"'.$key.'"}';
+            } else {
+                push @compares, '$a->{"'.$key.'"} cmp $b->{"'.$key.'"}';
+            }
         }
     }
     my $sortstring = join( ' || ', @compares );
 
     ## no critic
     no warnings;    # sorting by undef values generates lots of errors
-    if( uc $order eq 'ASC' ) {
-        eval '@sorted = sort {'.$sortstring.'} @{$data};';
-    }
-    else {
-        eval '@sorted = reverse sort {'.$sortstring.'} @{$data};';
-    }
+    eval '@sorted = sort {'.$sortstring.'} @{$data};';
     use warnings;
     ## use critic
 
