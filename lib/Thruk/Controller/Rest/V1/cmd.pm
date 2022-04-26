@@ -58,7 +58,7 @@ sub _rest_get_external_command {
         }
         unshift(@args, $cmd_name);
         $type = "system";
-        for my $t (qw/host hostgroup servicegroup contact contactgroup service/) {
+        for my $t (qw/host hostgroup servicegroup contact contactgroup service all_host_service/) {
             if($c->req->parameters->{$t}) {
                 $type = $t;
             }
@@ -100,9 +100,16 @@ sub _rest_get_external_command {
         }
     } else {
         $cmd_name = shift @args;
-        $cmd      = $cmd_data->{$type}->{$cmd_name} // $cmd_data->{$type}->{lc($cmd_name)};
-        if(!$c->check_cmd_permissions('system')) {
-            return({ 'message' => 'you are not allowed to run system commands', 'description' => 'you don\' have the system_commands role', code => 403 });
+        $cmd      = $cmd_data->{'all_host_service'}->{$cmd_name} // $cmd_data->{'all_host_service'}->{lc($cmd_name)};
+        if($cmd) {
+            if(!$c->check_cmd_permissions('all_hosts') || !$c->check_cmd_permissions('all_services')) {
+                return({ 'message' => 'you are not allowed to run this command, all_host_commands/all_service_commands permissions required', 'description' => 'you don\' have the all_host_commands/all_service_commands role', code => 403 });
+            }
+        } else {
+            $cmd = $cmd_data->{$type}->{$cmd_name} // $cmd_data->{$type}->{lc($cmd_name)};
+            if(!$c->check_cmd_permissions('system')) {
+                return({ 'message' => 'you are not allowed to run system commands', 'description' => 'you don\' have the system_commands role', code => 403 });
+            }
         }
     }
     if(!$cmd) {
@@ -980,6 +987,28 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc.html for details.
 
+# REST PATH: POST /system/cmd/del_downtime_by_host_name
+# This command deletes all downtimes matching the specified filters.
+#
+# Optional arguments:
+#
+#   * hostname
+#   * service_desc
+#   * start_time
+#   * comment
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
+
+# REST PATH: POST /system/cmd/del_downtime_by_start_time_comment
+# This command deletes all downtimes matching the specified filters.
+#
+# Optional arguments:
+#
+#   * start_time
+#   * comment
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_start_time_comment.html for details.
+
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_host_checks
 # Sends the DISABLE_HOSTGROUP_HOST_CHECKS command.
 #
@@ -1304,28 +1333,6 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_global_svc_event_handler.html for details.
 
-# REST PATH: POST /system/cmd/del_downtime_by_host_name
-# This command deletes all downtimes matching the specified filters.
-#
-# Optional arguments:
-#
-#   * hostname
-#   * service_desc
-#   * start_time
-#   * comment
-#
-# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
-
-# REST PATH: POST /system/cmd/del_downtime_by_start_time_comment
-# This command deletes all downtimes matching the specified filters.
-#
-# Optional arguments:
-#
-#   * start_time
-#   * comment
-#
-# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_start_time_comment.html for details.
-
 # REST PATH: POST /system/cmd/del_host_comment
 # Sends the DEL_HOST_COMMENT command.
 #
@@ -1572,7 +1579,11 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
 
-{"contactgroups":{
+{"all_host_service":{
+  "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","nr":-1,"required":[]},
+  "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","nr":-1,"required":[]}
+},
+"contactgroups":{
   "disable_contactgroup_host_notifications":{"args":[],"docs":"Disables host notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_host_notifications","nr":-1,"required":[]},
   "disable_contactgroup_svc_notifications":{"args":[],"docs":"Disables service notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_svc_notifications","nr":-1,"required":[]},
   "enable_contactgroup_host_notifications":{"args":[],"docs":"Enables host notifications for all contacts in a particular contactgroup.","name":"enable_contactgroup_host_notifications","nr":-1,"required":[]},
@@ -1701,8 +1712,6 @@ __DATA__
 "system":{
   "change_global_host_event_handler":{"args":["eventhandler"],"docs":"Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_host_event_handler","nr":-1,"required":["eventhandler"]},
   "change_global_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the global service event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_svc_event_handler","nr":-1,"required":["eventhandler"]},
-  "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","nr":-1,"required":[]},
-  "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","nr":-1,"required":[]},
   "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","nr":"2","required":["comment_id"]},
   "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","nr":"78","required":["downtime_id"]},
   "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","nr":"4","required":["comment_id"]},

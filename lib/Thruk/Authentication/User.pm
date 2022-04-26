@@ -453,9 +453,15 @@ sub check_cmd_permissions {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
         return 1 if $self->check_permissions($c, 'hostgroup', $value, 1);
     }
+    elsif($type eq 'all_hosts') {
+        return 1 if $self->check_user_roles('authorized_for_all_host_commands');
+    }
     elsif($type eq 'service') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
         return 1 if $self->check_permissions($c, 'service', $value, $value2, 1);
+    }
+    elsif($type eq 'all_services') {
+        return 1 if $self->check_user_roles('authorized_for_all_service_commands');
     }
     elsif($type eq 'servicegroup') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');

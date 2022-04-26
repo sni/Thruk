@@ -121,12 +121,14 @@ sub _update_cmds {
             'ENABLE_HOST_FRESHNESS_CHECKS'                => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
             'DISABLE_SERVICE_FRESHNESS_CHECKS'            => {"docs" => "Disables freshness checks of all services on a program-wide basis."},
             'DISABLE_HOST_FRESHNESS_CHECKS'               => {"docs" => "Disables freshness checks of all hosts on a program-wide basis."},
+            'CHANGE_GLOBAL_SVC_EVENT_HANDLER'             => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global service event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_GLOBAL_HOST_EVENT_HANDLER'            => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global host event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started."},
+        },
+        'all_host_service' => {
             'DEL_DOWNTIME_BY_START_TIME_COMMENT'          => {"args" => ["start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},
             'DEL_DOWNTIME_BY_HOST_NAME'                   => {"args" => ["hostname", "service_desc", "start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},
             #segfaults
             #'DEL_DOWNTIME_BY_HOSTGROUP_NAME'              => {"args" => ["hostgroup_name", "hostname", "service_desc", "start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},
-            'CHANGE_GLOBAL_SVC_EVENT_HANDLER'             => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global service event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
-            'CHANGE_GLOBAL_HOST_EVENT_HANDLER'            => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global host event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started."},
         }
     };
     for my $category (sort keys %{$cmds}) {
@@ -230,7 +232,7 @@ sub _update_cmds {
         }
     }
 
-    for my $category (qw/hosts services hostgroups servicegroups contacts contactgroups system/) {
+    for my $category (qw/hosts services all_host_service hostgroups servicegroups contacts contactgroups system/) {
         for my $name (sort keys %{$cmds->{$category}}) {
             my $cmd = $cmds->{$category}->{$name};
             if($category =~ m/^(hosts|hostgroups|servicegroups|contacts|contactgroups)$/mx) {
@@ -239,8 +241,10 @@ sub _update_cmds {
             elsif($category =~ m/^(services)$/mx) {
                 $content .= "# REST PATH: POST /$category/<host>/<service>/cmd/$name\n";
             }
-            elsif($category =~ m/^(system)$/mx) {
-                $content .= "# REST PATH: POST /$category/cmd/$name\n";
+            elsif($category =~ m/^(system|all_host_service)$/mx) {
+                $content .= "# REST PATH: POST /system/cmd/$name\n";
+            } else {
+                confess("unknown category: ".$category);
             }
             if($cmd->{'docs'}) {
                 $content .= "# ".join("\n# ", split/\n/mx, $cmd->{'docs'})."\n#\n";
@@ -276,7 +280,7 @@ sub _update_cmds {
 
     my $cmd_dump = Cpanel::JSON::XS->new->utf8->canonical->encode($cmds);
     $cmd_dump    =~ s/\},/},\n  /gmx;
-    $cmd_dump    =~ s/\ *"(hostgroups|hosts|services|servicegroups|system|contacts|contactgroups)":\{/"$1":{\n  /gmx;
+    $cmd_dump    =~ s/\ *"(hostgroups|hosts|services|all_host_service|servicegroups|system|contacts|contactgroups)":\{/"$1":{\n  /gmx;
     $cmd_dump    =~ s/\}$/\n}/gmx;
     $cmd_dump    =~ s/\}\},$/}\n},/gmx;
     $content .= $cmd_dump;
@@ -434,7 +438,7 @@ sub _update_cmds_list {
     $content =~ s/^<\!\-\-DATA\-\->\n.*$/<!--DATA-->\n/gsmx;
 
     $content .= "<tbody>\n";
-    for my $cat (qw/hosts services hostgroups servicegroups contacts contactgroups system/) {
+    for my $cat (qw/hosts services all_host_service hostgroups servicegroups contacts contactgroups system/) {
         for my $name (sort keys %{$cmds->{$cat}}) {
             my $cmd = $cmds->{$cat}->{$name};
             next if !$cmd->{'nr'};
