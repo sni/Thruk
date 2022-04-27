@@ -775,9 +775,9 @@ sub _task_uploadecho {
 sub _task_save_dashboard {
     my($c) = @_;
 
-    my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
-    $nr      =~ s/^pantab_//gmx;
-    my $d = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
+       $nr =~ s/^pantab_//gmx;
+    my $d  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $d) >= ACCESS_READONLY;
 
     my $data = {
@@ -2791,9 +2791,9 @@ sub _task_service_detail {
 ##########################################################
 sub _task_dashboard_save_states {
     my($c) = @_;
-    my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
-    $nr      =~ s/^pantab_//gmx;
 
+    my $nr        = $c->req->parameters->{'nr'} || die('no number supplied');
+       $nr        =~ s/^pantab_//gmx;
     my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     my $states;
     eval {
@@ -2881,7 +2881,7 @@ sub _get_dashboard_by_name {
     return unless $name;
 
     for my $file (glob($c->{'panorama_etc'}.'/*.tab')) {
-        if($file =~ s/^.*\/(\d+)\.tab$//mx) {
+        if($file =~ s/^.*\/([a-zA-Z_\-\d]+)\.tab$//mx) {
             my $d = Thruk::Utils::Panorama::load_dashboard($c, $1, 1);
             if($d) {
                 if(  ($d->{'tab'}->{'xdata'}->{'title'} && $d->{'tab'}->{'xdata'}->{'title'} eq $name)
@@ -3060,8 +3060,8 @@ sub _task_dashboard_restore {
     my($c) = @_;
 
     my $nr         = $c->req->parameters->{'nr'};
-    my $mode       = $c->req->parameters->{'mode'};
        $nr         =~ s/^pantab_//gmx;
+    my $mode       = $c->req->parameters->{'mode'};
     my $timestamp  = $c->req->parameters->{'timestamp'};
     my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
@@ -3525,10 +3525,10 @@ sub _add_json_dashboard_timestamps {
     }
     if($tab) {
         my $nr = $tab;
+           $nr =~ s/^pantab_//gmx;
         $json->{'dashboard_ts'} = {};
-        $nr =~ s/^pantab_//gmx;
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
-        if($nr == 0 && !-s $file) {
+        if($nr eq "0" && !-s $file) {
             $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
         }
         my @stat = stat($file);

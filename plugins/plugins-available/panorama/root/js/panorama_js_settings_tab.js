@@ -550,11 +550,25 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             boxLabel:   '(disables dashboard editing)',
             handler:    function(el, checked) { TP.tabSettingsWindowLocked(tab, checked); }
         }, {
-            /* tab title */
-            xtype:      'textfield',
-            name:       'title',
             fieldLabel: 'Title',
-            listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
+            xtype:      'fieldcontainer',
+            layout:      'hbox',
+            items: [{
+                /* tab title */
+                xtype:      'textfield',
+                name:       'title',
+                flex:        1,
+                listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
+            },
+            { xtype: 'label', text:  'File:', style: 'margin-left: 10px; margin-right: 2px; text-align: right;', cls: 'x-form-item-label' },
+            {
+                /* file name */
+                xtype:      'textfield',
+                name:       'file',
+                flex:        1,
+                regex:      RegExp(/^[a-zA-Z_\-\d]+.tab$/),
+                regexText:  'the filename must have the form: [a-zA-Z0-9_-].tab'
+            }]
         }, {
             /* tab description */
             xtype:      'textarea',
@@ -1002,7 +1016,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         modal:       true,
         width:       620,
         height:      400,
-        title:       'Settings: '+(tab.xdata.title ? tab.xdata.title+' - ' : '')+'#'+tab.nr(),
+        title:       'Settings: '+(tab.xdata.title ? tab.xdata.title+' - ' : '')+tab.nr()+'.tab',
         layout :     'fit',
         buttonAlign: 'center',
         items:       tabPanel,
@@ -1146,10 +1160,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         /* reload, permissions might have changed */
                         tab.addMask("reloading dashboard...");
                         TP.cp.saveChanges(null, function() {
-                            TP.renewDashboardDo(tab, function() {
+                            var newName = tab.xdata['file'].replace(/\.tab$/, '');
+                            if(newName != tab.nr()) {
                                 tab_win_settings.destroy();
-                                tab.setLock(locked);
-                            });
+                                TP.add_pantab({ id: newName, replace_id: tab.id });
+                            } else {
+                                TP.renewDashboardDo(tab, function() {
+                                    tab_win_settings.destroy();
+                                    tab.setLock(locked);
+                                });
+                            }
                         });
                     }
                }

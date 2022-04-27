@@ -88,7 +88,7 @@ if(scalar @{$own} > 0) {
     $dashboard->{'panlet_'.++$nr} = &{$_add_label}(20, 190, "Open Existing Dashboards:");
     for my $d (@{$own}) {
        last if $shown >= $maximum_number;
-        next if $d->{'nr'} == $dashboard->{'nr'}; # avoid recursion
+        next if $d->{'nr'} eq $dashboard->{'nr'}; # avoid recursion
         if($x > 650) {
             $x = 20;
             $y = $y + 90;

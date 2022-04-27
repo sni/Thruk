@@ -41,7 +41,7 @@ function setStateByTab(state) {
         if(key == 'tabbar') { data.tabbar = anyDecode(state[key]); }
 
         // dashboard main data
-        if(key.search(/pantab_\d+$/) != -1) {
+        if(key.match(/pantab_/) && !key.match(/pantab_.*_panlet_\d/)) {
             if(data[key] == undefined) { data[key] = {}; }
             data[key].tab = state[key];
 
@@ -61,7 +61,7 @@ function setStateByTab(state) {
         }
 
         // panels data
-        var matches = key.match(/(pantab_\d+)_(.*)$/);
+        var matches = key.match(/(pantab_.*)_(panlet_.*)$/);
         if(matches) {
             var tab_id = matches[1];
             if(data[tab_id] == undefined) { data[tab_id] = {}; }
@@ -138,6 +138,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(!cp.lastdata) {
             /* set initial data which we can later check against to reduce number of update querys */
             cp.lastdata = data;
+            if(callback) { callback(); }
             return;
         }
 
@@ -150,7 +151,10 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             }
         }
         cp.lastdata = data;
-        if(changed == 0) { return; }
+        if(changed == 0) {
+            if(callback) { callback(); }
+            return;
+        }
         params.task   = 'update2';
         if(extraParams) {
             Ext.apply(params, extraParams);

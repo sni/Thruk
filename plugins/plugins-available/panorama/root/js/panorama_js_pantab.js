@@ -23,7 +23,7 @@ Ext.define('TP.Pantab', {
         // fetch window ids from state
         this.window_ids = [];
         for(var key in TP.cp.state) {
-            var matches = key.match(/^(pantab_\d+)_panlet_(\d+)$/);
+            var matches = key.match(/^(pantab_.+)_panlet_(\d+)$/);
             if(matches && matches[1] == this.id) {
                 this.window_ids.push(key);
             }
@@ -238,7 +238,7 @@ Ext.define('TP.Pantab', {
             }
         }
 
-        var text = "double click to open settings (dashboard #"+tab.nr()+")";
+        var text = "double click to open settings ("+tab.nr()+".tab)";
         if(readonly || dashboard_ignore_changes) {
             text = "this is dashboard #"+tab.nr();
         }

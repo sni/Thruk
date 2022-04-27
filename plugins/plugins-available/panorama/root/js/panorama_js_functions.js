@@ -85,7 +85,7 @@ var TP = {
     add_pantab: function(opt) {
         if(!Ext.isObject(opt)) { opt = { id: opt }; }
         var id = opt.id;
-        if(id && Ext.isNumeric(String(id))) {
+        if(id && id != "new" && id != "new_geo" && id != "new_or_empty") {
             id = TP.nr2TabId(id);
         }
         var tabbar = Ext.getCmp('tabbar');
@@ -325,8 +325,8 @@ var TP = {
 
                 // add additionall hidden dashboards required from icons
                 for(var key in data) {
-                    var matches = key.match(/^pantab_\d+$/);
-                    if(matches && matches[0] != opt.id && !Ext.getCmp(matches[0])) {
+                    var matches = key.match(/^pantab_.*/);
+                    if(matches && !matches[0].match(/^pantab_.*_panlet_\d+/) &&  matches[0] != opt.id && !Ext.getCmp(matches[0])) {
                         TP.add_pantab({ id: matches[0], hidden: true });
                     }
                 }
@@ -2116,7 +2116,7 @@ var TP = {
                     for(var key in data) {
                         var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
-                        if(p && key.search(/pantab_\d+$/) != -1) {
+                        if(p && key.match(/^pantab_/) && !key.match(/^pantab_.*_panlet_\d+/)) {
                             if((p.xdata.map && !cfg.xdata.map) || (!p.xdata.map && cfg.xdata.map)) { mapChanged = true; }
                             /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
@@ -2133,7 +2133,7 @@ var TP = {
                         var cfg = anyDecode(data[key]);
                         var p   = Ext.getCmp(key);
 
-                        if(key.search(/pantab_\d+$/) != -1 || key == "tabbar") {
+                        if((key.match(/pantab_/) && !key.match(/pantab_.*_panlet_\d+/)) || key == "tabbar") {
                             /* tab has been updated already */
                             continue;
                         }
@@ -2438,7 +2438,7 @@ var TP = {
         var numbers = [];
         for(var nr=0; nr<open_tabs.length; nr++) {
             var num = open_tabs[nr].replace(/^pantab_/, '');
-            if(num > 0) {
+            if(num != "0") {
                 numbers.push(num);
             }
         }

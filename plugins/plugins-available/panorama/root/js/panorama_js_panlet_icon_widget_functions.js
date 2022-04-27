@@ -314,7 +314,7 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
     var menu    = link.match(/menu:\/\/(.+)$/);
     if(special && special[1]) {
         link = undefined;
-        if(special[1].match(/^\d+$/)) {
+        if(special[1].match(/^[a-zA-Z_\-\d]+$/)) {
             // is that tab already open?
             var tabbar = Ext.getCmp('tabbar');
             var tab_id = "pantab_"+special[1];

@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Panorama:
+            - support non-numeric dashboard file names
+            - dashboard save file can be renamed
+
 2.48     Sat Apr  2 17:04:45 CEST 2022
           - add filter to tactical overview page
           - fix hostgroup overview totals when using LMD

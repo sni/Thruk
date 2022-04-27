@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS;
 use Exporter 'import';
+use File::Copy qw/move/;
 
 use Thruk::Backend::Manager ();
 use Thruk::Utils ();
@@ -115,9 +116,9 @@ sub get_dashboard_list {
 
     my $dashboards = [];
     for my $file (glob($c->config->{'etc_path'}.'/panorama/*.tab')) {
-        if($file =~ s/^.*\/(\d+)\.tab$//mx) {
+        if($file =~ s/^.*\/([a-zA-Z_\-\d]+)\.tab$//mx) {
             my $nr = $1;
-            next if $nr == 0;
+            next if $nr eq "0";
             my $d  = load_dashboard($c, $nr, 1);
             if($d) {
                 if($type eq 'all') {
@@ -173,7 +174,7 @@ sub get_dashboard_list {
                 push @{$dashboards}, {
                     id          => $d->{'id'},
                     nr          => $d->{'nr'},
-                    name        => $d->{'tab'}->{'xdata'}->{'title'},
+                    name        => $d->{'tab'}->{'xdata'}->{'title'} // '',
                     user        => $d->{'user'},
                     perm_rw     => $perm_rw,
                     perm_ro     => $perm_ro,
@@ -208,14 +209,15 @@ return dashboard data.
 =cut
 sub load_dashboard {
     my($c, $nr, $meta_data_only, $file) = @_;
-    $nr       =~ s/^pantab_//gmx;
-    $file  = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab' unless $file;
 
-    # only numbers allowed
-    return if $nr !~ m/^\-?\d+$/gmx;
+    $nr   =~ s/^pantab_//gmx;
+    $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab' unless $file;
+
+    # only numbers and letters allowed
+    return if $nr !~ m/^\-?[a-zA-Z_\-\d]+$/gmx;
 
     # startpage can be overridden, only load original file if there is none in etc/
-    if($nr == 0 && !-s $file) {
+    if($nr eq "0" && !-s $file) {
         $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
 
@@ -251,7 +253,7 @@ sub load_dashboard {
     my @stat = stat($file);
     $dashboard->{'ts'}       = $stat[9] unless ($scripted && $dashboard->{'ts'});
     $dashboard->{'nr'}       = $nr;
-    $dashboard->{'id'}       = 'pantab_'.$nr unless $nr < 0;
+    $dashboard->{'id'}       = 'pantab_'.$nr unless $nr =~ m/^\-\d+\$/mx;
     $dashboard->{'file'}     = $file;
     $dashboard->{'scripted'} = $scripted;
 
@@ -300,6 +302,7 @@ sub load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'state_type'} = 'soft' unless defined $dashboard->{'tab'}->{'xdata'}->{'state_type'};
     $dashboard->{'tab'}->{'xdata'}->{'owner'}    = $dashboard->{'user'};
     $dashboard->{'tab'}->{'xdata'}->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $dashboard->{'tab'}->{'xdata'}->{'backends'});
+    $dashboard->{'tab'}->{'xdata'}->{'file'}     = $nr.".tab";
 
     for my $key (keys %{$dashboard}) {
         if($key =~ m/_panlet_(\d+)$/mx) {
@@ -373,6 +376,7 @@ sub save_dashboard {
     delete $dashboard->{'locked'};
     delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
     delete $dashboard->{'tab'}->{'xdata'}->{''};
+    my $newfile = delete $dashboard->{'tab'}->{'xdata'}->{'file'};
     delete $dashboard->{'tab'}->{'readonly'};
     delete $dashboard->{'tab'}->{'user'};
     delete $dashboard->{'tab'}->{'ts'};
@@ -400,6 +404,12 @@ sub save_dashboard {
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'pantab_'.$nr;
     $dashboard->{'ts'} = [stat($file)]->[9];
+
+    my $filename = $nr.'.tab';
+    if($newfile && $newfile ne $filename) {
+        $dashboard = move_dashboard($c, $dashboard, $filename, $newfile);
+    }
+
     return $dashboard;
 }
 
@@ -445,6 +455,7 @@ returns:
 sub is_authorized_for_dashboard {
     my($c, $nr, $dashboard) = @_;
     $nr =~ s/^pantab_//gmx;
+
     my $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
 
     # super user have permission for all reports
@@ -509,6 +520,44 @@ sub delete_dashboard {
     # and also all backups
     unlink(glob($c->config->{'var_path'}.'/panorama/'.$nr.'.tab.*'));
     return;
+}
+
+##########################################################
+
+=head2 move_dashboard
+
+    move_dashboard($c, $dashboard, $filename, $newfile)
+
+rename dashboard file and return new dashboard data
+
+=cut
+sub move_dashboard {
+    my($c, $dashboard, $filename, $newfile) = @_;
+
+    if($newfile !~ m/^[a-zA-Z0-9_\-]+\.tab$/gmx) {
+        Thruk::Utils::set_message($c, 'fail_message', 'Renaming dashboard failed, invalid filename.');
+        return($dashboard);
+    }
+
+    my $newnr = $newfile;
+       $newnr =~ s/\.tab//gmx;
+    my $oldnr = $dashboard->{'id'};
+       $oldnr =~ s/^pantab_//gmx;
+
+    if(-e $c->config->{'etc_path'}.'/panorama/'.$newfile) {
+        Thruk::Utils::set_message($c, 'fail_message', 'Renaming dashboard failed, '.$newfile.' does already exist.');
+        return($dashboard);
+    }
+    for my $folder ($c->config->{'etc_path'}.'/panorama', $c->config->{'var_path'}.'/panorama') {
+        for my $file (glob($folder.'/'.$oldnr.'.*')) {
+            my $movedfile = $file;
+            $movedfile =~ s/^.*\///gmx;
+            $movedfile =~ s/^\Q$oldnr\E/\Q$newnr\E/gmx;
+            move($file, $folder.'/'.$movedfile);
+        }
+    }
+    Thruk::Utils::set_message($c, 'success_message', 'Renamed dashboard to: '.$newfile);
+    return(load_dashboard($c, $newnr));
 }
 
 ##########################################################

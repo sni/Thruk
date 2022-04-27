@@ -133,9 +133,10 @@ sub _cleanup_dashboard {
 ##############################################
 sub _merge_meta {
     my($dashboard, $meta) = @_;
-    $dashboard->{'tab'}->{'xdata'}->{'title'}  = $meta->{'title'}  unless defined $dashboard->{'tab'}->{'xdata'}->{'title'};
-    $dashboard->{'tab'}->{'xdata'}->{'groups'} = $meta->{'groups'} unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
-    $dashboard->{'user'}                       = $meta->{'user'}   unless defined $dashboard->{'user'};
+    $dashboard->{'tab'}->{'xdata'}->{'title'}  = $meta->{'title'}     unless defined $dashboard->{'tab'}->{'xdata'}->{'title'};
+    $dashboard->{'tab'}->{'xdata'}->{'groups'} = $meta->{'groups'}    unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
+    $dashboard->{'tab'}->{'xdata'}->{'file'}   = $meta->{'nr'}.'.tab' unless defined $dashboard->{'tab'}->{'xdata'}->{'file'};
+    $dashboard->{'user'}                       = $meta->{'user'}      unless defined $dashboard->{'user'};
     $dashboard->{'nr'}                         = $meta->{'nr'};
     return($dashboard);
 }
