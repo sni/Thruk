@@ -1,140 +1,152 @@
 ﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="bottom" width="20%">
-          [% PROCESS _infobox.tt %]
-          <br>
-          <br>
-          <br>
-          [% PROCESS _table_search_field.tt ids=["configtable"] %]
-        </td>
-        <td align="center" valign="bottom" width="60%">
-          <div align="center" class='dataTitle'>[% dataTitle %]</div>
-          <br>
-        </td>
-        <td align="right" valign="bottom" width="20%">
-          <form method="get" action="config.cgi">
-            <table border="0">
-              <tr>
-                <td align="left" class='reportSelectSubTitle'>Object Type:</td>
-              </tr>
-              <tr>
-                <td align="left" class='reportSelectItem'>
-                  <select name='type'>
-                    <option value='hosts'[%               IF type == 'hosts'               %] selected [% END %]>Hosts</option>
-                    <!--<option value='hostdependencies'[%    IF type == 'hostdependencies'    %] selected [% END %]>Host Dependencies</option>-->
-                    <!--<option value='hostescalations'[%     IF type == 'hostescalations'     %] selected [% END %]>Host Escalations</option>-->
-                    <option value='hostgroups'[%          IF type == 'hostgroups'          %] selected [% END %]>Host Groups</option>
-                    <option value='services'[%            IF type == 'services'            %] selected [% END %]>Services</option>
-                    <option value='servicegroups'[%       IF type == 'servicegroups'       %] selected [% END %]>Service Groups</option>
-                    <!--<option value='servicedependencies'[% IF type == 'servicedependencies' %] selected [% END %]>Service Dependencies</option>-->
-                    <!--<option value='serviceescalations'[%  IF type == 'serviceescalations'  %] selected [% END %]>Service Escalations</option>-->
-                    <option value='contacts'[%            IF type == 'contacts'            %] selected [% END %]>Contacts</option>
-                    <option value='contactgroups'[%       IF type == 'contactgroups'       %] selected [% END %]>Contact Groups</option>
-                    <option value='timeperiods'[%         IF type == 'timeperiods'         %] selected [% END %]>Timeperiods</option>
-                    <option value='commands'[%            IF type == 'commands'            %] selected [% END %]>Commands</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td class='reportSelectItem'>
-                  <input type='submit' value='Update'>
-                </td>
-              </tr>
-            </table>
-          </form>
-        </td>
-        <td>
-          <table border="0">
-            <tr>
-              <td align="left" class='reportSelectSubTitle'>Columns:</td>
-            </tr>
-            <tr>
-             <td>
-                <select style="height: 120px;" id='columns_sel' multiple='multiple' onchange="toggleVis(this)">
-                </select>
-              </td>
-           </tr>
-         </table>
-       </td>
-      </tr>
-    </table>
+<div class="flexrow justify-between">
+  [% PROCESS _infobox.tt %]
+  <div class="card">
+    <div class="head">
+      <h3>Options</h3>
+    </div>
+    <div class="body flexrow flex-nowrap gap-2">
+      <form method="GET" action="config.cgi">
+        <table>
+          <tr>
+            <td>Object Type:</td>
+          </tr>
+          <tr>
+            <td>
+              <select name='type'>
+                <option value='hosts'[%               IF type == 'hosts'               %] selected [% END %]>Hosts</option>
+                <option value='hostgroups'[%          IF type == 'hostgroups'          %] selected [% END %]>Host Groups</option>
+                <option value='services'[%            IF type == 'services'            %] selected [% END %]>Services</option>
+                <option value='servicegroups'[%       IF type == 'servicegroups'       %] selected [% END %]>Service Groups</option>
+                <option value='contacts'[%            IF type == 'contacts'            %] selected [% END %]>Contacts</option>
+                <option value='contactgroups'[%       IF type == 'contactgroups'       %] selected [% END %]>Contact Groups</option>
+                <option value='timeperiods'[%         IF type == 'timeperiods'         %] selected [% END %]>Timeperiods</option>
+                <option value='commands'[%            IF type == 'commands'            %] selected [% END %]>Commands</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input type='submit' value='Update'>
+            </td>
+          </tr>
+        </table>
+      </form>
+      <table>
+        <tr>
+          <td>Columns:</td>
+        </tr>
+        <tr>
+          <td>
+            <select style="height: 120px;" id='columns_sel' multiple='multiple' onchange="toggleVis(this)"></select>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
 
-    <div align="center">[% PROCESS _pager.tt %]</div>
+<h1 class="mt-5">Configuration</h1>
 
-    <div align="center">[% content %]</div>
+<div class="card w-full mt-5">
+  <div class="head p-0 justify-between">
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Hosts' %] active[% END %]"><a class="block" href="config.cgi?type=hosts">Hosts</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Host Groups' %] active[% END %]"><a class="block" href="config.cgi?type=hostgroups">Host Groups</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Services' %] active[% END %]"><a class="block" href="config.cgi?type=services">Services</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Service Groups' %] active[% END %]"><a class="block" href="config.cgi?type=servicegroups">Service Groups</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Contacts' %] active[% END %]"><a class="block" href="config.cgi?type=contacts">Contacts</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Contact Groups' %] active[% END %]"><a class="block" href="config.cgi?type=contactgroups">Contact Groups</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Time Periods' %] active[% END %]"><a class="block" href="config.cgi?type=timeperiods">Timeperiods</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Commands' %] active[% END %]"><a class="block" href="config.cgi?type=commands">Commands</a></span>
+  </div>
+  <div class="mainTableHeader">
+    <div>
+      [% PROCESS _table_search_field.tt ids=["configtable"] %]
+    </div>
+    <div>
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
+    </div>
+  </div>
 
-    <div align="center">[% PROCESS _pager.tt %]</div>
-    <br>
-    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Entries Displayed</div>
+  <div class="mainTable">
+    [% content %]
+  </div>
 
-    <script type="text/javascript">
-    <!--
+  <div class="mainTableFooter">
+    [% PROCESS _pager_total_items.tt %]
+  </div>
+</div>
 
-var column_select = document.getElementById("columns_sel");
-var columns = new Array();
-jQuery('TH.data').each(function(i, col) {
-    if(i != 0 || col.innerHTML != 'Service') {
+
+<script type="text/javascript">
+<!--
+  var column_select = document.getElementById("columns_sel");
+  var columns = new Array();
+  jQuery('#configtable TH').each(function(i, col) {
+    if(i >= 2 || "[% dataTitle %]" != 'Services') {
       columns.push(col.innerHTML);
     }
-});
-add_options(column_select, columns);
-jQuery("#columns_sel option").prop('selected',true);
+  });
+  add_options(column_select, columns);
+  jQuery("#columns_sel option").prop('selected',true);
 
-// Set the default "show" mode to that specified by W3C DOM
-// compliant browsers
+  // Set the default "show" mode to that specified by W3C DOM
+  // compliant browsers
 
-var showMode = 'table-cell';
+  var showMode = 'table-cell';
 
-// However, IE5 at least does not render table cells correctly
-// using the style 'table-cell', but does when the style 'block'
-// is used, so handle this
+  // However, IE5 at least does not render table cells correctly
+  // using the style 'table-cell', but does when the style 'block'
+  // is used, so handle this
 
-if (document.all) showMode='block';
+  if (document.all) showMode='block';
 
-// This is the function that actually does the manipulation
-function toggleVis(sel){
-    var table = jQuery('TABLE.data')[0];
+  // This is the function that actually does the manipulation
+  function toggleVis(sel){
+    var table = jQuery('#configtable')[0];
     lines = table.getElementsByTagName('tr');
 
-    for ( k = 0; k < lines.length; k++) {
-        // Headers
-        h = lines[k].getElementsByTagName('th');
-        if (h.length == 2 && k == 0) {
-          if(sel.options[1].selected && sel.options[2].selected) {
-            lines[0].style.display = "";
-          } else {
-            lines[0].style.display = "none";
+    for( var k = 0; k < lines.length; k++) {
+      // Headers
+      var h = lines[k].getElementsByTagName('th');
+      if (h.length == 2 && k == 0) {
+        if(sel.options[1].selected && sel.options[2].selected) {
+          lines[0].style.display = "";
+        } else {
+          lines[0].style.display = "none";
+        }
+      }
+      if(h.length == sel.options.length) {
+        for (var i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].selected == true) {
+            h[i].style.display = showMode;
+          }
+          else {
+            h[i].style.display = 'none';
           }
         }
-        if (h.length == sel.options.length) {
-            for (var i = 0; i < sel.options.length; i++) {
-                if (sel.options[i].selected == true) {
-                    h[i].style.display = showMode;
-                }
-                else {
-                    h[i].style.display = 'none';
-                }
-           }
-        }
+      }
 
-        // Rows
-        c = lines[k].getElementsByTagName('td');
-        if (c.length == sel.options.length) {
-            for (var i = 0; i < sel.options.length; i++) {
-                if (sel.options[i].selected == true) {
-                    c[i].style.display = showMode;
-                }
-                else {
-                    c[i].style.display = 'none';
-                }
-            }
+      // Rows
+      c = lines[k].getElementsByTagName('td');
+      if (c.length == sel.options.length) {
+        for (var i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].selected == true) {
+            c[i].style.display = showMode;
+          }
+          else {
+            c[i].style.display = 'none';
+          }
         }
+      }
     }
-
-}
-    -->
-    </script>
+  }
+-->
+</script>
 
 [% PROCESS _footer.tt %]

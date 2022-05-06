@@ -1625,10 +1625,6 @@ sub _get_query_size {
     if( $entries > 0 ) {
         $pages = POSIX::ceil( $size / $entries );
     }
-    if( $options->{'pager'}->{'next'} )         { $page++; }
-    elsif ( $options->{'pager'}->{'previous'} ) { $page--; }
-    elsif ( $options->{'pager'}->{'first'} )    { $page = 1; }
-    elsif ( $options->{'pager'}->{'last'} )     { $page = $pages; }
     if( $page < 0 ) { $page = 1; }
     unless(wantarray) {
         confess("_get_query_size() should not be called in scalar context");
@@ -1775,10 +1771,6 @@ sub _optimized_for_wrapped_json {
     $options->{'options'}->{'wrapped_json'} = 1;
     if($options->{'pager'} && $options->{'pager'}->{'entries'} && $options->{'pager'}->{'entries'} =~ m/^\d+$/mx) {
         my $page = ($options->{'pager'}->{'page'} || 1);
-        $page++   if $options->{'pager'}->{'next'};
-        $page--   if $options->{'pager'}->{'previous'};
-        $page = 1 if $options->{'pager'}->{'first'};
-        $page = $options->{'pager'}->{'pages'} if $options->{'pager'}->{'last'};
         # offset can only be used if this is the only backend...
         # so use the minimal limit for now
         if($self->{'lmd_optimizations'}) {

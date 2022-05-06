@@ -19,8 +19,7 @@ Example of a themes:
   theme/
   ├── images
   │   └── logos -> ../../Classic/images/logos
-  ├── stylesheets
-  └── templates
+  └── stylesheets
 ----
 
 
@@ -173,8 +172,7 @@ TIP: Let me know if you want to get your theme listed here.
   theme/
   ├── images
   │   └── logos -> ../../Classic/images/logos
-  ├── stylesheets
-  └── templates
+  └── stylesheets
 ----
 
 .Structure
@@ -183,9 +181,6 @@ TIP: Let me know if you want to get your theme listed here.
 * 'logos' contains all logos, should be a symlink to your logos folder
   unless you have special logos in this theme.
 * 'stylesheets' contain your css files.
-* 'templates' contains all template files. You can override normal
-  templates in your theme and therefor completly rewrite the html
-  output.
 
 TIP: Easiest way would be to copy an existing theme and change it to your
 needs.

@@ -10,7 +10,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $filter = $ARGV[0];
 my $whitelist_vars = Thruk::Base::array2hash([qw/
     theme url_prefix logo_path_prefix filebranch thrukversion fileversion extjs_version
-    date.now pd referer cs j js jsfiles page class statusclass statusClass rowclass hostclass serviceclass
+     date.now pd referer cs j js jsfiles page pages class statusclass statusClass rowclass hostclass serviceclass
     loopclass body_class param.breakdown url defaults.$key.link
     c.config.useragentcompat c.stash.last_graph_type c.config.notes_url_target
     c.config.action_url_target avgClass log.class rowclasses show_sitepanel extrabodyclass b.cls
@@ -27,9 +27,10 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     has_bp bp.fullid r.fullid hex rd.file b.basefile
     host_health_pic service_health_pic health_perc service_perc
     a.t1 a.t2 nr id first_remaining tblID start_with
-    s_status f d i j x key size head_height image_width state status image_height
-    div_id graph_url loop_index c.config.navframesize show_home_button
+    s_status f d i j x key size head_height image_width state hoststate status image_height
+    div_id graph_url index loop_index filterprefix center extra_classes
     c.config.jquery_ui c.config.start_page c.config.home_link
+    host_health_cls service_health_cls host_perc opt_class
 /]);
 my $whitelist_regex = [
     qr/^\w+\.(id|nr)$/,
@@ -50,6 +51,7 @@ my $whitelist_regex = [
     qr/^loop\.\w+$/,
     qr/^a\.(x|y)\d*$/,
     qr/^action_icon\(/,
+    qr/^c\.config/,
 ];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {

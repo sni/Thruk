@@ -30,7 +30,7 @@
     <th class='data' width="5%" align="right">[% UNLESS readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
   </tr>
   <tr>
-    <td class="dataVar" colspan=3>
+    <td colspan=3>
         <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
         <script type="text/javascript">
         var editor;

@@ -10,14 +10,15 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% host_name            = c.request.parameters.host %]
 
     ENABLE_HOST_EVENT_HANDLER;[% sprintf("%s",host_name) %]
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value="[% c.request.parameters.host | html %]"></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_host %]
 
 [% END %]
 [% END %]

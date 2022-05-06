@@ -43,7 +43,6 @@
             </tr>
           [% END %]
           </table>
-          [% PROCESS _help.tt topic = "extinfo_5" %]
         </td>
       </tr>
     </table><br>

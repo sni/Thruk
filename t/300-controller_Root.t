@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 112;
+    plan tests => 92;
 }
 
 BEGIN {
@@ -38,9 +38,7 @@ my $pages = [
     '/thruk/',
     '/thruk/docs/index.html',
     '/thruk/index.html',
-   { url => '/thruk/main.html', like => ['Check for updates', 'Thruk Monitoring Webinterface', 'Thruk Developer Team'] },
-   { url => '/thruk/side.html', like => ['Home', 'Documentation', 'Hosts', 'Availability', 'Problems'] },
-    '/thruk/startup.html',
+   { url => '/thruk/main.html', like => ['Check for updates', 'Thruk Monitoring Webinterface', 'Thruk Developer Team', 'Home', 'Documentation', 'Hosts', 'Availability', 'Problems'] },
 ];
 
 for my $url (@{$pages}) {
@@ -53,9 +51,8 @@ is($Thruk::Globals::c, undef, "Request object is now empty");
 SKIP: {
     skip 'external tests', 11 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     # test works local only because we modify the config here
-    my($res, $c) = ctx_request('/thruk/side.html');
+    my($res, $c) = ctx_request('/thruk/main.html');
 
-    $c->app->config->{'use_frames'} = 1;
     $c->app->config->{'User'}->{$c->stash->{'remote_user'}}->{'start_page'} = '/thruk/cgi-bin/status.cgi?blah';
     TestUtils::test_page(
         'url'      => '/thruk/',

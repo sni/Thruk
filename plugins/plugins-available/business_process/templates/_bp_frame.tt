@@ -23,7 +23,6 @@
       </div>
     </td>
     <td align="right" valign="bottom" width="33%">
-      [% PROCESS _help.tt topic = "business_process" %]
     </td>
   </tr>
 </table>

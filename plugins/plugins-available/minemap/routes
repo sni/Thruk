@@ -8,9 +8,10 @@ page: /thruk/cgi-bin/minemap.cgi
 
 $routes->{'/thruk/cgi-bin/minemap.cgi'} = 'Thruk::Controller::minemap::index';
 
-Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
+Thruk::Utils::Menu::insert_item('Current Status', {
                                 'href'  => $app->config->{'Thruk::Plugin::Minemap'}->{'default_link'} || $app->config->{'minemap_default_link'} || '/thruk/cgi-bin/minemap.cgi',
                                 'name'  => 'Mine Map',
+                                'after' => 'Service Groups',
 });
 
 Thruk::Utils::Status::add_view({'group' => 'Mine Map',

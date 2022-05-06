@@ -95,16 +95,8 @@ jit-yc.js
   - https://philogb.github.io/jit/
   - MIT
 
-jqm.js
-  - http://jquerymobile.com
-  - MIT
-
 jquery.js
   - http://jquery.com/
-  - MIT
-
-jquery.mobile.router.js
-  - https://github.com/azicchetti/jquerymobile-router
   - MIT
 
 jquery-ui.js
@@ -130,10 +122,6 @@ openlayer.js
   - https://github.com/openlayers/openlayers/
   - BSD
 
-overlib.js:
-  - https://github.com/overlib/overlib
-  - Artistic
-
 sprintf.js
   - https://github.com/kvz/locutus/blob/master/src/php/strings/sprintf.js
   - MIT
@@ -145,3 +133,11 @@ strftime.js
 bestiejs.js
   - https://github.com/bestiejs/platform.js
   - MIT
+
+unicons
+  - https://github.com/Iconscout/unicons
+  - Apache-2.0
+
+font-awesome
+  - https://fontawesome.com/
+  - CC BY 4.0

@@ -11,7 +11,7 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% notification_time    = date.now() + c.request.parameters.not_dly * 60 %]
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
@@ -20,9 +20,10 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value="[% c.request.parameters.host | html %]"></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value="[% c.request.parameters.service | html %]"></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Notification Delay (minutes from now):</td><td><b><input type='text' name='not_dly' value='0'></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_host %]
+  [% PROCESS cmd_form_service %]
+  [% PROCESS cmd_form_not_dly %]
 
 [% END %]
 [% END %]

@@ -39,7 +39,7 @@ TestUtils::test_command({
     like => ['/Tactical Monitoring Overview/',
              '/Network Outages/',
              '/Monitoring Features/',
-             '/(vendor\/overlib\.js|thruk-[\d\-\.\~]+\.js)/',
+             '/(vendor\/sprintf|thruk-[\d\-\.\~]+\.js)/',
             ],
 });
 
@@ -51,7 +51,7 @@ TestUtils::test_command({
              '/Monitoring Features/',
              '/data:image/',
              '/jquery\.org\/license/',
-             '/\.peerDOWN/',
+             '/\.DOWN/',
             ],
 });
 
@@ -84,12 +84,12 @@ if($test->{'exit'} == 0) {
         TestUtils::test_command({
             cmd     => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=11" -b '.$backends[0].' -b '.$backends[1],
             errlike => ['/\['.$backends_string.'\]/', '/TESTMODE:/', '/DISABLE_NOTIFICATIONS/' ],
-            like    => ['/Command request successfully submitted to the Backend for processing/'],
+            like    => ['/Commands successfully submitted/'],
         });
         TestUtils::test_command({
             cmd     => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0],
             errlike => ['/\['.$names[0].'\]/', '/TESTMODE:/', '/'.$host.'/' ],
-            like    => ['/Command request successfully submitted to the Backend for processing/'],
+            like    => ['/Commands successfully submitted/'],
         });
     }
 }
@@ -234,7 +234,7 @@ TestUtils::test_command({
 # plugin list
 TestUtils::test_command({
     cmd  => $BIN.' plugin list',
-    like => ['/Description/', '/The Statusmap plugin creates maps/'],
+    like => ['/Description/', '/fully customizable dashboard/'],
 });
 
 # plugin list enabled

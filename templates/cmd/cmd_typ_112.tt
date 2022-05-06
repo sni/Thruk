@@ -10,14 +10,15 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% servicegroup_name    = c.request.parameters.servicegroup %]
 
     DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS;[% sprintf("%s",servicegroup_name) %]
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value="[% c.request.parameters.servicegroup | html %]"></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_servicegroup %]
 
 [% END %]
 [% END %]

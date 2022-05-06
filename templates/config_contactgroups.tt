@@ -1,43 +1,48 @@
 ﻿[% WRAPPER config_detail.tt
-   dataTitle = 'Contactgroups'
+   dataTitle = 'Contact Groups'
 %]
 
-<table border="0" class='data' id="configtable">
-  <tr>
-    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
-    <th class='data'></th>
-    [% END %]
-    [% IF backends.size > 1 %]
-      <th class='data'>Backend</th>
-    [% END %]
-    <th class='data'>Group Name</th>
-    <th class='data'>Description</th>
-    <th class='data'>Contact Member</th>
-  </tr>
-  [% FOREACH d = data %]
-  [% SET class = 'dataOdd'  IF loop.odd %]
-  [% SET class = 'dataEven' IF loop.even %]
-  [% SET class = 'tableRowHover' IF jump == d.name %]
-  <tr class='[% class %]' id="[% name2id(d.name, 'contactgroup') %]">
-    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
-    <td class='[% class %]'>
-      <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]"><img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="configure this contactgroup" width="16" height="16" border="0"></a>
-    </td>
-    [% END %]
-    [% IF backends.size > 1 %]
-      <td class='[% class %]'>
-        [% IF d.peer_key.size < backends.size %]
-          [% peer_name(d).join(', ') %]
-        [% ELSE %]
-        <i>all</i>
+<table class='mainTable striped sticky-2d' id="configtable">
+  <thead>
+    <tr>
+      <th class="!shadow-as-border-bottom"></th>
+      <th class="left-8 !shadow-as-border">Group Name</th>
+      <th class="border-l-0">Description</th>
+      [% IF backends.size > 1 %]
+        <th>Backend</th>
+      [% END %]
+      <th>Contact Member</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOREACH d = data %]
+      [% SET class = '' %]
+      [% SET class = 'tableRowSelected' IF jump == d.name %]
+      <tr class='[% class %]' id="[% name2id(d.name, 'contactgroup') %]">
+        <td class='[% class %] shadow-none'>
+          [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+            <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]">
+              <i class="fa-solid fa-pencil text-sm" title="configure this contactgroup"></i>
+            </a>
+          [% ELSE %]
+            <i class="fa-solid fa-pencil text-sm disabled" title="no permissions or configtool disabled"></i>
+          [% END %]
+        </td>
+        <td class='[% class %] sticky left-8 z-[9] bg-inherit shadow-as-border-right'>[% d.name | html %]</td>
+        <td class='[% class %] border-l-0'>[% d.alias | html %]</td>
+        [% IF backends.size > 1 %]
+          <td class='[% class %]'>
+            [% IF d.peer_key.size < backends.size %]
+              [% peer_name(d).join(', ') %]
+            [% ELSE %]
+            <i>all</i>
+            [% END %]
+          </td>
         [% END %]
-      </td>
+        <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact | html %]</a>[% END %]</td>
+      </tr>
     [% END %]
-    <td class='[% class %]'>[% d.name | html %]</td>
-    <td class='[% class %]'>[% d.alias | html %]</td>
-    <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact | html %]</a>[% END %]</td>
-  </tr>
-  [% END %]
+  </tbody>
 </table>
 
 [% END %]

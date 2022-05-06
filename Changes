@@ -1,5 +1,19 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next 3.x:
+          - deprecated configuration options:
+            - use_pager
+            - use_frames
+            - use_new_command_box
+            - info_popup_event_type
+            - info_popup_options
+          - deprecated plugins:
+            - mobile
+            - wml
+            - statusmap
+          - add collapsable side navigation
+          - add delete icon to comments/downtimes popup
+
 next:
           - fix sidebar search not showing all service names
           - Panorama:

@@ -24,7 +24,7 @@ use_ok 'Thruk::Utils::IO';
 
 #############################
 # prepare user and remove all settings
-my($res, $c) = ctx_request('/thruk/side.html');
+my($res, $c) = ctx_request('/thruk/main.html');
 Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/broadcast/');
 my $data = Thruk::Utils::get_user_data($c);
 delete $data->{'broadcast'};

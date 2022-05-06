@@ -192,7 +192,7 @@ sub _format_html_row {
             }
         }
         $output .= "<tr style='display:none;' id='pstack_".$id."' class='pstack_details'>\n";
-        $output .= "<td colspan=2><pre style='overflow: scroll; width: 794px; padding: 0 0 15px 0; margin: 0; height: inherit; min-width: inherit; border: 1px solid grey;'>\n";
+        $output .= "<td colspan=3><pre style='overflow: scroll; width: 794px; padding: 0 0 15px 0; margin: 0; height: inherit; min-width: inherit; border: 1px solid grey;'>\n";
         $output .= join("\n", @show);
         if(scalar @rest > 0) {
             $output .= "<span class='clickable pstack_expand' onclick='toggleElement(\"pstack_more_".$id."\"); this.style.display=\"none\";'>\n...</span>";

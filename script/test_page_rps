@@ -268,7 +268,6 @@ sub test_tag {
     my $rc = 0;
     for my $url (
         "$BASEURL/index.html",
-        "$BASEURL/side.html",
         "$BASEURL/main.html",
         "$BASEURL/cgi-bin/tac.cgi",
     ) {

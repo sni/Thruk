@@ -1496,4 +1496,18 @@ sub get_exposed_custom_vars {
 
 ########################################
 
+########################################
+
+=head2 get_browser_user_agent
+
+    get_browser_user_agent()
+
+return request user agent.
+
+=cut
+sub get_browser_user_agent {
+    my $c = $Thruk::Globals::c or die("not initialized!");
+    return($c->req->header('user-agent') // 'unknown');
+}
+
 1;

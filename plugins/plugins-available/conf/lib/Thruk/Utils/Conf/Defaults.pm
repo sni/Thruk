@@ -33,25 +33,21 @@ sub get_thruk_cfg {
                 server_timezone                         => ['STRING', ''],
                 default_user_timezone                   => ['STRING', ''],
                 use_strict_host_authorization           => ['BOOL',   '0'],
-                use_frames                              => ['BOOL',   '0'],
                 strict_passive_mode                     => ['BOOL',   '1'],
                 start_page                              => ['STRING', ''],
                 documentation_link                      => ['STRING', ''],
                 all_problems_link                       => ['STRING', ''],
-                allowed_frame_links                     => ['STRING', ''],
+                allowed_frame_links                     => ['ARRAY',  []],
                 default_theme                           => ['LIST',   'Thruk', Thruk::Base::array2hash($c->config->{'themes'}) ],
                 tmp_path                                => ['STRING', ''],
                 ssi_path                                => ['STRING', ''],
                 plugin_path                             => ['STRING', ''],
                 user_template_path                      => ['STRING', ''],
-                use_pager                               => ['BOOL',   '1'],
                 paging_steps                            => ['ARRAY',  []],
                 group_paging_overview                   => ['ARRAY',  []],
                 group_paging_summary                    => ['ARRAY',  []],
                 group_paging_grid                       => ['ARRAY',  []],
                 show_long_plugin_output                 => ['LIST', 'popup', Thruk::Base::array2hash([qw/popup inline off/]) ],
-                info_popup_event_type                   => ['LIST', 'onclick', Thruk::Base::array2hash([qw/onclick onmouseover/]) ],
-                info_popup_options                      => ['STRING', ''],
                 show_notification_number                => ['BOOL',   '1'],
                 show_backends_in_table                  => ['BOOL',   '0'],
                 show_full_commandline                   => ['LIST',   '', { '0' => 'off', '1' => 'authorized_for_configuration_information only', '2' => 'everyone' } ],
@@ -60,7 +56,6 @@ sub get_thruk_cfg {
                 show_modified_attributes                => ['BOOL',   '1'],
                 show_custom_vars                        => ['ARRAY',  []],
                 expose_custom_vars                      => ['ARRAY',  []],
-                use_new_command_box                     => ['BOOL',   '1'],
                 can_submit_commands                     => ['BOOL',   '1'],
                 datetime_format                         => ['STRING', ''],
                 datetime_format_today                   => ['STRING', ''],
@@ -85,7 +80,7 @@ sub get_thruk_cfg {
                 or $key eq 'plugin_path'
                 or $key eq 'user_template_path'
                ) {
-            # no useful default for these onse
+            # no useful default for these ones
         } else {
             die('no default for '.$key);
         }

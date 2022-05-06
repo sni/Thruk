@@ -21,7 +21,6 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
 
-my $template_provider_themes;
 my $template_provider_user;
 
 =head1 METHODS
@@ -53,15 +52,10 @@ sub register {
         push @{$settings->{'LOAD_TEMPLATES'}}, $template_provider_user;
     }
 
-    # theme template provider
-    my %theme_settings = (%{$settings}, (INCLUDE_PATH => []));
-    $template_provider_themes = Template::Provider->new(\%theme_settings);
-    push @{$settings->{'LOAD_TEMPLATES'}}, $template_provider_themes;
-
     # base template provider
     my %base_settings = (%{$settings}, (INCLUDE_PATH => [
-        reverse @{$app->config->{'plugin_templates_paths'}}, # last plugin overrides template
-          $app->config->{'base_templates_dir'},
+        reverse @{$app->config->{'plugin_templates_paths'}},
+        $app->config->{'base_templates_dir'},
     ]));
     push @{$settings->{'LOAD_TEMPLATES'}}, Template::Provider->new(\%base_settings);
 
@@ -108,7 +102,6 @@ sub render {
 
     # update Template::Provider include paths
     $template_provider_user->include_path([$c->config->{'user_template_path'}]) if $template_provider_user;
-    $template_provider_themes->include_path([$c->config->{'themes_path'}.'/themes-enabled/'.$c->stash->{'theme'}.'/templates']) if $template_provider_themes;
 
     $tt->process(
         $template,

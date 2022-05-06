@@ -12,8 +12,8 @@
       <th colspan=2 class='data conftoolheader' style="text-align:center">select user to change</th>
     </tr>
     <tr>
-      <td class='dataVar' align="left">Username</td>
-      <td class='dataVal'>
+      <td align="left">Username</td>
+      <td>
         <input type="text" name="data.username" id="data.username" value="[% user_name | html %]" onclick="ajax_search.init(this, 'contact', {url:'conf.cgi?action=cgi_contacts'})" size=40>
       </td>
     </tr>
@@ -39,11 +39,11 @@
 <table><tr><td valign="top">
   <table border="0" class='data conftoolusers'>
     <tr>
-      <td colspan=2 class='dataVar dataUserVar'>Edit: [% user_name | html %]</td>
+      <td colspan=2 >Edit: [% user_name | html %]</td>
     </tr>
     <tr>
-      <td class='dataVar' align="left">Contact Exists</td>
-      <td class='dataVal'>
+      <td align="left">Contact Exists</td>
+      <td>
         [% IF has_contact %]Yes[% ELSE %]No[% END %]
         [% IF backends_with_obj_config.keys.size > 0 %]
           [% IF has_contact %]
@@ -56,35 +56,35 @@
     </tr>
     [% IF conf_config.exists('htpasswd') %]
     <tr>
-      <td class='dataVar' align="left">Password Set</td>
-      <td class='dataVal'>[% IF has_htpasswd_entry %]Yes - <input type="submit" name="send" value="remove password">[% ELSE %]No[% END %]</td>
+      <td align="left">Password Set</td>
+      <td>[% IF has_htpasswd_entry %]Yes - <input type="submit" name="send" value="remove password">[% ELSE %]No[% END %]</td>
     </tr>
     <tr>
-      <td class='dataVar' align="left">Password</td>
-      <td class='dataVal'><input type="password" name="data.password" value="" size=15 autocomplete="off"></td>
+      <td align="left">Password</td>
+      <td><input type="password" name="data.password" value="" size=15 autocomplete="off"></td>
     </tr>
     <tr>
-      <td class='dataVar' align="left">Verify Password</td>
-      <td class='dataVal'><input type="password" name="data.password2" value="" size=15 autocomplete="off"><br>
+      <td align="left">Verify Password</td>
+      <td><input type="password" name="data.password2" value="" size=15 autocomplete="off"><br>
         <i>([% htpasswd_file %])</i>
       </td>
     </tr>
     [% END %]
     [% IF profile_user.is_locked %]
     <tr>
-      <td class='dataVar' align="left" style="color: red;">Account is Locked</td>
-      <td class='dataVal'><input type="submit" name="send" value="unlock account"></td>
+      <td align="left" style="color: red;">Account is Locked</td>
+      <td><input type="submit" name="send" value="unlock account"></td>
     </tr>
     [% ELSE %]
     <tr>
-      <td class='dataVar' align="left">Account is not Locked</td>
-      <td class='dataVal'><input type="submit" name="send" value="lock account"></td>
+      <td align="left">Account is not Locked</td>
+      <td><input type="submit" name="send" value="lock account"></td>
     </tr>
     [% END %]
     [% IF profile_user.settings.exists('login') && profile_user.settings.login.exists('last_failed') %]
     <tr>
-      <td class='dataVar' align="left" style="color: red;">Failed Logins</td>
-      <td class='dataVal'>
+      <td align="left" style="color: red;">Failed Logins</td>
+      <td>
         There had been [% profile_user.settings.login.failed %] failed login attempts.<br>
         (Date: [% date_format(c, profile_user.settings.login.last_failed.time) %] - IP: [% profile_user.settings.login.last_failed.ip %][% IF profile_user.settings.login.last_failed.defined('forwarded_for') %] ([% profile_user.settings.login.last_failed.forwarded_for %][% END %])
       </td>
@@ -92,12 +92,12 @@
     [% END %]
     [% IF conf_config.exists('cgi.cfg') %]
     <tr>
-      <td colspan=2 class='dataVar dataUserVar'>Roles (cgi.cfg)</td>
+      <td colspan=2 >Roles (cgi.cfg)</td>
     </tr>
     [% FOR auth = role_keys %]
     <tr>
-      <td class='dataVar' align="left">[% auth | html %]</td>
-      <td class='dataVal'>
+      <td align="left">[% auth | html %]</td>
+      <td>
         <input type="radio" name="data.[% auth | html %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
         <input type="radio" name="data.[% auth | html %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
       </td>
@@ -116,11 +116,11 @@
 
     <table border="0" class='data conftoolusers'>
       <tr>
-        <td colspan=2 class='dataVar dataUserVar'>Contact Information</td>
+        <td colspan=2 >Contact Information</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Groups</td>
-        <td class='dataVal'>
+        <td align="left">Groups</td>
+        <td>
           [% IF profile_user.groups.size == 0 %]
             this contact has no groups.
           [% ELSE %]
@@ -136,31 +136,31 @@
       </tr>
       [% IF has_contact %]
       <tr>
-        <td class='dataVar' align="left">E-Mail</td>
-        <td class='dataVal'><a href="mailto:[% contact.email | uri %]">[% contact.email | html %]</a></td>
+        <td align="left">E-Mail</td>
+        <td><a href="mailto:[% contact.email | uri %]">[% contact.email | html %]</a></td>
       </tr>
       <tr>
-        <td class='dataVar' align="left" nowrap>Host Notification Period</td>
-        <td class='dataVal'>[% contact.host_notification_period %]</td>
+        <td align="left" nowrap>Host Notification Period</td>
+        <td>[% contact.host_notification_period %]</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left" nowrap>Service Notification Period</td>
-        <td class='dataVal'>[% contact.service_notification_period %]</td>
+        <td align="left" nowrap>Service Notification Period</td>
+        <td>[% contact.service_notification_period %]</td>
       </tr>
       [% IF contact.pager %]
       <tr>
-        <td class='dataVar' align="left">Pager</td>
-        <td class='dataVal'>[% contact.pager %]</td>
+        <td align="left">Pager</td>
+        <td>[% contact.pager %]</td>
       </tr>
       [% END %]
       [% END %]
       <tr>
-        <td class='dataVar' align="left" nowrap>Can Submit Commands</td>
-        <td class='dataVal'>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
+        <td align="left" nowrap>Can Submit Commands</td>
+        <td>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Effective Roles</td>
-        <td class='dataVal'>
+        <td align="left">Effective Roles</td>
+        <td>
           [% PROCESS _user_roles.tt %]
         </td>
       </tr>
@@ -169,11 +169,11 @@
 
     <table border="0" class='data conftoolusers' style="margin-top: 30px;">
       <tr>
-        <td colspan=2 class='dataVar dataUserVar'>Contact Actions</td>
+        <td colspan=2 >Contact Actions</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Remove</td>
-        <td class='dataVal'>
+        <td align="left">Remove</td>
+        <td>
           <input type="submit" name="send" value="remove user profile data"[% IF !profile_file_exists %] disabled[% END %]><br>
           <i>[% profile_file %][% IF !profile_file_exists %] (does not exist)[% END %]</i>
         </td>

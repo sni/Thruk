@@ -23,7 +23,6 @@ for my $theme (@themes) {
 
 my $pages = [
     '/thruk/main.html',
-    '/thruk/side.html',
     '/thruk/cgi-bin/status.cgi',
 ];
 

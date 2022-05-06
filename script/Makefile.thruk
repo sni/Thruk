@@ -4,6 +4,8 @@ SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
 
+.PHONY: themes
+
 newversion: versionprecheck
 	test -e .git
 	make NEWVERSION="$(DAILYVERSION)" version
@@ -236,3 +238,18 @@ deb: $(NAME)-$(VERSION).tar.gz
 	tar zxvf $(NAME)-$(VERSION).tar.gz
 	debuild -rfakeroot -i -us -uc -b
 	rm -rf $(NAME)-$(VERSION)
+
+themes:
+	for theme in themes/themes-available/*/Makefile; do \
+		make -C $$(dirname $$theme); \
+	done
+
+themesclean:
+	for theme in themes/themes-available/*/Makefile; do \
+		make -C $$(dirname $$theme) clean; \
+	done
+
+themeswatcher:
+	parallel -j 2 -- \
+		'make -C themes/themes-available/Light watch 2>&1 | ts "[%H:%M:%S][Light] "' \
+		'make -C themes/themes-available/Dark  watch 2>&1 | ts "[%H:%M:%S][Dark]  "'

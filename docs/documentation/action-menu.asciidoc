@@ -114,7 +114,7 @@ function js_basic_menu(data) {
       "icon":"../themes/{{theme}}/images/dropdown.png",
       "title": "javascript menu",
       "menu":[{
-          "icon":"../themes/{{theme}}/images/link.png",
+          "icon":"uil-link",
           "label":"test menu item",
           "action":"http://..."
         }]
@@ -135,12 +135,12 @@ function js_adv_menu(cfg) {
       "title": "javascript advanced menu",
       "menu":[
         {
-          "icon":"../themes/{{theme}}/images/link.png",
+          "icon":"uil-link",
           "label":"test menu item",
           "action":"http://..."
         },
         {
-          "icon":"../themes/{{theme}}/images/folder.png",
+          "icon":"fa-folder",
           "label":"list all hosts",
           "menu": js_adv_menu_submenu
         }
@@ -219,7 +219,7 @@ server actions.
 .....
 {% raw %}
 {
-  "icon":"../themes/{{theme}}/images/arrow_refresh.png",
+  "icon":"uil-redo",
   "label":"service restart",
   "action":"server://restart_service",
   "onclick": "return(confirm('Really restart service?'));"
@@ -241,10 +241,12 @@ function js_menu(d) {
     "title": "form menu",
     "menu":[
       {
-        "icon":"../themes/{{theme}}/images/page_white_key.png",
-        "html":"<b>test</b>"
+        "icon":"uil-document-info",
+        "html":"<div class='flexrow gap-1 flex-nowrap'>"
+              +"<b>test</b>"
               +"<input type='text'>"
               +"<button onclick='test_form_handler(this)'>ok</button>"
+              +"</div>"
       }
     ]
   });
@@ -253,8 +255,7 @@ function js_menu(d) {
 function test_form_handler(btn) {
   // prevent clicking twice
   // and give user some response by adding a loading gif to the button
-  jQuery(btn).attr('disabled', true)
-             .html("<img src='"+url_prefix+"themes/"+theme+"/images/loading-icon.gif'>");
+  jQuery(btn).attr('disabled', true).html("<div class='spinner'>");
 
   // send user input as server action
   var input = jQuery(btn).prev().val();

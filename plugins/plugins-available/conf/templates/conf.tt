@@ -1,52 +1,73 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-<div align="center">
+<div class="flexcol mt-5 items-center">
+  <div class="card w-[480px]">
+    <div class="head">
+      <h3>General Configuration</h3>
+    </div>
+    <div class="actionbox">
+      [% IF conf_config.exists('thruk') %]
+      <div>
+        <a href="conf.cgi?sub=thruk">
+          <i class="uil uil-sliders-v-alt"></i>
+          <span class="inline-block w-32 font-semibold">Thruk Settings</span>
+          <span>Thruks settings from the thruk_local.conf</span>
+        </a>
+      </div>
+      <div>
+        <a href="conf.cgi?sub=backends">
+          <i class="uil uil-data-sharing"></i>
+          <span class="inline-block w-32 font-semibold">Backends / Sites</span>
+          <span>Configure Backends Connections</span>
+        </a>
+      </div>
+      [% END %]
+      [% IF conf_config.exists('cgi.cfg') %]
+      <div>
+        <a href="conf.cgi?sub=cgi">
+          <i class="uil uil-lock-open-alt"></i>
+          <span class="inline-block w-32 font-semibold">CGI &amp; Access</span>
+          <span>Change CGI and access settings from your cgi.cfg</span>
+        </a>
+      </div>
+      [% END %]
+      [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
+      <div>
+        <a href="conf.cgi?sub=users">
+          <i class="uil uil-users-alt"></i>
+          <span class="inline-block w-32 font-semibold">User settings</span>
+          <span>User settings, passwords and permissions</span>
+        </a>
+      </div>
+      [% END %]
+      <div>
+        <a href="conf.cgi?sub=plugins">
+          <i class="uil uil-puzzle-piece"></i>
+          <span class="inline-block w-32 font-semibold">Plugins</span>
+          <span>Plugin Manager for Thruk Addons</span>
+        </a>
+      </div>
+    </div>
+  </div>
 
-  <table border="0" class='data confTable' style="width:470px">
-    <tr>
-      <th class='data conftoolheader' colspan=2>General Configuration</th>
-    </tr>
-    [% IF conf_config.exists('thruk') %]
-    <tr>
-      <td class='dataVar'><a href="conf.cgi?sub=thruk">Thruk Settings</a></td>
-      <td class='dataVal'>Thruks settings from the thruk_local.conf</td>
-    </tr>
-    <tr>
-      <td class='dataVar'><a href="conf.cgi?sub=backends">Backends / Sites</a></td>
-      <td class='dataVal'>Configure Backends Connections</td>
-    </tr>
-    [% END %]
-    [% IF conf_config.exists('cgi.cfg') %]
-    <tr>
-      <td class='dataVar'><a href="conf.cgi?sub=cgi">CGI &amp; Access</a></td>
-      <td class='dataVal'>Change CGI and access settings from your cgi.cfg</td>
-    </tr>
-    [% END %]
-    [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
-    <tr>
-      <td class='dataVar'><a href="conf.cgi?sub=users">User settings</a></td>
-      <td class='dataVal'>User settings, password and permissions</td>
-    </tr>
-    [% END %]
-    <tr>
-      <td class='dataVar'><a href="conf.cgi?sub=plugins">Plugins</a></td>
-      <td class='dataVal'>Plugin Manager for Thruk Addons</td>
-    </tr>
-  </table>
 
-  <br>
-  <table border="0" class='data confTable' style="width:470px">
-    <tr>
-      <th class='data conftoolheader' colspan=2>Site Configuration</th>
-    </tr>
-    <tr>
-      <td class='dataVar' nowrap>[% IF has_obj_conf %]<a href="conf.cgi?sub=objects">[% END %]Object settings[% IF has_obj_conf %]</a>[% END %]</td>
-      <td class='dataVal'>Host, service, timeperiods and notification settings.
-        [% IF !has_obj_conf %]<br><span class="alerttext">No object configuration enabled, see <a href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation</a>.</span>[% END %]
-      </td>
-    </tr>
-  </table>
-
+  <div class="card w-[480px]">
+    <div class="head">
+      <h3>Site Configuration</h3>
+    </div>
+    <div class="actionbox">
+      <div>
+        [% IF has_obj_conf %]
+          <a class="link" href="conf.cgi?sub=objects">
+            <i class="uil uil-server"></i>
+            <span class="inline-block w-32 font-semibold">Object settings</span>
+            <span>Host, service, timeperiods and notification settings</span>
+          </a>
+        [% END %]
+        [% IF !has_obj_conf %]<br><span class="textALERT">No object configuration enabled, see <a class="link" href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation</a>.</span>[% END %]
+      </div>
+    </div>
+  </div>
 </div>
 
 [% END %]

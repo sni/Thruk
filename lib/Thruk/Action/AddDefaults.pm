@@ -33,8 +33,7 @@ use Thruk::Utils::Menu ();
 use Thruk::Utils::Timezone ();
 
 my @stash_config_keys = qw/
-    url_prefix product_prefix title_prefix use_pager start_page documentation_link
-    use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
+    url_prefix product_prefix title_prefix use_feature_configtool
     datetime_format datetime_format_today datetime_format_long datetime_format_log
     show_notification_number strict_passive_mode hide_passive_icon
     show_full_commandline all_problems_link show_long_plugin_output
@@ -73,24 +72,6 @@ sub begin {
     $c->stash->{'c'} = $c;
     weaken($c->stash->{'c'});
 
-    # frame options
-    my $use_frames = $c->config->{'use_frames'};
-    my $show_nav_button = 1;
-    if( exists $c->req->parameters->{'nav'} and $c->req->parameters->{'nav'} ne '' ) {
-        if( $c->req->parameters->{'nav'} ne '1' ) {
-            $show_nav_button = 1;
-        }
-        $use_frames = 1;
-        if( $c->req->parameters->{'nav'} eq '1' ) {
-            $use_frames = 0;
-        }
-    }
-    if( $c->config->{'use_frames'} == 1 ) {
-        $show_nav_button = 0;
-    }
-    $c->stash->{'use_frames'}         = $use_frames;
-    $c->stash->{'show_nav_button'}    = $show_nav_button;
-    $c->stash->{'reload_nav'}         = $c->req->parameters->{'reload_nav'} || '';
     $c->stash->{'show_sounds'}        = 0;
     $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} || 0;
 
@@ -111,19 +92,13 @@ sub begin {
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
 
-    $c->stash->{all_in_one_css} = 0;
-    if($theme eq 'Thruk' || $theme eq 'Thruk2') {
-        $c->stash->{all_in_one_css} = 1;
-    }
-
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;
     }
     $c->stash->{hidetop} = $c->req->parameters->{'hidetop'} || '';
 
     # minmal custom monitor screen
-    $c->stash->{minimal}               = $c->req->parameters->{'minimal'} || '';
-    $c->stash->{show_nav_button}       = 0 if $c->stash->{minimal};
+    $c->stash->{minimal} = $c->req->parameters->{'minimal'} || '';
 
     # menu cookie set?
     my $menu_states = {};
@@ -145,7 +120,7 @@ sub begin {
     $c->stash->{'menu_states'} = $menu_states;
 
     my $target = $c->req->parameters->{'target'};
-    if( !$c->stash->{'use_frames'} && defined $target && $target eq '_parent' ) {
+    if(defined $target && $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
     }
 
@@ -158,7 +133,7 @@ sub begin {
     $c->stash->{'logo_path_prefix'}  = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/logos/';
 
     # view mode must be a scalar
-    for my $key (qw/view_mode hidesearch hidetop style/) {
+    for my $key (qw/view_mode hidetop style/) {
         if($c->req->parameters->{$key}) {
             if(ref $c->req->parameters->{$key} eq 'ARRAY') {
                 $c->req->parameters->{$key} = pop(@{$c->req->parameters->{$key}});
@@ -183,7 +158,7 @@ sub begin {
     if(!$c->user_exists) {
         my $product_prefix = $c->config->{'product_prefix'};
         # if changed, adjust thruk_auth as well
-        if($c->req->path_info =~ m#/$product_prefix/(startup\.html|themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
+        if($c->req->path_info =~ m#/$product_prefix/(themes|javascript|cache|vendor|images|usercontent|cgi\-bin/(login|remote)\.cgi)#mx) {
             _debug($1.".cgi does not require authentication") if Thruk::Base->debug;
         } else {
             if(!$c->authenticate(skip_db_access => 1)) {
@@ -226,10 +201,6 @@ sub begin {
     # ex.: global bookmarks from var/global_user_data
     $c->stash->{global_user_data} = Thruk::Utils::get_global_user_data($c);
 
-    # set some pager defaults
-    $c->stash->{'entries_per_page'} = 0;
-    $c->stash->{'data'}             = [];
-
     # do some sanity checks
     if($c->req->parameters->{'referer'}) {
         $c->req->parameters->{'referer'} =~ s%^http://$c->{'env'}->{'SERVER_NAME'}(:80|)/%/%gmx;
@@ -261,10 +232,7 @@ sub end {
 
     if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
         if(!$c->stash->{'skip_navigation'}) {
-            # we need the navigation only if we don't use frames or its the side.html
-            if($c->req->path =~ m/\/side\.html/mx || !$c->stash->{'use_frames'}) {
-                Thruk::Utils::Menu::read_navigation($c);
-            }
+            Thruk::Utils::Menu::read_navigation($c);
         }
     }
 
@@ -456,9 +424,6 @@ sub add_defaults {
     $c->stash->{'user_tz'} = $user_tz;
 
     ###############################
-    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
-
-    ###############################
     $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'} || 0;
     $c->stash->{'enable_icinga_features'}  = $c->config->{'enable_icinga_features'}  || 0;
 
@@ -539,7 +504,7 @@ sub add_defaults {
             sleep 1;
         }
         if($err) {
-            # side.html and some other pages should not be redirect to the error page on backend errors
+            # index.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
             if(Thruk::Base->debug) {
                 _warn("data source error: $err");
@@ -601,9 +566,7 @@ sub add_defaults {
                                        or $c->stash->{'enable_shinken_features'};
 
     $c->stash->{'navigation'} = "";
-    if( $c->stash->{'use_frames'} == 0 ) {
-        Thruk::Utils::Menu::read_navigation($c);
-    }
+    Thruk::Utils::Menu::read_navigation($c);
 
     # config edit buttons?
     $c->stash->{'show_config_edit_buttons'} = 0;
@@ -838,7 +801,7 @@ sub update_site_panel_hashes {
     $c->stash->{'sites'}            = $c->db->{'sections'};
 
     # merge all panel in a Default section
-    if($c->stash->{'show_sitepanel'} eq 'panel') {
+    if($show_sitepanel eq 'panel' || $show_sitepanel eq 'list') {
         my $sites = $c->stash->{'sites'};
         if(!$sites->{'sub'} || !$sites->{'sub'}->{'Default'}) {
             $sites->{'sub'}->{'Default'} = { peers => delete $sites->{'peers'} || [] };

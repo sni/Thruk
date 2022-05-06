@@ -52,20 +52,19 @@ sub index {
             return;
         }
         my $action = $c->req->parameters->{'action'};
-        my $send   = $c->req->parameters->{'send'};
-        if($send && $send eq 'Create New API Key') {
+        if($action eq 'create') {
             if(!$c->config->{'api_keys_enabled'}) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'API keys are disabled' );
                 return $c->redirect_to('user.cgi');
             }
             if($c->config->{'max_api_keys_per_user'} <= 0 || $c->check_user_roles("authorized_for_read_only")) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to create API keys.' );
-                return $c->redirect_to('user.cgi');
+                return $c->redirect_to('user.cgi#apikeys');
             }
             my $keys = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
             if(scalar @{$keys} >= $c->config->{'max_api_keys_per_user'}) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Maximum number of API keys ('.$c->config->{'max_api_keys_per_user'}.') for this user reached.' );
-                return $c->redirect_to('user.cgi');
+                return $c->redirect_to('user.cgi#apikeys');
             }
             my($private_key, undef, undef) = Thruk::Utils::APIKeys::create_key_from_req_params($c);
             if($private_key) {
@@ -77,11 +76,11 @@ sub index {
         if($action eq 'remove_key') {
             if($c->check_user_roles("authorized_for_read_only")) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to delete API keys.' );
-                return $c->redirect_to('user.cgi');
+                return $c->redirect_to('user.cgi#apikeys');
             }
             Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'file'});
             Thruk::Utils::set_message( $c, 'success_message', 'API key removed' );
-            return $c->redirect_to('user.cgi');
+            return $c->redirect_to('user.cgi#apikeys');
         }
         if($action eq 'save') {
             my $data = Thruk::Utils::get_user_data($c);

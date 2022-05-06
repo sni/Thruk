@@ -403,7 +403,34 @@ sub _renew_navigation {
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
             $link->{'html'}   = $link->{'html'};
-            push(@{$section->{'links'}}, $link);
+
+            my $added = 0;
+            if($link->{'before'}) {
+                my $x = 0;
+                for my $s (@{$section->{'links'}}) {
+                    if($s->{'name'} eq $link->{'before'}) {
+                        splice(@{$section->{'links'}}, $x, 0, $link);
+                        $added = 1;
+                        last;
+                    }
+                    $x++;
+                }
+            }
+            elsif($link->{'after'}) {
+                my $x = 0;
+                for my $s (@{$section->{'links'}}) {
+                    if($s->{'name'} eq $link->{'after'}) {
+                        splice(@{$section->{'links'}}, $x+1, 0, $link);
+                        $added = 1;
+                        last;
+                    }
+                    $x++;
+                }
+            }
+
+            if(!$added) {
+                push(@{$section->{'links'}}, $link);
+            }
         }
     }
 
@@ -503,9 +530,6 @@ sub _get_menu_target {
 sub _set_menu_target {
     my($c) = @_;
     return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
-    if($c->stash->{'use_frames'}) {
-        return('main');
-    }
     return('_self');
 }
 
@@ -550,7 +574,7 @@ sub _get_section_by_name {
         my $section = {
             name  => $name,
             links => [],
-            icon  => '',
+            icon  => 'uil-bookmark',
         };
         push @{$Thruk::Utils::Menu::navigation}, $section;
         return $section;

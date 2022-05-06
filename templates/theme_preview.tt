@@ -1,0 +1,427 @@
+﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+
+<div class="flexrow justify-between">
+  [% PROCESS _infobox.tt %]
+  <div class="card min-w-[150px] place-items-center grid grid-cols-1">
+    <h3 class="text-center w-full">Switch Theme</h3>
+    <div class="flex">
+      <select multiple onchange="switchTheme(this)" size="[% c.config.themes.size %]" style="scrollbar-width: none;">
+        [% FOREACH t = c.config.themes %]
+          <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+        [% END %]
+      </select>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="grid grid-cols-2 2xl:grid-cols-3 gap-5 mt-5">
+  <div class="card min-w-[300px]">
+    <div class="head">
+      <h3>Logos</h3>
+    </div>
+    <div class="body">
+      <table>
+        <tr>
+          <th>small</th>
+          <td><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" alt="Thruk" title="Thruk"></td>
+        </tr>
+        <tr>
+          <th>normal</th>
+          <td><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card min-w-[300px]">
+    <div class="head">
+      <h3>.card</h3>
+    </div>
+    <div class="body">
+      <table>
+        <tr>
+          <th><a href='#'>table header</a></th>
+          <th><a href='#'>table header</a></th>
+        </tr>
+        <tr>
+          <td><a href='#'>table row</a></td>
+          <td><a href='#'>table row</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card shadow-float min-w-[300px]">
+    <div class="head">
+      <h3>.card .shadow-float</h3>
+    </div>
+    <div class="body">
+      <table>
+        <tr><td><span class="text1">.text1</span></td></tr>
+        <tr><td><span class="text2">.text2</span></td></tr>
+        <tr><td><span class="text3">.text3</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card min-w-[400px] text-center">
+    <div class="head">
+      <h3 class="text-left">Host Colors</h3>
+    </div>
+    <table class="w-full">
+      <tr>
+        <td class="UP textUP">UP</td>
+        <td class="UNREACHABLE textUNREACHABLE">UNREACHABLE</td>
+        <td class="DOWN textDOWN">DOWN</td>
+        <td class="PENDING textPENDING">PENDING</td>
+      </tr>
+      <tr>
+        <td class="bgUP">bgUP</td>
+        <td class="bgUNREACHABLE">bgUNREACHABLE</td>
+        <td class="bgDOWN">bgDOWN</td>
+        <td class="bgPENDING">bgPENDING</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card min-w-[400px] text-center">
+    <div class="head">
+      <h3 class="text-left">Service Colors</h3>
+    </div>
+    <table class="w-full">
+      <tr>
+        <td class="OK textOK">OK</td>
+        <td class="WARNING textWARNING">WARNING</td>
+        <td class="UNKNOWN textUNKNOWN">UNKNOWN</td>
+        <td class="CRITICAL textCRITICAL">CRITICAL</td>
+        <td class="PENDING textPENDING">PENDING</td>
+      </tr>
+      <tr>
+        <td class="bgOK">bgOK</td>
+        <td class="bgWARNING">bgWARNING</td>
+        <td class="bgUNKNOWN">bgUNKNOWN</td>
+        <td class="bgCRITICAL">bgCRITICAL</td>
+        <td class="bgPENDING">bgPENDING</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <h3>Progressbar</h3>
+    </div>
+    <div>
+      <div class="progressbar py-1 px-2">
+        <div class="description text1 font-semibold" style="width: 90px;">Description</div>
+        <div class="bar" style="height: 30px; width: 300px;">
+          <div style="background: #7FDBFF; width:20%"></div>
+          <div style="background: #FFDC00; width:25%"></div>
+          <div style="background: #FF851B; width:10%"></div>
+        </div>
+        <div class="percent" style="color: #FF851B"><span>66%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card w-fit">
+    <div class="head">
+      <h3>Buttons</h3>
+    </div>
+    <div>
+      <table class="w-full cellborder text-center border-white border-2">
+        <tr>
+          <th></th>
+          <th>small</th>
+          <th>(no class)</th>
+          <th>big</th>
+          <th>large</th>
+        </tr>
+        <tr>
+          <th>default</th>
+          <td></td>
+          <td><button>default</button></td>
+          <td><button class="big">big</button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>with icon</th>
+          <td></td>
+          <td><button><i class="uil uil-grin"></i>default</button></td>
+          <td><button class="big"><i class="uil uil-grin"></i>big</button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>.round</th>
+          <td><button class="small round"><i class="uil uil-grin"></i></button></td>
+          <td><button class="round"><i class="uil uil-grin"></i></button></td>
+          <td><button class="big round"><i class="uil uil-grin"></i></button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>.secondary</th>
+          <td></td>
+          <td><button class="secondary">default</button></td>
+          <td><button class="big secondary">big</button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>.green</th>
+          <td></td>
+          <td><button class="green">default</button></td>
+          <td><button class="big green">big</button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>.round .secondary</th>
+          <td><button class="small round secondary"><i class="uil uil-grin"></i></button></td>
+          <td><button class="round secondary"><i class="uil uil-grin"></i></button></td>
+          <td><button class="big round secondary"><i class="uil uil-grin"></i></button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>.iconOnly</th>
+          <td></td>
+          <td><button class="iconOnly"><i class="uil uil-grin"></i></button></td>
+          <td><button class="big iconOnly"><i class="uil uil-grin"></i></button></td>
+          <td><button class="large iconOnly"><i class="uil uil-grin"></i></button></td>
+        </tr>
+        <tr>
+          <th>.spinner</th>
+          <td></td>
+          <td colspan=3>
+            <button>
+              <div class="spinner mr-1"></div>processing commands...
+            </button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <h3>Icons in Actionbox</h3>
+    </div>
+    <div class="actionbox">
+      <!-- icons are updated automatically by running ./script/theme-icons-update.pl (do not change manually) -->
+      <div><a><i class="fa-solid fa-arrow-rotate-left"></i>fa-solid fa-arrow-rotate-left</a></div>
+      <div><a><i class="fa-solid fa-bell"></i>fa-solid fa-bell</a></div>
+      <div><a><i class="fa-solid fa-bell-slash"></i>fa-solid fa-bell-slash</a></div>
+      <div><a><i class="fa-solid fa-bug"></i>fa-solid fa-bug</a></div>
+      <div><a><i class="fa-solid fa-business-time"></i>fa-solid fa-business-time</a></div>
+      <div><a><i class="fa-solid fa-check round small green"></i>fa-solid fa-check round small green</a></div>
+      <div><a><i class="fa-solid fa-clipboard"></i>fa-solid fa-clipboard</a></div>
+      <div><a><i class="fa-solid fa-clipboard-check"></i>fa-solid fa-clipboard-check</a></div>
+      <div><a><i class="fa-solid fa-clock"></i>fa-solid fa-clock</a></div>
+      <div><a><i class="fa-solid fa-comment"></i>fa-solid fa-comment</a></div>
+      <div><a><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
+      <div><a><i class="fa-solid fa-folder-open"></i>fa-solid fa-folder-open</a></div>
+      <div><a><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
+      <div><a><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
+      <div><a><i class="fa-solid fa-trash"></i>fa-solid fa-trash</a></div>
+      <div><a><i class="fa-solid fa-volume-high small"></i>fa-solid fa-volume-high small</a></div>
+      <div><a><i class="fa-solid fa-wrench small"></i>fa-solid fa-wrench small</a></div>
+      <div><a><i class="fa-solid fa-xmark round small red"></i>fa-solid fa-xmark round small red</a></div>
+      <div><a><i class="uil uil-angle-double-left"></i>uil uil-angle-double-left</a></div>
+      <div><a><i class="uil uil-angle-double-right"></i>uil uil-angle-double-right</a></div>
+      <div><a><i class="uil uil-angle-down"></i>uil uil-angle-down</a></div>
+      <div><a><i class="uil uil-angle-left"></i>uil uil-angle-left</a></div>
+      <div><a><i class="uil uil-angle-right"></i>uil uil-angle-right</a></div>
+      <div><a><i class="uil uil-arrow-from-top"></i>uil uil-arrow-from-top</a></div>
+      <div><a><i class="uil uil-bookmark"></i>uil uil-bookmark</a></div>
+      <div><a><i class="uil uil-brush-alt"></i>uil uil-brush-alt</a></div>
+      <div><a><i class="uil uil-cog"></i>uil uil-cog</a></div>
+      <div><a><i class="uil uil-columns"></i>uil uil-columns</a></div>
+      <div><a><i class="uil uil-corner-down-right-alt"></i>uil uil-corner-down-right-alt</a></div>
+      <div><a><i class="uil uil-dialpad"></i>uil uil-dialpad</a></div>
+      <div><a><i class="uil uil-envelope-add"></i>uil uil-envelope-add</a></div>
+      <div><a><i class="uil uil-exclamation round yellow"></i>uil uil-exclamation round yellow</a></div>
+      <div><a><i class="uil uil-eye-slash"></i>uil uil-eye-slash</a></div>
+      <div><a><i class="uil uil-file-export"></i>uil uil-file-export</a></div>
+      <div><a><i class="uil uil-file-plus-alt"></i>uil uil-file-plus-alt</a></div>
+      <div><a><i class="uil uil-filter"></i>uil uil-filter</a></div>
+      <div><a><i class="uil uil-folder"></i>uil uil-folder</a></div>
+      <div><a><i class="uil uil-grids"></i>uil uil-grids</a></div>
+      <div><a><i class="uil uil-home"></i>uil uil-home</a></div>
+      <div><a><i class="uil uil-left-arrow-to-left small"></i>uil uil-left-arrow-to-left small</a></div>
+      <div><a><i class="uil uil-link"></i>uil uil-link</a></div>
+      <div><a><i class="uil uil-list-ul"></i>uil uil-list-ul</a></div>
+      <div><a><i class="uil uil-newspaper"></i>uil uil-newspaper</a></div>
+      <div><a><i class="uil uil-previous"></i>uil uil-previous</a></div>
+      <div><a><i class="uil uil-question"></i>uil uil-question</a></div>
+      <div><a><i class="uil uil-schedule"></i>uil uil-schedule</a></div>
+      <div><a><i class="uil uil-signout"></i>uil uil-signout</a></div>
+      <div><a><i class="uil uil-star"></i>uil uil-star</a></div>
+      <div><a><i class="uil uil-step-forward"></i>uil uil-step-forward</a></div>
+      <div><a><i class="uil uil-sync"></i>uil uil-sync</a></div>
+      <div><a><i class="uil uil-table"></i>uil uil-table</a></div>
+      <div><a><i class="uil uil-thunderstorm"></i>uil uil-thunderstorm</a></div>
+      <div><a><i class="uil uil-times"></i>uil uil-times</a></div>
+      <div><a><i class="uil uil-times-circle"></i>uil uil-times-circle</a></div>
+      <div><a><i class="uil uil-top-arrow-to-top"></i>uil uil-top-arrow-to-top</a></div>
+      <div><a><i class="uil uil-user"></i>uil uil-user</a></div>
+      <div><a><i class="uil uil-volume"></i>uil uil-volume</a></div>
+      <div><a><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
+<!-- end of "do not change manually" -->
+      <div>
+        <a>
+         <div class="spinner mr-2"></div>Spinner
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head">
+      <h3>Forms</h3>
+    </div>
+    <div class="body">
+      <form>
+        <table class="cellspacing">
+          <tr>
+            <th>Textfield</th>
+            <td><input type="text" class="w-full"></td>
+          </tr>
+          <tr>
+            <th class="required">Invalid</th>
+            <td><input type="text" class="w-full" name="test" required></td>
+          </tr>
+          <tr>
+            <th>Disabled</th>
+            <td><input type="text" value="disabled text" class="w-full" disabled></td>
+          </tr>
+          <tr>
+            <th>Password</th>
+            <td><input type="password" class="w-full"></td>
+          </tr>
+          <tr>
+            <th>Search</th>
+            <td><input type="search" class="deletable" class="w-full"></td>
+          </tr>
+          <tr>
+            <th>Submit</th>
+            <td><input type="submit" value="submit"></td>
+          </tr>
+          <tr>
+            <th>Dropdown</th>
+            <td>
+              <select>
+                <optgroup label="optgroup">
+                  <option>option</option>
+                  <option>option</option>
+                </optgroup>
+                <option>option</option>
+                <option>option</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Radiobox</th>
+            <td>
+              <input type="radio" name="radio" value="1" checked><label class="ml-1">Option 1</label>
+              <input type="radio" name="radio" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+            </td>
+          </tr>
+          <tr>
+            <th>Checkbox</th>
+            <td>
+              <input type="checkbox" name="check" value="1" checked><label class="ml-1">Option 1</label>
+              <input type="checkbox" name="check" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<div class="card w-full mt-5">
+  <div class="mainTableHeader">
+    <div>
+      <i class="fa-solid fa-bars"></i>
+    </div>
+    <div>
+      [% PROCESS _pager.tt pager={ page => 1, total_pages => 15, entries => 10 } data => [] %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
+    </div>
+  </div>
+  <div class="mainTable">
+    <table class="mainTable striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Service</th>
+          <th class="text-center">Duration</th>
+          <th>Attempt</th>
+          <th>ASDasdas</th>
+          <th>ASDasdas</th>
+          <th>ASDasdas</th>
+          <th>ASDasdas</th>
+          <th>Status Information</th>
+          <th>Attempt</th>
+          <th>ASDasdas</th>
+          <th>ASDasdas</th>
+          <th>ASDasdas</th>
+        </tr>
+      </thead>
+      <tbody>
+        [% index = 0 %]
+        [% WHILE index < 60 %]
+          <tr>
+            <td>
+              <div class="col_host_name">Test Host</div>
+            </td>
+            <td>
+              <div class="col_description">Checks the current CPU load on the system</div>
+            </td>
+            <td class="text-center">4d 10h 05m 10s</td>
+            <td>1/3</td>
+            <td>123</td>
+            <td>345</td>
+            <td>123</td>
+            <td>123</td>
+            <td class="col_plugin_output">
+              <div class="col_plugin_output">OK: OK - hostname: rta 2.526ms, lost 0%</div>
+            </td>
+            <td>123</td>
+            <td>123</td>
+            <td>123</td>
+            <td>123</td>
+          </tr>
+          [% index = index + 1 %]
+        [% END %]
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mainTableFooter">
+    <div class="flex-1 self-center">
+      [% PROCESS _pager_total_items.tt size=100 total_items=242 %][%# TODO: check #%]
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function switchTheme(sel) {
+  var theme = jQuery(sel).val()[0];
+  cookieSave('thruk_theme', theme);
+  jQuery("LINK.maintheme").attr("href", "[% url_prefix %]themes/"+theme+"/stylesheets/"+theme+".css");
+  jQuery("IMG").each(function() {
+    this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
+  });
+  if(window && window.parent && window.parent.frames[0] && window.parent.frames[0].document) {
+    jQuery("LINK.maintheme", window.parent.frames[0].document).attr("href", "[% url_prefix %]themes/"+theme+"/stylesheets/"+theme+".css")
+    jQuery("IMG", window.parent.frames[0].document).each(function() {
+      this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
+    });
+  }
+}
+</script>
+
+[% PROCESS _footer.tt %]

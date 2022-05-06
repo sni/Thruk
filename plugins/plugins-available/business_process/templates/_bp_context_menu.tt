@@ -24,12 +24,12 @@
       <ul>
         <li><a href="bp.cgi?action=details&amp;bp=[% bp.id %][% IF editmode %]&amp;edit=1[% END %]"><span>&nbsp;</span>Disable Test Mode</a></li>
         <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(-1)"><span class="">&nbsp;</span>Normal</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(0)"><span class="">&nbsp;</span>Ok</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(1)"><span class="">&nbsp;</span>Warning</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(2)"><span class="">&nbsp;</span>Critical</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(3)"><span class="">&nbsp;</span>Unknown</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(4)"><span class="">&nbsp;</span>Pending</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(-1)"><span>&nbsp;</span>Normal</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(0)"><span>&nbsp;</span>Ok</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(1)"><span>&nbsp;</span>Warning</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(2)"><span>&nbsp;</span>Critical</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(3)"><span>&nbsp;</span>Unknown</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(4)"><span>&nbsp;</span>Pending</a></li>
       </ul>
     </li>
   [% ELSE %]

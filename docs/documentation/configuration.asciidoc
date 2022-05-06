@@ -26,12 +26,12 @@ pairs like Backends are merged.
 ex.:
 
   thruk.conf:
-  use_frames = 0
+  default_theme = Thruk
 
   thruk_local.conf:
-  use_frames = 1
+  default_theme = Company
 
-results in use_frames = 1
+results in default_theme = Company
 
 nested values:
 
@@ -255,6 +255,7 @@ ex.:
 
 
 === mobile_agent
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
 Specify user agents which will be redirected to the mobile plugin (if
 enabled).
 
@@ -814,6 +815,9 @@ ex.:
 
 
 === use_pager
+
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
+
 Using the pager will make huge pages much faster as most people don't want a
 services page with 100.000 services displayed. Can be disabled if you don't
 need it.
@@ -913,6 +917,8 @@ ex.:
 
 === use_frames
 
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
+
 Set whether you want to use a framed navigation or not. With using frames it's
 sometimes easier to include addons.
 See allowed_frame_links option for how to integrate addons.
@@ -922,14 +928,18 @@ ex.:
   use_frames = 0
 
 === navframesize
-{% include new_since.ad version="2.36" %}
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
+
 Width of the navigation frame in px.
 
 ex.:
 
-  navframesize = 172
+  navframesize = 190
 
 === use_new_command_box
+
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
+
 Show the new split command box on the host / service details page.
 
 ex.:
@@ -986,23 +996,13 @@ ex.:
 
 
 === info_popup_event_type
-On which event should the comments / downtime or longpluginoutput popup
-show up. Valid values are onclick or onmouseover.
 
-ex.:
-
-  info_popup_event_type = onmouseover
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
 
 
 === info_popup_options
-Options for the popup window used for long pluginoutput, downtimes and
-comments.
-See http://www.bosrup.com/web/overlib/?Command_Reference for
-what options are available
 
-ex.:
-
-  info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
 
 
 === show_notification_number
@@ -2155,12 +2155,12 @@ Sample menu with two items and a seperator:
     "title": "sample menu",
     "menu": [
       {
-        "icon":   "../themes/{{theme}}/images/arrow_refresh.png",
+        "icon":   "uil-redo",
         "label":  "refresh",
         "action": "server://refresh/$HOSTNAME$"
       },
       {
-        "icon":   "../themes/{{theme}}/images/page_white_key.png",
+        "icon":   "fa-rocket",
         "label":  "example",
         "action": "server://example/$HOSTNAME$/$SERVICEDESC$"
       },
@@ -2179,6 +2179,10 @@ A menu has the following attributes:
 
      ** `icon`          icon for the menu itself. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url
                         and `{% raw %}{{remote_user}}{% endraw %}` for the user name. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
+                        An Icon can be either:
+                          - a path to an image
+                          - an unicon icon when startin with `uil-`
+                          - a font-awesome icon when startin with `fa-`
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
      ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
@@ -2189,6 +2193,10 @@ A single `"-"` item can be used as a menu item seperator.
 The menu item can have the following attributes:
 
      ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
+                        An Icon can be either:
+                          - a path to an image
+                          - an unicon icon when startin with `uil-`
+                          - a font-awesome icon when startin with `fa-`
      ** `label`         label name of the menu item.
      ** `menu`          list of sub menu items.
      ** `action`        url or action which will be run or openend. This can either be a
@@ -2237,7 +2245,7 @@ Sample icons with two action icons:
       "target":"_blank"
     },
     {
-      "icon":"../themes/{{theme}}/images/arrow_refresh.png",
+      "icon":"uil-redo",
       "action":"server://refresh/$HOSTNAME$",
     }
   ]
@@ -2289,7 +2297,7 @@ Menu files must contain the raw json definition of the action menu.
         standardmenu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
                         "title": "test title",\
                         "menu":[\
-                           {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
+                           {"icon":"uil-redo",\
                             "label":"refresh",\
                             "action":"server://refresh/$HOSTNAME$"}\
                         ]\
@@ -2319,7 +2327,7 @@ unless you want to change the menu from external commands.
     define host {
       host_name            localhost
       ...
-      _THRUK_ACTION_MENU   {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+      _THRUK_ACTION_MENU   {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"uil-redo","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
     }
 {% endraw %}
 .....
@@ -2899,19 +2907,6 @@ Format is "User Name <example@mail.com>"
 Set the default template used for new reports.
 
 
-
-== Component Thruk::Plugin::Statusmap
-
-The Statusmap plugin gives an overview over your network.
-
-ex.:
-
-  <Component Thruk::Plugin::Statusmap>
-    statusmap_default_groupby = address
-    statusmap_default_type    = table
-  </Component>
-
-
 === statusmap_default_type
 You may change the default map type of the statusmap here. Valid
 types are: 'table' and 'circle'
@@ -3041,25 +3036,6 @@ Valid values are:
 
 === read_only
 Make all bp related pages readonly.
-
-
-== Component Thruk::Plugin::Mobile
-
-The Mobile plugin adds a mobile view component.
-
-Configuration Example:
-
-  <Component Thruk::Plugin::Mobile>
-    links   = Dashboard ABC ; panorama.cgi?map=ABC
-    links   = My Problems   ; \#problems?contact=$CONTACTNAME$
-  </Component>
-
-
-=== links
-{% include new_since.ad version="2.18" %}
-Additonal links on the start page in the form `<name> ; <url>`.
-The url is relative to the mobile.cgi
-
 
 
 == User & Group Specific Overrides

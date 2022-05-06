@@ -85,8 +85,8 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42',
     '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems',
-    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&hidesearch=1&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
-    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&hidesearch=1&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
+    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
+    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
 # Search
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$hostgroup,
@@ -116,13 +116,13 @@ my $pages = [
 
 # Bugs
     # Paging all when nothing found -> div by zero
-    '/thruk/cgi-bin/status.cgi?style=detail&nav=0&entries=all&hidesearch=2&hidetop=1&s0_hoststatustypes=15&s0_servicestatustypes=29&s0_hostprops=0&s0_serviceprops=8&update.x=4&update.y=9&s0_serviceprop=8&s0_type=service&s0_op=%3D&s0_value=nonexstiant_service_check',
+    '/thruk/cgi-bin/status.cgi?style=detail&nav=0&entries=all&hidetop=1&s0_hoststatustypes=15&s0_servicestatustypes=29&s0_hostprops=0&s0_serviceprops=8&update.x=4&update.y=9&s0_serviceprop=8&s0_type=service&s0_op=%3D&s0_value=nonexstiant_service_check',
 
     # internal server error on problems page
-    '/thruk/cgi-bin/status.cgi?style=detail&hidesearch=1&s0_hoststatustypes=12&s0_servicestatustypes=31&s0_hostprops=10&s0_serviceprops=0&s1_hoststatustypes=15&s1_servicestatustypes=28&s1_hostprops=10&s1_serviceprops=10&s1_hostprop=2&s1_hostprop=8&title=All Unhandled Problems',
+    '/thruk/cgi-bin/status.cgi?style=detail&s0_hoststatustypes=12&s0_servicestatustypes=31&s0_hostprops=10&s0_serviceprops=0&s1_hoststatustypes=15&s1_servicestatustypes=28&s1_hostprops=10&s1_serviceprops=10&s1_hostprop=2&s1_hostprop=8&title=All Unhandled Problems',
 
     # search for service named '+ping' leads to err 500
-    { url => '/thruk/cgi-bin/status.cgi?style=detail&nav=&hidesearch=2&hidetop=0&s0_hoststatustypes=15&s0_servicestatustypes=31&s0_hostprops=0&s0_serviceprops=0&update.x=0&update.y=0&s0_type=search&s0_op=~&s0_value=%2Bping', fail_message_ok => 1},
+    { url => '/thruk/cgi-bin/status.cgi?style=detail&nav=&hidetop=0&s0_hoststatustypes=15&s0_servicestatustypes=31&s0_hostprops=0&s0_serviceprops=0&update.x=0&update.y=0&s0_type=search&s0_op=~&s0_value=%2Bping', fail_message_ok => 1},
 
     # internal error when searching for hostgroup/servicegroups
     '/thruk/cgi-bin/status.cgi?dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&dfl_s0_type=hostgroup&dfl_s0_op=~&dfl_s0_value='.$hostgroup.'&dfl_s0_value_sel=5',

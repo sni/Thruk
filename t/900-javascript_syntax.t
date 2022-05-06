@@ -2,8 +2,6 @@ use warnings;
 use strict;
 use Test::More;
 
-use Thruk::Utils::IO ();
-
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 BEGIN {
@@ -26,7 +24,7 @@ for my $file (@jsfiles) {
     TestUtils::verify_js($file);
 }
 
-my @tplfiles = split(/\n/, `find templates plugins/plugins-available/*/templates/. themes/themes-available/*/templates -name \*.tt`);
+my @tplfiles = split(/\n/, `find templates/. plugins/plugins-available/*/templates/. -type f`);
 for my $file (@tplfiles) {
     next if($filter && $file !~ m%$filter%mx);
     ok(1, "checking ".$file);
@@ -35,15 +33,5 @@ for my $file (@tplfiles) {
 
 use_ok("Thruk::Config");
 my $config = Thruk::Config::get_config();
-
-my $files = ['root/thruk/startup.html'];
-for my $file (@{$files}) {
-    next if($filter && $file !~ m%$filter%mx);
-    my $content = Thruk::Utils::IO::read($file);
-    my @jquery = grep/jquery-\d+.*\.js$/, @{$config->{'all_in_one_javascript'}};
-    is(scalar @jquery, 1, 'found jquery in config');
-    like($content, qr/$jquery[0]/, 'found jquery in '.$file);
-}
-
 
 done_testing();

@@ -78,3 +78,4 @@ plugins/plugins-available/omd
 plugins/plugins-available/pansnaps
 plugins/plugins-available/status-dashboard
 plugins/plugins-available/woshsh
+!root/thruk/vendor/unicons/Makefile

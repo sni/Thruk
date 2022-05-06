@@ -426,7 +426,6 @@ sub _process_host_page {
     my $backend = $c->req->parameters->{'backend'} || '';
     my $hostname = $c->req->parameters->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
     my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ], extra_columns => [qw/long_plugin_output contacts/] );
 
     return $c->detach('/error/index/5') if(!defined $hosts || !defined $hosts->[0]);
@@ -566,8 +565,6 @@ sub _process_service_page {
 
     my $servicename = $c->req->parameters->{'service'};
     return $c->detach('/error/index/15') unless defined $servicename;
-
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
     my $services = $c->db->get_services(
             filter        => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
@@ -721,8 +718,7 @@ sub _process_scheduling_page {
 
     $c->db->get_scheduling_queue($c,  sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
 
-    $c->stash->{'order'}   = $order;
-    $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
 
     return 1;
 }
@@ -825,7 +821,10 @@ sub _process_perf_info_page {
     }
 
     # add lmd cache statistics
-    $c->stash->{'lmd_stats'} = $c->db->lmd_stats($c) if $ENV{'THRUK_USE_LMD'};
+    if($ENV{'THRUK_USE_LMD'}) {
+        # sort them the same way as lmd stats
+        $c->stash->{'lmd_stats'} = [sort { $a->{'name'} cmp $b->{'name'} } @{$c->db->lmd_stats($c)}];
+    }
 
     return 1;
 }
@@ -940,6 +939,7 @@ sub _apache_status {
 sub _process_perf_info_logcache_details {
     my($c) = @_;
     $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{infoBoxTitle}     = "Logcache Statistics";
 
     my $peer_key = $c->req->parameters->{'logcachedetails'};
     my $peer     = $c->db->get_peer_by_key($peer_key);

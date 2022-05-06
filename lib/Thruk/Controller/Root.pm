@@ -2,7 +2,6 @@ package Thruk::Controller::Root;
 
 use warnings;
 use strict;
-use URI::Escape qw/uri_escape/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
@@ -45,13 +44,7 @@ because we dont want index.html in the url
 
 sub index_html {
     my( $c ) = @_;
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
-    if( $c->stash->{'use_frames'} ) {
-        return(thruk_index_html($c));
-    }
-    else {
-        return(thruk_main_html($c));
-    }
+    return(thruk_main_html($c));
 }
 
 ######################################
@@ -69,28 +62,6 @@ sub thruk_index {
     if($c->req->path !~ /\/$/mx) {
         return $c->redirect_to($c->stash->{'url_prefix'});
     }
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
-
-    if( $c->stash->{'use_frames'} && !$c->stash->{'show_nav_button'} ) {
-        return(thruk_index_html($c));
-    }
-
-    # custom start page?
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-    $c->stash->{'start_page'} = $c->stash->{'url_prefix'}.'main.html' unless defined $c->stash->{'start_page'};
-    if( CORE::index($c->stash->{'start_page'}, $c->stash->{'url_prefix'}) != 0 ) {
-
-        # external link, put in frames
-        my $start_page = uri_escape( $c->stash->{'start_page'} );
-        _debug( "redirecting to framed start page: '".$c->stash->{'url_prefix'}."frame.html?link=" . $start_page . "'" );
-        return $c->redirect_to( $c->stash->{'url_prefix'}."frame.html?link=" . $start_page );
-    }
-    elsif ( $c->stash->{'start_page'} ne $c->stash->{'url_prefix'}.'main.html' ) {
-
-        # internal link, no need to put in frames
-        _debug( "redirecting to default start page: '" . $c->stash->{'start_page'} . "'" );
-        return $c->redirect_to( $c->stash->{'start_page'} );
-    }
 
     return(thruk_main_html($c));
 }
@@ -105,99 +76,13 @@ page: /thruk/index.html
 
 sub thruk_index_html {
     my( $c ) = @_;
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-    if(!$c->stash->{'use_frames'}) {
-        return(thruk_main_html($c));
-    }
 
     # if index page is requested, this usually means this is a user $session and no script, unset fake flag to enable csrf protection
     if($c->{'session'} && $c->{'session'}->{'fake'} && $c->{'session'}->{'file'}) {
         Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { fake => undef });
     }
 
-    $c->stash->{'title'}           = $c->config->{'name'};
-    $c->stash->{'main'}            = '';
-    $c->stash->{'target'}          = '';
-    $c->stash->{'template'}        = 'index.tt';
-    $c->stash->{'no_auto_reload'}  = 1;
-    $c->stash->{'skip_navigation'} = 1;
-    $c->stash->{'inject_stats'}    = 0;
-
-    return 1;
-}
-
-######################################
-
-=head2 thruk_side_html
-
-page: /thruk/side.html
-
-=cut
-
-sub thruk_side_html {
-    my( $c ) = @_;
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-    Thruk::Utils::check_pid_file($c);
-    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
-
-    $c->stash->{'use_frames'}     = 1;
-    $c->stash->{'title'}          = $c->config->{'name'};
-    $c->stash->{'template'}       = 'side.tt';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'inject_stats'}   = 0;
-
-    return 1;
-}
-
-######################################
-
-=head2 thruk_frame_html
-
-page: /thruk/frame.html
-# creates frame for external pages
-
-=cut
-
-sub thruk_frame_html {
-    my( $c ) = @_;
-    # allowed links to be framed
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-    my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
-    my $additional_links = $c->config->{'allowed_frame_links'};
-    if( defined $additional_links ) {
-        if( ref $additional_links eq 'ARRAY' ) {
-            $valid_links = [ @{$valid_links}, @{$additional_links} ];
-        }
-        else {
-            $valid_links = [ @{$valid_links}, $additional_links ];
-        }
-    }
-
-    # check if any of the allowed links match
-    my $link = $c->req->parameters->{'link'};
-    if( defined $link ) {
-        for my $pattern ( @{$valid_links} ) {
-            if( $link =~ m/$pattern/mx ) {
-                if($c->stash->{'use_frames'}) {
-                    return $c->redirect_to($c->stash->{'url_prefix'}.'#'.$link);
-                }
-                $c->stash->{'target'}    = '_parent';
-                $c->stash->{'main'}      = $link;
-                $c->stash->{'title'}     = $c->config->{'name'};
-                $c->stash->{'template'}  = 'index.tt';
-
-                return 1;
-            }
-        }
-    }
-
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'navigation'}     = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
-    $c->stash->{'inject_stats'}   = 0;
-
-    # no link or none matched, display the usual index.html
-    return(thruk_index_html($c));
+    return(thruk_main_html($c));
 }
 
 ######################################
@@ -218,7 +103,7 @@ sub thruk_main_html {
     $c->stash->{'template'}                = 'main.tt';
     $c->stash->{'no_auto_reload'}          = 1;
     $c->stash->{'inject_stats'}            = 0;
-
+    $c->stash->{'allowed_frame_links'}     = [@{$c->config->{'allowed_frame_links'}//[]}, $c->config->{'documentation_link'}];
     return 1;
 }
 
@@ -264,6 +149,43 @@ sub thruk_docs  {
     $c->stash->{'extrabodyclass'}        = 'docs';
     $c->stash->{'page'}                  = 'splashpage';
     $c->stash->{'inject_stats'}          = 0;
+
+    return 1;
+}
+
+######################################
+
+=head2 thruk_theme_preview
+
+page: /thruk/cgi-bin/themes.cgi
+
+=cut
+
+sub thruk_theme_preview {
+    my( $c ) = @_;
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    $c->stash->{infoBoxTitle}            = 'Themes';
+    $c->stash->{'title'}                 = 'Themes';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'template'}              = 'theme_preview.tt';
+    $c->stash->{page}                    = 'status';
+
+    return 1;
+}
+
+######################################
+
+=head2 empty_page
+
+page: /thruk/cgi-bin/void.cgi
+
+=cut
+
+sub empty_page {
+    my( $c ) = @_;
+    $c->stash->{'template'} = 'void.tt';
+    $c->stash->{page}       = 'void';
+    $c->stash->{minimal}    = '1';
 
     return 1;
 }

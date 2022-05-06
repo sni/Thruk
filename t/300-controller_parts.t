@@ -17,7 +17,7 @@ BEGIN { use_ok 'Thruk::Controller::status' }
 my($host,$service) = TestUtils::get_test_service();
 
 my $pages = [
-   { url => '/thruk/cgi-bin/parts.cgi?part=_header_prefs', like => 'Sounds:' },
+   { url => '/thruk/cgi-bin/parts.cgi?part=_header_prefs', like => 'Sounds' },
    { url => '/thruk/cgi-bin/parts.cgi?part=_host_comments&host='.$host, like => 'Author' },
    { url => '/thruk/cgi-bin/parts.cgi?part=_host_downtimes&host='.$host, like => 'Author' },
    { url => '/thruk/cgi-bin/parts.cgi?part=_service_comments&host='.$host.'&service='.$service, like => 'Author' },

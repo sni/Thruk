@@ -28,7 +28,7 @@
     [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
-        [% escape_html(value) %] <img class="notclickable" src="[% logo_path_prefix %][% value | html %]" border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
+        [% escape_html(value) %] <img class="not-clickable" src="[% logo_path_prefix %][% value | html %]" border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
     [% ELSIF defaults.exists(key) && defaults.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value | html %]</a>
     [% ELSE %]

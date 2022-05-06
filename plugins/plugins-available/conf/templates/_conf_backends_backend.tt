@@ -1,16 +1,16 @@
 ﻿<tr class="backend_conf_[% x %]">
-  <td class='dataVar' align="left">Name</td>
-  <td class='dataVal'>
+  <td align="left">Name</td>
+  <td>
     <input type="hidden" name="id[% x %]" value="[% b.id %]">
     <input type="text" name="name[% x %]" value="[% b.name | html %]" style="width: 200px;" placeholder="connection name">
   </td>
-  <td class='dataVal' onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
+  <td onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
     <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove">
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">
-  <td class='dataVar' align="left">Type</td>
-  <td class='dataVal' colspan=2>
+  <td align="left">Type</td>
+  <td colspan=2>
     <select name="type[% x %]" id="sel_type[% x %]" style="width: 200px;" onchange="check_backends_config(this)">
       <option value="livestatus"[% IF b.type == 'livestatus' %] selected[% END %]>livestatus</option>
       <option value="http"[% IF       b.type == 'http'       %] selected[% END %]>http</option>
@@ -20,8 +20,8 @@
 </tr>
 [% FOREACH addr IN b.addr.list %]
 <tr class="backend_conf_[% x %] backend_connection">
-  <td class='dataVar' align="left">Connection</td>
-  <td class='dataVal' colspan=2 nowrap>
+  <td align="left">Connection</td>
+  <td colspan=2 nowrap>
     <input type="text" name="peer[% x %]" value="[% addr | html %]" class="peer_[% x %]_[% loop.index %]" style="width: 200px;" placeholder="server:6557 or socket">
     <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this, '[% x %]_[% loop.index %]')">
     <img class="hidden testimg[% x %]_[% loop.index %]" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
@@ -32,40 +32,40 @@
 </tr>
 [% END %]
 <tr class="backend_conf_[% x %] backend_auth">
-  <td class='dataVar' align="left">Auth-Key</td>
-  <td class='dataVal' colspan=2 nowrap>
+  <td align="left">Auth-Key</td>
+  <td colspan=2 nowrap>
     <input type="text" name="auth[% x %]" value="[% b.auth | html %]" style="width: 200px;" placeholder="authkey">
-    <a href="#" onclick="overlib('The authorization key is used to authorize http requests.<br>It must be provided from the remote host and can be either:<br><ul><li>an api key (<a href=&quot;http://thruk.org/documentation/rest.html#_api-key&quot; target=&quot;_blank&quot;>read more in the docs</a>)<\/li><li>the key from /var/lib/thruk/secret.key<\/li><li> the key from ~/var/thruk/secret.key (for OMD)<\/li><\/ul>',CAPTION,'Authorization Key',WIDTH,600,[% c.config.info_popup_options %]); return false;"><img id="authinfoimg[% x %]" src="[% url_prefix %]themes/[% theme %]/images/help.png" alt="help" style="vertical-align: text-bottom;" width=16 height=16></a>
+    <a href="#" onclick="overcard({ 'body': 'The authorization key is used to authorize http requests.<br>It must be provided from the remote host and can be either:<br><ul><li>an api key (<a href=&quot;http://thruk.org/documentation/rest.html#_api-key&quot; target=&quot;_blank&quot;>read more in the docs</a>)<\/li><li>the key from /var/lib/thruk/secret.key<\/li><li> the key from ~/var/thruk/secret.key (for OMD)<\/li><\/ul>', 'caption': 'Authorization Key', 'width': 600 }); return false;"><img id="authinfoimg[% x %]" src="[% url_prefix %]themes/[% theme %]/images/help.png" alt="help" style="vertical-align: text-bottom;" width=16 height=16></a>
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_proxy">
-  <td class='dataVar' align="left">Proxy</td>
-  <td class='dataVal' colspan=2 nowrap>
+  <td align="left">Proxy</td>
+  <td colspan=2 nowrap>
     <input type="text" name="proxy[% x %]" value="[% b.proxy | html %]" style="width: 200px;" placeholder="http://proxyhost:proxyport">
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_remote_name">
-  <td class='dataVar' align="left" style="white-space: nowrap;">Remote Name</td>
-  <td class='dataVal' colspan=2 nowrap>
+  <td align="left" style="white-space: nowrap;">Remote Name</td>
+  <td colspan=2 nowrap>
     <input type="text" name="remote_name[% x %]" value="[% b.remote_name | html %]" style="width: 200px;" placeholder="name of remote peer">
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_hidden">
-  <td class='dataVar' align="left">Hidden</td>
-  <td class='dataVal' colspan=2>
+  <td align="left">Hidden</td>
+  <td colspan=2>
     <input type="radio" name="hidden[% x %]" value="0"[% IF b.hidden == 0 %] checked[% END %]> No
     <input type="radio" name="hidden[% x %]" value="1"[% IF b.hidden == 1 %] checked[% END %]> Yes
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">
-  <td class='dataVar' align="left">Section</td>
-  <td class='dataVal' colspan=2>
+  <td align="left">Section</td>
+  <td colspan=2>
     <input type="text" name="section[% x %]" value="[% b.section | html %]" style="width: 200px;" placeholder="group sites by sections">
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">
-  <td class='dataVar' align="left">Source</td>
-  <td class='dataVal' colspan=2>
+  <td align="left">Source</td>
+  <td colspan=2>
     [% IF b.file != "" %][% b.file %]:[% b.lineno %][% ELSE %][% conf_file %][% END %]
   </td>
 </tr>

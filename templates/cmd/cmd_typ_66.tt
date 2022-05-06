@@ -10,14 +10,15 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% hostgroup_name       = c.request.parameters.hostgroup %]
 
     DISABLE_HOSTGROUP_HOST_NOTIFICATIONS;[% sprintf("%s",hostgroup_name) %]
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value="[% c.request.parameters.hostgroup | html %]"></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_hostgroup %]
 
 [% END %]
 [% END %]

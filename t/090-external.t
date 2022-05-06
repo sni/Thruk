@@ -15,7 +15,7 @@ BEGIN {
 
 use_ok("Thruk::Utils::External");
 
-my($res, $c) = ctx_request('/thruk/side.html');
+my($res, $c) = ctx_request('/thruk/main.html');
 my $cat      = -x '/usr/bin/cat'   ? '/usr/bin/cat'   : '/bin/cat';
 my $false    = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
 

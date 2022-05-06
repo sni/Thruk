@@ -1,34 +1,38 @@
 ﻿[% IF profile_user.roles.list.size == 0 %]
   none
 [% ELSE %]
-<table cellpadding=0 cellspacing=0>
-  [% IF profile_user.roles.list.size == 0 %]
-  <tr>
-    <td style="vertical-align: top;">&lt;none&gt;</td>
-  </tr>
-  [% END %]
-  [% has_admin = 0 %]
-  [% FOREACH r = profile_user.roles.list.sort %]
-  <tr[% IF has_admin == 1 %] style="display: none;" class="hidden_roles"[% END %]>
-    <td style="vertical-align: top;">[% r %]</td>
-    <td style="padding-left: 8px;">
-      [% IF profile_user.roles_from_groups.exists(r) %](from group: [% profile_user.roles_from_groups.$r.join(', ') %])
-      [% ELSIF profile_user.roles_from_cgi_cfg.exists(r) %](from cgi.cfg)
-      [% ELSIF profile_user.roles_from_session.exists(r) %](from session)
-      [% ELSIF r == "authorized_for_read_only" && !profile_user.can_submit_commands %](from can_submit_commands)
-      [% ELSIF r != "authorized_for_admin" %](from authorized_for_admin)
-      [% ELSIF r == "authorized_for_admin" %](from authorized_for_system_commands and<br>authorized_for_configuration_information)
-      [% END %]
-    </td>
-  </tr>
-  [% IF ! has_admin && r == "authorized_for_admin" %]
-    [% has_admin = 1 %]
-    <tr class="show_roles">
-      <td style="vertical-align: top;" colspan="2">
-        <a href="" onclick="jQuery('.hidden_roles').show(); jQuery('.show_roles').hide(); return false;">expand... <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="show error report" style="vertical-align: middle"></a>
-      </td>
-    </tr>
-  [% END %]
-  [% END %]
-</table>
+  <table class="w-full rowhover">
+    [% IF profile_user.roles.list.size == 0 %]
+      <tr>
+        <td class="align-top">&lt;none&gt;</td>
+      </tr>
+    [% END %]
+    [% has_admin = c.check_user_roles("admin") %]
+    [% FOREACH r = profile_user.roles.list.sort %]
+      <tr[% IF has_admin && r != "authorized_for_admin" %] style="display: none;" class="js-hidden_roles"[% END %]>
+        <td class="align-top">[% r %]</td>
+        <td class="pl-2">
+          [% IF profile_user.roles_from_groups.exists(r) %](from group: [% profile_user.roles_from_groups.$r.join(', ') %])
+          [% ELSIF profile_user.roles_from_cgi_cfg.exists(r) %](from cgi.cfg)
+          [% ELSIF profile_user.roles_from_session.exists(r) %](from session)
+          [% ELSIF r == "authorized_for_read_only" && !profile_user.can_submit_commands %](from can_submit_commands)
+          [% ELSIF r != "authorized_for_admin" %](from authorized_for_admin)
+          [% ELSIF r == "authorized_for_admin" %](from authorized_for_system_commands and<br>authorized_for_configuration_information)
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+    [% IF has_admin  %]
+      <tr class="js-show_roles">
+        <td class="align-top clickable hoverable rounded" colspan="2" onclick="jQuery('.js-hidden_roles').show(); jQuery('.js-show_roles').hide(); jQuery('.js-show_less_roles').show();">
+          <i class="uil uil-angle-down"></i>show all...
+        </td>
+      </tr>
+      <tr class="js-show_less_roles" style="display: none;">
+        <td class="align-top clickable hoverable rounded" colspan="2" onclick="jQuery('.js-hidden_roles').hide(); jQuery('.js-show_roles').show(); jQuery('.js-show_less_roles').hide();">
+          <i class="uil uil-angle-up"></i>show less...
+        </td>
+      </tr>
+    [% END %]
+  </table>
 [% END %]

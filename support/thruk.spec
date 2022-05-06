@@ -417,20 +417,12 @@ exit 0
 %{_datadir}/%{name}/plugins/plugins-available/minemap
 %config %{_sysconfdir}/%{name}/plugins/plugins-enabled/minemap
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/minemap
-%{_datadir}/%{name}/plugins/plugins-available/mobile
-%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/mobile
-%config %{_sysconfdir}/%{name}/plugins/plugins-available/mobile
 %{_datadir}/%{name}/plugins/plugins-available/panorama
 %config %{_sysconfdir}/%{name}/plugins/plugins-enabled/panorama
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/panorama
 %{_datadir}/%{name}/plugins/plugins-available/shinken_features
 %config %{_sysconfdir}/%{name}/plugins/plugins-enabled/shinken_features
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/shinken_features
-%{_datadir}/%{name}/plugins/plugins-available/statusmap
-%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/statusmap
-%config %{_sysconfdir}/%{name}/plugins/plugins-available/statusmap
-%{_datadir}/%{name}/plugins/plugins-available/wml
-%config %{_sysconfdir}/%{name}/plugins/plugins-available/wml
 %{_datadir}/%{name}/plugins/plugins-available/core_scheduling
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/core_scheduling
 %config(noreplace) %{_sysconfdir}/thruk/themes

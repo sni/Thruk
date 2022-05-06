@@ -1,65 +1,70 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-            [% PROCESS _infobox.tt %]
-            <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
-              <tr>
-                <td class='linkBox'>
-                  <a href='extinfo.cgi?type=4'>back to Performance Info</a><br>
-                </td>
-              </tr>
-            </table>
-        </td>
-        <td align="center" valign="middle" width="33%"></td>
-        <td align="right" valign="top" width="33%">
-          [% PROCESS _help.tt topic = "extinfo_4" %]
-        </td>
-      </tr>
-    </table><br>
-    <div align="center" class="extinfo4 logcachedetails">
-      <div class='dataTitle perfDataTitle'>Logcache Details for Backend '[% peer.name %]'</div>
-      <table border="0" class="data">
-        <tr class='data'>
-          <th class='data'>Backend</th>
-          <th class='data'>Data Usage</th>
-          <th class='data'>Index Usage</th>
-          <th class='data'>Items</th>
-          <th class='data'>Oldest Item</th>
-          <th class='data'>Latest Item</th>
-          <th class='data'>Logcache Duration</th>
-          <th class='data'>Logcache Version</th>
-          <th class='data'>Bytes per Item</th>
+<div class="flexrow">
+  <div class="flexcol">
+    [% PROCESS _infobox.tt %]
+    <div class="card">
+      <table>
+        <tr>
+          <td>
+            <a href='extinfo.cgi?type=4'>back to Performance Info</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div>
+  </div>
+</div>
+
+<div class="flex place-content-center">
+  <div class="flexcol w-fit">
+    <h1 class='mainTitle'>Logcache Details</h1>
+
+    <div class="card mb-4">
+      <h3>[% peer.name %]</h3>
+      <table class="cellspacing innercellborder">
+        <tr>
+          <th>Backend</th>
+          <th>Data Usage</th>
+          <th>Index Usage</th>
+          <th>Items</th>
+          <th>Oldest Item</th>
+          <th>Latest Item</th>
+          <th>Logcache Duration</th>
+          <th>Logcache Version</th>
+          <th>Bytes per Item</th>
         </tr>
         [% s = logcache_stats %]
         <tr>
-          <td class='dataVal'>[% s.name %]</td>
-          <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-          <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-          <td class='dataVal'>[% format_number(s.items) %]</td>
-          <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
-          <td class='dataVal'>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
-          <td class='dataVal'>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
-          <td class='dataVal'>[% s.cache_version %]</td>
-          <td class='dataVal'>[% IF s.items > 0 %][% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %][% END %]</td>
+          <td>[% s.name %]</td>
+          <td>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+          <td>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+          <td>[% format_number(s.items) %]</td>
+          <td>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
+          <td>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
+          <td>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
+          <td>[% s.cache_version %]</td>
+          <td>[% IF s.items > 0 %][% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %][% END %]</td>
         </tr>
         [% IF s.mode != "" %]
-          <td class='dataVal' colspan="9" style="text-align: center; color: red;"><b>currently running <i>[% s.mode %]</i> since [% date_format(c, s.last_update) %]...</b></td>
+          <td colspan="9" style="text-align: center; color: red;"><b>currently running <i>[% s.mode %]</i> since [% date_format(c, s.last_update) %]...</b></td>
         [% END %]
       </table>
 
-      <table border="0" class="data" style="margin: 30px 15px;">
-        <tr class='data'>
-          <th class='data'>Last Update</th>
-          <th class='data'>Update Duration</th>
-          <th class='data'></th>
+      <hr>
+
+      <table class="my-4 w-fit cellspacing innercellborder mx-auto">
+        <tr>
+          <th>Last Update</th>
+          <th>Update Duration</th>
+          <th></th>
         </tr>
         <tr>
-          <td class='dataVal'>[% date_format(c, s.last_update,) %]</td>
-          <td class='dataVal'>[% IF s.update_duration != ""; duration(s.update_duration, 3); END %]</td>
-          <td class='dataVal' style="text-align: center;">
+          <td>[% date_format(c, s.last_update,) %]</td>
+          <td>[% IF s.update_duration != ""; duration(s.update_duration, 3); END %]</td>
+          <td style="text-align: center;">
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
@@ -69,15 +74,15 @@
           </td>
         </tr>
 
-        <tr class='data'>
-          <th class='data'>Last Compact</th>
-          <th class='data'>Compact Duration</th>
-          <th class='data'></th>
+        <tr>
+          <th>Last Compact</th>
+          <th>Compact Duration</th>
+          <th></th>
         </tr>
         <tr>
-          <td class='dataVal'>[% IF s.last_compact && s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
-          <td class='dataVal'>[% IF s.compact_duration != ""; duration(s.compact_duration, 3); END %]</td>
-          <td class='dataVal' style="text-align: center;">
+          <td>[% IF s.last_compact && s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
+          <td>[% IF s.compact_duration != ""; duration(s.compact_duration, 3); END %]</td>
+          <td style="text-align: center;">
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
@@ -87,15 +92,15 @@
           </td>
         </tr>
 
-        <tr class='data'>
-          <th class='data'>Last Optimize</th>
-          <th class='data'>Optimize Duration</th>
-          <th class='data'></th>
+        <tr>
+          <th>Last Optimize</th>
+          <th>Optimize Duration</th>
+          <th></th>
         </tr>
         <tr>
-          <td class='dataVal'>[% IF s.last_reorder > 0; date_format(c, s.last_reorder); END %]</td>
-          <td class='dataVal'>[% IF s.reorder_duration != ""; duration(s.reorder_duration, 3); END %]</td>
-          <td class='dataVal' style="text-align: center;">
+          <td>[% IF s.last_reorder > 0; date_format(c, s.last_reorder); END %]</td>
+          <td>[% IF s.reorder_duration != ""; duration(s.reorder_duration, 3); END %]</td>
+          <td style="text-align: center;">
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
@@ -105,15 +110,15 @@
           </td>
         </tr>
 
-        <tr class='data'>
-          <th class='data'>Duration</th>
-          <th class='data'>Oldest Item</th>
-          <th class='data'></th>
+        <tr>
+          <th>Duration</th>
+          <th>Oldest Item</th>
+          <th></th>
         </tr>
         <tr>
-          <td class='dataVal'>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
-          <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start, "%Y-%m-%d") %][% END %]</td>
-          <td class='dataVal' style="text-align: center;">
+          <td>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
+          <td>[% IF s.defined('start') %][% date_format(c, s.start, "%Y-%m-%d") %][% END %]</td>
+          <td style="text-align: center;">
             <form action="extinfo.cgi" method="POST">
               <input type="hidden" name="type" value="4">
               <input type="hidden" name="logcachedetails" value="[% peer_key %]">
@@ -124,50 +129,49 @@
         </tr>
       </table>
 
-      <table><tr>
-      [% FOREACH s = [["class", logcache_class], ["type", logcache_types]] %]
-      <td valign="top">
-      <table border="1" cellspacing="0" cellpadding="0" class="data" style="margin: 30px 15px;">
-        <tr>
-          <td class='stateInfoTable1'>
-            <table border="0">
-              <tr class='data'>
-                <th class='data' colspan="3" style="text-align: center;">Log Entries by [% s.0 | ucfirst %]</th>
-              </tr>
-              <tr class='data'>
-                <th class='data'>[% s.0 | ucfirst %]</th>
-                <th class='data'>Count</th>
-                <th class='data'></th>
-              </tr>
-              [% FOREACH t = s.1 %]
-              <tr>
-                <td class='dataVal'>
-                  <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
-                  [% IF t.param != "" %]
-                    [% t.type | lc %]
+      <hr>
+
+      <div class="flexrow mt-4 w-fit mx-auto gap-16">
+        [% FOREACH s = [["class", logcache_class], ["type", logcache_types]] %]
+        <div class="flex">
+          <table class="h-fit cellspacing innercellborder">
+            <tr>
+              <th colspan="3" style="text-align: center;">Log Entries by [% s.0 | ucfirst %]</th>
+            </tr>
+            <tr>
+              <th>[% s.0 | ucfirst %]</th>
+              <th>Count</th>
+              <th></th>
+            </tr>
+            [% FOREACH t = s.1 %]
+            <tr>
+              <td>
+                <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
+                [% IF t.param != "" %]
+                  [% t.type | lc %]
+                [% ELSE %]
+                  [% IF s.0 == "type" %]
+                    &lt;untyped&gt;
+                  [% ELSIF s.0 == "class" %]
+                    &lt;unclassified&gt;
                   [% ELSE %]
-                    [% IF s.0 == "type" %]
-                      &lt;untyped&gt;
-                    [% ELSIF s.0 == "class" %]
-                      &lt;unclassified&gt;
-                    [% ELSE %]
-                      &lt;unknown &gt;
-                    [% END %]
+                    &lt;unknown &gt;
                   [% END %]
-                  </a>
-                </td>
-                <td class='dataVal' style="text-align: right;">[% format_number(t.total) %]</td>
-                <td class='dataVal' style="text-align: right;">[% sprintf("%1.f", t.procent) %]%</td>
-              </tr>
-              [% END %]
-            </table>
-          </td>
-        </tr>
-      </table>
-      </td>
-      [% END %]
-      </tr></table>
+                [% END %]
+                </a>
+              </td>
+              <td style="text-align: right;">[% format_number(t.total) %]</td>
+              <td style="text-align: right;">[% sprintf("%1.f", t.procent) %]%</td>
+            </tr>
+            [% END %]
+          </table>
+        </div>
+        [% END %]
+        </div>
 
     </div>
+
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]

@@ -27,7 +27,7 @@ BEGIN { use_ok 'Thruk::Controller::test' }
 
 $ENV{'THRUK_TEST_NO_LOG'} = "";
 
-my($res, $c) = ctx_request('/thruk/side.html');
+my($res, $c) = ctx_request('/thruk/main.html');
 
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/test.cgi',

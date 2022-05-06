@@ -10,14 +10,15 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% downtime_id          = c.request.parameters.down_id %]
 
     DEL_HOST_DOWNTIME;[% sprintf("%lu",downtime_id) %]
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Scheduled Downtime ID:</td><td><b><input type='text' name='down_id' value="[% c.request.parameters.down_id | html %]"></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_down_id %]
 
 [% END %]
 [% END %]

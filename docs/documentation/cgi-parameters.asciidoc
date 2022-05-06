@@ -51,20 +51,6 @@ Values:
 Example: /thruk/cgi-bin/status.cgi?hidetop=1
 
 
-=== hidesearch
-
-Pages: status pages
-
-Description: Show/Hide the status filters
-
-Values:
-
-- 1: Hides the search filter
-- 2: Shows the search filter
-
-Example: /thruk/cgi-bin/status.cgi?host=localhost&hidesearch=1
-
-
 === minimal
 
 Pages: status page
@@ -75,6 +61,7 @@ monitor screens where only the current problems should be displayed.
 Values:
 
 - 1: Activates minimal mode
+- 2: Activates minimal mode but keeps backend sites panel
 
 
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1

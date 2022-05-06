@@ -1,90 +1,81 @@
-﻿<button class="filter_button thruk_btn [% IF style == "tac" %]small[% ELSE %]big[% END %] filter [% IF show_filter_table %]primary[% ELSE %]secondary[% END %]" id="[% paneprefix %]filter_button" onClick="toggleFilterPane('[% paneprefix %]'); return false;"></button>
+﻿[% IF style == "inTable" %]
+<button class="w-36 text-sm rounded-[5px] border-0 font-medium display-filter[% IF show_filter_table %] textActive2 hover:textActive2[% END %]" onClick="toggleElement('[% paneprefix %]_all_filter_card'); return false;">[% IF show_filter_table %]Filters active[% ELSE %]Display Filter[% END %]</button>
+[% ELSE %]
+<button class="round [% IF style =="tac" %]small[% ELSE %]big[% END %] filter [% IF show_filter_table %]secondary[% END %]" onClick="toggleElement('[% paneprefix %]_all_filter_card'); return false;"><i class="uil uil-filter"></i></button>
+[% END %]
 [% IF show_form %]
-<form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this));">
+<form action="" method="GET" style="display: initial;" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this));">
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="nav" value="[% nav | html %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
-<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch | html %]">
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
 <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 [% END %]
-<table id="[% paneprefix %]all_filter_table" class="filter_container" style="display:none;" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
-[% FOR search = searches.$paneprefix %]
-[% SET prefix = 's' _ loop.index %]
-[% IF loop.index > 0 && loop.index % 3 == 0 %]</tr><tr>[% END %]
-<td valign="top" class="filter_table">
-<table border="1" class='filter filter_box' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
-  <tr>
-    <td class='filter'>
-      <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable" width="100%">
-        <tr>
-          <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>
-           [% IF loop.first %]
-           <div id="[% paneprefix %][% prefix %]_filter_title">
-            <a href="#" onClick="toggleFilterPane('[% paneprefix %]'); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% paneprefix %][% prefix %]_filter_button_mini" alt="filter"></a>
-            Display Filters:
-           </div>
-           [% END %]
-          </td>
-          <td align="left" class='filterTitle filterDisplayTitle' nowrap>
-           [% IF loop.first && show_substyle_selector == 1 %]
-            <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
-              <optgroup label="Host">
-                <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
-                <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
-                <option value="hostsummary"[% IF  style == 'summary'  && substyle == 'host' || style == 'hostsummary'  %] selected[% END %]>Summary</option>
-                <option value="hostgrid"[% IF     style == 'grid'     && substyle == 'host' || style == 'hostgrid'     %] selected[% END %]>Grid</option>
-              </optgroup>
-              <optgroup label="Service">
-                <option value="detail"[% IF          style == 'detail'          %] selected[% END %]>Detail</option>
-                <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
-                <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
-                <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
-                [% has_service_filter = 0 %]
+<div class="card z-30 absolute shadow-float overflow-visible mt-1 w-auto max-w-[95%]" style="display:none;" id="[% paneprefix %]_all_filter_card" onclick="resetRefresh()">
+  <div class="head flexrow flex-nowrap justify-between w-[450px] border-b-0">
+    <h3>Display Filter</h3>
+    <div class="flex gap-x-2 items-center">
+      <div>
+        [% IF show_substyle_selector == 1 %]
+          <select name="style">
+            <optgroup label="Host">
+              <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
+              <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
+              <option value="hostsummary"[% IF  style == 'summary'  && substyle == 'host' || style == 'hostsummary'  %] selected[% END %]>Summary</option>
+              <option value="hostgrid"[% IF     style == 'grid'     && substyle == 'host' || style == 'hostgrid'     %] selected[% END %]>Grid</option>
+            </optgroup>
+            <optgroup label="Service">
+              <option value="detail"[% IF          style == 'detail'          %] selected[% END %]>Detail</option>
+              <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
+              <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
+              <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
+              [% has_service_filter = 0 %]
+              [% FOREACH search = searches.$paneprefix %]
                 [% FOREACH s = search.text_filter %]
                   [% IF s.type == 'service' || s.type == 'search' %][% has_service_filter = 1 %][% END %]
                 [% END %]
-                [% IF style == 'perfmap' || has_service_filter %]
+              [% END %]
+              [% IF style == 'perfmap' || has_service_filter %]
                 <option value="perfmap"[% IF         style == 'perfmap' && substyle == 'service'                                %] selected[% END %]>Performancedata</option>
-                [% ELSE %]
+              [% ELSE %]
                 <option value="perfmap" disabled>Performancedata</option>
-                [% END %]
-              </optgroup>
-              <optgroup label="Tac">
-                <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
-              </optgroup>
-              [% FOREACH groupname = additional_views.keys.sort %]
+              [% END %]
+            </optgroup>
+            <optgroup label="Tac">
+              <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
+            </optgroup>
+            [% FOREACH groupname = additional_views.keys.sort %]
               <optgroup label="[% groupname | html %]">
                 [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
-                [% opt = additional_views.$groupname.options.$optname %]
-                <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name | html %]</option>
+                  [% opt = additional_views.$groupname.options.$optname %]
+                  <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name | html %]</option>
                 [% END %]
               </optgroup>
-              [% END %]
-             </select>
-           [% END %]
-           [% IF loop.first && show_column_select %]
-              <input class="noprint" type="image" src="[% url_prefix %]themes/[% theme %]/images/config.png" style="padding-left: 25px; vertical-align: bottom;" name="columns" id="[% paneprefix %][% prefix %]_btn_columns" alt="column editor" onclick="initStatusTableColumnSorting('[% paneprefix %]_columns_table'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;">
-           [% END %]
-          </td>
-          <td align="right">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="vertical-align: bottom; display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search" alt="accept">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)" alt="remove">
-          </td>
-          <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
-            <img src="[% url_prefix %]themes/[% theme %]/images/right.png" alt="add new filter"><br>
-            or
-          </td>
-        </tr>
+            [% END %]
+          </select>
+        [% END %]
+      </div>
+      <button class="iconOnly" type="submit" name="update" title="accept">
+        <i class="fa-solid fa-check round small green"></i>
+      </button>
+    </div>
+  </div>
+  <div class="w-full flexrow flex-nowrap gap-0 border-t borderDefault">
+    <div id="[% paneprefix %]filter_pane" class="flexrow flex-wrap gap-0">
+      [% FOREACH search = searches.$paneprefix %]
+        [% SET prefix = 's' _ loop.index %]
         [% PROCESS _status_filter_single.tt onchange="" %]
-      </table>
-    </td>
-  </tr>
-</table>
-</td>
-[% END %]
-</tr></table>
+      [% END %]
+    </div>
+    <div class="clickable hoverable p-0 rounded-br-lg" onClick="new_filter('[% paneprefix %]filter_pane')" id="[% paneprefix %]new_filter_box_btn">
+      <div class="flexcol gap-1 text-center pt-10">
+        <i class="uil uil-angle-right text-lg" title="add new filter"></i>
+        <span>or</span>
+      </div>
+    </div>
+  </div>
+</div>
 [% IF show_form %]
 </form>
 [% END %]

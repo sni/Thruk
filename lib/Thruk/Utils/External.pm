@@ -636,7 +636,6 @@ sub job_page {
             _error($err);
             return $c->detach('/error/index/23');
         }
-        delete($stash->{'all_in_one_css'});
         return _finished_job_page($c, $stash, $forward, $out);
     }
 

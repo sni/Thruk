@@ -1151,26 +1151,26 @@ Ext.define('TP.IconWidget', {
         if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
             if(panel.el) {
                 panel.addCls('clickable');
-                panel.removeCls('notclickable');
+                panel.removeCls('not-clickable');
                 panel.el.dom.href=xdata.link.link;
             }
             panel.autoEl.href=xdata.link.link;
             if(panel.labelEl && panel.labelEl.el) {
                 panel.labelEl.el.dom.href=xdata.link.link;
-                panel.labelEl.removeCls('notclickable');
+                panel.labelEl.removeCls('not-clickable');
                 panel.labelEl.addCls('clickable');
             }
         } else {
             if(panel.el) {
                 panel.removeCls('clickable');
-                panel.addCls('notclickable');
+                panel.addCls('not-clickable');
                 panel.el.dom.href='';
             }
             panel.autoEl.href='';
             if(panel.labelEl && panel.labelEl.el) {
                 panel.labelEl.el.dom.href='';
                 panel.labelEl.removeCls('clickable');
-                panel.labelEl.addCls('notclickable');
+                panel.labelEl.addCls('not-clickable');
             }
         }
     },

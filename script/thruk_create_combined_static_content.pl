@@ -31,7 +31,6 @@ my $config   = Thruk::Config::get_base_config();
 die('no config') unless $config->{'all_in_one_javascript'};
 die('no config') unless $config->{'fileversion'};
 my $fileversion = $config->{'fileversion'};
-my @themes  = qw/Thruk Thruk2/;
 
 #################################################
 # check if update is required
@@ -45,25 +44,6 @@ if(-e 'root/thruk/cache/thruk-'.$fileversion.'.js') {
     my @s = stat('root/thruk/cache/thruk-'.$fileversion.'.js');
     if($s[9] >= $newest) {
         $js_required = 0;
-    }
-}
-
-$newest = 0;
-for my $theme (@themes) {
-    for my $file (@{$config->{'all_in_one_css_frames'}->{$theme}}) {
-        my @s   = stat('themes/themes-available/'.$theme.'/stylesheets/'.$file);
-        $newest = $s[9] if $newest < $s[9];
-    }
-}
-my $css_required = 0;
-for my $theme (@themes) {
-    if(!-e 'root/thruk/cache/'.$theme.'-noframes-'.$fileversion.'.css') {
-        $css_required = 1;
-    } else {
-        my @s = stat('root/thruk/cache/'.$theme.'-noframes-'.$fileversion.'.css');
-        if($s[9] < $newest) {
-            $css_required = 1;
-        }
     }
 }
 
@@ -93,7 +73,7 @@ if(-e $all_in_one_panorama) {
     }
 }
 
-if(!$js_required && !$css_required && !$panorama_required && (!$ARGV[0] or $ARGV[0] ne '-f')) {
+if(!$js_required && !$panorama_required && (!$ARGV[0] or $ARGV[0] ne '-f')) {
     print STDERR "no update necessary\n";
     exit;
 }
@@ -105,16 +85,6 @@ my $cmds = [
     'cd root/thruk/ && cat '.join(' ', @{$config->{'all_in_one_javascript'}}).' > cache/thruk-'.$fileversion.'.js',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
 ];
-for my $theme (@themes) {
-    push @{$cmds},
-        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'all_in_one_css_noframes'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-noframes-'.$fileversion.'.css';
-    push @{$cmds},
-        'cd themes/themes-available/'.$theme.'/stylesheets/  && cat '.join(' ', @{$config->{'all_in_one_css_frames'}->{$theme}}).' > ../../../../root/thruk/cache/'.$theme.'-'.$fileversion.'.css';
-    push @{$cmds},
-        'sed -e "s/\((\'\?\"\?\)\.\.\/\(images\|fonts\)\//\1..\/themes\/'.$theme.'\/\2\//g"'
-          .' -e "s/\((\'\?\"\?\)\.\.\/\.\.\/\.\.\/images\//\1..\/images\//g"'
-          .' -i root/thruk/cache/'.$theme.'-*.css',
-}
 if($dos2unix) {
     push @{$cmds}, 'cd root/thruk/cache && '.$dos2unix.' thruk-'.$fileversion.'.js';
     push @{$cmds}, $dos2unix.' '.$all_in_one_panorama;

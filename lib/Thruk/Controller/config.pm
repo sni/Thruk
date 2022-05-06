@@ -31,14 +31,12 @@ sub index {
     $c->stash->{title}            = 'Configuration';
     $c->stash->{infoBoxTitle}     = 'Configuration';
     $c->stash->{page}             = 'config';
-    $c->stash->{template}         = 'config.tt';
     $c->stash->{'no_auto_reload'} = 1;
 
     return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
 
-    my $type = $c->req->parameters->{'type'};
+    my $type = $c->req->parameters->{'type'} || "hosts";
     $c->stash->{type} = $type;
-    return unless defined $type;
 
     # timeperiods
     if($type eq 'timeperiods') {
@@ -47,7 +45,7 @@ sub index {
     }
 
     # commands
-    if($type eq 'commands') {
+    elsif($type eq 'commands') {
         $c->db->get_commands(sort => 'name', remove_duplicates => 1, pager => 1);
         $c->stash->{template} = 'config_commands.tt';
     }
@@ -102,6 +100,10 @@ sub index {
     elsif($type eq 'servicegroups') {
         $c->db->get_servicegroups(sort => 'name', remove_duplicates => 1, pager => 1);
         $c->stash->{template} = 'config_servicegroups.tt';
+    }
+    else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such type', code => 404 });
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/config.cgi");
     }
 
     $c->stash->{jump} = $c->req->parameters->{'jump'} || '';

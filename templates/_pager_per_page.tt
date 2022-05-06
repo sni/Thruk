@@ -1,0 +1,21 @@
+﻿<div class="w-fit">
+  <form action="[% IF original_url; base_url(c, original_url); END %]" method="GET">
+    [% FOREACH par = c.request.parameters.keys %]
+      [% NEXT IF !c.request.parameters.defined(par) %]
+      [% NEXT IF par == 'entries' %]
+      [% NEXT IF par == 'page' %]
+      [% FOR value IN c.request.parameters.$par.list %]
+        <input type="hidden" name="[% par | html %]" value="[% value | html %]">
+      [% END %]
+    [% END %]
+    <select name="entries" onChange="this.form.submit()" class="w-36 text-sm border-0 font-medium pager-entries">
+      [% FOR step = paging_steps %]
+        [% IF step == "all" %]
+          <option value="all"[%  IF pager.entries == "all" %] selected[% END %]>all on one page</option>
+        [% ELSE %]
+          <option value="[% step | html %]"[% IF pager.entries == step %] selected[% END %]>[% step | html %] per page</option>
+        [% END %]
+      [% END %]
+    </select>
+  </form>
+</div>

@@ -1,10 +1,11 @@
-﻿<img src="[% url_prefix %]themes/[% theme %]/images/loading-icon.gif" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
-<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
-    <!-- Produced by Thruk (http://www.thruk.org).
-         Copyright (c) 2009-present Thruk Developer Team.
-         Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
-         Copyright (c) 1999-2009 Ethan Galstad.
-    -->
+﻿</main>
+<footer>
+  <!-- Produced by Thruk (http://www.thruk.org).
+        Copyright (c) 2009-present Thruk Developer Team.
+  -->
   [% IF ssi_footer; ssi_footer | evaltt; END %]
-  </body>
+</footer>
+</div>
+</div>
+</body>
 </html>

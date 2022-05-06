@@ -15,13 +15,13 @@
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Cloning [% object.get_type() | ucfirst +%] [%+ object.get_name() %] - Step 1</a></th>
   </tr>
   <tr>
-    <td class='dataVar' colspan=2>
+    <td colspan=2>
       Select incoming references which should be cloned:
     </td>
   </tr>
   [% FOREACH t = clonables.keys.sort %]
   <tr>
-    <td class='dataVar' colspan=2>
+    <td colspan=2>
       <br>
       [% t | ucfirst %]:
       <ul>
@@ -36,7 +36,7 @@
   </tr>
   [% END %]
   <tr>
-    <td class='dataVar' colspan=2>
+    <td colspan=2>
       <ul>
         <li>
           select
@@ -49,7 +49,7 @@
     </td>
   </tr>
   <tr>
-    <td class='dataVar' colspan=2 style="text-align: right; padding-bottom: 5px;">
+    <td colspan=2 style="text-align: right; padding-bottom: 5px;">
       <button class="conf_next_button conf_button">next</button>
     </td>
   </tr>

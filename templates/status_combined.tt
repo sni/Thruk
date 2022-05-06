@@ -4,7 +4,6 @@
 [% PROCESS _sounds.tt %]
 [% authorized_for_read_only = 0 %][% IF c.check_user_roles('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
-[% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
 <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %] class="infoboxrow">
   <tr>
@@ -14,7 +13,6 @@
     <td align="center" valign="top" width="33%">&nbsp;</td>
     <td align="center" valign="top" width="33%">&nbsp;</td>
     <td align="right" valign="bottom">
-      [% PROCESS _help.tt topic = "status_detail" %]
     </td>
   </tr>
   <tr><td colspan=4><br></td></tr>
@@ -25,7 +23,6 @@
 <input type="hidden" name="style" value="[% style | html %]">
 <input type="hidden" name="nav" value="[% nav | html %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
-<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch | html %]">
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
 <input type="hidden" name="title" id="title" value="[% custom_title | html %]">
 

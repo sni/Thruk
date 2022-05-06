@@ -157,6 +157,11 @@ print `./script/thruk_patch_makefile.pl`;
 print `./script/thruk_create_combined_static_content.pl`;
 print "created cached js/css files\n";
 
+print `test -f themes/themes-available/Light/stylesheets/Light.css || make themes`;
+if($? != 0) {
+  die("failed to build themes");
+}
+
 print `./script/thruk_set_standard_header`;
 if($? != 0) {
   die("failed to update standard headers");

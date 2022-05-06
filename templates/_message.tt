@@ -1,49 +1,41 @@
 ﻿[% SET message = get_message(c) %]
 [% IF message %]
-<div id="thruk_message" class="thruk_message" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">
-  <div class="shadow"><div class="shadowcontent">
-  <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">
-    <tr>
+<div id="thruk_message" class="card shadow-float absolute p-1 z-50 min-w-[600px] top-4 left-1/2 transform -translate-x-1/2">
+  <div class="flexrow flex-nowrap gap-2 justify-center">
+    <div class="w-5">
       [% IF message.2 %]
-      <td width="50" align="left" valign="top">
-        <a href="#" onclick="toggleElement('message_details', 'message_details_icon');return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id="message_details_icon" alt="show details" width="13" height="12" class="close_button" style="margin-left: 4px;"></a>
-      </td>
-      [% ELSE %]
-      <td width="50"></td>
+        <button class="iconOnly medium absolute top-1 left-0 p-1" title="show details" onclick="toggleElement('message_details', 'message_details_icon');return false;"><i class="uil uil-arrow-from-top"></i></button>
       [% END %]
-      <td align="center">
-        <span class="[% message.0 | html %]">[% message.1 %]</span>
+    </div>
+    <div class="flex-grow text-center font-semibold whitespace-nowrap">
+      <span class="[% message.0 | html %]">[% message.1 %]
         [% IF message.0 == 'fail_message' %]
-          <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Errors detected' title='Errors detected' width="16" height="16" style="vertical-align: text-bottom">
+          <i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>
         [% END %]
-      </td>
-      <td valign="top" align="right" width="50">
-        <a href="#" onclick="fade('thruk_message', 500);return false;"><img src='[% url_prefix %]themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
-      </td>
-    </tr>
-    [% IF message.2 == 2 %]
-        [% thruk_message_details = message.3 %]
-    [% END %]
-    [% IF message.2 %]
-    <tr style="display:none" id="message_details">
-      <td colspan=3 align="center">
-        <div style="float: left; position: relative; left: 50%;">
-        <pre class="[% message.0 | html %]" style="float: left; position: relative; left: -50%; text-align: left;">
-          [% FOREACH detail = thruk_message_details %]
-          [% detail %]<br>
-          [% END %]
-        </pre>
-        </div>
-      </td>
-    </tr>
-    [% END %]
-  </table>
-  </div></div>
+      </span>
+    </div>
+    <div class="w-5">
+      <button class="iconOnly medium" title="close this message" onclick="fade('thruk_message', 500);return false;"><i class="uil uil-times"></i></button>
+    </div>
+  </div>
+
+  [% IF message.2 == 2 %]
+    [% thruk_message_details = message.3 %]
+  [% END %]
+  [% IF message.2 %]
+    <div class="w-full flex justify-center" style="display:none" id="message_details">
+      <pre class="[% message.0 | html %]">
+        [% FOREACH detail = thruk_message_details %]
+        [% detail %]<br>
+        [% END %]
+      </pre>
+    </div>
+  [% END %]
 
   [% IF message.0 == 'success_message' %]
   <script type="text/javascript">
   <!--
-  thruk_message_fade_timer = window.setTimeout("fade('thruk_message', 500)", 5000);
+  thruk_message_fade_timer = window.setTimeout("fade('thruk_message')", 5000);
   -->
   </script>
   [% END %]

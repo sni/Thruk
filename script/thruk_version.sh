@@ -71,13 +71,10 @@ if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
                 -i lib/Thruk/Config.pm
     sed -r "s/\-${OLDFILEVERSION}(\.|_)/-$FILEVERSION\1/" \
                 -i MANIFEST                 \
-                -i root/thruk/startup.html  \
                 -i .gitignore
     sed -r "s/^next.*/$CHANGESHEADER/" -i Changes
     sed -r "s/^version.*/version    = $FILEVERSION/" -i dist.ini
 
-    git mv plugins/plugins-available/mobile/root/mobile-${OLDFILEVERSION}.css plugins/plugins-available/mobile/root/mobile-$FILEVERSION.css
-    git mv plugins/plugins-available/mobile/root/mobile-${OLDFILEVERSION}.js plugins/plugins-available/mobile/root/mobile-$FILEVERSION.js
     git mv plugins/plugins-available/business_process/root/bp-${OLDFILEVERSION}.css plugins/plugins-available/business_process/root/bp-$FILEVERSION.css
     git mv plugins/plugins-available/business_process/root/bp-${OLDFILEVERSION}.js plugins/plugins-available/business_process/root/bp-$FILEVERSION.js
     git mv plugins/plugins-available/panorama/root/panorama-${OLDFILEVERSION}.css plugins/plugins-available/panorama/root/panorama-$FILEVERSION.css
@@ -107,7 +104,6 @@ git add                     \
     MANIFEST                \
     support/thruk.spec      \
     docs/manpages/thruk.3   \
-    root/thruk/startup.html \
     dist.ini                \
     lib/Thruk/Config.pm     \
     Changes                 \

@@ -1,129 +1,151 @@
-﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><button class="thruk_btn small secondary add_bookmark" title="Add bookmark to this page"></button></a>&nbsp;
-<div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
-  <div class="shadow"><div class="shadowcontent">
+﻿<div class="flex relative">
+  <button class="round small" title="Manager user bookmarks" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><i class="uil uil-bookmark"></i></button>
 
-[% IF style != 'combined' %]
-<form action='status.cgi' method="GET" id="bookmark_form">
-<input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
-[% END %]
-<input type="hidden" name="referer" value="[% short_uri(c) %]">
+  <div class="card shadow-float absolute z-20 top-7 w-[550px]" style="display: none;" id="add_bookmark">
+    <div class="head p-0">
+      <span class="tabs active" id="sub_2" onclick="set_sub(2)">Add New</span>
+      <span class="tabs" id="sub_1" onclick="set_sub(1)">Remove Bookmarks</span>
+      <button class="iconOnly medium absolute right-2 top-2" onClick="toggleElement('add_bookmark'); return false;"><i class="uil uil-times"></i></button>
+    </div>
 
-
-
-<table border="0" class='data bookmarks' style="width:550px">
-  <tr style="cursor:pointer">
-    <th class='data' id="sub_1" onclick="set_sub(1)"><a href="#remove">Remove Bookmarks</a></th>
-    <th class='data dataSelected' width=100 id="sub_2" onclick="set_sub(2)"><a href="#add">Add New</a></th>
-    <th class='data' width="20" nowrap>
-      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/btn_close.png" onclick="toggleElement('add_bookmark'); resetRefresh(); return false;" style="height:14px; width:14px; position: absolute; top: 4px; right: 7px;" alt="add bookmark">
-    </th>
-  </tr>
-  <tr class="sub_2">
-    <td colspan=3 align="center" style="padding: 10px;">
-      Url <input type="text" size="60" value="[% full_uri(c) %]" name="bookmark">
-      <br>
-      in category
-      <select name="section" id="bookmark_sections">
-        <option value="Bookmarks" selected>Bookmarks</option>
-      </select>
-      with name <input type="text" size="15" value="" name="newname" id="newname">
-      <br>
-      options:
-      [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
-      public available <input type="checkbox" name="public" value=1> /
+    <div class="body">
+      [% IF style != 'combined' %]
+        <form action='status.cgi' method="GET" id="bookmark_form">
+        <input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
       [% END %]
-      [% IF num_backends > 1 %]
-      include selected backends <input type="checkbox" name="save_backends" value=1>
-      [% END %]
-      <div align="center">
-      <input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())" style="width: 250px; margin-top: 6px;">
-      </div>
-    </td>
-  </tr>
-  <tr style="display:none;" class="sub_1">
-    <td colspan=3 align="left" style="padding: 10px;">
-
-      <script type="text/javascript"><!--
-        bookmarks = new Object();
-        [% nr = 0 %]
-        [% IF user_data.exists('bookmarks') %]
-          [% FOREACH section = user_data.bookmarks.keys.sort %]
-              [% FOREACH link = user_data.bookmarks.$section %]
-                bookmarks["bm[% nr %]"] = "[% section | html %]::[% link.0 | html %]";
-              [% nr = nr + 1 %]
+      <input type="hidden" name="referer" value="[% short_uri(c) %]">
+      <div class='w-full sub_2'>
+        <table>
+          <tr>
+            <th>Url</th>
+            <td><input type="text" class="w-full" value="[% full_uri(c) %]" name="bookmark"></td>
+          </tr>
+          <tr>
+            <th>Category</th>
+            <td>
+              <select name="section" id="bookmark_sections" class="w-full">
+                <option value="Bookmarks" selected>Bookmarks</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td><input type="text" class="w-full" value="" name="newname" id="newname"></td>
+          </tr>
+          <tr>
+            <th>Options</th>
+            <td>
+              [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
+                <input type="checkbox" name="public" id="bookmark_public" value=1><label class="ml-1" for="bookmark_public">public available</label><br>
               [% END %]
-          [% END %]
-        [% END +%]
-        [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
-          [% IF global_user_data.exists('bookmarks') %]
-            [% FOREACH section = global_user_data.bookmarks.keys.sort %]
-                [% FOREACH link = global_user_data.bookmarks.$section %]
-                  bookmarks["bmp[% nr %]"] = "[% section | html %]::[% link.0 | html %]";
+              [% IF num_backends > 1 %]
+                <input type="checkbox" name="save_backends" id="bookmark_save_backends" value=1><label class="ml-1" for="bookmark_save_backends">selected backends</label><br>
+              [% END %]
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" align="center">
+              <input class="w-36 mt-2" type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())">
+            </td>
+          </tr>
+        </table>
+      </div>
+
+
+      <div style="display:none;" class="sub_1">
+        <script type="text/javascript">
+        <!--
+          bookmarks = new Object();
+          [% nr = 0 %]
+          [% IF user_data.exists('bookmarks') %]
+            [% FOREACH section = user_data.bookmarks.keys.sort %]
+                [% FOREACH link = user_data.bookmarks.$section %]
+                  bookmarks["bm[% nr %]"] = "[% section | html %]::[% link.0 | html %]";
                 [% nr = nr + 1 %]
                 [% END %]
             [% END %]
           [% END +%]
-        [% END +%]
-      --></script>
+          [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
+            [% IF global_user_data.exists('bookmarks') %]
+              [% FOREACH section = global_user_data.bookmarks.keys.sort %]
+                  [% FOREACH link = global_user_data.bookmarks.$section %]
+                    bookmarks["bmp[% nr %]"] = "[% section | html %]::[% link.0 | html %]";
+                  [% nr = nr + 1 %]
+                  [% END %]
+              [% END %]
+            [% END +%]
+          [% END +%]
+        -->
+        </script>
 
-      [% nr = 0 %]
-      <b>User Bookmarks:</b>
-      [% IF user_data.exists('bookmarks') %]
-        [% FOREACH section = user_data.bookmarks.keys.sort %]
-            [% FOREACH link = user_data.bookmarks.$section %]
-            <div id="bm[% nr %]">
-              <div onClick="removeBookmark([% nr %]); return false;" class="clickable">
-                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;" alt="delete">
-                <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarks">
-                [% section | html %]: [% link.0 | html %]<br>
-              </div>
-              <pre style="width:530px;" class="mightOverflow">[% link.1 | html %]</pre>
-            </div>
-            [% nr = nr + 1 %]
-            [% END %]
-        [% END %]
-      [% END %]
-      [% IF nr == 0 %]
-        <br>no bookmarks yet
-      [% END %]
-      [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
+        <table class="rowhover innercellborder">
+          <tr class="no-hover">
+            <th colspan="4">User Bookmarks</th>
+          </tr>
         [% nr = 0 %]
-        <hr>
-        <b>Public Bookmarks:</b>
-        [% IF global_user_data.exists('bookmarks') %]
-          [% FOREACH section = global_user_data.bookmarks.keys.sort %]
-            [% FOREACH link = global_user_data.bookmarks.$section %]
-            <div id="bmp[% nr %]">
-              <div onClick="removeBookmark('p'+[% nr %]); return false;" class="clickable">
-                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;" alt="delete">
-                <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarksp">
-                [% section | html %]: [% link.0 | html %]<br>
-              </div>
-              <pre style="width:530px;" class="mightOverflow">[% link.1 | html %]</pre>
-            </div>
-            [% nr = nr + 1 %]
-            [% END %]
+        [% IF user_data.exists('bookmarks') %]
+          [% FOREACH section = user_data.bookmarks.keys.sort %]
+              [% FOREACH link = user_data.bookmarks.$section %]
+              <tr id="bm[% nr %]">
+                <td class="truncate max-w-[100px]">[% section | html %]</td>
+                <td class="truncate max-w-[100px]">[% link.0 | html %]</td>
+                <td class="truncate max-w-[200px]">[% link.1 | html %]</td>
+                <td class="w-6">
+                  <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarks">
+                  <button class="iconOnly pl-1" onClick="removeBookmark([% nr %]); return false;">
+                    <i class="fa-solid fa-trash" title="remove this bookmark"></i>
+                  </button>
+                </td>
+              </tr>
+              [% nr = nr + 1 %]
+              [% END %]
           [% END %]
         [% END %]
-      [% IF nr == 0 %]
-        <br>no public bookmarks yet
+        [% IF nr == 0 %]
+          <tr>
+            <td colspan="4">no bookmarks yet</td>
+          </tr>
+        [% END %]
+        [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
+          [% nr = 0 %]
+          <tr class="no-hover">
+            <th class="pt-2" colspan="4">Public Bookmarks</th>
+          </tr>
+          [% IF global_user_data.exists('bookmarks') %]
+            [% FOREACH section = global_user_data.bookmarks.keys.sort %]
+              [% FOREACH link = global_user_data.bookmarks.$section %]
+              <tr id="bmp[% nr %]">
+                <td class="truncate max-w-[100px]">[% section | html %]</td>
+                <td class="truncate max-w-[100px]">[% link.0 | html %]</td>
+                <td class="truncate max-w-[200px]">[% link.1 | html %]</td>
+                <td class="w-6">
+                  <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarksp">
+                  <button class="iconOnly pl-1" onClick="removeBookmark('p'+[% nr %]); return false;">
+                    <i class="fa-solid fa-trash" title="remove this bookmark"></i>
+                  </button>
+                </td>
+              </tr>
+              [% nr = nr + 1 %]
+              [% END %]
+            [% END %]
+          [% END %]
+        [% IF nr == 0 %]
+          <tr>
+            <td colspan="4">no public bookmarks yet</td>
+          </tr>
+        [% END %]
+        [% END %]
+
+          <tr class="no-hover">
+            <td colspan="4" align="center">
+              <input type="submit" class="w-36 mt-2" value="save changes" name="saveb" onclick="return(setNoFormClean())">
+            </td>
+          </tr>
+        </table>
+      </div>
+      [% IF style != 'combined' %]
+        </form>
       [% END %]
-      [% END %]
-
-      <br>
-      <input type="submit" value="save changes" name="saveb" onclick="return(setNoFormClean())">
-
-    </td>
-  </tr>
-</table>
-
-
-
-
-
-[% IF style != 'combined' %]
-</form>
-[% END %]
-
-  </div></div>
+    </div>
+  </div>
 </div>

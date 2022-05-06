@@ -2,69 +2,80 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-[% PROCESS _extinfo_cmd_pane.tt cmd_type="comments" %]
+[% PROCESS _extinfo_cmd_pane.tt cmd_type="comments" %] <!-- TODO FIX -->
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="middle" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-          [% PROCESS _help.tt topic = "extinfo_3" %]
-        </td>
-      </tr>
-    </table><br>
-    <br>
-    <div class='commentNav'>
-      [&nbsp;<a href='#HOSTCOMMENTS' class='commentNav'>Host Comments</a>&nbsp;|&nbsp;<a href='#SERVICECOMMENTS' class='commentNav'>Service Comments</a>&nbsp;]
-    </div><br>
 
-    <a name="HOSTCOMMENTS" id="HOSTCOMMENTS"></a>
-    <div class='commentTitle'>Host Comments</div>
+[% PROCESS _infobox.tt %]
+<h1 class="mt-5">Comments</h1>
+<div class="w-full flex justify-center mt-2">
+  <div class="flex gap-5">
+    <a href='#HOSTCOMMENTS' class='button'>Host Comments</a>
+    <a href='#SERVICECOMMENTS' class='button'>Service Comments</a>
+  </div>
+</div>
+
+<a class="anchor-offset" id="HOSTCOMMENTS"></a>
+[% IF sortoption_hst %]
+  <div class="statusSort">Host comments sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+[% END %]
+
+<div class="flexrow flex-nowrap my-2">
+  <div class="flex basis-1/3 self-end gap-1">
+    [% style="comments" %]
+    [% PROCESS _json_export.tt %]
+    [% columns=[ 'Hostname', 'Service', 'Site', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ] %]
+    [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
+  </div>
+  <div class="basis-1/3 self-end">
+    <div class="hint text-center whitespace-nowrap text-xs">Mark host comments with leftclick. Select multiple with shift + mouse.</div>
+  </div>
+  <div class="basis-1/3 flex justify-end">
     [% UNLESS command_disabled(c, '1') || c.check_user_roles('authorized_for_read_only') %]
-    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a></div>
+    <a class="button green" href="cmd.cgi?cmd_typ=1">Add comment</a>
     [% END %]
-    <br>
-    [% IF sortoption_hst %]
-    <div class="statusSort" align="CENTER">Host comments sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-    [% END %]
-    <div align="center">
-    <table border=0 cellpadding=0 cellspacing=0>
-      <tr>
-        <td width="220"></td>
-        <td align="center">
-          <div class="hint">Mark host comments with leftclick. Select multiple with shift + mouse.</div>
-        </td>
-        <td width="220" align="right" class="toolbar">
-          [% style="comments" %]
-          [% PROCESS _table_search_field.tt ids=["host_comments_table", "service_comments_table"] %]
-          [% PROCESS _json_export.tt %]
-          [% columns=[ 'Hostname', 'Service', 'Site', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ] %]
-          [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
-        </td>
-      </tr>
-      <tr>
-        <td colspan=3>
-          [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 sortprefix='_hst' %]
-        </td>
-      </tr>
-    </table>
+  </div>
+</div>
+
+<div class="card w-full mb-10">
+  <div class="head justify-between">
+    <h3>Host Comments</h3>
+    <div>
+      [% PROCESS _table_search_field.tt ids=["host_comments_table"] %]
     </div>
-    <br>
-    <br>
-    <br>
-    <a name="SERVICECOMMENTS" id="SERVICECOMMENTS"></a>
-    <div class='commentTitle'>Service Comments</div>
+  </div>
+  <div class="mainTable border-0" style="max-height: calc(100vh - 160px);">
+    [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 sortprefix='_hst' %]
+  </div>
+</div>
+
+
+<a class="anchor-offset" id="SERVICECOMMENTS"></a>
+[% IF sortoption_svc %]
+  <div class="statusSort" align="CENTER">Service comments sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+[% END %]
+
+<div class="flexrow flex-nowrap my-2">
+  <div class="basis-1/3"></div>
+  <div class="basis-1/3 self-end">
+    <div class="hint text-center whitespace-nowrap text-xs">Mark service comments with leftclick. Select multiple with shift + mouse.</div>
+  </div>
+  <div class="basis-1/3 flex justify-end">
     [% UNLESS command_disabled(c, '3') || c.check_user_roles('authorized_for_read_only') %]
-    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div>
+    <a class="button green" href="cmd.cgi?cmd_typ=3">Add comment</a>
     [% END %]
-    <br>
-    [% IF sortoption_svc %]
-    <div class="statusSort" align="CENTER">Service comments sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-    [% END %]
-    <div align="center" class="hint" style="padding: 4px;">Mark service comments with leftclick. Select multiple with shift + mouse.</div>
+  </div>
+</div>
+
+<div class="card w-full">
+  <div class="head justify-between">
+    <h3>Service Comments</h3>
+    <div>
+      [% PROCESS _table_search_field.tt ids=["service_comments_table"] %]
+    </div>
+  </div>
+  <div class="mainTable border-0" style="max-height: calc(100vh - 160px);">
     [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 sortprefix='_svc' %]
-<br>
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]

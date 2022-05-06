@@ -32,7 +32,7 @@
     <th class='data' width="5%" align="right">[% UNLESS readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
   </tr>
   <tr>
-    <td class="dataVar" colspan=3>
+    <td colspan=3>
         <div id="editor"></div>
     </td>
   </tr>

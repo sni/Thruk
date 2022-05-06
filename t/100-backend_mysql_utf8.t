@@ -26,7 +26,7 @@ use_ok('Thruk::Utils');
 my $m = Thruk::Backend::Provider::Mysql->new({options => {peer => $ENV{'TEST_MYSQL'}, peer_key => 'abcd'}});
 isa_ok($m, 'Thruk::Backend::Provider::Mysql');
 
-my($res, $c)    = ctx_request('/thruk/side.html');
+my($res, $c)    = ctx_request('/thruk/main.html');
 my $mode        = 'update';
 my $files       = [Cwd::getcwd().'/t/data/mysql/archive.log'];
 my $verbose     = 1;

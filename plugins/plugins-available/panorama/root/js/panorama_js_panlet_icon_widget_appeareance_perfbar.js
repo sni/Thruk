@@ -47,7 +47,7 @@ Ext.define('TP.IconWidgetAppearancePerfBar', {
             data = panel.host;
         }
         if(data) {
-            var r =  perf_table(false, data.state, data.plugin_output, data.perf_data, data.check_command, "", !!panel.host, true);
+            var r =  perf_table_data({'state': data.state, 'pluginOutput': data.plugin_output, 'perfdata': data.perf_data, 'checkCommand': data.check_command, 'isHost': !!panel.host, 'noTitle': true});
             if(r == false) { r= ""; }
             panel.items.getAt(0).update(r);
         } else {
@@ -60,7 +60,7 @@ Ext.define('TP.IconWidgetAppearancePerfBar', {
             if(!panel.no_data) {
                 TP.updateAllIcons(tab, panel.id, xdata);
             }
-            panel.items.getAt(0).update("<div class='perf_bar_bg notclickable' style='width:75px;'>");
+            panel.items.getAt(0).update("<div class='perf_bar_bg not-clickable' style='width:75px;'>");
         }
     }
 });

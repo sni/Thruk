@@ -12,7 +12,6 @@
       <div align="center" class='dataTitle'>Send Report By Mail</div>
     </td>
     <td align="right" valign="bottom" width="33%">
-      [% PROCESS _help.tt topic = "reports" %]
     </td>
   </tr>
 </table>

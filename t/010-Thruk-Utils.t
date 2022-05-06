@@ -128,7 +128,7 @@ is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
 SKIP: {
     skip 'external tests', 16 if Thruk::Base->config->{'no_external_job_forks'};
 
-    my($res, $c) = ctx_request('/thruk/side.html');
+    my($res, $c) = ctx_request('/thruk/main.html');
     my $contactgroups = $c->db->get_contactgroups_by_contact('thrukadmin');
     is(ref $contactgroups, 'HASH', 'get_contactgroups_by_contact(thrukadmin)');
 
@@ -247,13 +247,13 @@ ok(is_utf8($encoded), 'is_utf8 test20ac');
 #########################
 my $uri;
 $uri = Thruk::Utils::Filter::uri_with($c, {});
-is($uri, 'side.html', 'uri_with without params');
+is($uri, 'main.html', 'uri_with without params');
 
 $uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => 2, c => 3});
-is($uri, 'side.html?a=1&amp;b=2&amp;c=3', 'uri_with with 3 params');
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3', 'uri_with with 3 params');
 
 $uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => undef, c => 'undef'});
-is($uri, 'side.html?a=1', 'uri_with with undef params');
+is($uri, 'main.html?a=1', 'uri_with with undef params');
 
 my($res, $context) = TestUtils::ctx_request('/thruk/main.html?a=1&b=2&c=3&a=4');
 $c = $context;

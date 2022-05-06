@@ -1941,43 +1941,6 @@ sub expand_duration {
 
 ##############################################
 
-=head2 choose_mobile
-
-  choose_mobile($c, $url)
-
-let the user choose a mobile page or not
-
-=cut
-
-sub choose_mobile {
-    my($c,$url) = @_;
-
-    return unless defined $c->config->{'use_feature_mobile'};
-    return unless defined $c->req->header('user-agent');
-    my $found = 0;
-    for my $agent (split(/\s*,\s*/mx, $c->config->{'mobile_agent'})) {
-        $found++ if $c->req->header('user-agent') =~ m/$agent/mx;
-    }
-    return unless $found;
-
-    my $choose_mobile;
-    if(defined $c->cookies('thruk_mobile')) {
-        $choose_mobile = $c->cookies('thruk_mobile');
-        return if $choose_mobile == 0;
-    }
-
-    $c->stash->{'title'}     = $c->config->{'name'};
-    $c->stash->{'template'} = 'mobile_choose.tt';
-    $c->stash->{'redirect'}  = $url;
-    if(defined $choose_mobile and $choose_mobile == 1) {
-        return $c->redirect_to($c->stash->{'redirect'});
-    }
-    return 1;
-}
-
-
-##############################################
-
 =head2 update_cron_file
 
   update_cron_file($c, $section, $entries)
@@ -2332,7 +2295,7 @@ sub restart_later {
             system("sleep 1 && kill -HUP $pid &");
         }
         Thruk::Utils::append_message($c, ' Thruk has been restarted.');
-        return $c->redirect_to($c->stash->{'url_prefix'}.'startup.html?wait#'.$redirect);
+        return $c->redirect_to($redirect);
     } else {
         Thruk::Utils::append_message($c, ' Changes take effect after Restart.');
         return $c->redirect_to($redirect);
@@ -3727,58 +3690,46 @@ sub page_data {
     $default_result_size = $c->stash->{'default_page_size'} unless defined $default_result_size;
 
     # set some defaults
-    my $pager = { current_page => 1, total_entries => 0 };
-    $c->stash->{'pager'} = $pager;
-    $c->stash->{'pages'} = 0;
     $c->stash->{'data'}  = $data;
+    $c->stash->{'pager'} = {
+            page        => 1,
+            total_pages => 1,
+            total_items => $total_size // scalar @{$data},
+            entries     => $default_result_size,
+    };
+    my $pager = $c->stash->{'pager'};
 
     # page only in html mode
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     return $data unless $view_mode eq 'html';
+
     my $entries = $c->req->parameters->{'entries'} || $default_result_size;
     return $data unless defined $entries;
     return $data unless $entries =~ m/^(\d+|all)$/mx;
-    $c->stash->{'entries_per_page'} = $entries;
+    $c->stash->{'pager'}->{'entries'} = $entries;
 
-    # we dont use paging at all?
-    unless($c->stash->{'use_pager'}) {
-        $pager->{'total_entries'} = ($total_size || scalar @{$data});
-        return $data;
-    }
-
-    if(defined $total_size) {
-        $pager->{'total_entries'} = $total_size;
-    } else {
-        $pager->{'total_entries'} = scalar @{$data};
-    }
-    if($entries eq 'all') { $entries = $pager->{'total_entries'}; }
-    my $pages = 0;
+    if($entries eq 'all') { $entries = $pager->{'total_items'}; }
     if($entries > 0) {
-        $pages = POSIX::ceil($pager->{'total_entries'} / $entries);
-    }
-    else {
-        $c->stash->{'data'} = $data;
+        $pager->{'total_pages'} = POSIX::ceil($pager->{'total_items'} / $entries);
+    } else {
         return $data;
     }
-    if($pager->{'total_entries'} == 0) {
-        $c->stash->{'data'} = $data;
+    if($pager->{'total_items'} == 0) {
         return $data;
     }
 
-    my $page = 1;
     # current page set by get parameter
-    if(defined $c->req->parameters->{'page'}) {
-        $page = $c->req->parameters->{'page'};
-    }
+    $pager->{'page'} = $c->req->parameters->{'page'} // 1;
+
     # current page set by jump anchor
-    elsif(defined $c->req->parameters->{'jump'}) {
+    if(defined $c->req->parameters->{'jump'}) {
         my $nr = 0;
         my $jump = $c->req->parameters->{'jump'};
         if(exists $data->[0]->{'description'}) {
             for my $row (@{$data}) {
                 $nr++;
                 if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
-                    $page = POSIX::ceil($nr / $entries);
+                    $pager->{'page'} = POSIX::ceil($nr / $entries);
                     last;
                 }
             }
@@ -3787,58 +3738,25 @@ sub page_data {
             for my $row (@{$data}) {
                 $nr++;
                 if(defined $row->{'name'} and $row->{'name'} eq $jump) {
-                    $page = POSIX::ceil($nr / $entries);
+                    $pager->{'page'} = POSIX::ceil($nr / $entries);
                     last;
                 }
             }
         }
     }
 
-    # last/first/prev or next button pressed?
-    if(   exists $c->req->parameters->{'next'}
-       or exists $c->req->parameters->{'next.x'} ) {
-        $page++;
-    }
-    elsif (   exists $c->req->parameters->{'previous'}
-           or exists $c->req->parameters->{'previous.x'} ) {
-        $page-- if $page > 1;
-    }
-    elsif (    exists $c->req->parameters->{'first'}
-            or exists $c->req->parameters->{'first.x'} ) {
-        $page = 1;
-    }
-    elsif (    exists $c->req->parameters->{'last'}
-            or exists $c->req->parameters->{'last.x'} ) {
-        $page = $pages;
-    }
+    if($pager->{'page'} !~ m|^\d+$|mx) { $pager->{'page'} = 1; }
+    if($pager->{'page'} < 0)           { $pager->{'page'} = 1; }
+    if($pager->{'page'} > $pager->{'total_pages'}) { $pager->{'page'} = $pager->{'total_pages'}; }
 
-    if(!defined $page)      { $page = 1; }
-    if($page !~ m|^\d+$|mx) { $page = 1; }
-    if($page < 0)           { $page = 1; }
-    if($page > $pages)      { $page = $pages; }
-
-    $c->stash->{'current_page'} = $page;
-    $pager->{'current_page'}    = $page;
-
-    if($entries eq 'all') {
-        $c->stash->{'data'} = $data;
-    }
-    else {
-        if(!$already_paged) {
-            if($page == $pages) {
-                $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
-            } else {
-                $data = [splice(@{$data}, $entries*($page-1), $entries)];
-            }
+    if(!$already_paged) {
+        if($pager->{'page'} == $pager->{'total_pages'}) {
+            $data = [splice(@{$data}, $entries*($pager->{'page'}-1), $pager->{'total_items'} - $entries*($pager->{'page'}-1))];
+        } else {
+            $data = [splice(@{$data}, $entries*($pager->{'page'}-1), $entries)];
         }
         $c->stash->{'data'} = $data;
     }
-
-    $c->stash->{'pages'} = $pages;
-
-    # set some variables to avoid undef values in templates
-    $c->stash->{'pager_previous_page'} = $page > 1      ? $page - 1 : 0;
-    $c->stash->{'pager_next_page'}     = $page < $pages ? $page + 1 : 0;
 
     return $data;
 }

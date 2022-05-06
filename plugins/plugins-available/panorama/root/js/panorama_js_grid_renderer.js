@@ -427,7 +427,7 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     if(perf_bar_mode == 'off') {
         return "";
     }
-    var r =  perf_table(false, item.data.state, item.data.plugin_output, item.data.perf_data, item.data.check_command, "");
+    var r =  perf_table_data({'state': item.data.state, 'pluginOutput': item.data.plugin_output, 'perfdata': item.data.perf_data, 'checkCommand': item.data.check_command });
     if(r == false) { return ""; }
     td.tdCls = "less_padding";
     return r;

@@ -45,9 +45,6 @@ server {
     location /thruk/documentation.html {
          alias /usr/share/thruk/root/thruk/documentation.html;
     }
-    location /thruk/startup.html {
-         alias /usr/share/thruk/root/thruk/startup.html;
-    }
     location ~ ^/thruk/plugins/(.*?)/(.*)$ {
          alias /etc/thruk/plugins/plugins-enabled/$1/root/$2;
     }

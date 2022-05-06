@@ -1779,8 +1779,8 @@ sub _task_hosts {
             { 'header' => 'Last Time Down',        dataIndex => 'last_time_down',        hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
         ],
         data        => $c->stash->{'data'},
-        totalCount  => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        totalCount  => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
 
@@ -1898,8 +1898,8 @@ sub _task_services {
             { 'header' => 'Last Time Critical', dataIndex => 'last_time_critical', hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_date' },
         ],
         data        => $c->stash->{'data'},
-        totalCount  => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        totalCount  => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
 
@@ -2421,8 +2421,8 @@ sub _task_show_comments {
             { 'header' => 'ID',                                   dataIndex => 'id',                  hidden => Cpanel::JSON::XS::true },
         ],
         data        => $c->stash->{'data'},
-        totalCount  => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        totalCount  => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
 
@@ -2468,8 +2468,8 @@ sub _task_pnp_graphs {
 
     my $json = {
         data        => $c->stash->{'data'},
-        total       => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        total       => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
 
@@ -2537,8 +2537,8 @@ sub _task_grafana_graphs {
 
     my $json = {
         data        => $c->stash->{'data'},
-        total       => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        total       => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
 
@@ -2573,8 +2573,8 @@ sub _task_userdata_backgroundimages {
     Thruk::Utils::page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
-        total       => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        total       => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
     return $c->render(json => $json);
@@ -2607,8 +2607,8 @@ sub _task_userdata_images {
     Thruk::Utils::page_data($c, $images);
     my $json = {
         data        => $c->stash->{'data'},
-        total       => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        total       => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
     return $c->render(json => $json);
@@ -2958,8 +2958,8 @@ sub _task_dashboard_list {
     my $json = {
         columns     => $columns,
         data        => $c->stash->{'data'},
-        total       => $c->stash->{'pager'}->{'total_entries'},
-        currentPage => $c->stash->{'pager'}->{'current_page'},
+        total       => $c->stash->{'pager'}->{'total_items'},
+        currentPage => $c->stash->{'pager'}->{'page'},
         paging      => Cpanel::JSON::XS::true,
     };
 

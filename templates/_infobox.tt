@@ -1,21 +1,53 @@
 ﻿[% USE date %]
-<table class='infoBox' border="1" cellspacing="0" cellpadding="0">
-  <tr>
-    <td class='infoBox'>
-      <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
-      [% IF show_last_update %]Last Update: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span id="refresh_label" title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]<br />[% END %]
-      <a href='http://www.thruk.org' target='_blank' class='homepageURL'>Thruk [% thrukversion %]</a>[% IF c.config.extra_version %]<span class="infoboxlinks"> - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a></span>[% END %]<br />
+[% DEFAULT extra_classes = "" %][% IF extra_classes %][% SET extra_classes =  " " _ extra_classes %][% END %]
+<div class="card min-w-[350px][% extra_classes %]">
+  <div class="head">
+    <h3>[% infoBoxTitle %]</h3>
+  </div>
+  <div class="body">
+    <table>
+      [% IF show_last_update %]
+      <tr>
+        <th>Date</th>
+        <td>
+          <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span id="refresh_label" title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]
+        </td>
+      </tr>
+      [% END %]
+      <tr>
+        <th>Version</th>
+        <td class="truncate">
+          <a class="link" href='http://www.thruk.org' target='_blank'>Thruk [% thrukversion %]</a>
+        </td>
+      </tr>
+      [% IF c.config.extra_version %]
+        <tr>
+          <th>OMD</th>
+          <td>
+            <a class="link" href='[% c.config.extra_version_link %]' target='_blank'>[% c.config.extra_version %]</a>
+          </td>
+        </tr>
+      [% END %]
       [% IF c.user_exists %]
-      Logged in as <i>[% remote_user %]</i><br />
+      <tr>
+        <th>User</th>
+        <td>
+          <a class="link" href="[% url_prefix %]cgi-bin/user.cgi">[% remote_user %]</a>
+        </td>
+      </tr>
       [% IF has_proc_info %]
-      [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
-      [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partially disabled</div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partially disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='infoBoxBadProcStatus'> - Host checks are disabled </div>[% END %]
-      [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partially disabled </div>[% END %]
+      <tr>
+        <td colspan="2">
+          [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='textALERT'> - Notifications are disabled</div>[% END %]
+          [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='textALERT'> - Notifications are partially disabled</div>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='textALERT'> - Service checks are disabled </div>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='textALERT'> - Service checks are partially disabled </div>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='textALERT'> - Host checks are disabled </div>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='textALERT'> - Host checks are partially disabled </div>[% END %]
+        </td>
+      </tr>
       [% END %]
       [% END %]
-    </td>
-  </tr>
-</table>
+    </table>
+  </div>
+</div>

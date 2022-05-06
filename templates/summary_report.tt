@@ -17,19 +17,19 @@
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>Alert Types:</td>
-              <td valign="top" align="left" class='optBoxValue'>[% alerttypefilter %] Alerts</td>
+              <td valign="top" align="left" >[% alerttypefilter %] Alerts</td>
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>State Types:</td>
-              <td valign="top" align="left" class='optBoxValue'>[% statetypefilter %] States</td>
+              <td valign="top" align="left" >[% statetypefilter %] States</td>
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>Host States:</td>
-              <td valign="top" align="left" class='optBoxValue'>[% hoststatusfilter %]</td>
+              <td valign="top" align="left" >[% hoststatusfilter %]</td>
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>Service States:</td>
-              <td valign="top" align="left" class='optBoxValue'>[% servicestatusfilter %]</td>
+              <td valign="top" align="left" >[% servicestatusfilter %]</td>
             </tr>
             <tr>
               <td valign="top" align="left" colspan="2" class='optBoxItem'>
@@ -41,7 +41,6 @@
             <tr>
               <td></td>
               <td align="right" valign="bottom">
-                [% PROCESS _help.tt topic = "summary" %]
               </td>
             </tr>
           </table>
