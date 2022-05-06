@@ -211,6 +211,10 @@ sub _process_raw_request {
 
     if($type eq 'host' || $type eq 'hosts' || $type eq 'all') {
         my($data, $size) = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ], columns => [qw/name alias/], limit => $limit );
+        for my $row (@{$data}) {
+            delete $row->{'peer_key'};
+            delete $row->{'peer_name'};
+        }
         push @{$json}, { 'name' => "hosts", 'data' => $data, 'total' => $size };
     }
 
@@ -222,6 +226,8 @@ sub _process_raw_request {
         for my $group (@{$hostgroups}) {
             my $row = $alias->{$group};
             next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
+            delete $row->{'peer_key'};
+            delete $row->{'peer_name'};
             push @{$data}, $row;
         }
         push @{$json}, { 'name' => "hostgroups", 'data' => $data };
@@ -235,6 +241,8 @@ sub _process_raw_request {
         for my $group (@{$servicegroups}) {
             my $row = $alias->{$group};
             next unless(!$filter || ($row->{'name'}.' - '.$row->{'alias'}) =~ m/$filter/mxi);
+            delete $row->{'peer_key'};
+            delete $row->{'peer_name'};
             push @{$data}, $row;
         }
         push @{$json}, { 'name' => "servicegroups", 'data' => $data };
@@ -255,8 +263,8 @@ sub _process_raw_request {
             }
             $additional_filter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
-        my($data, $size) = $c->db->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ], limit => $limit );
-        push @{$json}, { 'name' => "services", 'data' => $data, 'total' => $size };
+        my($data) = $c->db->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ], limit => $limit );
+        push @{$json}, { 'name' => "services", 'data' => $data };
     }
 
     if($type eq 'timeperiod' or $type eq 'timeperiods') {

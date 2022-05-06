@@ -652,19 +652,27 @@ returns a list of service names
 =cut
 sub get_service_names {
     my($self, %options) = @_;
-    if($options{'data'}) {
-        my %indexed;
-        for my $row (@{$options{'data'}}) { $indexed{$row->{'description'}} = 1; }
-        my @keys = keys %indexed;
-        return(\@keys, 'uniq');
-    }
+
+    return($options{'data'}, 'uniq') if($options{'data'});
+
     $options{'columns'} = [qw/description/];
-    my $data = $self->_get_hash_table('services', 'description', \%options);
-    my $keys = defined $data ? [keys %{$data}] : [];
-    unless(wantarray) {
-        confess("get_service_names() should not be called in scalar context");
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicenames')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_service_names() should not be called in scalar context");
+        }
+        my @names;
+        for my $row (@{$rows}) { push @names, $row->{'description'}; }
+        return(\@names, 'uniq');
     }
-    return($keys, 'uniq');
+
+    # use a filter which is always true, we only want the uniq service names
+    my $stats = [
+        'total'     => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('servicenames');
+    return($self->get_service_names(%options));
 }
 
 ##########################################################
