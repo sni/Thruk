@@ -132,7 +132,7 @@ sub duration {
         $minutes  = int($duration/60);
         $duration = $duration%60;
     }
-    $seconds = $duration;
+    $seconds = CORE::sprintf("%d", $duration);
 
     if($options == 0) {
         return($minus.$hours."h ".$minutes."m ".$seconds."s");
