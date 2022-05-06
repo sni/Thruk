@@ -61,7 +61,8 @@ SKIP: {
         'like'     => 'This item has moved',
         'redirect' => 1,
     );
-    like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[0]->{'name'}.','.$backends->[1]->{'name'}.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
+    my $backends_string = join(',', sort ($backends->[0]->{'name'}, $backends->[1]->{'name'}));
+    like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends_string.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
 };
 
 TestUtils::test_page(
