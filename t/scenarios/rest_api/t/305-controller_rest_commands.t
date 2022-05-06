@@ -22,21 +22,21 @@ my($contact,$contactgroup) = ('example', 'example');
 my $cmds = Thruk::Controller::Rest::V1::cmd::get_rest_external_command_data();
 
 for my $type (sort keys %{$cmds}) {
-    my $obj_path = '';
+    my $rest_path = '';
     if($type eq 'hosts') {
-        $obj_path = '/'.$host;
+        $rest_path = 'hosts/'.$host;
     } elsif($type eq 'hostgroups') {
-        $obj_path = '/'.$hostgroup;
+        $rest_path = 'hostgroups/'.$hostgroup;
     } elsif($type eq 'services') {
-        $obj_path = '/'.$host.'/'.$service;
+        $rest_path = 'services/'.$host.'/'.$service;
     } elsif($type eq 'servicegroups') {
-        $obj_path = '/'.$servicegroup;
+        $rest_path = 'servicegroups/'.$servicegroup;
     } elsif($type eq 'contacts') {
-        $obj_path = '/'.$contact;
+        $rest_path = 'contacts/'.$contact;
     } elsif($type eq 'contactgroups') {
-        $obj_path = '/'.$contactgroup;
-    } elsif($type eq 'system') {
-        $obj_path = '';
+        $rest_path = 'contactgroups/'.$contactgroup;
+    } elsif($type eq 'system' || $type eq 'all_host_service') {
+        $rest_path = 'system';
     } else {
         BAIL_OUT("unknown type: ".$type);
     }
@@ -47,7 +47,7 @@ for my $type (sort keys %{$cmds}) {
         next if $cmd =~ m/^restart_pro/mx;
         my $test = {
             'content_type' => 'application/json; charset=utf-8',
-            'url'          => '/thruk/r/'.$type.$obj_path.'/cmd/'.$cmd,
+            'url'          => '/thruk/r/'.$rest_path.'/cmd/'.$cmd,
             'like'         => ['Command successfully submitted', 'COMMAND \['],
             'unlike'       => ['sending command failed'],
             'post'         => {
