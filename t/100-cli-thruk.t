@@ -77,12 +77,13 @@ if($test->{'exit'} == 0) {
         push @names, $data->[1];
     }
     if(scalar @backends > 1) {
+        my $backends_string = join(',', sort ($names[0], $names[1]));
         # test commands with multiple backends
         local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = undef;
         local $ENV{'THRUK_NO_COMMANDS'} = 1;
         TestUtils::test_command({
             cmd     => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=11" -b '.$backends[0].' -b '.$backends[1],
-            errlike => ['/\['.$names[0].','.$names[1].'\]/', '/TESTMODE:/', '/DISABLE_NOTIFICATIONS/' ],
+            errlike => ['/\['.$backends_string.'\]/', '/TESTMODE:/', '/DISABLE_NOTIFICATIONS/' ],
             like    => ['/Command request successfully submitted to the Backend for processing/'],
         });
         TestUtils::test_command({
