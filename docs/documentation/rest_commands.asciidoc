@@ -601,11 +601,11 @@ Sends the PROCESS_HOST_CHECK_RESULT command.
 
 Required arguments:
 
+  * plugin_state
   * plugin_output
 
 Optional arguments:
 
-  * plugin_state
   * performance_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/process_host_check_result.html for details.
@@ -1139,11 +1139,11 @@ Sends the PROCESS_SERVICE_CHECK_RESULT command.
 
 Required arguments:
 
+  * plugin_state
   * plugin_output
 
 Optional arguments:
 
-  * plugin_state
   * performance_data
 
 See http://www.naemon.org/documentation/developer/externalcommands/process_service_check_result.html for details.

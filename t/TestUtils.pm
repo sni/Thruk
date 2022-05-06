@@ -559,37 +559,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
     my @return;
     for my $error ( $lint->errors ) {
         my $err_str = $error->as_string;
-        next if $err_str =~ m/<IMG\ SRC=".*command.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*warning.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*unknown.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*critical.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*flapping.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*recovery.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*restart.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*start.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*icon_minimize\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*right\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*left\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*right\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*up\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*down\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*down\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*json\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*waiting\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*downtime\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*info\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*problem\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*criticity_\d\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*stop\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*notify\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*passiveonly\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*pnp.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-
-        next if $err_str =~ m/<IMG\ SRC=".*\/conf\/images\/obj_.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC=".*\/logo_thruk.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC="[^"]*\.cgi[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/<IMG\ SRC="data:image[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
+        next if $err_str =~ m/<IMG\ SRC="[^"]+">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "data\-[\w\-]+"\ for\ tag/imxo;
         next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <input>/imxo;
@@ -608,6 +578,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/<title>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<body>\ tag\ is\ required/imxo;
         next if $err_str =~ m/Entity\ .*\ is\ unknown/imxo;
+        next if $err_str =~ m/Unknown\ element\ <(main|header|footer|nav)>/imxo;
         diag($error->as_string."\n");
         push @return, $error;
     }
@@ -625,7 +596,7 @@ sub get_c {
     our($c);
     return $c if defined $c;
     my $res;
-    ($res, $c) = ctx_request('/thruk/side.html');
+    ($res, $c) = ctx_request('/thruk/main.html');
     return $c;
 }
 
@@ -917,7 +888,6 @@ sub _request {
     $cookie_jar->add_cookie_header($request);
     my $response = request($request);
     $cookie_jar->extract_cookies($response);
-    $response = _check_startup_redirect($response, $start_to);
 
     return $response;
 }
@@ -974,8 +944,6 @@ sub _external_request {
         $req = $ua->request($request);
     }
 
-    $req = _check_startup_redirect($req, $start_to);
-
     if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/thruk\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
         die("login failed: ".Dumper($req)) unless $retry;
         my $referer = uri_unescape($1);
@@ -985,24 +953,6 @@ sub _external_request {
         $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, 0);
     }
     return $req;
-}
-
-#########################
-sub _check_startup_redirect {
-    my($request, $start_to) = @_;
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/thruk\/startup\.html\?(.*)$/mxo) {
-        my $link = $1;
-        $link    =~ s/^wait\#//mxo;
-        is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
-        # startup fcgid
-        my $r = _request('/thruk/cgi-bin/remote.cgi', undef, {});
-        fail("startup failed: ".Dumper($r)) unless $r->is_success;
-        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
-        sleep(3);
-        if($link !~ m/\?/mx && $link =~ m/\&/mx) { $link =~ s/\&/?/mx; }
-        $request = _request($link);
-    }
-    return($request);
 }
 
 #########################
@@ -1097,6 +1047,7 @@ sub verify_html_js {
 sub verify_tt {
     my($file) = @_;
     my $content = Thruk::Utils::IO::read($file);
+    confess("file could not be read: $file") unless $content;
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
     _check_marker($file, $content) if $errors_js;
     return;

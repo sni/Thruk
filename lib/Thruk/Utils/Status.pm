@@ -42,7 +42,6 @@ sub set_default_stash {
     $c->stash->{'sortoption'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption'}         || '');
     $c->stash->{'sortoption_hst'}       = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_hst'}     || '');
     $c->stash->{'sortoption_svc'}       = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_svc'}     || '');
-    $c->stash->{'hidesearch'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hidesearch'}         || 0);
     $c->stash->{'hostgroup'}            = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostgroup'}          || '');
     $c->stash->{'servicegroup'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicegroup'}       || '');
     $c->stash->{'host'}                 = Thruk::Utils::Filter::escape_html($c->req->parameters->{'host'}               || '');
@@ -2170,7 +2169,9 @@ sub serveraction {
     if(!defined $c->config->{'action_menu_actions'}->{$action}) {
         return(1, 'custom action '.$action.' is not defined');
     }
-    my @cmdline = split(/\s+/mx, $c->config->{'action_menu_actions'}->{$action});
+    # tokenize cmd
+    my @cmdline = split(/"?((?<!")\S+(?<!")|[^"]+)"?\s*/mx, $c->config->{'action_menu_actions'}->{$action});
+    @cmdline = grep{$_}@cmdline;
     my $cmd = shift @cmdline;
     # expand ~ in $cmd
     my @cmd = glob($cmd);

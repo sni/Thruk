@@ -532,11 +532,11 @@ __DATA__
 #
 # Required arguments:
 #
+#   * plugin_state
 #   * plugin_output
 #
 # Optional arguments:
 #
-#   * plugin_state
 #   * performance_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/process_host_check_result.html for details.
@@ -898,11 +898,11 @@ __DATA__
 #
 # Required arguments:
 #
+#   * plugin_state
 #   * plugin_output
 #
 # Optional arguments:
 #
-#   * plugin_state
 #   * performance_data
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/process_service_check_result.html for details.
@@ -1644,7 +1644,7 @@ __DATA__
   "enable_host_svc_checks":{"args":[],"name":"enable_host_svc_checks","nr":"15","required":[]},
   "enable_host_svc_notifications":{"args":[],"name":"enable_host_svc_notifications","nr":"28","required":[]},
   "enable_passive_host_checks":{"args":[],"name":"enable_passive_host_checks","nr":"92","required":[]},
-  "process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result","nr":"87","required":["plugin_output"]},
+  "process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result","nr":"87","required":["plugin_state","plugin_output"]},
   "remove_host_acknowledgement":{"args":[],"name":"remove_host_acknowledgement","nr":"51","required":[]},
   "schedule_and_propagate_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_host_downtime","nr":"55","required":["comment_data"]},
   "schedule_and_propagate_triggered_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_triggered_host_downtime","nr":"55","required":["comment_data"]},
@@ -1699,7 +1699,7 @@ __DATA__
   "enable_svc_event_handler":{"args":[],"name":"enable_svc_event_handler","nr":"45","required":[]},
   "enable_svc_flap_detection":{"args":[],"name":"enable_svc_flap_detection","nr":"59","required":[]},
   "enable_svc_notifications":{"args":[],"name":"enable_svc_notifications","nr":"22","required":[]},
-  "process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result","nr":"30","required":["plugin_output"]},
+  "process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result","nr":"30","required":["plugin_state","plugin_output"]},
   "remove_svc_acknowledgement":{"args":[],"name":"remove_svc_acknowledgement","nr":"52","required":[]},
   "schedule_forced_svc_check":{"args":["start_time"],"name":"schedule_forced_svc_check","nr":"7","required":[]},
   "schedule_svc_check":{"args":["start_time"],"name":"schedule_svc_check","nr":"7","required":[]},

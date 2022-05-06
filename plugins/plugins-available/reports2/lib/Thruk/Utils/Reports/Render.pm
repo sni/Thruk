@@ -983,6 +983,11 @@ sub _read_static_content_file {
     my $product_prefix = $c->config->{'product_prefix'};
     $url = _absolutize_url($baseurl, $url) if $baseurl;
 
+    if($url =~ m/v4compatibility/mx) {
+        return(200, { result => ''}) if wantarray;
+        return '';
+    }
+
     if($url =~ m/^https?:/mx) {
        return(Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $c->stash->{'fake_session_id'} }));
     }

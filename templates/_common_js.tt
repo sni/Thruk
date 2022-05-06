@@ -3,9 +3,7 @@
   jQuery.noConflict();
   [% PROCESS _header_initial_states.tt %]
   var thruk_static_export = false;
-  [% IF refresh_rate +%]
-  var refresh_rate        = [% refresh_rate %];
-  [% END +%]
+  var refresh_rate        = [% IF refresh_rate %][% refresh_rate %][% ELSE %]null[% END %];
   [% IF auto_reload_fn +%]
   var auto_reload_fn      = function(cb) { return([% auto_reload_fn %](cb)) };
   var datetime_format_long = '[% datetime_format_long %]';
@@ -22,7 +20,6 @@
   var fav_counter         = [% IF fav_counter +%]true[% ELSE %]false[% END %];
   var perf_bar_mode       = '[% perf_bar_mode %]';
   var perf_bar_pnp_popup  = '[% perf_bar_pnp_popup %]';
-  var internetExplorer    = false;
   var has_jquery_ui       = [% has_jquery_ui %];
   var jquery_ui_url       = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js';
   var jquery_ui_css       = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css';
@@ -40,11 +37,11 @@
   var show_sitepanel      = '[% show_sitepanel %]';
   var param_backend       = [% json_encode(param_backend.list) %];
   var backend_chooser     = '[% backend_chooser %]';
-  var info_popup_options  = [[% c.config.info_popup_options %]];
   var downtime_duration   = [% downtime_duration %];
   var has_debug_options   = [% has_debug_options %];
   var maximum_search_boxes = [% c.config.maximum_search_boxes %];
   var escape_html_tags    = [% IF escape_html_tags %]true[% ELSE %]false[% END %];
+  var sort_options        = [% json_encode(data_sorted) %];
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]
@@ -62,28 +59,11 @@
     history.replaceState({}, "", history_url);
   }
   [% END %]
-  [% IF use_frames && use_dynamic_titles %]
-  try {
-    if(window.parent.frames && !String(window.parent.location.href).match(/\/panorama\.cgi/)) {
-      window.parent.document.title = '[% escape_quotes(title_prefix) %][% escape_quotes(title) | html %]';
-    }
-  } catch(err) { console.log(err) }
-  [% END %]
 
-  [% IF bodyonload %]
   jQuery(document).ready(function() {
-    bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %]);
+    init_page();
   });
-  [% END %]
-  init_page();
 
-  try {
-      if(window.parent.frames && top.frames['side']) {
-          top.frames['side'].is_reloading = undefined;
-          top.frames['side'].load_errors  = 0;
-      }
-  }
-  catch(err) { console.log(err); }
   [%+ IF fav_counter +%]
   /* favicon counter */
   [% totals = set_favicon_counter(c) %]
@@ -100,7 +80,6 @@
 
 -->
 </script>
-<!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
 
 [% IF show_sitepanel == 'tree' %]
 <link href="[% url_prefix %]vendor/fancytree-2.36.1/skin-win8/ui.fancytree.min.css" rel="stylesheet">

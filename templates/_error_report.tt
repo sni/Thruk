@@ -4,17 +4,19 @@
 Make sure the report does not contain confidential information.
 
 ---------------
-Url:        [%+ short_uri(c) +%]
-Browser:    [%+ IF c.request.exists('user_agent') %][% c.request.user_agent %][% END +%]
+Url:        [%+ uri_with(c, {}, "", "", 1) +%]
+Browser:    [%+ get_browser_user_agent() +%]
 Version:    [% fullversion(c) +%]
 Release:    [% c.config.released +%]
 [%- IF c.config.exists('lmd_version') +%]
 LMD:        [% c.config.lmd_version +%]
-[%- END -%]
-Backends:   State / Program Version / Data Source Version
-[% FOREACH pd IN backends -%]
-            [% backend_detail.$pd.state %] / [% IF pi_detail.exists(pd) %][% IF pi_detail.$pd.exists('program_version'); pi_detail.$pd.program_version; END %] / [% IF pi_detail.$pd.exists('data_source_version'); pi_detail.$pd.data_source_version; END %][% END +%]
-[% END +%]
-[%+ debug_details(c) %]
+[%- END +%]
+[%+ debug_details(c) +%]
+Backends:
+  State | Program Version | Data Source Version
+[%+ FOREACH pd IN backends -%]
+[% sprintf("%-5s", backend_detail.$pd.state) %] | [% IF pi_detail.exists(pd) %][% IF pi_detail.$pd.exists('program_version'); sprintf("%-15s", pi_detail.$pd.program_version); ELSE; sprintf("%-15s", "unknown"); END %] | [% IF pi_detail.$pd.exists('data_source_version'); pi_detail.$pd.data_source_version; END %][% END +%]
+[%+ END +%]
+
 Stacktrace:
 [%+ stacktrace %]

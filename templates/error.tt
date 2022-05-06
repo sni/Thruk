@@ -3,52 +3,55 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-  <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-    <tr>
-      <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-      </td>
-      <td align="center" valign="middle" width="33%"></td>
-      <td align="right" valign="bottom" width="33%"></td>
-    </tr>
-  </table><br>
+[% PROCESS _infobox.tt %]
+
+<div class="flexcol w-full place-content-center items-center text-center mt-5">
   [% IF errorMessage %]
-  <div class='errorMessage'><b>[% errorMessage %]</b></div>
-  <div class='errorDescription'>[% dump2str(errorDescription, 0, 0) | nl2br %]</div>
+    <h1 class='textERROR'>[% errorMessage %]</h1>
+    <h2>[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
   [% ELSE %]
-  [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
-  <div class='errorMessage'>internal server error</div>
-  <div class='errorDescription'>internal server error occured, please look at your logfiles</div>
-  [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
+    <h1 class='textERROR'>internal server error</h1>
+    <h2>internal server error occured, please look at your logfiles</h2>
+    [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
   [% END %]
 
   [% IF errorDetails %]
-  <br>
-  <div class='errorDescription' style="text-align: left">
-  <b>Details:</b><br>
-  [% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]
-  </div><br>
+    <div class='card text-left w-fit'>
+      <div class="head">
+        <h3>Details</h3>
+      </div>
+      <div class="body">
+        [% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]
+      </div>
+    </div>
   [% END %]
 
   [% IF stacktrace %]
-  <br>
-  <div class='errorDescription'>
-  <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">
-    <img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" alt="Send Bug Report" width="16" height="16" style="vertical-align: text-bottom;">
-    Help making Thruk better and send a bug report
-  </a>.<br>
-[% IF !make_test_mode && !thruk_author %]
-  or<br>
-  <a href="#" onclick="document.getElementById('error_report_text').style.display=''; return false;">
-    <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="show error report" style="vertical-align: middle">
-    Preview error report text first
-  </a>
-[% END %]
-  </div>
-  [% IF thruk_author %]
-  <pre style="margin-top: 50px; text-align: left;">[% escape_html(stacktrace) %]</pre>
+    <div class="text-center w-fit">
+      <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
+        <i class="fa-solid fa-bug" title="Send Bug Report"></i>
+        Help making Thruk better and send a bug report.
+      </a>
+      [% IF !make_test_mode && !thruk_author %]
+        <div>or</div>
+        <a href="#" onclick="document.getElementById('error_report_text').style.display=''; return false;" class="button">
+          <i class="uil uil-angle-down" title="open bug report preview"></i>
+          Preview error report text first
+        </a>
+      [% END %]
+    </div>
+
+    [% IF thruk_author %]
+    <div class="card p-2 mt-2 mx-auto">
+      <h3>Stacktrace</h3>
+      <pre class="text-left">[% escape_html(stacktrace) %]</pre>
+    </div>
+    [% END %]
   [% END %]
-  [% END %]
+
+</div>
+
+
 [% IF make_test_mode || thruk_author %]
 <!--error:
 [%+ errorMessage +%]
@@ -56,11 +59,22 @@
 [%+ stacktrace +%]
 :error-->
 [% ELSE %]
-<div class="shadow" style="display: none; margin: 15px;" id="error_report_text"><div class="shadowcontent" style="padding: 10px;">
-<pre style="text-align: left;">
-<b>Please report this issue by mail to: <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">[% bug_email_rcpt %]</a></b><br>
-[% PROCESS _error_report.tt | html %]
-</pre>
-</div></div>
+  <div class="flexcol w-full items-center">
+    <div class="card mt-2 mx-auto w-fit" style="display: none;;" id="error_report_text">
+      <h3>Bug Report Preview</h3>
+      <div>
+        <div class="flexrow w-fit align-middle">
+          <div class="flex self-center">Please report this issue by mail to:</div>
+          <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
+            <i class="fa-solid fa-envelope"></i>
+            [% bug_email_rcpt %]
+          </a>
+        </div>
+        <pre class="text-left mt-5">
+          [% PROCESS _error_report.tt | html %]
+        </pre>
+      </div>
+    </div>
+  </div>
 [% END %]
 [% PROCESS _footer.tt %]

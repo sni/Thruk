@@ -310,9 +310,7 @@ sub index {
     $c->stash->{'infoBoxTitle'} = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
 
     $c->stash->{'navigation'}  = "";
-    if($c->stash->{'use_frames'} == 0) {
-        Thruk::Utils::Menu::read_navigation($c);
-    }
+    Thruk::Utils::Menu::read_navigation($c);
 
     # do not cache errors
     $c->res->code($code);
@@ -348,7 +346,6 @@ sub index {
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
-    $c->stash->{'show_home_button'}      = $c->user_exists ? $c->stash->{'url_prefix'} : $c->stash->{'url_prefix'}."cgi-bin/login.cgi";
     $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
 
     # do not download errors

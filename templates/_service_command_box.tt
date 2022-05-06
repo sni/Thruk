@@ -1,185 +1,184 @@
-﻿<table border='0' cellpadding="0" cellspacing="0">
-  <tr>
-    <td align="center" valign="top" class='commandPanel'>
-      <div class='dataTitle'>Service Actions</div>
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel">
-        <tr>
-          <td>
-            [% UNLESS c.check_cmd_permissions('service', service.description, service.host_name) %]
-            <div align=center class='infoMessage'>Your account does not have permissions to execute commands.</div><br>
+﻿[% USE date %]
+<div class="card min-w-[370px]">
+  <div class="head">
+    <h3>Service Actions</h3>
+  </div>
+  <div class="actionbox">
+    [% UNLESS c.check_cmd_permissions('service', service.description, service.host_name) %]
+    <div class='infoMessage text-center'>Your account does not have permissions to execute commands.</div>
+    [% ELSE %]
+      [% UNLESS command_disabled(c, '7') %]
+        <div class="flex flex-nowrap">
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=7&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+            <i class="fa-solid fa-clock"></i>Re-schedule next check of this service
+          </a>
+          <form class="flex ml-1" action='cmd.cgi' method='POST'>
+            <input type='hidden' name='cmd_typ' value='7'>
+            <input type='hidden' name='cmd_mod' value='2'>
+            <input type='hidden' name='start_time' value="[% date.now %]">
+            <input type='hidden' name='host' value="[% service.host_name | html %]">
+            <input type='hidden' name='service' value="[% service.description | html %]">
+            <input type='hidden' name='force_check' value='1'>
+            <input type='hidden' name='backend' value="[% service.peer_key %]">
+            <input type='hidden' name='referer' value="[% short_uri(c, {referer => 'undef'}) %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            (<a href="cmd.cgi?cmd_typ=7&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check=1&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]" onClick="setBtnSpinner(this); jQuery(this).closest('FORM').submit(); return false;">Now</a>)
+          </form>
+        </div>
+      [% END %]
+      [% IF service.accept_passive_checks %]
+        [% UNLESS command_disabled(c, '30') %]
+          <div>
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=30&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="uil uil-left-arrow-to-left small"></i>Submit passive check result for this service
+            </a>
+          </div>
+        [% END %]
+      [% END %]
+      [% IF service.acknowledged || service.state >= 1 %]
+        [% UNLESS command_disabled(c, '34') || command_disabled(c, '52') %]
+          <div>
+            [% IF service.acknowledged %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=52&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-clipboard"></i>Remove problem acknowledgement
+            </a>
             [% ELSE %]
-            <table border="0" cellspacing="0" cellpadding="0">
-              [% UNLESS command_disabled(c, '7') %]
-              <tr class='data'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
-                <td class='command'>
-                  <a href="cmd.cgi?cmd_typ=7&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Re-schedule next check of this service</a>
-                  <form action='cmd.cgi' method='POST' style="display: inline;">
-                    <input type='hidden' name='cmd_typ' value='7'>
-                    <input type='hidden' name='cmd_mod' value='2'>
-                    <input type='hidden' name='start_time' value="[% date.now %]">
-                    <input type='hidden' name='host' value="[% service.host_name | html %]">
-                    <input type='hidden' name='service' value="[% service.description | html %]">
-                    <input type='hidden' name='force_check' value='1'>
-                    <input type='hidden' name='backend' value="[% service.peer_key %]">
-                    <input type='hidden' name='referer' value="[% short_uri(c, {referer => 'undef'}) %]">
-                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                    (<a href="cmd.cgi?cmd_typ=7&amp;&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check=1&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Now</a>)
-                  </form>
-                </td>
-              </tr>
-              [% END %]
-              [% IF service.accept_passive_checks %]
-              [% UNLESS command_disabled(c, '30') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Service' title='Submit Passive Check Result For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=30&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Submit passive check result for this service</a></td>
-              </tr>
-              [% END %]
-              [% END %]
-              [% IF service.acknowledged || service.state >= 1 %]
-              [% UNLESS command_disabled(c, '34') || command_disabled(c, '52') %]
-              <tr class='command'>
-                [% IF service.acknowledged %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=52&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Remove problem acknowledgement</a></td>
-                [% ELSE %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" alt='Acknowledge This Service Problem' title='Acknowledge This Service Problem' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=34&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Acknowledge this service problem</a></td>
-                [% END %]
-              </tr>
-              [% END %]
-              [% END %]
-              [% IF service.state >= 1 %]
-              [% UNLESS command_disabled(c, '9') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Delay Next Service Notification' title='Delay Next Service Notification' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=9&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Delay next service notification</a></td>
-              </tr>
-              [% END %]
-              [% END %]
-              [% UNLESS command_disabled(c, '160') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=160&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Send custom service notification</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '56') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Schedule downtime for this service</a></td>
-              </tr>
-              [% END %]
-              [% IF service.modified_attributes_list.size > 0 %]
-              [% UNLESS command_disabled(c, '155') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Reset Modified Attributes Of This Service' title='Reset Modified Attributes Of This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=155&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Reset Modified Attributes</a></td>
-              </tr>
-              [% END %]
-              [% END %]
-            </table>
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=34&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-clipboard-check"></i>Acknowledge this service problem
+            </a>
             [% END %]
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-
-
+          </div>
+        [% END %]
+      [% END %]
+      [% IF service.state >= 1 %]
+        [% UNLESS command_disabled(c, '9') %]
+          <div>
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=9&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-clock"></i>Delay next service notification
+            </a>
+          </div>
+        [% END %]
+      [% END %]
+      [% UNLESS command_disabled(c, '160') %]
+        <div>
+          <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=160&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+            <i class="fa-solid fa-volume-high small"></i>Send custom service notification
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '56') %]
+        <div>
+          <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+            <i class="fa-solid fa-moon"></i>Schedule downtime for this service
+          </a>
+        </div>
+      [% END %]
+      [% IF service.modified_attributes_list.size > 0 %]
+        [% UNLESS command_disabled(c, '155') %]
+          <div>
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=155&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-arrow-rotate-left"></i>Reset Modified Attributes
+            </a>
+          </div>
+        [% END %]
+      [% END %]
+    [% END %]
+  </div>
+</div>
 
 [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
-<br><br>
-<table border='0' cellpadding="0" cellspacing="0">
-  <tr>
-    <td align="center" valign="top" class='commandPanel'>
-      <div class='dataTitle'>Service Commands</div>
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel">
-        <tr>
-          <td>
-            <table border="0" cellspacing="0" cellpadding="0">
-              [% UNLESS command_disabled(c, '5') || command_disabled(c, '6') %]
-              <tr class='command'>
-                [% IF service.checks_enabled %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=6&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Disable active checks of this service</a></td>
-                [% ELSE %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=5&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Enable active checks of this service</a></td>
-                [% END %]
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '39') || command_disabled(c, '40') %]
-              [% IF service.accept_passive_checks %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service' width="20" height="20"></td>
-                <td class='command' nowrap><a href="cmd.cgi?cmd_typ=40&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Stop accepting passive checks for this service</a></td>
-              </tr>
-              [% ELSE %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Service' title='Start Accepting Passive Checks For This Service' width="20" height="20"></td>
-                <td class='command' nowrap><a href="cmd.cgi?cmd_typ=39&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Start accepting passive checks for this service</a></td>
-              </tr>
-              [% END %]
-              [% END %]
-              [% UNLESS command_disabled(c, '99') || command_disabled(c, '100') %]
-              <tr class='command'>
-                [% IF service.obsess_over_service %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over This Service' title='Stop Obsessing Over This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=100&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Stop obsessing over this service</a></td>
-                [% ELSE %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over This Service' title='Start Obsessing Over This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=99&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Start obsessing over this service</a></td>
-                [% END %]
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '22') || command_disabled(c, '23') %]
-              <tr class='command'>
-                [% IF service.notifications_enabled %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For This Service' title='Disable Notifications For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=23&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Disable notifications for this service</a></td>
-                [% ELSE %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For This Service' title='Enable Notifications For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=22&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Enable notifications for this service</a></td>
-                [% END %]
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '45') || command_disabled(c, '46') %]
-              <tr class='command'>
-                [% IF service.event_handler_enabled %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Service' title='Disable Event Handler For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=46&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Disable event handler for this service</a></td>
-                [% ELSE %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handler For This Service' title='Enable Event Handler For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=45&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Enable event handler for this service</a></td>
-                [% END %]
-              </tr>
-              [% END %]
-              [% IF enable_shinken_features %]
-              [% UNLESS command_disabled(c, '200') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=200&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Launch event handler</a></td>
-              </tr>
-              [% END %]
-              [% END %]
-              [% UNLESS command_disabled(c, '59') || command_disabled(c, '60') %]
-              <tr class='command'>
-                [% IF service.flap_detection_enabled %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=60&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Disable flap detection for this service</a></td>
-                [% ELSE %]
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection For This Service' title='Enable Flap Detection For This Service' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=59&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Enable flap detection for this service</a></td>
-                [% END %]
-              </tr>
-              [% END %]
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+  <div class="card mt-5 min-w-[370px]">
+    <div class="head">
+      <h3>Service Commands</h3>
+    </div>
+    <div class="actionbox">
+      [% UNLESS command_disabled(c, '5') || command_disabled(c, '6') %]
+        <div>
+          [% IF service.checks_enabled %]
+          <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=6&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+            <i class="fa-solid fa-xmark round small red"></i>Disable active checks of this service
+          </a>
+          [% ELSE %]
+          <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=5&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+            <i class="fa-solid fa-check round small green"></i>Enable active checks of this service
+          </a>
+          [% END %]
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '39') || command_disabled(c, '40') %]
+        <div>
+          [% IF service.accept_passive_checks %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=40&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-xmark round small red"></i>Stop accepting passive checks for this service
+            </a>
+          [% ELSE %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=39&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-check round small green"></i>Start accepting passive checks for this service
+            </a>
+          [% END %]
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '99') || command_disabled(c, '100') %]
+        <div>
+          [% IF service.obsess_over_service %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=100&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-xmark round small red"></i>Stop obsessing over this service
+            </a>
+          [% ELSE %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=99&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-check round small green"></i>Start obsessing over this service
+            </a>
+          [% END %]
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '22') || command_disabled(c, '23') %]
+        <div>
+          [% IF service.notifications_enabled %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=23&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-xmark round small red"></i>Disable notifications for this service
+            </a>
+          [% ELSE %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=22&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-check round small green"></i>Enable notifications for this service
+            </a>
+          [% END %]
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '45') || command_disabled(c, '46') %]
+        <div>
+          [% IF service.event_handler_enabled %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=46&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-xmark round small red"></i>Disable event handler for this service
+            </a>
+          [% ELSE %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=45&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-check round small green"></i>Enable event handler for this service
+            </a>
+          [% END %]
+        </div>
+      [% END %]
+      [% IF enable_shinken_features %]
+        [% UNLESS command_disabled(c, '200') %]
+          <div>
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=200&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-check round small green"></i>Launch event handler
+            </a>
+          </div>
+        [% END %]
+      [% END %]
+      [% UNLESS command_disabled(c, '59') || command_disabled(c, '60') %]
+        <div>
+          [% IF service.flap_detection_enabled %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=60&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-xmark round small red"></i>Disable flap detection for this service
+            </a>
+          [% ELSE %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=59&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-check round small green"></i>Enable flap detection for this service
+            </a>
+          [% END %]
+        </div>
+      [% END %]
+    </div>
+  </div>
 [% END %]

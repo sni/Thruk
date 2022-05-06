@@ -24,7 +24,6 @@
       </div>
     </td>
     <td align="right" valign="bottom" width="20%">
-      [% PROCESS _help.tt topic = "core_scheduling" %]
     </td>
   </tr>
 </table>

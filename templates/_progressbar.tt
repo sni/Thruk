@@ -1,16 +1,31 @@
 ﻿<!-- thruk: waiting for job [% pb_options.job_id %] -->
-<div id="[% pb_options.id %]" style="position: relative; width: [% pb_options.width %]px; height:[% pb_options.height %]px; color: inherit;" [% IF pb_options.show_message %]onmouseover="return pb_overlib_[% pb_options.id %]()"[% ELSE %]onmouseover="return pb_overin_[% pb_options.id %]()"[% END %] onmouseout="return pb_overout_[% pb_options.id %]()">
-  <div align="center" class="job_time" style="z-index: 100; line-height: [% pb_options.lineheight %]px; position: absolute; width: [% pb_options.width %]px; color: inherit;">
+<div
+  id="[% pb_options.id %]"
+  style="position: relative; width: [% pb_options.width %]px; height:[% pb_options.height %]px;"
+  [% IF pb_options.show_message %]onmouseover="return pb_overcard_[% pb_options.id %]()"
+  [% ELSE %]onmouseover="return pb_overin_[% pb_options.id %]()"[% END %]
+  onmouseout="return pb_overout_[% pb_options.id %]()"
+  class="flexrow flex-nowrap justify-between my-2"
+>
+  <div class="progressbar w-full" style="height:[% pb_options.height %]px;">
+    <div class="bar" style="height:[% pb_options.height %]px;"><div style="width:0%; height:[% pb_options.height %]px;" id="bar_[% pb_options.id %]"></div></div>
+  </div>
+  <div class="flexrow flex-nowrap justify-between z-30 absolute w-full">
+    <div class="w-6"></div>
+    <div class="job_time text-center" style="line-height: [% pb_options.lineheight %]px;">
       [% pb_options.time %]s
       [% IF pb_options.show_message && pb_options.exists('message') && pb_options.message %] - [% pb_options.message %][% END %]
-  </div>
-  <div id="cancel_[% pb_options.id %]" title="terminate this job" style="z-index: 100; line-height: [% pb_options.lineheight %]px; position: absolute; left: 3px; display: none;" class="clickable" onclick="return pb_cancel_[% pb_options.id %]()">
-    <img src="[% url_prefix %]themes/[% theme %]/images/stop.png" alt='cancel' title='cancel' width=16 height=16>
+    </div>
+    <div class="w-6">
+      <div id="cancel_[% pb_options.id %]" style="line-height: [% pb_options.lineheight %]px; display: none;" class="clickable w-6" onclick="return pb_cancel_[% pb_options.id %]()">
+        <i class="uil uil-times-circle"></i>
+      </div>
+    </div>
   </div>
 </div>
 [% IF pb_options.defined("show_console") && pb_options.show_console %]
-<div class="continue_[% pb_options.id %]" style="display: none;"><button onclick="reloadPage(); return false;">job finished, continue</button><br></div>
-<textarea id="console_[% pb_options.id %]" style="width: 80%; height: 600px; color: #00ff00; background-color: black; font-size: 14px; font-family: 'Courier New', Courier, monospace;" readonly>
+<div class="continue_[% pb_options.id %] my-2" style="display: none; height:[% pb_options.height %]px;"><button onclick="reloadPage(); return false;">job finished, continue</button></div>
+<textarea id="console_[% pb_options.id %]" class="CONSOLE w-[80%] h-[600px] my-2" readonly>
 </textarea>
 [% END %]
 <script type="text/javascript">
@@ -23,13 +38,11 @@
     var is_killed_[% pb_options.id %]      = false;
 
     jQuery(function() {
-        jQuery( "#[% pb_options.id %]" ).progressbar({
-            value: Number("[% pb_options.percent %]")
-        });
+        jQuery("#bar_[% pb_options.id %]" ).css("width", "[% pb_options.percent %]%");
     });
 
-    function pb_overlib_[% pb_options.id %]() {
-        overlib("<div id='over_[% pb_options.id %]'><\/div>",CAPTION,'report status',WIDTH,200,[% c.config.info_popup_options %]);
+    function pb_overcard_[% pb_options.id %]() {
+        overcard({ 'bodyCls': 'p-2', 'body': "<div id='over_[% pb_options.id %]'><\/div>", 'caption': 'report status', 'width': 200 });
         jQuery("#over_[% pb_options.id %]").html(last_overmsg_[% pb_options.id %]);
         pb_overin_[% pb_options.id %]();
         return;
@@ -40,21 +53,16 @@
         return;
         [% END %]
         jQuery("#cancel_[% pb_options.id %]").show();
-        return;
     }
 
     function pb_overout_[% pb_options.id %]() {
-        if(jQuery("#cancel_[% pb_options.id %]").children()[0].src.match("stop.png")) {
-            jQuery("#cancel_[% pb_options.id %]").hide();
-        }
-        return;
+        jQuery("#cancel_[% pb_options.id %]").hide();
     }
 
     function pb_cancel_[% pb_options.id %]() {
         is_killed_[% pb_options.id %] = true;
         clearInterval(timer_[% pb_options.id %]);
-        jQuery("#cancel_[% pb_options.id %]").children()[0].src = "[% url_prefix %]themes/[% theme %]/images/loading-icon.gif";
-        jQuery("#[% pb_options.id %] DIV.job_time").html("killing...");
+        jQuery("#[% pb_options.id %] DIV.job_time").html("<div class='spinner'><\/div>killing...");
 
         /* send kill request and reload/go back afterwards */
         var datestr = Math.round((new Date()).getTime()/1000);
@@ -85,12 +93,12 @@
 
     function update_job_progressbar_[% pb_options.id %]() {
         var datestr = Math.round((new Date()).getTime()/1000);
-        var val = jQuery( "#[% pb_options.id %]" ).progressbar( "value" );
+        var val = jQuery("#bar_[% pb_options.id %]")[0].style.width.replace("%", "");
 
         // update every 2 seconds
         if(last_time_[% pb_options.id %] != 0 && datestr%2 != 0 && val < 100) {
             last_time_[% pb_options.id %] = last_time_[% pb_options.id %] + 1;
-            jQuery("#[% pb_options.id %]").progressbar( "value", val + [% pb_options.percent_per_second %] );
+            jQuery("#bar_[% pb_options.id %]" ).css("width", ""+(val + [% pb_options.percent_per_second %])+"%");
             jQuery("#[% pb_options.id %] DIV.job_time").html(last_time_[% pb_options.id %] + "s" + last_message_[% pb_options.id %]);
             return;
         }
@@ -104,7 +112,7 @@
                 if(is_killed_[% pb_options.id %]) { return; }
                 is_loading_[% pb_options.id %] = false;
                 if(data.percent != 0) {
-                    jQuery( "#[% pb_options.id %]" ).progressbar( "value", data.percent );
+                    jQuery("#bar_[% pb_options.id %]" ).css("width", ""+data.percent+"%");
                 }
                 if(data.percent != 100) {
                     if([% pb_options.show_message %] && data.message) { last_message_[% pb_options.id %] = " - " + data.message; }
@@ -132,7 +140,7 @@
             }
         });
 
-        var val = jQuery( "#[% pb_options.id %]" ).progressbar("value");
+        val = jQuery("#bar_[% pb_options.id %]")[0].style.width.replace("%", "");
         if(val >= 100) {
             clearInterval(timer_[% pb_options.id %]);
             [% IF pb_options.defined("show_console") && pb_options.show_console %]
@@ -143,7 +151,7 @@
             [% END %]
             return;
         } else {
-            jQuery( "#[% pb_options.id %]" ).progressbar( "value", val + [% pb_options.percent_per_second %] );
+            jQuery("#bar_[% pb_options.id %]").css("width", ""+(val + [% pb_options.percent_per_second %])+"%");
         }
     }
 
@@ -157,5 +165,5 @@
 </script>
 
 [% IF pb_options.defined("show_console") && pb_options.show_console %]
-<div class="continue_[% pb_options.id %]" style="display: none;"><button onclick="reloadPage(); return false;">job finished, continue</button><br></div>
+<div class="continue_[% pb_options.id %] my-2" style="display: none;"><button onclick="reloadPage(); return false;">job finished, continue</button></div>
 [% END %]

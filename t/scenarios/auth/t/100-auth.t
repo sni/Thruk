@@ -14,7 +14,7 @@ BEGIN {
 {
     local $ENV{'THRUK_TEST_AUTH'} = 'omdadmin:omd';
     TestUtils::test_page(
-        'url'    => '/thruk/side.html',
+        'url'    => '/thruk/main.html',
         'like'   => ['Config Role Link', 'logout'],
         'unlike' => ['Admin Link'],
     );
@@ -44,7 +44,7 @@ BEGIN {
 {
     local $ENV{'THRUK_TEST_AUTH'} = 'admin:admin';
     TestUtils::test_page(
-        'url'    => '/thruk/side.html',
+        'url'    => '/thruk/main.html',
         'like'   => ['Admin Link', 'Config Role Link', 'logout'],
     );
     TestUtils::test_page(
@@ -67,7 +67,7 @@ BEGIN {
 {
     local $ENV{'THRUK_TEST_AUTH'} = 'test:test';
     TestUtils::test_page(
-        'url'    => '/thruk/side.html',
+        'url'    => '/thruk/main.html',
         'like'   => ['logout'],
         'unlike' => ['Admin Link', 'Config Role Link'],
     );

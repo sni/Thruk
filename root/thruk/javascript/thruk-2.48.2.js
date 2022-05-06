@@ -14,11 +14,12 @@ var cmdPaneState     = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Object();
 var removeParams     = new Object();
-var scrollToPos      = 0;
+var scrollToPos      = null
 var refreshTimer;
 var lastRowSelected;
 var lastRowHighlighted;
 var verifyTimer;
+var sortClickTimer;
 var iPhone           = false;
 if(window.navigator && window.navigator.userAgent) {
     iPhone           = window.navigator.userAgent.match(/iPhone|iPad/i) ? true : false;
@@ -41,62 +42,111 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
   `"Y88888P"  88888888888 88      `888 88888888888 88      `8b 88   `"Y8888Y"'
 *******************************************************************************/
 
-window.addEventListener('load', function(evt) {
-    try {
-        if(top.frames && top.frames['side']) {
-            top.frames['side'].is_reloading = false;
-        }
-    }
-    catch(err) { console.log(err); }
-}, false);
-
-/* do initial things */
+/* do initial things
+ * - might be called multiple times, make sure events are not bound twice
+ */
 function init_page() {
-    jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
-        var This = this;
-        jQuery(This).prev('input').val('').focus();
-        if(jQuery(This).prev('input').attr('class').match("autosubmit")) {
-            window.setTimeout(function() {
-                jQuery(This).parents("FORM").submit();
-            }, 200);
+    jQuery('input.deletable').each(function(i, el) {
+        // do not add twice
+        if(el && el.parentNode && jQuery(el.parentNode).hasClass("deleteicon")) {
+            return;
         }
-    }));
+        jQuery(el)
+            .wrap('<div class="deleteicon" />')
+            .after(jQuery('<button type="reset" style="display:none;">&times;</button>')
+                .click(function() {
+                    var This = this;
+                    jQuery(This).hide();
+                    jQuery(This).prev("INPUT").val("").trigger("change");
+                    if(jQuery(This).hasClass("autosubmit")) {
+                        window.setTimeout(function() {
+                            jQuery(This).parents("FORM").submit();
+                        }, 200);
+                    }
+                })
+            )
+            .on("keyup focus change", function() {
+                var This = this;
+                jQuery(This).next("BUTTON").each(function(x, b) {
+                    if(jQuery(This).val() == "") {
+                        jQuery(b).hide();
+                    } else {
+                        jQuery(b).show();
+                    }
+                });
+            });
+    });
 
-    // init some buttons
-    if(has_jquery_ui) {
-        jQuery('BUTTON.thruk_button').button();
-        jQuery('A.thruk_button').button();
-        jQuery('INPUT.thruk_button').button();
-
-        jQuery('.thruk_button_refresh').button({
-            icons: {primary: 'ui-refresh-button'}
-        });
-        jQuery('.thruk_button_add').button({
-            icons: {primary: 'ui-add-button'}
-        });
-        jQuery('.thruk_button_save').button({
-            icons: {primary: 'ui-save-button'}
-        });
-
-        jQuery('.thruk_radioset').buttonset();
-
-        /* list wizard */
-        jQuery('button.members_wzd_button').button({
-            icons: {primary: 'ui-wzd-button'},
-            text: false,
-            label: 'open list wizard'
-        });
+    var urlArgs  = toQueryParams();
+    if(sort_options && sort_options.type != null && urlArgs.sorttype == null) {
+        urlArgs.sorttype   = sort_options.type;
+        urlArgs.sortoption = sort_options.option;
     }
+    jQuery("A.sort-by").each(function(i, el) {
+        var This = this;
+        var found = false;
+        var className;
+        for(var key in This.dataset) {
+            if(key.match(/^sortoption/i) && urlArgs[key.toLowerCase()] == This.dataset[key]) {
+                found = true;
+            }
+            if(key.match(/^sorttype/i)) {
+                if(urlArgs[key.toLowerCase()] == 1) {
+                    className = "sort1";
+                } else {
+                    className = "sort2";
+                }
+            }
+        }
+        if(found) {
+            jQuery(This).addClass(className);
+        }
+    });
+    jQuery("A.sort-by").off("click").on("click", function(evt) {
+        // prevent fireing from dbl click
+        if(evt.originalEvent.detail > 1){
+            return false;
+        }
+        var This = this;
+        sortClickTimer = window.setTimeout(function() {
+            window.clearTimeout(sortClickTimer);
+            handleSortHeaderClick(This);
+        }, 300);
+        return(false);
+    });
+
+    // try to match a navigation entry
+    try {
+        if(window.parent.frames && top.frames && top.frames['side']) {
+            check_side_nav_active_item(top.frames['side'].document);
+        } else {
+            check_side_nav_active_item(window.document);
+        }
+    }
+    catch(err) {
+        console.log(err);
+    }
+
+    jQuery('BUTTON.spinner')
+        .off("click")
+        .on("click", function() {
+            setBtnSpinner(this);
+        });
+
+    jQuery("A.js-modal-command-link")
+        .off("click")
+        .on("click", function(e) {
+            e.preventDefault();
+            openModalCommand(this);
+        });
+
+    jQuery("DIV.js-perf-bar").each(function(i, el) {
+        perf_table(el);
+    });
 
     jQuery(".fittext").each(function(i, el) {
         fitText(el);
     });
-
-    var newUrl = window.location.href;
-    var scroll = newUrl.match(/(\?|\&)scrollTo=([\d\.]+)/);
-    if(scroll) {
-        scrollToPos = scroll[2];
-    }
 
     var saved_hash = readCookie('thruk_preserve_hash');
     if(saved_hash != undefined) {
@@ -105,7 +155,7 @@ function init_page() {
     }
 
     // add title for things that might overflow
-    jQuery(document).on('mouseenter', '.mightOverflow', function() {
+    jQuery(document).on('mouseenter', '.truncate', function() {
       var This = jQuery(this);
       var title = This.attr('title');
       if(!title) {
@@ -122,21 +172,62 @@ function init_page() {
     // store browsers timezone in a cookie so we can use it in later requests
     cookieSave("thruk_tz", getBrowserTimezone());
     cookieSave("thruk_screen", JSON.stringify(getScreenData()));
-    jQuery(document).resize(function() {
+    jQuery(document).off("resize").on("resize", function() {
         cookieSave("thruk_screen", JSON.stringify(getScreenData()));
     });
-    jQuery(window).resize(function() {
+    jQuery(window).off("resize").on("resize", function() {
         cookieSave("thruk_screen", JSON.stringify(getScreenData()));
     });
 
     /* show calendar popups for these */
-    jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_clear").on("click", show_cal);
-    jQuery("IMG.cal_popup").on("click", show_cal).addClass("clickable");
+    jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_clear").off("click").on("click", show_cal);
+    jQuery("IMG.cal_popup, I.cal_popup").off("click").on("click", show_cal).addClass("clickable");
 
     /* toggle passwords */
-    jQuery("I.togglePassword").on("click", togglePasswordVisibility).addClass("clickable");
+    jQuery("I.togglePassword").off("click").on("click", togglePasswordVisibility).addClass("clickable");
+
+    var params = toQueryParams();
+    if(params["scrollTo"]) {
+        scrollToPos = params["scrollTo"];
+    }
+    if(scrollToPos) {
+        var scrolls = scrollToPos.split(":");
+        for(var i = 0; i < scrolls.length; i++) { scrolls[i] = Number(scrolls[i]); }
+        if(scrolls[0] > 0 || scrolls[1] > 0) {
+            var main = jQuery("MAIN")[0];
+            if(main) {
+                main.scroll(scrolls[0], scrolls[1]);
+            }
+        }
+        if(scrolls[3] != null && (scrolls[2] > 0 || scrolls[3] > 0)) {
+            var mainTable = jQuery(".mainTable")[0];
+            if(mainTable) {
+                mainTable.scroll(scrolls[2], scrolls[3]);
+            }
+        }
+        scrollToPos = null;
+    }
 
     cleanUnderscoreUrl();
+
+    if(refresh_rate) {
+        try {
+            if(window.parent && window.parent.location && String(window.parent.location.href).match(/\/panorama\.cgi/)) {
+                stopRefresh();
+                jQuery("#refresh_label").html("");
+            } else if(String(window.location.href).match(/\/panorama\.cgi/)) {
+                stopRefresh();
+                jQuery("#refresh_label").html("");
+            } else {
+                setRefreshRate(refresh_rate);
+                jQuery(window)
+                    .off("mousewheel DOMMouseScroll click keyup")
+                    .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
+            }
+        } catch(err) {
+            console.log(err);
+        }
+    }
 }
 
 function getBrowserTimezone() {
@@ -204,11 +295,12 @@ function thruk_onerror(msg, url, line, col, error) {
 /* remove ugly ?_=... from url */
 function cleanUnderscoreUrl() {
     var newUrl = window.location.href;
-    if (history.replaceState) {
+    if(history.replaceState) {
         newUrl = cleanUnderscore(newUrl);
         try {
             history.replaceState({}, "", newUrl);
-        } catch(err) { console.log(err) }
+        }
+        catch(err) { console.log(err) }
     }
 }
 
@@ -224,31 +316,6 @@ function cleanUnderscore(str) {
     return(str);
 }
 
-function bodyOnLoad(refresh) {
-    if(scrollToPos > 0) {
-        window.scroll(0, scrollToPos);
-        scrollToPos = 0;
-    }
-    if(refresh) {
-        try {
-            if(window.parent && window.parent.location && String(window.parent.location.href).match(/\/panorama\.cgi/)) {
-                stopRefresh();
-                jQuery("#refresh_label").html("");
-            } else if(String(window.location.href).match(/\/panorama\.cgi/)) {
-                stopRefresh();
-                jQuery("#refresh_label").html("");
-            } else {
-                setRefreshRate(refresh);
-                jQuery(window).bind("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
-            }
-        } catch(err) {
-            console.log(err);
-        }
-    }
-
-    init_page();
-}
-
 var lastUserInteraction;
 function updateLastUserInteraction() {
     lastUserInteraction = (new Date()).getTime();
@@ -257,12 +324,15 @@ function updateLastUserInteraction() {
 /* save scroll value */
 function saveScroll() {
     var scroll = getPageScroll();
-    if(scroll > 0) {
+
+    if(scroll != "0:0" && scroll != "0:0:0:0") {
         additionalParams['scrollTo'] = scroll;
         delete removeParams['scrollTo'];
+        scrollToPos = scroll;
     } else {
         delete additionalParams['scrollTo'];
         removeParams['scrollTo'] = true;
+        scrollToPos = null;
     }
 }
 
@@ -279,8 +349,12 @@ function hideElement(id, icon) {
     if(thruk_debug_js) { alert("ERROR: got no element for id in hideElement(): " + id); }
     return;
   }
-  pane.style.display    = 'none';
-  pane.style.visibility = 'hidden';
+  if(jQuery(pane).hasClass("js-hiddenByClass") || jQuery(pane).hasClass("hidden")) {
+    jQuery(pane).addClass("hidden").removeClass("js-hiddenByClass");
+  } else {
+    pane.style.display    = 'none';
+    pane.style.visibility = 'hidden';
+  }
 
   var img = document.getElementById(icon);
   if(img && img.src) {
@@ -294,6 +368,9 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   var pane;
   if(typeof(id) == 'object') {
     pane = id;
+    if(pane.id) {
+        id = pane.id;
+    }
   }
   else {
     pane = document.getElementById(id);
@@ -302,8 +379,12 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
     if(thruk_debug_js) { alert("ERROR: got no element for id in showElement(): " + id); }
     return;
   }
-  pane.style.display    = '';
-  pane.style.visibility = 'visible';
+  if(jQuery(pane).hasClass("hidden")) {
+    jQuery(pane).removeClass("hidden").addClass("js-hiddenByClass");
+  } else {
+    pane.style.display    = '';
+    pane.style.visibility = 'visible';
+  }
 
   var img = document.getElementById(icon);
   if(img && img.src) {
@@ -325,6 +406,161 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
         }
     }, 50);
   }
+}
+
+function setFormBtnSpinner(form) {
+    jQuery(form).find("[type=submit], BUTTON.submit").each(function(i, btn) {
+        setBtnSpinner(btn);
+    });
+}
+
+function return_false() {
+    return false;
+}
+
+function setBtnSpinner(btn) {
+    jQuery(btn).find("I").css("display", "none");
+    jQuery(btn).find('div.spinner').remove();
+    jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
+    jQuery(btn).prop('disabled', true).addClass(["opacity-50", "not-clickable"]);
+    var el = jQuery(btn).first();
+    if(el.tagName == "A") {
+        el.dataset["href"] = el.href;
+        jQuery(btn).on("click", return_false);
+        el.href = "#";
+    }
+    window.setTimeout(function() {
+        // seomthing didn't work, reset
+        setBtnError(btn, "timeout while processing the request");
+    }, 30000);
+}
+
+function setBtnError(btn, title) {
+    jQuery(btn).find('div.spinner').remove();
+    jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find("I").css("display", "none");
+    jQuery(btn).prepend('<I class="uil uil-exclamation round yellow mr-1"><\/I>');
+    jQuery(btn)
+        .prop('disabled', false)
+        .prop('title', title)
+        .removeClass(["opacity-50", "not-clickable"]);
+    var el = jQuery(btn).first();
+    if(el.tagName == "A") {
+        el.href = el.dataset["href"];
+        jQuery(btn).off("click", return_false);
+    }
+}
+
+
+function handleSortHeaderClick(el) {
+    var This    = el;
+    var urlArgs = toQueryParams();
+    var sortoptionkey;
+    var sorttypekey;
+    for(var key in This.dataset) {
+        if(key.match(/^sortoption/i)) {
+            additionalParams[key.toLowerCase()] = This.dataset[key];
+            sortoptionkey = key;
+        }
+        if(key.match(/^sorttype/i)) {
+            additionalParams[key.toLowerCase()] = This.dataset[key];
+            sorttypekey = key;
+        }
+    }
+    jQuery("A.sort-by").removeClass(["sort1", "sort2"]);
+    if(urlArgs[sorttypekey.toLowerCase()] && urlArgs[sorttypekey.toLowerCase()] == 1 && urlArgs[sortoptionkey.toLowerCase()] == This.dataset[sortoptionkey]) {
+        additionalParams[sorttypekey.toLowerCase()] = 2;
+        jQuery(This).addClass(["sort2"]);
+    } else {
+        jQuery(This).addClass(["sort1"]);
+    }
+    removeParams['page'] = true;
+    reloadPage(50, true);
+}
+
+function openModalCommand(el) {
+    var append = "?modal=1";
+    if(el.href.match(/\?/)) {
+        append = "&modal=1";
+    }
+    openModalWindow(el.href+append);
+}
+
+function openModalWindow(url) {
+    jQuery(document.body).append('<div id="modalBG" class="modalBG"><\/div>');
+    jQuery(document.body).append(
+         '<div id="modalFG" class="modalFG">'
+        +'  <div class="card w-[200px] mx-auto">'
+        +'    <div class="head"><h3>Loading...<\/h3><\/div>'
+        +'    <div class="body flexcol">'
+        +'      <div class="spinner w-10 h-10"><\/div>'
+        +'      <button class="w-20 self-center" onclick="closeModalWindow()">Cancel<\/button>'
+        +'    <\/div>'
+        +'  <\/div>'
+        +'<\/div>'
+    );
+    addEvent(document, 'keydown', closeModalWindowOnEscape);
+    jQuery('#modalFG').load(url, {}, function(text, status, req) {
+        if(status == "error") {
+            jQuery('#modalFG DIV.body').prepend('<div class="textERROR">'+req.status+': '+req.statusText+'<\/div>');
+            jQuery('#modalFG DIV.spinner').remove();
+        } else {
+            init_page();
+        }
+    });
+    return false;
+}
+
+function closeModalWindow() {
+    jQuery('#modalBG').remove();
+    jQuery('#modalFG').remove();
+    jQuery('DIV.daterangepicker').remove();
+    removeEvent(document, 'keydown', closeModalWindowOnEscape);
+}
+
+function closeModalWindowOnEscape(evt) {
+    evt = (evt) ? evt : ((window.event) ? event : null);
+    var keyCode = evt.keyCode;
+    if(keyCode == 27) {
+        if(!evt.target || evt.target.tagName != "INPUT") {
+            closeModalWindow();
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+            return false;
+        }
+    }
+    return(true);
+}
+
+// activate current page in navigation
+function check_side_nav_active_item(ctx) {
+    if(jQuery('#nav-container').hasClass('collapsed')) { return; }
+    var urlArgs = toQueryParams();
+    var page    = window.location.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+    var keyArgs = ["type", "style"];
+
+    jQuery("A", ctx).each(function(i, el) {
+        var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+        if(navPage == page) {
+            var href    = el.href.replace(/^.*\?/, '');
+            var navArgs = toQueryParams(href);
+            var found = true;
+            jQuery(keyArgs).each(function(i, key) {
+                if(urlArgs[key]) {
+                    if(!navArgs[key] || urlArgs[key] != navArgs[key]) {
+                        found = false;
+                    }
+                } else if(!urlArgs[key] && navArgs[key]) {
+                    found = false;
+                }
+            });
+            if(found) {
+                jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+                jQuery(el).addClass("active");
+                return false;
+            }
+        }
+    });
 }
 
 /* remove element from close elements list */
@@ -379,8 +615,7 @@ function close_and_remove_event(evt) {
             }
 
             // hilight checked area
-            //var color = inside ? 'green' : 'red';
-            //hilight_area(x1, y1, x2, y2, 1000, color);
+            //hilight_area(x1, y1, x2, y2, 1000, inside ? 'green' : 'red');
         }
 
         // make sure our event target is not a subelement of the panel to close
@@ -391,10 +626,10 @@ function close_and_remove_event(evt) {
         if(evt && inside) {
             new_elems.push(value);
         } else {
+            hideElement(value[0], value[1]); // must before the callback because they might check visibility
             if(value[3]) {
                 value[3]();
             }
-            hideElement(value[0], value[1]);
         }
     });
     close_elements = new_elems;
@@ -422,7 +657,7 @@ function toggleElementRemote(id, part, bodyclose) {
     if(has_debug_options) {
         append += "&debug=1";
     }
-    el.innerHTML = "<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'>";
+    el.innerHTML = "<div class='spinner w-8 h-8 mx-[50%] my-8'>";
     showElement(id, undefined, bodyclose);
     jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part+append, {}, function(text, status, req) {
         showElement(id, undefined, bodyclose);
@@ -438,7 +673,7 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
     return false;
   }
   resetRefresh();
-  if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
+  if(pane.style.visibility == "hidden" || pane.style.display == 'none' || jQuery(pane).hasClass("hidden")) {
     showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback);
     return true;
   }
@@ -484,17 +719,25 @@ function is_el_subelement(obj_a, obj_b) {
 function prefSubmit(url, current_theme) {
   var sel         = document.getElementById('pref_theme')
   if(current_theme != sel.value) {
-    additionalParams['theme']      = '';
-    additionalParams['reload_nav'] = 1;
+    additionalParams['theme'] = '';
     cookieSave('thruk_theme', sel.value);
-    reloadPage();
+    reloadPage(50, true);
   }
 }
 
 /* save settings in a cookie */
 function prefSubmitSound(url, value) {
   cookieSave('thruk_sounds', value);
-  reloadPage();
+  reloadPage(50, true);
+}
+
+function checkNavBackground() {
+    if(jQuery('#navbar').hasClass('hidden')) {
+        jQuery("MAIN").removeClass("brightness-50");
+    } else {
+        jQuery('#nav-container').removeClass('collapsed');
+        jQuery("MAIN").addClass("brightness-50");
+    }
 }
 
 /* save something in a cookie */
@@ -575,11 +818,29 @@ function readCookie(name,c,C,i){
 var remainingRefresh;
 function setRefreshRate(rate) {
   if(typeof thruk_static_export !== 'undefined' && thruk_static_export) { return; }
+  if(typeof refresh_rate !== 'undefined' && refresh_rate) {
+    jQuery("#refresh_label").html(" (&infin;"+refresh_rate+"s)");
+  }
   if(rate >= 0 && rate < 20) {
       // check lastUserInteraction date to not refresh while user is interacting with the page
       if(lastUserInteraction > ((new Date).getTime() - 20000)) {
           lastUserInteraction = undefined;
           rate = 20;
+      }
+      // background tab, do not refresh unnecessarily
+      if(document.visibilityState && document.visibilityState != 'visible') {
+        jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
+        rate = 2;
+      }
+      // do not refresh when modal window is open
+      if(document.getElementById('modalBG')) {
+        jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
+        rate = 20;
+      }
+      // do not refresh when dev tools are open
+      if((window.outerHeight-window.innerHeight)>250) {
+        jQuery("#refresh_label").html(" <span class='textALERT'>(dev tools open, paused)<\/span>");
+        rate = 20;
       }
   }
   remainingRefresh = rate;
@@ -587,12 +848,18 @@ function setRefreshRate(rate) {
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
     if(obj) {
-        obj.innerHTML = "This page will not refresh automatically <input type='button' value='refresh now' onClick='reloadPage()'>";
+        obj.innerHTML = "<span>This page will not refresh automatically<\/span> <input type='button' class='inline-block' value='refresh now' onClick='reloadPage(50, true)'>";
     }
   }
   else {
     if(obj) {
-        obj.innerHTML = "Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'>";
+        var msg = "Update in "+rate+" seconds";
+        var span = document.getElementById('refresh_rate_info');
+        if(span) {
+            span.innerHTML = msg;
+        } else {
+            obj.innerHTML = "<span id='refresh_rate_info'>"+msg+"<\/span> <input type='button' class='inline-block' value='stop' onClick='stopRefresh()'>";
+        }
     }
     if(rate == 0) {
       var has_auto_reload_fn = false;
@@ -613,7 +880,7 @@ function setRefreshRate(rate) {
         });
         resetRefresh();
       } else {
-        reloadPage();
+        reloadPage(50, true);
       }
     }
     if(rate > 0) {
@@ -640,14 +907,19 @@ function resetRefresh() {
 function stopRefresh(silent) {
   refreshPage = 0;
   if(!silent) {
-    jQuery("#refresh_label").html(" (stopped)").addClass("alerttext");
+    jQuery("#refresh_label").html(" <span class='textALERT'>(stopped)<\/span>");
   }
-  setRefreshRate(0);
+  window.clearTimeout(refreshTimer);
+  setRefreshRate(silent ? -1 : 0);
 }
 
 /* is this an array? */
 function is_array(o) {
     return typeof(o) == 'object' && (o instanceof Array);
+}
+
+function is_object(el) {
+    return(typeof(el) == 'object');
 }
 
 /* return url variables as hash */
@@ -721,8 +993,10 @@ function getCurrentUrl(addTimeAndScroll) {
 
     if(addTimeAndScroll == undefined) { addTimeAndScroll = true; }
 
-    // save scroll state
-    saveScroll();
+    if(addTimeAndScroll) {
+        // save scroll state
+        saveScroll();
+    }
 
     var urlArgs  = toQueryParams();
     for(var key in additionalParams) {
@@ -788,61 +1062,77 @@ function updateUrl() {
     try {
         history.replaceState({}, "", newUrl);
     } catch(err) { console.log(err) }
-
-    // parent window should reflect current changes as well
-    if(window.parent) {
-        try {
-            save_url_in_parents_hash();
-        } catch(err) { console.log(err); }
-    }
 }
 
 /* reloads the current page and adds some parameter from a hash */
-function reloadPage() {
+var isReloading = false;
+var reloadPageTimer;
+function reloadPage(delay, withReloadButton) {
+    if(!delay) { delay = 50; }
+    if(delay < 100 && withReloadButton) {
+        // update button earlier
+        jQuery("#refresh_button").html('<div class="spinner w-5 h-5"><\/div>');
+        withReloadButton = false;
+    }
+    window.clearTimeout(reloadPageTimer);
+    reloadPageTimer = window.setTimeout(function() {
+        reloadPageDo(withReloadButton);
+    }, delay);
+}
+
+function reloadPageDo(withReloadButton) {
+    if(isReloading) { return; } // prevent  multiple simultanious reloads
+    if(withReloadButton) {
+        jQuery("#refresh_button").removeClass("red");
+        jQuery("#refresh_button").find("I").css("display", "none");
+        jQuery("#refresh_button").find('div.spinner').remove();
+        jQuery("#refresh_button").find('I.uil-exclamation').remove();
+        jQuery("#refresh_button").prepend('<div class="spinner w-5 h-5"><\/div>');
+    }
+    isReloading = true;
     stopRefresh(true);
-    window.clearTimeout(refreshTimer);
     var obj = document.getElementById('refresh_rate');
     if(obj) {
         obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
     }
 
-    var newUrl = getCurrentUrl();
+    var newUrl = getCurrentUrl(true);
 
     if(fav_counter) {
         updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
     }
 
-    /* set reload mark in side frame */
-    try {
-        if(window.parent.frames && top.frames && top.frames['side']) {
-            top.frames['side'].is_reloading = newUrl;
+    jQuery.ajax({
+        url: newUrl,
+        type: 'POST',
+        data: {},
+        success: function(page) {
+            isReloading = false;
+            setInnerHTMLWithScripts(document.documentElement, page);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            isReloading = false;
+            jQuery("#refresh_button").addClass("red");
+            jQuery("#refresh_button").find('div.spinner').remove();
+            jQuery("#refresh_button").find('I.uil-exclamation').remove();
+            jQuery("#refresh_button").find("I").css("display", "none");
+            jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
+            thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
         }
-    }
-    catch(err) {
-        console.log(err);
-    }
-
-    /*
-     * reload new url and replace history
-     * otherwise history will contain every
-     * single reload
-     * and give the browser some time to update refresh buttons
-     * and icons
-     */
-    window.setTimeout(function() {
-        window_location_replace(newUrl)
-    }, 100);
+    });
 }
 
-function reloadNav() {
-    try {
-        if(parent.frames[0] != null) {
-            parent.frames[0].location.reload();
-        }
-    }
-    catch(err) {
-        console.log(err);
-    }
+/* set inner html but execute all scripts */
+function setInnerHTMLWithScripts(el, html) {
+    el.innerHTML = html;
+    jQuery(el).find("script").each(function(i, oldScript) {
+        var newScript = document.createElement("script");
+        jQuery(oldScript.attributes).each(function(k, attr) {
+             newScript.setAttribute(attr.name, attr.value);
+        });
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    });
 }
 
 /* wrapper for window.location which results in
@@ -856,7 +1146,8 @@ function window_location_replace(url) {
     window.location.replace(url);
 }
 
-function get_site_panel_backend_button(id, styles, onclick, section, extraClass) {
+function get_site_panel_backend_button(id, onclick, section, extraClass) {
+    if(!extraClass) { extraClass = ""; }
     if(!initial_backends[id] || !initial_backends[id]['cls']) { return(""); }
     var cls = initial_backends[id]['cls'];
     var title = initial_backends[id]['name']+": "+initial_backends[id]['last_error'];
@@ -873,7 +1164,9 @@ function get_site_panel_backend_button(id, styles, onclick, section, extraClass)
     }
     var btn = '<input type="button"';
     btn += " id='button_"+id+"'";
-    btn += ' class="button_peer'+cls+' backend_'+id+' section_'+section+'"';
+    btn += " data-id='"+id+"'";
+    btn += " data-section='"+section+"'";
+    btn += ' class="button_peer button_peer'+cls+' '+extraClass+'"';
     btn += ' value="'+initial_backends[id]['name']+'"';
     btn += ' title="'+escapeHTML(title).replace(/"/g, "'")+'"';
     if(initial_backends[id]['disabled'] == 5) {
@@ -882,8 +1175,7 @@ function get_site_panel_backend_button(id, styles, onclick, section, extraClass)
         btn += ' onClick="'+onclick+'">';
     }
 
-    if(!extraClass) { extraClass = ""; }
-    return("<div class='backend "+extraClass+"' style='"+styles+"'>"+btn+"<\/div>");
+    return(btn);
 }
 
 /* create sites popup */
@@ -894,7 +1186,7 @@ function create_site_panel_popup() {
     }
 
     var panel = '';
-    if(show_sitepanel == "panel") {
+    if(show_sitepanel == "panel" || show_sitepanel == "list") {
         panel += create_site_panel_popup_panel();
     }
     else if(show_sitepanel == "collapsed") {
@@ -912,37 +1204,31 @@ function create_site_panel_popup() {
 
 function create_site_panel_popup_panel() {
     var panel = "";
-    panel  = '<div class="site_panel_sections" style="overflow: auto;">';
-    panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
+    panel += '<table class="cellspacing w-fit">';
     panel += '  <tr>';
     if(sites["sub"] && keys(sites["sub"]).length > 1 || !sites["sub"]["Default"]) {
         jQuery(keys(sites["sub"]).sort()).each(function(i, subsection) {
             if(sites["sub"][subsection].total == 0) { return; }
-            panel += '<th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
-            panel += '  <a href="#" class="sites_subsection" onclick="toggleSection([\''+subsection+'\']); return false;" title="'+subsection+'">'+subsection+'</a>';
-            panel += '</th>';
+            panel += '<th class="borderDefault first:border-l-0 border-l py-0 text-center" onclick="toggleSection([\''+subsection+'\']); return false;" title="'+subsection+'">';
+            panel += '<span class="inline-block w-full h-full py-1 rounded clickable hoverable">'+subsection+'<\/span>';
+            panel += '<\/th>';
         });
     }
     panel += '  </tr>';
     panel += '  <tr>';
     jQuery(keys(sites["sub"]).sort()).each(function(i, subsection) {
         if(sites["sub"][subsection].total == 0) { return; }
-        panel += '<td valign="top" class="site_panel '+(i==0 ? "" : "notfirst")+'" align="center">';
-        panel += '<table cellpadding=0 cellspacing=0 border=0><tr class="subpeers_'+subsection+'">';
-        panel += '<td valign="top">';
+        panel += '<td valign="top" class="subpeers_'+subsection+' borderDefault first:border-l-0 border-l"><div class="flexrow flex-nowrap gap-px"><div class="flexcol gap-px">';
         var count = 0;
         jQuery(_site_panel_flat_peers(sites["sub"][subsection])).each(function(i, pd) {
-            panel += get_site_panel_backend_button(pd, "clear: both;", "toggleBackend('"+pd+"')", toClsName(subsection));
+            panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", toClsName(subsection), 'w-30');
             count++;
-            if(count > 15) { count = 0; panel += '</td><td valign="top">'; }
+            if(count > 15) { count = 0; panel += '</div><div class="flexcol gap-px">'; }
         });
-        panel += '</td>';
-        panel += '</tr></table>';
-        panel += '</td>';
+        panel += '<\/div><\/div></td>';
     });
     panel += '  </tr>';
     panel += '</table>';
-    panel += '<\/div>';
     return(panel);
 }
 
@@ -977,42 +1263,43 @@ function toClsNameList(list, join_char) {
 
 function create_site_panel_popup_collapsed() {
     var panel = "";
-    panel  = '<div class="site_panel_sections" style="overflow: auto;">';
-    panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
+    panel += '<table class="cellspacing w-full min-w-[900px]">';
     jQuery(keys(sites.sub).sort()).each(function(i, sectionname) {
         if(i > 0) {
             panel += '  <tr>';
-            panel += '    <td><hr class="sites_collapsed"></td>';
+            panel += '    <td><hr class="py-1"></td>';
             panel += '  </tr>';
         }
         panel += '<tr>';
-        panel += ' <th align="left">';
-        panel += '   <a href="#" onclick="toggleSection([\''+sectionname+'\']); return false;" title="'+sectionname+'" class="sites_subsection">'+sectionname+'</a>';
-        panel += '  </th>';
+        panel += '<th class="borderDefault first:border-l-0 border-l p-0" onclick="toggleSection([\''+sectionname+'\']); return false;" title="'+sectionname+'">';
+        panel += '<span class="inline-block w-full h-full p-1 rounded clickable hoverable">'+sectionname+'<\/span>';
+        panel += '<\/th>';
         panel += '</tr>';
         // show first two levels of sections
         panel += add_site_panel_popup_collapsed_section(sites["sub"][sectionname], [sectionname]);
         // including peers
         if(sites["sub"][sectionname]["peers"]) {
-            panel += '  <tr class="subpeer subpeers_'+(toClsName(sectionname))+' sublvl_1">';
-            panel += '    <th align="left" style="padding-left: 10px;">';
+            panel += '  <tr>';
+            panel += '    <td><div class="flexrow gap-px">';
             jQuery(sites["sub"][sectionname]["peers"]).each(function(i, pd) {
-                panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", toClsName(sectionname));
+                panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", toClsName(sectionname));
             });
-            panel += '    </th>';
+            panel += '    <\/div></td>';
             panel += '  </tr>';
         }
     });
 
     // add top level peers
     if(sites["peers"]) {
-        panel += '  <tr class="subpeer subpeers_top">';
-        panel += '    <th align="left">';
-        panel += '    <hr class="sites_collapsed">';
+        panel += '  <tr>';
+        panel += '    <td><hr class="py-1"></td>';
+        panel += '  </tr>';
+        panel += '  <tr>';
+        panel += '    <td><div class="flexrow gap-px">';
         jQuery(sites["peers"]).each(function(i, pd) {
-            panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", "top");
+            panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", "top");
         });
-        panel += '    </th>';
+        panel += '    <\/div></td>';
         panel += '  </tr>';
     }
 
@@ -1022,7 +1309,6 @@ function create_site_panel_popup_collapsed() {
     });
 
     panel += '</table>';
-    panel += '<\/div>';
     return(panel);
 }
 
@@ -1032,7 +1318,7 @@ function add_site_panel_popup_collapsed_section(section, prefix) {
     var prefixCls = toClsNameList(prefix);
     if(section["sub"]) {
         panel += '  <tr style="'+(lvl > 1 ? 'display: none;' : '')+'" class="subsection subsection_'+prefixCls+' sublvl_'+lvl+'">';
-        panel += '    <th align="left" style="padding-left: '+(lvl*10)+'px;">';
+        panel += '    <td align="left" style="padding-left: '+(lvl*10)+'px;">';
         jQuery(keys(section["sub"]).sort()).each(function(i, sectionname) {
             var subsection = section["sub"][sectionname];
             var new_prefix = prefix.concat(sectionname);
@@ -1043,10 +1329,11 @@ function add_site_panel_popup_collapsed_section(section, prefix) {
             if(subsection.up  > 0 && subsection.down > 0) { cls = 'button_peerWARN'; }
             if(subsection.up  > 0 && subsection.disabled > 0 && subsection.down == 0) { cls = 'button_peerUPDIS'; }
             if(subsection.up == 0 && subsection.disabled > 0 && subsection.down > 0) { cls = 'button_peerDOWNDIS'; }
-            panel += "<input type='button' class='"+cls+" btn_sites btn_sites_"+prefixCls+"_"+toClsName(sectionname)+"' value='"+sectionname+"' onClick='toggleSubSectionVisibility("+JSON.stringify(new_prefix)+")'>";
-            panel += "<span class='btn_sitesplus'>+</span>";
+            panel += "<button class='"+cls+" btn_sites btn_sites_"+prefixCls+"_"+toClsName(sectionname)+"' onClick='toggleSubSectionVisibility("+JSON.stringify(new_prefix)+")'>";
+            panel += "<i class='uil uil-folder-open'></i>"+sectionname;
+            panel += "<\/button>";
         });
-        panel += '    </th>';
+        panel += '    </td>';
         panel += '  </tr>';
 
         jQuery(keys(section["sub"]).sort()).each(function(i, sectionname) {
@@ -1064,20 +1351,21 @@ function add_site_panel_popup_collapsed_peers(section, prefix) {
     if(section["peers"]) {
         var prefixCls = toClsNameList(prefix);
         panel += '  <tr class="subpeer subpeers_'+prefixCls+'" style="display: none;">';
-        panel += '    <th align="left">';
-        panel += '    <hr class="sites_collapsed last">';
+        panel += '    <td>';
+        panel += '    <hr>';
 
-        panel += '    <table><tr><td>';
+        panel += '    <table><tr><th>';
         panel += "      <input type='checkbox' onclick='toggleSection("+JSON.stringify(prefix)+");' class='clickable section_check_box_"+prefixCls+"'>";
-        panel += '    </td><td style="vertical-align: middle;">';
-        panel += "      <a href='#' onclick='toggleSection("+JSON.stringify(prefix)+"); return false;'><b>";
+        panel += "      <a href='#' onclick='toggleSection("+JSON.stringify(prefix)+"); return false;'>";
         panel += prefix.join(' -&gt; ');
-        panel += '      </b></a>:';
-        panel += '    </td></tr></table>';
+        panel += '      </a>';
+        panel += '    </th></tr></table>';
+        panel += '    <div class="flexrow gap-px">';
         jQuery(section["peers"]).each(function(i, pd) {
-            panel += get_site_panel_backend_button(pd, "", "toggleBackend('"+pd+"')", prefixCls);
+            panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", prefixCls);
         });
-        panel += '    </th>';
+        panel += '    <\/div>';
+        panel += '    </td>';
         panel += '  </tr>';
     }
     if(section["sub"]) {
@@ -1092,29 +1380,22 @@ function add_site_panel_popup_collapsed_peers(section, prefix) {
 
 function create_site_panel_popup_tree() {
     var panel = "";
-    panel += '<div class="site_panel_sections" style="overflow: auto; min-height: 200px; border-top: 1px dashed grey;">';
-    panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
-    panel += '  <tr>';
-    panel += '    <td valign="top" width=200>';
-    panel += '      <div id="site_panel_sections">';
-    panel += '      <\/div>';
-    panel += '    <\/td>';
-    panel += '    <td valign="top" style="border-left: 1px dashed grey;">';
-    panel += '      <div style="min-height: 200px; min-width: 890px; margin-left: 3px;">';
+    panel += '<div class="flexrow flex-nowrap gap-1">';
+    panel += '  <div class="w-[200px]" id="site_panel_sections"><\/div>';
+    panel += '  <div class="min-h-[200px] min-w-[890px] w-full px-2 border-l borderDefault">';
+    panel += '    <div class="flexrow gap-px">';
     jQuery(backend_keys).each(function(i, peer_key) {
         var section = initial_backends[peer_key].section.replace(/\//g, '_');
-        panel += get_site_panel_backend_button(peer_key, "", "toggleBackend('"+peer_key+"')", section, "tree_peer_btn");
+        panel += get_site_panel_backend_button(peer_key, "toggleBackend('"+peer_key+"')", section, "tree_peer_btn");
     });
-    panel += '      <\/div>';
-    panel += '    <\/td>';
-    panel += '  </tr>';
-    panel += '  <tr>';
+    panel += '    <\/div>';
+    panel += '  <\/div>';
     panel += '<\/div>';
     return(panel);
 }
 
 function create_site_panel_popup_tree_populate() {
-    jQuery("DIV.tree_peer_btn").hide();
+    jQuery(".tree_peer_btn").hide();
     if(!has_jquery_ui) {
         load_jquery_ui(create_site_panel_popup_tree_populate);
         return;
@@ -1149,9 +1430,9 @@ function create_site_panel_popup_tree_populate() {
             resetRefresh();
             data.node.setActive();
             data.node.collapseSiblings();
-            jQuery("DIV.tree_peer_btn").hide();
+            jQuery(".tree_peer_btn").hide();
             jQuery(data.node.data.peers).each(function(i, peer_key) {
-                jQuery("#button_"+peer_key).parent().show();
+                jQuery("#button_"+peer_key).show();
             });
         },
         // clicking the checkbox -> select/deselect all nodes
@@ -1186,7 +1467,7 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
     }
 
     jQuery('#site_panel_bookmark_list').sortable({
-        items                : 'INPUT',
+        items                : 'BUTTON',
         helper               : 'clone',
         tolerance            : 'pointer',
         cursor               : 'pointer',
@@ -1198,7 +1479,7 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
         placeholder          : "site_panel_bookmark_placeholder",
         update               : function(event, ui) {
             var order = [];
-            jQuery("#site_panel_bookmark_list > INPUT").each(function(i, el) {
+            jQuery("#site_panel_bookmark_list > BUTTON").each(function(i, el) {
                 order.push(el.dataset["index"]);
             });
             jQuery.ajax({
@@ -1312,10 +1593,13 @@ function create_site_panel_popup_tree_data(d, current, tree) {
 
 function site_panel_search() {
     var val = jQuery("#site_panel_search").val();
-    jQuery("DIV.tree_peer_btn").hide();
+    jQuery(".tree_peer_btn").hide();
+    var input = document.getElementById("site_panel_search");
+    clearFormInputError(input);
     if(val == "") {
         return;
     }
+    jQuery("#site_panel_search").removeClass("invalid");
     var searches = val.split(/\s+/);
     for(var key in initial_backends) {
         var site = initial_backends[key];
@@ -1323,19 +1607,25 @@ function site_panel_search() {
         var show = true;
         jQuery(searches).each(function(i, v) {
             if(v == "") { return true; }
-            if(!name.match(v)) {
-                show = false;
-                return false;
+            try {
+                if(!name.match(v)) {
+                    show = false;
+                    return false;
+                }
+            } catch(e) {
+                addFormInputError(input, e, "below");
             }
         });
         if(show) {
-            jQuery("#button_"+key).parent().show();
+            jQuery("#button_"+key).show();
         }
     }
+    updateSitePanelCheckBox();
 }
 
 function site_panel_bookmark_save() {
-    jQuery("#site_panel_bookmark_new_save").addClass("ui-waiting-button").attr('disabled', true).val("");
+    setBtnSpinner("#site_panel_bookmark_new_save");
+    jQuery("#site_panel_bookmark_new_save").attr('disabled', true).val("");
     var name = jQuery("#site_panel_bookmark_new").val();
 
     var sections = [];
@@ -1367,7 +1657,7 @@ function site_panel_bookmark_save() {
             sections:  sections
         },
         success: function(data) {
-            jQuery("#site_panel_bookmark_new_save").removeClass("ui-waiting-button").attr('disabled', false).val("save");
+            jQuery("#site_panel_bookmark_new_save").attr('disabled', false).html("save");
             create_site_panel_popup_tree_make_bookmarks_sortable();
             jQuery("#site_panel_bookmark_new").val("").hide();
             jQuery("#site_panel_bookmark_new_save").hide();
@@ -1383,7 +1673,7 @@ function site_panel_bookmark_save() {
 
 function setBackends(backends, sections, btn) {
     // if delete button is pressed, remove this item
-    if(jQuery('#site_panel_bookmark_delete').hasClass("active")) {
+    if(jQuery('#site_panel_bookmark_delete').hasClass("red")) {
         jQuery.ajax({
             url: url_prefix + 'cgi-bin/user.cgi',
             type: 'POST',
@@ -1424,50 +1714,40 @@ function setBackends(backends, sections, btn) {
 }
 
 /* toggle site panel */
-/* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
     if(!document.getElementById('site_panel_content').innerHTML) {
         create_site_panel_popup();
     }
-    var enabled = toggleElement('site_panel', undefined, true, 'DIV#site_panel DIV.shadowcontent', toggleSitePanel);
-    var divs = jQuery('DIV.backend');
-    var panel = document.getElementById('site_panel');
-    panel.style.top = (divs[0].offsetHeight + 11) + 'px';
+    toggleElement('site_panel', undefined, true, undefined, checkSitePanelChanged);
+    checkSitePanelChanged();
+}
 
-    /* make sure site panel does not overlap screen */
-    var div = jQuery('DIV.site_panel_sections')[0];
-    if(enabled == true) {
-        var table = jQuery('TABLE.top_nav')[0];
-        var newWidth = table.offsetWidth - 10;
-        if(newWidth < div.offsetWidth) {
-            div.style.width = newWidth + 'px';
-        }
-    } else {
-        // reset styles till next open
-        div.style.width = '';
+function checkSitePanelChanged() {
+    if(!jQuery('#site_panel').is(":visible")) {
         // immediately reload if there were changes
-        if(additionalParams['reload_nav']) {
+        if(backends_toggled) {
             removeParams['backends'] = true;
-            window.setTimeout(reloadPage, 50);
+            reloadPage(50, true);
         }
     }
 
     updateSitePanelCheckBox();
 }
 
-/* toggle querys for this backend */
+/* toggle queries for this backend */
+var backends_toggled = false;
 function toggleBackend(backend, state, skip_update) {
   resetRefresh();
-  var button        = document.getElementById('button_' + backend);
+  var button = jQuery('.button_peer[data-id="'+backend+'"]');
   if(state == undefined) { state = -1; }
 
   if(backend_chooser == 'switch') {
-    jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
-    jQuery('INPUT.button_peerDOWN').removeClass('button_peerDOWN').addClass('button_peerDIS');
+    jQuery('.button_peer .button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
+    jQuery('.button_peer .button_peerDOWN').removeClass('button_peerDOWN').addClass('button_peerDIS');
     jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
     cookieSave('thruk_conf', backend);
     removeParams['backends'] = true;
-    reloadPage();
+    reloadPage(50, true);
     return;
   }
 
@@ -1479,7 +1759,7 @@ function toggleBackend(backend, state, skip_update) {
   var initial_state = initial_backends[backend]['state'];
   var newClass  = undefined;
   if((jQuery(button).hasClass("button_peerDIS") && state == -1) || state == 1) {
-    if(initial_state == 1) {
+    if(initial_state == 1 || (initial_backends[backend]['last_error'] && initial_backends[backend]['last_error'] != "OK")) {
       newClass = "button_peerDOWN";
     }
     else {
@@ -1498,17 +1778,18 @@ function toggleBackend(backend, state, skip_update) {
   /* remove all and set new class */
   jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP button_peerDOWN").addClass(newClass);
 
-  additionalParams['reload_nav'] = 1;
+  backends_toggled = true;
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states));
   // remove &backends=... from url, they would overwrite cookie settings
   removeParams['backends'] = true;
 
   var delay = 2;
-  if(show_sitepanel == 'collapsed') { delay = 10; }
+  if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
+  if(show_sitepanel == 'collapsed') { delay = 20; }
   if(show_sitepanel == 'tree')      { delay = 30; }
   if(show_sitepanel == 'list') {
-    window.setTimeout(reloadPage, delay*1000);
+    reloadPage(delay*1000, true);
   } else {
     setRefreshRate(delay);
   }
@@ -1523,7 +1804,7 @@ function toggleBackend(backend, state, skip_update) {
 function toggleSubSectionVisibility(subsection) {
     // hide everything
     jQuery('TR.subpeer, TR.subsection').css('display', 'none');
-    jQuery('TR.subsection INPUT').removeClass('button_peer_selected');
+    jQuery('TR.subsection BUTTON').removeClass('button_peer_selected');
 
     // show parents sections
     var subsectionCls = toClsNameList(subsection);
@@ -1534,32 +1815,29 @@ function toggleSubSectionVisibility(subsection) {
         // show section itself
         jQuery('TR.subsection_'+cls).css('display', '');
         // but hide all subsections
-        jQuery('TR.subsection_'+cls+' INPUT').css('display', 'none');
+        jQuery('TR.subsection_'+cls+' BUTTON').css('display', 'none');
         // except the one we want to see
-        jQuery('INPUT.btn_sites_'+cls).css('display', '').addClass('button_peer_selected');
+        jQuery('BUTTON.btn_sites_'+cls).css('display', '').addClass('button_peer_selected');
     }
 
     // show section itself
     jQuery('TR.subsection_'+subsectionCls).css('display', '');
-    jQuery('TR.subsection_'+subsectionCls+' INPUT').css('display', '');
+    jQuery('TR.subsection_'+subsectionCls+' BUTTON').css('display', '');
 
     // show peer for this subsection
     jQuery('TR.subpeers_'+subsectionCls).css('display', '');
-    jQuery('TR.subpeers_'+subsectionCls+' INPUT').css('display', '');
+    jQuery('TR.subpeers_'+subsectionCls+' BUTTON').css('display', '');
 
     // always show top sections
     jQuery('TR.sublvl_1').css('display', '');
-    jQuery('TR.sublvl_1 INPUT').css('display', '');
+    jQuery('TR.sublvl_1 BUTTON').css('display', '');
 }
 
 /* toggle all backends for this section */
 function toggleSection(sections, first_state) {
     var section = toClsNameList(sections);
-    var regex   = new RegExp('section_'+section+'(_|\\\s|$)');
-    jQuery('TABLE.site_panel INPUT[type=button]').each(function(i, b) {
-        var id = b.id.replace(/^button_/, '');
-        if(!id) { return; }
-        if(!b.className.match(regex)) { return; }
+    jQuery('HEADER .button_peer').each(function(i, b) {
+        if(b.dataset.section != section) { return(true); }
         if(first_state == undefined) {
             if(jQuery(b).hasClass("button_peerUP") || jQuery(b).hasClass("button_peerDOWN")) {
                 first_state = 0;
@@ -1567,7 +1845,7 @@ function toggleSection(sections, first_state) {
                 first_state = 1;
             }
         }
-        toggleBackend(id, first_state, true);
+        toggleBackend(b.dataset.id, first_state, true);
     });
 
     updateSitePanelCheckBox();
@@ -1582,11 +1860,16 @@ function toggleAllSections(reverse) {
     if(reverse != undefined) {
         if(state == 0) { state = 1; } else { state = 0; }
     }
-    jQuery('TABLE.site_panel DIV.backend INPUT').each(function(i, b) {
-        if(b.id.match(/^button_/)) {
-            var id = b.id.replace(/^button_/, '');
-            toggleBackend(id, state, true);
+    var visibleOnly = false;
+    if(jQuery("#site_panel_search").val()) {
+        visibleOnly = true;
+    }
+    jQuery('HEADER .button_peer').each(function(i, b) {
+        if(visibleOnly && !jQuery(b).is(":visible")) {
+            toggleBackend(b.dataset.id, 0, true);
+            return(true);
         }
+        toggleBackend(b.dataset.id, state, true);
     });
 
     updateSitePanelCheckBox();
@@ -1602,6 +1885,17 @@ function updateSitePanelCheckBox() {
         jQuery('#all_backends').prop('checked', false);
     } else {
         jQuery('#all_backends').prop('checked', true);
+    }
+
+    if(jQuery("#site_panel_search").val()) {
+        // if search is active, calculate based on visible backend buttons
+        jQuery('#all_backends').prop('checked', true);
+        jQuery('HEADER .button_peer').each(function(i, b) {
+            if(b.dataset.id && !jQuery(b).hasClass("button_peerUP") && jQuery(b).is(":visible")) {
+                jQuery('#all_backends').prop('checked', false);
+                return;
+            }
+        });
     }
 
     if(show_sitepanel == "tree") {
@@ -1691,6 +1985,7 @@ function count_site_section_totals(section, prefix) {
 }
 
 function duration(seconds) {
+    seconds = Math.round(seconds);
     if(seconds < 300) {
         return(seconds+" seconds");
     }
@@ -1979,11 +2274,7 @@ function checknonempty(id, name) {
 /* hide all waiting icons */
 var hide_activity_icons_timer;
 function hide_activity_icons() {
-    jQuery('img').each(function(i, el) {
-        if(el.src.indexOf("/images/waiting.gif") > 0) {
-            el.style.visibility = "hidden";
-        }
-    });
+    jQuery('.js-autohide').css("visibility", "hidden");
 }
 
 /* verify time */
@@ -1995,20 +2286,17 @@ function verify_time(id, duration_id) {
     }, 500);
 }
 function verify_time_do(id, duration_id) {
-    var obj  = document.getElementById(id);
+    var obj  = document.getElementById(id) || id;
     var obj2 = document.getElementById(duration_id);
     var duration = "";
     if(obj2 && jQuery(obj2).is(":visible")) {
         duration = obj2.value;
     }
 
+    clearFormInputError(obj);
+    delete verification_errors[id];
+
     if(obj.value == "") {
-        var next = jQuery(obj).next();
-        if(next[0] && next[0].className == 'smallalert') {
-            jQuery(next).remove();
-        }
-        obj.style.background = "";
-        delete verification_errors[id];
         return;
     }
 
@@ -2022,21 +2310,29 @@ function verify_time_do(id, duration_id) {
             duration_id: duration_id
         },
         success: function(data) {
-            var next = jQuery(obj).next();
-            if(next[0] && next[0].className == 'smallalert') {
-                jQuery(next).remove();
-            }
             if(data.verified == "false") {
                 console.log(data.error);
                 verification_errors[id] = 1;
-                obj.style.background = "#f8c4c4";
-                jQuery("<span class='smallalert'>"+data.error+"</span>").insertAfter(obj);
-            } else {
-                obj.style.background = "";
-                delete verification_errors[id];
+                addFormInputError(obj, data.error);
             }
         }
     });
+}
+
+function clearFormInputError(input) {
+    jQuery("DIV.card.alert").remove();
+    jQuery(input).removeClass('invalid');
+}
+
+function addFormInputError(input, msg, align) {
+    clearFormInputError(input);
+    jQuery(input).addClass('invalid')
+    input.parentNode.style.position = 'relative';
+    var top = "-top-8";
+    if(align == "below") {
+        top = "-bottom-8";
+    }
+    jQuery("<div class='card alert red p-1 "+top+" whitespace-nowrap'>"+msg+"</div>").insertBefore(input);
 }
 
 /* return unescaped html string */
@@ -2078,12 +2374,8 @@ function reset_table_row_classes(table, c1, c2) {
 }
 
 /* set icon src and refresh page */
-function refresh_button(btn) {
-    btn.src = url_prefix + 'themes/' + theme + '/images/waiting.gif';
-    jQuery(btn).addClass('refreshing');
-    window.setTimeout(function() {
-        reloadPage();
-    }, 100);
+function refresh_button() {
+    reloadPage(50, true);
 }
 
 /* reverse a string */
@@ -2353,10 +2645,13 @@ function do_table_search() {
 }
 
 function do_table_search_table(id, table, value) {
+    if(table.dataset["search"] && table.dataset["search"] == value) { return; }
+    if(!table.dataset["search"] && !value) { return; }
     /* make tables fixed width to avoid flickering */
-    if(table.offsetWidth) {
-        table.width = table.offsetWidth;
+    if(table.offsetWidth && !table.style.width) {
+        table.style.width = table.offsetWidth+"px";
     }
+    table.dataset["search"] = value;
     var startWith = 1;
     if(jQuery(table).hasClass('header2')) {
         startWith = 2;
@@ -2470,14 +2765,10 @@ function showBugReport(id, text) {
 function showErrorTextPopup(text) {
     text      = "<pre style='text-align:left;'>"+escapeHTML(text)+"<\/pre>";
     var title = "Error Report";
-    if(window.overlib != undefined) {
-        try {
-            var options = [text,CAPTION,title,WIDTH,900];
-            options     = options.concat(info_popup_options);
-            overlib.apply(this, options);
-        }
-        catch(e) {}
+    try {
+        overcard({'bodyCls': 'p-2', 'body': text, 'caption': title, 'width': 900 });
     }
+    catch(e) {}
     if (window.Ext != undefined) {
         Ext.Msg.alert(title, text);
     }
@@ -2612,8 +2903,8 @@ function update_recurring_type_select(select_id) {
 }
 
 /* make table header selectable */
-function set_sub(nr) {
-    for(var x=1;x<=10;x++) {
+function set_sub(nr, hash) {
+    for(var x=1;x<=20;x++) {
         /* reset table rows */
         if(x != nr) {
             jQuery('.sub_'+x).css('display', 'none');
@@ -2623,12 +2914,15 @@ function set_sub(nr) {
         /* reset buttons */
         var obj = document.getElementById("sub_"+x);
         if(obj) {
-            styleElements(obj, "data", 1);
+            styleElements(obj, "tabs", 1);
         }
     }
     obj = document.getElementById("sub_"+nr);
-    styleElements(obj, "data dataSelected", 1);
+    styleElements(obj, "tabs active", 1);
 
+    if(hash) {
+        set_hash(hash);
+    }
 
     return false;
 }
@@ -2646,22 +2940,39 @@ function hilight_area(x1, y1, x2, y2, duration, color) {
     }, duration);
 }
 
-/* fade out using jquery ui, ensure jquery ui loaded */
-function fade(id, duration) {
-    var success = function(script, textStatus, jqXHR) {
-        jQuery('#'+id).hide('fade', {}, duration);
-    };
-
-    if(has_jquery_ui) {
-        success();
-    } else {
-        load_jquery_ui(success);
+/* fade element away and optionally remove it */
+function fade(id, duration, remove) {
+    if(is_array(id)) {
+        jQuery(id).each(function(i, el) {
+            fade(el, duration, remove);
+        });
+        return true;
     }
-
-    // completly remove message from dom after fading out
-    if(id == 'thruk_message') {
-        window.setTimeout("jQuery('#"+id+"').remove()", duration + 1000);
+    var el = id;
+    if(!is_object(el)) {
+        el = document.getElementById(el);
     }
+    duration = duration || 500;
+    jQuery(el).css({
+        visibility: "hidden",
+        opacity: "0",
+        transition: "visibility 0s "+duration+"ms, opacity "+duration+"ms linear"
+    });
+
+    window.setTimeout(function() {
+        // completly remove message from dom after fading out
+        if(remove) {
+            jQuery(el).remove();
+            return;
+        }
+        // remove opacity style, since it confuses the showElement
+        jQuery(el).css({
+            visibility: "hidden",
+            opacity: "",
+            transition: ""
+        });
+    } , duration + 50);
+    return true;
 }
 
 var ui_loading = false;
@@ -2697,24 +3008,22 @@ function thruk_message(rc, message, close_timeout) {
     var cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
-        +'<div id="thruk_message" class="thruk_message '+cls+'" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">'
-        +'  <div class="shadow"><div class="shadowcontent">'
-        +'  <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">'
-        +'    <tr>'
-        +'      <td align="center">'
-        +'        <span class="' + cls + '">' + message + '<\/span>';
+        + '<div id="thruk_message" class="card shadow-float fixed p-1 z-50 min-w-[600px] top-14 left-1/2 transform -translate-x-1/2">'
+        + '  <div class="flexrow flex-nowrap gap-2 justify-center">'
+        + '    <div class="w-5"></div>'
+        + '    <div class="flex-grow text-center font-semibold whitespace-nowrap">'
+        + '      <span class="' + cls + '">' + message;
     if(rc != 0) {
-        html += ''
-        +'          <img src="' + url_prefix + 'themes/'+ theme +'/images/error.png" alt="Errors detected" title="Errors detected" width="16" height="16" style="vertical-align: text-bottom">';
+        html +=   '<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>';
     }
     html += ''
-        +'      <\/td>'
-        +'      <td valign="top" align="right" width="50">'
-        +'        <a href="#" onclick="fade(\'thruk_message\', 500);return false;"><img src="' + url_prefix + 'themes/' + theme + '/images/icon_close.gif" border="0" alt="Hide Message" title="Hide Message" width="13" height="12" class="close_button" style="margin-right: 4px;"><\/a>'
-        +'      <\/td>'
-        +'    <\/tr>'
-        +'  <\/table>'
-        +'  <\/div><\/div>';
+        + '      </span>'
+        + '    </div>'
+        + '    <div class="w-5">'
+        + '      <button class="iconOnly medium" title="close this message" onclick="fade(\'thruk_message\', 500, true);return false;"><i class="uil uil-times"></i></button>'
+        + '    </div>'
+        + '  </div>'
+        + '</div>';
 
     jQuery("body").append(html);
     var fade_away_in = 5000;
@@ -2728,7 +3037,7 @@ function thruk_message(rc, message, close_timeout) {
         fade_away_in = close_timeout * 1000;
     }
     thruk_message_fade_timer = window.setTimeout(function() {
-        fade('thruk_message', 500);
+        fade('thruk_message', 500, true);
     }, fade_away_in);
 }
 
@@ -2739,57 +3048,6 @@ function get_host() {
         host += ':' + window.location.port;
     }
     return(host);
-}
-
-var nohashchange = 0;
-function save_url_in_parents_hash() {
-    if(nohashchange == 1) {
-      nohashchange = 0;
-      return;
-    }
-    var oldloc = new String(window.parent.location);
-    oldloc     = oldloc.replace(/#+.*$/, '');
-    oldloc     = oldloc.replace(/\?.*$/, '');
-    var patt   = new RegExp('\/'+product_prefix+'\/$', 'g');
-    if(!oldloc.match(patt)) {
-        return;
-    }
-    var newloc = new String(window.location);
-    newloc     = newloc.replace(oldloc, '');
-    // changes have to be put in the index.tt too
-    newloc     = newloc.replace(/\?_=\d+/g, '');
-    newloc     = newloc.replace(/\&_=\d+/g, '');
-    newloc     = newloc.replace(/\&reload_nav=\d+/g, '');
-    newloc     = newloc.replace(/\?reload_nav=\d+/g, '');
-    newloc     = newloc.replace(/\&theme=\w*/g, '');
-    newloc     = newloc.replace(/\?theme=\w*/g, '');
-    newloc     = newloc.replace(/nav=\&/g, '');
-    newloc     = newloc.replace(/\&service_columns=\d+/g, '');
-    newloc     = newloc.replace(/\&host_columns=\d+/g, '');
-    newloc     = newloc.replace(/\&bookmarks=.*?\&/g, '&');
-    newloc     = newloc.replace(/\&bookmarksp=.*?\&/g, '&');
-    newloc     = newloc.replace(/\&section=.*?\&/g, '&');
-    newloc     = newloc.replace(/\&update\.x=\d+/g, '');
-    newloc     = newloc.replace(/\&update\.y=\d+/g, '');
-    newloc     = newloc.replace(/\&newname=\&/g, '&');
-    newloc     = newloc.replace(/\&view_mode=html\&/g, '&');
-    newloc     = newloc.replace(/\&all_col=\&/g, '&');
-    newloc     = newloc.replace(/\&bookmark=.*?\&/g, '&');
-    newloc     = newloc.replace(/\&referer=.*?\&/g, '&');
-    var patt   = new RegExp('^' + get_host(), 'gi');
-    newloc     = newloc.replace(patt, '');
-    if('#'+newloc != window.parent.location.hash) {
-        if(window.parent.history.replaceState) {
-            window.parent.history.replaceState({}, "", '#'+newloc);
-        } else {
-            nohashchange = 1;
-            // do not use window.parent.location.replace, as this causes
-            // IE to reload the frame page and then the navigation disapears
-            window.parent.location.hash = '#'+newloc;
-        }
-        window.setTimeout(function() { nohashchange=0; }, 100);
-    }
-    return;
 }
 
 /* set hash of url */
@@ -2820,11 +3078,6 @@ function set_hash(value, nr) {
     } else {
         window.location.replace(value);
     }
-    if(window.parent) {
-        try {
-            save_url_in_parents_hash();
-        } catch(err) { console.log(err); }
-    }
 }
 
 /* get hash of url */
@@ -2852,7 +3105,7 @@ function preserve_hash() {
 }
 
 /* fetch content by ajax and replace content */
-function load_overlib_content(id, url, add_pre) {
+function load_overcard_content(id, url, add_pre) {
     jQuery.ajax({
         url: url,
         type: 'POST',
@@ -2956,63 +3209,72 @@ function obj_diff(o1, o2, prefix) {
 
 /* callback to show popup with host comments */
 function host_comments_popup(host_name, peer_key) {
-    generic_downtimes_popup(host_name+' Comments', url_prefix+'cgi-bin/parts.cgi?part=_host_comments&host='+encodeURIComponent(host_name)+"&backend="+peer_key);
+    generic_downtimes_popup("Comments: "+host_name, url_prefix+'cgi-bin/parts.cgi?part=_host_comments&host='+encodeURIComponent(host_name)+"&backend="+peer_key);
 }
 
 /* callback to show popup with host downtimes */
 function host_downtimes_popup(host_name, peer_key) {
-    generic_downtimes_popup(host_name+' Downtimes', url_prefix+'cgi-bin/parts.cgi?part=_host_downtimes&host='+encodeURIComponent(host_name)+"&backend="+peer_key);
+    generic_downtimes_popup("Downtimes: "+host_name, url_prefix+'cgi-bin/parts.cgi?part=_host_downtimes&host='+encodeURIComponent(host_name)+"&backend="+peer_key);
 }
 
 /* callback to show popup with service comments */
 function service_comments_popup(host_name, service, peer_key) {
-    generic_downtimes_popup(host_name+' - '+service+' Comments', url_prefix+'cgi-bin/parts.cgi?part=_service_comments&host='+encodeURIComponent(host_name)+'&service='+encodeURIComponent(service)+"&backend="+peer_key);
+    generic_downtimes_popup("Comments: "+host_name+' - '+service, url_prefix+'cgi-bin/parts.cgi?part=_service_comments&host='+encodeURIComponent(host_name)+'&service='+encodeURIComponent(service)+"&backend="+peer_key);
 }
 
 /* callback to show popup with service downtimes */
 function service_downtimes_popup(host_name, service, peer_key) {
-    generic_downtimes_popup(host_name+' - '+service+' Downtimes', url_prefix+'cgi-bin/parts.cgi?part=_service_downtimes&host='+encodeURIComponent(host_name)+'&service='+encodeURIComponent(service)+"&backend="+peer_key);
+    generic_downtimes_popup("Downtimes: "+host_name+' - '+service, url_prefix+'cgi-bin/parts.cgi?part=_service_downtimes&host='+encodeURIComponent(host_name)+'&service='+encodeURIComponent(service)+"&backend="+peer_key);
 }
 
 /* callback to show popup host/service downtimes */
 function generic_downtimes_popup(title, url) {
-    var content = "<div id='comments_downtimes_popup'><img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>";
-    var options = [content, CAPTION, title,WIDTH,600];
-    options = options.concat(info_popup_options);
-    overlib.apply(this, options);
-    jQuery('#comments_downtimes_popup').load(url);
+    overcard({
+        'body':    '<div id="comments_downtimes_popup"><div class="p-2 spinner"></div><\/div>',
+        'caption':  title,
+        'minWidth': 800,
+        'callback': function(doc) {
+            jQuery('#comments_downtimes_popup', doc).load(url, function() {
+                var container = doc.getElementById("overcard");
+                overcard_check_visibility(container);
+            });
+        }
+    });
 }
 
-function show_plugin_output_popup(target, host, service, backend, escape_html, overlib_options) {
+function show_plugin_output_popup(target, host, service, backend, escape_html, overcard_options) {
     var caption = decodeURIComponent(host);
     if(service != '') {
         caption += " - "+decodeURIComponent(service);
     }
     caption = escapeHTML(caption);
-    overlib.apply(null, ["<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>",CAPTION, caption].concat(overlib_options));
-    jQuery('#overDiv .plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
+    overcard(jQuery.extend({ 'bodyCls': 'p-2', 'body': "<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>", 'caption': caption}, overcard_options));
+    jQuery('#overcard .plugin_output').html("<div class='spinner w-8 h-8'><\/div>");
 
     var url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/services/'+encodeURIComponent(host)+"/"+encodeURIComponent(service)+"?columns=plugin_output,long_plugin_output"
+    if(service == '') {
+        url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/hosts/'+encodeURIComponent(host)+"?columns=plugin_output,long_plugin_output"
+    }
     jQuery.get(url, {}, function(data, status, req) {
-        jQuery('#overDiv .plugin_output').html("");
+        jQuery('#overcard .plugin_output').html("");
         if(!data || !data[0]) {
-            jQuery('#overDiv .plugin_output').html("failed to fetch details: "+status);
+            jQuery('#overcard .plugin_output').html("failed to fetch details: "+status);
             return;
         }
         if(escape_html) {
             var text = jQuery("<div>").text(data[0]["plugin_output"]).html().replace(/\\n/g, "<br>");
-            jQuery('#overDiv .plugin_output').html(text);
+            jQuery('#overcard .plugin_output').html(text);
             var text = jQuery("<div>").text(data[0]["long_plugin_output"]).html().replace(/\\n/g, "<br>");
-            jQuery('#overDiv .long_plugin_output').html(text);
+            jQuery('#overcard .long_plugin_output').html(text);
         } else {
-            jQuery('#overDiv .plugin_output').html(data[0]["plugin_output"].replace(/\\n/g, "<br>"));
-            jQuery('#overDiv .long_plugin_output').html(data[0]["long_plugin_output"].replace(/\\n/g, "<br>"));
+            jQuery('#overcard .plugin_output').html(data[0]["plugin_output"].replace(/\\n/g, "<br>"));
+            jQuery('#overcard .long_plugin_output').html(data[0]["long_plugin_output"].replace(/\\n/g, "<br>"));
         }
     });
 }
 
 function fetch_long_plugin_output(target, host, service, backend, escape_html) {
-    jQuery('.long_plugin_output').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
+    jQuery('.long_plugin_output').html("<div class='spinner w-8 h-8'><\/div>");
     var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1';
     if(escape_html) {
         jQuery.post(url, {
@@ -3035,7 +3297,7 @@ function fetch_long_plugin_output(target, host, service, backend, escape_html) {
 
 /* callback to show service popup */
 function fetch_svc_info_popup(el, host, svc, peer_key) {
-    jQuery('.service_popup_content').html("<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>");
+    jQuery('.service_popup_content').html("<div class='spinner w-10 h-10 border-4'><\/div>");
     var url = url_prefix+'cgi-bin/parts.cgi?part=_service_info_popup';
     jQuery('.service_popup_content').load(url, {
         host:    host,
@@ -3103,7 +3365,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
     already_sortable[pane_prefix] = true;
 
     jQuery('TABLE.'+table_class).each(function(j, table) {
-        jQuery(table).find('tbody > tr:first-child').sortable({
+        jQuery(table).find('thead > tr:first-child').sortable({
             items                : '> th',
             helper               : 'clone',
             tolerance            : 'pointer',
@@ -3121,7 +3383,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
                 });
                 // fetch the target column order based on the current status table header
                 var target = [];
-                jQuery(table).find('tbody > tr:first-child > th').each(function(i, el) {
+                jQuery(table).find('thead > tr:first-child > th').each(function(i, el) {
                     var col = get_column_from_classname(el);
                     if(col) {
                         target.push(col);
@@ -3132,7 +3394,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
                 });
                 // remove the current column header and readd them in original order, so later ordering wont skip headers
                 var currentHeader = {};
-                jQuery(table).find('tbody > tr:first-child > th').each(function(i, el) {
+                jQuery(table).find('thead > tr:first-child > th').each(function(i, el) {
                     base_table = el.parentNode;
                     var row = el.parentNode.removeChild(el);
                     var col = get_column_from_classname(el);
@@ -3159,11 +3421,16 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
         }
     });
     /* enable changing columns header name */
-    jQuery('TABLE.'+table_class+' > tbody > tr:first-child > th').dblclick(function(evt) {
-        var th = evt.target;
-        var text   = (th.innerText || '').replace(/\s*$/, '');
-        var childs = removeChilds(th);
-        th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
+    jQuery('TABLE.'+table_class+' > thead > tr:first-child > th').dblclick(function(evt) {
+        evt.preventDefault();
+        evt.stopImmediatePropagation();
+        evt.stopPropagation();
+        window.clearTimeout(sortClickTimer);
+        var th   = evt.target;
+        if(th.tagName == "A") { th = th.parentNode; }
+        var text = (th.innerText || '').replace(/\s*$/, '');
+        jQuery(th).find("*").css("display", "none");
+        jQuery("<input type='text' class='header_inline_edit' value='"+text+"'></form>").appendTo(th);
         window.setTimeout(function() {
             jQuery(th).find('INPUT').focus();
             var input = jQuery(th).find('INPUT')[0];
@@ -3171,11 +3438,13 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
             jQuery(input).on('keyup blur', function (e) {
                 /* submit on enter/return */
                 if(e.keyCode == 13 || e.type == "blur") {
-                    th.innerHTML = escapeHTML(input.value)+" ";
                     // restore sort links
-                    addChilds(th, childs, 1);
+                    jQuery(th).find("*").css("display", "");
+                    jQuery(th).find("INPUT").remove();
                     var col  = get_column_from_classname(th);
                     var orig = jQuery('#'+pane_prefix+'_col_'+col)[0].title;
+
+                    jQuery(th).find("A").text(input.value);
 
                     var cols = default_columns[pane_prefix];
                     if(additionalParams[pane_prefix+'columns']) {
@@ -3202,15 +3471,17 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
                 }
                 /* cancel on escape */
                 if(e.keyCode == 27) {
-                    th.innerHTML = text+" ";
-                    // restore sort links
-                    addChilds(th, childs, 1);
+                    jQuery(th).find("*").css("display", "");
+                    jQuery(th).find("INPUT").remove();
                 }
             });
         }, 100);
     });
     /* enable changing columns header name */
-    jQuery('#'+pane_prefix+'_columns_table tbody td.filterName').dblclick(function(evt) {
+    jQuery('#'+pane_prefix+'_columns_table tbody td.js-column-renameable').dblclick(function(evt) {
+        evt.preventDefault();
+        evt.stopImmediatePropagation();
+        evt.stopPropagation();
         var th = evt.target;
         var text   = (th.innerText || '').replace(/\s*$/, '');
         th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
@@ -3361,7 +3632,7 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
         }
 
         // adjust table header text
-        var current   = (firstRow.cells[i].innerText || '').trim();
+        var current   = (jQuery("A", firstRow.cells[i]).text() || '').trim();
         var newHeadEl = document.getElementById(el.id+'n');
         if(!newHeadEl) {
             if(thruk_debug_js) { alert("ERROR: header element not found in updateStatusColumns(): " + el.id+'n'); }
@@ -3369,9 +3640,7 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
         }
         var newHead = newHeadEl.innerHTML.trim();
         if(current != newHead) {
-            var childs = removeChilds(firstRow.cells[i]);
-            firstRow.cells[i].innerHTML = newHead+" ";
-            addChilds(firstRow.cells[i], childs, 1);
+            jQuery("A", firstRow.cells[i]).text(newHead)
             changed = true;
         }
 
@@ -3401,11 +3670,11 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
             additionalParams[id+'columns'] = newVal;
             delete removeParams[id+'columns'];
 
-            var lenghtThreshols = table.dataset["baseColumnLength"];
-            if(reloadRequired && table.rows[1] && table.rows[1].cells.length <= lenghtThreshols) {
+            var lenghtThresholds = table.dataset["baseColumnLength"];
+            if(reloadRequired && table.rows[1] && table.rows[1].cells.length <= lenghtThresholds) {
                 additionalParams["autoShow"] = id+"_columns_select";
                 delete removeParams['autoShow'];
-                jQuery('#'+id+"_columns_select").find("DIV.shadowcontent").append("<div class='overlay'></div>").append("<div class='overlay-text'><img class='overlay' src='"+url_prefix + 'themes/' +  theme + "/images/loading-icon.gif'><br>fetching table...</div>");
+                jQuery('#'+id+"_columns_select").append("<div class='absolute top-0 left-0 h-full w-full bodyBG font-semibold opacity-95'><div class='spinner w-8 h-8'><\/div><br>fetching table...<\/div>");
                 reloadPage();
                 return;
             }
@@ -3416,15 +3685,6 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
         }
         updateUrl();
     }
-}
-
-/* reload page with with sorting parameters set */
-function sort_by_columns(args) {
-    for(var key in args) {
-        additionalParams[key] = args[key];
-    }
-    reloadPage();
-    return(false);
 }
 
 function setDefaultColumns(type, pane_prefix, value) {
@@ -3489,11 +3749,9 @@ function refreshNavSections(id) {
     return(false);
 }
 
-function send_form_in_background_and_reload(btn) {
-    var form = jQuery(btn).parents('FORM');
+function submitFormInBackground(form, cb) {
     var data = jQuery(form).serializeArray();
     var url  = jQuery(form).attr("action");
-    jQuery(btn).addClass("refreshing");
     jQuery.ajax({
         url:   url,
         data: data,
@@ -3502,10 +3760,19 @@ function send_form_in_background_and_reload(btn) {
             'Accept': "application/json; charset=utf-8"
         },
         success: function(data, textStatus, jqXHR) {
-            reloadPage();
+            if(cb) {
+                cb(form);
+            }
         },
         error: ajax_xhr_error_logonly
     });
+    return(false);
+}
+
+function send_form_in_background_and_reload(btn) {
+    var form = jQuery(btn).parents('FORM');
+    submitFormInBackground(form, reloadPage);
+    setBtnSpinner(btn);
     return(false);
 }
 
@@ -3647,8 +3914,9 @@ function fitText(el) {
 function togglePasswordVisibility(ev) {
     if(!ev || !ev.target) { return; }
     var el = jQuery(ev.target);
-    el.toggleClass("eye");
-    if(el.hasClass("eye")) {
+    el.toggleClass("uil-eye");
+    el.toggleClass("uil-eye-slash");
+    if(el.hasClass("uil-eye")) {
         jQuery("DIV.togglePassword INPUT").attr('type', 'text');
     } else {
         jQuery("DIV.togglePassword INPUT").attr('type', 'password');
@@ -3674,6 +3942,10 @@ function print_action_menu(src, options) {
     var service     = options.service;
     var orientation = options.orientation;
     var show_title  = options.show_title;
+
+    /* obtain reference to current script tag so we could insert the icons here */
+    var scriptTag = document.currentScript;
+
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
         if(typeof src === "function") {
@@ -3681,20 +3953,16 @@ function print_action_menu(src, options) {
         }
         src = is_array(src) ? src : [src];
         jQuery(src).each(function(i, el) {
-            var icon       = document.createElement('img');
-            var icon_url   = replace_macros(el.icon, undefined, options);
-            icon.src       = icon_url;
-            try {
-                // use data url in reports
-                if(action_images[icon_url]) {
-                    icon.src = action_images[icon_url];
-                }
-            } catch(e) {}
-            icon.className = 'action_icon '+(el.menu || el.action ? 'clickable' : '' );
+            var icon = action_menu_icon(el.icon, options);
+            icon.title     = replace_macros(el.title ? el.title : '', undefined, options);
+            icon.className += ' action_icon '+(el.menu || el.action ? 'clickable' : '' );
             if(el.menu) {
                 icon.nr = menu_nr;
-                jQuery(icon).bind("click", function() {
+                jQuery(icon).bind("click", function(e) {
                     /* open and show menu */
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
                     show_action_menu(icon, el.menu, icon.nr, backend, host, service, orientation);
                 });
                 menu_nr++;
@@ -3716,18 +3984,40 @@ function print_action_menu(src, options) {
                 }
             });
 
-            /* obtain reference to current script tag so we could insert the icons here */
-            var scriptTag = document.scripts[document.scripts.length - 1];
             scriptTag.parentNode.appendChild(item);
-            if(show_title && el.title) {
+            if(show_title && icon.title) {
                 var title = document.createTextNode(replace_macros(icon.title, undefined, options));
                 scriptTag.parentNode.appendChild(title);
             }
         });
     }
     catch(err) {
-        document.write('<img src="'+ url_prefix +'themes/'+ theme +'/images/error.png" title="'+err+'">');
+        jQuery(scriptTag.parentNode).append('<i class="uil uil-exclamation round yellow" title="'+err+'"><\/i>');
     }
+}
+
+/* create icon item */
+function action_menu_icon(iconUrl, options) {
+    if(iconUrl.match(/^uil\-/)) {
+        var icon = document.createElement('i');
+        icon.className = "uil "+iconUrl;
+        return(icon);
+    }
+    if(iconUrl.match(/^fa\-/)) {
+        var icon = document.createElement('i');
+        icon.className = "fa-solid "+iconUrl;
+        return(icon);
+    }
+    var icon = document.createElement('img');
+    iconUrl  = replace_macros(iconUrl, undefined, options);
+    icon.src = iconUrl;
+    try {
+        // use data url in reports
+        if(action_images[iconUrl]) {
+            icon.src = action_images[iconUrl];
+        }
+    } catch(e) {}
+    return(icon);
 }
 
 /* create link item */
@@ -3816,22 +4106,13 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
         jQuery(icon).addClass('active');
     }, 30);
 
-    container               = document.createElement('div');
+    container = document.createElement('div');
     container.className     = 'action_menu';
     container.id            = id;
     container.style.visible = 'hidden';
 
-    var s1 = document.createElement('div');
-    container.appendChild(s1);
-    s1.className = 'shadow';
-
-    var s2 = document.createElement('div');
-    s2.className = 'shadowcontent';
-    s1.appendChild(s2);
-
     var menu = document.createElement('ul');
-    s2.appendChild(menu);
-    menu.className = 'action_menu';
+    container.appendChild(menu);
 
     // make arguments available
     action_menu_options = {
@@ -3841,7 +4122,7 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     };
 
     if(typeof(items) === "function") {
-        menu.appendChild(actionGetMenuItem({icon: url_prefix+'themes/'+theme+'/images/waiting.gif', label: 'loading...'}, id, backend, host, service));
+        menu.appendChild(actionGetMenuItem({icon: 'spinner', label: 'loading...'}, id, backend, host, service));
         jQuery.when(items({config: null, submenu: menu, menu_id: id, backend: backend, host: host, service: service}))
         .done(function(data) {
             removeChilds(menu);
@@ -3868,29 +4149,38 @@ function actionGetMenuItem(el, id, backend, host, service) {
     if(el == "-") {
         var hr = document.createElement('hr');
         item.appendChild(hr);
-        item.className = 'nohover';
+        item.className = 'no-hover';
         return(item);
     }
 
+    var link = document.createElement('a');
     if(el.disabled) {
-        item.className = 'clickable disabled nohover';
+        item.className = 'disabled no-hover';
     } else {
         item.className = 'clickable';
     }
-    var link = document.createElement('a');
+    if(el.disabled || el.menu || !el.action) {
+        jQuery(link).off("click").on("click", function(e) {
+            e.preventDefault();
+            return(false);
+        });
+    }
     if(el.icon) {
         var span       = document.createElement('span');
         span.className = 'icon';
-        var img        = document.createElement('img');
-        img.src        = replace_macros(el.icon, undefined, options);
-        img.title      = replace_macros(el.title ? el.title : '', undefined, options);
-        span.appendChild(img);
+        if(el.icon == "spinner") {
+            span.innerHTML = "<div class='spinner'><\/div>";
+        } else {
+            var img   = action_menu_icon(el.icon, options);
+            img.title = replace_macros(el.title ? el.title : '', undefined, options);
+            span.appendChild(img);
+        }
         link.appendChild(span);
     }
 
     var label;
     if(el.html) {
-        label = document.createElement('span');
+        label = document.createElement('div');
         label.innerHTML = el.html;
     } else {
         label = document.createElement('span');
@@ -3906,13 +4196,12 @@ function actionGetMenuItem(el, id, backend, host, service) {
         }
     }
     if(el.menu) {
-        link.className = link.className+' hasSubMenu';
         var expandLabel = document.createElement('span');
         expandLabel.className = "expandable";
-        expandLabel.innerHTML = "&gt;";
+        expandLabel.innerHTML = '<i class="uil uil-angle-right"><\/i>';
         link.appendChild(expandLabel);
         var submenu = document.createElement('ul');
-        submenu.className = "action_menu submenu";
+        submenu.className = "submenu";
         submenu.style.display = 'none';
         item.appendChild(submenu);
         item.style.position = 'relative';
@@ -3970,7 +4259,7 @@ function expandActionSubMenu(parent, el, submenu, id, backend, host, service) {
     if(typeof el.menu !== "function") {
         return;
     }
-    submenu.appendChild(actionGetMenuItem({icon: url_prefix+'themes/'+theme+'/images/waiting.gif', label: 'loading...'}, id, backend, host, service));
+    submenu.appendChild(actionGetMenuItem({icon: 'spinner', label: 'loading...'}, id, backend, host, service));
     submenu.style.display = "";
     checkSubMenuPosition(id, parent, submenu);
 
@@ -3997,22 +4286,22 @@ function checkSubMenuPosition(id, parent, submenu) {
     } else {
         // place right of parent
         var w = jQuery(parent).outerWidth();
-        submenu.style.left = (Math.floor(w)-1) + "px";
+        submenu.style.left = (Math.floor(w)) + "px";
     }
 }
 
 function check_position_and_show_action_menu(id, icon, container, orientation) {
     var coords = jQuery(icon).offset();
     if(orientation == 'b-r') {
-        container.style.left = (Math.floor(coords.left)+12) + "px";
+        container.style.left = (Math.floor(coords.left)) + "px";
     }
     else if(orientation == 'b-l') {
         var w = jQuery(container).outerWidth();
-        container.style.left = (Math.floor(coords.left)-w+33) + "px";
+        container.style.left = (Math.floor(coords.left)-w) + "px";
     } else {
         if(thruk_debug_js) { alert("ERROR: unknown orientation in show_action_menu(): " + orientation); }
     }
-    container.style.top  = (Math.floor(coords.top) + icon.offsetHeight + 14) + "px";
+    container.style.top  = (Math.floor(coords.top) + icon.offsetHeight) + "px";
 
     jQuery('#'+id+' .submenu').css('display', 'none')
     showElement(id, undefined, true, 'DIV#'+id+' DIV.shadowcontent', reset_action_menu_icons);
@@ -4042,8 +4331,8 @@ function check_server_action(id, link, backend, host, service, server_action_url
         if(!link.serverActionClickHandlerAdded) {
             link.serverActionClickHandlerAdded = true;
             jQuery(link).bind("click", function() {
-                var oldSrc = jQuery(link).find('IMG').attr('src');
-                jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
+                jQuery(link).find('IMG, I, SPAN.icon').css("display", "none");
+                jQuery(link).prepend('<div class="spinner"><\/div>');
                 if(config == undefined) { config = {}; }
                 jQuery.ajax({
                     url: server_action_url,
@@ -4053,14 +4342,16 @@ function check_server_action(id, link, backend, host, service, server_action_url
                         thruk_message(data.rc, data.msg, config.close_timeout);
                         if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
                         reset_action_menu_icons();
-                        jQuery(link).find('IMG').attr('src', oldSrc);
+                        jQuery(link).find('IMG, I, SPAN.icon').css("display", "");
+                        jQuery(link).find('DIV.spinner').remove();
                         if(callback) { callback(data); }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         thruk_xhr_error('server action failed: ', '', textStatus, jqXHR, errorThrown, false, config.close_timeout);
                         if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
                         reset_action_menu_icons();
-                        jQuery(link).find('IMG').attr('src', oldSrc);
+                        jQuery(link).find('IMG, I, SPAN.icon').css("display", "");
+                        jQuery(link).find('DIV.spinner').remove();
                     }
                 });
                 return(false);
@@ -4158,7 +4449,7 @@ function replace_macros(input, macros, core_macros) {
 
 /* remove active class from action menu icons */
 function reset_action_menu_icons() {
-    jQuery('IMG.action_icon').removeClass('active');
+    jQuery('.action_icon').removeClass('active');
 }
 
 /* close all action menus */
@@ -4218,53 +4509,74 @@ function parse_perf_data(perfdata) {
     return(perf_data);
 }
 
-/* write/return table with performance data */
-function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host, no_title) {
+/* return table with performance data */
+function perf_table(container) {
+    if(container.firstChild) { return; } // already set
+    var result = perf_table_data(container.dataset);
+    if(result) {
+        jQuery(container).html(result);
+        return(true);
+    }
+    jQuery(container).remove();
+    return(false);
+}
+
+function perf_table_data(dataset) {
+    var add_link      = dataset.addLink;
+    var state         = dataset.state;
+    var plugin_output = dataset.pluginOutput;
+    var perfdata      = dataset.perfdata;
+    var check_command = dataset.checkCommand;
+    var pnp_url       = dataset.pnpUrl;
+    var is_host       = dataset.isHost;
+    var no_title      = dataset.noTitle;
+
     if(is_host == undefined) { is_host = false; }
     if(is_host && state == 1) { state = 2; } // set critical state for host checks
     var perf_data = parse_perf_data(perfdata);
-    var cls       = 'notclickable';
-    var result    = '';
+    var cls       = 'not-clickable';
     if(perf_data.length == 0) { return false; }
     if(pnp_url != '') {
         cls = 'clickable';
     }
+
     var res = perf_parse_data(check_command, state, plugin_output, perf_data);
-    if(res != null) {
-        res = res.reverse();
-        for(var nr=0; nr<res.length; nr++) {
-            if(res[nr] != undefined) {
-                var graph = res[nr];
-                result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
-                if(graph.warn_width_min != null) {
-                    result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width_min+'px;">&nbsp;<\/div>';
-                }
-                if(graph.crit_width_min != null) {
-                    result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width_min+'px;">&nbsp;<\/div>';
-                }
-                if(graph.warn_width_max != null) {
-                    result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width_max+'px;">&nbsp;<\/div>';
-                }
-                if(graph.crit_width_max != null) {
-                    result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width_max+'px;">&nbsp;<\/div>';
-                }
-                result += '<img class="perf_bar" src="' + url_prefix + 'themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
-                result += '<\/div>';
+    if(!res) {
+        return(false);
+    }
+    var result = '';
+    res = res.reverse();
+    for(var nr=0; nr<res.length; nr++) {
+        if(res[nr] != undefined) {
+            var graph = res[nr];
+            result += '<div class="perf-bar-container '+cls+'" style="width:'+graph.div_width+'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
+            result += '<div class="bg"><\/div>';
+            result += '<div class="bar '+graph.cls+'" style="width:'+ graph.bar_width +'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'><\/div>';
+            if(graph.warn_width_min != null) {
+                result += '<div class="threshold warn '+cls+'" style="margin-left:'+graph.warn_width_min+'px;"><\/div>';
             }
+            if(graph.crit_width_min != null) {
+                result += '<div class="threshold crit '+cls+'" style="margin-left:'+graph.crit_width_min+'px;"><\/div>';
+            }
+            if(graph.warn_width_max != null) {
+                result += '<div class="threshold warn '+cls+'" style="margin-left:'+graph.warn_width_max+'px;"><\/div>';
+            }
+            if(graph.crit_width_max != null) {
+                result += '<div class="threshold crit '+cls+'" style="margin-left:'+graph.crit_width_max+'px;"><\/div>';
+            }
+            result += '<\/div>';
         }
     }
-    if(write) {
-        if(result != '' && pnp_url != '') {
-            var rel_url = pnp_url.replace('/graph?', '/popup?');
-            if(perf_bar_pnp_popup == 1) {
-                document.write("<a href='"+pnp_url+"' class='tips' rel='"+rel_url+"'>");
-            } else {
-                document.write("<a href='"+pnp_url+"'>");
-            }
-        }
-        document.write(result);
-        if(result != '' && pnp_url != '') {
-            document.write("<\/a>");
+    if(result == '') {
+        return(false);
+    }
+
+    if(add_link && pnp_url != '') {
+        var rel_url = pnp_url.replace('/graph?', '/popup?');
+        if(perf_bar_pnp_popup == 1) {
+            result = "<a href='"+pnp_url+"' class='tips' rel='"+rel_url+"'>"+result+"<\/a>";
+        } else {
+            result = "<a href='"+pnp_url+"'>"+result+"<\/a>";
         }
     }
     return result;
@@ -4291,10 +4603,10 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
             var perc       = (Math.abs(d.val) / (d.max-d.min) * 100).toFixed(2);
             if(perc < 5)   { perc = 5;   }
             if(perc > 100) { perc = 100; }
-            var pic = 'thermok.png';
-            if(state == 1) { var pic = 'thermwarn.png'; }
-            if(state == 2) { var pic = 'thermcrit.png'; }
-            if(state == 4) { var pic = 'thermgrey.png'; }
+            var cls = 'green';
+            if(state == 1) { cls = 'yellow'; }
+            if(state == 2) { cls = 'red'; }
+            if(state == 4) { cls = 'gray'; }
             perc = Math.round(perc / 100 * size);
             var warn_perc_min = null;
             if(d.warn_min != '' && d.warn_min > d.min) {
@@ -4313,7 +4625,7 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
                 if(warn_perc_max == size) {warn_perc_max = null;}
             }
             var crit_perc_max = null;
-            if(d.crit_max != '' && d.crit_max < d.max) {
+            if(d.crit_max != '' && d.crit_max <= d.max) {
                 crit_perc_max = plot_point(d.crit_max, d.max, size);
                 if(crit_perc_max == size) {crit_perc_max = null;}
                 if(crit_perc_max == warn_perc_max) {warn_perc_max = null;}
@@ -4321,8 +4633,8 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
             var graph = {
                 title:          d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
                 div_width:      size,
-                img_width:      perc,
-                pic:            pic,
+                bar_width:      perc,
+                cls:            cls,
                 field:          d.key,
                 val:            d.val,
                 warn_width_min: warn_perc_min,
@@ -4347,13 +4659,15 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
     if(local_perf_bar_mode == 'match') {
         // some hardcoded relations
         if(check_command == 'check_mk-cpu.loads') { return(perf_get_graph_from_result('load15', result)); }
-        var matches = plugin_output.match(/([\d\.]+)/g);
-        if(matches != null) {
-            for(var nr=0; nr<matches.length; nr++) {
-                var val = matches[nr];
-                for(var nr2=0; nr2<result.length; nr2++) {
-                    if(result[nr2].val == val) {
-                        return([result[nr2]]);
+        if(plugin_output) {
+            var matches = plugin_output.match(/([\d\.]+)/g);
+            if(matches != null) {
+                for(var nr=0; nr<matches.length; nr++) {
+                    var val = matches[nr];
+                    for(var nr2=0; nr2<result.length; nr2++) {
+                        if(result[nr2].val == val) {
+                            return([result[nr2]]);
+                        }
                     }
                 }
             }
@@ -5140,7 +5454,7 @@ function checkCmdPaneVisibility() {
         else if( ssize > 0 ) {
             text = ssize + " " + serviceName;
         }
-        btn.value = "submit command for " + text;
+        btn.innerHTML = "submit command for " + text;
         check_selected_command();
 
         /* show command panel */
@@ -5226,15 +5540,17 @@ function collectFormData(form_id) {
 
 /* return scroll position */
 function getPageScroll() {
-    var yScroll;
-    if (self.pageYOffset) {
-        yScroll = self.pageYOffset;
-    } else if (document.documentElement && document.documentElement.scrollTop) {
-        yScroll = document.documentElement.scrollTop;
-    } else if (document.body) {
-        yScroll = document.body.scrollTop;
+    var main = jQuery("MAIN").first();
+    var scroll = "";
+    scroll +=     Number(main.scrollLeft()).toFixed(0);
+    scroll += ":"+Number(main.scrollTop()).toFixed(0);
+
+    var mainTable = jQuery(".mainTable").first();
+    if(mainTable) {
+        scroll += ":"+Number(mainTable.scrollLeft()).toFixed(0);
+        scroll += ":"+Number(mainTable.scrollTop()).toFixed(0);
     }
-    return Number(yScroll).toFixed(0);
+    return scroll;
 }
 
 /* submit a form by id */
@@ -5302,7 +5618,9 @@ function disableAllFormElement() {
     var elems = new Array('row_start', 'row_end', 'row_comment', 'row_comment_disable_cmd', 'row_downtime_options', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
     jQuery.each(elems, function(index, id) {
         var obj = document.getElementById(id);
-        obj.style.display = "none";
+        if(obj) {
+            obj.style.display = "none";
+        }
     });
 }
 
@@ -5326,31 +5644,17 @@ function check_quick_command() {
         jQuery.each(selectedServices, function(row_id, blah) {
             var cell = document.getElementById(row_id + "_s_exec");
             if(cell) {
-                cell.innerHTML = '';
-                img            = document.createElement('img');
-                img.src        = url_prefix + 'themes/' + theme + '/images/waiting.gif';
-                img.height     = 20;
-                img.width      = 20;
-                img.title      = "This service is currently executing its servicecheck";
-                img.alt        = "This service is currently executing its servicecheck";
-                cell.appendChild(img);
+                cell.innerHTML = '<div class="spinner" title="This service is currently executing its servicecheck"><\/div>';
             }
         });
         jQuery.each(selectedHosts, function(row_id, blah) {
             var cell = document.getElementById(row_id + "_h_exec");
             if(cell) {
-                cell.innerHTML = '';
-                img            = document.createElement('img');
-                img.src        = url_prefix + 'themes/' + theme + '/images/waiting.gif';
-                img.height     = 20;
-                img.width      = 20;
-                img.title      = "This host is currently executing its hostcheck";
-                img.alt        = "This host is currently executing its hostcheck";
-                cell.appendChild(img);
+                cell.innerHTML = '<div class="spinner" title="This service is currently executing its hostcheck"><\/div>';
             }
         });
         var btn = document.getElementById('multi_cmd_submit_button');
-        btn.value = "processing commands...";
+        btn.innerHTML = '<div class="spinner mr-1"><\/div>processing commands...';
     }
 
     return true;
@@ -5494,23 +5798,6 @@ function unset_comments() {
 everything needed for displaying and changing filter
 on status / host details page
 *******************************************************************************/
-
-/* toggle the visibility of the filter pane */
-function toggleFilterPane(prefix) {
-  //console.log("toggleFilterPane(): " + toggleFilterPane.caller);
-  var pane = document.getElementById(prefix+'all_filter_table');
-  var img  = document.getElementById(prefix+'filter_button');
-  if(pane.style.display == 'none') {
-    showElement(prefix+'all_filter_table');
-    img.style.display     = 'none';
-    img.style.visibility  = 'hidden';
-  }
-  else {
-    hideElement(prefix+'all_filter_table');
-    img.style.display     = '';
-    img.style.visibility  = 'visible';
-  }
-}
 
 /* toggle filter pane */
 function toggleFilterPaneSelector(search_prefix, id) {
@@ -5731,8 +6018,17 @@ function add_new_filter(search_prefix, table) {
 
   // add new row
   var tblBody        = tbl.tBodies[0];
-  var currentLastRow = tblBody.rows.length - 1;
-  var newRow         = tblBody.insertRow(currentLastRow);
+  var currentLastRow = tblBody.rows[tblBody.rows.length - 1];
+  var templateRow;
+  jQuery(tblBody.rows).each(function(i, row) {
+      if(row.className == "template") {
+          templateRow = row;
+          return false;
+      }
+  });
+  var newRow = templateRow.cloneNode(true);
+  jQuery(newRow).removeClass("template").css("display", "");
+  currentLastRow.parentNode.insertBefore(newRow, currentLastRow);
 
   // get first free number of typeselects
   var nr = 0;
@@ -5741,77 +6037,12 @@ function add_new_filter(search_prefix, table) {
     if(tst) { nr = x+1; }
   }
 
-  // add first cell
-  var typeselect = document.createElement('select');
-  var options    = getFilterTypeOptions();
-
-  typeselect.onchange   = verify_op;
-  typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
-  typeselect.setAttribute('id', pane_prefix + search_prefix + nr + '_ts');
-  add_options(typeselect, options);
-
-  var opselect          = document.createElement('select');
-  var options           = new Array('~', '!~', '=', '!=', '<=', '>=');
-  opselect.setAttribute('name', pane_prefix + search_prefix + 'op');
-  opselect.setAttribute('id', pane_prefix + search_prefix + nr + '_to');
-  opselect.className='filter_op_select';
-  add_options(opselect, options);
-
-  var newCell0 = newRow.insertCell(0);
-  newCell0.nowrap    = "true";
-  newCell0.className = "filterValueInput";
-  newCell0.colSpan   = 2;
-  newCell0.appendChild(typeselect);
-
-  var newInputPre    = document.createElement('input');
-  newInputPre.type      = 'text';
-  newInputPre.value     = '';
-  newInputPre.className = 'filter_pre_value';
-  newInputPre.setAttribute('name', pane_prefix + search_prefix + 'val_pre');
-  newInputPre.setAttribute('id',   pane_prefix + search_prefix + nr + '_val_pre');
-  newInputPre.style.display    = "none";
-  newInputPre.style.visibility = "hidden";
-  newInputPre.onclick = function() { ajax_search.init(this, 'custom variable') };
-  newCell0.appendChild(newInputPre);
-
-  newCell0.appendChild(opselect);
-
-  var newInput       = document.createElement('input');
-  newInput.type      = 'text';
-  newInput.value     = '';
-  newInput.setAttribute('name', pane_prefix + search_prefix + 'value');
-  newInput.setAttribute('id',   pane_prefix + search_prefix + nr + '_value');
-  newInput.onclick = function() { ajax_search.init(this, undefined, {striped: false}); };
-  newCell0.appendChild(newInput);
-
-  if(enable_shinken_features) {
-    var newSelect      = document.createElement('select');
-    newSelect.setAttribute('name', pane_prefix + search_prefix + 'value_sel');
-    newSelect.setAttribute('id', pane_prefix + search_prefix + nr + '_value_sel');
-    add_options(newSelect, priorities, 2);
-    newSelect.style.display    = "none";
-    newSelect.style.visibility = "hidden";
-    newCell0.appendChild(newSelect);
-  }
-
-  var calImg = document.createElement('img');
-  calImg.src = url_prefix + "themes/"+theme+"/images/calendar.png";
-  calImg.className = "cal_icon cal_popup for_" + pane_prefix + search_prefix + nr + "_value";
-  calImg.alt = "pick date";
-  calImg.setAttribute('id', pane_prefix + search_prefix + nr + '_cal');
-  calImg.style.display    = "none";
-  calImg.style.visibility = "hidden";
-  calImg.onclick = show_cal;
-  newCell0.appendChild(calImg);
-
-  // add second cell
-  var img            = document.createElement('input');
-  img.type           = 'image';
-  img.src            = url_prefix + "themes/"+theme+"/images/remove.png";
-  var newCell1       = newRow.insertCell(1);
-  newCell1.onclick   = delete_filter_row;
-  newCell1.className = "newfilter";
-  newCell1.appendChild(img);
+  // replace ids recursivly
+  jQuery(newRow).find('*').each(function(i, el) {
+    if(el.id) {
+        el.id = el.id.replace("template", nr);
+    }
+  });
 
   // fill in values from last row
   var lastnr=nr-1;
@@ -5872,89 +6103,50 @@ function add_options(select, options, numbered) {
 }
 
 /* create a complete new filter pane */
-function new_filter(cloneObj, parentObj, btnId) {
-  var pane_prefix   = btnId.substring(0,4);
-  btnId             = btnId.substring(4);
-  var index         = btnId.indexOf('_');
-  var search_prefix = btnId.substring(0, index+1);
-  cloneObj          = cloneObj.substring(4);
-  var origObj       = document.getElementById(pane_prefix+search_prefix+cloneObj);
-  if(!origObj) {
-    if(thruk_debug_js) { alert("ERROR: no elem to clone in new_filter() for: " + pane_prefix + search_prefix + cloneObj); }
-  }
-  var newObj   = origObj.cloneNode(true);
+function new_filter(filter_pane_id) {
+    var filter_pane = document.getElementById(filter_pane_id);
+    var prevObj     = filter_pane.lastElementChild;
+    var newObj      = prevObj.cloneNode(true);
+    filter_pane.appendChild(newObj);
 
-  var new_prefix = 's' + (parseInt(search_prefix.substring(1)) + 1) + '_';
+    var pane_prefix   = prevObj.id.substring(0,4);
+    var search_prefix = prevObj.id.substring(4);
+    var new_prefix    = 's' + (parseInt(search_prefix.substring(1)) + 1);
 
-  // replace ids and names
-  var tags = new Array('A', 'INPUT', 'TABLE', 'TR', 'TD', 'SELECT', 'INPUT', 'DIV', 'IMG');
-  jQuery.each(tags, function(i, tag) {
-      var elems = newObj.getElementsByTagName(tag);
-      replaceIdAndNames(elems, pane_prefix+new_prefix);
-  });
+    // replace id of panel itself
+    replaceIdAndNames(newObj, pane_prefix+new_prefix);
 
-  // replace id of panel itself
-  replaceIdAndNames(newObj, pane_prefix+new_prefix);
+    // replace ids and names
+    jQuery(newObj).find("*").each(function(i, el) {
+        if(el.id) {
+            replaceIdAndNames(el, pane_prefix+new_prefix);
+        }
+    });
 
-  var tblObj   = document.getElementById(parentObj);
-  var tblBody  = tblObj.tBodies[0];
-  var nextRow  = tblBody.rows.length - 1;
-  var nextCell = tblBody.rows[nextRow].cells.length;
-  if(nextCell > 2) {
-    nextCell = 0;
-    tblBody.insertRow(nextRow+1);
-    nextRow++;
-  }
-  var newCell  = tblBody.rows[nextRow].insertCell(nextCell);
-  newCell.setAttribute('valign', 'top');
-  newCell.appendChild(newObj);
+    check_new_filter_add_button_visiblity(pane_prefix);
 
-  // hide the original button
-  hideElement(pane_prefix + btnId);
+    showElement(pane_prefix+new_prefix+"_btn_del_search");
+}
 
-  var hideBtn = document.getElementById(pane_prefix+new_prefix + 'filter_button_mini');
-  if(hideBtn) { hideElement( hideBtn); }
-
-  var acceptBtn = document.getElementById(pane_prefix + new_prefix + 'btn_accept_search');
-  if(acceptBtn) { hideElement(acceptBtn); }
-
-  if(document.getElementById(pane_prefix + new_prefix + 'btn_columns')) {
-    hideElement(pane_prefix + new_prefix + 'btn_columns');
-  }
-  showElement(pane_prefix + new_prefix + 'btn_del_search');
-
-  // hide add button if maximum search boxes reached
-  if(maximum_search_boxes > 0 && jQuery('TABLE.filter_box').length >= maximum_search_boxes) {
-    hideElement(pane_prefix + new_prefix + 'new_filter');
-  }
-
-  hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');
-  if(hideBtn) { hideElement(hideBtn); }
-
-  var styler = document.getElementById(pane_prefix + new_prefix + 'style_selector');
-  if(styler) { styler.parentNode.removeChild(styler); }
+function check_new_filter_add_button_visiblity(pane_prefix) {
+    // hide add button if maximum search boxes reached
+    if(maximum_search_boxes > 0 && jQuery('#'+pane_prefix+'filter_pane DIV.singlefilterpane').length >= maximum_search_boxes) {
+        hideElement(pane_prefix+'new_filter_box_btn');
+    } else {
+        showElement(pane_prefix+'new_filter_box_btn');
+    }
 }
 
 /* replace ids and names for elements */
-function replaceIdAndNames(elems, new_prefix) {
-  if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
-    elems = new Array(elems);
-  }
-  for(var x = 0; x < elems.length; x++) {
-    var elem = elems[x];
+function replaceIdAndNames(elem, new_prefix) {
     if(elem.id) {
-        var new_id = elem.id.replace(/^\w{3}_s\d+_/, new_prefix);
+        var new_id = elem.id.replace(/^\w{3}_s\d+/, new_prefix);
         elem.setAttribute('id', new_id);
     }
     if(elem.name) {
-        var new_name = elem.name.replace(/^\w{3}_s\d+_/, new_prefix);
+        var new_name = elem.name.replace(/^\w{3}_s\d+/, new_prefix);
         elem.setAttribute('name', new_name);
     }
-
-    if(elem.tagName == 'INPUT' && elem.type == 'text') {
-      elem.onclick = ajax_search.init;
-    }
-  };
 }
 
 /* replace id and name of a object */
@@ -5971,53 +6163,17 @@ function replace_ids_and_names(elem, new_nr) {
 }
 
 /* remove a search panel */
-function deleteSearchPane(id) {
-  var pane_prefix   = id.substring(0,4);
-  id                = id.substring(4);
-  var index         = id.indexOf('_');
-  var search_prefix = id.substring(0,index+1);
+function deleteSearchPane(btnId) {
+    var pane_prefix   = btnId.substring(0,4);
+    var search_prefix = btnId.substring(4);
+    var index         = search_prefix.indexOf('_');
+    var search_prefix = search_prefix.substring(0, index);
+    var filterprefix  = pane_prefix+search_prefix;
 
-  var pane  = document.getElementById(pane_prefix + search_prefix + 'filter_pane');
-  var table = jQuery(pane.parentNode).parents('TABLE').first()[0];
+    var pane  = document.getElementById(filterprefix);
+    pane.parentNode.removeChild(pane);
 
-  var cell = pane.parentNode;
-  while(cell.firstChild) {
-      var child = cell.firstChild;
-      cell.removeChild(child);
-  }
-  cell.parentNode.removeChild(cell);
-
-  // show last "new search" button
-  var last_nr = 0;
-  for(var x = 0; x<= 99; x++) {
-      var tst = document.getElementById(pane_prefix + 's'+x+'_' + 'new_filter');
-      if(tst && pane_prefix + 's'+x+'_' != search_prefix) { last_nr = x; }
-  }
-  showElement( pane_prefix + 's'+last_nr+'_' + 'new_filter');
-
-  // realign search panel to 3 per row.
-  // first collect all cells from all rows
-  var cells = [];
-  for(var rowNum = 0; rowNum < table.rows.length; rowNum++) {
-      while(table.rows[rowNum].firstChild) {
-        var node = table.rows[rowNum].removeChild(table.rows[rowNum].firstChild);
-        if(node.nodeType === document.ELEMENT_NODE) cells.push(node);
-      }
-  }
-  var rowNum = 0;
-  for(var i = 0; i < cells.length; i++) {
-    table.rows[rowNum].appendChild(cells[i]);
-    if(i > 0 && (i+1)%3 == 0) {
-        rowNum++;
-    }
-  }
-  // remove last row if its emtpy now
-  var rowNum = table.rows.length - 1;
-  if(table.rows[rowNum].cells.length == 0) {
-    table.deleteRow(table.rows[rowNum].rowIndex);
-  }
-
-  return false;
+    check_new_filter_add_button_visiblity(pane_prefix);
 }
 
 /* toggle checkbox for attribute filter */
@@ -6210,6 +6366,7 @@ function remove_empty_form_params(form) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
     }
   }
+  jQuery(form).find("TR.template").remove();
   return(true);
 }
 
@@ -6297,13 +6454,15 @@ function toggleTopPane() {
     if(formInput) {
         formInput.value = 0;
     }
-    document.getElementById('btn_toggle_top_pane').src = url_prefix + "themes/" + theme + "/images/icon_minimize.gif";
+    jQuery("#btn_toggle_top_pane").addClass("uil-top-arrow-to-top");
+    jQuery("#btn_toggle_top_pane").removeClass("uil-arrow-to-bottom");
   } else {
     additionalParams['hidetop'] = 1;
     if(formInput) {
         formInput.value = 1;
     }
-    document.getElementById('btn_toggle_top_pane').src = url_prefix + "themes/" + theme + "/images/icon_maximize.gif";
+    jQuery("#btn_toggle_top_pane").removeClass("uil-top-arrow-to-top");
+    jQuery("#btn_toggle_top_pane").addClass("uil-arrow-to-bottom");
   }
 }
 
@@ -6320,7 +6479,7 @@ Y8,            d8""""""""8b   88
 
 function show_cal(ev) {
     // clicks in IMG tags redirect to corresponding input field
-    if(ev.target.tagName == "IMG") {
+    if(ev.target.tagName == "IMG" || ev.target.tagName == "I") {
         var matches = ev.target.className.match(/for_([\w_]+)/);
         if(matches && matches[1]) {
             var el = document.getElementById(matches[1]);
@@ -6522,7 +6681,7 @@ Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
 *******************************************************************************/
 var ajax_search = {
     max_results     : 12,
-    input_field     : 'NavBarSearchItem',
+    input_field     : '',
     result_pan      : 'search-results',
     update_interval : 3600, // update at least every hour
     search_type     : 'all',
@@ -6688,7 +6847,7 @@ var ajax_search = {
 
         var input = document.getElementById(ajax_search.input_field);
         if(input.disabled) { return false; }
-        ajax_search.size = jQuery(input).width();
+        ajax_search.size = jQuery(input).outerWidth();
         if(ajax_search.size < 100) {
             /* minimum is 100px */
             ajax_search.size = 100;
@@ -6778,7 +6937,7 @@ var ajax_search = {
         }
 
         input.setAttribute("autocomplete", "off");
-        if(!iPhone && !internetExplorer) {
+        if(!iPhone) {
             ajax_search.dont_hide = true;
             input.blur();   // blur & focus the element, otherwise the first
             input.focus();  // click would result in the browser autocomplete
@@ -7262,13 +7421,12 @@ var ajax_search = {
         var resultHTML = '<ul>';
         if(ajax_search.button_links) {
             jQuery.each(ajax_search.button_links, function(i, btn) {
-                resultHTML += '<li class="'+(btn.cls ? ' '+btn.cls+' ' : '')+'"><b>';
-                resultHTML += '<a href="" class="item" onclick="jQuery(\'#'+btn.id+'\').click(); return false;" style="width:'+ajax_search.size+'px;">';
+                resultHTML += '<li class="res '+(btn.cls ? ' '+btn.cls+' ' : '')+'" onclick="jQuery(\'#'+btn.id+'\').click(); return false;">';
                 if(btn.icon) {
                     resultHTML += '<img src="'+ url_prefix + 'themes/' + theme + '/images/' + btn.icon+'">';
                 }
                 resultHTML += btn.text;
-                resultHTML += '<\/b><\/a><\/li>';
+                resultHTML += '<\/li>';
             });
         }
         var x = 0;
@@ -7282,10 +7440,10 @@ var ajax_search = {
             if(type.results.length == 1) { name = name.substring(0, name.length -1); }
             name = name.replace(/ss$/, 's');
             if(type.results.length >= ajax_search.limit && !ajax_search.local_data) {
-                resultHTML += '<li><b><i>over ' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
+                resultHTML += '<li class="category">over ' + ( type.results.length ) + ' ' + name + '<\/li>';
                 limit_hit = true;
             } else {
-                resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
+                resultHTML += '<li class="category">' + ( type.results.length ) + ' ' + name + '<\/li>';
             }
             jQuery.each(type.results, function(index, data) {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
@@ -7305,9 +7463,9 @@ var ajax_search = {
                             name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
                         }
                     });
-                    var classname = "item";
+                    var classname = "";
                     if(selected != -1 && selected == x) {
-                        classname = "item ajax_search_selected";
+                        classname = "ajax_search_selected";
                     }
                     var prefix = '';
                     if(ajax_search.search_type == "all" || ajax_search.search_type == "full" || ajax_search.add_prefix == true) {
@@ -7321,10 +7479,10 @@ var ajax_search = {
                     var id = "suggest_item_"+x;
                     if(type.name == 'icons') {
                         var file = data.display.split(" - ");
-                        name = "<img src='" + file[1] + "' style='vertical-align: text-bottom; width: 16px; height: 16px;'> " + file[0];
+                        name = "<img src='" + file[1] + "'> " + file[0];
                     }
-                    name        = name.replace(/\ \(disabled\)$/, '<span style="color: #EB6900; margin-left: 20px;"> (disabled)<\/span>');
-                    resultHTML += '<li><a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.name +'" onclick="ajax_search.set_result(this.rev); return false;" title="' + data.display + '"> ' + name +'<\/a><\/li>';
+                    name        = name.replace(/\ \(disabled\)$/, '<span class="disabled"> (disabled)<\/span>');
+                    resultHTML += '<li class="res ' + classname + '" id="'+id+'" data-name="' + prefix+data.name +'" onclick="ajax_search.set_result(this.dataset.name); return false;" title="' + data.display + '"> ' + name +'<\/li>';
                     ajax_search.res[x] = prefix+data.name;
                     x++;
                     cur_count++;
@@ -7335,28 +7493,26 @@ var ajax_search = {
         });
         if(has_more) {
             var id = "suggest_item_"+x;
-            var classname = "item";
+            var classname = "";
             if(selected != -1 && selected == x) {
-                classname = "item ajax_search_selected";
+                classname = "ajax_search_selected";
             }
-            resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="more" onmousedown="ajax_search.set_result(this.rev); return false;"><b>more...<\/b><\/a><\/li>';
+            resultHTML += '<li class="more ' + classname + '" id="'+id+'" data-name="more" onmousedown="ajax_search.set_result(this.dataset.name); return false;">more...<\/li>';
             x++;
         }
         else if(ajax_search.show_all && limit_hit) {
-            resultHTML += '<li><b><span style="color: #EB6900;">too many results, be more specific<\/span><\/b><\/li>';
+            resultHTML += '<li class="toomany">too many results, be more specific<\/li>';
         }
         ajax_search.result_size = x;
         if(results.length == 0) {
-            resultHTML += '<li>';
             if(ajax_search.error) {
-                resultHTML += '<a href="#"><span style="color:red;">error: '+ajax_search.error+'</span></a>';
+                resultHTML += '<li class="error">error: '+ajax_search.error+'<\/li>';
             }
             else if(ajax_search.updating) {
-                resultHTML += '<a href="#"><img src="'+ url_prefix + 'themes/' + theme + '/images/loading-icon.gif" width=16 height=16 style="vertical-align: text-bottom;"> loading...</a>';
+                resultHTML += '<li class="loading"><div class="spinner"><\/div> loading...<\/li>';
             } else {
-                resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
+                resultHTML += '<li onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'<\/li>';
             }
-            resultHTML += '</li>';
             if(ajax_search.hideempty) {
                 ajax_search.hide_results();
                 return;
@@ -7367,38 +7523,12 @@ var ajax_search = {
         panel.innerHTML = resultHTML;
 
         var style     = panel.style;
-        var coords;
-        if(jQuery(input).hasClass("NavBarSearchItem")) {
-            // input is wraped in deletable icon span
-            coords    = jQuery(input.parentNode).position();
-        } else {
-            coords    = jQuery(input).offset();
-        }
+        var coords    = jQuery(input).offset();
         style.left    = coords.left + "px";
-        style.top     = (coords.top + input.offsetHeight + 2) + "px";
-        style.display = "block";
-        style.width   = ( ajax_search.size -2 ) + "px";
+        style.top     = (coords.top + input.offsetHeight) + "px";
+        style.width   = ajax_search.size + "px";
 
-        if(jQuery(input).hasClass("NavBarSearchItem")) {
-            style.top   = (coords.top + input.offsetHeight - 4) + "px";
-            style.width = ( ajax_search.size + 28 ) + "px";
-        }
-
-        /* move dom node to make sure it scrolls with the input field */
-        if(jQuery(input).hasClass("NavBarSearchItem")) {
-            var tmpElem = input;
-            var x = 0;
-            // put result div below the form, otherwise clicking a type header would result in a redirect to undefined (#197)
-            while(tmpElem && tmpElem.parentNode && x < 7) {
-                if(tmpElem.tagName != 'UL') {
-                    tmpElem = tmpElem.parentNode;
-                }
-                x++;
-            }
-            jQuery('#'+ajax_search.result_pan).insertAfter(tmpElem);
-        } else {
-            jQuery('#'+ajax_search.result_pan).appendTo('BODY');
-        }
+        jQuery(panel).appendTo("BODY");
 
         showElement(panel);
         ajax_search.stop_events = true;
@@ -7480,7 +7610,7 @@ var ajax_search = {
 
         if(( ajax_search.autosubmit == undefined
              && (
-                    jQuery(input).hasClass("NavBarSearchItem")
+                    jQuery(input).hasClass("autosubmit")
                  || ajax_search.input_field == "data.username"
                  || ajax_search.input_field == "data.name"
                  )
@@ -8052,8 +8182,8 @@ function init_tool_list_wizard(id, type) {
     // button has to be initialized only once
     if(init_tool_list_wizard_initialized[id] != undefined) {
         // reset filter
-        jQuery('INPUT.filter_available').val('');
-        jQuery('INPUT.filter_selected').val('');
+        jQuery('#filter_available').val('');
+        jQuery('#filter_selected').val('');
         data_filter_select(id+'available_members', '');
         data_filter_select(id+'selected_members', '');
         $d.dialog('open');
@@ -8081,5 +8211,161 @@ function init_tool_list_wizard(id, type) {
     });
 
     $d.dialog('open');
+    return;
+}
+
+/*******************************************************************************
+  ,ad8888ba,  8b           d8 88888888888 88888888ba    ,ad8888ba,        db        88888888ba  88888888ba,
+ d8"'    `"8b `8b         d8' 88          88      "8b  d8"'    `"8b      d88b       88      "8b 88      `"8b
+d8'        `8b `8b       d8'  88          88      ,8P d8'               d8'`8b      88      ,8P 88        `8b
+88          88  `8b     d8'   88aaaaa     88aaaaaa8P' 88               d8'  `8b     88aaaaaa8P' 88         88
+88          88   `8b   d8'    88"""""     88""""88'   88              d8YaaaaY8b    88""""88'   88         88
+Y8,        ,8P    `8b d8'     88          88    `8b   Y8,            d8""""""""8b   88    `8b   88         8P
+ Y8a.    .a8P      `888'      88          88     `8b   Y8a.    .a8P d8'        `8b  88     `8b  88      .a8P
+  `"Y8888Y"'        `8'       88888888888 88      `8b   `"Y8888Y"' d8'          `8b 88      `8b 88888888Y"'
+*******************************************************************************/
+// replaces the previous overlib library
+function overcard(options) {
+    var settings = {
+        'document': null,
+        'body':     '',
+        'bodyCls':  '',
+        'caption':  '',
+        'width':    '',
+        'minWidth': 500,
+        'callback': null
+    };
+
+    for(var key in options) {
+        if(key in settings) {
+            settings[key] = options[key];
+        } else {
+            if(thruk_debug_js) { alert("ERROR: unknown option to overcard: " + key); }
+        }
+    }
+
+    // use iframe if main css cannot be found
+    var iframe = document.getElementById("overcard-iframe");
+    if(iframe && !settings["document"]) {
+        jQuery(iframe).remove();
+        iframe = null;
+    }
+    if(!iframe) {
+        if(document.getElementsByClassName("maintheme").length == 0) {
+            jQuery('<iframe>', {
+                'id':         'overcard-iframe',
+                'frameborder': 0,
+                'scrolling':  'no',
+                'style':      'border: 1px; position: absolute; z-index: 1000; border-radius: 8px; visibility: hidden;',
+                'class':      'borderDark',
+                'src':        'void.cgi'
+            }).appendTo('BODY').on('load', function () {
+                var iframe = document.getElementById("overcard-iframe");
+                iframe = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+                settings["document"] = iframe.document;
+                jQuery("HTML", iframe.document).css("background-color", "inherit");
+                jQuery("MAIN", iframe.document).css("padding", "0");
+                overcard(settings);
+                jQuery("#overcard", iframe.document).removeClass("shadow-float");
+            });
+            return;
+        }
+    }
+
+    var doc = settings["document"] || document;
+    var containerId = 'overcard';
+    // check if container div is already present
+    var container = doc.getElementById(containerId);
+    if(!container) {
+        var containerHTML = ""
+            +'<div class="absolute card shadow-float z-50" id="'+containerId+'">'
+            +'<div class="head justify-between">'
+            +'<h3 id="'+containerId+'_head"><\/h3>'
+            +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
+            +'<\/div>'
+            +'<div class="'+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
+            +'<\/div>';
+        jQuery(containerHTML).appendTo(jQuery("BODY", doc));
+        container = doc.getElementById(containerId);
+        var check = function() { overcard_check_visibility(container); };
+        jQuery(container, doc).on('move', check);
+        new ResizeObserver(check).observe(container);
+    }
+
+    var head = doc.getElementById(containerId+"_head");
+    if(settings["caption"]) {
+        head.innerHTML = settings["caption"];
+        head.style.display = '';
+    } else {
+        head.style.display = 'none';
+    }
+
+    if(settings["width"])    { container.style.width    = settings["width"]+'px'; }
+    if(settings["minWidth"]) { container.style.minWidth = settings["minWidth"]+'px'; }
+
+    var body = doc.getElementById(containerId+"_body");
+    body.innerHTML = settings["body"];
+
+    // place it next to the mouse position
+    var posX = mouseX + document.documentElement.scrollLeft;
+    var posY = mouseY + document.documentElement.scrollTop;
+
+    if(iframe) {
+        iframe.style.left  = posX+'px';
+        iframe.style.top   = posY+'px';
+        if(settings["width"])    { iframe.style.width    = settings["width"]+'px'; }
+        if(settings["minWidth"]) { iframe.style.minWidth = settings["minWidth"]+'px'; }
+    } else {
+        container.style.left = posX+'px';
+        container.style.top  = posY+'px';
+    }
+
+    if(iframe) {
+        showElement(iframe, null, true, null);
+    } else {
+        showElement(container, null, true);
+    }
+    overcard_check_visibility(container);
+    if(settings['callback']) {
+        settings['callback'](doc);
+    }
+    return;
+}
+
+function removeOvercardIframe() {
+    if(!window.parent) { return; }
+    if(!window.parent.document) { return; }
+    jQuery("#overcard-iframe", window.parent.document).remove();
+}
+
+// save last known mouse position
+var mouseX, mouseY;
+document.onmousemove = function(evt){
+    mouseX = evt.clientX;
+    mouseY = evt.clientY;
+}
+document.onmouseover = function(evt){
+    mouseX = evt.clientX;
+    mouseY = evt.clientY;
+}
+
+function overcard_check_visibility(el) {
+    if(el.style.display == "none") {
+        return;
+    }
+    var rect = el.getBoundingClientRect();
+    var offsetX = rect.right  - (window.innerWidth  || document.documentElement.clientWidth);
+    var offsetY = rect.bottom - (window.innerHeight || document.documentElement.clientHeight);
+    if(offsetX > 0) { el.style.left = (parseInt(el.style.left) - 20 - offsetX)+"px"; }
+    if(offsetY > 0) { el.style.top  = (parseInt(el.style.top)  - 20 - offsetY)+"px"; }
+
+    // check parent iframe
+    if(!window.parent) { return; }
+    if(!window.parent.document) { return; }
+    jQuery("#overcard-iframe", window.parent.document).css({
+        'width': el.offsetWidth+'px',
+        'height': el.offsetHeight+'px'
+    });
+
     return;
 }

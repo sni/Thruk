@@ -22,8 +22,8 @@
         [% FOREACH key = cat.1 %]
         [% d = data.$key %]
         <tr>
-          <td class='dataVar' align="left" valign="top">[% key %]</td>
-          <td class='dataVal'>
+          <td align="left" valign="top">[% key %]</td>
+          <td>
           [% IF d.0 == 'BOOL' %]
             <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
             <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes

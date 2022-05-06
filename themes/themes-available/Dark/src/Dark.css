@@ -1,0 +1,68 @@
+/* Dark.css */
+@import '../../Light/src/Light.css';
+
+@layer base {
+  .text1 {
+    @apply text-river-bed-800;
+  }
+  .text2 {
+    @apply text-gray-900;
+  }
+  .text3 {
+    @apply text-gray-200;
+  }
+}
+
+body {
+  @apply
+    bg-river-bed-600
+    text-river-bed-100
+  ;
+}
+
+header {
+  @apply bg-gray-500;
+}
+
+@layer base {
+  .card {
+    @apply bg-river-bed-400;
+  }
+}
+
+/*******************************************************************************
+ * buttons
+ */
+ BUTTON, INPUT[type=submit], INPUT[type=button] {
+  @apply bg-gray-400 text-black hover:bg-gray-600;
+}
+
+BUTTON.secondary {
+    @apply bg-indigo-500 hover:bg-indigo-600 text-white;
+}
+
+/*******************************************************************************
+ * sidebar
+ */
+ BODY.sidebar {
+  @apply bg-gray-500;
+  A.navitem:hover, A.sublink:hover {
+    @apply hover:text-blue-300;
+  }
+}
+.navsectionlinks {
+  @apply text-black;
+}
+.navsectionlinks A {
+  @apply hover:text-gray-300 hover:bg-gray-600;
+}
+.navsectionlinks A.active {
+  @apply text-gray-300 bg-gray-600;
+}
+
+/*******************************************************************************
+ * forms
+ */
+INPUT[type=text], INPUT[type=password], INPUT[type=search], SELECT, [multiple], TEXTAREA {
+  @apply bg-gray-300;
+}

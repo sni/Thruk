@@ -3,8 +3,11 @@
 <html>
   <head>
     <title>Thruk Monitoring Webinterface</title>
-    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    [% PROCESS _common_css.tt use_frames=1 %]
+    [% PROCESS _favicon.tt %]
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    [% PROCESS _common_css.tt %]
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -62,9 +65,9 @@ BODY.loginpage DIV.loginmask DIV.separator{margin-bottom:0.3rem; margin-top:0.3r
         <div>
           <input type="text" name="login" placeholder="User" id="loginuser"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] />
         </div>
-        <div class="togglePassword">
+        <div class="togglePassword relative">
           <input type="password" name="password" placeholder="Password"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] />
-          <i class="eye-slash togglePassword"></i>
+          <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 my-2 opacity-50 text-2xl togglePassword"></i>
         </div>
         <button type="submit">Sign in</button>
       [% END %]
@@ -99,7 +102,6 @@ BODY.loginpage DIV.loginmask DIV.separator{margin-bottom:0.3rem; margin-top:0.3r
         ref = ref.replace(/^\/(expired|invalid|problem|locked)\&/,  '$1&/');
         ref = ref.replace(/_=\d+/, '');
         ref = ref.replace(/\?$/, '');
-        ref = ref.replace(/\#side.html$/, '');
         return(ref);
     }
 

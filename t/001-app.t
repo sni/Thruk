@@ -9,8 +9,8 @@ BEGIN {
     import TestUtils;
 }
 
-my $request = request('/thruk/side.html');
-ok( $request->is_success, 'Request /thruk/side.html should succeed' ) or TestUtils::bail_out_req('request should succeed', $request);
+my $request = request('/thruk/main.html');
+ok( $request->is_success, 'Request /thruk/main.html should succeed' ) or TestUtils::bail_out_req('request should succeed', $request);
 
 SKIP: {
     skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

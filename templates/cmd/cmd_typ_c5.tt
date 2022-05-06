@@ -11,14 +11,14 @@
     %]
 
     [%# definition of the command send to your backend #%]
-    [% BLOCK action%]
+    [% BLOCK action %]
         [% host_name            = c.request.parameters.host %]
     [% END %]
 
     [%# definition of the html form data #%]
-    <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value="[% c.request.parameters.host | html %]"></b></td></tr>
-    <tr><td class='optBoxItem'>Active Downtimes:</td><td><b><input type='checkbox' name='active_downtimes' checked></b></td></tr>
-    <tr><td class='optBoxItem'>Future Downtimes:</td><td><b><input type='checkbox' name='future_downtimes' checked></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+      [% PROCESS cmd_form_host %]
+      [% PROCESS cmd_form_del_downtime_opts %]
 
     [% END %]
     [% END %]
@@ -37,16 +37,16 @@
     %]
 
     [%# definition of the command send to your backend #%]
-    [% BLOCK action%]
+    [% BLOCK action %]
         [% host_name            = c.request.parameters.host %]
         [% service_desc         = c.request.parameters.service %]
     [% END %]
 
     [%# definition of the html form data #%]
-    <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value="[% c.request.parameters.host | html %]"></td></tr>
-    <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value="[% c.request.parameters.service | html %]"></b></td></tr>
-    <tr><td class='optBoxItem'>Active Downtimes:</td><td><b><input type='checkbox' name='active_downtimes' checked></b></td></tr>
-    <tr><td class='optBoxItem'>Future Downtimes:</td><td><b><input type='checkbox' name='future_downtimes' checked></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+      [% PROCESS cmd_form_host %]
+      [% PROCESS cmd_form_service %]
+      [% PROCESS cmd_form_del_downtime_opts %]
 
     [% END %]
     [% END %]

@@ -43,18 +43,7 @@ sub index {
     $c->stash->{'extra_log_comment'} = {};
 
     # fill in some defaults
-    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup/) {
-        $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
-    }
-    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly hostserviceoptions/) {
-        $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
-    }
-    if(!defined $c->req->parameters->{'backend'}) {
-        my($backends_list) = $c->db->select_backends('send_command');
-        $c->req->parameters->{'backend'} = $backends_list;
-    }
-
-    $c->req->parameters->{com_data} =~ s/\n//gmx;
+    _set_request_param_defaults($c);
 
     Thruk::Utils::ssi_include($c);
 
@@ -383,11 +372,12 @@ sub _check_for_commands {
         }
 
         $c->stash->{'backend'} = $c->req->parameters->{'backend'} || '';
+        $c->stash->{'modal'}   = $c->req->parameters->{'modal'}   || '';
 
         my $comment_author = $c->user->get('username');
         $comment_author = $c->user->get('alias') if $c->user->get('alias');
         $c->stash->{comment_author} = $comment_author;
-        $c->stash->{cmd_tt}         = 'cmd.tt';
+        $c->stash->{cmd_tt}         = $c->stash->{'modal'} ? '_cmd_form.tt' : 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_' . $cmd_typ . '.tt';
 
         # check if cmd exists
@@ -402,8 +392,6 @@ sub _check_for_commands {
 
         # set a valid referer
         my $referer = $c->req->parameters->{'referer'} || $c->req->header('referer') || '';
-        $referer =~ s/&amp;/&/gmx;
-        $referer =~ s/&/&amp;/gmx;
         $referer =~ s%^\w+://[^/]+/%/%gmx;
         $c->stash->{referer} = $referer;
     }
@@ -480,7 +468,7 @@ sub redirect_or_success {
     $c->stash->{how_far_back} = $how_far_back;
 
     my $referer = $c->req->parameters->{'referer'} || '';
-    if( $referer ne '' or $c->req->parameters->{'json'}) {
+    if($referer || $c->req->parameters->{'json'}) {
         # send a wait header?
         if(    $wait
            and defined $c->stash->{'lasthost'}
@@ -683,48 +671,28 @@ sub do_send_command {
     return $c->detach('/error/index/10') unless $cmd ne '';
 
     # check for required fields
-    my($form, @errors, $required_fields);
+    my(@errors, $fields, %required_fields);
     eval {
-        Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
-            {   c                         => $c,
-                cmd_tt                    => '_get_content.tt',
-                start_time_unix           => $start_time_unix,
-                end_time_unix             => $end_time_unix,
-                theme                     => $c->stash->{'theme'},
-                url_prefix                => $c->stash->{'url_prefix'},
-                has_expire_acks           => $c->stash->{'has_expire_acks'},
-                downtime_duration         => $c->stash->{'downtime_duration'},
-                expire_ack_duration       => $c->stash->{'expire_ack_duration'},
-                force_persistent_comments => $c->stash->{'force_persistent_comments'},
-                force_sticky_ack          => $c->stash->{'force_sticky_ack'},
-                force_send_notification   => $c->stash->{'force_send_notification'},
-                force_persistent_ack      => $c->stash->{'force_persistent_ack'},
-                comment_author            => '',
-                hostdowntimes             => '',
-                servicedowntimes          => '',
-        }, \$form);
+        $fields = get_fields_from_template($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt', $start_time_unix, $end_time_unix);
     };
     if($@) {
         $c->error('error in second cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
         return;
     }
-    if( my @matches = $form =~ m/class='(optBoxRequiredItem|optBoxItem)'>(.*?):<\/td>.*?input\s+type='.*?'\s+name='(.*?)'/gmx ) {
-        while ( scalar @matches > 0 ) {
-            my $req  = shift @matches;
-            my $name = shift @matches;
-            my $key  = shift @matches;
-            if( $req eq 'optBoxRequiredItem') {
-                $required_fields->{$key} = $c->req->parameters->{$key};
-            }
-            if( $req eq 'optBoxRequiredItem' && ( !defined $c->req->parameters->{$key} || $c->req->parameters->{$key} =~ m/^\s*$/mx ) ) {
+    for my $f (@{$fields}) {
+        my $name = $f->{'description'};
+        my $key  = $f->{'name'};
+        if($f->{'required'}) {
+            $required_fields{$key} = $key;
+            if(!defined $c->req->parameters->{$key} || $c->req->parameters->{$key} =~ m/^\s*$/mx) {
                 push @errors, { message => $name . ' is a required field' };
             }
         }
-        if( scalar @errors > 0 ) {
-            delete $c->req->parameters->{'cmd_mod'};
-            $c->stash->{'form_errors'} = \@errors;
-            return;
-        }
+    }
+    if(scalar @errors > 0) {
+        delete $c->req->parameters->{'cmd_mod'};
+        $c->stash->{'form_errors'} = \@errors;
+        return;
     }
     if($c->config->{downtime_max_duration}) {
         if($cmd_typ == 55 or $cmd_typ == 56 or $cmd_typ == 84 or $cmd_typ == 121) {
@@ -753,7 +721,7 @@ sub do_send_command {
         # send the command only to those backends which actually have that object.
         # this prevents ugly log entries when naemon core cannot find the corresponding object
         if(scalar @{$backends_list} > 1) {
-            $backends_list = get_affected_backends($c, $required_fields, $backends_list);
+            $backends_list = get_affected_backends($c, \%required_fields, $backends_list);
             if(scalar @{$backends_list} == 0) {
                 Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty." );
                 return;
@@ -1083,5 +1051,80 @@ sub add_remove_comments_commands_from_disabled_commands {
 }
 
 ######################################
+
+=head2 get_fields_from_template
+
+    get_fields_from_template($c, $template_path)
+
+returns fields from given template
+
+=cut
+sub get_fields_from_template {
+    my($c, $template, $start_time_unix, $end_time_unix) = @_;
+
+    _set_request_param_defaults($c);
+
+    my $content = '';
+    my $fields  = [];
+    Thruk::Views::ToolkitRenderer::render($c, $template, {
+            c                         => $c,
+            cmd_tt                    => '_get_content.tt',
+            start_time_unix           => $start_time_unix,
+            end_time_unix             => $end_time_unix,
+            theme                     => $c->stash->{'theme'},
+            url_prefix                => $c->stash->{'url_prefix'},
+            has_expire_acks           => $c->stash->{'has_expire_acks'},
+            downtime_duration         => $c->stash->{'downtime_duration'},
+            expire_ack_duration       => $c->stash->{'expire_ack_duration'},
+            force_persistent_comments => $c->stash->{'force_persistent_comments'},
+            force_sticky_ack          => $c->stash->{'force_sticky_ack'},
+            force_send_notification   => $c->stash->{'force_send_notification'},
+            force_persistent_ack      => $c->stash->{'force_persistent_ack'},
+            comment_author            => '',
+            hostdowntimes             => '',
+            servicedowntimes          => '',
+    }, \$content);
+    my @matches = $content =~ m/<th[^>]*>(.*?)<\/th>.*?
+                                (<(?:input|select)[^>]*
+                                    name=['"]{1}(.+?)['"]{1}[^>]*>
+                                ).*?
+                                <\/td>/gmxis;
+    while(scalar @matches > 0) {
+        my $desc  = shift @matches;
+        my $input = shift @matches;
+        my $key   = shift @matches;
+        my($req)  = $input =~ m/required/mx;
+        push @{$fields}, {
+            description => $desc,
+            name        => $key,
+            required    => $req ? 1 : 0,
+        };
+    }
+    return($fields);
+}
+
+######################################
+sub _set_request_param_defaults {
+    my($c) = @_;
+
+    # fill in some defaults
+    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup/) {
+        $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
+    }
+    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly hostserviceoptions/) {
+        $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
+    }
+    if(!defined $c->req->parameters->{'backend'}) {
+        my($backends_list) = $c->db->select_backends('send_command');
+        $c->req->parameters->{'backend'} = $backends_list;
+    }
+
+    $c->req->parameters->{com_data} =~ s/\n//gmx;
+
+    return;
+}
+
+######################################
+
 
 1;

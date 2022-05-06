@@ -1,124 +1,109 @@
 ﻿[% BLOCK cols %]
-  <table border=0 cellspacing=2 cellpadding=0 width="100%" class="sortable_col_table">
+  <table class="sortable_col_table rowhover">
     [% counter = 0 %]
     [% FOR column IN columns %]
     [% counter = counter + 1 %]
     [% meta = column.split(':'); column = meta.0 %]
     [% IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
-      <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
-      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
+      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
+      <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
     </tr>
     [% END %]
     [% FOREACH v IN get_exposed_custom_vars(1) %]
       [% counter = counter + 1 %]
       <tr class="sortable_row">
-        <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
-        <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
+        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
+        <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
       </tr>
     [% END %]
   </table>
 [% END %]
 [% BLOCK checkall %]
-  <table border=0 cellspacing=2 cellpadding=0 width="100%">
+  <table class="rowhover">
     <tr>
-      <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]');" width="90%">check all</td>
-      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" checked onclick="toggleAllFilterCheckBox('[% prefix %]')"></td>
-    </tr>
-    <tr>
-      <td colspan=2><hr></td>
+      <td class="px-2 py-0.5"><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% prefix %]')"></td>
+      <td class='clickable font-bold' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]');" width="90%">Select all</td>
     </tr>
   </table>
 [% END %]
 
-<a href="[% uri_with(c, 'view_mode' => 'xls') %]" onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink(); return false;" id='excelexportlink'><button class="thruk_btn small secondary excel_export" title="Export to Excel"></button></a>&nbsp;&nbsp;&nbsp;
-<div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
-<div class="shadow"><div class="shadowcontent">
-[% IF style != 'combined' %]
-<form action='[% uri_with(c, 'view_mode' => 'xls') %]' method="POST">
-[% ELSE %]
-<input type="hidden" name="view_mode" value="html" id="view_mode">
-[% END %]
-<table border="1" class='filter' cellspacing="0" cellpadding="0">
-  <tr>
-    <td class='filter'>
-      <table border="0" cellspacing="2" cellpadding="0">
+<div class="flex relative">
+  <a href="[% uri_with(c, 'view_mode' => 'xls') %]" class="button round small" onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink(); return false;" id='excelexportlink' title="Export to Excel">
+    <i class="uil uil-table"></i>
+  </a>
+  <div class="card shadow-float absolute z-20 top-7" style="display: none;" id="excel_export_columns">
+    <div class="head justify-between gap-2">
+      <h3>Choose Columns to Export</h3>
+      <button class="iconOnly" name="update" id="accept_ht" onclick="document.getElementById('excel_form_btn').click(); return false;" title="update">
+        <i class="fa-solid fa-check round small green"></i>
+      </button>
+    </div>
+    [% IF style != 'combined' %]
+      <form action='[% uri_with(c, 'view_mode' => 'xls') %]' method="POST">
+    [% ELSE %]
+      <input type="hidden" name="view_mode" value="html" id="view_mode">
+    [% END %]
+    <div class="py-2">
+      <table class="w-full">
+        [% IF columns != '' %]
         <tr>
-          <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
-          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="document.getElementById('excel_form_btn').click(); return false;" alt="update"></td>
-        </tr>
-          [% IF columns != '' %]
-          <tr>
-            <td colspan=2>
-              [% PROCESS checkall prefix='' %]
-            </td>
-          </tr>
-          <tr>
-            <td colspan=2>
-              [% PROCESS cols     prefix='' %]
-            </td>
-          </tr>
-          [% ELSE %]
-          <tr>
-            <td valign="bottom">
-              [% PROCESS checkall prefix='host_' %]
-            </td>
-            <td valign="bottom">
-              [% PROCESS checkall prefix='service_' %]
-            </td>
-          </tr>
-          <tr>
-            <td valign="top">
-              <b>Hosts:</b><br>
-              [% PROCESS cols prefix='host_' columns=hostcolumns %]
-            </td>
-            <td valign="top">
-              <b>Services:</b><br>
-              [% PROCESS cols prefix='service_' columns=servicecolumns %]
-            </td>
-          </tr>
-          [% END %]
-        <tr>
-          <td colspan=2 align="center">
-            <input type="submit" name="export" id="excel_form_btn" value="export" onclick="jQuery('#view_mode').val('xls'); setNoFormClean(); window.setTimeout(function() { toggleElement('excel_export_columns');}, 200);">
+          <td colspan=2>
+            [% PROCESS checkall prefix='' %]
           </td>
-        </tr>
-        <tr>
-          <td colspan=2><hr></td>
         </tr>
         <tr>
           <td colspan=2>
-            <table border=0 cellspacing=2 cellpadding=0 width="100%">
-              <tr>
-                <td>
-                  <span onclick="toggleElement('excel_export_url', 'excel_export_url_icon_display'); return false;" style="margin: 0 2px;" class="clickable">
-                    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id="excel_export_url_icon_display" style="vertical-align: sub;" alt="show permanent link">
-                    permanent link to this export
-                  </span><br>
-                  <input type="text" value="" id="excel_export_url" style="width: 99%; display: none;">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
-                <tr>
-                  <td>
-                    <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                    <input type="button" name="submit" value="Create E-Mail Report for this Excel Export" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(encodeURIComponent(document.getElementById('excel_export_url').value)); return false;">
-                  </td>
-                </tr>
-                [% END %]
-                </td>
-              </tr>
-            </table>
+            [% PROCESS cols     prefix='' %]
           </td>
         </tr>
+        [% ELSE %]
+        <tr>
+          <td valign="top">
+            <div class="px-2 font-semibold">Hosts:</div>
+            [% PROCESS checkall prefix='host_' %]
+            [% PROCESS cols prefix='host_' columns=hostcolumns %]
+          </td>
+          <td valign="top">
+            <div class="px-2 font-semibold">Services:</div>
+            [% PROCESS checkall prefix='service_' %]
+            [% PROCESS cols prefix='service_' columns=servicecolumns %]
+          </td>
+        </tr>
+        [% END %]
+        <tr>
+          <td class="px-2 py-0.5" colspan="2">
+            <input type="submit" class="w-full" name="export" id="excel_form_btn" value="Export" onclick="jQuery('#view_mode').val('xls'); setNoFormClean(); window.setTimeout(function() { toggleElement('excel_export_columns');}, 200);">
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2><hr class="my-2"></td>
+        </tr>
+        <tr>
+          <td class="px-2 py-0.5" colspan="2">
+            <div class="flexcol gap-1">
+              <button class="w-full" onclick="showElement('excel_export_url'); hideElement(this); return false;">
+                <i class="uil uil-link"></i>
+                Permanent link to this export
+              </button>
+              <input type="text" value="" id="excel_export_url" style="display: none;" class="w-full">
+            </div>
+          </td>
+        </tr>
+        [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
+        <tr>
+          <td class="px-2 py-0.5" colspan="2">
+            <button class="w-full" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(encodeURIComponent(document.getElementById('excel_export_url').value)); return false;">
+              <i class="uil uil-envelope-add"></i>
+              Create E-Mail Report
+            </button>
+          </td>
+        </tr>
+        [% END %]
       </table>
-    </td>
-  </tr>
-</table>
-[% IF style != 'combined' %]
-</form>
-[% END %]
-</div></div>
+    </div>
+    [% IF style != 'combined' %]
+      </form>
+    [% END %]
+  </div>
 </div>

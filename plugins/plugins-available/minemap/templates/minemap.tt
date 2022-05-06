@@ -3,118 +3,115 @@
 [% PROCESS _sounds.tt %]
 [% PROCESS _blocks.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %] class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%">[% PROCESS _host_status_details_box.tt %]</td>
-        <td align="center" valign="top" width="33%">[% PROCESS _service_status_details_box.tt %]</td>
-        <td align="right" valign="bottom">
-          [% PROCESS _help.tt topic = "mine_map" %]
-        </td>
-      </tr>
-    </table>
-    <br>
-    <table border="0" width="100%" cellpadding=0 cellspacing=0>
-      <tr>
-        <td valign="top" align="left" width="33%" nowrap class="filter_button_cell">
-          [% PROCESS _status_filter.tt %]
-          <br>
-        </td>
-        <td valign="top" align="center" width="33%" nowrap>
-          <div align="center" class='statusTitle'>
-            [% IF custom_title != '' %][% custom_title %]
-            [% ELSIF hostgroup != '' %]Mine Map For Host Group '[% hostgroup %]'
-            [% ELSIF servicegroup %]Mine Map For Service Group '[% servicegroup %]'
-            [% ELSIF host == 'all' %]Mine Map For All Host
-            [% ELSIF host != '' %]Mine Map For Host '[% host | uri %]'
-            [% ELSE %]
-            Mine Map
-            [% END %]
-          </div>
-          <br>
-        </td>
-        <td valign="bottom" align="right" width="33%">
-          [% PROCESS _add_bookmark.tt %]
-          [% PROCESS _show_link.tt %]
-        </td>
-      </tr>
-    </table>
+[% UNLESS minimal %]
+  [% WRAPPER _status_totals_header.tt %][% END %]
 
-    <div align="center">[% PROCESS _pager.tt %]</div>
+  <div class="flex flex-row mt-3">
+    <div class="basis-1/3">
+      [% PROCESS _status_filter.tt %]
+    </div>
 
-<table class='status servicestatus minemap' id="statusTable" style="background: transparent; border: 0px; width: auto;">
-<tr>
-  <td style="background: transparent; border: 0px;"></td>
-  [% FOREACH svc = services.keys.sort %]
-  [% SET class = 'statusEven' IF loop.even %]
-  [% SET class = 'statusOdd'  IF loop.odd %]
-  <td class='[% class %] minemap_head' title="[% svc | html %]" style="height:[% head_height %]px;"><div class="vertical"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% svc | html %]</a></div></td>
-  [% END %]
-</tr>
-[% FOREACH hstname = hostnames.keys.sort %]
-[% SET hst       = hostnames.$hstname %]
-[% SET hostclass = 'statusEven' IF loop.even %]
-[% SET hostclass = 'statusOdd'  IF loop.odd %]
-[% SET loopclass = hostclass %]
-[% IF hst.host_state == 1 %]
-  [% hostclass = 'statusHOSTDOWN' %]
-[% ELSIF hst.host_state == 2 %]
-  [% hostclass = 'statusHOSTUNREACHABLE' %]
-[% END %]
-<tr>
-  [% SET host_comment_count = 0 %]
-  [% SET host_comment_count = hst.host_comments.size IF hst.host_comments %]
-  <td class='[% hostclass %]' style="height: 18px;">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr>
-        <th align="left" class='[% hostclass %]' title="[% hst.host_address | html %]" style="height: 18px;"><a href="[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex=">[% hst.host_name | html %]</a></th>
-        <td align="right" class='[% hostclass %]' style="height: 18px;">
-          [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=15 %]
-        </td>
-      </tr>
-    </table>
-  </td>
-  [% FOREACH svcname = services.keys.sort %]
-    [% svcbg = loopclass %]
-    [% IF matrix.exists(hstname) && matrix.$hstname.exists(svcname) %]
-        [% s = matrix.$hstname.$svcname %]
-        [% size = 6 %]
-        [% icon_bg_class = loopclass %]
-        [% state         = servicestatetext(s) %]
-        [% serviceclass  = 'service' _ state %]
-        [% peer_key      = s.peer_key %]
-        [% IF s.state == 1 %]
-            [% icon_bg_class = 'statusBG' _ state %]
-            [% size = 8 %]
-        [% ELSIF s.state == 2 || s.state == 3 %]
-            [% size = 10 %]
-            [% icon_bg_class = 'statusBG' _ state %]
+    <div class="basis-1/3">
+      <h1 class='mainTitle'>
+        [% IF custom_title != '' %][% custom_title %]
+        [% ELSIF hostgroup != '' %]Mine Map For Host Group '[% hostgroup %]'
+        [% ELSIF servicegroup %]Mine Map For Service Group '[% servicegroup %]'
+        [% ELSIF host == 'all' %]Mine Map For All Host
+        [% ELSIF host != '' %]Mine Map For Host '[% host | uri %]'
+        [% ELSE %]
+        Mine Map
         [% END %]
+      </h1>
+    </div>
 
-    <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return(overlib('<div class=&quot;service_popup_content&quot;><\/div>',CAPTION,'[% escape_js(s.host_name) %] - [% escape_js(s.description) %]',WIDTH,600,[% c.config.info_popup_options %]) || fetch_svc_info_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]'));">
-      [% IF s.acknowledged %]
-        <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="acknowledged" height="15" width="15">
-        [% svcbg = icon_bg_class %]
-      [% ELSIF s.scheduled_downtime_depth > 0 %]
-        <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
-        [% svcbg = icon_bg_class %]
-      [% ELSE %]
-      <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
-      [% END %]
-    </td>
-    [% ELSE %]
-    <td class='[% svcbg %]' align="center">-</td>
-    [% END %]
-  [% END %]
-</tr>
+    <div class="basis-1/3"></div>
+  </div>
+
+  <div class="flex place-items-end gap-1 my-3">
+    [% PROCESS _add_bookmark.tt %]
+    [% PROCESS _show_link.tt %]
+  </div>
 [% END %]
-</table>
 
+<div class="card w-full">
+  <div class="mainTableHeader">
+    <div></div>
+    <div>[% PROCESS _pager.tt %]</div>
+    <div>[% PROCESS _pager_per_page.tt %]</div>
+  </div>
 
-<div align="center">[% PROCESS _pager.tt %]</div>
-<br>
-<div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
+  <div class="mainTable">
+    <table class='mainTable sticky-2d striped' id="statusTable">
+      <thead>
+        <tr>
+          <th class="vert"></th>
+          [% FOREACH svc = services.keys.sort %]
+          <th class='vert' title="[% svc | html %]">
+            <div class="vertical"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% svc | html %]</a></div>
+          </th>
+          [% END %]
+        </tr>
+      </thead>
+      [% FOREACH hstname = hostnames.keys.sort %]
+        [% SET hst       = hostnames.$hstname %]
+        [% SET hostclass = ''  %]
+        [% SET loopclass = hostclass %]
+        [% IF hst.host_state == 1 %]
+          [% hostclass = 'DOWN' %]
+        [% ELSIF hst.host_state == 2 %]
+          [% hostclass = 'UNREACHABLE' %]
+        [% END %]
+        <tr>
+          [% SET host_comment_count = 0 %]
+          [% SET host_comment_count = hst.host_comments.size IF hst.host_comments %]
+          <th class='[% hostclass %]'>
+            <div class="flex">
+              <div class="flex-1">
+                <a href="[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex=">[% hst.host_name | html %]</a>
+              </div>
+              [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=20 %]
+            </div>
+          </th>
+          [% FOREACH svcname = services.keys.sort %]
+            [% svcbg = loopclass %]
+            [% IF matrix.exists(hstname) && matrix.$hstname.exists(svcname) %]
+                [% s = matrix.$hstname.$svcname %]
+                [% size = 10 %]
+                [% icon_bg_class = loopclass %]
+                [% state         = servicestatetext(s) %]
+                [% serviceclass  = state %]
+                [% peer_key      = s.peer_key %]
+                [% IF s.state == 1 %]
+                    [% icon_bg_class = 'bg' _ state %]
+                    [% size = 12 %]
+                [% ELSIF s.state == 2 || s.state == 3 %]
+                    [% size = 14 %]
+                    [% icon_bg_class = 'bg' _ state %]
+                [% END %]
+
+                <td class='[% svcbg %] clickable text-center p-0' onclick="overcard({ 'body': '<div class=&quot;service_popup_content&quot;><\/div>', 'caption': '[% escape_js(s.host_name) | html %] - [% escape_js(s.description) | html %]','width': 600}); fetch_svc_info_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]');">
+                  [% IF s.acknowledged %]
+                    <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="acknowledged" height="20" width="20">
+                    [% svcbg = icon_bg_class %]
+                  [% ELSIF s.scheduled_downtime_depth > 0 %]
+                    <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="downtime" height="20" width="20">
+                    [% svcbg = icon_bg_class %]
+                  [% ELSE %]
+                    <div class="[% serviceclass %] p-1 mx-auto" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
+                  [% END %]
+                </td>
+            [% ELSE %]
+            <td class='[% svcbg %] text-center'>-</td>
+            [% END %]
+          [% END %]
+        </tr>
+      [% END %]
+    </table>
+  </div>
+
+  <div class="mainTableFooter">
+    <div>[% PROCESS _pager_total_items.tt %]</div>
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]

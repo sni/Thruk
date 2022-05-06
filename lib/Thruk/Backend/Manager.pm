@@ -1679,26 +1679,17 @@ sub select_backends {
         }
         if(exists $arg{'pager'}) {
             delete $arg{'pager'};
-            if($c->stash->{'use_pager'}) {
-                $arg{'pager'} = {
-                    entries  => $c->req->parameters->{'entries'} || $c->stash->{'default_page_size'},
-                    page     => $c->req->parameters->{'page'} || 1,
-                    next     => exists $c->req->parameters->{'next'}      || $c->req->parameters->{'next.x'},
-                    previous => exists $c->req->parameters->{'previous'}  || $c->req->parameters->{'previous.x'},
-                    first    => exists $c->req->parameters->{'first'}     || $c->req->parameters->{'first.x'},
-                    last     => exists $c->req->parameters->{'last'}      || $c->req->parameters->{'last.x'},
-                    pages    => $c->req->parameters->{'total_pages'}      || '',
-                };
-            } else {
-                $arg{'pager'} = {};
-            }
+            $arg{'pager'} = {
+                entries     => $c->req->parameters->{'entries'} // $c->stash->{'default_page_size'},
+                page        => $c->req->parameters->{'page'} // 1,
+                total_pages => 1,
+            };
         }
 
         # no paging except on html pages
         my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
         if($view_mode ne 'html') {
             delete $arg{'pager'};
-            $c->stash->{'use_pager'} = 0;
         }
 
         if(   $function eq 'get_hosts'

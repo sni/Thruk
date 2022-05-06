@@ -32,11 +32,11 @@
 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj' style="table-layout: fixed;"[% IF bare %] width="100%"[% END %]>
     <tr>
-      <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
-      <th class='data[% IF subcat == 'templates' %] confSelected[% END %]' id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
-      <th class='data[% IF subcat == 'comp'      %] confSelected[% END %]' id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
+      <th class='data[% IF subcat =='config'    %] confSelected[% END %]' id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
+      <th class='data[% IF subcat =='templates' %] confSelected[% END %]' id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
+      <th class='data[% IF subcat =='comp'      %] confSelected[% END %]' id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
       [% has_auth_section = 0; IF conf_config.exists('cgi.cfg') && ( type == "contactgroup" || type == "contact" ); has_auth_section = 1; %]
-      <th class='data[% IF subcat == 'auth'      %] confSelected[% END %]' id="sub_4" onclick="window.location.hash='#auth';set_sub(4)"><a href="#auth">Authorization</a></th>
+      <th class='data[% IF subcat =='auth'      %] confSelected[% END %]' id="sub_4" onclick="window.location.hash='#auth';set_sub(4)"><a href="#auth">Authorization</a></th>
       [% END %]
     </tr>
     <tr>
@@ -48,7 +48,7 @@
               <button class="conf_back_button conf_button" onclick="window.location='[% escape_js(referer) %]'; return false;">back</button>
               [% END %]
             </td>
-            <td class='dataVar dataUserVar'>
+            <td>
               [% IF object.defined('file') %]
                 [% type | ucfirst %][% IF object.conf.defined('register') && object.conf.register == 0 %]&nbsp;Template[% END %]:
                 [%+ object.get_long_name('&nbsp;') %]
@@ -80,7 +80,7 @@
     </tr>
 
     <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
-      <td class='dataVal' colspan=3 style="text-align: center;">
+      <td colspan=3 style="text-align: center;">
         <div align="center">
         [% IF readonly %]
           [% PROCESS _conf_object_view.tt obj = object conf = "obj" %]
@@ -101,7 +101,7 @@
           [% SET objs = c.obj_db.get_objects_by_name(type, key, 1) %]
           [% SET obj_id = "new" %]
           <tr>
-            <td class='dataVal' colspan=3 style="text-align:center">
+            <td colspan=3 style="text-align:center">
               <span style="font-weight:normal;">
                 [% IF objs.size > 0 %]
                 [% objs.0.file.display %] line [% objs.0.line %]
@@ -114,7 +114,7 @@
             </td>
           </tr>
           <tr>
-            <td class='dataVar' style="text-align: left; white-space: nowrap;">
+            <td style="text-align: left; white-space: nowrap;">
               <a href="conf.cgi?sub=objects&amp;type=[% type | uri %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
                 [% IF objs.size > 0 && objs.0.file.readonly %]
                 <img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' alt='View Template' title='View Template' width="16" height="16" style="vertical-align: middle">
@@ -124,7 +124,7 @@
               </a>
               &nbsp;[% key | html %]
             </td>
-            <td class='dataVal' colspan=2>
+            <td colspan=2>
               [% IF objs.size > 0 %]
                  [% PROCESS _conf_object_view.tt obj = objs.0 conf = "obj" %]
               [% ELSE %]
@@ -142,12 +142,12 @@
     </tr>
     [% ELSE %]
     <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2">
-      <td class='dataVar' colspan=3 style="text-align:center">This object does not use templates</td>
+      <td colspan=3 style="text-align:center">This object does not use templates</td>
     </tr>
     [% END %]
 
     <tr style="[% IF subcat != 'comp' %]display:none[% END %]" class="sub_3">
-      <td class='dataVal' colspan=3 style="text-align: center;">
+      <td colspan=3 style="text-align: center;">
         <div align="center">
         [% SET duplicate_keys = {} %]
         [% PROCESS _conf_object_view.tt obj = object conf = "computed" %]
@@ -157,16 +157,16 @@
 
     [% IF has_auth_section %]
     <tr style="[% IF subcat != 'auth' %]display:none[% END %]" class="sub_4">
-      <td class='dataVal' colspan=3 style="text-align: center;">
+      <td colspan=3 style="text-align: center;">
         <input type="hidden" name="hex" value="[% hex %]">
         <table>
           <tr>
-            <td colspan=2 class='dataVar dataUserVar'>Roles (cgi.cfg)</td>
+            <td colspan=2 >Roles (cgi.cfg)</td>
           </tr>
           [% FOR auth = role_keys %]
           <tr>
-            <td class='dataVar' align="left">[% auth | html %]</td>
-            <td class='dataVal'>
+            <td align="left">[% auth | html %]</td>
+            <td>
               <input type="radio" name="authdata.[% auth | html %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
               <input type="radio" name="authdata.[% auth | html %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
             </td>

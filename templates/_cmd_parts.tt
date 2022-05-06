@@ -1,0 +1,323 @@
+﻿[% USE date %]
+
+[% BLOCK cmd_form_backends %]
+  [% IF backends.size > 1 %]
+    <tr>
+      <th class="align-top">Target Backends</th>
+      [% IF backends.size > 10 %]
+        <td class="min-w-[450px]">
+          [% PROCESS _backends_select_multi.tt param_name='backend' selected_backends=backend can_edit=1 onchange="" %]
+        </td>
+      [% ELSE %]
+        <td>
+          <select name="backend" size="5" multiple class="w-full">
+            [% FOREACH b IN backends %]
+              <option value="[% b | html %]"[% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %] selected[% END %]>[% backend_detail.$b.name %]</option>
+            [% END %]
+          </select>
+        </td>
+      [% END %]
+      [% FOREACH b IN backends %]
+        [% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %]
+          <input type="hidden" name="backend.orig" value="[% b | html %]">
+        [% END %]
+      [% END %]
+    </tr>
+  [% END %]
+[% END %]
+
+[% BLOCK cmd_form_host %]
+<tr>
+  <th class='w-1/4'>Host Name</th>
+  <td><input type='text' name='host' value="[% c.request.parameters.host | html %]" class="w-full" required onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_service %]
+<tr>
+  <th class='w-1/4'>Service</th>
+  <td><input type='text' name='service' value="[% c.request.parameters.service | html %]" class="w-full" required onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'INPUT[name=host]' })"></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_hostgroup %]
+<tr>
+  <th class='w-1/4'>Hostgroup Name</th>
+  <td><input type='text' name='hostgroup' value="[% c.request.parameters.hostgroup | html %]" class="w-full" required onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroup', autosubmit:false })"></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_servicegroup %]
+<tr>
+  <th class='w-1/4'>Servicegroup Name</th>
+  <td><input type='text' name='servicegroup' value="[% c.request.parameters.servicegroup | html %]" class="w-full" required onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroup', autosubmit:false })"></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_author %]
+<tr>
+  <th class='w-1/4'>Author (Your Name)</th>
+  <td><input type='text' name='com_author' value="[% comment_author | html %]"[% IF c.config.lock_author_names %] readonly disabled[% END %] class="w-full" required></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_comment %]
+<tr>
+  <th class='w-1/4'>Comment</th>
+  <td><input type='text' name='com_data' value='' class="w-full" required></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_start_time %]
+<tr>
+  <th class='w-1/4'>Start Time</th>
+  <td>
+    <div class="flex flex-nowrap gap-1">
+      <input type='text' name='start_time' id="start_time" value="[% start_time | html %]" class="date_input cal_popup[% IF range %]_range[% END %] cal_popup_select w-36" required onkeyup="verify_time(this)">
+      <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_start_time" title="pick date"></i></div>
+    </div>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_end_time %]
+<tr>
+  <th class='w-1/4'>End Time</th>
+  <td>
+    <div class="flex flex-nowrap gap-1">
+      <input type='text' name='end_time' id="end_time" value="[% end_time | html %]" class="date_input cal_popup_range cal_popup_select w-36" required onkeyup="verify_time(this)">
+      <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_end_time" title="pick date"></i></div>
+    </div>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_trigger %]
+<tr>
+  <th class="w-1/4">Triggered By</th>
+  <td>
+    <select name='trigger' class="min-w-[9rem]">
+      <option value='0'> N/A </option>
+      [% FOREACH d = hostdowntimes %]
+        <option value="[% d.id %]"> ID: [% d.id %], Host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:00') %] </option>
+      [% END %]
+      [% FOREACH d = servicedowntimes %]
+        <option value="[% d.id %]"> ID: [% d.id %], Service '[% d.service_description %]' on host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:00') %] </option>
+      [% END %]
+    </select>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_fixed %]
+<tr>
+  <th class="w-1/4">Type</th>
+  <td>
+    <select name='fixed' class="w-36">
+      <option value="1">Fixed</option>
+      <option value="0">Flexible</option>
+    </select>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_duration %]
+<tr>
+  <th class="w-1/4">Duration (If Flexible)</th>
+  <td>
+    <input type='text' name='hours' value='2' size= "2" maxlength="2">
+    Hours
+    <input type='text' name='minutes' value='0' size= "2" maxlength="2" class="ml-2">
+    Minutes
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_persistent %]
+<tr>
+  <th class="w-1/4">Persistent</th>
+  <td><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_comments || force_persistent_comments %] checked[% END %][% IF force_persistent_comments %] disabled[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_childoptions %]
+<tr>
+  <th class="w-1/4">Child Hosts</th>
+  <td>
+    <select name='childoptions' class="w-full">
+      <option value='0'>Do nothing with child hosts </option>
+      <option value='1'>Schedule triggered downtime for all child hosts </option>
+      <option value='2'>Schedule non-triggered downtime for all child hosts </option>
+    </select>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_hostserviceoptions %]
+<tr>
+  <th class="w-1/4">Services</th>
+  <td>
+    <select name='hostserviceoptions' class="w-full">
+      <option value='0'>Do nothing with services</option>
+      <option value='1'[% IF c.request.parameters.hostserviceoptions == 1 %] selected[% END %]>Schedule downtime for all services as well</option>
+    </select>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_ahas %]
+<tr>
+  <th class="w-1/4">[% name %] For Hosts Too</th>
+  <td><input type='checkbox' name='ahas'[% IF c.config.cmd_defaults.ahas %] checked[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_not_dly %]
+<tr>
+  <th class='w-1/4'>Notification Delay (minutes from now)</th>
+  <td><input type='text' name='not_dly' value='0' required></td>
+</tr>
+[% END %]
+
+
+[% BLOCK cmd_form_force_notification %]
+<tr>
+  <th class="w-1/4">Forced</th>
+  <td><input type='checkbox' name='force_notification'[% IF c.config.cmd_defaults.force_notification %] checked[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_broadcast_notification %]
+<tr>
+  <th class="w-1/4">Broadcast</th>
+  <td><input type='checkbox' name='broadcast_notification'[% IF c.config.cmd_defaults.broadcast_notification %] checked[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_disable_cmd_comment %]
+  [% IF c.stash.require_comments_for_disable_cmds %]
+  <tr>
+    <th class='w-1/4'>Comment</th>
+    <td><input type='text' name='com_data_disable_cmd' required></td>
+  </tr>
+  [% END %]
+[% END %]
+
+[% BLOCK cmd_form_force_check %]
+<tr>
+  <th class="w-1/4">Force Check</th>
+  <td><input type='checkbox' name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_ptc %]
+<tr>
+  <th class="w-1/4">[% name %] Notifications For Child Hosts Too</th>
+  <td><input type='checkbox' name='ptc'[% IF c.config.cmd_defaults.ptc %] checked[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_com_id %]
+<tr>
+  <th class='w-1/4'>Comment ID</th>
+  <td><input type='text' name='com_id' value="[% c.request.parameters.com_id | html %]" required></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_down_id %]
+<tr>
+  <th class='w-1/4'>Scheduled Downtime ID</th>
+  <td><input type='text' name='down_id' value="[% c.request.parameters.down_id | html %]" required></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_plugin_hst_state %]
+<tr>
+  <th class='w-1/4'>Check Result</th>
+  <td>
+    <select name='plugin_state' required>
+      <option value="0" selected>UP</option>
+      <option value="1">DOWN</option>
+      <option value="2">UNREACHABLE</option>
+    </select>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_plugin_svc_state %]
+<tr>
+  <th class='w-1/4'>Check Result</th>
+  <td>
+    <select name='plugin_state' required>
+      <option value="0" selected>OK</option>
+      <option value="1">WARNING</option>
+      <option value="3">UNKNOWN</option>
+      <option value="2">CRITICAL</option>
+    </select>
+  </td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_plugin_output %]
+<tr>
+  <th class='w-1/4'>Check Output</th>
+  <td><input type='text' name='plugin_output' value='' required></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_perf_data %]
+<tr>
+  <th class="w-1/4">Performance Data</th>
+  <td><input type='text' name='performance_data' value= ''></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_del_downtime_opts %]
+<tr>
+  <th class="w-1/4">Active Downtimes</th>
+  <td><input type='checkbox' name='active_downtimes' checked></td>
+</tr>
+<tr>
+  <th class="w-1/4">Future Downtimes</th>
+  <td><input type='checkbox' name='future_downtimes' checked></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_sticky_ack %]
+<tr>
+  <th class="w-1/4">Sticky Acknowledgement</th>
+  <td><input type='checkbox' name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack || force_sticky_ack %] checked[% END %][% IF force_sticky_ack %] disabled[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_send_notification %]
+<tr>
+  <th class="w-1/4">Send Notification</th>
+  <td><input type='checkbox' name='send_notification'[% IF c.config.cmd_defaults.send_notification || force_send_notification %] checked[% END %][% IF force_send_notification %] disabled[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_persistent %]
+<tr>
+  <th class="w-1/4">Persistent Comment</th>
+  <td><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_comments %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_expire_acks %]
+  [% IF has_expire_acks %]
+  <tr>
+    <th class="w-1/4">Use Expire Time</th>
+    <td><input type='checkbox' name='use_expire' onchange="if(this.checked == true) {showElement('expire_row')} else { hideElement('expire_row')};"[% IF c.config.cmd_defaults.use_expire %] checked[% END %]></td>
+  </tr>
+  <tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]>
+    <th class="w-1/4">Expire Time</th>
+    <td>
+      <div class="flex flex-nowrap gap-1">
+        <input type='text' name='end_time' id="end_time" value="[% end_time | html %]" class="date_input cal_popup w-36" required>
+        <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_end_time" title="pick date"></i></div>
+      </div>
+    </td>
+  </tr>
+  [% END %]
+[% END %]

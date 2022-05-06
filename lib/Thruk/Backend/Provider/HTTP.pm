@@ -916,6 +916,7 @@ sub _req {
     if($@) {
         confess($@);
     }
+    Thruk::UserAgent::disable_verify_hostname_by_url($self->{'ua'}, $self->{'addr'});
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},

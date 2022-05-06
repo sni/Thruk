@@ -6,7 +6,7 @@ BEGIN {
     eval "use Test::Cmd";
     plan skip_all => 'Test::Cmd required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 63;
+    plan tests => 59;
 
     use lib('t');
     require TestUtils;
@@ -37,12 +37,6 @@ TestUtils::test_command({
     cmd   => './script/thruk_auth',
     stdin => '/thruk/',
     like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi$/'],
-});
-
-TestUtils::test_command({
-    cmd   => './script/thruk_auth',
-    stdin => '///____/thruk/startup.html',
-    like => ['/^\/pass\/thruk\/startup\.html$/'],
 });
 
 TestUtils::test_command({

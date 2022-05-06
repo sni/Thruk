@@ -1,1 +1,1 @@
-﻿<a href="[% uri_with(c, 'view_mode' => 'json') %]" target="_blank"><button class="thruk_btn small secondary json_export" title="Export to JSON"></button></a>&nbsp;
+﻿<a href="[% uri_with(c, 'view_mode' => 'json') %]" target="_blank" class="button small round" title="Export to JSON"><i class="uil uil-file-export"></i></a>

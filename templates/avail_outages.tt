@@ -16,14 +16,12 @@
                 <a href="avail.cgi?host=[% host | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For This Host</a><br>
                 <a href="avail.cgi?host=null&amp;service=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Services</a><br>
                 [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=no&amp;includesoftstates=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedservicestate=0&amp;backtrack=4&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Service</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]">View Alert Histogram For This Service</a><br>[% END %]
                 <a href="history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;nosystem=1">View Alert History For This Service</a><br>
                 <a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a><br>
                 <a href="extinfo.cgi?type=2&amp;host=[% host | uri %]&service=[% service | uri %]">View Information For This Service</a><br>
               [% ELSIF host %]
                 <a href="avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Hosts</a><br>
                 [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Host</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes">View Alert Histogram For This Host</a><br>[% END %]
                 <a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a><br>
                 <a href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View Alert History For This Host</a><br>
                 <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>
@@ -33,7 +31,7 @@
           </tr>
         </table>
         [% END %]
-        [% PROCESS _status_filter.tt show_filter_table=1 style="service" substyle="service" nav=0 entries=0 hidesearch=1 show_substyle_selector=0 show_column_select=0 %]
+        [% PROCESS _status_filter.tt show_filter_table=1 style="service" substyle="service" nav=0 entries=0 show_substyle_selector=0 show_column_select=0 %]
       </td>
       <td align="center" valign="top" width="33%">
         <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
@@ -96,7 +94,6 @@
             <td align="right" valign="bottom"></td>
           </tr>
         </table>
-        [% PROCESS _help.tt topic = "avail" %]
       </td>
     </tr>
   </table>
@@ -154,7 +151,7 @@ Outages:
     <td class="status [% rowclass %]">[% duration(l.duration) %]</td>
     [% END %]
     <td class="status [% rowclass %] status[% l.class.upper | html %]">[% l.type %]</td>
-    <td class="status [% rowclass %] mightOverflow" align="left">[% log_line_plugin_output(l) %]</td>
+    <td class="status [% rowclass %] truncate" align="left">[% log_line_plugin_output(l) %]</td>
     <td class="status [% rowclass %]"><a href="showlog.cgi?host=[% l.host | uri %][% IF l.exists('service') %]&service=[% l.service | uri %][% END %]&start=[% l.start | uri %]&end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %]"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></a></td>
   </tr>
   [% END %]

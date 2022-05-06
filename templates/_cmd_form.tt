@@ -1,0 +1,46 @@
+﻿<div class="card min-w-[600px] h-auto[% IF modal %] shadow-float[% END %]">
+  <div class="head justify-between">
+    <h3>[% IF modal %][% request %][% ELSE %]Command Options[% END %]</h3>
+    [% IF modal %]
+    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    [% END %]
+  </div>
+  <div class="body">
+    <form method='post' action='cmd.cgi' onsubmit="setFormBtnSpinner(this)">
+      <input type="hidden" name="referer" value="[% referer | html %]">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <input type='hidden' name='cmd_typ' value="[% cmd_typ | html %]">
+      <input type='hidden' name='cmd_mod' value='2'>
+      [% IF backends.size == 1 %]
+        <input type="hidden" name="backend" value="[% backends.0 | html %]">
+      [% END %]
+      <table class="cellspacing">
+        [% content %]
+        [% IF content.trim() == "" %]
+          <tr>
+            <td></td>
+            <td>This command does not have any options.</td>
+          </tr>
+        [% END %]
+        [% PROCESS cmd_form_backends %]
+        <tr>
+          <td></td>
+          <td>
+            <div class="flexrow gap-1">
+              [% IF modal %]
+              <button class="w-20" onclick="closeModalWindow()">Cancel</button>
+              [% ELSIF referer != "" %]
+              <a href="[% referer %]" class="button w-20">Cancel</a>
+              [% ELSE %]
+              <button class="w-20" onclick="window.history.go(-1)">Cancel</button>
+              [% END %]
+              <button type='submit' name='btnSubmit' value='Commit' class="w-40 green">
+                <i class="uil uil-corner-down-right-alt"></i>Commit
+              </button>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>

@@ -44,7 +44,7 @@ Thruk::Utils::Log::reset_logging();
 # test some pages
 my $pages = [
     '/thruk/cgi-bin/tac.cgi',
-    '/thruk/side.html',
+    '/thruk/main.html',
 ];
 for my $url (@{$pages}) {
     TestUtils::test_page(

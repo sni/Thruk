@@ -3,43 +3,56 @@
 [% PROCESS _message.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
-[% SET peer_key      = service.peer_key %]
-[% SET program_start = pi_detail.$peer_key.program_start %]
+[% SET peer_key = service.peer_key %]
 
+<div class="flexrow justify-between">
+  <div>
+    [% PROCESS _infobox.tt %]
+    <div class="card mt-5 min-w-[370px]">
+      <div class="actionbox less-padding">
+        <div><a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a></div>
+        <div><a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a></div>
+        <div><a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;nosystem=1">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Outages</a>)</div>
+        [% IF show_impacts_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]">View Impacts For This Problem</a></div>[% END %]
+        [% IF show_rootproblems_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]">View Root Problem For This Impact</a></div>[% END %]
+        [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Trends For This Service</a></div>[% END %]
+        <div><a href="avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries">View Availability Report For This Service</a></div>
+        <div><a href="notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Notifications For This Service</a></div>
+        [% IF c.check_user_roles('authorized_for_configuration_information') %]
+          <div>
+            <a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">
+              View Configuration For This Service
+            </a>
+            [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+              <a href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"> (Edit This Service)</a>
+            [% END %]
+          </div>
+        [% END %]
+        <div><a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]">View All '[% IF service.description.length > 7; service.description.substr(0, 7) | html %]...[% ELSE; service.description | html; END %]' Services</a> (<a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap">As Performance Map</a>)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card min-w-min">
+    <div class="head">
+      <h3>Service State Information</h3>
+    </div>
+    <div class="body">
+      [% PROCESS _extinfo_host_service_details.tt obj=service %]
+    </div>
+  </div>
+
+  <div>
+    [% PROCESS _service_command_box.tt %]
+  </div>
+</div>
+
+  <!-- TODO: fix later -->
     <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
         <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
-            <tr>
-              <td class='linkBox'>
-                <a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a><br>
-                <a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a><br>
-                <a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;nosystem=1">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Outages</a>)<br>
-                [% IF show_impacts_link %]<a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]">View Impacts For This Problem</a><br>[% END %]
-                [% IF show_rootproblems_link %]<a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]">View Root Problem For This Impact</a><br>[% END %]
-                [% IF use_feature_trends %]<a href="trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Trends For This Service</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Alert Histogram For This Service</a><br>[% END %]
-                <a href="avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries">View Availability Report For This Service</a><br>
-                <a href="notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Notifications For This Service</a>
-                [% IF c.check_user_roles('authorized_for_configuration_information') %]
-                <br><a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">View Configuration For This Service</a>
-                  [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-                  <a href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"> (Edit This Service)</a>
-                  [% END %]
-                [% END %]
-                <br><a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]">View All '[% IF service.description.length > 7; service.description.substr(0, 7) | html %]...[% ELSE; service.description | html; END %]' Services</a> (<a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap">As Performance Map</a>)
-                <br>
-              </td>
-            </tr>
-          </table>
         </td>
         <td align="center" width="33%" class="ext_head_attributes">
-          <div class='data'>Service</div>
-          <div class='dataTitle'>[% IF use_service_description %][% service.description | html %][% ELSE %][% service.display_name | html %][% END %]</div>
-          <div class='data'>On Host</div>
-          <div class='dataTitle'>[% service.host_alias %]</div>
-          <div class='dataTitle'>(<a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% service.host_display_name | html %]</a>)</div><br>
           [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
@@ -68,7 +81,6 @@
           <div class='dataTitle'>[% FOREACH group IN service.groups.sort %][% IF !loop.first() %], [% END %]<a href="status.cgi?servicegroup=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
           </div><br>
           [% END %]
-          <div class='data'>[% service.host_address %]</div>
           [% IF service.icon_image_expanded %]
           <img src='[% logo_path_prefix %][% service.icon_image_expanded %]' border="0" alt="[% service.icon_image_alt | html %]" title="[% service.icon_image_alt | html %]"><br clear="all">
           [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt | html %] )</i></font>[% END %]
@@ -121,7 +133,7 @@
               <td align='left'>
                 [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
                 [% IF menu.defined('err') && menu.err %]
-                  <img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% menu.err | html %]" alt="json error" width=16 height=16>
+                  <i class="uil uil-exclamation round yellow" title="[% menu.err | html %]"></i>
                 [% ELSE %]
                   <script type="text/javascript">
                   [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
@@ -146,8 +158,7 @@
                 <table>
                   [% FOREACH cust = custom_vars %]
                   <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
-                    <td style="padding-right: 7px;" valign="top">
-                      <a href="status.cgi?style=detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 | html %]</i></font></a><br clear="all">
+                    <td style="padding-right: 7px;" valign=""><i>[% cust.0 | html %]</i></font></a><br clear="all">
                     </td>
                     <td>
                       <font size="-1">[% cust.1 %]</font>
@@ -159,304 +170,72 @@
             </tr>
           [% END %]
           </table>
-          [% PROCESS _help.tt topic = "extinfo_2" %]
         </td>
       </tr>
     </table>
     <br>
+     <!-- fix later-->
 
-    <div align="center">
-      <table border="0" cellpadding="0" cellspacing="0" width="100%" class="extdetails">
-        <tr>
-          <td align="center" valign="top" class='stateInfoPanel'>
-            <div class='dataTitle'>Service State Information</div>
-            <table border="0">
-              <tr>
-                <td>
-                  <table border="1" cellspacing="0" cellpadding="0" class="data extdetails2">
-                    <tr>
-                      <td class='stateInfoTable1 extdetails'>
-                        <table border="0">
-                          <tr>
-                            <td class='dataVar'>Current Status:</td>
-                            <td class='dataVal'>
-                              [% IF service.has_been_checked == 0 %]
-                              <div class='servicePENDING'>&nbsp;&nbsp;PENDING&nbsp;&nbsp;</div>
-                              [% ELSIF service.state == 0 %]
-                              <div class='serviceOK'>&nbsp;&nbsp;OK&nbsp;&nbsp;</div>
-                              [% ELSIF service.state == 1 %]
-                              <div class='serviceWARNING'>&nbsp;&nbsp;WARNING&nbsp;&nbsp;</div>
-                              [% ELSIF service.state == 2 %]
-                              <div class='serviceCRITICAL'>&nbsp;&nbsp;CRITICAL&nbsp;&nbsp;</div>
-                              [% ELSIF service.state == 3 %]
-                              <div class='serviceUNKNOWN'>&nbsp;&nbsp;UNKNOWN&nbsp;&nbsp;</div>
-                              [% END %]
-                              &nbsp;(for [% IF service.last_state_change %][% duration(date.now - service.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
-                              [% IF service.acknowledged %]
-                              &nbsp;(Has been acknowledged)
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar' valign='top'> Status Information:<br><div align="center"><a href="#" style="display: none;" class="more_button moreStatusOutputButton" onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');">...</a></div></td>
-                            <td class='dataVal detail_plugin_output'>
-                              <span class='detail_plugin_outputBlock mightOverflowBlock' style="max-width: 1000px; max-height: 600px;">
-                              [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
-                              [% IF escape_html_tags %][% nl2br(escape_html(service.plugin_output)) %][% ELSE %][% nl2br(service.plugin_output) %][% END %]
-                              [% IF service.long_plugin_output %]
-                              <br>[% IF escape_html_tags %][% nl2br(escape_html(service.long_plugin_output)) %][% ELSE %][% nl2br(service.long_plugin_output) %][% END %]
-                              [% END %]
-                              </span>
-                              <div align="center"><a href="#" style="display: none;" class="more_button moreStatusOutputButton" onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');">...</a></div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar' valign='top'>Performance Data:<br>
-                              [% IF service.perf_data %]
-                              <div style="font-weight: normal;" id="raw_perf_switch">
-                                <a href="#" onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement('raw_perf_switch'); showElement('human_perf_switch'); return false;">(show raw data)</a>
-                              </div>
-                              <div style="font-weight: normal; display: none;" id="human_perf_switch">
-                                <a href="#" onclick="hideElement('perfdata_raw'); showElement('perfdata_human'); hideElement('human_perf_switch'); showElement('raw_perf_switch'); return false;">(show human data)</a>
-                              </div>
-                              <br>
-                              [% END %]
-                            </td>
-                            <td class='dataVal' valign="top">
-                                [% PROCESS _perfdata_human.tt state=service.state plugin_output=service.plugin_output perfdata=service.perf_data check_command=service.check_command hst=service.host_name svc=service.description %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Current Attempt:</td>
-                            <td class='dataVal'>[% service.current_attempt %]/[% service.max_check_attempts %]&nbsp;&nbsp;([% IF service.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Last Check Time:</td>
-                            <td class='dataVal'>[% last_check(c, service.last_check) %]</td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Check Type:</td>
-                            <td class='dataVal'>[% IF service.check_type == 0 %]ACTIVE[% ELSE %]PASSIVE[% END %]</td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar' nowrap>Check Latency / Duration:</td>
-                            <td class='dataVal'>
-                              [% IF service.check_type == 0 %]
-                                [% FILTER format('%.3f') %][% service.latency %][% END %]
-                              [% ELSE %]
-                                N/A
-                              [% END %]
-                              /
-                              [% FILTER format('%.3f') %][% service.execution_time %][% END %] seconds
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Next Scheduled Check:&nbsp;&nbsp;</td>
-                            <td class='dataVal'>
-                              [% IF service.next_check %][% date_format(c, service.next_check) %][% ELSE %]N/A[% END %]
-                              [% IF service.check_type == 0; d = duration(service.check_interval * pi_detail.$peer_key.interval_length, 5) %]<span class="check_interval" title="this service will be checked every [% d %]."> (&infin;[% d %])</span>[% END %]
-                              [% IF service.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]
-                              [% IF service.depends_exec.size > 0 %]
-                              (dependency: [% FOREACH parent IN service.depends_exec %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Last State Change:</td>
-                            <td class='dataVal'>[% date_format(c, service.last_state_change) %]</td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Last Notification:</td>
-                            <td class='dataVal'>
-                              [% IF service.last_notification != 0 %]
-                              [% date_format(c, service.last_notification) %]
-                              [% ELSE %]
-                              N/A
-                              [% END %]
-                              (notification [% service.current_notification_number %])
-                              [% IF service.current_notification_number == 0 && service.first_notification_delay != "" && service.first_notification_delay > 0 %]
-                                [% first_remaining = calculate_first_notification_delay_remaining(service) %]
-                                [% IF first_remaining >= 0 %]
-                                  &nbsp;<span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
-                                [% END %]
-                              [% END %]
-                              [% IF service.depends_parents.size > 0 %]
-                              (parents: [% FOREACH parent IN service.depends_parents %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
-                              [% END %]
-                              [% IF service.depends_notify.size > 0 %]
-                              (dependency: [% FOREACH parent IN service.depends_notify %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %])
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Is This Service Flapping?</td>
-                            <td class='dataVal'>
-                              [% IF service.flap_detection_enabled %]
-                                [% IF service.is_flapping %]
-                                <div class='flapping'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                                [% ELSE %]
-                                <div class='notflapping'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                                [% END %]
-                                &nbsp;([% FILTER format('%.2f') %][% service.percent_state_change %][% END %]% state change)
-                              [% ELSE %]
-                                N/A
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>In Scheduled Downtime?</td>
-                            <td class='dataVal'>
-                              [% IF service.scheduled_downtime_depth > 0 %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>In Check Period?</td>
-                            <td class='dataVal'>
-                              [% IF service.in_check_period %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                              [% END %]
-                              &nbsp;(<a href="config.cgi?type=timeperiods&jump=[% service.check_period | uri %]">[% service.check_period | html %]</a>)
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>In Notification Period?</td>
-                            <td class='dataVal'>
-                              [% IF service.in_notification_period %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
-                              [% END %]
-                              &nbsp;(<a href="config.cgi?type=timeperiods&jump=[% service.notification_period | uri %]">[% service.notification_period | html %]</a>)
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Last Update:</td>
-                            [% IF service.exists("lmd_last_cache_update") %]
-                            <td class='dataVal'>[% date_format(c, service.lmd_last_cache_update) %]&nbsp;&nbsp;( [% duration(date.now - service.lmd_last_cache_update, 4) %] ago, lmd cached )</td>
-                            [% ELSE %]
-                            <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0s ago )</td>
-                            [% END %]
-                          </tr>
-                          [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
-                          <tr>
-                            <td class='dataVar'>Contacts</td>
-                            <td class='dataVal'><span class='mightOverflowBlock clickable' style="width: 480px;" onClick="toggleClass(this, 'mightOverflowBlock');">[% service.contacts.join(', ') %]</span></td>
-                          </tr>
-                          [% END %]
-                          [% IF show_modified_attributes %]
-                          <tr>
-                            <td class='dataVar'>Modified Attributes</td>
-                            <td class='dataVal'>[% IF service.modified_attributes_list.size > 0 %]<div class='serviceWARNING' style="padding-right: 4px; padding-left: 4px;">[% service.modified_attributes_list.join(', ') %]</div>[% ELSE %]none[% END %]</td>
-                          </tr>
-                          [% END %]
-                          [% IF backends && backends.size > 1 %]
-                          <tr>
-                            <td class='dataVar'>Monitored by:</td>
-                            <td class='dataVal'>[% pi_detail.$peer_key.peer_name %]</td>
-                          </tr>
-                          [% END %]
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <table border="1" cellspacing="0" cellpadding="0" class="data checkstatus">
-                    <tr>
-                      <td class='stateInfoTable2 checkstatus'>
-                        <table border="0">
-                          <tr>
-                            <td class='dataVar'>Active Checks:</td>
-                            <td class='dataVal'>
-                              [% IF service.checks_enabled %]
-                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Passive Checks:</td>
-                            <td class='dataVal'>
-                              [% IF service.accept_passive_checks %]
-                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Obsessing:</td>
-                            <td class='dataVal'>
-                              [% IF service.obsess_over_service %]
-                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Notifications:</td>
-                            <td class='dataVal'>
-                              [% IF service.notifications_enabled %]
-                              <div class='notificationsENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
-                              [% ELSE %]
-                              <div class='notificationsDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Event Handler:</td>
-                            <td class='dataVal eventHandler'>
-                              [% IF !service.event_handler %]
-                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;UNUSED&nbsp;&nbsp;</div>
-                              [% ELSIF service.event_handler_enabled %]
-                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
-                                [% IF   show_full_commandline == 2 ||
-                                      ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
-                                %]
-                                <div class='eventhandlersCOMMAND'>([% service.event_handler %])</div>
-                                [% END %]
-                              [% ELSE %]
-                              <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
-                              [% END %]
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Flap Detection:</td>
-                            <td class='dataVal'>
-                              [% IF service.flap_detection_enabled %]
-                              <div class='flapdetectionENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp; </div>
-                              [% ELSE %]
-                              <div class='flapdetectionDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp; </div>
-                              [% END %]
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td align="center" valign="top" class="action_menu">
-            [% IF c.config.use_new_command_box %]
-              [% PROCESS _service_command_box.tt %]
-            [% ELSE %]
-              [% PROCESS _service_command_box_full.tt %]
+  <div>
+    [% IF pnp_url %]
+      [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
+    [% ELSIF histou_url %]
+      [% PROCESS _histou_graph.tt hst=service.host_name svc=service.description %]
+    [% ELSE %]
+      [% graph_url = get_graph_url(c, service, 1)%]
+      [% IF graph_url %]
+        [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
+      [% END %]
+    [% END %]
+  </div>
+
+  <div class="flexrow mt-5">
+    <div class="card flex-grow">
+      <div class="head">
+        <h3>Service Comments</h3>
+      </div>
+      <div class="body">
+        [% IF comments.size > 0 %]
+          [% IF sortoption_cmt %]
+            <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+          [% END %]
+          [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
+        [% END %]
+      </div>
+    </div>
+
+    <div class="card h-auto">
+      <div class="head">
+        <h3>Comment Actions</h3>
+      </div>
+      <div class="actionbox">
+        [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
+          [% UNLESS command_disabled(c, '3') %]
+            <div>
+              <a class="flex hoverable px-2 py-1 whitespace-nowrap" href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+                <i class="fa-solid fa-comment mr-1"></i>Add a new comment
+              </a>
+            </div>
+          [% END %]
+          [% IF comments.size > 0 %]
+            [% UNLESS command_disabled(c, '21') %]
+              <div>
+                <a class="flex hoverable px-2 py-1 whitespace-nowrap" href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+                  <i class="fa-solid fa-trash mr-1"></i>Delete all comments
+                </a>
+              </div>
             [% END %]
-          </td>
-        </tr>
+          [% END %]
+        [% ELSE %]
+          <div class='infoMessage text-center'>Your account does not have permissions to add/delete comments.</div> <!--TODO: Check if text suits usecase -->
+        [% END %]
+      </div>
+    </div>
+  </div>
 
+
+    <div align="center" class="mt-5">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" class="extdetails leftHeader">
         [% IF pnp_url %]
         <tr>
           <td colspan="2" align="center">
@@ -594,7 +373,7 @@
               [% END %]
               <tr>
                 <th class='comment' nowrap>Check Command</th>
-                <td class='comment'><pre class="no_margin command_line config_info mightOverflow" onClick="removeClass(this, 'mightOverflow');">[% command.line | html %]</pre></td>
+                <td class='comment'><pre class="no_margin command_line config_info truncate" onClick="removeClass(this, 'truncate');">[% command.line | html %]</pre></td>
               </tr>
               <tr>
                 <th class='comment' nowrap>Expanded Command</th>
@@ -603,7 +382,7 @@
                   <i class="commandNote"><b>Note:</b> [% command.note %]</i>
                   <br><br>
                   [% END %]
-                  <pre class="no_margin command_line config_info mightOverflow" onClick="removeClass(this, 'mightOverflow');">[% command.line_expanded | html %]</pre>
+                  <pre class="no_margin command_line config_info truncate" onClick="removeClass(this, 'truncate');">[% command.line_expanded | html %]</pre>
                 </td>
               </tr>
             </table>

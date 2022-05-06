@@ -1,19 +1,19 @@
 ﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
-    <table border="0" width="100%" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
-        <td align="right" valign="bottom" width="33%"></td>
-      </tr>
-    </table>
-    <div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.<br>
-      <br>
-      Note: It may take a while before the command is actually processed.<br>
-      <br>
-      <a href='#' onclick='window.history.go([% how_far_back %])'>Done</a>
+[% PROCESS _infobox.tt %]
+
+<div class="flexrow justify-center">
+  <div class="card w-[600px]">
+    <div class="head">
+      <h3>Command Submitted</h3>
     </div>
+    <div class="body">
+      <p>Your command request was successfully submitted to the Backend for processing.</p>
+      <p>Note: It may take a while before the command is actually processed.</p>
+      <button class="mt-2 mx-auto w-20" onclick='window.history.go([% how_far_back %])'>Done</button>
+    </div>
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]

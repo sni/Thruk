@@ -1,35 +1,52 @@
-﻿[% USE date %]
-[% PROCESS _blocks.tt %]
+﻿[% PROCESS _blocks.tt %]
 
-<table width="100%"><tr>
-<td style="width:10%">&nbsp;</td>
-<td style="width:80%">
-  <div align="center">[% PROCESS _pager.tt %]</div>
-</td>
-<td style="width:10%" align="right">
+<div class="flex place-items-end gap-1 mb-3">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
   [% PROCESS _excel_export.tt columns=[ 'Time', 'Site', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 %]
-</td>
-</tr></table>
+</div>
 
-[% SET last_hour = '' %]
-[% FOREACH l = data %]
-[% this_hour = format_date(l.time, '%Y-%m-%d  %H') _ ':00' %]
-[% IF this_hour != last_hour %]
-  [% SET last_hour = this_hour %]
+<div class="card w-full min-w-[400px]">
+  <div class="mainTableHeader">
+    <div></div>
+    <div>
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
+    </div>
+  </div>
 
-[% IF ! loop.first %]</div>[% END %]
-<div class='dateTimeBreak'><table border="0" width="95%"><tr><td width="40%"><hr width="100%"></td><td align="center" class='dateTimeBreak'>[% format_date(l.time, datetime_format_log) _ ':00' %]</td><td width="40%"><hr width="100%"></td></tr></table></div>
-<div class='logEntries'>
+  <div class="mainTable border-t-0" style="max-height: calc(100vh - 225px);">
+    [% SET last_hour = '' %]
+    [% FOREACH l = data %]
+      [% this_hour = format_date(l.time, '%Y-%m-%d  %H') _ ':00' %]
+      [% IF this_hour != last_hour %]
+        [% SET last_hour = this_hour %]
 
-[% END %]
-[% PROCESS _logs_line %]
-<img align='middle' src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]][% IF showsites %][[% l.peer_name %]][% END %] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
+        [% IF ! loop.first %]</div>[% END %]
+        <div class="sticky top-0 bgTable">
+          <div class='flex flex-nowrap'>
+            <div class="flex-grow mt-1.5"><hr class="w-full"></div>
+            <div class='w-40 mx-4 text-center font-semibold'>[% format_date(l.time, datetime_format_log) _ ':00' %]</div>
+            <div class="flex-grow mt-1.5"><hr class="w-full"></div>
+          </div>
+        </div>
+        <div class='py-0'>
+      [% END %]
 
-[% END %]
+      [% PROCESS _logs_line %]
+      <div class="flex gap-2 py-1 px-2 hoverable">
+        <span class="w-4"><img src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' class="w-4 max-w-[1rem]"></span>
+        <span class="whitespace-nowrap">[[% format_date(l.time, datetime_format) %]]</span>
+        [% IF showsites %]<span class="whitespace-nowrap">[[% l.peer_name %]]</span>[% END %]
+        <span class="truncate">[% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]</span>
+      </div>
+    [% END %]
 
-[% IF data.size and data.size > 0 %]</div>[% END %]
-<hr>
-<div align="center">[% PROCESS _pager.tt %]</div>
-<div class="itemTotalsTitle">[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
+    [% IF data.size and data.size > 0 %]</div>[% END %]
+  </div>
+  <div class="mainTableFooter">
+    [% PROCESS _pager_total_items.tt %]
+  </div>
+</div>

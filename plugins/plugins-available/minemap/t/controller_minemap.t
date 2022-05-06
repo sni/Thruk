@@ -35,7 +35,7 @@ my $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
-        'like'    => [ 'Mine Map', 'statusTitle' ],
+        'like'    => [ 'Mine Map', 'Host Status Totals' ],
     );
 }
 

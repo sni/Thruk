@@ -46,7 +46,7 @@ Thruk::Utils::Log::reset_logging();
 my($host,$service) = TestUtils::get_test_service();
 my $pages = [
     '/thruk/cgi-bin/tac.cgi',
-    '/thruk/side.html',
+    '/thruk/main.html',
     '/thruk/cgi-bin/avail.cgi?host='.$host.'&timeperiod=last24hours',
 ];
 for my $url (@{$pages}) {

@@ -3,114 +3,80 @@
 [% PROCESS _message.tt %]
 
 <form action="showlog.cgi" method="GET" id="date_form">
-  [% FOREACH par = c.request.parameters.keys %]
-    [% NEXT IF !c.request.parameters.defined(par) %]
-    [% NEXT IF par == 'pattern' %]
-    [% NEXT IF par == 'exclude_pattern' %]
-    [% NEXT IF par == 'start' %]
-    [% NEXT IF par == 'end' %]
-    [% NEXT IF par == 'logcache' %]
-    [% NEXT IF par == 'showsites' %]
-    [% NEXT IF par == 'oldestfirst' %]
-    [% NEXT IF par == 'archive' %]
-    [% NEXT IF par == 'update.x' %]
-    [% NEXT IF par == 'update.y' %]
-    [% FOR value IN c.request.parameters.$par.list %]
-      <input type="hidden" name="[% par | html %]" value="[% value | html %]">
-    [% END %]
+  [% IF c.request.parameters.defined("entries") %]
+  <input type="hidden" name="entries" value="[% c.request.parameters.entries | html %]">
   [% END %]
-  <table border="0" width="100%" cellpadding="0" cellspacing="0" class="infoboxrow">
-    <tr>
-      <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        <table border="1" class='filter' cellspacing="0" cellpadding="0">
-          <tr>
-            <td class='filter'>
-              <table border="0" cellspacing="2" cellpadding="0">
-                <tr>
-                  <td align="left" class='filterTitle'>Display Filters:</td>
-                  <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" alt="update"></td>
-                </tr>
-                <tr>
-                  <td align="left" class='filterName'>Search Pattern:</td>
-                  <td align="left" class='filterValue'><input type="text" name="pattern" value="[% pattern | html %]" size=30></td>
-                </tr>
-                <tr>
-                  <td align="left" class='filterName'>Exclude Pattern:</td>
-                  <td align="left" class='filterValue'><input type="text" name="exclude_pattern" value="[% exclude_pattern | html %]" size=30></td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-      <td align="center" valign="top" width="33%">
-        <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
-          <tr>
-            <td align="center" valign="middle" class='navBoxItem' width="75">
-              Previous Day<br>
-              <img style="cursor: pointer;" src='[% url_prefix %]themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
-            </td>
-            <td width="15"></td>
-            <td align="center" class='navBoxDate' nowrap>
-              [% PROCESS _log_date_select.tt %]
-            </td>
-            <td valign="middle">
-              &nbsp;&nbsp;<input type='submit' value='Update'>
-              <input type="hidden" name="archive" value="" id="archive">
-            </td>
-            <td align="center" valign="middle" class='navBoxItem' width="75">
-              [% IF end < date.now %]
-              Next Day<br>
-              <img style="cursor: pointer;" src='[% url_prefix %]themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
-              [% END %]
-            </td>
-          </tr>
-        </table>
-        [% IF host %]
-          <br><br><br><br>
-          <div align="center" class='statusTitle'>
-            Log File Entries for [% host | html %][% IF service %] - [% service | html %][% END %]
-          </div>
-        [% END %]
-      </td>
-      <td align="right" valign="top" width="33%">
-          <table border="0" cellspacing="0" cellpadding="0" class='optBox'>
+
+  <div class="flexrow justify-between">
+    <div class="flex">
+      [% PROCESS _infobox.tt %]
+    </div>
+
+    <div class="flex">
+      [% PROCESS _log_date_select.tt %]
+    </div>
+
+    <div class="flex">
+      <div class="card min-w-[400px]">
+        <div class="head">
+          <h3>Options</h3>
+        </div>
+        <div class="body">
+          <table>
             <tr>
-              <td align="left" valign="bottom" class='optBoxItem'>
-                <input type='checkbox' id="oldestfirst" name="oldestfirst" [% IF oldestfirst %] checked[% END %]> <label for="oldestfirst">Older Entries First</label>
+              <td class="pr-2">
+                <input type='text' class="w-full" name='host' id='host' value="[% IF host != 'all'; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
               </td>
+              <td><input type='checkbox' id="oldestfirst" name="oldestfirst" [% IF oldestfirst %] checked[% END %]> <label for="oldestfirst">Older Entries First</label></td>
             </tr>
-            [% IF c.config.defined("logcache") && c.config.logcache %]
             <tr>
-              <td align="left" valign="bottom" class='optBoxItem'>
+              <td class="pr-2">
+                <input type='text' class="w-full" name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"  placeholder="service description">
+              </td>
+              <td>
+                [% IF c.config.defined("logcache") && c.config.logcache %]
                 <input type='checkbox' id="disable_logcache" name="logcache" value="0" [% IF c.req.parameters.exists("logcache") && c.req.parameters.logcache == 0 %] checked[% END %]> <label for="disable_logcache">Disable Logcache</label>
+                [% END %]
               </td>
             </tr>
-            [% END %]
-            [% IF backends.size > 1 %]
             <tr>
-              <td align="left" valign="bottom" class='optBoxItem'>
+              <td class="pr-2">
+                <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
+              </td>
+              <td>
+                [% IF backends.size > 1 %]
                 <input type='checkbox' id="showsites" name="showsites" [% IF showsites %] checked[% END %]> <label for="showsites">Show Site Names</label>
+                [% END %]
               </td>
             </tr>
-            [% END %]
             <tr>
-              <td align="left" class='optBoxItem'><input type='submit' value='Update'></td>
-            </tr>
-            <tr>
-              <td align="right"></td>
+              <td class="pr-2">
+                <input type="text" class="w-full" name="exclude_pattern" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
+              </td>
+              <td colspan="2"><input type='submit' value='Apply' class="w-24"></td>
             </tr>
           </table>
-        [% PROCESS _help.tt topic = "showlog" %]
-      </td>
-    </tr>
-  </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </form>
 
+<div>
+  <h1 class="py-4">
+    Log File Entries
+    [% IF host %]
+      for [% host | html %][% IF service %] - [% service | html %][% END %]
+    [% END %]
+  </h1>
+</div>
+
 [% IF logs_from_compacted_zone %]
-<div id="compact_log_alert" class="alert yellow closable floating" style="position: absolute; left: 0; right: 0; margin-left: auto; margin-right: auto; top: 7px; width: 600px; text-align: center;">
-  <a href="#" onclick="fade('compact_log_alert', 500);return false;" style="position: absolute; right: 2px; top: 2px;"><img src='[% url_prefix %]themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
+<div id="compact_log_alert" class="card alert yellow closable top-center w-[600px]">
+  <button onclick="fade('compact_log_alert', 500);return false;" class="iconOnly medium absolute right-1 top-1">
+    <i class="uil uil-times" title='Hide Message'></i>
+  </button>
   This page is based on the compacted logfile cache which is optimized for sla reporting.<br>
   <a href="[% uri_with(c, 'logcache' => 0) %]">Click here to show all log entries by disabling the cache.</a>
 </div>

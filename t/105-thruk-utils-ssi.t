@@ -29,7 +29,7 @@ END {
     }
 }
 
-my($res, $c) = ctx_request('/thruk/side.html');
+my($res, $c) = ctx_request('/thruk/main.html');
 my $rand = rand();
 
 for my $place (qw/header footer/) {

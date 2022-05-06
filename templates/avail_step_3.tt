@@ -9,7 +9,6 @@
         <td align="center" valign="top" width="33%"></td>
 
         <td align="right" valign="bottom" width="33%">
-          [% PROCESS _help.tt topic = "avail" %]
         </td>
       </tr>
     </table>

@@ -20,6 +20,9 @@ if [ $? -eq 0 ]; then
   date=`date +%Y-%m-%d`
   major=` echo $version | cut -d . -f 1`
   minor=`echo $version | cut -d . -f 2 | sed -e 's/^0*//g'`
+  if [ "x$minor" = "x" ]; then
+    minor=0
+  fi
 
   # do we have a even minor version?
   let mod=$minor%2

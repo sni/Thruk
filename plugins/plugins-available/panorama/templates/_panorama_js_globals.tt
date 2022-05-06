@@ -24,7 +24,6 @@ var fav_counter         = false;
 var readonly            = [% IF readonly %]true[% ELSE %]false[% END %];
 var one_tab_only        = [% IF one_tab_only %]'[% one_tab_only %]'[% ELSE %]false[% END %];
 var use_feature_bp      = [% IF use_feature_bp %]true[% ELSE %]false[% END %];
-var use_frames          = [% IF use_frames %]true[% ELSE %]false[% END %];
 var hide_passive_icon   = [% IF hide_passive_icon %]true[% ELSE %]false[% END %];
 var strict_passive_mode = [% IF strict_passive_mode %]true[% ELSE %]false[% END %];
 var thruk_is_admin      = [% IF is_admin %]true[% ELSE %]false[% END %];

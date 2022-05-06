@@ -1,77 +1,74 @@
-﻿[% PROCESS _header.tt overlib=1
+﻿[% PROCESS _header.tt
                       css=["plugins/conf/conf.css","vendor/linedtextarea-e619e09/jquery-linedtextarea.css", "vendor/jstree-3.3.8/themes/default/style.min.css"]
                       js=["plugins/conf/conf.js", "vendor/jstree-3.3.8/jstree.min.js"]
 %]
 [% PROCESS _message.tt %]
-[% PROCESS _overdiv.tt %]
 [% PROCESS _blocks.tt %]
 
 [% IF thruk_author && !c.config.demo_mode && c.config.exists('conf_retention_file') %]
-<div style="top: 3px; right: 200px;" class="thruk_dev_panel">
-   <span>file: [% c.config.conf_retention_file %]</span>
-   <span style="border-left: 1px solid grey; padding-left: 5px; margin-left: 5px;">mtime: [% date_format(c, c.config.conf_retention.9) %]</span>
+<div class="card z-50 fixed bottom-0 right-0 m-2 mr-64 min-w-fit">
+  <div class="body p-1 font-semibold text1">
+    <span>file: [% c.config.conf_retention_file %]</span>
+    <span class="border-l borderDefault pl-1 mr-1">mtime: [% date_format(c, c.config.conf_retention.9) %]</span>
+  </div>
 </div>
 [% END %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="20%">
-        [% PROCESS _infobox.tt has_proc_info=0 %]
-        </td>
-        <td valign="bottom">
-          [% IF action != "tree" %]
-          <div align="center" class='dataTitle' style="padding-top: 4px; padding-bottom: 4px;">[% subtitle %]</div>
-          [% END %]
-        </td>
-        <td align="right" valign="top" width="20%">
-            <table border="0" class="optBox">
-              <tr>
-                <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
-              </tr>
-              <tr>
-                <td align="left" class='reportSelectItem'>
-                  <form method="get" action="conf.cgi" id="obj_type_show_form">
-                  <select name='sub' onchange="document.getElementById('obj_type_show_form').submit()">
-                    <option value='all'[%    IF sub == 'all'   %] selected [% END %]>Overview</option>
-                    [% IF conf_config.exists('thruk') %]
-                    <option value='thruk'[%  IF sub == 'thruk' %] selected [% END %]>Thruk</option>
-                    <option value='backends'[%  IF sub == 'backends' %] selected [% END %]>Backends</option>
-                    [% END %]
-                    [% IF conf_config.exists('cgi.cfg') %]
-                    <option value='cgi'[%    IF sub == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
-                    [% END %]
-                    [% IF conf_config.exists('cgi.cfg') || conf_config.exists('htpasswd') %]
-                    <option value='users'[%  IF sub == 'users' %] selected [% END %]>Users</option>
-                    [% END %]
-                    <option value='plugins'[%  IF sub == 'plugins' %] selected [% END %]>Plugins</option>
-                    [% IF has_obj_conf %]
-                    <option value='objects'[%  IF sub == 'objects' %] selected [% END %]>Objects</option>
-                    [% END %]
-                  </select>
-                  </form>
-                  <div style="position: relative; top: 5px; height: 10px;">
-                  [% IF last_changed || needs_commit || show_save_reload %]
-                    [% PROCESS _button btn = {
-                      form   => { action => 'conf.cgi', },
-                      data   => { sub => 'objects', 'apply' => 'yes', save_and_reload => 'yes', CSRFtoken => get_user_token(c), },
-                      button => { class => 'conf_save_reload_button', onclick => "return save_reload_apply(this, '" _ show_save_reload _ "')", text => 'save & reload' },
-                    }%]
-                  [% END %]
-                  </div>
-                </td>
-              </tr>
-            </table>
-          [% PROCESS _help.tt topic = "conf" %]
-        </td>
-      </tr>
-    </table>
-    [% content %]
+<div class="flexrow justify-between">
+  <div class="flex">
+    [% PROCESS _infobox.tt has_proc_info=0 %]
+  </div>
 
-[% IF action != "editor" && action != "tree" %]
-<br><br>
+  <div class="flexcol">
+    <div class="card w-full">
+      <div class="head">
+        <h3>Configuration Type</h3>
+      </div>
+      <div class="body">
+        <form method="GET" action="conf.cgi" id="obj_type_show_form">
+        <select name='sub' onchange="document.getElementById('obj_type_show_form').submit()" class="w-full">
+          <option value='all'[%    IF sub == 'all'   %] selected [% END %]>Overview</option>
+          [% IF conf_config.exists('thruk') %]
+          <option value='thruk'[%  IF sub == 'thruk' %] selected [% END %]>Thruk</option>
+          <option value='backends'[%  IF sub == 'backends' %] selected [% END %]>Backends</option>
+          [% END %]
+          [% IF conf_config.exists('cgi.cfg') %]
+          <option value='cgi'[%    IF sub == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
+          [% END %]
+          [% IF conf_config.exists('cgi.cfg') || conf_config.exists('htpasswd') %]
+          <option value='users'[%  IF sub == 'users' %] selected [% END %]>Users</option>
+          [% END %]
+          <option value='plugins'[%  IF sub == 'plugins' %] selected [% END %]>Plugins</option>
+          [% IF has_obj_conf %]
+          <option value='objects'[%  IF sub == 'objects' %] selected [% END %]>Objects</option>
+          [% END %]
+        </select>
+        </form>
+      </div>
+    </div>
+    <div class="h-3">
+    [% IF last_changed || needs_commit || show_save_reload %]
+      [% PROCESS _button btn = {
+        form   => { action => 'conf.cgi', },
+        data   => { sub => 'objects', 'apply' => 'yes', save_and_reload => 'yes', CSRFtoken => get_user_token(c), },
+        button => { class => 'w-full', onclick => "return save_reload_apply(this, '" _ show_save_reload _ "')", html => '<i class="uil uil-save"></i>Save &amp; Reload' },
+      }%]
+    [% END %]
+    </div>
+  </div>
+</div>
+
+[% IF action != "tree" %]
+<div class="flex place-content-center">
+  <h1 class='mainTitle'>[% subtitle %]</h1>
+</div>
 [% END %]
 
+
+[% content %]
+
 <div id="summary-dialog-form" style="display:none;">
+<!--TODO: check-->
   <form>
     <table border=0>
       <tr>

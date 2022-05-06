@@ -689,11 +689,7 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));
     }
-    if(use_frames) {
-        return(url_prefix+"#cgi-bin/"+base+"?"+Ext.Object.toQueryString(options));
-    } else {
-        return(base+"?"+Ext.Object.toQueryString(options));
-    }
+    return(base+"?"+Ext.Object.toQueryString(options));
 }
 
 /* get gradient for color */

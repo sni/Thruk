@@ -11,7 +11,6 @@
               <td class='linkBox'>
                 <a href="avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Hosts</a><br>
                 [% IF use_feature_trends %]<a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Host</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes">View Alert Histogram For This Host</a><br>[% END %]
                 <a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a><br>
                 <a href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View Alert History For This Host</a><br>
                 <a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a><br>
@@ -35,7 +34,6 @@
         </td>
         <td align="right" valign="bottom" width="33%">
           [% PROCESS avail_report_form_box.tt %]
-          [% PROCESS _help.tt topic = "avail" %]
         </td>
       </tr>
     </table>

@@ -5,12 +5,12 @@
 
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
-   request     = 'You are requesting to disable actice checks of a particular service'
+   request     = 'You are requesting to disable active checks of a particular service'
    description = 'This command is used to disable active checks of a service.'
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
     [% IF c.stash.require_comments_for_disable_cmds %]
@@ -25,11 +25,10 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value="[% c.request.parameters.host | html %]"></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value="[% c.request.parameters.service | html %]"></b></td></tr>
-[% IF c.stash.require_comments_for_disable_cmds %]
-<tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data_disable_cmd'></b></td></tr>
-[% END %]
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_host %]
+  [% PROCESS cmd_form_service %]
+  [% PROCESS cmd_form_disable_cmd_comment %]
 
 [% END %]
 [% END %]

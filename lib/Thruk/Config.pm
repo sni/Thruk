@@ -66,8 +66,6 @@ my $base_defaults = {
     'use_wait_feature'                      => 1,
     'wait_timeout'                          => 10,
     'use_curl'                              => $ENV{'THRUK_CURL'} ? 1 : 0,
-    'use_frames'                            => 1,
-    'navframesize'                          => 172,
     'use_strict_host_authorization'         => 0,
     'make_auth_user_lowercase'              => 0,
     'make_auth_user_uppercase'              => 0,
@@ -76,14 +74,13 @@ my $base_defaults = {
     'group_paging_overview'                 => '*3, 10, 100, all',
     'group_paging_grid'                     => '*5, 10, 50, all',
     'group_paging_summary'                  => '*10, 50, 100, all',
-    'default_theme'                         => 'Thruk2',
-    'datetime_format'                           => '%Y-%m-%d  %H:%M:%S',
+    'default_theme'                         => 'auto',
+    'datetime_format'                       => '%Y-%m-%d  %H:%M:%S',
     'datetime_format_long'                  => '%a %b %e %H:%M:%S %Z %Y',
     'datetime_format_today'                 => '%H:%M:%S',
     'datetime_format_log'                   => '%B %d, %Y  %H',
     'datetime_format_trends'                => '%a %b %e %H:%M:%S %Y',
     'title_prefix'                          => '',
-    'use_pager'                             => 1,
     'useragentcompat'                       => '',
     'show_notification_number'              => 1,
     'strict_passive_mode'                   => 1,
@@ -93,13 +90,10 @@ my $base_defaults = {
     'show_contacts'                         => 1,
     'show_config_edit_buttons'              => 0,
     'show_backends_in_table'                => 0,
-    'show_logout_button'                    => 0,
+    'show_logout_button'                    => 1,
     'logout_link'                           => '/thruk/cgi-bin/login.cgi?logout',
     'commandline_obfuscate_pattern'         => [],
     'backends_with_obj_config'              => {},
-    'use_feature_statusmap'                 => 0,
-    'use_feature_statuswrl'                 => 0,
-    'use_feature_histogram'                 => 0,
     'use_feature_configtool'                => 0,
     'use_feature_recurring_downtime'        => 1,
     'use_feature_bp'                        => 0,
@@ -107,10 +101,7 @@ my $base_defaults = {
     'use_service_description'               => 0,
     'use_bookmark_titles'                   => 0,
     'use_dynamic_titles'                    => 1,
-    'use_new_command_box'                   => 1,
     'show_long_plugin_output'               => 'popup',
-    'info_popup_event_type'                 => 'onclick',
-    'info_popup_options'                    => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
     'cmd_quick_status'                      => {
                 'default'                       => 'reschedule next check',
                 'reschedule'                    => 1,
@@ -174,7 +165,6 @@ my $base_defaults = {
                 '6'                             => 'Saturday',
                 '7'                             => 'Sunday',
     },
-    'mobile_agent'                          => 'iPhone,Android,IEMobile',
     'show_error_reports'                    => 'both',
     'skip_js_errors'                        => [ 'cluetip is not a function', 'sprite._defaults is undefined' ],
     'cookie_auth_restricted_url'            => 'http://localhost/thruk/cgi-bin/restricted.cgi',
@@ -232,9 +222,6 @@ my $base_defaults = {
     'uri_filter'     => {
                 'bookmark'                      => undef,
                 'referer'                       => undef,
-                'reload_nav'                    => undef,
-                'update.y'                      => undef,
-                'update.x'                      => undef,
                 'scrollTo'                      => undef,
                 'autoShow'                      => undef,
                 '_'                             => undef,
@@ -245,32 +232,9 @@ my $base_defaults = {
                 'javascript/thruk-'.$VERSION.'.js',
                 'vendor/daterangepicker-3.0.5/moment.min.js',
                 'vendor/daterangepicker-3.0.5/daterangepicker.js',
-                'vendor/overlib-4.21.js',
                 'vendor/strftime-min-1.3.js',
                 'vendor/bestiejs-1.3.5/platform.js',
     ],
-    'all_in_one_css_frames'                 => {
-                'Thruk' => [
-                    'thruk_global.css',
-                    'Thruk.css',
-                ],
-                'Thruk2' => [
-                    'thruk_global.css',
-                    'Thruk2.css',
-                ],
-    },
-    'all_in_one_css_noframes'               => {
-                'Thruk' => [
-                    'thruk_global.css',
-                    'thruk_noframes.css',
-                    'Thruk.css',
-                ],
-                'Thruk2' => [
-                    'thruk_global.css',
-                    'thruk_noframes.css',
-                    'Thruk2.css',
-                ],
-    },
     'jquery_ui'                             => '1.13.1',
     'all_in_one_javascript_panorama'        => [
                 'vendor/jquery-3.5.1.min.js',
@@ -280,7 +244,6 @@ my $base_defaults = {
                 'vendor/extjs_ux/chart/series/KPIGauge.js',
                 'vendor/sprintf-ef8258f.js',
                 'vendor/bigscreen-2.0.4.js',
-                'vendor/overlib-4.21.js',
                 'vendor/strftime-min-1.3.js',
                 'vendor/bestiejs-1.3.5/platform.js',
                 'vendor/openlayer-2.13.1/OpenLayers-2.13.1.js',
@@ -363,7 +326,6 @@ sub get_default_stash {
         'show_top_pane'             => 0,        # used in _header.tt on status pages
         'body_class'                => '',       # used in _conf_bare.tt on config pages
         'thruk_verbose'             => $ENV{'THRUK_VERBOSE'} // 0,
-        'all_in_one_css'            => 0,
         'hide_backends_chooser'     => 0,
         'show_sitepanel'            => 'off',
         'sites'                     => [],
@@ -377,12 +339,11 @@ sub get_default_stash {
         'cookie_auth'               => 0,
         'space'                     => ' ',
         'debug_info'                => '',
-        'bodyonload'                => 1,
-        'show_home_button'          => "",
         'has_jquery_ui'             => 0,
         'physical_logo_path'        => [],
         'fav_counter'               => 0,
         'show_last_update'          => 1,
+        'data_sorted'               => {},
     };
     $stash = {%{$pre}, %{$stash}};
     return($stash);
@@ -529,7 +490,7 @@ sub set_default_config {
         $config->{'url_prefix_fixed'} = 1;
     }
 
-    $config->{'start_page'}            = $config->{'url_prefix'}.'main.html' unless defined $config->{'start_page'};
+    $config->{'start_page'}            = '' unless defined $config->{'start_page'};
     $config->{'documentation_link'}    = $config->{'url_prefix'}.'docs/index.html' unless defined $config->{'documentation_link'};
     $config->{'all_problems_link'}     = $config->{'url_prefix'}.'cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems' unless defined $config->{'all_problems_link'};
     $config->{'cookie_auth_login_url'} = $config->{'url_prefix'}.'cgi-bin/login.cgi' unless defined $config->{'cookie_auth_login_url'};
@@ -916,7 +877,7 @@ sub get_debug_details {
     return($details) if $level eq 'none';
 
     if($level eq 'full') {
-        $details .= "uname:      ".join(" ", POSIX::uname())."\n";
+        $details .= "Uname:      ".join(" ", POSIX::uname())."\n";
     }
 
     if($level eq 'prod' || $level eq 'full') {
@@ -930,7 +891,7 @@ sub get_debug_details {
         $release =~ s/^\s*//gmx;
         $release =~ s/\\\w//gmx;
         $release =~ s/\s*$//gmx;
-        $details .= "release:    $release\n";
+        $details .= "OS Release: $release\n";
     }
 
     return($details);

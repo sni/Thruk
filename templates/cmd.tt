@@ -1,112 +1,36 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-          [% PROCESS _help.tt topic = "cmd" %]
-        </td>
-      </tr>
-    </table>
-    [% error_count = 0 %]
-    [% FOREACH e = form_errors %]
-    [% error_count = error_count + 1 %]
-    <div class='errorMessage'>[% e.message %]</div>
-    [% END %]
-    [% IF error_count > 0 %]
-    <br>
-    <div align='center'>Please correct the errors above[% IF referer %] or <a href="[% referer %]">go back</a>[% END %]</div><br>
-    [% END %]
-    <div align="center" class='cmdType'>[% request %]</div><br>
-    <div align='center'>
-      <table border="0" width="90%" class="cmdOuterTable">
-        <tr>
-          <td align="center" valign="top">
-            <div align="center" class='optBoxTitle blockHead blockHeadBorder'>Command Options</div>
-            <table cellspacing="0" cellpadding="0" border="1" class='optBox cmdOptBox'>
-              <tr>
-                <td>
-                  <form method='post' action='cmd.cgi'>
-                    <input type="hidden" name="referer" value="[% referer | html %]">
-                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                    <table cellspacing="0" cellpadding="0" border="0" class="optBoxInnerTable">
-                      <tr><td><input type='hidden' name='cmd_typ' value="[% cmd_typ | html %]"><input type='hidden' name='cmd_mod' value='2'></td></tr>
-                      [% content %]
-                      <tr>
-                        <td class='optBoxItem' colspan="2">&nbsp;</td>
-                      </tr>
-                      [% IF backends.size > 1 %]
-                      <tr>
-                        <td class='optBoxItem'>Send command to backend:</td>
-                        <td class='optBoxItem'>
-                          <select name="backend" size="5" multiple>
-                            [% FOREACH b IN backends %]
-                              <option value="[% b | html %]"[% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %] selected[% END %]>[% backend_detail.$b.name %]</option>
-                            [% END %]
-                          </select>
-                          [% FOREACH b IN backends %]
-                            [% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %]
-                            <input type="hidden" name="backend.orig" value="[% b | html %]">
-                            [% END %]
-                          [% END %]
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class='optBoxItem' colspan="2">&nbsp;</td>
-                      </tr>
-                      [% END %]
-                      <tr>
-                        <td class='optBoxItem'></td>
-                        <td class='optBoxItem'>
-                          [% IF backends.size == 1 %]
-                          <input type="hidden" name="backend" value="[% backends.0 | html %]">
-                          [% END %]
-                          <input type='submit' name='btnSubmit' value='Commit'> <input type='reset' value='Reset'>
-                        </td>
-                      </tr>
-                    </table>
-                  </form>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td align="center" valign="top" width="50%">
-            <div align="center" class='descriptionTitle blockHead blockHeadBorder'>Command Description</div>
-            <table border="1" cellspacing="0" cellpadding="0" class='commandDescription'>
-              <tr>
-                <td class='commandDescription'>[% description %]</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <br>
-    <div class='infoMessage'>
-      Please enter all required information before committing the command.<br>
-      Required fields are marked in red.<br>
-      Failure to supply all required values will result in an error.
-    </div>
+[% PROCESS _infobox.tt %]
 
-<script type="text/javascript">
-jQuery(document).ready(function() {
-  jQuery(["host", "hostgroup", "servicegroup"]).each(function(i, type) {
-    jQuery("INPUT[name="+type+"]").each(function(i, el) {
-      jQuery(el).on("click focus", function(input) {
-        ajax_search.init(input.target, type, { autosubmit:false });
-      });
-    });
-  });
-  jQuery("INPUT[name=service]").each(function(i, el) {
-    jQuery(el).on("click focus", function(input) {
-      ajax_search.init(input.target, "service", { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'INPUT[name=host]' });
-    });
-  });
-})
-</script>
+[% PROCESS _cmd_parts.tt %]
+
+[% IF form_errors.size > 0 %]
+  <div class="card shadow-float fixed p-1 z-50 min-w-[600px] top-14 left-1/2 transform -translate-x-1/2 text-center">
+    <span class="font-semibold textERROR">Please correct the following errors:</span>
+    <div class="flex justify-center">
+      <ul class="w-fit text-left">
+      [% FOREACH e = form_errors %]
+        <li class="list-disc">[% e.message %]</li>
+      [% END %]
+      </ul>
+    </div>
+  </div>
+[% END %]
+
+<h1 class="mt-5">[% request %]</h1>
+
+<div class="flexrow justify-center mt-5">
+  [% PROCESS _cmd_form.tt %]
+
+  <div class="card min-w-[600px] h-auto" id="cmdHelp">
+    <div class="head">
+      <h3>Command Description</h3>
+    </div>
+    <div class="body">
+      [% description %]
+    </div>
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]

@@ -678,7 +678,7 @@ function save_plugins(btn) {
                     label:   'saved...',
                     disabled: false
                 }).addClass('done');
-                window_location_replace('conf.cgi?sub=plugins&reload_nav=1');
+                window_location_replace('conf.cgi?sub=plugins');
             }, 1300);
         },
         error: function(jqXHR, textStatus, errorThrown) {
@@ -701,13 +701,9 @@ function save_reload_apply(btn, formid, name) {
     if(!remoteform) {
         remoteform = jQuery(btn).closest('FORM');
     }
-    jQuery(btn).button({
-        icons: {primary: 'ui-waiting-button'}
-    });
+    setBtnSpinner(btn);
     window.setTimeout(function() {
-        jQuery(btn).button({
-            icons: {primary: 'ui-error-button'}
-        });
+        setBtnError(btn, "reload timed out");
     }, 30000);
     conf_prompt_change_summary(remoteform, function() {
         var input = jQuery("<input>", { type: "submit", name: name, value: "1", style: "visibility: hidden;" });

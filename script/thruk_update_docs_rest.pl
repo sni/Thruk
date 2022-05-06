@@ -8,6 +8,7 @@ use URI::Escape qw/uri_escape/;
 
 use Thruk ();
 use Thruk::Action::AddDefaults ();
+use Thruk::Controller::cmd ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
@@ -146,11 +147,13 @@ sub _update_cmds {
         if($file =~ m/cmd_typ_(\d+)\./gmx) {
             $nr = $1;
         }
+        $c->stash->{'require_comments_for_disable_cmds'} = 0;
         my $template = Thruk::Utils::IO::read($file);
         next if $template =~ m/enable_shinken_features/gmx;
+        my $fields   = Thruk::Controller::cmd::get_fields_from_template($c, 'cmd/cmd_typ_' . $nr . '.tt', 0, 0);
         my @matches = $template =~ m%^\s*([A-Z_]+)\s*(;|$|)(.*sprintf.*|$)%gmx;
         die("got no command in ".$file) if scalar @matches == 0;
-        my $require_comments = $template =~ m/require_comments_for_disable_cmds/gmx ? 1 : 0;
+        my $require_comments = $template =~ m/cmd_form_disable_cmd_comment/gmx ? 1 : 0;
         while(scalar @matches > 0) {
             my $name = shift @matches;
             shift @matches;
@@ -167,31 +170,28 @@ sub _update_cmds {
                 }
             }
             my @required_args;
-            if(my @req = $template =~ m/class='(optBoxRequiredItem|optBoxItem)'>(?:.*?):<\/td>.*?input\s+type='.*?'\s+name='(.*?)'/gmx ) {
-                while ( scalar @req > 0 ) {
-                    my $req  = shift @req;
-                    my $key  = shift @req;
-                    if($req eq 'optBoxRequiredItem') {
-                        # unfortunatly naming is different, so we need to translate some names
-                        $key = 'triggered_by'       if $key eq 'trigger';
-                        $key = 'comment_data'       if $key eq 'com_data';
-                        $key = 'comment_data'       if $key eq 'com_data_disable_cmd';
-                        $key = 'comment_author'     if $key eq 'com_author';
-                        $key = 'persistent_comment' if $key eq 'persistent';
-                        $key = 'sticky_ack'         if $key eq 'sticky';
-                        $key = 'notification_time'  if $key eq 'not_dly';
-                        $key = 'downtime_id'        if $key eq 'down_id';
-                        $key = 'comment_id'         if $key eq 'com_id';
-                        # some are required but have defaults, so they are not strictly required
-                        next if $key eq 'comment_author';
-                        next if $key eq 'start_time';
-                        next if $key eq 'end_time';
+            for my $field (@{$fields}) {
+                next unless $field->{'required'};
+                my $key = $field->{'name'};
 
-                        # comment_data is a false positive if comments are added to other commands
-                        next if($require_comments && $key eq 'comment_data');
-                        push @required_args, $key;
-                    }
-                }
+                # unfortunatly naming is different, so we need to translate some names
+                $key = 'triggered_by'       if $key eq 'trigger';
+                $key = 'comment_data'       if $key eq 'com_data';
+                $key = 'comment_data'       if $key eq 'com_data_disable_cmd';
+                $key = 'comment_author'     if $key eq 'com_author';
+                $key = 'persistent_comment' if $key eq 'persistent';
+                $key = 'sticky_ack'         if $key eq 'sticky';
+                $key = 'notification_time'  if $key eq 'not_dly';
+                $key = 'downtime_id'        if $key eq 'down_id';
+                $key = 'comment_id'         if $key eq 'com_id';
+                # some are required but have defaults, so they are not strictly required
+                next if $key eq 'comment_author';
+                next if $key eq 'start_time';
+                next if $key eq 'end_time';
+
+                # comment_data is a false positive if comments are added to other commands
+                next if($require_comments && $key eq 'comment_data');
+                push @required_args, $key;
             }
 
             next if $require_comments && $cmd->{'name'} =~ m/add_.*_comment/;

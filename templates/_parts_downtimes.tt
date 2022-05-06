@@ -1,16 +1,44 @@
-﻿<table border=0 cellpadding=3 cellspacing=0 class="[% type | html %]downtimes" width='100%'>
-  <tr>
-    <th>Start Time</th>
-    <th>End Time</th>
-    <th>Author</th>
-    <th>Comment</th>
-  </tr>
-  [% FOR d = downtimes %]
-  <tr>
-    <td nowrap valign='top' align='right'>[% date_format(c, d.start_time) %]</td>
-    <td nowrap valign='top' align='right'>[% date_format(c, d.end_time) %]</td>
-    <td nowrap valign='top'>[% escape_quotes(d.author) %]</td>
-    <td>[% IF escape_html_tags %][% escape_html(d.comment) | replace_links %][% ELSE %][% d.comment %][% END %]</td>
-  </tr>
-  [% END %]
+﻿<table class="[% type | html %]downtimes cellspacing-x innercellborder">
+  <thead>
+    <tr class="rowOdd">
+      <th class="pl-2">Start Time</th>
+      <th>End Time</th>
+      <th>Author</th>
+      <th>Comment</th>
+      [% UNLESS command_disabled(c, 78) && command_disabled(c, 79) %]
+        <th></th>
+      [% END %]
+    </tr>
+  </thead>
+  <tbody>
+    [% FOR d = downtimes %]
+    <tr>
+      <td class="align-top pl-2">[% date_format(c, d.start_time) %]</td>
+      <td class="align-top">[% date_format(c, d.end_time) %]</td>
+      <td class="align-top whitespace-normal">[% escape_quotes(d.author) %]</td>
+      <td class="align-top whitespace-normal">[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
+      [% UNLESS command_disabled(c, 78) && command_disabled(c, 79) %]
+        <td class="align-top">
+          <form class="flex ml-1" action='cmd.cgi' method='POST' onsubmit="setFormBtnSpinner(this); submitFormInBackground(this, function(form) { fade(jQuery(form).parents('TR'), 500, true); }); return false;">
+            [% IF d.service_description == "" %]
+            <input type='hidden' name='cmd_typ' value='78'>
+            [% ELSE %]
+            <input type='hidden' name='cmd_typ' value='79'>
+            [% END %]
+            <input type='hidden' name='cmd_mod' value='2'>
+            <input type='hidden' name='down_id' value='[% d.id %]'>
+            <input type='hidden' name='json' value='1'>
+            <input type='hidden' name='host' value="[% d.host_name | html %]">
+            <input type='hidden' name='service' value="[% d.service_description | html %]">
+            <input type='hidden' name='backend' value="[% d.peer_key %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <button class="iconOnly submit">
+              <i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Downtime'></i>
+            </button>
+          </form>
+        </td>
+      [% END %]
+    </tr>
+    [% END %]
+  </tbody>
 </table>

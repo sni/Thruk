@@ -10,14 +10,15 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% comment_id           = c.request.parameters.com_id %]
 
     DEL_HOST_COMMENT;[% sprintf("%lu",comment_id) %]
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value="[% c.request.parameters.com_id | html %]"></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_com_id %]
 
 [% END %]
 [% END %]

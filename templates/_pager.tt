@@ -1,85 +1,67 @@
-﻿[% IF use_pager AND pager %]
-[% IF pages > 1 %]
-
-  <form action="[% IF original_url; base_url(c, original_url); END %]" method="GET">
-  [% FOREACH par = c.request.parameters.keys %]
-    [% NEXT IF !c.request.parameters.defined(par) %]
-    [% NEXT IF par == 'entries' %]
-    [% NEXT IF par == 'next' %]
-    [% NEXT IF par == 'next.x' %]
-    [% NEXT IF par == 'next.y' %]
-    [% NEXT IF par == 'previous' %]
-    [% NEXT IF par == 'previous.x' %]
-    [% NEXT IF par == 'previous.y' %]
-    [% NEXT IF par == 'first' %]
-    [% NEXT IF par == 'first.x' %]
-    [% NEXT IF par == 'first.y' %]
-    [% NEXT IF par == 'last' %]
-    [% NEXT IF par == 'last.x' %]
-    [% NEXT IF par == 'last.y' %]
-    [% NEXT IF par == 'update' %]
-    [% NEXT IF par == 'update.x' %]
-    [% NEXT IF par == 'update.y' %]
-    [% NEXT IF par == 'page' %]
-    [% NEXT IF par == 'total_pages' %]
-    [% NEXT IF par == 'noheader' %]
-    [% FOR value IN c.request.parameters.$par.list %]
-      <input type="hidden" name="[% par | html %]" value="[% value | html %]">
+﻿<div>
+  <nav class="inline-flex -space-x-px h-7">
+    [% prev_page = pager.page - 1 %]
+    [% IF prev_page <= 0 %]
+      [% prev_page = 1 %]
     [% END %]
-  [% END %]
-
-  <input type="hidden" name="page" value="[% current_page | html %]">
-  [% IF pager_previous_page %]
-    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
-  [% END %]
-
-  [% IF pages <= 13 %]
-    [% cur_page  = 1 %]
-    [% WHILE cur_page <= pages %]
-      [% class = "pager_direct_link" %]
-      [% IF cur_page == current_page %]
-        [% class = "pager_direct_link_current" %]
-      [% END %]
-      <a class="[% class %]" href="[% uri_with(c, 'page' => cur_page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef', 'total_pages' => 'undef') %]">[% cur_page %]</a>
-      [% cur_page  = cur_page + 1 %]
-    [% END %]
-  [% ELSE %]
-    [% firstpage = current_page - 3 %]
-    [% IF firstpage <= 0 %][% firstpage = 1 %][% END %]
-    [% IF firstpage != 1 %]<a class="pager_direct_link" href="[% uri_with(c, page => 1, next => 'undef', previous => 'undef') %]">1</a>[% END %]
-    [% IF firstpage > 2 %]...[% END %]
-    [% lastpage  = firstpage + 9 %]
-    [% IF lastpage >= pages %][% lastpage = pages %][% firstpage = lastpage - 9 %][% END %]
-    [% cur_page  = firstpage %]
-    [% WHILE cur_page <= lastpage %]
-      [% class = "pager_direct_link" %]
-      [% IF cur_page == current_page %]
-        [% class = "pager_direct_link_current" %]
-      [% END %]
-      <a class="[% class %]" href="[% uri_with(c, 'page' => cur_page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef', 'total_pages' => 'undef') %]">[% cur_page %]</a>
-      [% cur_page  = cur_page + 1 %]
-    [% END %]
-    [% IF lastpage < pages - 1 %]...[% END %]
-    [% IF lastpage != pages %]<a class="pager_direct_link" href="[% uri_with(c, page => pages, next => 'undef', previous => 'undef') %]">[% pages | html %]</a>[% END %]
-  [% END %]
-
-  [% IF pager_next_page AND pages > 1 %]
-    &nbsp;<input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_next.png" name="next" alt="next" value="1" class="pager_input_img"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_last.png" name="last" alt="last" value="1" class="pager_input_img">
-  [% END %]
-
-  [% IF paging_steps.0 && pager.total_entries > paging_steps.0 %]
-    &nbsp;&nbsp;
-    <select name="entries" onChange="this.form.submit()">
-      [% FOR step = paging_steps %]
-        [% IF step == "all" %]
-          <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
-        [% ELSE %]
-          <option value="[% step | html %]"[% IF entries_per_page == step %] selected[% END %]>[% step | html %] per page</option>
+    <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, 'page' => prev_page) %]"><i class="uil uil-angle-left text-lg contents"></i></a>
+    [% IF pager.total_pages <= 13 %]
+      [% page  = 1 %]
+      [% WHILE page <= pager.total_pages %]
+        [% class = "" %]
+        [% IF page == pager.page %]
+          [% class = " textActive2" %]
         [% END %]
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
+        [% page  = page + 1 %]
       [% END %]
-    </select>
-  [% END %]
-  <input type="hidden" name="total_pages" value="[% pages | html %]">
-  </form>
-[% END %]
-[% END %]
+    [% ELSE %]
+      [% IF pager.page < 8 %]
+        [% page  = 1 %]
+        [% WHILE page < 10 %]
+          [% class = "" %]
+          [% IF page == pager.page %]
+            [% class = " textActive2" %]
+          [% END %]
+          <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
+          [% page  = page + 1 %]
+        [% END %]
+        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, 'page' => pager.total_pages) %]">[% pager.total_pages %]</a>
+      [% ELSIF pager.page > pager.total_pages - 8 %]
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, page => 1) %]">1</a>
+        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
+        [% page  = pager.total_pages - 8 %]
+        [% WHILE page <= pager.total_pages %]
+          [% class = "" %]
+          [% IF page == pager.page %]
+            [% class = " textActive2" %]
+          [% END %]
+          <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
+          [% page  = page + 1 %]
+        [% END %]
+      [% ELSE %]
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, page => 1) %]">1</a>
+        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
+        [% page  = pager.page - 3 %]
+        [% endpage = pager.page + 3 %]
+        [% WHILE page <= endpage %]
+          [% class = "" %]
+          [% IF page == pager.page %]
+            [% class = " textActive2" %]
+          [% END %]
+          <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
+          [% page  = page + 1 %]
+        [% END %]
+        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, 'page' => pager.total_pages) %]">[% pager.total_pages %]</a>
+      [% END %]
+    [% END %]
+
+    [% next_page = pager.page + 1 %]
+    [% IF next_page > pager.total_pages %]
+      [% next_page = pager.total_pages %]
+    [% END %]
+    <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, 'page' => next_page) %]"><i class="uil uil-angle-right text-lg contents"></i></a>
+  </nav>
+</div>

@@ -19,13 +19,13 @@
 
     [% IF parse_errors.size > 0 %]
     <tr>
-      <td class='dataVar' style="padding-top: 5px;">
+      <td style="padding-top: 5px;">
         Config Parse Errors
       </td>
-      <td class='dataVar'>
+      <td>
         <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='there are parse errors' title='there are parse errors' width="16" height="16" style="vertical-align: text-top">
       </td>
-      <td class='dataVal' style="padding-top: 5px; text-align: left;">
+      <td style="padding-top: 5px; text-align: left;">
           [% FOREACH err IN parse_errors %]
             <span class="fail_message">[% err %]</span><br>
           [% END %]
@@ -35,15 +35,15 @@
     [% END %]
 
     <tr>
-      <td class='dataVar' style="padding-top: 5px;">
+      <td style="padding-top: 5px;">
         1. Verify your changes
       </td>
-      <td class='dataVar'>
+      <td>
         [% IF needs_commit %]
         <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: text-top">
         [% END %]
       </td>
-      <td class='dataVal' style="padding-top: 5px; text-align: center;">
+      <td style="padding-top: 5px; text-align: center;">
         [% IF changed_files.size > 0 %]
         <input type='hidden' name='ignore_whitespace' value='1'>
         <input type="submit" name="diff" value="view diff of changed files" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
@@ -55,15 +55,15 @@
     <tr><td colspan=3><hr></td></tr>
 
     <tr>
-      <td class='dataVar' style="padding-top: 5px;">
+      <td style="padding-top: 5px;">
         2. Save changes to disk:
       </td>
-      <td class='dataVar'>
+      <td>
         [% IF needs_commit %]
         <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: bottom">
         [% END %]
       </td>
-      <td class='dataVal' style="text-align: center;">
+      <td style="text-align: center;">
         [% IF changed_files.size > 0 %]
         The following files have been changed:<br><br>
         <div style="float: left; position: relative; left: 50%;"><div style="float: left; position: relative; left: -50%; text-align: left;">
@@ -81,15 +81,15 @@
     <tr><td colspan=3><hr></td></tr>
 
     <tr>
-      <td class='dataVar'>
+      <td>
         3. Check your configuration changes
       </td>
-      <td class='dataVar'>
+      <td>
         [% IF last_changed %]
         <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
         [% END %]
       </td>
-      <td class='dataVal' style="text-align: center;">
+      <td style="text-align: center;">
         [% IF peer_conftool.exists('obj_check_cmd') %]
         <input type="submit" name="check" value="check your configuration changes" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
         [% ELSE %]
@@ -100,15 +100,15 @@
     <tr><td colspan=3><hr></td></tr>
 
     <tr>
-      <td class='dataVar'>
+      <td>
         4. Reload your monitoring core
       </td>
-      <td class='dataVar'>
+      <td>
         [% IF last_changed %]
         <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
         [% END %]
       </td>
-      <td class='dataVal' style="text-align: center;">
+      <td style="text-align: center;">
         [% IF peer_conftool.exists('obj_reload_cmd') %]
         <input type="submit" name="reload" value="reload your monitoring core" style="width:250px" class="conf_button" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
         [% ELSE %]
@@ -120,11 +120,11 @@
     [% IF changed_files.size > 0 %]
     <tr><td colspan=3><br><br><hr></td></tr>
     <tr>
-      <td class='dataVar'>
+      <td>
         Discard changes
       </td>
-      <td class='dataVar'></td>
-      <td class='dataVal' style="text-align: center;">
+      <td></td>
+      <td style="text-align: center;">
         <input type="submit" name="discard" value="discard all unsaved changes" style="width:250px" onclick="return confirm('really discard all unsaved changes?')" class="conf_button">
       </td>
     </tr>
@@ -151,10 +151,10 @@
 <br><br>
 <table>
   <tr>
-    <td class='dataVar'>Command Output:</td>
+    <td>Command Output:</td>
   </tr>
   <tr>
-    <td class='dataVal'>[% output %]</td>
+    <td>[% output %]</td>
   </tr>
 </table>
 </div>

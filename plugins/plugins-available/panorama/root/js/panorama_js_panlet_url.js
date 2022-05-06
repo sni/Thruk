@@ -43,7 +43,7 @@ Ext.define('TP.PanletUrl', {
                     /* keep css links */
                     if(panel.xdata.keepcss && panel.xdata.selector != '') {
                         el.body.select('LINK').each(function(el) {
-                            if(!el.dom.outerHTML.match(/thruk_noframes\.css/)) {
+                            if(!el.dom.outerHTML.match(/class="maintheme"/)) {
                                 head = head + el.dom.outerHTML;
                             }
                         });

@@ -11,7 +11,7 @@ BEGIN {
     import TestUtils;
 }
 
-my($res, $c) = ctx_request('/thruk/side.html');
+my($res, $c) = ctx_request('/thruk/main.html');
 if($c->stash->{'enable_icinga_features'}) {
     plan tests => 47;
 } else {

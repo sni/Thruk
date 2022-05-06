@@ -439,7 +439,6 @@ sub _process_details_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
     $c->stash->{'show_column_select'} = 1;
-    $c->stash->{'hide_filter'}        = 0;
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -461,7 +460,6 @@ sub _process_details_page {
 
     if($c->req->parameters->{'q'}) {
         $c->stash->{'has_service_filter'}= 1;
-        $c->stash->{'hide_filter'}= 1;
         $servicefilter = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'});
     }
 
@@ -562,8 +560,7 @@ sub _process_details_page {
         return $c->render(json => $services);
     }
 
-    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
-    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
 
     if($c->config->{'show_custom_vars'}
        and $c->stash->{'data'}
@@ -683,8 +680,7 @@ sub _process_hostdetails_page {
         return $c->render(json => $hosts);
     }
 
-    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
-    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
 
     return 1;
 }
@@ -1300,8 +1296,7 @@ sub _process_perfmap_page {
     $c->stash->{'perf_keys'} = $keys;
     Thruk::Utils::page_data($c, $data);
 
-    $c->stash->{'orderby'}  = $sortoption;
-    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
 
     return 1;
 }
@@ -1424,7 +1419,7 @@ sub _process_bookmarks {
         Thruk::Utils::set_message( $c, 'fail_message', 'nothing to do!' );
     }
 
-    return $c->redirect_to($referer."&reload_nav=1");
+    return $c->redirect_to($referer);
 }
 
 

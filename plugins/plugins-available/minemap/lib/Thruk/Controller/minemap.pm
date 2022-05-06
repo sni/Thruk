@@ -46,14 +46,6 @@ sub index {
     $c->stash->{services}     = $uniq_services;
     $c->stash->{hostnames}    = $hosts;
     $c->stash->{matrix}       = $matrix;
-
-    my $longest_service = 1;
-    for my $s (keys %{$uniq_services}) {
-        my $len = length $s;
-        $longest_service = $len if $len > $longest_service;
-    }
-
-    $c->stash->{head_height}   = 7*$longest_service;
     $c->stash->{style}         = 'minemap';
     $c->stash->{substyle}      = 'service';
     $c->stash->{title}         = 'Mine Map';

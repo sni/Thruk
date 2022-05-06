@@ -10,7 +10,7 @@
 %]
 
 [%# definition of the command send to your backend #%]
-[% BLOCK action%]
+[% BLOCK action %]
     [% hostgroup_name       = c.request.parameters.hostgroup %]
 
     [% IF c.request.parameters.ahas %]
@@ -20,8 +20,9 @@
 [% END %]
 
 [%# definition of the html form data #%]
-<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value="[% c.request.parameters.hostgroup | html %]"></b></td></tr>
-<tr><td class='optBoxItem'>Disable For Hosts Too:</td><td><b><input type='checkbox' name='ahas'[% IF c.config.cmd_defaults.ahas %] checked[% END %]></b></td></tr>
+[% PROCESS _cmd_parts.tt %]
+  [% PROCESS cmd_form_hostgroup %]
+  [% PROCESS cmd_form_ahas name="Disable" %]
 
 [% END %]
 [% END %]

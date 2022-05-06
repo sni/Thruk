@@ -1,41 +1,48 @@
 ﻿[% IF show_form %]<form action="#" method="POST" style="text-align: left;">[% END %]
-<button class="thruk_btn primary small wrench" style="display: none; position: absolute;" name="columns" id="[% paneprefix %]_btn_columns_hover" onclick="initStatusTableColumnSorting('[% paneprefix %]', 'statusTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" onmouseover="jQuery('#[% paneprefix %]_btn_columns_hover').show()"  onmouseout="jQuery('#[% paneprefix %]_btn_columns_hover').hide()"></button>
-<div class="filter_pane" style="visibility:hidden; left: 50px;" id="[% paneprefix %]_columns_select">
-<div class="shadow"><div class="shadowcontent">
-<table border="1" class='filter' cellspacing="0" cellpadding="0">
-  <tr>
-    <td class='filter' style="width: 140px;">
-      <table border="0" cellspacing="2" cellpadding="0">
+<button
+  class="round small bg-inherit hover:text-inherit"
+  id="[% paneprefix %]_btn_columns_hover"
+  onclick="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;"
+  title="change column visibility"
+>
+  <i class="uil uil-columns"></i>
+</button>
+<div class="card absolute shadow-float z-30" style="display:none;" id="[% paneprefix %]_columns_select">
+  <div class="head justify-between">
+    <h3>Edit Columns</h3>
+    <button class="iconOnly p-0" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" title="accept">
+      <i class="fa-solid fa-check round small green"></i>
+    </button>
+  </div>
+  <div>
+    <table id="[% paneprefix %]_columns_table" class="w-full cellspacing-x">
+      <thead>
         <tr>
-          <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Edit Columns:</td>
-          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %]_accept_columns" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" alt="accept"></td>
+          <th colspan=2>
+            reorder columns with drag/drop<br>rename with double click
+          </th>
         </tr>
-      </table>
-      <table border=0 cellspacing=2 cellpadding=0 width="100%" id="[% paneprefix %]_columns_table">
-        <thead>
-          <tr>
-            <th colspan=2 class="drag_hint">reorder columns with drag/drop<br>rename with double click</th>
-          </tr>
-          <tr>
-            <th colspan=2 class="drag_hint"><input type="button" value="use as my default [% columns_name %] columns" onclick='setDefaultColumns("[% colprefix %]", "[% paneprefix %]")'></th>
-          </tr>
-          <tr>
-            <th colspan=2 class="drag_hint"><input type="button" class="[% paneprefix %]_reset_columns_btn" value="reset my default [% columns_name %] columns" onclick='setDefaultColumns("[% colprefix %]", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]></th>
-          </tr>
-        </thead>
-        <tbody>
+        <tr>
+          <th colspan=2>
+            <input type="button"  class="w-full" value="use as my default [% columns_name %] columns" onclick='setDefaultColumns("[% colprefix %]", "[% paneprefix %]")'>
+          </th>
+        </tr>
+        <tr>
+          <th colspan=2>
+            <input type="button" class="w-full [% paneprefix %]_reset_columns_btn" value="reset my default [% columns_name %] columns" onclick='setDefaultColumns("[% colprefix %]", "[% paneprefix %]", "")'[% IF !has_user_columns.$paneprefix %] disabled[% END %]>
+          </th>
+        </tr>
+      </thead>
 
+      <tbody class="rowhover">
         [% FOREACH col = table_columns.$paneprefix %]
-        <tr>
-          <td valign="top" align="right" class="filterName clickable col_[% col.field | html %]" id="[% paneprefix %]_col_[% col.field | html %]n" width="90%">[% col.title | html %]</td>
-          <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; escape_html(col.title); END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field | html %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
-        </tr>
+          <tr>
+            <td><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; escape_html(col.title); END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field | html %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
+            <td class="clickable col_[% col.field | html %] js-column-renameable" id="[% paneprefix %]_col_[% col.field | html %]n" width="90%">[% col.title | html %]</td>
+          </tr>
         [% END %]
-        </tbody>
-      </table>
-    </td>
-  </tr>
-</table>
-</div></div>
+      </tbody>
+    </table>
+  </div>
 </div>
 [% IF show_form %]</form>[% END %]

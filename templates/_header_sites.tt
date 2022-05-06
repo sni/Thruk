@@ -1,67 +1,68 @@
 ﻿[% BLOCK site_btn %]
-[% b = initial_backends.$id %]
-[% IF b.exists('cls') && b.cls != "" %]
-<div class="backend">
-  <input id="button_[% id %]" class="button_peer[% b.cls %] backend_[% id %]" value="[% b.name | html %]" title="[% b.last_error | html %]" onclick="toggleBackend('[% id %]')" type="button">
-</div>
-[% END %]
+  [% b = initial_backends.$id %]
+  [% IF b.exists('cls') && b.cls != "" %]
+    <button data-id="[% id %]" class="button_peer button_peer[% b.cls %]" title="[% b.last_error | html %]" onclick="toggleBackend('[% id %]')">[% b.name | html %]</button>
+  [% END %]
 [% END %]
 
-<table border=0 cellpadding=0 cellspacing=0 class="site_panel_container"><tr><td>
 [% IF !hide_backends_chooser && sites != "" %]
   [% IF show_sitepanel == 'list' %]
+    <div class="buttongroup backends hidden lg:flex">
       [% FOREACH b = backends %]
         [% PROCESS site_btn id=b %]
       [% END %]
-  [% ELSIF show_sitepanel == 'panel' || show_sitepanel == 'collapsed' || show_sitepanel == 'tree' %]
-    [% IF backend_chooser == "switch" && param_backend.list.size > 0 && param_backend.list.0 != "" %]
-      [% b = param_backend.list.0 %]
-      <div class='backend'><input type='button' class='button_peerUP' value="[% initial_backends.$b.name | html %]" onClick='toggleSitePanel()'></div>
-      [% IF sites.disabled > 0 %]
-        <div class='backend'><input type='button' class='button_peerDIS' value="[% sites.disabled %] more" onClick='toggleSitePanel()'></div>
-      [% END %]
-    [% ELSE %]
-      <div class='backend'><input type='button' class='[% IF sites.up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]' value="[% sites.up %] up" onClick='toggleSitePanel()'></div>
-      <div class='backend'><input type='button' class='button_peerDIS' value="[% sites.disabled %] disabled" onClick='toggleSitePanel()'></div>
-      <div class='backend'><input type='button' class='[% IF sites.down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]' value="[% sites.down %] down" onClick='toggleSitePanel()'></div>
-    [% END %]
-    <div id="site_panel" class="site_panel_[% show_sitepanel %]" style="display: none;">
-      <div class="shadow"><div class="shadowcontent">
-        <table class="site_panel" cellspacing=0 cellpadding=0 width="100%">
-          <tr>
-            <th align="center">
-              <table border=0 cellpadding=0 cellspacing=0 width="100%" style="padding-bottom: 10px;">
-                <tr>
-                <td style="padding-right: 20px;">Choose your sites</td>
-                [% IF show_sitepanel == 'tree' %]
-                <td align="left" width="635">
-                  Bookmarks:
-                  <span id="site_panel_bookmark_list_container">
-                  <span id="site_panel_bookmark_list">
-                    [% IF user_data.exists('site_panel_bookmarks'); FOREACH b = user_data.site_panel_bookmarks %]<input type='button' class='site_panel_bookmark' value="[% b.name | html %]" onClick='setBackends([% json_encode(b.backends) %], [% json_encode(b.sections) %], this)' data-index="[% loop.index %]">[% END; END %]
-                  </span>
-                  </span>
-                  <input type='text' value='' id="site_panel_bookmark_new" style="display: none; width: 50px;">
-                  <input type='button' value='save' id="site_panel_bookmark_new_save" style="display: none;" onclick="site_panel_bookmark_save()">
-                  <input type='button' value='+' class="site_panel_bookmark_small_btn" id="site_panel_bookmark_plus" onClick='jQuery(this).hide(); jQuery("#site_panel_bookmark_new").show().val("").focus(); jQuery("#site_panel_bookmark_new_save").show();'>
-                  <input type='button' value='X' class="site_panel_bookmark_small_btn" onclick="jQuery(this).toggleClass('active')" id="site_panel_bookmark_delete">
-                </td>
-                <td align="right" width="70">
-                  <input type="text" placeholder="filter" class="deletable" id="site_panel_search" onchange='site_panel_search()' onkeyup='site_panel_search()' onfocus='site_panel_search()'>
-                </td>
-                [% END %]
-                [% IF backend_chooser != 'switch' %]
-                <td align="right" width="70" class="clickable" onclick="toggleAllSections(true);">enable all</td>
-                <td align="left" width="20"><input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();"></td>
-                [% END %]
-                </tr>
-              </table>
-            </th>
-          </tr>
-        </table>
-        <div id="site_panel_content"></div>
-      </div></div>
     </div>
   [% END %]
+  [% IF backend_chooser == "switch" && param_backend.list.size > 0 && param_backend.list.0 != "" %]
+    <div class="buttongroup backends[% IF show_sitepanel == 'list' %] lg:hidden[% END %]" onClick='toggleSitePanel()'>
+      [% b = param_backend.list.0 %]
+      <button class='button_peerUP'>[% initial_backends.$b.name | html %]</button>
+      [% IF sites.disabled > 0 %]
+        <button class='button_peerDIS'>[% sites.disabled %] more</button>
+      [% END %]
+    </div>
+  [% ELSE %]
+    <div class="buttongroup backends[% IF show_sitepanel == 'list' %] lg:hidden[% END %]" onClick='toggleSitePanel()'>
+      <button class='[% IF sites.up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]'>[% sites.up %] Up</button>
+      <button class='button_peerDIS'>[% sites.disabled %] Disabled</button>
+      [% broken = []; FOREACH down = initial_backends.values; IF down.last_error != 'OK'; broken.push(down.name); END; END %]
+      <button class='[% IF sites.down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]' title="[% broken.join(', ') | html %]">[% sites.down %] Down</button>
+    </div>
+  [% END %]
+
+  <div id="site_panel" class="card shadow-float absolute min-w-[400px] site_panel_[% show_sitepanel %] hidden">
+    <div class="head justify-between gap-5">
+      <h3>[% IF backend_chooser == "switch" %]Choose Active Site[% ELSE %]Toggle Site Visibility[% END %]</h3>
+      [% IF show_sitepanel == 'tree' %]
+        <div class="flexrow flex-nowrap gap-5">
+            <div class="flex flex-nowrap gap-1 items-center">
+              <span>Bookmarks:</span>
+              <div id="site_panel_bookmark_list_container">
+                <div id="site_panel_bookmark_list" class="flexrow flex-nowrap gap-px">
+                  [% IF user_data.exists('site_panel_bookmarks'); FOREACH b = user_data.site_panel_bookmarks %]
+                    <button onClick='setBackends([% json_encode(b.backends) %], [% json_encode(b.sections) %], this)' data-index="[% loop.index %]">[% b.name | html %]</button>
+                  [% END; END %]
+                </div>
+              </div>
+              <input type='text' value='' placeholder="enter name" id="site_panel_bookmark_new" class="w-20" style="display: none;">
+              <button id="site_panel_bookmark_new_save" class="w-20" style="display: none;" onclick="site_panel_bookmark_save()">save</button>
+              <button id="site_panel_bookmark_plus" onClick='jQuery(this).hide(); jQuery("#site_panel_bookmark_new").show().val("").focus(); jQuery("#site_panel_bookmark_new_save").show();'><i class="uil uil-plus"></i>add</button>
+              <button onclick="jQuery(this).toggleClass('red')" id="site_panel_bookmark_delete"><i class="uil uil-trash"></i>remove</button>
+            </div>
+        </div>
+      [% END %]
+      <div class="flexrow flex-nowrap gap-5">
+        [% IF backend_chooser != 'switch' %]
+          <div class="flex flex-nowrap gap-1 items-center">
+            <label class="clickable whitespace-nowrap" onclick="toggleAllSections(true);">Toogle All</label>
+            <input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();">
+          </div>
+        [% END %]
+        [% IF show_sitepanel == 'tree' %]
+          <input type="text" placeholder="filter" class="deletable" id="site_panel_search" onchange='site_panel_search()' onkeyup='site_panel_search()' onfocus='site_panel_search()'>
+        [% END %]
+      </div>
+    </div>
+    <div id="site_panel_content" class="body"></div>
+  </div>
 [% END %]
-</td></tr></table>

@@ -6,8 +6,8 @@
   </tr>
   [% IF services.host.size > 0 %]
   <tr>
-    <td class='dataVar' width="30%">Directly Assigned to Host</td>
-    <td class='dataVar' width="70%">
+    <td width="30%">Directly Assigned to Host</td>
+    <td width="70%">
       <ul>
       [% FOREACH svc_name = services.host.keys.sort %]
         [% svc = services.host.$svc_name %]
@@ -20,14 +20,14 @@
 
   [% IF services.group.size > 0 && services.host.size > 0%]
   <tr>
-    <td class='dataVar' colspan=2><hr></td>
+    <td colspan=2><hr></td>
   </tr>
   [% END %]
 
   [% IF services.group.size > 0 %]
   <tr>
-    <td class='dataVar' width="30%">From Hostgroups</td>
-    <td class='dataVar' width="70%">
+    <td width="30%">From Hostgroups</td>
+    <td width="70%">
       <ul>
       [% FOREACH svc_name = services.group.keys.sort %]
         [% ref = services.group.$svc_name %]

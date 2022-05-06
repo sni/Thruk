@@ -509,7 +509,7 @@ consists of HTML with some variables accessed via the [% variable_name %] notati
 <html>
 	<head>
 		<title>[% title_prefix %][% title %]</title>
-		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		[% PROCESS _favicon.tt %]
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 	</head>
@@ -525,7 +525,7 @@ Now if you want a more stylish plugin you can add some Thruk-common css and make
 <html>
 	<head>
 		<title>[% title_prefix %][% title %]</title>
-		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		[% PROCESS _favicon.tt %]
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 		[% PROCESS _common_css.tt  %]
@@ -548,7 +548,7 @@ You can also add some info boxes and your plugin will look like all the rest:
 <html>
 	<head>
 		<title>[% title_prefix %][% title %]</title>
-		<link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+		[% PROCESS _favicon.tt %]
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 		[% PROCESS _common_css.tt %]

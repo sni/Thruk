@@ -1,0 +1,3 @@
+﻿<div class="textPager inline-flex items-center font-medium justify-center min-w-[2rem] rounded-md leading-7 whitespace-nowrap">
+  [% IF data.size %][% data.size %] of [% pager.total_items %][% ELSE %]0[% END %] Items Displayed
+</div>

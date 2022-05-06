@@ -1,0 +1,16 @@
+﻿[% UNLESS minimal %]
+  <div class="flexrow gap-x-1" id="top_pane" [% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+    <div class="flexcol">
+      [% PROCESS _infobox.tt %]
+      [% content %]
+    </div>
+    <div class="flexrow gap-x-1 grow flex-wrap md:flex-nowrap">
+      <div class="flex grow lg:justify-center">
+        [% PROCESS _host_status_details_box.tt %]
+      </div>
+      <div>
+        [% PROCESS _service_status_details_box.tt %]
+      </div>
+    </div>
+  </div>
+[% END %]

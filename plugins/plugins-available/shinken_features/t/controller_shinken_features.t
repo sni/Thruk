@@ -12,7 +12,7 @@ BEGIN {
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
-my($res, $c) = ctx_request('/thruk/side.html');
+my($res, $c) = ctx_request('/thruk/main.html');
 if($c->stash->{'enable_shinken_features'}) {
     plan tests => 59;
 } else {

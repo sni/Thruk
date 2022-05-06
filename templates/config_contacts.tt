@@ -2,66 +2,54 @@
    dataTitle = 'Contacts'
 %]
 
-<table border="0" class='data' id="configtable">
-  <tr>
-    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
-    <th class='data'></th>
-    [% END %]
-    [% IF backends.size > 1 %]
-      <th class='data'>Backend</th>
-    [% END %]
-    <th class='data'>Contact Name</th>
-    <th class='data'>Alias</th>
-    <th class='data'>Email Address</th>
-    <th class='data'>Pager Address/Number</th>
-<!--
-    <th class='data'>Service Notification Options</th>
-    <th class='data'>Host Notification Options</th>
--->
-    <th class='data'>Service Notification Period</th>
-    <th class='data'>Host Notification Period</th>
-<!--
-    <th class='data'>Service Notification Commands</th>
-    <th class='data'>Host Notification Commands</th>
-    <th class='data'>Retention Options</th>
--->
-  </tr>
-  [% FOREACH d = data %]
-  [% SET class = 'dataOdd'  IF loop.odd %]
-  [% SET class = 'dataEven' IF loop.even %]
-  [% SET class = 'tableRowHover' IF jump == d.name %]
-  <tr class='[% class %]' id="[% name2id(d.name, 'contact') %]">
-    [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
-    <td class='[% class %]'>
-      <a href="conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]"><img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="configure this contact" width="16" height="16" border="0"></a>
-    </td>
-    [% END %]
-    [% IF backends.size > 1 %]
-      <td class='[% class %]'>
-        [% IF d.peer_key.size < backends.size %]
-          [% peer_name(d).join(', ') %]
-        [% ELSE %]
-        <i>all</i>
+<table class='mainTable striped sticky-2d' id="configtable">
+  <thead>
+    <tr>
+      <th class="!shadow-as-border-bottom"></th>
+      <th class="left-8 !shadow-as-border z-[11]">Contact Name</th>
+      <th class="border-l-0">Alias</th>
+      [% IF backends.size > 1 %]
+        <th>Backend</th>
+      [% END %]
+      <th>Email Address</th>
+      <th>Pager Address/Number</th>
+      <th class="text-center">Service Notification Period</th>
+      <th class="text-center">Host Notification Period</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    [% FOREACH d = data %]
+      [% SET class = '' %]
+      [% SET class = 'tableRowSelected' IF jump == d.name %]
+      <tr class='[% class %]' id="[% name2id(d.name, 'contact') %]">
+        <td class='[% class %] shadow-none'>
+          [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
+            <a href="conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]">
+              <i class="fa-solid fa-pencil text-sm" title="configure this contact"></i>
+            </a>
+          [% ELSE %]
+            <i class="fa-solid fa-pencil text-sm disabled" title="no permissions or configtool disabled"></i>
+          [% END %]
+        </td>
+        <td class='[% class %] sticky left-8 z-[9] bg-inherit shadow-as-border-right'>[% d.name | html %]</td>
+        <td class='[% class %] border-l-0'>[% d.alias | html %]</td>
+        [% IF backends.size > 1 %]
+          <td class='[% class %]'>
+            [% IF d.peer_key.size < backends.size %]
+              [% peer_name(d).join(', ') %]
+            [% ELSE %]
+            <i>all</i>
+            [% END %]
+          </td>
         [% END %]
-      </td>
+        <td class='[% class %]'><a href="mailto:[% d.email | uri %]">[% d.email | html %]</a></td>
+        <td class='[% class %]'>[% d.pager | html %]</td>
+        <td class='[% class %] text-center'><a href="config.cgi?type=timeperiods&amp;jump=[% d.service_notification_period | uri %]#[% d.service_notification_period | uri %]">[% d.service_notification_period | html %]</a></td>
+        <td class='[% class %] text-center'><a href="config.cgi?type=timeperiods&amp;jump=[% d.host_notification_period | uri %]#[% d.host_notification_period | uri %]">[% d.host_notification_period | html %]</a></td>
+      </tr>
     [% END %]
-    <td class='[% class %]'>[% d.name | html %]</td>
-    <td class='[% class %]'>[% d.alias | html %]</td>
-    <td class='[% class %]'><a href="mailto:[% d.email | uri %]">[% d.email | html %]</a></td>
-    <td class='[% class %]'>[% d.pager | html %]</td>
-<!--
-    <td class='[% class %]'></td>
-    <td class='[% class %]'></td>
--->
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.service_notification_period | uri %]#[% d.service_notification_period | uri %]">[% d.service_notification_period | html %]</a></td>
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.host_notification_period | uri %]#[% d.host_notification_period | uri %]">[% d.host_notification_period | html %]</a></td>
-<!--
-    <td class='[% class %]'></td>
-    <td class='[% class %]'></td>
-    <td class='[% class %]'></td>
--->
-  </tr>
-  [% END %]
+  </tbody>
 </table>
 
 [% END %]

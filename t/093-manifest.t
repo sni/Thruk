@@ -74,20 +74,36 @@ while(<$ph>) {
     $line =~ s|//|/|gmx;
     my $dst = readlink($line);
     if($dst =~ m|/root$|) {
-        if(defined $manifest->{$line} || defined $manifest_skip->{$line}) {
+        if(defined $manifest->{$line}) {
             fail("$line is in the MANIFEST but should not: $dst");
         } else {
             pass("$line is NOT in the MANIFEST");
         }
     } else {
-        if(defined $manifest->{$line} || defined $manifest_skip->{$line}) {
+        if(defined $manifest->{$line}) {
+            if(_match_skip($line)) {
+                fail("$line is in the MANIFEST but matches MANIFEST.SKIP too");
+                next;
+            }
             pass("$line is in the MANIFEST");
         } else {
+            next if _match_skip($line);
             fail("$line is NOT in the MANIFEST");
         }
     }
 }
 close($ph);
 
-
 done_testing();
+
+sub _match_skip {
+    my($line) = @_;
+    for my $p (sort keys %{$manifest_skip}) {
+        ## no critics
+        if($line =~ m|$p|) {
+            return(1);
+        }
+        ## use critics
+    }
+    return;
+}

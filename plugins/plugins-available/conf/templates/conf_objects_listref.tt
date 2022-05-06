@@ -10,7 +10,7 @@
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
   </tr>
   <tr>
-    <td class='dataVar' style="text-align:center" colspan=2>
+    <td style="text-align:center" colspan=2>
       <br>
       [% PROCESS _button btn = {
         skipform => 1,
@@ -28,8 +28,8 @@
   </tr>
   [% FOREACH t = incoming.keys.sort %]
   <tr>
-    <td class='dataVar'>[% t | ucfirst %]</td>
-    <td class='dataVal'>
+    <td>[% t | ucfirst %]</td>
+    <td>
       <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
       [% FOREACH name = incoming.$t.keys.sort %]
         [% inc_ref = incoming.$t.$name %]
@@ -50,8 +50,8 @@
   [% END %]
   [% IF force_delete %]
   <tr>
-    <td class='dataVar'></td>
-    <td class='dataVal'>
+    <td></td>
+    <td>
       select
       <input type="checkbox" name="none" value="">
       <a href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
@@ -62,7 +62,7 @@
   [% END %]
   [% IF incoming.keys.size == 0 %]
   <tr>
-    <td class='dataVar' colspan=2 style="text-align: center;">No incoming references found</td>
+    <td colspan=2 style="text-align: center;">No incoming references found</td>
   </tr>
   [% END %]
   [% END %]
@@ -74,8 +74,8 @@
   </tr>
   [% FOREACH t = outgoing.keys.sort %]
   <tr>
-    <td class='dataVar'>[% t | ucfirst | html %]</td>
-    <td class='dataVal'>
+    <td>[% t | ucfirst | html %]</td>
+    <td>
       <ul>
       [% FOREACH name = outgoing.$t.keys.sort %]
         <li><a href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">[% name | html %]</a></li>
@@ -86,7 +86,7 @@
   [% END %]
   [% IF outgoing.keys.size == 0 %]
   <tr>
-    <td class='dataVar' colspan=2 style="text-align: center;">No outgoing references found</td>
+    <td colspan=2 style="text-align: center;">No outgoing references found</td>
   </tr>
   [% END %]
   [% END %]
@@ -99,15 +99,15 @@
   </tr>
   [% IF force_delete %]
   <tr>
-    <td class='dataVar' colspan=2 style="text-align: center;">These references should be checked manually.</td>
+    <td colspan=2 style="text-align: center;">These references should be checked manually.</td>
   </tr>
   [% END %]
   [% IF show_renamed %]
   <tr>
-    <td class='dataVar' colspan=2 style="text-align: center; padding-top: 10px;">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
+    <td colspan=2 style="text-align: center; padding-top: 10px;">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
   </tr>
   <tr>
-    <td class='dataVar' style="text-align:center" colspan=2>
+    <td style="text-align:center" colspan=2>
       <br>
       [% PROCESS _button btn = {
         form   => { action => 'conf.cgi', method => 'GET' },
@@ -121,8 +121,8 @@
   [% END %]
   [% FOREACH t = other_refs.keys.sort %]
   <tr>
-    <td class='dataVar'>[% t | html %]</td>
-    <td class='dataVal'>
+    <td>[% t | html %]</td>
+    <td>
       <ul>
       [% FOREACH r = other_refs.$t %]
         <li><a href="[% r.link %]" target="_blank">[% r.name | html %] ([% r.details | html %])</a></li>

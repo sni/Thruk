@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
-<html[% IF extrahtmlclass %] class="[% extrahtmlclass | html %]"[% END %]>
+<html[% IF extrahtmlclass %] class="[% extrahtmlclass | html %] h-full w-full overflow-hidden"[% END %]>
   <head>
     <title>[% title_prefix %][% escape_html(title) %]</title>
-    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <link rel="icon" type="image/png" href="[% url_prefix %]themes/[% theme %]/images/favicon-32x32.png" />
-     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    [% PROCESS _favicon.tt %]
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [%- SET page = 'status' IF page == '' -%]
     [%- PROCESS _common_css.tt %]
     [%- PROCESS _common_js_files.tt -%]
@@ -14,81 +15,57 @@
     [%- IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END -%]
   </head>
 
-  <body style="[% IF show_nav_button && use_frames %]margin-left: 8px;[% END %]" class="[% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
+  <!-- Produced by Thruk (http://www.thruk.org).
+      Copyright (c) 2009-present Thruk Developer Team.
+  -->
+  <body class="h-screen w-screen overflow-hidden [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
   <div style="display:none;" id="search-results"></div>
 
-  <div class="pref_pane" id="pref_pane" style="display:none;"></div>
-  [% IF use_frames %]
-      [% IF reload_nav %]
-      <script type="text/javascript">
-      <!--
-        try {
-          if(parent.frames["side"] != null && parent.frames["side"] != window) {
-            parent.frames["side"].location.reload();
-          }
-        } catch(err) { console.log(err) }
-      -->
-      </script>
-      [% END %]
-  [% ELSE %]
-  <div id="navbar" class="navbar">
-    [% PROCESS side.tt %]
-  </div>
-  [% END %]
-  [% IF show_nav_button %]
-    [% UNLESS use_frames %]
-    <div class="hidenav clickable" onclick="window.location='[% short_uri(c, 'nav' => 0) %]'" title="hide navigation"></div>
-    [% ELSE %]
-    <div class="shownav clickable" onclick="window.location='[% short_uri(c, 'nav' => 1) %]'"></div>
-    [% END %]
-  [% END %]
+  <div class="flexrow flex-nowrap gap-0 h-screen w-screen overflow-hidden">
+    <div id="navbar" class="navbar w-fit h-screen z-50 lg:mt-0 mt-[50px] lg:block hidden lg:relative absolute">
+      [% PROCESS side.tt %]
+    </div>
 
-<!-- Produced by Thruk (http://www.thruk.org).
-     Copyright (c) 2009-present Thruk Developer Team.
-     Copyright (c) 2009 Nagios Core Development Team and Community Contributors.
-     Copyright (c) 1999-2009 Ethan Galstad.
--->
-[% IF minimal == 2 %]
-<div class="top_nav">
-[% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
-</div>
-[% END %]
-[% UNLESS minimal %]
-<table border="0" cellpadding=0 cellspacing=0 class="top_nav" style="position: relative;">
-  <tr>
-    <td class="noprint top_nav_pref" [% IF !show_home_button %]style="display:none;"[% END %]>
-      <form action="[% show_home_button %]" target='_top' style="margin:0; padding: 0;">
-      <button class="noprint top_nav_logout_button thruk_btn big primary home"> startpage</button>
-      </form>
-    </td>
-    <td width="100%" valign="top">[% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %][% PROCESS _header_broadcast.tt %]</td>
-    <td class="hidden noprint top_nav_pref" id="bug_report">
-      [% IF show_error_reports%]
-      <a href="#" id="bug_report-btnEl">
-      <button class="thruk_btn big primary bugs"></button>
-      </a>
-      [% END %]
-    </td>
-    <td class="top_nav_pref">
-      <button class="noprint top_refresh_button thruk_btn big primary refresh" onClick="refresh_button(this)"></button>
-    </td>
-    [% IF c.user_exists %]
-    <td class="top_nav_pref">
-      <button class="noprint top_nav_pref_button thruk_btn big primary settings" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;">preferences</button>
-    </td>
-    [% IF cookie_auth && show_logout_button %]
-    <td class="top_nav_pref">
-      <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
-      <button class="noprint top_nav_logout_button thruk_btn big primary logout" title="logout">logout</button>
-      </form>
-    </td>
+    <div class="flexcol gap-0 flex-grow w-0 h-screen" id="mainframe">
+    [% IF minimal == 2 %]
+      <header class="header">
+        <div class="h-[50px] flexrow flex-nowrap items-center">
+          [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
+        </div>
+      </header>
     [% END %]
+    [% UNLESS minimal %]
+      <header class="header">
+        <div class="h-[50px] flexrow flex-nowrap items-center">
+          <button class="big iconOnly w-10 h-10 ml-[-10px] block lg:hidden hoverable" onclick="toggleElement('navbar', null, true, null, checkNavBackground); checkNavBackground(); return false;"><i class="fa-solid fa-bars"></i></button>
+          <div class="flex-grow h-min">
+            [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
+          </div>
+          [% PROCESS _header_broadcast.tt %]
+
+          <div class="flexrow w-fit gap-2 flex-nowrap">
+            <div class="w-fit" id="bug_report" style="display: none;">
+              [% IF show_error_reports %]
+                <button class="noprint big red round" id="bug_report-btnEl"><i class="uil uil-thunderstorm"></i></button>
+              [% END %]
+            </div>
+            <button class="noprint big primary round" title="reload page" id="refresh_button" onClick="refresh_button()"><i class="uil uil-sync"></i></button>
+            [% IF c.user_exists %]
+              <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="uil uil-cog"></i></button>
+              <div id="pref_pane" class="card z-50 shadow-float fixed right-0 top-[50px] mt-0 min-h-[150px] w-[500px] rounded-t-none rounded-r-none" style="display: none;"></div>
+              [% IF cookie_auth && show_logout_button %]
+                <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top' style="display: initial;">
+                  <button class="noprint big primary round" title="sign out"><i class="uil uil-signout"></i></button>
+                </form>
+              [% END %]
+            [% END %]
+          </div>
+        </div>
+      </header>
     [% END %]
-  </tr>
-</table>
+<main class="relative p-5 flex-grow scrollauto">
 [% IF show_top_pane %]
-<img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane clickable" id="btn_toggle_top_pane" alt="toggle header" onClick="toggleTopPane(); return false;">
-[% END %]
+  <button class="iconOnly noprint big absolute p-0 m-0 top-0 right-0" onClick="toggleTopPane(); return false;"><i class="uil uil-top-arrow-to-top m-0" id="btn_toggle_top_pane"></i></button>
 [% END %]

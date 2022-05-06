@@ -67,7 +67,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['Profile:','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json; charset=utf-8', },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=update&debug=1', 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/reports2.cgi', waitfor => 'reports2.cgi\?report=999\&amp;refreshreport=0', unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'' },
-    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=download_debug', like => ['version:', 'parameters:', 'release:', 'ma_options'] },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=download_debug', like => ['version:', 'parameters:', 'OS Release:', 'ma_options'] },
     { url => '/thruk/cgi-bin/reports2.cgi', post => { 'action' => 'remove', 'report' => 999 }, 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
 
     # sample excel report

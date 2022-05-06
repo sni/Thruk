@@ -551,13 +551,10 @@ sub _process_thruk_page {
                         title_prefix
                         use_wait_feature
                         wait_timeout
-                        use_frames
                         server_timezone
                         default_user_timezone
                         use_strict_host_authorization
                         show_long_plugin_output
-                        info_popup_event_type
-                        info_popup_options
                         resource_file
                         can_submit_commands
                      /],
@@ -589,13 +586,11 @@ sub _process_thruk_page {
                         datetime_format_long
                         datetime_format_log
                         datetime_format_trends
-                        use_new_command_box
                         show_custom_vars
                         expose_custom_vars
                     /],
         ],
         [ 'Paging', [qw/
-                        use_pager
                         paging_steps
                         group_paging_overview
                         group_paging_summary
@@ -785,7 +780,7 @@ sub _process_plugins_page {
                 }
             }
             Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully.' );
-            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=plugins&reload_nav=1');
+            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=plugins');
         }
     }
 
@@ -2777,9 +2772,6 @@ sub _config_reload {
             $c->stash->{'output'}          .= "\n<font color='red'>".$c->stash->{'original_output'}."</font>";
         }
     }
-
-    # reload navigation, probably some names have changed
-    $c->stash->{'reload_nav'} = 1;
 
     $c->stats->profile(end => "conf::_config_reload");
     return(1, $c->stash->{'original_output'});
