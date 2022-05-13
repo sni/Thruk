@@ -8,11 +8,7 @@
       [% END %]
     </div>
     <div class="flex-grow text-center font-semibold whitespace-nowrap">
-      <span class="[% message.0 | html %]">[% message.1 %]
-        [% IF message.0 == 'fail_message' %]
-          <i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>
-        [% END %]
-      </span>
+      <span class="[% message.0 | html %]">[% message.1 %][% IF message.0 == 'fail_message' %]<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>[% END %]</span>
     </div>
     <div class="w-5">
       <button class="iconOnly medium" title="close this message" onclick="fade('thruk_message', 500);return false;"><i class="uil uil-times"></i></button>
@@ -32,7 +28,7 @@
     </div>
   [% END %]
 
-  [% IF message.0 == 'success_message' %]
+  [% IF message.0 == 'success_message' && !message.0.match("js-no-auto-hide") %]
   <script type="text/javascript">
   <!--
   thruk_message_fade_timer = window.setTimeout("fade('thruk_message')", 5000);

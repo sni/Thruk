@@ -1215,7 +1215,7 @@ sub save_debug_information_to_tmp_file {
     print $fh $c->stash->{'debug_info'};
     Thruk::Utils::IO::close($fh, $tmpfile);
     $c->stash->{'debug_info_file'} = $tmpfile;
-    Thruk::Utils::set_message( $c, 'success_message fixed', 'Debug Information written to: '.$tmpfile );
+    Thruk::Utils::set_message($c, 'success_message js-no-auto-hide', 'Debug information written to: '.$tmpfile);
     $c->stats->profile(end => "save_debug_information_to_tmp_file");
     return($tmpfile);
 }
