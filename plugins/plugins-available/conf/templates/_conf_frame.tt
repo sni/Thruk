@@ -68,7 +68,6 @@
 [% content %]
 
 <div id="summary-dialog-form" style="display:none;">
-<!--TODO: check-->
   <form>
     <table border=0>
       <tr>

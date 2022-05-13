@@ -6,7 +6,7 @@
   <thead>
     <tr>
       <th class="!shadow-as-border-bottom"></th>
-      <th class="left-8 !shadow-as-border">Group Name</th>
+      <th class="left-8 !shadow-as-border z-[11]">Group Name</th>
       <th class="border-l-0">Description</th>
       [% IF backends.size > 1 %]
         <th>Backend</th>

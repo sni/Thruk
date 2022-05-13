@@ -344,14 +344,4 @@
 
     [% PROCESS user_ext_host_info.tt %]
 
-<script type="text/javascript">
-  <!--
-  jQuery(document).ready(function() {
-    if(jQuery(".detail_plugin_outputBlock").innerWidth() >= 1000 || jQuery(".detail_plugin_outputBlock").innerHeight() >= 600) {
-      jQuery(".moreStatusOutputButton").show();
-    }
-  });
-  -->
-  </script>
-
 [% PROCESS _footer.tt %]

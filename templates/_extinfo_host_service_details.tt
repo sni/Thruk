@@ -63,30 +63,50 @@ END
     </td>
   </tr>
   <tr>
-    <!-- TODO: change button + change span? min w and min h -->
     <th class="align-top">
-      <div align="center"><a href="#" style="display: none;" class="more_button moreStatusOutputButton" onClick="toggleClass('.detail_plugin_outputBlock', 'truncateBlock');">...</a></div>
+      <div
+        class="link hoverable rounded clickable font-normal moreStatusOutputButton"
+        style="display: none;"
+        onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');"
+        >
+        (toggle full plugin output)
+      </div>
     </th>
     <td class='detail_plugin_output whitespace-normal'>
-      <span class='detail_plugin_outputBlock min-w-[1000px] min-h-[600px]'>
+      <span class="detail_plugin_outputBlock mightOverflowBlock max-w-[1000px] max-h-[600px]">
         [% IF obj.has_been_checked == 0 %]obj has not been checked yet[% END %]
         [% IF escape_html_tags %][% nl2br(escape_html(obj.plugin_output)) %][% ELSE %][% nl2br(obj.plugin_output) %][% END %]
         [% IF obj.long_plugin_output %]
           <br>[% IF escape_html_tags %][% nl2br(escape_html(obj.long_plugin_output)) %][% ELSE %][% nl2br(obj.long_plugin_output) %][% END %]
         [% END %]
       </span>
-      <div align="center"><a href="#" style="display: none;" class="more_button moreStatusOutputButton" onClick="toggleClass('.detail_plugin_outputBlock', 'truncateBlock');">...</a></div>
+      <div
+        class="link text-center hoverable rounded clickable font-normal moreStatusOutputButton"
+        style="display: none;"
+        onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');"
+        >
+        (toggle full plugin output)
+      </div>
     </td>
   </tr>
   <tr>
     <th class="align-top">
       Performance Data
       [% IF obj.perf_data %]
-      <div style="font-weight: normal;" id="raw_perf_switch">
-        <a href="#" onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement('raw_perf_switch'); showElement('human_perf_switch'); return false;">(show raw data)</a>
+      <div
+        class="link hoverable rounded clickable font-normal"
+        id="raw_perf_switch"
+        onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement('raw_perf_switch'); showElement('human_perf_switch');"
+        >
+          (show raw data)
       </div>
-      <div style="font-weight: normal; display: none;" id="human_perf_switch">
-        <a href="#" onclick="hideElement('perfdata_raw'); showElement('perfdata_human'); hideElement('human_perf_switch'); showElement('raw_perf_switch'); return false;">(show human data)</a>
+      <div
+        class="link hoverable rounded clickable font-normal"
+        style="display: none;"
+        id="human_perf_switch"
+        onclick="hideElement('perfdata_raw'); showElement('perfdata_human'); hideElement('human_perf_switch'); showElement('raw_perf_switch');"
+        >
+        (show human data)
       </div>
       [% END %]
     </th>
@@ -117,7 +137,7 @@ END
     <td>[% IF obj.check_type == 0 %]ACTIVE[% ELSE %]PASSIVE[% END %]</td>
   </tr>
   <tr>
-    <th>Check Latency / Duration:</th>
+    <th>Check Latency / Duration</th>
     <td>
       [% IF obj.check_type == 0 %]
         [% FILTER format('%.3f') %][% obj.latency %][% END %]
@@ -257,7 +277,7 @@ END
   [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
     <tr>
       <th class="align-top">Contacts</th>
-      <td class='whitespace-normal'><span class='truncateBlock clickable' style="width: 480px;" onClick="toggleClass(this, 'truncateBlock');">[% obj.contacts.join(', ') %]</span></td>
+      <td class='whitespace-normal'><span class='mightOverflowBlock clickable' style="width: 480px;" onClick="toggleClass(this, 'mightOverflowBlock');">[% obj.contacts.join(', ') %]</span></td>
     </tr>
   [% END %]
   [% IF show_modified_attributes %]
@@ -348,3 +368,13 @@ END
     </td>
   </tr>
 </table>
+
+<script type="text/javascript">
+  <!--
+  jQuery(document).ready(function() {
+    if(jQuery(".detail_plugin_outputBlock").innerWidth() >= 1000 || jQuery(".detail_plugin_outputBlock").innerHeight() >= 600) {
+      jQuery(".moreStatusOutputButton").show();
+    }
+  });
+  -->
+  </script>

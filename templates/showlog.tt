@@ -7,7 +7,7 @@
   <input type="hidden" name="entries" value="[% c.request.parameters.entries | html %]">
   [% END %]
 
-  <div class="flexrow justify-between">
+  <div class="flexrow justify-between gap-1">
     <div class="flex">
       [% PROCESS _infobox.tt %]
     </div>
