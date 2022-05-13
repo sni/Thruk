@@ -46,6 +46,11 @@ sub index {
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(defined $c->req->parameters->{'action'}) {
+        if($c->config->{'demo_mode'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'saving user settings is disabled in demo mode');
+            return $c->redirect_to('user.cgi');
+            return;
+        }
         my $action = $c->req->parameters->{'action'};
         my $send   = $c->req->parameters->{'send'};
         if($send && $send eq 'Create New API Key') {
