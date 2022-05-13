@@ -15,7 +15,7 @@
       </td>
       <td>
         <div style="display:none;" id="[% filterprefix %]_hoststatustypes_pane" class="card shadow-float absolute z-40">
-          <div class="tabhead flexrow flex-nowrap justify-between">
+          <div class="flexrow flex-nowrap justify-between">
             <h4>Host Status Types</h4>
             <button class="iconOnly p-2" title="update hoststatus filter" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;" id="[% filterprefix %]_accept_ht">
               <i class="fa-solid fa-check round small green"></i>
@@ -53,7 +53,7 @@
       <td class="clickable hoverable w-full whitespace-normal" onclick="toggleFilterPaneSelector(this.id, 'hostprops')" id="[% filterprefix %]_hpn">[% search.host_prop_filtername %]</td>
       <td>
         <div style="display:none;" id="[% filterprefix %]_hostprops_pane" class="card shadow-float absolute z-40">
-          <div class="tabhead flexrow flex-nowrap justify-between">
+          <div class="flexrow flex-nowrap justify-between">
             <h4>Host Properties</h4>
             <button class="iconOnly p-2" title="update hostproperties filter" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;" id="[% filterprefix %]_accept_hp">
               <i class="fa-solid fa-check round small green"></i>
@@ -151,7 +151,7 @@
       <td class="clickable hoverable w-full whitespace-normal" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes')" id="[% filterprefix %]_stn">[% search.service_statustype_filtername %]</td>
       <td>
         <div style="display:none;" id="[% filterprefix %]_servicestatustypes_pane" class="card shadow-float absolute z-40">
-          <div class="tabhead flexrow flex-nowrap justify-between">
+          <div class="flexrow flex-nowrap justify-between">
             <h4>Service Status Types</h4>
             <button class="iconOnly p-2" title="update service status types" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;" id="[% filterprefix %]_accept_st">
               <i class="fa-solid fa-check round small green"></i>
@@ -190,7 +190,7 @@
       <td class="clickable hoverable w-full whitespace-normal" onclick="toggleFilterPaneSelector(this.id, 'serviceprops')" id="[% filterprefix %]_spn">[% search.service_prop_filtername %]</td>
       <td>
         <div style="display:none;" id="[% filterprefix %]_serviceprops_pane" class="card shadow-float absolute z-40">
-          <div class="tabhead flexrow flex-nowrap justify-between">
+          <div class="flexrow flex-nowrap justify-between">
             <h4>Service Properties</h4>
             <button class="iconOnly p-2" title="update service properties" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;" id="[% filterprefix %]_accept_sp">
               <i class="fa-solid fa-check round small green"></i>

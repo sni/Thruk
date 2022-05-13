@@ -402,7 +402,7 @@
 
   <div class="mainTableFooter">
     <div class="flex-1 self-center">
-      [% PROCESS _pager_total_items.tt size=100 total_items=242 %][%# TODO: check #%]
+      [% PROCESS _pager_total_items.tt size=100 total_items=242 %]
     </div>
   </div>
 </div>

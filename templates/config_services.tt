@@ -6,8 +6,8 @@
   <thead>
     <tr>
       <th class="!shadow-as-border-bottom"></th>
-      <th class="left-8 !shadow-as-border">Host</th>
-      <th class="border-l-0">Service</th> <!-- TODO: Make service sticky, fixed width with truncate?-->
+      <th class="left-8 !shadow-as-border z-[11]">Host</th>
+      <th class="left-8 sticky !shadow-as-border z-[12] border-l-0">Service</th>
       [% IF backends.size > 1 %]
         <th>Backend</th>
       [% END %]
@@ -58,7 +58,7 @@
           [% END %]
         </td>
         <td class='[% class %] sticky left-8 z-[9] bg-inherit shadow-as-border-right'><a href="config.cgi?type=hosts&amp;jump=[% d.host_name | uri %]#[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
-        <td class='[% class %] border-l-0'>[% d.description | html %]</td>
+        <td class='[% class %] left-8 sticky !shadow-as-border z-[12] bg-inherit border-l-0'>[% d.description | html %]</td>
         [% IF backends.size > 1 %]
           <td class='[% class %]'>
             [% IF d.peer_key.size < backends.size %]
