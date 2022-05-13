@@ -131,7 +131,7 @@ sub check_templates {
                         $escaped = 1;
                         my $escaped_var = $var;
                         $escaped_var =~ s/\s*\|.*$//gmx;
-                        $escaped_var =~ s/[\w_]+\(([^\)]+)\)/$1/gmx;
+                        for(1..3) { $escaped_var =~ s/[\w_]+\(([^\)]+)\)/$1/gmx; }
                         $escaped_keys->{$escaped_var} = $linenr;
                         next;
                     }
@@ -155,7 +155,7 @@ sub check_templates {
                         $escaped = 1;
                         my $escaped_var = $var;
                         $escaped_var =~ s/\s*\|.*$//gmx;
-                        $escaped_var =~ s/[\w_]+\((\s*[^\)]+\s*)\)/$1/gmx;
+                        for(1..3) { $escaped_var =~ s/[\w_]+\((\s*[^\)]+\s*)\)/$1/gmx; }
                         $escaped_keys->{$escaped_var} = $linenr;
                         next;
                     }
@@ -180,6 +180,7 @@ sub check_templates {
             next if $var eq 'cust.1';
             next if $var eq 'referer';
             next if $var =~ m/^PROCESS/mx;
+            next if($var eq 'plugin_output' && $file =~ m/(_status_detail_table|_status_hostdetail_table)\.tt/mx);
             fail(sprintf("%s:%d uses unescaped variable which is used escaped elsewhere in the same file (line %d) in: %s", $file, $linenr, $escaped_keys->{$var}, $tag));
             $failed++;
         }
