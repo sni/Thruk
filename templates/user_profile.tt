@@ -204,7 +204,6 @@
             <a href="user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key" onClick="if(confirm('Really remove?')) { setBtnSpinner(this); return true; } else { return false; }">
               <i class="fa-solid fa-trash opacity-75 text-base" title="delete this api key"></i>
             </a>
-            </button>
           </td>
         </tr>
         [% END %]
