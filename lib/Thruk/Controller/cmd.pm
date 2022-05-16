@@ -683,7 +683,7 @@ sub do_send_command {
         my $name = $f->{'description'};
         my $key  = $f->{'name'};
         if($f->{'required'}) {
-            $required_fields{$key} = $key;
+            $required_fields{$key} = $c->req->parameters->{$key};
             if(!defined $c->req->parameters->{$key} || $c->req->parameters->{$key} =~ m/^\s*$/mx) {
                 push @errors, { message => $name . ' is a required field' };
             }
