@@ -863,6 +863,9 @@ INPUT:disabled {
 }
 INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid {
   @apply outline-none ring-0 ring-red-600 border-red-600;
+  &.silent {
+    @apply outline-none ring-0 ring-inherit border-inherit;
+  }
 }
 
 .daterangepicker {
@@ -1084,6 +1087,17 @@ DIV.actionbox {
         @apply pb-1;
       }
     }
+  }
+}
+
+/*******************************************************************************
+ * login page
+ */
+BODY.loginpage {
+  @apply bg-gradient-to-t from-gray-200 via-slate-300 to-gray-200;
+
+  DIV.loginmask {
+    @apply bg-slate-100;
   }
 }
 
