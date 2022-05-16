@@ -49,7 +49,6 @@ sub index {
         if($c->config->{'demo_mode'}) {
             Thruk::Utils::set_message( $c, 'fail_message', 'saving user settings is disabled in demo mode');
             return $c->redirect_to('user.cgi');
-            return;
         }
         my $action = $c->req->parameters->{'action'};
         my $send   = $c->req->parameters->{'send'};
