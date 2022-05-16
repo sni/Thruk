@@ -221,6 +221,6 @@
 <input type="hidden" name="[% k | html %]" value="[% btn.data.$k | html %]">
 [% END %]
 [% END %]
-<button[% FOREACH k = btn.button.keys; IF k == "text"; NEXT; END %] [% k | html %]="[% btn.button.$k | html %]"[% END %]>[% IF btn.button.defined('text'); btn.button.text | html; END %][% IF btn.button.defined('html'); btn.button.html; END %]</button>
+<button[% FOREACH k = btn.button.keys; IF k == "text" || k == "html"; NEXT; END %] [% k | html %]="[% btn.button.$k | html %]"[% END %]>[% IF btn.button.defined('text'); btn.button.text | html; END %][% IF btn.button.defined('html'); btn.button.html; END %]</button>
 [% UNLESS btn.defined('skipform') && btn.skipform %]</form>[% END %]
 [% END %]
