@@ -164,7 +164,7 @@ sub _build_app {
         '/thruk/cgi-bin/cmd.cgi'           => 'Thruk::Controller::cmd::index',
         '/thruk/cgi-bin/config.cgi'        => 'Thruk::Controller::config::index',
         '/thruk/cgi-bin/extinfo.cgi'       => 'Thruk::Controller::extinfo::index',
-        '/thruk/cgi-bin/history.cgi'       => 'Thruk::Controller::history::index',
+        '/thruk/cgi-bin/history.cgi'       => 'Thruk::Controller::showlog::index',
         '/thruk/cgi-bin/login.cgi'         => 'Thruk::Controller::login::index',
         '/thruk/cgi-bin/broadcast.cgi'     => 'Thruk::Controller::broadcast::index',
         '/thruk/cgi-bin/user.cgi'          => 'Thruk::Controller::user::index',

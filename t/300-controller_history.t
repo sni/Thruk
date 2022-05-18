@@ -11,7 +11,6 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-BEGIN { use_ok 'Thruk::Controller::history' }
 
 my $pages = [
     '/thruk/cgi-bin/history.cgi',

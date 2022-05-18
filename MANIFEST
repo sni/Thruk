@@ -78,7 +78,6 @@ lib/Thruk/Controller/cmd.pm
 lib/Thruk/Controller/config.pm
 lib/Thruk/Controller/error.pm
 lib/Thruk/Controller/extinfo.pm
-lib/Thruk/Controller/history.pm
 lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
@@ -2897,8 +2896,6 @@ templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
 templates/extra_headers.tt
 templates/get_variable.tt
-templates/histogram_step_1.tt
-templates/history.tt
 templates/login.tt
 templates/main.tt
 templates/notifications.tt
