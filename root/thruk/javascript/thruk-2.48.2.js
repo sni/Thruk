@@ -490,6 +490,12 @@ function openModalCommand(el) {
 }
 
 function openModalWindow(url) {
+    if(!has_jquery_ui) {
+        load_jquery_ui(function() {
+            openModalWindow(url);
+        });
+        return;
+    }
     jQuery(document.body).append('<div id="modalBG" class="modalBG"><\/div>');
     jQuery(document.body).append(
          '<div id="modalFG" class="modalFG">'
@@ -502,6 +508,7 @@ function openModalWindow(url) {
         +'  <\/div>'
         +'<\/div>'
     );
+    jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
     addEvent(document, 'keydown', closeModalWindowOnEscape);
     jQuery('#modalFG').load(url, {}, function(text, status, req) {
         if(status == "error") {
@@ -509,6 +516,8 @@ function openModalWindow(url) {
             jQuery('#modalFG DIV.spinner').remove();
         } else {
             init_page();
+            jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
+            jQuery('#modalFG H3, #modalFG .head').css("cursor", "move");
         }
     });
     return false;
