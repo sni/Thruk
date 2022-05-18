@@ -1,6 +1,5 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
-[% PROCESS _message.tt %]
 
 <form action="showlog.cgi" method="GET" id="date_form">
   [% IF c.request.parameters.defined("entries") %]
@@ -8,8 +7,24 @@
   [% END %]
 
   <div class="flexrow justify-between gap-1">
-    <div class="flex">
+    <div class="flexcol gap-1">
       [% PROCESS _infobox.tt %]
+      <div class="card mt-5 min-w-[350px]">
+        <div class="actionbox less-padding">
+          [% IF service != '' and host != 'all' %]
+          <div><a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
+          [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a></div>[% END %]
+          <div><a href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
+          [% ELSIF host != 'all' %]
+          <div><a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a></div>
+          <div><a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
+          [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]">View Trends For This Host</a></div>[% END %]
+          [% ELSE %]
+          <div><a href='status.cgi?host=all'>View Status Detail For All Hosts</a></div>
+          <div><a href='notifications.cgi?host=all'>View Notifications For All Hosts</a></div>
+          [% END %]
+        </div>
+      </div>
     </div>
 
     <div class="flex">
@@ -21,41 +36,44 @@
         <div class="head">
           <h3>Options</h3>
         </div>
-        <div class="body">
-          <table>
-            <tr>
-              <td class="pr-2">
-                <input type='text' class="w-full" name='host' id='host' value="[% IF host != 'all'; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
-              </td>
-              <td><input type='checkbox' id="oldestfirst" name="oldestfirst" [% IF oldestfirst %] checked[% END %]> <label for="oldestfirst">Older Entries First</label></td>
-            </tr>
-            <tr>
-              <td class="pr-2">
-                <input type='text' class="w-full" name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"  placeholder="service description">
-              </td>
-              <td>
-                [% IF c.config.defined("logcache") && c.config.logcache %]
-                <input type='checkbox' id="disable_logcache" name="logcache" value="0" [% IF c.req.parameters.exists("logcache") && c.req.parameters.logcache == 0 %] checked[% END %]> <label for="disable_logcache">Disable Logcache</label>
-                [% END %]
-              </td>
-            </tr>
-            <tr>
-              <td class="pr-2">
-                <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
-              </td>
-              <td>
-                [% IF backends.size > 1 %]
-                <input type='checkbox' id="showsites" name="showsites" [% IF showsites %] checked[% END %]> <label for="showsites">Show Site Names</label>
-                [% END %]
-              </td>
-            </tr>
-            <tr>
-              <td class="pr-2">
-                <input type="text" class="w-full" name="exclude_pattern" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
-              </td>
-              <td colspan="2"><input type='submit' value='Apply' class="w-24"></td>
-            </tr>
-          </table>
+        <div class="body flexrow flex-nowrap gap-2">
+          <div class="flexcol flex-nowrap gap-1 grow">
+            <select name='type'>
+              <option value=""[% IF    type ==  "" %] selected[% END %]>All entries</option>
+              <option value="0"[% IF   type ==   0 %] selected[% END %]>All alerts</option>
+              <option value="1"[% IF   type ==   1 %] selected[% END %]>All service alerts</option>
+              <option value="2"[% IF   type ==   2 %] selected[% END %]>All host alerts</option>
+              <option value="4"[% IF   type ==   4 %] selected[% END %]>Service warning</option>
+              <option value="8"[% IF   type ==   8 %] selected[% END %]>Service unknown</option>
+              <option value="16"[% IF  type ==  16 %] selected[% END %]>Service critical</option>
+              <option value="32"[% IF  type ==  32 %] selected[% END %]>Service recovery</option>
+              <option value="64"[% IF  type ==  64 %] selected[% END %]>Host down</option>
+              <option value="128"[% IF type == 128 %] selected[% END %]>Host unreachable</option>
+              <option value="256"[% IF type == 256 %] selected[% END %]>Host recovery</option>
+            </select>
+            <select name='statetype'>
+              <option value="0"[% IF statetype == 0 %] selected[% END %]>All state types</option>
+              <option value="1"[% IF statetype == 1 %] selected[% END %]>Soft states</option>
+              <option value="2"[% IF statetype == 2 %] selected[% END %]>Hard states</option>
+            </select>
+            <input type='text' name='host' id='host' value="[% IF host != 'all'; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
+            <input type='text' name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })" placeholder="service">
+            <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
+            <input type="text" class="w-full" name="exclude_pattern" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
+          </div>
+          <div class="flexcol flex-nowrap gap-1 grow">
+            <div><input type='checkbox' id='noflapping' name='noflapping'[% IF noflapping %] checked[% END %]><label class="clickable ml-1" for="noflapping">Hide Flapping Alerts</label></div>
+            <div><input type='checkbox' id='nodowntime' name='nodowntime'[% IF nodowntime %] checked[% END %]><label class="clickable ml-1" for="nodowntime">Hide Downtime Alerts</label></div>
+            <div><input type='checkbox' id='nosystem' name='nosystem'[% IF nosystem %] checked[% END %]><label class="clickable ml-1" for="nosystem">Hide Process Messages</label></div>
+            <div><input type='checkbox' id="oldestfirst" name="oldestfirst" [% IF oldestfirst %] checked[% END %]><label class="clickable ml-1" for="oldestfirst">Older Entries First</label></div>
+            [% IF backends.size > 1 %]
+              <div><input type='checkbox' id="showsites" name="showsites" [% IF showsites %] checked[% END %]><label class="clickable ml-1" for="showsites">Show Site Names</label></div>
+            [% END %]
+            [% IF c.config.defined("logcache") && c.config.logcache %]
+            <div><input type='checkbox' id="disable_logcache" name="logcache" value="0" [% IF c.req.parameters.exists("logcache") && c.req.parameters.logcache == 0 %] checked[% END %]><label class="clickable ml-1" for="disable_logcache">Disable Logcache</label></div>
+            [% END %]
+            <input type='submit' value='Apply' class="w-24 mt-auto">
+          </div>
         </div>
       </div>
     </div>
@@ -65,9 +83,16 @@
 
 <div>
   <h1 class="py-4">
-    Log File Entries
-    [% IF host %]
-      for [% host | html %][% IF service %] - [% service | html %][% END %]
+    [% IF service != '' and host != '' %]
+    Service '[% service | html %]' On Host '[% host | html %]'
+    [% ELSIF host != '' %]
+    Host '[% host | html %]'
+    [% ELSE %]
+      [% IF type == "" %]
+        Log File Entries
+      [% ELSE %]
+        All Hosts and Services
+      [% END %]
     [% END %]
   </h1>
 </div>
@@ -78,7 +103,7 @@
     <i class="uil uil-times" title='Hide Message'></i>
   </button>
   This page is based on the compacted logfile cache which is optimized for sla reporting.<br>
-  <a href="[% uri_with(c, 'logcache' => 0) %]">Click here to show all log entries by disabling the cache.</a>
+  <a class="link" href="[% uri_with(c, 'logcache' => 0) %]">Click here to show all log entries by disabling the cache.</a>
 </div>
 [% END %]
 

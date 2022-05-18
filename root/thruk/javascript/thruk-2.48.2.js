@@ -5557,7 +5557,7 @@ function getPageScroll() {
     scroll += ":"+Number(main.scrollTop()).toFixed(0);
 
     var mainTable = jQuery(".mainTable").first();
-    if(mainTable) {
+    if(mainTable.length > 0) {
         scroll += ":"+Number(mainTable.scrollLeft()).toFixed(0);
         scroll += ":"+Number(mainTable.scrollTop()).toFixed(0);
     }
