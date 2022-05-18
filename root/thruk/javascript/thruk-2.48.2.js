@@ -117,11 +117,7 @@ function init_page() {
 
     // try to match a navigation entry
     try {
-        if(window.parent.frames && top.frames && top.frames['side']) {
-            check_side_nav_active_item(top.frames['side'].document);
-        } else {
-            check_side_nav_active_item(window.document);
-        }
+        check_side_nav_active_item(window.document);
     }
     catch(err) {
         console.log(err);
@@ -548,14 +544,74 @@ function check_side_nav_active_item(ctx) {
     if(jQuery('#nav-container').hasClass('collapsed')) { return; }
     var urlArgs = toQueryParams();
     var page    = window.location.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
-    var keyArgs = ["type", "style"];
 
+    // compare complete url
+    var found   = false;
+    var pageUrl = window.location.href.toString();
+    jQuery("A", ctx).each(function(i, el) {
+        if(el.href.toString() == pageUrl) {
+            found = true;
+        }
+        if(found) {
+            jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+            jQuery(el).addClass("active");
+            return false;
+        }
+    });
+    if(found) { return; }
+
+    // compare all args from the nav link (with value)
     jQuery("A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
             var href    = el.href.replace(/^.*\?/, '');
             var navArgs = toQueryParams(href);
-            var found = true;
+            if(navArgs.length == 0) { return(true); }
+            found = true;
+            for(var key in navArgs) {
+                if(!urlArgs[key] || urlArgs[key] != navArgs[key]) {
+                    found = false;
+                }
+            }
+            if(found) {
+                jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+                jQuery(el).addClass("active");
+                return false;
+            }
+        }
+    });
+    if(found) { return; }
+
+    // compare all args from the nav link (only keyword)
+    jQuery("A", ctx).each(function(i, el) {
+        var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+        if(navPage == page) {
+            var href    = el.href.replace(/^.*\?/, '');
+            var navArgs = toQueryParams(href);
+            if(navArgs.length == 0) { return(true); }
+            found = true;
+            for(var key in navArgs) {
+                if(!urlArgs[key]) {
+                    found = false;
+                }
+            }
+            if(found) {
+                jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+                jQuery(el).addClass("active");
+                return false;
+            }
+        }
+    });
+    if(found) { return; }
+
+    // compare some main args
+    var keyArgs = ["type", "style"];
+    jQuery("A", ctx).each(function(i, el) {
+        var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+        if(navPage == page) {
+            var href    = el.href.replace(/^.*\?/, '');
+            var navArgs = toQueryParams(href);
+            found = true;
             jQuery(keyArgs).each(function(i, key) {
                 if(urlArgs[key]) {
                     if(!navArgs[key] || urlArgs[key] != navArgs[key]) {
