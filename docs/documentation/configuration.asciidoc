@@ -1880,6 +1880,7 @@ ex.:
   <auth_oauth>
     <provider name>
       login         = "Login with OAuth"      # Value of the login button.
+      icon          = "uil uil-enter"         # CSS class for button icon.
       client_id     = <required>              # Client_id as set from the oauth provider.
       client_secret = <required>              # Secret key from the oauth provider
       scopes        = openid profile email    # Scopes required to access user information
