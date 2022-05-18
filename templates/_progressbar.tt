@@ -36,6 +36,21 @@
     var last_overmsg_[% pb_options.id %]   = '';
     var is_loading_[% pb_options.id %]     = false;
     var is_killed_[% pb_options.id %]      = false;
+    var data_percent_[% pb_options.id %]   = Number([% pb_options.percent %]);
+
+    // register kill handler if page unloads
+    jQuery(window).on("beforeunload unload", function() {
+        if(!is_killed_[% pb_options.id %] && Number(data_percent_[% pb_options.id %]) < 100) {
+            is_killed_[% pb_options.id %] = true;
+            var datestr = Math.round((new Date()).getTime()/1000);
+            jQuery.ajax({
+                url: "job.cgi?job=[% pb_options.job_id %]&json=1&cancel=1&_"+datestr,
+                type: 'POST',
+                dataType: 'json',
+                async: false
+            });
+        }
+    });
 
     jQuery(function() {
         jQuery("#bar_[% pb_options.id %]" ).css("width", "[% pb_options.percent %]%");
@@ -67,7 +82,7 @@
         /* send kill request and reload/go back afterwards */
         var datestr = Math.round((new Date()).getTime()/1000);
         jQuery.ajax({
-            url: "job.cgi?job=[% pb_options.job_id %]&cancel=1&_"+datestr,
+            url: "job.cgi?job=[% pb_options.job_id %]&json=1&cancel=1&_"+datestr,
             type: 'POST',
             dataType: 'json',
             success: function(data, status, jqXHR) {
@@ -93,7 +108,7 @@
 
     function update_job_progressbar_[% pb_options.id %]() {
         var datestr = Math.round((new Date()).getTime()/1000);
-        var val = jQuery("#bar_[% pb_options.id %]")[0].style.width.replace("%", "");
+        var val = data_percent_[% pb_options.id %];
 
         // update every 2 seconds
         if(last_time_[% pb_options.id %] != 0 && datestr%2 != 0 && val < 100) {
@@ -113,6 +128,7 @@
                 is_loading_[% pb_options.id %] = false;
                 if(data.percent != 0) {
                     jQuery("#bar_[% pb_options.id %]" ).css("width", ""+data.percent+"%");
+                    data_percent_[% pb_options.id %] = Number(data.percent);
                 }
                 if(data.percent != 100) {
                     if([% pb_options.show_message %] && data.message) { last_message_[% pb_options.id %] = " - " + data.message; }
@@ -140,7 +156,7 @@
             }
         });
 
-        val = jQuery("#bar_[% pb_options.id %]")[0].style.width.replace("%", "");
+        val = data_percent_[% pb_options.id %];
         if(val >= 100) {
             clearInterval(timer_[% pb_options.id %]);
             [% IF pb_options.defined("show_console") && pb_options.show_console %]
@@ -151,7 +167,9 @@
             [% END %]
             return;
         } else {
-            jQuery("#bar_[% pb_options.id %]").css("width", ""+(val + [% pb_options.percent_per_second %])+"%");
+            val = val + [% pb_options.percent_per_second %];
+            jQuery("#bar_[% pb_options.id %]").css("width", ""+val+"%");
+            data_percent_[% pb_options.id %] = val;
         }
     }
 

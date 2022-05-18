@@ -308,6 +308,7 @@ sub cancel {
         }
 
         update_status($dir, 99.9, 'canceled');
+        Thruk::Utils::IO::write($dir."/killed", sprintf("killed at: %d\njob pid: %d\nuser: %s\n", time(), $pid, $c->stash->{'remote_user'} // '<none>'));
         CORE::kill(15, $pid);
         CORE::kill(-15, $pid);
         sleep(1);
@@ -583,17 +584,18 @@ sub job_page {
     my $cancel = $c->req->parameters->{'cancel'} || 0;
     $c->stash->{no_auto_reload} = 1;
     return $c->detach('/error/index/22') unless defined $job;
+
+    if($cancel) {
+        cancel($c, $job);
+        return get_json_status($c, $job);
+    }
+
     if($json) {
         return get_json_status($c, $job);
     }
 
     my($is_running,$time,$percent,$message,$forward,$remaining,$user,$show_output) = get_status($c, $job);
     return $c->detach('/error/index/22') unless defined $is_running;
-
-    if($cancel) {
-        cancel($c, $job);
-        return;
-    }
 
     if(!$show_output) {
         # try to directly serve the request if it takes less than 3 seconds
