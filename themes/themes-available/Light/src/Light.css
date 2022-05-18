@@ -614,6 +614,7 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
     hover:cursor-pointer
     ease-in-out
     transition
+    items-center
   ;
 
   &.secondary {
@@ -1098,6 +1099,18 @@ BODY.loginpage {
 
   DIV.loginmask {
     @apply bg-slate-100;
+
+    BUTTON, A.button {
+      @apply text-white bg-slate-500 hover:bg-slate-600;
+    }
+
+    HR {
+      @apply border-gray-500;
+    }
+
+    DIV.spinner {
+      @apply border-white border-r-transparent w-5 h-5 mr-1;
+    }
   }
 }
 

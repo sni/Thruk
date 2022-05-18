@@ -19,6 +19,7 @@ You need to create a new OAuth2 application here: https://github.com/settings/de
 <auth_oauth>
   <provider>
     login = "Login with GitHub"
+    icon = "uil uil-github"
     client_id = ...
     client_secret = ...
     scopes = openid profile email groups
@@ -39,6 +40,7 @@ You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.goog
 <auth_oauth>
   <provider>
     login = "Google Account Login"
+    icon = "uil uil-google"
     client_id = ...
     client_secret = ...
     scopes = openid profile email
@@ -57,6 +59,7 @@ You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.goog
 <auth_oauth>
   <provider>
     login = "Login with Okta"
+    icon = "uil uil-okta"
     client_id = ...
     client_secret = ...
     scopes = openid profile email groups
@@ -79,6 +82,7 @@ decode and validate the attribute assertions.
 <auth_oauth>
   <provider>
     login = "Login with AD FS"
+    icon = "uil uil-windows"
     client_id = ...
     client_secret = ...
     scopes = openid profile

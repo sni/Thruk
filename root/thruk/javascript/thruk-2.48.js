@@ -127,12 +127,6 @@ function init_page() {
         console.log(err);
     }
 
-    jQuery('BUTTON.spinner')
-        .off("click")
-        .on("click", function() {
-            setBtnSpinner(this);
-        });
-
     jQuery("A.js-modal-command-link")
         .off("click")
         .on("click", function(e) {
@@ -422,7 +416,11 @@ function setBtnSpinner(btn) {
     jQuery(btn).find("I").css("display", "none");
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
-    jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
+    if(jQuery(btn).find("I").length > 0) {
+        jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
+    } else {
+        jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
+    }
     jQuery(btn).prop('disabled', true).addClass(["opacity-50", "not-clickable"]);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
@@ -440,7 +438,11 @@ function setBtnError(btn, title) {
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
     jQuery(btn).find("I").css("display", "none");
-    jQuery(btn).prepend('<I class="uil uil-exclamation round yellow mr-1"><\/I>');
+    if(jQuery(btn).find("I").length > 0) {
+        jQuery(btn).find("I").after('<I class="uil uil-exclamation round yellow small mr-1"><\/I>');
+    } else {
+        jQuery(btn).prepend('<I class="uil uil-exclamation round yellow small mr-1"><\/I>');
+    }
     jQuery(btn)
         .prop('disabled', false)
         .prop('title', title)

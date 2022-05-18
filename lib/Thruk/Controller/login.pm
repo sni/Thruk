@@ -56,7 +56,6 @@ sub index {
 
     my $login   = $c->req->parameters->{'login'}    || '';
     my $pass    = $c->req->parameters->{'password'} || '';
-    my $submit  = $c->req->parameters->{'submit'}   || '';
     my $referer = $c->req->parameters->{'referer'}  || '';
     $referer    =~ s#^//#/#gmx;         # strip double slashes
     $referer    = $c->stash->{'url_prefix'} unless $referer;
@@ -109,8 +108,8 @@ sub index {
         return(Thruk::Utils::OAuth::handle_oauth_login($c, $referer, $cookie_path, $cookie_domain));
     }
 
-    if($submit ne '' && $login eq '') {
-        Thruk::Utils::set_message( $c, 'fail_message', 'missing parameter: username' );
+    if(defined $c->req->parameters->{'login'} && $login eq '') {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Missing credentials' );
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
     }
 

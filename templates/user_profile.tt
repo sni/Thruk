@@ -70,7 +70,7 @@
                   </select>
                 </div>
                 <div>
-                  <button onclick="setBtnSpinner(this)"><i class="uil uil-save"></i>save changes</button>
+                  <button onclick="setBtnSpinner(this);"><i class="uil uil-save"></i>save changes</button>
                 </div>
                 <div>
                   <span>Server: <span id="server_tz">[% c.config._server_timezone %]</span></span><br>
@@ -138,7 +138,7 @@
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
             <div class="flexrow gap-1">
               <input type="text" name="comment" value="" placeholder="comment" class="grow">
-              <button class="w-40" onclick="setBtnSpinner(this);">Create New API Key</button>
+              <button class="w-44" onclick="setBtnSpinner(this);"><i class="uil uil-plus"></i>Create New API Key</button>
             </div>
             <div class="pt-1">
               <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
