@@ -415,12 +415,6 @@ function switchTheme(sel) {
   jQuery("IMG").each(function() {
     this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
   });
-  if(window && window.parent && window.parent.frames[0] && window.parent.frames[0].document) {
-    jQuery("LINK.maintheme", window.parent.frames[0].document).attr("href", "[% url_prefix %]themes/"+theme+"/stylesheets/"+theme+".css")
-    jQuery("IMG", window.parent.frames[0].document).each(function() {
-      this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
-    });
-  }
 }
 </script>
 

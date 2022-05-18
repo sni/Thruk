@@ -12,12 +12,12 @@
       <div class="actionbox less-padding">
         <div><a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a></div>
         <div><a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a></div>
-        <div><a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;nosystem=1">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Outages</a>)</div>
+        <div><a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;nosystem=1&amp;backend=[% service.peer_key %]">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Outages</a>)</div>
         [% IF show_impacts_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]">View Impacts For This Problem</a></div>[% END %]
         [% IF show_rootproblems_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]">View Root Problem For This Impact</a></div>[% END %]
         [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Trends For This Service</a></div>[% END %]
         <div><a href="avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries">View Availability Report For This Service</a></div>
-        <div><a href="notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Notifications For This Service</a></div>
+        <div><a href="notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">View Notifications For This Service</a></div>
         [% IF c.check_user_roles('authorized_for_configuration_information') %]
           <div>
             <a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">
