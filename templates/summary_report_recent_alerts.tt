@@ -1,44 +1,51 @@
 ﻿[% USE date %]
-<div align="center" class='dataSubTitle'>
-  Displaying [% IF pager.total_entries > limit %] most recent [% limit %] of [% pager.total_entries %] [% ELSE %] all [% data.size %] [% END %]  matching alerts
-  <div align="center">
-    <table border="0" class='data'>
-      <tr>
-        <th class='data'>Time</th>
-        <th class='data'>Alert Type</th>
-        <th class='data'>Host</th>
-        <th class='data'>Service</th>
-        <th class='data'>State</th>
-        <th class='data'>State Type</th>
-        <th class='data'>Information</th>
-      </tr>
-      [%  FOREACH d = data %]
-      [% SET class = 'dataOdd'  IF loop.even %]
-      [% SET class = 'dataEven' IF loop.odd  %]
-      <tr class='[% class %]'>
-        <td class='[% class %]'>[% format_date(d.time, datetime_format) %]</td>
-        [% IF d.service_description %]
-        [% SET status = 'OK'       IF d.state == 0 %]
-        [% SET status = 'WARNING'  IF d.state == 1 %]
-        [% SET status = 'UNKNOWN'  IF d.state == 3 %]
-        [% SET status = 'CRITICAL' IF d.state == 2 %]
-        <td class='[% class %]'>Service Alert</td>
-        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
-        <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
-        <td class='service[% status %]'>[% status %]</td>
-        [% ELSE %]
-        [% SET status = 'UP'          IF d.state == 0 %]
-        [% SET status = 'DOWN'        IF d.state == 1 %]
-        [% SET status = 'UNREACHABLE' IF d.state == 2 %]
-        <td class='[% class %]'>Host Alert</td>
-        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
-        <td class='[% class %]'>N/A</td>
-        <td class='host[% status %]'>[% status %]</td>
+
+<div class="card w-full mt-5">
+  <div class="mainTable">
+    <table class="mainTable striped">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Alert Type</th>
+          <th>Host</th>
+          <th>Service</th>
+          <th>State</th>
+          <th>State Type</th>
+          <th>Information</th>
+        </tr>
+      </thead>
+      <tbody>
+        [%  FOREACH d = data %]
+        <tr>
+          <td>[% format_date(d.time, datetime_format) %]</td>
+          [% IF d.service_description %]
+          [% SET status = 'OK'       IF d.state == 0 %]
+          [% SET status = 'WARNING'  IF d.state == 1 %]
+          [% SET status = 'UNKNOWN'  IF d.state == 3 %]
+          [% SET status = 'CRITICAL' IF d.state == 2 %]
+          <td>Service Alert</td>
+          <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
+          <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
+          <td class='text-center [% status %]'>[% status %]</td>
+          [% ELSE %]
+          [% SET status = 'UP'          IF d.state == 0 %]
+          [% SET status = 'DOWN'        IF d.state == 1 %]
+          [% SET status = 'UNREACHABLE' IF d.state == 2 %]
+          <td>Host Alert</td>
+          <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
+          <td>N/A</td>
+          <td class='text-center [% status %]'>[% status %]</td>
+          [% END %]
+          <td>[% d.state_type %]</td>
+          <td class="truncate w-1/2 max-w-xs">[% IF escape_html_tags %][% escape_html(log_line_plugin_output(d)) %][% ELSE %][% log_line_plugin_output(d) %][% END %]</td>
+        </tr>
         [% END %]
-        <td class='[% class %]'>[% d.state_type %]</td>
-        <td class='[% class %]' style="text-align: left;">[% IF escape_html_tags %][% escape_html(log_line_plugin_output(d)) %][% ELSE %][% log_line_plugin_output(d) %][% END %]</td>
-      </tr>
-      [% END %]
+      </tbody>
     </table>
+  </div>
+  <div class="mainTableFooter">
+    <div class="flex-1 self-center">
+      [% PROCESS _pager_total_items.tt %]
+    </div>
   </div>
 </div>
