@@ -634,9 +634,11 @@ sub job_page {
 
         # other errors
         if((defined $err && $err ne '') && (!defined $rc || $rc != 0 || (!$out && !$stash))) {
-            $c->error($err);
-            _error($err);
-            return $c->detach('/error/index/23');
+            return $c->detach_error({
+                msg               => 'Background Job Failed',
+                descr             => 'background job failed, look at your logfile for details',
+                debug_information => $err,
+            });
         }
         return _finished_job_page($c, $stash, $forward, $out);
     }

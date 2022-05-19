@@ -209,11 +209,6 @@ sub index {
             'dscr' => 'Job could not be found.',
             'code' => 404, # not found
         },
-        '23'  => {
-            'mess' => 'Background Job Failed',
-            'dscr' => 'background job failed, look at your logfile for details',
-            'code' => 500, # internal server error
-        },
         '24'  => {
             'mess'    => 'CSRF Security Alert',
             'dscr'    => 'Using this formular requires a POST with a valid CSRF token or an API key.',
@@ -251,6 +246,7 @@ sub index {
     }
 
     my $errorDetails = join("\n", @{$c->error});
+    $c->stash->{errorDebugInfo} = '' unless $c->stash->{errorDebugInfo};
 
     # redirected from $c->detach_error()
     my $log_req;
