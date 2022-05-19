@@ -258,9 +258,6 @@
                 <td>[% stats.services_passive_all_sum %] ([% sprintf('%.1f',stats.services_passive_all_perc) %]%)</td>
               </tr>
             </table>
-              </td>
-            </tr>
-          </table>
           </div>
         </div>
 

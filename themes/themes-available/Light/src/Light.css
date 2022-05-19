@@ -569,7 +569,10 @@ DIV.progressbar {
  * perf bar (ex.: on service/hosts lists)
  */
 .perf-bar-container {
-  @apply w-[75px] h-5 relative;
+  @apply block w-[75px] h-5 relative;
+  SPAN {
+    @apply block;
+  }
   .ok,.green {
     @apply bg-green-500 border-green-700;
   }
