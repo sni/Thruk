@@ -3140,7 +3140,7 @@ function set_hash(value, nr) {
     } else {
         value = '#'+value;
     }
-    if (history.replaceState) {
+    if(history.replaceState) {
         history.replaceState({}, "", value);
     } else {
         window.location.replace(value);
@@ -6521,16 +6521,15 @@ function toggleTopPane() {
     if(formInput) {
         formInput.value = 0;
     }
-    jQuery("#btn_toggle_top_pane").addClass("uil-top-arrow-to-top");
-    jQuery("#btn_toggle_top_pane").removeClass("uil-arrow-to-bottom");
+    hideElement("btn_toggle_top_pane");
   } else {
     additionalParams['hidetop'] = 1;
     if(formInput) {
         formInput.value = 1;
     }
-    jQuery("#btn_toggle_top_pane").removeClass("uil-top-arrow-to-top");
-    jQuery("#btn_toggle_top_pane").addClass("uil-arrow-to-bottom");
+    showElement("btn_toggle_top_pane");
   }
+  updateUrl();
 }
 
 /*******************************************************************************

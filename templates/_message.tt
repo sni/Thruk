@@ -3,12 +3,13 @@
 <div id="thruk_message" class="card shadow-float absolute p-1 z-50 min-w-[600px] top-4 left-1/2 transform -translate-x-1/2">
   <div class="flexrow flex-nowrap gap-2 justify-center">
     <div class="w-5">
-      [% IF message.2 %]
-        <button class="iconOnly medium absolute top-1 left-0 p-1" title="show details" onclick="toggleElement('message_details', 'message_details_icon');return false;"><i class="uil uil-arrow-from-top"></i></button>
-      [% END %]
+      [% IF message.0 == 'fail_message' %]<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>[% END %]
     </div>
     <div class="flex-grow text-center font-semibold whitespace-nowrap">
-      <span class="[% message.0 | html %]">[% message.1 %][% IF message.0 == 'fail_message' %]<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>[% END %]</span>
+      <span class="[% message.0 | html %]">[% message.1 %]</span>
+      [% IF message.2 %]
+        <div class="mt-1"><a class="link" href="#" onclick="showElement('message_details'); hideElement(this.parentNode); return false;">show details...</a></div>
+      [% END %]
     </div>
     <div class="w-5">
       <button class="iconOnly medium" title="close this message" onclick="fade('thruk_message', 500);return false;"><i class="uil uil-times"></i></button>
@@ -19,10 +20,10 @@
     [% thruk_message_details = message.3 %]
   [% END %]
   [% IF message.2 %]
-    <div class="w-full flex justify-center" style="display:none" id="message_details">
-      <pre class="[% message.0 | html %]">
+    <div class="w-full flex justify-center">
+      <pre class="[% message.0 | html %]" style="display:none;" id="message_details">
         [% FOREACH detail = thruk_message_details %]
-        [% detail %]<br>
+        [% detail %]
         [% END %]
       </pre>
     </div>

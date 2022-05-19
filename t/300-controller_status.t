@@ -52,7 +52,7 @@ my $pages = [
 # Services
     '/thruk/cgi-bin/status.cgi?host=all',
     '/thruk/cgi-bin/status.cgi?host=does_not_exist',
-    { url => '/thruk/cgi-bin/status.cgi?host='.$host, like => ['Service Status Details For Host \''.$host.'\'', 'Current Network Status', 'Matching Service Entries Displayed'] },
+    { url => '/thruk/cgi-bin/status.cgi?host='.$host, like => ['Service Status Details For Host \''.$host.'\'', 'Current Network Status', 'Items Displayed'] },
     '/thruk/cgi-bin/status.cgi?sortoption=1&sorttype=1&host=all',
     '/thruk/cgi-bin/status.cgi?sortoption=1&sorttype=2&host=all',
     '/thruk/cgi-bin/status.cgi?sortoption=2&sorttype=1&host=all',
@@ -63,7 +63,7 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?sortoption=5&sorttype=1&host=all',
     '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
     '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
-    { url => '/thruk/cgi-bin/status.cgi?q=***host_name = "'.$host.'"***', like => ['Service Status Details', 'Matching Service Entries Displayed'] },
+    { url => '/thruk/cgi-bin/status.cgi?q=***host_name = "'.$host.'"***', like => ['Service Status Details', 'Items Displayed'] },
 
 # Servicegroups
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',
@@ -130,7 +130,7 @@ my $pages = [
 ];
 
 for my $url (@{$pages}) {
-    my $test = TestUtils::make_test_hash($url, {'like' => [ 'Current Network Status', 'statusTitle' ]});
+    my $test = TestUtils::make_test_hash($url, {'like' => [ 'Current Network Status' ]});
     TestUtils::test_page(%{$test});
 }
 
