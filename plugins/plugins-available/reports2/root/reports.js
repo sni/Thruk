@@ -1,46 +1,4 @@
 /* initialize all buttons */
-function init_report_tool_buttons() {
-    jQuery('A.report_button').button();
-    jQuery('BUTTON.report_button').button();
-
-    jQuery('.report_edit_button').button({
-        icons: {primary: 'ui-edit-button'}
-    });
-
-    jQuery('.report_save_button').button({
-        icons: {primary: 'ui-save-button'}
-    });
-    jQuery('.report_clone_button').button({
-        icons: {primary: 'ui-clone-button'}
-    });
-
-    jQuery('.report_email_button').button({
-        icons: {primary: 'ui-email-button'}
-    });
-
-    jQuery('.right_arrow_button').button({
-        icons: {primary: 'ui-r-arrow-button'}
-    });
-
-    jQuery('.add_button').button({
-        icons: {primary: 'ui-add-button'}
-    });
-
-    jQuery('.report_small_remove_button').button({
-        icons: {primary: 'ui-remove-button'},
-        text: false
-    });
-
-    jQuery('.radioset INPUT[type=radio]').button({icon:false});
-    jQuery('.radioset').controlgroup({});
-
-    jQuery('.report_remove_button').button({
-        icons: {primary: 'ui-remove-button'}
-    }).click(function() {
-        return confirm('really delete?');
-    });
-}
-
 /* update reports edit step2 */
 var tmpDiv;
 var updateRetries;
@@ -82,30 +40,36 @@ function reports_view(typ) {
 
     // show owner column?
     if(typ == 'all' || typ == 'public') {
-        jQuery('#statusTable .usercol').each(function(nr, el) {
+        jQuery('#reportsTable .js-usercol').each(function(nr, el) {
             showElement(el);
         });
     } else {
-        jQuery('#statusTable .usercol').each(function(nr, el) {
+        jQuery('#reportsTable .js-usercol').each(function(nr, el) {
             hideElement(el);
         });
     }
 
     if(typ == 'all') {
-        jQuery('#statusTable TR').each(function(nr, el) {
-            jQuery(el).removeClass('tab_hidden');
+        jQuery('#reportsTable TR').each(function(nr, el) {
+            jQuery(el).removeClass('hidden');
         });
     } else {
-        jQuery('#statusTable TR').each(function(nr, el) {
+        jQuery('#reportsTable TR').each(function(nr, el) {
             if(nr > 0) {
                 if(jQuery(el).hasClass(typ)) {
-                    jQuery(el).removeClass('tab_hidden');
+                    jQuery(el).removeClass('hidden');
                 } else {
-                    jQuery(el).addClass('tab_hidden');
+                    jQuery(el).addClass('hidden');
                 }
             }
         });
     }
+
+    jQuery(".js-tabs").removeClass("active");
+    if(typ == 'my')          { jQuery('#view1').addClass('active') }
+    else if(typ == 'public') { jQuery('#view2').addClass('active') }
+    else if(typ == 'all')    { jQuery('#view3').addClass('active') }
+    else                     { jQuery('#view1').addClass('active') }
     set_hash(typ, 1);
 }
 

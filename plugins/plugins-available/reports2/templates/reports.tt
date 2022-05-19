@@ -3,205 +3,197 @@
 [% PROCESS _blocks.tt %]
 [% USE date %]
 
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="20%">
-      [% PROCESS _infobox.tt %]
-    </td>
-    <td align="center" valign="top" width="60%">
-      <br><br>
-      <div align="center" class='dataTitle'>
-        Reporting
-      </div>
-      [% IF !phantomjs %]
-      <br><div class="alert"><b>Missing Converter!</b> [% phantomjs_file %] missing, no pdfs can be generated. <a href="http://www.thruk.org/faq.html#_phantomjs" target="_blank">please read the FAQ.</a></div>
-      [% END %]
-    </td>
-    <td align="right" valign="bottom" width="20%">
-    </td>
-  </tr>
-</table>
+[% PROCESS _infobox.tt %]
 
-<table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
-  <tr>
-    <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
+[% IF !phantomjs %]
+<div class="card red alert top-center w-[550px]">
+  <div class="head">
+    <h3>Missing Converter!</h3>
+  </div>
+  <div class="body">
+    [% phantomjs_file %] missing, no pdfs can be generated.<br>
+    <i class="uuil uil-external-link-alt"></i> <a class="link" href="http://www.thruk.org/faq.html#_phantomjs" target="_blank">please read the FAQ.</a>
+  </div>
+</div>
+[% END %]
+
+<div class="card w-full mt-5">
+  <div class="head p-0 justify-between border-0">
+    <div class="mx-2">
+      [% PROCESS _table_search_field.tt ids=["reportsTable"] %]
+    </div>
+    <div class="grow"></div>
     [% IF !filtered %]
-    <td align="center">
-      <div class="radioset">
-        <input type="radio" id="view1" name="radio" onclick="reports_view('my')"    ><label for="view1">My</label>
-        <input type="radio" id="view2" name="radio" onclick="reports_view('public')"><label for="view2">Public</label>
-        <input type="radio" id="view3" name="radio" onclick="reports_view('all')"   ><label for="view3">All</label>
-      </div>
-    </td>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view1" onclick="reports_view('my')    ; return false;"><a class="block" href="#">My Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view2" onclick="reports_view('public'); return false;"><a class="block" href="#">Public  Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view3" onclick="reports_view('all')   ; return false;"><a class="block" href="#">All  Reports</a></span>
     [% ELSE %]
-    <td align="center">
-        <div class="radioset">
-          <input type="radio" id="view4" name="radio" onclick="document.location = 'reports2.cgi';"><label for="view4">Go back to overview</label>
-        </div>
-      </td>
+      <a href="reports2.cgi" class="button">Show all reports</a>
     [% END %]
-    <td align="right">
-      <a href="reports2.cgi?action=edit&amp;report=new" class="report_button report_edit_button" style="width: 160px;">create new report</a>
-    </td>
-  </tr>
-</table>
-<table border="1" class='status hoverable' id="statusTable" style="min-width: 1000px;">
-  <tr>
-    <th class="status" nowrap>Name</th>
-    <th class="status" nowrap>Description</th>
-    <th class="status" nowrap>Public</th>
-    <th class="status usercol" nowrap>Owner</th>
-    <th class="status" nowrap>Mail</th>
-    <th class="status" nowrap>Schedule</th>
-    <th class="status" nowrap>Last Time Run</th>
-    <th class="status" nowrap>Duration</th>
-    <th class="status" nowrap>&nbsp;</th>
-    <th class="status" nowrap>&nbsp;</th>
-    <th class="status" nowrap>&nbsp;</th>
-    <th class="status" nowrap>&nbsp;</th>
-  </tr>
-  [% FOREACH r = reports %]
-  [% SET rowclass = 'statusOdd'  IF loop.even %]
-  [% SET rowclass = 'statusEven' IF loop.odd %]
-  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %] mightOverflow50" align="left" nowrap title="[% r.name | html %]">[% r.name | html %]</td>
-    <td class="status [% rowclass %]" align="left" style="overflow: hidden; white-space: nowrap;" nowrap>[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
-    <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
-    <td class="status [% rowclass %] usercol" style="white-space: nowrap;">[% r.user | html %]</td>
-    <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
-    <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
-    <td class="status [% rowclass %]" style="white-space: nowrap;">
-      [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
-    </td>
-    <td class="status [% rowclass %] report_progessbar">
-      [% IF r.var.exists('is_waiting') && r.var.is_waiting %]
-        queued
-      [% ELSIF r.failed %]
-        <span style="color: red;">failed</span>
-      [% ELSE %]
-        [% IF r.var.start_time %]
-          [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
-          [% job_time = end_time - r.var.start_time %]
-          [% IF r.var.exists('job_data') %]
-                [% job_message = ""; IF r.var.job_data.defined('message'); job_message = r.var.job_data.message; END %]
-                [% PROCESS _progressbar.tt
-                            pb_options = {
-                                percent             => r.var.job_data.percent,
-                                time                => job_time,
-                                job_id              => r.var.job,
-                                id                  => "progressbar" _ r.nr,
-                                lineheight          =>  19,
-                                width               => 160,
-                                height              =>  20,
-                                percent_per_second  =>  0,
-                                show_message        =>  1,
-                                message             =>  job_message,
-                                hide_cancel_btn     =>  1,
-                            }
-                %]
-          [% ELSE %]
-            [% IF c.check_user_roles('admin') %]
-              <span onclick="overcard({ 'body': '<div id=\'report_profile\'><center><img src=\'[% url_prefix %]themes/[% theme %]/images/waiting.gif\' alt=\'content is being fetched\' title=\'content is being fetched\' border=0 height=20 width=20></center><\/div>', 'caption': 'report profile', 'width': 600 }); load_overcard_content('report_profile', 'reports2.cgi?report=[% r.nr %]&amp;action=profile', true);">
-              [% duration(job_time, 3) %]
-              </span>
+    <div class="grow"></div>
+    <a href="reports2.cgi?action=edit&amp;report=new" class="button green w-40 mx-2">create new report</a>
+  </div>
+  <div class="mainTable">
+    <table class="mainTable striped" id="reportsTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th class="text-center">Public</th>
+          <th class="text-center js-usercol">Owner</th>
+          <th class="text-center">Mail</th>
+          <th class="text-center">Schedule</th>
+          <th class="text-center">Last Time Run</th>
+          <th class="text-center">Duration</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        [% FOREACH r = reports %]
+        <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+          <td class="truncate w-1/4 max-w-xs" title="[% r.name | html %]">[% r.name | html %]</td>
+          <td class="truncate w-1/4 max-w-xs">[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
+          <td class="text-center">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
+          <td class="text-center js-usercol">[% r.user | html %]</td>
+          <td class="text-center">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
+          <td class="text-center">[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
+          <td class="text-center">[% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]</td>
+          <td class="text-center">
+            [% IF r.var.exists('is_waiting') && r.var.is_waiting %]
+              queued
+            [% ELSIF r.failed %]
+              <span class="textERROR">failed</span>
             [% ELSE %]
-                [% duration(job_time, 3) %]
+              [% IF r.var.start_time %]
+                [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
+                [% job_time = end_time - r.var.start_time %]
+                [% IF r.var.exists('job_data') %]
+                      [% job_message = ""; IF r.var.job_data.defined('message'); job_message = r.var.job_data.message; END %]
+                      [% PROCESS _progressbar.tt
+                                  pb_options = {
+                                      percent             => r.var.job_data.percent,
+                                      time                => job_time,
+                                      job_id              => r.var.job,
+                                      id                  => "progressbar" _ r.nr,
+                                      lineheight          =>  19,
+                                      width               => 160,
+                                      height              =>  20,
+                                      percent_per_second  =>  0,
+                                      show_message        =>  1,
+                                      message             =>  job_message,
+                                      hide_cancel_btn     =>  1,
+                                  }
+                      %]
+                [% ELSE %]
+                  [% IF c.check_user_roles('admin') %]
+                    <span class="clickable" onclick="overcard({ 'body': '<div id=\'report_profile\'><div class=\'spinner w-8 h-8\'><\/div>', 'caption': 'report profile', 'width': 800 }); load_overcard_content('report_profile', 'reports2.cgi?report=[% r.nr %]&amp;action=profile', true);">
+                    [% duration(job_time, 3) %]
+                    </span>
+                  [% ELSE %]
+                      [% duration(job_time, 3) %]
+                  [% END %]
+                [% END %]
+              [% END %]
             [% END %]
-          [% END %]
+          </td>
+          <td class="text-center w-5">
+            <form action="reports2.cgi" method="POST">
+              <div class="flexrow flex-nowrap gap-1">
+                <input type="hidden" name="report" value="[% r.nr %]">
+                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
+                  <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'cancel'})"><i class="fa-solid fa-circle-xmark text-sm" title='Cancel Report'></i></a>
+                [% ELSE %]
+                  <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'update'})"><i class="fa-solid fa-arrows-rotate text-sm" title='Regenerate Report'></i></a>
+                  [% IF debug %]
+                    <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'update', debug: 1})"><i class="fa-solid fa-wand-magic-sparkles text-sm" title='Regenerate Report in Debug Mode'></i></a>
+                    [% IF r.var.exists("debug_file") %]
+                      <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_debug"><i class="fa-solid fa-file-circle-plus text-sm" title='Download Debug Report'></i></a>
+                    [% END %]
+                  [% END %]
+                [% END %]
+              </div>
+            </form>
+          </td>
+          <td class="text-center w-5">
+            [% IF ! r.readonly %]
+              <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><i class="fa-solid fa-pencil text-sm" title='Change Report'></i></a>
+            [% END %]
+          </td>
+          <td class="text-center w-5">
+            <div class="flexrow flex-nowrap gap-1">
+              [% IF r.var.file_exists && r.var.is_running == 0 %]
+                [% PROCESS _reports_icon.tt r=r %]
+                [% IF r.var.ctype == 'html2pdf' %]
+                  <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0&amp;html=1" target="_blank"><i class="fa-solid fa-file-circle-check text-sm" title='View Report Preview'></i></a>
+                [% ELSE %]
+                  <div></div>
+                [% END %]
+                <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0"><i class="[% icon %] text-sm" title="View Report"></i></a>
+                <a href="reports2.cgi?report=[% r.nr %]&amp;action=email"><i class="fa-solid fa-envelope text-sm" title="Send Report by Mail"></i></a>
+                [% IF r.var.exists("json_file") %]
+                <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json"><i class="fa-solid fa-file-code text-sm" title='Download JSON raw data'></i></a>
+                [% END %]
+              [% END %]
+            </div>
+          </td>
+          <td class="text-center w-5">
+            [% IF ! r.readonly %]
+              <form action="reports2.cgi" method="POST">
+                <input type="hidden" name="report" value="[% r.nr %]">
+                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                <a href="#" onclick="if(confirm('really remove?')) { return send_form_in_background_and_reload(this, {action: 'delete'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete Report'></i></a>
+              </form>
+            [% END %]
+          </td>
+        </tr>
+        [% IF r.failed %]
+          <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+            <td></td>
+            <td colspan=9 class="textERROR">
+              [% IF r.exists('long_error') && r.long_error != "" %]
+                <i class="uil uil-arrow-from-top clickable" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;"></i>
+              [% END %]
+              [% escape_html(r.error) | nl2br %]
+              [% IF r.exists('long_error') %]
+                <div id='long_error_[% r.nr %]' class="truncate max-w-[70%]" style="display:none;">
+                [% escape_html(r.long_error) | nl2br %]
+              </div>
+              [% END %]
+            </td>
+          </tr>
         [% END %]
-      [% END %]
-    </td>
-    <td class="status [% rowclass %]" nowrap align="left">
-      [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
-        [% PROCESS _button btn = {
-          form   => { action => 'reports2.cgi', },
-          data   => { report => r.nr, action => 'cancel', CSRFtoken => get_user_token(c), },
-          button => { class => 'thruk_btn_img_only cancel_button small', onclick => 'return send_form_in_background_and_reload(this)', title => 'Cancel Report', },
-        }%]
-      [% ELSE %]
-        [% PROCESS _button btn = {
-          form   => { action => 'reports2.cgi', },
-          data   => { report => r.nr, action => 'update', CSRFtoken => get_user_token(c), },
-          button => { class => 'thruk_btn_img_only update_button small', onclick => 'return send_form_in_background_and_reload(this)', title => 'Regenerate Report' },
-        }%]
-        [% IF debug %]
-          [% PROCESS _button btn = {
-            form   => { action => 'reports2.cgi', },
-            data   => { report => r.nr, action => 'update', debug => 1, CSRFtoken => get_user_token(c), },
-            button => { class => 'thruk_btn_img_only wand_button small', onclick => 'return send_form_in_background_and_reload(this)', title => 'Regenerate Report in Debug Mode' },
-          }%]
-        [% IF r.var.exists("debug_file") %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_debug" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='Download Debug Report' title='Download Debug Report' width=16 height=16 style="vertical-align: text-bottom;"></a>
+        [% IF r.exists("var") && r.var.exists("opt_errors") %]
+          <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+            <td></td>
+            <td colspan=9 class="textERROR">
+              Error(s) in report options:
+              <ul>
+              [% FOREACH e = r.var.opt_errors %]
+                <li>[% e | html %]
+              [% END %]
+              </ul>
+            </td>
+          </tr>
         [% END %]
         [% END %]
-      [% END %]
-    </td>
-    <td class="status [% rowclass %]">
-      [% IF ! r.readonly %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16 style="vertical-align: text-bottom;"></a>
-      [% END %]
-    </td>
-    <td class="status [% rowclass %]" nowrap align="left">
-      [% IF r.var.file_exists && r.var.is_running == 0 %]
-        [% PROCESS _reports_icon.tt r=r %]
-        [% IF r.var.ctype == 'html2pdf' %]
-          <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16 style="vertical-align: text-bottom;"></a>
-        [% ELSE %]
-          <img style="padding-left: 3px;" src='[% url_prefix %]themes/[% theme %]/images/empty.gif' border="0" alt='' width=16 height=16>
+        [% IF reports.size == 0 %]
+          <tr>
+            <td class="text-center" colspan="10">no reports defined yet</td>
+          </tr>
         [% END %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16 style="vertical-align: text-bottom;"></a>
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16 style="vertical-align: text-bottom;"></a>
-        [% IF r.var.exists("json_file") %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=download_json" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='Download JSON raw data' title='Download JSON raw data' width=16 height=16 style="vertical-align: text-bottom;"></a>
-        [% END %]
-      [% END %]
-    </td>
-    <td class="status [% rowclass %]">
-      [% IF ! r.readonly %]
-        [% PROCESS _button btn = {
-          form   => { action => 'reports2.cgi', },
-          data   => { report => r.nr, action => 'remove', CSRFtoken => get_user_token(c), },
-          button => { class => 'thruk_btn_img_only delete_button small', onclick => "if(confirm('really remove?')) { send_form_in_background_and_reload(this); }; return false;", title => 'Delete Report', value => '', },
-        }%]
-      [% END %]
-    </td>
-  </tr>
-  [% IF r.failed %]
-  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %]"></td>
-    <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
-      [% IF r.exists('long_error') && r.long_error != "" %]
-      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
-      [% END %]
-      [% escape_html(r.error) | nl2br %]
-      [% IF r.exists('long_error') %]
-      <div id='long_error_[% r.nr %]' style="display:none;">
-      [% escape_html(r.long_error) | nl2br %]
-      </div>
-      [% END %]
-    </td>
-  </tr>
-  [% END %]
-  [% IF r.exists("var") && r.var.exists("opt_errors") %]
-  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
-    <td class="status [% rowclass %]"></td>
-    <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
-      Error(s) in report options:
-      <ul>
-      [% FOREACH e = r.var.opt_errors %]
-      <li>[% e | html %]
-      [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
-  [% END %]
-  [% IF reports.size == 0 %]
-  <tr class="firstrow">
-    <td class="status statusOdd" align="center" colspan="10">no reports defined yet</td>
-  </tr>
-  [% END %]
-</table>
+      </tbody>
+    </table>
+  </div>
+  <div class="mainTableFooter">
+    <div class="flex-1 self-center">
+      [% PROCESS _pager_total_items.tt pager = { total_items => reports.size } %]
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
 <!--
@@ -210,11 +202,6 @@
     if(typ == undefined) { typ = 'my' }
     if(typ == "")        { typ = 'my' }
     reports_view(typ);
-    if(typ == 'my')          { jQuery('#view1').prop('checked', true) }
-    else if(typ == 'public') { jQuery('#view2').prop('checked', true) }
-    else if(typ == 'all')    { jQuery('#view3').prop('checked', true) }
-    else                     { jQuery('#view1').prop('checked', true) }
-    init_report_tool_buttons();
     [% IF highlight %]
     jQuery('TR.report[% escape_quotes(highlight) +%] TD').effect('highlight', {}, 2000, function() {
       reports_view(typ);
@@ -224,7 +211,7 @@
       reports_view(typ);
     }
     [%+ END +%]
-    table_search("table_search_input", ["statusTable"], 1);
+    table_search("table_search_input", ["reportsTable"], 1);
   });
 -->
 </script>

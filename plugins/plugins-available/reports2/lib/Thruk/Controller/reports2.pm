@@ -168,6 +168,7 @@ sub index {
     $c->stash->{'no_auto_reload'} = 0;
     $c->stash->{'highlight'}      = $highlight;
     $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c, undef, $report_nr);
+    $c->stash->{'data'}           = $c->stash->{'reports'};
 
     Thruk::Utils::ssi_include($c);
 
