@@ -56,147 +56,6 @@
     </div>
 
     <div class="mainTable">
-      <div class="flex border-b"> <!-- DEMO TABLE -->
-        <div class="basis-1/3">
-          <h3 class="p-2">Hostgroup 1</h3>
-          <table class="">
-            <thead>
-              <tr>
-                <th class="border px-2">Host</th>
-                <th class="border px-2 text-center">Status</th>
-                <th class="border px-2 text-center">Services</th>
-                <th class="border px-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="basis-1/3 border-l">
-          <h3 class="p-2">Hostgroup 2</h3>
-          <table class="">
-            <thead>
-              <tr>
-                <th class="border px-2">Host</th>
-                <th class="border px-2 text-center">Status</th>
-                <th class="border px-2 text-center">Services</th>
-                <th class="border px-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="basis-1/3 border-l">
-          <h3 class="p-2">Hostgroup 3</h3>
-          <table class="">
-            <thead>
-              <tr>
-                <th class="border px-2">Host</th>
-                <th class="border px-2 text-center">Status</th>
-                <th class="border px-2 text-center">Services</th>
-                <th class="border px-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-2">mon_host_000</td>
-                <td class="DOWN text-center">DOWN</td>
-                <td class="OK text-center">
-                  9 OK
-                </td>
-                <td class="text-center">
-                  <i class="fa-solid fa-bars"></i>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-
       <div class="flex">
       [% FOR g IN data %]
         <div class="basis-1/3[% IF !loop.first %] border-l[% END %]">
@@ -213,11 +72,11 @@
           [% END %]
           <div class='border-t'>
             [% start_with = 4 %]
-            <table class='status statusgroups [% paneprefix %]_table statusTable mainTable' [% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
+            <table class='status statusgroups [% paneprefix %]_table statusTable mainTable striped' [% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
               <thead>
                 <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()">
                   <th class='status col_name'>Host</th>
-                  <th class='status col_state'>Status</th>
+                  <th class='status col_state text-center'>Status</th>
                   <th class='status col_services'>Services</th>
                   <th class='status col_actions'>Actions</th>
                   [% FOREACH col = default_columns.$paneprefix %]
@@ -231,63 +90,58 @@
                 [% FOR hostname IN g.hosts.keys.sort %]
                   [% SET h = g.hosts.$hostname %]
                   [% host_name = h.name %]
-                  [% SET hostclass = 'statusEven' IF loop.odd  %]
-                  [% SET hostclass = 'statusOdd'  IF loop.even %]
-                  [% IF h.state == 1 %]
-                    [% hostclass = 'statusHOSTDOWN' %]
-                  [% ELSIF h.state == 2 %]
-                    [% hostclass = 'statusHOSTUNREACHABLE' %]
-                  [% END %]
-                  <tr class='[% hostclass %][% IF loop.first %] firstrow[% END %]'>
-                    <td class='[% hostclass %] name'>
-                      <table border="0" width="100%" cellpadding="0" cellspacing="0">
-                        <tr class='[% hostclass %]'>
-                          <td class='[% hostclass %]'><a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% h.display_name | html %]</a></td>
-
-                          [% IF h.icon_image_expanded %]
-                          <td class='[% hostclass %]' width="5"></td>
-                          <td class='[% hostclass %]' align="right"><a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' border="0" width="20" height="20" alt="[% h.icon_image_alt | html %]" title="[% h.icon_image_alt | html %]"></a></td>
-                          [% END %]
-
-                        </tr>
-                      </table>
+                  <tr>
+                    <td class='name'>
+                      <div class="flex min-w-max">
+                        <div class="flex-1">
+                          <a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% h.display_name | html %]</a>
+                        </div>
+                        [% IF h.icon_image_expanded %]
+                          <div class="flex pl-1.5">
+                            <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' alt="[% h.icon_image_alt | html %]" title="[% h.icon_image_alt | html %]"></a>
+                          </div>
+                        [% END %]
+                      </div>
                     </td>
                     [% IF h.has_been_checked == 0 %]
-                    <td class='statusHOSTPENDING state'>PENDING</td>
+                    <td class='PENDING text-center'>PENDING</td>
                     [% ELSIF h.state == 0 %]
-                    <td class='statusHOSTUP state'>UP</td>
+                    <td class='UP text-center'>UP</td>
                     [% ELSIF h.state == 1 %]
-                    <td class='statusHOSTDOWN state'>DOWN</td>
+                    <td class='DOWN text-center'>DOWN</td>
                     [% ELSIF h.state == 2 %]
-                    <td class='statusHOSTUNREACHABLE state'>UNREACHABLE</td>
+                    <td class='UNREACHABLE text-center'>UNREACHABLE</td>
                     [% END %]
-                    <td class='[% hostclass %] services'>
-                      <table border="0" width="100%">
+                    <td class="p-0">
+                      <div class="flex h-full">
                         [% grouplink = substyle _ 'group' %]
-                        [% IF h.ok       %]<tr><td class='miniStatusOK'><a href='[%       uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '2',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.ok %] OK</a></td></tr>[% END %]
-                        [% IF h.warning  %]<tr><td class='miniStatusWARNING'><a href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '4',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.warning %] WARNING</a></td></tr>[% END %]
-                        [% IF h.unknown  %]<tr><td class='miniStatusUNKNOWN'><a href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '8',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
-                        [% IF h.critical %]<tr><td class='miniStatusCRITICAL'><a href='[% uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '16', 'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
-                        [% IF h.pending  %]<tr><td class='miniStatusPENDING'><a href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '1',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.pending %] PENDING</a></td></tr>[% END %]
-                      </table>
-                      [% IF h.ok + h.warning + h.unknown + h.critical + h.pending == 0 %]
+                        [% SET total_hosts = h.ok + h.warning + h.unknown + h.critical + h.pending %]
+                        [% IF h.ok       %][% SET ok_pct = h.ok / total_hosts * 100 %]<a style="width: [% ok_pct %]%" class="OK pt-0.5 min-w-[15px] px-1" href='[%       uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '2',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.ok %]</a>[% END %]
+                        [% IF h.warning  %][% SET w_pct = h.warning / total_hosts * 100 %]<a style="width: [% w_pct %]%" class="WARNING text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '4',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.warning %]</a>[% END %]
+                        [% IF h.unknown  %][% SET u_pct = h.unknown / total_hosts * 100 %]<a style="width: [% u_pct %]%" class="UNKNOWN text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '8',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.unknown %]</a>[% END %]
+                        [% IF h.critical %][% SET c_pct = h.critical / total_hosts * 100 %]<a style="width: [% c_pct %]%" class="CRITICAL textcenter pt-0.5 min-w-[15px] px-1" href='[% uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '16', 'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.critical %]</a>[% END %]
+                        [% IF h.pending  %][% SET p_pct = h.pending / total_hosts * 100 %]<a style="width: [% p_pct %]%" class="PENDING text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '1',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.pending %]</a>[% END %]
+                      </div>
+                      [% IF total_hosts == 0 %]
                       No matching services
                       [% END %]
                     </td>
-                    <td class='[% hostclass %] actions'>
-                      <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
-                      [% IF h.notes_url_expanded %]
-                      <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
-                      [% END %]
-                      [% IF h.action_url_expanded %]
-                      [% action_url = proxifiy_url(c, h, get_action_url(c, 2, 1, h.action_url_expanded , h)) %]
-                      <a href='[% action_url %]' target='[% c.config.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(h, host_action_icon) %]' border="0" width="20" height="20" alt='Perform Extra Host Actions'></a>
-                      [% END %]
-                      <a href="status.cgi?host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
+                    <td class='actions'>
+                      <div class="flex gap-x-1 justify-center">
+                        <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
+                        [% IF h.notes_url_expanded %]
+                        <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
+                        [% END %]
+                        [% IF h.action_url_expanded %]
+                        [% action_url = proxifiy_url(c, h, get_action_url(c, 2, 1, h.action_url_expanded , h)) %]
+                        <a href='[% action_url %]' target='[% c.config.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(h, host_action_icon) %]' border="0" width="20" height="20" alt='Perform Extra Host Actions'></a>
+                        [% END %]
+                        <a href="status.cgi?host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
+                      </div>
                     </td>
-                    <td class='[% hostclass %] address' style="display: none;" nowrap align="left">[% h.address | html %]</td>
-                    <td class='[% hostclass %] alias' style="display: none;" nowrap align="left">[% h.alias | html %]</td>
-                    <td class='[% hostclass %] peer_name' style="display: none;" nowrap align="left">[% peer_name(h) | html %]</td>
+                    <td class='address' style="display: none;" nowrap align="left">[% h.address | html %]</td>
+                    <td class='alias' style="display: none;" nowrap align="left">[% h.alias | html %]</td>
+                    <td class='peer_name' style="display: none;" nowrap align="left">[% peer_name(h) | html %]</td>
                   </tr>
                 [% END %]
               </tbody>
