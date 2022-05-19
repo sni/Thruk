@@ -105,6 +105,7 @@
                 [% FOR hostname IN g.hosts.keys.sort %]
                 <!-- last loop no border bottom-->
                   [% SET h = g.hosts.$hostname %]
+                  [% hoststate = '' %]
                   [% IF h.state == 1 %]
                     [% hoststate = 'DOWN' %]
                   [% ELSIF h.state == 2 %]
