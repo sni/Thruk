@@ -346,10 +346,7 @@ function hideElement(id, icon) {
     pane.style.visibility = 'hidden';
   }
 
-  var img = document.getElementById(icon);
-  if(img && img.src) {
-    img.src = img.src.replace(/icon_minimize\.gif/g, "icon_maximize.gif");
-  }
+  toogleIconImage(icon);
 }
 
 /* show a element by id */
@@ -376,10 +373,7 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
     pane.style.visibility = 'visible';
   }
 
-  var img = document.getElementById(icon);
-  if(img && img.src) {
-    img.src = img.src.replace(/icon_maximize\.gif/g, "icon_minimize.gif");
-  }
+  toogleIconImage(icon);
 
   if(bodyclose) {
     remove_close_element(id);
@@ -395,6 +389,22 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
             close_elements.push([id, icon, bodycloseelement, bodyclosecallback])
         }
     }, 50);
+  }
+}
+
+function toogleIconImage(icon) {
+  if(!icon) { return; }
+  var img = document.getElementById(icon);
+  if(!img) { return; }
+  if(img.tagName != "I") { return; }
+
+  if(jQuery(img).hasClass("uil-arrow-from-top")) {
+    jQuery(img).removeClass("uil-arrow-from-top");
+    jQuery(img).addClass("uil-top-arrow-to-top");
+  }
+  else if(jQuery(img).hasClass("uil-top-arrow-to-top")) {
+    jQuery(img).addClass("uil-arrow-from-top");
+    jQuery(img).removeClass("uil-top-arrow-to-top");
   }
 }
 
@@ -905,7 +915,7 @@ function setRefreshRate(rate) {
         rate = 20;
       }
       // do not refresh when dev tools are open
-      if((window.outerHeight-window.innerHeight)>250) {
+      if((window.outerHeight-window.innerHeight)>250 || (window.outerWidth-window.innerWidth)>250) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(dev tools open, paused)<\/span>");
         rate = 20;
       }
@@ -3836,8 +3846,17 @@ function submitFormInBackground(form, cb) {
     return(false);
 }
 
-function send_form_in_background_and_reload(btn) {
+function send_form_in_background_and_reload(btn, extraData) {
     var form = jQuery(btn).parents('FORM');
+    if(extraData) {
+        for(var key in extraData) {
+            jQuery('<input />', {
+                type:  'hidden',
+                name:   key,
+                value:  extraData[key]
+            }).appendTo(form);
+        }
+    }
     submitFormInBackground(form, reloadPage);
     setBtnSpinner(btn);
     return(false);
@@ -8351,7 +8370,7 @@ function overcard(options) {
             +'<\/div>'
             +'<div class="'+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
             +'<\/div>';
-        jQuery(containerHTML).appendTo(jQuery("BODY", doc));
+        jQuery(containerHTML).appendTo(jQuery("MAIN", doc));
         container = doc.getElementById(containerId);
         var check = function() { overcard_check_visibility(container); };
         jQuery(container, doc).on('move', check);
@@ -8422,8 +8441,8 @@ function overcard_check_visibility(el) {
     var rect = el.getBoundingClientRect();
     var offsetX = rect.right  - (window.innerWidth  || document.documentElement.clientWidth);
     var offsetY = rect.bottom - (window.innerHeight || document.documentElement.clientHeight);
-    if(offsetX > 0) { el.style.left = (parseInt(el.style.left) - 20 - offsetX)+"px"; }
-    if(offsetY > 0) { el.style.top  = (parseInt(el.style.top)  - 20 - offsetY)+"px"; }
+    if(offsetX > 0) { el.style.left = Math.max(0, parseInt(el.style.left) - 20 - offsetX)+"px"; }
+    if(offsetY > 0) { el.style.top  = Math.max(0, parseInt(el.style.top)  - 20 - offsetY)+"px"; }
 
     // check parent iframe
     if(!window.parent) { return; }
