@@ -46,15 +46,15 @@ sub set_default_stash {
     $c->stash->{'servicegroup'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicegroup'}       || '');
     $c->stash->{'host'}                 = Thruk::Utils::Filter::escape_html($c->req->parameters->{'host'}               || '');
     $c->stash->{'service'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'service'}            || '');
-    $c->stash->{'data'}                = '';
     $c->stash->{'style'}                = '';
     $c->stash->{'has_error'}            = 0;
-    $c->stash->{'pager'}                = '';
     $c->stash->{show_substyle_selector} = 1;
     $c->stash->{imgsize}                = 20;
     $c->stash->{'audiofile'}            = '';
     $c->stash->{'has_service_filter'}   = 0;
     $c->stash->{'show_column_select'}   = 0;
+
+    Thruk::Utils::page_data($c, []) unless defined $c->stash->{'pager'};
 
     return;
 }

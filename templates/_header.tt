@@ -67,5 +67,5 @@
     [% END %]
 <main class="relative p-5 flex-grow scrollauto">
 [% IF show_top_pane %]
-  <button class="iconOnly noprint big absolute p-0 m-0 top-0 right-0" onClick="toggleTopPane(); return false;"><i class="uil uil-top-arrow-to-top m-0" id="btn_toggle_top_pane"></i></button>
+  <button class="iconOnly noprint big absolute p-0 m-0 top-7 right-7" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane"><i class="uil uil-arrow-to-bottom m-0"></i></button>
 [% END %]
