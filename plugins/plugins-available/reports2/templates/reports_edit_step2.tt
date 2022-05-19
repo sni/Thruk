@@ -11,9 +11,13 @@
 [% BLOCK field %]
   [% fh = normalize_required_field(c, f) %]
   [% IF fh.defined("hidden") && fh.hidden; NEXT; END %]
-  <tr class="report_options report_type_[% fh.type | html %]">
-    <td class="dataEven" align="center" valign="top"><b>[% fh.desc %]</b>[% IF fh.required %]<span class="required">*</span>[% END %][% IF fh.details != '' %]<br><font size='-2'>[% fh.details %]</font>[% END %]</td>
-    <td class="dataOdd" align="left" colspan=2>
+  <tr class="report_type_[% fh.type | html %]">
+    <th valign="top">
+      [% fh.desc %]
+      [% IF fh.required %]<span class="required">*</span>[% END %]
+      [% IF fh.details != '' %]<br><span class="whitespace-normal text-xs font-normal">[% fh.details %]</span>[% END %]
+    </th>
+    <td colspan=2>
       [% PROCESS field_form fh=fh %]
     </td>
   </tr>
@@ -31,16 +35,18 @@
   [% value   = default %]
   [% IF r.params.exists(key) %][% value = r.params.$key %][% END %]
   [% IF type == 'int' %]
-    <input type="text" name="params.[% key %]" value="[% value | html %]">
+    <input type="text" name="params.[% key %]" value="[% value | html %]" class="w-full">
   [% ELSIF type == 'int_box' %]
-    <input type="hidden" name="optional.[% key %]" value="1">[% checked = 0 %]
-    <input type="checkbox" name="enabled.[% key %]" value="1" onchange="var el = document.getElementsByName('params.[% key %]')[0]; if(this.checked) { el.disabled = false; } else { el.disabled = true;  }"[% IF value != -1; checked = 1; %]checked[% END %]>
-    [% IF value == -1 || value == "" %][% value = default %][% END %]
-    <input type="text" name="params.[% key %]" value="[% IF default == value %][% extra | html %][% ELSE %][% value | html %][% END %]" class="with_checkbox"[% IF ! checked %] disabled[% END %]>
+    <div class="flexrow flex-nowrap gap-1 items-center w-full">
+      <input type="hidden" name="optional.[% key %]" value="1">[% checked = 0 %]
+      <input type="checkbox" name="enabled.[% key %]" value="1" onchange="var el = document.getElementsByName('params.[% key %]')[0]; if(this.checked) { el.disabled = false; } else { el.disabled = true;  }"[% IF value != -1; checked = 1; %]checked[% END %]>
+      [% IF value == -1 || value == "" %][% value = default %][% END %]
+      <input type="text" class="w-full" name="params.[% key %]" value="[% IF default == value %][% extra | html %][% ELSE %][% value | html %][% END %]" class="with_checkbox"[% IF ! checked %] disabled[% END %]>
+    </div>
   [% ELSIF type == 'textarea' %]
-    <textarea name="params.[% key %]" wrap="hard" cols=74>[% value | html %]</textarea>
+    <textarea name="params.[% key %]" wrap="hard" class="w-full">[% value | html %]</textarea>
   [% ELSIF type == 'yes_no' %]
-    <select name="params.[% key %]">
+    <select name="params.[% key %]" class="w-full">
       <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
       <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
     </select>
@@ -58,9 +64,17 @@
   [% ELSIF type == 'services' %]
     <input type="text" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: '[% last_host_id | html %]', backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
   [% ELSIF type == 'affected_sla_objects' %]
-    <span class="wait" id="reports_waiting" style="display: none;"><img class="not-clickable" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="getting expected objects" title="getting expected objects" border="0" height="11" width="11"></span>
-    <span class="value" id="reports_expected_objects">&nbsp;</span>
-    <span class="name">expected objects:</span>
+    <div class="flexrow flex-nowrap justify-end">
+      <div class="w-full text-right">
+        <span class="name">expected objects:</span>
+        <span class="value inline-block w-5" id="reports_expected_objects">&nbsp;</span>
+      </div>
+      <div class="w-5">
+        <div id="reports_waiting" style="display: none;">
+          <div class="spinner w-3 h-3" title="getting expected objects"></div>
+        </div>
+      </div>
+    </div>
     <script type="text/javascript">
       window.setInterval(function() {
         var input = jQuery("#reports_waiting");
@@ -319,28 +333,21 @@
     [% substyle   = 'service' %]
     [% paneprefix = sprintf('f%02d_', loop.index)  %]
     <input type="hidden" name="filter.[% key %]" value="[% paneprefix %]">
-    <table id="[% paneprefix %]all_filter_table" class="filter_container" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
-    [% FOR search = get_searches(c, 'dfl_', value, 1) %]
-    [% SET prefix = 's' _ loop.index %]
-    [% IF loop.index > 0 && loop.index % 3 == 0 %]</tr><tr>[% END %]
-    <td valign="top" class="filter_table">
-        <table border="1" class='filter filter_box' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
-          <tr>
-            <td class='filter' style="position: relative;">
-              <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %]; position: absolute; right: 5px; top: 5px;" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id);reports_update_affected_sla_objects(this);" alt="remove">
-              <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable" width="100%">
-                [% PROCESS _status_filter_single.tt onchange="reports_update_affected_sla_objects(this);" %]
-              </table>
-            </td>
-            <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id);reports_update_affected_sla_objects(this);" id="[% paneprefix %][% prefix %]_new_filter">
-              <img src="[% url_prefix %]themes/[% theme %]/images/right.png" alt="add new filter"><br>
-              or
-            </td>
-          </tr>
-        </table>
-    </td>
-    [% END %]
-    </tr></table>
+
+    <div class="w-full flexrow flex-nowrap gap-0">
+      <div id="[% paneprefix %]filter_pane" class="flexrow flex-wrap gap-0">
+        [% FOR search = get_searches(c, 'dfl_', value, 1) %]
+          [% SET prefix = 's' _ loop.index %]
+          [% PROCESS _status_filter_single.tt onchange="" %]
+        [% END %]
+      </div>
+      <div class="clickable hoverable p-0 rounded-br-lg" onClick="new_filter('[% paneprefix %]filter_pane')" id="[% paneprefix %]new_filter_box_btn">
+        <div class="flexcol gap-1 text-center pt-10">
+          <i class="uil uil-angle-right text-lg" title="add new filter"></i>
+          <span>or</span>
+        </div>
+      </div>
+    </div>
   [% ELSE %]
   [% PROCESS $temp block = 'edit_types' %]
   [% PROCESS custom_reports_edit_step2.tt %]

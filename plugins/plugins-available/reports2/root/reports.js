@@ -71,6 +71,8 @@ function reports_view(typ) {
     else if(typ == 'all')    { jQuery('#view3').addClass('active') }
     else                     { jQuery('#view1').addClass('active') }
     set_hash(typ, 1);
+
+    updatePagerCount('reportsTable');
 }
 
 /* collect total number of affected hosts and services */
@@ -130,14 +132,14 @@ function reports_update_affected_sla_objects(input) {
             else if(data.hosts == 0 && data.services > 0) {
                 msg = data.services+" service"+(data.services == 1 ? '' : 's');
             }
-            span1.removeClass('error');
-            span2.removeClass('error');
+            span1.removeClass('textERROR');
+            span2.removeClass('textERROR');
             span1.attr('title', '');
             span2.attr('title', '');
             span2.html(msg);
             if(data['too_many'] != undefined && data['too_many'] == 1) {
-                span1.addClass('error');
-                span2.addClass('error');
+                span1.addClass('textERROR');
+                span2.addClass('textERROR');
                 span1.attr('title', 'too many objects, please use more specific filter');
                 span2.attr('title', 'too many objects, please use more specific filter');
             }

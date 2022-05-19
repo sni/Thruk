@@ -14,7 +14,7 @@
     <h1 class="py-5">Send Report By Mail</h1>
     <div class="card w-[500px]">
       <div class="head gap-2">
-        <a href="reports2.cgi" class="link hoverable" title="Go back to report list"><i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i> </a>
+        <a href="reports2.cgi" class="link hoverable rounded" title="Go back to report list"><i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i> </a>
         <h3>E-Mail: [% r.name %]</h3>
       </div>
       <div class="body">

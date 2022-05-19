@@ -485,8 +485,11 @@ I.fa-solid, I.uil {
  * Cards
  */
 @layer base {
+  .bgCard {
+    @apply bg-white;
+  }
   .card {
-    @apply w-min h-min text-left overflow-hidden rounded-lg text2 bg-white shadow-card;
+    @apply w-min h-min text-left overflow-hidden rounded-lg text2 bgCard shadow-card;
     >DIV.head {
       @apply h-[40px] px-2 border-b borderDefault items-center flex;
       >SPAN.tabs {
@@ -631,6 +634,9 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
 
   &.red {
     @apply bg-red-600 text-black hover:text-white;
+  }
+  &.hover-red {
+    @apply hover:bg-red-600 hover:text-white;
   }
 
   I.fa-solid, I.uil {
@@ -865,7 +871,7 @@ TABLE.mainTable {
   @apply !ring-transparent;
 }
 SELECT {
-  @apply pr-5 cursor-pointer;
+  @apply pr-6 cursor-pointer;
 }
 INPUT:disabled {
   @apply bg-gray-200 cursor-default;
@@ -875,6 +881,9 @@ INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid {
   &.silent {
     @apply outline-none ring-0 ring-inherit border-inherit;
   }
+}
+.required {
+  @apply textERROR;
 }
 
 .daterangepicker {

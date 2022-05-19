@@ -2,174 +2,164 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="33%">
-      [% PROCESS _infobox.tt %]
-    </td>
-    <td align="center" valign="top" width="33%">
-      <br><br>
-      <div align="center" class='dataTitle'>
-        Reporting
-      </div>
-    </td>
-    <td align="right" valign="bottom" width="33%">
-    </td>
-  </tr>
-</table>
-<br><br>
+[% PROCESS _infobox.tt %]
 
 <form action="reports2.cgi" method="POST">
-<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
-<input type="hidden" name="action" value="save">
-<input type="hidden" name="report" value="[% r.nr %]">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-<table border="1" class='data reports'>
-  <tr>
-    <th class='data sticky-header' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
-    <th class="data sticky-header" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
-    <th class='data sticky-header' style="width:125px;">
-      <button class="report_save_button report_button" style="width: 160px; z-index: 10;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
-    </th>
-  </tr>
-  <tr class="firstrow">
-    <td class="dataEven" align="center"><b>Name</b><span class="required">*</span></td>
-    <td class="dataOdd" align="left" colspan=2><input type="text" name="name" value="[% r.name | html %]"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Description</b></td>
-    <td class="dataOdd" align="left" colspan=2><textarea name="desc" wrap="hard" cols=74>[% r.desc %]</textarea></td>
-  </tr>
-  [% IF c.check_user_roles('admin') %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Owner</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type='text' id="owner" name="owner" value="[% r.user | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search', autosubmit:false, striped: true })" style="width: 515px;">
-    </td>
-  </tr>
-  [% END %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Permissions</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <table id="permissions">
-        <tr[% IF r.permissions.size == 0 %] style="display: none;"[% END %]>
-          <th>Type</th>
-          <th>Contact/Group</th>
-          <th>Permissions</th>
-          <th></th>
-        </tr>
-        [% PROCESS _permission_edit.tt nr=0 p={type => "user", name="", perm => "ro"} %]
-        [% FOREACH p = r.permissions %]
-          [% PROCESS _permission_edit.tt nr=loop.index + 1 p=p %]
-        [% END %]
-        <tr>
-          <td colspan=4 class='newfilter' onclick="permission_add_row('permissions'); return false;" style="min-width:100px;" nowrap>
-              <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
-              add permission
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-  [% IF backends.size > 10 %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-    [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 onchange="reports_update_affected_sla_objects(this)" %]
-    </td>
-  </tr>
-  [% ELSIF backends.size > 1 %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      [% backends_selected=0 %]
-      [% IF r.backends.size > 0 %][% backends_selected=1 %][% END %]
-      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('report_backends'); reports_update_affected_sla_objects(this);" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleElement('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span><br>
-      <select id="report_backends" name="report_backends" multiple style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]" onchange="reports_update_affected_sla_objects(this)">
-        [% FOREACH b = backends %]
-        <option value="[% b | html %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
-        [% END %]
-      </select>
-    </td>
-  </tr>
-  [% END %]
-  [% IF backends.size > 1 %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Failed Backends</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <font size='-2'>what should happen if some of the selected backends are not available:</font><br>
-      <select name="failed_backends">
-        <option value="cancel"[% IF r.failed_backends == 'cancel' %] selected[% END %]>cancel report</option>
-        <option value="ignore"[% IF r.failed_backends == 'ignore' %] selected[% END %]>ignore the error</option>
-        <option value="print"[%  IF r.failed_backends == 'print'  %] selected[% END %]>ignore the error and add error details page</option>
-      </select>
-    </td>
-  </tr>
-  [% END %]
-  <tr>
-    <td class="dataEven" align="center" colspan=3><b>E-Mail Settings:</b></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>To</b></td>
-    <td class="dataOdd" align="left" colspan=2><input type="text" name="to" value="[% r.to | html %]"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Cc</b></td>
-    <td class="dataOdd" align="left" colspan=2><input type="text" name="cc" value="[% r.cc | html %]"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-        <table id="cron_entries">
-          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
-          [% PROCESS _cron_edit.tt nr=0 can_edit=1 %]
-          [% FOREACH cr = r.send_types %]
-              [% nr = loop.index + 1 %]
-              [% PROCESS _cron_edit.tt can_edit=1 %]
+  <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+  <input type="hidden" name="action" value="save">
+  <input type="hidden" name="report" value="[% r.nr %]">
+  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+  <div class="grow flexcol gap-1 items-center pt-5">
+    <div class="card overflow-visible w-[700px]">
+      <div class="head sticky -top-5 bgCard rounded-lg rounded-b-none z-10 justify-between">
+        <a href="reports2.cgi" class="link hoverable rounded" title="Go back to report list"><i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i> </a>
+        <h3>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</h3>
+        <button><i class="uil uil-save"></i> [% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+      </div>
+      <div class="body">
+        <table class="cellspacing striped">
+          <tr>
+            <th>Name<span class="required">*</span></th>
+            <td colspan=2><input type="text" name="name" value="[% r.name | html %]" class="w-full"></td>
+          </tr>
+          <tr>
+            <th valign="top">Description</th>
+            <td colspan=2><textarea name="desc" wrap="hard" class="w-full">[% r.desc %]</textarea></td>
+          </tr>
+          [% IF c.check_user_roles('admin') %]
+          <tr>
+            <th valign="top">Owner</th>
+            <td colspan=2>
+              <input type='text' id="owner" name="owner" value="[% r.user | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search', autosubmit:false, striped: true })" class="w-full">
+            </td>
+          </tr>
           [% END %]
           <tr>
-            <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
-                add more
+            <th valign="top">Permissions</th>
+            <td colspan=2 class="p-1">
+              <table id="permissions" class="w-full">
+                <tr[% IF r.permissions.size == 0 %] style="display: none;"[% END %]>
+                  <th>Type</th>
+                  <th>Contact/Group</th>
+                  <th>Permissions</th>
+                  <th></th>
+                </tr>
+                [% PROCESS _permission_edit.tt nr=0 p={type => "user", name="", perm => "ro"} %]
+                [% FOREACH p = r.permissions %]
+                  [% PROCESS _permission_edit.tt nr=loop.index + 1 p=p %]
+                [% END %]
+                <tr>
+                  <td colspan=4 onclick="permission_add_row('permissions'); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable rounded">
+                    <i class="uil uil-angle-down text-lg leading-3" title="add new permission entry"></i> add permission
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          [% IF backends.size > 10 %]
+          <tr>
+            <th valign="top">Backends</th>
+            <td colspan=2>
+            [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 onchange="reports_update_affected_sla_objects(this)" %]
+            </td>
+          </tr>
+          [% ELSIF backends.size > 1 %]
+          <tr>
+            <th valign="top">Backends</th>
+            <td colspan=2>
+              [% backends_selected=0 %]
+              [% IF r.backends.size > 0 %][% backends_selected=1 %][% END %]
+              <div class="align-center flexrow gap-1">
+                <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('report_backends'); reports_update_affected_sla_objects(this);">
+                <span onclick="toggleCheckBox('report_backends_toggle'); toggleElement('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span>
+              </div>
+              <select id="report_backends" name="report_backends" multiple class="mt-1 w-full" style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]" onchange="reports_update_affected_sla_objects(this)">
+                [% FOREACH b = backends %]
+                <option value="[% b | html %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          [% END %]
+          [% IF backends.size > 1 %]
+          <tr>
+            <th valign="top">Failed Backends</th>
+            <td colspan=2>
+              <select name="failed_backends" class="w-full">
+                <option value="cancel"[% IF r.failed_backends == 'cancel' %] selected[% END %]>cancel report</option>
+                <option value="ignore"[% IF r.failed_backends == 'ignore' %] selected[% END %]>ignore the error</option>
+                <option value="print"[%  IF r.failed_backends == 'print'  %] selected[% END %]>ignore the error and add error details page</option>
+              </select>
+              <br>
+              <font size='-2'>choose what happens if some of the selected backends are not available.</font>
+            </td>
+          </tr>
+          [% END %]
+          <tr>
+            <td colspan=3 class="pt-5"><h3 class="text-center">E-Mail Settings</h3></td>
+          </tr>
+          <tr>
+            <th>To</th>
+            <td colspan=2><input type="text" name="to" value="[% r.to | html %]" class="w-full"></td>
+          </tr>
+          <tr>
+            <th>Cc</td>
+            <td colspan=2><input type="text" name="cc" value="[% r.cc | html %]" class="w-full"></td>
+          </tr>
+          <tr>
+            <th valign="top">Schedule</td>
+            <td colspan=2 class="p-1">
+              <table id="cron_entries" class="w-full">
+                [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
+                [% PROCESS _cron_edit.tt nr=0 can_edit=1 %]
+                [% FOREACH cr = r.send_types %]
+                    [% nr = loop.index + 1 %]
+                    [% PROCESS _cron_edit.tt can_edit=1 %]
+                [% END %]
+                <tr>
+                  <td colspan=4 onclick="add_cron_row('cron_entries'); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable rounded">
+                    <i class="uil uil-angle-down text-lg leading-3" title="add new schedule entry"></i> add more
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr id="report_type">
+            <td colspan=3 class="pt-5"><h3 class="text-center">Report Type</h3></td>
+          </tr>
+          <tr>
+            <th>Type</th>
+            <td colspan=2>
+              <select name="template" class="w-full" onchange="update_reports_type('[% r.nr %]', this.value)">
+                [% FOREACH file = templates.keys.sort %]
+                [% IF templates.$file.deprecated && file != r.template; NEXT; END %]
+                <option value="[% file | html %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          <tr id="new_reports_options">
+            <td colspan=3 class="pt-5"><h3 class="text-center">Report Options</h3></td>
+          </tr>
+          [% PROCESS reports_edit_step2.tt %]
+          <tr>
+            <td>
+              <span class="required">* - required</span>
+            </td>
+            <td colspan=2>
+              <div class="flexrow gap-1 justify-between">
+                [% IF r.nr != "new" %]<button name="action" value="remove" class="hover-red w-32" onclick="return(confirm('really remove report: [% r.name | html %]?'))"><i class="uil uil-trash-alt"></i> Delete</button>[% END %]
+                <button class="w-44 green"><i class="uil uil-save"></i> [% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+                [% IF r.nr != "new" %]
+                <button name="action" value="clone" class="w-32"><i class="uil uil-copy"></i> Clone Report</button>
+                [% END %]
+              </div>
             </td>
           </tr>
         </table>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="3" style="padding-top: 20px;"></td>
-  </tr>
-  <tr id="report_type">
-    <th class='data' style="width:125px;"></th>
-    <th class="data" nowrap>Report Type</th>
-    <th class='data' style="width:125px;"></th>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Type</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <select name="template" style="min-width: 180px;" onchange="update_reports_type('[% r.nr %]', this.value)">
-        [% FOREACH file = templates.keys.sort %]
-        [% IF templates.$file.deprecated && file != r.template; NEXT; END %]
-        <option value="[% file | html %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
-        [% END %]
-      </select>
-    </td>
-  </tr>
-  <tr id="new_reports_options">
-    <td class="dataEven" align="center" colspan=3><b>Report Options:</b></td>
-  </tr>
-  [% PROCESS reports_edit_step2.tt %]
-  <tr>
-    <td class="dataEven" align="center" colspan=3>
-      <span class="required" style="float: left;">* - required</span>
-      [% IF r.nr != "new" %]<button name="action" value="remove" class="report_remove_button report_button" style="width: 90px; float: left; margin-left: 65px;">Delete</button>[% END %]
-      <button class="report_save_button report_button" style="width: 160px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
-      [% IF r.nr != "new" %]
-      <button name="action" value="clone" class="report_clone_button report_button" style="width: 130px; float: right;">Clone Report</button>
-      [% END %]
-    </td>
-  </tr>
-</table>
+      </div>
+    </div>
+  </div>
 </form>
 
 
