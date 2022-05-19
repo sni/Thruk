@@ -1,4 +1,4 @@
-﻿<select name="[% name | html %]" onchange="if(this.value == 'custom') { showElement('[% name | html %]_custom_timeperiod') } else { hideElement('[% name | html %]_custom_timeperiod') }">
+﻿<select class="w-full" name="[% name | html %]" onchange="if(this.value == 'custom') { showElement('[% name | html %]_custom_timeperiod') } else { hideElement('[% name | html %]_custom_timeperiod') }">
   [% IF current %]
   <option value="current"[% IF      selected_timeperiod == 'current'      %] selected[% END %]>[ Current time range ]</option>
   [% END %]
@@ -21,20 +21,32 @@
   [% END %]
 </select>
 [% IF custom %]
-<div [% IF selected_timeperiod != 'custom' %]style="display:none"[% END %] id="[% name | html %]_custom_timeperiod">
-<table>
-  <tr>
-    <td>Start</td>
-    <td>
-    [% IF custom == 2 %]
-      <input type="text" value="[% t1 | html %]" id="t1" name="t1" size="20" class="date_input cal_popup_range cal_popup_select cal_custom"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t1" onkeyup="verify_time(this.id)">
-    [% ELSE %]
-      <input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input cal_popup_range cal_popup_select"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t1" onkeyup="verify_time(this.id)">
-    [% END %]
-    </td>
+<div class="flexrow flex-nowrap pt-2" [% IF selected_timeperiod != 'custom' %]style="display:none"[% END %] id="[% name | html %]_custom_timeperiod">
+  <div class="flexcol flex-nowrap">
+    <div class="flex flex-nowrap gap-1 w-fit">
+      <span class="w-8 inline-flex items-center">Start</span>
+      [% IF custom == 2 %]
+        <input type="text" value="[% t1 | html %]" id="t1" name="t1" class="date_input cal_popup_range cal_popup_select cal_custom w-36" onkeyup="verify_time(this.id)">
+        <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_t1" title="pick date"></i></div>
+      [% ELSE %]
+        <input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" class="date_input cal_popup_range cal_popup_select w-36" onkeyup="verify_time(this.id)">
+        <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_t1" title="pick date"></i></div>
+      [% END %]
+    </div>
+    <div class="flex flex-nowrap gap-1 w-fit">
+      <span class="w-8 inline-flex items-center">End</span>
+      [% IF custom == 2 %]
+        <input type="text" value="[% t2 | html %]" id="t2" name="t2" class="date_input cal_popup_range cal_popup_select cal_custom w-36" onkeyup="verify_time(this.id)">
+        <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_t2" title="pick date"></i></div>
+      [% ELSE %]
+        <input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input cal_popup_range cal_popup_select w-36" onkeyup="verify_time(this.id)">
+        <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_t2" title="pick date"></i></div>
+      [% END %]
+    </div>
+  </div>
+
     [% IF show_hint %]
-    <td rowspan="3" valign="top">
-      <table style="margin-left: 30px; border: 1px solid grey;">
+      <table class="borderDefault border">
         <tr>
           <th colspan="2">Examples for custom timeranges</th>
         </tr>
@@ -51,25 +63,10 @@
           <td>now - 2d</td>
         </tr>
         <tr>
-          <td colspan="2"><a target="_blank" href="https://thruk.org/documentation/timedefinitions.html">find more examples online.</a></td>
+          <td colspan="2"><a class="link" target="_blank" href="https://thruk.org/documentation/timedefinitions.html"><i class="uuil uil-external-link-alt"></i> find more examples online.</a></td>
         </tr>
       </table>
-    </td>
     [% END %]
-  </tr>
-  <tr>
-    <td>End</td>
-    <td>
-    [% IF custom == 2 %]
-      <input type="text" value="[% t2 | html %]" id="t2" name="t2" size="20" class="date_input cal_popup_range cal_popup_select cal_custom"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t2">
-    [% ELSE %]
-      <input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input cal_popup_range cal_popup_select"> <img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon cal_popup for_t2">
-    [% END %]
-    </td>
-  </tr>
-  [% IF show_hint %]
-  <tr><td style="height: 70px;"></td></tr>
-  [% END %]
-</table>
 </div>
+
 [% END %]
