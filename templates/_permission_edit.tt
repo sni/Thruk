@@ -5,8 +5,8 @@
       <option[% IF p.type == "group" %] selected[% END %] value="contactgroup">group</option>
     </select>
   </td>
-  <td>
-    <input type='text' id="p_[% nr %]_value" name="p_[% nr %]_value" value="[% p.name.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, null, { url: 'status.cgi?format=search&wildcards=1', autosubmit:false, striped: true, list: '\\s*,\\s*' })" style="width: 300px;">
+  <td class="w-full">
+    <input type='text' id="p_[% nr %]_value" name="p_[% nr %]_value" value="[% p.name.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, null, { url: 'status.cgi?format=search&wildcards=1', autosubmit:false, striped: true, list: '\\s*,\\s*' })" class="w-full">
   </td>
   <td>
     <select id="p_[% nr %]_perm" name="p_[% nr %]_perm">
@@ -14,5 +14,7 @@
       <option[% IF p.perm == "rw" %] selected[% END %] value="rw">read-write</option>
     </select>
   </td>
-  <td><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="delete" onclick="permission_del_row(this); return false;"></td>
+  <td onclick="permission_del_row(this); return false;" class="hoverable clickable w-5 px-1 rounded">
+    <i class="uil uil-times"></i>
+  </td>
 </tr>

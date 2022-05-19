@@ -2799,6 +2799,7 @@ function do_table_search_table(id, table, value) {
             }
         });
     }
+    updatePagerCount(id);
     if(table_search_cb[id] != undefined) {
         try {
             table_search_cb[id]();
@@ -2806,6 +2807,16 @@ function do_table_search_table(id, table, value) {
             console.log(err);
         }
     }
+}
+
+function updatePagerCount(table_id) {
+    var total = 0;
+    jQuery("#"+table_id+" > TBODY > TR").each(function(i, row) {
+        if(jQuery(row).hasClass("js-skip-count")) { return(true); }
+        if(!jQuery(row).is(":visible"))           { return(true); }
+        total++;
+    });
+    jQuery(".js-pager-totals").text(total);
 }
 
 /* show bug report icon */

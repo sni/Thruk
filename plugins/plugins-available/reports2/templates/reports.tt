@@ -151,7 +151,7 @@
           </td>
         </tr>
         [% IF r.failed %]
-          <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+          <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
             <td colspan=9 class="textERROR">
               [% IF r.exists('long_error') && r.long_error != "" %]
@@ -167,7 +167,7 @@
           </tr>
         [% END %]
         [% IF r.exists("var") && r.var.exists("opt_errors") %]
-          <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
+          <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
             <td colspan=9 class="textERROR">
               Error(s) in report options:
@@ -181,7 +181,7 @@
         [% END %]
         [% END %]
         [% IF reports.size == 0 %]
-          <tr>
+          <tr class="js-skip-count">
             <td class="text-center" colspan="10">no reports defined yet</td>
           </tr>
         [% END %]
