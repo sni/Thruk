@@ -26,6 +26,17 @@
     </div>
   [% END %]
 
+  [% IF errorDebugInfo && thruk_author %]
+    <div class='card text-left w-fit'>
+      <div class="head">
+        <h3>Details</h3>
+      </div>
+      <div class="body">
+        <pre class="text-left">[% escape_html(errorDebugInfo) %]</pre>
+      </div>
+    </div>
+  [% END %]
+
   [% IF stacktrace %]
     <div class="text-center w-fit">
       <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
