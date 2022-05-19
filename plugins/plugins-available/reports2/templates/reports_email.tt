@@ -2,62 +2,56 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="33%">
-      [% PROCESS _infobox.tt %]
-    </td>
-    <td align="center" valign="top" width="33%">
-      <br><br>
-      <div align="center" class='dataTitle'>Send Report By Mail</div>
-    </td>
-    <td align="right" valign="bottom" width="33%">
-    </td>
-  </tr>
-</table>
-<br><br>
+[% PROCESS _infobox.tt %]
 
 <form action="reports2.cgi" method="POST">
-<input type="submit" name="sub" value="sub" style="display:none"><!-- make enter submit the form -->
-<input type="hidden" name="action" value="email">
-<input type="hidden" name="send" value="1">
-<input type="hidden" name="report" value="[% r.nr %]">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-<table border="1" class='data reports'>
-  <tr>
-    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
-    <th class='data'>E-Mail: [% r.name %]</th>
-  </tr>
-  <tr class="firstrow">
-    <td class="dataEven" align="center"><b>Subject</b></td>
-    <td class="dataOdd" align="left"><input type="text" name="subject" value="[% subject | html %]"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>To</b></td>
-    <td class="dataOdd" align="left"><input type="text" name="to" value="[% r.to | html %]"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Cc</b></td>
-    <td class="dataOdd" align="left"><input type="text" name="cc" value="[% r.cc | html %]"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Description</b></td>
-    <td class="dataOdd" align="left"><textarea name="desc" wrap="hard" cols=74>[% r.desc %]</textarea></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Attachments</b></td>
-    <td class="dataOdd" align="left">
-      [% PROCESS _reports_icon.tt r=r %]
-      <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='' title='' width=16 height=16 style="vertical-align: top;"> [% attach %] ([% n = reduce_number(size, 'B', 1000); sprintf("%.1f %s", n.0, n.1) %])</a>
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"></td>
-    <td class="dataOdd" align="center">
-      <button class="report_email_button report_button" style="width: 150px;">Send E-Mail</button>
-    </td>
-  </tr>
-</table>
+  <input type="submit" name="sub" value="sub" style="display:none"><!-- make enter submit the form -->
+  <input type="hidden" name="action" value="email">
+  <input type="hidden" name="send" value="1">
+  <input type="hidden" name="report" value="[% r.nr %]">
+  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+  <div class="grow flexcol gap-1 items-center">
+    <h1 class="py-5">Send Report By Mail</h1>
+    <div class="card w-[500px]">
+      <div class="head gap-2">
+        <a href="reports2.cgi" class="link hoverable" title="Go back to report list"><i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i> </a>
+        <h3>E-Mail: [% r.name %]</h3>
+      </div>
+      <div class="body">
+        <table class="w-full cellspacing">
+          <tr>
+            <th>Subject</th>
+            <td><input type="text" name="subject" value="[% subject | html %]" class="w-full" required></td>
+          </tr>
+          <tr>
+            <th>To</th>
+            <td><input type="text" name="to" value="[% r.to | html %]" class="w-full" required></td>
+          </tr>
+          <tr>
+            <th>Cc</th>
+            <td><input type="text" name="cc" value="[% r.cc | html %]" class="w-full"></td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <td><textarea name="desc" wrap="hard" class="w-full h-20">[% r.desc %]</textarea></td>
+          </tr>
+          <tr>
+            <th>Attachments</th>
+            <td>
+              [% PROCESS _reports_icon.tt r=r %]
+              <a href="reports2.cgi?report=[% r.nr %]&amp;refreshreport=0"><i class="[% icon %] text-sm"></i> [% attach %] ([% n = reduce_number(size, 'B', 1000); sprintf("%.1f %s", n.0, n.1) %])</a>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              <button class="w-44 green self-center"><i class="uil uil-fast-mail"></i> Send E-Mail</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
 </form>
 
 
