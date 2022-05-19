@@ -16,7 +16,7 @@
 					<br>
 					If you don't need a documentation link at all, set the <b>documentation_link</b> option to a blank value.<br>
 					<br>
-					For installation information and general Thruk help look at the <a class="font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank">online documentation</a>.<br>
+					For installation information and general Thruk help look at the <a class="font-semibold underline link" href="http://www.thruk.org/documentation/" target="_blank">online documentation</a>.<br>
 					<br>
 					<br>
 					<button class="green big"><a href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a></button>
