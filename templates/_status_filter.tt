@@ -1,8 +1,4 @@
-﻿[% IF style == "inTable" %]
-<button class="w-36 text-sm rounded-[5px] border-0 font-medium display-filter[% IF show_filter_table %] textActive2 hover:textActive2[% END %]" onClick="toggleElement('[% paneprefix %]_all_filter_card'); return false;">[% IF show_filter_table %]Filters active[% ELSE %]Display Filter[% END %]</button>
-[% ELSE %]
-<button class="round [% IF style =="tac" %]small[% ELSE %]big[% END %] filter [% IF show_filter_table %]secondary[% END %]" onClick="toggleElement('[% paneprefix %]_all_filter_card'); return false;"><i class="uil uil-filter"></i></button>
-[% END %]
+﻿<button class="w-36 text-sm rounded-[5px] border-0 font-medium display-filter[% IF show_filter_table %] textActive2 hover:textActive2[% END %]" onClick="toggleElement('[% paneprefix %]_all_filter_card'); return false;">[% IF show_filter_table %]Filters active[% ELSE %]Display Filter[% END %]</button>
 [% IF show_form %]
 <form action="" method="GET" style="display: initial;" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this));">
 [%# make sure IE can submit form by pressing enter #%]
