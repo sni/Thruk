@@ -4616,22 +4616,22 @@ function perf_table_data(dataset) {
     for(var nr=0; nr<res.length; nr++) {
         if(res[nr] != undefined) {
             var graph = res[nr];
-            result += '<div class="perf-bar-container '+cls+'" style="width:'+graph.div_width+'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
-            result += '<div class="bg"><\/div>';
-            result += '<div class="bar '+graph.cls+'" style="width:'+ graph.bar_width +'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'><\/div>';
+            result += '<span class="perf-bar-container '+cls+'" style="width:'+graph.div_width+'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'>';
+            result += '<span class="bg"><\/span>';
+            result += '<span class="bar '+graph.cls+'" style="width:'+ graph.bar_width +'px;" '+(no_title ? '' : 'title="'+graph.title+'"')+'><\/span>';
             if(graph.warn_width_min != null) {
-                result += '<div class="threshold warn '+cls+'" style="margin-left:'+graph.warn_width_min+'px;"><\/div>';
+                result += '<span class="threshold warn '+cls+'" style="margin-left:'+graph.warn_width_min+'px;"><\/span>';
             }
             if(graph.crit_width_min != null) {
-                result += '<div class="threshold crit '+cls+'" style="margin-left:'+graph.crit_width_min+'px;"><\/div>';
+                result += '<span class="threshold crit '+cls+'" style="margin-left:'+graph.crit_width_min+'px;"><\/span>';
             }
             if(graph.warn_width_max != null) {
-                result += '<div class="threshold warn '+cls+'" style="margin-left:'+graph.warn_width_max+'px;"><\/div>';
+                result += '<span class="threshold warn '+cls+'" style="margin-left:'+graph.warn_width_max+'px;"><\/span>';
             }
             if(graph.crit_width_max != null) {
-                result += '<div class="threshold crit '+cls+'" style="margin-left:'+graph.crit_width_max+'px;"><\/div>';
+                result += '<span class="threshold crit '+cls+'" style="margin-left:'+graph.crit_width_max+'px;"><\/span>';
             }
-            result += '<\/div>';
+            result += '<\/span>';
         }
     }
     if(result == '') {
