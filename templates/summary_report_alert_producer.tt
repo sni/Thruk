@@ -1,31 +1,39 @@
-﻿<div align="center" class='dataSubTitle'>
-  Displaying [% IF pager.total_entries > limit %] first [% limit %] of [% pager.total_entries %] [% ELSE %] all [% data.size %] [% END %] matching alert producers
-  <div align="center">
-    <table border="0" class='data'>
-      <tr>
-        <th class='data'>Rank</th>
-        <th class='data'>Producer Type</th>
-        <th class='data'>Host</th>
-        <th class='data'>Service</th>
-        <th class='data'>Total Alerts</th>
-      </tr>
-      [%  FOREACH d = data %]
-      [% SET class = 'dataOdd'  IF loop.even %]
-      [% SET class = 'dataEven' IF loop.odd %]
-      <tr class='dataEven'>
-        <td class='[% class %]'>#[% loop.index() + 1 %]</td>
-        [% IF d.service_description %]
-        <td class='[% class %]'>Service</td>
-        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
-        <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
-        [% ELSE %]
-        <td class='[% class %]'>Host</td>
-        <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
-        <td class='[% class %]'>N/A</td>
-        [% END %]
-        <td class='[% class %]'>[% d.alerts %]</td>
-      </tr>
-      [% END %]
-    </table>
+﻿<div class="grow flexcol gap-1 items-center">
+  <div class="card w-fit min-w-[500px] mt-5">
+    <div class="mainTable">
+      <table class="mainTable striped">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Producer Type</th>
+            <th>Host</th>
+            <th>Service</th>
+            <th>Total Alerts</th>
+          </tr>
+        </thead>
+        <tbody>
+          [%  FOREACH d = data %]
+          <tr>
+            <td>#[% loop.index() + 1 %]</td>
+            [% IF d.service_description %]
+            <td>Service</td>
+            <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
+            <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
+            [% ELSE %]
+            <td>Host</td>
+            <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
+            <td>N/A</td>
+            [% END %]
+            <td class="truncate w-1/2 max-w-xs">[% d.alerts %]</td>
+          </tr>
+          [% END %]
+        </tbody>
+      </table>
+    </div>
+    <div class="mainTableFooter">
+      <div class="flex-1 self-center">
+        [% PROCESS _pager_total_items.tt %]
+      </div>
+    </div>
   </div>
 </div>
