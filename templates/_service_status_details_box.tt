@@ -4,7 +4,7 @@
   <div class="head flexrow justify-between">
     <h3>Service Status Totals</h3>
     [% IF show_top_pane %]
-      <button class="iconOnly noprint big" onClick="toggleTopPane(); return false;"><i class="uil uil-top-arrow-to-top m-0" id="btn_toggle_top_pane"></i></button>
+      <button class="iconOnly noprint big" onClick="toggleTopPane(); return false;"><i class="uil uil-top-arrow-to-top m-0"></i></button>
     [% END %]
   </div>
   <table class="serviceTotals">
