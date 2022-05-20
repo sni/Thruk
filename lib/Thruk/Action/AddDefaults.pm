@@ -79,16 +79,16 @@ sub begin {
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
 
     # which theme?
+    my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
     my($param_theme, $cookie_theme);
     if( $c->req->parameters->{'theme'} ) {
         $param_theme = $c->req->parameters->{'theme'};
     }
     elsif($c->cookies('thruk_theme') ) {
         my $theme_cookie = $c->cookies('thruk_theme');
-        $cookie_theme = $theme_cookie if defined $theme_cookie and grep $theme_cookie, $c->config->{'themes'};
+        $cookie_theme = $theme_cookie if(defined $theme_cookie && defined $available_themes->{$theme_cookie});
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
-    my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $theme = 'Light'                       unless defined $available_themes->{$theme};
     $theme = $c->config->{'themes'}->[0]   unless defined $available_themes->{$theme};
