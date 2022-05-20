@@ -1,0 +1,48 @@
+{
+   "backends" : {
+      "backends" : []
+   },
+   "cc" : "",
+   "desc" : "Description",
+   "failed_backends" : "cancel",
+   "is_public" : 0,
+   "name" : "Formlist Report",
+   "params" : {
+      "assumeinitialstates" : "yes",
+      "includesoftstates" : "no",
+      "initialassumedservicestate" : "0",
+      "rpttimeperiod" : "",
+      "servicenameformat" : "servicedescription",
+      "servicenameformat_cust" : "",
+      "services" : [
+         {
+            "host" : "localhost",
+            "service" : "PING",
+            "sla" : "98"
+         },
+         {
+            "host" : "localhost",
+            "service" : "HTTP",
+            "sla" : "98"
+         }
+      ],
+      "timeperiod" : "last7days",
+      "unavailable" : [
+         "critical",
+         "unknown"
+      ]
+   },
+   "permissions" : [],
+   "send_types" : [],
+   "template" : "formlist_report.tt",
+   "to" : "",
+   "user" : "omdadmin",
+   "var" : {
+      "attachment" : "",
+      "ctype" : "",
+      "end_time" : 0,
+      "file_exists" : 0,
+      "is_running" : 0,
+      "start_time" : 0
+   }
+}

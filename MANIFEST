@@ -2491,9 +2491,11 @@ t/scenarios/report_mails_e2e/omd/test.sh
 t/scenarios/report_mails_e2e/thruk.conf
 t/scenarios/report_mails_e2e/thruk_local.conf
 t/scenarios/reports/docker-compose.yml
+t/scenarios/reports/formlist_report.tt
 t/scenarios/reports/Makefile
 t/scenarios/reports/omd/1.rpt
 t/scenarios/reports/omd/2.rpt
+t/scenarios/reports/omd/3.rpt
 t/scenarios/reports/omd/Dockerfile
 t/scenarios/reports/omd/playbook.yml
 t/scenarios/reports/omd/test.cfg
