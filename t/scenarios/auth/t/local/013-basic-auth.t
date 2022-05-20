@@ -32,7 +32,7 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd  => $curl.' -u omdadmin:omd https://127.0.0.1/demo/thruk/cgi-bin/user.cgi',
-    like => ['/Logged in as/'],
+    like => ['/>User</'],
 });
 
 TestUtils::test_command({

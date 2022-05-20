@@ -21,6 +21,6 @@ TestUtils::test_command({
 # thruk cluster commands
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk user.cgi',
-    like => ['/Logged\ in\ as.*\(cli\)/', '/authorized_for_admin/'],
+    like => ['/>User<.*?>\(cli\)</', '/authorized_for_admin/'],
 });
 ###########################################################

@@ -26,7 +26,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*omdadmin', 'authorized_for_admin', 'from cgi.cfg'],
+        'like'   => ['>User<.*?>omdadmin<', 'authorized_for_admin', 'from cgi.cfg'],
     );
 
     # report 1
@@ -51,7 +51,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*omdadmin', 'authorized_for_admin', 'from cgi.cfg'],
+        'like'   => ['>User<.*?>omdadmin<', 'authorized_for_admin', 'from cgi.cfg'],
     );
 
     # report 2
@@ -75,7 +75,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*omdadmin', 'authorized_for_admin', 'from cgi.cfg'],
+        'like'   => ['>User<.*?>omdadmin<', 'authorized_for_admin', 'from cgi.cfg'],
     );
 
     TestUtils::test_page(
@@ -102,7 +102,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*test_contact', 'authorized_for_reports', 'from cgi.cfg'],
+        'like'   => ['>User<.*?>test_contact<', 'authorized_for_reports', 'from cgi.cfg'],
     );
 
     # report 2
@@ -126,7 +126,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*test_contact', 'authorized_for_reports', 'from cgi.cfg'],
+        'like'   => ['>User<.*?>test_contact<', 'authorized_for_reports', 'from cgi.cfg'],
     );
 
     TestUtils::test_page(
