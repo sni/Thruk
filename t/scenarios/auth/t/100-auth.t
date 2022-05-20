@@ -20,7 +20,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*omdadmin', 'authorized_for_admin', 'from cgi.cfg'],
+        'like'   => ['>User<.*?>omdadmin<', 'authorized_for_admin', 'from cgi.cfg'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/thruk/whoami',
@@ -49,7 +49,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*admin', 'authorized_for_admin', 'from group: admins'],
+        'like'   => ['>User<.*?>admin<', 'authorized_for_admin', 'from group: admins'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/thruk/whoami',
@@ -73,7 +73,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['Logged in as.*test', 'none'],
+        'like'   => ['>User<.*?>test<', 'none'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/thruk/whoami',

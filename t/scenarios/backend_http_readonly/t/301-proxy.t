@@ -15,7 +15,7 @@ BEGIN {
 
 TestUtils::test_page(
     url     => '/thruk/cgi-bin/proxy.cgi/backend1/demo/thruk/cgi-bin/user.cgi',
-    like    => ['authorized_for_all_hosts', 'authorized_for_read_only', 'Read-Only sessions cannot create API keys', 'Logged in as <i>omdadmin'],
+    like    => ['authorized_for_all_hosts', 'authorized_for_read_only', 'Read-Only sessions cannot create API keys', '>User<.*?>omdadmin<'],
     unlike  => ['authorized_for_admin', 'authorized_for_system_commands', 'New API Key'],
 );
 

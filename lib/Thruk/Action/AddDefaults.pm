@@ -90,6 +90,7 @@ sub begin {
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
     my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
+    $theme = $c->config->{'themes'}->[0] unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
 
     if(exists $c->req->parameters->{'noheader'}) {

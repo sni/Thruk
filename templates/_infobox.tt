@@ -30,10 +30,7 @@
       [% END %]
       [% IF c.user_exists %]
       <tr>
-        <th>User</th>
-        <td>
-          <a class="link" href="[% url_prefix %]cgi-bin/user.cgi">[% remote_user %]</a>
-        </td>
+        <th>User</th><td><a class="link" href="[% url_prefix %]cgi-bin/user.cgi">[% remote_user %]</a></td>
       </tr>
       [% IF has_proc_info %]
       <tr>
