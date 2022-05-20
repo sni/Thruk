@@ -24,6 +24,7 @@
  *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
  *       - select all with downtime does not work (has_downtime class missing)
  *       - Problems Button is buggy, can't close cmd popup
+ *       - Problems Page - Select all Buttons buggy, website refreshes and filter changes
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  */
 

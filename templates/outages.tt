@@ -1,59 +1,64 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table>
-    <div align="center">
-      <br>
-      <div class='dataTitle'>Blocking Outages</div>
-      <table border="0" class='data'>
-        <tr>
-          <th class='data'>Severity</th>
-          <th class='data'>Host</th>
-          <th class='data'>State</th>
-          <th class='data'>Notes</th>
-          <th class='data'>State Duration</th>
-          <th class='data'># Hosts Affected</th>
-          <th class='data'># Services Affected</th>
-          <th class='data'>Actions</th>
-        </tr>
-        [% SET num = 0 %]
-        [% FOREACH host = outages %]
-        [% SET num = num + 1 %]
-        [% SET class = 'dataOdd'  IF loop.odd %]
-        [% SET class = 'dataEven' IF loop.even %]
-        <tr class='[% class %]'>
-          <td class='[% class %]'>[% host.severity %]</td>
-          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">[% host.name | html %]</a></td>
-          <td class='hostDOWN'>DOWN</td>
-          <td class='[% class %]'>
-            [% IF host.comment_count > 0 %]
-            <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
-            [% ELSE %]
-            N/A
-            [% END %]
-          </td>
-          <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
-          <td class='[% class %]'>[% host.affected_hosts %]</td>
-          <td class='[% class %]'>[% host.affected_services %]</td>
-          <td class='[% class %]'>
-            <a href="status.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
-            [% IF use_feature_trends %]<a href="trends.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href="notifications.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
-        </tr>
-        [% END %]
+  [% PROCESS _infobox.tt %]
+
+  <h1 class="mt-5">Blocking Outages</h1>
+
+  <div class="card w-full mt-5">
+    <div class="mainTable">
+      <table class="mainTable striped">
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>Host</th>
+            <th class="text-center">State</th>
+            <th>Notes</th>
+            <th class="text-center">State Duration</th>
+            <th># Hosts Affected</th>
+            <th># Services Affected</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <body>
+          [% SET num = 0 %]
+          [% FOREACH host = outages %]
+            [% SET num = num + 1 %]
+            <tr>
+              <td>[% host.severity %]</td>
+              <td><a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">[% host.name | html %]</a></td>
+              <td class='text-center DOWN'>DOWN</td>
+              <td>
+                [% IF host.comment_count > 0 %]
+                <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" height="20" width="20"></a>
+                [% ELSE %]
+                N/A
+                [% END %]
+              </td>
+              <td class="text-center">[% duration(date.now - host.last_state_change) %]</td>
+              <td>[% host.affected_hosts %]</td>
+              <td>[% host.affected_services %]</td>
+              <td>
+                <div class="flex gap-1 justify-center">
+                  <a href="status.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+                  [% IF use_feature_trends %]
+                    <a href="trends.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>
+                  [% END %]
+                  <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+                  <a href="notifications.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a>
+                </div>
+              </td>
+            </tr>
+          [% END %]
+        </body>
       </table>
     </div>
 
-    <div class='itemTotalsTitle'>[% num %] Blocking Outages Displayed</div>
+    <div class="mainTableFooter">
+      <div class="textPager font-medium leading-7 whitespace-nowrap">
+        [% num %] Blocking Outages Displayed
+      </div>
+    </div>
+  </div>
 
 [% PROCESS _footer.tt %]
