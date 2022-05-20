@@ -15,3 +15,6 @@ wait_start_failed_extra:
 server:
 	@echo -e "\n\n*** no server implemented, access via http://127.0.0.3:60080/demo/\n"
 
+extra_prepare:
+	docker exec reports_site_1 mkdir -p /omd/sites/demo/etc/thruk/templates/reports
+	docker cp formlist_report.tt reports_site_1:/omd/sites/demo/etc/thruk/templates/reports/

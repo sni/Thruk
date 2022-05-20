@@ -290,7 +290,7 @@
     <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*' })" style="width: 150px; [% IF value != 'servicecustom' %]display: none;[% END %]">
   [% ELSIF type == 'label' %]
     [% fh.label %]
-  [% ELSIF type == 'formlist' %][%# TODO: ... #%]
+  [% ELSIF type == 'formlist' %]
     [% parent = fh %]
     [% parentvalue = value %]
     <table class="formlist"[% IF parent.draggable %] id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
@@ -309,7 +309,7 @@
           [% PROCESS field_form fh=ch %]
         </td>
         [% END %]
-        <td class='newfilter' onclick="delete_form_row(this); return false;"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="delete"></td>
+        <td class='clickable hoverable rounded px-1' onclick="delete_form_row(this); return false;"><i class="uil uil-times" title="remove this row"></i></td>
       </tr>
       [% END %]
 
@@ -322,15 +322,14 @@
         </td>
         [% END %]
         [% IF parent.multiple %]
-        <td class='newfilter' onclick="delete_form_row(this); return false;"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="delete"></td>
+        <td class='clickable hoverable rounded px-1' onclick="delete_form_row(this); return false;"><i class="uil uil-times" title="remove this row"></td>
         [% END %]
       </tr>
       [% END %]
       [% IF parent.multiple %]
       <tr>
-        <td colspan=100 class='newfilter' onclick="add_form_row(this, 1); return false;" style="min-width:100px;" nowrap>
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
-            add more
+        <td colspan=100 class='clickable hoverable rounded px-1 min-w-[100px] whitespace-nowrap' onclick="add_form_row(this, 1); return false;">
+            <i class="uil uil-angle-down" title="add new schedule entry"></i> add more
         </td>
       </tr>
       [% END %]

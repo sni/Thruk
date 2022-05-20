@@ -1,0 +1,110 @@
+﻿[%# EDIT #%]
+[% sla_options = [[98, 'gold (98%)'], [96, 'silver (96%)'], [94, 'other (94%)']] %]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { name => 'services', desc => 'Services', type => 'formlist', multiple => 1, draggable => 1, childs => [
+                { name => 'sla',     desc => 'SLA',     type => 'select', options => sla_options },
+                { name => 'host',    desc => 'Host',    type => 'hosts'    },
+                { name => 'service', desc => 'Service', type => 'services' },
+              ]
+        },
+        { name => 'timeperiod',                   desc => 'Timeperiod',                 type => 'rptimeperiod',             default => 'lastmonth' },
+        { name => 'rpttimeperiod',                desc => 'Report Timeperiod',          type => 'rpttimeperiod' },
+        { name => 'servicenameformat',            desc => 'Servicename Format',         type => 'serviceformat',            default => 'description' },
+        { name => 'assumeinitialstates',          desc => 'Assume Initial States',      type => 'yes_no',                   default => 'yes' },
+        { name => 'initialassumedservicestate',   desc => 'Initial Assumed State',      type => 'svc_initialassumedstate',  default => '0' },
+        { name => 'includesoftstates',            desc => 'Include Soft States',        type => 'yes_no',                   default => 'no' },
+        { name => 'unavailable',                  desc => 'Unavailable States',         type => 'svc_unavailable',          default => ['critical', 'unknown'], required => 1 },
+    ];
+  %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# PREPARE REPORT #%]
+[% IF block == 'prepare' %]
+  [% c.req.parameters.s_filter = get_service_filter(param.services); %]
+  [% PROCESS 'reports/comp/sla_prepare.tt' %]
+[% END %]
+
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+  [% slas = expand_service_slas(param.services); %]
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_blank.tt' %]
+
+<style type="text/css">
+BODY {
+  font-size: 8px;
+  color: black;
+  font-family: sans-serif;
+}
+TABLE.sla {
+  border-collapse: collapse;
+}
+TABLE.sla TH {
+  background-color: #D9D9D9;
+  border: 1px solid black;
+}
+TABLE.sla TR.middle TH {
+  background-color: #F2F2F2;
+  text-align: left;
+}
+TABLE.sla TD {
+  border: 1px solid black;
+}
+.bad {
+  background-color: #FF0000;
+  color: #006100;
+}
+.good {
+  background-color: #C5DFB3;
+  color: #006100;
+}
+</style>
+
+<div style="text-align: center;">
+  <b>
+  Availability report for central it services.<br>
+  [% format_date(start, "%B %Y") %]<br>
+  Report duration in minutes: [% sprintf("%d", (end - start) / 60) %]
+  </b>
+</div>
+
+<table class="sla" width="100%">
+  <tr>
+    <th>Group</th>
+    <th>Service</th>
+    <th>Servicelevel</th>
+    <th>Availability</th>
+    <th>Nr</th>
+    <th>Outage in minutes</th>
+  </tr>
+  <tr class="middle">
+    <th colspan="6">customers and partners</th>
+  </tr>
+
+[% FOREACH hst = avail_data.services.keys.sort %]
+  [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+  <tr>
+    [% available = get_availability_percents(hst, svc) %]
+    [% p = available.total.percent %]
+    [% sla = slas.$hst.$svc %]
+
+    <td></td>
+    <td>[% svc %]</td>
+    <td align="center">[% FOREACH s = sla_options; IF s.0 == sla; s.1; END; END %]</td>
+    <td align="center" class="[% IF p == -1 %][% ELSIF p < sla %]bad[% ELSE %]good[% END %]">[% IF p == -1 %]-[% ELSE %][% sprintf("%.1f", p) %]%[% END %]</td>
+    <td align="center"></td>
+    <td align="right">[% sprintf("%d", available.total.time.unavailable / 60) %]</td>
+  </tr>
+  [% END %]
+[% END %]
+</table>
+
+    [% END %]
+  [% END %]
+[% END %]

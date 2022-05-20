@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 214;
+    plan tests => 241;
 
     use lib('t');
     require TestUtils;
@@ -73,6 +73,25 @@ BEGIN {
         'skip_html_lint' => 1,
         'skip_js_check'  => 1,
     );
+
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/reports2.cgi',
+        'like'   => ['Reports', 'report scheduled for update'],
+        'post'   => { report => '3', action => 'update' },
+        'follow' => 1,
+    );
+    TestUtils::test_page(
+        'url'     => '/thruk/cgi-bin/reports2.cgi',
+        'like'    => ['Reports'],
+        'waitfor' => qr(\Qreports2.cgi?report=3&amp;refreshreport=0&amp;html=1\E),
+    );
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/reports2.cgi?report=3&refreshreport=0&html=1',
+        'like'           => ['gold', 'PING'],
+        'skip_html_lint' => 1,
+        'skip_js_check'  => 1,
+    );
+
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
         'like'   => ['>User<.*?>omdadmin<', 'authorized_for_admin', 'from cgi.cfg'],

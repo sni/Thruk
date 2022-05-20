@@ -26,4 +26,9 @@
       dest: /omd/sites/demo/var/thruk/reports/
       owner: demo
       group: demo
+  - copy:
+      src: /root/3.rpt
+      dest: /omd/sites/demo/var/thruk/reports/
+      owner: demo
+      group: demo
   - shell: sudo su - demo -c "htpasswd -b etc/htpasswd test_contact test"
