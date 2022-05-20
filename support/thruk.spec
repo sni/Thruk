@@ -268,15 +268,21 @@ exit 0
 # restore themes and plugins
 if [ -d /tmp/thruk_update/themes/. ]; then
   # do not remove the new default theme
-  test -h /tmp/thruk_update/themes/Thruk2 || mv /etc/thruk/themes/themes-enabled/Thruk2 /etc/thruk/themes/themes-enabled/.Thruk2
+  test -h /tmp/thruk_update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light 
+  test -h /tmp/thruk_update/themes/Dark  || mv /etc/thruk/themes/themes-enabled/Dark  /etc/thruk/themes/themes-enabled/.Dark
   rm -f /etc/thruk/themes/themes-enabled/*
   cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
-  test -h /etc/thruk/themes/themes-enabled/.Thruk2 && mv /etc/thruk/themes/themes-enabled/.Thruk2 /etc/thruk/themes/themes-enabled/Thruk2
+  test -h /etc/thruk/themes/themes-enabled/.Light && mv /etc/thruk/themes/themes-enabled/.Light /etc/thruk/themes/themes-enabled/Light
+  test -h /etc/thruk/themes/themes-enabled/.Dark  && mv /etc/thruk/themes/themes-enabled/.Dark  /etc/thruk/themes/themes-enabled/Dark
 fi
+# remove broken/old symlinks
+for link in /etc/thruk/themes/themes-enabled/*; do test -e $link/. || rm $link done
 if [ -d /tmp/thruk_update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
   cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
 fi
+# remove broken/old symlinks
+for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm $link done
 echo "thruk plugins enabled:" $(ls /etc/thruk/plugins/plugins-enabled/)
 if [ -d /tmp/thruk_update/ssi/. ]; then
   rm -f /etc/thruk/ssi/*
