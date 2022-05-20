@@ -1,85 +1,91 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="20%">
-      [% PROCESS _infobox.tt %]
-    </td>
-    <td align="center" valign="top" width="60%">
-      <br><br>
-      <div align="center" class='dataTitle'>Broadcast</div>
-    </td>
-    <td align="right" valign="bottom" width="20%">
-    </td>
-  </tr>
-</table>
+  [% PROCESS _infobox.tt %]
 
-<table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
-  <tr>
-    <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
-    <td align="center"></td>
-    <td align="right">
-      <a href="broadcast.cgi?action=edit&amp;id=new">
-        <button class="thruk_button_add">create new broadcast</button>
-      </a>
-    </td>
-  </tr>
-</table>
-<div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1200px; width: 1200px;">
-  <tr>
-    <th class="status" nowrap width="300">Name</th>
-    <th class="status" nowrap width="80">Author</th>
-    <th class="status" nowrap width="110">Hide Before</th>
-    <th class="status" nowrap width="110">Expires After</th>
-    <th class="status" nowrap width="70">Public</th>
-    <th class="status" nowrap width="100">Contacts</th>
-    <th class="status" nowrap width="100">Contactgroups</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
-    <th class="status" nowrap width="25">&nbsp;</th>
-  </tr>
-  [% FOREACH b = all_broadcasts %]
-  [% SET rowclass = 'statusOdd'  IF loop.even %]
-  [% SET rowclass = 'statusEven' IF loop.odd %]
-  <tr class="[%+ IF loop.first +%]firstrow[% END %]">
-    <td class="status [% rowclass %] text_ellipsis" align="left" style="white-space: inherit;">
-      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit" style="padding-left: 3px;">
-        [% IF b.name %]
-        [% b.name %]
-        [% ELSE %]
-        [% b.raw_text.split('<br>').0.substr(0, 100) | html %]
-        [% END %]
-        [% IF b.template %]<span style="color: #eb6900; padding-left: 10px; float: right;">(DRAFT)</span>[% END %]
-      </a>
-    </td>
-    <td class="status [% rowclass %]" align="left">[% b.author %]</td>
-    <td class="status [% rowclass %]" align="left">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
-    <td class="status [% rowclass %]" align="left">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
-    <td class="status [% rowclass %]" align="left">[% IF b.loginpage %]Yes[% END %]</td>
-    <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contacts.join(', ') %]</td>
-    <td class="status [% rowclass %] text_ellipsis" align="left">[% b.contactgroups.join(', ') %]</td>
-    <td class="status [% rowclass %]" nowrap align="left">
-      <form action="broadcast.cgi" method="POST">
-        <input type="hidden" name="id" value="[% b.basefile %]">
-        <input type="hidden" name="action" value="delete">
-        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-        <input type="image" name="submit" value="remove" src="[% url_prefix %]themes/[% theme %]/images/delete.png" style="width:16px; height: 16px;" onclick="return confirm('really remove?')" alt="remove broadcast">
-      </form>
-    </td>
-    <td class="status [% rowclass %]" nowrap align="left">
-      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=clone" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_copy.png' border="0" alt='Clone Broadcast' title='Clone Broadcast' width=16 height=16></a>
-      <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Broadcast' title='Edit Broadcast' width=16 height=16></a>
-    </td>
-  </tr>
-  [% END %]
-  [% IF all_broadcasts.size == 0 %]
-  <tr class="firstrow">
-    <td class="status statusOdd" align="center" colspan="10">no broadcasts defined yet</td>
-  </tr>
-  [% END %]
-</table>
-</div>
+  <div class="mt-5 pb-2">
+    <div class="flex justify-end">
+      <a href="broadcast.cgi?action=edit&amp;id=new" class="button green">Create broadcast</a>
+    </div>
+  </div>
+
+  <div class="card w-full">
+    <div class="head justify-between">
+      <h3>Broadcasts</h3>
+      <div>
+        [% PROCESS _table_search_field.tt ids=["statusTable"] %]
+      </div>
+    </div>
+
+    <div class="mainTable border-t-0">
+      <table class="mainTable striped" id="statusTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Author</th>
+            <th class="text-center">Hide Before</th>
+            <th class="text-center">Expires After</th>
+            <th class="text-center">Public</th>
+            <th>Contacts</th>
+            <th>Contactgroups</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          [% IF all_broadcasts.size == 0 %]
+          <tr>
+            <td colspan="8" class="textALERT text-center">No broadcasts defined</td>
+          </tr>
+          [% ELSE %]
+            [% FOREACH b = all_broadcasts %]
+              <tr>
+                <td>
+                  <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit">
+                    [% IF b.name %]
+                      [% b.name %]
+                    [% ELSE %]
+                      [% b.raw_text.split('<br>').0.substr(0, 100) | html %]
+                    [% END %]
+                    [% IF b.template %]<span class="textALERT">(TEMPLATE)</span>[% END %] <!-- TODO: Fragen ob es weiterhin Draft heißen muss -->
+                  </a>
+                </td>
+                <td>[% b.author %]</td>
+                <td class="text-center">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
+                <td class="text-center">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
+                <td class="text-center">[% IF b.loginpage %]Yes[% END %]</td>
+                <td>[% b.contacts.join(', ') %]</td> <!-- TODO: truncate notwendig? -->
+                <td>[% b.contactgroups.join(', ') %]</td>
+                <td>
+                  <div class="flex gap-1 justify-center">
+                    <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=clone">
+                      <i class="fa-solid fa-copy small" title='Clone Broadcast'></i>
+                    </a>
+                    <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit">
+                      <i class="fa-solid fa-pencil small" title='Clone Broadcast'></i>
+                    </a>
+                    <form action="broadcast.cgi" method="POST">
+                      <input type="hidden" name="id" value="[% b.basefile %]">
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                      <button type="submit" onclick="return confirm('Do you really want to delete this broadcast?')" title="Delete broadcast" class="iconOnly">
+                        <i class="fa-solid fa-trash small"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            [% END %]
+          [% END %]
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mainTableFooter">
+      <div class="textPager font-medium leading-7 whitespace-nowrap">
+        [% all_broadcasts.size %] Broadcasts Displayed
+      </div>
+    </div>
+  </div>
 
 <script type="text/javascript">
 <!--

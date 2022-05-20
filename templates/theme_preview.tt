@@ -222,13 +222,14 @@
       <div><a><i class="fa-solid fa-clock"></i>fa-solid fa-clock</a></div>
       <div><a><i class="fa-solid fa-clock-rotate-left small"></i>fa-solid fa-clock-rotate-left small</a></div>
       <div><a><i class="fa-solid fa-comment"></i>fa-solid fa-comment</a></div>
+      <div><a><i class="fa-solid fa-copy"></i>fa-solid fa-copy</a></div>
       <div><a><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
       <div><a><i class="fa-solid fa-file-circle-check"></i>fa-solid fa-file-circle-check</a></div>
       <div><a><i class="fa-solid fa-file-circle-plus"></i>fa-solid fa-file-circle-plus</a></div>
       <div><a><i class="fa-solid fa-file-code"></i>fa-solid fa-file-code</a></div>
       <div><a><i class="fa-solid fa-folder-open"></i>fa-solid fa-folder-open</a></div>
       <div><a><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
-      <div><a><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
+      <div><a><i class="fa-solid fa-pencil small"></i>fa-solid fa-pencil small</a></div>
       <div><a><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
       <div><a><i class="fa-solid fa-rocket"></i>fa-solid fa-rocket</a></div>
       <div><a><i class="fa-solid fa-trash"></i>fa-solid fa-trash</a></div>
