@@ -783,11 +783,11 @@ TABLE.cellspacing-0\.25 {
 }
 
 TABLE.striped {
-  TBODY {
-    TR:nth-child(even){
+  > TBODY {
+    > TR:nth-child(even){
       @apply rowEven;
     }
-    TR:nth-child(odd) {
+    > TR:nth-child(odd) {
       @apply rowOdd;
     }
   }

@@ -1,4 +1,4 @@
-﻿<select class="w-full" name="[% name | html %]" onchange="if(this.value == 'custom') { showElement('[% name | html %]_custom_timeperiod') } else { hideElement('[% name | html %]_custom_timeperiod') }">
+﻿<select class="w-56" name="[% name | html %]" onchange="if(this.value == 'custom') { showElement('[% name | html %]_custom_timeperiod') } else { hideElement('[% name | html %]_custom_timeperiod') }">
   [% IF current %]
   <option value="current"[% IF      selected_timeperiod == 'current'      %] selected[% END %]>[ Current time range ]</option>
   [% END %]

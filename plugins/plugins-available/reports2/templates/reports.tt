@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt css="plugins/reports2/reports.css" js="plugins/reports2/reports.js" %]
+﻿[% PROCESS _header.tt js="plugins/reports2/reports.js" %]
 [% PROCESS _message.tt %]
 [% PROCESS _blocks.tt %]
 [% USE date %]
@@ -155,7 +155,7 @@
             <td></td>
             <td colspan=9 class="textERROR">
               [% IF r.exists('long_error') && r.long_error != "" %]
-                <i class="uil uil-arrow-from-top clickable" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;"></i>
+                <i class="uil uil-arrow-from-top clickable" id='long_error_icon_[% r.nr %]' title="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;"></i>
               [% END %]
               [% escape_html(r.error) | nl2br %]
               [% IF r.exists('long_error') %]

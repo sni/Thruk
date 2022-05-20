@@ -544,7 +544,6 @@ plugins/plugins-available/reports2/lib/Thruk/Utils/CLI/Report.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports/Render.pm
 plugins/plugins-available/reports2/preview.png
-plugins/plugins-available/reports2/root/reports.css
 plugins/plugins-available/reports2/root/reports.js
 plugins/plugins-available/reports2/root/reports_render.js
 plugins/plugins-available/reports2/routes
