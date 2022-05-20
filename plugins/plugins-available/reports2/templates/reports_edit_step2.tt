@@ -11,8 +11,8 @@
 [% BLOCK field %]
   [% fh = normalize_required_field(c, f) %]
   [% IF fh.defined("hidden") && fh.hidden; NEXT; END %]
-  <tr class="report_type_[% fh.type | html %]">
-    <th valign="top">
+  <tr class="report_type_[% fh.type | html %] js-report-options">
+    <th class="align-top">
       [% fh.desc %]
       [% IF fh.required %]<span class="required">*</span>[% END %]
       [% IF fh.details != '' %]<br><span class="whitespace-normal text-xs font-normal">[% fh.details %]</span>[% END %]
@@ -35,13 +35,13 @@
   [% value   = default %]
   [% IF r.params.exists(key) %][% value = r.params.$key %][% END %]
   [% IF type == 'int' %]
-    <input type="text" name="params.[% key %]" value="[% value | html %]" class="w-full">
+    <input type="text" name="params.[% key %]" value="[% value | html %]" class="w-56">
   [% ELSIF type == 'int_box' %]
-    <div class="flexrow flex-nowrap gap-1 items-center w-full">
+    <div class="flexrow flex-nowrap gap-1 items-center w-56">
       <input type="hidden" name="optional.[% key %]" value="1">[% checked = 0 %]
       <input type="checkbox" name="enabled.[% key %]" value="1" onchange="var el = document.getElementsByName('params.[% key %]')[0]; if(this.checked) { el.disabled = false; } else { el.disabled = true;  }"[% IF value != -1; checked = 1; %]checked[% END %]>
       [% IF value == -1 || value == "" %][% value = default %][% END %]
-      <input type="text" class="w-full" name="params.[% key %]" value="[% IF default == value %][% extra | html %][% ELSE %][% value | html %][% END %]" class="with_checkbox"[% IF ! checked %] disabled[% END %]>
+      <input type="text" name="params.[% key %]" value="[% IF default == value %][% extra | html %][% ELSE %][% value | html %][% END %]" class="w-full with_checkbox"[% IF ! checked %] disabled[% END %]>
     </div>
   [% ELSIF type == 'textarea' %]
     <textarea name="params.[% key %]" wrap="hard" class="w-full">[% value | html %]</textarea>
@@ -51,7 +51,7 @@
       <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
     </select>
   [% ELSIF type == 'select' %]
-    <select name="params.[% key %]">
+    <select name="params.[% key %]" class="w-56">
       [% FOREACH o = fh.options %]
       [% o = o.list; v = o.0; IF o.size > 1; k = o.1; ELSE; k = o.0; END %]
       <option value="[% v | html %]"[%  IF value == v  %] selected[% END %]>[% k %]</option>
@@ -60,14 +60,14 @@
   [% ELSIF type == 'hosts' OR type == 'hostgroups' OR type == 'servicegroups' %]
     [% inputid = "params." _ key _ "_" _ counter; counter = counter + 1 %]
     [% IF type == 'hosts'; last_host_id = inputid; END %]
-    <input type="text" id="[% inputid | html %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'status.cgi?format=search&amp;type=[% type | html %]', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
+    <input class="w-full" type="text" id="[% inputid | html %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'status.cgi?format=search&amp;type=[% type | html %]', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
   [% ELSIF type == 'services' %]
-    <input type="text" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: '[% last_host_id | html %]', backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
+    <input class="w-full" type="text" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: '[% last_host_id | html %]', backend_select:'report_backends', list: '\\s*,\\s*', onselect:reports_update_affected_sla_objects })" onchange="reports_update_affected_sla_objects(this)">
   [% ELSIF type == 'affected_sla_objects' %]
     <div class="flexrow flex-nowrap justify-end">
       <div class="w-full text-right">
         <span class="name">expected objects:</span>
-        <span class="value inline-block w-5" id="reports_expected_objects">&nbsp;</span>
+        <span class="value inline-block w-40 text-left pl-2" id="reports_expected_objects">&nbsp;</span>
       </div>
       <div class="w-5">
         <div id="reports_waiting" style="display: none;">
@@ -87,13 +87,13 @@
     [% custom=1; IF value == "custom"; custom=2; END %]
     [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value custom=custom name="params." _ key t1=t1 t2=t2 current=0 show_hint=1 %]
   [% ELSIF type == 'breakdowns' %]
-    <select name="params.[% key %]">
+    <select name="params.[% key %]" class="w-56">
       <option value="months"[% IF value == 'months' %] selected[% END %]>Months</option>
       <option value="weeks"[%  IF value == 'weeks'  %] selected[% END %]>Weeks</option>
       <option value="days"[%   IF value == 'days'   %] selected[% END %]>Days</option>
     </select>
   [% ELSIF type == 'rpttimeperiod' %]
-    <select name="params.[% key %]">
+    <select name="params.[% key %]" class="w-56">
       <option value="">None</option>
       [% FOREACH t = timeperiods %]
       <option value="[% t.name | html %]"[% IF value == t.name %] selected[% END %]>[% t.name | html %]</option>
@@ -105,57 +105,61 @@
     <input type="hidden" name="params.[% key %]" value="">
     [% lookup = {} %]
     [% FOREACH tmp = value %][% lookup.$tmp = 1 %][% END %]
-    <table class="unavailable_states">
+    <table class="w-fit innercellborder unavailable_states">
       <tr>
-        <th>State</th><th>Normal</th><th>During Downtime</th>
+        <th class="w-24">State</th>
+        <th class="text-center">Normal</th>
+        <th class="text-center">During Downtime</th>
       </tr>
       <tr>
         <td>Up</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="up"[% IF lookup.exists('up') %] checked[% END %]></td>
-        <td align="center"></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="up"[% IF lookup.exists('up') %] checked[% END %]></td>
+        <td></td>
       </tr>
       <tr>
         <td>Down</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="down"[% IF lookup.exists('down') %] checked[% END %]></td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="down_downtime"[% IF lookup.exists('down_downtime') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="down"[% IF lookup.exists('down') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="down_downtime"[% IF lookup.exists('down_downtime') %] checked[% END %]></td>
       </tr>
       <tr>
         <td>Unreachable</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="unreachable"[% IF lookup.exists('unreachable') %] checked[% END %]></td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="unreachable_downtime"[% IF lookup.exists('unreachable_downtime') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="unreachable"[% IF lookup.exists('unreachable') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="unreachable_downtime"[% IF lookup.exists('unreachable_downtime') %] checked[% END %]></td>
       </tr>
     </table>
   [% ELSIF type == 'svc_unavailable' %]
     <input type="hidden" name="params.[% key %]" value="">
     [% lookup = {} %]
     [% FOREACH tmp = value %][% lookup.$tmp = 1 %][% END %]
-    <table class="unavailable_states">
+    <table class="w-fit innercellborder unavailable_states">
       <tr>
-        <th>State</th><th>Normal</th><th>During Downtime</th>
+        <th class="w-24">State</th>
+        <th class="text-center">Normal</th>
+        <th class="text-center">During Downtime</th>
       </tr>
       <tr>
         <td>Ok</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="ok"[% IF lookup.exists('ok') %] checked[% END %]></td>
-        <td align="center"></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="ok"[% IF lookup.exists('ok') %] checked[% END %]></td>
+        <td></td>
       </tr>
       <tr>
         <td>Warning</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="warning"[% IF lookup.exists('warning') %] checked[% END %]></td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="warning_downtime"[% IF lookup.exists('warning_downtime') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="warning"[% IF lookup.exists('warning') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="warning_downtime"[% IF lookup.exists('warning_downtime') %] checked[% END %]></td>
       </tr>
       <tr>
         <td>Critical</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="critical"[% IF lookup.exists('critical') %] checked[% END %]></td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="critical_downtime"[% IF lookup.exists('critical_downtime') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="critical"[% IF lookup.exists('critical') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="critical_downtime"[% IF lookup.exists('critical_downtime') %] checked[% END %]></td>
       </tr>
       <tr>
         <td>Unknown</td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="unknown"[% IF lookup.exists('unknown') %] checked[% END %]></td>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="unknown_downtime"[% IF lookup.exists('unknown_downtime') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="unknown"[% IF lookup.exists('unknown') %] checked[% END %]></td>
+        <td class="text-center"><input type="checkbox" name="params.[% key %]" value="unknown_downtime"[% IF lookup.exists('unknown_downtime') %] checked[% END %]></td>
       </tr>
     </table>
   [% ELSIF type == 'hst_initialassumedstate' %]
-    <select name='params.[% key %]'>
+    <select name='params.[% key %]' class="w-56">
       <option value=0[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
       <option value=-1[% IF value == '-1' %] selected[% END %]>Current State</option>
       <option value=3[% IF  value ==  '3' %] selected[% END %]>Host Up</option>
@@ -163,7 +167,7 @@
       <option value=5[% IF  value ==  '5' %] selected[% END %]>Host Unreachable</option>
     </select>
   [% ELSIF type == 'svc_initialassumedstate' %]
-    <select name='params.[% key %]'>
+    <select name='params.[% key %]' class="w-56">
       <option value="0"[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
       <option value="-1"[% IF value == '-1' %] selected[% END %]>Current State</option>
       <option value="6"[% IF  value ==  '6' %] selected[% END %]>Service Ok</option>
@@ -175,98 +179,100 @@
     <input type="hidden" name="params.[% key %]" value="">
     [% lookup = {} %]
     [% FOREACH tmp = value %][% lookup.$tmp = 1 %][% END %]
-    <table class="log_states">
-      <tr>
-        <th align="center" colspan=2>Host Alerts</th>
-      </tr>
-      <tr>
-        <td align="center" colspan=2>
+    <div class="flexrow justify-between">
+      <table class="w-fit h-fit">
+        <tr>
+          <th class="pl-0" colspan=2>Host Alerts</th>
+        </tr>
+        <tr>
+          <td class="pl-0" colspan=2>
             <select name='params.[% key %]'>
               <option value="host_state_hard"[% IF lookup.exists('host_state_hard') %] selected[% END %]>Hard States</option>
               <option value="host_state_soft"[% IF lookup.exists('host_state_soft') %] selected[% END %]>Soft States</option>
               <option value="host_state_both"[% IF lookup.exists('host_state_both') %] selected[% END %]>Both</option>
             </select>
-        </td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="host_up"[% IF lookup.exists('host_up') %] checked[% END %]></td><td>Up</td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="host_down"[% IF lookup.exists('host_down') %] checked[% END %]></td><td>Down</td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="host_unreachable"[% IF lookup.exists('host_unreachable') %] checked[% END %]></td><td>Unreachable</td>
-      </tr>
-    </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="pl-0"><input type="checkbox" name="params.[% key %]" value="host_up"[% IF lookup.exists('host_up') %] checked[% END %]></td><td>Up</td>
+        </tr>
+        <tr>
+          <td class="pl-0"><input type="checkbox" name="params.[% key %]" value="host_down"[% IF lookup.exists('host_down') %] checked[% END %]></td><td>Down</td>
+        </tr>
+        <tr>
+          <td class="pl-0"><input type="checkbox" name="params.[% key %]" value="host_unreachable"[% IF lookup.exists('host_unreachable') %] checked[% END %]></td><td>Unreachable</td>
+        </tr>
+      </table>
 
-    <table class="log_states">
-      <tr>
-        <th align="center" colspan=2>Service Alerts</th>
-      </tr>
-      <tr>
-        <td align="center" colspan=2>
-            <select name='params.[% key %]'>
-              <option value="service_state_hard"[% IF lookup.exists('service_state_hard') %] selected[% END %]>Hard States</option>
-              <option value="service_state_soft"[% IF lookup.exists('service_state_soft') %] selected[% END %]>Soft States</option>
-              <option value="service_state_both"[% IF lookup.exists('service_state_both') %] selected[% END %]>Both</option>
-            </select>
-        </td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="service_ok"[% IF lookup.exists('service_ok') %] checked[% END %]></td><td>OK</td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="service_warning"[% IF lookup.exists('service_warning') %] checked[% END %]></td><td>Warning</td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="service_unknown"[% IF lookup.exists('service_unknown') %] checked[% END %]></td><td>Unknown</td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="service_critical"[% IF lookup.exists('service_critical') %] checked[% END %]></td><td>Critical</td>
-      </tr>
-    </table>
+      <table class="w-fit h-fit">
+        <tr>
+          <th colspan=2>Service Alerts</th>
+        </tr>
+        <tr>
+          <td colspan=2>
+              <select name='params.[% key %]'>
+                <option value="service_state_hard"[% IF lookup.exists('service_state_hard') %] selected[% END %]>Hard States</option>
+                <option value="service_state_soft"[% IF lookup.exists('service_state_soft') %] selected[% END %]>Soft States</option>
+                <option value="service_state_both"[% IF lookup.exists('service_state_both') %] selected[% END %]>Both</option>
+              </select>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="params.[% key %]" value="service_ok"[% IF lookup.exists('service_ok') %] checked[% END %]></td><td>OK</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="params.[% key %]" value="service_warning"[% IF lookup.exists('service_warning') %] checked[% END %]></td><td>Warning</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="params.[% key %]" value="service_unknown"[% IF lookup.exists('service_unknown') %] checked[% END %]></td><td>Unknown</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="params.[% key %]" value="service_critical"[% IF lookup.exists('service_critical') %] checked[% END %]></td><td>Critical</td>
+        </tr>
+      </table>
 
-    <table class="log_states">
-      <tr>
-        <th align="center" colspan=2>Notifications</th>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="notification_host"[%  IF lookup.exists('notification_host') %] checked[% END %]></td><td>Host</td>
-      </tr>
-      <tr>
-        <td align="center"><input type="checkbox" name="params.[% key %]" value="notification_service"[% IF lookup.exists('notification_service') %] checked[% END %]></td><td>Service</td>
-      </tr>
-    </table>
+      <table class="w-fit h-fit">
+        <tr>
+          <th colspan=2>Notifications</th>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="params.[% key %]" value="notification_host"[%  IF lookup.exists('notification_host') %] checked[% END %]></td><td>Host</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" name="params.[% key %]" value="notification_service"[% IF lookup.exists('notification_service') %] checked[% END %]></td><td>Service</td>
+        </tr>
+      </table>
+    </div>
   [% ELSIF type == 'radio' %]
       [% FOR v = fh.extra %]
         <input type="radio" id="[% v | html %]" name="params.[% key %]" value="[% v | html %]"[% IF v == value %] checked[% END %] onchange="reports_update_affected_sla_objects(this)">
-        <label for="[% v | html %]">[% v | html %]</label>
+        <label for="[% v | html %]" class="pr-2 clickable">[% v | html %]</label>
       [% END %]
   [% ELSIF type == 'themes' %]
-    <select name='params.[% key %]'>
+    <select name='params.[% key %]' class="w-56">
       [% FOR t = c.config.themes %]
       <option value="[% t | html %]"[% IF t == value %] selected[% END %]>[% t | html %]</option>
       [% END %]
     </select>
   [% ELSIF type == 'report_theme' %]
-    <select name='params.[% key %]'>
+    <select name='params.[% key %]' class="w-56">
       <option value="default">default</option>
       [% FOR t = report_themes %]
       <option value="[% t.name | html %]"[% IF t.name == value %] selected[% END %]>[% t.name | html %]</option>
       [% END %]
     </select>
   [% ELSIF type == 'language' %]
-    <select name='params.[% key %]'>
+    <select name='params.[% key %]' class="w-56">
       [% FOR l = languages.keys.sort %]
       <option value="[% languages.$l.abrv | html %]"[% IF languages.$l.abrv == value %] selected[% END %]>[% l %]</option>
       [% END %]
     </select>
   [% ELSIF type == 'dateformat' %]
-    <input type="text" name="params.[% key %]" value="[% value | html %]" placeholder="%d %b %Y">
+    <input type="text" class="w-56" name="params.[% key %]" value="[% value | html %]" placeholder="%d %b %Y">
   [% ELSIF type == 'datetimeformat' %]
-    <input type="text" name="params.[% key %]" value="[% value | html %]" placeholder="%d %b %Y  %H:%M:%S">
+    <input type="text" class="w-56" name="params.[% key %]" value="[% value | html %]" placeholder="%d %b %Y  %H:%M:%S">
   [% ELSIF type == 'hostformat' %]
-    <select name="params.[% key %]" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'hostcustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
+    <select name="params.[% key %]" class="w-56" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'hostcustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
       <option value="hostname"[%        IF value == 'hostname'        %] selected[% END %]>Name</option>
       <option value="hostalias"[%       IF value == 'hostalias'       %] selected[% END %]>Alias</option>
       <option value="hostdisplayname"[% IF value == 'hostdisplayname' %] selected[% END %]>Displayname</option>
@@ -275,7 +281,7 @@
     [% cust_value = ""; cust_key = key _ '_cust'; IF r.params.exists(cust_key) %][% cust_value = r.params.$cust_key %][% END %]
     <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*' })" style="width: 150px; [% IF value != 'hostcustom' %]display: none;[% END %]">
   [% ELSIF type == 'serviceformat' %]
-    <select name="params.[% key %]" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'servicecustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
+    <select name="params.[% key %]" class="w-56" onchange="var el = document.getElementById('params.[% key %]_cust'); if(this.value == 'servicecustom') { el.style.display = ''; } else { el.style.display = 'none'; }">
       <option value="servicedescription"[% IF value == 'description'        %] selected[% END %]>Description</option>
       <option value="servicedisplayname"[% IF value == 'servicedisplayname' %] selected[% END %]>Displayname</option>
       <option value="servicecustom"[%      IF value == 'servicecustom'      %] selected[% END %]>Customvariable</option>
@@ -284,7 +290,7 @@
     <input type="text" id="params.[% key %]_cust" name="params.[% key %]_cust" value="[% cust_value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'custom variable', { url: 'status.cgi?format=search&amp;type=custom variable&exposed_only=1', autosubmit:false, backend_select:'report_backends', list: '\\s*,\\s*' })" style="width: 150px; [% IF value != 'servicecustom' %]display: none;[% END %]">
   [% ELSIF type == 'label' %]
     [% fh.label %]
-  [% ELSIF type == 'formlist' %]
+  [% ELSIF type == 'formlist' %][%# TODO: ... #%]
     [% parent = fh %]
     [% parentvalue = value %]
     <table class="formlist"[% IF parent.draggable %] id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>

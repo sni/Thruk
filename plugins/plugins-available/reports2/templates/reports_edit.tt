@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt css="plugins/reports2/reports.css" js="plugins/reports2/reports.js" %]
+﻿[% PROCESS _header.tt js="plugins/reports2/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
@@ -23,19 +23,19 @@
             <td colspan=2><input type="text" name="name" value="[% r.name | html %]" class="w-full"></td>
           </tr>
           <tr>
-            <th valign="top">Description</th>
-            <td colspan=2><textarea name="desc" wrap="hard" class="w-full">[% r.desc %]</textarea></td>
+            <th class="align-top">Description</th>
+            <td colspan=2><textarea name="desc" wrap="hard" cols="56" class="w-full">[% r.desc %]</textarea></td>
           </tr>
           [% IF c.check_user_roles('admin') %]
           <tr>
-            <th valign="top">Owner</th>
+            <th>Owner</th>
             <td colspan=2>
               <input type='text' id="owner" name="owner" value="[% r.user | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search', autosubmit:false, striped: true })" class="w-full">
             </td>
           </tr>
           [% END %]
           <tr>
-            <th valign="top">Permissions</th>
+            <th class="align-top">Permissions</th>
             <td colspan=2 class="p-1">
               <table id="permissions" class="w-full">
                 <tr[% IF r.permissions.size == 0 %] style="display: none;"[% END %]>
@@ -58,14 +58,14 @@
           </tr>
           [% IF backends.size > 10 %]
           <tr>
-            <th valign="top">Backends</th>
+            <th class="align-top">Backends</th>
             <td colspan=2>
             [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 onchange="reports_update_affected_sla_objects(this)" %]
             </td>
           </tr>
           [% ELSIF backends.size > 1 %]
           <tr>
-            <th valign="top">Backends</th>
+            <th class="align-top">Backends</th>
             <td colspan=2>
               [% backends_selected=0 %]
               [% IF r.backends.size > 0 %][% backends_selected=1 %][% END %]
@@ -73,7 +73,7 @@
                 <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('report_backends'); reports_update_affected_sla_objects(this);">
                 <span onclick="toggleCheckBox('report_backends_toggle'); toggleElement('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span>
               </div>
-              <select id="report_backends" name="report_backends" multiple class="mt-1 w-full" style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]" onchange="reports_update_affected_sla_objects(this)">
+              <select id="report_backends" name="report_backends" multiple class="mt-1 w-56" style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]" onchange="reports_update_affected_sla_objects(this)">
                 [% FOREACH b = backends %]
                 <option value="[% b | html %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
                 [% END %]
@@ -83,15 +83,15 @@
           [% END %]
           [% IF backends.size > 1 %]
           <tr>
-            <th valign="top">Failed Backends</th>
+            <th class="align-top">Failed Backends</th>
             <td colspan=2>
-              <select name="failed_backends" class="w-full">
+              <select name="failed_backends" class="w-56">
                 <option value="cancel"[% IF r.failed_backends == 'cancel' %] selected[% END %]>cancel report</option>
                 <option value="ignore"[% IF r.failed_backends == 'ignore' %] selected[% END %]>ignore the error</option>
                 <option value="print"[%  IF r.failed_backends == 'print'  %] selected[% END %]>ignore the error and add error details page</option>
               </select>
               <br>
-              <font size='-2'>choose what happens if some of the selected backends are not available.</font>
+              <span class="whitespace-normal text-xs font-normal">choose what happens if some of the selected backends are not available.</span>
             </td>
           </tr>
           [% END %]
@@ -103,11 +103,11 @@
             <td colspan=2><input type="text" name="to" value="[% r.to | html %]" class="w-full"></td>
           </tr>
           <tr>
-            <th>Cc</td>
+            <th>Cc</th>
             <td colspan=2><input type="text" name="cc" value="[% r.cc | html %]" class="w-full"></td>
           </tr>
           <tr>
-            <th valign="top">Schedule</td>
+            <th class="align-top">Schedule</th>
             <td colspan=2 class="p-1">
               <table id="cron_entries" class="w-full">
                 [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
@@ -130,7 +130,7 @@
           <tr>
             <th>Type</th>
             <td colspan=2>
-              <select name="template" class="w-full" onchange="update_reports_type('[% r.nr %]', this.value)">
+              <select name="template" class="w-56" onchange="update_reports_type('[% r.nr %]', this.value)">
                 [% FOREACH file = templates.keys.sort %]
                 [% IF templates.$file.deprecated && file != r.template; NEXT; END %]
                 <option value="[% file | html %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
@@ -172,6 +172,9 @@
   // preserve filter and tab on save
   jQuery("FORM").on('submit', preserve_hash);
   jQuery("FORM A").on('click', preserve_hash);
+  jQuery("FORM").on('submit', function() {
+    jQuery("FORM").find(".template").remove();
+  });
 -->
 </script>
 

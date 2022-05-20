@@ -14,17 +14,17 @@ function update_reports_type_step2() {
     if(updateRetries == 30) {
         return;
     }
-    if(tmpDiv.find('TR.report_options').length == 0) {
+    if(tmpDiv.find('TR.js-report-options').length == 0) {
         window.setTimeout(update_reports_type_step2, 100);
         return;
     }
 
     // replace settings
-    jQuery('TR.report_options').remove();
-    tmpDiv.find('TR.report_options').insertAfter('#new_reports_options')
+    jQuery('TR.js-report-options').remove();
+    tmpDiv.find('TR.js-report-options').insertAfter('#new_reports_options')
 
     // scroll to report settings
-    jQuery('TR.report_options TD').effect('highlight', {}, 1000);
+    jQuery('TR.js-report-options TD').effect('highlight', {}, 1000);
     jQuery([document.documentElement, document.body]).animate({
         scrollTop: jQuery("#report_type").offset().top
     }, 1000);
@@ -99,6 +99,10 @@ function reports_update_affected_sla_objects(input) {
     } catch(e) {
         console.log(e);
     }
+
+    form = jQuery(form).clone();
+    jQuery(form).find(".template").remove();
+
     var data = {
         action:         'check_affected_objects',
         emptyok:        '1',
