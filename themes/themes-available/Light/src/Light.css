@@ -19,6 +19,7 @@
  *       - change Options for Columns on Configuration page (extinfo type 4) + make Host_name sticky
  *       - config.cgi Show correct "xxx of yyy items displayed" with JS count when using the filter
  *   - Bugs:
+ *       - JS sets width when searching on filter field (reports or broadcast) -> refresh, table width not 100% anymore
  *       - sorting removed when changing filter
  *       - Comments page, 2 filter boxes, buggy when leaving first box (applies to 2nd box aswell? )
  *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
@@ -373,6 +374,9 @@ I.fa-solid, I.uil {
   }
   &.yellow {
     @apply bg-yellow-300 text-black;
+  }
+  &.gray {
+    @apply bg-gray-200 text-black;
   }
 }
 
@@ -877,7 +881,7 @@ SELECT {
 INPUT:disabled {
   @apply bg-gray-200 cursor-default;
 }
-INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid {
+INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
   @apply outline-none ring-0 ring-red-600 border-red-600;
   &.silent {
     @apply outline-none ring-0 ring-inherit border-inherit;

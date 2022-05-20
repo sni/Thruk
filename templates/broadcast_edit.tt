@@ -2,186 +2,179 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="33%">
-      [% PROCESS _infobox.tt %]
-    </td>
-    <td align="center" valign="top" width="33%">
-      <br><br>
-      <div align="center" class='dataTitle'>Broadcast</div>
-    </td>
-    <td align="right" valign="bottom" width="33%">
-    </td>
-  </tr>
-</table>
-<br><br>
+  [% PROCESS _infobox.tt %]
+  <h1 class="mt-5">[% IF broadcast.id != "new" %]Edit[% ELSE%]Create[% END %] Broadcast</h1>
 
-<form action="broadcast.cgi" method="POST">
-<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
-<input type="hidden" name="action" value="save">
-<input type="hidden" name="id" value="[% broadcast.id %]">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-<table border="1" class='data' width=1000>
-  <tr>
-    <th class='data' style="width:125px;"><a href='broadcast.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
-    <th class="data" nowrap>[% IF broadcast.id != "new" %]Edit[% ELSE%]Create[% END %] Broadcast</th>
-  </tr>
-[% IF broadcast.id == "new" %]
-  <tr>
-    <td class="dataEven" align="center"><b>Clone From Template</b></td>
-    <td class="dataOdd" align="left">
-      <select onchange="chooseTemplate(this.value)">
-        <option value="" selected hidden disabled>choose template</option>
-        [% FOREACH t = bc_templates %]
-        <option value="[% t.basefile | html %]">[% t.name | html %]</option>
+  <a href="broadcast.cgi" class="button iconOnly contents">
+    <i class="uil uil-angle-left" title="Back"></i>
+  </a>
+
+  <div class="card w-[800px] mx-auto">
+    <form action="broadcast.cgi" method="POST">
+      <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+      <input type="hidden" name="action" value="save">
+      <input type="hidden" name="id" value="[% broadcast.id %]">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <table class="cellspacing">
+      [% IF broadcast.id == "new" %]
+        <tr>
+          <td><b>Clone From Template</b></td>
+          <td>
+            <select onchange="chooseTemplate(this.value)">
+              <option value="" selected hidden disabled>choose template</option>
+              [% FOREACH t = bc_templates %]
+              <option value="[% t.basefile | html %]">[% t.name | html %]</option>
+              [% END %]
+            </select>
+          </td>
+        </tr>
+      [% END %]
+        <tr>
+          <td><b>Save as Template</b></td>
+          <td><input type="checkbox" value="1" name="template" id="template"[% IF broadcast.template %] checked[% END %]> <label for="template">Templates will never be displayed but can be cloned.</label></td>
+        </tr>
+        <tr>
+          <td><b>Name</b></td>
+          <td><input type="text" value="[% broadcast.name | html %]" name="name" style="width: 97%;"></td>
+        </tr>
+        <tr>
+          <td><b>Hide Before</b></td> <!-- klären ob altes popup notwendig-->
+          <td>
+            <input type="datetime-local"
+                  class="cal_popup_clear"
+                  value="[% IF broadcast.hide_before %][% format_date(broadcast.hide_before_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
+                  id="hide_before"
+                  name="hide_before"
+                  onkeyup="verify_time(this.id)"
+                  onchange="verify_time(this.id)"
+            >
+            </td>
+        </tr>
+        <tr>
+          <td><b>Expire After</b></td>
+          <td>
+            <input type="text"
+                  class="cal_popup_clear"
+                  value="[% IF broadcast.expires %][% format_date(broadcast.expires_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
+                  id="expires"
+                  name="expires"
+                  onkeyup="verify_time(this.id)"
+                  onchange="verify_time(this.id)"
+            >
+            </td>
+        </tr>
+        <tr>
+          <td><b>Annotation</b></td>
+          <td>
+              <div class="flex">
+                <input type="radio" name="annotation" value=""[% IF !broadcast.annotation %] checked[% END %]>None
+                <input type="radio" name="annotation" value="info"[% IF broadcast.annotation == "info" %] checked[% END %]><i class="uil uil-info round gray" title="Info"></i>
+                <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %]><i class="uil uil-exclamation round yellow" title="Warning"></i>
+              </div>
+          </td>
+        </tr>
+        [% IF broadcast.frontmatter.keys.size > 0 %]
+        <tr class="frontmatter_edit">
+          <td valign="top">
+            <b>Variables</b>
+            <br>
+            <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', ''); jQuery('TR.frontmatter_edit').css('display', 'none')"; return(false); value="raw edit">
+          </td>
+          <td style="position: relative;">
+            <table style="width: 97%; border-spacing: 0;" class="frontmatterlist">
+            <tr style="display: none;" class="firstrow frontmatter_row">
+              <td style="width: 0;" align="right" nowrap><b></b></td>
+              <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="" value="" style="width: 100%;"></td>
+            </tr>
+            [% FOREACH f = broadcast.frontmatter.keys.sort %]
+            <tr class="frontmatter_row" data-name="[% f | html %]">
+              <td style="width: 0;" align="right" nowrap><b>[% f | html %]:</b></td>
+              <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="frontmatter.[% f | html %]" value="[% broadcast.frontmatter.$f | html %]" style="width: 100%;"></td>
+            </tr>
+            [% END %]
+            </table>
+          </td>
+        </tr>
         [% END %]
-      </select>
-    </td>
-  </tr>
-[% END %]
-  <tr>
-    <td class="dataEven" align="center"><b>Save as Template</b></td>
-    <td class="dataOdd" align="left"><input type="checkbox" value="1" name="template" id="template"[% IF broadcast.template %] checked[% END %]> <label for="template">Templates will never be displayed but can be cloned.</label></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Name</b></td>
-    <td class="dataOdd" align="left"><input type="text" value="[% broadcast.name | html %]" name="name" style="width: 97%;"></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Hide Before</b></td>
-    <td class="dataOdd" align="left">
-      <input type="text"
-             class="cal_popup_clear"
-             value="[% IF broadcast.hide_before %][% format_date(broadcast.hide_before_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
-             id="hide_before"
-             name="hide_before"
-             onkeyup="verify_time(this.id)"
-             onchange="verify_time(this.id)"
-      >
-      </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Expire After</b></td>
-    <td class="dataOdd" align="left">
-      <input type="text"
-             class="cal_popup_clear"
-             value="[% IF broadcast.expires %][% format_date(broadcast.expires_ts, '%Y-%m-%d %H:%M:00') %][% END %]"
-             id="expires"
-             name="expires"
-             onkeyup="verify_time(this.id)"
-             onchange="verify_time(this.id)"
-      >
-      </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Annotation</b></td>
-    <td class="dataOdd" align="left">
-        <input type="radio" name="annotation" value=""[% IF !broadcast.annotation %] checked[% END %]> None &nbsp; &nbsp; &nbsp;
-        <input type="radio" name="annotation" value="info"[% IF broadcast.annotation == "info" %] checked[% END %]> <img src='[% url_prefix %]themes/[% theme %]/images/info.png' border="0" alt='warning' title='warning' width="16" height="16" style="vertical-align: text-bottom;"> &nbsp; &nbsp; &nbsp;
-        <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %]> <img src='[% url_prefix %]themes/[% theme %]/images/warning.png' border="0" alt='warning' title='warning' width="16" height="16" style="vertical-align: text-bottom;">
-    </td>
-  </tr>
-  [% IF broadcast.frontmatter.keys.size > 0 %]
-  <tr class="frontmatter_edit">
-    <td class="dataEven" align="center" valign="top">
-      <b>Variables</b>
-      <br>
-      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', ''); jQuery('TR.frontmatter_edit').css('display', 'none')"; return(false); value="raw edit">
-    </td>
-    <td class="dataOdd" align="left" style="position: relative;">
-      <table style="width: 97%; border-spacing: 0;" class="frontmatterlist">
-      <tr style="display: none;" class="firstrow frontmatter_row">
-        <td style="width: 0;" align="right" nowrap><b></b></td>
-        <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="" value="" style="width: 100%;"></td>
-      </tr>
-      [% FOREACH f = broadcast.frontmatter.keys.sort %]
-      <tr class="frontmatter_row" data-name="[% f | html %]">
-        <td style="width: 0;" align="right" nowrap><b>[% f | html %]:</b></td>
-        <td style="width:auto; padding-left: 5px;"><input type="text" class="frontmatter" name="frontmatter.[% f | html %]" value="[% broadcast.frontmatter.$f | html %]" style="width: 100%;"></td>
-      </tr>
-      [% END %]
+        <tr class="raw"[% IF broadcast.frontmatter.keys.size > 0 %] style="display: none;"[% END %]>
+          <td valign="top">
+            <b>Text</b><span class="required">*</span>
+            [% IF broadcast.frontmatter.keys.size > 0 %]
+            <br>
+            <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', 'none'); jQuery('TR.frontmatter_edit').css('display', ''); updateVariables(); return(false);" value="edit variables">
+            [% END %]
+          </td>
+          <td style="position: relative;">
+            <textarea name="text" cols=74 rows=14 style="width: 99%;" required>[% broadcast.raw_text %]</textarea>
+            <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
+              Help:
+              <ul style="padding-left: 10px; margin: 0;">
+              <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
+              <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
+              <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</li>
+              <li>Frontmatter variables:<br>
+      <pre>---
+      variable: create variables first
+      another: test
+      ---
+      then use later like: {{variable}} and {{another}}</pre>
+              </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><b>Contacts</b></td>
+          <td>
+            [% PROCESS _wizard_list.tt id="id_contacts_wzd" wzd_args="contacts,contacts,1" %]
+            <input type="text"
+                  name="contacts"
+                  id="contacts"
+                  style="width: 97%;"
+                  value="[% broadcast.contacts.join(', ') | html %]"
+                  onfocus="this.click()"
+                  onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+            >
+          </td>
+        </tr>
+        <tr>
+          <td><b>Contactgroups</b></td>
+          <td>
+            [% PROCESS _wizard_list.tt id="id_contactgroups_wzd" wzd_args="contactgroups,contactgroups,1" %]
+            <input type="text"
+                  name="contactgroups"
+                  id="contactgroups"
+                  style="width: 97%;"
+                  value="[% broadcast.contactgroups.join(', ') | html %]"
+                  onfocus="this.click()"
+                  onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+            >
+          </td>
+        </tr>
+        <tr>
+          <td><b>Panorama Dashboard</b></td>
+          <td>
+              <input type="checkbox" value="1" name="panorama"[% IF broadcast.panorama %] checked[% END %]> Display on panorama dashboards.
+          </td>
+        </tr>
+        <tr>
+            <td><b>Login Page</b></td>
+            <td>
+                <input type="checkbox" value="1" name="loginpage"[% IF broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
+            </td>
+          </tr>
+        <tr>
+          <td colspan=2>
+            <div class="flex justify-center">
+              <button class="green">
+                [% IF broadcast.id != "new" %]Save[% ELSE%]Create[% END %] Broadcast
+              </button>
+            </div>
+          </td>
+        </tr>
       </table>
-    </td>
-  </tr>
-  [% END %]
-  <tr class="raw"[% IF broadcast.frontmatter.keys.size > 0 %] style="display: none;"[% END %]>
-    <td class="dataEven" align="center" valign="top">
-      <b>Text</b><span class="required">*</span>
-      [% IF broadcast.frontmatter.keys.size > 0 %]
-      <br>
-      <input class="thruk_button" type="button" onclick="jQuery('TR.raw').css('display', 'none'); jQuery('TR.frontmatter_edit').css('display', ''); updateVariables(); return(false);" value="edit variables">
-      [% END %]
-    </td>
-    <td class="dataOdd" align="left" style="position: relative;">
-      <textarea name="text" cols=74 rows=14 style="width: 99%;">[% broadcast.raw_text %]</textarea>
-      <div style="position: absolute; right: -430px; top: 10px; background: #e6e6e6; border-radius: 5px; border: 1px solid gray; padding: 8px;">
-        Help:
-        <ul style="padding-left: 10px; margin: 0;">
-         <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
-         <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
-         <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</li>
-         <li>Frontmatter variables:<br>
-<pre>---
-variable: create variables first
-another: test
----
-then use later like: {{variable}} and {{another}}</pre>
-         </li>
-        </ul>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Contacts</b></td>
-    <td class="dataOdd" align="left">
-      [% PROCESS _wizard_list.tt id="id_contacts_wzd" wzd_args="contacts,contacts,1" %]
-      <input type="text"
-             name="contacts"
-             id="contacts"
-             style="width: 97%;"
-             value="[% broadcast.contacts.join(', ') | html %]"
-             onfocus="this.click()"
-             onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
-      >
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Contactgroups</b></td>
-    <td class="dataOdd" align="left">
-      [% PROCESS _wizard_list.tt id="id_contactgroups_wzd" wzd_args="contactgroups,contactgroups,1" %]
-      <input type="text"
-             name="contactgroups"
-             id="contactgroups"
-             style="width: 97%;"
-             value="[% broadcast.contactgroups.join(', ') | html %]"
-             onfocus="this.click()"
-             onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
-      >
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Panorama Dashboard</b></td>
-    <td class="dataOdd" align="left">
-        <input type="checkbox" value="1" name="panorama"[% IF broadcast.panorama %] checked[% END %]> Display on panorama dashboards.
-    </td>
-  </tr>
-  <tr>
-      <td class="dataEven" align="center"><b>Login Page</b></td>
-      <td class="dataOdd" align="left">
-          <input type="checkbox" value="1" name="loginpage"[% IF broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
-      </td>
-    </tr>
-  <tr>
-    <td class="dataEven" align="center" colspan=2>
-      <span class="required" style="float: left;">* - required</span>
-      <button class="thruk_button_save" style="width: 160px;">
-        [% IF broadcast.id != "new" %]Save[% ELSE%]Create[% END %] Broadcast
-      </button>
-    </td>
-  </tr>
-</table>
-</form>
+    </form>
+  </div>
 
 <script type="text/javascript">
 <!--
