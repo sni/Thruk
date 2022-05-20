@@ -6,21 +6,21 @@
   <h1 class="mt-5">Blocking Outages</h1>
 
   <div class="card w-full mt-5">
-    <div class="mainTable">
+    <div class="mainTable border-t-0">
       <table class="mainTable striped">
         <thead>
           <tr>
             <th>Severity</th>
             <th>Host</th>
             <th class="text-center">State</th>
-            <th>Notes</th>
+            <th class="text-center">Notes</th>
             <th class="text-center">State Duration</th>
-            <th># Hosts Affected</th>
-            <th># Services Affected</th>
+            <th class="text-center"># Hosts Affected</th>
+            <th class="text-center"># Services Affected</th>
             <th class="text-center">Actions</th>
           </tr>
         </thead>
-        <body>
+        <tbody>
           [% SET num = 0 %]
           [% FOREACH host = outages %]
             [% SET num = num + 1 %]
@@ -28,29 +28,39 @@
               <td>[% host.severity %]</td>
               <td><a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">[% host.name | html %]</a></td>
               <td class='text-center DOWN'>DOWN</td>
-              <td>
+              <td class="text-center">
                 [% IF host.comment_count > 0 %]
-                <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" height="20" width="20"></a>
+                <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments">
+                  <i class="fa-solid fa-comment text-sm" title="This host has [% host.comment_count %] comment associated with it"></i>
+                </a>
                 [% ELSE %]
                 N/A
                 [% END %]
               </td>
               <td class="text-center">[% duration(date.now - host.last_state_change) %]</td>
-              <td>[% host.affected_hosts %]</td>
-              <td>[% host.affected_services %]</td>
+              <td class="text-center">[% host.affected_hosts %]</td>
+              <td class="text-center">[% host.affected_services %]</td>
               <td>
                 <div class="flex gap-1 justify-center">
-                  <a href="status.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+                  <a href="status.cgi?host=[% host.name | uri %]">
+                    <i class="fa-solid fa-bars small" title='View status detail for this host'></i>
+                  </a>
                   [% IF use_feature_trends %]
-                    <a href="trends.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>
+                    <a href="trends.cgi?host=[% host.name | uri %]">
+                      <i class="fa-solid fa-arrow-trend-up" title='View trends for this host'></i>
+                    </a>
                   [% END %]
-                  <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-                  <a href="notifications.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a>
+                  <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1">
+                    <i class="fa-solid fa-clock-rotate-left small" title='View alert history for this host'></i>
+                  </a>
+                  <a href="notifications.cgi?host=[% host.name | uri %]">
+                    <i class="fa-solid fa-volume-high small" title='View notifications for this host'></i>
+                  </a>
                 </div>
               </td>
             </tr>
           [% END %]
-        </body>
+        </tbody>
       </table>
     </div>
 
