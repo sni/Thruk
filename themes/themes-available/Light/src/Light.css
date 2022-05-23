@@ -507,6 +507,9 @@ I.fa-solid, I.uil {
     >DIV.body {
       @apply p-2 w-full;
     }
+    >DIV.footer {
+      @apply h-[40px] px-2 border-t borderDefault items-center flex;
+    }
   }
 }
 
