@@ -637,7 +637,7 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
   }
 
   &.green {
-    @apply bg-green-500 text-black hover:text-white;
+    @apply bg-green-500 text-white hover:text-white hover:bg-green-400;
   }
 
   &.red {
