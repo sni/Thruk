@@ -293,46 +293,54 @@
   [% ELSIF type == 'formlist' %]
     [% parent = fh %]
     [% parentvalue = value %]
-    <table class="formlist"[% IF parent.draggable %] id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
-      <tr>
-        [% FOREACH ch = parent.childs %]
-        <th>[% ch.desc %]</th>
-        [% END %]
+    <table class="cellspacing-y" [% IF parent.draggable %]id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
+      <tbody>
+        <tr>
+          [% IF parent.draggable %]
+          <th></th>
+          [% END %]
+          [% FOREACH ch = parent.childs %]
+          <th>[% ch.desc %]</th>
+          [% END %]
+          [% IF parent.multiple %]
+          <th></th>
+          [% END %]
+        </tr>
         [% IF parent.multiple %]
-        <th></th>
+        <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" style="display: none;" id="formlist_row_0">
+          [% FOREACH ch = parent.childs; ch.origname = ch.name; ch.name = parent.name _ "." _ ch.name %]
+          <td>
+            [% PROCESS field_form fh=ch %]
+          </td>
+          [% END %]
+          <td class='clickable hoverable rounded px-1' onclick="delete_form_row(this); return false;"><i class="uil uil-times" title="remove this row"></i></td>
+        </tr>
         [% END %]
-      </tr>
-      [% IF parent.multiple %]
-      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" style="display: none;" id="formlist_row_0">
-        [% FOREACH ch = parent.childs; ch.origname = ch.name; ch.name = parent.name _ "." _ ch.name %]
-        <td>
-          [% PROCESS field_form fh=ch %]
-        </td>
-        [% END %]
-        <td class='clickable hoverable rounded px-1' onclick="delete_form_row(this); return false;"><i class="uil uil-times" title="remove this row"></i></td>
-      </tr>
-      [% END %]
 
-      [% FOREACH chv = parentvalue.list %]
-      <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" id="formlist_row_[% loop.count %]">
-        [% FOREACH ch = parent.childs %]
-        <td>
-          [% subkey = ch.name; origname = ch.origname; IF chv.exists(origname); r.params.$subkey = chv.$origname; END %]
-          [% PROCESS field_form fh=ch %]
-        </td>
+        [% FOREACH chv = parentvalue.list %]
+        <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" id="formlist_row_[% loop.count %]">
+          [% IF parent.draggable %]
+          <td class="cursor-move"><i class="uil uil-draggabledots"></i></td>
+          [% END %]
+          [% FOREACH ch = parent.childs %]
+          <td>
+            [% subkey = ch.name; origname = ch.origname; IF chv.exists(origname); r.params.$subkey = chv.$origname; END %]
+            [% PROCESS field_form fh=ch %]
+          </td>
+          [% END %]
+          [% IF parent.multiple %]
+          <td class='clickable hoverable rounded px-1' onclick="delete_form_row(this); return false;"><i class="uil uil-times" title="remove this row"></td>
+          [% END %]
+        </tr>
         [% END %]
         [% IF parent.multiple %]
-        <td class='clickable hoverable rounded px-1' onclick="delete_form_row(this); return false;"><i class="uil uil-times" title="remove this row"></td>
+        <tr>
+          <td colspan=100 class='clickable hoverable rounded px-1 min-w-[100px] whitespace-nowrap' onclick="add_form_row(this, 1); return false;">
+              <i class="uil uil-angle-down" title="add new schedule entry"></i> add more
+          </td>
+        </tr>
         [% END %]
-      </tr>
-      [% END %]
-      [% IF parent.multiple %]
-      <tr>
-        <td colspan=100 class='clickable hoverable rounded px-1 min-w-[100px] whitespace-nowrap' onclick="add_form_row(this, 1); return false;">
-            <i class="uil uil-angle-down" title="add new schedule entry"></i> add more
-        </td>
-      </tr>
-      [% END %]
+      </tbody>
     </table>
   [% ELSIF type == 'filter' %]
     [% substyle   = 'service' %]
