@@ -44,15 +44,15 @@
                     [% ELSE %]
                       [% b.raw_text.split('<br>').0.substr(0, 100) | html %]
                     [% END %]
-                    [% IF b.template %]<span class="textALERT">(TEMPLATE)</span>[% END %] <!-- TODO: Fragen ob es weiterhin Draft heißen muss -->
+                    [% IF b.template %]<span class="textALERT">(TEMPLATE)</span>[% END %]
                   </a>
                 </td>
                 <td>[% b.author %]</td>
                 <td class="text-center">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
                 <td class="text-center">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
                 <td class="text-center">[% IF b.loginpage %]Yes[% END %]</td>
-                <td>[% b.contacts.join(', ') %]</td> <!-- TODO: truncate notwendig? -->
-                <td>[% b.contactgroups.join(', ') %]</td>
+                <td class="max-w-sm truncate">[% b.contacts.join(', ') %]</td>
+                <td class="max-w-sm truncate">[% b.contactgroups.join(', ') %]</td>
                 <td>
                   <div class="flex gap-1 justify-center">
                     <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=clone">

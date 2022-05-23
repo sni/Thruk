@@ -3874,29 +3874,29 @@ function send_form_in_background_and_reload(btn, extraData) {
 }
 
 function broadcast_show_list(incr) {
-    var broadcasts = jQuery(".broadcast_panel_container div.broadcast");
+    var broadcasts = jQuery(".js-broadcast-panel div.broadcast");
     var curIdx = 0;
     jQuery(broadcasts).each(function(i, n) {
         if(jQuery(n).is(":visible")) {
-            jQuery(n).hide();
+            jQuery(n).addClass("hidden");
             curIdx = i;
             return(false);
         }
     });
     var newIdx = curIdx+incr;
-    jQuery(broadcasts[newIdx]).show();
-    jQuery(".broadcast_panel_container BUTTON.next").css('visibility', '');
-    jQuery(".broadcast_panel_container BUTTON.previous").css('visibility', '');
+    jQuery(broadcasts[newIdx]).removeClass("hidden");
+    jQuery(".js-broadcast-panel .js-next").css('visibility', '');
+    jQuery(".js-broadcast-panel .js-previous").css('visibility', '');
     if(newIdx == broadcasts.length -1) {
-        jQuery(".broadcast_panel_container BUTTON.next").css('visibility', 'hidden');
+        jQuery(".js-broadcast-panel .js-next").css('visibility', 'hidden');
     }
     if(newIdx == 0) {
-        jQuery(".broadcast_panel_container BUTTON.previous").css('visibility', 'hidden');
+        jQuery(".js-broadcast-panel .js-previous").css('visibility', 'hidden');
     }
 }
 
 function broadcast_dismiss() {
-    jQuery('.broadcast_panel_container').hide();
+    jQuery('.js-broadcast-panel').hide();
     jQuery.ajax({
         url: url_prefix + 'cgi-bin/broadcast.cgi',
         data: {
