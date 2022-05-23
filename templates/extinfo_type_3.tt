@@ -2,22 +2,11 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-[% PROCESS _extinfo_cmd_pane.tt cmd_type="comments" %] <!-- TODO FIX -->
+[% PROCESS _extinfo_cmd_pane.tt cmd_type="comments" %]
 
 
 [% PROCESS _infobox.tt %]
 <h1 class="mt-5">Comments</h1>
-<div class="w-full flex justify-center mt-2">
-  <div class="flex gap-5">
-    <a href='#HOSTCOMMENTS' class='button'>Host Comments</a>
-    <a href='#SERVICECOMMENTS' class='button'>Service Comments</a>
-  </div>
-</div>
-
-<a class="anchor-offset" id="HOSTCOMMENTS"></a>
-[% IF sortoption_hst %]
-  <div class="statusSort">Host comments sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-[% END %]
 
 <div class="flexrow flex-nowrap my-2">
   <div class="flex basis-1/3 self-end gap-1">
@@ -29,52 +18,47 @@
   <div class="basis-1/3 self-end">
     <div class="hint text-center whitespace-nowrap text-xs">Mark host comments with leftclick. Select multiple with shift + mouse.</div>
   </div>
-  <div class="basis-1/3 flex justify-end">
-    [% UNLESS command_disabled(c, '1') || c.check_user_roles('authorized_for_read_only') %]
-    <a class="button green" href="cmd.cgi?cmd_typ=1">Add comment</a>
-    [% END %]
-  </div>
+  <div class="basis-1/3 flex"></div>
 </div>
 
-<div class="card w-full mb-10">
-  <div class="head justify-between">
-    <h3>Host Comments</h3>
+<div class="card w-full mt-2">
+  <div class="mainTableHeader">
+    <div class="relative">
+      <button
+        class="w-36 text-sm rounded-[5px] border-0 font-medium display-filter [% IF has_filter %]textActive2[% END %] hover:textActive2"
+        onClick="toggleElement('filterForm', null, true, null, function() { submitFormIfChanged('#filterForm'); return false; }); return false;">[% IF has_filter %]Filters active[% ELSE %]Display Filter[% END %]
+      </button>
+      <form action="extinfo.cgi" method="GET" onsubmit="setFormBtnSpinner(this)" id="filterForm" class="absolute top-8 z-40 hidden">
+        <div class="card shadow-float w-52">
+          <div class="head justify-between">
+            <h3>Display Filter</h3>
+            <button class="iconOnly" type="submit" name="update" title="accept">
+              <i class="fa-solid fa-check round small green"></i>
+            </button>
+          </div>
+          <div class="body">
+              <input type="hidden" name="type" value="3">
+              <input type="text" class="w-full" name='host' id='host' value="[% IF host != ''; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
+              <input type="text" class="w-full" name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })" placeholder="service">
+              <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
+          </div>
+        </div>
+      </form>
+    </div>
     <div>
-      [% PROCESS _table_search_field.tt ids=["host_comments_table"] %]
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
     </div>
   </div>
-  <div class="mainTable border-0" style="max-height: calc(100vh - 160px);">
-    [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 sortprefix='_hst' %]
+  <div class="mainTable">
+    [% PROCESS _comments_table.tt comments=data names=1 type="service" %]
   </div>
-</div>
-
-
-<a class="anchor-offset" id="SERVICECOMMENTS"></a>
-[% IF sortoption_svc %]
-  <div class="statusSort" align="CENTER">Service comments sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-[% END %]
-
-<div class="flexrow flex-nowrap my-2">
-  <div class="basis-1/3"></div>
-  <div class="basis-1/3 self-end">
-    <div class="hint text-center whitespace-nowrap text-xs">Mark service comments with leftclick. Select multiple with shift + mouse.</div>
-  </div>
-  <div class="basis-1/3 flex justify-end">
-    [% UNLESS command_disabled(c, '3') || c.check_user_roles('authorized_for_read_only') %]
-    <a class="button green" href="cmd.cgi?cmd_typ=3">Add comment</a>
-    [% END %]
-  </div>
-</div>
-
-<div class="card w-full">
-  <div class="head justify-between">
-    <h3>Service Comments</h3>
-    <div>
-      [% PROCESS _table_search_field.tt ids=["service_comments_table"] %]
+  <div class="mainTableFooter">
+    <div class="flex-1 self-center">
+      [% PROCESS _pager_total_items.tt %]
     </div>
-  </div>
-  <div class="mainTable border-0" style="max-height: calc(100vh - 160px);">
-    [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 sortprefix='_svc' %]
   </div>
 </div>
 
