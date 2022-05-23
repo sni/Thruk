@@ -276,13 +276,13 @@ if [ -d /tmp/thruk_update/themes/. ]; then
   test -h /etc/thruk/themes/themes-enabled/.Dark  && mv /etc/thruk/themes/themes-enabled/.Dark  /etc/thruk/themes/themes-enabled/Dark
 fi
 # remove broken/old symlinks
-for link in /etc/thruk/themes/themes-enabled/*; do test -e $link/. || rm $link done
+for link in /etc/thruk/themes/themes-enabled/*; do test -e $link/. || rm $link; done
 if [ -d /tmp/thruk_update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
   cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
 fi
 # remove broken/old symlinks
-for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm $link done
+for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm $link; done
 echo "thruk plugins enabled:" $(ls /etc/thruk/plugins/plugins-enabled/)
 if [ -d /tmp/thruk_update/ssi/. ]; then
   rm -f /etc/thruk/ssi/*
