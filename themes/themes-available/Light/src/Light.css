@@ -820,7 +820,7 @@ TABLE.striped {
   }
 }
 
-TABLE.rowhover TR, TBODY.rowhover TR {
+TABLE.rowhover > TR, TBODY.rowhover > TR {
   @apply hover:hoverBG1;
 }
 

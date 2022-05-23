@@ -153,35 +153,35 @@ sub _get_downtime_sort_option {
 ##########################################################
 # create the comments page
 sub _process_comments_page {
-    my( $c ) = @_;
+    my($c) = @_;
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
-    # services
-    my $svc_sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
-    my $svc_sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
-    my $svc_order      = "ASC";
-    $svc_order = "DESC" if $svc_sorttype eq "2";
-    $svc_sortoption = 1 if !defined _get_comment_sort_option($svc_sortoption);
-    $c->stash->{'svc_orderby'}    = _get_comment_sort_option($svc_sortoption)->[1];
-    $c->stash->{'svc_orderdir'}   = $svc_order;
-    $c->stash->{'sortoption_svc'} = $c->req->parameters->{'sortoption_svc'} || '';
+    my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
+    my $sortoption = $c->req->parameters->{'sortoption'} || 1;
+    my $order      = "ASC";
+    $order = "DESC" if $sorttype eq "2";
 
-    # hosts
-    my $hst_sorttype   = $c->req->parameters->{'sorttype_hst'}   || 1;
-    my $hst_sortoption = $c->req->parameters->{'sortoption_hst'} || 1;
-    my $hst_order      = "ASC";
-    $hst_order = "DESC" if $hst_sorttype eq "2";
-    $hst_sortoption = 1 if !defined _get_comment_sort_option($hst_sortoption);
-    $c->stash->{'hst_orderby'}    = _get_comment_sort_option($hst_sortoption)->[1];
-    $c->stash->{'hst_orderdir'}   = $hst_order;
-    $c->stash->{'sortoption_hst'} = $c->req->parameters->{'sortoption_hst'} || '';
+    $c->stash->{'host'}       = $c->req->parameters->{'host'}    // "";
+    $c->stash->{'service'}    = $c->req->parameters->{'service'} // "";
+    $c->stash->{'pattern'}    = $c->req->parameters->{'pattern'} // "";
 
-    $c->stash->{'hostcomments'}    = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ],
-                                                               sort   => { $hst_order => _get_comment_sort_option($hst_sortoption)->[0] },
-                                                             );
-    $c->stash->{'servicecomments'} = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ],
-                                                               sort   => { $svc_order => _get_comment_sort_option($svc_sortoption)->[0] },
-                                                             );
+    my $filter = [];
+    if($c->stash->{'host'})    { push @{$filter}, { host_name           => $c->stash->{'host'} }; }
+    if($c->stash->{'service'}) { push @{$filter}, { service_description => $c->stash->{'service'} }; }
+    if($c->stash->{'pattern'}) {
+        push @{$filter}, { '-or' => [
+            { host_name           => { '~~' => $c->stash->{'pattern'} } },
+            { service_description => { '~~' => $c->stash->{'pattern'} } },
+            { comment             => { '~~' => $c->stash->{'pattern'} } },
+            { author              => { '~~' => $c->stash->{'pattern'} } },
+        ]};
+    }
+    $c->stash->{'has_filter'} = scalar @{$filter} > 0 ? 1 : 0;
+
+    my $comments = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), $filter ],
+                                        sort   => { $order => _get_comment_sort_option($sortoption)->[0] },
+                                        pager  => 1,
+                                       );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_'], 'comment');
@@ -190,12 +190,11 @@ sub _process_comments_page {
         return $c->render_excel();
     }
     if($view_mode eq 'json') {
-        my $json = {
-            'host'    => $c->stash->{'hostcomments'},
-            'service' => $c->stash->{'servicecomments'},
-        };
-        return $c->render(json => $json);
+        return $c->render(json => $comments);
     }
+
+    $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
+
     return 1;
 }
 

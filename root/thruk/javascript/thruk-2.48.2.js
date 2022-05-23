@@ -4935,7 +4935,6 @@ function addEventHandler(elem, type) {
         }
     }
     if(type == 'service') {
-        addEvent(elem, 'mouseover', highlightServiceRow);
         if(!elem.onclick) {
             elem.onclick = selectService;
         }
@@ -5114,59 +5113,12 @@ function styleElements(elems, style, force) {
         elems = new Array(elems);
     }
 
-    if(navigator.appName == "Microsoft Internet Explorer") {
-        return styleElementsIE(elems, style, force);
-    }
-    else {
-        return styleElementsFF(elems, style, force);
-    }
-}
-
-/* save current style and change it (IE only) */
-function styleElementsIE(elems, style, force) {
     for(var x = 0; x < elems.length; x++) {
         if(style == 'original') {
-            // reset style to original
-            if(elems[x].className != "tableRowSelected" || force) {
-                if(elems[x].origclass != undefined) {
-                    elems[x].className = elems[x].origclass;
-                }
-            }
+            jQuery(elems[x]).removeClass("tableRowSelected");
         }
         else {
-            if(elems[x].className != "tableRowSelected" || force) {
-                // save style in custom attribute
-                if(elems[x].className != undefined && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
-                    elems[x].setAttribute('origclass', elems[x].className);
-                }
-
-                // set new style
-                elems[x].className = style;
-            }
-        }
-    }
-}
-
-/* save current style and change it (non IE version) */
-function styleElementsFF(elems, style, force) {
-    for(var x = 0; x < elems.length; x++) {
-        if(style == 'original') {
-            // reset style to original
-            if(elems[x].hasAttribute('origClass') && (elems[x].className == "tableRowHover" || force)) {
-                elems[x].className = elems[x].origClass;
-            }
-        }
-        else {
-            if(elems[x].className != "tableRowSelected" || force) {
-                // save style in custom attribute
-                if(!elems[x].hasAttribute('origClass')) {
-                    elems[x].setAttribute('origClass', elems[x].className);
-                    elems[x].origClass = elems[x].className;
-                }
-
-                // set new style
-                elems[x].className = style;
-            }
+            jQuery(elems[x]).addClass("tableRowSelected");
         }
     }
 }
@@ -5654,6 +5606,21 @@ function getPageScroll() {
 function submit_form() {
     var btn = document.getElementById(submit_form_id);
     btn.submit();
+}
+
+function submitFormIfChanged(el) {
+    var form = jQuery(el)[0];
+    if(!form) {
+        if(thruk_debug_js) { alert("ERROR: no form found in submitFormIfChanged(): " + el); }
+        return;
+    }
+    var data = jQuery(form).serialize();
+    var url  = jQuery(form).attr("action")+"?"+data;
+    var curUrl = getCurrentUrl(false).replace(/^.*\//, "");
+    if(url != curUrl) {
+        setFormBtnSpinner(form);
+        jQuery(form).submit();
+    }
 }
 
 /* show/hide options for commands based on the selected command*/

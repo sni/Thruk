@@ -1,80 +1,77 @@
-﻿<table class='mainTable striped comment' id="[% type | html %]_comments_table">
+﻿<table class='mainTable striped' id="comments_table">
   <thead title="click to sort">
-    <tr class='comment'>
+    <tr>
       [% IF names %]
-      <th class='comment'>
+      <th>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="1">Host Name</a>
       </th>
       [% IF type == 'service' %]
-      <th class='comment'>
+      <th>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="2">Service</a>
       </th>
       [% END %]
       [% IF backends.size > 1 %]
-      <th class='comment text-center'>
+      <th class='text-center'>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="10">Site</a>
       </th>
       [% END %]
       [% END %]
-      <th class='comment text-center'>
+      <th class='text-center'>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="3">Entry Time</a>
       </th>
-      <th class='comment'>
+      <th>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="4">Author</a>
       </th>
-      <th class='comment'>
+      <th>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="5">Comment</a>
       </th>
-      <th class='comment text-center'>
+      <th class='text-center'>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="6">Comment ID</a>
       </th>
-      <th class='comment text-center'>
+      <th class='text-center'>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="7">Persistent</a>
       </th>
-      <th class='comment'>
+      <th>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="8">Type</a>
       </th>
-      <th class='comment text-center'>
+      <th class='text-center'>
         <a class="sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="9">Expires</a>
       </th>
-      <th class='comment text-center'>Actions</th>
+      <th class='text-center'>Actions</th>
     </tr>
   </thead>
   [%  FOREACH com = comments %]
-    [% SET class = 'commentOdd'  IF loop.even %]
-    [% SET class = 'commentEven' IF loop.odd %]
-    <tr class='[% class %][% IF names %] clickable[% END %]' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% com.id %]_[% com.peer_key %]">
+    <tr class='[% IF names %] clickable[% END %]' id="[% IF com.service_description == '' %]hst[% ELSE %]svc[% END %]_[% com.id %]_[% com.peer_key %]">
       [% IF names %]
-      <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]">[% com.host_name | html %]</a></td>
-      [% IF type == 'service' %]
-      <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]">[% com.service_description | html %]</a></td>
-      [% END %]
-      [% IF backends.size > 1 %]
-      <td class='[% class %] text-center'>[% peer_name(com) %]</td>
-      [% END %]
-      [% END %]
-      <td class='[% class %] text-center'>[% date_format(c, com.entry_time) %]</td>
-      <td class='[% class %]'>[% com.author %]</td>
-      <td class='[% class %]' style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
-      <td class='[% class %] text-center'>[% com.id %]</td>
-      <td class='[% class %] text-center'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
-      <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
-      <td class='[% class %] text-center'>[% IF com.expires %][% date_format(c, com.expire_time) %][% ELSE %]N/A[% END %]</td>
-      [% IF type == 'host' %]
-        [% UNLESS command_disabled(c, 2) %]
-        <td class='[% class %] text-center'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
+        <td><a href="extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]">[% com.host_name | html %]</a></td>
+        [% IF type == 'service' %]
+          <td><a href="extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]">[% com.service_description | html %]</a></td>
+        [% END %]
+        [% IF backends.size > 1 %]
+          <td class='text-center'>[% peer_name(com) %]</td>
         [% END %]
       [% END %]
-      [% IF type == 'service' %]
+      <td class='text-center'>[% date_format(c, com.entry_time) %]</td>
+      <td >[% com.author %]</td>
+      <td style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+      <td class='text-center'>[% com.id %]</td>
+      <td class='text-center'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
+      <td >[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
+      <td class='text-center'>[% IF com.expires %][% date_format(c, com.expire_time) %][% ELSE %]N/A[% END %]</td>
+      [% IF com.service_description == '' %]
+        [% UNLESS command_disabled(c, 2) %]
+        <td class='text-center'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
+        [% END %]
+      [% ELSE %]
         [% UNLESS command_disabled(c, 4) %]
-        <td class='[% class %] text-center'><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
+        <td class='text-center'><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
         [% END %]
       [% END %]
     </tr>
   [% END %]
   [% IF comments.size == 0 %]
-  <tr class='commentOdd'>
-    <td class='commentOdd' colspan="10">There are no [% type | html %] comments</td>
+  <tr>
+    <td class='text-center textERROR' colspan="10">There are no comments</td>
   </tr>
   [% END %]
 </table>
