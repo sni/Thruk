@@ -749,40 +749,60 @@ TABLE.innercellborder {
 }
 
 TABLE.cellspacing {
-  TD, TH {
-    @apply py-1 px-2 first:pl-1 last:pr-1;
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply py-1 px-2 first:pl-1 last:pr-1;
+      }
+    }
   }
 }
 TABLE.cellspacing-none {
-  TD, TH {
-    @apply p-0 first:p-0 last:p-0;
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply p-0 first:p-0 last:p-0;
+      }
+    }
   }
 }
 
 TABLE.cellspacing-y {
-  TD, TH {
-    @apply py-1;
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply py-1;
+      }
+    }
   }
 }
 TABLE.cellspacing-x {
-  TD, TH {
-    @apply px-2;
-  }
-  TR:first-child {
-    TD,TH {
-      @apply pt-2;
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply px-2;
+      }
     }
-  }
-  TR:last-child {
-    TD,TH {
-      @apply pb-2;
+    > TR:first-child {
+      > TD, > TH {
+        @apply pt-2;
+      }
+    }
+    > TR:last-child {
+      > TD, > TH {
+        @apply pb-2;
+      }
     }
   }
 }
 
 TABLE.cellspacing-0\.25 {
-  TD, TH {
-    @apply p-[1px] first:pt-0 last:pb-0;
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply p-[1px] first:pt-0 last:pb-0;
+      }
+    }
   }
 }
 
