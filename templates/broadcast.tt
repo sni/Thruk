@@ -3,17 +3,15 @@
 
   [% PROCESS _infobox.tt %]
 
-  <div class="mt-5 pb-2">
-    <div class="flex justify-end">
-      <a href="broadcast.cgi?action=edit&amp;id=new" class="button green">Create broadcast</a>
-    </div>
-  </div>
+  <h1 class="mt-5">Broadcasts</h1>
 
-  <div class="card w-full">
+  <div class="card w-full mt-2">
     <div class="head justify-between">
-      <h3>Broadcasts</h3>
       <div>
         [% PROCESS _table_search_field.tt ids=["statusTable"] %]
+      </div>
+      <div class="flex justify-end">
+        <a href="broadcast.cgi?action=edit&amp;id=new" class="button green">Create broadcast</a>
       </div>
     </div>
 
