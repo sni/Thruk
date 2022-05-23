@@ -159,8 +159,10 @@
                   No notifications have been recorded for this contact in the current timeperiod
                 [% ELSIF host != '' and service != '' %]
                   No notifications have been recorded for this service in the current timeperiod
-                [% ELSIF host != ''  %]
+                [% ELSIF host != '' && host != 'all' %]
                   No notifications have been recorded for this host in the current timeperiod
+                [% ELSE %]
+                  No notifications have been recorded in the current timeperiod
                 [% END %]
               </div>
             </td>
