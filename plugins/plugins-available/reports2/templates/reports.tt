@@ -145,7 +145,7 @@
               <form action="reports2.cgi" method="POST">
                 <input type="hidden" name="report" value="[% r.nr %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                <a href="#" onclick="if(confirm('really remove?')) { return send_form_in_background_and_reload(this, {action: 'delete'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete Report'></i></a>
+                <a href="#" onclick="if(confirm('really remove?')) { return send_form_in_background_and_reload(this, {action: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete Report'></i></a>
               </form>
             [% END %]
           </td>
