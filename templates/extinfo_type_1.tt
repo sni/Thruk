@@ -11,7 +11,7 @@
     <div class="card mt-5 min-w-[370px]">
       <div class="actionbox less-padding">
         <div><a href="status.cgi?host=[% host.name | uri %]">View Status Detail For This Host</a></div>
-        [% IF host.childs.size > 0 %]div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]
+        [% IF host.childs.size > 0 %]<div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]
         [% IF show_impacts_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]">View Impacts For This Problem</a></div>[% END %]
         [% IF show_rootproblems_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]">View Root Problem For This Impact</a></div>[% END %]
         <div><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1&amp;backend=[% host.peer_key %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Outages</a>)</div>
