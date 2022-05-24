@@ -37,7 +37,7 @@
     <div class="head">
       <h3>Service State Information</h3>
     </div>
-    <div class="body">
+    <div>
       [% PROCESS _extinfo_host_service_details.tt obj=service %]
     </div>
   </div>
@@ -54,38 +54,24 @@
         </td>
         <td align="center" width="33%" class="ext_head_attributes">
           [% IF matching_backends.size > 1 %]
-          <div class='data'>
-            <form action="extinfo.cgi" method="GET">
-              <input type="hidden" name="type" value="1">
-              <input type="hidden" name="host" value="[% service.host_name | html %]">
-              <input type="hidden" name="description" value="[% service.description | html %]">
-              This service is ambiguous:
-              <select name="backend">
-                [% FOREACH b IN matching_backends %]
-                [% SET name = pi_detail.$b.peer_name %]
-                <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
-                [% END %]
-              </select>
-              <input type="submit" name="go" value="go">
-            </form>
-          </div>
+            <div class='data'>
+              <form action="extinfo.cgi" method="GET">
+                <input type="hidden" name="type" value="1">
+                <input type="hidden" name="host" value="[% service.host_name | html %]">
+                <input type="hidden" name="description" value="[% service.description | html %]">
+                This service is ambiguous:
+                <select name="backend">
+                  [% FOREACH b IN matching_backends %]
+                  [% SET name = pi_detail.$b.peer_name %]
+                  <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
+                  [% END %]
+                </select>
+                <input type="submit" name="go" value="go">
+              </form>
+            </div>
           [% END %]
-          [% IF service.depends.size > 0 %]
-          <div class='data'>Depends On:</div>
-          <div class='dataTitle'>
-            [% FOREACH parent IN service.depends.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
-          </div><br>
-          [% END %]
-          [% IF service.groups.size > 0 %]
-          <div class='data'> Member of </div>
-          <div class='dataTitle'>[% FOREACH group IN service.groups.sort %][% IF !loop.first() %], [% END %]<a href="status.cgi?servicegroup=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
-          </div><br>
-          [% END %]
-          [% IF service.icon_image_expanded %]
-          <img src='[% logo_path_prefix %][% service.icon_image_expanded %]' border="0" alt="[% service.icon_image_alt | html %]" title="[% service.icon_image_alt | html %]"><br clear="all">
-          [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt | html %] )</i></font>[% END %]
-          [% END %]
-          [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]
+
+
         </td>
         <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
@@ -189,211 +175,105 @@
     [% END %]
   </div>
 
-  <div class="flexrow mt-5">
-    <div class="card flex-grow">
+  [% IF service.notes_expanded %]
+    <div class="card w-full">
       <div class="head">
-        <h3>Service Comments</h3>
+        <h3>Notes</h3>
       </div>
       <div class="body">
-        [% IF comments.size > 0 %]
-          [% IF sortoption_cmt %]
-            <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-          [% END %]
-          [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
-        [% END %]
+        [% service.notes_expanded %]
       </div>
     </div>
+  [% END %]
 
-    <div class="card h-auto">
-      <div class="head">
-        <h3>Comment Actions</h3>
-      </div>
-      <div class="actionbox">
-        [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
+  <div class="card w-full mt-5">
+    <div class="head justify-between">
+      <h3>Service Comments</h3>
+      [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
+        <div class="flex gap-1">
           [% UNLESS command_disabled(c, '3') %]
             <div>
-              <a class="flex hoverable px-2 py-1 whitespace-nowrap" href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-                <i class="fa-solid fa-comment mr-1"></i>Add a new comment
+              <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+                <i class="fa-solid fa-comment mr-1"></i>Add comment
               </a>
             </div>
           [% END %]
           [% IF comments.size > 0 %]
             [% UNLESS command_disabled(c, '21') %]
               <div>
-                <a class="flex hoverable px-2 py-1 whitespace-nowrap" href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-                  <i class="fa-solid fa-trash mr-1"></i>Delete all comments
+                <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+                  <i class="fa-solid fa-trash mr-1"></i>Delete all
                 </a>
               </div>
             [% END %]
           [% END %]
-        [% ELSE %]
-          <div class='infoMessage text-center'>Your account does not have permissions to add/delete comments.</div>
+        </div>
+      [% ELSE %]
+        <div class='infoMessage text-center'>Your account does not have permissions to add/delete comments.</div> <!-- TODO: where to put this -->
+      [% END %]
+    </div>
+    <div>
+      [% IF comments.size > 0 %]
+        [% IF sortoption_cmt %] <!-- TODO: Remove? Fix JS Sort arrows in table -->
+          <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
         [% END %]
-      </div>
+        [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
+      [% ELSE %]
+        <div class="flex justify-center textALERT p-2">There are no comments</div>
+      [% END %]
     </div>
   </div>
 
-
-    <div align="center" class="mt-5">
-      <table border="0" cellpadding="0" cellspacing="0" width="100%" class="extdetails leftHeader">
-        [% IF pnp_url %]
-        <tr>
-          <td colspan="2" align="center">
-          [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
-          </td>
-        </tr>
-        [% ELSIF histou_url %]
-        <tr>
-          <td colspan="2" align="center">
-          [% PROCESS _histou_graph.tt hst=service.host_name svc=service.description %]
-          </td>
-        </tr>
-        [% ELSE %]
-        [% graph_url = get_graph_url(c, service, 1)%]
-        [% IF graph_url %]
-        <tr>
-          <td colspan="2" align="center">
-          [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
-          </td>
-        </tr>
-        [% END %]
-        [% END %]
-
-        <tr>
-          <td colspan="2">
-            <br>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="center" valign="top" class='commentPanel'>
-            <a name="comments" id="comments"></a>
-            <div class='commentTitle'>Service Comments</div>
-            [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
-            <table border="0">
-              <tr>
-                [% UNLESS command_disabled(c, '3') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Add a new comment</a></td>
-                [% END %]
-                [% IF comments %]
-                [% UNLESS command_disabled(c, '21') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Delete all comments</a></td>
-                [% END %]
-                [% END %]
-              </tr>
-            </table>
+  [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
+    <div class="card mt-5 w-full">
+      <div class="head justify-between">
+        <h3>Configuration Information</h3>
+        <div class="flex gap-x-1">
+          [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+            <a class="button" href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure service</a></td>
+          [% ELSE %]
+            <a class="button" href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]"><i class="fa-solid fa-eye small"></i>View Configuration</a></td>
+          [% END %]
+        </div>
+      </div>
+      <div>
+        <table class="cellspacing-x">
+          [% IF source %]
+            <tr>
+              <th>Source</th>
+              <td>[% source %]</td>
+            </tr>
+            [% IF source2 %]
+            <tr>
+              <th></th>
+              <td>[% source2 %]</td>
+            </tr>
             [% END %]
-            [% IF comments.size > 0 %]
-              [% IF sortoption_cmt %]
-              <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-              [% END %]
-              [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
+            [% IF source3 %]
+              <tr>
+                <th></th>
+                <td>[% source3 %]</td>
+              </tr>
             [% END %]
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="center" valign="top" class='commentPanel'>
-            <br>
-            <a name="downtimes" id="downtimes"></a>
-            <div class='commentTitle'>Service Downtimes</div>
-            [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
-            <table border="0">
-              <tr>
-                [% UNLESS command_disabled(c, '56') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'>
-                  <a href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Add a new downtime</a>
-                  [% IF use_feature_recurring_downtime %]
-                    | <a href="extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]" class='comment'>Add recurring downtime</a>
-                  [% END %]
-                </td>
-                [% END %]
-                [% IF downtimes %]
-                [% UNLESS command_disabled(c, '5') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' class='comment'>Delete all downtimes</a></td>
-                [% END %]
-                [% END %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]" class='comment'>List recent downtimes</a></td>
-              </tr>
-            </table>
-            [% END %]
-            [% IF downtimes.size > 0 %]
-              [% IF sortoption_dtm %]
-              <div class="statusSort" align="CENTER">Downtimes sorted by <b>[% dtm_orderby %]</b> ([% IF dtm_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+          [% END %]
+          <tr class="whitespace-normal">
+            <th class="align-top">Check Command</th>
+            <td><pre class="whitespace-normal">[% command.line | html %]</pre></td>
+          </tr>
+          <tr class="whitespace-normal">
+            <th class="align-top">Expanded Command</th>
+            <td>
+              [% IF command.note %]
+                <div class="textALERT text-xs italic"><span class="font-semibold">Note:</span> This is not a valid macro</div>
               [% END %]
-              [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 sortprefix='_dtm' %]
-            [% END %]
-            [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
-              <br>
-              <div class='commentTitle'>Recurring Service Downtime</div>
-              [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' names=0 %]
-            [% END %]
-          </td>
-        </tr>
-
-        [% IF   show_full_commandline == 2 ||
-              ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
-        %]
-        <tr>
-          <td colspan="2" align="center" valign="top" class='commentPanel'>
-            <br>
-            <a name="command" id="command"></a>
-            <div class='commentTitle'>Configuration Information</div>
-            <table border="0">
-              <tr>
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
-                [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-                <td valign="middle"><a href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Configure This Service</a></td>
-                [% ELSE %]
-                <td valign="middle"><a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">View Configuration For This Service</a></td>
-                [% END %]
-              </tr>
-            </table>
-            <table border="0" class="commandPanel">
-              [% IF source %]
-              <tr>
-                <th class='comment' nowrap>Source</th>
-                <td class='comment'><pre class="no_margin config_info">[% source %]</pre></td>
-              </tr>
-              [% IF source2 %]
-              <tr>
-                <th class='comment' nowrap></th>
-                <td class='comment'><pre class="no_margin config_info">[% source2 %]</pre></td>
-              </tr>
-              [% END %]
-              [% IF source3 %]
-              <tr>
-                <th class='comment' nowrap></th>
-                <td class='comment'><pre class="no_margin config_info">[% source3 %]</pre></td>
-              </tr>
-              [% END %]
-              [% END %]
-              <tr>
-                <th class='comment' nowrap>Check Command</th>
-                <td class='comment'><pre class="no_margin command_line config_info truncate" onClick="removeClass(this, 'truncate');">[% command.line | html %]</pre></td>
-              </tr>
-              <tr>
-                <th class='comment' nowrap>Expanded Command</th>
-                <td class='comment'>
-                  [% IF command.note %]
-                  <i class="commandNote"><b>Note:</b> [% command.note %]</i>
-                  <br><br>
-                  [% END %]
-                  <pre class="no_margin command_line config_info truncate" onClick="removeClass(this, 'truncate');">[% command.line_expanded | html %]</pre>
-                </td>
-              </tr>
-            </table>
-            <br>
-            <br>
-          </td>
-        </tr>
-        [% END %]
-      </table>
+              <pre class="whitespace-normal">[% command.line_expanded | html %]</pre>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
+  [% END %]
 
-    [% PROCESS user_ext_service_info.tt %]
+[% PROCESS user_ext_service_info.tt %]
 
 [% PROCESS _footer.tt %]

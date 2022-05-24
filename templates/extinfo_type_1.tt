@@ -34,7 +34,7 @@
     <div class="head">
       <h3>Host State Information</h3>
     </div>
-    <div class="body">
+    <div>
       [% PROCESS _extinfo_host_service_details.tt obj=host %]
     </div>
   </div>
@@ -67,26 +67,6 @@
             </form>
           </div>
           [% END %]
-          [% IF host.parents.size > 0 %]
-          <div class='data'>Parents:</div>
-          <div class='dataTitle'>
-            [% FOREACH parent IN host.parents.sort %][% IF !loop.first() %], [% END %]<a href="status.cgi?host=[% parent | uri %]">[% parent | html %]</a>[% END %]
-          </div><br>
-          [% END %]
-          [% IF host.depends.size > 0 %]
-          <div class='data'>Depends On:</div>
-          <div class='dataTitle'>
-            [% FOREACH depend IN host.depends.sort %][% IF !loop.first() %], [% END %]<a href="extinfo.cgi?type=1&host=[% depend | uri %]">[% depend | html %]</a>[% END %]
-          </div><br>
-          [% END %]
-          [% IF host.groups.size > 0 %]
-          <div class='data'>Member of</div>
-          <div class='dataTitle'>
-            [% FOREACH group IN host.groups.sort %][% IF !loop.first() %], [% END %]<a href="status.cgi?hostgroup=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
-          </div><br>
-          [% END %]
-
-          <div class='data'>[% host.address %]</div>
           [% IF host.icon_image_expanded %]
           <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' border="0" alt="[% host.icon_image_alt | html %]" title="[% host.icon_image_alt | html %]"><br clear="all">
           [% IF host.icon_image_alt %]<font size="-1"><i>( [% host.icon_image_alt | html %] )</i></font>[% END %]

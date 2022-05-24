@@ -222,7 +222,7 @@
       <div><a><i class="fa-solid fa-clock"></i>fa-solid fa-clock</a></div>
       <div><a><i class="fa-solid fa-clock-rotate-left small"></i>fa-solid fa-clock-rotate-left small</a></div>
       <div><a><i class="fa-solid fa-comment"></i>fa-solid fa-comment</a></div>
-      <div><a><i class="fa-solid fa-copy"></i>fa-solid fa-copy</a></div>
+      <div><a><i class="fa-solid fa-copy small"></i>fa-solid fa-copy small</a></div>
       <div><a><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
       <div><a><i class="fa-solid fa-file-circle-check"></i>fa-solid fa-file-circle-check</a></div>
       <div><a><i class="fa-solid fa-file-circle-plus"></i>fa-solid fa-file-circle-plus</a></div>
@@ -253,6 +253,7 @@
       <div><a><i class="uil uil-corner-down-right-alt"></i>uil uil-corner-down-right-alt</a></div>
       <div><a><i class="uil uil-data-sharing"></i>uil uil-data-sharing</a></div>
       <div><a><i class="uil uil-dialpad"></i>uil uil-dialpad</a></div>
+      <div><a><i class="uil uil-draggabledots"></i>uil uil-draggabledots</a></div>
       <div><a><i class="uil uil-envelope-add"></i>uil uil-envelope-add</a></div>
       <div><a><i class="uil uil-exclamation round yellow"></i>uil uil-exclamation round yellow</a></div>
       <div><a><i class="uil uil-eye-slash"></i>uil uil-eye-slash</a></div>
@@ -260,6 +261,7 @@
       <div><a><i class="uil uil-file-export"></i>uil uil-file-export</a></div>
       <div><a><i class="uil uil-file-plus-alt"></i>uil uil-file-plus-alt</a></div>
       <div><a><i class="uil uil-folder"></i>uil uil-folder</a></div>
+      <div><a><i class="uil uil-info round"></i>uil uil-info round</a></div>
       <div><a><i class="uil uil-left-arrow-to-left small"></i>uil uil-left-arrow-to-left small</a></div>
       <div><a><i class="uil uil-link"></i>uil uil-link</a></div>
       <div><a><i class="uil uil-list-ul"></i>uil uil-list-ul</a></div>
@@ -268,6 +270,7 @@
       <div><a><i class="uil uil-placeholder"></i>uil uil-placeholder</a></div>
       <div><a><i class="uil uil-plus"></i>uil uil-plus</a></div>
       <div><a><i class="uil uil-puzzle-piece"></i>uil uil-puzzle-piece</a></div>
+      <div><a><i class="uil uil-question"></i>uil uil-question</a></div>
       <div><a><i class="uil uil-save"></i>uil uil-save</a></div>
       <div><a><i class="uil uil-schedule"></i>uil uil-schedule</a></div>
       <div><a><i class="uil uil-server"></i>uil uil-server</a></div>
@@ -288,7 +291,9 @@
       <div><a><i class="uil uil-users-alt"></i>uil uil-users-alt</a></div>
       <div><a><i class="uil uil-volume"></i>uil uil-volume</a></div>
       <div><a><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
+      <div><a><i class="uil-exclamation round yellow"></i>uil-exclamation round yellow</a></div>
       <div><a><i class="uil-external-link-alt"></i>uil-external-link-alt</a></div>
+      <div><a><i class="uil-info round"></i>uil-info round</a></div>
 <!-- end of "do not change manually" -->
       <div>
         <a>

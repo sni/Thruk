@@ -20,7 +20,14 @@ END
   [% IF type == "service" %]
     <tr>
       <th>Service</th>
-      <td>[% IF use_service_description %][% obj.description | html %][% ELSE %][% obj.display_name | html %][% END %]</td>
+      <td>
+        <div class="flex gap-x-2">
+          [% IF use_service_description %][% obj.description | html %][% ELSE %][% obj.display_name | html %][% END %]
+          [% IF service.icon_image_expanded %]
+            <img src='[% logo_path_prefix %][% service.icon_image_expanded %]'[% IF service.icon_image_alt %] alt="[% service.icon_image_alt | html %]" title="[% service.icon_image_alt | html %]"[% END %] width="20" height="20">
+          [% END %]
+        </div>
+      </td>
     </tr>
   [% END %]
   <tr>
@@ -39,6 +46,32 @@ END
       [% END %]
     </td>
   </tr>
+  [% IF obj.depends.size > 0 %]
+    <tr>
+      <th class="align-top">Dependencies</th>
+      <td class='whitespace-normal'>
+        [% FOREACH parent IN obj.depends.sort %][% IF !loop.first() %], [% END %]<a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>[% END %]
+      </td>
+    </tr>
+  [% END %]
+  [% IF obj.groups.size > 0 %]
+    <tr>
+      <th class="align-top">[% IF type == "service" %]Service Groups[% ELSIF type == "host" %]Host Groups[% END %]</th>
+      <td class='whitespace-normal'>
+        [% FOREACH group IN obj.groups.sort %][% IF !loop.first() %], [% END %]<a class="link" href="status.cgi?servicegroup=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
+      </td>
+    </tr>
+  [% END %]
+  [% IF type == "host" %]
+    [% IF obj.parents.size > 0 %]
+      <tr>
+        <th>Parents</th>
+        <td>
+          [% FOREACH parent IN obj.parents.sort %][% IF !loop.first() %], [% END %]<a class="link" href="status.cgi?host=[% parent | uri %]">[% parent | html %]</a>[% END %]
+        </td>
+      </tr>
+    [% END %]
+  [% END %]
   <tr>
     <th>Current Status</th>
     <td>
