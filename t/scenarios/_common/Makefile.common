@@ -26,6 +26,9 @@ wait_start:
 	$(MAKE) extra_wait_start
 
 wait_start_failed: non_interactive_only
+	$(MAKE) wait_start_info
+
+wait_start_info:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: startup failed"
 	-test -e thruk.conf && $(THRUK) -vvv -l
