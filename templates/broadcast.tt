@@ -79,8 +79,8 @@
     </div>
 
     <div class="mainTableFooter">
-      <div class="textPager font-medium leading-7 whitespace-nowrap">
-        [% all_broadcasts.size %] Broadcasts Displayed
+      <div class="flex-1 self-center">
+        [% PROCESS _pager_total_items.tt pager = { total_items => all_broadcasts.size } data=all_broadcasts %]
       </div>
     </div>
   </div>
