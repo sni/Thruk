@@ -12,7 +12,7 @@
   </div>
   <div class="body">
     [% phantomjs_file %] missing, no pdfs can be generated.<br>
-    <i class="uuil uil-external-link-alt"></i> <a class="link" href="http://www.thruk.org/faq.html#_phantomjs" target="_blank">please read the FAQ.</a>
+    <i class="uil uil-external-link-alt"></i> <a class="link" href="http://www.thruk.org/faq.html#_phantomjs" target="_blank">please read the FAQ.</a>
   </div>
 </div>
 [% END %]

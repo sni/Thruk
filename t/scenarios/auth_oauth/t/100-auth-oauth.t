@@ -29,7 +29,7 @@ TestUtils::test_page(
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/login.cgi',
     'post'    => { 'oauth' => 0, submit => 'login' },
-    'like'    => ['frameset'],
+    'like'    => ['tac.cgi'],
     'follow'  => 1,
 );
 

@@ -339,7 +339,7 @@
 [% WRAPPER _bp_context_menu_frame.tt
     div_id='bp_select_custom'
     function='custom'
-    div_help='Custom Aggregation Functions.<br><a href="http://thruk.org/documentation/business-process.html#custom-functions" target="_blank">See online documentation for details.</a>'
+    div_help='Custom Aggregation Functions.<br><a href="http://thruk.org/documentation/business-process.html#custom-functions" target="_blank">See online documentation for details<i class="uil uil-external-link-alt text-sm"></i></a>'
 %]
 <tr>
   <th align="right">Custom Function</th>
@@ -528,7 +528,7 @@
             <li>objects_templates_file</li>
             <li>objects_save_file</li>
           </ul>
-          in your configuration. <a href="http://thruk.org/documentation.html#_component_thruk_plugin_bp" target="_blank">See online documentation</a>.
+          in your configuration. <a href="http://thruk.org/documentation.html#_component_thruk_plugin_bp" target="_blank">See online documentation<i class="uil uil-external-link-alt text-sm"></i></a>.
         </p>
       </td>
     </tr>

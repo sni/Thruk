@@ -103,7 +103,6 @@ sub get_cgi_cfg {
     my ( $self ) = @_;
 
     my $conf = {
-        'show_context_help'                         => ['BOOL',   '0'],
         'use_pending_states'                        => ['BOOL',   '1'],
         'default_user_name'                         => ['STRING', 'thrukadmin' ],
         'use_authentication'                        => ['BOOL',   '1'],

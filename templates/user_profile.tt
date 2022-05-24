@@ -143,7 +143,7 @@
             <div class="pt-1">
               <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
               <label for="superuser" title="Enable to create a global shared api key, which is not bound to this user." class="font-semibold [% IF !c.check_user_roles("admin") %]disabled[% END %]">Superuser Key</label>
-              <a class="link ml-5" href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(<i class="uuil uil-external-link-alt"></i> read more about superuser keys)</a>
+              <a class="link ml-5" href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(<i class="uil uil-external-link-alt"></i> read more about superuser keys)</a>
             </div>
 
             <div class="pt-1">

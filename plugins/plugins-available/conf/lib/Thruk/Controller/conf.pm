@@ -497,7 +497,6 @@ sub _process_cgi_page {
 
     my $keys = [
         [ 'CGI Settings', [qw/
-                        show_context_help
                         use_pending_states
                         refresh_rate
                         escape_html_tags

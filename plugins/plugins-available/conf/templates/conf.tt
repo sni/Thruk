@@ -64,7 +64,12 @@
             <span>Host, service, timeperiods and notification settings</span>
           </a>
         [% END %]
-        [% IF !has_obj_conf %]<br><span class="textALERT">No object configuration enabled, see <a class="link" href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation</a>.</span>[% END %]
+        [% IF !has_obj_conf %]
+          <span class="textALERT">
+            No object configuration enabled, see
+            <a class="link" href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation<i class="uil uil-external-link-alt text-sm m-0"></i></a>
+          </span>
+        [% END %]
       </div>
     </div>
   </div>

@@ -63,7 +63,7 @@
           <td>now - 2d</td>
         </tr>
         <tr>
-          <td colspan="2"><a class="link" target="_blank" href="https://thruk.org/documentation/timedefinitions.html"><i class="uuil uil-external-link-alt"></i> find more examples online.</a></td>
+          <td colspan="2"><a class="link" target="_blank" href="https://thruk.org/documentation/timedefinitions.html">find more examples online<i class="uil uil-external-link-alt text-sm"></i></a></td>
         </tr>
       </table>
     [% END %]

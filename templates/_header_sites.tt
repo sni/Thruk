@@ -13,19 +13,21 @@
       [% END %]
     </div>
   [% END %]
-  [% IF backend_chooser == "switch" && param_backend.list.size > 0 && param_backend.list.0 != "" %]
-    <div class="buttongroup backends[% IF show_sitepanel == 'list' %] lg:hidden[% END %]" onClick='toggleSitePanel()'>
-      [% b = param_backend.list.0 %]
-      <button class='button_peerUP'>[% initial_backends.$b.name | html %]</button>
-      [% IF sites.disabled > 0 %]
-        <button class='button_peerDIS'>[% sites.disabled %] more</button>
-      [% END %]
-    </div>
+  [% IF backend_chooser == "switch" %]
+    [% IF param_backend.list.size > 0 && param_backend.list.0 != "" %]
+      <div class="buttongroup backends[% IF show_sitepanel == 'list' %] lg:hidden[% END %]" onClick='toggleSitePanel()'>
+        [% b = param_backend.list.0 %]
+        <button class='button_peerUP'>[% initial_backends.$b.name | html %]</button>
+        [% IF sites.disabled > 0 %]
+          <button class='button_peerDIS'>[% sites.disabled %] more</button>
+        [% END %]
+      </div>
+    [% END %]
   [% ELSE %]
     <div class="buttongroup backends[% IF show_sitepanel == 'list' %] lg:hidden[% END %]" onClick='toggleSitePanel()'>
       <button class='[% IF sites.up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]'>[% sites.up %] Up</button>
       <button class='button_peerDIS'>[% sites.disabled %] Disabled</button>
-      [% broken = []; FOREACH down = initial_backends.values; IF down.last_error != 'OK'; broken.push(down.name); END; END %]
+      [% broken = []; FOREACH down = initial_backends.values; IF down && down.defined("last_error") && down.last_error != 'OK'; broken.push(down.name); END; END %]
       <button class='[% IF sites.down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]' title="[% broken.join(', ') | html %]">[% sites.down %] Down</button>
     </div>
   [% END %]

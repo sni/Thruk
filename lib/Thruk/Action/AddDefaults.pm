@@ -149,11 +149,6 @@ sub begin {
     # parse cgi.cfg
     Thruk::Config::merge_cgi_cfg($c);
     $c->stash->{'escape_html_tags'}  = $c->config->{'escape_html_tags'}  // 1;
-    $c->stash->{'show_context_help'} = $c->config->{'show_context_help'} // 0;
-    $c->stash->{'escape_html_tags'}  = $c->config->{'escape_html_tags'}  // 1;
-    $c->stash->{'show_context_help'} = $c->config->{'show_context_help'} // 0;
-
-
 
     ###############################
     # Authentication
