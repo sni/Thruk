@@ -202,7 +202,7 @@
           <td class="align-top">[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
           <td class="align-top">
             <a href="user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key" onClick="if(confirm('Really remove?')) { setBtnSpinner(this); return true; } else { return false; }">
-              <i class="fa-solid fa-trash opacity-75 text-base" title="delete this api key"></i>
+              <i class="fa-solid fa-trash text-base" title="delete this api key"></i>
             </a>
           </td>
         </tr>

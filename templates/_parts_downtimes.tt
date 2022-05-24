@@ -33,7 +33,7 @@
             <input type='hidden' name='backend' value="[% d.peer_key %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
             <button class="iconOnly submit">
-              <i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Downtime'></i>
+              <i class="fa-solid fa-trash text-base" title='Delete This Downtime'></i>
             </button>
           </form>
         </td>
