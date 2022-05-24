@@ -184,9 +184,10 @@ sub _process_comments_page {
                                        );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_'], 'comment');
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'comment');
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="comments.xls"' );
         $c->stash->{'template'} = 'excel/comments.tt';
+        $c->stash->{'data'}     = $comments;
         return $c->render_excel();
     }
     if($view_mode eq 'json') {
