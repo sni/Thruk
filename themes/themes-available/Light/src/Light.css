@@ -507,6 +507,13 @@ I.fa-solid, I.uil {
     >DIV.body {
       @apply p-2 w-full;
     }
+    TABLE.body {
+      >TBODY > TR, >THEAD > TR, > TR {
+        >TH, >TD {
+          @apply first:pl-2 last:pr-2 !important;
+        }
+      }
+    }
     >DIV.footer {
       @apply h-[40px] px-2 border-t borderDefault items-center flex;
     }

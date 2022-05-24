@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="grow h-full overflow-auto">
-        <table class="cellspacing striped">
+        <table class="body cellspacing striped">
           <tbody>
             <tr>
               <th>Name <span class="required">*</span></th>
