@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 242;
+    plan tests => 260;
 }
 
 BEGIN {
@@ -92,15 +92,17 @@ for my $url (@{$pages}) {
         'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
-    is(ref $data, 'HASH', "json result is an array: ".$url);
+    is(ref $data, 'ARRAY', "json result is an array: ".$url);
 }
 
 # excel pages
 $pages = [
     '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls', # all columns
     '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls&columns=1&columns=2&columns=3&columns=4&columns=5&columns=6&columns=7&columns=8&columns=9', # old compat column selection
+    '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls&columns=Hostname&columns=Service&columns=Site&columns=Entry%20Time&columns=Author&columns=Comment&columns=Comment%20ID&columns=Persistent&columns=Type&columns=Expires',
     '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=xls',
     '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=xls&columns=1&columns=2&columns=3&columns=4&columns=5&columns=6&columns=7&columns=8&columns=9&columns=10&columns=11',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=xls&columns=Hostname&columns=Service&columns=Entry%20Time&columns=Author',
 ];
 
 for my $url (@{$pages}) {

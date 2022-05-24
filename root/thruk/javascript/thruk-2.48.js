@@ -297,8 +297,8 @@ function cleanUnderscoreUrl() {
 function cleanUnderscore(str) {
     str = str.replace(/\?_=\d+/g, '?');
     str = str.replace(/\&_=\d+/g, '');
-    str = str.replace(/\?scrollTo=[\d\.]+/g, '?');
-    str = str.replace(/\&scrollTo=[\d\.]+/g, '');
+    str = str.replace(/\?scrollTo=[:\d\.]+/g, '?');
+    str = str.replace(/\&scrollTo=[:\d\.]+/g, '');
     str = str.replace(/\?autoShow=\w+/g, '?');
     str = str.replace(/\&autoShow=\w+/g, '');
     str = str.replace(/\?$/g, '');
@@ -5170,22 +5170,13 @@ function selectService(event, state) {
         row_id = getFirstParentId(event.target);
 
         // dont select row when clicked on a link
-        if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+        if(event.target.tagName == 'A' || event.target.tagName == 'IMG' || event.target.tagName == 'I') {
             resetServiceRow(event);
             return;
         }
     }
     else if (event && (event.id || event.parentNode)) {
         row_id = getFirstParentId(event);
-    }
-    else {
-        /* ex.: IE 7/8 */
-        if(window.event.srcElement.tagName == 'A' || window.event.srcElement.tagName == 'IMG') {
-            resetServiceRow(event);
-            return;
-        }
-        row_id = getFirstParentId(this);
-        event  = this;
     }
     if(!row_id) {
         return;
@@ -5280,22 +5271,13 @@ function selectHost(event, state) {
         row_id = getFirstParentId(event.target);
 
         // dont select row when clicked on a link
-        if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+        if(event.target.tagName == 'A' || event.target.tagName == 'IMG' || event.target.tagName == 'I') {
             resetHostRow(event);
             return;
         }
     }
     else if (event && (event.id || event.parentNode)) {
         row_id = getFirstParentId(event);
-    }
-    else {
-        /* ex.: IE 7/8 */
-        if(window.event.srcElement.tagName == 'A' || window.event.srcElement.tagName == 'IMG') {
-            resetHostRow(event);
-            return;
-        }
-        row_id = getFirstParentId(this);
-        event  = this;
     }
     if(!row_id) {
         return;
@@ -5739,7 +5721,7 @@ function toggle_comment(event) {
     }
     if(event && event.target) {
         // dont select row when clicked on a link
-        if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+        if(event.target.tagName == 'A' || event.target.tagName == 'IMG' || event.target.tagName == 'I') {
             return true;
         }
     }

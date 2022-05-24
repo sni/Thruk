@@ -1,4 +1,45 @@
-﻿<workbook>
-  [% PROCESS "excel/_downtime_host_worksheet.tt"    data=hostdowntimes     name="Hosts"    columns=host_columns    last_col=host_last_col %]
-  [% PROCESS "excel/_downtime_service_worksheet.tt" data=servicedowntimes  name="Services" columns=service_columns last_col=service_last_col %]
+﻿[% USE date %]
+<workbook>
+[% size = 1 %]
+[% IF data %][% size = data.size + 1 %][% END %]
+  <worksheet name='Downtimes' autofilter='A1:[% last_col %][% size %]'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        [% FOREACH col = columns %]
+        [% IF    col == "Hostname"    %]<cell width='30'>Hostname</cell>
+        [% ELSIF col == "Service"     %]<cell width='30'>Service</cell>
+        [% ELSIF col == "Site"        %]<cell width='30'>Site</cell>
+        [% ELSIF col == "Entry Time"  %]<cell width='20'>Entry Time</cell>
+        [% ELSIF col == "Author"      %]<cell width='16'>Author</cell>
+        [% ELSIF col == "Comment"     %]<cell width='40'>Comment</cell>
+        [% ELSIF col == "Start Time"  %]<cell width='20'>Start Time</cell>
+        [% ELSIF col == "End Time"    %]<cell width='20'>End Time</cell>
+        [% ELSIF col == "Type"        %]<cell width='14'>Type</cell>
+        [% ELSIF col == "Duration"    %]<cell width='14'>Duration</cell>
+        [% ELSIF col == "Downtime ID" %]<cell width='16'>Downtime ID</cell>
+        [% ELSIF col == "Trigger ID"  %]<cell width='16'>Trigger ID</cell>
+        [% END %]
+        [% END %]
+      </format>
+    </row>
+    [% FOREACH d = data %]
+      <row>
+        [% FOREACH col = columns %]
+        [% IF    col == "Hostname"    %]<cell>[% escape_xml(d.host_name) %]</cell>
+        [% ELSIF col == "Service"     %]<cell>[% escape_xml(d.service_description) %]</cell>
+        [% ELSIF col == "Site"        %]<cell>[% escape_xml(d.peer_name) %]</cell>
+        [% ELSIF col == "Entry Time"  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "Author"      %]<cell>[% escape_xml(d.author) %]</cell>
+        [% ELSIF col == "Comment"     %]<cell>[% escape_xml(d.comment) %]</cell>
+        [% ELSIF col == "Start Time"  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.start_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "End Time"    %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.end_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>
+        [% ELSIF col == "Type"        %]<cell>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</cell>
+        [% ELSIF col == "Duration"    %]<cell>[% IF d.fixed %][% duration(d.end_time - d.start_time) %][% ELSE%][% duration(d.duration) %][% END %]</cell>
+        [% ELSIF col == "Downtime ID" %]<cell>[% d.id %]</cell>
+        [% ELSIF col == "Trigger ID"  %]<cell>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</cell>
+        [% END %]
+        [% END %]
+      </row>
+    [% END %]
+  </worksheet>
 </workbook>

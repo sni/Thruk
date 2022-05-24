@@ -4,75 +4,62 @@
 
 [% PROCESS _extinfo_cmd_pane.tt cmd_type="downtimes" %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="middle" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table><br>
-    <br>
-    <div class='downtimeNav'>[&nbsp;<a href='#HOSTDOWNTIME' class='downtimeNav'>Host Downtime</a>&nbsp;|&nbsp;<a href='#SERVICEDOWNTIME' class='downtimeNav'>Service Downtime</a>&nbsp;]</div><br>
 
-    <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
-    <div class='downtimeTitle'>Scheduled Host Downtimes</div>
-    [% UNLESS command_disabled(c, '55') || c.check_user_roles('authorized_for_read_only') %]
-    <div class='comment'>
-      <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" border="0" alt="downtime" width="20" height="20">&nbsp;
-      <a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a>
-      - (<a href='cmd.cgi?cmd_typ=84'>hostgroup</a>
-         <a href='cmd.cgi?cmd_typ=85'> - with services</a>
-      )
-    </div>
-    [% END %]
-    <br>
-    [% IF sortoption_hst %]
-    <div class="statusSort" align="CENTER">Host downtimes sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-    [% END %]
-    <div align="center">
-    <table border=0 cellpadding=0 cellspacing=0>
-      <tr>
-        <td width="220"></td>
-        <td align="center">
-          <div class="hint">Mark host / service downtimes with leftclick. Select multiple with shift + mouse.</div>
-        </td>
-        <td width="220" align="right" class="toolbar">
-          [% style="comments" %]
-          [% PROCESS _table_search_field.tt ids=["host_downtimes_table", "service_downtimes_table"] %]
-          [% PROCESS _json_export.tt %]
-          [% columns=[ 'Hostname', 'Service', 'Site', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ] %]
-          [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
-        </td>
-      </tr>
-      <tr>
-        <td colspan=3>
-          [% PROCESS _downtimes_table.tt downtimes = hostdowntimes type='host' names=1 sortprefix='_hst' %]
-        </td>
-      </tr>
-    </table>
-    </div>
+[% PROCESS _infobox.tt %]
+<h1 class="mt-5">Downtimes</h1>
 
-    <br>
-    <br>
-    <br>
-    <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
-    <div class='downtimeTitle'>Scheduled Service Downtimes</div>
-    [% UNLESS command_disabled(c, '56') || c.check_user_roles('authorized_for_read_only') %]
-    <div class='comment'>
-      <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" border="0" alt="downtime" width="20" height="20">&nbsp;
-      <a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a>
-      - (<a href='cmd.cgi?cmd_typ=122'>servicegroup</a>)
+<div class="flexrow flex-nowrap my-2">
+  <div class="flex basis-1/3 self-end gap-1">
+    [% style="downtimes" %]
+    [% PROCESS _json_export.tt %]
+    [% columns=[ 'Hostname', 'Service', 'Site', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ] %]
+    [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
+  </div>
+  <div class="basis-1/3 self-end">
+    <div class="hint text-center whitespace-nowrap text-xs">Mark downtimes with leftclick. Select multiple with shift + mouse.</div>
+  </div>
+  <div class="basis-1/3 flex"></div>
+</div>
+
+<div class="card w-full mt-2">
+  <div class="mainTableHeader">
+    <div class="relative">
+      <button
+        class="w-36 text-sm rounded-[5px] border-0 font-medium display-filter [% IF has_filter %]textActive2[% END %] hover:textActive2"
+        onClick="toggleElement('filterForm', null, true, null, function() { submitFormIfChanged('#filterForm'); return false; }); return false;">[% IF has_filter %]Filters active[% ELSE %]Display Filter[% END %]
+      </button>
+      <form action="extinfo.cgi" method="GET" onsubmit="setFormBtnSpinner(this)" id="filterForm" class="absolute top-8 z-40 hidden">
+        <div class="card shadow-float w-52">
+          <div class="head justify-between">
+            <h3>Display Filter</h3>
+            <button class="iconOnly" type="submit" name="update" title="accept">
+              <i class="fa-solid fa-check round small green"></i>
+            </button>
+          </div>
+          <div class="body">
+            <input type="hidden" name="type" value="6">
+            <input type="text" class="w-full" name='host' id='host' value="[% IF host != ''; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
+            <input type="text" class="w-full" name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })" placeholder="service">
+            <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
+          </div>
+        </div>
+      </form>
     </div>
-    [% END %]
-    <br>
-    [% IF sortoption_svc %]
-    <div class="statusSort" align="CENTER">Service downtimes sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-    [% END %]
-    <div align="center" class="hint" style="padding: 4px;">Mark service downtimes with leftclick. Select multiple with shift + mouse.</div>
-    [% PROCESS _downtimes_table.tt downtimes = servicedowntimes type='service' names=1 sortprefix='_svc' %]
-<br>
+    <div>
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
+    </div>
+  </div>
+  <div class="mainTable">
+    [% PROCESS _downtimes_table.tt downtimes=data type='service' names=1 %]
+  </div>
+  <div class="mainTableFooter">
+    <div class="flex-1 self-center">
+      [% PROCESS _pager_total_items.tt %]
+    </div>
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]
