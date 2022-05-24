@@ -32,7 +32,7 @@ for my $x (1..3) {
 
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4&cluster=1',
-    'like'    => ['Performance Information', 'Cluster Status', 'accept.png'],
+    'like'    => ['Performance Information', 'Cluster Status', '<i[^>]+"ok"[^>]*>'],
 );
 
 TestUtils::test_page(
