@@ -16,6 +16,8 @@ set in the thruk_local.conf as well.
 
 
 == show_context_help
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
+
 Displays an icon with context specific help on most pages.
 
 ex.:

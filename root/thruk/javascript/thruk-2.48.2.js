@@ -576,7 +576,7 @@ function check_side_nav_active_item(ctx) {
         if(navPage == page) {
             var href    = el.href.replace(/^.*\?/, '');
             var navArgs = toQueryParams(href);
-            if(navArgs.length == 0) { return(true); }
+            if(Object.keys(navArgs).length == 0) { return(true); }
             found = true;
             for(var key in navArgs) {
                 if(!urlArgs[key] || urlArgs[key] != navArgs[key]) {
@@ -598,7 +598,7 @@ function check_side_nav_active_item(ctx) {
         if(navPage == page) {
             var href    = el.href.replace(/^.*\?/, '');
             var navArgs = toQueryParams(href);
-            if(navArgs.length == 0) { return(true); }
+            if(Object.keys(navArgs).length == 0) { return(true); }
             found = true;
             for(var key in navArgs) {
                 if(!urlArgs[key]) {

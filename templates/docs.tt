@@ -10,13 +10,13 @@
 		<div class="px-2 py-3 sm:px-4 flex-auto border-t border-gray-200">
 			<div class="flex flex-nowrap">
 				<div class="flex-initial text-sm text-gray-900">
-					Thruks documentation itself is available online at <a class="font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank">www.thruk.org/documentation/</a>.<br>
+					Thruks documentation itself is available online at <a class="link font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank"><i class="uil uil-external-link-alt text-sm m-0"></i>www.thruk.org/documentation/</a>.<br>
 					<br>
 					To replace this link with the documentation of your monitoring tool add a <b>documentation_link</b> config item to your thruk_local.conf.<br>
 					<br>
 					If you don't need a documentation link at all, set the <b>documentation_link</b> option to a blank value.<br>
 					<br>
-					For installation information and general Thruk help look at the <a class="font-semibold underline link" href="http://www.thruk.org/documentation/" target="_blank">online documentation</a>.<br>
+					For installation information and general Thruk help look at the <a class="link font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank"><i class="uil uil-external-link-alt text-sm m-0"></i>online documentation</a>.<br>
 					<br>
 					<br>
 					<button class="green big"><a href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a></button>

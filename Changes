@@ -9,6 +9,7 @@ next 3.x:
             - use_new_command_box
             - info_popup_event_type
             - info_popup_options
+            - show_context_help
           - deprecated plugins:
             - mobile
             - wml
