@@ -2866,8 +2866,6 @@ templates/config_timeperiods.tt
 templates/custom_perf_bar_adjustments.tt
 templates/docs.tt
 templates/error.tt
-templates/excel/_comment_host_worksheet.tt
-templates/excel/_comment_service_worksheet.tt
 templates/excel/_downtime_host_worksheet.tt
 templates/excel/_downtime_service_worksheet.tt
 templates/excel/_status_detail_worksheet.tt
