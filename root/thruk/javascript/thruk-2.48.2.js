@@ -1174,6 +1174,7 @@ function reloadPageDo(withReloadButton) {
     }
 
     var newUrl = getCurrentUrl(true);
+    updateUrl();
 
     if(fav_counter) {
         updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
