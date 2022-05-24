@@ -20,11 +20,11 @@
   </div>
   <div class="body">
     [% IF cmd_type == "recurring" %]
-      <form action="extinfo.cgi" method="POST" id="quick_cmd_form">
+      <form action="extinfo.cgi" method="POST" id="quick_cmd_form" onsubmit="setFormBtnSpinner(this)">
         <input type="hidden" name="type" value="6">
         <input type="hidden" name="recurring" value="remove">
     [% ELSE %]
-      <form action="cmd.cgi" method="POST" id="quick_cmd_form">
+      <form action="cmd.cgi" method="POST" id="quick_cmd_form" onsubmit="setFormBtnSpinner(this)">
     [% END %]
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <input type="hidden" name="referer" value="[% short_uri(c, {referer => 'undef'}) %]">
@@ -40,7 +40,7 @@
         <option value="13">remove comments</option>
         [% END %]
       </select>
-      <input type="submit" id="multi_cmd_submit_button" value="send command" onClick="return collectFormData('quick_cmd_form')" class="mt-2 mx-auto w-40">
+      <button id="multi_cmd_submit_button" onClick="return collectFormData('quick_cmd_form')" class="mt-2 mx-auto w-40 submit">send command</button>
     </form>
   </div>
 </div>

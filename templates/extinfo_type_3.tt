@@ -16,7 +16,7 @@
     [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
   </div>
   <div class="basis-1/3 self-end">
-    <div class="hint text-center whitespace-nowrap text-xs">Mark host comments with leftclick. Select multiple with shift + mouse.</div>
+    <div class="hint text-center whitespace-nowrap text-xs">Mark comments with leftclick. Select multiple with shift + mouse.</div>
   </div>
   <div class="basis-1/3 flex"></div>
 </div>
@@ -37,10 +37,10 @@
             </button>
           </div>
           <div class="body">
-              <input type="hidden" name="type" value="3">
-              <input type="text" class="w-full" name='host' id='host' value="[% IF host != ''; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
-              <input type="text" class="w-full" name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })" placeholder="service">
-              <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
+            <input type="hidden" name="type" value="3">
+            <input type="text" class="w-full" name='host' id='host' value="[% IF host != ''; escape_html(host); END %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name">
+            <input type="text" class="w-full" name='service' id='service' value="[% service | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })" placeholder="service">
+            <input type="text" class="w-full" name="pattern" value="[% pattern | html %]" placeholder="search pattern">
           </div>
         </div>
       </form>

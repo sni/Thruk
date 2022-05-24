@@ -60,11 +60,11 @@
       <td class='text-center'>[% IF com.expires %][% date_format(c, com.expire_time) %][% ELSE %]N/A[% END %]</td>
       [% IF com.service_description == '' %]
         [% UNLESS command_disabled(c, 2) %]
-        <td class='text-center'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
+        <td class='text-center'><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
         [% END %]
       [% ELSE %]
         [% UNLESS command_disabled(c, 4) %]
-        <td class='text-center'><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
+        <td class='text-center'><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><i class="fa-solid fa-trash opacity-75 text-base" title='Delete This Comment'></i></a></td>
         [% END %]
       [% END %]
     </tr>

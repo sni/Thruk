@@ -1758,9 +1758,8 @@ sub set_selected_columns {
     my $default_compat_columns = {
         'host'             => ['Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information'],
         'service'          => ['Hostname', 'IP', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information'],
-        'host_downtime'    => ['Hostname', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ],
-        'service_downtime' => ['Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ],
-        'comment'  => ['Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ],
+        'downtime'         => ['Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ],
+        'comment'          => ['Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ],
         'log'              => ['Time', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ],
         'notification'     => ['Host', 'Service', 'Type', 'Time', 'Contact', 'Command', 'Information'],
     };
