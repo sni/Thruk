@@ -214,9 +214,6 @@
     </div>
     <div>
       [% IF comments.size > 0 %]
-        [% IF sortoption_cmt %] <!-- TODO: Remove? Fix JS Sort arrows in table -->
-          <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-        [% END %]
         [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
       [% ELSE %]
         <div class="flex justify-center textALERT p-2">There are no comments</div>
