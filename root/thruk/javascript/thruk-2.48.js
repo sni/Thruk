@@ -6762,7 +6762,6 @@ var ajax_search = {
     result_pan      : 'search-results',
     update_interval : 3600, // update at least every hour
     search_type     : 'all',
-    size            : 150,
     updating        : false,
     error           : false,
 
@@ -6924,11 +6923,6 @@ var ajax_search = {
 
         var input = document.getElementById(ajax_search.input_field);
         if(input.disabled) { return false; }
-        ajax_search.size = jQuery(input).outerWidth();
-        if(ajax_search.size < 100) {
-            /* minimum is 100px */
-            ajax_search.size = 100;
-        }
 
         if(ajax_search.empty == true) {
             if(input.value == ajax_search.emptytxt) {
@@ -7603,7 +7597,9 @@ var ajax_search = {
         var coords    = jQuery(input).offset();
         style.left    = coords.left + "px";
         style.top     = (coords.top + input.offsetHeight) + "px";
-        style.width   = ajax_search.size + "px";
+        var size      = jQuery(input).outerWidth();
+        if(size < 100) { size = 100; }
+        style.width   = size + "px";
 
         jQuery(panel).appendTo("BODY");
 

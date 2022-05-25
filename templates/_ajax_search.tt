@@ -1,9 +1,10 @@
 ﻿<script type="text/javascript">
 <!--
-  var input = document.getElementById('s0_value');
-  if(input) {
-    input.onclick    = ajax_search.init;
-    input.ondblclick = ajax_search.init;
-  }
+  jQuery(document).ready(function() {
+    jQuery("input[type='search'][name='s0_value']").each(function(i, el) {
+      el.onclick    = ajax_search.init;
+      el.ondblclick = ajax_search.init;
+    });
+  });
 -->
 </script>
