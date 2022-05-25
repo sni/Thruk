@@ -195,6 +195,12 @@ function init_page() {
                 mainTable.scroll(scrolls[2], scrolls[3]);
             }
         }
+        if(scrolls[4] != null && scrolls[4] > 0) {
+            var navTable = jQuery("DIV.navsectionlinks.scrollauto")[0];
+            if(navTable) {
+                navTable.scroll(0, scrolls[4]);
+            }
+        }
         scrollToPos = null;
     }
 
@@ -315,15 +321,15 @@ function updateLastUserInteraction() {
 function saveScroll() {
     var scroll = getPageScroll();
 
-    if(scroll != "0:0" && scroll != "0:0:0:0") {
-        additionalParams['scrollTo'] = scroll;
-        delete removeParams['scrollTo'];
-        scrollToPos = scroll;
-    } else {
+    if(!scroll || scroll.match(/^[0:]*$/)) {
         delete additionalParams['scrollTo'];
         removeParams['scrollTo'] = true;
         scrollToPos = null;
     }
+
+    additionalParams['scrollTo'] = scroll;
+    delete removeParams['scrollTo'];
+    scrollToPos = scroll;
 }
 
 /* hide a element by id */
@@ -5581,7 +5587,17 @@ function getPageScroll() {
     if(mainTable.length > 0) {
         scroll += ":"+Number(mainTable.scrollLeft()).toFixed(0);
         scroll += ":"+Number(mainTable.scrollTop()).toFixed(0);
+    }  else {
+        scroll += "::";
     }
+
+    var navTable = jQuery("DIV.navsectionlinks.scrollauto").first();
+    if(navTable.length > 0) {
+        scroll += ":"+Number(navTable.scrollTop()).toFixed(0);
+    }  else {
+        scroll += ":";
+    }
+
     return scroll;
 }
 
