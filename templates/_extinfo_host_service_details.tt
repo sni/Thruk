@@ -33,17 +33,26 @@ END
   <tr>
     <th>Host</th>
     <td>
-      [% IF svc_name != "" %]
-        <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
-        [% IF obj.host_name != obj.host_display_name %]
-          (<a class="link" href="extinfo.cgi?type=1&amp;host=[% obj.host_name | uri %]">[% obj.host_display_name | html %]</a> -
-          [% obj.host_address %])
-        [% ELSE %]
-          ([% obj.host_address %])
+      <div class="flex gap-x-2">
+        <div>
+          [% IF svc_name != "" %]
+            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
+            [% IF obj.host_name != obj.host_display_name %]
+              (<a class="link" href="extinfo.cgi?type=1&amp;host=[% obj.host_name | uri %]">[% obj.host_display_name | html %]</a> -
+              [% obj.host_address %])
+            [% ELSE %]
+              ([% obj.host_address %])
+            [% END %]
+          [% ELSE %]
+            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
+          [% END %]
+        </div>
+        [% IF type == "host" %] <!-- TODO: check ob moeglich/sinnvoll bei service information auch host icon anzuzeigen -->
+          [% IF host.icon_image_expanded %]
+              <img src='[% logo_path_prefix %][% host.icon_image_expanded %]'[% IF host.icon_image_alt %] alt="[% host.icon_image_alt | html %]" title="[% host.icon_image_alt | html %]"[% END %] width="20" height="20">
+          [% END %]
         [% END %]
-      [% ELSE %]
-        <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
-      [% END %]
+      </div>
     </td>
   </tr>
   [% IF obj.depends.size > 0 %]

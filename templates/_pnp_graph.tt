@@ -29,8 +29,8 @@
   });
 </script>
 
-<div class="card w-full">
-  <div class="head">
+<div class="card w-[670px] mx-auto">
+  <div class="head justify-between">
     <h3>Performance Graph</h3>
     <!-- ???? -->
     <div class='pnpSelector'>

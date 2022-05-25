@@ -8,7 +8,7 @@
 <div class="flexrow justify-between">
   <div>
     [% PROCESS _infobox.tt %]
-    <div class="card mt-5 min-w-[370px]">
+    <div class="card mt-5 min-w-[350px]">
       <div class="actionbox less-padding">
         <div><a href="status.cgi?host=[% host.name | uri %]">View Status Detail For This Host</a></div>
         [% IF host.childs.size > 0 %]<div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]
@@ -44,13 +44,166 @@
   </div>
 </div>
 
+<div class="mt-5">
+  [% IF pnp_url %]
+    [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
+  [% ELSIF histou_url %]
+    [% PROCESS _histou_graph.tt hst=host.name svc="" %]
+  [% ELSE %]
+    [% graph_url = get_graph_url(c, host, 1)%]
+    [% IF graph_url %]
+      [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
+    [% END %]
+  [% END %]
+</div>
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
+[% IF host.notes_expanded %]
+  <div class="card w-full">
+    <div class="head">
+      <h3>Notes</h3>
+    </div>
+    <div class="body">
+      [% host.notes_expanded %]
+    </div>
+  </div>
+[% END %]
+
+<div class="card w-full mt-5">
+  <div class="head justify-between">
+    <h3>Service Comments</h3>
+    [% IF c.check_cmd_permissions('host', host.name) %]
+      <div class="flex gap-1">
+        [% UNLESS command_disabled(c, '1') %]
+          <div>
+            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+              <i class="fa-solid fa-comment mr-1"></i>Add comment
+            </a>
+          </div>
+        [% END %]
+        [% IF comments.size > 0 %]
+          [% UNLESS command_disabled(c, '20') %]
+            <div>
+              <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+                <i class="fa-solid fa-trash mr-1"></i>Delete all
+              </a>
+            </div>
+          [% END %]
+        [% END %]
+      </div>
+    [% END %]
+  </div>
+  <div>
+    [% IF comments.size > 0 %]
+      [% PROCESS _comments_table.tt comments = comments type='host' names=0 sortprefix='_cmt' %]
+    [% ELSE %]
+      <div class="flex justify-center textALERT p-2">There are no comments</div>
+    [% END %]
+  </div>
+</div>
+<!-- DOWNTIMES -->
+<div class="card w-full mt-5">
+  <div class="head justify-between">
+    <h3>Host Downtimes</h3>
+    [% IF c.check_cmd_permissions('host', host.name) %]
+      <div class="flex gap-1">
+        [% UNLESS command_disabled(c, '55') %]
+          <div>
+            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+              <i class="fa-solid fa-comment mr-1"></i>Add downtime
+            </a>
+          </div>
+          [% IF use_feature_recurring_downtime %]
+            <div>
+              <a href="extinfo.cgi?type=6&amp;recurring=add&amp;target=host&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]" class="button js-modal-command-link">
+                <i class="fa-solid fa-comment mr-1"></i>Add recurring downtime</a>
+            </div>
+          [% END %]
+        [% END %]
+        [% IF downtimes %]
+          [% UNLESS command_disabled(c, '5') %]
+            <div>
+              <a class="button js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
+                <i class="fa-solid fa-trash mr-1"></i>Delete all
+              </a>
+            </div>
+          [% END %]
+        [% END %]
+      </div>
+    [% END %]
+  </div>
+  <div>
+    [% IF downtimes.size > 0 %]
+      [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 sortprefix='_dtm' %]
+    [% ELSE %]  [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+    <br>
+    <div class='commentTitle'>Recurring Host Downtime</div>
+    [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
+  [% END %]
+      <div class="flex justify-center textALERT p-2">There are no downtimes</div>
+    [% END %]
+  </div>
+  [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+    <br>
+    <div class='commentTitle'>Recurring Host Downtime</div>
+    [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
+  [% END %]
+</div>
+
+[% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
+  <div class="card mt-5 w-full">
+    <div class="head justify-between">
+      <h3>Configuration Information</h3>
+      <div class="flex gap-x-1">
+        [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+          <a class="button" href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure host</a>
+        [% ELSE %]
+          <a class="button" href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]"><i class="fa-solid fa-eye small"></i>View Configuration</a></td>
+        [% END %]
+      </div>
+    </div>
+    <div>
+      <table class="cellspacing-x">
+        [% IF source %]
+          <tr>
+            <th>Source</th>
+            <td>[% source %]</td>
+          </tr>
+          [% IF source2 %]
+          <tr>
+            <th></th>
+            <td>[% source2 %]</td>
+          </tr>
+          [% END %]
+          [% IF source3 %]
+            <tr>
+              <th></th>
+              <td>[% source3 %]</td>
+            </tr>
+          [% END %]
+        [% END %]
+        <tr class="whitespace-normal">
+          <th class="align-top w-[170px]">Check Command</th>
+          <td><pre class="whitespace-normal">[% command.line | html %]</pre></td>
+        </tr>
+        <tr class="whitespace-normal">
+          <th class="align-top w-[170px]">Expanded Command</th>
+          <td>
+            [% IF command.note %]
+              <div class="textALERT text-xs italic"><span class="font-semibold">Note:</span> This is not a valid macro</div>
+            [% END %]
+            <pre class="whitespace-normal">[% command.line_expanded | html %]</pre>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+[% END %]
+
+
+  <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
       <tr>
         <td align="center" valign="middle" width="33%" class="ext_head_attributes">
-          <div class='data'>Host</div>
-          <div class='dataTitle'>[% host.alias %]</div>
-          <div class='dataTitle'>([% host.display_name %])</div><br>
+
           [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
@@ -67,11 +220,6 @@
             </form>
           </div>
           [% END %]
-          [% IF host.icon_image_expanded %]
-          <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' border="0" alt="[% host.icon_image_alt | html %]" title="[% host.icon_image_alt | html %]"><br clear="all">
-          [% IF host.icon_image_alt %]<font size="-1"><i>( [% host.icon_image_alt | html %] )</i></font>[% END %]
-          [% END %]
-          [% IF host.notes_expanded %]<p>[% host.notes_expanded %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
@@ -162,166 +310,6 @@
     </table>
     <br>
 
-    <div align="center">
-      <table border="0" cellpadding="0" width="100%" class="extdetails">
-        [% IF pnp_url %]
-        <tr>
-          <td colspan="2" align="center">
-          [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
-          </td>
-        </tr>
-        [% ELSIF histou_url %]
-        <tr>
-          <td colspan="2" align="center">
-          [% PROCESS _histou_graph.tt hst=host.name svc="" %]
-          </td>
-        </tr>
-        [% ELSE %]
-        [% graph_url = get_graph_url(c, host, 1)%]
-        [% IF graph_url %]
-        <tr>
-          <td colspan="2" align="center">
-          [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
-          </td>
-        </tr>
-        [% END %]
-        [% END %]
-
-        <tr>
-          <td colspan="2">
-            <br>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="center" valign="top" class='commentPanel'>
-            <a name="comments" id="comments"></a>
-            <div class='commentTitle'>Host Comments</div>
-            [% IF c.check_cmd_permissions('host', host.name) %]
-            <table border="0">
-              <tr>
-                [% UNLESS command_disabled(c, '1') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]" class='comment'>Add a new comment</a></td>
-                [% END %]
-                [% IF comments %]
-                [% UNLESS command_disabled(c, '20') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]" class='comment'>Delete all comments</a></td>
-                [% END %]
-                [% END %]
-              </tr>
-            </table>
-            [% END %]
-            [% IF comments.size > 0 %]
-              [% IF sortoption_cmt %]
-              <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-              [% END %]
-              [% PROCESS _comments_table.tt comments = comments type='host' names=0 sortprefix='_cmt' %]
-            [% END %]
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="center" valign="top" class='commentPanel'>
-            <br>
-            <a name="downtimes" id="downtimes"></a>
-            <div class='commentTitle'>Host Downtimes</div>
-            [% IF c.check_cmd_permissions('host', host.name) %]
-            <table border="0">
-              <tr>
-                [% UNLESS command_disabled(c, '55') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'>
-                  <a href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]" class='comment'>Add a new downtime</a>
-                  [% IF use_feature_recurring_downtime %]
-                    | <a href="extinfo.cgi?type=6&amp;recurring=add&amp;target=host&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]" class='comment'>Add recurring downtime</a>
-                  [% END %]
-                </td>
-                [% END %]
-                [% IF downtimes %]
-                [% UNLESS command_disabled(c, '5') %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]" class='comment'>Delete all downtimes</a></td>
-                [% END %]
-                [% END %]
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]" class='comment'>List recent downtimes</a></td>
-              </tr>
-            </table>
-            [% END %]
-            [% IF downtimes.size > 0 %]
-              [% IF sortoption_dtm %]
-              <div class="statusSort" align="CENTER">Downtimes sorted by <b>[% dtm_orderby %]</b> ([% IF dtm_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-              [% END %]
-              [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 sortprefix='_dtm' %]
-            [% END %]
-            [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
-              <br>
-              <div class='commentTitle'>Recurring Host Downtime</div>
-              [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
-            [% END %]
-          </td>
-        </tr>
-
-        [% IF   show_full_commandline == 2 ||
-              ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
-        %]
-        <tr>
-          <td colspan="2" align="center" valign="top" class='commentPanel'>
-            <br>
-            <a name="command" id="command"></a>
-            <div class='commentTitle'>Configuration Information</div>
-            <table border="0">
-              <tr>
-                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
-                [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-                <td valign="middle"><a href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Configure This Host</a></td>
-                [% ELSE %]
-                <td valign="middle"><a href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]">View Configuration For This Host</a></td>
-                [% END %]
-              </tr>
-            </table>
-            <table border="0" class="commandPanel">
-              [% IF source %]
-              <tr>
-                <th class='comment' nowrap>Source</th>
-                <td class='comment'><pre class="no_margin config_info">[% source %]</pre></td>
-              </tr>
-              [% IF source2 %]
-              <tr>
-                <th class='comment' nowrap></th>
-                <td class='comment'><pre class="no_margin config_info">[% source2 %]</pre></td>
-              </tr>
-              [% END %]
-              [% IF source3 %]
-              <tr>
-                <th class='comment' nowrap></th>
-                <td class='comment'><pre class="no_margin config_info">[% source3 %]</pre></td>
-              </tr>
-              [% END %]
-              [% END %]
-              <tr>
-                <th class='comment' nowrap>Check Command</th>
-                <td class='comment'><pre class="no_margin command_line config_info truncate" onClick="removeClass(this, 'truncate');">[% command.line | html %]</pre></td>
-              </tr>
-              <tr>
-                <th class='comment' nowrap>Expanded Command</th>
-                <td class='comment'>
-                  [% IF command.note %]
-                  <i class="commandNote"><b>Note:</b> [% command.note %]</i>
-                  <br><br>
-                  [% END %]
-                  <pre class="no_margin command_line config_info truncate" onClick="removeClass(this, 'truncate');">[% command.line_expanded | html %]</pre>
-                </td>
-              </tr>
-            </table>
-            <br>
-            <br>
-          </td>
-        </tr>
-        [% END %]
-      </table>
-    </div>
-
-    [% PROCESS user_ext_host_info.tt %]
+[% PROCESS user_ext_host_info.tt %]
 
 [% PROCESS _footer.tt %]
