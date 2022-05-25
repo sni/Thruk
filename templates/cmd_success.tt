@@ -9,7 +9,7 @@
       <h3>Command Submitted</h3>
     </div>
     <div class="body">
-      <p>Your command request was successfully submitted to the Backend for processing.</p>
+      <p>Your command request was successfully submitted to the backend for processing.</p>
       <p>Note: It may take a while before the command is actually processed.</p>
       <button class="mt-2 mx-auto w-20" onclick='window.history.go([% how_far_back %])'>Done</button>
     </div>

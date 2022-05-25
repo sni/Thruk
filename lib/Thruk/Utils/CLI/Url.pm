@@ -91,8 +91,8 @@ sub cmd {
     $c->stats->profile(end => "_cmd_url($action)");
     my $rc = $res[0] >= 400 ? 1 : 0;
     return({output => $res[2], rc => $rc, 'content_type' => $content_type}) if $res[2];
-    if($res[1]->{'result'} =~ m/\Q<div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.\E/gmx) {
-        return({output => "Command request successfully submitted to the Backend for processing\n", rc => $rc});
+    if($res[1]->{'result'} =~ m/\Qyour command request was successfully\E/gmxi) {
+        return({output => "Your command request was successfully submitted to the backend for processing\n", rc => $rc});
     }
     return({output => $res[1]->{'result'}, rc => $rc, 'content_type' => $content_type});
 }

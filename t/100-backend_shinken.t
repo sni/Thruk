@@ -30,6 +30,6 @@ my $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
-        'like'    => 'Use Expire Time:',
+        'like'    => 'Use Expire Time',
     );
 }
