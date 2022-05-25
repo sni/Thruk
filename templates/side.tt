@@ -51,7 +51,7 @@
               [% ELSIF link.defined("search") && link.search %]
                 <li>
                   <div>
-                    <form method="get" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]" class="pl-6 pr-[10px]">
+                    <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]" class="pl-6 pr-[10px]">
                       <fieldset>
                         [% IF link.name %]
                         <span class="searchlabel">[% link.name | html %]</span>
