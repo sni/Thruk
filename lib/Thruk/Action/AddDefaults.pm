@@ -97,7 +97,7 @@ sub begin {
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;
     }
-    $c->stash->{hidetop} = $c->req->parameters->{'hidetop'} || '';
+    $c->stash->{hidetop} = $c->req->parameters->{'hidetop'} // '';
 
     # minmal custom monitor screen
     $c->stash->{minimal} = $c->req->parameters->{'minimal'} || '';

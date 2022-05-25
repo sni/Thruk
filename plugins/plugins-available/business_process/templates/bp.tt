@@ -3,114 +3,123 @@
 [% WRAPPER _bp_frame.tt subtitle=subtitle %]
 [% USE date %]
 
-<div align="center">[% PROCESS _pager.tt %]</div>
-
-<table border="0" width="100%" cellpadding=0 cellspacing=0>
-  <tr>
-    <td valign="bottom" align="left" width="33%" nowrap class="filter_button_cell">
-      <form action="bp.cgi" method="GET">
-        <input type="hidden" name="type" value="[% type | html %]">
-        <input type="text" style="margin-bottom: 4px;" id="filter" placeholder="filter" class="deletable autosubmit" name="filter" value="[% filter | html%]" onfocus="this.click()" onclick="ajax_search.init(this, 'bp', { url: 'bp.cgi?format=search&amp;type=[% type | html %]', autosubmit:true })">
-      </form>
-    </td>
-    <td valign="bottom" align="center" width="50%">
-      [% IF has_remote_bps %]
-      <div class="radioset" style="margin-bottom: 3px;">
-        <input type="radio" id="view1" name="radio" onclick="window.location='[% uri_with(c, 'type' => 'local') %]'"[%  IF type == 'local'  %] checked[% END %]><label for="view1">Local</label>
-        <input type="radio" id="view2" name="radio" onclick="window.location='[% uri_with(c, 'type' => 'remote') %]'"[% IF type == 'remote' %] checked[% END %]><label for="view2">Remote</label>
-        <input type="radio" id="view3" name="radio" onclick="window.location='[% uri_with(c, 'type' => 'all') %]'"[%    IF type == 'all'    %] checked[% END %]><label for="view3">All</label>
-      </div>
-      [% END %]
-    </td>
-    <td valign="bottom" align="center" width="50%">
-      [% IF allowed_for_edit %]
-      <div style="text-align: right; margin-bottom: 3px; margin-right: 10px;"><a href="bp.cgi?action=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
-      [% END %]
-    </td>
-    <td valign="bottom" align="right" width="10%" nowrap>
-      [% PROCESS _add_bookmark.tt %]
-      [% PROCESS _show_link.tt %]
+<div class="card w-full mt-5">
+  <div class="head justify-between">
+    <div class="flexrow gap-1 flex-nowrap w-52">
       [% PROCESS _json_export.tt %]
       [% PROCESS _excel_export.tt columns=excel_columns with_custom_vars=0 %]
-    </td>
-  </tr>
-</table>
-
-<table border="1" class='status hoverable' id="statusTable" width="100%">
-  <tr>
-    <th class="status" nowrap width="200">Name</th>
-    <th class="status" nowrap width="0">&nbsp;</th>
-    [% IF type != "local" %]
-    <th class="status" nowrap width="30">Site</th>
+    </div>
+    [% IF has_remote_bps %]
+      <div class="flexrow flex-nowrap gap-0">
+        <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF type == 'local'  %] active[% END %]"><a class="block" href="[% uri_with(c, 'type' => 'local')  %]">Local</a></span>
+        <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF type == 'remote' %] active[% END %]"><a class="block" href="[% uri_with(c, 'type' => 'remote') %]">Remote</a></span>
+        <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF type == 'all'    %] active[% END %]"><a class="block" href="[% uri_with(c, 'type' => 'all')    %]">All</a></span>
+      </div>
     [% END %]
-    <th class="status" nowrap width="100">Status</th>
-    <th class="status" nowrap width="100">Last Check</th>
-    <th class="status" nowrap width="100">Duration</th>
-    <th class="status" nowrap>Status Information</th>
-    [% IF allowed_for_edit %]
-    <th class="status" nowrap width="0">&nbsp;</th>
-    [% END %]
-  </tr>
-  [% FOREACH bp IN data %]
-  [% SET rowclass = 'statusOdd'  IF loop.even %]
-  [% SET rowclass = 'statusEven' IF loop.odd %]
-  [% statusClass = 'statusUNKNOWN' %]
-  [% statusText  = 'UNKNOWN' %]
-  [% IF bp.draft %][% statusClass = 'statusPENDING' %][% statusText  = 'DRAFT' %]
-  [% ELSIF bp.status == 0 %][% statusClass = 'statusOK' %][% statusText  = 'OK' %]
-  [% ELSIF bp.status == 1 %][% statusClass = 'statusWARNING' %][% statusText  = 'WARNING' %]
-  [% ELSIF bp.status == 2 %][% statusClass = 'statusCRITICAL' %][% statusText = 'CRITICAL' %]
-  [% ELSIF bp.status == 3 %][% statusClass = 'statusUNKNOWN' %][% statusText  = 'UNKNOWN' %]
-  [% ELSIF bp.status == 4 %][% statusClass = 'statusPENDING' %][% statusText  = 'PENDING' %]
-  [% END %]
-  <tr class="[%+ IF loop.first +%] firstrow[% END %]">
-    [% IF bp.draft %]
-    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><b>[% bp.name | html %] <span style="color: #eb6900; padding-left: 10px;">(DRAFT)</span></b></a></td>
-    [% ELSE %]
-    <td class="status [% rowclass %] mightOverflow name" align="left"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><b>[% bp.name | html %]</b></a></td>
-    [% END %]
-    <td class="status [% rowclass %]" align="right" nowrap>
-    [% IF !bp.draft %]
-      <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;testmode=1"><img src='[% url_prefix %]themes/[% theme %]/images/folder_explore.png' border="0" alt='Business Impact Analysis' title='Business Impact Analysis' width="16" height="16"></a>
-      <a href="status.cgi?host=[% bp.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='Show Service Details' title='Show Service Details' width="16" height="16"></a>
-      <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Graph' title='Show Graph' width="16" height="16"></a>
-    [% END %]
-    </td>
-    [% IF type != "local" %]
-    <td class="status [% rowclass %]" align="center" nowrap>[% bp.site %]</td>
-    [% END %]
-    <td class="status [% statusClass %]" align="center">[% statusText %]</td>
-    <td class="status [% rowclass %]" align="center" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
-    <td class="status [% rowclass %]" align="left" nowrap>[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
-    [% output = bp.status_text.split("\n") %]
-    <td class="status [% rowclass %] truncate plugin_output" align="left"[% IF output.size > 1 %]
-      onclick="overcard({ 'body': this.abbr, 'caption': '[% escape_js(bp.name) | html %]', 'width': 600 })" abbr="[% escape_html(nl2br(bp.status_text)) %]"
-      [% END %]>
-      [% IF bp.draft %]
-      [% ELSE %]
-        [% IF output.size > 1 %]
-        <span class="has_long_plugin_output clickable">
-        [% END %]
-        [% IF output.size > 0 %]
-        [% output.0 %]
-        [% END %]
-        [% IF output.size > 1 %]
-        </span>
-        [% END %]
+    <div class="w-52">
+      [% IF allowed_for_edit %]
+      <a href="bp.cgi?action=new" class="button green">create new business process</a>
       [% END %]
-    </td>
-    [% IF allowed_for_edit %]
-    <td class="status [% rowclass %]" align="right" nowrap>
-      <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Graph' title='Edit Graph' width="16" height="16"></a>
-    </td>
-    [% END %]
-  </tr>
-  [% END %]
-</table>
+    </div>
+  </div>
+  <div class="mainTableHeader">
+    <div>
+      <form action="bp.cgi" method="GET">
+        <input type="hidden" name="type" value="[% type | html %]">
+        <input type="text" id="filter" placeholder="filter" class="deletable autosubmit" name="filter" value="[% filter | html%]" onfocus="this.click()" onclick="ajax_search.init(this, 'bp', { url: 'bp.cgi?format=search&amp;type=[% type | html %]', autosubmit:true })">
+      </form>
+    </div>
+    <div>
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
+    </div>
+  </div>
 
-<div align="center" style="margin-top: 10px;">[% PROCESS _pager.tt %]</div>
+  <div class="mainTable">
+    <table class='mainTable rowhover striped' id="statusTable">
+      <thead>
+        <tr>
+          <th class="w-0"></th>
+          <th class="w-[400px]">Name</th>
+          <th class="w-0"></th>
+          [% IF type != "local" %]
+          <th class="w-[100px] text-center">Site</th>
+          [% END %]
+          <th class="w-[100px] text-center">Status</th>
+          <th class="w-[130px] text-center">Last Check</th>
+          <th class="w-[130px] text-center">Duration</th>
+          <th class="whitespace-nowrap"">Status Information</th>
+        </tr>
+      </thead>
+      <tbody>
+        [% FOREACH bp IN data %]
+          [% statusClass = 'UNKNOWN' %]
+          [% statusText  = 'UNKNOWN' %]
+          [% IF bp.draft %][% statusClass = 'PENDING' %][% statusText  = 'DRAFT' %]
+          [% ELSIF bp.status == 0 %][% statusClass = 'OK'       %][% statusText  = 'OK'      %]
+          [% ELSIF bp.status == 1 %][% statusClass = 'WARNING'  %][% statusText  = 'WARNING' %]
+          [% ELSIF bp.status == 2 %][% statusClass = 'CRITICAL' %][% statusText = 'CRITICAL' %]
+          [% ELSIF bp.status == 3 %][% statusClass = 'UNKNOWN'  %][% statusText  = 'UNKNOWN' %]
+          [% ELSIF bp.status == 4 %][% statusClass = 'PENDING'  %][% statusText  = 'PENDING' %]
+          [% END %]
+          <tr>
+            <td>
+              [% IF allowed_for_edit %]
+                <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><i class="fa-solid fa-pencil text-sm" title='Change Business Process'></i></a>
+              [% ELSE %]
+                <a href="#" class="not-clickable"><i class="fa-solid fa-pencil text-sm disabled" title='Change Business Process'></i></a>
+              [% END %]
+            </td>
+            [% IF bp.draft %]
+            <td class="mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><b>[% bp.name | html %]</b> <span class="textHINT pl-2">(DRAFT)</span></a></td>
+            [% ELSE %]
+            <td class="mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><b>[% bp.name | html %]</b></a></td>
+            [% END %]
+            <td class="text-right">
+              <div class="flexrow gap-1 flex-nowrap">
+                [% IF !bp.draft %]
+                  <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;testmode=1"><i class="fa-solid fa-clipboard-question" title="Business Impact Analysis"></i></a>
+                  <a href="status.cgi?host=[% bp.name | uri %]"><i class="fa-solid fa-bars" title="Show Service Details"></i></a>
+                  <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><i class="fa-solid fa-sitemap" title='Show Business Process'></i></a>
+                [% END %]
+              </div>
+            </td>
+            [% IF type != "local" %]
+            <td class="text-center whitespace-nowrap">[% bp.site %]</td>
+            [% END %]
+            <td class="[% statusClass %] text-center">[% statusText %]</td>
+            <td class="text-center whitespace-nowrap">[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
+            <td class="whitespace-nowrap">[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
+            [% output = bp.status_text.split("\n") %]
+            <td class="truncate max-w-sm"[% IF output.size > 1 %]
+              onclick="overcard({ 'body': this.abbr, 'caption': '[% escape_js(bp.name) | html %]', 'width': 600 })" abbr="[% escape_html(nl2br(bp.status_text)) %]"
+              [% END %]>
+              [% IF bp.draft %]
+              [% ELSE %]
+                [% IF output.size > 1 %]
+                <span class="has_long_plugin_output clickable">
+                [% END %]
+                [% IF output.size > 0 %]
+                [% output.0 %]
+                [% END %]
+                [% IF output.size > 1 %]
+                </span>
+                [% END %]
+              [% END %]
+            </td>
+          </tr>
+        [% END %]
+      </tbody>
+    </table>
 
-<br>
-<div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Business Processes Displayed</div>
+
+  </div>
+
+  <div class="mainTableFooter">
+    [% PROCESS _pager_total_items.tt %]
+  </div>
+</div>
 
 [% END %]
