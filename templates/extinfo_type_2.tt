@@ -8,7 +8,7 @@
 <div class="flexrow justify-between">
   <div>
     [% PROCESS _infobox.tt %]
-    <div class="card mt-5 min-w-[370px]">
+    <div class="card mt-5 min-w-[350px]">
       <div class="actionbox less-padding">
         <div><a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a></div>
         <div><a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a></div>
@@ -162,7 +162,7 @@
     <br>
      <!-- fix later-->
 
-  <div>
+  <div class="mt-5">
     [% IF pnp_url %]
       [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
     [% ELSIF histou_url %]
@@ -252,11 +252,11 @@
             [% END %]
           [% END %]
           <tr class="whitespace-normal">
-            <th class="align-top">Check Command</th>
+            <th class="align-top w-[170px]">Check Command</th>
             <td><pre class="whitespace-normal">[% command.line | html %]</pre></td>
           </tr>
           <tr class="whitespace-normal">
-            <th class="align-top">Expanded Command</th>
+            <th class="align-top w-[170px]">Expanded Command</th>
             <td>
               [% IF command.note %]
                 <div class="textALERT text-xs italic"><span class="font-semibold">Note:</span> This is not a valid macro</div>
