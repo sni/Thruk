@@ -219,22 +219,26 @@
       <div><a><i class="fa-solid fa-circle-xmark"></i>fa-solid fa-circle-xmark</a></div>
       <div><a><i class="fa-solid fa-clipboard"></i>fa-solid fa-clipboard</a></div>
       <div><a><i class="fa-solid fa-clipboard-check"></i>fa-solid fa-clipboard-check</a></div>
+      <div><a><i class="fa-solid fa-clipboard-question"></i>fa-solid fa-clipboard-question</a></div>
       <div><a><i class="fa-solid fa-clock"></i>fa-solid fa-clock</a></div>
       <div><a><i class="fa-solid fa-clock-rotate-left small"></i>fa-solid fa-clock-rotate-left small</a></div>
       <div><a><i class="fa-solid fa-comment"></i>fa-solid fa-comment</a></div>
       <div><a><i class="fa-solid fa-copy small"></i>fa-solid fa-copy small</a></div>
       <div><a><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
+      <div><a><i class="fa-solid fa-eye small"></i>fa-solid fa-eye small</a></div>
       <div><a><i class="fa-solid fa-file-circle-check"></i>fa-solid fa-file-circle-check</a></div>
       <div><a><i class="fa-solid fa-file-circle-plus"></i>fa-solid fa-file-circle-plus</a></div>
       <div><a><i class="fa-solid fa-file-code"></i>fa-solid fa-file-code</a></div>
       <div><a><i class="fa-solid fa-folder-open"></i>fa-solid fa-folder-open</a></div>
       <div><a><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
-      <div><a><i class="fa-solid fa-pencil small"></i>fa-solid fa-pencil small</a></div>
+      <div><a><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
       <div><a><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
       <div><a><i class="fa-solid fa-rocket"></i>fa-solid fa-rocket</a></div>
+      <div><a><i class="fa-solid fa-sitemap"></i>fa-solid fa-sitemap</a></div>
       <div><a><i class="fa-solid fa-trash"></i>fa-solid fa-trash</a></div>
       <div><a><i class="fa-solid fa-volume-high small"></i>fa-solid fa-volume-high small</a></div>
       <div><a><i class="fa-solid fa-wand-magic-sparkles"></i>fa-solid fa-wand-magic-sparkles</a></div>
+      <div><a><i class="fa-solid fa-wrench small"></i>fa-solid fa-wrench small</a></div>
       <div><a><i class="fa-solid fa-xmark round small red"></i>fa-solid fa-xmark round small red</a></div>
       <div><a><i class="uil uil-angle-double-left"></i>uil uil-angle-double-left</a></div>
       <div><a><i class="uil uil-angle-double-right"></i>uil uil-angle-double-right</a></div>
@@ -256,6 +260,7 @@
       <div><a><i class="uil uil-draggabledots"></i>uil uil-draggabledots</a></div>
       <div><a><i class="uil uil-envelope-add"></i>uil uil-envelope-add</a></div>
       <div><a><i class="uil uil-exclamation round yellow"></i>uil uil-exclamation round yellow</a></div>
+      <div><a><i class="uil uil-external-link-alt"></i>uil uil-external-link-alt</a></div>
       <div><a><i class="uil uil-eye-slash"></i>uil uil-eye-slash</a></div>
       <div><a><i class="uil uil-fast-mail"></i>uil uil-fast-mail</a></div>
       <div><a><i class="uil uil-file-export"></i>uil uil-file-export</a></div>
@@ -292,7 +297,6 @@
       <div><a><i class="uil uil-volume"></i>uil uil-volume</a></div>
       <div><a><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
       <div><a><i class="uil-exclamation round yellow"></i>uil-exclamation round yellow</a></div>
-      <div><a><i class="uil-external-link-alt"></i>uil-external-link-alt</a></div>
       <div><a><i class="uil-info round"></i>uil-info round</a></div>
 <!-- end of "do not change manually" -->
       <div>

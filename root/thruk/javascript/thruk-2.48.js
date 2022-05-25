@@ -644,6 +644,17 @@ function check_side_nav_active_item(ctx) {
             }
         }
     });
+
+    // compare only main page
+    jQuery("A", ctx).each(function(i, el) {
+        var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+        if(navPage == page) {
+            found = true;
+            jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+            jQuery(el).addClass("active");
+            return false;
+        }
+    });
 }
 
 /* remove element from close elements list */
@@ -748,7 +759,11 @@ function toggleElementRemote(id, part, bodyclose) {
     });
 }
 
-/* toggle a element by id */
+/* toggle a element by id
+   returns:
+    - true:  if element is visible now
+    - false: if element got switched to invisible
+ */
 function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   var pane = document.getElementById(id);
   if(!pane) {

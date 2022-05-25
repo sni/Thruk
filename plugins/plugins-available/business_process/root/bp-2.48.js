@@ -1,20 +1,6 @@
 /* initialize all buttons */
 function init_bp_buttons() {
-    jQuery('A.bp_button').button();
-    jQuery('BUTTON.bp_button').button();
-
-    jQuery('.bp_edit_button').button({
-        icons: {primary: 'ui-edit-button'}
-    });
-
-    jQuery('.bp_save_button').button({
-        icons: {primary: 'ui-save-button'}
-    });
-
-    jQuery('.radioset INPUT[type=radio]').button({icon:false});
-    jQuery('.radioset').controlgroup({});
-
-    if (document.layers) {
+    if(document.layers) {
       document.captureEvents(Event.MOUSEDOWN);
     }
 
@@ -22,7 +8,7 @@ function init_bp_buttons() {
         document.onmousedown   = bp_context_menu_open;
         document.oncontextmenu = bp_context_menu_open;
     }
-    window.onresize        = bp_redraw;
+    window.onresize = bp_redraw;
 
     // initialize graph options in edit mode
     if(editmode) {

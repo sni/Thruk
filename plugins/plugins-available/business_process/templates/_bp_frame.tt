@@ -7,25 +7,22 @@
 [% PROCESS _message.tt %]
 
 [% UNLESS minimal %]
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="33%">
-      <div id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+<div class="flexrow">
+  <div class="basis-1/3">
+      <div id="top_pane" [% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
       [% PROCESS _infobox.tt %]
       </div>
-    </td>
-    <td align="center" valign="top" width="33%">
-      <br><br>
-      <div align="center" class='dataTitle'>
-        <span id="subtitle">[% subtitle | html %]</span>
-        [% IF editmode %]<br><span style="color: #EB6900">(Edit-Mode)</span>[% END %]
-        [% IF testmode && !editmode %]<br><span style="color: #EB6900">(Business-Impact-Analysis-Mode)</span>[% END %]
-      </div>
-    </td>
-    <td align="right" valign="bottom" width="33%">
-    </td>
-  </tr>
-</table>
+  </div>
+  <div class="basis-1/3">
+    <h1 id="subtitle">[% subtitle | html %]</h1>
+    [% IF editmode %]
+      <span class="textHINT">(Edit-Mode)</span>
+    [% ELSIF testmode %]
+      <span class="textHINT">(Business-Impact-Analysis-Mode)</span>
+    [% END %]
+  </div>
+  <div class="basis-1/3"></div>
+</div>
 [% END %]
 
 [% content %]
