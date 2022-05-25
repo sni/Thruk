@@ -875,6 +875,7 @@ ex.:
 
 === host_action_icon
 
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
 Change path to your host action icons. You may use
 relative paths to specify completely different location.
 You also may want to use 'action_pnp.png' when using pnp.
@@ -887,6 +888,7 @@ ex.:
 
 === service_action_icon
 
+**DEPRECATED:** setting this has no effect with Thruk 3.x or later.
 Change path to your service action icons. You may use
 relative paths to specify completely different location.
 You also may want to use 'action_pnp.png' when using pnp.

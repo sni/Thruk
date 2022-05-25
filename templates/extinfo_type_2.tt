@@ -89,7 +89,7 @@
           [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
           <tr>
             <td align='right'>
-              <a href='[% action_url %]' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
+              <a href='[% action_url %]' target='_blank'><i class="fa-solid fa-chart-line clickable text-4xl" title='Show Performance Chart'></i></a><br clear="all">
               <font size="-1"><i>Extra Actions</i></font><br clear="all">
               <br clear="all">
             </td>

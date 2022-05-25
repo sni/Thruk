@@ -298,7 +298,7 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(d.acknowledged)                      { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/ack.gif" alt="This host problem has been acknowledged" border="0" height="20" width="20">'; }
     if(d.comments && d.comments.length > 0) { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/comment.gif" alt="This host has '+d.comments.length+' comments associated with it" border="0" height="20" width="20" class="clickable" onclick="return(host_comments_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
     if(d.scheduled_downtime_depth > 0)      { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" border="0" height="20" width="20" class="clickable" onclick="return(host_downtimes_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
-    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, host_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Host Actions' title='Perform Extra Host Actions'><\/a>"; }
+    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'><\/i><\/a>"; }
     if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Host Notes' title='View Extra Host Notes'><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu;
@@ -338,7 +338,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(d.acknowledged)                      { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/ack.gif" alt="This service problem has been acknowledged" border="0" height="20" width="20">'; }
     if(d.comments && d.comments.length > 0) { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/comment.gif" alt="This service has '+d.comments.length+' comments associated with it" border="0" height="20" width="20" class="clickable" onclick="return(service_comments_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
     if(d.scheduled_downtime_depth > 0)      { icons += '<img src="'+url_prefix+'themes/'+theme+'/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" border="0" height="20" width="20" class="clickable" onclick="return(service_downtimes_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))">'; }
-    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/"+action_icon(d, service_action_icon)+"' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>"; }
+    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'><\/i><\/a>"; }
     if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='"+url_prefix+"themes/"+theme+"/images/notes.gif' border='0' width='20' height='20' alt='View Extra Service Notes' title='View Extra Service Notes'><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
@@ -544,19 +544,6 @@ TP.calculate_first_notification_delay_remaining = function(obj) {
     }
 
     return(obj.first_notification_delay - remaining_min);
-}
-
-/* return action info icon */
-function action_icon(o, action_icon) {
-    if(!o || !o.custom_variable_names) {
-        return action_icon;
-    }
-    for(var nr=0; nr<o.custom_variable_names.length; nr++) {
-        if(o.custom_variable_names[nr] == 'ACTION_ICON') {
-            return o.custom_variable_values[nr];
-        }
-    }
-    return action_icon;
 }
 
 TP.addActionIconsFromMenu = function(action_menu_name, host, service, view) {

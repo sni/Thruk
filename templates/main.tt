@@ -31,6 +31,9 @@
             pageurl = oldurl + newurl;
         }
     }
+    if(!pageurl) {
+        return;
+    }
     pageurl = pageurl.replace(/"/g, '&quot;');
     if(pageurl.match(/\/[% product_prefix %]\//)) {
       jQuery("BODY").css("display", "none"); // prevent flickering

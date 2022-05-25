@@ -134,7 +134,7 @@
                         [% END %]
                         [% IF h.action_url_expanded %]
                         [% action_url = proxifiy_url(c, h, get_action_url(c, 2, 1, h.action_url_expanded , h)) %]
-                        <a href='[% action_url %]' target='[% c.config.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(h, host_action_icon) %]' border="0" width="20" height="20" alt='Perform Extra Host Actions'></a>
+                        <a href='[% action_url %]' target='[% c.config.action_url_target %]'><i class="fa-solid fa-chart-line clickable" title='Show Performance Chart'></i></a>
                         [% END %]
                         <a href="status.cgi?host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
                       </div>
