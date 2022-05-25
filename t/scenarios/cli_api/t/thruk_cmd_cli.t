@@ -74,7 +74,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk -A omdadmin url "status.cgi?host=all&servicestatustypes=1&style=detail"',
     like    => ['/Current Network Status/'],
-    waitfor => '(0|1|2)\ Matching\ Service\ Entries',
+    waitfor => '(0|1|2)\ Items\ Displayed',
 });
 
 ###########################################################
@@ -176,12 +176,12 @@ TestUtils::test_command({
 # thruk cmd.cgi
 TestUtils::test_command({
     cmd  => "/usr/bin/env thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now'",
-    like => ['/Command request successfully submitted/'],
+    like => ['/command request was successfully submitted/'],
     errlike => ['/SCHEDULE_HOST_CHECK/'],
 });
 TestUtils::test_command({
     cmd  => "/usr/bin/env thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now' --local",
-    like => ['/Command request successfully submitted/'],
+    like => ['/command request was successfully submitted/'],
     errlike => ['/SCHEDULE_HOST_CHECK/'],
 });
 

@@ -208,8 +208,6 @@
             [% END %]
           [% END %]
         </div>
-      [% ELSE %]
-        <div class='infoMessage text-center'>Your account does not have permissions to add/delete comments.</div> <!-- TODO: where to put this -->
       [% END %]
     </div>
     <div>
@@ -227,7 +225,7 @@
         <h3>Configuration Information</h3>
         <div class="flex gap-x-1">
           [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-            <a class="button" href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure service</a></td>
+            <a class="button" href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure service</a>
           [% ELSE %]
             <a class="button" href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]"><i class="fa-solid fa-eye small"></i>View Configuration</a></td>
           [% END %]
