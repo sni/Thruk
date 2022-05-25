@@ -149,8 +149,6 @@ my $base_defaults = {
                 '0'                             => 'Development',
     },
     'no_external_job_forks'                 => 0,
-    'host_action_icon'                      => 'action.gif',
-    'service_action_icon'                   => 'action.gif',
     'thruk_bin'                             => -f 'script/thruk' ? 'script/thruk' : '/usr/bin/thruk',
     'thruk_init'                            => '/etc/init.d/thruk',
     'thruk_shell'                           => '/bin/bash -l -c',

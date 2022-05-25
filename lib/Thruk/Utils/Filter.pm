@@ -894,28 +894,6 @@ sub calculate_first_notification_delay_remaining {
 
 ########################################
 
-=head2 action_icon
-
-  my $icon = action_icon($obj, $fallback)
-
-returns action icon path
-
-=cut
-sub action_icon {
-    my($obj, $fallback, $prefix) = @_;
-    $prefix = '' unless defined $prefix;
-    my $x = 0;
-    return $fallback unless ref $obj->{$prefix.'custom_variable_names'} eq 'ARRAY';
-    for my $var (@{$obj->{$prefix.'custom_variable_names'}}) {
-        return $obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'ACTION_ICON';
-        $x++;
-    }
-    return $fallback;
-}
-
-
-########################################
-
 =head2 logline_icon
 
   my $icon = logline_icon($logentry)

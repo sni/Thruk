@@ -2290,7 +2290,7 @@ sub _task_servicesminemap {
         my $hst  = $hosts->{$name};
         my $data;
         if ($hst->{'host_action_url_expanded'}) {
-            $data = { 'host_display_name' => $hst->{'host_display_name'} . "&nbsp;<a target='_blank' href='".$hst->{'host_action_url_expanded'}."' style='position: relative;'><img src='".$c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/'.$c->stash->{'host_action_icon'}."' border=0 width=20 height=20 alt='Perform Extra Host Actions' title='Perform Extra Host Actions' style='vertical-align: text-bottom; position: absolute; top: -2px;'></a>" };
+            $data = { 'host_display_name' => $hst->{'host_display_name'} . "&nbsp;<a target='_blank' href='".$hst->{'host_action_url_expanded'}."' style='position: relative;'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'></i></a>" };
         } else {
             $data = { 'host_display_name' => $hst->{'host_display_name'} };
         }

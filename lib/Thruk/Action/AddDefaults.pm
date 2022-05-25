@@ -38,7 +38,7 @@ my @stash_config_keys = qw/
     show_notification_number strict_passive_mode hide_passive_icon
     show_full_commandline all_problems_link show_long_plugin_output
     priorities show_modified_attributes downtime_duration expire_ack_duration show_contacts
-    show_backends_in_table host_action_icon service_action_icon cookie_path
+    show_backends_in_table cookie_path
     use_feature_trends show_error_reports skip_js_errors perf_bar_mode
     bug_email_rcpt first_day_of_week sitepanel perf_bar_pnp_popup
     status_color_background show_logout_button use_feature_recurring_downtime
