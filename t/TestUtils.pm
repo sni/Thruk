@@ -445,8 +445,8 @@ sub test_page {
             $lint->parse($content);
             $lint->eof();
             my @errors = $lint->errors;
-            @errors = diag_lint_errors_and_remove_some_exceptions($lint);
-            is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
+            @errors = diag_lint_errors_and_remove_some_exceptions($lint, $content);
+            is(scalar @errors, 0, "No errors found in HTML");
             $lint->clear_errors();
             my $html_only_content = $return->{'content'};
             $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
@@ -555,7 +555,7 @@ sub set_cookie {
 
 #########################
 sub diag_lint_errors_and_remove_some_exceptions {
-    my $lint = shift;
+    my($lint, $content) = @_;
     my @return;
     for my $error ( $lint->errors ) {
         my $err_str = $error->as_string;
@@ -580,9 +580,26 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Entity\ .*\ is\ unknown/imxo;
         next if $err_str =~ m/Unknown\ element\ <(main|header|footer|nav)>/imxo;
         diag($error->as_string."\n");
+        my @lines = $error->as_string() =~ m/\((\d+):\d+\)/gmx;
+        for my $line (sort @lines) {
+            _diag_context($content, $line);
+        }
         push @return, $error;
     }
     return @return;
+}
+
+#########################
+sub _diag_context {
+    my($content, $nr) = @_;
+    my $linenr = 0;
+    for my $line (split(/\n/, $content)) {
+        $linenr++;
+        if($linenr >= $nr-2 && $linenr <= $nr+2) {
+            diag($linenr.": ".substr($line, 0, 100));
+        }
+    }
+    return;
 }
 
 #########################
