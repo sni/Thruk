@@ -49,7 +49,7 @@ END
         </div>
         [% IF type == "host" %] <!-- TODO check ob moeglich/sinnvoll bei service information auch host icon anzuzeigen -->
           [% IF host.icon_image_expanded %]
-              <img src='[% logo_path_prefix %][% host.icon_image_expanded %]'[% IF host.icon_image_alt %] alt="[% host.icon_image_alt | html %]" title="[% host.icon_image_alt | html %]"[% END %] width="20" height="20">
+              <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' alt="[% host.icon_image_alt | html %]" title="[% host.icon_image_alt | html %]" width="20" height="20">
           [% END %]
         [% END %]
       </div>
