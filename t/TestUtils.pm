@@ -596,7 +596,7 @@ sub _diag_context {
     for my $line (split(/\n/, $content)) {
         $linenr++;
         if($linenr >= $nr-2 && $linenr <= $nr+2) {
-            diag($linenr.": ".substr($line, 0, 100));
+            diag($linenr.": ".substr($line, 0, 250));
         }
     }
     return;
