@@ -57,7 +57,7 @@ TestUtils::test_page(
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/extinfo.cgi?type=4&logcachedetails=abcd',
     'follow'  => 1,
-    'like'    => ['Logcache Details for Backend', 'Log Entries by Type', 'untyped', 'timeperiod transition'],
+    'like'    => ['Logcache Details', 'Log Entries by Type', 'untyped', 'timeperiod transition'],
 );
 
 ################################################################################
