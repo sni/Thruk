@@ -384,7 +384,7 @@
   document.getElementById("copytooltip").addEventListener(
     "click",
     f_TurnOff,
-    false,
+    false
   );
 
 
