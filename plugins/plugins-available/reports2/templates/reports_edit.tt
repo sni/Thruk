@@ -11,11 +11,12 @@
     <input type="hidden" name="report" value="[% r.nr %]">
     <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
     <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[600px]">
-      <div class="head justify-between" style="flex: 0 0 40px;">
-        <a href="reports2.cgi" class="link hoverable rounded w-10" title="Go back to report list"><i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i> </a>
+      <div class="head justify-between" style="flex: 0 0 40px;"> <!-- ToDo: Why 40px? -->
+        <a href="reports2.cgi" class="button back-button rounded w-[70px]" title="Go back to report list">
+          <i class="uil uil-angle-double-left"></i>Back
+        </a>
         <h3>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</h3>
-        <div class="w-10">
-        </div>
+        <div class="w-[70px]"></div>
       </div>
       <div class="grow h-full overflow-auto">
         <table class="body cellspacing striped">

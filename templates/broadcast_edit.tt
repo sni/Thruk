@@ -7,13 +7,13 @@
 
     <div class="card w-[800px] overflow-x-auto">
       <div class="head justify-between">
-        <a href="broadcast.cgi" class="link hoverable rounded" title="Go back to broadcast list">
-          <i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i>
+        <a href="broadcast.cgi" class="button back-button rounded w-[70px]" title="Go back to broadcast list">
+          <i class="uil uil-angle-double-left"></i>Back
         </a>
         <div>
           <h3>[% IF broadcast.id != "new" %]Edit[% ELSE%]Create[% END %] Broadcast</h3>
         </div>
-        <div></div>
+        <div class="w-[70px]"></div>
       </div>
 
       <div class="body">
@@ -126,8 +126,7 @@
                 <textarea name="text" cols=74 rows=14 class="w-full" required>[% broadcast.raw_text %]</textarea>
                 <div>
                   <button onclick="toggleElement('help-text'); return false;">
-                    <i class="uil uil-question text-xl leading-5 mr-0"></i>
-                    Toggle Help
+                    Help
                   </button>
                 </div>
                 <div id="help-text" style="display: none" class="border my-2 mr-2">
