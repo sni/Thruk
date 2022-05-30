@@ -31,8 +31,32 @@
   </div>
 
   <div class="card min-w-min">
-    <div class="head">
+    <div class="head justify-between">
       <h3>Host State Information</h3>
+      <div>
+        [% IF host.notes_url_expanded %]
+            <div>
+              <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
+                <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40">
+              </a>
+            </div>
+          [% END %]
+          [% has_bp = has_business_process(host) %]
+          [% IF has_bp %]
+            <div>
+              <a href="bp.cgi?action=details&bp=[% has_bp %]">
+                <img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40">
+              </a>
+          [% END %]
+          [% IF host.action_url_expanded %]
+            [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
+            <div>
+              <a href='[% action_url %]' target='[% c.config.action_url_target %]'>
+                <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
+              </a>
+            </div>
+          [% END %]
+      </div>
     </div>
     <div>
       [% PROCESS _extinfo_host_service_details.tt obj=host %]
@@ -183,7 +207,16 @@
         [% END %]
         <tr class="whitespace-normal">
           <th class="align-top w-[170px]">Check Command</th>
-          <td><pre class="whitespace-normal">[% command.line | html %]</pre></td>
+          <td>
+            <div class="flex bg-gray-100 px-2 rounded-md items-center">
+              <div class="flex-grow">
+                <pre id="copyToClipboard" class="whitespace-normal"><code>[% command.line | html %]</code></pre>
+              </div>
+              <div>
+                <button class="iconOnly px-1 copy_button" onclick="copyCode('copyToClipboard')"><i class="uil uil-copy" title="Copy command to clipboard"></i></button>
+              </div>
+            </div>
+          </td>
         </tr>
         <tr class="whitespace-normal">
           <th class="align-top w-[170px]">
@@ -195,10 +228,10 @@
             [% END %]
             <div class="flex bg-gray-100 px-2 rounded-md items-center">
               <div class="flex-grow">
-                <pre id="copyCode" class="whitespace-normal"><code id="copyToClipboard">[% command.line_expanded | html %]</code></pre>
+                <pre id="copyToClipboard2" class="whitespace-normal"><code>[% command.line_expanded | html %]</code></pre>
               </div>
-              <div class="">
-                <button id="copy" class="iconOnly px-1" onclick="copyCode()"><i class="uil uil-copy" title="Copy expanded command to clipboard"></i></button>
+              <div>
+                <button class="iconOnly px-1 copy_button" onclick="copyCode('copyToClipboard2')"><i class="uil uil-copy" title="Copy expanded command to clipboard"></i></button>
               </div>
             </div>
           </td>
@@ -242,35 +275,8 @@
             </td>
           </tr>
           [% END %]
-          [% IF host.action_url_expanded %]
-          [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
-            <tr>
-              <td align='right'>
-                <a href='[% action_url %]' target='[% c.config.action_url_target %]'><i class="fa-solid fa-chart-line clickable text-4xl" title='Show Performance Chart'></i></a><br clear="all">
-                <font size="-1"><i>Extra Actions</i></font><br clear="all">
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
-          [% IF host.notes_url_expanded %]
-            <tr>
-              <td align='right'>
-                <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40"></a><br clear="all">
-                <font size="-1"><i>Extra Notes</i></font><br clear="all">
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
-          [% has_bp = has_business_process(host) %]
-          [% IF has_bp %]
-            <tr>
-              <td align='right'>
-                <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
-                <font size="-1"><i>Business<br>Process</i></font>
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
+
+
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
@@ -320,77 +326,50 @@
     <br>
 
     <script>
-      const copyButtonLabel = "Copy";
-
-      async function copyCode() {
+      async function copyCode(id) {
         //const button = event.srcElement;
-        const pre = document.getElementById("copyCode")
+        const pre = document.getElementById(arguments[0])
         let code = pre.querySelector("code");
         let text = code.innerText;
         await navigator.clipboard.writeText(text);
-        //button.innerText = "Copied!";
       }
 
-      const hotbox18623 = document.getElementById("copy");
-
       // create tooltip element
-      const ttBox = document.createElement("div");
+      const tooltip = document.createElement("div");
 
       // set style
-      ttBox.id = "copytooltip";
-      ttBox.style.visibility = "hidden"; // make it hidden till mouse over
-      ttBox.style.position = "fixed";
-      ttBox.style.top = "8px";
-      ttBox.style.left = "-50px";
-      ttBox.style.padding = "8px";
-      ttBox.style.width = "70px";
-      ttBox.style.borderRadius = "16px";
-      ttBox.style.border = "solid thin grey";
-      ttBox.style.backgroundColor = "grey";
+      tooltip.id = "copytooltip";
+      tooltip.classList.add("tooltiptext");
 
-  // insert into DOM
-  document.body.appendChild(ttBox);
+      // insert into DOM
+      document.body.appendChild(tooltip);
 
-  const f_TurnOn = ((evt) => {
-    // get the position of the hover element
-    const boundBox = evt.target.getBoundingClientRect();
-    const coordX = boundBox.left;
-    const coordY = boundBox.top;
+      const f_TurnOn = ((evt) => {
+        // get the position of the hover element
+        const boundBox = evt.target.getBoundingClientRect();
+        const coordX = boundBox.left;
+        const coordY = boundBox.top;
 
-    // adjust bubble position
-    ttBox.style.left = (coordX).toString() + "px";
-    ttBox.style.top = (coordY + 20).toString() + "px";
+        // adjust bubble position
+        tooltip.style.left = (coordX - 27).toString() + "px";
+        tooltip.style.top = (coordY - 25).toString() + "px";
 
-    // add bubble content. Can include image or link
-    ttBox.innerHTML =
-      "Copied!";
+        tooltip.innerHTML = "Copied!";
 
-    // make bubble VISIBLE
-    ttBox.style.visibility = "visible";
+        // make bubble VISIBLE
+        tooltip.style.visibility = "visible";
+        tooltip.style.opacity = "1"
 
-    setTimeout(() => {
-      ttBox.style.visibility = "hidden";
-  }, 1000);
+        setTimeout(() => {
+          tooltip.style.visibility = "hidden";
+      }, 1500);
 
-  });
+      });
+      document.querySelectorAll(".copy_button").forEach(item => {
+        item.addEventListener("click", f_TurnOn, false)
+      })
 
-  const f_TurnOff = (() => {
-    ttBox.style.visibility = "hidden";
-  });
-
-
-  hotbox18623.addEventListener("click", f_TurnOn, false);
-  hotbox18623.addEventListener("mouseout", f_TurnOff, false);
-  document.getElementById("copytooltip").addEventListener(
-    "click",
-    f_TurnOff,
-    false
-  );
-
-
-
-
-      </script>
+    </script>
 
 [% PROCESS user_ext_host_info.tt %]
 

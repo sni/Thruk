@@ -336,7 +336,7 @@ H4 {
   }
 }
 
-/* needed for comments page for example, because header has 50px height */
+/* needed for comments page for example, because header has 50px height - CAN BE REMOVED NOW? */
 A.anchor-offset {
   @apply block relative invisible top-[-50px];
 }
@@ -345,8 +345,36 @@ A.anchor-offset {
   @apply textPager hover:hoverBG1;
 }
 
-.pager-entries, .display-filter {
+.pager-entries, .display-filter, A.button.back-button{
   @apply textPager hover:textPager bg-gray-100 hover:bg-gray-200;
+}
+
+.tooltiptext {
+  visibility: hidden;
+  width: 70px;
+  height: 22px;
+  padding-top: 1px;
+  background-color: #888;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 100;
+  bottom: 150%;
+  left: 50%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #888 transparent transparent transparent;
 }
 
 /*******************************************************************************
