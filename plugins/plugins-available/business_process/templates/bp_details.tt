@@ -43,7 +43,7 @@
 
   [% UNLESS minimal %]
   <div class="w-80">
-    <div class="card w-full">
+    <div class="card w-full overflow-visible">
       <div class="head">
         <h3>Information</h3>
       </div>

@@ -93,6 +93,7 @@ TR.expanded #bp_status_plugin_output {
     border: 1px solid grey;
     -webkit-box-shadow:  3px 3px 3px 3px rgba(140, 140, 140, 0.6);
     box-shadow:  3px 3px 3px 3px rgba(140, 140, 140, 0.6);
+    border-radius: 5px;
     cursor: default;
     z-index: 200;
 }
