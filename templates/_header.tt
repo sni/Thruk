@@ -22,9 +22,11 @@
   <div style="display:none;" id="search-results"></div>
 
   <div class="flexrow flex-nowrap gap-0 h-screen w-screen overflow-hidden">
-    <div id="navbar" class="navbar w-fit h-screen z-50 lg:mt-0 mt-[50px] lg:block hidden lg:relative absolute">
-      [% PROCESS side.tt %]
-    </div>
+    [% IF nav == 1 %]
+      <div id="navbar" class="navbar w-fit h-screen z-50 lg:mt-0 mt-[50px] lg:block hidden lg:relative absolute">
+        [% PROCESS side.tt %]
+      </div>
+    [% END %]
 
     <div class="flexcol gap-0 flex-grow w-0 h-screen" id="mainframe">
     [% IF minimal == 2 %]

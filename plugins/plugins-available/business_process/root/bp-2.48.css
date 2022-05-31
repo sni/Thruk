@@ -1,48 +1,4 @@
-A.bp_button {
-    height: 16px;
-}
-BUTTON.bp_button {
-    height: 27px;
-    min-width: 27px;
-}
-
-.ui-menu {
-    width: 150px;
-    z-index: 100;
-}
-
-#bp_menu BUTTON, #bp_menu INPUT {
-    z-index: 150;
-}
-
-#bp_menu INPUT[type=BUTTON] {
-    padding: 0;
-}
-
-TD.action_menu {
-    padding-left: 10px;
-    padding-right: 5px;
-}
-
-#statusTable TD.plugin_output, #statusTable TD.name {
-  max-width: 50%;
-  width: 50%;
-  max-width: 0;
-}
-
-LI.bp_menu_seperator.ui-state-disabled {
-    height: 3px;
-}
-LI.bp_menu_seperator.ui-state-disabled A {
-    line-height: 0px;
-}
-#bp_menu A {
-    width: 117px;
-    height: 16px;
-    display: block;
-}
-
-.bp_type_btn, .bp_type_box, .bp_type_box_label {
+.bp_type_box, .bp_type_box_label {
     height: 60px;
     width: 60px;
     white-space: normal;
@@ -64,16 +20,6 @@ LI.bp_menu_seperator.ui-state-disabled A {
 
 #bp_edit_node_form .ui-dialog-titlebar-close {
     top: 12px;
-}
-
-.bp_dialog_back_btn {
-    float: left;
-}
-.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
-    float: inherit;
-}
-.bp_dialog_create_btn {
-    float: right;
 }
 
 DIV.ui-dialog INPUT[type=text] {
@@ -179,49 +125,13 @@ TR.expanded #bp_status_plugin_output {
     margin-top: 3px;
 }
 
-.bp_container_zoom {
-    position: absolute;
-    right: 5px;
-    background: white;
-    border: 1px solid grey;
-    width: 11px;
-    height: 11px;
-    display: block;
-    line-height: 11px;
-    font-weight: bold;
-    z-index: 50;
-}
 DIV.bp_zoom_container .bp_container_zoom {
     display: none;
 }
 DIV.bp_zoom_container:hover .bp_container_zoom {
     display: inherit;
 }
-.bp_container_zoom:hover {
-    background: #DDDDDD;
-}
-.bp_container_zoom.plus {
-    top:  18px;
-}
-.bp_container_zoom.equal {
-    top: 33px;
-    width: 30px;
-    text-align: right;
-    border: 0;
-}
-.bp_container_zoom.minus {
-    top: 47px;
-}
 
-.bp_container {
-    position: relative;
-    overflow: hidden;
-}
-DIV.bp_zoom_container {
-    border: 1px solid grey;
-    overflow: hidden;
-    position: relative;
-}
 TABLE.minimal .bp_container {
     border: 0;
 }
@@ -236,7 +146,8 @@ TABLE.minimal DIV.bp_zoom_container {
 }
 
 .bp_node {
-    border: 1px solid black;
+    border: 1px solid gray;
+    border-radius: 5px;
     position: absolute;
     text-align: center;
     height: 40px;
@@ -244,9 +155,6 @@ TABLE.minimal DIV.bp_zoom_container {
     display: block;
     overflow: hidden;
     z-index: 10;
-
-    -webkit-box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
-    box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
 }
 
 .bp_node A {
@@ -311,12 +219,6 @@ SPAN.bp_label {
 .bp_node_icons {
     position: absolute;
     top: 2px;
-    left: 1px;
-}
-
-.bp_node_link_icons {
-    position: absolute;
-    top: 25px;
     left: 1px;
 }
 

@@ -433,7 +433,10 @@ function setBtnSpinner(btn) {
     } else {
         jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
     }
-    jQuery(btn).prop('disabled', true).addClass(["opacity-50", "not-clickable"]);
+    window.setTimeout(function() {
+        // disable delayed, otherwise chrome won't send the form
+        jQuery(btn).prop('disabled', true).addClass(["opacity-50", "not-clickable"]);
+    }, 300);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
         el.dataset["href"] = el.href;
@@ -498,30 +501,26 @@ function openModalCommand(el) {
     if(el.href.match(/\?/)) {
         append = "&modal=1";
     }
-    openModalWindow(el.href+append);
+    openModalWindowUrl(el.href+append);
 }
 
-function openModalWindow(url) {
+function openModalWindowUrl(url) {
     if(!has_jquery_ui) {
         load_jquery_ui(function() {
-            openModalWindow(url);
+            openModalWindowUrl(url);
         });
         return;
     }
-    jQuery(document.body).append('<div id="modalBG" class="modalBG"><\/div>');
-    jQuery(document.body).append(
-         '<div id="modalFG" class="modalFG">'
+    var content = ''
         +'  <div class="card w-[200px] mx-auto">'
         +'    <div class="head"><h3>Loading...<\/h3><\/div>'
         +'    <div class="body flexcol">'
         +'      <div class="spinner w-10 h-10"><\/div>'
         +'      <button class="w-20 self-center" onclick="closeModalWindow()">Cancel<\/button>'
         +'    <\/div>'
-        +'  <\/div>'
-        +'<\/div>'
-    );
-    jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
-    addEvent(document, 'keydown', closeModalWindowOnEscape);
+        +'  <\/div>';
+    openModalWindow(content);
+
     jQuery('#modalFG').load(url, {}, function(text, status, req) {
         if(status == "error") {
             jQuery('#modalFG DIV.body').prepend('<div class="textERROR">'+req.status+': '+req.statusText+'<\/div>');
@@ -532,6 +531,14 @@ function openModalWindow(url) {
             jQuery('#modalFG H3, #modalFG .head').css("cursor", "move");
         }
     });
+    return false;
+}
+
+function openModalWindow(content) {
+    jQuery(document.body).append('<div id="modalBG" class="modalBG"><\/div>');
+    jQuery(document.body).append('<div id="modalFG" class="modalFG">'+content+'<\/div>');
+    jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
+    addEvent(document, 'keydown', closeModalWindowOnEscape);
     return false;
 }
 
@@ -765,7 +772,7 @@ function toggleElementRemote(id, part, bodyclose) {
     - false: if element got switched to invisible
  */
 function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
-  var pane = document.getElementById(id);
+  var pane = document.getElementById(id) || jQuery(id)[0];
   if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
     return false;
@@ -3346,7 +3353,7 @@ function generic_downtimes_popup(title, url) {
         'callback': function(doc) {
             jQuery('#comments_downtimes_popup', doc).load(url, function() {
                 var container = doc.getElementById("overcard");
-                overcard_check_visibility(container);
+                element_check_visibility(container);
             });
         }
     });
@@ -8360,7 +8367,7 @@ function overcard(options) {
             +'<\/div>';
         jQuery(containerHTML).appendTo(jQuery("MAIN", doc));
         container = doc.getElementById(containerId);
-        var check = function() { overcard_check_visibility(container); };
+        var check = function() { element_check_visibility(container); };
         jQuery(container, doc).on('move', check);
         new ResizeObserver(check).observe(container);
     }
@@ -8398,7 +8405,7 @@ function overcard(options) {
     } else {
         showElement(container, null, true);
     }
-    overcard_check_visibility(container);
+    element_check_visibility(container);
     if(settings['callback']) {
         settings['callback'](doc);
     }
@@ -8422,7 +8429,7 @@ document.onmouseover = function(evt){
     mouseY = evt.clientY;
 }
 
-function overcard_check_visibility(el) {
+function element_check_visibility(el) {
     if(el.style.display == "none") {
         return;
     }

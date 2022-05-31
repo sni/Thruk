@@ -13,13 +13,8 @@
       [% PROCESS _infobox.tt %]
       </div>
   </div>
-  <div class="basis-1/3">
+  <div class="basis-1/3 text-center">
     <h1 id="subtitle">[% subtitle | html %]</h1>
-    [% IF editmode %]
-      <span class="textHINT">(Edit-Mode)</span>
-    [% ELSIF testmode %]
-      <span class="textHINT">(Business-Impact-Analysis-Mode)</span>
-    [% END %]
   </div>
   <div class="basis-1/3"></div>
 </div>

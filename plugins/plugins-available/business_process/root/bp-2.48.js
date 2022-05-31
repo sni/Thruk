@@ -118,33 +118,29 @@ function bp_context_menu_open(evt, node) {
     else if (evt.button) rightclick = (evt.button == 2);
 
     // clicking the wrench icon counts as right click too
-    if(evt.target && jQuery(evt.target).hasClass('ui-icon-wrench')) { rightclick = true; }
+    if(evt.target && jQuery(evt.target).hasClass('js-edit-icon')) { rightclick = true; }
     if(rightclick && node) {
         bp_unset_active_node();
         bp_context_menu = true;
         jQuery(node).addClass('bp_node_active');
         bp_active_node = node.id;
         bp_update_status(evt, node);
-        jQuery('LI.bp_submenu UL').css('display', 'none'); // hide sub menu
-        jQuery("#bp_menu").menu()
+        jQuery('.submenu').css('display', 'none'); // hide sub menu
+        jQuery("#bp_menu")
                           .css('top', evt.pageY+'px')
                           .css('left', evt.pageX+'px')
-                          .menu("collapseAll", null, true)    // close sub menus
+                          //.menu("collapseAll", null, true)    // close sub menus TODO: check
                           .unbind('keydown');                 // use cursor keys in input field
         bp_menu_restore();
-        // make sure menu does not overlap window
-        var h = jQuery(window).height() - jQuery("#bp_menu").height() - 10;
-        if(h < evt.pageY) {
-            jQuery("#bp_menu").css('top', h+'px');
-        }
+        element_check_visibility(jQuery("#bp_menu")[0]);
         bp_update_firstnode_css();
         // first node cannot be removed or cloned
         if(node.id == 'node1' || !editmode) {
-            jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
-            jQuery('#bp_menu_clone_node').addClass('ui-state-disabled');
+            jQuery('#bp_menu_remove_node').addClass('disabled');
+            jQuery('#bp_menu_clone_node').addClass('disabled');
         } else {
-            jQuery('#bp_menu_remove_node').removeClass('ui-state-disabled');
-            jQuery('#bp_menu_clone_node').removeClass('ui-state-disabled');
+            jQuery('#bp_menu_remove_node').removeClass('disabled');
+            jQuery('#bp_menu_clone_node').removeClass('disabled');
         }
     } else if(node) {
         bp_unset_active_node();
@@ -182,7 +178,6 @@ function bp_menu_restore() {
         jQuery('#bp_menu').html(original_menu);
     }
     showElement('bp_menu', undefined, true, undefined, bp_context_menu_close_cb);
-    jQuery('.ui-state-focus').removeClass('ui-state-focus');
 }
 
 /* make node renameable */
@@ -192,8 +187,10 @@ function bp_show_rename(evt) {
     bp_menu_restore();
     var node = bp_get_node(current_node);
     jQuery('#bp_menu_rename_node').html(
-         '<input type="text" value="'+node.label+'" id="bp_rename_text" style="width:100px;" onkeyup="bp_submit_on_enter(event, \'bp_rename_btn\')">'
-        +'<input type="button" value="OK" style="width:40px;" id="bp_rename_btn" onclick="bp_confirmed_rename('+node.id+')">'
+         '<div class="flexrow flex-nowrap gap-px px-1">'
+        +'<input type="text" class="grow min-w-0" value="'+node.label+'" id="bp_rename_text" onkeyup="bp_submit_on_enter(event, \'bp_rename_btn\')">'
+        +'<input type="button" class="min-w-fit" value="OK" id="bp_rename_btn" onclick="bp_confirmed_rename('+node.id+')">'
+        +'<\/div>'
     );
     document.getElementById('bp_rename_text').focus();
     setCaretToPos(document.getElementById('bp_rename_text'), node.label.length);
@@ -235,8 +232,11 @@ function bp_show_remove() {
     var node = bp_get_node(current_node);
     if(node) {
         jQuery('#bp_menu_remove_node').html(
-             'Confirm: <input type="button" value="No" style="width: 50px;" onclick="bp_menu_restore()">'
-            +'<input type="button" value="Yes" style="width: 40px;" onclick="bp_confirmed_remove('+node.id+')">'
+            '<div class="flexrow flex-nowrap gap-px px-1">'
+            +'<div class="flex items-center">Confirm:<\/div>'
+            +'<input type="button" value="No" onclick="bp_menu_restore()">'
+            +'<input type="button" value="Yes" onclick="bp_confirmed_remove('+node.id+')">'
+            +'<\/div>'
         );
     }
     return false;
@@ -265,13 +265,9 @@ function bp_add_new_node() {
     hideElement('bp_menu');
     current_edit_node         = 'new';
     current_edit_node_clicked = current_node;
-    jQuery("#bp_add_new_node").dialog({
-        modal: true,
-        closeOnEscape: true,
-        width: 450
-    });
-    jQuery('.bp_type_btn').button();
-    showElement('bp_add_new_node');
+    var panel = document.getElementById("bp_add_new_node").cloneNode(true);
+    panel.style.display = "";
+    openModalWindow(panel.outerHTML);
 }
 
 function bp_clone_node() {
@@ -857,7 +853,7 @@ function bp_update_status(evt, node) {
     if(status == 2) { statusName = 'CRITICAL'; }
     if(status == 3) { statusName = 'UNKNOWN'; }
     if(status == 4) { statusName = 'PENDING'; }
-    jQuery('#bp_status_status').html('<div class="statusField status'+statusName+'">  '+statusName+'  </div>');
+    jQuery('#bp_status_status').html('<div class="badge '+statusName+'">'+statusName+'</div>');
     jQuery('#bp_status_label').html(n.label);
 
     var status_text = n.status_text.replace(/\|.*$/g, '');
@@ -934,28 +930,28 @@ function bp_update_status(evt, node) {
         }
         if(op != "=") {
             var filter = service.replace(/^(w|b):/, '');
-            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op="+encodeURIComponent(op)+"&dfl_s0_value="+filter+"&backend=ALL'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op="+encodeURIComponent(op)+"&dfl_s0_value="+filter+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Service Details'><\/i><\/a>";
         } else {
-            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend=ALL'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>";
+            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Service Details'><\/i><\/a>";
         }
     }
 
     // host specific things...
     else if(host) {
-        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend=ALL'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>";
+        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Host Details'><\/i><\/a>";
     }
     // hostgroup link
     else if(n.hostgroup) {
-        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"&backend=ALL'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>";
+        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Hostgroup Details'><\/i><\/a>";
     }
 
     // servicegroup link
     else if(n.servicegroup) {
-        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"&backend=ALL'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>";
+        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Servicegroup Details'><\/i><\/a>";
     }
 
     else if(n.func == "statusfilter") {
-        link = "<a href='"+bp_statusfilter_link(n)+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Details' width='16' height='16'><\/a>";
+        link = "<a href='"+bp_statusfilter_link(n)+"'><i class='fa-solid fa-hand-point-right' title='Goto Servicegroup Details'><\/i><\/a>";
     }
 
     jQuery('.bp_status_extinfo_link').css('display', 'none');
@@ -982,7 +978,7 @@ function bp_update_status(evt, node) {
         if(bp_iframed) { href += "&iframed=1"; }
         if(htmlCls)    { href += "&htmlCls="+htmlCls; }
         jQuery("#"+n.id+" .bp_node_bp_ref_icon").attr("href", href).css('visibility', '');
-        jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+bp_id+"'><img src='"+url_prefix+"themes/"+theme+"/images/chart_organisation.png' border='0' alt='Show Business Process' title='Show Business Process' width='16' height='16'><\/a>");
+        jQuery('.bp_ref_link').css('display', '').html("<a href='bp.cgi?action=details&amp;bp="+bp_id+"'><i class='fa-solid fa-sitemap' title='Show Business Process'><\/i><\/a>");
         jQuery("#"+n.id).addClass("clickable").data({"href": href, "target": ""});
     } else if(link) {
         var href = jQuery('.bp_status_extinfo_link').find('A').attr("href");
@@ -1353,8 +1349,6 @@ function bp_redraw(evt) {
     if(!minimal) {
         graphW = graphW - 315;
     }
-    container.style.width  = graphW+'px';
-    container.style.height = graphH+'px';
 
     var zcontainer = document.getElementById('zoom'+bp_id);
     if(!zcontainer) { return false; }
@@ -1395,26 +1389,6 @@ function bp_redraw(evt) {
 function bp_remove_search_prefix(search) {
     search = search.replace(/^(w|b):/, "");
     return(search);
-}
-
-function bp_on_save_click(btn) {
-    jQuery(btn).button({
-        icons: {primary: 'ui-waiting-button'}
-    });
-    window.setTimeout(function() {
-        jQuery(btn).button({
-            icons: {primary: 'ui-error-button'}
-        });
-    }, 30000);
-
-    /* returning true does no longer work in recent chrome versions(tested in v63.0.3239)
-     * so remove the onclick handler and click again
-     */
-    jQuery(btn).prop('onclick',null).off('click');
-    window.setTimeout(function() {
-        btn.click();
-    }, 100);
-    return false;
 }
 
 function bp_statusfilter_changed() {
