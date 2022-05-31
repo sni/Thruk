@@ -50,7 +50,7 @@
           <th class="w-[100px] text-center">Status</th>
           <th class="w-[130px] text-center">Last Check</th>
           <th class="w-[130px] text-center">Duration</th>
-          <th class="whitespace-nowrap"">Status Information</th>
+          <th class="whitespace-nowrap">Status Information</th>
         </tr>
       </thead>
       <tbody>

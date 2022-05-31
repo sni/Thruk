@@ -210,6 +210,7 @@
       <div><a><i class="fa-solid fa-arrow-rotate-left"></i>fa-solid fa-arrow-rotate-left</a></div>
       <div><a><i class="fa-solid fa-arrow-trend-up"></i>fa-solid fa-arrow-trend-up</a></div>
       <div><a><i class="fa-solid fa-arrows-rotate"></i>fa-solid fa-arrows-rotate</a></div>
+      <div><a><i class="fa-solid fa-backward-step"></i>fa-solid fa-backward-step</a></div>
       <div><a><i class="fa-solid fa-bars small"></i>fa-solid fa-bars small</a></div>
       <div><a><i class="fa-solid fa-bell"></i>fa-solid fa-bell</a></div>
       <div><a><i class="fa-solid fa-bell-slash"></i>fa-solid fa-bell-slash</a></div>
@@ -231,13 +232,17 @@
       <div><a><i class="fa-solid fa-file-circle-plus"></i>fa-solid fa-file-circle-plus</a></div>
       <div><a><i class="fa-solid fa-file-code"></i>fa-solid fa-file-code</a></div>
       <div><a><i class="fa-solid fa-folder-open"></i>fa-solid fa-folder-open</a></div>
+      <div><a><i class="fa-solid fa-house"></i>fa-solid fa-house</a></div>
+      <div><a><i class="fa-solid fa-maximize"></i>fa-solid fa-maximize</a></div>
       <div><a><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
       <div><a><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
       <div><a><i class="fa-solid fa-person-digging"></i>fa-solid fa-person-digging</a></div>
       <div><a><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
       <div><a><i class="fa-solid fa-rocket"></i>fa-solid fa-rocket</a></div>
+      <div><a><i class="fa-solid fa-save"></i>fa-solid fa-save</a></div>
       <div><a><i class="fa-solid fa-shuffle"></i>fa-solid fa-shuffle</a></div>
       <div><a><i class="fa-solid fa-sitemap"></i>fa-solid fa-sitemap</a></div>
+      <div><a><i class="fa-solid fa-square-caret-left"></i>fa-solid fa-square-caret-left</a></div>
       <div><a><i class="fa-solid fa-trash"></i>fa-solid fa-trash</a></div>
       <div><a><i class="fa-solid fa-volume-high small"></i>fa-solid fa-volume-high small</a></div>
       <div><a><i class="fa-solid fa-wand-magic-sparkles"></i>fa-solid fa-wand-magic-sparkles</a></div>

@@ -1,72 +1,78 @@
-﻿<img src="[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/images/ui-icons_222222_256x240.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
-
-<!-- context menu -->
-<ul id="bp_menu" style="display: none; position: absolute;">
-  <li><a href="#" onclick="bp_refresh('[% bp.id %]', current_node); hideElement('bp_menu')"><span class="ui-icon ui-icon-refresh">&nbsp;</span>Refresh Status</a></li>
-  <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
-  <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)"><span class="ui-icon ui-icon-zoomin">&nbsp;</span>Zoom In</a></li>
-  <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)"><span class="ui-icon ui-icon-zoomout">&nbsp;</span>Zoom Out</a></li>
-  <li><a href="#" onclick="bp_zoom_reset('inner_container[% bp.id %]'); hideElement('bp_menu')"><span class="ui-icon ui-icon-arrow-4-diag">&nbsp;</span>Reset Zoom</a></li>
-  <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
-  [% IF editmode %]
-  <li><a href="#" onclick="bp_add_new_node()"><span class="ui-icon ui-icon-plus">&nbsp;</span>Add New Node</a></li>
-  <li id="bp_menu_clone_node" class="ui-state-disabled"><a href="#" onclick="bp_clone_node()"><span class="ui-icon ui-icon-copy">&nbsp;</span>Clone This Node</a></li>
-  <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
-  <li id='bp_menu_remove_node'><a href="#" onclick="bp_show_remove()"><span class="ui-icon ui-icon-trash">&nbsp;</span>Remove Node</a></li>
-  <li id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><span class="ui-icon ui-icon-tag">&nbsp;</span>Rename Node</a></li>
-  <li><a href="#" onclick="bp_show_edit_node('current')"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Edit Node</a></li>
-  [% ELSE %]
-    <li[% UNLESS allowed_for_edit %] class="ui-state-disabled"[% END %]><a href="bp.cgi?action=details&amp;edit=1&amp;bp=[% bp.id %]"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Enable Edit Mode</a></li>
-  [% END %]
-  [% IF editmode || testmode %]
-    <li class="bp_submenu">
-      <a href="#"><span class="ui-icon ui-icon-pin-w">&nbsp;</span>Test Mode</a>
-      <ul>
-        <li><a href="bp.cgi?action=details&amp;bp=[% bp.id %][% IF editmode %]&amp;edit=1[% END %]"><span>&nbsp;</span>Disable Test Mode</a></li>
-        <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(-1)"><span>&nbsp;</span>Normal</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(0)"><span>&nbsp;</span>Ok</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(1)"><span>&nbsp;</span>Warning</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(2)"><span>&nbsp;</span>Critical</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(3)"><span>&nbsp;</span>Unknown</a></li>
-        <li><a href="#" onclick="bp_test_mode_node(4)"><span>&nbsp;</span>Pending</a></li>
-      </ul>
-    </li>
-  [% ELSE %]
-    <li><a href="bp.cgi?action=details&amp;bp=[% bp.id %][% IF editmode %]&amp;edit=1[% END %]&amp;testmode=1"><span class="ui-icon ui-icon-pin-s">&nbsp;</span>Enable Test Mode</a></li>
-  [% END %]
-</ul>
+﻿<!-- context menu -->
+<div id="bp_menu" style="display: none;" class="context_menu w-[160px]">
+  <ul class="w-full">
+    <li><a href="#" onclick="bp_refresh('[% bp.id %]', current_node); hideElement('bp_menu')"><i class="fa-solid fa-arrows-rotate text-xs"></i>Refresh Status</a></li>
+    <li><hr></li>
+    <li><a href="#" onclick="bp_zoom_rel( 0.05)"><i class="fa-solid fa-magnifying-glass-plus text-xs"></i>Zoom In</a></li>
+    <li><a href="#" onclick="bp_zoom_rel(-0.05)"><i class="fa-solid fa-magnifying-glass-minus text-xs"></i>Zoom Out</a></li>
+    <li><a href="#" onclick="bp_zoom_reset(); hideElement('bp_menu')"><i class="fa-solid fa-expand text-xs"></i>Reset Zoom</a></li>
+    <li><hr></li>
+    [% IF editmode %]
+    <li><a href="#" onclick="bp_add_new_node()"><i class="fa-solid fa-plus text-xs"></i>Add New Node</a></li>
+    <li id="bp_menu_clone_node" class="disabled"><a href="#" onclick="bp_clone_node()"><i class="fa-solid fa-copy text-xs"></i>Clone This Node</a></li>
+    <li><hr></li>
+    <li id='bp_menu_remove_node'><a href="#" onclick="bp_show_remove()"><i class="fa-solid fa-trash text-xs"></i>Remove Node</a></li>
+    <li id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><i class="fa-solid fa-tag text-xs"></i>Rename Node</a></li>
+    <li><a href="#" onclick="bp_show_edit_node('current')"><i class="fa-solid fa-pencil text-xs"></i>Edit Node</a></li>
+    [% ELSE %]
+      <li[% UNLESS allowed_for_edit %] class="disabled"[% END %]><a href="bp.cgi?action=details&amp;edit=1&amp;bp=[% bp.id %]"><i class="fa-solid fa-pencil text-xs"></i>Enable Edit Mode</a></li>
+    [% END %]
+    [% IF editmode || testmode %]
+      <li class="relative">
+        <a href="#"><i class="fa-solid fa-thumbtack text-xs"></i>Test Mode<span class="expandable"><i class="uil uil-angle-right"></i></span></a>
+        <ul class="submenu autoopen absolute bottom-0 left-[160px]">
+          <li><a href="bp.cgi?action=details&amp;bp=[% bp.id %][% IF editmode %]&amp;edit=1[% END %]">Disable Test Mode</a></li>
+          <li><hr></li>
+          <li><a href="#" onclick="bp_test_mode_node(-1)">Normal</a></li>
+          <li><a href="#" onclick="bp_test_mode_node( 0)">Ok</a></li>
+          <li><a href="#" onclick="bp_test_mode_node( 1)">Warning</a></li>
+          <li><a href="#" onclick="bp_test_mode_node( 2)">Critical</a></li>
+          <li><a href="#" onclick="bp_test_mode_node( 3)">Unknown</a></li>
+          <li><a href="#" onclick="bp_test_mode_node( 4)">Pending</a></li>
+        </ul>
+      </li>
+    [% ELSE %]
+      <li><a href="bp.cgi?action=details&amp;bp=[% bp.id %][% IF editmode %]&amp;edit=1[% END %]&amp;testmode=1"><i class="fa-solid fa-thumbtack text-xs"></i>Enable Test Mode</a></li>
+    [% END %]
+  </ul>
+</div>
 
 <!-- main edit node dialog -->
-<div id="bp_add_new_node" style="display: none;" title="Create New Node">
-  <table width="100%">
-    <tr>
-      <th>Live Status</th>
-      <th colspan=3 align="center">Aggregation Functions</th>
-      <th>Custom</th>
-    </tr>
-    <tr>
-      <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host / Service" onclick="bp_select_type('status')"></td>
-      <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_type('best')"></td>
-      <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_type('at_least')"></td>
-      <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_type('equals')"></td>
-      <td><input type="button" class="bp_type_btn" value="Custom" onclick="bp_select_type('custom')"></td>
-    </tr>
-    <tr>
-      <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host- / Service- group" onclick="bp_select_type('groupstatus')"></td>
-      <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_type('worst')"></td>
-      <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_type('not_more')"></td>
-      <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_type('fixed')"></td>
-      <td>[% IF fav_custom_fun.size > 0 %]<input type="button" class="bp_type_btn" value="[% fav_custom_fun.0 | html %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% escape_js(fav_custom_fun.0) %]'})">[% END %]</td>
-    </tr>
-    <tr>
-        <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Any Filter" onclick="bp_select_type('statusfilter')"></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>[% IF fav_custom_fun.size > 1 %]<input type="button" class="bp_type_btn" value="[% fav_custom_fun.1 | html %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% escape_js(fav_custom_fun.1) %]'})">[% END %]</td>
-    </tr>
-  </table>
+<div id="bp_add_new_node" style="display: none;">
+  <div class="card">
+    <div class="head justify-between">
+      <h3>Create New Node</h3>
+      <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    </div>
+    <table class="body">
+      <tr>
+        <th>Live Status</th>
+        <th colspan=3 align="center">Aggregation Functions</th>
+        <th>Custom</th>
+      </tr>
+      <tr>
+        <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="w-16 h-16 p-0 whitespace-normal" value="Host / Service" onclick="bp_select_type('status')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="Best" onclick="bp_select_type('best')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="&gt;=" onclick="bp_select_type('at_least')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="=" onclick="bp_select_type('equals')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="Custom" onclick="bp_select_type('custom')"></td>
+      </tr>
+      <tr>
+        <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="w-16 h-16 p-0 whitespace-normal" value="Host- / Service- group" onclick="bp_select_type('groupstatus')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="Worst" onclick="bp_select_type('worst')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="&lt;=" onclick="bp_select_type('not_more')"></td>
+        <td><input type="button" class="w-16 h-16 p-0" value="Dummy" onclick="bp_select_type('fixed')"></td>
+        <td>[% IF fav_custom_fun.size > 0 %]<input type="button" class="w-16 h-16 p-0" value="[% fav_custom_fun.0 | html %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% escape_js(fav_custom_fun.0) %]'})">[% END %]</td>
+      </tr>
+      <tr>
+          <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="w-16 h-16 p-0 whitespace-normal" value="Any Filter" onclick="bp_select_type('statusfilter')"></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>[% IF fav_custom_fun.size > 1 %]<input type="button" class="w-16 h-16 p-0" value="[% fav_custom_fun.1 | html %]" onclick="bp_select_type('custom', {'bp_arg1_custom':'[% escape_js(fav_custom_fun.1) %]'})">[% END %]</td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 

@@ -4,7 +4,7 @@
  *   - check no frames mode
  *   - custom_vars_table auf service details
  *   - replace waiting.gif with <div class="spinner"></div>
- *   - remove unused images
+ *   - remove unused images, also from plugins (create script)
  *   - identical class and style in actionbox if no permissions (infoMessage? )
  *   - height fixen maintable und logs
  *   - add truncate in minemap
@@ -1058,12 +1058,12 @@ DIV#search-results {
  * action menu
  */
 
-DIV.action_menu {
+DIV.action_menu, DIV.context_menu {
   @apply absolute z-50 overflow-visible;
   UL {
     @apply card shadow-float min-w-[120px] whitespace-nowrap overflow-visible;
     LI {
-      @apply first:rounded-t-lg last:rounded-b-lg hover:hoverBG1 hover:textActive1;
+      @apply relative first:rounded-t-lg last:rounded-b-lg hover:hoverBG1 hover:textActive1;
       &.disabled {
         @apply hover:text-inherit cursor-default;
       }
@@ -1085,6 +1085,9 @@ DIV.action_menu {
     }
     .submenu {
       @apply absolute min-w-[120px] z-[51];
+    }
+    LI:hover > UL.submenu.autoopen {
+      display: initial !important;
     }
     SPAN.expandable {
       @apply ml-auto;
