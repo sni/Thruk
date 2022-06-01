@@ -325,17 +325,18 @@
     </table>
     <br>
 
+    <!-- TODO: move to global JS, remove width, add padding to css -->
     <script>
       async function copyCode(id) {
         //const button = event.srcElement;
-        const pre = document.getElementById(arguments[0])
+        var pre = document.getElementById(arguments[0])
         let code = pre.querySelector("code");
         let text = code.innerText;
         await navigator.clipboard.writeText(text);
       }
 
       // create tooltip element
-      const tooltip = document.createElement("div");
+      var tooltip = document.createElement("div");
 
       // set style
       tooltip.id = "copytooltip";
@@ -344,11 +345,11 @@
       // insert into DOM
       document.body.appendChild(tooltip);
 
-      const f_TurnOn = ((evt) => {
+      var f_TurnOn = ((evt) => {
         // get the position of the hover element
-        const boundBox = evt.target.getBoundingClientRect();
-        const coordX = boundBox.left;
-        const coordY = boundBox.top;
+        var boundBox = evt.target.getBoundingClientRect();
+        var coordX = boundBox.left;
+        var coordY = boundBox.top;
 
         // adjust bubble position
         tooltip.style.left = (coordX - 27).toString() + "px";

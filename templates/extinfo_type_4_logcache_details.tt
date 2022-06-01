@@ -1,170 +1,194 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-<div class="flexrow">
-  <div class="flexcol">
-    [% PROCESS _infobox.tt %]
-  </div>
-</div>
-
-<div class="flex place-content-center">
-  <div class="flexcol w-fit">
-    <div class="card my-5">
-      <div class="head justify-between">
-        <a href="extinfo.cgi?type=4" class="button back-button rounded w-[70px]" title="Go back to Performance Info">
-          <i class="uil uil-angle-double-left"></i>Back
-        </a>
-        <h3>Logcache Details for [% peer.name %]</h3>
-        <div class="w-[70px]"></div>
-      </div>
-      <div>
-        <table class="cellspacing innercellborder">
-          <tr>
-            <th>Backend</th>
-            <th>Data Usage</th>
-            <th>Index Usage</th>
-            <th>Items</th>
-            <th>Oldest Item</th>
-            <th>Latest Item</th>
-            <th>Logcache Duration</th>
-            <th>Logcache Version</th>
-            <th>Bytes per Item</th>
-          </tr>
-          [% s = logcache_stats %]
-          <tr>
-            <td>[% s.name %]</td>
-            <td>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-            <td>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
-            <td>[% format_number(s.items) %]</td>
-            <td>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
-            <td>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
-            <td>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
-            <td>[% s.cache_version %]</td>
-            <td>[% IF s.items > 0 %][% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %][% END %]</td>
-          </tr>
-          [% IF s.mode != "" %]
-            <td colspan="9" style="text-align: center; color: red;"><b>currently running <i>[% s.mode %]</i> since [% date_format(c, s.last_update) %]...</b></td>
-          [% END %]
-        </table>
-
-        <hr>
-
-        <table class="my-4 w-fit cellspacing innercellborder mx-auto">
-          <tr>
-            <th>Last Update</th>
-            <th>Update Duration</th>
-            <th></th>
-          </tr>
-          <tr>
-            <td>[% date_format(c, s.last_update,) %]</td>
-            <td>[% IF s.update_duration != ""; duration(s.update_duration, 3); END %]</td>
-            <td style="text-align: center;">
-              <form action="extinfo.cgi" method="POST">
-                <input type="hidden" name="type" value="4">
-                <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                <button name="submit" value="update" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run update</button>
-              </form>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Last Compact</th>
-            <th>Compact Duration</th>
-            <th></th>
-          </tr>
-          <tr>
-            <td>[% IF s.last_compact && s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
-            <td>[% IF s.compact_duration != ""; duration(s.compact_duration, 3); END %]</td>
-            <td style="text-align: center;">
-              <form action="extinfo.cgi" method="POST">
-                <input type="hidden" name="type" value="4">
-                <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                <button name="submit" value="compact" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run compact ([% c.config.logcache_compact_duration %])</button>
-              </form>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Last Optimize</th>
-            <th>Optimize Duration</th>
-            <th></th>
-          </tr>
-          <tr>
-            <td>[% IF s.last_reorder > 0; date_format(c, s.last_reorder); END %]</td>
-            <td>[% IF s.reorder_duration != ""; duration(s.reorder_duration, 3); END %]</td>
-            <td style="text-align: center;">
-              <form action="extinfo.cgi" method="POST">
-                <input type="hidden" name="type" value="4">
-                <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                <button name="submit" value="optimize" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run optimize</button>
-              </form>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Duration</th>
-            <th>Oldest Item</th>
-            <th></th>
-          </tr>
-          <tr>
-            <td>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
-            <td>[% IF s.defined('start') %][% date_format(c, s.start, "%Y-%m-%d") %][% END %]</td>
-            <td style="text-align: center;">
-              <form action="extinfo.cgi" method="POST">
-                <input type="hidden" name="type" value="4">
-                <input type="hidden" name="logcachedetails" value="[% peer_key %]">
-                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                <button name="submit" value="clean" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run clean ([% c.config.logcache_clean_duration %])</button>
-              </form>
-            </td>
-          </tr>
-        </table>
-
-        <hr>
-
-        <div class="flexrow mt-4 w-fit mx-auto gap-16">
-          [% FOREACH s = [["class", logcache_class], ["type", logcache_types]] %]
-          <div class="flex">
-            <table class="h-fit cellspacing innercellborder">
-              <tr>
-                <th colspan="3" style="text-align: center;">Log Entries by [% s.0 | ucfirst %]</th>
-              </tr>
-              <tr>
-                <th>[% s.0 | ucfirst %]</th>
-                <th>Count</th>
-                <th></th>
-              </tr>
-              [% FOREACH t = s.1 %]
-              <tr>
-                <td>
-                  <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
-                  [% IF t.param != "" %]
-                    [% t.type | lc %]
-                  [% ELSE %]
-                    [% IF s.0 == "type" %]
-                      &lt;untyped&gt;
-                    [% ELSIF s.0 == "class" %]
-                      &lt;unclassified&gt;
-                    [% ELSE %]
-                      &lt;unknown &gt;
-                    [% END %]
-                  [% END %]
-                  </a>
-                </td>
-                <td style="text-align: right;">[% format_number(t.total) %]</td>
-                <td style="text-align: right;">[% sprintf("%1.f", t.procent) %]%</td>
-              </tr>
-              [% END %]
-            </table>
-          </div>
-          [% END %]
-        </div>
+<div class="flexrow 2xl:justify-between h-full">
+  [% PROCESS _infobox.tt %]
+  <div class="card w-fit overflow-x-auto">
+    <div class="head justify-between gap-x-1">
+      <a href="extinfo.cgi?type=4" class="button back-button rounded min-w-[70px] w-[70px]" title="Go back to Performance Info">
+        <i class="uil uil-angle-double-left"></i>Back
+      </a>
+      <h3>Logcache Details for [% peer.name %]</h3>
+      <div class="w-[70px]"></div>
     </div>
+    <div>
+      <table class="cellspacing innercellborder">
+        <tr>
+          <th>Backend</th>
+          <th>Data Usage</th>
+          <th>Index Usage</th>
+          <th>Items</th>
+          <th>Oldest Item</th>
+          <th>Latest Item</th>
+          <th>Logcache Duration</th>
+          <th>Logcache Version</th>
+          <th>Bytes per Item</th>
+        </tr>
+        [% s = logcache_stats %]
+        <tr>
+          <td>[% s.name %]</td>
+          <td>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+          <td>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+          <td>[% format_number(s.items) %]</td>
+          <td>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
+          <td>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
+          <td>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
+          <td>[% s.cache_version %]</td>
+          <td>[% IF s.items > 0 %][% bytes = ( ( s.data_size + s.index_size ) / s.items ); n = reduce_number(bytes, 'B', 1024); sprintf('%d %s',n.0, n.1) %][% END %]</td>
+        </tr>
+        [% IF s.mode != "" %]
+          <td colspan="9" style="text-align: center; color: red;"><b>currently running <i>[% s.mode %]</i> since [% date_format(c, s.last_update) %]...</b></td>
+        [% END %]
+      </table>
 
+      <hr>
+      <div class="px-2 pt-1">
+        <h3 class="text-center">Actions</h3>
+      </div>
+
+      <div class="w-full flex">
+        <div class="w-1/2 min-w-min py-1 px-5">
+          <table class="cellspacing-x">
+            <tr>
+              <th class="w-40">Last Update</th>
+              <td>[% date_format(c, s.last_update,) %]</td>
+            </tr>
+            <tr>
+              <th class="w-40">Update Duration</th>
+              <td>[% IF s.update_duration != ""; duration(s.update_duration, 3); END %]</td>
+            </tr>
+            <tr>
+              <td>
+                <form action="extinfo.cgi" method="POST">
+                  <input type="hidden" name="type" value="4">
+                  <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                  <button name="submit" value="update" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>Run update</button>
+                </form>
+              </td>
+              <td></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="w-1/2 min-w-min  py-1 px-5">
+          <table class="cellspacing-x">
+            <tr>
+              <th class="w-40">Last Compact</th>
+              <td>[% IF s.last_compact && s.last_compact > 0; date_format(c, s.last_compact); END %]</td>
+            </tr>
+            <tr>
+              <th class="w-40">Compact Duration</th>
+              <td>[% IF s.compact_duration != ""; duration(s.compact_duration, 3); END %]</td>
+            </tr>
+            <tr>
+              <td>
+                <form action="extinfo.cgi" method="POST">
+                  <input type="hidden" name="type" value="4">
+                  <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                  <button name="submit" value="compact" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>Run compact ([% c.config.logcache_compact_duration %])</button>
+                </form>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="flex w-full">
+        <div class="w-1/2 min-w-min  py-1 px-5">
+          <table class="cellspacing-x">
+            <tr>
+              <th class="w-40">Last Optimize</th>
+              <td>[% IF s.last_reorder > 0; date_format(c, s.last_reorder); END %]</td>
+            </tr>
+            <tr>
+              <th class="w-40">Optimize Duration</th>
+              <td>[% IF s.reorder_duration != ""; duration(s.reorder_duration, 3); END %]</td>
+            </tr>
+            <tr>
+              <td>
+                <form action="extinfo.cgi" method="POST">
+                  <input type="hidden" name="type" value="4">
+                  <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                  <button name="submit" value="optimize" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>Run optimize</button>
+                </form>
+              </td>
+              <td></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="w-1/2 min-w-min  py-1 px-5">
+          <table class="cellspacing-x">
+            <tr>
+              <th class="w-40">Duration</th>
+              <td>[% IF s.defined('start') && s.defined('end'); duration(s.end - s.start, 6); END %]</td>
+            </tr>
+            <tr>
+              <th class="w-40">Oldest Item</th>
+              <td>[% IF s.defined('start') %][% date_format(c, s.start, "%Y-%m-%d") %][% END %]</td>
+            </tr>
+            <tr>
+              <td>
+                <form action="extinfo.cgi" method="POST">
+                  <input type="hidden" name="type" value="4">
+                  <input type="hidden" name="logcachedetails" value="[% peer_key %]">
+                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                  <button name="submit" value="clean" style="width: 160px;"[% IF s.mode == "import" %] disabled[% END %]>run clean ([% c.config.logcache_clean_duration %])</button>
+                </form>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="px-2 pt-1">
+        <h3 class="text-center">Log Entries</h3>
+      </div>
+
+      <div class="flexrow my-1 w-fit mx-auto gap-16">
+        [% FOREACH s = [["class", logcache_class], ["type", logcache_types]] %]
+        <div class="flex">
+          <table class="h-fit cellspacing innercellborder">
+            <tr>
+              <th colspan="3" style="text-align: center;">Log Entries by [% s.0 | ucfirst %]</th>
+            </tr>
+            <tr>
+              <th>[% s.0 | ucfirst %]</th>
+              <th>Count</th>
+              <th></th>
+            </tr>
+            [% FOREACH t = s.1 %]
+            <tr>
+              <td>
+                <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
+                [% IF t.param != "" %]
+                  [% t.type | lc %]
+                [% ELSE %]
+                  [% IF s.0 == "type" %]
+                    &lt;untyped&gt;
+                  [% ELSIF s.0 == "class" %]
+                    &lt;unclassified&gt;
+                  [% ELSE %]
+                    &lt;unknown &gt;
+                  [% END %]
+                [% END %]
+                </a>
+              </td>
+              <td style="text-align: right;">[% format_number(t.total) %]</td>
+              <td style="text-align: right;">[% sprintf("%1.f", t.procent) %]%</td>
+            </tr>
+            [% END %]
+          </table>
+        </div>
+        [% END %]
+      </div>
+    </div>
   </div>
+  <div class="w-[350px] hidden xl:block"></div>
 </div>
 
 [% PROCESS _footer.tt %]
