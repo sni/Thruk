@@ -4085,6 +4085,44 @@ function togglePasswordVisibility(ev) {
     }
 }
 
+function copyCode(evt, id) {
+    var pre  = document.getElementById(id)
+    var code = pre.querySelector("code");
+    var text = code.innerText;
+    navigator.clipboard.writeText(text);
+
+    if(!evt) { return; }
+
+    // create tooltip element
+    var tooltip = document.createElement("div");
+
+    // set style
+    tooltip.id = "copytooltip";
+    tooltip.classList.add("tooltiptext");
+
+    // insert into DOM
+    document.body.appendChild(tooltip);
+
+    // get the position of the hover element
+    var boundBox = evt.target.getBoundingClientRect();
+    var coordX = boundBox.left;
+    var coordY = boundBox.top;
+
+    // adjust bubble position
+    tooltip.style.left = (coordX - 27).toString() + "px";
+    tooltip.style.top = (coordY - 25).toString() + "px";
+
+    tooltip.innerHTML = "Copied!";
+
+    // make bubble VISIBLE
+    tooltip.style.visibility = "visible";
+    tooltip.style.opacity = "1"
+
+    window.setTimeout(function () {
+        jQuery(tooltip).remove();
+    }, 1500);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

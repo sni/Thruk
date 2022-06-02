@@ -9,7 +9,6 @@
 
 <div class="flexrow flex-nowrap my-2">
   <div class="flex basis-1/3 self-end gap-1">
-    <!-- TODO: Add export icons similar to normal downtimes site? -->
   </div>
   <div class="basis-1/3 self-end">
     <div class="hint text-center whitespace-nowrap text-xs">Mark downtimes with leftclick. Select multiple with shift + mouse.</div>
