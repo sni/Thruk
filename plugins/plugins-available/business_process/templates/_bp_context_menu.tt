@@ -57,13 +57,14 @@
             <input type="button" class="w-20 h-20 p-0 whitespace-normal js-type-select js-type-select-status"       value="Host / Service"         onclick="bp_select_type('status')"       title="Node will use the status of given host or service.">
             <input type="button" class="w-20 h-20 p-0 whitespace-normal js-type-select js-type-select-groupstatus"  value="Host- / Service- group" onclick="bp_select_type('groupstatus')"  title="Node will use the status of given host- or servicegroup.">
             <input type="button" class="w-20 h-20 p-0 whitespace-normal js-type-select js-type-select-statusfilter" value="Any Filter"             onclick="bp_select_type('statusfilter')" title="Node will use the status of a status query.">
+          </div>
         </td>
         <td class="align-top pl-2">
           <div class="flexcol flex-nowrap gap-px">
             <div class="flexrow flex-nowrap gap-px">
-              <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-best"      value="Best"  onclick="bp_select_type('best')"     title="Node will have the best status from all child nodes.">
-              <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-at_least"" value="&gt;=" onclick="bp_select_type('at_least')" title="Node will be ok if a minumum number of child nodes are ok.">
-              <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-equals"    value="="     onclick="bp_select_type('equals')"   title="Node will be ok if an exact number of child nodes are ok.">
+              <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-best"     value="Best"  onclick="bp_select_type('best')"     title="Node will have the best status from all child nodes.">
+              <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-at_least" value="&gt;=" onclick="bp_select_type('at_least')" title="Node will be ok if a minumum number of child nodes are ok.">
+              <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-equals"   value="="     onclick="bp_select_type('equals')"   title="Node will be ok if an exact number of child nodes are ok.">
             </div>
             <div class="flexrow flex-nowrap gap-px">
               <input type="button" class="w-20 h-20 p-0 js-type-select js-type-select-worst" value="Worst"     onclick="bp_select_type('worst')"    title="Node will have the worst status from all child nodes.">
