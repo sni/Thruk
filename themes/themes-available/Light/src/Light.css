@@ -743,7 +743,7 @@ DIV.buttongroup {
 .fa-trash {
   @apply hover:text-red-600;
 }
-a.button:hover>.fa-trash {
+a:hover>.fa-trash {
   @apply text-red-600;
 }
 
