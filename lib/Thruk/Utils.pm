@@ -3711,7 +3711,7 @@ sub page_data {
 
     if($entries eq 'all') { $entries = $pager->{'total_items'}; }
     if($entries > 0) {
-        $pager->{'total_pages'} = POSIX::ceil($pager->{'total_items'} / $entries);
+        $pager->{'total_pages'} = POSIX::ceil($pager->{'total_items'} / $entries) || 1;
     } else {
         return $data;
     }
