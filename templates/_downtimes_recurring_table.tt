@@ -65,11 +65,11 @@
           <a href="extinfo.cgi?type=6&amp;nr=[% d.file | uri %]&amp;recurring=edit">
             <i class="fa-solid fa-pencil small" title='Edit recurring downtime'></i>
           </a>
-          <!-- TODO: Fix delete button or remove again, rd.file does not exist as used in recurring_edit.tt-->
           <form action="extinfo.cgi" method="POST">
+            <input type="hidden" name="nr" value="[% d.file | html %]">
             <input type="hidden" name="type" value="6">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a href="#" onclick="if(confirm('Do you really want to delete this downtime?')) { return send_form_in_background_and_reload(this, {action: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete recurring downtime'></i></a>
+            <a href="#" onclick="if(confirm('Do you really want to delete this downtime?')) { return send_form_in_background_and_reload(this, {recurring: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete recurring downtime'></i></a>
           </form>
         </div>
       </td>

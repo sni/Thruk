@@ -214,7 +214,7 @@
                 <pre id="copyToClipboard" class="whitespace-normal"><code>[% command.line | html %]</code></pre>
               </div>
               <div>
-                <button class="iconOnly px-1 copy_button" onclick="copyCode('copyToClipboard')"><i class="uil uil-copy" title="Copy command to clipboard"></i></button>
+                <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'copyToClipboard')"><i class="uil uil-copy" title="Copy command to clipboard"></i></button>
               </div>
             </div>
           </td>
@@ -232,7 +232,7 @@
                 <pre id="copyToClipboard2" class="whitespace-normal"><code>[% command.line_expanded | html %]</code></pre>
               </div>
               <div>
-                <button class="iconOnly px-1 copy_button" onclick="copyCode('copyToClipboard2')"><i class="uil uil-copy" title="Copy expanded command to clipboard"></i></button>
+                <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'copyToClipboard2')"><i class="uil uil-copy" title="Copy expanded command to clipboard"></i></button>
               </div>
             </div>
           </td>
@@ -325,53 +325,6 @@
       </tr>
     </table>
     <br>
-
-    <!-- TODO: move to global JS, remove width, add padding to css -->
-    <script>
-      async function copyCode(id) {
-        //const button = event.srcElement;
-        var pre = document.getElementById(arguments[0])
-        let code = pre.querySelector("code");
-        let text = code.innerText;
-        await navigator.clipboard.writeText(text);
-      }
-
-      // create tooltip element
-      var tooltip = document.createElement("div");
-
-      // set style
-      tooltip.id = "copytooltip";
-      tooltip.classList.add("tooltiptext");
-
-      // insert into DOM
-      document.body.appendChild(tooltip);
-
-      var f_TurnOn = ((evt) => {
-        // get the position of the hover element
-        var boundBox = evt.target.getBoundingClientRect();
-        var coordX = boundBox.left;
-        var coordY = boundBox.top;
-
-        // adjust bubble position
-        tooltip.style.left = (coordX - 27).toString() + "px";
-        tooltip.style.top = (coordY - 25).toString() + "px";
-
-        tooltip.innerHTML = "Copied!";
-
-        // make bubble VISIBLE
-        tooltip.style.visibility = "visible";
-        tooltip.style.opacity = "1"
-
-        setTimeout(() => {
-          tooltip.style.visibility = "hidden";
-      }, 1500);
-
-      });
-      document.querySelectorAll(".copy_button").forEach(item => {
-        item.addEventListener("click", f_TurnOn, false)
-      })
-
-    </script>
 
 [% PROCESS user_ext_host_info.tt %]
 
