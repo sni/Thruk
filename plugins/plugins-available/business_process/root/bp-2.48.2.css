@@ -1,55 +1,6 @@
-.bp_type_box, .bp_type_box_label {
-    height: 60px;
-    width: 60px;
-    white-space: normal;
-    display: inherit;
-    vertical-align: middle;
-}
-.bp_type_box_label SPAN {
-    height: 65px;
-    width: 50px;
-    text-align: center;
-    display: table-cell !important;
-    vertical-align: middle;
-}
-.bp_type_btn_small {
-    height: inherit;
-    width: inherit;
-    white-space: inherit;
-}
-
-#bp_edit_node_form .ui-dialog-titlebar-close {
-    top: 12px;
-}
-
-DIV.ui-dialog INPUT[type=text] {
-    width: 290px;
-}
-DIV.ui-dialog TD.filterValueInput INPUT[type=text] {
-    width: 135px;
-}
-DIV.ui-dialog TD.filterValueInput INPUT.filter_pre_value[type=text] {
-    width: 80px;
-}
-
-DIV.ui-dialog SELECT.filter_op_select {
-    width: 40px;
-}
-DIV.ui-dialog input#bp_arg2_status {
-    width: 245px;
-}
-
-.bp_type_desc {
-    font-size: smaller;
-}
-
 .bp_help_cmd {
     background: #CCCCCC;
     color: #FE4071;
-}
-
-.bp_type_desc A {
-    border-bottom: 1px dotted grey;
 }
 
 .bp_info TH {
@@ -72,7 +23,7 @@ DIV.ui-dialog input#bp_arg2_status {
 }
 
 TR.expanded #bp_status_plugin_output_expand {
-    display: none;
+    visibility: hidden;
 }
 TR.expanded TD {
     overflow: visible;
@@ -108,17 +59,6 @@ TR.expanded #bp_status_plugin_output {
 .bp_status_status_icons IMG {
     margin-left: 3px;
     float: left;
-}
-.bp_status_extinfo_link {
-    position: absolute;
-    top: 2px;
-    right: 10px;
-}
-
-.bp_ref_link {
-    position: absolute;
-    top: 0;
-    right: 2px;
 }
 
 .bp_settings INPUT, .bp_settings SELECT {
@@ -199,8 +139,8 @@ SPAN.bp_label {
 
 .bp_node_edit_icon {
     position: absolute;
-    top: -2px;
-    right: 0px;
+    top: 0px;
+    right: -1px;
     display: none;
 }
 .bp_node:hover .bp_node_edit_icon {
@@ -209,28 +149,18 @@ SPAN.bp_label {
 
 .bp_node_bp_ref_icon, .bp_node_link_icon {
     position: absolute;
-    bottom: 2px;
-    right: 0px;
+    bottom: -2px;
+    right: -1px;
     display: none;
 }
 .bp_node:hover .bp_node_bp_ref_icon, .bp_node:hover .bp_node_link_icon, .bp_node:hover .bp_node_add_icon {
-    display: inherit;
+    display: inherit !important;
 }
 
 .bp_node_icons {
     position: absolute;
     top: 2px;
     left: 1px;
-}
-
-.bp_node_add_icon {
-    position: fixed;
-    width: 124px;
-    display: none;
-}
-.bp_node_add_icon IMG {
-    position: relative;
-    top: 2px;
 }
 
 .bp_node:hover {
@@ -295,18 +225,6 @@ HTML.transparent DIV.bp_zoom_container {
 /* custom fields */
 #cust_help PRE {
     margin: 0;
-}
-
-TABLE.bp_filter {
-  width: 100%;
-}
-
-TABLE.bp_filter TD {
-  text-align: center;
-}
-
-TABLE.bp_filter TD:first-child {
-  text-align: left;
 }
 
 #bp_select_statusfilter div.filter_pane {

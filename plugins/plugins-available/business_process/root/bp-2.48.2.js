@@ -129,7 +129,6 @@ function bp_context_menu_open(evt, node) {
         jQuery("#bp_menu")
                           .css('top', evt.pageY+'px')
                           .css('left', evt.pageX+'px')
-                          //.menu("collapseAll", null, true)    // close sub menus TODO: check
                           .unbind('keydown');                 // use cursor keys in input field
         bp_menu_restore();
         element_check_visibility(jQuery("#bp_menu")[0]);
@@ -265,9 +264,7 @@ function bp_add_new_node() {
     hideElement('bp_menu');
     current_edit_node         = 'new';
     current_edit_node_clicked = current_node;
-    var panel = document.getElementById("bp_add_new_node").cloneNode(true);
-    panel.style.display = "";
-    openModalWindow(panel.outerHTML);
+    openModalWindow(document.getElementById("bp_add_new_node"));
 }
 
 function bp_clone_node() {
@@ -334,15 +331,15 @@ function bp_input_keys(evt, input) {
 /* generic node type selection */
 function bp_select_type(type, defaults) {
     bp_show_edit_node(undefined, false);
-    jQuery('.bp_type_box').prop('checked', false).button("refresh");
-    jQuery('#bp_check_'+type).prop('checked', true).button("refresh");
+    jQuery(".js-type-select").removeClass("active");
+    jQuery('.js-type-select-'+type).addClass("active");
     jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom', 'statusfilter'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
     // change details tab
     showElement('bp_select_'+type);
     // switch to details tab
-    jQuery("#edit_dialog_"+bp_id).tabs({ active: 1 });
+    setTab('tabs-2_'+bp_id);
 
     // insert current values
     var node = bp_get_node(current_edit_node);
@@ -570,7 +567,7 @@ function bp_update_cust_attributes(select, node) {
     });
 
     // add help row
-    jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">Help</th><td align="left" class="bp_type_desc" id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
+    jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">Help</th><td align="left" id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
 }
 
 /* show node type select: not_more */
@@ -621,7 +618,7 @@ var edit_dialog;
 function bp_show_edit_node(id, refreshType) {
     if(refreshType == undefined) { refreshType = true; }
     hideElement('bp_menu');
-    jQuery("#bp_add_new_node").dialog().dialog("close");
+    closeModalWindow();
     if(id) {
         if(id == 'new') {
             current_edit_node         = 'new';
@@ -633,38 +630,8 @@ function bp_show_edit_node(id, refreshType) {
         }
     }
     jQuery('#bp_node_id').val(current_edit_node);
-    // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
-    jQuery("#edit_dialog_"+bp_id).tabs().dialog({
-        autoOpen: false,
-        width: 570, height: 400,
-        draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
-        modal: true,
-        closeOnEscape: true,
-        buttons: [{
-              'text':   current_edit_node == 'new' ? 'Create' : 'Save',
-              'click':  function() { bp_edit_node_submit('bp_edit_node_form'); },
-              'class': 'bp_dialog_create_btn'
-        }],
-        create: function() { // turn tabs into dialogs
-            // define the elements we're dealing with
-            var tabs = jQuery(this).find('.ui-tabs-nav');
-            var dlg  = jQuery(this).parent();
-            edit_dialog = dlg;
-            // clone close button from dialog title and put it in the tabs area
-            dlg.find('.ui-dialog-titlebar-close').appendTo(tabs);
-            // make the tabs draggable, give it a class that gracefully adds the move cursor and remove the dialog's original titlebar completely
-            dlg.draggable({handle: ".ui-tabs-nav"})
-                .addClass('ui-draggable')
-                .find('.ui-dialog-titlebar').remove();
-            // give dialog styles to the tabs (would like to do this without adding CSS, but couldn't)
-            dlg.find('.ui-tabs').css('padding', '0px');
-            // turn off the highlighting of tabs in chrome, add titlebar style to tabs to give close button correct styling
-            tabs.addClass('ui-dialog-titlebar')
-                .find('li, a').css('outline', 'none').mousedown(function(e){ e.stopPropagation(); });
-        }
-    });
-    jQuery('.bp_type_box').button();
-    jQuery("#edit_dialog_"+bp_id).dialog("open");
+
+    openModalWindow(document.getElementById("edit_dialog_"+bp_id));
 
     // show correct type
     var node = bp_get_node(current_edit_node);
@@ -672,7 +639,7 @@ function bp_show_edit_node(id, refreshType) {
         bp_select_type(node.func.toLowerCase());
     }
     if(id && id == 'current') {
-        jQuery("#edit_dialog_"+bp_id).tabs({ active: 0 });
+        setTab("tabs-2_"+bp_id);
     }
 
     // update object creation status
@@ -725,11 +692,6 @@ function bp_show_edit_node(id, refreshType) {
     // initialize tabs
     bp_initialize_children_tab(node);
     bp_initialize_filter_tab(node);
-
-    // make dragable again
-    if(edit_dialog) {
-        edit_dialog.draggable({handle: ".ui-tabs-nav"}).addClass('ui-draggable');
-    }
 }
 
 function bpRemoveAttribute(attr) {
@@ -738,6 +700,7 @@ function bpRemoveAttribute(attr) {
 }
 
 function bpAddAttribute(attr) {
+    if(!attr || attr.match(/^\-/)) { return; }
     jQuery("INPUT[name=bp_"+attr+"]").parents("TR").show();
     jQuery("INPUT[name=bp_"+attr+"]").val('');
 }
@@ -813,7 +776,7 @@ function bp_edit_node_submit(formId) {
     var data = jQuery('#'+formId).serializeArray();
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
     bp_post_and_refresh('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, current_edit_node);
-    jQuery('#edit_dialog_'+bp_id).dialog("close");
+    closeModalWindow();
     return false;
 }
 
@@ -957,7 +920,7 @@ function bp_update_status(evt, node) {
     jQuery('.bp_status_extinfo_link').css('display', 'none');
     if(link) {
         jQuery('.bp_status_extinfo_link').html(link);
-        if(!minimal) {
+        if(minimal) {
             jQuery('.bp_status_extinfo_link').css('display', '');
         }
     }
@@ -1131,7 +1094,9 @@ var bp_graph_layout;
 function bp_render(containerId, nodes, edges) {
     // first reset zoom
     bp_zoom(1);
+    jQuery('#'+containerId).css("visibility", "hidden");
     var g = new dagre.Digraph();
+
     jQuery.each(nodes, function(nr, n) {
         g.addNode(n.id, { label: n.label, width: node_width, height: node_height });
     });
@@ -1164,6 +1129,7 @@ function bp_render(containerId, nodes, edges) {
         bp_plump('inner_'+containerId, u, v, value);
     });
 
+    jQuery('#'+containerId).css("visibility", "");
     bp_redraw();
 }
 
@@ -1233,9 +1199,9 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     jQuery(container).append('<div id="'+edge_id+'"><\/div>');
     var edge_container = jQuery('#'+edge_id);
 
-    var srcX = upos.left + 55;
+    var srcX = upos.left + 60;
     var srcY = upos.top + 20;
-    var tarX = lpos.left + 55;
+    var tarX = lpos.left + 60;
     var tarY = lpos.top + 20;
     if(bp_graph_options.bp_rankDir == 'TB') {
         // Top -> Bottom Graphs
@@ -1344,11 +1310,8 @@ function bp_redraw(evt) {
     // adjust size of container
     var container = document.getElementById('bp'+bp_id);
     if(!container) { return false; }
-    graphW = jQuery(window).width() - container.offsetLeft - 5;
-    graphH = jQuery(window).height() - container.offsetTop -10;
-    if(!minimal) {
-        graphW = graphW - 315;
-    }
+    graphW = jQuery(container).width();
+    graphH = jQuery(container).height();
 
     var zcontainer = document.getElementById('zoom'+bp_id);
     if(!zcontainer) { return false; }

@@ -40,13 +40,13 @@
   [% END %]
   <tr>
     <th class="align-middle"><i class="uil uil-star"></i></th>
-    <th class="align-middle">Favicon:</th>
+    <th class="align-middle">Favicon</th>
     <td>
       <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')" class="w-40">
     </td>
   </tr>
   <tr>
-    <th colspan=3><h4>Page Actions</h4></th>
+    <th colspan=3><h4 class="pt-2 border-b borderDefault">Page Actions</h4></th>
   </tr>
   [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
   <tr>
