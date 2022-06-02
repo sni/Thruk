@@ -244,10 +244,12 @@
       </table>
     </div>
   [% ELSIF type == 'radio' %]
+    <div class="radiogroup">
       [% FOR v = fh.extra %]
         <input type="radio" id="[% v | html %]" name="params.[% key %]" value="[% v | html %]"[% IF v == value %] checked[% END %] onchange="reports_update_affected_sla_objects(this)">
-        <label for="[% v | html %]" class="pr-2 clickable">[% v | html %]</label>
+        <label for="[% v | html %]">[% v | html %]</label>
       [% END %]
+    </div>
   [% ELSIF type == 'themes' %]
     <select name='params.[% key %]' class="w-56">
       [% FOR t = c.config.themes %]
