@@ -1,11 +1,12 @@
-﻿<table width="100%" id="[% div_id %]" style="display: none;">
-  <tr>
-    <td></td>
-    <td align="left">[% div_help %]</td>
-  </tr>
-  <tr>
-    <th align="right">Label</th>
-    <td align="left"><input type="text" value="" name="bp_label_[% function | html %]" placeholder="node name"></td>
-  </tr>
-  [% content %]
-</table>
+﻿<div id="[% div_id %]" class="p-2" style="display: none;">
+  <table class="cellspacing w-full h-full">
+    <tr>
+      <th colspan="2"><h4 class="w-fit mx-auto leading-4">[% div_help %]</h4></th>
+    </tr>
+    <tr>
+      <th class="text-right">Label</th>
+      <td><input type="text" class="w-80" value="" name="bp_label_[% function | html %]" placeholder="node name"></td>
+    </tr>
+    [% content %]
+  </table>
+</div>

@@ -281,13 +281,8 @@ function bp_fill_select_form(data, form) {
     if(data.radio) {
         for(var key in data.radio) {
             var d = data.radio[key];
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+']')
-               .prop("checked", false)
-               .checkboxradio({
-                  icon: false
-            });
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked",true).checkboxradio("refresh");
-            jQuery(d[1]).controlgroup();
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+']').prop("checked", false)
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked",true);
         }
     }
     if(data.text) {
@@ -512,7 +507,7 @@ function bp_update_cust_attributes(select, node) {
     });
 
     // remove old attributes and help
-    jQuery('#bp_select_custom > tbody > tr').each(function(nr, row) {
+    jQuery('#bp_select_custom > table > tbody > tr').each(function(nr, row) {
         if(nr >= 3) {
             jQuery(row).remove();
         }
@@ -529,28 +524,23 @@ function bp_update_cust_attributes(select, node) {
             val = node['func_args'][x+1];
         }
         if(arg['type'] == 'text') {
-            field = '<input type="text" value="" name="bp_arg'+nr+'_custom" placeholder="'+arg['args']+'"><\/td><\/tr>';
+            field = '<input type="text" class="w-80" value="" name="bp_arg'+nr+'_custom" placeholder="'+arg['args']+'"><\/td><\/tr>';
         }
         else if(arg['type'] == 'select') {
-            field = '<select name="bp_arg'+nr+'_custom">';
+            field = '<select name="bp_arg'+nr+'_custom" class="w-80">';
             jQuery(arg['args']).each(function(x, option) {
                 field += "<option value='"+option+"'>"+option+"<\/option>";
             });
             field += '<\/select>';
         }
         else if(arg['type'] == 'checkbox') {
-            field = '<div id="bp_radio_'+nr+'">';
+            field = '<div id="bp_radio_'+nr+'" class="radiogroup">';
             jQuery(arg['args']).each(function(y, option) {
                 field += '<input type="radio" value="'+option+'" id="bp_custom_'+nr+'_'+y+'" name="bp_arg'+nr+'_custom" /><label for="bp_custom_'+nr+'_'+y+'">'+option+'</label>';
             });
             field += "<\/div>";
         }
-        jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">'+arg['name']+'</th><td align="left">'+field+'<\/td><\/tr>');
-
-        // make buttonset nicer
-        if(arg['type'] == 'checkbox') {
-            jQuery('#bp_radio_'+nr).buttonset();
-        }
+        jQuery('#bp_select_custom tr:last').after('<tr><th class="text-right align-top">'+arg['name']+'</th><td align="left">'+field+'<\/td><\/tr>');
 
         var value = {};
         value['bp_arg'+nr+'_custom'] = val;
@@ -567,7 +557,7 @@ function bp_update_cust_attributes(select, node) {
     });
 
     // add help row
-    jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">Help</th><td align="left" id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
+    jQuery('#bp_select_custom tr:last').after('<tr><th class="text-right align-top">Help</th><td id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
 }
 
 /* show node type select: not_more */
@@ -772,8 +762,15 @@ function bp_initialize_children_tab(node) {
 /* save node */
 function bp_edit_node_submit(formId) {
     // add selected nodes
-    jQuery('#'+formId).find('#bp_'+bp_id+'_selected_nodes OPTION').prop('selected',true);
-    var data = jQuery('#'+formId).serializeArray();
+    jQuery('#'+formId).find("select").each(function(i, el) {
+      if(el.selectedIndex >= 0) {
+        el.options[el.selectedIndex].setAttribute("selected","");
+      }
+    });
+    var form = document.getElementById(formId).cloneNode(true);
+    jQuery(form).find(".template").remove();
+    jQuery(form).find('#bp_'+bp_id+'_selected_nodes OPTION').prop('selected',true);
+    var data = jQuery(form).serializeArray();
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
     bp_post_and_refresh('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, current_edit_node);
     closeModalWindow();
@@ -825,6 +822,7 @@ function bp_update_status(evt, node) {
     }
     status_text = status_text.replace(/\n+/g, '<br>').replace(/\\+n/g, '<br>');
     jQuery('#bp_status_plugin_output').html(status_text);
+    jQuery('#bp_status_plugin_output_expanded').html(status_text);
 
     if(jQuery('#bp_status_plugin_output').overflown()) {
         jQuery('#bp_status_plugin_output_expand').css({visibility: 'inherit'});
@@ -993,25 +991,6 @@ function bp_loaded() {
         } else {
             jQuery(".bp_back_link").hide();
         }
-    }
-}
-
-/* toggle display of long plugin output */
-function bp_toggle_plugin_output() {
-    if(!jQuery('#bp_status_plugin_output').overflown()) {
-        return;
-    }
-    var tr = jQuery('#bp_status_plugin_output').parents("TR").first();
-    if(!tr.hasClass("expanded")) {
-        showElement('bp_status_plugin_output', undefined, true, undefined, function() {
-            // restore on body close
-            tr.removeClass("expanded");
-            window.setTimeout(function() {
-                // restore visibility
-                showElement('bp_status_plugin_output');
-            }, 100);
-        });
-        tr.addClass("expanded");
     }
 }
 
