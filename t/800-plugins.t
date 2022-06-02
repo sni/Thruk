@@ -23,7 +23,6 @@ my $plugins = [
     { name => 'editor' },
     { name => 'omd' },
     { name => 'pansnaps' },
-    { name => 'status-dashboard', skip_tests => qr/(Perl\-Critic|modules)/mx },
     { name => 'woshsh' },
 ];
 my $filter = $ARGV[0];

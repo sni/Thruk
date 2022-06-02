@@ -10,7 +10,7 @@ module.exports = {
      '../../../plugins/plugins-available/*/root/*.js',
   ],
   safelist: [
-  '.textUP', '.textOK', '.textWARNING', '.textUNKNOWN', '.textDOWN', '.textCRITICAL', '.textUNREACHABLE', '.textPENDING',
+  '.textUP', '.textOK', '.textWARNING', '.textUNKNOWN', '.textDOWN', '.textCRITICAL', '.textUNREACHABLE', '.textPENDING', '.textHINTsoft',
   '.UP', '.OK', '.WARNING', '.UNKNOWN', '.DOWN', '.CRITICAL', '.UNREACHABLE', '.PENDING', '.PROBLEMS',
   '.bgUP', '.bgOK', '.bgWARNING', '.bgUNKNOWN', '.bgDOWN', '.bgCRITICAL', '.bgUNREACHABLE', '.bgPENDING', '.bgPROBLEMS',
   ],
