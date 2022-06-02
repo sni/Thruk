@@ -237,7 +237,7 @@
               </a>
             [% END %]
           [% END %]
-          <a class="button" href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]" class='comment'>
+          <a class="button" href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]">
             <i class="fa-solid fa-bars mr-1"></i>List recent downtimes
           </a>
         </div>
