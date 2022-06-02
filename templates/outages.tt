@@ -47,7 +47,7 @@
                   </a>
                   [% IF use_feature_trends %]
                     <a href="trends.cgi?host=[% host.name | uri %]">
-                      <i class="fa-solid fa-arrow-trend-up" title='View trends for this host'></i>
+                      <i class="fa-solid fa-chart-simple" title='View trends for this host'></i>
                     </a>
                   [% END %]
                   <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1">
