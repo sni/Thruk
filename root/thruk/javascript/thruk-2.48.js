@@ -534,15 +534,31 @@ function openModalWindowUrl(url) {
     return false;
 }
 
+var modalElement  = null;
+var modalElementP = null;
 function openModalWindow(content) {
     jQuery(document.body).append('<div id="modalBG" class="modalBG"><\/div>');
-    jQuery(document.body).append('<div id="modalFG" class="modalFG">'+content+'<\/div>');
+    if(content && content.tagName) {
+        modalElementP = content.parentNode;
+        jQuery(document.body).append('<div id="modalFG" class="modalFG"><\/div>');
+        jQuery('#modalFG').append(jQuery(content));
+        content.style.display = "";
+        modalElement = content;
+    } else {
+        jQuery(document.body).append('<div id="modalFG" class="modalFG">'+content+'<\/div>');
+    }
     jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
     addEvent(document, 'keydown', closeModalWindowOnEscape);
     return false;
 }
 
 function closeModalWindow() {
+    if(modalElement) {
+        modalElement.style.display = "none";
+        jQuery(modalElementP).append(jQuery(modalElement));
+        modalElement  = null;
+        modalElementP = null;
+    }
     jQuery('#modalBG').remove();
     jQuery('#modalFG').remove();
     jQuery('DIV.daterangepicker').remove();
@@ -3041,6 +3057,15 @@ function set_sub(nr, hash) {
         set_hash(hash);
     }
 
+    return false;
+}
+
+/* select active tabs */
+function setTab(id) {
+    jQuery('.js-tabs').css('display', 'none');
+    jQuery('SPAN.tabs').removeClass("active");
+    jQuery('#'+id+'_head').addClass("active");
+    jQuery('#'+id).css('display', '');
     return false;
 }
 

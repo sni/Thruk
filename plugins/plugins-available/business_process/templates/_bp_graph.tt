@@ -1,5 +1,10 @@
 ﻿[% USE date %]
 <div class="absolute top-1 right-2 flexcol gap-px p-0 z-20 bp_container_zoom">
+  [% IF minimal %]
+  <div class="h-5">
+    <div class="bp_status_extinfo_link" style="display: none;"></div>
+  </div>
+  [% END %]
   <a class="button text-xs font-normal p-px m-0" href="#" onclick="bp_zoom_rel(0.05)">+</a>
   <a class="button text-xs font-normal p-px m-0" href="#" onclick="bp_zoom_reset()" id='zoom_val_[% bp.id %]'>=</a>
   <a class="button text-xs font-normal p-px m-0" href="#" onclick="bp_zoom_rel(-0.05)">-</a>
@@ -9,7 +14,7 @@
 </div>
 <div class="relative w-full h-full z-10 overflow-auto">
   <div id='zoom[% bp.id %]'>
-  <div id='container[% bp.id %]' class="bp_container" style="height: 100%; width: 100%;">
+  <div id='container[% bp.id %]' class="bp_container" style="height: 100%; width: 100%; visibility: hidden;">
     <div id='inner_container[% bp.id %]' class="bp_container_inner">
       [% FOREACH n IN bp.nodes %]
       [% statusClass = 'UNKNOWN' %]
@@ -27,7 +32,7 @@
         [% has_details_link = 1 %]
       [% END %]
       <div id='[% n.id %]'
-          class='bp_node [% IF !no_menu || has_details_link %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %][% IF highlight_node == n.id %] bp_node_active[% END %]'
+          class='bp_node overflow-visible [% IF !no_menu || has_details_link %]clickable [% END %] [% statusClass %][% IF n.testmode %] testmode[% END %][% IF highlight_node == n.id %] bp_node_active[% END %]'
           [% UNLESS no_menu %]oncontextmenu="bp_context_menu_open(event, this)"[% END %]
           onmouseover="bp_mouse_over_node(event, this);"
           onmouseout="bp_mouse_out_node(event, this);"
@@ -41,10 +46,10 @@
           <div class="bp_label" [% IF n.label.length > 20 %]style="font-size: 9px; line-height: 8px;"[% END %]><span class="bp_label">[% n.label | html %]</span></div>
           <div class="bp_sublabel" title="[% nl2br(escape_html(short_desc)).replace('<br>', '&#013;') %]">[% short_desc | html %]</div>
           [% UNLESS no_menu %]
-          <a href="#" onclick="return bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><i class="fa-solid fa-pencil text-xs text1 js-edit-icon"></i></a>
+          <a href="#" onclick="return bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon hoverable rounded"><i class="fa-solid fa-pencil text-xs text1 js-edit-icon"></i></a>
           [% END %]
-          <a href="#" class="bp_node_bp_ref_icon" style="visibility: hidden;"><i class="fa-solid fa-shuffle text-xs text1"></i></a>
-          <a href="#" class="bp_node_link_icon" style="visibility: hidden;"><i class="fa-solid fa-arrow-right text-xs text1"></i></a>
+          <a href="#" class="bp_node_bp_ref_icon hoverable rounded" style="visibility: hidden;"><i class="fa-solid fa-shuffle text-xs text1"></i></a>
+          <a href="#" class="bp_node_link_icon hoverable rounded" style="visibility: hidden;"><i class="fa-solid fa-arrow-right text-xs text1"></i></a>
           <div class="bp_node_icons">
             [% IF n.testmode %]
               <i class="fa-solid fa-lock text-xs text1" title="Status has been locked by testmode"></i>
@@ -62,7 +67,7 @@
           </div>
           [% END %]
           [% IF editmode  %]
-          <div class="bp_node_add_icon clickable" onclick="bp_add_new_node()">
+          <div class="bp_node_add_icon clickable hoverable rounded relative left-10 bottom-1 w-fit hidden" onclick="bp_add_new_node()">
             <i class="uil uil-plus-circle text1" title="add new node"></i>
           </div>
           [% END %]

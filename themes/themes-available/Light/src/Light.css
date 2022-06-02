@@ -287,6 +287,9 @@ TR:nth-child(even) TD.tableRowSelected {
   .hoverable {
     @apply hover:hoverBG1;
   }
+  .not-hoverable {
+    @apply hover:bg-inherit !important;
+  }
 
   .vertical {
     -ms-writing-mode: tb-rl;
@@ -659,13 +662,14 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
     justify-center
     bg-gray-300
     text-gray-700
-    hover:bg-gray-400
-    hover:text-white
-    hover:cursor-pointer
     ease-in-out
     transition
     items-center
   ;
+
+  &.active, &:hover {
+    @apply bg-gray-400 text-white cursor-pointer;
+  }
 
   &.secondary {
     @apply bg-sky-500 hover:bg-sky-600 text-white hover:text-sky-200;
