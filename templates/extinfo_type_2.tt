@@ -219,6 +219,44 @@
     </div>
   </div>
 
+  <div class="card w-full mt-5">
+    <div class="head justify-between">
+      <h3>Service Downtimes</h3>
+      [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
+        <div class="flex gap-1">
+          [% UNLESS command_disabled(c, '56') %]
+            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Add downtime</a>
+            [% IF use_feature_recurring_downtime %]
+              <a class="button" href="extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Add recurring downtime</a>
+            [% END %]
+          [% END %]
+          [% IF downtimes %]
+            [% UNLESS command_disabled(c, '5') %]
+              <a class="button js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
+                <i class="fa-solid fa-trash mr-1"></i>Delete all
+              </a>
+            [% END %]
+          [% END %]
+          <a class="button" href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]" class='comment'>
+            <i class="fa-solid fa-bars mr-1"></i>List recent downtimes
+          </a>
+        </div>
+      [% END %]
+    </div>
+    <div>
+      [% IF downtimes.size > 0 %]
+        [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 sortprefix='_dtm' %]
+      [% END %]
+      [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+        <div class="px-2 py-1 border-b[%IF downtimes.size > 0 %] border-t[% END %]"><h4>Recurring Service Downtimes</h4></div>
+        [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' names=0 %]
+      [% END %]
+      [% IF downtimes.size == 0 && recurring_downtimes.size == 0 %]
+        <div class="flex justify-center p-2 textALERT">There are no downtimes</div>
+      [% END %]
+    </div>
+  </div>
+
   [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
     <div class="card mt-5 w-full">
       <div class="head justify-between">

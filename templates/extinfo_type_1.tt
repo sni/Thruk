@@ -124,7 +124,7 @@
     [% END %]
   </div>
 </div>
-<!-- DOWNTIMES -->
+
 <div class="card w-full mt-5">
   <div class="head justify-between">
     <h3>Host Downtimes</h3>
@@ -152,25 +152,26 @@
             </div>
           [% END %]
         [% END %]
+        <div>
+          <a class="button" href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]">
+            <i class="fa-solid fa-bars mr-1"></i>List recent downtimes
+          </a>
+        </div>
       </div>
     [% END %]
   </div>
   <div>
     [% IF downtimes.size > 0 %]
       [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 sortprefix='_dtm' %]
-    [% ELSE %]  [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
-    <br>
-    <div class='commentTitle'>Recurring Host Downtime</div>
-    [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
-  [% END %]
-      <div class="flex justify-center textALERT p-2">There are no downtimes</div>
+    [% END %]
+    [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+      <div class="px-2 py-1 border-b[%IF downtimes.size > 0 %] border-t[% END %]"><h4>Recurring Host Downtimes</h4></div>
+      [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
+    [% END %]
+    [% IF downtimes.size == 0 && recurring_downtimes.size == 0 %]
+      <div class="flex justify-center p-2 textALERT">There are no downtimes</div>
     [% END %]
   </div>
-  [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
-    <br>
-    <div class='commentTitle'>Recurring Host Downtime</div>
-    [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
-  [% END %]
 </div>
 
 [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
