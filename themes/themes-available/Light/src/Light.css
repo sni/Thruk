@@ -51,6 +51,9 @@
    .textPager {
      @apply text-gray-500;
    }
+   .textHINTsoft {
+     @apply text-gray-400;
+   }
 
    .textActive1 {
      @apply text-blue-600;
@@ -528,7 +531,7 @@ I.fa-solid, I.uil {
   }
   .card {
     @apply w-min h-min text-left overflow-hidden rounded-lg text2 bgCard shadow-card;
-    >DIV.head {
+    DIV.head {
       @apply h-[40px] px-2 border-b borderDefault items-center flex;
       SPAN.tabs {
         @apply text-sm inline-block px-4 py-1.5 hover:hoverBG1 h-full w-fit align-middle border-y-2 border-transparent whitespace-nowrap;
@@ -537,7 +540,7 @@ I.fa-solid, I.uil {
         }
       }
     }
-    >DIV.body {
+    DIV.body {
       @apply p-2 w-full;
     }
     TABLE.body {
@@ -547,7 +550,7 @@ I.fa-solid, I.uil {
         }
       }
     }
-    >DIV.footer {
+    DIV.footer {
       @apply h-[40px] px-2 border-t borderDefault items-center flex;
     }
   }
