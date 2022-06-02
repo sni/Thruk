@@ -56,16 +56,23 @@
         <tr>
           <th>Status</th>
           <td>
-            <div id="bp_status_status"></div>
-            <div class="bp_status_status_icons">
-              <i id="bp_status_icon_downtime" class="fa-solid fa-moon" title="This Business Process is currently in a period of scheduled downtime" style="display: none;"></i>
-              <i id="bp_status_icon_ack" class="fa-solid fa-person-digging" title="This problem has been acknowledged" style="display: none;"></i>
+            <div class="flexrow flex-nowrap gap-0 justify-between">
+              <div id="bp_status_status"></div>
+              <div class="bp_status_status_icons">
+                <i id="bp_status_icon_downtime" class="fa-solid fa-moon" title="This Business Process is currently in a period of scheduled downtime" style="display: none;"></i>
+                <i id="bp_status_icon_ack" class="fa-solid fa-person-digging" title="This problem has been acknowledged" style="display: none;"></i>
+              </div>
             </div>
           </td>
         </tr>
-        <tr class='clickable' onclick="bp_toggle_plugin_output();">
+        <tr class='clickable' onclick="toggleElement('bp_status_plugin_output_expanded', undefined, true); return false;">
           <th>Plugin Output<div id="bp_status_plugin_output_expand" class="w-full text-center font-bold h-4">...</div></th>
-          <td><div id="bp_status_plugin_output" class="truncate max-w-full"></div></td>
+          <td class="align-top relative">
+            <div class="absolute w-0 h-0 right-0 top-0">
+              <div id="bp_status_plugin_output_expanded" class="card shadow-float fixed z-50 p-2 -translate-x-full" style="display: none;"></div>
+            </div>
+            <div id="bp_status_plugin_output" class="truncate max-w-full overflow-hidden"></div>
+          </td>
         </tr>
         <tr>
           <th>Last Check</th>

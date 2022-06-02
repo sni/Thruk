@@ -6190,6 +6190,7 @@ function delete_filter_row(event) {
   }
   /* find first table row */
   while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
+  if(jQuery(row).hasClass("template")) { return; }
   row.parentNode.deleteRow(row.rowIndex);
   return false;
 }
@@ -6505,8 +6506,8 @@ function selectByValue(select, val) {
 function resetFilter(prefix, d) {
     var filterTable = document.getElementById(prefix+'filterTable');
     // remove all existing text filter
-    jQuery(filterTable).find('TD.filterValueInput').each(function(i, el) {
-      jQuery(el).parents().first().find(".newfilter").click();
+    jQuery(filterTable).find('.js-remove-filter-row').each(function(i, el) {
+      jQuery(el).click();
     });
 
     // add our text filter

@@ -651,23 +651,29 @@ DIV.progressbar {
 /*******************************************************************************
  * buttons
  */
+@layer base {
+  .defaultButton {
+    @apply
+      flex
+      rounded
+      px-2 py-1 m-0
+      font-medium
+      whitespace-nowrap
+      truncate
+      text-sm
+      text-center
+      justify-center
+      bg-gray-300
+      text-gray-700
+      ease-in-out
+      transition
+      items-center
+    ;
+  }
+}
+
 BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
-  @apply
-    flex
-    rounded
-    px-2 py-1 m-0
-    font-medium
-    whitespace-nowrap
-    truncate
-    text-sm
-    text-center
-    justify-center
-    bg-gray-300
-    text-gray-700
-    ease-in-out
-    transition
-    items-center
-  ;
+  @apply defaultButton;
 
   &.active, &:hover {
     @apply bg-gray-400 text-white cursor-pointer;
@@ -737,6 +743,19 @@ DIV.buttongroup {
   @apply flex flex-row flex-nowrap w-fit;
   BUTTON {
     @apply border border-r-0 borderDark rounded-none first:rounded-l last:rounded-r last:border-r;
+  }
+}
+
+DIV.radiogroup {
+  @apply flex flex-row flex-nowrap w-fit gap-0;
+  INPUT[type="radio"] {
+    @apply invisible w-0 border-0;
+  }
+  INPUT[type="radio"] + label {
+    @apply defaultButton clickable border border-r-0 borderDark rounded-none second:rounded-l last:rounded-r last:border-r grow basis-0 min-w-fit;
+  }
+  INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
+    @apply bg-gray-400 text-white cursor-pointer;
   }
 }
 

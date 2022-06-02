@@ -101,7 +101,7 @@
           <span class="tabs" id="tabs-5_[% bp.id %]_head" onclick="setTab('tabs-5_[% bp.id %]')">Link</span>
           <span class="tabs" id="tabs-6_[% bp.id %]_head" onclick="setTab('tabs-6_[% bp.id %]')">General</span>
         </div>
-        <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+        <button class="iconOnly medium hoverable mr-2" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
       </div>
 
 <!-- TAB 1: TYPE -->
@@ -111,7 +111,7 @@
       </div>
 
 <!-- TAB 2: DETAILS -->
-      <div id="tabs-2_[% bp.id %]" class="js-tabs grow h-full">
+      <div id="tabs-2_[% bp.id %]" class="js-tabs grow h-full overflow-auto">
 
 
     <!-- host/service status type select -->
@@ -121,23 +121,25 @@
         div_help='Uses status from the selected host or service.<br>'
               _ 'The hoststatus will be used if the service is left empty.<br>'
               _ 'Regular expressions in service descriptions are possible, ex.:<br>'
-              _ 'Service: <span class="bp_help_cmd">w:^db_.*</span> (worst state of all db_* services),<br>'
-              _ 'Service: <span class="bp_help_cmd">b:^(db_|web_).*</span> (best state from all db_*  and web_* services)'
+              _ 'Service: <span class="textHINT">w:^db_.*</span> (worst state of all db_* services),<br>'
+              _ 'Service: <span class="textHINT">b:^(db_|web_).*</span> (best state from all db_*  and web_* services)'
     %]
     <tr>
-      <th align="right">Host</th>
-      <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"></td>
+      <th class="text-right">Host</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"></td>
     </tr>
     <tr>
-      <th align="right">Service</th>
-      <td align="left">
-        <select name="bp_arg3_status" id="bp_arg3_status" class="filter_op_select">
-          <option value="~">~</option>
-          <option value="!~">!~</option>
-          <option value="=">=</option>
-          <option value="!=">!=</option>
-        </select>
-        <input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })">
+      <th class="text-right">Service</th>
+      <td>
+        <div class="flexrow flex-nowrap gap-1 w-80">
+          <select name="bp_arg3_status" id="bp_arg3_status" class="filter_op_select w-fit">
+            <option value="~">~</option>
+            <option value="!~">!~</option>
+            <option value="=">=</option>
+            <option value="!=">!=</option>
+          </select>
+          <input type="text" class="w-full" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, regex_matching:true, search_for_cb:bp_remove_search_prefix, append_value_of: 'bp_arg1_status' })">
+        </div>
       </td>
     </tr>
     [% END %]
@@ -147,36 +149,38 @@
     [% WRAPPER _bp_context_menu_frame.tt
         div_id='bp_select_groupstatus'
         function='groupstatus'
-        div_help='Uses status from the selected host- or servicegroup. Thresholds are calculated against the number of failed objects. Not using thresholds will display the worst host/servicestate.'
+        div_help='Uses status from the selected host- or servicegroup.<br>'
+               _ 'Thresholds are calculated against the number of failed objects.<br>'
+               _ 'Not using thresholds will display the worst host/servicestate.'
     %]
     <tr>
-      <th align="right">Type</th>
-      <td align="left">
-        <div class="bp_groupstatus_radio">
+      <th class="text-right">Type</th>
+      <td>
+        <div class="bp_groupstatus_radio radiogroup">
           <input type="radio" value="hostgroup"    id="bp_groupstatus_hostgroup"    name="bp_arg1_groupstatus" onChange="bp_groupstatus_check_changed()" /><label for="bp_groupstatus_hostgroup">Hostgroup</label>
           <input type="radio" value="servicegroup" id="bp_groupstatus_servicegroup" name="bp_arg1_groupstatus" onChange="bp_groupstatus_check_changed()" /><label for="bp_groupstatus_servicegroup">Servicegroup</label>
         </div>
       </td>
     </tr>
     <tr>
-      <th align="right">Group</th>
-      <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup" onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp;', autosubmit:false })"></td>
+      <th class="text-right">Group</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup" onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp;', autosubmit:false })"></td>
     </tr>
     <tr>
-      <th align="right" nowrap>Hosts Warning</th>
-      <td align="left"><input type="text" value="" id="bp_arg3_groupstatus" name="bp_arg3_groupstatus" placeholder="opt. hosts warn. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Hosts Warning</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg3_groupstatus" name="bp_arg3_groupstatus" placeholder="opt. hosts warn. threshold, ex: 5 or 10%"></td>
     </tr>
     <tr>
-      <th align="right" nowrap>Hosts Critical</th>
-      <td align="left"><input type="text" value="" id="bp_arg4_groupstatus" name="bp_arg4_groupstatus" placeholder="opt. hosts crit. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Hosts Critical</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg4_groupstatus" name="bp_arg4_groupstatus" placeholder="opt. hosts crit. threshold, ex: 5 or 10%"></td>
     </tr>
     <tr>
-      <th align="right" nowrap>Services Warn.</th>
-      <td align="left"><input type="text" value="" id="bp_arg5_groupstatus" name="bp_arg5_groupstatus" placeholder="opt. services warn. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Services Warn.</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg5_groupstatus" name="bp_arg5_groupstatus" placeholder="opt. services warn. threshold, ex: 5 or 10%"></td>
     </tr>
     <tr>
-      <th align="right" nowrap>Services Crit.</th>
-      <td align="left"><input type="text" value="" id="bp_arg6_groupstatus" name="bp_arg6_groupstatus" placeholder="opt. services crit. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Services Crit.</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg6_groupstatus" name="bp_arg6_groupstatus" placeholder="opt. services crit. threshold, ex: 5 or 10%"></td>
     </tr>
     [% END %]
 
@@ -188,9 +192,9 @@
         div_help='Uses status from the filtered hosts- or services.'
     %]
     <tr>
-      <th align="right">Aggregation</th>
-      <td align="left">
-        <div class="bp_statusfilter_radio">
+      <th class="text-right">Aggregation</th>
+      <td>
+        <div class="bp_statusfilter_radio radiogroup w-64">
           <input type="radio" value="worst" id="bp_statusfilter_worst" name="bp_arg1_statusfilter" onchange="bp_statusfilter_changed()" checked="checked" /><label for="bp_statusfilter_worst">Worst</label>
           <input type="radio" value="best" id="bp_statusfilter_best" name="bp_arg1_statusfilter" onchange="bp_statusfilter_changed()" /><label for="bp_statusfilter_best">Best</label>
           <input type="radio" value="threshold" id="bp_statusfilter_threshold" name="bp_arg1_statusfilter" onchange="bp_statusfilter_changed()" /><label for="bp_statusfilter_threshold">Threshold</label>
@@ -198,9 +202,9 @@
       </td>
     </tr>
     <tr>
-      <th align="right">Type</th>
-      <td align="left">
-        <div class="bp_statusfilter_radio">
+      <th class="text-right">Type</th>
+      <td>
+        <div class="bp_statusfilter_radio radiogroup w-64">
           <input type="radio" value="both" id="bp_statusfilter_both" name="bp_arg2_statusfilter" checked="checked" onchange="bp_statusfilter_changed()" /><label for="bp_statusfilter_both">Both</label>
           <input type="radio" value="hosts" id="bp_statusfilter_hosts" name="bp_arg2_statusfilter" onchange="bp_statusfilter_changed()" /><label for="bp_statusfilter_hosts">Hosts</label>
           <input type="radio" value="services" id="bp_statusfilter_services" name="bp_arg2_statusfilter" onchange="bp_statusfilter_changed()" /><label for="bp_statusfilter_services">Services</label>
@@ -208,28 +212,26 @@
       </td>
     </tr>
     <tr>
-      <th align="right" valign="top">Filter</th>
-      <td align="left">
-        <table id="dfl_s0_filterTable" style="width: 320px;">
+      <th class="text-right align-top">Filter</th>
+      <td>
         [% PROCESS _status_filter_single.tt paneprefix="dfl_" prefix="s0" onchange="" %]
-        </table>
       </td>
     </tr>
     <tr class="statusfilter_host_thresholds">
-      <th align="right" nowrap>Hosts Warning</th>
-      <td align="left"><input type="text" value="" id="bp_arg4_statusfilter" name="bp_arg4_statusfilter" placeholder="opt. hosts warn. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Hosts Warning</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg4_statusfilter" name="bp_arg4_statusfilter" placeholder="opt. hosts warn. threshold, ex: 5 or 10%"></td>
     </tr>
     <tr class="statusfilter_host_thresholds">
-      <th align="right" nowrap>Hosts Critical</th>
-      <td align="left"><input type="text" value="" id="bp_arg5_statusfilter" name="bp_arg5_statusfilter" placeholder="opt. hosts crit. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Hosts Critical</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg5_statusfilter" name="bp_arg5_statusfilter" placeholder="opt. hosts crit. threshold, ex: 5 or 10%"></td>
     </tr>
     <tr class="statusfilter_service_thresholds">
-      <th align="right" nowrap>Services Warn.</th>
-      <td align="left"><input type="text" value="" id="bp_arg6_statusfilter" name="bp_arg6_statusfilter" placeholder="opt. services warn. threshold, ex: 5 or 10%"></td>
+      <th class="text-right" nowrap>Services Warn.</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg6_statusfilter" name="bp_arg6_statusfilter" placeholder="opt. services warn. threshold, ex: 5 or 10%"></td>
     </tr>
     <tr class="statusfilter_service_thresholds">
-      <th align="right" nowrap>Services Crit.</th>
-      <td align="left"><input type="text" value="" id="bp_arg7_statusfilter" name="bp_arg7_statusfilter" placeholder="opt. services crit. threshold, ex: 5 or 10%"></td>
+      <th class="text-right">Services Crit.</th>
+      <td><input type="text" class="w-80" value="" id="bp_arg7_statusfilter" name="bp_arg7_statusfilter" placeholder="opt. services crit. threshold, ex: 5 or 10%"></td>
     </tr>
     [% END %]
 
@@ -241,9 +243,9 @@
         div_help='Shows the same fixed state all the time.'
     %]
     <tr>
-      <th align="right">Status</th>
-      <td align="left">
-        <div class="bp_fixed_radio">
+      <th class="text-right">Status</th>
+      <td>
+        <div class="bp_fixed_radio radiogroup">
           <input type="radio" value="OK" id="bp_fixed_ok" name="bp_arg1_fixed" checked="checked" /><label for="bp_fixed_ok">Ok</label>
           <input type="radio" value="WARNING" id="bp_fixed_warning" name="bp_arg1_fixed" /><label for="bp_fixed_warning">Warning</label>
           <input type="radio" value="CRITICAL" id="bp_fixed_critical" name="bp_arg1_fixed" /><label for="bp_fixed_critical">Critical</label>
@@ -252,8 +254,8 @@
       </td>
     </tr>
     <tr>
-      <th align="right">Plugin Output</th>
-      <td align="left"><input type="text" value="" name="bp_arg2_fixed" placeholder="dummy plugin output"></td>
+      <th class="text-right">Plugin Output</th>
+      <td><input type="text" class="w-80" value="" name="bp_arg2_fixed" placeholder="dummy plugin output"></td>
     </tr>
     [% END %]
 
@@ -264,7 +266,7 @@
         div_help='Shows the best state of all nodes.'
     %]
       <tr>
-        <td align="center" colspan=2>this aggregation function does not have any arguments.</td>
+        <td class="text-center" colspan=2>this aggregation function does not have any arguments.</td>
       </tr>
     [% END %]
 
@@ -275,7 +277,7 @@
         div_help='Shows the worst state of all nodes.'
     %]
       <tr>
-        <td align="center" colspan=2>this aggregation function does not have any arguments.</td>
+        <td class="text-center" colspan=2>this aggregation function does not have any arguments.</td>
       </tr>
     [% END %]
 
@@ -286,8 +288,8 @@
         div_help='Ok if the number of good nodes equals this number.'
     %]
     <tr>
-      <th align="right">Number</th>
-      <td align="left"><input type="text" value="" name="bp_arg1_equals" placeholder="threshold, ex.: 2"></td>
+      <th class="text-right">Number</th>
+      <td><input type="text" class="w-80" value="" name="bp_arg1_equals" placeholder="threshold, ex.: 2"></td>
     </tr>
     [% END %]
 
@@ -299,12 +301,12 @@
               _ 'There must be <b>not more</b> than this number of nodes ok.'
     %]
     <tr>
-      <th align="right">Warning</th>
-      <td align="left"><input type="text" value="" name="bp_arg1_not_more" placeholder="threshold, ex.: 2"></td>
+      <th class="text-right">Warning</th>
+      <td><input type="text" class="w-80" value="" name="bp_arg1_not_more" placeholder="threshold, ex.: 2"></td>
     </tr>
     <tr>
-      <th align="right">Critical</th>
-      <td align="left"><input type="text" value="" name="bp_arg2_not_more" placeholder="threshold, ex.: 3"></td>
+      <th class="text-right">Critical</th>
+      <td><input type="text" class="w-80" value="" name="bp_arg2_not_more" placeholder="threshold, ex.: 3"></td>
     </tr>
     [% END %]
 
@@ -316,12 +318,12 @@
               _ 'There must be <b>at least</b> this number of nodes ok.'
     %]
     <tr>
-      <th align="right">Warning</th>
-      <td align="left"><input type="text" value="" name="bp_arg1_at_least" placeholder="threshold, ex.: 2"></td>
+      <th class="text-right">Warning</th>
+      <td><input type="text" class="w-80" value="" name="bp_arg1_at_least" placeholder="threshold, ex.: 2"></td>
     </tr>
     <tr>
-      <th align="right">Critical</th>
-      <td align="left"><input type="text" value="" name="bp_arg2_at_least" placeholder="threshold, ex.: 3"></td>
+      <th class="text-right">Critical</th>
+      <td><input type="text" class="w-80" value="" name="bp_arg2_at_least" placeholder="threshold, ex.: 3"></td>
     </tr>
     [% END %]
 
@@ -329,12 +331,12 @@
     [% WRAPPER _bp_context_menu_frame.tt
         div_id='bp_select_custom'
         function='custom'
-        div_help='Custom Aggregation Functions.<br><a href="http://thruk.org/documentation/business-process.html#custom-functions" target="_blank">See online documentation for details<i class="uil uil-external-link-alt text-sm"></i></a>'
+        div_help='Custom Aggregation Functions.<br><a class="link" href="http://thruk.org/documentation/business-process.html#custom-functions" target="_blank">See online documentation for details<i class="uil uil-external-link-alt text-sm"></i></a>'
     %]
     <tr>
-      <th align="right">Custom Function</th>
-      <td align="left">
-        <select name="bp_arg1_custom" id="bp_arg1_custom" onchange="bp_update_cust_attributes(this)">
+      <th class="text-right">Custom Function</th>
+      <td>
+        <select name="bp_arg1_custom" class="w-80" id="bp_arg1_custom" onchange="bp_update_cust_attributes(this)">
         </select>
       </td>
     </tr>
@@ -562,7 +564,7 @@
         </table>
       </div>
 
-      <div class="footer h-min py-2 flexrow justify-between items-end">
+      <div class="footer h-min py-2 flexrow justify-evenly items-end">
         <button class="w-16" onclick="closeModalWindow()">Cancel</button>
         <button class="green w-16">Accept</button>
       </div>
