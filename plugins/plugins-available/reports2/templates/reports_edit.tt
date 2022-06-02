@@ -11,7 +11,7 @@
     <input type="hidden" name="report" value="[% r.nr %]">
     <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
     <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[600px]">
-      <div class="head justify-between" style="flex: 0 0 40px;"> <!-- ToDo: Why 40px? -->
+      <div class="head justify-between" style="flex: 0 0 40px;">
         <a href="reports2.cgi" class="button back-button rounded w-[70px]" title="Go back to report list">
           <i class="uil uil-angle-double-left"></i>Back
         </a>
@@ -148,7 +148,7 @@
           </tbody>
         </table>
       </div>
-      <div class="footer [% IF r.nr != "new" %]justify-between[% ELSE %]justify-center[% END %]" style="flex: 0 0 40px;">
+      <div class="footer justify-evenly" style="flex: 0 0 40px;">
           [% IF r.nr != "new" %]<button name="action" value="remove" class="hover-red w-32" onclick="return(confirm('really remove report: [% r.name | html %]?'))"><i class="uil uil-trash-alt"></i> Delete</button>[% END %]
           <button class="w-44 green"><i class="uil uil-save"></i> Save Report</button>
           [% IF r.nr != "new" %]<button name="action" value="clone" class="w-32"><i class="uil uil-copy"></i> Clone Report</button>[% END %]
