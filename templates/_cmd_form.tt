@@ -7,6 +7,7 @@
   </div>
   <div class="body">
     <form method='post' action='cmd.cgi' onsubmit="setFormBtnSpinner(this)">
+      <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
       <input type="hidden" name="referer" value="[% referer | html %]">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <input type='hidden' name='cmd_typ' value="[% cmd_typ | html %]">

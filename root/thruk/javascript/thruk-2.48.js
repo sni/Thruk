@@ -128,6 +128,7 @@ function init_page() {
         .on("click", function(e) {
             e.preventDefault();
             openModalCommand(this);
+            return false;
         });
 
     jQuery("DIV.js-perf-bar").each(function(i, el) {
@@ -501,13 +502,22 @@ function openModalCommand(el) {
     if(el.href.match(/\?/)) {
         append = "&modal=1";
     }
-    openModalWindowUrl(el.href+append);
+    openModalWindowUrl(el.href+append, function() {
+        var inputs = jQuery("#modalFG INPUT[required][value='']");
+        if(inputs.length == 0) {
+            inputs = jQuery("#modalFG INPUT[value='']");
+        }
+        if(inputs.length == 0) {
+            inputs = jQuery("#modalFG BUTTON[type='submit']");
+        }
+        jQuery(inputs).first().focus();
+    });
 }
 
-function openModalWindowUrl(url) {
+function openModalWindowUrl(url, callback) {
     if(!has_jquery_ui) {
         load_jquery_ui(function() {
-            openModalWindowUrl(url);
+            openModalWindowUrl(url, callback);
         });
         return;
     }
@@ -530,6 +540,7 @@ function openModalWindowUrl(url) {
             jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
             jQuery('#modalFG H3, #modalFG .head').css("cursor", "move");
         }
+        if(callback) { callback(text, status, req); }
     });
     return false;
 }
@@ -8080,33 +8091,6 @@ function move_histou_img(factor) {
 
     return set_histou_img(start, end);
 }
-
-/* initialize all buttons */
-function init_buttons() {
-    jQuery('BUTTON.button').button();
-
-    jQuery('A.report_button').button();
-    jQuery('BUTTON.report_button').button();
-
-    jQuery('.save_button').button({
-        icons: {primary: 'ui-save-button'}
-    });
-
-    jQuery('.right_arrow_button').button({
-        icons: {primary: 'ui-r-arrow-button'}
-    });
-
-    jQuery('.add_button').button({
-        icons: {primary: 'ui-add-button'}
-    });
-
-    jQuery('.remove_button').button({
-        icons: {primary: 'ui-remove-button'}
-    }).click(function() {
-        return confirm('really delete?');
-    });
-}
-
 
 /*******************************************************************************
 88888888888 db  8b           d8 88   ,ad8888ba,   ,ad8888ba,   888b      88
