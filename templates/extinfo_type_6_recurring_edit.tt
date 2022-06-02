@@ -5,20 +5,20 @@
 <div class="flexrow 2xl:justify-between">
   [% PROCESS _infobox.tt %]
 
-  <div class="card min-w-[550px] w-[700px]">
-    <div class="head justify-between">
-      <a href="extinfo.cgi?type=6&amp;recurring" class="button back-button rounded w-[70px]" title="Go back to recurring downtimes">
-        <i class="uil uil-angle-double-left"></i>Back
-      </a>
-      <h3>Recurring Downtime</h3>
-      <div class="w-[70px]"></div>
-    </div>
-    <div>
-      <form action="extinfo.cgi" method="POST">
-        <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
-        <input type="hidden" name="nr" value="[% rd.file | html %]">
-        <input type="hidden" name="type" value="6">
-        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+  <form action="extinfo.cgi" method="POST" class="min-w-[550px] w-[700px]">
+    <div class="card">
+      <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+      <input type="hidden" name="nr" value="[% rd.file | html %]">
+      <input type="hidden" name="type" value="6">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <div class="head justify-between">
+        <a href="extinfo.cgi?type=6&amp;recurring" class="button back-button rounded w-[70px]" title="Go back to recurring downtimes">
+          <i class="uil uil-angle-double-left"></i>Back
+        </a>
+        <h3>Recurring Downtime</h3>
+        <div class="w-[70px]"></div>
+      </div>
+      <div class="overflow-auto">
         <table class='recurring_downtimes body cellspacing'>
           <tr class="firstrow">
             <th>Type</th>
@@ -33,23 +33,23 @@
           </tr>
 
           [% IF backends.size > 1 %]
-          <tr>
-            <th class="align-top">Backend</th>
-            <td colspan=2>
-              [% IF backends.size > 10 %]
-                [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit onchange="" %]
-              [% ELSIF backends.size > 1 %]
-              [% backends_selected=0 %]
-              [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
-              <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
-              <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
-                [% FOREACH b = backends %]
-                <option value="[% b | html %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+            <tr>
+              <th class="align-top">Backend</th>
+              <td colspan=2>
+                [% IF backends.size > 10 %]
+                  [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit onchange="" %]
+                [% ELSIF backends.size > 1 %]
+                [% backends_selected=0 %]
+                [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
+                <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
+                <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
+                  [% FOREACH b = backends %]
+                  <option value="[% b | html %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+                  [% END %]
+                </select>
                 [% END %]
-              </select>
-              [% END %]
-            </td>
-          </tr>
+              </td>
+            </tr>
           [% END %]
           <tr id="input_host">
             <th>Host</th>
@@ -90,7 +90,6 @@
                 [% PROCESS _cron_edit.tt nr = 0 %]
                 [% FOREACH cr = rd.schedule %]
                     [% nr = loop.index + 1 %]
-                    HALLO
                     [% PROCESS _cron_edit.tt %]
                 [% END %]
                 [% IF can_edit %]
@@ -135,24 +134,19 @@
               </select>
             </td>
           </tr>
-          <tr>
-            <td colspan=3>
-              <div class="flex justify-center gap-x-5">
-                [% IF rd.file %]
-                  <button name="recurring" value="remove" class="hover-red w-32" onclick="return(confirm('Do you really want to remove this downtime?'))">
-                    <i class="uil uil-trash-alt"></i>Delete
-                  </button>
-                [% END %]
-                <button name="recurring" value="save" class="w-32"[% IF !can_edit %] disabled[% END %]>Save</button>
-              </div>
-            </td>
-          </tr>
         </table>
-      </form>
+      </div>
+      <div class="footer justify-evenly">
+        [% IF rd.file %]
+          <button name="recurring" value="remove" class="hover-red w-32" onclick="return(confirm('Do you really want to remove this downtime?'))">
+            <i class="uil uil-trash-alt"></i>Delete
+          </button>
+        [% END %]
+        <button name="recurring" value="save" class="w-32 green"[% IF !can_edit %] disabled[% END %]>Save</button>
+      </div>
     </div>
-  </div>
-
-  <div class="w-[350px] hidden xl:block"></div>
+    <div class="w-[350px] hidden xl:block"></div>
+  </form>
 </div>
 
 <script type="text/javascript">
