@@ -103,11 +103,11 @@
             </tr>
             <tr>
               <th>To</th>
-              <td colspan=2><input type="text" name="to" value="[% r.to | html %]" class="w-full"></td>
+              <td colspan=2><input type="text" name="to" value="[% r.to | html %]" class="w-full" placeholder="email1, email2, ..."></td>
             </tr>
             <tr>
               <th>Cc</th>
-              <td colspan=2><input type="text" name="cc" value="[% r.cc | html %]" class="w-full"></td>
+              <td colspan=2><input type="text" name="cc" value="[% r.cc | html %]" class="w-full" placeholder="email1, email2, ..."></td>
             </tr>
             <tr>
               <th class="align-top">Schedule</th>
