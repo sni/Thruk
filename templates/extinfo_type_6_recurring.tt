@@ -9,8 +9,7 @@
 
 <div class="flexrow flex-nowrap my-2">
   <div class="flex basis-1/3 self-end gap-1">
-    [% style="downtimes" %]
-    [% PROCESS _json_export.tt %]
+    <!-- TODO: Add export icons similar to normal downtimes site? -->
   </div>
   <div class="basis-1/3 self-end">
     <div class="hint text-center whitespace-nowrap text-xs">Mark downtimes with leftclick. Select multiple with shift + mouse.</div>
@@ -18,20 +17,16 @@
   <div class="basis-1/3 flex"></div>
 </div>
 
-[% IF !command_disabled(c, '55') && !command_disabled(c, '56') %]
-  <div class="flex justify-end">
-    <a class="button green" href='extinfo.cgi?recurring=add&amp;type=6'><i class="fa-solid fa-moon"></i>Add recurring downtime</a>
-  </div>
-[% END %]
 <div class="card w-full mt-2">
   <div class="mainTableHeader">
     <div>
       [% PROCESS _table_search_field.tt ids=["recurring_downtimes_table_all"] %]
     </div>
-    <div>
-    </div>
-    <div>
-    </div>
+    [% IF !command_disabled(c, '55') && !command_disabled(c, '56') %]
+      <div class="flex justify-end">
+        <a class="button green" href='extinfo.cgi?recurring=add&amp;type=6'>Add recurring downtime</a>
+      </div>
+    [% END %]
   </div>
   <div class="mainTable">
     [% PROCESS _downtimes_recurring_table.tt downtimes = downtimes type='all' names=1 %]
@@ -42,29 +37,5 @@
     </div>
   </div>
 </div>
-
-
-
-
-    <div align="center">
-    <table border=0 cellpadding=0 cellspacing=0>
-    <tr>
-    <td width=150></td>
-    <td align="center">
-    [% IF !command_disabled(c, '55') && !command_disabled(c, '56') %]
-    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?recurring=add&amp;type=6'>Add recurring downtime</a></div><br>
-    [% END %]
-    </td>
-    <td width=150 align="right">
-        [% PROCESS _table_search_field.tt ids=["recurring_downtimes_table_all"] %]
-    </td>
-    </tr>
-    <tr>
-    <td colspan=3>
-    [% PROCESS _downtimes_recurring_table.tt downtimes = downtimes type='all' names=1 %]
-    </td>
-    </tr>
-    </table>
-    </div>
 
 [% PROCESS _footer.tt %]

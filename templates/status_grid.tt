@@ -91,7 +91,7 @@
               <thead>
                 <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()">
                   <th class='status col_name'>Host</th>
-                  <th class='status col_state'>Status</th>
+                  <th class='status col_state'>Services</th>
                   <th class='status col_actions'>Actions</th>
                   [% start_with = 3 %]
                   [% FOREACH col = default_columns.$paneprefix %]

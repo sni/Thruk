@@ -2,162 +2,166 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-        [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="middle" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table><br>
-    <br>
+<div class="flexrow 2xl:justify-between">
+  [% PROCESS _infobox.tt %]
 
-<form action="extinfo.cgi" method="POST">
-<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
-<input type="hidden" name="nr" value="[% rd.file | html %]">
-<input type="hidden" name="type" value="6">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-<table border="1" class='data recurring_downtimes'>
-  <tr>
-    <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
-    <th class="data" nowrap>Recurring Downtime</th>
-    <th class='data' style="width:125px;"></th>
-  </tr>
-  <tr class="firstrow">
-    <td class="dataEven" align="center"><b>Type</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <select name="target" id="type_select" onchange="update_recurring_type_select('type_select')"[% IF !can_edit %] disabled[% END %]>
-        <option[% IF rd.target == 'host'         %] selected[% END %]>Host</option>
-        <option[% IF rd.target == 'service'      %] selected[% END %]>Service</option>
-        <option[% IF rd.target == 'hostgroup'    %] selected[% END %]>Hostgroup</option>
-        <option[% IF rd.target == 'servicegroup' %] selected[% END %]>Servicegroup</option>
-      </select>
-    </td>
-  </tr>
+  <div class="card min-w-[550px] w-[700px]">
+    <div class="head justify-between">
+      <a href="extinfo.cgi?type=6&amp;recurring" class="button back-button rounded w-[70px]" title="Go back to recurring downtimes">
+        <i class="uil uil-angle-double-left"></i>Back
+      </a>
+      <h3>Recurring Downtime</h3>
+      <div class="w-[70px]"></div>
+    </div>
+    <div>
+      <form action="extinfo.cgi" method="POST">
+        <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+        <input type="hidden" name="nr" value="[% rd.file | html %]">
+        <input type="hidden" name="type" value="6">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+        <table class='recurring_downtimes body cellspacing'>
+          <tr class="firstrow">
+            <th>Type</th>
+            <td colspan=2>
+              <select name="target" id="type_select" onchange="update_recurring_type_select('type_select')"[% IF !can_edit %] disabled[% END %]>
+                <option[% IF rd.target == 'host'         %] selected[% END %]>Host</option>
+                <option[% IF rd.target == 'service'      %] selected[% END %]>Service</option>
+                <option[% IF rd.target == 'hostgroup'    %] selected[% END %]>Hostgroup</option>
+                <option[% IF rd.target == 'servicegroup' %] selected[% END %]>Servicegroup</option>
+              </select>
+            </td>
+          </tr>
 
-  [% IF backends.size > 1 %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Backend</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      [% IF backends.size > 10 %]
-        [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit onchange="" %]
-      [% ELSIF backends.size > 1 %]
-      [% backends_selected=0 %]
-      [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
-      <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
-      <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
-        [% FOREACH b = backends %]
-        <option value="[% b | html %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
-        [% END %]
-      </select>
-      [% END %]
-    </td>
-  </tr>
-  [% END %]
-  <tr id="input_host">
-    <td class="dataEven" align="center"><b>Host</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-  <tr id="input_service">
-    <td class="dataEven" align="center"><b>Service</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="service" name="service" value="[% rd.service.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-  <tr id="input_hostgroup">
-    <td class="dataEven" align="center"><b>Hostgroup</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-  <tr id="input_servicegroup">
-    <td class="dataEven" align="center"><b>Servicegroup</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-
-  <tr>
-    <td class="dataEven" align="center"><b>Comment</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="comment" value="[% rd.comment | html %]"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-        <table id="cron_entries">
-          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
-          [% PROCESS _cron_edit.tt nr = 0 %]
-          [% FOREACH cr = rd.schedule %]
-              [% nr = loop.index + 1 %]
-              [% PROCESS _cron_edit.tt %]
-          [% END %]
-          [% IF can_edit %]
+          [% IF backends.size > 1 %]
           <tr>
-            <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
-                add more
+            <th class="align-top">Backend</th>
+            <td colspan=2>
+              [% IF backends.size > 10 %]
+                [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit onchange="" %]
+              [% ELSIF backends.size > 1 %]
+              [% backends_selected=0 %]
+              [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
+              <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
+              <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
+                [% FOREACH b = backends %]
+                <option value="[% b | html %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+                [% END %]
+              </select>
+              [% END %]
             </td>
           </tr>
           [% END %]
-        </table>
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Duration<br>(in minutes)</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="duration" value="[% rd.duration | html %]"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-  <tr>
-    <td class='dataEven'>Type:</td>
-    <td class="dataOdd" align="left" colspan=2>
-      <select name='fixed'[% IF !can_edit %] disabled[% END %]>
-        <option value="1"[% IF rd.fixed == "1" %] selected[% END %]>Fixed </option>
-        <option value="0"[% IF rd.fixed == "0" %] selected[% END %]>Flexible </option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>If Flexible, Range<br>(in minutes)</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="flex_range" value="[% rd.flex_range | html %]"[% IF !can_edit %] disabled[% END %]>
-    </td>
-  </tr>
-  <tr id="input_host_options">
-    <td class="dataEven" align="center"><b>Child Hosts:</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <select name="childoptions"[% IF !can_edit %] disabled[% END %]>
-        <option value="0"[% IF rd.childoptions == "0" %] selected[% END %]>Do nothing with child hosts</option>
-        <option value="1"[% IF rd.childoptions == "1" %] selected[% END %]>Schedule triggered downtime for all child hosts</option>
-        <option value="2"[% IF rd.childoptions == "2" %] selected[% END %]>Schedule non-triggered downtime for all child hosts</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center" colspan=3>
-      [% IF rd.file %]
-      <button name="recurring" value="remove" class="remove_button button" style="width: 90px;">Delete</button>[% END %]
-      <button name="recurring" value="save" class="save_button button" style="width: 180px;"[% IF !can_edit %] disabled[% END %]>Save</button>
-    </td>
-  </tr>
-</table>
-</form>
+          <tr id="input_host">
+            <th>Host</th>
+            <td colspan=2>
+              <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
+          <tr id="input_service">
+            <th>Service</th>
+            <td colspan=2>
+              <input type="text" id="service" name="service" value="[% rd.service.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
+          <tr id="input_hostgroup">
+            <th>Hostgroup</th>
+            <td colspan=2>
+              <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
+          <tr id="input_servicegroup">
+            <th>Servicegroup</th>
+            <td colspan=2>
+              <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
 
+          <tr>
+            <th>Comment</th>
+            <td colspan=2>
+              <input type="text" name="comment" value="[% rd.comment | html %]"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
+          <tr>
+            <th class="align-top">Schedule</th>
+            <td colspan=2>
+              <table id="cron_entries">
+                [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
+                [% PROCESS _cron_edit.tt nr = 0 %]
+                [% FOREACH cr = rd.schedule %]
+                    [% nr = loop.index + 1 %]
+                    HALLO
+                    [% PROCESS _cron_edit.tt %]
+                [% END %]
+                [% IF can_edit %]
+                  <tr>
+                    <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
+                        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
+                        add more
+                    </td>
+                  </tr>
+                [% END %]
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <th>Duration<br>(in minutes)</th>
+            <td colspan=2>
+              <input type="text" name="duration" value="[% rd.duration | html %]"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
+          <tr>
+            <th>Type</th>
+            <td colspan=2>
+              <select name='fixed'[% IF !can_edit %] disabled[% END %]>
+                <option value="1"[% IF rd.fixed == "1" %] selected[% END %]>Fixed </option>
+                <option value="0"[% IF rd.fixed == "0" %] selected[% END %]>Flexible </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>If Flexible, Range<br>(in minutes)</th>
+            <td colspan=2>
+              <input type="text" name="flex_range" value="[% rd.flex_range | html %]"[% IF !can_edit %] disabled[% END %]>
+            </td>
+          </tr>
+          <tr id="input_host_options">
+            <th>Child Hosts</th>
+            <td colspan=2>
+              <select name="childoptions"[% IF !can_edit %] disabled[% END %]>
+                <option value="0"[% IF rd.childoptions == "0" %] selected[% END %]>Do nothing with child hosts</option>
+                <option value="1"[% IF rd.childoptions == "1" %] selected[% END %]>Schedule triggered downtime for all child hosts</option>
+                <option value="2"[% IF rd.childoptions == "2" %] selected[% END %]>Schedule non-triggered downtime for all child hosts</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan=3>
+              <div class="flex justify-center gap-x-5">
+                [% IF rd.file %]
+                  <button name="recurring" value="remove" class="hover-red w-32" onclick="return(confirm('Do you really want to remove this downtime?'))">
+                    <i class="uil uil-trash-alt"></i>Delete
+                  </button>
+                [% END %]
+                <button name="recurring" value="save" class="w-32"[% IF !can_edit %] disabled[% END %]>Save</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </div>
+
+  <div class="w-[350px] hidden xl:block"></div>
+</div>
 
 <script type="text/javascript">
-<!--
-  init_buttons();
-  [%+ IF rd.schedule.size == 0 +%]
-  add_cron_row('cron_entries');
-  [%+ END +%]
-  update_recurring_type_select('type_select');
--->
-</script>
+  <!--
+    [%+ IF rd.schedule.size == 0 +%]
+    add_cron_row('cron_entries');
+    [%+ END +%]
+    update_recurring_type_select('type_select');
+  -->
+  </script>
 
 [% PROCESS _footer.tt %]
