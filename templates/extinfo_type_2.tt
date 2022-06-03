@@ -270,39 +270,7 @@
         </div>
       </div>
       <div>
-        <table class="cellspacing-x">
-          [% IF source %]
-            <tr>
-              <th>Source</th>
-              <td>[% source %]</td>
-            </tr>
-            [% IF source2 %]
-            <tr>
-              <th></th>
-              <td>[% source2 %]</td>
-            </tr>
-            [% END %]
-            [% IF source3 %]
-              <tr>
-                <th></th>
-                <td>[% source3 %]</td>
-              </tr>
-            [% END %]
-          [% END %]
-          <tr class="whitespace-normal">
-            <th class="align-top w-[170px]">Check Command</th>
-            <td><pre class="whitespace-normal">[% command.line | html %]</pre></td>
-          </tr>
-          <tr class="whitespace-normal">
-            <th class="align-top w-[170px]">Expanded Command</th>
-            <td>
-              [% IF command.note %]
-                <div class="textALERT text-xs italic"><span class="font-semibold">Note:</span> This is not a valid macro</div>
-              [% END %]
-              <pre class="whitespace-normal">[% command.line_expanded | html %]</pre>
-            </td>
-          </tr>
-        </table>
+        [% PROCESS _extinfo_command_line.tt %]
       </div>
     </div>
   [% END %]

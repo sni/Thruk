@@ -82,11 +82,14 @@
         <tr>
           <td class="px-2 py-0.5" colspan="2">
             <div class="flexcol gap-1">
-              <button class="w-full" onclick="showElement('excel_export_url'); hideElement(this); return false;">
+              <button class="w-full" onclick="showElement('excel_export_url_row'); hideElement(this); return false;">
                 <i class="uil uil-link"></i>
                 Permanent link to this export
               </button>
-              <input type="text" value="" id="excel_export_url" style="display: none;" class="w-full">
+              <div class="flexrow flex-nowrap gap-1" style="display: none;" id="excel_export_url_row">
+                <input type="text" value="" class="w-full" id="excel_export_url">
+                <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'excel_export_url'); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>
+              </div>
             </div>
           </td>
         </tr>

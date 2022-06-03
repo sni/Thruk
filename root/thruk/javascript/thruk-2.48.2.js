@@ -4099,7 +4099,10 @@ function togglePasswordVisibility(ev) {
 function copyCode(evt, id) {
     var pre  = document.getElementById(id)
     var code = pre.querySelector("code");
-    var text = code.innerText;
+    var text = pre.value || pre.innerText;
+    if(code) {
+        text = code.innerText;
+    }
     navigator.clipboard.writeText(text);
 
     if(!evt) { return; }

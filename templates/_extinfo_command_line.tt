@@ -1,0 +1,51 @@
+﻿<table class="cellspacing-x">
+  [% IF source %]
+    <tr>
+      <th>Source</th>
+      <td>[% source %]</td>
+    </tr>
+    [% IF source2 %]
+    <tr>
+      <th></th>
+      <td>[% source2 %]</td>
+    </tr>
+    [% END %]
+    [% IF source3 %]
+      <tr>
+        <th></th>
+        <td>[% source3 %]</td>
+      </tr>
+    [% END %]
+  [% END %]
+  <tr class="whitespace-normal">
+    <th class="align-top w-[170px]">Check Command</th>
+    <td>
+      <div class="flex bg-gray-100 px-2 rounded-md items-center">
+        <div class="flex-grow">
+          <pre id="copyToClipboard" class="whitespace-normal"><code>[% command.line | html %]</code></pre>
+        </div>
+        <div>
+          <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'copyToClipboard'); return false;"><i class="uil uil-copy" title="Copy command to clipboard"></i></button>
+        </div>
+      </div>
+    </td>
+  </tr>
+  <tr class="whitespace-normal">
+    <th class="align-top w-[170px]">
+      Expanded Command
+    </th>
+    <td>
+      [% IF command.note %]
+        <div class="textALERT text-xs italic"><span class="font-semibold">Note:</span> This is not a valid macro</div>
+      [% END %]
+      <div class="flex bg-gray-100 px-2 rounded-md items-center">
+        <div class="flex-grow">
+          <pre id="copyToClipboard2" class="whitespace-normal"><code>[% command.line_expanded | html %]</code></pre>
+        </div>
+        <div>
+          <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'copyToClipboard2'); return false;"><i class="uil uil-copy" title="Copy expanded command to clipboard"></i></button>
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>

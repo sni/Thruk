@@ -10,7 +10,10 @@
       [% IF style != 'combined' %]
         <form action='#' method="GET" id="url_form">
       [% END %]
-      <input type="text" size="60" value="" id="url_input" onfocus="updateExportLink(this); this.select()" readonly>
+      <div class="flexrow flex-nowrap gap-1">
+        <input type="text" size="60" value="" id="url_input" onfocus="updateExportLink(this); this.select()" readonly>
+        <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'url_input'); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>
+      </div>
       [% IF style != 'combined' %]
         </form>
       [% END %]
