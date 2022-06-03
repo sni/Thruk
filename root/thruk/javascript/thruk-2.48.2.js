@@ -14,7 +14,6 @@ var cmdPaneState     = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Object();
 var removeParams     = new Object();
-var scrollToPos      = null
 var refreshTimer;
 var lastRowSelected;
 var lastRowHighlighted;
@@ -179,30 +178,7 @@ function init_page() {
 
     var params = toQueryParams();
     if(params["scrollTo"]) {
-        scrollToPos = params["scrollTo"];
-    }
-    if(scrollToPos) {
-        var scrolls = scrollToPos.split("_");
-        for(var i = 0; i < scrolls.length; i++) { scrolls[i] = Number(scrolls[i]); }
-        if(scrolls[0] > 0 || scrolls[1] > 0) {
-            var main = jQuery("MAIN")[0];
-            if(main) {
-                main.scroll(scrolls[0], scrolls[1]);
-            }
-        }
-        if(scrolls[3] != null && (scrolls[2] > 0 || scrolls[3] > 0)) {
-            var mainTable = jQuery(".mainTable")[0];
-            if(mainTable) {
-                mainTable.scroll(scrolls[2], scrolls[3]);
-            }
-        }
-        if(scrolls[4] != null && scrolls[4] > 0) {
-            var navTable = jQuery("DIV.navsectionlinks.scrollauto")[0];
-            if(navTable) {
-                navTable.scroll(0, scrolls[4]);
-            }
-        }
-        scrollToPos = null;
+        applyScroll(params["scrollTo"]);
     }
 
     cleanUnderscoreUrl();
@@ -223,6 +199,29 @@ function init_page() {
             }
         } catch(err) {
             console.log(err);
+        }
+    }
+}
+
+function applyScroll(scrollTo) {
+    var scrolls = scrollTo.split("_");
+    for(var i = 0; i < scrolls.length; i++) { scrolls[i] = Number(scrolls[i]); }
+    if(scrolls[0] > 0 || scrolls[1] > 0) {
+        var main = jQuery("MAIN")[0];
+        if(main) {
+            main.scroll(scrolls[0], scrolls[1]);
+        }
+    }
+    if(scrolls[3] != null && (scrolls[2] > 0 || scrolls[3] > 0)) {
+        var mainTable = jQuery(".mainTable")[0];
+        if(mainTable) {
+            mainTable.scroll(scrolls[2], scrolls[3]);
+        }
+    }
+    if(scrolls[4] != null && scrolls[4] > 0) {
+        var navTable = jQuery("DIV.navsectionlinks.scrollauto")[0];
+        if(navTable) {
+            navTable.scroll(0, scrolls[4]);
         }
     }
 }
@@ -325,12 +324,10 @@ function saveScroll() {
     if(!scroll || scroll.match(/^[0:]*$/)) {
         delete additionalParams['scrollTo'];
         removeParams['scrollTo'] = true;
-        scrollToPos = null;
     }
 
     additionalParams['scrollTo'] = scroll;
     delete removeParams['scrollTo'];
-    scrollToPos = scroll;
 }
 
 /* hide a element by id */
@@ -1246,7 +1243,16 @@ function reloadPageDo(withReloadButton, freshReload) {
         data: {},
         success: function(page) {
             isReloading = false;
+            var scrollTo = getPageScroll();
             setInnerHTMLWithScripts(document.documentElement, page);
+            init_page();
+            if(scrollTo) {
+                applyScroll(scrollTo);
+                // chrome does not set scroll immediately on page load, wait some milliseconds and set again
+                window.setTimeout(function() {
+                    applyScroll(scrollTo);
+                }, 50);
+            }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             isReloading = false;
