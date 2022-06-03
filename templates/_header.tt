@@ -46,16 +46,18 @@
           [% PROCESS _header_broadcast.tt %]
 
           <div class="flexrow w-fit gap-2 flex-nowrap">
-            <div class="flex items-center">
-              <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi">
-                <fieldset>
-                  <input type='hidden' name='s0_op' value='~' />
-                  <input type='hidden' name='s0_type' value='search' />
-                  <input type='hidden' name='add_default_service_filter' value='1' />
-                  <input type='search' name='s0_value' class="deletable autosubmit w-20 active:w-40 focus:w-48 transition-all ease-linear duration-150" id="header-search" placeholder="search..." />
-                </fieldset>
-              </form>
-            </div>
+            [% IF c.user_exists %]
+              <div class="flex items-center">
+                <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi">
+                  <fieldset>
+                    <input type='hidden' name='s0_op' value='~' />
+                    <input type='hidden' name='s0_type' value='search' />
+                    <input type='hidden' name='add_default_service_filter' value='1' />
+                    <input type='search' name='s0_value' class="deletable autosubmit w-20 active:w-40 focus:w-48 transition-all ease-linear duration-150" id="header-search" placeholder="search..." />
+                  </fieldset>
+                </form>
+              </div>
+            [% END %]
             <div class="w-fit" id="bug_report" style="display: none;">
               [% IF show_error_reports %]
                 <button class="noprint big red round" id="bug_report-btnEl"><i class="uil uil-thunderstorm"></i></button>
