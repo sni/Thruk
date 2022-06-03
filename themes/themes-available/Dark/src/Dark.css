@@ -3,19 +3,50 @@
 
 @layer base {
   .text1 {
-    @apply text-river-bed-800;
+    @apply !text-gray-100;
   }
   .text2 {
-    @apply text-gray-900;
+    @apply !text-gray-200;
   }
   .text3 {
-    @apply text-gray-200;
+    @apply !text-gray-300;
   }
+  .bodyBG {
+    @apply !bg-[#222];
+  }
+  .headerBG {
+    @apply bg-[#333];
+  }
+  .hoverBG1 {
+    @apply bg-gray-400 !text-white;
+  }
+  .bgTable {
+    @apply bg-[#333];
+  }
+  .rowOdd {
+    @apply bg-[#292929];
+  }
+  .rowEven {
+    @apply bg-[#333];
+  }
+  .borderDefault {
+    @apply border-gray-200;
+  }
+  .borderDark {
+    @apply border-gray-400;
+  }
+  .PROBLEMS {
+    @apply !text-gray-800;
+  }
+}
+
+:root {
+  color-scheme: dark;
 }
 
 body {
   @apply
-    bg-river-bed-600
+    bg-[#222]
     text-river-bed-100
   ;
 }
@@ -26,7 +57,7 @@ header {
 
 @layer base {
   .card {
-    @apply bg-river-bed-400;
+    @apply bg-[#333];
   }
 }
 
@@ -51,7 +82,7 @@ BUTTON.secondary {
   }
 }
 .navsectionlinks {
-  @apply text-black;
+  @apply text-white;
 }
 .navsectionlinks A {
   @apply hover:text-gray-300 hover:bg-gray-600;

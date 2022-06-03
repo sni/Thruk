@@ -11,7 +11,6 @@
  *   - replace old img icons in table with new <i>
  *   - multiple comments in comments TD in host/service details are multiline? Fix
  *   - check body.iframed from header.tt
- *   - Hostgroups and Servicegroups missing on extinfo for Hosts/Services
  *   - Fix service/hostgroup missing right/bottom borders in overview style
  *   - Features:
  *       - Show Tooltip while hoving comment icon "Click to show comments"
@@ -29,6 +28,7 @@
  *       - Problems Page - Select all Buttons buggy, website refreshes and filter changes
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  *       - List recent downtimes => undef down.names in showlog.tt
+ *       - Downtimes Display Filter partially hidden when there are no downtimes
  */
 
 @tailwind base;
