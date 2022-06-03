@@ -44,7 +44,7 @@
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">
           [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
-          [% PROCESS _status_filter.tt style="inTable" %]
+          [% PROCESS _status_filter.tt %]
         </div>
       </div>
       <div>
