@@ -68,6 +68,7 @@ sub index {
         $c->stash->{'remote_user'}  = $c->user->get('username');
     } else {
         $c->stash->{'remote_user'}  = '?';
+        $c->stash->{'show_nav'}     = 0;
     }
 
     # status code must be != 200, otherwise compressed output will fail
