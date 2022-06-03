@@ -5535,7 +5535,7 @@ function selectAllServices(state, pane_prefix) {
 /* select services by class name */
 function selectServicesByClass(classes) {
     jQuery.each(classes, function(i, classname) {
-        jQuery(classname).each(function(i, obj) {
+        jQuery('DIV.mainTable').find(classname).each(function(i, obj) {
             selectService(obj, true);
         })
     });

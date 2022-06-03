@@ -19,8 +19,6 @@
  *       - sorting removed when changing filter
  *       - Comments page, 2 filter boxes, buggy when leaving first box (applies to 2nd box aswell? )
  *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
- *       - select all with downtime does not work (has_downtime class missing)
- *       - Problems Button is buggy, can't close cmd popup
  *       - Problems Page - Select all Buttons buggy, website refreshes and filter changes
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  *       - List recent downtimes => undef down.names in showlog.tt
