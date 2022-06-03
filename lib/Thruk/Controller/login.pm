@@ -58,45 +58,50 @@ sub index {
     my $pass    = $c->req->parameters->{'password'} || '';
     my $referer = $c->req->parameters->{'referer'}  || '';
     $referer    =~ s#^//#/#gmx;         # strip double slashes
-    $referer    = $c->stash->{'url_prefix'} unless $referer;
+    $referer    = $keywords || $c->stash->{'url_prefix'} unless $referer;
     # append slash for omd sites, IE and chrome wont send the login cookie otherwise
     if(($ENV{'OMD_SITE'} and $referer eq '/'.$ENV{'OMD_SITE'})
        or ($referer eq $c->stash->{'url_prefix'})) {
         $referer =~ s/\/*$//gmx;
         $referer = $referer.'/';
     }
-    $referer =~ s/%3f/?/mx;
+    $referer = $c->req->unescape($referer);
     # add trailing slash if referer ends with the product prefix and nothing else
     if($referer =~ m|\Q/$product_prefix\E$|mx) {
         $referer = $referer.'/';
     }
 
-    if(defined $keywords) {
+    # remove known keywords from referer
+    $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession)\&//gmx;
+    $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession)\&/$1/gmx if $keywords;
+
+    $c->stash->{'referer'} = $referer;
+
+    if($keywords) {
         if($keywords eq 'logout') {
             _invalidate_current_session($c, $cookie_path, "user logout");
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
             return $c->redirect_to($logoutref) if $logoutref;
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
         }
-
-        if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
+        elsif($keywords eq 'expired') {
             _invalidate_current_session($c, $cookie_path, "session expired");
             Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
         }
-        if($keywords =~ /^invalid\&(.*)$/mx or $keywords eq 'invalid') {
+        elsif($keywords eq 'invalid') {
             _invalidate_current_session($c, $cookie_path, "session invalid");
             Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
         }
-        if($keywords =~ /^problem\&(.*)$/mx or $keywords eq 'problem') {
+        elsif($keywords eq 'problem') {
             # don't remove all sessions when there is a (temporary) technical problem
             #_invalidate_current_session($c, $cookie_path, "technical issue");
             Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
         }
-        if($keywords =~ /^locked\&(.*)$/mx or $keywords eq 'locked') {
+        elsif($keywords eq 'locked') {
             _invalidate_current_session($c, $cookie_path, "user locked");
             Thruk::Utils::set_message($c, { 'style' => 'fail_message', 'msg' => $c->config->{'locked_message'}, 'escape'  => 0 });
         }
-        if($keywords =~ /^setsession\&(.*)$/mx or $keywords eq 'setsession') {
+        elsif($keywords eq 'setsession') {
             $c->authenticate();
             return $c->redirect_to($referer) if $referer;
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
@@ -243,6 +248,13 @@ sub login_successful {
     }
 
     _audit_log("login", "user login, session started (".$type.")");
+
+    # add missing leading /
+    my $prefix = $c->stash->{'url_prefix'};
+    $prefix =~ s|^/||gmx;
+    if($referer =~ m|^\Q$prefix\E|gmx) {
+        $referer = '/'.$referer;
+    }
 
     return $c->redirect_to($referer);
 }

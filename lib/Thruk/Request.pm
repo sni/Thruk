@@ -72,6 +72,11 @@ sub _url {
     return($self->encoding->decode($url));
 }
 
+sub unescape {
+    my($self, $param) = @_;
+    return(URI::Escape::uri_unescape($param));
+}
+
 # returns uri, but applies HTTP_X_FORWARDED_* environment if set
 sub uri {
     my($self) = @_;
@@ -152,6 +157,10 @@ Returns urldecoded utf8 uri as string.
 =head2 uri
 
 Returns L<Uri> object, but applies HTTP_X_FORWARDED_* environment if set.
+
+=head2 unescape
+
+Returns B<uri_unescape> for given value.
 
 =head1 SEE ALSO
 
