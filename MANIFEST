@@ -183,7 +183,6 @@ plugins/plugins-available/business_process/lib/Thruk/Utils/CLI/Bp.pm
 plugins/plugins-available/business_process/preview.png
 plugins/plugins-available/business_process/root/bp-2.48.2.css
 plugins/plugins-available/business_process/root/bp-2.48.2.js
-plugins/plugins-available/business_process/root/bp-ie-fixes.js
 plugins/plugins-available/business_process/root/images/lock.png
 plugins/plugins-available/business_process/root/images/testmode_critical.png
 plugins/plugins-available/business_process/root/images/testmode_ok.png
