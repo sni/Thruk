@@ -180,10 +180,26 @@ sub _plugin_install {
     if(!$name) {
         return("usage: $0 plugin install <name|tarball>\n", 1);
     }
+    my $url = shift @{$commandoptions};
+
+    # download if it looks like an url
+    my $plugin;
+    if($url && $url =~ m/^https:\/\/.*gz$/gmx) {
+        my $basefile = $url;
+        $basefile =~ s/^.*\///gmx;
+        $basefile =~ s/\.tar\.gz//gmx;
+        $plugin = {
+            'tarball'  => $url,
+            'name'     => $name,
+            'basefile' => $basefile,
+            'version'  => 'DEV',
+        };
+    }
 
     return("ERROR: bogus plugin name\n", 1) unless Thruk::Utils::Plugin::verify_plugin_name($name);
 
-    my($output, $rc, $plugin) = _do_plugin_install($c, $name, $globaloptions);
+    my($output, $rc);
+    ($output, $rc, $plugin) = _do_plugin_install($c, $name, $globaloptions, $plugin);
     if($rc != 0) {
         return($output, $rc);
     }
@@ -196,7 +212,7 @@ sub _plugin_install {
 
 ##############################################
 sub _do_plugin_install {
-    my($c, $name, $globaloptions) = @_;
+    my($c, $name, $globaloptions, $plugin) = @_;
 
     # check/create available folder
     my(undef, $plugin_available_dir) = Thruk::Utils::Plugin::get_plugin_paths($c);
@@ -216,13 +232,14 @@ sub _do_plugin_install {
         # install from file
         $tarball = $name;
     } else {
-        my $plugin;
         # get remote plugins
-        my $plugins = Thruk::Utils::Plugin::get_online_plugins($c, $globaloptions->{'force'});
-        for my $p (sort _plugin_sort @{$plugins}) {
-            if($p->{'name'} eq $name) {
-                $plugin = $p;
-                last;
+        if(!$plugin) {
+            my $plugins = Thruk::Utils::Plugin::get_online_plugins($c, $globaloptions->{'force'});
+            for my $p (sort _plugin_sort @{$plugins}) {
+                if($p->{'name'} eq $name) {
+                    $plugin = $p;
+                    last;
+                }
             }
         }
         if(!$plugin) {
@@ -239,7 +256,7 @@ sub _do_plugin_install {
             _debug(Dumper(\@res));
             return("installation failed\n", 1);
         }
-        $tarball = $tmpdir.'/'.$plugin->{'name'}.'.tar.gz';
+        $tarball = $tmpdir.'/'.($plugin->{'basefile'} // $plugin->{'name'}).'.tar.gz';
         Thruk::Utils::IO::write($tarball, $res[1]->{'result'});
         $stick_version = $plugin->{'version'};
     }
@@ -274,7 +291,7 @@ sub _do_plugin_install {
     $root = $tmpdir.'/'.(keys %{$root})[0];
     move($root, $tmpdir.'/'.$name);
     $root = $tmpdir.'/'.$name;
-    my $plugin = Thruk::Utils::Plugin::read_plugin_details($root);
+    $plugin = Thruk::Utils::Plugin::read_plugin_details($root);
     if(!$plugin->{'version'} && $stick_version) {
         Thruk::Utils::IO::write($root.'/description.txt', 'Version: v'.$stick_version, undef, 1);
     }
