@@ -182,7 +182,7 @@ function init_page() {
         scrollToPos = params["scrollTo"];
     }
     if(scrollToPos) {
-        var scrolls = scrollToPos.split(":");
+        var scrolls = scrollToPos.split("_");
         for(var i = 0; i < scrolls.length; i++) { scrolls[i] = Number(scrolls[i]); }
         if(scrolls[0] > 0 || scrolls[1] > 0) {
             var main = jQuery("MAIN")[0];
@@ -304,8 +304,8 @@ function cleanUnderscoreUrl() {
 function cleanUnderscore(str) {
     str = str.replace(/\?_=\d+/g, '?');
     str = str.replace(/\&_=\d+/g, '');
-    str = str.replace(/\?scrollTo=[:\d\.]+/g, '?');
-    str = str.replace(/\&scrollTo=[:\d\.]+/g, '');
+    str = str.replace(/\?scrollTo=[_\d\.]+/g, '?');
+    str = str.replace(/\&scrollTo=[_\d\.]+/g, '');
     str = str.replace(/\?autoShow=\w+/g, '?');
     str = str.replace(/\&autoShow=\w+/g, '');
     str = str.replace(/\?$/g, '');
@@ -847,13 +847,13 @@ function is_el_subelement(obj_a, obj_b) {
     return false;
 }
 
-/* save settings in a cookie */
-function prefSubmit(url, current_theme) {
-  var sel         = document.getElementById('pref_theme')
+/* save theme settings in a cookie */
+function prefSubmitTheme(current_theme) {
+  var sel = document.getElementById('pref_theme')
   if(current_theme != sel.value) {
-    additionalParams['theme'] = '';
+    removeParams['theme'] = true;
     cookieSave('thruk_theme', sel.value);
-    reloadPage(50, true);
+    reloadPage(50, true, true);
   }
 }
 
@@ -1199,7 +1199,7 @@ function updateUrl() {
 /* reloads the current page and adds some parameter from a hash */
 var isReloading = false;
 var reloadPageTimer;
-function reloadPage(delay, withReloadButton) {
+function reloadPage(delay, withReloadButton, freshReload) {
     if(!delay) { delay = 50; }
     if(delay < 100 && withReloadButton) {
         // update button earlier
@@ -1208,11 +1208,11 @@ function reloadPage(delay, withReloadButton) {
     }
     window.clearTimeout(reloadPageTimer);
     reloadPageTimer = window.setTimeout(function() {
-        reloadPageDo(withReloadButton);
+        reloadPageDo(withReloadButton, freshReload);
     }, delay);
 }
 
-function reloadPageDo(withReloadButton) {
+function reloadPageDo(withReloadButton, freshReload) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
         jQuery("#refresh_button").removeClass("red");
@@ -1233,6 +1233,11 @@ function reloadPageDo(withReloadButton) {
 
     if(fav_counter) {
         updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
+    }
+
+    if(freshReload) {
+        redirect_url(newUrl);
+        return;
     }
 
     jQuery.ajax({
@@ -5677,21 +5682,21 @@ function getPageScroll() {
     var main = jQuery("MAIN").first();
     var scroll = "";
     scroll +=     Number(main.scrollLeft()).toFixed(0);
-    scroll += ":"+Number(main.scrollTop()).toFixed(0);
+    scroll += "_"+Number(main.scrollTop()).toFixed(0);
 
     var mainTable = jQuery(".mainTable").first();
     if(mainTable.length > 0) {
-        scroll += ":"+Number(mainTable.scrollLeft()).toFixed(0);
-        scroll += ":"+Number(mainTable.scrollTop()).toFixed(0);
+        scroll += "_"+Number(mainTable.scrollLeft()).toFixed(0);
+        scroll += "_"+Number(mainTable.scrollTop()).toFixed(0);
     }  else {
-        scroll += "::";
+        scroll += "__";
     }
 
     var navTable = jQuery("DIV.navsectionlinks.scrollauto").first();
     if(navTable.length > 0) {
-        scroll += ":"+Number(navTable.scrollTop()).toFixed(0);
+        scroll += "_"+Number(navTable.scrollTop()).toFixed(0);
     }  else {
-        scroll += ":";
+        scroll += "_";
     }
 
     return scroll;

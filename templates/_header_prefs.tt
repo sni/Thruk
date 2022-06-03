@@ -22,7 +22,7 @@
         <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
         [% END %]
       </select>
-      <input type="button" name="submit" value="change" onClick="prefSubmit(full_uri, '[% theme %]')">
+      <input type="button" name="submit" value="change" onClick="prefSubmitTheme('[% theme %]')">
     </td>
   </tr>
   [% IF show_sounds %]
