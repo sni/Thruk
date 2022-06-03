@@ -70,7 +70,7 @@
     <div>
       <div class="flex flex-nowrap gap-x-1 items-center">
         [% PROCESS _status_column_select.tt colprefix="hst" columns_name="host" %]
-        [% PROCESS _status_filter.tt style="inTable" %]
+        [% PROCESS _status_filter.tt %]
       </div>
     </div>
     <div>

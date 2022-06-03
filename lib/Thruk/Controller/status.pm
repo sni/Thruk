@@ -513,7 +513,13 @@ sub _process_details_page {
     push @{$extra_columns}, 'contacts' if $has_columns;
 
     # get all services
-    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns  );
+    my $services = $c->db->get_services(
+                                filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                sort    => { $backend_order => $sortoptions->{$sortoption}->[0] },
+                                pager   => 1,
+                                columns => $columns,
+                                extra_columns => $extra_columns,
+                    );
 
     if(scalar @{$services} == 0 && !$c->stash->{'has_service_filter'}) {
         # try to find matching hosts, maybe we got some hosts without service
