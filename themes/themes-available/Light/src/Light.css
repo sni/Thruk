@@ -13,11 +13,7 @@
  *   - check body.iframed from header.tt
  *   - Fix service/hostgroup missing right/bottom borders in overview style
  *   - Features:
- *       - Show Tooltip while hoving comment icon "Click to show comments"
  *       - change Options for Columns on Configuration page (extinfo type 4) + make Host_name sticky
- *       - config.cgi Show correct "xxx of yyy items displayed" with JS count when using the filter
- *       - Copy button next to extended command, also auto copy on the bookmark URL button
- *       - js-modal-command-link for recurring downtimes?
  *   - Bugs:
  *       - JS sets width when searching on filter field (reports or broadcast) -> refresh, table width not 100% anymore
  *       - sorting removed when changing filter

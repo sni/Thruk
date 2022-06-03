@@ -2684,6 +2684,7 @@ templates/_downtimes_table.tt
 templates/_error_report.tt
 templates/_excel_export.tt
 templates/_extinfo_cmd_pane.tt
+templates/_extinfo_command_line.tt
 templates/_extinfo_host_service_details.tt
 templates/_extinfo_type_0_blocks.tt
 templates/_extinfo_type_0_table.tt
