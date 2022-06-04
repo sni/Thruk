@@ -197,7 +197,7 @@ END
       [% IF obj.check_type == 0; d = duration(obj.check_interval * pi_detail.$peer_key.interval_length, 5) %]
         <span class="check_interval" title="this [% type | html %] will be checked every [% d %]."> (&infin;[% d %])</span>
       [% END %]
-      [% IF obj.is_executing > 0 %]<div class="spinner" title="This [% type | html %] is currently executing its [% type | html %]check">[% END %]
+      [% IF obj.is_executing > 0 %]<div class="spinner" title="This [% type | html %] is currently executing its [% type | html %]check"></div>[% END %]
       [% IF obj.depends_exec.size > 0 %]
         (dependency:
         [% FOREACH parent IN obj.depends_exec %]
