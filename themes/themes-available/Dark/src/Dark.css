@@ -1,99 +1,429 @@
 /* Dark.css */
 @import '../../Light/src/Light.css';
 
-@layer base {
-  .text1 {
-    @apply !text-gray-100;
-  }
-  .text2 {
-    @apply !text-gray-200;
-  }
-  .text3 {
-    @apply !text-gray-300;
-  }
-  .bodyBG {
-    @apply !bg-[#222];
-  }
-  .headerBG {
-    @apply bg-[#333];
-  }
-  .hoverBG1 {
-    @apply bg-gray-400 !text-white;
-  }
-  .bgTable {
-    @apply bg-[#333];
-  }
-  .rowOdd {
-    @apply bg-[#292929];
-  }
-  .rowEven {
-    @apply bg-[#333];
-  }
-  .borderDefault {
-    @apply border-gray-200;
-  }
-  .borderDark {
-    @apply border-gray-400;
-  }
-  .PROBLEMS {
-    @apply !text-gray-800;
-  }
-}
+/*******************************************************************************
+ * basic colors for dark theme
+ */
 
-:root {
+ :root {
   color-scheme: dark;
-}
+ }
 
-body {
-  @apply
-    bg-[#222]
-    text-river-bed-100
-  ;
-}
-
-header {
-  @apply bg-gray-500;
-}
-
-@layer base {
-  .card {
-    @apply bg-[#333];
+ @layer base {
+  .textBody {
+    @apply !text-[#d4d4d4];
   }
+  .textCard {
+    @apply !text-[#ccc];
+  }
+  .textTH {
+    @apply !text-white;
+  }
+  .textPager {
+    @apply text-gray-200;
+  }
+  .textHINTsoft {
+    @apply text-gray-400;
+  }
+
+  .textActive1 {
+    @apply text-blue-600;
+  }
+  .textActive2 {
+    @apply text-red-600 !important;
+  }
+
+ .textUP, .textOK, .textSUCCESS {
+   @apply !text-green-600;
+ }
+ .textWARNING {
+   @apply !text-yellow-600;
+ }
+ .textUNKNOWN, .textHINT {
+   @apply !text-orange-600;
+ }
+ .textDOWN, .textCRITICAL, .textERROR, .textALERT {
+   @apply !text-red-600;
+ }
+ .textUNREACHABLE {
+   @apply !text-red-500;
+ }
+ .textPENDING {
+   @apply !text-truegray-600;
+ }
+
+ .UP, .OK, .YES, .ENABLED, .button_peerUP {
+   @apply !bg-green-500 !text-white;
+ }
+ .WARNING {
+   @apply !bg-yellow-500 !text-white;
+ }
+ .UNKNOWN {
+   @apply !bg-orange-500 !text-white;
+ }
+ .DOWN, .CRITICAL, .NO, .DISABLED, .button_peerDOWN {
+   @apply !bg-red-500 !text-white;
+ }
+ .UNREACHABLE {
+   @apply !bg-red-400 !text-white;
+ }
+ .PENDING {
+   @apply !bg-truegray-500 !text-white;
+ }
+ .button_peerDIS {
+   @apply !bg-truegray-300 !text-white;
+ }
+ .button_peerHID {
+   @apply !bg-truegray-200 !text-white;
+ }
+ .PROBLEMS {
+   @apply !bg-yellow-200 !text-gray-800;
+ }
+ .CONSOLE {
+   @apply text-lime-500 bg-black text-sm font-mono;
+ }
+
+ .bgUP, .bgOK, .bgSUCCESS {
+   @apply !bg-green-200;
+ }
+ .bgWARNING {
+   @apply !bg-yellow-200;
+ }
+ .bgUNKNOWN, .bgHINT {
+   @apply !bg-orange-200;
+ }
+ .bgDOWN, .bgCRITICAL {
+   @apply !bg-red-300;
+ }
+ .bgUNREACHABLE {
+   @apply !bg-red-100;
+ }
+ .bgPENDING {
+   @apply !bg-truegray-200;
+ }
+ .bgPROBLEMS {
+   @apply !bg-yellow-200;
+ }
+
+ .bgCard {
+  @apply bg-[#333];
+ }
+
+ .bodyBG {
+   @apply !bg-[#222];
+ }
+ .headerBG {
+   @apply bg-[#444];
+ }
+
+ .hoverBG1 {
+   @apply bg-warmgray-100;
+ }
+
+ /* Because of a browser bug the bottom border of a sticky TH would scroll up and disappear, this sets a shadow with inset #E5E7EB = border-gray-200 */
+ .shadow-as-border-bottom {
+   box-shadow: inset 0px -1px 0 #E5E7EB;
+ }
+ .shadow-as-border-right {
+   box-shadow: inset -1px 0px 0 #E5E7EB;
+ }
+ .shadow-as-border {
+   box-shadow: inset -1px -1px 0 #E5E7EB;
+ }
+
+ .bgTable {
+   @apply bg-[#333];
+ }
+
+ .rowOdd {
+   @apply bg-[#292929];
+ }
+
+ .rowEven {
+   @apply bg-[#333];
+ }
+
+ .borderDefault {
+   @apply border-gray-200;
+ }
+ .borderDark {
+   @apply border-gray-400;
+ }
+
+ .borderActive {
+   @apply border-blue-600;
+ }
+
+ .borderError {
+   @apply border-red-600;
+ }
 }
 
 /*******************************************************************************
- * buttons
- */
- BUTTON, INPUT[type=submit], INPUT[type=button] {
-  @apply bg-gray-400 text-black hover:bg-gray-600;
+* general
+*/
+.scrollauto {
+ /* avoid flickering and moving elements if scrollbar is required for dynamic elements */
+ scrollbar-color: #3B4D54 white;
+}
+MAIN.scrollauto {
+ scrollbar-color: #3B4D54 #ECEEf0;
 }
 
-BUTTON.secondary {
-    @apply bg-indigo-500 hover:bg-indigo-600 text-white;
+.modalBG {
+ @apply bg-black opacity-50;
+}
+
+TH {
+ a.sort-by {
+   &:before {
+     border-bottom-color: #666;
+   }
+   &:after {
+     border-top-color: #666;
+   }
+ }
+}
+
+TR:nth-child(odd) TD.tableRowSelected{
+ @apply bg-yellow-200 bg-opacity-70  text-gray-700 !important;
+}
+TR:nth-child(even) TD.tableRowSelected {
+ @apply bg-yellow-200 bg-opacity-50 text-gray-700 !important;
+}
+
+.badge {
+ @apply bg-gray-200;
+}
+
+.pager-entries, .display-filter, A.button.back-button{
+ @apply bg-gray-100 hover:bg-gray-200;
+}
+
+.tooltiptext {
+ background-color: #888;
+ color: #fff;
+}
+
+.tooltiptext::after {
+ border-color: #888 transparent transparent transparent;
 }
 
 /*******************************************************************************
- * sidebar
- */
- BODY.sidebar {
-  @apply bg-gray-500;
-  A.navitem:hover, A.sublink:hover {
-    @apply hover:text-blue-300;
-  }
+* icons as part of text links (ex. in action box container)
+*/
+I.fa-solid, I.uil {
+ &.red {
+   @apply bg-red-600 text-white;
+ }
+ &.green {
+   @apply bg-green-500 text-white;
+ }
+ &.yellow {
+   @apply bg-yellow-300 text-black;
+ }
+ &.gray {
+   @apply bg-gray-200 text-black;
+ }
 }
+
+/*******************************************************************************
+* sidebar
+*/
+
 .navsectionlinks {
-  @apply text-white;
-}
-.navsectionlinks A {
-  @apply hover:text-gray-300 hover:bg-gray-600;
-}
-.navsectionlinks A.active {
-  @apply text-gray-300 bg-gray-600;
+ @apply text-white;
 }
 
 /*******************************************************************************
- * forms
- */
-INPUT[type=text], INPUT[type=password], INPUT[type=search], SELECT, [multiple], TEXTAREA {
-  @apply bg-gray-300;
+* floating alerts
+*/
+DIV.card.alert {
+ &.yellow {
+   @apply text-yellow-700 bg-yellow-50 border-yellow-700;
+ }
+ &.red {
+   @apply text-red-700 bg-red-50 border-red-700;
+ }
+ &.green {
+   @apply text-green-700 bg-green-50 border-green-700;
+ }
+}
+
+/*******************************************************************************
+* progress bar (ex.: on tac page)
+*/
+DIV.progressbar {
+ DIV.bar {
+   DIV {
+     @apply bg-sky-400;
+   }
+ }
+}
+
+/*******************************************************************************
+* perf bar (ex.: on service/hosts lists)
+*/
+.perf-bar-container {
+ .ok,.green {
+   @apply bg-green-500 border-green-700;
+ }
+ .warn,.yellow {
+   @apply bg-yellow-500 border-yellow-700;
+ }
+ .crit,.red {
+   @apply bg-red-500 border-red-700;
+ }
+ .gray {
+   @apply bg-gray-400 border-gray-500;
+ }
+}
+
+/*******************************************************************************
+* buttons
+*/
+@layer base {
+ .defaultButton {
+   @apply
+     bg-gray-300
+     text-gray-700
+   ;
+ }
+}
+
+BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
+ &.active, &:hover {
+   @apply bg-gray-400 text-white;
+ }
+
+ &.secondary {
+   @apply bg-sky-500 hover:bg-sky-600 text-white hover:text-sky-200;
+ }
+
+ &.green {
+   @apply bg-green-500 text-white hover:text-white hover:bg-green-400;
+ }
+
+ &.red {
+   @apply bg-red-600 text-black hover:text-white;
+ }
+ &.hover-red {
+   @apply hover:bg-red-600 hover:text-white;
+ }
+}
+
+DIV.radiogroup {
+ INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
+   @apply bg-gray-400 text-white;
+ }
+}
+
+.fa-trash {
+ @apply hover:text-red-600;
+}
+a:hover>.fa-trash {
+ @apply text-red-600;
+}
+
+
+/*******************************************************************************
+* forms
+*/
+INPUT:disabled {
+ @apply bg-gray-200;
+}
+INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
+ @apply ring-0 ring-red-600 border-red-600;
+}
+
+
+DIV.deleteicon {
+ BUTTON {
+   @apply hover:text-black;
+ }
+}
+
+
+DIV.spinner {
+ @apply border-gray-700;
+}
+
+/*******************************************************************************
+* site panel / backends
+*/
+#site_panel .button_peer, div.backends BUTTON, #site_panel .btn_sites {
+ @apply !text-gray-700 hover:!text-white hover:brightness-95;
+}
+
+/*******************************************************************************
+* search results
+*/
+DIV#search-results {
+ @apply border-gray-400;
+ LI {
+   &.ajax_search_selected {
+     @apply bg-yellow-200;
+   }
+   &.toomany {
+     @apply text-orange-600;
+   }
+   &.error {
+     @apply text-red-600;
+   }
+ }
+ .disabled {
+   @apply ml-5 text-orange-600 opacity-100;
+ }
+}
+
+/*******************************************************************************
+* action menu
+*/
+
+DIV.action_menu, DIV.context_menu {
+ INPUT {
+   color: initial;
+ }
+}
+
+IMG.action_icon {
+ &.clickable {
+   &.active {
+     @apply ring-gray-400;
+   }
+ }
+}
+
+/*******************************************************************************
+* commands / action box
+*/
+DIV.actionbox {
+ A {
+   I, INPUT {
+     color: initial;
+   }
+ }
+}
+
+/*******************************************************************************
+* login page
+*/
+BODY.loginpage {
+ @apply bg-gradient-to-t from-gray-200 via-slate-300 to-gray-200;
+
+ DIV.loginmask {
+   @apply bg-slate-100;
+
+   BUTTON, A.button {
+     @apply text-white bg-slate-500 hover:bg-slate-600;
+   }
+
+   HR {
+     @apply border-gray-500;
+   }
+
+   DIV.spinner {
+     @apply border-white border-r-transparent;
+   }
+ }
 }
