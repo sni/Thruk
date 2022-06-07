@@ -2,7 +2,7 @@
   <h3>Settings</h3>
   <button class="iconOnly medium" onClick="toggleElement('pref_pane'); return false;"><i class="uil uil-times"></i></button>
 </div>
-<table class="body table-fixed cellspacing">
+<table class="table-fixed cellspacing">
   <tr>
     <th class="align-middle w-5"><i class="uil uil-user"></i></th>
     <th class="align-middle w-24">User Profile</th>
@@ -11,7 +11,7 @@
     </td>
   </tr>
   <tr>
-    <th colspan=3><h4 class="pt-2 border-b borderDefault">Session Settings</h4></th>
+    <th colspan=3 class="px-0 pt-1 border-b borderDefault"><h4 class="px-2">Session Settings</h4></th>
   </tr>
   <tr>
     <th class="align-middle"><i class="uil uil-brush-alt"></i></th>
@@ -46,7 +46,7 @@
     </td>
   </tr>
   <tr>
-    <th colspan=3><h4 class="pt-2 border-b borderDefault">Page Actions</h4></th>
+    <th colspan=3 class="px-0 pt-1 border-b borderDefault"><h4 class="px-2">Page Actions</h4></th>
   </tr>
   [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
   <tr>
