@@ -52,7 +52,7 @@
             </a>
           [% END %]
         [% END %]
-        <div class="mt-5 font-semibold whitespace-nowrap text-center text3 flexcol gap-1 opacity-60">
+        <div class="mt-5 font-semibold whitespace-nowrap text-center textHINTsoft flexcol gap-1">
           <a class="link text-sm" href="https://www.thruk.org/" target="_blank">
             v[% thrukversion %]
           </a>

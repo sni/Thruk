@@ -60,9 +60,9 @@
     </div>
     <div class="body">
       <table>
-        <tr><td><span class="text1">.text1</span></td></tr>
-        <tr><td><span class="text2">.text2</span></td></tr>
-        <tr><td><span class="text3">.text3</span></td></tr>
+        <tr><td><span class="textBody">.textBody</span></td></tr>
+        <tr><td><span class="textCard">.textCard</span></td></tr>
+        <tr><td><span class="textTH">.textTH</span></td></tr>
       </table>
     </div>
   </div>
@@ -115,7 +115,7 @@
     </div>
     <div>
       <div class="progressbar py-1 px-2">
-        <div class="description text1 font-semibold" style="width: 90px;">Description</div>
+        <div class="description textBody font-semibold" style="width: 90px;">Description</div>
         <div class="bar" style="height: 30px; width: 300px;">
           <div style="background: #7FDBFF; width:20%"></div>
           <div style="background: #FFDC00; width:25%"></div>

@@ -10,6 +10,7 @@
  *   - replace old img icons in table with new <i>
  *   - multiple comments in comments TD in host/service details are multiline? Fix
  *   - check body.iframed from header.tt
+ *   - show custom vars on extinfo 1 and 2
  *   - Fix service/hostgroup missing right/bottom borders in overview style
  *   - Features:
  *       - change Options for Columns on Configuration page (extinfo type 4) + make Host_name sticky
@@ -32,13 +33,13 @@
  * basic colors
  */
  @layer base {
-   .text1 {
+   .textBody {
      @apply !text-river-bed-600;
    }
-   .text2 {
+   .textCard {
      @apply !text-gray-900;
    }
-   .text3 {
+   .textTH {
      @apply !text-gray-600;
    }
    .textPager {
@@ -127,6 +128,10 @@
     @apply !bg-yellow-200;
   }
 
+  .bgCard {
+    @apply bg-white;
+  }
+
   .bodyBG {
     @apply bg-river-bed-100;
   }
@@ -200,7 +205,7 @@ HTML.minimal {
 BODY {
   @apply
     font-sans
-    text1
+    textBody
     text-default
     tracking-normal
   ;
@@ -519,11 +524,8 @@ I.fa-solid, I.uil {
  * Cards
  */
 @layer base {
-  .bgCard {
-    @apply bg-white;
-  }
   .card {
-    @apply w-min h-min text-left overflow-hidden rounded-lg text2 bgCard shadow-card;
+    @apply w-min h-min text-left overflow-hidden rounded-lg textCard bgCard shadow-card;
     DIV.head {
       @apply h-[40px] px-2 border-b borderDefault items-center flex;
       SPAN.tabs {
@@ -779,7 +781,7 @@ TD, TH {
 }
 
 TH {
-  @apply text3 font-semibold;
+  @apply textTH font-semibold;
 }
 
 TABLE.cellborder {

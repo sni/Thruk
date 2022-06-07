@@ -1,7 +1,7 @@
 ﻿[% total = time_total; IF total < 1; total = 1; END %]
 <div class="card clickable z-50 fixed bottom-0 right-0 m-2" onclick="stopRefresh(); toggleElement('stats_details', undefined, true);">
   <div class="progressbar py-1 px-2">
-    <div class="description text1 font-semibold" style="width: 90px;">Time: [% sprintf("%.3fs", time_total) %]</div>
+    <div class="description textBody font-semibold" style="width: 90px;">Time: [% sprintf("%.3fs", time_total) %]</div>
     <div class="bar bgPENDING flex" style="height: 12px; width: 100px;">
       <div style="height: 12px; background: #7FDBFF; width: [% sprintf("%d", total_backend_waited / total * 200) %]px"></div>
       <div style="height: 12px; background: #FFDC00; width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></div>
@@ -38,7 +38,7 @@
         </td>
       </tr>
     </table>
-    <div style="text-align: right; margin-bottom: 24px; border-bottom: 1px solid gray;" class="flex justify-end font-semibold text1">
+    <div style="text-align: right; margin-bottom: 24px; border-bottom: 1px solid gray;" class="flex justify-end font-semibold textBody">
       <table class="w-[100px] my-2">
         <tr>
           <td class="pr-2">Backend</td>

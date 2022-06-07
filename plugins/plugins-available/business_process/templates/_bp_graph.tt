@@ -46,29 +46,29 @@
             <div class="bp_label" [% IF n.label.length > 20 %]style="font-size: 9px; line-height: 8px;"[% END %]><span class="bp_label">[% n.label | html %]</span></div>
             <div class="bp_sublabel" title="[% nl2br(escape_html(short_desc)).replace('<br>', '&#013;') %]">[% short_desc | html %]</div>
             [% UNLESS no_menu %]
-            <a href="#" onclick="return bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon hoverable rounded"><i class="fa-solid fa-pencil text-xs text1 js-edit-icon"></i></a>
+            <a href="#" onclick="return bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon hoverable rounded"><i class="fa-solid fa-pencil text-xs textBody js-edit-icon"></i></a>
             [% END %]
-            <a href="#" class="bp_node_bp_ref_icon hoverable rounded" style="visibility: hidden;"><i class="fa-solid fa-shuffle text-xs text1"></i></a>
-            <a href="#" class="bp_node_link_icon hoverable rounded" style="visibility: hidden;"><i class="fa-solid fa-arrow-right text-xs text1"></i></a>
+            <a href="#" class="bp_node_bp_ref_icon hoverable rounded" style="visibility: hidden;"><i class="fa-solid fa-shuffle text-xs textBody"></i></a>
+            <a href="#" class="bp_node_link_icon hoverable rounded" style="visibility: hidden;"><i class="fa-solid fa-arrow-right text-xs textBody"></i></a>
             <div class="absolute top-0 left-0 flexrow gap-px">
               [% IF n.testmode %]
-                <i class="fa-solid fa-lock text-xs text1" title="Status has been locked by testmode"></i>
+                <i class="fa-solid fa-lock text-xs textBody" title="Status has been locked by testmode"></i>
               [% END %]
               [% IF n.scheduled_downtime_depth > 0 %]
-                <i class="fa-solid fa-moon text-xs text1" title="This Business Process is currently in a period of scheduled downtime"></i>
+                <i class="fa-solid fa-moon text-xs textBody" title="This Business Process is currently in a period of scheduled downtime"></i>
               [% END %]
               [% IF n.acknowledged > 0 %]
-                <i class="fa-solid fa-person-digging text-xs text1" title="This problem has been acknowledged"></i>
+                <i class="fa-solid fa-person-digging text-xs textBody" title="This problem has been acknowledged"></i>
               [% END %]
             </div>
             [% IF editmode && n.create_obj %]
             <div class="absolute bottom-0 left-1">
-              <i class="uil uil-link-h text1" title="This node is linked to a host or service object"></i>
+              <i class="uil uil-link-h textBody" title="This node is linked to a host or service object"></i>
             </div>
             [% END %]
             [% IF editmode  %]
             <div class="bp_node_add_icon clickable hoverable rounded relative left-10 bottom-1 w-fit hidden" onclick="bp_add_new_node()">
-              <i class="uil uil-plus-circle text1" title="add new node"></i>
+              <i class="uil uil-plus-circle textBody" title="add new node"></i>
             </div>
             [% END %]
         </div>
