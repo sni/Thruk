@@ -5,8 +5,8 @@
 <div class="flexrow 2xl:justify-between">
   [% PROCESS _infobox.tt %]
 
-  <form action="extinfo.cgi" method="POST" class="min-w-[550px] w-[700px]">
-    <div class="card">
+  <form action="extinfo.cgi" method="POST" class="min-w-[450px] w-[550px]">
+    <div class="card w-full">
       <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
       <input type="hidden" name="nr" value="[% rd.file | html %]">
       <input type="hidden" name="type" value="6">
@@ -145,8 +145,8 @@
         <button name="recurring" value="save" class="w-32 green"[% IF !can_edit %] disabled[% END %]>Save</button>
       </div>
     </div>
-    <div class="w-[350px] hidden xl:block"></div>
   </form>
+  <div class="w-[350px] hidden xl:block"></div>
 </div>
 
 <script type="text/javascript">
