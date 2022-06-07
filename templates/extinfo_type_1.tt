@@ -33,7 +33,7 @@
   <div class="card min-w-min">
     <div class="head justify-between">
       <h3>Host State Information</h3>
-      <div>
+      <div class="flex gap-x-1">
         [% IF host.notes_url_expanded %]
             <div>
               <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
@@ -45,8 +45,9 @@
           [% IF has_bp %]
             <div>
               <a href="bp.cgi?action=details&bp=[% has_bp %]">
-                <img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40">
+                <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
               </a>
+            </div>
           [% END %]
           [% IF host.action_url_expanded %]
             [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]

@@ -34,8 +34,31 @@
   </div>
 
   <div class="card min-w-min">
-    <div class="head">
+    <div class="head justify-between">
       <h3>Service State Information</h3>
+      <div class="flex gap-x-1">
+        [% IF service.action_url_expanded %]
+          [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
+          <div>
+            <a href='[% action_url %]' target='_blank'><i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i></a>
+          </div>
+        [% END %]
+        [% IF service.notes_url_expanded %]
+          <div>
+            <a href='[% service.notes_url_expanded %]' target='_blank'>
+              <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40">
+            </a>
+          </div>
+        [% END %]
+        [% has_bp = has_business_process(service, 'host_') %]
+        [% IF has_bp %]
+          <div>
+            <a href="bp.cgi?action=details&bp=[% has_bp %]">
+              <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
+            </a>
+          </div>
+        [% END %]
+      </div>
     </div>
     <div>
       [% PROCESS _extinfo_host_service_details.tt obj=service %]
@@ -85,35 +108,7 @@
             </td>
           </tr>
           [% END %]
-          [% IF service.action_url_expanded %]
-          [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
-          <tr>
-            <td align='right'>
-              <a href='[% action_url %]' target='_blank'><i class="fa-solid fa-chart-line clickable text-4xl" title='Show Performance Chart'></i></a><br clear="all">
-              <font size="-1"><i>Extra Actions</i></font><br clear="all">
-              <br clear="all">
-            </td>
-          </tr>
-          [% END %]
-          [% IF service.notes_url_expanded %]
-          <tr>
-            <td align='right'>
-              <a href='[% service.notes_url_expanded %]' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40"></a><br clear="all">
-              <font size="-1"><i>Extra Notes</i></font><br clear="all">
-              <br clear="all">
-            </td>
-          </tr>
-          [% END %]
-          [% has_bp = has_business_process(service, 'host_') %]
-          [% IF has_bp %]
-            <tr>
-              <td align='right'>
-                <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
-                <font size="-1"><i>Business<br>Process</i></font>
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
+
           [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
@@ -134,7 +129,6 @@
                   [% END %]
                   </script>
                 [% END %]
-                <br clear="all">
               </td>
             </tr>
           [% END %]
@@ -159,7 +153,6 @@
         </td>
       </tr>
     </table>
-    <br>
      <!-- fix later-->
 
   <div class="mt-5">
