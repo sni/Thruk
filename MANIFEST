@@ -1846,6 +1846,7 @@ script/templates_cleanup.pl
 script/test_cpan_modules.pl
 script/test_page_rps
 script/theme-icons-update.pl
+script/theme-obsolete-images.pl
 script/thruk
 script/thruk.psgi
 script/thruk_auth
