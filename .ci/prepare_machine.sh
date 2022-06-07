@@ -75,6 +75,8 @@ gpasswd -a naemon docker
 chmod 660 /var/cache/naemon/live
 touch /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 666 /etc/naemon/conf.d/thruk_bp_generated.cfg
+chmod 777 /var/cache/naemon/checkresults
+ln -s /usr/share/thruk/support/thruk_templates.cfg /etc/naemon/conf.d/thruk_templates.cfg
 
 # ensure we have a test database in place for tests
 /etc/init.d/mysql start
