@@ -13,9 +13,9 @@
  *   - show custom vars on extinfo 1 and 2
  *   - Fix service/hostgroup missing right/bottom borders in overview style
  *   - Login page make SSO button standalone, so normal login button can have required (without red borders)
- *   - Broadcasts add padding
+ *   - Broadcasts + minemap overcard popup add padding
  *   - Features:
- *       - change Options for Columns on Configuration page (extinfo type 4) + make Host_name sticky
+ *       - change Options for Columns on Configuration page + make Host_name sticky
  *   - Bugs:
  *       - JS sets width when searching on filter field (reports or broadcast) -> refresh, table width not 100% anymore
  *       - sorting removed when changing filter
@@ -25,7 +25,6 @@
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  *       - List recent downtimes => undef down.names in showlog.tt
  *       - Downtimes Display Filter partially hidden when there are no downtimes
- *       - Display Filter hover red text?
  *       - broken <img usercontent/images/notes.png > helpbox on login page?
  */
 
@@ -345,6 +344,10 @@ H3 {
 
 H4 {
   @apply text-default leading-6;
+}
+
+HR {
+  @apply borderDefault;
 }
 
 .badge {
@@ -916,6 +919,9 @@ DIV.mainTableFooter {
 
 DIV.mainTable {
   @apply w-full overflow-auto border-t border-b borderDefault;
+  DIV {
+    @apply borderDefault;
+  }
   max-height: calc(100vh - 260px);
 }
 
@@ -932,6 +938,9 @@ TABLE.mainTable {
     }
   }
   TBODY {
+    TR {
+      @apply borderDefault;
+    }
     TD,TH {
       @apply borderDefault border-t border-l border-b text-left px-1.5 py-0.5 h-[25px] align-middle;
     }

@@ -68,7 +68,7 @@
 <div class="card w-full">
   <div class="mainTableHeader">
     <div>
-      <div class="flex flex-nowrap gap-x-1 items-center">
+      <div class="flex flex-nowrap gap-x-2 items-center">
         [% PROCESS _status_column_select.tt colprefix="hst" columns_name="host" %]
         [% PROCESS _status_filter.tt %]
       </div>

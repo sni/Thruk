@@ -103,7 +103,6 @@
               </thead>
               <tbody>
                 [% FOR hostname IN g.hosts.keys.sort %]
-                <!-- last loop no border bottom-->
                   [% SET h = g.hosts.$hostname %]
                   [% hoststate = '' %]
                   [% IF h.state == 1 %]

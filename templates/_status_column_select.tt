@@ -1,6 +1,6 @@
 ﻿[% IF show_form %]<form action="#" method="POST" style="text-align: left;">[% END %]
 <button
-  class="round small bg-inherit hover:text-inherit"
+  class="iconOnly"
   id="[% paneprefix %]_btn_columns_hover"
   onclick="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;"
   title="change column visibility"
