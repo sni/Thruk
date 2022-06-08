@@ -636,7 +636,7 @@ sub job_page {
         if((defined $err && $err ne '') && (!defined $rc || $rc != 0 || (!$out && !$stash))) {
             return $c->detach_error({
                 msg               => 'Background Job Failed',
-                descr             => 'background job failed, look at your logfile for details',
+                descr             => 'background job failed, look at your logfile for details. ( job id: '.$job.' )',
                 debug_information => $err,
             });
         }
