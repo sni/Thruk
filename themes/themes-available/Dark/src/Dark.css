@@ -3,8 +3,7 @@
 
 /* TODOs:
 *
-* text color search field
-*
+* darkmode for calender popup, e.g. notifications.cgi
 */
 
 /*******************************************************************************
@@ -184,10 +183,10 @@
 */
 .scrollauto {
  /* avoid flickering and moving elements if scrollbar is required for dynamic elements */
- scrollbar-color: #444 white;
+ scrollbar-color: #555 #444;
 }
 MAIN.scrollauto {
- scrollbar-color: #444 #ECEEf0;
+ scrollbar-color: #555 #444;
 }
 
 .modalBG {
@@ -322,11 +321,14 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
  &.hover-red {
    @apply hover:bg-red-600 hover:text-white;
  }
+ &.iconOnly {
+  @apply bg-transparent text-inherit hover:text-inherit hover:bg-transparent;
+ }
 }
 
 DIV.buttongroup {
   BUTTON {
-    @apply border-[#555];
+    @apply border-[#555] textDark;
   }
 }
 
@@ -437,10 +439,6 @@ BODY.loginpage {
 
    BUTTON, A.button {
      @apply bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-white;
-   }
-
-   HR {
-     @apply border-[#555];
    }
 
    I.togglePassword {
