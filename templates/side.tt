@@ -7,7 +7,7 @@
     </a>
   </header>
 
-  <div class="navsectionlinks sticky scrollauto overflow-x-hidden">
+  <div class="navsectionlinks sticky scrollauto overflow-x-hidden grow">
     <ul class="p-1 pt-0">
       [% FOREACH section = navigation %]
       [% cookie_section_name = section.name.replace(' ', '_') | lower %]
@@ -74,8 +74,8 @@
     </ul>
   </div>
 
-  <div class="h-8 flex-shrink-0 mt-auto w-full m-0 hidden lg:block collapse-btn">
-    <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 rounded-none h-full hover:bodyBG block text-left js-menu-collapse">
+  <div class="h-8 flex-shrink-0 mt-auto w-full m-0 hidden lg:block collapse-btn navBarBG">
+    <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 rounded-none h-full textNavBar hover:navItemBG block text-left js-menu-collapse">
       <i class="uil uil-angle-double-left text-2xl contents" title="collapse navigation"></i>
     </button>
   </div>

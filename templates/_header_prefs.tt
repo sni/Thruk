@@ -70,7 +70,7 @@
     <th class="align-middle"><i class="uil uil-sync"></i></th>
     <th class="align-middle">Page Refresh</th>
     <td class="align-middle">
-      <span id="refresh_rate"></span>
+      <span id="refresh_rate" class="flex items-center gap-x-2"></span>
     </td>
   </tr>
 </table>

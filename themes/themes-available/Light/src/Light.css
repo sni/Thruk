@@ -12,6 +12,8 @@
  *   - check body.iframed from header.tt
  *   - show custom vars on extinfo 1 and 2
  *   - Fix service/hostgroup missing right/bottom borders in overview style
+ *   - Login page make SSO button standalone, so normal login button can have required (without red borders)
+ *   - Broadcasts add padding
  *   - Features:
  *       - change Options for Columns on Configuration page (extinfo type 4) + make Host_name sticky
  *   - Bugs:
@@ -23,6 +25,8 @@
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  *       - List recent downtimes => undef down.names in showlog.tt
  *       - Downtimes Display Filter partially hidden when there are no downtimes
+ *       - Display Filter hover red text?
+ *       - broken <img usercontent/images/notes.png > helpbox on login page?
  */
 
 @tailwind base;
@@ -47,6 +51,9 @@
    }
    .textHINTsoft {
      @apply text-gray-400;
+   }
+   .textNavBar {
+    @apply text-gray-700;
    }
 
    .textActive1 {
@@ -139,6 +146,13 @@
     @apply bg-white;
   }
 
+  .navBarBG {
+    @apply bg-white;
+  }
+  .navItemBG {
+    @apply bg-river-bed-100;
+  }
+
   .hoverBG1 {
     @apply bg-warmgray-100;
   }
@@ -190,11 +204,12 @@
   @apply
     overflow-y-scroll
     overflow-x-auto
-    bodyBG
+    headerBG
   ;
   scrollbar-color: #3B4D54 white;
 }
 MAIN.scrollauto {
+  @apply bodyBG;
   scrollbar-color: #3B4D54 #ECEEf0;
 }
 HTML.minimal {
@@ -264,10 +279,10 @@ TH {
 }
 
 TR:nth-child(odd) TD.tableRowSelected{
-  @apply bg-yellow-200 bg-opacity-70  text-gray-700 !important;
+  @apply bg-yellow-200 bg-opacity-50  text-gray-700 !important;
 }
 TR:nth-child(even) TD.tableRowSelected {
-  @apply bg-yellow-200 bg-opacity-50 text-gray-700 !important;
+  @apply bg-yellow-200 bg-opacity-70 text-gray-700 !important;
 }
 
 @media print {
@@ -427,7 +442,7 @@ I.fa-solid, I.uil {
       @apply overflow-visible hidden;
     }
     A.navsectiontitle {
-      @apply bg-transparent;
+      @apply navBarBG;
       SPAN, I {
         @apply hidden;
       }
@@ -448,11 +463,11 @@ I.fa-solid, I.uil {
       }
       A.navsectiontitle {
         SPAN {
-          @apply absolute left-[40px] top-0 block w-[200px] h-6 p-1 shadow-card rounded rounded-b-none headerBG;
+          @apply absolute left-[40px] top-0 block w-[200px] h-6 p-1 shadow-card rounded rounded-b-none navBarBG;
         }
       }
       UL.navsectionlinks {
-        @apply absolute left-[40px] top-6 shadow-card rounded rounded-t-none headerBG w-[200px];
+        @apply absolute left-[40px] top-6 shadow-card rounded rounded-t-none navBarBG w-[200px];
         display: inherit;
       }
       A.navsectionsubtitle {
@@ -483,16 +498,16 @@ I.fa-solid, I.uil {
   }
 }
 .navsectionlinks {
-  @apply text-gray-700 headerBG;
+  @apply textNavBar navBarBG;
 }
 .navitem {
-  @apply hover:bodyBG rounded transition duration-100 ease-in-out cursor-pointer hover:textActive1;
+  @apply hover:navItemBG rounded transition duration-100 ease-in-out cursor-pointer hover:textActive1;
   &.active {
-    @apply textActive1 bodyBG;
+    @apply textActive1 navItemBG;
   }
 }
 .navsectiontitle {
-  @apply flex items-center text-sm p-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap hover:text-inherit;
+  @apply flex items-center text-sm p-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap hover:text-inherit navBarBG;
   line-height: inherit;
 }
 .navsectionsubtitle {
@@ -905,7 +920,7 @@ DIV.mainTable {
 }
 
 TABLE.mainTable {
-  @apply bgTable;
+  @apply bgTable borderDefault;
   TH:first-child,TD:first-child {
     @apply border-l-0;
   }
@@ -913,12 +928,12 @@ TABLE.mainTable {
   THEAD>TR {
     @apply bgTable;
     TH{
-      @apply align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit;
+      @apply borderDefault align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit;
     }
   }
   TBODY {
     TD,TH {
-      @apply border-t border-l border-b text-left px-1.5 py-0.5 h-[25px] align-middle;
+      @apply borderDefault border-t border-l border-b text-left px-1.5 py-0.5 h-[25px] align-middle;
     }
     TR:first-child TD, TR:first-child TH {
       @apply border-t-0;

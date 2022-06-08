@@ -39,7 +39,7 @@
     [% UNLESS minimal %]
       <header class="header">
         <div class="h-[50px] flexrow flex-nowrap items-center">
-          <button class="big iconOnly w-10 h-10 ml-[-10px] block lg:hidden hoverable" onclick="toggleElement('navbar', null, true, null, checkNavBackground); checkNavBackground(); return false;"><i class="fa-solid fa-bars"></i></button>
+          <button class="big iconOnly w-10 h-10 ml-[-10px] block lg:hidden hoverable min-w-[30px]" onclick="toggleElement('navbar', null, true, null, checkNavBackground); checkNavBackground(); return false;"><i class="fa-solid fa-bars"></i></button>
           <div class="flex-grow h-min">
             [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
           </div>

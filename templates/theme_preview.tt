@@ -131,7 +131,7 @@
       <h3>Buttons</h3>
     </div>
     <div>
-      <table class="w-full cellborder text-center border-white border-2">
+      <table class="w-full cellborder text-center">
         <tr>
           <th></th>
           <th>small</th>
