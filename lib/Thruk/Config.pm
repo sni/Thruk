@@ -911,7 +911,7 @@ sub home {
     if(my $inc_entry = $INC{$file}) {
         $inc_entry = Cwd::abs_path($inc_entry);
         $inc_entry =~ s/\Q\/$file\E$//mx;
-        $inc_entry =~ s/\/b?lib//gmx;
+        $inc_entry =~ s|(/thruk/)b?lib|$1|gmxi;
         if($inc_entry =~ m#/omd/versions/[^/]*/share/thruk#mx && $ENV{'OMD_ROOT'}) {
             return $ENV{'OMD_ROOT'}.'/share/thruk';
         }
