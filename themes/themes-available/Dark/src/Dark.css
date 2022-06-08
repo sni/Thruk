@@ -1,6 +1,12 @@
 /* Dark.css */
 @import '../../Light/src/Light.css';
 
+/* TODOs:
+*
+* text color search field
+*
+*/
+
 /*******************************************************************************
  * basic colors for dark theme
  */
@@ -11,13 +17,13 @@
 
  @layer base {
   .textBody {
-    @apply !text-[#d4d4d4];
+    @apply !text-[#f2f2f2];
   }
   .textCard {
-    @apply !text-[#ccc];
+    @apply !text-[#ddd];
   }
   .textTH {
-    @apply !text-white;
+    @apply !text-[#eee];
   }
   .textPager {
     @apply text-gray-200;
@@ -25,12 +31,19 @@
   .textHINTsoft {
     @apply text-gray-400;
   }
+  .textNavBar {
+    @apply text-[#d4d4d4];
+  }
+  /* only exists in darkmode, used on bright backgrounds like problems, badge, etc. */
+  .textDark {
+    @apply text-[#333];
+  }
 
   .textActive1 {
-    @apply text-blue-600;
+    @apply text-blue-400;
   }
   .textActive2 {
-    @apply text-red-600 !important;
+    @apply text-red-500 !important;
   }
 
  .textUP, .textOK, .textSUCCESS {
@@ -43,10 +56,10 @@
    @apply !text-orange-600;
  }
  .textDOWN, .textCRITICAL, .textERROR, .textALERT {
-   @apply !text-red-600;
+   @apply !text-red-500;
  }
  .textUNREACHABLE {
-   @apply !text-red-500;
+   @apply !text-red-400;
  }
  .textPENDING {
    @apply !text-truegray-600;
@@ -77,85 +90,92 @@
    @apply !bg-truegray-200 !text-white;
  }
  .PROBLEMS {
-   @apply !bg-yellow-200 !text-gray-800;
+   @apply !bg-yellow-200 !textDark;
  }
  .CONSOLE {
    @apply text-lime-500 bg-black text-sm font-mono;
  }
 
  .bgUP, .bgOK, .bgSUCCESS {
-   @apply !bg-green-200;
+   @apply !bg-green-200 !textDark;
  }
  .bgWARNING {
-   @apply !bg-yellow-200;
+   @apply !bg-yellow-200 !textDark;
  }
  .bgUNKNOWN, .bgHINT {
-   @apply !bg-orange-200;
+   @apply !bg-orange-200 !textDark;
  }
  .bgDOWN, .bgCRITICAL {
-   @apply !bg-red-300;
+   @apply !bg-red-300 !textDark;
  }
  .bgUNREACHABLE {
-   @apply !bg-red-100;
+   @apply !bg-red-100 !textDark;
  }
  .bgPENDING {
-   @apply !bg-truegray-200;
+   @apply !bg-truegray-200 !textDark;
  }
  .bgPROBLEMS {
-   @apply !bg-yellow-200;
+   @apply !bg-yellow-200 !textDark;
  }
 
  .bgCard {
-  @apply bg-[#333];
+  @apply bg-[#444];
  }
 
  .bodyBG {
-   @apply !bg-[#222];
+   @apply !bg-[#252525];
  }
  .headerBG {
    @apply bg-[#444];
  }
 
+ .navBarBG {
+   @apply bg-[#444];
+ }
+ .navItemBG  {
+   @apply bg-[#555];
+ }
+
  .hoverBG1 {
-   @apply bg-warmgray-100;
+   @apply bg-[#555];
  }
 
  /* Because of a browser bug the bottom border of a sticky TH would scroll up and disappear, this sets a shadow with inset #E5E7EB = border-gray-200 */
  .shadow-as-border-bottom {
-   box-shadow: inset 0px -1px 0 #E5E7EB;
+   box-shadow: inset 0px -1px 0 #555;
  }
  .shadow-as-border-right {
-   box-shadow: inset -1px 0px 0 #E5E7EB;
+   box-shadow: inset -1px 0px 0 #555;
  }
  .shadow-as-border {
-   box-shadow: inset -1px -1px 0 #E5E7EB;
+   box-shadow: inset -1px -1px 0 #555;
  }
 
  .bgTable {
-   @apply bg-[#333];
+   @apply bg-[#444];
  }
 
  .rowOdd {
-   @apply bg-[#292929];
+   @apply bg-[#303030];
  }
 
  .rowEven {
-   @apply bg-[#333];
+   @apply bg-[#444];
  }
 
  .borderDefault {
-   @apply border-gray-200;
+   @apply border-[#555];
  }
  .borderDark {
    @apply border-gray-400;
  }
 
  .borderActive {
-   @apply border-blue-600;
+   @apply border-blue-400;
  }
 
  .borderError {
-   @apply border-red-600;
+   @apply border-red-500;
  }
 }
 
@@ -164,10 +184,10 @@
 */
 .scrollauto {
  /* avoid flickering and moving elements if scrollbar is required for dynamic elements */
- scrollbar-color: #3B4D54 white;
+ scrollbar-color: #444 white;
 }
 MAIN.scrollauto {
- scrollbar-color: #3B4D54 #ECEEf0;
+ scrollbar-color: #444 #ECEEf0;
 }
 
 .modalBG {
@@ -177,27 +197,27 @@ MAIN.scrollauto {
 TH {
  a.sort-by {
    &:before {
-     border-bottom-color: #666;
+     border-bottom-color: #ccc;
    }
    &:after {
-     border-top-color: #666;
+     border-top-color: #ccc;
    }
  }
 }
 
 TR:nth-child(odd) TD.tableRowSelected{
- @apply bg-yellow-200 bg-opacity-70  text-gray-700 !important;
+ @apply bg-yellow-300 bg-opacity-70  text-gray-700 !important;
 }
 TR:nth-child(even) TD.tableRowSelected {
- @apply bg-yellow-200 bg-opacity-50 text-gray-700 !important;
+ @apply bg-yellow-300 bg-opacity-80 text-gray-700 !important;
 }
 
 .badge {
- @apply bg-gray-200;
+ @apply bg-gray-200 textDark;
 }
 
 .pager-entries, .display-filter, A.button.back-button{
- @apply bg-gray-100 hover:bg-gray-200;
+ @apply bg-gray-100 hover:textDark hover:bg-gray-200 text-[#666];
 }
 
 .tooltiptext {
@@ -225,14 +245,6 @@ I.fa-solid, I.uil {
  &.gray {
    @apply bg-gray-200 text-black;
  }
-}
-
-/*******************************************************************************
-* sidebar
-*/
-
-.navsectionlinks {
- @apply text-white;
 }
 
 /*******************************************************************************
@@ -312,6 +324,12 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
  }
 }
 
+DIV.buttongroup {
+  BUTTON {
+    @apply border-[#555];
+  }
+}
+
 DIV.radiogroup {
  INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
    @apply bg-gray-400 text-white;
@@ -329,11 +347,14 @@ a:hover>.fa-trash {
 /*******************************************************************************
 * forms
 */
+INPUT, SELECT {
+  @apply textDark;
+}
 INPUT:disabled {
- @apply bg-gray-200;
+ @apply bg-gray-300;
 }
 INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
- @apply ring-0 ring-red-600 border-red-600;
+ @apply ring-0 ring-red-500 border-red-500 border-2;
 }
 
 
@@ -345,7 +366,7 @@ DIV.deleteicon {
 
 
 DIV.spinner {
- @apply border-gray-700;
+ @apply border-gray-600;
 }
 
 /*******************************************************************************
@@ -409,19 +430,22 @@ DIV.actionbox {
 * login page
 */
 BODY.loginpage {
- @apply bg-gradient-to-t from-gray-200 via-slate-300 to-gray-200;
+ @apply bg-gradient-to-t from-[#111] via-[#222] to-[#111];
 
  DIV.loginmask {
-   @apply bg-slate-100;
+   @apply bg-[#444];
 
    BUTTON, A.button {
-     @apply text-white bg-slate-500 hover:bg-slate-600;
+     @apply bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-white;
    }
 
    HR {
-     @apply border-gray-500;
+     @apply border-[#555];
    }
 
+   I.togglePassword {
+     @apply textDark;
+   }
    DIV.spinner {
      @apply border-white border-r-transparent;
    }
