@@ -1,0 +1,7 @@
+site:
+    build: citest/
+    volumes:
+        - "/etc/timezone:/etc/timezone:ro"
+        - "/etc/localtime:/etc/localtime:ro"
+        - "../../../:/thruk:ro"
+        - "../../../.ci:/.ci:ro"

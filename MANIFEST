@@ -2288,6 +2288,11 @@ t/scenarios/bp_sync_e2e/frontend/thruk_local.conf
 t/scenarios/bp_sync_e2e/Makefile
 t/scenarios/bp_sync_e2e/README
 t/scenarios/bp_sync_e2e/t/100-bp-sync.t
+t/scenarios/citest/citest/Dockerfile
+t/scenarios/citest/docker-compose.yml
+t/scenarios/citest/extra_prepare.sh
+t/scenarios/citest/Makefile
+t/scenarios/citest/test.sh
 t/scenarios/cli_api/docker-compose.yml
 t/scenarios/cli_api/Makefile
 t/scenarios/cli_api/omd/1.rpt

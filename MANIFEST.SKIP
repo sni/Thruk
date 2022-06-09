@@ -47,6 +47,7 @@ inc/File/Copy/Recursive.pm
 TODO
 docs/development
 docs/documentation/(?!(configuration|cgi-cfg).asciidoc)
+docs/images
 plugins/plugins-available/conf/test.pl
 plugins/plugins-available/conf/tmon.out
 thruk_.*.changes

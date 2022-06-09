@@ -70,13 +70,13 @@ wget -q "http://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | apt-key add -
 apt-get -y update
 apt-get -y install naemon-core naemon-livestatus
 chsh -s /bin/bash naemon
-gpasswd -a naemon docker
+! grep docker /etc/group >/dev/null || gpasswd -a naemon docker
 /etc/init.d/naemon start
 chmod 660 /var/cache/naemon/live
 touch /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 666 /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 777 /var/cache/naemon/checkresults
-ln -s /usr/share/thruk/support/thruk_templates.cfg /etc/naemon/conf.d/thruk_templates.cfg
+ln -sfn ~naemon/thruk/support/thruk_templates.cfg /etc/naemon/conf.d/thruk_templates.cfg
 
 # ensure we have a test database in place for tests
 /etc/init.d/mysql start

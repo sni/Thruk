@@ -1,15 +1,16 @@
 #!/bin/bash
 
-set -ex
+if [ $(ls -1 ~/perl5/lib/perl5/*/JavaScript/SpiderMonkey.pm 2>&1) != "" ]; then
+    echo "JavaScript-SpiderMonkey already installed in ~/perl5"
+    exit 0
+fi
+
+set -eux
 
 if ! test -d ~/perl5; then
     echo "script will install JavaScript-SpiderMonkey-0.25 into ~/perl5 but target folder could not be found"
     exit 1
 fi
-
-set -e
-set -u
-set -x
 
 eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
 cd ~/perl5/
