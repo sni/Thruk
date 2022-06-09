@@ -76,7 +76,11 @@ chmod 660 /var/cache/naemon/live
 touch /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 666 /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 777 /var/cache/naemon/checkresults
-ln -sfn ~naemon/thruk/support/thruk_templates.cfg /etc/naemon/conf.d/thruk_templates.cfg
+if [ -e support/thruk_templates.cfg ]; then
+    ln -sfn $(realpath support/thruk_templates.cfg) /etc/naemon/conf.d/thruk_templates.cfg
+else
+    :
+fi
 
 # ensure we have a test database in place for tests
 /etc/init.d/mysql start

@@ -4,6 +4,7 @@ set -ex
 
 mkdir -p /var/lib/naemon/thruk
 rsync -a --delete --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
+ln -sfn $(realpath /thruk/support/thruk_templates.cfg) /etc/naemon/conf.d/thruk_templates.cfg
 sudo su naemon -c -- bash -c 'cd ~/thruk && ./.ci/install_deps.sh'
 service naemon start
 service mysql start
