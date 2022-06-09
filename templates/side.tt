@@ -53,7 +53,7 @@
                   <div>
                     <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]" class="pl-6 pr-[10px]">
                       <fieldset>
-                        [% IF link.name %]
+                        [% IF link.defined("name") &&  link.name != "" %]
                         <span class="searchlabel">[% link.name | html %]</span>
                         [% END %]
                         <input type='hidden' name='s0_op' value='~' id="s0_to" />
