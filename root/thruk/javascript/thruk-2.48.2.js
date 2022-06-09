@@ -8089,6 +8089,12 @@ function set_histou_img(start, end, id, source) {
     var getParamTo = "&to=" + (end*1000);
     var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
 
+    if(theme.match(/dark/i)) {
+        newUrl = newUrl+'&theme=dark';
+    } else {
+        newUrl = newUrl+'&theme=light';
+    }
+
     //add timerange to iconlink, so the target graph matches the preview
     jQuery("#histou_graph_link").attr("href", url_prefix + "#" + histou_url + getParamFrom + getParamTo);
 
