@@ -14,6 +14,15 @@
   color-scheme: dark;
  }
 
+ ::selection {
+  background: #84c9fd; /* WebKit/Blink Browsers */
+  color: white;
+}
+::-moz-selection {
+  background: #84c9fd; /* Gecko Browsers */
+  color: white;
+}
+
  @layer base {
   .textBody {
     @apply !text-[#f2f2f2];
@@ -356,7 +365,7 @@ INPUT:disabled {
  @apply bg-gray-300;
 }
 INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
- @apply ring-0 ring-red-500 border-red-500 border-2;
+ @apply ring-0 ring-red-500 border-red-500;
 }
 
 

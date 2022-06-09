@@ -76,8 +76,10 @@
     <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
   </div>
   <div class="card w-[500px] mt-5">
-    <h3>Thruk Monitoring Webinterface</h3>
-    <table>
+    <div class="head">
+      <h3>Thruk Monitoring Webinterface</h3>
+    </div>
+    <table class="body cellspacing">
       <tr>
         <th>Thruk Version</th>
         <td>[% thrukversion %]</td>
@@ -94,8 +96,10 @@
       </tr>
       <tr>
         <td colspan="2">
-          <button><a href="http://www.thruk.org/download.html?version=[% thrukversion %]" target="_blank">Check for updates</a></button>
-          <button><a href="[% url_prefix %]changes.html">Read what's new in Thruk</a></button>
+          <div class="flex gap-x-2">
+            <button><a href="http://www.thruk.org/download.html?version=[% thrukversion %]" target="_blank">Check for updates</a></button>
+            <button><a href="[% url_prefix %]changes.html">Read what's new in Thruk</a></button>
+          </div>
         </td>
       </tr>
     </table>
@@ -103,7 +107,7 @@
   <div class="logos">
     <div class="flexrow place-content-center gap-12 mt-10">
       <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" title="Thruk" alt="Thruk"></a>
-      <a href="http://github.com/sni/Thruk" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/github.png" alt="Github.com Logo"></a>
+      <a href="http://github.com/sni/Thruk" target="_blank"><img class="w-32 h-auto" src="[% url_prefix %]themes/[% theme %]/images/GitHub_Logo.png" alt="Github.com Logo"></a>
     </div>
   </div>
 </div>
