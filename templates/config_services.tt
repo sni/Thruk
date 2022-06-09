@@ -11,7 +11,7 @@
       [% IF backends.size > 1 %]
         <th class="border-l-0">Backend</th>
       [% END %]
-      <th[% IF backends.size < 2 %]class="border-l-0"[% END %]>Contacts</th>
+      <th [% IF backends.size < 2 %]class="border-l-0"[% END %]>Contacts</th>
       <th>Contact Groups</th>
       <th class="text-center">Max. Check Attempts</th>
       <th class="text-center">Normal Check Interval</th>
