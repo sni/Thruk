@@ -26,6 +26,7 @@
  *       - List recent downtimes => undef down.names in showlog.tt
  *       - Downtimes Display Filter partially hidden when there are no downtimes
  *       - broken <img usercontent/images/notes.png > helpbox on login page?
+ *       - extinfo type 0, cut off on the right if more than 3 backends, make scrollable with sticky left header?
  */
 
 @tailwind base;
@@ -954,7 +955,7 @@ TABLE.mainTable {
 
   &.sticky-2d {
     THEAD TR:first-child TH:first-child {
-      @apply z-[11] left-0 bgTable shadow-as-border;
+      @apply z-[11] left-0 bgTable shadow-as-border min-w-[32px];
     }
     THEAD TH {
       @apply bgTable hover:bgTable second:border-l-0;
