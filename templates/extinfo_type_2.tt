@@ -34,7 +34,7 @@
   </div>
 
   <div class="flexcol">
-    <div class="card min-w-min">
+    <div class="card min-w-min mx-auto">
       <div class="head justify-between">
         <h3>Service State Information</h3>
         <div class="flex gap-x-1">
@@ -169,7 +169,7 @@
     </table>
 
   [% IF service.notes_expanded %]
-    <div class="card w-full">
+    <div class="card w-full mt-5">
       <div class="head">
         <h3>Notes</h3>
       </div>
