@@ -77,9 +77,14 @@ for my $file (@files) {
     $images->{$img} = $file;
 }
 
-for my $img (sort keys %{$images}) {
+for my $img (sort values %{$images}) {
+    my $file = $img;
+    $img =~ s/^.*\///gmx;
+    next if $img eq 'logo.svg';     # should not be removed
+    next if $img eq 'dropdown.png'; # should not be removed
+    next if $img =~ /^criticity_\d+/mx; # used for shinken
     my $res = `grep -r "$img" templates/ root/thruk/javascript/ plugins/plugins-available/ 2>/dev/null`;
     if(!$res) {
-        _warn("image: %40s is not used anywhere and could be removed. path: %s", $img, $images->{$img});
+        _warn("image: %40s is not used anywhere and could be removed. path: %s", $img, $file);
     }
 }
