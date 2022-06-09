@@ -100,7 +100,7 @@ sub add_link {
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $link{'links'}  = [] unless defined $link{'links'};
     $link{'target'} = _get_menu_target() unless defined $link{'target'};
-    $link{'href'}   = _get_menu_link($link{'href'});
+    $link{'href'}   = _get_menu_link($link{'href'}, $link{'target'});
     $link{'html'}   = $link{'html'};
     push(@{$last_section->{'links'}}, \%link);
     return;
@@ -122,7 +122,7 @@ sub add_sub_link {
     my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
     $link{'target'}  = _get_menu_target() unless defined $link{'target'};
     $link{'links'}   = [] unless defined $link{'links'};
-    $link{'href'}    = _get_menu_link($link{'href'});
+    $link{'href'}    = _get_menu_link($link{'href'}, $link{'target'});
     $link{'name'}    = "" unless defined $link{'name'};
     $link{'html'}   = $link{'html'};
     push(@{$last_link->{'links'}}, \%link);
@@ -145,7 +145,7 @@ sub add_sub_sub_link {
     my $last_link     = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
     my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
     $link{'target'}   = _get_menu_target() unless defined $link{'target'};
-    $link{'href'}     = _get_menu_link($link{'href'});
+    $link{'href'}     = _get_menu_link($link{'href'}, $link{'target'});
     $link{'name'}     = "" unless defined $link{'name'};
     push(@{$last_sub_link->{'links'}}, \%link);
     return;
@@ -363,8 +363,9 @@ sub _renew_navigation {
                         $href = _uri_with($href, { backend => join(',', @{$backends}) });
                     }
                     my $item = {
-                        name => $item->[0],
-                        href => $href,
+                        name   => $item->[0],
+                        href   => $href,
+                        target => $item->[3],
                     };
                     push @{$user_items}, [ $section, $item ];
                 }
@@ -401,7 +402,7 @@ sub _renew_navigation {
 
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
-            $link->{'href'}   = _get_menu_link($link->{'href'});
+            $link->{'href'}   = _get_menu_link($link->{'href'}, $link->{'target'});
             $link->{'html'}   = $link->{'html'};
 
             my $added = 0;
@@ -456,7 +457,7 @@ sub _renew_navigation {
 
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
-            $link->{'href'}   = _get_menu_link($link->{'href'});
+            $link->{'href'}   = _get_menu_link($link->{'href'}, $link->{'target'});
             $link->{'html'}   = $link->{'html'};
 
             push(@{$sublink->{'links'}}, $link);
@@ -543,12 +544,15 @@ returns the link with prefix
 
 =cut
 sub _get_menu_link {
-    my($link) = @_;
+    my($link, $target) = @_;
     return '' unless defined $link;
     my $c = $Thruk::Globals::c;
     my $product = $c->config->{'product_prefix'};
     if($link =~ s|^\Q/thruk/\E||mx || $link =~ s|^\Q$product\E/||mx) {
-        return $c->stash->{'url_prefix'}.$link;
+        return($c->stash->{'url_prefix'}.$link);
+    }
+    if(!$target) {
+        return($c->stash->{'url_prefix'}.'#'.$link);
     }
     return $link;
 }

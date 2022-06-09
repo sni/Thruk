@@ -1322,6 +1322,7 @@ sub _process_bookmarks {
     my $save          = $c->req->parameters->{'saveb'};
     my $public        = $c->req->parameters->{'public'} || 0;
     my $save_backends = $c->req->parameters->{'save_backends'} || 0;
+    my $link_target   = $c->req->parameters->{'link_target'} || "";
 
     # public only allowed for bookmark admins
     if($public) {
@@ -1348,7 +1349,10 @@ sub _process_bookmarks {
         if($save_backends) {
             my $backends = Thruk::Utils::backends_list_to_hash($c);
             push @{$new_bookmark}, $backends;
+        } else {
+            push @{$new_bookmark}, '';
         }
+        push @{$new_bookmark}, $link_target;
         if($public) {
             $global->{'bookmarks'}->{$section} = [] unless defined $global->{'bookmarks'}->{$section};
             push @{$global->{'bookmarks'}->{$section}}, $new_bookmark;
