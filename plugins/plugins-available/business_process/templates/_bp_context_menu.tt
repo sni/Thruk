@@ -431,13 +431,13 @@
               <tr>
                 <th class="align-top text-right">Host Template</th>
                 <td>
-                  <input type="text" class="w-80" value="" id="bp_host_template" name="bp_host_template" placeholder="host template" class="bp_create" onfocus="this.click()" onclick="ajax_search.init(this, 'host template', { url: 'bp.cgi?action=templates', autosubmit:false })">
+                  <input type="text" class="w-80 bp_create" value="" id="bp_host_template" name="bp_host_template" placeholder="host template" onfocus="this.click()" onclick="ajax_search.init(this, 'host template', { url: 'bp.cgi?action=templates', autosubmit:false })">
                 </td>
               </tr>
               <tr>
                 <th class="align-top text-right">Service Template</th>
                 <td>
-                  <input type="text" class="w-80" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create" onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })">
+                  <input type="text" class="w-80 bp_create" value="" id="bp_template" name="bp_template" placeholder="service template" onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })">
                   [% IF objects_save_format == "nagios" && use_feature_configtool %]
                     <br>
                     <div class="pt-2">
@@ -454,7 +454,7 @@
                   <th class="align-top text-right">Contact Groups</th>
                   <td>
                     <div class="flexrow flex-nowrap gap-1">
-                      <input type="text" class="w-80" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '\\s*,\\s*' })">
+                      <input type="text" class="w-80 bp_create" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '\\s*,\\s*' })">
                       <button class="iconOnly px-1 hoverable" onclick="bpRemoveAttribute('contactgroups'); return false;" title="remove this attribute"><i class="uil uil-times"></i></button>
                     </div>
                   </td>
@@ -463,7 +463,7 @@
                   <th class="align-top text-right">Contacts</th>
                   <td>
                     <div class="flexrow flex-nowrap gap-1">
-                      <input type="text" class="w-80" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '\\s*,\\s*', striped: false })">
+                      <input type="text" class="w-80 bp_create" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." value="" onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '\\s*,\\s*', striped: false })">
                       <button class="iconOnly px-1 hoverable" onclick="bpRemoveAttribute('contacts'); return false;" title="remove this attribute"><i class="uil uil-times"></i></button>
                     </div>
                   </td>
@@ -472,7 +472,7 @@
                   <th class="align-top text-right">Eventhandler</th>
                   <td>
                     <div class="flexrow flex-nowrap gap-1">
-                      <input type="text" class="w-80" id="bp_event_handler" name="bp_event_handler" placeholder="eventhandler command"  class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'command', { url: 'status.cgi?format=search&amp;type=command', autosubmit:false })">
+                      <input type="text" class="w-80 bp_create" id="bp_event_handler" name="bp_event_handler" placeholder="eventhandler command" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'command', { url: 'status.cgi?format=search&amp;type=command', autosubmit:false })">
                       <button class="iconOnly px-1 hoverable" onclick="bpRemoveAttribute('event_handler'); return false;" title="remove this attribute"><i class="uil uil-times"></i></button>
                     </div>
                   </td>
@@ -481,7 +481,7 @@
                   <th class="align-top text-right">Notification Period</th>
                   <td>
                     <div class="flexrow flex-nowrap gap-1">
-                      <input type="text" class="w-80" id="bp_notification_period" name="bp_notification_period" placeholder="notification period"  class="bp_create" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'timeperiod', { url: 'status.cgi?format=search&amp;type=timeperiod', autosubmit:false })">
+                      <input type="text" class="w-80 bp_create" id="bp_notification_period" name="bp_notification_period" placeholder="notification period" value="" onfocus="this.click()" onclick="ajax_search.init(this, 'timeperiod', { url: 'status.cgi?format=search&amp;type=timeperiod', autosubmit:false })">
                       <button class="iconOnly px-1 hoverable" onclick="bpRemoveAttribute('notification_period'); return false;" title="remove this attribute"><i class="uil uil-times"></i></button>
                     </div>
                   </td>
@@ -490,7 +490,7 @@
                   <th class="align-top text-right">Max Check Attempts</th>
                   <td>
                     <div class="flexrow flex-nowrap gap-1">
-                      <input type="text" class="w-80" id="bp_max_check_attempts" name="bp_max_check_attempts" placeholder="max check attempts"  class="bp_create" value="">
+                      <input type="text" class="w-80 bp_create" id="bp_max_check_attempts" name="bp_max_check_attempts" placeholder="max check attempts" value="">
                       <button class="iconOnly px-1 hoverable" onclick="bpRemoveAttribute('max_check_attempts'); return false;" title="remove this attribute"><i class="uil uil-times"></i></button>
                     </div>
                   </td>
