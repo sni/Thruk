@@ -8090,7 +8090,7 @@ function set_histou_img(start, end, id, source) {
     var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
 
     //add timerange to iconlink, so the target graph matches the preview
-    jQuery("#histou_graph_link").attr("href", histou_url + getParamFrom + getParamTo);
+    jQuery("#histou_graph_link").attr("href", url_prefix + "#" + histou_url + getParamFrom + getParamTo);
 
     jQuery('#pnpwaitimg').css('display', 'block');
 
@@ -8108,11 +8108,9 @@ function set_histou_img(start, end, id, source) {
         id=id.replace(/^#/g, '');
         var obj;
         for(var x=1;x<=5;x++) {
-            obj = document.getElementById("histou_th"+x);
-            styleElements(obj, "original", 1);
+            jQuery('#'+"histou_th"+x).removeClass("active");
         }
-        obj = document.getElementById(id);
-        styleElements(obj, "commentEven pnpSelected", 1);
+        jQuery('#'+id).addClass("active");
     } else {
         // get id from hash
         id = get_hash();
