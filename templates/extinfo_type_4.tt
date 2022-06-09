@@ -366,7 +366,7 @@
           </tr>
           [% IF logcache_error %]
             <tr>
-              <td colspan=6><div class="errorMessage">[% logcache_error %]</div></td>
+              <td colspan=6 class="whitespace-normal"><div class="textERROR">[% logcache_error %]</div></td>
             </tr>
           [% ELSE %]
             [% FOREACH s = logcache_stats %]
