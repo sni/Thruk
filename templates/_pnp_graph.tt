@@ -29,10 +29,9 @@
   });
 </script>
 
-<div class="card w-[670px] mx-auto">
+<div class="card w-full max-w-[700px] mx-auto">
   <div class="head justify-between">
     <h3>Performance Graph</h3>
-    <!-- ???? -->
     <div class='pnpSelector'>
       <form action="#">
         <select onchange="pnp_source=this.value; set_png_img();" id="pnp_source_select" style="display: none;">
@@ -41,32 +40,22 @@
     </div>
   </div>
 
-  <table border="0" class='comment blockHeadBorder' width='650'>
-    <tr class='comment' style="cursor:pointer">
-      <th class='comment' width="20" nowrap>
-        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
-      </th>
-      <th id="pnp_th1" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id, pnp_source)">4 hours</th>
-      <th id="pnp_th2" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id, pnp_source)">day</th>
-      <th id="pnp_th3" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id, pnp_source)">week</th>
-      <th id="pnp_th4" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id, pnp_source)">month</th>
-      <th id="pnp_th5" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id, pnp_source)">year</th>
-      <th class='comment' width="20" nowrap>
-        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
-      </th>
-    </tr>
-    <tr>
-      <td colspan=7 align="center">
-        <div id="pnp_graph_pane" style="position: relative;">
-          <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness">
-            <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%; display: none;" alt="waiting">
-            <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph">
-            <span id="pnperr" style="display:none">Could not retrieve graph data</span>
-          </a>
-        </div>
-      </td>
-    </tr>
-  </table>
+  <div class="head px-0 clickable">
+    <span              class="tabs text-center w-12"    onclick="return move_png_img(-0.5)"><i class="uil uil-angle-left text-lg contents"></i></span>
+    <span id="pnp_th1" class="tabs text-center w-[18%]" onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id, pnp_source)">4 hours</span>
+    <span id="pnp_th2" class="tabs text-center w-[18%]" onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id, pnp_source)">day</span>
+    <span id="pnp_th3" class="tabs text-center w-[18%]" onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id, pnp_source)">week</span>
+    <span id="pnp_th4" class="tabs text-center w-[18%]" onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id, pnp_source)">month</span>
+    <span id="pnp_th5" class="tabs text-center w-[18%]" onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id, pnp_source)">year</span>
+    <span              class="tabs text-center w-12"    onclick="return move_png_img( 0.5)"><i class="uil uil-angle-right text-lg contents"></i></span>
+  </div>
+  <div id="pnp_graph_pane" class="relative justify-center">
+    <a href="[% url_prefix %]#[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness" class="w-full">
+      <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
+      <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph" class="mx-auto">
+      <div id="pnperr" style="display:none" class="textERROR text-center py-2">Could not retrieve graph data</div>
+    </a>
+  </div>
 </div>
 
 <script type="text/javascript">
