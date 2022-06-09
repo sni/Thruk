@@ -32,14 +32,30 @@
           <td><input type="text" class="w-full" value="" name="newname" id="newname"></td>
         </tr>
         <tr>
-          <th>Options</th>
+          <th class="align-top">Options</th>
           <td>
-            [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
-              <input type="checkbox" name="public" id="bookmark_public" value=1><label class="ml-1" for="bookmark_public">public available</label><br>
-            [% END %]
-            [% IF num_backends > 1 %]
-              <input type="checkbox" name="save_backends" id="bookmark_save_backends" value=1><label class="ml-1" for="bookmark_save_backends">selected backends</label><br>
-            [% END %]
+            <div class="flexcol gap-1">
+              [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
+                <div>
+                  <input type="checkbox" name="public" id="bookmark_public" value=1>
+                  <label class="ml-1" for="bookmark_public">public available</label>
+                </div>
+              [% END %]
+              [% IF num_backends > 1 %]
+                <div>
+                  <input type="checkbox" name="save_backends" id="bookmark_save_backends" value=1>
+                  <label class="ml-1" for="bookmark_save_backends">selected backends</label>
+                </div>
+              [% END %]
+              <div>
+                <label>link target</label>
+                <select name="link_target">
+                  <option value="">same window</option>
+                  <option value="_parent">parent window</option>
+                  <option value="_blank">new window</option>
+                </select>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
