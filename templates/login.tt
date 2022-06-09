@@ -20,64 +20,65 @@
     [% PROCESS _header_broadcast.tt %]
     [% PROCESS _message.tt %]
 
-    <form method="POST" action="login.cgi" class="w-fit h-fit z-10 pt-5">
-      <div class="w-[300px] card rounded-xl shadow-float p-8 flexcol flex-nowrap gap-y-0 loginmask">
-        <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" class="mb-5"></a>
-        <input type="hidden" name="referer" value="[% referer | html %]" id="referer">
-        [% IF c.config.basic_auth_enabled %]
-          <input type="text" name="login" placeholder="User" id="loginuser"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] class="w-full text-lg silent mt-2" />
+    <div class="w-[300px] card rounded-xl shadow-float h-fit z-10 p-8 flexcol flex-nowrap gap-y-0 loginmask">
+      <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" class="mb-5"></a>
+      [% IF c.config.basic_auth_enabled %]
+        <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
+          <input type="hidden" name="referer" value="[% referer | html %]">
+          <input type="text" name="login" placeholder="User" id="loginuser" required class="w-full text-lg silent mt-2" />
           <div class="togglePassword relative mt-2">
-            <input type="password" name="password" placeholder="Password"[% IF !c.config.basic_auth_enabled || c.config.auth_oauth.provider.size == 0 %] required[% END %] class="w-full text-lg silent" />
+            <input type="password" name="password" placeholder="Password" required class="w-full text-lg silent" />
             <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 my-1.5 opacity-50 text-lg togglePassword"></i>
           </div>
-          <button class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between" onclick="setBtnSpinner(this);">
+          <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
             <div class="w-5"><i class="uil uil-placeholder"></i></div>
             Sign in
             <div class="w-5"></div>
           </button>
-        [% END %]
-        [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
-          [% FOREACH auth = c.config.auth_oauth.provider %]
-            [% IF c.config.basic_auth_enabled && loop.first %]
-            <div class="flex flex-nowrap pt-2">
-              <div class="flex-grow mt-2"><hr class="w-full"></div>
-              <div class="w-fit mx-4 text-center font-semibold">OR</div>
-              <div class="flex-grow mt-2"><hr class="w-full"></div>
-            </div>
-            [% END %]
-            <a class="button text-lg font-semibold mt-2 flexrow flex-nowrap justify-between" href="login.cgi?oauth=[% loop.index %]" onclick="setBtnSpinner(this);">
+        </form>
+      [% END %]
+      [% IF c.config.basic_auth_enabled || c.config.auth_oauth.provider.size > 0 %]
+        [% FOREACH auth = c.config.auth_oauth.provider %]
+          [% IF c.config.basic_auth_enabled && loop.first %]
+          <div class="flex flex-nowrap pt-2">
+            <div class="flex-grow mt-2"><hr class="w-full"></div>
+            <div class="w-fit mx-4 text-center font-semibold">OR</div>
+            <div class="flex-grow mt-2"><hr class="w-full"></div>
+          </div>
+          [% END %]
+          <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
+            <input type="hidden" name="referer" value="[% referer | html %]">
+            <input type="hidden" name="oauth" value="[% loop.index %]">
+            <button class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
               <div class="w-5"><i class="[% IF auth.defined("icon") %][% auth.icon | html %][% ELSE %]uil uil-placeholder[% END %]"></i></div>
               [% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]
               <div class="w-5"></div>
-            </a>
-          [% END %]
+            </button>
+          </form>
         [% END %]
-        <div class="mt-5 font-semibold whitespace-nowrap text-center textHINTsoft flexcol gap-1">
-          <a class="link text-sm" href="https://www.thruk.org/" target="_blank">
-            v[% thrukversion %]
-          </a>
-          [% IF c.config.extra_version %]
-            <a class="link text-xs" href='[% c.config.extra_version_link %]' target='_blank'>[% c.config.extra_version %]</a>
-          [% END %]
-        </div>
+      [% END %]
+      <div class="mt-5 font-semibold whitespace-nowrap text-center textHINTsoft flexcol gap-1">
+        <a class="link text-sm" href="https://www.thruk.org/" target="_blank">
+          v[% thrukversion %]
+        </a>
+        [% IF c.config.extra_version %]
+          <a class="link text-xs" href='[% c.config.extra_version_link %]' target='_blank'>[% c.config.extra_version %]</a>
+        [% END %]
       </div>
-    </form>
+    </div>
 
     <div class="basis-1/3"></div>
 
     <script type="text/javascript">
     <!--
-      var el  = document.getElementById('referer');
-      if(el) {
-        if(window.location.hash) {
-          var val = window.location.search + window.location.hash;
-          val = val.replace(/\/thruk\/#/, '/thruk/');
-          val = val.replace(/^\?/, '');
-          val = val.replace(/^(logout|expired|invalid|problem|locked|setsession)&/, '');
-          val = val.replace(/^\/*/, '/');
-          if(val != '') {
-            el.value = val;
-          }
+      if(window.location.hash) {
+        var val = window.location.search + window.location.hash;
+        val = val.replace(/\/thruk\/#/, '/thruk/');
+        val = val.replace(/^\?/, '');
+        val = val.replace(/^(logout|expired|invalid|problem|locked|setsession)&/, '');
+        val = val.replace(/^\/*/, '/');
+        if(val != '') {
+          jQuery("INPUT[name='referer']").val(val);
         }
       }
     -->

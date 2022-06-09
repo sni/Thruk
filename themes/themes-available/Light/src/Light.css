@@ -12,8 +12,6 @@
  *   - check body.iframed from header.tt
  *   - show custom vars on extinfo 1 and 2
  *   - Fix service/hostgroup missing right/bottom borders in overview style
- *   - Login page make SSO button standalone, so normal login button can have required (without red borders)
- *   - Broadcasts + minemap overcard popup add padding
  *   - Features:
  *       - change Options for Columns on Configuration page + make Host_name sticky
  *   - Bugs:
