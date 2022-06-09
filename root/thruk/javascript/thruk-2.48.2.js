@@ -8024,21 +8024,20 @@ function set_png_img(start, end, id, source) {
     pnp_end   = end;
 
     jQuery('#pnpwaitimg').css('display', 'block');
-    jQuery('#pnpimg').css('visibility', 'hidden');
+    jQuery('#pnpimg').css('opacity', '0.3');
 
     jQuery('#pnpimg').one("load", function() {
-      jQuery('#pnpimg').css('display' , 'block');
+      jQuery('#pnpimg').css('opacity' , '');
       jQuery('#pnperr').css('display' , 'none');
-      jQuery('#pnpimg').css('visibility', '');
-      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
+      jQuery('#pnpwaitimg').css({'display': 'none'});
     })
     .one("error", function(err) {
-      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
+      jQuery('#pnpwaitimg').css('display', 'none');
       jQuery('#pnpimg').css('display' , 'none');
-      jQuery('#pnperr').css('display' , 'block');
+      jQuery('#pnperr').css('display' , '');
     });
 
-    jQuery('#pnperr').css('display' , 'none');
+    jQuery('#pnperr').css('display', 'none');
     jQuery('#pnpimg').attr('src', newUrl);
 
     // set style of buttons
@@ -8046,11 +8045,9 @@ function set_png_img(start, end, id, source) {
         id=id.replace(/^#/g, '');
         var obj;
         for(var x=1;x<=5;x++) {
-            obj = document.getElementById("pnp_th"+x);
-            styleElements(obj, "original", 1);
+            jQuery('#'+"pnp_th"+x).removeClass("active");
         }
-        obj = document.getElementById(id);
-        styleElements(obj, "commentEven pnpSelected", 1);
+        jQuery('#'+id).addClass("active");
     } else {
         // get id from hash
         id = get_hash();
@@ -8098,10 +8095,10 @@ function set_histou_img(start, end, id, source) {
     jQuery('#pnpwaitimg').css('display', 'block');
 
     jQuery('#histou_iframe').one("load", function() {
-      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
+      jQuery('#pnpwaitimg').css({'display': 'none'});
     })
     .one("error", function(err) {
-      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
+      jQuery('#pnpwaitimg').css({'display': 'none'});
     });
 
     jQuery('#histou_iframe').attr('src', newUrl);

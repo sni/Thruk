@@ -30,56 +30,57 @@
     </div>
   </div>
 
-  <div class="card min-w-min">
-    <div class="head justify-between">
-      <h3>Host State Information</h3>
-      <div class="flex gap-x-1">
-        [% IF host.notes_url_expanded %]
-            <div>
-              <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
-                <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40">
-              </a>
-            </div>
-          [% END %]
-          [% has_bp = has_business_process(host) %]
-          [% IF has_bp %]
-            <div>
-              <a href="bp.cgi?action=details&bp=[% has_bp %]">
-                <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
-              </a>
-            </div>
-          [% END %]
-          [% IF host.action_url_expanded %]
-            [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
-            <div>
-              <a href='[% action_url %]' target='[% c.config.action_url_target %]'>
-                <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
-              </a>
-            </div>
-          [% END %]
+  <div class="flexcol">
+    <div class="card min-w-min">
+      <div class="head justify-between">
+        <h3>Host State Information</h3>
+        <div class="flex gap-x-1">
+          [% IF host.notes_url_expanded %]
+              <div>
+                <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
+                  <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40">
+                </a>
+              </div>
+            [% END %]
+            [% has_bp = has_business_process(host) %]
+            [% IF has_bp %]
+              <div>
+                <a href="bp.cgi?action=details&bp=[% has_bp %]">
+                  <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
+                </a>
+              </div>
+            [% END %]
+            [% IF host.action_url_expanded %]
+              [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
+              <div>
+                <a href='[% action_url %]' target='[% c.config.action_url_target %]'>
+                  <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
+                </a>
+              </div>
+            [% END %]
+        </div>
+      </div>
+      <div>
+        [% PROCESS _extinfo_host_service_details.tt obj=host %]
       </div>
     </div>
     <div>
-      [% PROCESS _extinfo_host_service_details.tt obj=host %]
+      [% IF pnp_url %]
+        [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
+      [% ELSIF histou_url %]
+        [% PROCESS _histou_graph.tt hst=host.name svc="" %]
+      [% ELSE %]
+        [% graph_url = get_graph_url(c, host, 1)%]
+        [% IF graph_url %]
+          [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
+        [% END %]
+      [% END %]
     </div>
   </div>
 
   <div>
     [% PROCESS _host_command_box.tt %]
   </div>
-</div>
-
-<div class="mt-5">
-  [% IF pnp_url %]
-    [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
-  [% ELSIF histou_url %]
-    [% PROCESS _histou_graph.tt hst=host.name svc="" %]
-  [% ELSE %]
-    [% graph_url = get_graph_url(c, host, 1)%]
-    [% IF graph_url %]
-      [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
-    [% END %]
-  [% END %]
 </div>
 
 [% IF host.notes_expanded %]

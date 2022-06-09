@@ -33,35 +33,49 @@
     </div>
   </div>
 
-  <div class="card min-w-min">
-    <div class="head justify-between">
-      <h3>Service State Information</h3>
-      <div class="flex gap-x-1">
-        [% IF service.action_url_expanded %]
-          [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
-          <div>
-            <a href='[% action_url %]' target='_blank'><i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i></a>
-          </div>
-        [% END %]
-        [% IF service.notes_url_expanded %]
-          <div>
-            <a href='[% service.notes_url_expanded %]' target='_blank'>
-              <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40">
-            </a>
-          </div>
-        [% END %]
-        [% has_bp = has_business_process(service, 'host_') %]
-        [% IF has_bp %]
-          <div>
-            <a href="bp.cgi?action=details&bp=[% has_bp %]">
-              <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
-            </a>
-          </div>
-        [% END %]
+  <div class="flexcol">
+    <div class="card min-w-min">
+      <div class="head justify-between">
+        <h3>Service State Information</h3>
+        <div class="flex gap-x-1">
+          [% IF service.action_url_expanded %]
+            [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
+            <div>
+              <a href='[% action_url %]' target='_blank'><i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i></a>
+            </div>
+          [% END %]
+          [% IF service.notes_url_expanded %]
+            <div>
+              <a href='[% service.notes_url_expanded %]' target='_blank'>
+                <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40">
+              </a>
+            </div>
+          [% END %]
+          [% has_bp = has_business_process(service, 'host_') %]
+          [% IF has_bp %]
+            <div>
+              <a href="bp.cgi?action=details&bp=[% has_bp %]">
+                <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
+              </a>
+            </div>
+          [% END %]
+        </div>
+      </div>
+      <div>
+        [% PROCESS _extinfo_host_service_details.tt obj=service %]
       </div>
     </div>
     <div>
-      [% PROCESS _extinfo_host_service_details.tt obj=service %]
+      [% IF pnp_url %]
+        [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
+      [% ELSIF histou_url %]
+        [% PROCESS _histou_graph.tt hst=service.host_name svc=service.description %]
+      [% ELSE %]
+        [% graph_url = get_graph_url(c, service, 1)%]
+        [% IF graph_url %]
+          [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
+        [% END %]
+      [% END %]
     </div>
   </div>
 
@@ -153,20 +167,6 @@
         </td>
       </tr>
     </table>
-     <!-- fix later-->
-
-  <div class="mt-5">
-    [% IF pnp_url %]
-      [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
-    [% ELSIF histou_url %]
-      [% PROCESS _histou_graph.tt hst=service.host_name svc=service.description %]
-    [% ELSE %]
-      [% graph_url = get_graph_url(c, service, 1)%]
-      [% IF graph_url %]
-        [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
-      [% END %]
-    [% END %]
-  </div>
 
   [% IF service.notes_expanded %]
     <div class="card w-full">
