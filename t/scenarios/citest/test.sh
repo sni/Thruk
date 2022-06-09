@@ -20,6 +20,8 @@ for ARG in $*; do
         :
     elif [ "$ARG" == "prepare" ]; then
         :
+    elif [ "$ARG" == "update" ]; then
+        :
     else
         echo "ERROR: unknown option: '$ARG'"
         exit 1
