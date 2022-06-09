@@ -1,7 +1,8 @@
 ﻿[% broadcasts = get_broadcasts(c) %]
 [% IF c.stash.defined("broadcast"); broadcasts = [broadcast]; END %]
 [% IF broadcasts.size > 0 %]
-  <div class="card mt-1 min-w-[200px] shadow-float rounded-t-none absolute -top-1 right-40 js-broadcast-panel noprint">
+  <div class="card mt-1 min-w-[200px] shadow-float rounded-t-none absolute -top-1 right-96 z-10 js-broadcast-panel noprint">
+    [% IF broadcasts.size > 1 %]
     <div class="flexrow gap-0 flex-nowrap">
       <div class="js-previous text-center grow hoverable clickable" style="visibility: hidden;" onclick="broadcast_show_list(-1);"><i class="uil uil-angle-left"></i></div>
       <div class="js-next     text-center grow hoverable clickable"[% IF broadcasts.size == 1 %] style="visibility: hidden;"[% END %] onclick="broadcast_show_list(1);"><i class="uil uil-angle-right"></i></div>
@@ -9,7 +10,8 @@
         <a class="button iconOnly medium hoverable p-1" href="#" onclick="broadcast_dismiss(); return(false);"><i class="uil uil-times"></i></a>
       [% END %]
     </div>
-    <div class="flex justify-between">
+    [% END %]
+    <div class="body flex justify-between">
       <div class="w-full">
         [% FOREACH n = broadcasts %]
           <div class="broadcast [% IF !loop.first %]hidden[% END %]">
