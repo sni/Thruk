@@ -44,7 +44,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center">
-            <input class="w-36 mt-2" type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())">
+            <input class="w-36 my-2" type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())">
           </td>
         </tr>
       </table>
@@ -135,7 +135,7 @@
 
         <tr class="no-hover">
           <td colspan="4" align="center">
-            <input type="submit" class="w-36 mt-2" value="save changes" name="saveb" onclick="return(setNoFormClean())">
+            <input type="submit" class="w-36 my-2" value="save changes" name="saveb" onclick="return(setNoFormClean())">
           </td>
         </tr>
       </table>
