@@ -113,7 +113,10 @@ server:
 web:
 	@python3 -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
 
+preprepare:
+
 prepare:
+	$(MAKE) preprepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker-compose build
 	docker-compose up --remove-orphans -d
@@ -121,8 +124,9 @@ prepare:
 	@docker-compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
 		echo "$${LOGLINE}"; \
 		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ docker-compose && exit 0; \
-		[[ "$${LOGLINE}" == *"ERROR"* ]] && pkill -P $$$$ docker-compose && exit 1; \
-		[[ "$${LOGLINE}" == *"exited with code"* ]] && pkill -P $$$$ docker-compose && exit 1; \
+		[[ "$${LOGLINE}" == *"ci container ready"* ]]         && pkill -P $$$$ docker-compose -9 && exit 0; \
+		[[ "$${LOGLINE}" == *"ERROR"* ]]                      && pkill -P $$$$ docker-compose && exit 1; \
+		[[ "$${LOGLINE}" == *"exited with code"* ]]           && pkill -P $$$$ docker-compose && exit 1; \
 	done
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare

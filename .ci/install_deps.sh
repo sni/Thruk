@@ -5,7 +5,7 @@ set -ex
 cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
 
 # newer version are broken when using symlinks
-cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
+if [ ! -f ~/perl5/lib/perl5/ExtUtils/Manifest.pm ]; then cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz; fi
 ./.ci/install_javascript_spidermonkey.sh
 cpanm -q -f --installdeps --notest --no-man-pages .
 

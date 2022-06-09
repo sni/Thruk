@@ -57,6 +57,7 @@ for my $dir (@{$scenarios}) {
     else {
         # simply test if we have a specific test case for all required scenarios
         next if $dir =~ /nagios4/mx;
+        next if $dir =~ /citest/mx;
         my $dirname = $dir;
         $dirname =~ s%^.*/%%gmx;
         my $filename = 't/610-scenario-'.$dirname.'.t';
