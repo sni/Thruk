@@ -65,6 +65,9 @@ SKIP: {
     like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends_string.'\] cmd: COMMAND \[\d+\] DISABLE_NOTIFICATIONS/', 'got combined command');
 };
 
+$ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
+$ENV{'THRUK_TEST_NO_LOG'}       = "";
+
 TestUtils::test_page(
     'url'      => '/thruk/cgi-bin/cmd.cgi?cmd_typ=96&host='.$host.'&backend='.$backends->[0]->{'key'}.'&backend='.$backends->[0]->{'key'},
     'like'     => 'Command Options',
