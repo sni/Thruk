@@ -39,10 +39,10 @@
         <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
         <div class="hint text-center font-medium pb-1">Select all:</div>
         <div class="hint flex place-content-center gap-x-0.5">
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');">Hosts</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(Array('.DOWN','.UNREACHABLE'));">Problems</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">With Downtime</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');">Unselect all</button>
+          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');return false;">Hosts</button>
+          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(['.DOWN','.UNREACHABLE']);return false;">Problems</button>
+          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(['.has_downtime']);return false;">With Downtime</button>
+          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');return false;">Unselect all</button>
         </div>
         [% END %]
       </div>
@@ -79,17 +79,15 @@
 
   [% UNLESS minimal %]
     <div class="my-2">
-      <!-- to do fix -->
-      [% PROCESS _status_filter.tt style='detail' substyle='service' paneprefix='svc_' show_form=0 %]
       [% UNLESS authorized_for_read_only %]
         <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
         <div class="hint text-center font-medium pb-1">Select all:</div>
         <div class="hint flex place-content-center gap-x-0.5">
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');">Hosts</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');">Services</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.CRITICAL','.WARNING','.UNKNOWN'));">Problems</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">With Downtime</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">Unselect all</button>
+          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(true,'svc_');return false;">Hosts</button>
+          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');return false;">Services</button>
+          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(['.CRITICAL','.WARNING','.UNKNOWN']);return false;">Problems</button>
+          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectHostsByClass(['.has_downtime']);selectServicesByClass(['.has_downtime']);return false;">With Downtime</button>
+          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');;return false;">Unselect all</button>
         </div>
       [% END %]
     </div>
