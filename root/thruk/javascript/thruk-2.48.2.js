@@ -5274,6 +5274,7 @@ function highlightHostRow() {
 
 /* select this service */
 function selectService(event, state) {
+    resetRefresh();
     var t = getTextSelection();
     var l = t.split(/\r?\n|\r/).length;
     if(t != '' && l == 1) {
@@ -5307,6 +5308,7 @@ function selectService(event, state) {
 
 /* select this service */
 function selectServiceByIdEvent(row_id, state, event) {
+    resetRefresh();
     row_id = row_id.replace(/_s_exec$/, '');
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
@@ -5345,6 +5347,7 @@ function selectServiceByIdEvent(row_id, state, event) {
 
 /* select service row by id */
 function selectServiceById(row_id, state) {
+    resetRefresh();
     row_id = row_id.replace(/_s_exec$/, '');
     var targetState;
     if(state != undefined) {
@@ -5375,6 +5378,7 @@ function selectServiceById(row_id, state) {
 
 /* select this host */
 function selectHost(event, state) {
+    resetRefresh();
     var t = getTextSelection();
     var l = t.split(/\r?\n|\r/).length;
     if(t != '' && l == 1) {
@@ -5409,6 +5413,7 @@ function selectHost(event, state) {
 
 /* select this service */
 function selectHostByIdEvent(row_id, state, event) {
+    resetRefresh();
     row_id = row_id.replace(/_h_exec$/, '');
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
@@ -5446,6 +5451,7 @@ function selectHostByIdEvent(row_id, state, event) {
 
 /* set host row selected */
 function selectHostById(row_id, state) {
+    resetRefresh();
     row_id = row_id.replace(/_h_exec$/, '');
     var targetState;
     if(state != undefined) {
@@ -5480,6 +5486,7 @@ function selectHostById(row_id, state) {
 
 /* reset row style unless it has been clicked */
 function resetServiceRow(event) {
+    resetRefresh();
     var row_id;
     if(!event) {
         event = this;
@@ -5503,6 +5510,7 @@ function resetServiceRow(event) {
 
 /* reset row style unless it has been clicked */
 function resetHostRow(event) {
+    resetRefresh();
     var row_id;
     if(!event) {
         event = this;
@@ -5533,6 +5541,7 @@ function selectAllServices(state, pane_prefix) {
     };
 
     checkCmdPaneVisibility();
+    return false;
 }
 /* select services by class name */
 function selectServicesByClass(classes) {
@@ -5563,6 +5572,7 @@ function selectAllHosts(state, pane_prefix) {
     };
 
     checkCmdPaneVisibility();
+    return false;
 }
 
 /* toggle the visibility of the command pane */
