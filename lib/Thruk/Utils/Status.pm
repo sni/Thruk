@@ -319,7 +319,7 @@ sub do_filter {
     $prefix = 'dfl_' unless defined $prefix;
 
     # rewrite prefix
-    if(!$params->{$prefix.'s0_type'}) {
+    if(!$params->{$prefix.'s0_type'} && !$params->{$prefix.'s0_hostprops'}) {
         for my $prfx ($prefix, qw/dfl_ ovr_ grd_ svc_ hst_/) {
             if(exists $params->{$prfx.'s0_type'}) {
                 if($prefix ne $prfx) {
