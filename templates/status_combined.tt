@@ -9,10 +9,10 @@
   [% PROCESS _infobox.tt %]
 </div>
 
-<form action="" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(remove_empty_form_params(this))">
+<form action="status.cgi" method="GET" id="[% paneprefix %]filterForm" onsubmit="return(remove_empty_form_params(this))">
   <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;" alt="show">
   <input type="hidden" name="style" value="[% style | html %]">
-  <input type="hidden" name="nav" value="[% nav | html %]">
+  <input type="hidden" name="nav" value="[% show_nav | html %]">
   [% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
   <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
   <input type="hidden" name="title" id="title" value="[% custom_title | html %]">
@@ -48,14 +48,13 @@
       </div>
       <div class="basis-1/3"></div>
     </div>
-    [% PROCESS _status_filter.tt style='hostdetail' substyle='host' paneprefix='hst_' show_form=0 %]
   [% END %]
 
   <div class="card w-full">
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">
-          [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
+          [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" paneprefix='hst_' show_form=0 %]
           [% PROCESS _status_filter.tt style='hostdetail' substyle='host' paneprefix='hst_' show_form=0 %]
         </div>
       </div>
@@ -97,7 +96,7 @@
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">
-          [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
+          [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" paneprefix='svc_' show_form=0 %]
           [% PROCESS _status_filter.tt style='detail' substyle='service' paneprefix='svc_' show_form=0 %]
         </div>
       </div>
