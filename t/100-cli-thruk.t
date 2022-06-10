@@ -84,12 +84,12 @@ if($test->{'exit'} == 0) {
         TestUtils::test_command({
             cmd     => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=11" -b '.$backends[0].' -b '.$backends[1],
             errlike => ['/\['.$backends_string.'\]/', '/TESTMODE:/', '/DISABLE_NOTIFICATIONS/' ],
-            like    => ['/Commands successfully submitted/'],
+            like    => ['/Your command request was successfully submitted/'],
         });
         TestUtils::test_command({
             cmd     => $BIN.' "cmd.cgi?cmd_mod=2&cmd_typ=96&host='.$host.'&start_time=now" -b '.$backends[0],
             errlike => ['/\['.$names[0].'\]/', '/TESTMODE:/', '/'.$host.'/' ],
-            like    => ['/Commands successfully submitted/'],
+            like    => ['/Your command request was successfully submitted/'],
         });
     }
 }
