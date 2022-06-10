@@ -28,7 +28,7 @@ TestUtils::test_page(
 );
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/showlog.cgi',
-    'like'    => ["Event Log", "SERVICE ALERT:", "Matching Log Entries Displayed"],
+    'like'    => ["Event Log", "SERVICE ALERT:", "Items Displayed"],
 );
 
 TestUtils::test_page(
