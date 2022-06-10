@@ -4,24 +4,24 @@
   </div>
   <table class="hostsTotals">
     <tr>
-      <th class="w-1/4 links"><a href='[% uri_with(c, hoststatustypes => 2) %]'>Up</a></th>
-      <th class="w-1/4 links"><a href='[% uri_with(c, hoststatustypes => 4) %]'>Down</a></th>
-      <th class="w-1/4 links"><a href='[% uri_with(c, hoststatustypes => 8) %]'>Unreach.</a></th>
-      <th class="w-1/4 links"><a href='[% uri_with(c, hoststatustypes => 1) %]'>Pending</a></th>
+      <th class="w-1/4 links"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 2) %]'>Up</a></th>
+      <th class="w-1/4 links"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 4) %]'>Down</a></th>
+      <th class="w-1/4 links"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 8) %]'>Unreach.</a></th>
+      <th class="w-1/4 links"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 1) %]'>Pending</a></th>
     </tr>
     <tr>
-      <td class='w-1/4 [% IF !has_error && host_stats.up > 0 %]UP[% END %]'><a href='[% uri_with(c, hoststatustypes => 2) %]'>[% IF !has_error && host_stats.up %][% host_stats.up %][% ELSE %]0[% END %]</a></td>
-      <td class='w-1/4 [% IF !has_error && host_stats.down > 0 %]DOWN[% END %]'><a href='[% uri_with(c, hoststatustypes => 4) %]'>[% IF !has_error && host_stats.down %][% host_stats.down %][% ELSE %]0[% END %]</a></td>
-      <td class='w-1/4 [% IF !has_error && host_stats.unreachable > 0 %]UNREACHABLE[% END %]'><a href='[% uri_with(c, hoststatustypes => 8) %]'>[% IF !has_error && host_stats.unreachable %][% host_stats.unreachable %][% ELSE %]0[% END %]</a></td>
-      <td class='w-1/4 [% IF !has_error && host_stats.pending > 0 %]PENDING[% END %]'><a href='[% uri_with(c, hoststatustypes => 1) %]'>[% IF !has_error && host_stats.pending %][% host_stats.pending %][% ELSE %]0[% END %]</a></td>
+      <td class='w-1/4 [% IF !has_error && host_stats.up          > 0 %]UP[%          END %]'><a href='[% uri_with(c, page => 'undef', hoststatustypes => 2) %]'>[% IF !has_error && host_stats.up %][% host_stats.up %][% ELSE %]0[% END %]</a></td>
+      <td class='w-1/4 [% IF !has_error && host_stats.down        > 0 %]DOWN[%        END %]'><a href='[% uri_with(c, page => 'undef', hoststatustypes => 4) %]'>[% IF !has_error && host_stats.down %][% host_stats.down %][% ELSE %]0[% END %]</a></td>
+      <td class='w-1/4 [% IF !has_error && host_stats.unreachable > 0 %]UNREACHABLE[% END %]'><a href='[% uri_with(c, page => 'undef', hoststatustypes => 8) %]'>[% IF !has_error && host_stats.unreachable %][% host_stats.unreachable %][% ELSE %]0[% END %]</a></td>
+      <td class='w-1/4 [% IF !has_error && host_stats.pending     > 0 %]PENDING[%     END %]'><a href='[% uri_with(c, page => 'undef', hoststatustypes => 1) %]'>[% IF !has_error && host_stats.pending %][% host_stats.pending %][% ELSE %]0[% END %]</a></td>
     </tr>
     <tr>
-      <th colspan="2" class="links"><a href='[% uri_with(c, hoststatustypes => 12) %]'>All Problems</a></th>
-      <th colspan="2" class="links"><a href='[% uri_with(c, hoststatustypes => 16) %]'>All Types</a></th>
+      <th colspan="2" class="links"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 12) %]'>All Problems</a></th>
+      <th colspan="2" class="links"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 16) %]'>All Types</a></th>
     </tr>
     <tr>
-      <td colspan="2" class='[% IF !has_error && host_stats.down + host_stats.unreachable > 0 %]PROBLEMS[% END %]'><a href='[% uri_with(c, hoststatustypes => 12) %]'>[% IF !has_error && host_stats.down + host_stats.unreachable > 0 %][% host_stats.down + host_stats.unreachable %][% ELSE %]0[% END %]</a></td>
-      <td colspan="2"><a href='[% uri_with(c, hoststatustypes => 16) %]'>[% IF !has_error && host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %][% host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %][% ELSE %]0[% END %]</a></td>
+      <td colspan="2" class='[% IF !has_error && host_stats.down + host_stats.unreachable > 0 %]PROBLEMS[% END %]'><a href='[% uri_with(c, page => 'undef', hoststatustypes => 12) %]'>[% IF !has_error && host_stats.down + host_stats.unreachable > 0 %][% host_stats.down + host_stats.unreachable %][% ELSE %]0[% END %]</a></td>
+      <td colspan="2"><a href='[% uri_with(c, page => 'undef', hoststatustypes => 16) %]'>[% IF !has_error && host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %][% host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %][% ELSE %]0[% END %]</a></td>
     </tr>
   </table>
 </div>
