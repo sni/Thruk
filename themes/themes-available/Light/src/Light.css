@@ -544,7 +544,7 @@ I.fa-solid, I.uil {
  */
 @layer base {
   .card {
-    @apply w-min h-min text-left overflow-hidden rounded-lg textCard bgCard shadow-card;
+    @apply w-min h-min text-left rounded-lg textCard bgCard shadow-card;
     DIV.head {
       @apply h-[40px] px-2 border-b borderDefault items-center flex;
       SPAN.tabs {
