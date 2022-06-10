@@ -215,10 +215,14 @@ TH {
 }
 
 TR:nth-child(odd) TD.tableRowSelected{
- @apply bg-yellow-300 bg-opacity-70  text-gray-700 !important;
+  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
+    @apply bg-yellow-300 bg-opacity-70  text-gray-700 !important;
+  }
 }
 TR:nth-child(even) TD.tableRowSelected {
- @apply bg-yellow-300 bg-opacity-80 text-gray-700 !important;
+  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
+    @apply bg-yellow-300 bg-opacity-80 text-gray-700 !important;
+  }
 }
 
 .badge {
