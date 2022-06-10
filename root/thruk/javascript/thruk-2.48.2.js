@@ -192,6 +192,7 @@ function init_page() {
                 stopRefresh();
                 jQuery("#refresh_label").html("");
             } else {
+                refreshPage = 1;
                 setRefreshRate(refresh_rate);
                 jQuery(window)
                     .off("mousewheel DOMMouseScroll click keyup")
@@ -1026,6 +1027,7 @@ function setRefreshRate(rate) {
 function resetRefresh() {
   window.clearTimeout(refreshTimer);
   if( typeof refresh_rate == "number" ) {
+    refreshPage = 1;
     setRefreshRate(refresh_rate);
   } else {
     stopRefresh();
