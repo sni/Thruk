@@ -46,7 +46,7 @@ TestUtils::test_page(
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/status.cgi?host=host-host1&style=hostdetail&hoststatustypes=1',
     'like'    => ['Current Network Status', 'Host Status Details'],
-    'waitfor' => '0\ Matching\ Host\ Entries',
+    'waitfor' => '0\ Items\ Displayed',
 );
 
 # cannot determine fixed number of tests, number depends on wether initial import redirects or not,
