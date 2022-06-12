@@ -48,7 +48,6 @@ var available_fonts          = [% json_encode(fonts) %];
 var omd_site                 = '[% omd_site %]';
 var grafana_default_panelId  = [% c.config.grafana_default_panelId %];
 var enable_shinken_features  = [% enable_shinken_features %];
-var has_jquery_ui            = false;
 var escape_html_tags         = [% IF escape_html_tags %]true[% ELSE %]false[% END %];
 var jquery_ui_css            = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css';
 var jquery_ui_url            = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js';
