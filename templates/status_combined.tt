@@ -36,7 +36,7 @@
       </div>
       <div class="basis-1/3">
         [% UNLESS authorized_for_read_only %]
-        <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
+        <div class="hint text-center text-xs whitespace-nowrap">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
         <div class="hint text-center font-medium pb-1">Select all:</div>
         <div class="hint flex place-content-center gap-x-0.5">
           <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');return false;">Hosts</button>
@@ -79,7 +79,7 @@
   [% UNLESS minimal %]
     <div class="my-2">
       [% UNLESS authorized_for_read_only %]
-        <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
+        <div class="hint text-center text-xs whitespace-nowrap">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
         <div class="hint text-center font-medium pb-1">Select all:</div>
         <div class="hint flex place-content-center gap-x-0.5">
           <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(true,'svc_');return false;">Hosts</button>
