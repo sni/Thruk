@@ -20,7 +20,6 @@
   var fav_counter         = [% IF fav_counter +%]true[% ELSE %]false[% END %];
   var perf_bar_mode       = '[% perf_bar_mode %]';
   var perf_bar_pnp_popup  = '[% perf_bar_pnp_popup %]';
-  var has_jquery_ui       = [% has_jquery_ui %];
   var jquery_ui_url       = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js';
   var jquery_ui_css       = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css';
   var thruk_debug_js      = [% IF thruk_author %]true[% ELSE %]false[% END %];

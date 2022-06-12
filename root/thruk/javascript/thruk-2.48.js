@@ -513,7 +513,7 @@ function openModalCommand(el) {
 }
 
 function openModalWindowUrl(url, callback) {
-    if(!has_jquery_ui) {
+    if(!has_jquery_ui()) {
         load_jquery_ui(function() {
             openModalWindowUrl(url, callback);
         });
@@ -1542,7 +1542,7 @@ function create_site_panel_popup_tree() {
 
 function create_site_panel_popup_tree_populate() {
     jQuery(".tree_peer_btn").hide();
-    if(!has_jquery_ui) {
+    if(!has_jquery_ui()) {
         load_jquery_ui(create_site_panel_popup_tree_populate);
         return;
     }
@@ -1607,7 +1607,7 @@ function create_site_panel_popup_tree_populate() {
 }
 
 function create_site_panel_popup_tree_make_bookmarks_sortable() {
-    if(!has_jquery_ui) {
+    if(!has_jquery_ui()) {
         load_jquery_ui(create_site_panel_popup_tree_make_bookmarks_sortable);
         return;
     }
@@ -3143,7 +3143,7 @@ function fade(id, duration, remove) {
 
 var ui_loading = false;
 function load_jquery_ui(callback) {
-    if(has_jquery_ui || ui_loading) {
+    if(has_jquery_ui() || ui_loading) {
         return;
     }
     var css  = document.createElement('link');
@@ -3156,7 +3156,6 @@ function load_jquery_ui(callback) {
         url:       jquery_ui_url,
         dataType: 'script',
         success:   function(script, textStatus, jqXHR) {
-            has_jquery_ui = true;
             callback(script, textStatus, jqXHR);
             ui_loading = false;
         },
@@ -3474,7 +3473,7 @@ function fetch_svc_info_popup(el, host, svc, peer_key) {
 }
 
 function initTableRowSorting(tblId) {
-    if(!has_jquery_ui) {
+    if(!has_jquery_ui()) {
         load_jquery_ui(function() {
             initTableRowSorting(tblId);
         });
@@ -3495,7 +3494,7 @@ function initTableRowSorting(tblId) {
 }
 
 function initExcelExportSorting() {
-    if(!has_jquery_ui) {
+    if(!has_jquery_ui()) {
         load_jquery_ui(function() {
             initExcelExportSorting();
         });
@@ -3519,7 +3518,7 @@ function initExcelExportSorting() {
 // make the columns sortable
 var already_sortable = {};
 function initStatusTableColumnSorting(pane_prefix, table_class) {
-    if(!has_jquery_ui) {
+    if(!has_jquery_ui()) {
         load_jquery_ui(function() {
             initStatusTableColumnSorting(pane_prefix, table_class);
         });
@@ -4137,6 +4136,14 @@ function copyCode(evt, id) {
     window.setTimeout(function () {
         jQuery(tooltip).remove();
     }, 1500);
+}
+
+// returns true if query ui is available
+function has_jquery_ui() {
+    if(jQuery().sortable) {
+        return true;
+    }
+    return false;
 }
 
 /*******************************************************************************
