@@ -58,10 +58,10 @@
     <div class="mainTable">
       <div class="flex">
       [% FOR g IN data %]
-        <div class="basis-1/3[% IF !loop.first %] border-l[% END %]">
+        <div class="basis-1/3[% IF !loop.first %] border-l[% END %]"> <!-- TODO: wenn weniger als 3 dann right border und 1/3 dann anpassen -->
           [% IF substyle == 'host' %]
           <h3 class="p-2">
-            <a class="link" href="status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
+            <a class="link" href="status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %][% data.size %]</a>
             <a href="extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]"><i class="uil uil-sliders-v"></i></a>
           </h3>
           [% ELSIF substyle == 'service' %]
@@ -70,7 +70,7 @@
             <a href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]"><i class="uil uil-sliders-v"></i></a>
           </h3>
           [% END %]
-          <div class='border-t'>
+          <div class='border-t border-b'>
             [% start_with = 4 %]
             <table class='status statusgroups [% paneprefix %]_table statusTable mainTable striped' [% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
               <thead>
