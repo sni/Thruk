@@ -3,10 +3,10 @@
 <table class="search_hide_empty header2 cellspacing-x rowhover" id="procInfoTable">
   <tr>
     <th colspan="5"></th>
-    <th colspan="2">Checks Enabled</th>
+    <th colspan="2" class="text-center">Checks Enabled</th>
     <th></th>
-    <th colspan="2">Obsessing Over</th>
-    <th>Flap</th>
+    <th colspan="2" class="text-center">Obsessing Over</th>
+    <th class="text-center">Flap</th>
   </tr>
   <tr class="font-semibold">
     <th>Section</th>

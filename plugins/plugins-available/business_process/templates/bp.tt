@@ -42,15 +42,15 @@
       <thead>
         <tr>
           <th class="w-0"></th>
-          <th class="w-[400px]">Name</th>
-          <th class="w-0"></th>
+          <th class="w-[400px] border-l-0">Name</th>
+          <th class="w-[100px] text-center">Actions</th>
           [% IF type != "local" %]
           <th class="w-[100px] text-center">Site</th>
           [% END %]
           <th class="w-[100px] text-center">Status</th>
           <th class="w-[130px] text-center">Last Check</th>
           <th class="w-[130px] text-center">Duration</th>
-          <th class="whitespace-nowrap">Status Information</th>
+          <th>Status Information</th>
         </tr>
       </thead>
       <tbody>
@@ -72,13 +72,15 @@
                 <a href="#" class="not-clickable"><i class="fa-solid fa-pencil text-sm disabled" title='Change Business Process'></i></a>
               [% END %]
             </td>
-            [% IF bp.draft %]
-            <td class="mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><b>[% bp.name | html %]</b> <span class="textHINT pl-2">(DRAFT)</span></a></td>
-            [% ELSE %]
-            <td class="mightOverflow"><a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><b>[% bp.name | html %]</b></a></td>
-            [% END %]
+            <td class="mightOverflow border-l-0">
+              [% IF bp.draft %]
+                <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><b>[% bp.name | html %]</b> <span class="textHINT pl-2">(DRAFT)</span></a>
+              [% ELSE %]
+                <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]"><b>[% bp.name | html %]</b></a>
+              [% END %]
+            </td>
             <td class="text-right">
-              <div class="flexrow gap-1 flex-nowrap">
+              <div class="flex gap-x-1 justify-center">
                 [% IF !bp.draft %]
                   <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;testmode=1"><i class="fa-solid fa-clipboard-question" title="Business Impact Analysis"></i></a>
                   <a href="status.cgi?host=[% bp.name | uri %]"><i class="fa-solid fa-bars" title="Show Service Details"></i></a>
@@ -87,11 +89,11 @@
               </div>
             </td>
             [% IF type != "local" %]
-            <td class="text-center whitespace-nowrap">[% bp.site %]</td>
+            <td class="text-center">[% bp.site %]</td>
             [% END %]
             <td class="[% statusClass %] text-center">[% statusText %]</td>
-            <td class="text-center whitespace-nowrap">[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
-            <td class="whitespace-nowrap">[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
+            <td class="text-center">[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
+            <td class="text-center">[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
             [% output = bp.status_text.split("\n") %]
             <td class="truncate max-w-sm"[% IF output.size > 1 %]
               onclick="overcard({ 'body': this.abbr, 'caption': '[% escape_js(bp.name) | html %]', 'width': 600 })" abbr="[% escape_html(nl2br(bp.status_text)) %]"

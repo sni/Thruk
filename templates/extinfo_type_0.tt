@@ -29,11 +29,13 @@
         [% END %]
       </div>
     </div>
-    [% IF list_mode == "list" %]
-      [% PROCESS _extinfo_type_0_table.tt %]
-    [% ELSE %]
-      [% PROCESS _extinfo_type_0_blocks.tt %]
-    [% END %]
+    <div class="overflow-x-auto">
+      [% IF list_mode == "list" %]
+        [% PROCESS _extinfo_type_0_table.tt %]
+      [% ELSE %]
+        [% PROCESS _extinfo_type_0_blocks.tt %]
+      [% END %]
+    </div>
   </div>
 
   <div class="card w-fit">

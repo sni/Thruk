@@ -20,7 +20,7 @@
   <tr class="whitespace-normal">
     <th class="align-top w-[170px]">Check Command</th>
     <td>
-      <div class="flex bg-gray-100 px-2 rounded-md items-center">
+      <div class="flex px-2 rounded-md items-center codeBG">
         <div class="flex-grow">
           <pre id="copyToClipboard" class="whitespace-normal"><code>[% command.line | html %]</code></pre>
         </div>
@@ -38,7 +38,7 @@
       [% IF command.note %]
         <div class="textALERT text-xs italic"><span class="font-semibold">Note:</span> This is not a valid macro</div>
       [% END %]
-      <div class="flex bg-gray-100 px-2 rounded-md items-center">
+      <div class="flex px-2 rounded-md items-center codeBG">
         <div class="flex-grow">
           <pre id="copyToClipboard2" class="whitespace-normal"><code>[% command.line_expanded | html %]</code></pre>
         </div>
