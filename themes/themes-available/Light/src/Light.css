@@ -152,6 +152,9 @@
   .hoverBG1 {
     @apply bg-warmgray-100;
   }
+  .codeBG {
+    @apply bg-gray-50;
+  }
 
   /* Because of a browser bug the bottom border of a sticky TH would scroll up and disappear, this sets a shadow with inset #E5E7EB = border-gray-200 */
   .shadow-as-border-bottom {

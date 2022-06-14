@@ -145,6 +145,10 @@
    @apply bg-[#555];
  }
 
+ .codeBG {
+   @apply bg-[#333];
+ }
+
  .hoverBG1 {
    @apply bg-[#555];
  }
