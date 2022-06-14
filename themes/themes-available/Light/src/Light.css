@@ -10,7 +10,7 @@
  *   - multiple comments in comments TD in host/service details are multiline? Fix
  *   - check body.iframed from header.tt
  *   - show custom vars on extinfo 1 and 2
- *   - Fix service/hostgroup missing right/bottom borders in overview style
+ *   - Fix service/hostgroup missing right border in status_overview.tt
  *   - Features:
  *       - change Options for Columns on Configuration page + make Host_name sticky
  *   - Bugs:
