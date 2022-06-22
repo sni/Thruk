@@ -53,7 +53,7 @@
                     <input type='hidden' name='s0_op' value='~' />
                     <input type='hidden' name='s0_type' value='search' />
                     <input type='hidden' name='add_default_service_filter' value='1' />
-                    <input type='search' name='s0_value' class="deletable autosubmit w-20 active:w-40 focus:w-48 transition-all ease-linear duration-150" id="header-search" placeholder="search..." />
+                    <input type='search' name='s0_value' class="deletable autosubmit w-20 active:w-40 focus:w-48 transition-all ease-linear duration-150 delay-150" id="header-search" placeholder="search..." />
                   </fieldset>
                 </form>
               </div>
