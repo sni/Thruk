@@ -115,7 +115,7 @@ END
       </div>
     </th>
     <td class='detail_plugin_output whitespace-normal'>
-      <span class="detail_plugin_outputBlock mightOverflowBlock max-w-[1000px] max-h-[600px]">
+      <span class="detail_plugin_outputBlock mightOverflowBlock max-w-[500px] max-h-[300px] lg:max-w-[1000px] lg:max-h-[600px]">
         [% IF obj.has_been_checked == 0 %]obj has not been checked yet[% END %]
         [% IF escape_html_tags %][% nl2br(escape_html(obj.plugin_output)) %][% ELSE %][% nl2br(obj.plugin_output) %][% END %]
         [% IF obj.long_plugin_output %]
