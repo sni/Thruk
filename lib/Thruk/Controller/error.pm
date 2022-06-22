@@ -22,10 +22,11 @@ Thruk Controller.
 
     detailed errors:
         return $c->detach_error({
-            msg   => "main error",
-            descr => "more descriptive details",
-            code  => http code,
-            log   => 0|1, #  force logging
+            msg         => "main error",
+            descr       => "more descriptive details",
+            code        => http code,
+            log         => 0|1, #  force logging
+            skip_escape => 0|1, # skip html escape of data
         });
 
 
@@ -251,6 +252,9 @@ sub index {
     # redirected from $c->detach_error()
     my $log_req;
     if($c->stash->{'error_data'}) {
+        if(!$c->stash->{'error_data'}->{'skip_escape'}) {
+            Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});
+        }
         $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
         $code                           = $c->stash->{'error_data'}->{'code'}  // 500;
