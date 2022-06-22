@@ -11,6 +11,7 @@
  *   - check body.iframed from header.tt
  *   - show custom vars on extinfo 1 and 2
  *   - Fix service/hostgroup missing right border in status_overview.tt
+ *   - extinfo type 0, make right-scrollable with sticky left header instead of new row after 3?
  *   - Features:
  *       - change Options for Columns on Configuration page + make Host_name sticky
  *   - Bugs:
@@ -20,8 +21,7 @@
  *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  *       - List recent downtimes => undef down.names in showlog.tt
- *       - Downtimes Display Filter partially hidden when there are no downtimes
- *       - extinfo type 0, cut off on the right if more than 3 backends, make scrollable with sticky left header?
+ *       - Backends on top double/buggy on conf.cgi
  */
 
 @tailwind base;

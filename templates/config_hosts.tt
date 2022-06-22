@@ -31,7 +31,7 @@
       <th class="text-center">Enable Flap Detection</th>
       <th class="text-center">Low Flap Threshold</th>
       <th class="text-center">High Flap Threshold</th>
-      <th> class="text-center"Process Performance Data</th>
+      <th class="text-center">Process Performance Data</th>
       <th>Notes</th>
       <th>Notes URL</th>
       <th>Action URL</th>
