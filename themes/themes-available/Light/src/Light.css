@@ -17,11 +17,8 @@
  *   - Bugs:
  *       - JS sets width when searching on filter field (reports or broadcast) -> refresh, table width not 100% anymore
  *       - sorting removed when changing filter
- *       - Comments page, 2 filter boxes, buggy when leaving first box (applies to 2nd box aswell? )
  *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
  *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
- *       - List recent downtimes => undef down.names in showlog.tt
- *       - Backends on top double/buggy on conf.cgi
  */
 
 @tailwind base;
