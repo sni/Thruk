@@ -1249,9 +1249,19 @@ returns peer_name
 =cut
 sub peer_name {
     my($row) = @_;
-    return($row->{'peer_name'}) if $row->{'peer_name'};
 
     my $c = $Thruk::Globals::c;
+
+    if(ref $row ne "HASH") {
+        my $peer = $c->db->get_peer_by_key($row);
+        if($peer && $peer->{'name'}) {
+            return($peer->{'name'});
+        }
+        return($row);
+    }
+
+    return($row->{'peer_name'}) if $row->{'peer_name'};
+
     if($row->{'peer_key'}) {
         if(ref $row->{'peer_key'} eq 'ARRAY') {
             my $names = [];

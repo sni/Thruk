@@ -895,8 +895,8 @@ sub _set_backend_selector {
     my %backends = map { $_ => 1 } @{$backends};
 
     my @backends;
-    my @possible_backends = $c->db->peer_key();
-    for my $back (@possible_backends) {
+    my $possible_backends = $c->db->peer_key();
+    for my $back (@{$possible_backends}) {
         next if !defined $backends{$back};
         push @backends, $back;
     }
