@@ -54,13 +54,53 @@
         <div><a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]">View All '[% IF service.description.length > 7; service.description.substr(0, 7) | html %]...[% ELSE; service.description | html; END %]' Services</a> (<a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap">As Performance Map</a>)</div>
       </div>
     </div>
+
+    [% IF custom_vars.size > 0 %]
+      <div class="mt-5 px-2">
+        <table>
+          [% FOREACH cust = custom_vars %]
+          <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
+            <td class="align-top">
+              <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]">
+                <font size="-1"><i>[% cust.0 | html %]</i></font>
+              </a>
+            </td>
+            <td>
+              <font size="-1">[% cust.1 %]</font>
+            </td>
+          </tr>
+          [% END %]
+        </table>
+      </div>
+    [% END %]
   </div>
 
   <div class="flexcol order-1 2xl:order-2">
     <div class="card min-w-min mx-auto">
       <div class="head justify-between">
-        <h3>Service State Information</h3>
+        <h3>Service [% service.description | html %] on <a class="link" href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% service.host_name | html %]</a></h3>
         <div class="flexrow gap-x-1">
+          [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+            <div class="mt-5 px-2">
+              [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
+              [% IF menu.defined('err') && menu.err %]
+                <i class="uil uil-exclamation round yellow" title="[% menu.err | html %]"></i>
+              [% ELSE %]
+                <script type="text/javascript">
+                [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
+                [% IF menu.type == "js" %]
+                  [% IF !action_menus_inserted.defined(menu.data) %]
+                  [% menu.data %]
+                  [% action_menus_inserted.item(menu.data) = 1 %]
+                  [% END %]
+                  print_action_menu([% menu.function %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "service" => service.description }) %]);
+                [% ELSE %]
+                  print_action_menu([% menu.data %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "service" => service.description }) %]);
+                [% END %]
+                </script>
+              [% END %]
+            </div>
+          [% END %]
           [% IF enable_shinken_features %]
             [% prio = service.criticity %]
             <div class="flex items-center gap-1 mr-3">
@@ -114,154 +154,105 @@
   </div>
 </div>
 
-    <table>
-      <tr>
-        <td align="right" valign="bottom" width="33%" class="notesCell">
-          <table border='0'>
-          [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
-            <tr>
-              <td align='left'>
-                [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
-                [% IF menu.defined('err') && menu.err %]
-                  <i class="uil uil-exclamation round yellow" title="[% menu.err | html %]"></i>
-                [% ELSE %]
-                  <script type="text/javascript">
-                  [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
-                  [% IF menu.type == "js" %]
-                    [% IF !action_menus_inserted.defined(menu.data) %]
-                    [% menu.data %]
-                    [% action_menus_inserted.item(menu.data) = 1 %]
-                    [% END %]
-                    print_action_menu([% menu.function %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "service" => service.description, "orientation" => "b-l", "show_title" => "true"}) %]);
-                  [% ELSE %]
-                    print_action_menu([% menu.data %], [% json_encode({"backend" => service.peer_key, "host" => service.host_name, "service" => service.description, "orientation" => "b-l", "show_title" => "true"}) %]);
-                  [% END %]
-                  </script>
-                [% END %]
-              </td>
-            </tr>
-          [% END %]
-          [% IF custom_vars.size > 0 %]
-            <tr>
-              <td align='right'>
-                <table>
-                  [% FOREACH cust = custom_vars %]
-                  <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
-                    <td style="padding-right: 7px;" valign=""><i>[% cust.0 | html %]</i></font></a><br clear="all">
-                    </td>
-                    <td>
-                      <font size="-1">[% cust.1 %]</font>
-                    </td>
-                  </tr>
-                  [% END %]
-                </table>
-              </td>
-            </tr>
-          [% END %]
-          </table>
-        </td>
-      </tr>
-    </table>
-
-  [% IF service.notes_expanded %]
-    <div class="card w-full mt-5">
-      <div class="head">
-        <h3>Notes</h3>
-      </div>
-      <div class="body">
-        [% service.notes_expanded %]
-      </div>
-    </div>
-  [% END %]
-
+[% IF service.notes_expanded %]
   <div class="card w-full mt-5">
-    <div class="head justify-between">
-      <h3>Service Comments</h3>
-      [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
-        <div class="flex gap-1">
-          [% UNLESS command_disabled(c, '3') %]
+    <div class="head">
+      <h3>Notes</h3>
+    </div>
+    <div class="body">
+      [% service.notes_expanded %]
+    </div>
+  </div>
+[% END %]
+
+<div class="card w-full mt-5">
+  <div class="head justify-between">
+    <h3>Service Comments</h3>
+    [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
+      <div class="flex gap-1">
+        [% UNLESS command_disabled(c, '3') %]
+          <div>
+            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+              <i class="fa-solid fa-comment mr-1"></i>Add comment
+            </a>
+          </div>
+        [% END %]
+        [% IF comments.size > 0 %]
+          [% UNLESS command_disabled(c, '21') %]
             <div>
-              <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-                <i class="fa-solid fa-comment mr-1"></i>Add comment
+              <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+                <i class="fa-solid fa-trash mr-1"></i>Delete all
               </a>
             </div>
           [% END %]
-          [% IF comments.size > 0 %]
-            [% UNLESS command_disabled(c, '21') %]
-              <div>
-                <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-                  <i class="fa-solid fa-trash mr-1"></i>Delete all
-                </a>
-              </div>
-            [% END %]
-          [% END %]
-        </div>
-      [% END %]
-    </div>
-    <div>
-      [% IF comments.size > 0 %]
-        [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
-      [% ELSE %]
-        <div class="flex justify-center textALERT p-2">There are no comments</div>
-      [% END %]
-    </div>
+        [% END %]
+      </div>
+    [% END %]
   </div>
+  <div>
+    [% IF comments.size > 0 %]
+      [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
+    [% ELSE %]
+      <div class="flex justify-center textALERT p-2">There are no comments</div>
+    [% END %]
+  </div>
+</div>
 
-  <div class="card w-full mt-5">
+<div class="card w-full mt-5">
+  <div class="head justify-between">
+    <h3>Service Downtimes</h3>
+    [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
+      <div class="flex gap-1">
+        [% UNLESS command_disabled(c, '56') %]
+          <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Add downtime</a>
+          [% IF use_feature_recurring_downtime %]
+            <a class="button" href="extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Add recurring downtime</a>
+          [% END %]
+        [% END %]
+        [% IF downtimes %]
+          [% UNLESS command_disabled(c, '5') %]
+            <a class="button js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
+              <i class="fa-solid fa-trash mr-1"></i>Delete all
+            </a>
+          [% END %]
+        [% END %]
+        <a class="button" href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]">
+          <i class="fa-solid fa-bars mr-1"></i>List recent downtimes
+        </a>
+      </div>
+    [% END %]
+  </div>
+  <div>
+    [% IF downtimes.size > 0 %]
+      [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 sortprefix='_dtm' %]
+    [% END %]
+    [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+      <div class="px-2 py-1 border-b[%IF downtimes.size > 0 %] border-t[% END %]"><h4>Recurring Service Downtimes</h4></div>
+      [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' names=0 %]
+    [% END %]
+    [% IF downtimes.size == 0 && recurring_downtimes.size == 0 %]
+      <div class="flex justify-center p-2 textALERT">There are no downtimes</div>
+    [% END %]
+  </div>
+</div>
+
+[% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
+  <div class="card mt-5 w-full">
     <div class="head justify-between">
-      <h3>Service Downtimes</h3>
-      [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
-        <div class="flex gap-1">
-          [% UNLESS command_disabled(c, '56') %]
-            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Add downtime</a>
-            [% IF use_feature_recurring_downtime %]
-              <a class="button" href="extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">Add recurring downtime</a>
-            [% END %]
-          [% END %]
-          [% IF downtimes %]
-            [% UNLESS command_disabled(c, '5') %]
-              <a class="button js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
-                <i class="fa-solid fa-trash mr-1"></i>Delete all
-              </a>
-            [% END %]
-          [% END %]
-          <a class="button" href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]">
-            <i class="fa-solid fa-bars mr-1"></i>List recent downtimes
-          </a>
-        </div>
-      [% END %]
+      <h3>Configuration Information</h3>
+      <div class="flex gap-x-1">
+        [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+          <a class="button" href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure service</a>
+        [% ELSE %]
+          <a class="button" href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]"><i class="fa-solid fa-eye small"></i>View Configuration</a>
+        [% END %]
+      </div>
     </div>
     <div>
-      [% IF downtimes.size > 0 %]
-        [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 sortprefix='_dtm' %]
-      [% END %]
-      [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
-        <div class="px-2 py-1 border-b[%IF downtimes.size > 0 %] border-t[% END %]"><h4>Recurring Service Downtimes</h4></div>
-        [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' names=0 %]
-      [% END %]
-      [% IF downtimes.size == 0 && recurring_downtimes.size == 0 %]
-        <div class="flex justify-center p-2 textALERT">There are no downtimes</div>
-      [% END %]
+      [% PROCESS _extinfo_command_line.tt %]
     </div>
   </div>
-
-  [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
-    <div class="card mt-5 w-full">
-      <div class="head justify-between">
-        <h3>Configuration Information</h3>
-        <div class="flex gap-x-1">
-          [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-            <a class="button" href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure service</a>
-          [% ELSE %]
-            <a class="button" href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]"><i class="fa-solid fa-eye small"></i>View Configuration</a>
-          [% END %]
-        </div>
-      </div>
-      <div>
-        [% PROCESS _extinfo_command_line.tt %]
-      </div>
-    </div>
-  [% END %]
+[% END %]
 
 [% PROCESS user_ext_service_info.tt %]
 
