@@ -60,7 +60,14 @@
     <div class="card min-w-min mx-auto">
       <div class="head justify-between">
         <h3>Service State Information</h3>
-        <div class="flex gap-x-1">
+        <div class="flexrow gap-x-1">
+          [% IF enable_shinken_features %]
+            [% prio = service.criticity %]
+            <div class="flex items-center gap-1 mr-3">
+              <span class="font-bold">Priority [% prio %]/5</span>
+              <img class="inline-block" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
+            </div>
+          [% END %]
           [% IF service.action_url_expanded %]
             [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
             <div>
@@ -111,17 +118,6 @@
       <tr>
         <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
-          [% IF enable_shinken_features %]
-          <tr>
-            <td align='right'>
-              [% prio = service.criticity %]
-              <div class='dataTitle'>Priority [% prio %]/5
-                <img class="crit_icon" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
-              </div>
-            </td>
-          </tr>
-          [% END %]
-
           [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
