@@ -57,6 +57,13 @@
       <div class="head justify-between">
         <h3>Host State Information</h3>
         <div class="flex gap-x-1">
+          [% IF enable_shinken_features %]
+            [% prio = host.criticity %]
+            <div class="flex items-center gap-1 mr-3">
+              <span class="font-bold">Priority [% prio %]/5</span>
+              <img class="inline-block" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
+            </div>
+          [% END %]
           [% IF host.notes_url_expanded %]
               <div>
                 <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
@@ -221,17 +228,6 @@
       <tr>
         <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
-          [% IF enable_shinken_features %]
-          <tr>
-            <td align='right'>
-              [% prio = host.criticity %]
-              <div class='dataTitle'>Priority [% host.criticity %]/5
-                <img class="crit_icon" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
-              </div>
-            </td>
-          </tr>
-          [% END %]
-
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
