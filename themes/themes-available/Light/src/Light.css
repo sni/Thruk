@@ -6,11 +6,11 @@
  *   - remove unused images, also from plugins (create script)
  *   - identical class and style in actionbox if no permissions (infoMessage? )
  *   - height fixen maintable und logs
- *   - replace old img icons in table with new <i>
+ *   - replace old img icons in table with new <i> (e.g. status_overview.tt actions)
  *   - multiple comments in comments TD in host/service details are multiline? Fix
  *   - check body.iframed from header.tt
  *   - show custom vars on extinfo 1 and 2
- *   - Fix service/hostgroup missing right border in status_overview.tt
+ *   - Fix service/hostgroup missing right border in status_overview.tt - wenn weniger als 3 dann right border und 1/3 dann anpassen - rework?
  *   - extinfo type 0, make right-scrollable with sticky left header instead of new row after 3?
  *   - Features:
  *       - change Options for Columns on Configuration page + make Host_name sticky
@@ -1261,12 +1261,12 @@ BODY.loginpage {
  * status page
  */
 DIV.card.statusTotals {
-  width: 350px;
+  @apply overflow-hidden w-[350px];
   >TABLE {
     TD, TH {
       @apply text-center;
     }
-    TH A, TD A, TH DIV A {
+    TH A, TD A {
       @apply block py-1;
     }
   }

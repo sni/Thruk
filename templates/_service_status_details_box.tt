@@ -22,6 +22,8 @@
       <td class='w-1/5 [% IF !has_error && service_stats.critical > 0 %]CRITICAL[% END %]'><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 16,  hoststatustypes => hoststatustypes) %]'>[% IF !has_error && service_stats.critical %][% service_stats.critical %][% ELSE %]0[% END %]</a></td>
       <td class='w-1/5 [% IF !has_error && service_stats.pending  > 0 %]PENDING[%  END %]'><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 1,   hoststatustypes => hoststatustypes) %]'>[% IF !has_error && service_stats.pending %][% service_stats.pending %][% ELSE %]0[% END %]</a></td>
     </tr>
+  </table>
+  <table>
     <tr>
       [% totalProblems  = 0 %]
       [% totalUnhandled = 0 %]
@@ -31,22 +33,14 @@
       [% totalUnhandled = service_stats.warning_and_unhandled + service_stats.critical_and_unhandled + service_stats.unknown_and_unhandled %]
       [% total          = service_stats.ok + totalProblems + service_stats.pending %]
       [% END %]
-      <th colspan="5">
-        <div class="flex flex-nowrap links">
-          <a class="basis-1/3 py-1" href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => '', hostprops => '', hoststatustypes => '') %]'>All Problems</a>
-          <a class="basis-1/3 py-1" href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => 10, hostprops => 10, hoststatustypes => 3) %]'>Unhand. Issues</a>
-          <a class="basis-1/3 py-1" href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 32, hoststatustypes => hoststatustypes) %]'>All Types</a>
-        </div>
-      </th>
+      <th class="w-1/3 links"><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => '', hostprops => '', hoststatustypes => '') %]'>All Problems</a></th>
+      <th class="w-1/3 links"><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => 10, hostprops => 10, hoststatustypes => 3) %]'>Unhand. Issues</a></th>
+      <th class="w-1/3 links"><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 32, hoststatustypes => hoststatustypes) %]'>All Types</a></th>
     </tr>
     <tr>
-      <td colspan="5">
-        <div class="flex flex-nowrap">
-          <a class="basis-1/3 PROBLEMS py-1" href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => '', hostprops => '', hoststatustypes => '') %]'>[% totalProblems %]</a>
-          <a class="basis-1/3 PROBLEMS py-1" href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => 10, hostprops => 10, hoststatustypes => 3) %]'>[% totalUnhandled %]</a>
-          <a class="basis-1/3 py-1" href='[%          uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 32, hoststatustypes => hoststatustypes) %]'>[% total %]</a>
-        </div>
-      </td>
+      <td class="w-1/3[% IF !has_error && totalProblems > 0 %] PROBLEMS[% END %]"><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => '', hostprops => '', hoststatustypes => '') %]'>[% totalProblems %]</a></td>
+      <td class="w-1/3[% IF !has_error && totalUnhandled > 0 %] PROBLEMS[% END %]"><a href='[% uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 28, serviceprops => 10, hostprops => 10, hoststatustypes => 3) %]'>[% totalUnhandled %]</a></td>
+      <td class="w-1/3"><a href='[%          uri_with(c, style => 'detail', page => 'undef', servicestatustypes => 32, hoststatustypes => hoststatustypes) %]'>[% total %]</a></td>
     </tr>
   </table>
 </div>
