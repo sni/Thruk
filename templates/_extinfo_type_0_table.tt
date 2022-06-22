@@ -166,12 +166,12 @@
       [% END %]
     </td>
     <td>
-      [% IF pi_detail.$pd.exists("thruk") && pi_detail.$pd.thruk.exists("thruk_version") %]
+      [% IF pi_detail.$pd.exists("thruk") && pi_detail.$pd.thruk && pi_detail.$pd.thruk.exists("thruk_version") %]
         [% pi_detail.$pd.thruk.thruk_version %]
       [% END %]
     </td>
     <td class="truncate">
-      [% IF pi_detail.$pd.exists("thruk") && pi_detail.$pd.thruk.exists("extra_version") %]
+      [% IF pi_detail.$pd.exists("thruk") && pi_detail.$pd.thruk && pi_detail.$pd.thruk.exists("extra_version") %]
         [% v = pi_detail.$pd.thruk.extra_version; v.replace('^OMD\s+').replace('-labs-edition$') %]
       [% END %]
     </td>
