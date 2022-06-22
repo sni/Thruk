@@ -10,6 +10,23 @@
     <div class="hidden lg:block">
       [% PROCESS _infobox.tt %]
     </div>
+    [% IF matching_backends.size > 1 %]
+      <div class="card mt-5 min-w-[350px] p-3">
+        <form action="extinfo.cgi" method="GET">
+          <input type="hidden" name="type" value="1">
+          <input type="hidden" name="host" value="[% host.name | html %]">
+          <div class="flexrow gap-1 items-center">
+            <span>This host is ambiguous:</span>
+            <select name="backend">
+              [% FOREACH b IN matching_backends %]
+                <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% peer_name(b) %]</option>
+              [% END %]
+            </select>
+            <input type="submit" name="go" value="go">
+          </div>
+        </form>
+      </div>
+    [% END %]
     <div class="2xl:hidden block mt-5">
       [% PROCESS _host_command_box.tt %]
     </div>
@@ -200,27 +217,8 @@
 [% END %]
 
 
-  <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
+    <table>
       <tr>
-        <td align="center" valign="middle" width="33%" class="ext_head_attributes">
-
-          [% IF matching_backends.size > 1 %]
-          <div class='data'>
-            <form action="extinfo.cgi" method="GET">
-              <input type="hidden" name="type" value="1">
-              <input type="hidden" name="host" value="[% host.name | html %]">
-              This host is ambiguous:
-              <select name="backend">
-                [% FOREACH b IN matching_backends %]
-                [% SET name = pi_detail.$b.peer_name %]
-                <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
-                [% END %]
-              </select>
-              <input type="submit" name="go" value="go">
-            </form>
-          </div>
-          [% END %]
-        </td>
         <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
           [% IF enable_shinken_features %]
@@ -233,7 +231,6 @@
             </td>
           </tr>
           [% END %]
-
 
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
