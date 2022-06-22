@@ -3,7 +3,7 @@
 <div class="flexcol">
   [% PROCESS _infobox.tt %]
   [% IF c.check_user_roles('authorized_for_configuration_information') && c.check_user_roles('authorized_for_system_information') && ( apache_status.size > 0 || c.cluster.is_clustered ) %]
-    <div class="card">
+    <div class="card overflow-hidden">
       <div class="actionbox less-padding">
         [% IF c.cluster.is_clustered %]
           <div>

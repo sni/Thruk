@@ -3,7 +3,7 @@
 <div class="flexrow">
   <div class="flexcol">
     [% PROCESS _infobox.tt %]
-    <div class="card">
+    <div class="card overflow-hidden">
       <div class="actionbox less-padding">
         <div><a href='extinfo.cgi?type=4'>Back to Performance Info</a></div>
       </div>

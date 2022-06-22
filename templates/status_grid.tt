@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _sounds.tt %]
   [% WRAPPER _status_totals_header.tt %]
-  <div class="card">
+  <div class="card overflow-hidden">
     <div class="actionbox less-padding">
       [% IF hostgroup == 'all' %]
         <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>

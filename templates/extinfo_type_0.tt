@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <div class="card w-fit">
+  <div class="card w-fit overflow-hidden">
     <div class="head">
       <h3>Process Commands</h3>
     </div>

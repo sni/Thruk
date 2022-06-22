@@ -52,7 +52,7 @@
   </div>
 
   <div class="flexrow justify-between">
-    <div class="card min-w-[385px]">
+    <div class="card min-w-[385px] overflow-hidden">
       <div class="head">
         <h3>Network Outages</h3>
       </div>
@@ -68,7 +68,7 @@
       </table>
     </div>
 
-    <div class="card min-w-[450px]">
+    <div class="card min-w-[450px] overflow-hidden">
       <div class="head">
         <h3><a href='extinfo.cgi?type=4'>Network Health</a></h3>
       </div>
@@ -121,7 +121,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card overflow-hidden">
     <div class="head">
       <h3>Hosts</h3>
     </div>
@@ -171,7 +171,7 @@
     </table>
   </div>
 
-  <div class="card">
+  <div class="card overflow-hidden">
     <div class="head">
       <h3>Services</h3>
     </div>
@@ -236,7 +236,7 @@
     </table>
   </div>
 
-  <div class="card">
+  <div class="card overflow-hidden">
     <div class="head">
       <h3>Monitoring Features</h3>
     </div>
