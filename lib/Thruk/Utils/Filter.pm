@@ -469,6 +469,35 @@ wrapper for escape_html for compatibility reasons
 
 ########################################
 
+=head2 html_escape_recursive
+
+  html_escape_recursive($any)
+
+recursively escape data
+
+=cut
+sub html_escape_recursive {
+    my($data) = @_;
+    if(ref $data eq "ARRAY") {
+        my $x = 0;
+        for my $d (@{$data}) {
+            $data->[$x] = html_escape_recursive($d);
+            $x++;
+        }
+    }
+    elsif(ref $data eq "HASH") {
+        for my $key (keys %{$data}) {
+            $data->{$key} = html_escape_recursive($data->{$key});
+        }
+    }
+    else {
+        $data = html_escape($data);
+    }
+    return($data);
+}
+
+########################################
+
 =head2 escape_html
 
   escape_html($text)
