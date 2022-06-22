@@ -201,7 +201,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card overflow-hidden">
     <div class="head">
       <h3>Icons in Actionbox</h3>
     </div>

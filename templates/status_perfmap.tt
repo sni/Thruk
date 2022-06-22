@@ -8,7 +8,7 @@
 
 [% UNLESS minimal %]
   [% WRAPPER _status_totals_header.tt %]
-    <div class="card">
+    <div class="card overflow-hidden">
       <div class="actionbox less-padding">
         <div><a href='[% short_uri(c, 'style' => 'detail') %]'>View Service Status Details</a></div>
       </div>

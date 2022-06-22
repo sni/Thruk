@@ -8,7 +8,7 @@
 <div class="flexrow justify-between">
   <div>
     [% PROCESS _infobox.tt %]
-    <div class="card mt-5 min-w-[350px]">
+    <div class="card mt-5 min-w-[350px] overflow-hidden">
       <div class="actionbox less-padding">
         <div><a href="status.cgi?host=[% host.name | uri %]">View Status Detail For This Host</a></div>
         [% IF host.childs.size > 0 %]<div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]

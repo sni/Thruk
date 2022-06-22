@@ -9,7 +9,7 @@
   <div class="flexrow justify-between gap-1">
     <div class="flexcol gap-1">
       [% PROCESS _infobox.tt %]
-      <div class="card mt-5 min-w-[350px]">
+      <div class="card mt-5 min-w-[350px] overflow-hidden">
         <div class="actionbox less-padding">
           [% IF service != '' and host != 'all' %]
           <div><a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>

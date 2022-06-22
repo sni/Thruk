@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-<div class="card min-w-[370px]">
+<div class="card min-w-[370px] overflow-hidden">
   <div class="head">
     <h3>Host Actions</h3>
   </div>
@@ -112,7 +112,7 @@
 
 
 [% IF c.check_cmd_permissions('host', host.name) %]
-<div class="card mt-5 min-w-[370px]">
+<div class="card mt-5 min-w-[370px] overflow-hidden">
   <div class="head">
     <h3>Host Commands</h3>
   </div>
