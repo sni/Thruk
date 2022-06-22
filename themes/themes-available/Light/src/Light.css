@@ -1132,6 +1132,13 @@ DIV#search-results {
   }
 }
 
+INPUT.headersearch {
+  @apply w-20 transition-all ease-linear duration-100;
+  &.expanded, &:focus, &:active {
+    @apply w-48;
+  }
+}
+
 /*******************************************************************************
  * action menu
  */
