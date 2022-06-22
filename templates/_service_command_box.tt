@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-<div class="card min-w-[370px] overflow-hidden">
+<div class="card min-w-[350px] overflow-hidden">
   <div class="head">
     <h3>Service Actions</h3>
   </div>
@@ -87,7 +87,7 @@
 </div>
 
 [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
-  <div class="card mt-5 min-w-[370px] overflow-hidden">
+  <div class="card mt-5 min-w-[350px] overflow-hidden">
     <div class="head">
       <h3>Service Commands</h3>
     </div>

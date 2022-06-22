@@ -6,8 +6,13 @@
 [% SET peer_key = host.peer_key %]
 
 <div class="flexrow justify-between">
-  <div>
-    [% PROCESS _infobox.tt %]
+  <div class="order-3 2xl:order-1">
+    <div class="hidden lg:block">
+      [% PROCESS _infobox.tt %]
+    </div>
+    <div class="2xl:hidden block mt-5">
+      [% PROCESS _host_command_box.tt %]
+    </div>
     <div class="card mt-5 min-w-[350px] overflow-hidden">
       <div class="actionbox less-padding">
         <div><a href="status.cgi?host=[% host.name | uri %]">View Status Detail For This Host</a></div>
@@ -30,7 +35,7 @@
     </div>
   </div>
 
-  <div class="flexcol">
+  <div class="flexcol order-1 2xl:order-2">
     <div class="card min-w-min mx-auto">
       <div class="head justify-between">
         <h3>Host State Information</h3>
@@ -78,7 +83,7 @@
     </div>
   </div>
 
-  <div>
+  <div class="hidden 2xl:block order-2 2xl:order-3">
     [% PROCESS _host_command_box.tt %]
   </div>
 </div>
