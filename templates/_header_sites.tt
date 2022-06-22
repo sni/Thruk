@@ -15,7 +15,7 @@
   [% END %]
   [% IF backend_chooser == "switch" %]
     [% IF param_backend.list.size > 0 && param_backend.list.0 != "" %]
-      <div class="buttongroup backends[% IF show_sitepanel == 'list' && param_backend.list.size > 3 %] lg:hidden[% END %]" onClick='toggleSitePanel()'>
+      <div class="buttongroup backends [% IF show_sitepanel == 'list' %][% IF param_backend.list.size > 3 %]lg:hidden[% ELSE %]hidden[% END %][% END %]" onClick='toggleSitePanel()'>
         [% b = param_backend.list.0 %]
         <button class='button_peerUP'>[% initial_backends.$b.name | html %]</button>
         [% IF sites.disabled > 0 %]
