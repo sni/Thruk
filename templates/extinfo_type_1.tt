@@ -108,7 +108,7 @@
           [% IF host.notes_url_expanded %]
               <div>
                 <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
-                  <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40">
+                  <i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i>
                 </a>
               </div>
             [% END %]
