@@ -116,8 +116,8 @@
           [% END %]
           [% IF service.notes_url_expanded %]
             <div>
-              <a href='[% service.notes_url_expanded %]' target='_blank'>
-                <img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40">
+              <a href='[% service.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
+                <i class="fa-solid fa-clipboard clickable" title='View Extra Service Notes'></i>
               </a>
             </div>
           [% END %]

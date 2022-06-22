@@ -131,7 +131,9 @@
                       <div class="flex gap-x-1 justify-center">
                         <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
                         [% IF h.notes_url_expanded %]
-                        <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
+                        <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
+                          <i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i>
+                        </a>
                         [% END %]
                         [% IF h.action_url_expanded %]
                         [% action_url = proxifiy_url(c, h, get_action_url(c, 2, 1, h.action_url_expanded , h)) %]
