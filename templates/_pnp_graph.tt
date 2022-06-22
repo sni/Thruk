@@ -49,7 +49,7 @@
     <span id="pnp_th5" class="tabs text-center w-[18%]" onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id, pnp_source)">year</span>
     <span              class="tabs text-center w-12"    onclick="return move_png_img( 0.5)"><i class="uil uil-angle-right text-lg contents"></i></span>
   </div>
-  <div id="pnp_graph_pane" class="relative justify-center">
+  <div id="pnp_graph_pane" class="relative justify-center min-h-[100px]">
     <a href="[% url_prefix %]#[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness" class="w-full">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
       <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph" class="mx-auto">
