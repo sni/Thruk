@@ -45,6 +45,12 @@ END
             [% END %]
           [% ELSE %]
             <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
+            [% IF obj.name != obj.display_name %]
+              (<a class="link" href="extinfo.cgi?type=1&amp;host=[% obj.name | uri %]">[% obj.display_name | html %]</a> -
+              [% obj.address %])
+            [% ELSE %]
+              ([% obj.address %])
+            [% END %]
           [% END %]
         </div>
         [% IF type == "host" %]
@@ -55,6 +61,12 @@ END
       </div>
     </td>
   </tr>
+  [% IF type == "host" && obj.name != obj.alias %]
+    <tr>
+      <th>Host Alias</th>
+      <td>[% obj.alias | html %]</td>
+    </tr>
+  [% END %]
   [% IF obj.depends.size > 0 %]
     <tr>
       <th class="align-top">Dependencies</th>
@@ -152,7 +164,7 @@ END
       </div>
       [% END %]
     </th>
-    <td>
+    <td class="py-0">
       [% IF obj.perf_data %]
         [% perf_svc=svc_name; IF perf_svc == ""; perf_svc='_HOST_'; END %]
         [% PROCESS _perfdata_human.tt

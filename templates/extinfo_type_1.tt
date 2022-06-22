@@ -50,13 +50,54 @@
         [% END %]
       </div>
     </div>
+
+    [% IF custom_vars.size > 0 %]
+      <div class="mt-5 px-2">
+        <table>
+          [% FOREACH cust = custom_vars %]
+          <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
+            <td class="align-top">
+              <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]">
+                <font size="-1"><i>[% cust.0 | html %]</i></font>
+              </a>
+            </td>
+            <td>
+              <font size="-1">[% cust.1 %]</font>
+            </td>
+          </tr>
+          [% END %]
+        </table>
+      </div>
+    [% END %]
+
   </div>
 
   <div class="flexcol order-1 2xl:order-2">
     <div class="card min-w-min mx-auto">
       <div class="head justify-between">
-        <h3>Host State Information</h3>
+        <h3>Host: [% host.name | html %]</h3>
         <div class="flex gap-x-1">
+          [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+            <div class="mr-3">
+              [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
+              [% IF menu.defined('err') && menu.err %]
+                <i class="uil uil-exclamation round yellow" title="[% menu.err | html %]"></i>
+              [% ELSE %]
+                <script type="text/javascript">
+                [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
+                [% IF menu.type == "js" %]
+                  [% IF !action_menus_inserted.defined(menu.data) %]
+                  [% menu.data %]
+                  [% action_menus_inserted.item(menu.data) = 1 %]
+                  [% END %]
+                  print_action_menu([% menu.function %], [% json_encode({"backend" => host.peer_key, "host" => host.name }) %]);
+                [% ELSE %]
+                  print_action_menu([% menu.data %], [% json_encode({"backend" => host.peer_key, "host" => host.name }) %]);
+                [% END %]
+                </script>
+              [% END %]
+            </div>
+          [% END %]
           [% IF enable_shinken_features %]
             [% prio = host.criticity %]
             <div class="flex items-center gap-1 mr-3">
@@ -222,59 +263,6 @@
     </div>
   </div>
 [% END %]
-
-
-    <table>
-      <tr>
-        <td align="right" valign="bottom" width="33%" class="notesCell">
-          <table border='0'>
-          [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
-            <tr>
-              <td align='left'>
-                [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
-                [% IF menu.defined('err') && menu.err %]
-                  <i class="uil uil-exclamation round yellow" title="[% menu.err | html %]"></i>
-                [% ELSE %]
-                  <script type="text/javascript">
-                  [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
-                  [% IF menu.type == "js" %]
-                    [% IF !action_menus_inserted.defined(menu.data) %]
-                    [% menu.data %]
-                    [% action_menus_inserted.item(menu.data) = 1 %]
-                    [% END %]
-                    print_action_menu([% menu.function %], [% json_encode({"backend" => host.peer_key, "host" => host.name, "orientation" => "b-l", "show_title" => "true" }) %]);
-                  [% ELSE %]
-                    print_action_menu([% menu.data %], [% json_encode({"backend" => host.peer_key, "host" => host.name, "orientation" => "b-l", "show_title" => "true" }) %]);
-                  [% END %]
-                  </script>
-                [% END %]
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
-          [% IF custom_vars.size > 0 %]
-            <tr>
-              <td align='right'>
-                <table>
-                  [% FOREACH cust = custom_vars %]
-                  <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
-                    <td style="padding-right: 7px;" valign="top">
-                      <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]"><font size="-1"><i>[% cust.0 | html %]</i></font></a><br clear="all">
-                    </td>
-                    <td>
-                      <font size="-1">[% cust.1 %]</font>
-                    </td>
-                  </tr>
-                  [% END %]
-                </table>
-              </td>
-            </tr>
-          [% END %]
-          </table>
-        </td>
-      </tr>
-    </table>
-    <br>
 
 [% PROCESS user_ext_host_info.tt %]
 
