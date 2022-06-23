@@ -29,7 +29,7 @@
   });
 </script>
 
-<div class="card w-full max-w-[700px] mx-auto">
+<div class="card w-full max-w-[700px] mx-auto overflow-hidden">
   <div class="head justify-between">
     <h3>Performance Graph</h3>
     <div class='pnpSelector'>
