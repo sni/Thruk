@@ -375,9 +375,11 @@ A.anchor-offset {
 
 .tooltiptext {
   visibility: hidden;
-  width: 70px;
+  width: auto;
   height: 22px;
-  padding-top: 1px;
+  line-height: 13px;
+  white-space: nowrap;
+  padding: 4px;
   background-color: #888;
   color: #fff;
   text-align: center;

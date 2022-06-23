@@ -4104,30 +4104,34 @@ function copyCode(evt, id) {
     if(code) {
         text = code.innerText;
     }
-    navigator.clipboard.writeText(text);
+    var result      = "Copied!";
+    var removeDelay = 1500;
+    if(navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+    } else {
+        removeDelay = 3000;
+        result = "Failed to copy";
+        if(!window.isSecureContext) {
+            result = "https only feature";
+        }
+    }
 
     if(!evt) { return; }
 
     // create tooltip element
-    var tooltip = document.createElement("div");
-
-    // set style
-    tooltip.id = "copytooltip";
-    tooltip.classList.add("tooltiptext");
-
-    // insert into DOM
-    document.body.appendChild(tooltip);
+    var tooltip = jQuery('<div id="copytooltip" class="tooltiptext"><\/div>').appendTo(document.body)[0];
+    tooltip.innerHTML = result;
 
     // get the position of the hover element
     var boundBox = evt.target.getBoundingClientRect();
     var coordX = boundBox.left;
     var coordY = boundBox.top;
 
-    // adjust bubble position
-    tooltip.style.left = (coordX - 27).toString() + "px";
-    tooltip.style.top = (coordY - 25).toString() + "px";
+    var width = jQuery(tooltip).width();
 
-    tooltip.innerHTML = "Copied!";
+    // adjust bubble position
+    tooltip.style.left = (coordX - (width/2) + 5).toString() + "px";
+    tooltip.style.top = (coordY - 25).toString() + "px";
 
     // make bubble VISIBLE
     tooltip.style.visibility = "visible";
@@ -4135,7 +4139,7 @@ function copyCode(evt, id) {
 
     window.setTimeout(function () {
         jQuery(tooltip).remove();
-    }, 1500);
+    }, removeDelay);
 }
 
 // returns true if query ui is available
