@@ -59,7 +59,7 @@
       [% UNLESS command_disabled(c, '84') %]
         <div>
           <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=84&amp;hostgroup=[% hostgroup.name | uri %]">
-            <i class="fa-solid fa-moon"></i>Schedule downtime for all hosts in this hostgroup</a>
+            <i class="fa-solid fa-moon"></i>Schedule downtime for all hosts in this hostgroup
           </a>
         </div>
       [% END %]
