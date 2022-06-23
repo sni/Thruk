@@ -250,9 +250,7 @@ sub login_successful {
     _audit_log("login", "user login, session started (".$type.")");
 
     # add missing leading /
-    my $prefix = $c->stash->{'url_prefix'};
-    $prefix =~ s|^/||gmx;
-    if($referer =~ m|^\Q$prefix\E|gmx) {
+    if($referer !~ m|^/|gmx) {
         $referer = '/'.$referer;
     }
 
