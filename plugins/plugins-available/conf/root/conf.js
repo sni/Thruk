@@ -93,45 +93,7 @@ function remove_conf_attribute(key, nr) {
 
 /* initialize all buttons */
 function init_conf_tool_buttons() {
-    jQuery('INPUT.conf_button').button();
-    jQuery('BUTTON.conf_button').button();
-    jQuery('.radioset').controlgroup();
-
-    jQuery('.conf_save_button').button({
-        icons: {primary: 'ui-save-button'}
-    });
-    jQuery('.conf_apply_button').button({
-        icons: {primary: 'ui-apply-button'}
-    });
-    jQuery('.conf_back_button').button({
-        icons: {primary: 'ui-l-arrow-button'}
-    });
-    jQuery('.conf_save_reload_button').button({
-        icons: {primary: 'ui-save_reload-button'}
-    });
-    jQuery('.conf_delete_button').button({
-        icons: {primary: 'ui-delete-button'}
-    });
-    jQuery('.conf_cleanup_button').button({
-        icons: {primary: 'ui-wrench-button'}
-    })
-    jQuery('.conf_cut_button').button({
-        icons: {primary: 'ui-cut-button'}
-    })
-    jQuery('.conf_next_button').button({
-        icons: {primary: 'ui-r-arrow-button'}
-    })
-
-    jQuery(".radio_on").checkboxradio({
-        icon: false
-    });
-    jQuery(".radio_off").checkboxradio({
-        icon: false
-    });
-
-    jQuery('.conf_preview_button').button({
-        icons: {primary: 'ui-preview-button'}
-    }).unbind("click").click(function() {
+    jQuery('.conf_preview_button').unbind("click").click(function() {
         check_plugin_exec(this.id);
         return false;
     });
@@ -144,46 +106,30 @@ function init_conf_tool_buttons() {
         width:      'auto',
         position:   'top'
     });
-    jQuery('#attr_opener').button({
-        icons: {primary: 'ui-add-button'}
-    }).unbind("click").click(function() {
+    jQuery('#attr_opener').unbind("click").click(function() {
         $dialog.dialog('open');
         return false;
     });
 
-    jQuery('#finish_button').button({
-        icons: {primary: 'ui-ok-button'}
-    }).unbind("click").click(function() {
+    jQuery('#finish_button').unbind("click").click(function() {
         $dialog.dialog('close');
         return false;
     });
 
     /* command wizard */
-    jQuery('button.cmd_wzd_button').button({
-        icons: {primary: 'ui-wzd-button'},
-        text: false,
-        label: 'open command line wizard'
-    }).unbind("click").click(function() {
+    jQuery('button.cmd_wzd_button').unbind("click").click(function() {
         init_conf_tool_command_wizard(this.id);
         return false;
     });
 
     /* command line wizard / plugins */
-    jQuery('button.plugin_wzd_button').button({
-        icons: {primary: 'ui-wzd-button'},
-        text: false,
-        label: 'open command line wizard'
-    }).unbind("click").click(function() {
+    jQuery('button.plugin_wzd_button').unbind("click").click(function() {
         init_conf_tool_plugin_wizard(this.id);
         return false;
     });
 
     /* command line wizard / plugins */
-    jQuery('button.ip_wzd_button').button({
-        icons: {primary: 'ui-wzd-button'},
-        text: false,
-        label: 'set ip based on current hostname'
-    }).unbind("click").click(function() {
+    jQuery('button.ip_wzd_button').unbind("click").click(function() {
         var host = jQuery('#attr_table').find('.obj_host_name').val();
         if(host == undefined) {
             return false;
@@ -229,7 +175,6 @@ function init_conf_tool_buttons() {
         return false;
     });
 
-    jQuery('TD.attrValue').button();
     return;
 }
 
@@ -655,16 +600,8 @@ function conf_validate_object_form(f) {
 }
 
 function save_plugins(btn) {
-    jQuery(btn).button({
-        icons: {primary: 'ui-waiting-button'},
-        disabled: true
-    });
-    window.setTimeout(function() {
-        jQuery(btn).button({
-            icons: {primary: 'ui-error-button'},
-            disabled: false
-        });
-    }, 30000);
+    var form = jQuery(btn).parents("FORM");
+    setFormBtnSpinner(form);
 
     jQuery.ajax({
         url:   'conf.cgi?'+jQuery(btn).parents("FORM").serialize(),
@@ -673,21 +610,13 @@ function save_plugins(btn) {
         success: function(data) {
             // thruk will be restarted 1 second after this request, so wait at least 1 second till redirect to the plugins page again
             window.setTimeout(function() {
-                jQuery(btn).button({
-                    icons:   {primary: 'ui-ok-button'},
-                    label:   'saved...',
-                    disabled: false
-                }).addClass('done');
+                setBtnSuccess(btn, "saved successfully");
                 window_location_replace('conf.cgi?sub=plugins');
             }, 1300);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
-            jQuery(btn).button({
-                icons:   {primary: 'ui-error-button'},
-                label:   'failed',
-                disabled: false
-            });
+            setBtnError(btn, "reload failed");
         }
     });
     return false;
@@ -702,9 +631,6 @@ function save_reload_apply(btn, formid, name) {
         remoteform = jQuery(btn).closest('FORM');
     }
     setBtnSpinner(btn);
-    window.setTimeout(function() {
-        setBtnError(btn, "reload timed out");
-    }, 30000);
     conf_prompt_change_summary(remoteform, function() {
         var input = jQuery("<input>", { type: "submit", name: name, value: "1", style: "visibility: hidden;" });
         jQuery(remoteform).append(jQuery(input));

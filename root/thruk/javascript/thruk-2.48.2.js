@@ -427,6 +427,7 @@ function setBtnSpinner(btn) {
     jQuery(btn).find("I").css("display", "none");
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find('I.fa-check').remove();
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
     } else {
@@ -451,6 +452,7 @@ function setBtnSpinner(btn) {
 function setBtnError(btn, title) {
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find('I.fa-check').remove();
     jQuery(btn).find("I").css("display", "none");
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<I class="uil uil-exclamation round yellow small mr-1"><\/I>');
@@ -468,6 +470,25 @@ function setBtnError(btn, title) {
     }
 }
 
+function setBtnSuccess(btn, title) {
+    jQuery(btn).find('div.spinner').remove();
+    jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find("I").css("display", "none");
+    if(jQuery(btn).find("I").length > 0) {
+        jQuery(btn).find("I").after('<I class="fa-solid fa-check round small green mr-1"><\/I>');
+    } else {
+        jQuery(btn).prepend('<I class="fa-solid fa-check round small green mr-1"><\/I>');
+    }
+    jQuery(btn)
+        .prop('disabled', false)
+        .prop('title', title)
+        .removeClass(["opacity-50", "not-clickable"]);
+    var el = jQuery(btn).first();
+    if(el.tagName == "A") {
+        el.href = el.dataset["href"];
+        jQuery(btn).off("click", return_false);
+    }
+}
 
 function handleSortHeaderClick(el) {
     var This    = el;
@@ -596,7 +617,7 @@ function check_side_nav_active_item(ctx) {
     // compare complete url
     var found   = false;
     var pageUrl = window.location.href.toString();
-    jQuery("A", ctx).each(function(i, el) {
+    jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         if(el.href.toString() == pageUrl) {
             found = true;
         }
@@ -609,7 +630,7 @@ function check_side_nav_active_item(ctx) {
     if(found) { return; }
 
     // compare all args from the nav link (with value)
-    jQuery("A", ctx).each(function(i, el) {
+    jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
             var href    = el.href.replace(/^.*\?/, '');
@@ -631,7 +652,7 @@ function check_side_nav_active_item(ctx) {
     if(found) { return; }
 
     // compare all args from the nav link (only keyword)
-    jQuery("A", ctx).each(function(i, el) {
+    jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
             var href    = el.href.replace(/^.*\?/, '');
@@ -654,7 +675,7 @@ function check_side_nav_active_item(ctx) {
 
     // compare some main args
     var keyArgs = ["type", "style"];
-    jQuery("A", ctx).each(function(i, el) {
+    jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
             var href    = el.href.replace(/^.*\?/, '');
@@ -678,7 +699,7 @@ function check_side_nav_active_item(ctx) {
     });
 
     // compare only main page
-    jQuery("A", ctx).each(function(i, el) {
+    jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
             found = true;

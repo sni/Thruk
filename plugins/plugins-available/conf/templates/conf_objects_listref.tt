@@ -112,7 +112,7 @@
       [% PROCESS _button btn = {
         form   => { action => 'conf.cgi', method => 'GET' },
         data   => { sub => 'objects', 'data.id' => object.get_id() },
-        button => { class => 'conf_button', text => "Continue editing " _ object.get_type().ucfirst },
+        button => { class => '', text => "Continue editing " _ object.get_type().ucfirst },
       }%]
       <br>
       <br>

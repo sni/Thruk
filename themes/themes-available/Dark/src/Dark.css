@@ -356,14 +356,6 @@ DIV.radiogroup {
  }
 }
 
-.fa-trash {
- @apply hover:text-red-600;
-}
-a:hover>.fa-trash {
- @apply text-red-600;
-}
-
-
 /*******************************************************************************
 * forms
 */

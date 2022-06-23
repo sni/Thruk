@@ -25,8 +25,8 @@
       </td>
     </tr>
     <tr>
-      <td colspan=3 class="data dataSubmit">
-        <input type="submit" name="move" value="move" style="width:90px" class="conf_button">
+      <td colspan=3>
+        <input type="submit" name="move" value="move" style="width:90px">
       </td>
     </tr>
   </table>
