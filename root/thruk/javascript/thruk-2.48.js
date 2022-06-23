@@ -3173,7 +3173,7 @@ function thruk_message(rc, message, close_timeout) {
     var cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
-        + '<div id="thruk_message" class="card shadow-float fixed p-1 z-50 min-w-[600px] top-14 left-1/2 transform -translate-x-1/2">'
+        + '<div id="thruk_message" class="card shadow-float fixed p-1 z-50 min-w-[600px] max-w-[90vw] top-14 left-1/2 transform -translate-x-1/2">'
         + '  <div class="flexrow flex-nowrap gap-2 justify-center">'
         + '    <div class="w-5"></div>'
         + '    <div class="flex-grow text-center font-semibold whitespace-nowrap">'
@@ -8458,7 +8458,7 @@ function overcard(options) {
     var container = doc.getElementById(containerId);
     if(!container) {
         var containerHTML = ""
-            +'<div class="absolute card shadow-float z-50" id="'+containerId+'">'
+            +'<div class="fixed card shadow-float z-50" id="'+containerId+'">'
             +'<div class="head justify-between">'
             +'<h3 id="'+containerId+'_head"><\/h3>'
             +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
@@ -8487,7 +8487,7 @@ function overcard(options) {
     body.innerHTML = settings["body"];
 
     // place it next to the mouse position
-    var posX = mouseX + document.documentElement.scrollLeft;
+    var posX = mouseX + document.documentElement.scrollLeft + 50;
     var posY = mouseY + document.documentElement.scrollTop;
 
     if(iframe) {

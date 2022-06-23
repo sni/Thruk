@@ -1,44 +1,55 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-<div align="center">
-<form action="conf.cgi" method="POST">
-<input type="hidden" name="sub" value="backends">
-[%# make sure IE can submit form by pressing enter #%]
-<input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
-<input type="hidden" name="action" value="save">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-Note: some options are not accessible here for security reasons.
 [% IF readonly %]
-<br><div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
+<div class="card red alert top-center w-fit">
+  <div class="body textERROR"><b>Readonly:</b> Make sure the config file is writable!</div>
+</div>
 [% END %]
-<table border="0" class='data conftoolusers' style="width:360px;">
-  <tr>
-    <th colspan=4 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
-  </tr>
-  [% x = 0 %]
-  [% FOREACH b = conf_sites %]
-  [% x = x + 1 %]
-  [% PROCESS _conf_backends_backend.tt %]
-  [% END %]
-  <tr class="backend_conf_0_add">
-    <td colspan=3 style="text-align:left;">
-      <a href="#" onclick="conf_sites_add(); return false;">
-        <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
-        add new connection
-      </a>
-    </td>
-  </tr>
-  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '' } x = 0 %]
-  <tr>
-    <td colspan=3 style="text-align:center; padding-bottom: 7px;">
-      <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"[% IF readonly %] disabled[% END %]>
-    </td>
-  </tr>
-</table>
-</form>
+
+<div class="flexcol justify-center items-center mt-5">
+  <form action="conf.cgi" method="POST" class="w-fit">
+    <input type="hidden" name="sub" value="backends">
+    [%# make sure IE can submit form by pressing enter #%]
+    <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
+    <input type="hidden" name="action" value="save">
+    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+    <div class="card w-[450px]">
+      <div class="head justify-between">
+        <h3>Backends Configuration</h3>
+        <button class="w-32" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
+          <i class="uil uil-save"></i>Save Changes
+        </button>
+      </div>
+      <div class="body">
+        <span class="textHINT block text-center">Note: some options are not accessible here for security reasons.</span>
+      </div>
+      <table class="cellspacing-0.25">
+        [% x = 0 %]
+        [% FOREACH b = conf_sites %]
+          [% x = x + 1 %]
+          [% PROCESS _conf_backends_backend.tt %]
+        [% END %]
+        <tr class="backend_conf_0_add">
+          <td colspan=3 class="clickable hoverable text-center" onclick="conf_sites_add(); return false;">
+            <i class="fa-solid fa-plus"></i>add new connection
+          </td>
+        </tr>
+        <tr>
+          <td colspan=3><hr></td>
+        </tr>
+        [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '' } x = 0 %]
+        <tr>
+          <td colspan=3>
+            <button class="w-32 mx-auto m-2" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
+              <i class="uil uil-save"></i>Save Changes
+            </button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </form>
 </div>
 
-<img src="[% url_prefix %]themes/[% theme %]/images/error.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 <script type="text/javascript">
 <!--
   function conf_sites_add_hide() {
@@ -62,8 +73,8 @@ Note: some options are not accessible here for security reasons.
     check_backends_config(sel);
   }
 
-  function delete_site_row(td) {
-    jQuery('.'+td.parentNode.className).each(function() {
+  function delete_site_row(btn) {
+    jQuery('.'+btn.parentNode.parentNode.className).each(function() {
       var p = this.parentNode;
       p.removeChild(this);
     });
@@ -90,14 +101,9 @@ Note: some options are not accessible here for security reasons.
     var auth        = jQuery('INPUT[name=auth'+nr+']').val();
     var proxy       = jQuery('INPUT[name=proxy'+nr+']').val();
     var remote_name = jQuery('INPUT[name=remote_name'+nr+']').val();
-    var img         = jQuery('.testimg'+loopid)[0];
-    if(orig_src == undefined) {
-      orig_src = img.src;
-    } else {
-      img.src = orig_src;
-    }
-    img.title = 'checking connection...';
-    showElement(img);
+    jQuery('.testimg_c_'+loopid).removeClass("hidden");
+    jQuery('.testimg_e_'+loopid).addClass("hidden");
+    jQuery('.testimg_o_'+loopid).addClass("hidden");
     jQuery('#thruk_message').remove();
 
     jQuery("#backend_conf_"+nr+"_details").hide();
@@ -116,9 +122,9 @@ Note: some options are not accessible here for security reasons.
         type: 'POST',
         cache: false,
         success: function(data) {
+          jQuery('.testimg_c_'+loopid).addClass("hidden");
           if(data.ok == 1) {
-            img.src   = '[% url_prefix %]themes/[% theme %]/images/accept.png';
-            img.title = 'connection test successful';
+            jQuery('.testimg_o_'+loopid).removeClass("hidden").attr("title", 'connection test successful')
             details = "";
             if(data.data) {
               details +=  "<tr><th>Version:</th><td>"+data.data.program_version+"</td></tr>"
@@ -129,21 +135,26 @@ Note: some options are not accessible here for security reasons.
                          +"<tr><th>Groups:</th><td>"+(data.whoami.groups ? data.whoami.groups.join(", ") : 'none')+"</td></tr>"
                          +"<tr><th>Roles:</th><td>"+list_roles(data.whoami.roles)+"</td></tr>"
             }
-            jQuery("#backend_conf_"+nr+"_details").show().html(
-                 "<table>"
-                +details
-                +"</table>"
-            );
+            if(data.data && data.data.thruk && data.data.thruk.thruk_version) {
+              details +=  "<tr><th>Thruk:</th><td>"+data.data.thruk.thruk_version+"</td></tr>";
+            }
+            if(data.data && data.data.thruk && data.data.thruk.extra_version) {
+              details +=  "<tr><th>OMD:</th><td>"+data.data.thruk.extra_version+"</td></tr>";
+            }
+            overcard({
+              'bodyCls': 'p-2',
+              'body':    "<table>"+details+"</table>",
+              'caption': 'Connection details',
+              'minWidth': 200
+            });
           } else {
-            img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
-            img.title = data.error;
-            thruk_message(1, data.error + ' ('+peer+')');
+            jQuery('.testimg_e_'+loopid).removeClass("hidden").attr("title", 'connection test failed: '+data.error)
+            thruk_message(1, "<pre class='max-w-[85vw] text-left'>"+data.error + ' ('+peer+')</pre>');
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
           thruk_xhr_error('connection test unknown: ', '', textStatus, jqXHR, errorThrown);
-          img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
-          img.title = 'connection test unknown';
+          jQuery('.testimg_e_'+loopid).removeClass("hidden").attr("title", 'connection test failed')
         }
     });
   }
