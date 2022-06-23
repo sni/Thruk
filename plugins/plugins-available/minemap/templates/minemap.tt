@@ -69,7 +69,7 @@
               <div class="flex-1 truncate max-w-[180px]">
                 <a href="[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex=">[% hst.host_name | html %]</a>
               </div>
-              [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=20 %]
+              [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 %]
             </div>
           </th>
           [% FOREACH svcname = services.keys.sort %]

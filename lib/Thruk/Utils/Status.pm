@@ -49,7 +49,6 @@ sub set_default_stash {
     $c->stash->{'style'}                = '';
     $c->stash->{'has_error'}            = 0;
     $c->stash->{show_substyle_selector} = 1;
-    $c->stash->{imgsize}                = 20;
     $c->stash->{'audiofile'}            = '';
     $c->stash->{'has_service_filter'}   = 0;
     $c->stash->{'show_column_select'}   = 0;
