@@ -39,7 +39,7 @@
     error: ajax_xhr_error_logonly
   });
 </script>
-<div class="card w-fit mx-auto">
+<div class="card w-full max-w-[800px] mx-auto overflow-hidden">
   <div class="head justify-between">
     <h3>Performance Graph</h3>
     <div class='pnpSelector'>
@@ -59,7 +59,7 @@
     <span id="histou_th5" class="tabs text-center w-[18%]" onclick="return set_histou_img([% date.now - 30067200 %], [% date.now %], this.id, histou_source)">year</span>
     <span                 class="tabs text-center w-12"    onclick="return move_histou_img( 0.5)"><i class="uil uil-angle-right text-lg contents"></i></span>
   </div>
-  <div class="w-[800px] h-[262px] relative">
+  <div class="h-[262px] relative justify-center">
     <a id="histou_graph_link" href="[% url_prefix %]#[% histou_url %]" class="clickable absolute top-0 left-0 w-full h-full z-40"></a>
     <div id="histou_graph_pane" class="relative w-full h-full overflow-hidden">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
