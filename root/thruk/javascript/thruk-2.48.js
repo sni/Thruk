@@ -919,10 +919,11 @@ function cookieRemoveAll(name) {
     jQuery.each(document.location.hostname.split(".").reverse(), function(key, hostpart) {
         if(domain == "") {
             domain = hostpart;
+            return true;
         } else {
             domain = hostpart+"."+domain;
         }
-        jQuery.each(document.location.hostname.split(".").reverse(), function(key2, path) {
+        jQuery.each(paths, function(key2, path) {
             document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
         });
     });
