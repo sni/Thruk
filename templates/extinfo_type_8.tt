@@ -1,110 +1,120 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
-            <tr>
-              <td class='linkBox'>
-                <a href="status.cgi?servicegroup=[% servicegroup.name | uri %]&amp;style=detail">View Status Detail For This Servicegroup</a><br>
-                <a href="status.cgi?servicegroup=[% servicegroup.name | uri %]&amp;style=overview">View Status Overview For This Servicegroup</a><br>
-                <a href="status.cgi?servicegroup=[% servicegroup.name | uri %]&amp;style=grid">View Status Grid For This Servicegroup</a><br>
-                <a href="avail.cgi?servicegroup=[% servicegroup.name | uri %]">View Availability For This Servicegroup</a><br>
-              </td>
-            </tr>
-          </table>
-        </td>
-        <td align="center" valign="middle" width="33%">
-          <div class='data'>Servicegroup</div>
-          <div class='dataTitle'>[% servicegroup.alias | html %]</div>
-          <div class='dataTitle'>([% servicegroup.name | html %])</div>
-          [% IF servicegroup.notes %]<p>[% servicegroup.notes | html %]</p>[% END %]
-        </td>
-        <td align="right" valign="bottom" width="33%">
-          <table border='0'>
-          [% IF servicegroup.action_url %]
-            <tr>
-              <td align='right'>
-                <a href="[% servicegroup.action_url %]" target='[% c.config.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Servicegroup' title='Perform Additional Actions On This Servicegroup' width="40" height="40"></a><br clear="all">
-                <font size="-1"><i>Extra Actions</i></font><br clear="all">
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
-          [% IF servicegroup.notes_url %]
-            <tr>
-              <td align='right'>
-                <a href="[% servicegroup.notes_url %]" target='[% c.config.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Servicegroup' title='View Additional Notes For This Servicegroup' width="40" height="40"></a><br clear="all">
-                <font size="-1"><i>Extra Notes</i></font><br clear="all">
-                <br clear="all">
-              </td>
-            </tr>
-          [% END %]
-          </table>
-        </td>
-      </tr>
-    </table><br>
-
-    <div align="center">
-      <table border="0">
-        <tr>
-          <td align="center" valign="top" class='stateInfoPanel'>
-            <div class='dataTitle'>Servicegroup Commands</div>
-            <table border="0" cellspacing="0" cellpadding="0" class='command'>
-              [% UNLESS command_disabled(c, '121') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=121&amp;servicegroup=[% servicegroup.name | uri %]">Schedule downtime for all hosts in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '122') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=122&amp;servicegroup=[% servicegroup.name | uri %]">Schedule downtime for all services in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '111') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=111&amp;servicegroup=[% servicegroup.name | uri %]">Enable notifications for all hosts in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '112') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=112&amp;servicegroup=[% servicegroup.name | uri %]">Disable notifications for all hosts in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '109') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=109&amp;servicegroup=[% servicegroup.name | uri %]">Enable notifications for all services in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '110') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=110&amp;servicegroup=[% servicegroup.name | uri %]">Disable notifications for all services in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '113') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=113&amp;servicegroup=[% servicegroup.name | uri %]">Enable active checks of all services in this servicegroup</a></td>
-              </tr>
-              [% END %]
-              [% UNLESS command_disabled(c, '114') %]
-              <tr class='command'>
-                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
-                <td class='command'><a href="cmd.cgi?cmd_typ=114&amp;servicegroup=[% servicegroup.name | uri %]">Disable active checks of all services in this servicegroup</a></td>
-              </tr>
-              [% END %]
-            </table>
-          </td>
-        </tr>
-      </table>
+<div class="flexrow justify-between">
+  <div class="flexcol w-fit">
+    [% PROCESS _infobox.tt %]
+    <div class="card w-full">
+      <div class="actionbox">
+        <div><a class="flex" href="status.cgi?servicegroup=[% servicegroup.name | uri %]&amp;style=detail">View Status Detail For This Servicegroup</a></div>
+        <div><a class="flex" href="status.cgi?servicegroup=[% servicegroup.name | uri %]&amp;style=overview">View Status Overview For This Servicegroup</a></div>
+        <div><a class="flex" href="status.cgi?servicegroup=[% servicegroup.name | uri %]&amp;style=grid">View Status Grid For This Servicegroup</a></div>
+        <div><a class="flex" href="avail.cgi?servicegroup=[% servicegroup.name | uri %]">View Availability For This Servicegroup</a></div>
+      </div>
     </div>
+  </div>
+
+  <div class="flexcol text-center">
+    [% IF servicegroup.action_url %]
+      <div>
+        <a class="link" href='[% servicegroup.action_url %]' target='[% c.config.action_url_target %]' title='Perform Additional Actions On This Servicegroup'>
+          <i class="fa-solid fa-chart-line text-4xl w-fit h-fit"></i><br>
+          <font size="-1"><i>Extra Actions</i></font>
+        </a>
+      </div>
+    [% END %]
+
+    [% IF servicegroup.notes_url %]
+      <div>
+        <a class="link" href='[% servicegroup.notes_url %]' target='[% c.config.notes_url_target %]' title='View Additional Notes For This Servicegroup'>
+          <i class="fa-solid fa-clipboard text-4xl w-fit h-fit"></i><br>
+          <font size="-1"><i>Extra Notes</i></font>
+        </a>
+      </div>
+    [% END %]
+  </div>
+</div>
+
+<div class="flexcol w-fit mx-auto text-center items-center">
+  <div>
+    <h1>Servicegroup</h1>
+    <h3>[% servicegroup.alias | html %]</h3>
+    <h3>([% servicegroup.name | html %])</h3>
+  </div>
+
+  [% IF servicegroup.notes %]
+    <div class="card w-fit">
+      <div class="head"><h3>Notes</h3></div>
+      <div class="body w-fit">
+      [% servicegroup.notes | html %]
+      </div>
+    </div>
+  [% END %]
+
+  <div class="card mt-5 min-w-[350px] overflow-hidden">
+    <div class="head">
+      <h3>Servicegroup Commands</h3>
+    </div>
+    <div class="actionbox">
+      [% UNLESS command_disabled(c, '121') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=121&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-moon"></i>Schedule downtime for all hosts in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '122') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=122&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-moon"></i>Schedule downtime for all services in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '111') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=111&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-bell"></i>Enable notifications for all hosts in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '112') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=112&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-bell-slash"></i>Disable notifications for all hosts in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '109') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=109&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-bell"></i>Enable notifications for all services in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '110') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=110&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-bell-slash"></i>Disable notifications for all services in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '113') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=113&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-check round small green"></i>Enable active checks of all services in this servicegroup
+          </a>
+        </div>
+      [% END %]
+      [% UNLESS command_disabled(c, '114') %]
+        <div>
+          <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=114&amp;servicegroup=[% servicegroup.name | uri %]">
+            <i class="fa-solid fa-xmark round small red"></i>Disable active checks of all services in this servicegroup
+          </a>
+        </div>
+      [% END %]
+    </div>
+  </div>
+</div>
+
 
 [% PROCESS _footer.tt %]
