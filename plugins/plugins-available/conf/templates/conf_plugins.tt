@@ -2,78 +2,86 @@
 [% first_enabled  = 1 %]
 [% first_disabled = 1 %]
 
-<div align="center">
-<form action="conf.cgi" method="POST">
-<input type="hidden" name="sub" value="plugins">
-<input type="hidden" name="action" value="save">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 [% IF readonly %]
-<div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
-[% ELSE %]
-<button class="conf_save_button" onclick="return save_plugins(this);">Save Changes</button><br>
-Don't forget to restart Thruk after changing plugins.
+<div class="card red alert top-center w-fit">
+  <div class="body textERROR"><b>Readonly:</b> Make sure the config file is writable!</div>
+</div>
 [% END %]
-<table><tr><td valign="top">
-  <table border="0" class='data conftoolusers' style="width:580px;">
-    <tr>
-      <th colspan=5 class='data conftoolheader' style="text-align:center">Enabled Plugins</th>
-    </tr>
-    [% FOREACH name = plugins.keys.sort %]
-    [% plugin = plugins.$name %]
-    [% IF plugin.enabled == 0 %][% NEXT %][% END %]
-    [% IF first_enabled == 0 %]
-    <tr>
-      <td colspan=4><hr></td>
-    </tr>
-    [% END %]
-    [% first_enabled = 0 %]
-    <tr style="height:160px;">
-      <td align="left">[% name | html %]</td>
-      <td><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
-      <td class='plugin_description'>[% plugin.description %][% IF plugin.url %]<br><br><a href="[% plugin.url %]">view plugin page</a>[% END %]</td>
-      <td>
-        <div class="radioset" style="width: 135px;">
-            <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
-            <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
-        </div>
-      </td>
-    </tr>
-    [% END %]
-  </table>
-</td><td valign="top">
-  <table border="0" class='data conftoolusers' style="width:580px;">
-    <tr>
-      <th colspan=5 class='data conftoolheader' style="text-align:center">Available Plugins</th>
-    </tr>
-    [% FOREACH name = plugins.keys.sort %]
-    [% plugin = plugins.$name %]
-    [% IF plugin.enabled == 1 %][% NEXT %][% END %]
-    [% IF first_disabled == 0 %]
-    <tr>
-      <td colspan=4><hr></td>
-    </tr>
-    [% END %]
-    [% first_disabled = 0 %]
-    <tr style="height:160px;">
-      <td align="left">[% name | html %]</td>
-      <td><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
-      <td class='plugin_description'>[% plugin.description %]</td>
-      <td>
-        <div class="radioset" style="width: 135px;">
-            <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
-            <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
-        </div>
-      </td>
-    </tr>
-    [% END %]
-  </table>
-</td></tr></table>
-<br>
-[% IF !readonly %]
-<button class="conf_save_button" onclick="return save_plugins(this);">Save Changes</button><br>
-Don't forget to restart Thruk after changing plugins.
-[% END %]
-</form>
+
+<div class="flexcol mx-auto w-fit mt-5">
+  <form action="conf.cgi" method="POST" class="w-fit">
+    <input type="hidden" name="sub" value="plugins">
+    <input type="hidden" name="action" value="save">
+    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+    <div class="card">
+      [% IF !readonly %]
+      <div class="head justify-center gap-3">
+        <button onclick="return save_plugins(this);" class="submit"><i class="uil uil-save"></i>Save Changes</button><br>
+        Don't forget to restart Thruk after changing plugins.
+      </div>
+      [% END %]
+      <div class="flexrow flex-nowrap gap-10">
+        <table class="w-[580px] h-fit">
+          <tr>
+            <th colspan=5 class="px-2 text-center"><h3>Enabled Plugins</h3></th>
+          </tr>
+          [% FOREACH name = plugins.keys.sort %]
+          [% plugin = plugins.$name %]
+          [% IF plugin.enabled == 0 %][% NEXT %][% END %]
+          [% IF first_enabled == 0 %]
+          <tr>
+            <td colspan=4><hr class="pt-2 mb-2"></td>
+          </tr>
+          [% END %]
+          [% first_enabled = 0 %]
+          <tr style="height:160px;">
+            <th class="px-2 align-top">[% name | html %]</th>
+            <td class="align-top"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
+            <td class='align-top plugin_description'>[% plugin.description %][% IF plugin.url %]<br><br><a href="[% plugin.url %]">view plugin page</a>[% END %]</td>
+            <td class="align-top">
+              <div class="radiogroup" style="width: 135px;">
+                <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
+                <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
+              </div>
+            </td>
+          </tr>
+          [% END %]
+        </table>
+        <table class="w-[580px] h-fit">
+          <tr>
+            <th colspan=5 class="px-2 text-center"><h3>Available Plugins</h3></th>
+          </tr>
+          [% FOREACH name = plugins.keys.sort %]
+          [% plugin = plugins.$name %]
+          [% IF plugin.enabled == 1 %][% NEXT %][% END %]
+          [% IF first_disabled == 0 %]
+          <tr>
+            <td colspan=4><hr class="pt-2 mb-2"></td>
+          </tr>
+          [% END %]
+          [% first_disabled = 0 %]
+          <tr style="height:160px;">
+            <th class="px-2 align-top">[% name | html %]</th>
+            <td class="align-top"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
+            <td class='align-top plugin_description'>[% plugin.description %]</td>
+            <td class="px-2 align-top">
+              <div class="radiogroup" style="width: 135px;">
+                  <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
+                  <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
+              </div>
+            </td>
+          </tr>
+          [% END %]
+        </table>
+      </div>
+      [% IF !readonly %]
+      <div class="footer justify-center gap-3">
+        <button onclick="return save_plugins(this);" class="submit"><i class="uil uil-save"></i>Save Changes</button><br>
+        Don't forget to restart Thruk after changing plugins.
+      </div>
+      [% END %]
+    </div>
+  </form>
 </div>
 
 [% END %]

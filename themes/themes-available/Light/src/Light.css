@@ -777,11 +777,14 @@ DIV.radiogroup {
   }
 }
 
-.fa-trash {
-  @apply hover:text-red-600;
+.fa-trash, .uil-trash-alt {
+  @apply hover:textALERT;
 }
-a:hover>.fa-trash {
-  @apply text-red-600;
+a:hover>.fa-trash, a:hover>.uil-trash-alt {
+  @apply textALERT;
+}
+BUTTON:hover>.fa-trash, BUTTON:hover>.uil-trash-alt {
+  @apply textALERT;
 }
 
 /*******************************************************************************

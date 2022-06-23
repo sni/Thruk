@@ -1,30 +1,29 @@
-﻿<tr>
-  <th class='data[% IF type =='host'         %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=host">Hosts</a></th>
-  <th class='data[% IF type =='service'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=service">Services</a></th>
-  <th class='data[% IF type =='command'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=command">Commands</a></th>
-  <th class='data[% IF type =='timeperiod'   %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=timeperiod">Timeperiods</a></th>
-  <th class='data[% IF type =='hostgroup'    %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=hostgroup">Hostgroups</a></th>
-  <th class='data[% IF type =='servicegroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroups</a></th>
-  <th class='data[% IF type =='contact'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contact">Contacts</a></th>
-  <th class='data[% IF type =='contactgroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroups</a></th>
-  <th class='data[% IF type =='hostdependency' || type == 'servicedependency' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=hostdependency" id="depsopen">Dependencies</a></th>
-  <th class='data[% IF type =='hostescalation' || type == 'serviceescalation' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=hostescalation" id="escopen">Escalations</a></th>
-  [% IF coretype == 'shinken' %]
-  <th class='data[% IF type =='notificationway' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=notificationway">Notificationways</a></th>
-  <th class='data[% IF type =='discoveryrule'   %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=discoveryrule">Discoveryrules</a></th>
-  <th class='data[% IF type =='discoveryrun'   %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=discoveryrun">Discoveryruns</a></th>
-  <th class='data[% IF type =='realm'           %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=realm">Realms</a></th>
-  [% END %]
-  [% IF coretype == 'icinga' or coretype == 'shinken' %]
-  <th class='data[% IF type =='module'       %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=module">Modules</a></th>
-  [% END %]
-  <th class='data'>&nbsp;</th>
-  <th class='data[% IF type =='tools'        %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;tools=start">Tools</a></th>
-  <th class='data[% IF type =='apply'        %] confSelected[% END %]' style="width:60px;" nowrap>
-    <a href="conf.cgi?sub=objects&amp;apply=yes">Apply</a>
+﻿<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='host'                                          %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=host">Host</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='service'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=service">Service</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='command'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=command">Command</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='timeperiod'                                    %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=timeperiod">Timeperiod</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='hostgroup'                                     %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostgroup">Hostgroup</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='servicegroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroup</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='contact'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contact">Contact</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='contactgroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroup</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='hostdependency' || type == 'servicedependency' %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostdependency">Dependency</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='hostescalation' || type == 'serviceescalation' %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostescalation">Escalation</a></span>
+[% IF coretype == 'shinken' %]
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='notificationway'                               %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=notificationway">Notificationway</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='discoveryrule'                                 %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=discoveryrule">Discoveryrule</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='discoveryrun'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=discoveryrun">Discoveryrun</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='realm'                                         %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=realm">Realm</a></span>
+[% END %]
+[% IF coretype == 'icinga' or coretype == 'shinken' %]
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='module'                                        %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=module">Module</a></span>
+[% END %]
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='tools'                                         %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;tools=start">Tools</a></span>
+<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='apply'                                         %] active[% END %]">
+  <a class="block [% IF last_changed || needs_commit %]textHINT[% END %]" href="conf.cgi?sub=objects&amp;apply=yes">
+    <i id="apply_config_changes_icon" style="display: [% IF last_changed || needs_commit %][% ELSE %]none[% END %];" class='uil uil-save' title='Config has changed and needs to be applied'></i>
+    Apply
     [% IF parse_errors.size > 0 %]
-    <a href="conf.cgi?sub=objects&amp;apply=yes"><img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config Errors Detected' title='Config Errors Detected' width="16" height="16" style="vertical-align: text-bottom"></a>
+    <i class="uil uil-exclamation round yellow" title='Config Errors Detected'></i>
     [% END %]
-    <a href="conf.cgi?sub=objects&amp;apply=yes" id="apply_config_changes_icon" style="display: [% IF last_changed || needs_commit %][% ELSE %]none[% END %];"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' alt='Config has changed and needs to be applied' title='Config has changed and needs to be applied' width="16" height="16" style="vertical-align: text-bottom"></a>
-  </th>
-</tr>
+  </a>
+</span>

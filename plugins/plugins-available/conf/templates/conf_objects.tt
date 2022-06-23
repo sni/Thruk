@@ -43,9 +43,9 @@
       <td colspan=3>
         <table style="width:100%">
           <tr>
-            <td style="width: 50px;" class="data dataSubmit sub_1">
+            <td style="width: 50px;" class="sub_1">
               [% IF referer %]
-              <button class="conf_back_button conf_button" onclick="window.location='[% escape_js(referer) %]'; return false;">back</button>
+              <button onclick="window.location='[% escape_js(referer) %]'; return false;">back</button>
               [% END %]
             </td>
             <td>
@@ -69,9 +69,9 @@
                 [% END %]
               </span>
             </td>
-            <td style="width: 50px;" class="data dataSubmit sub_1">
+            <td style="width: 50px;" class="sub_1">
               [% IF ! readonly %]
-              <button class="conf_apply_button conf_button">apply</button>
+              <button>apply</button>
               [% END %]
             </td>
           </tr>
@@ -179,11 +179,11 @@
 
     [% IF ! readonly %]
     <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1 sub_4">
-      <td colspan=3 class="data dataSubmit">
+      <td colspan=3>
         [% IF object.get_id() != 'new' && ! bare %]
-        <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button sub_1">
+        <input type="submit" name="send" value="raw edit" style="width:90px" class="sub_1">
         [% END %]
-        <button class="conf_apply_button conf_button" style="width:90px">apply</button>
+        <button style="width:90px">apply</button>
       </td>
     </tr>
     [% END %]

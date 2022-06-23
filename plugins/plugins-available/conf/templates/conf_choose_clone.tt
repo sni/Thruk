@@ -50,7 +50,7 @@
   </tr>
   <tr>
     <td colspan=2 style="text-align: right; padding-bottom: 5px;">
-      <button class="conf_next_button conf_button">next</button>
+      <button>next</button>
     </td>
   </tr>
 

@@ -69,7 +69,7 @@
   <tr>
     <td class='[% loopclass %] conf_row' align="left" style="border-bottom: 0px;">comments</td>
     <td class='[% loopclass %] conf_row' style="text-align: center; border-bottom: 0px; white-space: inherit;" colspan=4>
-      <button id="attr_opener" class="conf_button">add new attribute</button>
+      <button id="attr_opener">add new attribute</button>
 
       <script type="text/javascript">
       <!--
@@ -97,7 +97,7 @@
                 </tr>
               [% END %]
             </table>
-            <center><button class="conf_button" id="finish_button">finish</button></center>
+            <center><button id="finish_button">finish</button></center>
           </td>
         </tr>
       </table>

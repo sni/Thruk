@@ -1,11 +1,15 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 [% PROCESS _blocks.tt %]
 
+<div class="flexcol mx-auto w-fit mt-5">
+  <div class="card">
+    <div class="head p-0 justify-between">
+      [% PROCESS _conf_objects_menu.tt type="apply" %]
+    </div>
+  </div>
+</div>
+
 <div align="center">
-<table border="0" class='data conftoolobj'>
-  [% PROCESS _conf_objects_menu.tt type="tools" %]
-</table>
-<br><br>
 <table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
 <tr>
 
@@ -22,7 +26,7 @@
           [% IF toolobj.defined("fix_all_serial") && toolobj.defined("fix_all_serial") %]
             [% PROCESS _button btn = {
               form   => { action => "#", style => "padding-left: 3px;" },
-              button => { class => 'conf_cut_button conf_cleanup_button width_100', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", text => toolobj.fixlink _ " all" },
+              button => { class => 'conf_cleanup_button width_100', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", text => toolobj.fixlink _ " all" },
             }%]
           [% ELSE %]
             [% PROCESS _button btn = {

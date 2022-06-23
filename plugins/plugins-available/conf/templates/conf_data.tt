@@ -1,97 +1,99 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-<form action="conf.cgi" method="POST" onsubmit="multi_select_all(this)">
-<input type="hidden" name="sub" value="[% sub | html %]">
-<input type="hidden" name="action" value="store">
-<input type="hidden" name="hex" value="[% hex %]">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-<div align="center">
 [% IF readonly %]
-<br><div class="alert"><b>Readonly!</b> Make sure the config file is writable</div>
+<div class="card red alert top-center w-fit">
+  <div class="body textERROR"><b>Readonly:</b> Make sure the config file is writable!</div>
+</div>
 [% END %]
-  <table border="0" class='data conftool'>
-    [% FOREACH cat = keys %]
-        [% UNLESS loop.first %]
-        <tr><td colspan=2>&nbsp;</td></tr>
+
+<div class="flexcol items-center">
+  <form action="conf.cgi" method="POST" onsubmit="multi_select_all(this)" class="w-fit">
+    <input type="hidden" name="sub" value="[% sub | html %]">
+    <input type="hidden" name="action" value="store">
+    <input type="hidden" name="hex" value="[% hex %]">
+    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+    <div class="card">
+      <table>
+        [% FOREACH cat = keys %]
+          <tr>
+            <td colspan=2 class="borderDefault border-b [% IF ! loop.first %]pt-5[% END %]"><h3 class="text-center">[% cat.0 %]</h3></td>
+          </tr>
+          [% FOREACH key = cat.1 %]
+            [% d = data.$key %]
+            <tr>
+              <th class="px-2 align-top">[% key %]</th>
+              <td class="pr-2">
+                [% IF d.0 == 'BOOL' %]
+                  <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
+                  <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
+                [% ELSIF d.0 == 'STRING' %]
+                  <input type="text" name="data.[% key %]" value="[% d.1 | html %]" size=65>
+                [% ELSIF d.0 == 'INT' %]
+                  <input type="text" name="data.[% key %]" value="[% d.1 | html %]" size=65>
+                [% ELSIF d.0 == 'ARRAY' %]
+                  <input type="text" name="data.[% key %]" value="[% d.1.join(', ') | html %]" size=65>
+                [% ELSIF d.0 == 'LIST' %]
+                  <select name="data.[% key %]">
+                      [% FOREACH opt = d.2 %]
+                          <option value="[% opt.key | html %]"[% IF opt.key == d.1 %] selected[% END %]>[% opt.value %]</option>
+                      [% END %]
+                  </select>
+                [% ELSIF d.0 == 'MULTI_LIST' %]
+                  <table>
+                    <tr>
+                      <th>Available</th>
+                      <th></th>
+                      <th>Selected</th>
+                    </tr>
+                    <tr>
+                      <td>
+                        <select id="avail.[% key %]" name="avail.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('avail.[% key %]', 'data.[% key %]')">
+                            [% test = {} %]
+                            [% FOREACH t = d.1 %]
+                              [% test.$t = t %]
+                            [% END %]
+                            [% FOREACH opt = d.2 %]
+                              [% NEXT IF test.exists(opt.key) %]
+                              <option value="[% opt.key | html %]">[% opt.value | html %]</option>
+                            [% END %]
+                        </select>
+                      </td>
+                      <td valign="middle">
+                        <input type="button" value="&gt;&gt;" onclick="data_select_move('avail.[% key %]', 'data.[% key %]')">
+                          <br>
+                        <input type="button" value="&lt;&lt;" onclick="data_select_move('data.[% key %]', 'avail.[% key %]')">
+                      </td>
+                      <td>
+                        <select id="data.[% key %]" name="data.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('data.[% key %]', 'avail.[% key %]')">
+                            [% FOREACH opt = d.1 %]
+                              [% IF d.2.exists(opt) %]
+                                <option value="[% opt | html %]">[% d.2.$opt %]</option>
+                              [% ELSE %]
+                                <option value="[% opt | html %]">[% opt | html %]</option>
+                              [% END %]
+                            [% END %]
+                        </select>
+                      </td>
+                    </tr>
+                  </table>
+                [% ELSE %]
+                  [% d.list.join(', ') %]
+                [% END %]
+              </td>
+            </tr>
+          [% END %]
         [% END %]
         <tr>
-            <th colspan=2 class='data conftoolheader' style="text-align:center">
-                [% cat.0 %]
-            </th>
-        </tr>
-        [% FOREACH key = cat.1 %]
-        [% d = data.$key %]
-        <tr>
-          <td align="left" valign="top">[% key %]</td>
-          <td>
-          [% IF d.0 == 'BOOL' %]
-            <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
-            <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
-          [% ELSIF d.0 == 'STRING' %]
-            <input type="text" name="data.[% key %]" value="[% d.1 | html %]" size=65>
-          [% ELSIF d.0 == 'INT' %]
-            <input type="text" name="data.[% key %]" value="[% d.1 | html %]" size=65>
-          [% ELSIF d.0 == 'ARRAY' %]
-            <input type="text" name="data.[% key %]" value="[% d.1.join(', ') | html %]" size=65>
-          [% ELSIF d.0 == 'LIST' %]
-            <select name="data.[% key %]">
-                [% FOREACH opt = d.2 %]
-                    <option value="[% opt.key | html %]"[% IF opt.key == d.1 %] selected[% END %]>[% opt.value %]</option>
-                [% END %]
-            </select>
-          [% ELSIF d.0 == 'MULTI_LIST' %]
-            <table border=0>
-              <tr>
-                <th>Available</th>
-                <th></th>
-                <th>Selected</th>
-              </tr>
-              <tr>
-                <td>
-                  <select id="avail.[% key %]" name="avail.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('avail.[% key %]', 'data.[% key %]')">
-                      [% test = {} %]
-                      [% FOREACH t = d.1 %]
-                        [% test.$t = t %]
-                      [% END %]
-                      [% FOREACH opt = d.2 %]
-                        [% NEXT IF test.exists(opt.key) %]
-                        <option value="[% opt.key | html %]">[% opt.value | html %]</option>
-                      [% END %]
-                  </select>
-                </td>
-                <td valign="middle">
-                  <input type="button" value="&gt;&gt;" onclick="data_select_move('avail.[% key %]', 'data.[% key %]')">
-                    <br>
-                  <input type="button" value="&lt;&lt;" onclick="data_select_move('data.[% key %]', 'avail.[% key %]')">
-                </td>
-                <td>
-                  <select id="data.[% key %]" name="data.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('data.[% key %]', 'avail.[% key %]')">
-                      [% FOREACH opt = d.1 %]
-                        [% IF d.2.exists(opt) %]
-                          <option value="[% opt | html %]">[% d.2.$opt %]</option>
-                        [% ELSE %]
-                          <option value="[% opt | html %]">[% opt | html %]</option>
-                        [% END %]
-                      [% END %]
-                  </select>
-                </td>
-              </tr>
-            </table>
-          [% ELSE %]
-          [% d.list.join(', ') %]
-          [% END %]
+          <td colspan=2>
+            <div class="flexrow justify-evenly py-2">
+              <a class="button" style="width:90px" href="conf.cgi">cancel</a>
+              <button name="send" value="save" style="width:140px"[% IF readonly %] disabled[% END %]>save</button>
+            </div>
           </td>
         </tr>
-        [% END %]
-    [% END %]
-    <tr>
-      <td colspan=2 class="data dataSubmit">
-        <button class="conf_back_button" name="cancel" value="cancel" style="width:90px" onclick="window.location='conf.cgi'">cancel</button>
-        <button class="conf_save_button" name="send" value="save" style="width:140px"[% IF readonly %] disabled[% END %]>save</button>
-      </td>
-    </tr>
-  </table>
+      </table>
+    </div>
+  </form>
 </div>
-</form>
 
 [% END %]
