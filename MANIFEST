@@ -2926,7 +2926,6 @@ templates/waiting_for_job.tt
 THANKS
 themes/themes-available/Dark/images/accept.png
 themes/themes-available/Dark/images/ack.gif
-themes/themes-available/Dark/images/action.gif
 themes/themes-available/Dark/images/add.png
 themes/themes-available/Dark/images/apple-touch-icon-180x180.png
 themes/themes-available/Dark/images/application_view_list.png
@@ -2937,7 +2936,6 @@ themes/themes-available/Dark/images/bug_error.png
 themes/themes-available/Dark/images/calendar.png
 themes/themes-available/Dark/images/chart_organisation.png
 themes/themes-available/Dark/images/command.png
-themes/themes-available/Dark/images/comment.gif
 themes/themes-available/Dark/images/control_pause_blue.png
 themes/themes-available/Dark/images/control_play_blue.png
 themes/themes-available/Dark/images/critical.png
@@ -2951,15 +2949,12 @@ themes/themes-available/Dark/images/date_magnify.png
 themes/themes-available/Dark/images/delete.gif
 themes/themes-available/Dark/images/delete.png
 themes/themes-available/Dark/images/detail.gif
-themes/themes-available/Dark/images/disabled.gif
 themes/themes-available/Dark/images/disk.png
 themes/themes-available/Dark/images/down.gif
 themes/themes-available/Dark/images/down.png
 themes/themes-available/Dark/images/downtime.gif
 themes/themes-available/Dark/images/dropdown.png
 themes/themes-available/Dark/images/edit.png
-themes/themes-available/Dark/images/empty.gif
-themes/themes-available/Dark/images/enabled.gif
 themes/themes-available/Dark/images/error.png
 themes/themes-available/Dark/images/favicon-16x16.png
 themes/themes-available/Dark/images/favicon-32x32.png
@@ -2985,8 +2980,6 @@ themes/themes-available/Dark/images/logo_thruk_small.png
 themes/themes-available/Dark/images/logo_thruk_small_icon.png
 themes/themes-available/Dark/images/logrotate.png
 themes/themes-available/Dark/images/minus.gif
-themes/themes-available/Dark/images/ndisabled.gif
-themes/themes-available/Dark/images/notes.gif
 themes/themes-available/Dark/images/notify.gif
 themes/themes-available/Dark/images/package_go.png
 themes/themes-available/Dark/images/page_add.png
@@ -3018,7 +3011,6 @@ themes/themes-available/Dark/images/warning.png
 themes/themes-available/Dark/stylesheets/Dark.css
 themes/themes-available/Light/images/accept.png
 themes/themes-available/Light/images/ack.gif
-themes/themes-available/Light/images/action.gif
 themes/themes-available/Light/images/add.png
 themes/themes-available/Light/images/apple-touch-icon-180x180.png
 themes/themes-available/Light/images/application_view_list.png
@@ -3029,7 +3021,6 @@ themes/themes-available/Light/images/bug_error.png
 themes/themes-available/Light/images/calendar.png
 themes/themes-available/Light/images/chart_organisation.png
 themes/themes-available/Light/images/command.png
-themes/themes-available/Light/images/comment.gif
 themes/themes-available/Light/images/control_pause_blue.png
 themes/themes-available/Light/images/control_play_blue.png
 themes/themes-available/Light/images/critical.png
@@ -3043,15 +3034,12 @@ themes/themes-available/Light/images/date_magnify.png
 themes/themes-available/Light/images/delete.gif
 themes/themes-available/Light/images/delete.png
 themes/themes-available/Light/images/detail.gif
-themes/themes-available/Light/images/disabled.gif
 themes/themes-available/Light/images/disk.png
 themes/themes-available/Light/images/down.gif
 themes/themes-available/Light/images/down.png
 themes/themes-available/Light/images/downtime.gif
 themes/themes-available/Light/images/dropdown.png
 themes/themes-available/Light/images/edit.png
-themes/themes-available/Light/images/empty.gif
-themes/themes-available/Light/images/enabled.gif
 themes/themes-available/Light/images/error.png
 themes/themes-available/Light/images/favicon-16x16.png
 themes/themes-available/Light/images/favicon-32x32.png
@@ -3077,8 +3065,6 @@ themes/themes-available/Light/images/logo_thruk_small.png
 themes/themes-available/Light/images/logo_thruk_small_icon.png
 themes/themes-available/Light/images/logrotate.png
 themes/themes-available/Light/images/minus.gif
-themes/themes-available/Light/images/ndisabled.gif
-themes/themes-available/Light/images/notes.gif
 themes/themes-available/Light/images/notify.gif
 themes/themes-available/Light/images/package_go.png
 themes/themes-available/Light/images/page_add.png
