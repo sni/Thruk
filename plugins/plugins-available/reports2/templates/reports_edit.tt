@@ -12,7 +12,7 @@
     <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
     <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[600px]">
       <div class="head justify-between" style="flex: 0 0 40px;">
-        <a href="reports2.cgi" class="button back-button rounded w-[70px]" title="Go back to report list">
+        <a href="reports2.cgi" class="button header-button rounded w-[70px]" title="Go back to report list">
           <i class="uil uil-angle-double-left"></i>Back
         </a>
         <h3>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</h3>

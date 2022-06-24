@@ -7,7 +7,7 @@
 
     <div class="card w-[800px] overflow-x-auto">
       <div class="head justify-between">
-        <a href="broadcast.cgi" class="button back-button rounded w-[70px]" title="Go back to broadcast list">
+        <a href="broadcast.cgi" class="button header-button rounded w-[70px]" title="Go back to broadcast list">
           <i class="uil uil-angle-double-left"></i>Back
         </a>
         <div>

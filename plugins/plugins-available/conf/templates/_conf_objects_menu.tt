@@ -1,24 +1,24 @@
-﻿<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='host'                                          %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=host">Host</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='service'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=service">Service</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='command'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=command">Command</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='timeperiod'                                    %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=timeperiod">Timeperiod</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='hostgroup'                                     %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostgroup">Hostgroup</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='servicegroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroup</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='contact'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contact">Contact</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='contactgroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroup</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='hostdependency' || type == 'servicedependency' %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostdependency">Dependency</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='hostescalation' || type == 'serviceescalation' %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostescalation">Escalation</a></span>
+﻿<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='host'                                          %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=host">Host</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='service'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=service">Service</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='command'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=command">Command</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='timeperiod'                                    %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=timeperiod">Timeperiod</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='hostgroup'                                     %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostgroup">Hostgroup</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='servicegroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroup</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='contact'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contact">Contact</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='contactgroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroup</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='hostdependency' || type == 'servicedependency' %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostdependency">Dependency</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='hostescalation' || type == 'serviceescalation' %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=hostescalation">Escalation</a></span>
 [% IF coretype == 'shinken' %]
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='notificationway'                               %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=notificationway">Notificationway</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='discoveryrule'                                 %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=discoveryrule">Discoveryrule</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='discoveryrun'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=discoveryrun">Discoveryrun</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='realm'                                         %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=realm">Realm</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='notificationway'                               %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=notificationway">Notificationway</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='discoveryrule'                                 %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=discoveryrule">Discoveryrule</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='discoveryrun'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=discoveryrun">Discoveryrun</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='realm'                                         %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=realm">Realm</a></span>
 [% END %]
 [% IF coretype == 'icinga' or coretype == 'shinken' %]
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='module'                                        %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=module">Module</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='module'                                        %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=module">Module</a></span>
 [% END %]
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='tools'                                         %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;tools=start">Tools</a></span>
-<span class="tabs min-w-[100px] w-28 px-2 text-center font-medium text-base[% IF type =='apply'                                         %] active[% END %]">
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='tools'                                         %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;tools=start">Tools</a></span>
+<span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='apply'                                         %] active[% END %]">
   <a class="block [% IF last_changed || needs_commit %]textHINT[% END %]" href="conf.cgi?sub=objects&amp;apply=yes">
     <i id="apply_config_changes_icon" style="display: [% IF last_changed || needs_commit %][% ELSE %]none[% END %];" class='uil uil-save' title='Config has changed and needs to be applied'></i>
     Apply

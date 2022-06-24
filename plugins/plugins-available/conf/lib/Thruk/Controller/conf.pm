@@ -1245,8 +1245,7 @@ sub _apply_config_changes {
             }
         }
 
-        $c->stash->{'output'} .= "<hr style='margin: 0;'>\n";
-        $c->stash->{'output'} .= "<form action='conf.cgi#output' method='POST' class='diffoptions'>\n";
+        $c->stash->{'output'} .= "<form action='conf.cgi#output' method='POST' class='flexrow gap-1 flex-nowrap items-center absolute right-2' style='top: -34px;'>\n";
         $c->stash->{'output'} .= "<input type='hidden' name='diff' value='1'>\n";
         $c->stash->{'output'} .= "<input type='hidden' name='apply' value='yes'>\n";
         $c->stash->{'output'} .= "<input type='hidden' name='sub' value='objects'>\n";
@@ -1264,7 +1263,7 @@ sub _apply_config_changes {
 
         $c->stash->{'output'} .= "<ul>\n";
         for my $file_display (sort keys %{$diffs}) {
-            $c->stash->{'output'} .= "<li><a href='#".Thruk::Utils::Filter::name2id($file_display)."'>".$file_display."</a></li>\n";
+            $c->stash->{'output'} .= "<li><a class='link' href='#".Thruk::Utils::Filter::name2id($file_display)."'>".$file_display."</a></li>\n";
         }
         $c->stash->{'output'} .= "</ul>\n";
 
