@@ -5,7 +5,7 @@
   [% PROCESS _infobox.tt %]
   <div class="card w-fit overflow-x-auto">
     <div class="head justify-between gap-x-1">
-      <a href="extinfo.cgi?type=4" class="button back-button rounded min-w-[70px] w-[70px]" title="Go back to Performance Info">
+      <a href="extinfo.cgi?type=4" class="button header-button rounded min-w-[70px] w-[70px]" title="Go back to Performance Info">
         <i class="uil uil-angle-double-left"></i>Back
       </a>
       <h3>Logcache Details for [% peer.name %]</h3>

@@ -12,7 +12,7 @@
       <input type="hidden" name="type" value="6">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <div class="head justify-between">
-        <a href="extinfo.cgi?type=6&amp;recurring" class="button back-button rounded w-[70px]" title="Go back to recurring downtimes">
+        <a href="extinfo.cgi?type=6&amp;recurring" class="button header-button rounded w-[70px]" title="Go back to recurring downtimes">
           <i class="uil uil-angle-double-left"></i>Back
         </a>
         <h3>Recurring Downtime</h3>

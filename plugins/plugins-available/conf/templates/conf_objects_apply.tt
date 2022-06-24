@@ -1,160 +1,161 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
   <div class="flexcol mx-auto w-fit mt-5">
-    <div class="card">
+    <div class="card self-center">
       <div class="head p-0 justify-between">
         [% PROCESS _conf_objects_menu.tt type="apply" %]
       </div>
     </div>
-  </div>
 
-  <form action="conf.cgi" method="POST" id="save_form">
-    <input type="hidden" name="sub" value="objects">
-    <input type="hidden" name="apply" value="commit">
-    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-
-    <div class="flexcol mx-auto w-fit mt-5">
-      <div class="flexrow flex-nowrap mx-auto w-fit mt-5 gap-10">
+    <div class="flexrow flex-nowrap mx-auto w-full gap-5 justify-between">
+      <div class="w-44"></div>
+      <form action="conf.cgi" method="POST" id="save_form">
+        <input type="hidden" name="sub" value="objects">
+        <input type="hidden" name="apply" value="commit">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
         <div class="card min-w-[700px]">
           <div class="head">
             <h3>Apply Configuration Changes</h3>
           </div>
 
-          <table class="my-2">
-            [% IF parse_errors.size > 0 %]
+          <div class="py-2">
+            <table>
+              [% IF parse_errors.size > 0 %]
+                <tr>
+                  <th class="px-2 align-top">Config Parse Errors</th>
+                  <td class="align-top">
+                    <i class="uil uil-exclamation round yellow" title='there are parse errors'></i>
+                  </td>
+                  <td class="px-2">
+                    <ul class="overflow-x-auto max-w-[60vw]">
+                      [% FOREACH err IN parse_errors %]
+                        <li class="textERROR">[% err %]</li>
+                      [% END %]
+                    </ul>
+                  </td>
+                </tr>
+                <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
+              [% END %]
+
               <tr>
-                <th class="px-2 align-top">Config Parse Errors</th>
+                <th class="px-2 align-top">
+                  1. Verify your changes
+                </th>
                 <td>
-                  <i class="uil uil-exclamation round yellow" title='there are parse errors'></i>
+                  [% IF needs_commit %]
+                    <i class="uil uil-exclamation round yellow" title='Config changes needs to be saved'></i>
+                  [% END %]
                 </td>
                 <td class="px-2">
-                    [% FOREACH err IN parse_errors %]
-                      <span class="fail_message">[% err %]</span><br>
-                    [% END %]
+                  [% IF changed_files.size > 0 %]
+                    <input type='hidden' name='ignore_whitespace' value='1'>
+                    <button name="diff" class="w-full" onClick="document.getElementById('save_form').action = 'conf.cgi?sub=objects&apply=yes#output'; return true;">
+                      <i class="uil uil-search"></i>
+                      view diff of changed files
+                    </button>
+                  [% ELSE %]
+                    There are no pending changes.
+                  [% END %]
                 </td>
               </tr>
               <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
-            [% END %]
 
-            <tr>
-              <th class="px-2 align-top">
-                1. Verify your changes
-              </th>
-              <td>
-                [% IF needs_commit %]
-                  <i class="uil uil-exclamation round yellow" title='Config changes needs to be saved'></i>
-                [% END %]
-              </td>
-              <td class="px-2">
-                [% IF changed_files.size > 0 %]
-                  <input type='hidden' name='ignore_whitespace' value='1'>
-                  <button name="diff" class="w-full" onClick="document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
-                    <i class="uil uil-search"></i>
-                    view diff of changed files
-                  </button>
-                [% ELSE %]
-                  There are no pending changes.
-                [% END %]
-              </td>
-            </tr>
-            <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
-
-            <tr>
-              <th class="px-2 align-top">
-                2. Save changes to disk:
-              </td>
-              <td class="align-top">
-                [% IF needs_commit %]
-                  <i class="uil uil-exclamation round yellow" title='Config changes needs to be saved'></i>
-                [% END %]
-              </td>
-              <td class="px-2">
-                [% IF changed_files.size > 0 %]
-                  The following files have been changed:
-                  <ul class="py-2 pl-5">
-                  [% FOREACH f = changed_files %]
-                    <li>[% f.display %]</li>
-                  [% END %]
-                  </ul>
-                  <button name="save" class="submit w-full" onclick="setBtnSpinner(this); save_apply(this, 'save_form'); return false;">
-                    <i class="uil uil-save"></i>
-                    save your changes to disk
-                  </button>
-                [% ELSE %]
-                  There are no pending changes to commit.
-                [% END %]
-              </td>
-            </tr>
-            <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
-
-            <tr>
-              <th class="px-2 align-top">
-                3. Check your configuration changes
-              </th>
-              <td>
-                [% IF last_changed %]
-                <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
-                [% END %]
-              </td>
-              <td class="px-2">
-                [% IF peer_conftool.exists('obj_check_cmd') %]
-                  <button name="check" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
-                    <i class="uil uil-check"></i>
-                    check your configuration changes
-                  </button>
-                [% ELSE %]
-                  please set a <i>obj_check_cmd</i> option in your peer config in your thruk_local.conf.
-                [% END %]
-              </td>
-            </tr>
-            <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
-
-            <tr>
-              <th class="px-2 align-top">
-                4. Reload your monitoring core
-              </td>
-              <td>
-                [% IF last_changed %]
-                <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
-                [% END %]
-              </td>
-              <td class="px-2">
-                [% IF peer_conftool.exists('obj_reload_cmd') %]
-                  <button name="reload" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi#output'; return true;">
-                    <i class="uil uil-sync"></i>
-                    reload your monitoring core
-                  </button>
-                [% ELSE %]
-                  please set a <i>obj_reload_cmd</i> option in your peer config in your thruk_local.conf.
-                [% END %]
-              </td>
-            </tr>
-
-            [% IF changed_files.size > 0 %]
-              <tr><td colspan=3><hr class="mt-8 pb-2"></td></tr>
               <tr>
                 <th class="px-2 align-top">
-                  Discard changes
+                  2. Save changes to disk:
                 </th>
-                <td></td>
+                <td class="align-top">
+                  [% IF needs_commit %]
+                    <i class="uil uil-exclamation round yellow" title='Config changes needs to be saved'></i>
+                  [% END %]
+                </td>
                 <td class="px-2">
-                  <button class="submit w-full hover:textALERT" onclick="if(confirm('really discard all unsaved changes?')) { send_form_in_background_and_reload(this, { discard: true }) } else { return false; }">
-                    <i class="uil uil-trash-alt"></i>
-                    discard all unsaved changes
-                  </button>
+                  [% IF changed_files.size > 0 %]
+                    The following files have been changed:
+                    <ul class="py-2 pl-5">
+                    [% FOREACH f = changed_files %]
+                      <li>[% f.display %]</li>
+                    [% END %]
+                    </ul>
+                    <button name="save" class="submit w-full" onclick="setBtnSpinner(this); save_apply(this, 'save_form'); return false;">
+                      <i class="uil uil-save"></i>
+                      save your changes to disk
+                    </button>
+                  [% ELSE %]
+                    There are no pending changes to commit.
+                  [% END %]
                 </td>
               </tr>
-            [% END %]
+              <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
 
-          </table>
+              <tr>
+                <th class="px-2 align-top">
+                  3. Check your configuration changes
+                </th>
+                <td>
+                  [% IF last_changed %]
+                  <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+                  [% END %]
+                </td>
+                <td class="px-2">
+                  [% IF peer_conftool.exists('obj_check_cmd') %]
+                    <button name="check" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi?sub=objects&apply=yes#output'; return true;">
+                      <i class="uil uil-check"></i>
+                      check your configuration changes
+                    </button>
+                  [% ELSE %]
+                    please set a <i>obj_check_cmd</i> option in your peer config in your thruk_local.conf.
+                  [% END %]
+                </td>
+              </tr>
+              <tr><td colspan=3><hr class="mt-2 pb-2"></td></tr>
+
+              <tr>
+                <th class="px-2 align-top">
+                  4. Reload your monitoring core
+                </td>
+                <td>
+                  [% IF last_changed %]
+                  <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+                  [% END %]
+                </td>
+                <td class="px-2">
+                  [% IF peer_conftool.exists('obj_reload_cmd') %]
+                    <button name="reload" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi?sub=objects&apply=yes#output'; return true;">
+                      <i class="uil uil-sync"></i>
+                      reload your monitoring core
+                    </button>
+                  [% ELSE %]
+                    please set a <i>obj_reload_cmd</i> option in your peer config in your thruk_local.conf.
+                  [% END %]
+                </td>
+              </tr>
+
+              [% IF changed_files.size > 0 %]
+                <tr><td colspan=3><hr class="mt-8 pb-2"></td></tr>
+                <tr>
+                  <th class="px-2 align-top">
+                    Discard changes
+                  </th>
+                  <td></td>
+                  <td class="px-2">
+                    <button class="submit w-full hover:textALERT" onclick="if(confirm('really discard all unsaved changes?')) { send_form_in_background_and_reload(this, { discard: true }) } else { return false; }">
+                      <i class="uil uil-trash-alt"></i>
+                      discard all unsaved changes
+                    </button>
+                  </td>
+                </tr>
+              [% END %]
+
+            </table>
+          </div>
         </div>
-
-        <div>
+      </form>
+      <div class="w-44 flex justify-end align-top">
         [% PROCESS _conf_action_menu.tt show_object="" %]
-        </div>
       </div>
     </div>
-  </form>
+  </div>
 
   [% IF output %]
     <a name="output"></a>
@@ -162,7 +163,7 @@
       <div class="head">
         <h3>Command Output</h3>
       </div>
-      <div class="body">
+      <div class="body relative">
         [% output %]
       </div>
     </div>

@@ -3155,6 +3155,7 @@ function fade(id, duration, remove) {
         }
         // remove opacity style, since it confuses the showElement
         jQuery(el).css({
+            display: "none",
             visibility: "hidden",
             opacity: "",
             transition: ""

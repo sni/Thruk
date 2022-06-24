@@ -1,54 +1,44 @@
 ﻿[% IF has_refs && action != "editor" %]
-<table border='0' cellpadding="0" cellspacing="0" style="padding-top: 10px;">
-  <tr>
-    <td align="center" valign="top" class='confPanel'>
-      <div class='dataTitle'>References</div>
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
-        [% IF incoming.keys.size > 0 %]
-        <tr>
-          <td>
-            <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
-              <tr class='data'>
-                  <td class="obj_ref">
-                    Incoming:<br>
-                    <ul class="obj_ref">
-                    [% FOREACH t = incoming.keys.sort %]
-                      [% FOREACH name = incoming.$t.keys.sort %]
-                        [% inc_ref = incoming.$t.$name %]
-                        <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name | html %]</a><span class="obj_ref">([% t | html %])</span></li>
-                      [% END %]
-                    [% END %]
-                    </ul>
-                  </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
+<div class="card overflow-hidden mt-3 w-full">
+  <div class="head">
+    <h3>References</h3>
+  </div>
+  <div>
+    [% IF incoming.keys.size > 0 %]
+      <h4 class="ml-2">Incoming:</h4>
+      <ul class="ml-4 pr-2">
+      [% FOREACH t = incoming.keys.sort %]
+        [% FOREACH name = incoming.$t.keys.sort %]
+          [% inc_ref = incoming.$t.$name %]
+          <li>
+            <a class="flexrow flex-nowrap gap-1 justify-between link" href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">
+              <span class="truncate max-w-[175px]">[% name | html %]</span>
+              <span class="text-xs">([% t | html %])</span>
+            </a>
+          </li>
         [% END %]
-        [% IF outgoing.keys.size > 0 %]
-        <tr>
-          <td>
-            [% IF incoming.keys.size > 0 %]<hr>[% END %]
-            <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
-              <tr class='data'>
-                  <td class="obj_ref">
-                    Outgoing:<br>
-                    <ul class="obj_ref">
-                    [% FOREACH t = outgoing.keys.sort %]
-                      [% FOREACH name = outgoing.$t.keys.sort %]
-                        [% oid = outgoing.$t.$name %]
-                        <li><a href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">[% name | html %]</a><span class="obj_ref">([% t | html %])</span></li>
-                      [% END %]
-                    [% END %]
-                    </ul>
-                  </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
+      [% END %]
+      </ul>
+    [% END %]
+    [% IF outgoing.keys.size > 0 %]
+      [% IF incoming.keys.size > 0 %]
+        <hr class="mt-0.5 pt-0.5">
+      [% END %]
+      <h4 class="ml-2">Outgoing:</h4>
+      <ul class="ml-4 pr-2">
+      [% FOREACH t = outgoing.keys.sort %]
+        [% FOREACH name = outgoing.$t.keys.sort %]
+          [% oid = outgoing.$t.$name %]
+          <li>
+            <a class="flexrow flex-nowrap gap-1 justify-between link" href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">
+              <span class="truncate max-w-[175px]">[% name | html %]</span>
+              <span class="text-xs">([% t | html %])</span>
+            </a>
+          </li>
         [% END %]
-      </table>
-    </td>
-  </tr>
-</table>
+      [% END %]
+      </ul>
+    [% END %]
+  </div>
+</div>
 [% END %]

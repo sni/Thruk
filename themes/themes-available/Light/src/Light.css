@@ -369,7 +369,7 @@ A.anchor-offset {
   @apply textPager hover:hoverBG1;
 }
 
-.pager-entries, .display-filter, A.button.back-button{
+.pager-entries, .display-filter, A.button.header-button{
   @apply textPager hover:textPager bg-gray-100 hover:bg-gray-200;
 }
 

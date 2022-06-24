@@ -18,7 +18,7 @@
         </div>
       [% END %]
       [% IF show_object && object.get_id() != "new" %]
-        <div><hr class="mt-2 pt-2"></div>
+        <hr class="mt-0.5 pt-0.5">
         <div>
           <a class="flex" href="status.cgi?style=[% IF type == "host" %]host[% END %]detail&dfl_s0_type=[% type | html %]&dfl_s0_op=%3D&dfl_s0_value=[% object.get_name() | html %]">
             <i class="fa-solid fa-magnifying-glass-arrow-right"></i>
@@ -47,83 +47,87 @@
           </a>
         </div>
       [% END %]
-      <div><hr class="mt-2 pt-2"></div>
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/page_copy.png' border="0" alt="Clone this [% type | html %]" title="Clone this [% type | html %]" width="16" height="16"></td>
-          <td class='command'>
-            <form action='conf.cgi' method='POST'>
-              <input type='hidden' name='sub' value='objects'>
-              <input type='hidden' name='action' value='clone'>
-              <input type='hidden' name='data.id' value="[% object.get_id() %]">
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Clone this [% type | html %]</a>
-            </form>
-          </td>
-        </tr>
+        <hr class="mt-0.5 pt-0.5">
+        <div>
+          <form action='conf.cgi' method='POST'>
+            <input type='hidden' name='sub' value='objects'>
+            <input type='hidden' name='action' value='clone'>
+            <input type='hidden' name='data.id' value="[% object.get_id() %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+              <i class="fa-solid fa-clone"></i>
+              Clone this [% type | html %]
+            </a>
+          </form>
+        </div>
         [% IF object.disabled %]
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/control_play_blue.png' border="0" alt="Enable this [% type | html %]" title="Enable this [% type | html %]" width="16" height="16"></td>
-          <td class='command'>
-            <form action='conf.cgi' method='POST'>
-              <input type='hidden' name='sub' value='objects'>
-              <input type='hidden' name='action' value='enable'>
-              <input type='hidden' name='data.id' value="[% object.get_id() %]">
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Enable this [% type | html %]</a>
-            </form>
-          </td>
-        </tr>
+        <div>
+          <form action='conf.cgi' method='POST'>
+            <input type='hidden' name='sub' value='objects'>
+            <input type='hidden' name='action' value='enable'>
+            <input type='hidden' name='data.id' value="[% object.get_id() %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+              <i class="fa-solid fa-circle-play"></i>
+              Enable this [% type | html %]
+            </a>
+          </form>
+        </div>
         [% ELSE %]
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/control_pause_blue.png' border="0" alt="Disable this [% type | html %] temporarily" title="Disable this [% type | html %] temporarily" width="16" height="16"></td>
-          <td class='command'>
-            <form action='conf.cgi' method='POST'>
-              <input type='hidden' name='sub' value='objects'>
-              <input type='hidden' name='action' value='disable'>
-              <input type='hidden' name='data.id' value="[% object.get_id() %]">
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Disable this [% type | html %] temporarily</a>
-            </form>
-          </td>
-        </tr>
+        <div>
+          <form action='conf.cgi' method='POST'>
+            <input type='hidden' name='sub' value='objects'>
+            <input type='hidden' name='action' value='disable'>
+            <input type='hidden' name='data.id' value="[% object.get_id() %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+              <i class="fa-solid fa-circle-pause"></i>
+              Disable this [% type | html %] temporarily
+            </a>
+          </form>
+        </div>
         [% END %]
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="Delete this [% type | html %]" title="Delete this [% type | html %]" width="20" height="20"></td>
-          <td class='command'>
-            <form action='conf.cgi' method='POST'>
-              <input type='hidden' name='sub' value='objects'>
-              <input type='hidden' name='action' value='delete'>
-              <input type='hidden' name='data.id' value="[% object.get_id() %]">
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Delete this [% type | html %]</a>
-            </form>
-          </td>
-        </tr>
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/page_white_swoosh.png' border="0" alt="Revert this [% type | html %]" title="Revert this [% type | html %]" width="16" height="16"></td>
-          <td class='command'>
-            <form action='conf.cgi' method='POST'>
-              <input type='hidden' name='sub' value='objects'>
-              <input type='hidden' name='action' value='revert'>
-              <input type='hidden' name='data.id' value="[% object.get_id() %]">
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">Revert this [% type | html %]</a>
-            </form>
-          </td>
-        </tr>
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt="Move this [% type | html %]" title="Move this [% type | html %]" width="16" height="16"></td>
-          <td class='command'><a href="conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]">Move [% type | html %] to file</a></td>
-        </tr>
+        <div>
+          <form action='conf.cgi' method='POST'>
+            <input type='hidden' name='sub' value='objects'>
+            <input type='hidden' name='action' value='delete'>
+            <input type='hidden' name='data.id' value="[% object.get_id() %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+              <i class="fa-solid fa-trash"></i>
+              Delete this [% type | html %]
+            </a>
+          </form>
+        </div>
+        <div>
+          <form action='conf.cgi' method='POST'>
+            <input type='hidden' name='sub' value='objects'>
+            <input type='hidden' name='action' value='revert'>
+            <input type='hidden' name='data.id' value="[% object.get_id() %]">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+              <i class="fa-solid fa-reply-all"></i>
+              Revert this [% type | html %]
+            </a>
+          </form>
+        </div>
+        <div>
+          <a class="flex" href="conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]">
+            <i class="fa-solid fa-truck-fast"></i>
+            Move [% type | html %] to file
+          </a>
+        </div>
         [% IF type == 'contact' %]
-        <tr class='data'>
-          <td><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit CGI Permissions' title='Edit CGI Permissions' width="16" height="16"></td>
-          <td class='command'><a href="conf.cgi?sub=users&amp;action=change&amp;data.username=[% object.get_name() | uri %]">Edit CGI Permissions</a></td>
-        </tr>
+        <div>
+          <a class="flex" href="conf.cgi?sub=users&amp;action=change&amp;data.username=[% object.get_name() | uri %]">
+            <i class="fa-solid fa-user-pen"></i>
+            Edit CGI Permissions
+          </a>
+        </div>
         [% END %]
       [% END %]
         [% IF type != "apply"|| show_object %]
-        <div><hr class="mt-2 pt-2"></div>
+        <hr class="mt-0.5 pt-0.5">
         [% END %]
         <div>
           <a class="flex" href="conf.cgi?sub=objects&amp;action=browser[% IF file_link %]#[% file_link | uri %][% END %]">

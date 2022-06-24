@@ -2,39 +2,39 @@
 [% WRAPPER _conf_objects_frame.tt %]
 
 
-[% SET  today = date_format(c, date.now, '%Y-%m-%d') %]
-[% SET last_day = '' %]
-[% FOREACH l = data %]
-[% this_day = date_format(c, l.date, '%Y-%m-%d') %]
-[% IF this_day != last_day %]
-    [% SET last_day = this_day %]
-[% UNLESS loop.first %]</table><br>[% END %]
-<table border="0" class='data conftoolobj hoverable' width="700">
-  <tr>
-    <th class='data' colspan=2>[% IF today == this_day %]Today[% ELSE %][% this_day %][% END %]</th>
-  </tr>
-[% ELSE %]
-  <tr>
-    <td colspan=2><hr></td>
-  </tr>
-[% END %]
+<div class="card flexcol gap-1 w-fit min-w-[700px]">
+  <div class="head justify-center">
+    <div>[% PROCESS _pager.tt %]</div>
+  </div>
+  [% SET  today = date_format(c, date.now, '%Y-%m-%d') %]
+  [% SET last_day = '' %]
+  [% FOREACH l = data %]
+    [% this_day = date_format(c, l.date, '%Y-%m-%d') %]
+    [% IF this_day != last_day %]
+        [% SET last_day = this_day %]
+        <div class="head border-0 justify-center"><h3>[% IF today == this_day %]Today[% ELSE %][% this_day %][% END %]</h3></div>
+    [% END %]
 
-  [% link = "conf.cgi?sub=objects&amp;action=history&id=" _ l.id _ "&dir=" _ dir %]
-  <tr onclick="location='[% link %]'">
-    <td align="right" width=100 valign="top" style="padding-right: 6px; cursor: pointer;" nowrap>[% date_format(c, l.date) %]</td>
-    <td align="left" valign="top" style="cursor: pointer;">
-      <a href="[% link %]">
-      <b>[% l.message | html %]</b>
-      <img width="16" height="16" border="0" style="vertical-align: middle; float: right; margin-right: 5px;" title="details" alt="details" src="[% url_prefix %]themes/[% theme %]/images/arrow_right.png">
+    [% link = "conf.cgi?sub=objects&amp;action=history&id=" _ l.id _ "&dir=" _ dir %]
+    <div class="hoverable clickable px-2 pb-2" onclick="location='[% link %]'">
+      <a href="[% link %]" class="flexrow flex-nowrap gap-1 w-full">
+        <div class="flexcol flex-nowrap gap-1 grow">
+          <div class="flexrow flex-nowrap gap-2">
+            <div class="w-32 whitespace-nowrap">[% date_format(c, l.date) %]</div>
+            <div class="font-bold">[% l.message | html %]</div>
+          </div>
+          <div>
+            [% l.author_name | html %] &lt;[% l.author_email | html %]&gt;
+          </div>
+        </div>
+        <div class="w-5 flex items-center">
+          <i class="fa-solid fa-angle-right"></i>
+        </div>
       </a>
-      <br>
-      [% l.author_name | html %] &lt;[% l.author_email | html %]&gt;
-    </td>
-  </tr>
-[% END %]
-</table>
+    </div>
+  [% END %]
 
-<br>
-<div align="center">[% PROCESS _pager.tt %]</div>
+</div>
+
 
 [% END %]
