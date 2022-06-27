@@ -2310,19 +2310,20 @@ sub restart_later {
 
   wait_after_reload($c, [$backend], [$timestamp])
 
-wait up to 60 seconds till the core responds
+wait up to 30 seconds till the core responds
 
 =cut
 
 sub wait_after_reload {
-    my($c, $pkey, $time) = @_;
-    $c->stats->profile(begin => "wait_after_reload ($time)");
+    my($c, $pkey, $last_reload) = @_;
+    $c->stats->profile(begin => "wait_after_reload");
     $pkey = $c->stash->{'param_backend'} unless $pkey;
     my $start = time();
-    if(!$pkey && !$time) {
-        _debug('no peer key and time, waiting 3 seconds');
+    if(!$pkey) {
+        _debug('no peer key, waiting 3 seconds');
         sleep 3;
     }
+    $last_reload = time() unless $last_reload;
 
     # wait until core responds again
     my $procinfo = {};
@@ -2333,7 +2334,7 @@ sub wait_after_reload {
                 'header' => {
                     'WaitTimeout'   => 2000,
                     'WaitTrigger'   => 'all', # using something else seems not to work all the time
-                    'WaitCondition' => "program_start > ".$time,
+                    'WaitCondition' => "program_start > ".$last_reload,
                 },
         };
     }
@@ -2357,11 +2358,11 @@ sub wait_after_reload {
             $msg = 'still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey};
             _debug($msg);
         }
-        elsif($pkey and $time) {
+        elsif($pkey and $last_reload) {
             # not yet restarted
             if($procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'}) {
                 $c->stats->profile(comment => "core program_start: ".$procinfo->{$pkey}->{'program_start'});
-                if($procinfo->{$pkey}->{'program_start'} > $time) {
+                if($procinfo->{$pkey}->{'program_start'} > $last_reload) {
                     $done = 1;
                     _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
                     last;
@@ -2371,14 +2372,14 @@ sub wait_after_reload {
                 }
             }
         }
-        elsif($time) {
+        elsif($last_reload) {
             my $newest_core = 0;
             if($procinfo) {
                 for my $key (keys %{$procinfo}) {
                     if($procinfo->{$key}->{'program_start'} > $newest_core) { $newest_core = $procinfo->{$key}->{'program_start'}; }
                 }
                 $c->stats->profile(comment => "core program_start: ".$newest_core);
-                if($newest_core > $time) {
+                if($newest_core > $last_reload) {
                     $done = 1;
                     last;
                 } else {
@@ -2396,7 +2397,7 @@ sub wait_after_reload {
             sleep(1);
         }
     }
-    $c->stats->profile(end => "wait_after_reload ($time)");
+    $c->stats->profile(end => "wait_after_reload");
     if($done) {
         # clean up cached groups which may have changed
         $c->cache->clear();
