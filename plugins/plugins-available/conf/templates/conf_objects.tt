@@ -32,11 +32,11 @@
 
       <div class="card min-w-[850px] overflow-hidden">
         <div class="head p-0 justify-between">
-          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='config'    %]active[% END %]" id="sub_1" onclick="window.location.hash='#config';   set_sub(1)"><a class="block" href="#config">Config</a></th></span>
-          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='templates' %]active[% END %]" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a class="block" href="#templates">Templates</a></th></span>
-          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='comp'      %]active[% END %]" id="sub_3" onclick="window.location.hash='#comp';     set_sub(3)"><a class="block" href="#comp">Computed</a></th></span>
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='config'    %]active[% END %]" id="sub_1" onclick="window.location.hash='#config';   set_sub(1)"><a class="block" href="#config">Config</a></span>
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='templates' %]active[% END %]" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a class="block" href="#templates">Templates</a></span>
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='comp'      %]active[% END %]" id="sub_3" onclick="window.location.hash='#comp';     set_sub(3)"><a class="block" href="#comp">Computed</a></span>
           [% has_auth_section = 0; IF conf_config.exists('cgi.cfg') && ( type == "contactgroup" || type == "contact" ); has_auth_section = 1; %]
-          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='auth'      %]active[% END %]" id="sub_4" onclick="window.location.hash='#auth';     set_sub(4)"><a class="block" href="#auth">Authorization</a></th></span>
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='auth'      %]active[% END %]" id="sub_4" onclick="window.location.hash='#auth';     set_sub(4)"><a class="block" href="#auth">Authorization</a></span>
           [% END %]
         </div>
         <div class="head flexrow flex-nowrap gap-1 justify-between h-fit min-h-[40px]">
@@ -181,13 +181,6 @@
     if(window.location.hash == '#templates') { set_sub(2); }
     if(window.location.hash == '#comp')      { set_sub(3); }
     if(window.location.hash == '#auth')      { set_sub(4); }
-
-    jQuery('input,select').each(function() {
-      var $input = jQuery(this);
-      if($input.attr("tabindex") == 13 ) {
-        $input.attr("tabindex", -1);
-      }
-    });
 
     [% IF show_object %]
     [% IF ! readonly %]
