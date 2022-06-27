@@ -378,8 +378,17 @@ sub _create_output {
     my $macros = {
         STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
     };
+
+    $macros->{RAW} = $result->[0]->{'result'} // '';
+    my $x = 0;
+    for my $r (@{$result}) {
+        $macros->{'RAW'.$x} = $r->{'result'} // '';
+        $x++;
+    }
+
     $output = $totals->{'output'};
     $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;
+    $output =~ s/\\n/\n/gmx; # support adding newlines
 
     chomp($output);
     $output .= _append_performance_data($opt, $result);
@@ -480,6 +489,7 @@ sub _calculate_data_totals {
     my $perffilter  = [];
     for my $r (@{$result}) {
         $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
+        next unless ref $r->{'data'} eq 'HASH';
         for my $key (sort keys %{$r->{'data'}}) {
             if(!defined $totals->{'data'}->{$key}) {
                 $totals->{'data'}->{$key} = $r->{'data'}->{$key};
