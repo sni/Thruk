@@ -8,29 +8,31 @@
   [% IF edit %]
     [% has_wizard = 0 %]
     [% wzd_btn = BLOCK %]
-    [% IF key == 'command_line' %][% has_wizard = 1 %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
-    [% IF key == 'address'      %][% has_wizard = 1 %]<button class="ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
+      [% IF key == 'command_line' %][% has_wizard = 1 %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
+      [% IF key == 'address'      %][% has_wizard = 1 %]<button class="ip_wzd_button px-1" id="[% key %]_btn[% nr %]" title="autofill address from hostname ip lookup."><i class="fa-solid fa-wand-magic-sparkles"></i></button>[% END %]
     [% END %]
-    <input
-      type="text"
-      class="obj_[% key %][% IF has_wizard %] wizard[% END %]"
-      name="obj.[% key %]"
-      id="id_[% key %][% nr %]"
-      value="[% IF obj_conf.defined(key) %][% value | html %][% END %]"
-      [% IF defaults.exists(key) && defaults.$key.exists('link') %]
-        onfocus="this.click()"
-        onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:[% IF defaults.$key.link == "icon" %]true[% ELSE %]false[% END %], autosubmit:false})"
-      [% ELSIF key == 'customvariable' || key.substr(0, 1) == '_' %]
-        onfocus="this.click()"
-        onclick="ajax_search.init(this, 'custom value', {url:'status.cgi?format=search&type=custom%20value&var='+this.name.replace(/^obj\._/, ''), striped:false, autosubmit:false})"
-      [% END %]
-    >
-    [% wzd_btn %]
+    <div class="flexrow flex-nowrap gap-1">
+      <input
+        type="text"
+        class="obj_[% key %][% IF has_wizard %] wizard[% END %] grow"
+        name="obj.[% key %]"
+        id="id_[% key %][% nr %]"
+        value="[% IF obj_conf.defined(key) %][% value | html %][% END %]"
+        [% IF defaults.exists(key) && defaults.$key.exists('link') %]
+          onfocus="this.click()"
+          onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:[% IF defaults.$key.link == "icon" %]true[% ELSE %]false[% END %], autosubmit:false})"
+        [% ELSIF key == 'customvariable' || key.substr(0, 1) == '_' %]
+          onfocus="this.click()"
+          onclick="ajax_search.init(this, 'custom value', {url:'status.cgi?format=search&type=custom%20value&var='+this.name.replace(/^obj\._/, ''), striped:false, autosubmit:false})"
+        [% END %]
+      >
+      [% wzd_btn %]
+    </div>
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
-        [% escape_html(value) %] <img class="not-clickable" src="[% logo_path_prefix %][% value | html %]" border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
+        [% escape_html(value) %] <img class="not-clickable" src="[% logo_path_prefix %][% value | html %]" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
     [% ELSIF defaults.exists(key) && defaults.$key.exists('link') %]
-        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value | html %]</a>
+        <a class="link" href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value | html %]</a>
     [% ELSE %]
         [% escape_html(value) %]
     [% END %]
@@ -45,12 +47,16 @@
   [% END %]
   [% IF cmd.size == 0 %][% cmd = ['',''] %][% END %]
   [% IF edit %]
-    <input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 | html %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"[% END %] placeholder="command name">
-    [% PROCESS _conf_wizard_command.tt id="id_" _ key _ "_wzd" _ nr inp1="id_" _ key _ "_1" inp2="id_" _ key _ "_2" %]<br>
-    <input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]" placeholder="command arguments">
+    <div class="flexcol gap-px flex-nowrap">
+      <div class="flexrow flex-nowrap gap-1">
+        <input class="grow" type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 | html %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:false, autosubmit:false})"[% END %] placeholder="command name">
+        [% PROCESS _conf_wizard_command.tt id="id_" _ key _ "_wzd" _ nr inp1="id_" _ key _ "_1" inp2="id_" _ key _ "_2" %]
+      </div>
+      <input class="w-full" type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]" placeholder="command arguments">
+    </div>
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
-        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% value | html %]</a>
+        <a class="link" href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% value | html %]</a>
     [% ELSE %]
         [% escape_html(value) %]
     [% END %]
@@ -59,8 +65,8 @@
 
 [% ELSIF defaults.$key.type == 'BOOL' %]
   [% IF edit %]
-    <input type="radio" name="obj.[% key %]" id="id_[% key %][% nr %]" value="0"[% IF obj_conf.defined(key) && value == 0 %] checked[% END %]> No
-    <input type="radio" name="obj.[% key %]" value="1"[% IF obj_conf.defined(key) && value == 1 %] checked[% END %]> Yes
+    <input type="radio" name="obj.[% key %]" id="id_[% key %][% nr %]" value="0"[% IF obj_conf.defined(key) && value == 0 %] checked[% END %]><label class="ml-1 clickable" for="id_[% key %][% nr %]">No</label>
+    <input type="radio" name="obj.[% key %]" id="id_[% key %][% nr %]_1" value="1"[% IF obj_conf.defined(key) && value == 1 %] checked[% END %] class="ml-3"><label class="ml-1 clickable" for="id_[% key %][% nr %]_1">Yes</label>
   [% ELSE %]
     [% IF value %]Yes[% ELSE %]No[% END %]
   [% END %]
@@ -71,7 +77,7 @@
     <input type="checkbox" name="obj.[% key %]" value="noop" style="display:none" checked>
     [% FOREACH v = defaults.$key.values %]
       [% ind = loop.index %]
-      <input type="checkbox" name="obj.[% key %]" [% IF loop.first %]id="id_[% key %][% nr %]"[% END %]value="[% v | html %]"[% IF obj_conf.defined(key) && value.grep(v).size() > 0 %] checked[% END %]>[% defaults.$key.keys.$ind %]&nbsp;
+      <input type="checkbox" name="obj.[% key %]" [% IF loop.first %]id="id_[% key %][% nr %]"[% ELSE %]id="id_[% key %][% nr %]_[% loop.index %]"[% END %]value="[% v | html %]"[% IF obj_conf.defined(key) && value.grep(v).size() > 0 %] checked[% END %]><label class="ml-1 mr-3 clickable" for="[% IF loop.first %]id_[% key %][% nr %][% ELSE %]id_[% key %][% nr %]_[% loop.index %][% END %]">[% defaults.$key.keys.$ind %]</label>
     [% END %]
   [% ELSE %]
     [% first = 1 %]
@@ -84,7 +90,7 @@
 [% ELSIF defaults.$key.type == 'CHOOSE' %]
   [% IF edit %]
     [% IF defaults.$key.keys.size > 2 %]
-        <select name="obj.[% key %]" id="id_[% key %][% nr %]">
+        <select name="obj.[% key %]" id="id_[% key %][% nr %]" class="w-full">
         [% FOREACH k = defaults.$key.keys %]
         [% SET x = loop.index %]
         [% SET v = defaults.$key.values.$x %]
@@ -124,7 +130,7 @@
       %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
       [% END %]
     [% END %]
-    <input type="text" class="obj_[% key %] obj_[% type | html %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') | html %][% END %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'[% url %]', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'wand.png',cls:'wzd' }][% END %]})"[% END %]>
+    <input type="text" class="obj_[% key %] obj_[% type | html %]_[% key %] w-full" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') | html %][% END %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'[% url %]', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'wand.png',cls:'wzd' }][% END %]})"[% END %]>
     [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]

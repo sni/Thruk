@@ -1,232 +1,215 @@
 ﻿[% IF bare %][% wrapper="_conf_bare.tt" %][% ELSE %][% wrapper="_conf_objects_frame.tt" %][% END %]
 [% WRAPPER $wrapper %]
 
-[% IF show_object %]
+  [% IF show_object %]
+    [% UNLESS object.defined('file') %]
+      <script type="text/javascript">
+      <!--
+          var data = [% filenames_json %];
+      -->
+      </script>
+    [% END %]
+    [% file_locked = ""; IF object.defined('file'); PROCESS _conf_ondemand_file_edit.tt file=object.file form="obj_edit_" _ object.get_id(); END %]
+    [% readonly = 0;
+      IF object.defined('file') && object.file.readonly; readonly = 1; END;
+      IF file_locked; readonly = 1; END;
+    %]
 
-[% UNLESS object.defined('file') %]
-<script type="text/javascript">
-<!--
-    var data = [% filenames_json %];
--->
-</script>
-[% END %]
-[% file_locked = ""; IF object.defined('file'); PROCESS _conf_ondemand_file_edit.tt file=object.file form="obj_edit_" _ object.get_id(); END %]
-[% readonly = 0;
-   IF object.defined('file') && object.file.readonly; readonly = 1; END;
-   IF file_locked; readonly = 1; END;
-%]
-
-[% duplicate_keys = {} %]
-<form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);" id="obj_edit_[% object.get_id() %]">
-<input type="submit" name="send" value="save" style="display:none">
-<input type="hidden" name="sub" value="objects">
-<input type="hidden" name="type" value="[% type | html %]">
-<input type="hidden" name="data.id" value="[% object.get_id() %]">
-<input type="hidden" name="action" value="store">
-<input type="hidden" name="cloned" value="[% cloned | html %]">
-<input type="hidden" name="clone_ref" value="">
-[% FOR value IN clone_ref.list %]
-<input type="hidden" name="clone_ref" value="[% value | html %]">
-[% END %]
-<input type="hidden" name="referer" value="[% referer | html %]">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-  <table border="0" class='data conftoolobj' style="table-layout: fixed;"[% IF bare %] width="100%"[% END %]>
-    <tr>
-      <th class='data[% IF subcat =='config'    %] confSelected[% END %]' id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
-      <th class='data[% IF subcat =='templates' %] confSelected[% END %]' id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
-      <th class='data[% IF subcat =='comp'      %] confSelected[% END %]' id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
-      [% has_auth_section = 0; IF conf_config.exists('cgi.cfg') && ( type == "contactgroup" || type == "contact" ); has_auth_section = 1; %]
-      <th class='data[% IF subcat =='auth'      %] confSelected[% END %]' id="sub_4" onclick="window.location.hash='#auth';set_sub(4)"><a href="#auth">Authorization</a></th>
+    [% duplicate_keys = {} %]
+    <form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);" id="obj_edit_[% object.get_id() %]">
+      <input type="submit" name="send" value="save" style="display:none">
+      <input type="hidden" name="sub" value="objects">
+      <input type="hidden" name="type" value="[% type | html %]">
+      <input type="hidden" name="data.id" value="[% object.get_id() %]">
+      <input type="hidden" name="action" value="store">
+      <input type="hidden" name="cloned" value="[% cloned | html %]">
+      <input type="hidden" name="clone_ref" value="">
+      [% FOR value IN clone_ref.list %]
+      <input type="hidden" name="clone_ref" value="[% value | html %]">
       [% END %]
-    </tr>
-    <tr>
-      <td colspan=3>
-        <table style="width:100%">
-          <tr>
-            <td style="width: 50px;" class="sub_1">
-              [% IF referer %]
-              <button onclick="window.location='[% escape_js(referer) %]'; return false;">back</button>
-              [% END %]
-            </td>
-            <td>
+      <input type="hidden" name="referer" value="[% referer | html %]">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+
+      <div class="card min-w-[850px] overflow-hidden">
+        <div class="head p-0 justify-between">
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='config'    %]active[% END %]" id="sub_1" onclick="window.location.hash='#config';   set_sub(1)"><a class="block" href="#config">Config</a></th></span>
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='templates' %]active[% END %]" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a class="block" href="#templates">Templates</a></th></span>
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='comp'      %]active[% END %]" id="sub_3" onclick="window.location.hash='#comp';     set_sub(3)"><a class="block" href="#comp">Computed</a></th></span>
+          [% has_auth_section = 0; IF conf_config.exists('cgi.cfg') && ( type == "contactgroup" || type == "contact" ); has_auth_section = 1; %]
+          <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='auth'      %]active[% END %]" id="sub_4" onclick="window.location.hash='#auth';     set_sub(4)"><a class="block" href="#auth">Authorization</a></th></span>
+          [% END %]
+        </div>
+        <div class="head flexrow flex-nowrap gap-1 justify-between h-fit min-h-[40px]">
+          <div class="w-40 sub_1">
+            [% IF referer %]
+              <a class="button" href="[% referer %]">back</a>
+            [% END %]
+          </div>
+          <div class="grow justify-center text-center">
+            <h3 class="p-0 m-0">
               [% IF object.defined('file') %]
                 [% type | ucfirst %][% IF object.conf.defined('register') && object.conf.register == 0 %]&nbsp;Template[% END %]:
                 [%+ object.get_long_name('&nbsp;') %]
-                [% IF object.disabled %]<span style="color: #EB6900"> (disabled)</span>[% END %]
+                [% IF object.disabled %]<span class="textHINT">(disabled)</span>[% END %]
               [% ELSE %]
                 new [% type | html %]
               [% END %]
-              <span style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3">
-                <br>
-                [% IF object.defined('file') %]
-                  [% object.file.display %] [% IF object.line > 0 %] line [% object.line %][% END %]
-                  [% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
-                  [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span style="color: #EB6900"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
-                [% ELSE %]
-                  <span style="[% IF subcat != 'config' %]display:none;[% END %]" class="sub_1">
-                  save to: <input type="text" class="deletable" placeholder="enter filename" name="data.file" id="fileselect" value="[% new_file | html %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
-                  </span>
-                [% END %]
-              </span>
-            </td>
-            <td style="width: 50px;" class="sub_1">
-              [% IF ! readonly %]
-              <button>apply</button>
-              [% END %]
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
-      <td colspan=3 style="text-align: center;">
-        <div align="center">
-        [% IF readonly %]
-          [% PROCESS _conf_object_view.tt obj = object conf = "obj" %]
-        [% ELSE %]
-          [% show_save_reload = 'obj_edit_' _ object.get_id() %]
-          [% PROCESS _conf_object_edit.tt obj = object %]
-        [% END %]
-        </div>
-      </td>
-    </tr>
-
-    [% IF used_templates.size > 0 %]
-    <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2">
-      <td colspan=3>
-        <div align="center">
-        <table>
-          [% FOREACH key = used_templates %]
-          [% SET objs = c.obj_db.get_objects_by_name(type, key, 1) %]
-          [% SET obj_id = "new" %]
-          <tr>
-            <td colspan=3 style="text-align:center">
-              <span style="font-weight:normal;">
-                [% IF objs.size > 0 %]
-                [% objs.0.file.display %] line [% objs.0.line %]
-                [% IF objs.0.file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]
-                [% SET obj_id = objs.0.get_id() %]
-                [% ELSE %]
-                object does not exist
-                [% END %]
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td style="text-align: left; white-space: nowrap;">
-              <a href="conf.cgi?sub=objects&amp;type=[% type | uri %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
-                [% IF objs.size > 0 && objs.0.file.readonly %]
-                <img src='[% url_prefix %]themes/[% theme %]/images/detail.gif' alt='View Template' title='View Template' width="16" height="16" style="vertical-align: middle">
-                [% ELSE %]
-                <img src='[% url_prefix %]themes/[% theme %]/images/edit.png' alt='Edit Template' title='Edit Template' width="16" height="16" style="vertical-align: middle">
-                [% END %]
-              </a>
-              &nbsp;[% key | html %]
-            </td>
-            <td colspan=2>
-              [% IF objs.size > 0 %]
-                 [% PROCESS _conf_object_view.tt obj = objs.0 conf = "obj" %]
+            </h3>
+            <div style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3 sub_4">
+              [% IF object.defined('file') %]
+                [% object.file.display %] [% IF object.line > 0 %] line [% object.line %][% END %]
+                [% IF object.file.readonly %] <span class="textHINT">(read-only)</span>[% END %]
+                [% IF file_locked %]<br><a class="textHINT" href="[% uri_with(c, unlock => 1) %]">File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %])</a>[% END %]
               [% ELSE %]
-                Template does not exist
+                <div style="[% IF subcat != 'config' %]display:none;[% END %]" class="flexrow flex-nowrap gap-1 justify-center items-center sub_1">
+                  <span>save to:</span>
+                  <input type="text" class="w-96 deletable" placeholder="enter filename" name="data.file" id="fileselect" value="[% new_file | html %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
+                </div>
               [% END %]
-            </td>
-          </tr>
-          [% UNLESS loop.last %]
-          <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2"><td colspan=3><hr></td></tr>
-          [% END %]
-          [% END %]
-        </table>
+            </div>
+          </div>
+          <div class="w-40 flexrow justify-end sub_1">
+            [% IF ! readonly %]
+            <button class="w-20">apply</button>
+            [% END %]
+          </div>
         </div>
-      </td>
-    </tr>
-    [% ELSE %]
-    <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2">
-      <td colspan=3 style="text-align:center">This object does not use templates</td>
-    </tr>
-    [% END %]
 
-    <tr style="[% IF subcat != 'comp' %]display:none[% END %]" class="sub_3">
-      <td colspan=3 style="text-align: center;">
-        <div align="center">
-        [% SET duplicate_keys = {} %]
-        [% PROCESS _conf_object_view.tt obj = object conf = "computed" %]
-        </div>
-      </td>
-    </tr>
-
-    [% IF has_auth_section %]
-    <tr style="[% IF subcat != 'auth' %]display:none[% END %]" class="sub_4">
-      <td colspan=3 style="text-align: center;">
-        <input type="hidden" name="hex" value="[% hex %]">
-        <table>
-          <tr>
-            <td colspan=2 >Roles (cgi.cfg)</td>
-          </tr>
-          [% FOR auth = role_keys %]
-          <tr>
-            <td align="left">[% auth | html %]</td>
-            <td>
-              <input type="radio" name="authdata.[% auth | html %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
-              <input type="radio" name="authdata.[% auth | html %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
-            </td>
-          </tr>
+        <div style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
+          [% IF readonly %]
+            [% PROCESS _conf_object_view.tt obj = object conf = "obj" %]
+          [% ELSE %]
+            [% show_save_reload = 'obj_edit_' _ object.get_id() %]
+            [% PROCESS _conf_object_edit.tt obj = object %]
           [% END %]
-        </table>
-      </td>
-    </tr>
-    [% END %]
+        </div>
 
-    [% IF ! readonly %]
-    <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1 sub_4">
-      <td colspan=3>
-        [% IF object.get_id() != 'new' && ! bare %]
-        <input type="submit" name="send" value="raw edit" style="width:90px" class="sub_1">
+        <div style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2">
+          [% IF used_templates.size > 0 %]
+            <table class="cellspacing-x">
+              [% FOREACH key = used_templates %]
+                <tr>
+                  [% SET objs = c.obj_db.get_objects_by_name(type, key, 1) %]
+                  [% SET obj_id = "new" %]
+                  <td colspan="2" class="pl-2 text-center">
+                    [% IF objs.size > 0 %]
+                      [% objs.0.file.display %] line [% objs.0.line %]
+                      [% IF objs.0.file.readonly %]<span class="textHINT">(read-only)</span>[% END %]
+                      [% SET obj_id = objs.0.get_id() %]
+                    [% ELSE %]
+                      object does not exist
+                    [% END %]
+                  </td>
+                </tr>
+                <tr>
+                  <td class="pl-2 align-top font-bold">
+                    <a class="link" href="conf.cgi?sub=objects&amp;type=[% type | uri %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
+                      [% IF objs.size > 0 && objs.0.file.readonly %]
+                        <i class="fa-solid fa-eye" title='View Template'></i>
+                      [% ELSE %]
+                        <i class="fa-solid fa-pencil" title='Edit Template'></i>
+                      [% END %]
+                      [% key | html %]
+                    </a>
+                  </td>
+                  <td class="pr-2">
+                    [% IF objs.size > 0 %]
+                      [% PROCESS _conf_object_view.tt obj = objs.0 conf = "obj" %]
+                    [% ELSE %]
+                      Template does not exist
+                    [% END %]
+                  </td>
+                </tr>
+                [% UNLESS loop.last %]
+                  <tr>
+                    <td colspan="2">
+                      <hr style="[% IF subcat != 'templates' %]display:none[% END %]" class="mt-1 pb-1 sub_2">
+                    </td>
+                  </tr>
+                [% END %]
+              [% END %]
+              </table>
+          [% ELSE %]
+            <div class="text-center textHINT">This object does not use templates</div>
+          [% END %]
+        </div>
+
+        <div style="[% IF subcat != 'comp' %]display:none[% END %]" class="sub_3">
+          [% SET duplicate_keys = {} %]
+          [% PROCESS _conf_object_view.tt obj = object conf = "computed" %]
+        </div>
+
+        [% IF has_auth_section %]
+          <div style="[% IF subcat != 'auth' %]display:none[% END %]" class="sub_4">
+            <input type="hidden" name="hex" value="[% hex %]">
+            <table class="body w-fit cellspacing-x mx-auto mt-2">
+              <thead>
+                <tr>
+                  <th colspan=2 ><h3>Roles (cgi.cfg)</h3></th>
+                </tr>
+              </thead>
+              <tbody class="rowhover">
+                [% FOR auth = role_keys %]
+                <tr>
+                  <th>[% auth | html %]</th>
+                  <td>
+                    <input type="radio" name="authdata.[% auth | html %]" id="authdata.[% auth | html %]_0" value="0"[% IF roles.$auth == 0 %] checked[% END %]><label class="ml-1 mr-3 clickable" for="authdata.[% auth | html %]_0">No</label>
+                    <input type="radio" name="authdata.[% auth | html %]" id="authdata.[% auth | html %]_1" value="1"[% IF roles.$auth == 1 %] checked[% END %]><label class="ml-1 mr-3 clickable" for="authdata.[% auth | html %]_1">Yes</label>
+                  </td>
+                </tr>
+                [% END %]
+              </tbody>
+            </table>
+          </div>
         [% END %]
-        <button style="width:90px">apply</button>
-      </td>
-    </tr>
+
+        [% IF ! readonly %]
+          <div style="[% IF subcat != 'config' %]display:none[% END %]" class="footer justify-evenly sub_1 sub_4">
+              [% IF object.get_id() != 'new' && ! bare %]
+              <input type="submit" name="send" value="raw edit" class="sub_1 w-40">
+              [% END %]
+              <button class="w-40">apply</button>
+          </div>
+        [% END %]
+      </div>
+    </form>
+  [% END %]
+
+  <script type="text/javascript">
+  <!--
+    if(window.location.hash == '#config')    { set_sub(1); }
+    if(window.location.hash == '#templates') { set_sub(2); }
+    if(window.location.hash == '#comp')      { set_sub(3); }
+    if(window.location.hash == '#auth')      { set_sub(4); }
+
+    jQuery('input,select').each(function() {
+      var $input = jQuery(this);
+      if($input.attr("tabindex") == 13 ) {
+        $input.attr("tabindex", -1);
+      }
+    });
+
+    [% IF show_object %]
+    [% IF ! readonly %]
+    var form_id = "obj_edit_[% object.get_id() %]";
+    var initial_form_values;
+    jQuery(window).on('beforeunload', function(e){
+      var form = document.getElementById(form_id);
+      var form_values = jQuery("#"+form_id).serialize();
+      if(form_values != initial_form_values && !form.needs_reload) {
+        var msg = "Not applied changes will be lost if you leave this page.";
+        e.returnValue = msg;
+        return(msg);
+      }
+      return;
+    });
+    jQuery(document).ready(function() {
+      initial_form_values = jQuery("#"+form_id).serialize();
+    });
     [% END %]
-  </table>
-</form>
+    [% END %]
 
-[% END %]
-
-<script type="text/javascript">
-<!--
-  if(window.location.hash == '#config')    { set_sub(1); }
-  if(window.location.hash == '#templates') { set_sub(2); }
-  if(window.location.hash == '#comp')      { set_sub(3); }
-  if(window.location.hash == '#auth')      { set_sub(4); }
-
-  jQuery('input,select').each(function() {
-    var $input = jQuery(this);
-    if($input.attr("tabindex") == 13 ) {
-      $input.attr("tabindex", -1);
-    }
-  });
-
-  [% IF show_object %]
-  [% IF ! readonly %]
-  var form_id = "obj_edit_[% object.get_id() %]";
-  var initial_form_values;
-  jQuery(window).on('beforeunload', function(e){
-    var form = document.getElementById(form_id);
-    var form_values = jQuery("#"+form_id).serialize();
-    if(form_values != initial_form_values && !form.needs_reload) {
-      var msg = "Not applied changes will be lost if you leave this page.";
-      e.returnValue = msg;
-      return(msg);
-    }
-    return;
-  });
-  jQuery(document).ready(function() {
-    initial_form_values = jQuery("#"+form_id).serialize();
-  });
-  [% END %]
-  [% END %]
-
--->
-</script>
+  -->
+  </script>
 
 [% END %]

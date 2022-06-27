@@ -1,31 +1,24 @@
 ﻿[% PROCESS _conf_object_row.tt %]
-<table width="644" cellspacing=0 cellpadding=0 id="attr_table">
+<table id="attr_table" class="rowhover">
 
   <tr style="display: none" id="el_0">
-    <td class='dataOdd conf_attr_unused conf_row' align="left" width="170" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></td>
-    <td class='dataOdd conf_row clickable' align="left" width="16" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none; height:16px; width: 16px;" tabindex='13' alt="remove"></td>
-    <td class='dataOdd conf_row' colspan=2></td>
-    <td class='dataOdd clickable conf_row' onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600 });" abbr=''><img src='[% url_prefix %]themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
+    <th class="pl-2 align-top" width="210" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></th>
+    <td class='clickable align-top' width="22" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><i class="fa-solid fa-square-minus" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none;" tabindex='13' alt="remove"></i></td>
+    <td colspan=2></td>
+    <td class='clickable pr-2' width="22" onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600, bodyCls: 'p-2' });" abbr=''><i class="fa-solid fa-circle-question"></i></td>
   </tr>
 
-  [% SET loopclass="dataEven" %]
   [% FOREACH key = obj.get_sorted_keys() %]
     [% NEXT IF key.substr(0, 1) == ":" %]
     [% NEXT IF obj.default.exists(key) && obj.default.$key.type == "DEPRECATED" %]
+    [% class = "" %]
     [% IF duplicate_keys.exists(key) %]
-      [% class = "conf_attr_used" %]
-    [% ELSE %]
-      [% class = "conf_attr_unused" %]
+      [% class = "line-through font-normal" %]
     [% END %]
-    [% IF loop.even %]
-        [% SET loopclass="dataEven" %]
-    [% ELSE %]
-        [% SET loopclass="dataOdd" %]
-    [% END %]
-    <tr class="[% loopclass %]">
-      <td class='[% loopclass +%] [%+ class %] conf_row' align="left" width="170" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src' ,'[% url_prefix %]images/spacer.png')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</td>
-      <td class='[% loopclass +%] [%+ class %] conf_row clickable' width="16" align="left" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]images/spacer.png')"><input type="image" src="[% url_prefix %]images/spacer.png" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="height:16px; width: 16px;" tabindex='13' alt="remove"></td>
-      <td class='[% loopclass %] conf_row' colspan=2>
+    <tr>
+      <th class='[%+ class %] pl-2 align-top' width="210" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display' ,'none')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</th>
+      <td class='[%+ class %] clickable align-top' width="22" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display', 'none')"><i class="fa-solid fa-square-minus" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="display: none;" tabindex='13' alt="remove"></i></td>
+      <td colspan=2>
         [% PROCESS _conf_object_row nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
       </td>
       [% SET helpkey = key %]
@@ -38,7 +31,7 @@
       [% ELSIF obj.default.$key.exists('help') %]
         [% SET helpkey = obj.default.$key.help %]
       [% END %]
-      <td class='[% loopclass %] clickable conf_row'  width="18" onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600 });" abbr="&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]"><img src='[% url_prefix %]themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
+      <td class='clickable pr-2' width="22" onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600, bodyCls: 'p-2' });" abbr="&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]"><i class="fa-solid fa-circle-question"></i></td>
     </tr>
 
     [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || (obj_conf.$key.size > 0 && obj.conf.$key.0.substr(0,1) != '+') %]
@@ -46,31 +39,20 @@
     [% END %]
   [% END %]
 
-  [% IF loopclass=="dataEven" %]
-      [% SET loopclass="dataOdd" %]
-  [% ELSE %]
-      [% SET loopclass="dataEven" %]
-  [% END %]
-  <tr class="[% loopclass %]">
-    <td class='[% loopclass +%] conf_row' align="left">
+  <tr>
+    <td class="pl-2">
       <input type="text" class="attrkey new_attr" name="newattr" id="newattr" value="new attribute..." onfocus="this.click()" onclick="ajax_search.init(this, 'attribute', { url:'conf.cgi?action=json&amp;type=attribute&amp;obj=[% type | html %]', autosubmit:false, empty: true, emptytxt: 'new attribute...', emptyclass:'new_attr', filter:new_attr_filter[% IF obj.defined("has_custom") %], emptymsg:'add custom variable'[% END %], onselect:function() { on_attr_select(); return false; }, onemptyclick: function() { on_empty_click(); } })">
     </td>
-    <td class='[% loopclass +%] conf_row' align="left"></td>
-    <td class='[% loopclass %] conf_row' colspan=2></td>
-    <td class='[% loopclass %] conf_row'></td>
+    <td colspan=4></td>
   </tr>
 
-
-  [% IF loopclass=="dataEven" %]
-      [% SET loopclass="dataOdd" %]
-  [% ELSE %]
-      [% SET loopclass="dataEven" %]
-  [% END %]
   <tr>
-    <td class='[% loopclass %] conf_row' align="left" style="border-bottom: 0px;">comments</td>
-    <td class='[% loopclass %] conf_row' style="text-align: center; border-bottom: 0px; white-space: inherit;" colspan=4>
-      <button id="attr_opener">add new attribute</button>
-
+    <th class="pl-2 align-bottom">comments</th>
+    <td colspan=4 class="align-top pr-2">
+      <button class="mx-auto" onclick="openModalWindow(document.getElementById('new_attribute_pane')); return false;">
+        <i class="uil uil-plus"></i>
+        add new attribute
+      </button>
       <script type="text/javascript">
       <!--
       var fields = new Object({
@@ -84,27 +66,36 @@
       -->
       </script>
 
-      <table border="1" class='filter' cellspacing="0" cellpadding="0" id="new_attribute_pane" style="display:none">
-        <tr>
-          <td class='filter'>
-            <table>
-              [% FOREACH key_cat = obj.get_default_keys() %]
-                <tr>
-                  <td class='attrName'><b>[% key_cat.name %]</b></td>
+      <div class="card w-[800px]" id="new_attribute_pane" style="display:none">
+        <div class="head justify-between">
+          <h3>Add New Attributes</h3>
+          <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+        </div>
+        <table class="body">
+          [% FOREACH key_cat = obj.get_default_keys() %]
+            <tr>
+              <th>[% key_cat.name %]</th>
+              <td>
+                <div class="flexrow gap-px">
                   [% FOREACH key = key_cat.keys %]
-                    <td class='attrValue clickable' onclick="add_conf_attribute('attr_table', '[% key %]'); return false;" id="new_[% key %]_btn" style="min-width:80px;[% IF key != 'customvariable' && key != 'exception' && obj.conf.defined(key) %] display:none[% END %]">[% key %]</td>
+                    <button onclick="add_conf_attribute('attr_table', '[% key %]'); return false;" id="new_[% key %]_btn" style="min-width:80px;[% IF key != 'customvariable' && key != 'exception' && obj.conf.defined(key) %] display:none[% END %]">[% key %]</button>
                   [% END %]
-                </tr>
-              [% END %]
-            </table>
-            <center><button id="finish_button">finish</button></center>
-          </td>
-        </tr>
-      </table>
+                </div>
+              </td>
+            </tr>
+          [% END %]
+        </table>
+        <div class="footer justify-center">
+          <button class="green" onclick="closeModalWindow(); return false;">
+            <i class="fa-solid fa-check"></i>
+            finish
+          </button>
+        </div>
+      </div>
     </td>
   </tr>
   <tr>
-    <td class='[% loopclass %] conf_row' colspan=5><textarea rows=8 name="conf_comment" wrap="off">[% obj.comments.join("\n") %]</textarea></td>
+    <td class="px-2" colspan=5><textarea rows=8 class="w-full" name="conf_comment" wrap="off">[% obj.comments.join("\n") %]</textarea></td>
   </tr>
 
 </table>

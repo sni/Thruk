@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
   <div class="flexcol mx-auto w-fit mt-5">
-    <div class="card self-center">
+    <div class="card self-center overflow-hidden">
       <div class="head p-0 justify-between">
         [% PROCESS _conf_objects_menu.tt type="apply" %]
       </div>

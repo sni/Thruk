@@ -443,10 +443,21 @@ function setBtnSpinner(btn) {
         jQuery(btn).on("click", return_false);
         el.href = "#";
     }
-    window.setTimeout(function() {
+    var timer = window.setTimeout(function() {
         // seomthing didn't work, reset
         setBtnError(btn, "timeout while processing the request");
     }, 30000);
+    jQuery(btn).data("timer", timer);
+}
+
+function setBtnNoSpinner(btn) {
+    jQuery(btn).find('div.spinner').remove();
+    jQuery(btn).prop('disabled', false).removeClass(["opacity-50", "not-clickable"]);
+    jQuery(btn).find("I").css("display", "");
+    var timer = jQuery(btn).data("timer");
+    if(timer) {
+        window.clearTimeout(timer);
+    }
 }
 
 function setBtnError(btn, title) {
@@ -488,6 +499,32 @@ function setBtnSuccess(btn, title) {
         el.href = el.dataset["href"];
         jQuery(btn).off("click", return_false);
     }
+}
+
+function toggleAccordion(btn, cb) {
+    var closed = jQuery(btn).next("DIV").css("max-height") == "0px";
+    closeAccordion(btn);
+    if(closed) {
+        var panel = jQuery(btn).next("DIV");
+        jQuery(panel).css({
+            "transition":"max-height 0.2s ease-out"
+        });
+        jQuery(panel).css({
+            "max-height": panel[0].scrollHeight+"px"
+        }).addClass("active");
+        jQuery(btn).addClass("active");
+        cb();
+        window.setTimeout(function() {
+        jQuery(panel).css({
+            "max-height": "max-content"
+        });
+        }, 200);
+    }
+}
+
+function closeAccordion(btn) {
+    jQuery(btn.parentNode).find('> BUTTON').next("DIV").css('max-height', '0').removeClass("active");
+    jQuery(btn.parentNode).find('> BUTTON').removeClass("active");
 }
 
 function handleSortHeaderClick(el) {
@@ -3086,18 +3123,13 @@ function set_sub(nr, hash) {
     for(var x=1;x<=20;x++) {
         /* reset table rows */
         if(x != nr) {
-            jQuery('.sub_'+x).css('display', 'none');
-        }
-        jQuery('.sub_'+nr).css('display', '');
-
-        /* reset buttons */
-        var obj = document.getElementById("sub_"+x);
-        if(obj) {
-            styleElements(obj, "tabs", 1);
+            jQuery(".sub_"+x).css("display", "none");
+            jQuery("#sub_"+x).removeClass("active");
         }
     }
-    obj = document.getElementById("sub_"+nr);
-    styleElements(obj, "tabs active", 1);
+
+    jQuery(".sub_"+nr).css("display", "");
+    jQuery("#sub_"+nr).addClass("active");
 
     if(hash) {
         set_hash(hash);

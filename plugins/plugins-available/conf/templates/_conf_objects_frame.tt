@@ -3,7 +3,7 @@
 <div class="flexcol mx-auto w-fit max-w-full">
   <form action="conf.cgi" method="GET" class="self-center">
     <input type="hidden" name="sub" value="objects">
-    <div class="card">
+    <div class="card overflow-hidden">
       <div class="head p-0 justify-between">
         [% PROCESS _conf_objects_menu.tt %]
       </div>

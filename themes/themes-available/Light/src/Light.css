@@ -711,6 +711,9 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
   &.hover-red {
     @apply hover:bg-red-600 hover:text-white;
   }
+  &.not-clickable {
+    @apply pointer-events-none;
+  }
 
   I.fa-solid, I.uil {
     @apply h-auto w-auto mr-1;
@@ -774,6 +777,22 @@ DIV.radiogroup {
   }
   INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
     @apply bg-gray-400 text-white cursor-pointer;
+  }
+}
+
+DIV.accordion {
+  @apply borderDefault border rounded overflow-hidden;
+  > BUTTON {
+    @apply border-0 rounded-none first:rounded-t last:rounded-b;
+  }
+  > BUTTON.active {
+    @apply last:rounded-b-none;
+  }
+  > DIV {
+    @apply overflow-hidden max-h-0;
+    &.active {
+      @apply p-2 overflow-auto;
+    }
   }
 }
 
@@ -904,7 +923,7 @@ TABLE.striped {
   }
 }
 
-TABLE.rowhover > TR, TBODY.rowhover > TR {
+TABLE.rowhover > TBODY > TR, TBODY.rowhover > TR {
   @apply hover:hoverBG1;
 }
 
