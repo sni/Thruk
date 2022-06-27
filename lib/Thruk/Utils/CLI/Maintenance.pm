@@ -30,7 +30,13 @@ use warnings;
 use strict;
 
 use Thruk::Utils::CookieAuth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+
+##############################################
+# no backends required for this command
+our $skip_backends = 1;
 
 ##############################################
 
@@ -54,10 +60,64 @@ sub cmd {
         sleep(int(rand(10)));
     }
 
-    Thruk::Utils::CookieAuth::clean_session_files($c);
+    _info("running maintenance jobs:");
+
+    # remove old user session files
+    my($total, $removed) = Thruk::Utils::CookieAuth::clean_session_files($c);
+    _info("  - %-20s: removed %5d / %5d old sessions", "sessions", $removed, $total);
+
+    ($total, $removed) = clean_old_user_files($c);
+    _info("  - %-20s: removed %5d / %5d unused user files", "user files", $removed, $total);
+
+    ($total, $removed) = Thruk::Utils::External::cleanup_job_folders($c, 1);
+    _info("  - %-20s: removed %5d / %5d old job folders", "jobs", $removed, $total);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");
     return("maintenance complete\n", 0);
+}
+
+##############################################
+
+=head2 clean_old_user_files
+
+    clean_old_user_files($c)
+
+removes user files from failed logins after 24hours
+
+=cut
+sub clean_old_user_files {
+    my($c) = @_;
+    $c->stats->profile(begin => "clean_old_user_files");
+    my($total, $removed) = (0, 0);
+
+    my $sdir      = $c->config->{'var_path'}.'/users';
+    my $threshold = 86400;
+    my $timeout   = time() - $threshold;
+    opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
+    for my $entry (readdir($dh)) {
+        next if $entry eq '.' or $entry eq '..';
+        $total++;
+        my $file = $sdir.'/'.$entry;
+        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+           $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+
+        next unless $mtime;
+        next unless $mtime < $timeout;
+
+        my $data;
+        eval {
+            $data = Thruk::Utils::IO::json_lock_retrieve($file);
+        };
+        _warn($@) if $@;
+        next if scalar keys %{$data} > 1;
+        next unless defined $data->{'login'};
+        next unless $data->{'login'}->{'failed'};
+        unlink($file);
+        $removed++;
+    }
+
+    $c->stats->profile(end => "clean_old_user_files");
+    return($total, $removed);
 }
 
 ##############################################
