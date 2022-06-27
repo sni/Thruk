@@ -190,7 +190,9 @@ script has the following arguments
         - {attribute name + another attribute}
 
     Special macros:
-        - {STATUS} contains the text status
+        - {STATUS}  contains the text status
+        - {RAW}     contains the raw json data as formated text
+        - {RAW<nr>} contains the raw json data as formated text of given query number
 
     Use printf format strings like this:
         - {var%format}, ex.: {execution_time:%02f}
@@ -259,6 +261,12 @@ check_thruk_rest returns 0 on OK, 1 on Warning, 2 on Critical and 3 on Unknown
         --warning=sessions:20 \
         --critical=sessions:30 \
         '/thruk/sessions?columns=count(*):sessions&active[gte]=-10m'
+
+    - check number of available backends:
+      check_thruk_rest \
+        -o "{STATUS} - {down} backends are down.\n{RAW2}" \
+        --warning=down:0 --critical=down:1 \
+        '/sites?columns=count(*):down&status[ne]=0' '/sites?columns=id,name&status[ne]=0'
 
     - set performance data units
       check_thruk_rest \

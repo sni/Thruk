@@ -853,21 +853,7 @@ sub init_external {
     }
 
     # cleanup old jobs
-    my $max_age      = time() - 3600;      # keep them for one hour
-    my $max_age_dead = time() - (86400*3); # clean broken jobs after 3 days
-    for my $olddir (glob($c->config->{'var_path'}."/jobs/*")) {
-        if(-f $olddir.'/rc') {
-            my @stat = stat($olddir.'/rc');
-            if($stat[9] < $max_age) {
-                remove_job_dir($olddir);
-            }
-        } elsif(-f $olddir.'/start') {
-            my @stat = stat($olddir.'/start');
-            if($stat[9] < $max_age_dead) {
-                remove_job_dir($olddir);
-            }
-        }
-    }
+    cleanup_job_folders($c);
 
     $c->stash->{job_id}         = $id;
     $c->stash->{job_dir}        = $c->config->{'var_path'}."/jobs/".$id."/";
@@ -880,6 +866,61 @@ sub init_external {
     }
 
     return($id, $dir);
+}
+
+##############################################
+
+=head2 cleanup_job_folders
+
+  cleanup_job_folders($c)
+
+remove old job folders
+
+=cut
+sub cleanup_job_folders {
+    my($c, $verbose) = @_;
+
+    $c->stats->profile(begin => "cleanup_job_folders");
+
+    my($total, $removed) = (0, 0);
+    my $max_age      = time() - 3600;      # keep them for one hour
+    my $max_age_dead = time() - (86400*3); # clean broken jobs after 3 days
+    for my $olddir (glob($c->config->{'var_path'}."/jobs/*")) {
+        $total++;
+        if(-f $olddir.'/rc') {
+            my @stat = stat($olddir.'/rc');
+            if($stat[9] < $max_age) {
+                remove_job_dir($olddir);
+                $removed++;
+                if($verbose && -d $olddir.'/.') {
+                    _warn("unable to remove job folder: %s", $olddir);
+                }
+            }
+        }
+        elsif(-f $olddir.'/start') {
+            my @stat = stat($olddir.'/start');
+            if($stat[9] < $max_age_dead) {
+                remove_job_dir($olddir);
+                $removed++;
+                if($verbose && -d $olddir.'/.') {
+                    _warn("unable to remove job folder: %s", $olddir);
+                }
+            }
+        }
+        else {
+            my @stat = stat($olddir.'/');
+            if($stat[9] < $max_age_dead) {
+                remove_job_dir($olddir);
+                $removed++;
+                if($verbose && -d $olddir.'/.') {
+                    _warn("unable to remove job folder: %s", $olddir);
+                }
+            }
+        }
+    }
+
+    $c->stats->profile(end => "cleanup_job_folders");
+    return($total, $removed);
 }
 
 ##############################################

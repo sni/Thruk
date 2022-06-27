@@ -191,6 +191,10 @@ clean up session files
 sub clean_session_files {
     my($c) = @_;
     die("no config") unless $c;
+
+    $c->stats->profile(begin => "clean_session_files");
+
+    my($total, $cleaned) = (0, 0);
     my $sdir    = $c->config->{'var_path'}.'/sessions';
     my $cookie_auth_session_timeout = $c->config->{'cookie_auth_session_timeout'};
     if($cookie_auth_session_timeout <= 0) {
@@ -204,6 +208,7 @@ sub clean_session_files {
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';
+        $total++;
         my $file = $sdir.'/'.$entry;
         my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
@@ -216,6 +221,7 @@ sub clean_session_files {
                 _warn($@) if $@;
                 _audit_log("session", "session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                 unlink($file);
+                $cleaned++;
             }
             elsif($mtime < $fake_session_timeout) {
                 eval {
@@ -227,6 +233,7 @@ sub clean_session_files {
                     if($data && $data->{'fake'}) {
                         _audit_log("session", "short session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
                         unlink($file);
+                        $cleaned++;
                     } elsif(defined $data->{'username'}) {
                         $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
                     }
@@ -248,6 +255,7 @@ sub clean_session_files {
                     $entry =~ s|^.*/||gmx;
                     _audit_log("session", "max session reached, cleaning old session", $user, $entry, 0);
                     unlink($file);
+                    $cleaned++;
                     $num--;
                 } else {
                     last;
@@ -256,7 +264,9 @@ sub clean_session_files {
         }
     }
 
-    return;
+    $c->stats->profile(end => "clean_session_files");
+
+    return($total, $cleaned);
 }
 
 ##############################################
