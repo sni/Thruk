@@ -303,7 +303,6 @@ sub save_bp_objects {
         }
 
         # and reload
-        my $time = time();
         my $pkey;
         if($result_backend) {
             my $peer = $c->db->get_peer_by_key($result_backend);
@@ -317,6 +316,17 @@ sub save_bp_objects {
                 }
             }
         }
+
+        my $last_reload = time() - 1;
+        if($pkey) {
+            $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
+            if(!$last_reload) {
+                my $processinfo = $c->db->get_processinfo(backends => $pkey);
+                $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time() - 1);
+            }
+            sleep(1) if $last_reload == time();
+        }
+
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         my $reloaded = 0;
         if($cmd) {
@@ -335,7 +345,7 @@ sub save_bp_objects {
             $reloaded = 1;
         }
         if($rc == 0 && $reloaded) {
-            my $core_reloaded = Thruk::Utils::wait_after_reload($c, $pkey, $time-1);
+            my $core_reloaded = Thruk::Utils::wait_after_reload($c, $pkey, $last_reload);
             if(!$core_reloaded) {
                 ($rc, $msg) = (1, 'business process saved but core failed to restart');
             }

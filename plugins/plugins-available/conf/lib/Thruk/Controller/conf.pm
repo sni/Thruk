@@ -2737,9 +2737,9 @@ sub _config_reload {
     if(!$last_reload) {
         my $processinfo = $c->db->get_processinfo(backends => $pkey);
         $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time() - 1);
+        sleep(1) if $last_reload == time();
     }
 
-    $c->stats->profile(comment => "program_start before reload: ".$last_reload);
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
