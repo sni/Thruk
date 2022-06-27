@@ -1,67 +1,7 @@
-body.config TABLE.conftoolobj TEXTAREA {
-  white-space: pre-wrap; /* needed for IE8 */
-  width: 100%;
-}
-body.config TABLE.conftoolobj INPUT#id_check_command_1 {
-  width: 419px;
-}
-body.config TABLE.conftoolobj INPUT#id_check_command_2 {
-  width: 450px;
-}
-body.config TABLE.conftoolobj INPUT[type=text].attrkey {
-  width: 170px;
-}
 BODY.bare_tree {
   background-color: white;
   margin-top: 40px;
   border: none;
-}
-
-/* input fields with wizards */
-TD.conf_row INPUT[type=text].wizard {
-  width: 419px !important;
-}
-
-TABLE.command_line_wzd {
-  width: 100%;
-  border-collapse: collapse;
-}
-TABLE.command_line_wzd INPUT {
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  min-width: 100px;
-}
-TABLE.command_line_wzd TD, TABLE.command_line_wzd TR {
-  height: 10px;
-  line-height: 10px;
-  padding: 1px 0;
-  margin: 0;
-  border-right: 10px solid transparent;
-}
-TABLE.command_line_wzd > tbody > TR > TD:first-child {
-  padding-left: 10px;
-  width: 10px;
-}
-TABLE.command_line_wzd.first > tbody > TR > TD:first-child {
-  padding-left: 0;
-}
-
-.conf_attr_used {
-  text-decoration: line-through;
-  color: #999999;
-}
-
-body.config TD.conf_row {
-  border-right: 0px;
-  border-left: 0px;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  border-bottom: 3px solid white;
-  margin: 0px;
-  vertical-align: middle;
-  white-space: normal;
-  vertical-align: top;
 }
 
 TD#filesystem {
@@ -137,19 +77,6 @@ TD.dataVar DIV#editor {
 /* object attributes: host_name */
 .ace_support.ace_function {
   color: #23238E !important;
-}
-
-body.config TABLE.filter {
-  text-align: left;
-}
-
-TABLE.confPanel {
-  min-width: 212px;
-}
-
-TD.plugin_description {
-    width: 170px;
-    white-space: normal;
 }
 
 /* object browser */
