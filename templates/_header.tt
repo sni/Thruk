@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE HTML>
-<html[% IF extrahtmlclass %] class="[% extrahtmlclass | html %] h-full w-full overflow-hidden"[% END %]>
+<html[% IF extrahtmlclass %] class="[% extrahtmlclass | html %] h-full w-full overflow-hidden"[% END %] lang="en">
   <head>
     <title>[% title_prefix %][% escape_html(title) %]</title>
     [% PROCESS _favicon.tt %]

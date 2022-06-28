@@ -2,10 +2,10 @@
 <table id="attr_table" class="rowhover">
 
   <tr style="display: none" id="el_0">
-    <th class="pl-2 align-top" width="210" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></th>
-    <td class='clickable align-top' width="22" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><i class="fa-solid fa-square-minus" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none;"></i></td>
+    <th class="pl-2 align-top w-[210px]" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></th>
+    <td class="clickable align-top w-6 " abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><i class="fa-solid fa-square-minus" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none;"></i></td>
     <td colspan=2></td>
-    <td class='clickable pr-2' width="22" onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600, bodyCls: 'p-2' });" abbr=''><i class="fa-solid fa-circle-question"></i></td>
+    <td class='clickable pr-2 w-6' onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600, bodyCls: 'p-2' });" abbr=''><i class="fa-solid fa-circle-question"></i></td>
   </tr>
 
   [% FOREACH key = obj.get_sorted_keys() %]
@@ -16,8 +16,8 @@
       [% class = "line-through font-normal" %]
     [% END %]
     <tr>
-      <th class='[%+ class %] pl-2 align-top' width="210" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display' ,'none')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</th>
-      <td class='[%+ class %] clickable align-top' width="22" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display', 'none')"><i class="fa-solid fa-square-minus" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="display: none;"></i></td>
+      <th class='[%+ class %] pl-2 align-top w-[210px]' abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display' ,'none')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</th>
+      <td class='[%+ class %] clickable align-top w-6' abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display', 'none')"><i class="fa-solid fa-square-minus" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="display: none;"></i></td>
       <td colspan=2>
         [% PROCESS _conf_object_row nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
       </td>
@@ -31,7 +31,7 @@
       [% ELSIF obj.default.$key.exists('help') %]
         [% SET helpkey = obj.default.$key.help %]
       [% END %]
-      <td class='clickable pr-2' width="22" onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600, bodyCls: 'p-2' });" abbr="&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]"><i class="fa-solid fa-circle-question"></i></td>
+      <td class='clickable pr-2 w-6' onclick="return overcard({ 'body': this.abbr, 'caption': 'Help', 'width': 600, bodyCls: 'p-2' });" abbr="&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]"><i class="fa-solid fa-circle-question"></i></td>
     </tr>
 
     [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || (obj_conf.$key.size > 0 && obj.conf.$key.0.substr(0,1) != '+') %]

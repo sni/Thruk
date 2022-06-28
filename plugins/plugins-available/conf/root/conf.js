@@ -180,6 +180,7 @@ function init_conf_tool_command_wizard(id) {
         autoOpen:    false,
         closeOnEscape: false,
         width:       750,
+        // TODO: ...
         close:       function(event, ui) { do_command_line_updates=0; ajax_search.hide_results(undefined, 1); return true; }
     });
     */
@@ -337,6 +338,7 @@ function init_conf_tool_plugin_wizard(id) {
     };
     document.getElementById(id + "inp_plugin").value = cmd_line;
 
+    // TODO: ...
     var $d = jQuery('#' + id + 'dialog')
       .dialog({
         dialogClass: 'dialogWithDropShadow',
@@ -683,6 +685,7 @@ function conf_prompt_change_summary(remoteform, callback) {
     if(!show_commit_summary_prompt) {
         return(callback());
     }
+    // TODO: ...
     jQuery("#summary-dialog-form").dialog({
         autoOpen: true,
         modal: true,
