@@ -50,13 +50,15 @@ function init_page() {
         if(el && el.parentNode && jQuery(el.parentNode).hasClass("deleteicon")) {
             return;
         }
+        var extraClass = "";
+        if(jQuery(el).hasClass("w-full")) { extraClass = "w-full"; }
         jQuery(el)
-            .wrap('<div class="deleteicon" />')
+            .wrap('<div class="deleteicon '+extraClass+'" />')
             .after(jQuery('<button type="reset" style="display:none;">&times;</button>')
                 .click(function() {
                     var This = this;
                     jQuery(This).hide();
-                    jQuery(This).prev("INPUT").val("").trigger("change");
+                    jQuery(This).prev("INPUT").val("").trigger("change").trigger("keyup");
                     if(jQuery(This).hasClass("autosubmit")) {
                         window.setTimeout(function() {
                             jQuery(This).parents("FORM").submit();
@@ -7678,9 +7680,18 @@ var ajax_search = {
         var resultHTML = '<ul>';
         if(ajax_search.button_links) {
             jQuery.each(ajax_search.button_links, function(i, btn) {
+                // press on the button with given id
                 resultHTML += '<li class="res '+(btn.cls ? ' '+btn.cls+' ' : '')+'" onclick="jQuery(\'#'+btn.id+'\').click(); return false;">';
                 if(btn.icon) {
-                    resultHTML += '<img src="'+ url_prefix + 'themes/' + theme + '/images/' + btn.icon+'">';
+                    if(btn.icon.match(/^uil\-/)) {
+                        resultHTML += '<i class="uil '+btn.icon+'" style="font-size: 16px; line-height: 15px;"><\/i>';
+                    }
+                    else if(btn.icon.match(/^fa\-/)) {
+                        resultHTML += '<i class="fa-solid '+btn.icon+'" style="font-size: 16px; line-height: 15px;"><\/i>';
+                    }
+                    else {
+                        resultHTML += '<img src="'+ url_prefix + 'themes/' + theme + '/images/' + btn.icon+'">';
+                    }
                 }
                 resultHTML += btn.text;
                 resultHTML += '<\/li>';
@@ -8340,15 +8351,7 @@ function init_tool_list_wizard(id, type) {
     var aggregate = Math.abs(tmp[2]);
     var templates = tmp[3] ? true : false;
 
-    var $d = jQuery('#' + id + 'dialog')
-      .dialog({
-        dialogClass: 'dialogWithDropShadow',
-        autoOpen:    false,
-        width:       'auto',
-        maxWidth:    1024,
-        modal:       true,
-        position:    { my: "center", at: "center", of: window }
-    });
+    openModalWindow(document.getElementById((id + 'dialog')));
 
     // initialize selected members
     selected_members       = new Array();
@@ -8421,14 +8424,11 @@ function init_tool_list_wizard(id, type) {
         jQuery('#filter_selected').val('');
         data_filter_select(id+'available_members', '');
         data_filter_select(id+'selected_members', '');
-        $d.dialog('open');
         return;
     }
     init_tool_list_wizard_initialized[id] = true;
 
-    jQuery('#' + id + 'accept').button({
-        icons: {primary: 'ui-ok-button'}
-    }).click(function() {
+    jQuery('#' + id + 'accept').click(function() {
         data_filter_select(id+'available_members', '');
         data_filter_select(id+'selected_members', '');
 
@@ -8441,11 +8441,10 @@ function init_tool_list_wizard(id, type) {
             }
         }
         jQuery('#'+input_id).val(newval);
-        $d.dialog('close');
+        closeModalWindow();
         return false;
     });
 
-    $d.dialog('open');
     return;
 }
 
