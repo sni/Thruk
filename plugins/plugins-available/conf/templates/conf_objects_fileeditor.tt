@@ -1,38 +1,41 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 <script src="[% url_prefix %]vendor/linedtextarea-e619e09/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
-<form action="conf.cgi" method="POST" id="saveform">
-<input type="hidden" name="sub" value="objects">
-<input type="hidden" name="action" value="savefile">
-<input type="hidden" name="file" value="[% file_link | html %]">
-<input type="hidden" name="content" value="" id='filecontent'>
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-[% IF show_object && back == "edit" %]
-<input type="hidden" name="data.id" value="[% object.get_id() %]">
-[% END %]
-<input type="hidden" name="line" value="" id="fileline">
-[% IF c.req.parameters.exists('backlink') %]
-<input type="hidden" name="backlink" value="[% c.req.parameters.backlink | html %]">
-[% END %]
-[% file_locked = ""; PROCESS _conf_ondemand_file_edit.tt file=file form="saveform" %]
-[% readonly = 0;
-   IF file.readonly; readonly = 1; END;
-   IF file_locked; readonly = 1; END;
-%]
-<div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
-<table border="0" class='data conftoolobj' style="width: 100%;">
-  <tr>
-    <th class='data' width="5%" align="left"><a href="[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink | html %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link | html %][% END %]" onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
-    <th class='data' width="90%">
-        <span  style="font-size: larger;">[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>
-        [% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]
-        [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span style="color: #EB6900"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
-    </th>
-    <th class='data' width="5%" align="right">[% UNLESS readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
-  </tr>
-  <tr>
-    <td colspan=3>
-        <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
-        <script>
+
+<form action="conf.cgi" method="POST" id="saveform" class="w-full h-[calc(100%_-_170px)] mt-5">
+  <input type="hidden" name="sub" value="objects">
+  <input type="hidden" name="action" value="savefile">
+  <input type="hidden" name="file" value="[% file_link | html %]">
+  <input type="hidden" name="content" value="" id='filecontent'>
+  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+  [% IF show_object && back == "edit" %]
+  <input type="hidden" name="data.id" value="[% object.get_id() %]">
+  [% END %]
+  <input type="hidden" name="line" value="" id="fileline">
+  [% IF c.req.parameters.exists('backlink') %]
+  <input type="hidden" name="backlink" value="[% c.req.parameters.backlink | html %]">
+  [% END %]
+  [% file_locked = ""; PROCESS _conf_ondemand_file_edit.tt file=file form="saveform" %]
+  [% readonly = 0;
+  IF file.readonly; readonly = 1; END;
+  IF file_locked; readonly = 1; END;
+  %]
+  <div class="card w-full h-full flexcol flex-nowrap gap-0">
+    <div class="head justify-between">
+      <a href="[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink | html %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link | html %][% END %]" onclick="return confirm_discard_changes()" class="button header-button rounded w-[70px]" title="Go back to report list">
+        <i class="uil uil-angle-double-left"></i>Back
+      </a>
+      <h3>
+        <span>[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>
+        [% IF file.readonly %]<span class="textHINT"> (read-only)</span>[% END %]
+        [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span class="textHINT"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
+      </h3>
+      <div>
+        [% UNLESS readonly %]<a class="button w-40 green" href='#' onClick="save_file(this); return false;"><i class="uil uil-save"></i> save</a>[% END %]
+      </div>
+    </div>
+    <div class="w-full h-full flex">
+      <textarea id="texteditor" name="texteditor" class="w-full h-full" wrap="off"[% IF readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
+      <script>
         var editor;
         var original_value;
         window.onload = function() {
@@ -41,15 +44,8 @@
             // save original value decoded
             original_value = editor.value;
 
-            var w = editor.offsetWidth - 10, h = jQuery(window).height() - jQuery('#texteditor').offset().top - 30;
-            editor.style.width  = w + 'px';
-            editor.style.height = h + 'px';
-
-            jQuery('#texteditor').css('width',  w + 'px')
-                                 .css('height', h + 'px');
-
             jQuery("#texteditor").linedtextarea(
-               {selectedLine: [% line %]}
+            {selectedLine: [% line %]}
             );
             set_current_line([% line %]);
         };
@@ -90,22 +86,19 @@
             return false;
         }
 
-        function save_file() {
+        function save_file(btn) {
             form = document.getElementById('saveform');
             document.getElementById('filecontent').value = editor.value;
             [%+ IF show_object && back == "edit" +%]
             document.getElementById('fileline').value    = get_current_line();
             [%+ END +%]
 
+            setBtnSpinner(btn);
             form.submit();
         }
-        </script>
-        <!--[IF IE]>
-        <![ENDIF]-->
-    </td>
-  </tr>
-</table>
-</div>
+      </script>
+    </div>
+  </div>
 </form>
 
 [% END %]

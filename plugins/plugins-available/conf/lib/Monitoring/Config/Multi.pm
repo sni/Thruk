@@ -53,6 +53,7 @@ sub init {
     if(defined $data) {
         $self->{'configs'}->{$key} = $data;
         $self->{'configs'}->{$key}->{'cached'} = 1;
+        $stats->profile(end => "M::C::M::init()") if defined $stats;
         return $self->{'configs'}->{$key};
     }
 

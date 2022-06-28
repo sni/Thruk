@@ -1,60 +1,63 @@
 ﻿[% WRAPPER _conf_objects_frame.tt %]
 
 <form action="conf.cgi" method="post">
-<input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-[% FOREACH par = c.request.parameters.keys %]
-  [% NEXT IF !c.request.parameters.defined(par) %]
-  [% NEXT IF par == "CSRFtoken" %]
-  [% FOR value IN c.request.parameters.$par.list %]
-    <input type="hidden" name="[% par | html %]" value="[% value | html %]">
+  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+  [% FOREACH par = c.request.parameters.keys %]
+    [% NEXT IF !c.request.parameters.defined(par) %]
+    [% NEXT IF par == "CSRFtoken" %]
+    [% FOR value IN c.request.parameters.$par.list %]
+      <input type="hidden" name="[% par | html %]" value="[% value | html %]">
+    [% END %]
   [% END %]
-[% END %]
-<input type="hidden" name="clone_ref" value="-1">
-<table border="0" class='data conftoolobj'>
-  <tr>
-    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Cloning [% object.get_type() | ucfirst +%] [%+ object.get_name() %] - Step 1</a></th>
-  </tr>
-  <tr>
-    <td colspan=2>
-      Select incoming references which should be cloned:
-    </td>
-  </tr>
-  [% FOREACH t = clonables.keys.sort %]
-  <tr>
-    <td colspan=2>
-      <br>
-      [% t | ucfirst %]:
-      <ul>
-      [% FOREACH id = clonables.$t.keys %]
-        <li>
-          <input type="checkbox" name="clone_ref" value="[% id | html %]" [% IF clonables.$t.$id.readonly %]disabled[% ELSE %]checked[% END %]>
-          <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% clonables.$t.$id.name %]</a>
-        </li>
-      [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
-  <tr>
-    <td colspan=2>
-      <ul>
-        <li>
-          select
-          <input type="checkbox" name="none" value="" onclick="if(this.checked) { jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=all]').prop('checked', false); }">
-          <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
-          <input type="checkbox" name="all" value="" checked onclick="if(this.checked) { jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); }">
-          <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
-        </li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td colspan=2 style="text-align: right; padding-bottom: 5px;">
-      <button>next</button>
-    </td>
-  </tr>
+  <input type="hidden" name="clone_ref" value="-1">
 
-</table>
+  <div class="card w-[600px]">
+    <div class="head justify-between">
+      <div class="w-20">
+        <a class="button header-button" href='conf.cgi?sub=objects&amp;type=[% object.get_type() %]&amp;data.id=[% object.get_id %]'>
+          <i class="uil uil-angle-double-left"></i>Back
+        </a>
+      </div>
+      <h3>Cloning [% object.get_type() | ucfirst +%] [%+ object.get_name() %] - Step 1</h3>
+      <div class="w-[70px]"></div>
+    </div>
+
+    <div class="flexrow flex-nowrap gap-1 justify-between p-2">
+      <h4>Select incoming references which should be cloned:</h4>
+      <div class="flexrow gap-1 flex-nowrap">
+        <a class="button w-20" href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">
+          <input class="mr-1" type="checkbox" name="none" value="" onclick="if(this.checked) { jQuery('input[name=clone_ref]').prop('checked', false); jQuery('input[name=all]').prop('checked', false); }">
+          none
+        </a>
+
+        <a class="button w-20 ml-3" href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">
+          <input class="mr-1" type="checkbox" name="all" value="" checked onclick="if(this.checked) { jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); }">
+          all
+        </a>
+      </div>
+    </div>
+
+    <table class='body innercellborder'>
+      [% FOREACH t = clonables.keys.sort %]
+      <tr>
+        <th class="w-fit align-top">[% t | ucfirst %]</th>
+        <td class="w-full">
+          <ul class="w-full">
+          [% FOREACH id = clonables.$t.keys %]
+            <li class="hoverable flexrow flex-nowrap gap-1 py-px">
+              <input type="checkbox" name="clone_ref" value="[% id | html %]" [% IF clonables.$t.$id.readonly %]disabled[% ELSE %]checked[% END %]>
+              <a class="flex w-full" href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% clonables.$t.$id.name %]</a>
+            </li>
+          [% END %]
+          </ul>
+        </td>
+      </tr>
+      [% END %]
+    </table>
+    <div class="footer justify-center">
+      <button class="w-40 green">next</button>
+    </div>
+  </div>
 </form>
 
 [% END %]

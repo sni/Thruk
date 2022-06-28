@@ -9,50 +9,46 @@ var objects_type        = "[% objects_type %]";
 
 
 <!-- view switch and filter -->
-<table style="width:100%; position: fixed; top: 0; left: 0; z-index: 1000; background: white; border-bottom: 1px solid grey;">
-  <tr>
-    <td align="left" width="30%">
-      <div id="layout_set">
-        <button name="layout" id="layout_icons"[% IF 0 && tree_objects_layout == "icons" %] checked[% END %]><label for="layout_icons">I</label></button>
-        <button name="layout" id="layout_table"[% IF 0 && tree_objects_layout == "table" %] checked[% END %]><label for="layout_table">T</label></button>
-      </div>
-    </td>
-    <td></td>
-    <td align="right" width="30%">
-      <input type="text" id="search_filter" onkeyup="filter_objects(this.id)" onchange="filter_objects(this.id)" placeholder="filter objects" class="deletable">
-    </td>
-  </tr>
-</table>
+<div class="card w-full h-full">
+  <div class="head justify-between">
+    <div class="buttongroup">
+      <button class="header-button" name="layout" id="layout_icons"[% IF 0 && tree_objects_layout == "icons" %] checked[% END %] title="show objects with icons"><i class="uil uil-picture"></i></button>
+      <button class="header-button" name="layout" id="layout_table"[% IF 0 && tree_objects_layout == "table" %] checked[% END %] title="show objects with details"><i class="uil uil-table"></i></button>
+    </div>
+    <input type="text" id="search_filter" onkeyup="filter_objects(this.id)" onchange="filter_objects(this.id)" placeholder="filter objects" class="deletable">
+  </div>
+  <div class="body h-full max-h-full overflow-auto">
+    <!-- details view menu header -->
+    <div class="browser_file_menu">
+      <div class="browser_file_image">&nbsp;</div>
+      <div class="browser_file_longtitle">Name</div>
+      <div class="browser_file_type">Type</div>
+      <div class="browser_file_template">Template</div>
+      <div class="browser_file_filename">File</div>
+      <div class="browser_file_linenr">Line</div>
+      <div class="browser_file_comments">Comments</div>
+    </div>
 
-<!-- details view menu header -->
-<div class="browser_file_menu">
-  <div class="browser_file_image">&nbsp;</div>
-  <div class="browser_file_longtitle">Name</div>
-  <div class="browser_file_type">Type</div>
-  <div class="browser_file_template">Template</div>
-  <div class="browser_file_filename">File</div>
-  <div class="browser_file_linenr">Line</div>
-  <div class="browser_file_comments">Comments</div>
+    <!-- object elements -->
+    [% FOREACH o = objects %]
+    [% fullname  = o.get_long_name('&nbsp;') %]
+    [% shortname = fullname %]
+    [% type = o.get_type() %]
+    [% IF shortname.length > 15 %][% shortname = shortname.substr(0,15) _ '..' %][% END %]
+    [% filepath = o.file.display.replace(files_root,'/'); IF filepath.length > 50; filepath = filepath.substr(-50); END; filepath = '...' _ filepath %]
+    <div class="jstree-draggable clickable browser_file_item" onclick="window.location='conf.cgi?bare=1&amp;sub=objects&amp;type=[% type | html %]&amp;data.id=[% o.get_id() %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'" ondblclick="window.parent.location='conf.cgi?sub=objects&amp;type=[% type | html %]&amp;data.id=[% o.get_id() %]'" title="[% fullname %]">
+      <img src="../plugins/conf/images/obj_[% type | html %].png" alt="config item">
+      <div class="browser_file_shorttitle">[% shortname %]</div>
+      <div class="browser_file_longtitle">[% fullname %]</div>
+      <div class="browser_file_type" title="[% type | html %]">[% type | html %]</div>
+      <div class="browser_file_template">[% IF o.is_template() %]yes[% ELSE %]no[% END %]</div>
+      <div class="browser_file_filename" title="[% o.file.display | html %]">[% filepath | html %]</div>
+      <div class="browser_file_linenr">[% o.line %]</div>
+      <div class="browser_file_comments" title="[% escape_html(o.comments.join('_-xXx-_')).replace('_-xXx-_','&#10;') %]">[% escape_html(o.comments.join(' ')) %]</div>
+    </div>
+    [% END %]
+  </div>
 </div>
-
-<!-- object elements -->
-[% FOREACH o = objects %]
-[% fullname  = o.get_long_name('&nbsp;') %]
-[% shortname = fullname %]
-[% type = o.get_type() %]
-[% IF shortname.length > 15 %][% shortname = shortname.substr(0,15) _ '..' %][% END %]
-[% filepath = o.file.display.replace(files_root,'/'); IF filepath.length > 50; filepath = filepath.substr(-50); END; filepath = '...' _ filepath %]
-<div class="jstree-draggable clickable browser_file_item" onclick="window.location='conf.cgi?bare=1&amp;sub=objects&amp;type=[% type | html %]&amp;data.id=[% o.get_id() %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'" ondblclick="window.parent.location='conf.cgi?sub=objects&amp;type=[% type | html %]&amp;data.id=[% o.get_id() %]'" title="[% fullname %]">
-  <img src="../plugins/conf/images/obj_[% type | html %].png" alt="config item">
-  <div class="browser_file_shorttitle">[% shortname %]</div>
-  <div class="browser_file_longtitle">[% fullname %]</div>
-  <div class="browser_file_type" title="[% type | html %]">[% type | html %]</div>
-  <div class="browser_file_template">[% IF o.is_template() %]yes[% ELSE %]no[% END %]</div>
-  <div class="browser_file_filename" title="[% o.file.display | html %]">[% filepath | html %]</div>
-  <div class="browser_file_linenr">[% o.line %]</div>
-  <div class="browser_file_comments" title="[% escape_html(o.comments.join('_-xXx-_')).replace('_-xXx-_','&#10;') %]">[% escape_html(o.comments.join(' ')) %]</div>
-</div>
-[% END %]
 
 <script>
 <!--
@@ -93,21 +89,12 @@ function do_filter_objects(id) {
 
 /* layout buttons */
 function init_tree_buttons() {
-    jQuery('#layout_table').button({
-        icon: 'ui-applist-button',
-        showLabel: false,
-        label: 'show objects with details'
-    }).click(function() {
+    jQuery('#layout_table').click(function() {
         return set_tree_layout('table', 'icons');
     });
-    jQuery('#layout_icons').button({
-        icon: 'ui-appicons-button',
-        showLabel: false,
-        label: 'show objects with icons'
-    }).click(function() {
+    jQuery('#layout_icons').click(function() {
         return set_tree_layout('icons', 'table');
     });
-    jQuery("#layout_set").controlgroup();
 
     function set_tree_layout(on, off) {
         jQuery('DIV.browser_file_item').removeClass('layout_'+off);

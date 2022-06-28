@@ -1,50 +1,60 @@
 ﻿[% WRAPPER _conf_objects_frame.tt %]
 
-<table border="0" class='data conftoolobj'>
-  <tr>
-    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Services for host [% object.get_name() %]</a></th>
-  </tr>
-  [% IF services.host.size > 0 %]
-  <tr>
-    <td width="30%">Directly Assigned to Host</td>
-    <td width="70%">
-      <ul>
-      [% FOREACH svc_name = services.host.keys.sort %]
-        [% svc = services.host.$svc_name %]
-        <li><a href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() %]</a></li>
-      [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
+  <div class="card w-[600px]">
+    <div class="head justify-between">
+      <div class="w-20">
+        <a class="button header-button" href='conf.cgi?sub=objects&amp;type=[% object.get_type() %]&amp;data.id=[% object.get_id %]'>
+          <i class="uil uil-angle-double-left"></i>Back
+        </a>
+      </div>
+      <h3>Services for host [% object.get_name() %]</h3>
+      <div class="w-[70px]"></div>
+    </div>
+    <div class='body'>
+      <table>
+        [% IF services.host.size > 0 %]
+        <tr>
+          <th class="w-fit align-top">Directly Assigned</th>
+          <td class="w-full px-2">
+            <ul>
+            [% FOREACH svc_name = services.host.keys.sort %]
+              [% svc = services.host.$svc_name %]
+              <li><a class="flex hoverable link" href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() %]</a></li>
+            [% END %]
+            </ul>
+          </td>
+        </tr>
+        [% END %]
 
-  [% IF services.group.size > 0 && services.host.size > 0%]
-  <tr>
-    <td colspan=2><hr></td>
-  </tr>
-  [% END %]
+        [% IF services.group.size > 0 && services.host.size > 0%]
+        <tr>
+          <td colspan=2><hr></td>
+        </tr>
+        [% END %]
 
-  [% IF services.group.size > 0 %]
-  <tr>
-    <td width="30%">From Hostgroups</td>
-    <td width="70%">
-      <ul>
-      [% FOREACH svc_name = services.group.keys.sort %]
-        [% ref = services.group.$svc_name %]
-        [% svc = ref.svc %]
-        <li><a href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() | html %]</a>
-          (
-          [% FOREACH group = ref.groups %]
-          <a href="conf.cgi?sub=objects&amp;type=hostgroup&amp;data.name=[% group | uri %]">[% group | html %]</a>
-          [% IF ! loop.last %], [% END %]
-          [% END %]
-          )
-        </li>
-      [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
-</table>
+        [% IF services.group.size > 0 %]
+        <tr>
+          <td class="w-fit align-top">From Hostgroups</td>
+          <td class="w-full px-2">
+            <ul>
+            [% FOREACH svc_name = services.group.keys.sort %]
+              [% ref = services.group.$svc_name %]
+              [% svc = ref.svc %]
+              <li><a class="link" href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() | html %]</a>
+                (
+                [% FOREACH group = ref.groups %]
+                  <a class="link" href="conf.cgi?sub=objects&amp;type=hostgroup&amp;data.name=[% group | uri %]">[% group | html %]</a>
+                  [% IF ! loop.last %], [% END %]
+                [% END %]
+                )
+              </li>
+            [% END %]
+            </ul>
+          </td>
+        </tr>
+        [% END %]
+      </table>
+    </div>
+  </div>
 
 [% END %]

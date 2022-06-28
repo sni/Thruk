@@ -1,141 +1,154 @@
 ﻿[% WRAPPER _conf_objects_frame.tt %]
 [% PROCESS _blocks.tt %]
 
-[% IF force_delete %]
-<form action="conf.cgi" method="POST">
-[% END %]
-<table border="0" class='data conftoolobj conftoolrefs'>
   [% IF force_delete %]
-  <tr>
-    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
-  </tr>
-  <tr>
-    <td style="text-align:center" colspan=2>
-      <br>
-      [% PROCESS _button btn = {
-        skipform => 1,
-        data     => { sub => 'objects', 'data.id' => object.get_id(), force => 1, action => "delete", CSRFtoken => get_user_token(c) },
-        button   => { class => 'conf_delete_button', text => "Delete this " _ object.get_type().ucfirst _ " and remove it from the selected references" },
-      }%]
-      <br>
-      <br>
-    </td>
-  </tr>
+    <form action="conf.cgi" method="POST">
   [% END %]
-  [% IF show_incoming %]
-  <tr>
-    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
-  </tr>
-  [% FOREACH t = incoming.keys.sort %]
-  <tr>
-    <td>[% t | ucfirst %]</td>
-    <td>
-      <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
-      [% FOREACH name = incoming.$t.keys.sort %]
-        [% inc_ref = incoming.$t.$name %]
+
+  <div class="card w-[800px]">
+    <div class="head justify-between">
+      <div class="w-20">
+        <a class="button header-button" href='conf.cgi?sub=objects&amp;type=[% object.get_type() %]&amp;data.id=[% object.get_id %]'>
+          <i class="uil uil-angle-double-left"></i>Back
+        </a>
+      </div>
+      <h3>References for [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</h3>
+      <div class="w-[70px]"></div>
+    </div>
+    <table class="body cellspacing">
+      [% IF force_delete %]
+        <tr>
+          <td colspan=2>
+            [% PROCESS _button btn = {
+              skipform => 1,
+              data     => { sub => 'objects', 'data.id' => object.get_id(), force => 1, action => "delete", CSRFtoken => get_user_token(c) },
+              button   => { class => 'mx-auto my-5', html => "<i class='uil uil-trash-alt'></\i> Remove this " _ object.get_type().ucfirst _ " along with all selected references" },
+            }%]
+          </td>
+        </tr>
+      [% END %]
+      [% IF show_incoming %]
+        <tr>
+          <th class='text-center pt-2 border-t borderDefault' colspan=2><h4><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>Incoming references</h4></th>
+        </tr>
+        [% FOREACH t = incoming.keys.sort %]
+          <tr>
+            <th class="align-top">[% t | ucfirst %]</th>
+            <td>
+              <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
+              [% FOREACH name = incoming.$t.keys.sort %]
+                [% inc_ref = incoming.$t.$name %]
+                [% IF force_delete %]
+                  <li class="list-none flexrow gap-1 flex-nowrap">
+                    <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
+                    <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name | html %]</a>
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">
+                      <i class="fa-solid fa-link small"></i>
+                    </a>
+                    [% IF inc_ref.readonly %] <span class="textHINT"> (read-only)</span>[% END %]
+                  </li>
+                [% ELSE %]
+                  <li><a class="link" href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name | html %]</a></li>
+                [% END %]
+              [% END %]
+              </ul>
+            </td>
+          </tr>
+        [% END %]
         [% IF force_delete %]
-          <li style="list-style: none;">
-            <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
-            <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name | html %]</a>
-            <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]"><img src="[% url_prefix %]themes/[% theme %]/images/link.png" style="vertical-align: middle;"></a>
-            [% IF inc_ref.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
-          </li>
-        [% ELSE %]
-          <li><a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name | html %]</a></li>
+          <tr>
+            <td></td>
+            <td>
+              <div class="flexrow gap-1 flex-nowrap">
+                <a class="button w-20" href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">
+                  <input class="mr-1" type="checkbox" name="none" value="">
+                  none
+                </a>
+                <a class="button w-20" href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">
+                  <input class="mr-1" type="checkbox" name="all" value="" checked>
+                  all
+                </a>
+              </div>
+            </td>
+          </tr>
+        [% END %]
+        [% IF incoming.keys.size == 0 %]
+          <tr>
+            <td colspan=2 class="text-center textHINT">No incoming references found</td>
+          </tr>
         [% END %]
       [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
-  [% IF force_delete %]
-  <tr>
-    <td></td>
-    <td>
-      select
-      <input type="checkbox" name="none" value="">
-      <a href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', false); jQuery('input[name=none]').prop('checked', true); jQuery('input[name=all]').prop('checked', false); return false;">none</a> -
-      <input type="checkbox" name="all" value="" checked>
-      <a href="#" onclick="jQuery('input[name=ref]').not(':disabled').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
-    </td>
-  </tr>
-  [% END %]
-  [% IF incoming.keys.size == 0 %]
-  <tr>
-    <td colspan=2 style="text-align: center;">No incoming references found</td>
-  </tr>
-  [% END %]
-  [% END %]
 
-  [% IF show_outgoing %]
-[% IF !force_delete %]
-  <tr>
-    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Outgoing references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
-  </tr>
-  [% FOREACH t = outgoing.keys.sort %]
-  <tr>
-    <td>[% t | ucfirst | html %]</td>
-    <td>
-      <ul>
-      [% FOREACH name = outgoing.$t.keys.sort %]
-        <li><a href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">[% name | html %]</a></li>
+      [% IF show_outgoing %]
+        [% IF !force_delete %]
+          <tr>
+            <th class="text-center pt-2 border-t borderDefault" colspan=2><h4><i class="fa-solid fa-right-from-bracket mr-1"></i>Outgoing references</h4></th>
+          </tr>
+          [% FOREACH t = outgoing.keys.sort %]
+            <tr>
+              <th class="align-top">[% t | ucfirst | html %]</th>
+              <td>
+                <ul>
+                [% FOREACH name = outgoing.$t.keys.sort %]
+                  <li><a class="link" href="conf.cgi?sub=objects&amp;type=[% t | uri %]&amp;data.name=[% name | uri %]">[% name | html %]</a></li>
+                [% END %]
+                </ul>
+              </td>
+            </tr>
+          [% END %]
+          [% IF outgoing.keys.size == 0 %]
+            <tr>
+              <td colspan=2 class="text-center textHINT">No outgoing references found</td>
+            </tr>
+          [% END %]
+        [% END %]
       [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
-  [% IF outgoing.keys.size == 0 %]
-  <tr>
-    <td colspan=2 style="text-align: center;">No outgoing references found</td>
-  </tr>
-  [% END %]
-  [% END %]
-  [% END %]
 
 
-  [% IF other_refs.keys.size > 0 %]
-  <tr>
-    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Outside references of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
-  </tr>
-  [% IF force_delete %]
-  <tr>
-    <td colspan=2 style="text-align: center;">These references should be checked manually.</td>
-  </tr>
-  [% END %]
-  [% IF show_renamed %]
-  <tr>
-    <td colspan=2 style="text-align: center; padding-top: 10px;">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
-  </tr>
-  <tr>
-    <td style="text-align:center" colspan=2>
-      <br>
-      [% PROCESS _button btn = {
-        form   => { action => 'conf.cgi', method => 'GET' },
-        data   => { sub => 'objects', 'data.id' => object.get_id() },
-        button => { class => '', text => "Continue editing " _ object.get_type().ucfirst },
-      }%]
-      <br>
-      <br>
-    </td>
-  </tr>
-  [% END %]
-  [% FOREACH t = other_refs.keys.sort %]
-  <tr>
-    <td>[% t | html %]</td>
-    <td>
-      <ul>
-      [% FOREACH r = other_refs.$t %]
-        <li><a href="[% r.link %]" target="_blank">[% r.name | html %] ([% r.details | html %])</a></li>
+      [% IF other_refs.keys.size > 0 %]
+        <tr>
+          <th class="text-center pt-2 border-t borderDefault" colspan=2><h4><i class="fa-solid fa-arrow-turn-down mr-1"></i>Outside references</h4></th>
+        </tr>
+        [% IF force_delete %]
+          <tr>
+            <td colspan=2 class="text-center textHINT"><i class="uil uil-exclamation round yellow"></i> These references should be checked manually.</td>
+          </tr>
+        [% END %]
+        [% IF show_renamed %]
+          <tr>
+            <td colspan=2 class="text-center textHINT pt-3">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
+          </tr>
+          <tr>
+            <td style="text-align:center" colspan=2>
+              <br>
+              [% PROCESS _button btn = {
+                form   => { action => 'conf.cgi', method => 'GET' },
+                data   => { sub => 'objects', 'data.id' => object.get_id() },
+                button => { class => '', text => "Continue editing " _ object.get_type().ucfirst },
+              }%]
+              <br>
+              <br>
+            </td>
+          </tr>
+        [% END %]
+        [% FOREACH t = other_refs.keys.sort %]
+          <tr>
+            <th>[% t | html %]</th>
+            <td>
+              <ul>
+              [% FOREACH r = other_refs.$t %]
+                <li><a class="link" href="[% r.link %]" target="_blank"><i class="uil uil-external-link-alt text-sm"></i> [% r.name | html %] ([% r.details | html %])</a></li>
+              [% END %]
+              </ul>
+            </td>
+          </tr>
+        [% END %]
       [% END %]
-      </ul>
-    </td>
-  </tr>
-  [% END %]
-  [% END %]
+    </table>
+  </div>
 
-</table>
-[% IF force_delete %]
-</form>
-[% END %]
+  [% IF force_delete %]
+    </form>
+  [% END %]
 
 [% END %]

@@ -1,9 +1,3 @@
-BODY.bare_tree {
-  background-color: white;
-  margin-top: 40px;
-  border: none;
-}
-
 TD#filesystem {
   text-align: left;
   min-width: 600px;
@@ -211,4 +205,13 @@ LI#o_objects > INS {
 }
 LI#o_objects > UL {
   margin-left: -17px;
+}
+
+
+DIV.linedwrap {
+  display: flex;
+}
+
+DIV.linedtextarea {
+  width: 100%;
 }
