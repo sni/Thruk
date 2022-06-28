@@ -505,26 +505,36 @@ function setBtnSuccess(btn, title) {
 
 function toggleAccordion(btn, cb) {
     var closed = jQuery(btn).next("DIV").css("max-height") == "0px";
-    closeAccordion(btn);
+    closeAccordionAll(btn);
     if(closed) {
-        var panel = jQuery(btn).next("DIV");
-        jQuery(panel).css({
-            "transition":"max-height 0.2s ease-out"
-        });
-        jQuery(panel).css({
-            "max-height": panel[0].scrollHeight+"px"
-        }).addClass("active");
-        jQuery(btn).addClass("active");
-        cb();
-        window.setTimeout(function() {
-        jQuery(panel).css({
-            "max-height": "max-content"
-        });
-        }, 200);
+        openAccordion(btn, cb);
     }
 }
 
-function closeAccordion(btn) {
+function openAccordion(btn, cb) {
+    var panel = jQuery(btn).next("DIV");
+    if(!panel || panel.length == 0) {
+        if(thruk_debug_js) { alert("ERROR: got no panel for id in openAccordion(): " + btn); }
+        return;
+    }
+    jQuery(panel).css({
+        "transition":"max-height 0.2s ease-out"
+    });
+    jQuery(panel).css({
+        "max-height": panel[0].scrollHeight+"px"
+    }).addClass("active");
+    jQuery(btn).addClass("active");
+    if(cb) {
+        cb();
+    }
+    window.setTimeout(function() {
+    jQuery(panel).css({
+        "max-height": "max-content"
+    });
+    }, 200);
+}
+
+function closeAccordionAll(btn) {
     jQuery(btn.parentNode).find('> BUTTON').next("DIV").css('max-height', '0').removeClass("active");
     jQuery(btn.parentNode).find('> BUTTON').removeClass("active");
 }

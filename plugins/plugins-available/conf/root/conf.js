@@ -175,17 +175,6 @@ function init_conf_tool_command_wizard(id) {
     document.getElementById(id + "inp_args").value    = cmd_arg;
 
     openModalWindow(document.getElementById(id + 'dialog'));
-    /*
-    var $d = jQuery('#' + id + 'dialog')
-      .dialog({
-        dialogClass: 'dialogWithDropShadow',
-        autoOpen:    false,
-        closeOnEscape: false,
-        width:       750,
-        // TODO: ...
-        close:       function(event, ui) { do_command_line_updates=0; ajax_search.hide_results(undefined, 1); return true; }
-    });
-    */
     jQuery('#' + id + 'accept').off("click").click(function() {
         do_command_line_updates=0;
         ajax_search.hide_results(undefined, 1);
@@ -340,21 +329,10 @@ function init_conf_tool_plugin_wizard(id) {
     };
     document.getElementById(id + "inp_plugin").value = cmd_line;
 
-    // TODO: ...
-    var $d = jQuery('#' + id + 'dialog')
-      .dialog({
-        dialogClass: 'dialogWithDropShadow',
-        autoOpen:    false,
-        closeOnEscape: false,
-        width:       'auto',
-        maxWidth:    1024,
-        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
-    });
-    jQuery('#' + id + 'accept').button({
-        icons: {primary: 'ui-ok-button'}
-    }).click(function() {
+    openModalWindow(document.getElementById(id + 'dialog'));
+    jQuery('#' + id + 'accept').click(function() {
         ajax_search.hide_results(undefined, 1);
-        $d.dialog('close');
+        closeModalWindow();
         // set values in original inputs
         var newcmd = document.getElementById(id+'inp_plugin').value;
         if(document.getElementById(id+'inp_args').value != '') {
@@ -364,9 +342,8 @@ function init_conf_tool_plugin_wizard(id) {
         return false;
     });
 
+    openAccordion("#"+id+"help_accordion_preview");
     update_command_preview(id);
-
-    $d.dialog('open');
 
     return;
 }
@@ -481,7 +458,7 @@ function check_plugin_exec(id) {
 
 function close_accordion() {
     // close the helper accordion
-    closeAccordion("DIV.accordion > BUTTON");
+    closeAccordionAll("DIV.accordion > BUTTON");
 }
 
 /* filter already displayed attributes */
