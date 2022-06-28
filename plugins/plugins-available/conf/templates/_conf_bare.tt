@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<html class="w-full h-full">
   <head>
     <title>[% title_prefix %][% title %]</title>
     [% PROCESS _favicon.tt %]
@@ -10,7 +10,7 @@
     <script src="[% url_prefix %]plugins/conf/conf.js"></script>
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
-  <body id="config" class="config[% IF body_class %] [%+ body_class %][% END %]" style="background: inherit;">
+  <body id="config" class="config[% IF body_class %] [%+ body_class %][% END %] w-full h-full m-0 p-0 overflow-hidden" style="background: inherit;">
   [% PROCESS _common_js.tt %]
   <div style="display:none;" id="search-results"></div>
   [% PROCESS _message.tt %]

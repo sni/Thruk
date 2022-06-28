@@ -1419,6 +1419,9 @@ sub _process_tools_page {
     }
     $c->stash->{'tools_by_category'} = $tools_by_category;
 
+    $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
+    $c->stash->{'needs_commit'}  = $c->{'obj_db'}->{'needs_commit'};
+
     $c->stats->profile(end => "tool: ".$tool);
     return;
 }

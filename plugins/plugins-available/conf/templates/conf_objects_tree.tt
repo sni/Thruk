@@ -19,21 +19,20 @@
   [% END %]
 [% END %]
 
-<div class="dataTitle" style="padding-top: 4px; padding-bottom: 4px;">
-  <a href="conf.cgi?sub=objects" style="float:left;"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='go back' title='go back' width="16" height="16" style="vertical-align: middle;"> back</a>
-  Objects Browser
-</div>
+<h1>Objects Browser</h1>
 
-<table style="background: white; table-layout: fixed;" border=1 id="treetable" width="100%">
-  <tr>
-    <td valign="top" style="text-align: left; width: 200px;">
-      <div style="width: 200px; height: 34px; background: white; border-bottom: 1px solid grey;">
-        <div id="tool_set">
-          <button name="expand" id="tool_collapse"><label for="tool_collapse">C</label></button>
-          <button name="expand" id="tool_expand"><label for="tool_expand">E</label></button>
-        </div>
+<div class="card flexrow flex-nowrap gap-0 w-full h-[calc(100%_-_170px)] mt-5">
+  <div class="w-[200px] flexcol gap-0 borderDefault border-r">
+    <div class="head justify-between">
+      <a href="conf.cgi?sub=objects" class="button header-button rounded w-[70px]">
+        <i class="uil uil-angle-double-left"></i>Back
+      </a>
+      <div class="buttongroup">
+        <button class="header-button" name="expand" id="tool_collapse" title="collapse all folder"><i class="uil uil-folder-minus"></i></button>
+        <button class="header-button" name="expand" id="tool_expand" title="expand all folder"><i class="uil uil-folder-open"></i></button>
       </div>
-      <div id="container">
+    </div>
+    <div id="container" class="grow max-h-full overflow-y-auto">
       <ul>
         <li id="o_files">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Files</a>
@@ -83,51 +82,27 @@
           </ul>
         </li>
       </ul>
-      </div>
-    </td>
-    <td valign="top" style="border-left: 1px solid grey;">
-      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" style="border: 0;" frameborder=0 id="content_frame"></iframe>
-    </td>
-  </tr>
-</table>
+    </div>
+  </div>
+  <div class="w-full">
+    <iframe class="w-full h-full" name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" id="content_frame"></iframe>
+  </div>
+</div>
 
 <script>
 <!--
 
 jQuery(function($) {
 
-    // adjust size of iframe and tree browser
-    var treetable = document.getElementById('treetable');
-    var w = treetable.offsetWidth, h = jQuery(window).height() - treetable.offsetTop;
-    treetable.style.width  = (w-10) + 'px';
-    treetable.style.height = (h-10) + 'px';
-
-    var cont_iframe = document.getElementById('content_frame');
-    cont_iframe.style.width  = (w-220) + 'px';
-    cont_iframe.style.height = (h-20)  + 'px';
-
-    var container = document.getElementById('container');
-    container.style.width  = 200 + 'px';
-    container.style.height = (h-55)  + 'px';
-
-    jQuery('#tool_collapse').button({
-        icon: 'ui-appsidelist-button',
-        showLabel: false,
-        label: 'collapse all folder'
-    }).click(function() {
+    jQuery('#tool_collapse').click(function() {
         jQuery('#container').jstree('close_all');
         jQuery('#container').jstree('open_node', '#o_objects');
         return;
     });
-    jQuery('#tool_expand').button({
-        icon: 'ui-appsidetree-button',
-        showLabel: false,
-        label: 'expand all folder'
-    }).click(function() {
+    jQuery('#tool_expand').click(function() {
         jQuery('#container').jstree('open_all');
         return;
     });
-    jQuery("#tool_set").controlgroup();
 
   jQuery('#container')
   .on('changed.jstree', function (e, data) {
@@ -163,17 +138,7 @@ jQuery(function($) {
         "drag_finish" : function (data) {
           alert("DRAG OK");
       }
-    }/*,
-    contextmenu: {
-      select_node: true,
-      items: {
-        "rename" : {
-          "label"             : "Rename",
-          "action"            : function (obj) { this.rename(obj); },
-          "icon"              : false
-        }
-      }
-    }*/
+    }
   });
 });
 
