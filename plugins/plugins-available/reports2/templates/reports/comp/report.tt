@@ -23,13 +23,13 @@
 <body>
 [% PROCESS _common_js.tt %]
 [% current_page = current_page(0) %]
-<script type="text/javascript">
+<script>
 <!--
 $=jQuery;
 -->
 </script>
 [% content %]
-<script type="text/javascript">
+<script>
 <!--
 jQuery(document).ready(function() {
   reports_body_end();

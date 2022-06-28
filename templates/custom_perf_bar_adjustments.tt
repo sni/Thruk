@@ -1,5 +1,5 @@
 ﻿[% IF perf_bar_mode != 'off' %]
-<script type="text/javascript">
+<script>
 <!--
 function custom_perf_bar_adjustments(perf_bar_mode, graphs, check_command, state, plugin_output, perfdata) {
     /* you may copy this template in your my_templates folder and adjust

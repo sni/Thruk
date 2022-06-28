@@ -1,4 +1,4 @@
-﻿<script type="text/javascript">
+﻿<script>
 <!--
   [%+ IF cmd_type == "downtimes" || cmd_type == "recurring" %]
   type = "downtime";

@@ -136,7 +136,7 @@
 
     </div>
 
-<script type="text/javascript">
+<script>
   function update_permalink() {
     var link = 'avail.cgi?'+jQuery("#avail_form").find("input[type='hidden'], :input:not(:hidden)").serialize();
     jQuery('#permalink').text(link).attr('href', link);

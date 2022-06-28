@@ -1,5 +1,5 @@
 ﻿[% WRAPPER _conf_objects_frame.tt %]
-<script type="text/javascript">
+<script>
 <!--
     var data = [% filenames_json %];
 -->

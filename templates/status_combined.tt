@@ -119,7 +119,7 @@
 </form>
 
 [% UNLESS authorized_for_read_only %]
-<script type="text/javascript">
+<script>
 <!--
   var hst_Hash = [% get_cmd_submit_hash(hosts, 'hst') %];
   var svc_Hash = [% get_cmd_submit_hash(services, 'svc') %];

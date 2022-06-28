@@ -59,7 +59,7 @@
     </div>
   </div>
 </div>
-<script type="text/javascript">
+<script>
   jQuery(document).ready(function() {
     // DIV requires absolute px height, but we just want 90% of the screen
     var height = jQuery(window).height() * 0.8;

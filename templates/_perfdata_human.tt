@@ -41,7 +41,7 @@
     [% orig_perfdata | html %]
   </div>
 [% ELSE %]
-  <script type="text/javascript">
+  <script>
   <!--
     hideElement('raw_perf_switch');
   -->

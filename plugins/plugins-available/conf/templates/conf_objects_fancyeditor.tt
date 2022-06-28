@@ -40,7 +40,7 @@
 </div>
 </form>
 
-<script type="text/javascript">
+<script>
     var editor = ace.edit("editor");
     var original_value;
     /* set up editor */

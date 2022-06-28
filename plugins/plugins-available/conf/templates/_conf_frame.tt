@@ -82,7 +82,7 @@
   </form>
 </div>
 
-<script type="text/javascript">
+<script>
 <!--
 var show_commit_summary_prompt = [% IF post_obj_save_cmd && show_summary_prompt %]true[% ELSE %]false[% END %];
 init_conf_tool_buttons();

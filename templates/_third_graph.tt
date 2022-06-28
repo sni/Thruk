@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-<script type="text/javascript">
+<script>
   var graph_url = "[% escape_js(graph_url) %]";
 
 if(/render/.test(graph_url)) {

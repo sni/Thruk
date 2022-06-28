@@ -1,6 +1,6 @@
 ﻿[% nr = uniqnumber() %]
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
-<script type="text/javascript">
+<script>
   var d1 = {
       label: "[% loc("Availability") %]",
       color: "rgb(82, 167, 82)",

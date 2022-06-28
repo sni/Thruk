@@ -1,6 +1,6 @@
 ﻿[% WRAPPER "_conf_bare.tt" body_class="bare_tree" %]
 
-<script type="text/javascript">
+<script>
 <!--
 var tree_objects_layout = "[% tree_objects_layout %]";
 var objects_type        = "[% objects_type %]";
@@ -54,7 +54,7 @@ var objects_type        = "[% objects_type %]";
 </div>
 [% END %]
 
-<script type="text/javascript">
+<script>
 <!--
 
 /* filtering stuff */

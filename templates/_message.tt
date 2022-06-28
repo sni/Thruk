@@ -30,7 +30,7 @@
   [% END %]
 
   [% IF message.0 == 'success_message' && !message.0.match("js-no-auto-hide") %]
-  <script type="text/javascript">
+  <script>
   <!--
   thruk_message_fade_timer = window.setTimeout("fade('thruk_message')", 5000);
   -->

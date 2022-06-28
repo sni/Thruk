@@ -1,6 +1,6 @@
 ﻿[% PROCESS _header.tt %]
 
-<script type="text/javascript">
+<script>
 <!--
   var allowed_frame_links = [% json_encode(allowed_frame_links) %];
   function get_host() {

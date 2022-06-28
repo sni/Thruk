@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script>
 function resizeGraphIFrame(obj) {
   try {
     obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';

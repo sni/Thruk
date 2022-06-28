@@ -83,7 +83,7 @@
 </div>
 
 
-<script type="text/javascript">
+<script>
 <!--
   var column_select = document.getElementById("columns_sel");
   var columns = new Array();

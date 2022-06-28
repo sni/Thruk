@@ -10,7 +10,7 @@
   <div class="body grow">
     <table>
       <tr>
-        <th class="w-32">Choose Command</td>
+        <th class="w-32">Choose Command</th>
         <td>
           <input class="w-full" type="text" id="[% id %]_inp_command" value="" onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:false, autosubmit:false})">
           <input type="hidden" id="[% id %]_inp_args" value="">
@@ -42,7 +42,6 @@
               preview
             </button>
           </div>
-          <br>
           <span id="[% id %]_plugin_exec_output" style="text-align: left;"></span>
         </div>
       </div>

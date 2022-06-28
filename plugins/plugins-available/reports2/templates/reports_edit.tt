@@ -160,7 +160,7 @@
 </div>
 
 
-<script type="text/javascript">
+<script>
 <!--
   var inp = jQuery('SELECT[name=template]');
   if(inp && inp.length > 0) {

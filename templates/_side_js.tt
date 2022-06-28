@@ -1,4 +1,4 @@
-﻿<script type="text/javascript">
+﻿<script>
 var menuState = [% json_encode(menu_states) %];
 jQuery(document).ready(function() {
     // make them toggle

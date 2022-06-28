@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 [% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/') %]
-<script type="text/javascript">
+<script>
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";
   var histou_source     = [% histou_source %];
@@ -68,7 +68,7 @@
   </div>
 </div>
 
-<script type="text/javascript">
+<script>
   var histou_id     = 'histou_th2';
   var histou_start  = [% date.now - 90000 %];
   var histou_end    = [% date.now %];

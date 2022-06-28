@@ -20,7 +20,7 @@
 
 [% sla_averages_total = 0; sla_averages_num = 0; %]
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
-<script type="text/javascript">
+<script>
 <!--
 jQuery(document).ready(function() {
     var graph_data = [% encode_json_obj(values) %];

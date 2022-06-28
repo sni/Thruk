@@ -195,7 +195,7 @@
   </div>
 </div>
 
-<script type="text/javascript">
+<script>
 <!--
   jQuery(document).ready(function() {
     var typ = get_hash(1);

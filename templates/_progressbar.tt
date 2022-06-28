@@ -28,7 +28,7 @@
 <textarea id="console_[% pb_options.id %]" class="CONSOLE w-[80%] h-[600px] my-2" readonly>
 </textarea>
 [% END %]
-<script type="text/javascript">
+<script>
 <!--
     var last_time_[% pb_options.id %]      = 0;
     var last_message_[% pb_options.id %]   = '';

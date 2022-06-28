@@ -339,7 +339,7 @@
           <button class="iconOnly hoverable w-6 h-6" title="remove this filter attribute">
             <i class="uil uil-times"></i>
           </button>
-          <script type="text/javascript">
+          <script>
           <!--
             verify_op(jQuery(document.currentScript).parents("TR").first().find(".js-type-filter").attr("id"));
           -->

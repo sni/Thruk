@@ -1,4 +1,4 @@
-﻿<script type="text/javascript">
+﻿<script>
 <!--
   jQuery(document).ready(function() {
     jQuery("input[type='search'][name='s0_value']").each(function(i, el) {

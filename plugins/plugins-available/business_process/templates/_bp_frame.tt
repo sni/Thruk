@@ -21,7 +21,7 @@
 
 [% content %]
 
-<script type="text/javascript">
+<script>
 <!--
   var bp_no_menu = '[% no_menu %]';
   var editmode   = [% editmode %];

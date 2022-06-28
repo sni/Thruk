@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-<script type="text/javascript">
+<script>
   var pnp_source = [% pnp_source %];
   var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550";
 
@@ -58,7 +58,7 @@
   </div>
 </div>
 
-<script type="text/javascript">
+<script>
   var pnp_id     = 'pnp_th2';
   var pnp_start  = [% date.now - 90000 %];
   var pnp_end    = [% date.now %];

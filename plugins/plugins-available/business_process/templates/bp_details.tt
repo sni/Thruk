@@ -213,7 +213,7 @@
 
 </div>
 
-<script type="text/javascript">
+<script>
 <!--
   var bp_backend = '[% bp_backend | uri %]';
   jQuery(document).ready(function() {
@@ -223,4 +223,3 @@
 </script>
 
 [% PROCESS _footer.tt %]
-
