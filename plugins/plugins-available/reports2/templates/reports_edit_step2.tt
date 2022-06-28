@@ -75,7 +75,7 @@
         </div>
       </div>
     </div>
-    <script type="text/javascript">
+    <script>
       window.setInterval(function() {
         var input = jQuery("#reports_waiting");
         reports_update_affected_sla_objects(input[0]);

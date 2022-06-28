@@ -32,7 +32,7 @@
   <tr>
     <td colspan=3>
         <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
-        <script type="text/javascript">
+        <script>
         var editor;
         var original_value;
         window.onload = function() {

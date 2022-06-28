@@ -2,7 +2,7 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <script type="text/javascript">
+    <script>
     <!--
     [%+ PROCESS _panorama_js_globals.tt +%]
     -->
@@ -14,25 +14,25 @@
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]vendor/extjs-[% extjs_version %]/resources/css/ext-all-gray.css">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% fileversion %].css' />
     [% IF thruk_author %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all-debug.js"></script>
+      <script charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all-debug.js"></script>
     [% ELSE %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all.js"></script>
+      <script charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all.js"></script>
     [% END %]
     [% IF thruk_author || panorama_debug %]
       [% FOREACH js = c.config.all_in_one_javascript_panorama %]
-        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
+        <script charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]
       [% FOREACH js = get_static_panorama_files(c.config) %]
-        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
+        <script charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/js/panorama_js_track_timers.js"></script>
+      <script charset="UTF-8" src="[% url_prefix %]plugins/panorama/js/panorama_js_track_timers.js"></script>
     [% ELSE %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]cache/thruk-panorama-[% fileversion %].js"></script>
+      <script charset="UTF-8" src="[% url_prefix %]cache/thruk-panorama-[% fileversion %].js"></script>
     [% END %]
 </head>
 <body onunload="TP.unload()">
 <div id="iconContainer"></div>
-<script type="text/javascript">
+<script>
 <!--
 jQuery.noConflict();
 [%#

@@ -83,7 +83,7 @@
               [% IF menu.defined('err') && menu.err %]
                 <i class="uil uil-exclamation round yellow" title="[% menu.err | html %]"></i>
               [% ELSE %]
-                <script type="text/javascript">
+                <script>
                 [% IF menu.defined('icons') %]action_images = [% json_encode(menu.icons) %];[% END %]
                 [% IF menu.type == "js" %]
                   [% IF !action_menus_inserted.defined(menu.data) %]

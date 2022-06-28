@@ -119,7 +119,7 @@
 </div>
 
 [% UNLESS authorized_for_read_only %]
-<script type="text/javascript">
+<script>
   var dfl_Hash = [% get_cmd_submit_hash(data, 'svc') %];
   hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
 </script>

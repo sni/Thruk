@@ -85,7 +85,7 @@
     </div>
   </div>
 
-<script type="text/javascript">
+<script>
 <!--
   jQuery(document).ready(function() {
     table_search("table_search_input", ["statusTable"], 1);

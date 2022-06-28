@@ -31,7 +31,7 @@
 </table>
 </form>
 
-<script type="text/javascript">
+<script>
 <!--
 
     var all_files = [% files_json %];

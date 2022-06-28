@@ -88,7 +88,7 @@
   </td>
   <td [% IF can_edit %]class='hoverable clickable w-5 px-1 rounded' onclick="delete_cron_row(this); return false;"[% END %]>
     [% IF can_edit %]<i class="uil uil-times"></i>[% END %]
-    <script type="text/javascript">
+    <script>
     <!--
     cron_change_date("send_type_[% nr %]");
     -->

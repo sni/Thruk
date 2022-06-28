@@ -423,7 +423,7 @@ END
   </tr>
 </table>
 
-<script type="text/javascript">
+<script>
   <!--
   jQuery(document).ready(function() {
     if(jQuery(".detail_plugin_outputBlock").innerWidth() >= 1000 || jQuery(".detail_plugin_outputBlock").innerHeight() >= 600) {

@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script>
 jQuery(document).ready(function() {
     jQuery("TABLE.comment, TABLE.downtime").each(function() {
         var headers = jQuery(this).find("th");

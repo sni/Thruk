@@ -34,7 +34,7 @@
   </table>
 </div>
 
-<script type="text/javascript">
+<script>
 <!--
   selected_backends   = new Array();
   selected_backends_h = new Object();

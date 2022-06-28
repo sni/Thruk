@@ -224,7 +224,7 @@
   </tbody>
 </table>
 
-<script type="text/javascript">
+<script>
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_host_columns %]";

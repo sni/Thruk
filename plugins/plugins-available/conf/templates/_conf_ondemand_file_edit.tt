@@ -1,5 +1,5 @@
 ﻿[% IF ! file.readonly && ! file.backup && ! file.is_new_file %]
-<script type="text/javascript">
+<script>
 <!--
     jQuery(document).ready(function() {
         // set onchange for all inputs in this form

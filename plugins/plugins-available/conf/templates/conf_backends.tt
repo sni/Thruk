@@ -50,7 +50,7 @@
   </form>
 </div>
 
-<script type="text/javascript">
+<script>
 <!--
   function conf_sites_add_hide() {
     jQuery('.backend_conf_0').each(function() {

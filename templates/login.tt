@@ -69,7 +69,7 @@
 
     <div class="basis-1/3"></div>
 
-    <script type="text/javascript">
+    <script>
     <!--
       if(window.location.hash) {
         var val = window.location.search + window.location.hash;

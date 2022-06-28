@@ -1,4 +1,4 @@
-﻿<script type="text/javascript">
+﻿<script>
 <!--
   jQuery.noConflict();
   [% PROCESS _header_initial_states.tt %]

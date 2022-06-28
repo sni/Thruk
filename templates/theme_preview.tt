@@ -460,7 +460,7 @@
   </div>
 </div>
 
-<script type="text/javascript">
+<script>
 function switchTheme(sel) {
   var theme = jQuery(sel).val()[0];
   cookieSave('thruk_theme', theme);

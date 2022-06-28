@@ -1,16 +1,16 @@
 ﻿[%+ UNLESS thruk_author %]
-<script type="text/javascript" src="[% url_prefix %]cache/thruk-[% fileversion %].js"></script>
+<script src="[% url_prefix %]cache/thruk-[% fileversion %].js"></script>
 [%- ELSE -%]
 [% FOREACH jsfiles = c.config.all_in_one_javascript -%]
-<script type="text/javascript" src="[% url_prefix %][% jsfiles %]"></script>
+<script src="[% url_prefix %][% jsfiles %]"></script>
 [%+ END %]
 [%- END +%]
 [%- IF has_jquery_ui -%]
-<script type="text/javascript" src="[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js"></script>
+<script src="[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js"></script>
 [% END +%]
 [%- FOREACH j = js.list -%]
-<script type="text/javascript" src="[% url_prefix %][% j %]"></script>
+<script src="[% url_prefix %][% j %]"></script>
 [%+ END %]
 [% IF show_sitepanel == 'tree' %]
-<script type="text/javascript" src="[% url_prefix %]vendor/jstree-3.3.8/jstree.min.js"></script>
+<script src="[% url_prefix %]vendor/jstree-3.3.8/jstree.min.js"></script>
 [% END %]

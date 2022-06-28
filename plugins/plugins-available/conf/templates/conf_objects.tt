@@ -3,7 +3,7 @@
 
   [% IF show_object %]
     [% UNLESS object.defined('file') %]
-      <script type="text/javascript">
+      <script>
       <!--
           var data = [% filenames_json %];
       -->
@@ -175,7 +175,7 @@
     </form>
   [% END %]
 
-  <script type="text/javascript">
+  <script>
   <!--
     if(window.location.hash == '#config')    { set_sub(1); }
     if(window.location.hash == '#templates') { set_sub(2); }

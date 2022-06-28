@@ -149,7 +149,7 @@
   <div class="w-[350px] hidden xl:block"></div>
 </div>
 
-<script type="text/javascript">
+<script>
   <!--
     [%+ IF rd.schedule.size == 0 +%]
     add_cron_row('cron_entries');

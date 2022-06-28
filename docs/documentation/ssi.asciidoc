@@ -79,7 +79,7 @@ Hide images in plugin output of extinfo page if user is not in Admins contact gr
 .extinfo-header.ssi:
 ------
 [% IF !c.user_exists || !c.user.has_group("Admins") %]
-<script type="text/javascript">
+<script>
 jQuery(document).ready(function() {
     jQuery("TD.detail_plugin_output IMG").hide().after("<div>Image removed</div>");
 });

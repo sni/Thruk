@@ -3,7 +3,7 @@
 [% PROCESS _message.tt %]
 [% UNLESS nomap %]
 
-<script type="text/javascript">
+<script>
 <!--
 
   function html_entity_decode(str) {

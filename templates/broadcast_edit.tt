@@ -204,7 +204,7 @@
     <div class="w-[350px] hidden xl:block"></div>
   </div>
 
-<script type="text/javascript">
+<script>
 <!--
   function update_broadcast_preview(frontmatter_first) {
     var val        = jQuery('TEXTAREA[name=text]').val();
