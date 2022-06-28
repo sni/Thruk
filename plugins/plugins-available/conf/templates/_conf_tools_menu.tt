@@ -1,52 +1,38 @@
-﻿<table border='0' cellpadding="0" cellspacing="0">
-  <tr>
-    <td align="center" valign="top" class='confPanel'>
-      <div class='dataTitle'>Tools</div>
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
-        <tr>
-          <td>
-            <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
-              [% FOREACH category = tools_by_category.keys.sort %]
-              <tr class='data[% IF !loop.first %] tools_category[% END %]'>
-                <td width=23></td>
-                <td class='command'><b>[% category %]</b></td>
-              </tr>
-              [% FOREACH name = tools_by_category.$category.keys.sort %]
-              [% t = tools.$name %]
-              <tr class='data'>
-                <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt="[% t.link | html %]" title="[% t.link | html %]" width="16" height="16"></td>
-                <td class='command'>
-                    [% IF name == tool %]<b>[% END %]
-                    <a href="conf.cgi?sub=objects&amp;tools=[% name | uri %]">[% t.link | html %]</a>
-                    [% IF name == tool %]</b>[% END %]
-                </td>
-              </tr>
-              [% END %]
-              [% END %]
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-<br>
-<table border='0' cellpadding="0" cellspacing="0">
-  <tr>
-    <td align="center" valign="top" class='confPanel'>
-      <div class='dataTitle'>Actions</div>
-      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
-        <tr>
-          <td>
-            <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
-              <tr class='data'>
-                <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/folder_brick.png' border="0" alt='reset ignores' title='reset ignores' width="16" height="16"></td>
-                <td class='command'><a href="conf.cgi?sub=objects&amp;tools=reset_ignores&amp;oldtool=[% tool | uri %]">Reset Ignores</a></td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+﻿<div class="card overflow-hidden w-full">
+  <div class="head">
+    <h3>Tools</h3>
+  </div>
+  <div class="actionbox">
+    [% FOREACH category = tools_by_category.keys.sort %]
+      [% IF !loop.first %]
+        <hr class="mt-1 pb-1">
+      [% END %]
+      <div>
+        <h4 class="ml-6">[% category %]</h4>
+      </div>
+      [% FOREACH name = tools_by_category.$category.keys.sort %]
+        [% t = tools.$name %]
+        <div class="[% IF name == tool %]active[% END %]">
+          <a class="flex" href="conf.cgi?sub=objects&amp;tools=[% name | uri %]">
+            <i class="fa-solid fa-magnifying-glass-arrow-right"></i>
+            [% t.link | html %]
+          </a>
+        </div>
+      [% END %]
+    [% END %]
+  </div>
+</div>
+
+<div class="card overflow-hidden mt-5 w-full">
+  <div class="head">
+    <h3>Actions</h3>
+  </div>
+  <div class="actionbox">
+    <div>
+      <a class="flex" href="conf.cgi?sub=objects&amp;tools=reset_ignores&amp;oldtool=[% tool | uri %]">
+        <i class="fa-solid fa-bolt"></i>
+        Reset Ignores
+      </a>
+    </div>
+  </div>
+</div>

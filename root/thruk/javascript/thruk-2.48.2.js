@@ -425,7 +425,7 @@ function return_false() {
     return false;
 }
 
-function setBtnSpinner(btn) {
+function setBtnSpinner(btn, skipTimeout) {
     jQuery(btn).find("I").css("display", "none");
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
@@ -437,7 +437,7 @@ function setBtnSpinner(btn) {
     }
     window.setTimeout(function() {
         // disable delayed, otherwise chrome won't send the form
-        jQuery(btn).prop('disabled', true).addClass(["opacity-50", "not-clickable"]);
+        setBtnDisabled(btn);
     }, 300);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
@@ -445,16 +445,18 @@ function setBtnSpinner(btn) {
         jQuery(btn).on("click", return_false);
         el.href = "#";
     }
-    var timer = window.setTimeout(function() {
-        // seomthing didn't work, reset
-        setBtnError(btn, "timeout while processing the request");
-    }, 30000);
-    jQuery(btn).data("timer", timer);
+    if(!skipTimeout) {
+        var timer = window.setTimeout(function() {
+            // seomthing didn't work, reset
+            setBtnError(btn, "timeout while processing the request");
+        }, 30000);
+        jQuery(btn).data("timer", timer);
+    }
 }
 
 function setBtnNoSpinner(btn) {
     jQuery(btn).find('div.spinner').remove();
-    jQuery(btn).prop('disabled', false).removeClass(["opacity-50", "not-clickable"]);
+    setBtnEnabled(btn);
     jQuery(btn).find("I").css("display", "");
     var timer = jQuery(btn).data("timer");
     if(timer) {
@@ -472,10 +474,8 @@ function setBtnError(btn, title) {
     } else {
         jQuery(btn).prepend('<I class="uil uil-exclamation round yellow small mr-1"><\/I>');
     }
-    jQuery(btn)
-        .prop('disabled', false)
-        .prop('title', title)
-        .removeClass(["opacity-50", "not-clickable"]);
+    setBtnEnabled(btn);
+    jQuery(btn).prop('title', title)
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
         el.href = el.dataset["href"];
@@ -492,15 +492,21 @@ function setBtnSuccess(btn, title) {
     } else {
         jQuery(btn).prepend('<I class="fa-solid fa-check round small green mr-1"><\/I>');
     }
-    jQuery(btn)
-        .prop('disabled', false)
-        .prop('title', title)
-        .removeClass(["opacity-50", "not-clickable"]);
+    jQuery(btn).prop('title', title)
+    setBtnEnabled(btn);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
         el.href = el.dataset["href"];
         jQuery(btn).off("click", return_false);
     }
+}
+
+function setBtnDisabled(btn) {
+    jQuery(btn).prop('disabled', true).addClass(["opacity-50", "not-clickable"]);
+}
+
+function setBtnEnabled(btn) {
+    jQuery(btn).prop('disabled', false).removeClass(["opacity-50", "not-clickable"]);
 }
 
 function toggleAccordion(btn, cb) {
