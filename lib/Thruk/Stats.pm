@@ -108,7 +108,7 @@ sub report_html {
     my($self) = @_;
     my $result = $self->_result();
     my $report = "Profile:\n";
-    $report .= "<table style='border: 1px solid black; width: 800px;' class='stats_profile'>";
+    $report .= "<table class='cellborder rowhover' style='width: 800px;'>";
     $self->{'total_time'} = _row_elapsed($result->[0]);
     $self->{'total_time'} =~ s/s$//gmx if $self->{'total_time'};
     $self->{'total_time'} =~ s/^~//gmx if $self->{'total_time'};
@@ -156,20 +156,20 @@ sub _format_html_row {
     my $elapsed = _row_elapsed($row);
     my $name    = substr($indent.$row->{'name'}, 0, 78);
     my $output  = "<tr>";
-    my $clickable = '';
+    my $onclick = '';
     if($row->{'stack'}) {
-        $clickable = " class='clickable' onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")' ";
+        $onclick = "onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")'";
     }
-    $output .= "<td".$clickable.">".$name."</td>\n";
-    $output .= "<td class='stats_elapsed'>".$elapsed."</td>\n";
+    $output .= "<td class='whitespace-pre ".($onclick ? 'clickable' : '')."' ".$onclick.">".$name."</td>\n";
+    $output .= "<td class='text-right'>".$elapsed."</td>\n";
     if($self->{'total_time'}) {
         if($elapsed && $row->{'level'} > 1) {
             $elapsed =~ s/s$//gmx;
             $elapsed =~ s/^~//gmx;
             my $perc = $elapsed / $self->{'total_time'};
-            $output .= "<td style='text-align:right; position: relative;' width=50>";
-            $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 16px; position: absolute; top:0; right:0; background-color: #b9b9b9;'></div>";
-            $output .= "<span style='position: absolute; top:0; right:0; margin-right: 3px;'>".sprintf("%.1f", $perc*100)."%</span>";
+            $output .= "<td class='text-right relative' style='width: 50px'>";
+            $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 20px;' class='bgPROBLEMS absolute top-0 right-0'></div>";
+            $output .= "<span class='absolute top-0 right-0' style='margin-right: 3px;'>".sprintf("%.1f", $perc*100)."%</span>";
             $output .= "</td>\n";
         } else {
             $output .= "<td></td>\n";
@@ -192,7 +192,7 @@ sub _format_html_row {
             }
         }
         $output .= "<tr style='display:none;' id='pstack_".$id."' class='pstack_details'>\n";
-        $output .= "<td colspan=3><pre style='overflow: scroll; width: 794px; padding: 0 0 15px 0; margin: 0; height: inherit; min-width: inherit; border: 1px solid grey;'>\n";
+        $output .= "<td colspan=3><pre style='overflow: scroll; width: 794px; padding: 0 0 15px 0; margin: 0; height: inherit; min-width: inherit;' class='border borderDefault'>\n";
         $output .= join("\n", @show);
         if(scalar @rest > 0) {
             $output .= "<span class='clickable pstack_expand' onclick='toggleElement(\"pstack_more_".$id."\"); this.style.display=\"none\";'>\n...</span>";
