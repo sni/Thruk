@@ -828,7 +828,7 @@ TH {
 
 TABLE.cellborder {
   TD, TH {
-    @apply border borderDefault px-2 py-1; /* border color oben aufnehmen */
+    @apply border borderDefault;
   }
 }
 
