@@ -1,42 +1,41 @@
-﻿<button class="plugin_wzd_button" id="[% id %]_btn">&nbsp;</button>
+﻿<button class="plugin_wzd_button" id="[% id %]_btn"><i class="uil uil-lightbulb mx-0"></i></button>
 <input type="hidden" id="[% id %]_orig_inp" value="[% inp | html %]">
 
-<div id="[% id %]_dialog" title="Command Line Wizzard" style="display: none; padding: 0;">
-<table><tr><td class="filter">
-  <table style="width:100%;">
+<div id="[% id %]_dialog" style="display: none" class="card w-[700px]">
+  <div class="head justify-between">
+    <h3>Command Line Wizzard</h3>
+    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+  </div>
+  <table class="body">
     <tr>
-      <td class="attrName"><b>Choose Plugin</b></td>
+      <th>Choose Plugin</th>
       <td>
-        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:false, autosubmit:false})" style="width:650px" onkeyup="update_command_preview('[% id %]')">
+        <input class="w-full" type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion(); update_command_preview('[% id %]');" onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:false, autosubmit:false})" style="width:650px" onkeyup="update_command_preview('[% id %]')">
       </td>
     </tr>
     <tr>
-      <td class="attrName"><b>Plugin Arguments</b></td>
+      <th>Plugin Arguments</th>
       <td>
-        <textarea id="[% id %]_inp_args" style="width:650px; height: 150px;" onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})" onkeyup="update_command_preview('[% id %]')" onchange="update_command_preview('[% id %]')"></textarea>
+        <textarea id="[% id %]_inp_args" class="w-full h-[150px] " onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})" onkeyup="update_command_preview('[% id %]')" onchange="update_command_preview('[% id %]')"></textarea>
       </td>
-    </tr>
-    <tr>
-      <td class="attrName" colspan=2>
-        <div id="[% id %]_help_accordion" style="width: 780px;">
-          [% IF conf_config.show_plugin_syntax_helper %]
-          <h3><a href="#">Plugin Help</a></h3>
-          <div style="max-width:1000px;">
-              <span id="[% id %]_plugin_help" style="text-align: left;"></span>
-              <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
-          </div>
-          [% END %]
-          <h3><a href="#">Input Preview</a></h3>
-          <div style="max-width:1000px;">
-            <span id="[% id %]_command_line" class="cmd_line_wizard_wrapper"></span>
-            <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
-          </div>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td colspan=2 align="center"><br><button id="[% id %]_accept">accept</button></td>
     </tr>
   </table>
-</td></tr></table>
+  <div id="[% id %]_help_accordion" class="w-full accordion my-1">
+    [% IF conf_config.show_plugin_syntax_helper %]
+    <button class="w-full" onclick="toggleAccordion(this, function() { check_plugin_help('[% id %]_'); }); return false;">Plugin Help<i class="uil uil-plus ml-auto"></i></button>
+    <div class="w-full" style="max-width:1000px;">
+      <span id="[% id %]_plugin_help"></span>
+      <div class="spinner mx-auto" id="[% id %]_wait_help" title="please wait till the plugin help is loaded"></div>
+    </div>
+    [% END %]
+
+    <button class="w-full" id="[% id %]_help_accordion_preview" onclick="toggleAccordion(this); return false;">Input Preview<i class="uil uil-plus ml-auto"></i></button>
+    <div class="w-full" style="max-width:1000px;">
+      <span id="[% id %]_command_line"></span>
+      <div class="spinner mx-auto" id="[% id %]_wait" title="please wait till the command line is loaded"></div>
+    </div>
+  </div>
+  <div class="footer justify-center">
+    <button id="[% id %]_accept" class="w-40 green">accept</button>
+  </div>
 </div>
