@@ -6,6 +6,7 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
 use Storable qw/store retrieve/;
+use Time::HiRes qw(stat);
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Constants qw/:peer_states/;

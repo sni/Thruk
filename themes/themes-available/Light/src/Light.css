@@ -1226,6 +1226,9 @@ DIV.actionbox {
   >DIV {
     @apply whitespace-nowrap px-2 py-1 hover:hoverBG1;
   }
+  >DIV.active {
+    @apply hoverBG1;
+  }
   >DIV:first-child {
     @apply pt-2;
   }

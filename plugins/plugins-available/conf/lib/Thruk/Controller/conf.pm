@@ -1383,6 +1383,9 @@ sub _process_tools_page {
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
         return if Thruk::Utils::External::render_page_in_background($c);
 
+        # make sure we have the up2date objects
+        Thruk::Utils::Conf::set_object_model($c);
+
         $c->stash->{'toolobj'} = $tools->{$tool};
         if($c->req->parameters->{'cleanup'} && $c->req->parameters->{'ident'}) {
             $c->stats->profile(begin => "tool cleanup");

@@ -1,86 +1,95 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 [% PROCESS _blocks.tt %]
 
-<div class="flexcol mx-auto w-fit mt-5">
-  <div class="card self-center overflow-hidden">
-    <div class="head p-0 justify-between">
-      [% PROCESS _conf_objects_menu.tt type="apply" %]
+  <div class="flexcol mx-auto w-fit max-w-full mt-5">
+    <div class="card self-center overflow-hidden">
+      <div class="head p-0 justify-between">
+        [% PROCESS _conf_objects_menu.tt type="tools" %]
+      </div>
+    </div>
+
+    <div class="flexrow flex-nowrap mx-auto min-w-full gap-0 justify-between">
+      <div class="basis-1/6 shrink"></div>
+      <div class="grow justify-center flex">
+
+        [% IF tool != "start" %]
+          <div class="card min-w-[800px]">
+            <div class="head flexcol gap-0 h-fit">
+              <h3>[% toolobj.title %]</h3>
+              <div>[% toolobj.description %]</div>
+            </div>
+            <div>
+              [% IF results.size == 0 %]
+                <div class="body flex justify-center">
+                  <i class="fa-solid fa-check round small green mr-1"></i>everything ok
+                </div>
+              [% ELSE %]
+                <div class="flexrow justify-between flex-nowrap whitespace-nowrap p-2">
+                  <div class="w-40"></div>
+                  <div><i class="uil uil-exclamation round yellow mr-1"></i>found [% results.size %] possible improvements:</div>
+                  <div class="w-40 flex justify-end">
+                    [% IF toolobj.defined("fix_all_serial") && toolobj.defined("fix_all_serial") %]
+                      [% PROCESS _button btn = {
+                        form   => { action => "#", style => "padding-left: 3px;" },
+                        button => { class => 'w-28', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", html => "<i class='uil uil-trowel'><\/i>" _ toolobj.fixlink _ " all" },
+                      }%]
+                    [% ELSE %]
+                      [% PROCESS _button btn = {
+                        form   => { action => "conf.cgi" },
+                        data   => { sub => 'objects', tools => tool, cleanup => 1, ident => 'all' },
+                        button => { class => 'w-28', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", html => "<i class='uil uil-trowel'><\/i>" _ toolobj.fixlink _ " all" },
+                      }%]
+                    [% END %]
+                  </div>
+                </div>
+                <table class="rowhover cellspacing-x">
+                  <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Source</th>
+                    <th>Message</th>
+                    <th>Action</th>
+                  </tr>
+                  [% FOREACH r = results %]
+                  <tr>
+                    <td>[% r.type %]</td>
+                    <td class="w-full">[% IF r.id %]<a href="conf.cgi?sub=objects&amp;data.id=[% r.id %]">[% r.name %]</a>[% ELSE %][% r.name %][% END %]</td>
+                    <td>[% IF r.id %][% link_obj(r.obj) %][% END %]</td>
+                    <td>[% r.message %]</td>
+                    <td>
+                      <div class="flexrow gap-px flex-nowrap">
+                        [% PROCESS _button btn = {
+                          form   => { action => "conf.cgi", style => "padding-left: 3px;" },
+                          data   => { sub => 'objects', tools => tool, ignore => 1, ident => r.ident },
+                          button => { class => 'w-20', onclick => "return conf_tool_cleanup(this, '', true)", html => "<i class='uil uil-eye-slash'><\/i>ignore" },
+                        }%]
+                        [% IF r.id  && r.obj.file.readonly %]
+                          file is read-only
+                        [% ELSIF r.cleanable %]
+                          [% PROCESS _button btn = {
+                            form   => { action => "conf.cgi" },
+                            data   => { sub => 'objects', tools => tool, cleanup => 1, ident => r.ident },
+                            button => { class => 'w-28 conf_cleanup_button_fix', onclick => "return conf_tool_cleanup(this, '')", html => "<i class='uil uil-trowel'><\/i>" _ toolobj.fixlink },
+                          }%]
+                        [% END %]
+                      </div>
+                    </td>
+                  </tr>
+                  [% END %]
+                </table>
+                [% END %]
+            </div>
+            <div class="footer justify-center" style="[% IF hidden == 0 %] display: none;[% END %]" id="hiding_entries">
+              hiding [% hidden %] entries.
+            </div>
+          </div>
+        [% END %]
+
+      </div>
+      <div class="basis-1/6 max-w-[220px] flexcol flex-nowrap items-end ml-5">
+        [% PROCESS _conf_tools_menu.tt %]
+      </div>
     </div>
   </div>
-</div>
 
-<div align="center">
-<table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
-<tr>
-
-[% IF tool != "start" %]
-  <td align="left" valign="top" width="100%" style="padding-left: 20px; position: relative;" class="confPanel">
-    <div class="dataTitle" style="padding-bottom: 5px;">[% toolobj.title %]</div>
-    <div class="data" style="padding-bottom: 5px;">[% toolobj.description %]</div>
-    [% IF results.size == 0 %]
-      <img src='[% url_prefix %]themes/[% theme %]/images/accept.png' alt='OK' title='OK' width="16" height="16" style="vertical-align: text-bottom"> everything ok
-    [% ELSE %]
-    <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Warnings' title='Warnings' width="16" height="16" style="vertical-align: text-bottom"> found [% results.size %] possible improvements:
-      [% IF results.size > 1 %]
-        <div align="right" style="position: absolute; right: 15px; top: 30px;">
-          [% IF toolobj.defined("fix_all_serial") && toolobj.defined("fix_all_serial") %]
-            [% PROCESS _button btn = {
-              form   => { action => "#", style => "padding-left: 3px;" },
-              button => { class => 'conf_cleanup_button width_100', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", text => toolobj.fixlink _ " all" },
-            }%]
-          [% ELSE %]
-            [% PROCESS _button btn = {
-              form   => { action => "conf.cgi" },
-              data   => { sub => 'objects', tools => tool, cleanup => 1, ident => 'all' },
-              button => { class => 'conf_cleanup_button', onclick => "return conf_tool_cleanup(this, 'fix_all_serial')", text => toolobj.fixlink _ " all" },
-            }%]
-          [% END %]
-        </div>
-      [% END %]
-    <table class="conf_tool_results hoverTable">
-      <tr>
-        <th>Type</th>
-        <th>Name</th>
-        <th>Source</th>
-        <th>Message</th>
-        <th>Action</th>
-      </tr>
-      [% FOREACH r = results %]
-      <tr>
-        <td nowrap>[% r.type %]</td>
-        <td nowrap>[% IF r.id %]<a href="conf.cgi?sub=objects&amp;data.id=[% r.id %]">[% r.name %]</a>[% ELSE %][% r.name %][% END %]</td>
-        <td nowrap>[% IF r.id %][% link_obj(r.obj) %][% END %]</td>
-        <td nowrap>[% r.message %]</td>
-        <td nowrap>
-          [% PROCESS _button btn = {
-            form   => { action => "conf.cgi", style => "padding-left: 3px;" },
-            data   => { sub => 'objects', tools => tool, ignore => 1, ident => r.ident },
-            button => { class => 'conf_cut_button conf_cleanup_button width_100', onclick => "return conf_tool_cleanup(this, '', true)", text => "ignore" },
-          }%]
-          [% IF r.id  && r.obj.file.readonly %]
-            file is read-only
-          [% ELSIF r.cleanable %]
-            [% PROCESS _button btn = {
-              form   => { action => "conf.cgi" },
-              data   => { sub => 'objects', tools => tool, cleanup => 1, ident => r.ident },
-              button => { class => 'conf_cleanup_button width_100 conf_cleanup_button_fix', onclick => "return conf_tool_cleanup(this, '')", text => toolobj.fixlink },
-            }%]
-          [% END %]
-        </td>
-      </tr>
-      [% END %]
-    </table>
-    <div style="text-align: center;[% IF hidden == 0 %] display: none;[% END %]" id="hiding_entries">hiding [% hidden %] entries.</div>
-    [% END %]
-  </td>
-[% ELSE %]
-  <td align="left" valign="top" width="100%" style="padding-left: 20px"></td>
-[% END %]
-
-<td align="center" valign="top" class="action_menu">
-[% PROCESS _conf_tools_menu.tt %]
-</td>
-</tr>
-</table>
-</div>
 [% END %]

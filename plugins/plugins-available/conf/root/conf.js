@@ -578,10 +578,7 @@ function conf_tool_cleanup(btn, link, hide) {
         return(false);
     }
     if(link == "fix_all_serial") {
-        jQuery(btn).button({
-            icons: {primary: 'ui-waiting-button'},
-            disabled: true
-        });
+        setBtnSpinner(btn, true);
         var fix_buttons = jQuery('BUTTON.conf_cleanup_button_fix');
         if(fix_buttons.length > 0) {
             continue_cb = function() {
@@ -591,18 +588,12 @@ function conf_tool_cleanup(btn, link, hide) {
         }
         if(fix_buttons.length == 0) {
             continue_cb = undefined;
-            jQuery(btn).button({
-                icons: {primary: 'ui-ok-button'},
-                label:   'done',
-                disabled: false
-            }).addClass('done');
+            setBtnSuccess(btn, "done")
+            jQuery(btn).addClass('done');
         }
         return false;
     }
-    jQuery(btn).button({
-        icons: {primary: 'ui-waiting-button'},
-        disabled: true
-    });
+    setBtnSpinner(btn, true);
     if(hide) {
         /* ensure table width is fixed */
         var table = jQuery(btn).parents('table')[0];
@@ -622,37 +613,31 @@ function conf_tool_cleanup(btn, link, hide) {
     var data = {};
     if(link == "") {
         var form = jQuery(btn).parents('FORM');
-        data = jQuery(form).serializeArray();
-        link  = jQuery(form).attr("action");
+        data     = jQuery(form).serializeArray();
+        link     = jQuery(form).attr("action");
     }
     jQuery.ajax({
         url:   link,
         data:  data,
         type: 'POST',
         success: function(data) {
-            jQuery(btn).button({
-                icons:   {primary: 'ui-ok-button'},
-                label:   'done',
-                disabled: false
-            }).addClass('done');
+            setBtnSuccess(btn, "done")
+            setBtnDisabled(btn);
+            jQuery(btn).addClass('done');
             if(!hide) {
                 /* hide ignore button */
                 var buttons = jQuery(btn).parentsUntil('TABLE', 'TR').find('BUTTON');
                 if(buttons[0]) {
-                    jQuery(buttons[0]).button('disable');
+                    setBtnDisabled(buttons[0]);
                 }
-                jQuery('#apply_config_changes_icon').show();
+                jQuery('#apply_config_changes_icon').show().parent().addClass("textHINT");
             }
             jQuery(btn).removeClass('conf_cleanup_button_fix');
             if(continue_cb) { continue_cb(); }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
-            jQuery(btn).button({
-                icons:   {primary: 'ui-error-button'},
-                label:   'failed',
-                disabled: false
-            });
+            setBtnError(btn, "failed");
             jQuery(btn).removeClass('conf_cleanup_button_fix');
         }
     });
