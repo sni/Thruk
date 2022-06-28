@@ -9,7 +9,7 @@
     [% has_wizard = 0 %]
     [% wzd_btn = BLOCK %]
       [% IF key == 'command_line' %][% has_wizard = 1 %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
-      [% IF key == 'address'      %][% has_wizard = 1 %]<button class="ip_wzd_button px-1" id="[% key %]_btn[% nr %]" title="autofill address from hostname ip lookup."><i class="fa-solid fa-wand-magic-sparkles"></i></button>[% END %]
+      [% IF key == 'address'      %][% has_wizard = 1 %]<button class="ip_wzd_button px-1" id="[% key %]_btn[% nr %]" title="autofill address from hostname ip lookup."><i class="uil uil-lightbulb mr-0"></i></button>[% END %]
     [% END %]
     <div class="flexrow flex-nowrap gap-1">
       <input
@@ -130,7 +130,14 @@
       %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
       [% END %]
     [% END %]
-    <input type="text" class="obj_[% key %] obj_[% type | html %]_[% key %] w-full" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') | html %][% END %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'[% url %]', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'fa-wand-magic-sparkles' }][% END %]})"[% END %]>
+    <div class="flexrow flex-nowrap gap-1">
+      <input type="text" class="obj_[% key %] obj_[% type | html %]_[% key %] w-full" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') | html %][% END %]"[% IF defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'[% url %]', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*'[% IF key == "use" %], templates:'templates'[% END %][% IF has_wizard %],button_links:[{text: 'use list wizard', id:'id_[% key %]_wzd[% nr %]_btn' , icon:'fa-wand-magic-sparkles' }][% END %]})"[% END %]>
+      [% IF has_wizard %]
+        <button class="px-1" name="[% wzd_args | html %]" onclick="init_tool_list_wizard('[% id %]_btn', this.name); return false;" title="open list editor">
+          <i class="uil uil-sliders-v mx-0"></i>
+        </button>
+      [% END %]
+    </div>
     [% wzd_btn %]
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]

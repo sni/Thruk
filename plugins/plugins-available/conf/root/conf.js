@@ -127,7 +127,9 @@ function init_conf_tool_buttons() {
             },
             type: 'POST',
             success: function(data) {
-                jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
+                if(confirm("autofill with resolved addess: "+data.address)) {
+                    jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
+                }
             },
             error: ajax_xhr_error_logonly
         });
@@ -257,7 +259,7 @@ function update_command_line(id) {
         error: function(jqXHR, textStatus, errorThrown) {
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             hideElement(id + 'wait');
-            document.getElementById(id + 'command_line').innerHTML = '<font color="red"><b>error<\/b><\/font>';
+            document.getElementById(id + 'command_line').innerHTML = '<font class="textERROR"><b>error<\/b><\/font>';
         }
     });
 
@@ -579,8 +581,8 @@ function save_reload_apply(btn, formid, name) {
     if(!remoteform) {
         remoteform = jQuery(btn).closest('FORM');
     }
-    setBtnSpinner(btn);
     conf_prompt_change_summary(remoteform, function() {
+        setBtnSpinner(btn);
         var input = jQuery("<input>", { type: "submit", name: name, value: "1", style: "visibility: hidden;" });
         jQuery(remoteform).append(jQuery(input));
         input.click();
@@ -681,31 +683,26 @@ function conf_tool_cleanup(btn, link, hide) {
     return(false);
 }
 
+var summary_cb;
+var summary_form;
 function conf_prompt_change_summary(remoteform, callback) {
     if(!show_commit_summary_prompt) {
         return(callback());
     }
-    // TODO: ...
-    jQuery("#summary-dialog-form").dialog({
-        autoOpen: true,
-        modal: true,
-        title: 'Enter Change Summary',
-        width: 500,
-        buttons: {
-            "Ok": function() {
-                var input = jQuery("<input>", { type: "hidden", name: "summary", value: jQuery("#summary-text").val() });
-                jQuery(remoteform).append(jQuery(input));
+    summary_cb   = callback;
+    summary_form = remoteform;
+    openModalWindow(document.getElementById("summary-dialog-form"));
 
-                var input = jQuery("<input>", { type: "hidden", name: "summarydesc", value: jQuery("#summary-desc").val() });
-                jQuery(remoteform).append(jQuery(input));
-
-                jQuery(this).dialog("close");
-                return(callback());
-            },
-            "Cancel": function() {
-                jQuery(this).dialog("close");
-            }
-        }
-    });
     return(true);
+}
+
+function conf_prompt_change_summary_submit() {
+    var input = jQuery("<input>", { type: "hidden", name: "summary", value: jQuery("#summary-text").val() });
+    jQuery(summary_form).append(jQuery(input));
+
+    var input = jQuery("<input>", { type: "hidden", name: "summarydesc", value: jQuery("#summary-desc").val() });
+    jQuery(summary_form).append(jQuery(input));
+
+    closeModalWindow();
+    return(summary_cb());
 }
