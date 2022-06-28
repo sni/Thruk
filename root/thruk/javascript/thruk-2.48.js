@@ -7484,7 +7484,7 @@ var ajax_search = {
                 window.setTimeout(function() { ajax_search.stop_events=false; }, 200);
                 input.focus();
             } else {
-                if(input.value == "") {
+                if(input && input.value == "") {
                     jQuery(input).removeClass("expanded");
                 }
             }

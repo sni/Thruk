@@ -1,4 +1,4 @@
-﻿<button class="cmd_wzd_button px-1" id="[% id %]_btn"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+﻿<button class="cmd_wzd_button px-1" id="[% id %]_btn" title="open command line wizard"><i class="uil uil-bolt mx-0"></i></button>
 <input type="hidden" id="[% id %]_orig_inp1" value="[% inp1 | html %]">
 <input type="hidden" id="[% id %]_orig_inp2" value="[% inp2 | html %]">
 

@@ -1,5 +1,5 @@
 ﻿[% PROCESS _conf_object_row.tt %]
-<table class="body">
+<table class="body rowhover">
   [% IF conf == "computed" %]
     [% tmp      = obj.get_computed_config(c.obj_db) %]
     [% keys     = tmp.0 %]
@@ -13,10 +13,10 @@
     [% NEXT IF key.substr(0, 1) == ":" %]
     [% NEXT IF obj.default.exists(key) && obj.default.$key.type == "DEPRECATED" %]
     <tr>
-      <th class='[% IF (duplicate_keys.exists(key) && key != 'use' && key != 'register' && key != 'name') && !(obj.default.exists(key) && obj.default.$key.type == 'LIST' && obj_conf.$key.size > 0 && obj_conf.$key.0.substr(0,1) == '+') %]line-through font-normal[% END %] w-44'>
+      <th class='w-44 align-top [% IF (duplicate_keys.exists(key) && key != 'use' && key != 'register' && key != 'name') && !(obj.default.exists(key) && obj.default.$key.type == 'LIST' && obj_conf.$key.size > 0 && obj_conf.$key.0.substr(0,1) == '+') %]line-through font-normal[% END %]'>
         [% key %]
       </th>
-      <td>
+      <td class="whitespace-normal">
         [% PROCESS _conf_object_row nr = loop.count edit = 0 defaults = obj.default key = key obj_conf = obj_conf %]
       </td>
     </tr>

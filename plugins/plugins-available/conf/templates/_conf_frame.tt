@@ -14,7 +14,7 @@
 </div>
 [% END %]
 
-<div class="flexrow justify-between">
+<div class="flexrow justify-between hidden xl:flex">
   <div class="flex">
     [% PROCESS _infobox.tt has_proc_info=0 %]
   </div>
@@ -67,19 +67,29 @@
 
 [% content %]
 
-<div id="summary-dialog-form" style="display:none;">
-  <form>
-    <table border=0>
-      <tr>
-        <td><label for="summarytext">Summary</label></td>
-        <td><input type="text" name="summarytext" id="summary-text" class="text ui-widget-content ui-corner-all" placeholder="enter commit message" /></td>
-      </tr>
-      <tr>
-        <td><label for="summarydesc">Details</label></td>
-        <td><textarea name="summarydesc" id="summary-desc" class="text ui-widget-content ui-corner-all" placeholder="optional commit details"></textarea></td>
-      </tr>
-    </table>
-  </form>
+<div id="summary-dialog-form" style="display:none;" class="card w-[700px] flexcol gap-0">
+  <div class="head justify-between">
+    <h3>Enter Change Summary</h3>
+    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+  </div>
+  <div class="body">
+    <form>
+      <table>
+        <tr>
+          <th><label for="summary-text">Summary</label></th>
+          <td><input type="text" name="summarytext" id="summary-text" class="w-full" placeholder="enter commit message" required /></td>
+        </tr>
+        <tr>
+          <th class="align-top"><label for="summary-desc">Details</label></th>
+          <td><textarea name="summarydesc" id="summary-desc" class="w-full h-[120px]" placeholder="optional commit details"></textarea></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div class="footer justify-evenly">
+    <button onclick="closeModalWindow(); return false;">Cancel</button>
+    <button class="w-40 green" onclick="conf_prompt_change_summary_submit()">Ok</button>
+  </div>
 </div>
 
 <script>

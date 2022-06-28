@@ -1,6 +1,6 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-<div class="flexcol mx-auto w-fit max-w-full">
+<div class="flexcol mx-auto w-fit max-w-full mt-5">
   <form action="conf.cgi" method="GET" class="self-center">
     <input type="hidden" name="sub" value="objects">
     <div class="card overflow-hidden">
@@ -38,10 +38,10 @@
     </div>
   </form>
 
-  <div class="flexrow flex-nowrap mx-auto min-w-full gap-5 justify-between">
+  <div class="flexrow flex-nowrap mx-auto min-w-full gap-0 justify-between">
     <div class="basis-1/6 shrink"></div>
     <div class="grow justify-center flex">[% content %]</div>
-    <div class="basis-1/6 flexcol flex-nowrap items-end">
+    <div class="basis-1/6 flexcol flex-nowrap items-end ml-5">
       [% PROCESS _conf_action_menu.tt %]
       [% PROCESS _conf_references_menu.tt %]
     </div>

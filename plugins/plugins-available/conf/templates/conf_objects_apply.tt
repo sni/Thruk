@@ -77,7 +77,7 @@
                       <li>[% f.display %]</li>
                     [% END %]
                     </ul>
-                    <button name="save" class="submit w-full" onclick="setBtnSpinner(this); save_apply(this, 'save_form'); return false;">
+                    <button name="save" class="submit w-full" onclick="save_apply(this, 'save_form'); return false;">
                       <i class="uil uil-save"></i>
                       save your changes to disk
                     </button>

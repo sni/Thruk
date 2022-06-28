@@ -30,7 +30,7 @@
       <input type="hidden" name="referer" value="[% referer | html %]">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 
-      <div class="card min-w-[850px] overflow-hidden">
+      <div class="card min-w-[880px] overflow-hidden">
         <div class="head p-0 justify-between">
           <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='config'    %]active[% END %]" id="sub_1" onclick="window.location.hash='#config';   set_sub(1)"><a class="block" href="#config">Config</a></span>
           <span class="tabs w-full px-1 text-center font-medium text-sm [% IF subcat =='templates' %]active[% END %]" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a class="block" href="#templates">Templates</a></span>
@@ -168,7 +168,7 @@
               [% IF object.get_id() != 'new' && ! bare %]
               <input type="submit" name="send" value="raw edit" class="sub_1 w-40">
               [% END %]
-              <button class="w-40">apply</button>
+              <button class="w-40 green">apply</button>
           </div>
         [% END %]
       </div>
