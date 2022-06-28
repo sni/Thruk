@@ -1333,7 +1333,7 @@ sub gather_references {
             my $obj = $self->get_object_by_id($id);
             $incoming->{$type}->{$obj->get_name()} = {
                 id       => $id,
-                readonly => $obj->{'file'}->readonly(),
+                readonly => $obj->{'file'} ? $obj->{'file'}->readonly() : 0,
             };
         }
     }
