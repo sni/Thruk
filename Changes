@@ -16,6 +16,7 @@ next 3.x:
           - add delete icon to comments/downtimes popup
 
 next:
+          - make links clickable in comments and downtimes
           - fix sidebar search not showing all service names
           - Panorama:
             - support non-numeric dashboard file names

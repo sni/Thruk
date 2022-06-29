@@ -1513,8 +1513,6 @@ sub get_exposed_custom_vars {
 
 ########################################
 
-########################################
-
 =head2 get_browser_user_agent
 
     get_browser_user_agent()
@@ -1526,5 +1524,24 @@ sub get_browser_user_agent {
     my $c = $Thruk::Globals::c or die("not initialized!");
     return($c->req->header('user-agent') // 'unknown');
 }
+
+########################################
+
+=head2 replace_links
+
+    replace_links()
+
+return text with http/https links replaced with real links
+
+=cut
+sub replace_links {
+    my($txt) = @_;
+    $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
+             /<a class="link" href="$1" target="_blank">$1<\/a>
+             /gmx;
+    return($txt);
+}
+
+########################################
 
 1;

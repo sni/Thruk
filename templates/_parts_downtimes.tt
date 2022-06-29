@@ -16,7 +16,7 @@
       <td class="align-top pl-2">[% date_format(c, d.start_time) %]</td>
       <td class="align-top">[% date_format(c, d.end_time) %]</td>
       <td class="align-top whitespace-normal">[% escape_quotes(d.author) %]</td>
-      <td class="align-top whitespace-normal">[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
+      <td class="align-top whitespace-normal">[% IF escape_html_tags %][% escape_html(d.comment) | replace_links %][% ELSE %][% d.comment %][% END %]</td>
       [% UNLESS command_disabled(c, 78) && command_disabled(c, 79) %]
         <td class="align-top">
           <form class="flex ml-1" action='cmd.cgi' method='POST' onsubmit="setFormBtnSpinner(this); submitFormInBackground(this, function(form) { fade(jQuery(form).parents('TR'), 500, true); }); return false;">
