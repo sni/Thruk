@@ -28,15 +28,23 @@ cleanup_apache() {
   set -e
 }
 
+# remove broken/old symlinks
+cleanup_themes_plugins() {
+    for link in /etc/thruk/themes/themes-enabled/*;   do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm -f $link; done
+}
+
 case "$1" in
     remove)
         rm -rf /var/cache/thruk
         [ -x /usr/sbin/apache2 ] && cleanup_apache
+        cleanup_themes_plugins
    ;;
     upgrade)
         rm -rf /var/cache/thruk/*
         mkdir -p /var/cache/thruk/reports
         chown -R www-data: /var/cache/thruk
+        cleanup_themes_plugins
     ;;
     purge)
         rm -rf /var/cache/thruk
@@ -46,6 +54,7 @@ case "$1" in
         rm -rf /etc/thruk/panorama
         rm -rf /etc/thruk/thruk_local.conf
         rm -rf /etc/thruk/thruk_local.d
+        cleanup_themes_plugins
     ;;
 
     failed-upgrade|abort-install|abort-upgrade|disappear)

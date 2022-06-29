@@ -328,6 +328,11 @@ case "$*" in
     rmdir /usr/share/thruk/plugins 2>/dev/null
     rmdir /usr/share/thruk 2>/dev/null
     %{insserv_cleanup}
+    # remove broken/old symlinks
+    for link in /etc/thruk/themes/themes-available/*;   do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/themes/themes-enabled/*;     do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/plugins/plugins-available/*; do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/plugins/plugins-enabled/*;   do test -e $link/. || rm -f $link; done
     rmdir /usr/share/thruk/script \
           /usr/share/thruk \
           /usr/lib/thruk \
@@ -344,6 +349,11 @@ case "$*" in
     rm -rf %{_localstatedir}/cache/thruk/*
     mkdir -p /var/cache/thruk/reports
     chown -R %{apacheuser}:%{apachegroup} /var/cache/thruk
+    # remove broken/old symlinks
+    for link in /etc/thruk/themes/themes-available/*;   do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/themes/themes-enabled/*;     do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/plugins/plugins-available/*; do test -e $link/. || rm -f $link; done
+    for link in /etc/thruk/plugins/plugins-enabled/*;   do test -e $link/. || rm -f $link; done
     ;;
   *) echo case "$*" not handled in postun
 esac
