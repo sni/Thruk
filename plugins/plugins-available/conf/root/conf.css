@@ -9,46 +9,6 @@ TD#filepath {
   padding-left: 15px;
 }
 
-UL.obj_browse LI {
-  list-style: none;
-  text-align: left;
-  clear: both;
-  display: inline-block;
-  width: 100%;
-}
-
-UL.obj_browse LI:hover {
-  background-color:#FFEB66;
-}
-
-UL.obj_browse LI IMG {
-  float: left;
-  margin-right: 5px;
-}
-
-DIV.obj_browse_name {
-  width: 500px;
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: 60%;
-  float: left;
-}
-
-DIV.obj_browse_date {
-  width: 120px;
-  text-align: right;
-  max-width: 50%;
-  float: left;
-}
-INPUT.obj_browse_box {
-  float: left;
-  margin-right: 5px;
-}
-A.deleted, DIV.deleted {
-  text-decoration: line-through;
-  color: #999999;
-}
-
 DIV#editor {
   position: relative;
 }
