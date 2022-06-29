@@ -12,16 +12,16 @@
       <div class="card mt-5 min-w-[350px] overflow-hidden">
         <div class="actionbox less-padding">
           [% IF service != '' and host != 'all' %]
-          <div><a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
+          <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
           [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a></div>[% END %]
-          <div><a href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
+          <div><a class="flex" href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
           [% ELSIF host != 'all' %]
-          <div><a href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a></div>
-          <div><a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
+          <div><a class="flex" href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a></div>
+          <div><a class="flex" href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
           [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]">View Trends For This Host</a></div>[% END %]
           [% ELSE %]
-          <div><a href='status.cgi?host=all'>View Status Detail For All Hosts</a></div>
-          <div><a href='notifications.cgi?host=all'>View Notifications For All Hosts</a></div>
+          <div><a class="flex" href='status.cgi?host=all'>View Status Detail For All Hosts</a></div>
+          <div><a class="flex" href='notifications.cgi?host=all'>View Notifications For All Hosts</a></div>
           [% END %]
         </div>
       </div>

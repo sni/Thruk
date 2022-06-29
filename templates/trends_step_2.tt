@@ -1,42 +1,38 @@
 ﻿[% PROCESS _header.tt %]
 
-<div id="popup" style="position:absolute; z-index:1; visibility: hidden"></div>
-<table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-  <tr>
-    <td align="left" valign="top" width="33%">
-      [% PROCESS _infobox.tt %]
-    </td>
-    <td align="center" valign="top" width="33%"></td>
-    <td align="right" valign="bottom" width="33%">
-    </td>
-  </tr>
-</table>
-<div align="center">
-  <div class='reportSelectTitle'>Step 2: Select [% IF input == 'gethost' %]Host[% ELSIF input == 'getservice' %]Service[% END %]</div>
-</div>
-<div align="center">
-  <form method="get" action="trends.cgi">
-    <input type='hidden' name='input' value='getoptions'>
-    <table border="0" cellspacing="0" cellpadding="10">
-      <tr>
-        <td class='reportSelectSubTitle' valign="center">
-          Host:
-        </td>
-        <td class='reportSelectItem' valign="center">
-          <select name='[% IF input == 'gethost' %]host[% ELSIF input == 'getservice' %]service[% END %]'>
-            [% FOR d = data %]
-            <option value="[% d | html %]">[% d | html %]</option>
+[% PROCESS _infobox.tt %]
 
-            [% END %]
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class='reportSelectItem'><input type='submit' value='Continue to Step 3'></td>
-      </tr>
-    </table>
-  </form>
+<h1 class="mt-5">Host and Service State Trends</h1>
+
+<div class="card mx-auto w-[800px] mt-5">
+  <div class="head">
+    <h3>
+      <span class="tabs w-40"><a class="flex" href="trends.cgi">1. Report Type</a></span>
+      <i class="fa-solid fa-angle-right text-sm"></i>
+      <span class="tabs w-40 active"><a class="flex" href="#">2. [% IF input == 'gethost' %]Host[% ELSIF input == 'getservice' %]Service[% END %]</a></span>
+    </h3>
+  </div>
+
+  <div class="body">
+    <form method="get" action="trends.cgi">
+      <input type='hidden' name='input' value='getoptions'>
+      <table class="cellspacing-x w-fit mx-auto">
+        <tr>
+          <th class="text-right">[% IF input == 'gethost' %]Host[% ELSIF input == 'getservice' %]Service[% END %]</th>
+          <td>
+            <select name='[% IF input == 'gethost' %]host[% ELSIF input == 'getservice' %]service[% END %]'>
+              [% FOREACH d = data %]
+                <option value="[% d | html %]">[% d | html %]</option>
+              [% END %]
+            </select>
+          </td>
+        </tr>
+      </table>
+      <div class="footer justify-center">
+        <input class="green" type='submit' value='Continue to Step 3'>
+      </div>
+    </form>
+  </div>
 </div>
 
 [% PROCESS _footer.tt %]
