@@ -1537,7 +1537,7 @@ return text with http/https links replaced with real links
 sub replace_links {
     my($txt) = @_;
     $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
-             /<a class="link" href="$1" target="_blank">$1<\/a>
+             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
              /gmx;
     return($txt);
 }
