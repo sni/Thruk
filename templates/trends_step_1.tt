@@ -1,39 +1,34 @@
 ﻿[% PROCESS _header.tt %]
 
-    <div id="popup" style="position:absolute; z-index:1; visibility: hidden"></div>
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table>
-    <div align="center">
-      <div class='reportSelectTitle'>Step 1: Select Report Type</div>
-    </div>
-    <div align="center">
-      <form method="get" action="trends.cgi">
-        <table border="0" cellpadding="5">
-          <tr>
-            <td class='reportSelectSubTitle' align="right">Type:</td>
-            <td class='reportSelectItem'>
-              <select name='input'>
-                <option value="gethost">Host</option>
-                <option value="getservice">Service</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class='reportSelectItem'>
-              <input type='submit' value='Continue to Step 2'>
-            </td>
-          </tr>
-        </table>
-      </form>
-    </div>
+[% PROCESS _infobox.tt %]
+
+<h1 class="mt-5">Host and Service State Trends</h1>
+
+<div class="card mx-auto w-[800px] mt-5">
+  <div class="head">
+    <h3>
+      <span class="tabs w-40 active"><a class="flex" href="#">1. Report Type</a></span>
+    </h3>
+  </div>
+
+  <div class="body">
+    <form method="get" action="trends.cgi">
+      <table class="cellspacing-x w-fit mx-auto">
+        <tr>
+          <th class="text-right">Type</th>
+          <td>
+            <select name='input'>
+              <option value="gethost">Host</option>
+              <option value="getservice">Service</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <div class="footer justify-center">
+        <input class="green" type='submit' value='Continue to Step 2'>
+      </div>
+    </form>
+  </div>
+</div>
 
 [% PROCESS _footer.tt %]
