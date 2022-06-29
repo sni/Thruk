@@ -145,6 +145,10 @@
    @apply bg-[#555];
  }
 
+ .formsBG  {
+   @apply bg-[#aaa];
+ }
+
  .codeBG {
    @apply bg-[#333];
  }
@@ -234,7 +238,7 @@ TR:nth-child(even) TD.tableRowSelected {
 }
 
 .pager-entries, .display-filter, A.button.header-button, BUTTON.header-button {
- @apply bg-gray-100 hover:textDark hover:bg-gray-200 text-[#666];
+ @apply bg-gray-300 hover:textDark hover:bg-gray-400 text-[#666];
 }
 
 .tooltiptext {
@@ -250,17 +254,19 @@ TR:nth-child(even) TD.tableRowSelected {
 * icons as part of text links (ex. in action box container)
 */
 I.fa-solid, I.uil {
+ @apply text-[#aaa] !important;
+
  &.red {
-   @apply bg-red-600 text-white;
+   @apply bg-red-600 text-white !important;
  }
  &.green {
-   @apply bg-green-500 text-white;
+   @apply bg-green-500 text-white !important;
  }
  &.yellow {
-   @apply bg-yellow-300 text-black;
+   @apply bg-yellow-300 text-black !important;
  }
  &.gray {
-   @apply bg-gray-200 text-black;
+   @apply bg-gray-200 text-black !important;
  }
 }
 
@@ -321,6 +327,9 @@ DIV.progressbar {
 }
 
 BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
+ I.fa-solid, I.uil {
+   @apply text-inherit !important;
+ }
  &.active, &:hover {
    @apply bg-gray-400 text-white;
  }
@@ -359,8 +368,11 @@ DIV.radiogroup {
 /*******************************************************************************
 * forms
 */
-INPUT, SELECT {
-  @apply textDark;
+[type="text"], [type="email"], [type="url"], [type="password"], [type="number"], [type="date"], [type="datetime-local"], [type="month"], [type="search"], [type="tel"], [type="time"], [type="week"], [multiple], textarea, select {
+  @apply textDark formsBG;
+}
+[type="checkbox"], [type="radio"] {
+  @apply formsBG;
 }
 INPUT:disabled {
  @apply bg-gray-300;
