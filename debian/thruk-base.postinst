@@ -61,11 +61,15 @@ case "$1" in
           rm -f /etc/thruk/themes/themes-enabled/*
           cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
           test -h /etc/thruk/themes/themes-enabled/.Thruk2 && mv /etc/thruk/themes/themes-enabled/.Thruk2 /etc/thruk/themes/themes-enabled/Thruk2
+          # remove broken/old symlinks
+          for link in /etc/thruk/themes/themes-enabled/*; do test -e $link/. || rm $link; done
         fi
         if [ -d /tmp/thruk_update/plugins/. ]; then
           rm -f /etc/thruk/plugins/plugins-enabled/*
           cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
         fi
+        # remove broken/old symlinks
+        for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm $link; done
         echo "thruk plugins enabled:" $(ls /etc/thruk/plugins/plugins-enabled/)
         if [ -d /tmp/thruk_update/ssi/. ]; then
           rm -f /etc/thruk/ssi/*
