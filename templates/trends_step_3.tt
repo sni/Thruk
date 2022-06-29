@@ -9,16 +9,16 @@
     <h3>
       <span class="tabs w-40"><a class="flex" href="trends.cgi">1. Report Type</a></span>
       <i class="fa-solid fa-angle-right text-sm"></i>
-      <span class="tabs w-40"><a class="flex" href="trends.cgi?[% IF ! service %]input=gethost[% ELSE %]input=getservice[% END %]">2. [% IF ! service %]Host[% ELSE %]Service[% END %]</a></span>
+      <span class="tabs w-40"><a class="flex" href="trends.cgi?[% IF ! service %]input=gethost[% ELSE %]input=getservice[% END %]">2. Select [% IF ! service %]Host[% ELSE %]Service[% END %]</a></span>
       <i class="fa-solid fa-angle-right text-sm"></i>
       <span class="tabs w-40 active"><a class="flex" href="#">3. Report Options</a></span>
     </h3>
   </div>
 
-  <div class="body">
-    <form method="get" action="trends.cgi">
-      [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
-      [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+  <form method="get" action="trends.cgi">
+    [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
+    [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+    <div class="body">
       <table class="cellspacing-x">
         <tr>
           <th class="text-right w-1/2 align-top">Report period</th>
@@ -34,16 +34,13 @@
         <tr>
           <th class="text-right">Report time Period</th>
           <td class="align-top">
-            <select name='rpttimeperiod'>
+            <select name='rpttimeperiod' class="w-56">
               <option value="">None</option>
               [% FOREACH t = timeperiods %]
                 <option value="[% t.name | html %]">[% t.name | html %]</option>
               [% END %]
             </select>
           </td>
-        </tr>
-        <tr>
-          <td colspan="2" class="h-5"></td>
         </tr>
         <tr>
           <th class="text-right">Assume Initial States</th>
@@ -84,7 +81,7 @@
         <tr>
           <th class="text-right">First Assumed Service State</th>
           <td>
-            <select name='initialassumedservicestate'>
+            <select name='initialassumedservicestate' class="w-56">
               <option value="0">Unspecified</option>
               <option value="-1">Current State</option>
               <option value="6">Service Ok</option>
@@ -103,11 +100,11 @@
           <td><input type='checkbox' name='nomap'></td>
         </tr>
       </table>
-      <div class="footer justify-center">
-        <input class="green" type='submit' value='Create Report'>
-      </div>
-    </form>
-  </div>
+    </div>
+    <div class="footer justify-center">
+      <input class="green" type='submit' value='Create Report'>
+    </div>
+  </form>
 </div>
 
 [% PROCESS _footer.tt %]

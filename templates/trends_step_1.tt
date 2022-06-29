@@ -7,12 +7,12 @@
 <div class="card mx-auto w-[800px] mt-5">
   <div class="head">
     <h3>
-      <span class="tabs w-40 active"><a class="flex" href="#">1. Report Type</a></span>
+      <span class="tabs w-44 active"><a class="flex" href="#">1. Report Type</a></span>
     </h3>
   </div>
 
-  <div class="body">
-    <form method="get" action="trends.cgi">
+  <form method="get" action="trends.cgi">
+    <div class="body">
       <table class="cellspacing-x w-fit mx-auto">
         <tr>
           <th class="text-right">Type</th>
@@ -24,11 +24,11 @@
           </td>
         </tr>
       </table>
+    </div>
       <div class="footer justify-center">
         <input class="green" type='submit' value='Continue to Step 2'>
       </div>
-    </form>
-  </div>
+  </form>
 </div>
 
 [% PROCESS _footer.tt %]
