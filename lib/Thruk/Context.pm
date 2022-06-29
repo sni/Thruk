@@ -603,7 +603,9 @@ sub redirect_to {
 
     # do not redirect json post requests, for ex.: from send_form_in_background_and_reload()
     if($c->req->method eq 'POST' && want_json_response($c)) {
-        return($c->render(json => { OK => 1 }));
+        my $data = { 'ok' => 1 };
+        $data->{'message'} = $c->stash->{'thruk_message_raw'} if $c->stash->{'thruk_message_raw'};
+        return($c->render(json => $data));
     }
 
     $c->res->content_type('text/html; charset=utf-8');
