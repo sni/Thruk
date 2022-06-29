@@ -2,42 +2,37 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%">
-          <div align="center" class='dataTitle'>
-          [% IF hostgroup == 'all' %]
-            All Hostgroups
-          [% ELSE %]
-            Hostgroup '[% hostgroup %]'
-          [% END %]
-          </div><br>
-          <img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='Availability Report' title='Availability Report' width="20" height="20"><br clear="all">
-          <div align="center" class='reportRange'>
-            [% format_date(start, datetime_format) %] to [% format_date(end, datetime_format) %]
-          </div>
-          <div align="center" class='reportDuration'>
-            Duration: [% SET dur = end - start %][% duration(dur) %]
-          </div>
-        </td>
-        <td align="right" valign="bottom" width="33%">
-          [% PROCESS avail_report_form_box.tt %]
-        </td>
-      </tr>
-    </table>
+<div class="flexrow justify-between gap-1">
+  [% PROCESS _infobox.tt %]
 
-    <div align="center" class='reportTime'>[ Availability report completed in [% duration(time_token, 2) %] ]</div><br>
-    <br>
-    <br>
-    <br>
+  <div class="flexcol gap-2 items-center">
+    <h1>
+      [% IF hostgroup == 'all' %]
+        All Hostgroups
+      [% ELSE %]
+        Hostgroup '[% hostgroup %]'
+      [% END %]
+    </h1>
+    <i class="fa-solid fa-chart-line" title='Availability Report'></i>
+    <div>
+      [% format_date(start, datetime_format) %] to [% format_date(end, datetime_format) %]
+    </div>
+    <div>
+      Duration: [% SET dur = end - start %][% duration(dur) %]
+    </div>
+  </div>
 
-    [% FOR groupname IN groups.keys.sort %]
-        [% SET hostgroupname = groupname %]
-        [% SET hosts         = groups.$groupname.hosts %]
-        [% PROCESS avail_report_hosts_part.tt %]
-    [% END %]
+  <div class="flex">
+    [% PROCESS avail_report_form_box.tt %]
+  </div>
+</div>
+
+[% FOR groupname IN groups.keys.sort %]
+    [% SET hostgroupname = groupname %]
+    [% SET hosts         = groups.$groupname.hosts %]
+    [% PROCESS avail_report_hosts_part.tt %]
+[% END %]
+
+<div class="w-full text-center my-5">[ Availability report completed in [% duration(time_token, 2) %] ]</div>
 
 [% PROCESS _footer.tt %]

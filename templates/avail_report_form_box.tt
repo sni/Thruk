@@ -1,66 +1,66 @@
 ﻿<form method="GET" action="avail.cgi">
-[% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
-[% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
-[% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
-[% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
-[% IF show_log_entries %]<input type='hidden' name='show_log_entries' value="[% show_log_entries | html %]">[% END %]
-[% IF full_log_entries %]<input type='hidden' name='full_log_entries' value="[% full_log_entries | html %]">[% END %]
-<input type='hidden' name='assumeinitialstates' value="[% assumeinitialstates | html %]">
-<input type='hidden' name='assumestateretention' value="[% assumestateretention | html %]">
-<input type='hidden' name='assumestatesduringnotrunning' value="[% assumestatesduringnotrunning | html %]">
-<input type='hidden' name='includesoftstates' value="[% includesoftstates | html %]">
-[% IF report_type %]<input type='hidden' name='report_type' value="[% report_type | html %]">[% END %]
-<table border="0" class='optBox'>
-  <tr>
-    [% UNLESS service %]
-    <td valign="top" align="left" class='optBoxItem'>First assumed host state:</td>
-    [% END %]
-    <td valign="top" align="left" class='optBoxItem'>First assumed service state</td>
-  </tr>
-  <tr>
-    [% UNLESS service %]
-    <td valign="top" align="left" class='optBoxItem'>
-      <select name='initialassumedhoststate'>
-        <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
-        <option value="-1"[% IF initialassumedhoststate == -1 %] selected[% END %]>Current State</option>
-        <option value="3"[% IF  initialassumedhoststate ==  3 %] selected[% END %]>Host Up</option>
-        <option value="4"[% IF  initialassumedhoststate ==  4 %] selected[% END %]>Host Down</option>
-        <option value="5"[% IF  initialassumedhoststate ==  5 %] selected[% END %]>Host Unreachable</option>
-      </select>
-    </td>
-    [% END %]
-    <td class='optBoxItem'>
-      <select name='initialassumedservicestate'>
-        <option value="0"[% IF  initialassumedservicestate ==  0 %] selected[% END %]>Unspecified</option>
-        <option value="-1"[% IF initialassumedservicestate == -1 %] selected[% END %]>Current State</option>
-        <option value="6"[% IF  initialassumedservicestate ==  6 %] selected[% END %]>Service Ok</option>
-        <option value="8"[% IF  initialassumedservicestate ==  8 %] selected[% END %]>Service Warning</option>
-        <option value="7"[% IF  initialassumedservicestate ==  7 %] selected[% END %]>Service Unknown</option>
-        <option value="9"[% IF  initialassumedservicestate ==  9 %] selected[% END %]>Service Critical</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td valign="top" align="left" class='optBoxItem'>Report period:</td>
-    <td valign="top" align="left" class='optBoxItem'>Backtracked archives:</td>
-  </tr>
-  <tr>
-    <td valign="top" align="left" class='optBoxItem'>
-      [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 %]
-    </td>
-    <td valign="top" align="left" class='optBoxItem'>
-      <input type='text' size='2' maxlength='2' name='backtrack' value="[% backtrack | html %]">
-    </td>
-  </tr>
-  <tr>
-    <td valign="top" align="left"></td>
-    <td valign="top" align="left" class='optBoxItem'>
-      <input type='submit' value='Update'>
-    </td>
-  </tr>
-  <tr>
-    <td></td>
-    <td align="right" valign="bottom"></td>
-  </tr>
-</table>
+  [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
+  [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
+  [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+  [% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
+  [% IF show_log_entries %]<input type='hidden' name='show_log_entries' value="[% show_log_entries | html %]">[% END %]
+  [% IF full_log_entries %]<input type='hidden' name='full_log_entries' value="[% full_log_entries | html %]">[% END %]
+  <input type='hidden' name='assumeinitialstates' value="[% assumeinitialstates | html %]">
+  <input type='hidden' name='assumestateretention' value="[% assumestateretention | html %]">
+  <input type='hidden' name='assumestatesduringnotrunning' value="[% assumestatesduringnotrunning | html %]">
+  <input type='hidden' name='includesoftstates' value="[% includesoftstates | html %]">
+  [% IF report_type %]<input type='hidden' name='report_type' value="[% report_type | html %]">[% END %]
+  <div class="card">
+    <div class="head">
+      <h3>Options</h3>
+    </div>
+    <table class="body cellspacing-x">
+      <tr>
+        [% UNLESS service %]
+        <th>First assumed host state</th>
+        [% END %]
+        <th>First assumed service state</th>
+      </tr>
+      <tr>
+        [% UNLESS service %]
+        <td>
+          <select name='initialassumedhoststate'>
+            <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
+            <option value="-1"[% IF initialassumedhoststate == -1 %] selected[% END %]>Current State</option>
+            <option value="3"[% IF  initialassumedhoststate ==  3 %] selected[% END %]>Host Up</option>
+            <option value="4"[% IF  initialassumedhoststate ==  4 %] selected[% END %]>Host Down</option>
+            <option value="5"[% IF  initialassumedhoststate ==  5 %] selected[% END %]>Host Unreachable</option>
+          </select>
+        </td>
+        [% END %]
+        <td>
+          <select name='initialassumedservicestate'>
+            <option value="0"[% IF  initialassumedservicestate ==  0 %] selected[% END %]>Unspecified</option>
+            <option value="-1"[% IF initialassumedservicestate == -1 %] selected[% END %]>Current State</option>
+            <option value="6"[% IF  initialassumedservicestate ==  6 %] selected[% END %]>Service Ok</option>
+            <option value="8"[% IF  initialassumedservicestate ==  8 %] selected[% END %]>Service Warning</option>
+            <option value="7"[% IF  initialassumedservicestate ==  7 %] selected[% END %]>Service Unknown</option>
+            <option value="9"[% IF  initialassumedservicestate ==  9 %] selected[% END %]>Service Critical</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>Report period</th>
+        <th>Backtracked archives</th>
+      </tr>
+      <tr>
+        <td>
+          [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 %]
+        </td>
+        <td class="align-top">
+          <input type='text' size='2' maxlength='2' name='backtrack' value="[% backtrack | html %]">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" class="pb-2">
+          <input type='submit' value='Update' class="mx-auto">
+        </td>
+      </tr>
+    </table>
+  </div>
 </form>
