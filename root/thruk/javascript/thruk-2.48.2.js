@@ -4182,11 +4182,14 @@ function togglePasswordVisibility(ev) {
 }
 
 function copyCode(evt, id) {
+    var text = id;
     var pre  = document.getElementById(id)
-    var code = pre.querySelector("code");
-    var text = pre.value || pre.innerText;
-    if(code) {
-        text = code.innerText;
+    if(pre) {
+        var code = pre.querySelector("code");
+        text = pre.value || pre.innerText;
+        if(code) {
+            text = code.innerText;
+        }
     }
     var result      = "Copied!";
     var removeDelay = 1500;

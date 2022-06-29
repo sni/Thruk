@@ -1,140 +1,160 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
+[% PROCESS _infobox.tt %]
 
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table>
+<h1 class="mt-5">Availability Report</h1>
 
-    <div align="center" class='dateSelectTitle'>Step 3: Select Report Options</div>
-    <div align="center">
-      <form method="get" action="avail.cgi" id="avail_form">
-        <input type='hidden' name='show_log_entries' value=''>
-        [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
-        [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
-        [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
-        [% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
-        <table border="0" cellpadding="5">
-          <tr>
-            <td valign="top" class='reportSelectSubTitle' align="right">Report Period:</td>
-            <td valign="top" align="left">
-              [% t1 = date.now - 86400 %]
-              [% t2 = date.now %]
-              [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" custom=1 name="timeperiod" t1=t1 t2=t2 current=0 show_hint=0 %]
-            </td>
-          </tr>
-          <tr>
-            <td valign="top" class='reportSelectSubTitle' align="right">Report time Period:</td>
-            <td valign="top" align="left" class='optBoxItem'>
-              <select name='rpttimeperiod'>
-                <option value="">None</option>
-                [% FOREACH t = timeperiods %]
-                <option value="[% t.name | html %]">[% t.name | html %]</option>
-                [% END %]
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class='reportSelectSubTitle' align="right">Assume Initial States:</td>
-            <td class='reportSelectItem'>
-              <select name='assumeinitialstates'>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class='reportSelectSubTitle' align="right">Assume State Retention:</td>
-            <td class='reportSelectItem'>
-              <select name='assumestateretention'>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class='reportSelectSubTitle' align="right">Assume States During Program Downtime:</td>
-            <td class='reportSelectItem'>
-              <select name='assumestatesduringnotrunning'>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class='reportSelectSubTitle' align="right">Include Soft States:</td>
-            <td class='reportSelectItem'>
-              <select name='includesoftstates'>
-                <option value="yes">Yes</option>
-                <option value="no" selected>No</option>
-              </select>
-            </td>
-          </tr>
-          [% UNLESS service %]
-          <tr>
-            <td class='reportSelectSubTitle' align="right">First Assumed Host State:</td>
-            <td class='reportSelectItem'>
-              <select name='initialassumedhoststate'>
-                <option value=0>Unspecified</option>
-                <option value=-1>Current State</option>
-                <option value=3>Host Up</option>
-                <option value=4>Host Down</option>
-                <option value=5>Host Unreachable</option>
-              </select>
-            </td>
-          </tr>
-          [% END %]
-          <tr>
-            <td class='reportSelectSubTitle' align="right">First Assumed Service State:</td>
-            <td class='reportSelectItem'>
-              <select name='initialassumedservicestate'>
-                <option value="0">Unspecified</option>
-                <option value="-1">Current State</option>
-                <option value="6">Service Ok</option>
-                <option value="8">Service Warning</option>
-                <option value="7">Service Unknown</option>
-                <option value="9">Service Critical</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td valign="top" class='reportSelectSubTitle' align="right">Output Format:</td>
-            <td valign="top" class='reportSelectItem'>
-              <input type="radio" name="view_mode" value="html" checked>HTML
-              <input type="radio" name="view_mode" value="xls">XLS
-              <input type="radio" name="view_mode" value="csv">CSV
-              <input type="radio" name="view_mode" value="json">JSON
-            </td>
-          </tr>
-          <tr>
-            <td colspan=2 align="center" class='dateSelectItem'><input type='submit' value='Create Availability Report!'></td>
-          </tr>
-        </table>
-      </form>
+<div class="card mx-auto w-[800px] mt-5">
+  <div class="head">
+    <h3>
+      <span class="tabs w-44"><a class="flex" href="avail.cgi">1. Report Type</a></span>
+      <i class="fa-solid fa-angle-right text-sm"></i>
+      <span class="tabs w-44">
+        [% IF host %]
+          <a class="flex" href="avail.cgi?report_type=hosts">2. Select Host</a>
+        [% ELSIF hostgroup %]
+          <a class="flex" href="avail.cgi?report_type=hostgroups">2. Select Hostgroup</a>
+        [% ELSIF service %]
+          <a class="flex" href="avail.cgi?report_type=services">2. Select Service</a>
+        [% ELSIF servicegroup %]
+          <a class="flex" href="avail.cgi?report_type=servicegroups">2. Select Servicegroup</a>
+        [% END %]
+      </span>
+      <i class="fa-solid fa-angle-right text-sm"></i>
+      <span class="tabs w-44 active"><a class="flex" href="#">3. Report Options</a></span>
+    </h3>
+  </div>
 
-      <br>
-      <hr>
-      <b>Other options:</b>
-      <br>
-      <div class="report_permalink">
-        Permanent url for this report: <a href="" id="permalink"></a>
-      </div>
-
-      [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
-      <br>
-      <div>
-        <input name="email" value="Create E-Mail Report" onclick="window.location='reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+encodeURIComponent(jQuery('#permalink').attr('href')); return false;" type="button">
-      </div>
-      [% END %]
-
+  <form method="get" action="avail.cgi" id="avail_form">
+    <input type='hidden' name='show_log_entries' value=''>
+    [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
+    [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
+    [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
+    [% IF servicegroup %]<input type='hidden' name='servicegroup' value="[% servicegroup | html %]">[% END %]
+    <div class="body">
+      <table class="cellspacing-x">
+        <tr>
+          <th class="text-right align-top">Report Period</th>
+          <td>
+            [% t1 = date.now - 86400 %]
+            [% t2 = date.now %]
+            [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" custom=1 name="timeperiod" t1=t1 t2=t2 current=0 show_hint=0 %]
+          </td>
+        </tr>
+        <tr>
+          <th class="text-right align-top">Report time Period</th>
+          <td>
+            <select name='rpttimeperiod' class="w-56">
+              <option value="">None</option>
+              [% FOREACH t = timeperiods %]
+              <option value="[% t.name | html %]">[% t.name | html %]</option>
+              [% END %]
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="text-right align-top">Assume Initial States</th>
+          <td>
+            <select name='assumeinitialstates'>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="text-right align-top">Assume State Retention</th>
+          <td>
+            <select name='assumestateretention'>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="text-right align-top">Assume States During Program Downtime</th>
+          <td>
+            <select name='assumestatesduringnotrunning'>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="text-right align-top">Include Soft States</th>
+          <td>
+            <select name='includesoftstates'>
+              <option value="yes">Yes</option>
+              <option value="no" selected>No</option>
+            </select>
+          </td>
+        </tr>
+        [% UNLESS service %]
+        <tr>
+          <th class="text-right align-top">First Assumed Host State</th>
+          <td>
+            <select name='initialassumedhoststate' class="w-56">
+              <option value=0>Unspecified</option>
+              <option value=-1>Current State</option>
+              <option value=3>Host Up</option>
+              <option value=4>Host Down</option>
+              <option value=5>Host Unreachable</option>
+            </select>
+          </td>
+        </tr>
+        [% END %]
+        <tr>
+          <th class="text-right align-top">First Assumed Service State</th>
+          <td>
+            <select name='initialassumedservicestate' class="w-56">
+              <option value="0">Unspecified</option>
+              <option value="-1">Current State</option>
+              <option value="6">Service Ok</option>
+              <option value="8">Service Warning</option>
+              <option value="7">Service Unknown</option>
+              <option value="9">Service Critical</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="text-right align-top">Output Format</th>
+          <td>
+            <div class="radiogroup w-56">
+              <input type="radio" name="view_mode" value="html" id="view_mode_0" checked><label for="view_mode_0">HTML</label>
+              <input type="radio" name="view_mode" value="xls"  id="view_mode_1" ><label for="view_mode_1">XLS</label>
+              <input type="radio" name="view_mode" value="csv"  id="view_mode_2" ><label for="view_mode_2">CSV</label>
+              <input type="radio" name="view_mode" value="json" id="view_mode_3" ><label for="view_mode_3">JSON</label>
+            </div>
+          </td>
+        </tr>
+      </table>
     </div>
+    <div class="footer justify-center border-t-0">
+      <input class="green" type='submit' value='Create Availability Report'></td>
+    </div>
+  </form>
+
+  <div class="footer justify-center h-fit flexcol gap-2">
+    <h4 class=" self-start">Other options:</h4>
+    <div class="w-full">
+      <table>
+        <tr>
+          <th>Permanent url for this report:</th>
+          <td><a class="link truncate max-w-[450px] block" target="_blank" href="" id="permalink"></a></td>
+          <td>
+            <button class="iconOnly px-1 copy_button" onclick="copyCode(event, String(document.getElementById('permalink').href)); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
+    <div class="pb-2">
+      <input name="email" value="Create E-Mail Report" onclick="window.location='reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+encodeURIComponent(jQuery('#permalink').attr('href')); return false;" type="button">
+    </div>
+    [% END %]
+  </div>
+</div>
 
 <script>
   function update_permalink() {

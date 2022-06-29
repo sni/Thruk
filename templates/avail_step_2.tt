@@ -1,69 +1,71 @@
 ﻿[% PROCESS _header.tt %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table>
-    <div align="center" class='reportSelectTitle'>
-      [% IF report_type == 'hosts' %]
-      Step 2: Select Host
-      [% ELSIF report_type == 'hostgroups' %]
-      Step 2: Select Hostgroup
-      [% ELSIF report_type == 'services' %]
-      Step 2: Select Service
-      [% ELSIF report_type == 'servicegroups' %]
-      Step 2: Select Servicegroup
-      [% END %]
-    </div>
-    <div align="center">
-      <form method="GET" action="avail.cgi">
-        <input type='hidden' name='get_date_parts'>
-        <table border="0" cellpadding="5">
-          <tr>
-            <td class='reportSelectSubTitle' valign="middle">
-              [% IF report_type == 'hosts' %]
-              Host(s):
-              [% ELSIF report_type == 'hostgroups' %]
-              Hostgroup(s):
-              [% ELSIF report_type == 'services' %]
-              Service(s):
-              [% ELSIF report_type == 'servicegroups' %]
-              Servicegroup(s):
-              [% END %]
-            </td>
-            <td align="left" valign="middle" class='reportSelectItem'>
-              <select name='[% IF report_type == 'hosts' %]host[% ELSIF report_type == 'services' %]service[% ELSIF report_type == 'servicegroups' %]servicegroup[% ELSIF report_type == 'hostgroups' %]hostgroup[% END %]'>
-                <option value='all'>
-                  [% IF report_type == 'hosts' %]
-                  ** ALL HOSTS **
-                  [% ELSIF report_type == 'hostgroups' %]
-                  ** ALL HOSTGROUPS **
-                  [% ELSIF report_type == 'services' %]
-                  ** ALL SERVICES **
-                  [% ELSIF report_type == 'servicegroups' %]
-                  ** ALL SERVICEGROUPS **
-                  [% END %]
-                </option>
-                [% FOREACH opt = data %]
-                <option>[% opt %]</option>
+[% PROCESS _infobox.tt %]
+
+<h1 class="mt-5">Availability Report</h1>
+
+<div class="card mx-auto w-[800px] mt-5">
+  <div class="head">
+    <h3>
+      <span class="tabs w-44"><a class="flex" href="avail.cgi">1. Report Type</a></span>
+      <i class="fa-solid fa-angle-right text-sm"></i>
+      <span class="tabs w-44 active">
+        <a class="flex" href="#">
+          [% IF report_type == 'hosts' %]
+          2. Select Host
+          [% ELSIF report_type == 'hostgroups' %]
+          2. Select Hostgroup
+          [% ELSIF report_type == 'services' %]
+          2. Select Service
+          [% ELSIF report_type == 'servicegroups' %]
+          2. Select Servicegroup
+          [% END %]
+        </a>
+      </span>
+    </h3>
+  </div>
+
+  <form method="get" action="avail.cgi">
+    <input type='hidden' name='get_date_parts'>
+    <div class="body">
+      <table class="cellspacing-x w-fit mx-auto">
+        <tr>
+          <th class="text-right">
+            [% IF report_type == 'hosts' %]
+            Host(s)
+            [% ELSIF report_type == 'hostgroups' %]
+            Hostgroup(s)
+            [% ELSIF report_type == 'services' %]
+            Service(s)
+            [% ELSIF report_type == 'servicegroups' %]
+            Servicegroup(s)
+            [% END %]
+          </th>
+          <td>
+            <select name='[% IF report_type == 'hosts' %]host[% ELSIF report_type == 'services' %]service[% ELSIF report_type == 'servicegroups' %]servicegroup[% ELSIF report_type == 'hostgroups' %]hostgroup[% END %]'>
+              <option value='all'>
+                [% IF report_type == 'hosts' %]
+                ** ALL HOSTS **
+                [% ELSIF report_type == 'hostgroups' %]
+                ** ALL HOSTGROUPS **
+                [% ELSIF report_type == 'services' %]
+                ** ALL SERVICES **
+                [% ELSIF report_type == 'servicegroups' %]
+                ** ALL SERVICEGROUPS **
                 [% END %]
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td align="left" class='dateSelectItem'>
-              <input type='submit' value='Continue to Step 3'>
-            </td>
-          </tr>
-        </table>
-      </form>
+              </option>
+              [% FOREACH opt = data %]
+              <option>[% opt %]</option>
+              [% END %]
+            </select>
+          </td>
+        </tr>
+      </table>
     </div>
+    <div class="footer justify-center">
+      <input class="green" type='submit' value='Continue to Step 3'>
+    </div>
+  </form>
+</div>
 
 [% PROCESS _footer.tt %]
