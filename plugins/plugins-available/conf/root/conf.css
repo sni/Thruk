@@ -1,14 +1,3 @@
-TD#filesystem {
-  text-align: left;
-  min-width: 600px;
-}
-
-TD#filepath {
-  font-size: larger;
-  padding-top: 5px;
-  padding-left: 15px;
-}
-
 DIV#editor {
   position: relative;
 }
@@ -35,9 +24,6 @@ TD.dataVar DIV#editor {
 
 /* object browser */
 /* icons layout */
-DIV.layout_icons.browser_file_item:hover {
-  background-color:#FFF8CC;
-}
 DIV.layout_icons.browser_file_item {
   height: 65px;
   width: 100px;
@@ -95,9 +81,6 @@ DIV.layout_table.browser_file_item {
   height: 20px;
   width: 880px;
   overflow: hidden;
-}
-DIV.layout_table.browser_file_item:hover {
-  background-color:#FFF8CC;
 }
 DIV.layout_table.browser_file_item IMG {
   width: 18px;

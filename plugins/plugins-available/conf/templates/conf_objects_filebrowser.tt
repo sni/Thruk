@@ -11,7 +11,7 @@
       </div>
       <table class="body">
         <tr>
-          <td id="filepath"></td>
+          <td id="filepath" class="text-base"></td>
         </tr>
         <tr>
           <td id="filesystem"></td>
