@@ -816,6 +816,7 @@ sub get_toolkit_config {
                     'strip_command_args'            => \&Thruk::Utils::Filter::strip_command_args,
                     'escape_html'                   => \&Thruk::Utils::Filter::escape_html,
                     'lc'                            => \&Thruk::Utils::Filter::lc,
+                    'replace_links'                 => \&Thruk::Utils::Filter::replace_links,
         },
         'PRE_DEFINE'                            => {
                     # subs from Thruk::Utils::Filter will be added automatically

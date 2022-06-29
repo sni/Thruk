@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - make links clickable in comments and downtimes
           - fix sidebar search not showing all service names
           - Panorama:
             - support non-numeric dashboard file names
