@@ -204,6 +204,17 @@ function init_page() {
             console.log(err);
         }
     }
+
+    // break from old frame mode
+    try {
+        if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
+            if(String(window.top.location).match(/\/thruk\/#cgi-bin\//)) {
+                if(String(window.top.location).replace(/\/thruk\/#cgi-bin\//, "/thruk/cgi-bin/") == String(window.location)) {
+                    window.top.location = window.location;
+                }
+            }
+        }
+    } catch(err) { console.log(err); }
 }
 
 function applyScroll(scrollTo) {
@@ -7510,7 +7521,7 @@ var ajax_search = {
                 if(ajax_search.dont_hide==false) {
                     fade(ajax_search.result_pan, 300);
                     var input = document.getElementById(ajax_search.input_field);
-                    if(input.value == "") {
+                    if(input && input.value == "") {
                         jQuery(input).removeClass("expanded");
                     }
                 }
