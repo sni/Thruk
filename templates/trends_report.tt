@@ -89,20 +89,20 @@
       </div>
     </div>
 
-    <div class="flexcol gap-2 items-center">
-      <h1>
-        [% IF service %]
-        Service '[% service | html %]' On Host '[% host | html %]'
-        [% ELSE %]
-        Host '[% host | html %]'
-        [% END %]
-      </h1>
-      <i class="fa-solid fa-chart-line" title='[% IF service %]Service[% ELSE %]Host[% END %] State Trends'></i>
-      <div>
-        [% format_date(start, datetime_format) %] to [% format_date(end, datetime_format) %]
+    <div class="card  min-w-[430px] min-h-[190px]">
+      <div class="head justify-between">
+        <h3>
+            [% IF service %]
+          Service '[% service | html %]' On Host '[% host | html %]'
+          [% ELSE %]
+          Host '[% host | html %]'
+          [% END %]
+        </h3>
+        <i class="fa-solid fa-chart-line" title='[% IF service %]Service[% ELSE %]Host[% END %] State Trends'></i>
       </div>
-      <div>
-        Duration: [% SET dur = end - start %][% duration(dur) %]
+      <div class="body flexcol gap-2 justify-center items-center">
+        <h3 class="w-full text-center">[% format_date(start, datetime_format) %]<br>to<br>[% format_date(end, datetime_format) %]</h3>
+        <div>Duration: [% SET dur = end - start %][% duration(dur) %]</div>
       </div>
     </div>
 

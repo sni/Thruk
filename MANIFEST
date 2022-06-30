@@ -2667,6 +2667,7 @@ t/timed_test.sh
 t/waitmax
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
+templates/_avail_report_header.tt
 templates/_backends_select_multi.tt
 templates/_blocks.tt
 templates/_cmd_form.tt
