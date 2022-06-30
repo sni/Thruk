@@ -446,10 +446,11 @@ function setBtnSpinner(btn, skipTimeout) {
     } else {
         jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
     }
-    window.setTimeout(function() {
+    var disableTimer = window.setTimeout(function() {
         // disable delayed, otherwise chrome won't send the form
         setBtnDisabled(btn);
     }, 300);
+    jQuery(btn).data("distimer", disableTimer);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
         el.dataset["href"] = el.href;
@@ -465,17 +466,26 @@ function setBtnSpinner(btn, skipTimeout) {
     }
 }
 
-function setBtnNoSpinner(btn) {
-    jQuery(btn).find('div.spinner').remove();
-    setBtnEnabled(btn);
-    jQuery(btn).find("I").css("display", "");
+function setBtnClearTimer(btn) {
     var timer = jQuery(btn).data("timer");
+    if(timer) {
+        window.clearTimeout(timer);
+    }
+    timer = jQuery(btn).data("distimer");
     if(timer) {
         window.clearTimeout(timer);
     }
 }
 
+function setBtnNoSpinner(btn) {
+    jQuery(btn).find('div.spinner').remove();
+    setBtnEnabled(btn);
+    jQuery(btn).find("I").css("display", "");
+    setBtnClearTimer(btn);
+}
+
 function setBtnError(btn, title) {
+    setBtnClearTimer(btn);
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
     jQuery(btn).find('I.fa-check').remove();
@@ -495,6 +505,7 @@ function setBtnError(btn, title) {
 }
 
 function setBtnSuccess(btn, title) {
+    setBtnClearTimer(btn);
     jQuery(btn).find('div.spinner').remove();
     jQuery(btn).find('I.uil-exclamation').remove();
     jQuery(btn).find("I").css("display", "none");

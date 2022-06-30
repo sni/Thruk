@@ -2,101 +2,107 @@
     js           => [ "vendor/flot-d7c58b5/jquery.flot.js",
                       "vendor/flot-d7c58b5/jquery.flot.time.js",
                       "vendor/flot-d7c58b5/jquery.flot.stack.js",
-                    ],
-    css          => [ "plugins/core_scheduling/core_scheduling.css" ],
+                    ]
 %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
-<table border="0" width="100%" cellspacing="0" cellpadding="0">
-  <tr>
-    <td align="left" valign="top" width="20%" class="filter_button_cell">
-      [% PROCESS _status_filter.tt %]
-    </td>
-    <td align="center" valign="top" width="60%">
-      <div align="center" class='dataTitle'>
-        Core Scheduling Overview
-        [% IF hostgroup       == 'all' %] For All Host Groups
-        [% ELSIF hostgroup    != ''    %] For Host Group '[% hostgroup %]'
-        [% ELSIF servicegroup == 'all' %] For All Service Groups
-        [% ELSIF servicegroup != ''    %] For Service Group '[% servicegroup %]'
-        [% END %]
-      </div>
-    </td>
-    <td align="right" valign="bottom" width="20%">
-    </td>
-  </tr>
-</table>
-
-
-<div id='tooltip'></div>
-<div id="queue_graph" style="height: 350px; width: 1000px;"></div>
-
-<br>
-<table style="width: 1000px;"><tr><td style="vertical-align: top;">
-
-<form>
-<table class="core_schedule">
-  <tr>
-    <th colspan=2 style="border-bottom: 1px solid grey;">Graph Options</th>
-  </tr>
-  <tr>
-    <th>Look ahead seconds</th>
-    <td><input type="text" id="look_ahead" value="[% look_ahead | html %]" onchange="updateGraphDelayed()">s</td>
-  </tr>
-  <tr>
-    <th>Look back seconds</th>
-    <td><input type="text" id="look_back" value=[% look_back %] onchange="updateGraphDelayed()">s</td>
-  </tr>
-  <tr>
-    <th>Group Checks</th>
-    <td><input type="text" id="group_seconds" value=[% group_seconds %] onchange="updateGraphDelayed()">s</td>
-  </tr>
-  <tr>
-    <th>Update interval</th>
-    <td><input type="text" id="update_interval" value=3 onchange="updateGraphDelayed()">s</td>
-  </tr>
-</table>
-</form>
-
-</td><td style="vertical-align: top;">
-
-<table class="core_schedule">
-  <tr>
-    <th colspan=2 style="border-bottom: 1px solid grey;">Check Interval Distribution</th>
-  </tr>
-  <tr>
-    <th style="border-bottom: 1px solid grey;">Interval</th>
-    <th style="border-bottom: 1px solid grey; border-left: 1px solid grey;">Number of Checks</th>
-  </tr>
-  [% FOREACH interval = intervals.keys.nsort %]
-  <tr>
-    <th style="text-align: right;">[% interval %] min</th>
-    <td style="text-align: right; border-left: 1px solid grey;">[% intervals.$interval %] #</td>
-  </tr>
+<h1>
+  Core Scheduling Overview
+  [% IF hostgroup       == 'all' %] For All Host Groups
+  [% ELSIF hostgroup    != ''    %] For Host Group '[% hostgroup %]'
+  [% ELSIF servicegroup == 'all' %] For All Service Groups
+  [% ELSIF servicegroup != ''    %] For Service Group '[% servicegroup %]'
   [% END %]
-</table>
-
-</td><td style="vertical-align: top;">
+</h1>
 
 
-<table class="core_schedule">
-  <tr>
-    <th colspan=2 style="border-bottom: 1px solid grey;">Checks per Second</th>
-  </tr>
-  <tr>
-    <th style="text-align: right;">Calculated Average</th>
-    <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;">[% sprintf("%.2f", average) %]/s</td>
-  </tr>
-  <tr>
-    <th style="text-align: right;">Current Rate</th>
-    <td style="border-bottom: 1px solid grey; border-left: 1px solid grey;" id="current_rate">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]/s</td>
-  </tr>
-</table>
-<br>
-<a href="#" id="reschedule_btn" class="wzd_button">balance all hosts and services</a>
+<div class="card mx-auto w-[1000px] mt-5">
+  <div class="head justify-between">
+    [% PROCESS _status_filter.tt %]
+    <button id="reschedule_btn" class="green">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      balance all hosts and services
+    </button>
+  </div>
+  <div class="body">
+    <div id="queue_graph" class="w-full h-[350px]"></div>
 
-</td></tr></table>
+    <div class="flexrow flex-nowrap gap-3 justify-between">
+      <form>
+        <table class="w-fit cellspacing-x">
+          <tr>
+            <th colspan=2 class="text-center">Graph Options</th>
+          </tr>
+          <tr>
+            <td colspan=2><hr class="pb-1 mt-1"></td>
+          </tr>
+          <tr>
+            <th>Look ahead seconds</th>
+            <td><input class="w-16" type="text" id="look_ahead" value="[% look_ahead | html %]" onchange="updateGraphDelayed()"> s</td>
+          </tr>
+          <tr>
+            <th>Look back seconds</th>
+            <td><input class="w-16" type="text" id="look_back" value=[% look_back %] onchange="updateGraphDelayed()"> s</td>
+          </tr>
+          <tr>
+            <th>Group Checks</th>
+            <td><input class="w-16" type="text" id="group_seconds" value=[% group_seconds %] onchange="updateGraphDelayed()"> s</td>
+          </tr>
+          <tr>
+            <th>Update interval</th>
+            <td><input class="w-16" type="text" id="update_interval" value=3 onchange="updateGraphDelayed()"> s</td>
+          </tr>
+        </table>
+      </form>
+
+      <table class="w-fit cellspacing-x">
+        <tr>
+          <th colspan=2 class="text-center">Check Interval Distribution</th>
+        </tr>
+        <tr>
+          <td colspan=2><hr class="pb-1 mt-1"></td>
+        </tr>
+        <tr>
+          <th>Interval</th>
+          <th>Number of Checks</th>
+        </tr>
+        [% FOREACH interval = intervals.keys.nsort %]
+          <tr>
+            <th class="text-right">[% interval %] min</th>
+            <td class="text-right">[% intervals.$interval %]</td>
+          </tr>
+        [% END %]
+      </table>
+
+      <div class="flexcol gap-3">
+        <table class="w-fit cellspacing-x">
+          <tr>
+            <th colspan=2 class="text-center">Checks per Second</th>
+          </tr>
+          <tr>
+            <td colspan=2><hr class="pb-1 mt-1"></td>
+          </tr>
+          <tr>
+            <th class="text-right">Calculated Average</th>
+            <td>[% sprintf("%.2f", average) %]/s</td>
+          </tr>
+          <tr>
+            <th class="text-right">Current Rate</th>
+            <td id="current_rate">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]/s</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  DIV.legend TABLE {
+    width: auto !important;
+  }
+</style>
 
 <script>
 <!--
@@ -141,9 +147,7 @@ jQuery().ready(function() {
       jQuery('#update_interval').val(update_interval);
   }
 
-  jQuery('A.wzd_button').button({
-    icons: {primary: 'ui-wzd-button'}
-  }).click(function() {
+  jQuery('#reschedule_btn').click(function() {
     if(confirm('really reschedule everything?')) {
         updateGraph(true);
     }
@@ -168,10 +172,9 @@ function updateGraph(reschedule) {
   window.clearTimeout(updateTimer);
   updateInterval = jQuery('#update_interval').val()*1000;
   if(reschedule) {
-    jQuery('#reschedule_btn').button({
-        icons: {primary: 'ui-waiting-button'}
-    }).button("disable");
+    setBtnSpinner('#reschedule_btn');
   }
+
   jQuery.ajax({
       url:      "[%  uri_with(c, 'json' => 'true' ) %]",
       type:     "POST",
@@ -200,9 +203,7 @@ function updateGraph(reschedule) {
         }
 
         if(reschedule) {
-          jQuery('#reschedule_btn').button({
-              icons: {primary: 'ui-wzd-button'}
-          }).button("enable");
+          setBtnNoSpinner('#reschedule_btn');
         }
 
         window.clearTimeout(updateTimer);
@@ -212,6 +213,7 @@ function updateGraph(reschedule) {
         window.clearTimeout(updateTimer);
         updateTimer = window.setTimeout(updateGraph, updateInterval*2);
         jQuery("#now_label").html("update error: "+textStatus);
+        setBtnError('#reschedule_btn');
       }
   });
 }
