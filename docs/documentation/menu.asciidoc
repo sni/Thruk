@@ -212,7 +212,7 @@ It is possible to insert arbitrary HTML in the menu by specifying the html
 attribute. You may have to use CSS to style the content to your needs.
 
 -----
-  insert_item("General", {html => "<a href='#test'>test: <img src='/thruk/themes/Thruk/images/arrow_refresh.png'></a>" })
+  insert_item("General", {html => "<a href='#test'>test: <img src='/thruk/themes/Thruk/images/logo_thruk_small.png'></a>" })
 -----
 
 

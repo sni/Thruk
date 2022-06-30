@@ -19,7 +19,7 @@ SKIP: {
 };
 
 # make sure static content has Last-Modfied header
-$request = request('/thruk/themes/Thruk/images/ack.gif');
+$request = request('/thruk/themes/Thruk/images/logo_thruk.png');
 ok($request->headers('last-modified'), "static content request has last-modified header");
 ok($request->headers('content-length'), "static content request has content-length header");
 

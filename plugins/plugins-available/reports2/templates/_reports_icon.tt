@@ -1,4 +1,4 @@
-﻿[% icon = 'page_white_acrobat.png' %]
+﻿[% icon = 'fa-solid fa-file-pdf' %]
 [% IF    r.var.ctype == 'html2pdf'              %][% icon = 'fa-solid fa-file-pdf' %]
 [% ELSIF r.var.ctype == 'application/x-msexcel' %][% icon = 'fa-solid fa-file-excel' %]
 [% ELSIF r.var.ctype == 'application/pdf'       %][% icon = 'fa-solid fa-file-pdf' %]

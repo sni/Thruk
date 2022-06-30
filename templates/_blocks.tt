@@ -163,7 +163,7 @@
                             [%    IF l.state == 0 %][% SET pic = "fa-solid fa-check round small green"           desc = "Service Ok" %]
                             [% ELSIF l.state == 1 %][% SET pic = "fa-solid fa-exclamation round small yellow"    desc = "Service Warning" %]
                             [% ELSIF l.state == 2 %][% SET pic = "fa-solid fa-exclamation round small red"       desc = "Service Critical" %]
-                            [% ELSIF l.state == 3 %][% SET pic = "fa-solid fa-exclamation round small bgUNKNOWN" desc = "Service Unknown" %]
+                            [% ELSIF l.state == 3 %][% SET pic = "fa-solid fa-question round small bgUNKNOWN"    desc = "Service Unknown" %]
                             [% END %]
 [% ELSIF l.type == 'HOST ALERT'                   %]
                             [%    IF l.state == 0 %][% SET pic = "fa-solid fa-check round small green"      desc = "Host Up" %]

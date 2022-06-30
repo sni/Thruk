@@ -134,7 +134,7 @@
                   <ul class="pl-6 pr-2 list-disc">
                     <li>HTML is allowed, ex: <b>&lt;b&gt;bold text&lt;/b&gt;</b></li>
                     <li>Icons: &lt;i class=&quot;uil uil-question&quot;&gt;&lt;\/i&gt;</li>
-                    <li>Images: &lt;img src="../themes/{{theme}}/images/ack.gif" width=16 height=16&gt;</li>
+                    <li>Images: &lt;img src="../themes/{{theme}}/images/logo_thruk.png" width=16 height=16&gt;</li>
                     <li>Text macros: {{contact}}, {{contactemail}}, {{date}} and {{theme}}</li>
                     <li>Frontmatter variables:
               <pre>---

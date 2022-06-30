@@ -164,7 +164,7 @@
         </tr>
         <tr id="row_expire">
           <th>Expire</th>
-          <td><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom" class="cal_popup for_expire_time"> <input type="text" value="[% format_date(date.now+expire_ack_duration, '%Y-%m-%d %H:%M:%S') %]" id="expire_time" name="expire_time" size="20" onkeyup="verify_time(this.id, 'now')" class="cal_popup_clear"></td>
+          <td><i class="uil uil-schedule cal_popup for_expire_time" title="pick date"></i> <input type="text" value="[% format_date(date.now+expire_ack_duration, '%Y-%m-%d %H:%M:%S') %]" id="expire_time" name="expire_time" size="20" onkeyup="verify_time(this.id, 'now')" class="cal_popup_clear"></td>
         </tr>
         <tr id="row_comment_options">
           <th>Options</th>
