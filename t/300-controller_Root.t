@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 92;
+    plan tests => 89;
 }
 
 BEGIN {
@@ -30,7 +30,7 @@ if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} && $ENV{'PLACK_TEST_EXTERNALSERVER_URI'
     }
     TestUtils::test_page(url => '/thruk', redirect => 1, location => '/'.$product .'/');
 #}
-my $res = TestUtils::test_page(url => '/thruk/cgi-bin/blah.cgi', fail => 1, like => 'This page does not exist');
+my $res = TestUtils::test_page(url => '/thruk/cgi-bin/blah.cgi', fail => 1, like => 'This page does not exist', unlike => []);
 is($res->{'code'}, 404, 'got page not found');
 
 #####################################################################

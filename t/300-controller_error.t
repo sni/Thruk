@@ -21,10 +21,8 @@ for(0..25) {
     my $test = {
         'url'     => '/thruk/cgi-bin/error.cgi?error='.$nr,
         'fail'    => 1,
+        'unlike'  => [],
     };
-    if($nr == 13) {
-        $test->{'unlike'} = [];
-    }
     TestUtils::test_page(%{$test});
 }
 
