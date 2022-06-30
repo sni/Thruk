@@ -354,7 +354,7 @@ sub index {
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
-    $c->stash->{'hide_backends_chooser'} = (ref $c->stash->{'sites'} ne 'ARRAY' || scalar @{$c->stash->{'sites'}} == 0) ? 1 : 0;
+    $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
 
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');
