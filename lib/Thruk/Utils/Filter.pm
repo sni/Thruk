@@ -945,7 +945,7 @@ sub logline_icon {
                              if($log->{'state'} == 0)  { $pic = "fa-solid fa-check round small green";           $desc = "Service Ok"; }
                           elsif($log->{'state'} == 1)  { $pic = "fa-solid fa-exclamation round small yellow";    $desc = "Service Warning"; }
                           elsif($log->{'state'} == 2)  { $pic = "fa-solid fa-exclamation round small red";       $desc = "Service Critical"; }
-                          elsif($log->{'state'} == 3)  { $pic = "fa-solid fa-exclamation round small bgUNKNOWN"; $desc = "Service Unknown"; }
+                          elsif($log->{'state'} == 3)  { $pic = "fa-solid fa-question round small bgUNKNOWN"; $desc = "Service Unknown"; }
     }
     elsif($type eq 'HOST ALERT') {
                              if($log->{'state'} == 0)  { $pic = "fa-solid fa-check round small green";     $desc = "Host Up"; }

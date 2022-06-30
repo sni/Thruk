@@ -24,6 +24,7 @@
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
   [% PROCESS _blocks.tt %]
+  [% PROCESS _common_css_fonts.tt %]
 
   [%# report settings #%]
   [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
@@ -45,15 +46,15 @@
           <th></th><th>[% loc('Host Alert') %]</th><th class="totals">[% loc('Totals') %]</th>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/recovery.png"></td><td>[% loc('Up') %]</td>
+          <td class="img"><i class="fa-solid fa-check round small green"></i></td><td>[% loc('Up') %]</td>
           <td class="totals">[% totals.host.up %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/critical.png"></td><td>[% loc('Down') %]</td>
+          <td class="img"><i class="fa-solid fa-exclamation round small red"></i></td><td>[% loc('Down') %]</td>
           <td class="totals">[% totals.host.down %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/critical.png"></td><td>[% loc('Unreachable') %]</td>
+          <td class="img"><i class="fa-solid fa-exclamation round small red"></i></td><td>[% loc('Unreachable') %]</td>
           <td class="totals">[% totals.host.unreachable %]</td>
         </tr>
       </table>
@@ -63,19 +64,19 @@
           <th></th><th>[% loc('Service Alert') %]</th><th class="totals">[% loc('Totals') %]</th>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/recovery.png"></td><td>[% loc('Ok') %]</td>
+          <td class="img"><i class="fa-solid fa-check round small green"></i></td><td>[% loc('Ok') %]</td>
           <td class="totals">[% totals.service.ok %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/warning.png"></td><td>[% loc('Warning') %]</td>
+          <td class="img"><i class="fa-solid fa-exclamation round small yellow"></i></td><td>[% loc('Warning') %]</td>
           <td class="totals">[% totals.service.warning %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/unknown.png"></td><td>[% loc('Unknown') %]</td>
+          <td class="img"><i class="fa-solid fa-question round small orange"></i></td><td>[% loc('Unknown') %]</td>
           <td class="totals">[% totals.service.unknown %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/critical.png"></td><td>[% loc('Critical') %]</td>
+          <td class="img"><i class="fa-solid fa-exclamation round small red"></i></td><td>[% loc('Critical') %]</td>
           <td class="totals">[% totals.service.critical %]</td>
         </tr>
       </table>

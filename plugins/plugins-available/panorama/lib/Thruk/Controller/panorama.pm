@@ -2301,8 +2301,8 @@ sub _task_servicesminemap {
             my $cls     = 'mine_map_state'.$service->{state};
             $cls        = 'mine_map_state4' if $service->{has_been_checked} == 0;
             my $text    = '&nbsp;';
-            if($service->{'scheduled_downtime_depth'}) { $text = '<img src="'.$c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/downtime.gif" alt="downtime" height="15" width="15">' }
-            if($service->{'acknowledged'})             { $text = '<img src="'.$c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/ack.gif" alt="acknowledged" height="15" width="15">' }
+            if($service->{'scheduled_downtime_depth'}) { $text = '<i class="fa-solid fa-moon" title="downtime" style="font-size: 14px; line-height: 16px;"></i>' }
+            if($service->{'acknowledged'})             { $text = '<i class="fa-solid fa-person-digging" title="acknowledged" style="font-size: 14px; line-height: 16px;"></i>' }
             $data->{$service2index->{$svc}} = '<div class="clickable '.$cls.'" '._generate_service_popup($c, $service).'>'.$text.'</div>';
         }
         push @{$json->{'data'}}, $data;

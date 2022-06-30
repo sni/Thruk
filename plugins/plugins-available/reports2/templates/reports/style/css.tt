@@ -282,6 +282,41 @@ BODY.preview DIV.page {
   white-space: nowrap;
 }
 
+.round {
+  border-radius: 9999px;
+  text-align: center;
+}
+.red {
+  background-color: #ef4444;
+  color: black;
+}
+.green {
+  background-color: #22c55e;
+  color: white;
+}
+.yellow {
+  background-color: #fde047;
+  color: black;
+}
+.orange {
+  background-color: #fb923c;
+  color: black;
+}
+I.fa-solid {
+  width: 14px;
+  height: 14px;
+  font-size: 15px;
+  line-height: 14px;
+  margin-top: -5px;
+}
+.small, I.fa-solid.small {
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  margin-top: -4px;
+}
+
 /* debug styles */
 /*
 HTML BODY DIV.page {
