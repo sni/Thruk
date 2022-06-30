@@ -6,30 +6,30 @@
 [% SET perc_unreachable_known_total  = 0 %]
 [% SET perc_undetermined_hosts_total = 0 %]
 
-<div class="card mt-5 mx-auto min-w-[800px]">
+<div class="card mt-5 mx-auto min-w-[950px] overflow-hidden">
   <div class="head">
     <h3>
-  [% IF hostgroupname %]
-    Hostgroup '[% hostgroupname %]' Host State Breakdowns
-  [% ELSIF servicegroupname %]
-    Servicegroup '[% servicegroupname %]' Host State Breakdowns
-  [% ELSE %]
-    Host State Breakdowns
-  [% END %]
+      [% IF hostgroupname %]
+        Hostgroup '[% hostgroupname %]' Host State Breakdowns
+      [% ELSIF servicegroupname %]
+        Servicegroup '[% servicegroupname %]' Host State Breakdowns
+      [% ELSE %]
+        Host State Breakdowns
+      [% END %]
     </h3>
   </div>
 
-  <table class='body cellspacing-x'>
+  <table class='body cellspacing-x striped rowhover'>
     <thead>
       <tr>
-        <th>Host</th>
-        <th>% Time Up</th>
-        <th>% Time Down</th>
-        <th>% Time Unreachable</th>
-        <th>% Time Undetermined</th>
+        <th class="w-full">Host</th>
+        <th class="w-[160px] text-center">% Time Up</th>
+        <th class="w-[160px] text-center">% Time Down</th>
+        <th class="w-[160px] text-center">% Time Unreachable</th>
+        <th class="w-[145px] text-center">% Time Undetermined</th>
       </tr>
     </thead>
-    <tbody class="striped">
+    <tbody>
       [% FOREACH hostname IN hosts.keys.sort %]
       [% SET
           total_time_unknown =
@@ -79,18 +79,18 @@
       [% SET perc_undetermined_hosts_total = perc_undetermined_hosts_total + perc_undetermined     %]
       <tr>
         <td><a class="link" href="avail.cgi?host=[% hostname | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">[% hostname | html %]</a></td>
-        <td class='UP'>[% sprintf('%2.3f', perc_up) %]% ([% sprintf('%2.3f', perc_up_known ) %]%)</td>
-        <td class='DOWN'>[% sprintf('%2.3f', perc_down) %]% ([% sprintf('%2.3f', perc_down_known ) %]%)</td>
-        <td class='UNREACHABLE'>[% sprintf('%2.3f', perc_unreachable) %]% ([% sprintf('%2.3f', perc_unreachable_known ) %]%)</td>
-        <td>[% sprintf('%2.3f', perc_undetermined) %]%</td>
+        <td class='UP'         ><span class="inline-block w-16 text-right" title="availability over full duration.">[% sprintf('%2.3f', perc_up)           %]%</span><span class="inline-block w-20 text-right" title="availability for known time only.">([% sprintf('%2.3f', perc_up_known )          %]%)</span></td>
+        <td class='DOWN'       ><span class="inline-block w-16 text-right" title="availability over full duration.">[% sprintf('%2.3f', perc_down)         %]%</span><span class="inline-block w-20 text-right" title="availability for known time only.">([% sprintf('%2.3f', perc_down_known )        %]%)</span></td>
+        <td class='UNREACHABLE'><span class="inline-block w-16 text-right" title="availability over full duration.">[% sprintf('%2.3f', perc_unreachable)  %]%</span><span class="inline-block w-20 text-right" title="availability for known time only.">([% sprintf('%2.3f', perc_unreachable_known ) %]%)</span></td>
+        <td                    ><span class="inline-block w-16 text-right">[% sprintf('%2.3f', perc_undetermined) %]%</span></td>
       </tr>
       [% END %]
       <tr>
         <th class="borderDefault border-t">Average</th>
-        <td class='borderDefault border-t UP'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_up_total / hosts.size) %]% ([% sprintf('%2.3f', perc_up_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</td>
-        <td class='borderDefault border-t DOWN'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_down_total / hosts.size) %]% ([% sprintf('%2.3f', perc_down_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</td>
-        <td class='borderDefault border-t UNREACHABLE'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_unreachable_total / hosts.size) %]% ([% sprintf('%2.3f', perc_unreachable_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</td>
-        <td class="borderDefault border-t">[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_undetermined_hosts_total / hosts.size) %]%[% ELSE %]00.000%[% END %]</td>
+        <td class='borderDefault border-t UP'         ><span class="inline-block w-16 text-right" title="availability over full duration.">[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_up_total / hosts.size)          %]%</span><span class="inline-block w-20 text-right" title="availability for known time only.">([% sprintf('%2.3f', perc_up_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</span></td>
+        <td class='borderDefault border-t DOWN'       ><span class="inline-block w-16 text-right" title="availability over full duration.">[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_down_total / hosts.size)        %]%</span><span class="inline-block w-20 text-right" title="availability for known time only.">([% sprintf('%2.3f', perc_down_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</span></td>
+        <td class='borderDefault border-t UNREACHABLE'><span class="inline-block w-16 text-right" title="availability over full duration.">[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_unreachable_total / hosts.size) %]%</span><span class="inline-block w-20 text-right" title="availability for known time only.">([% sprintf('%2.3f', perc_unreachable_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</span></td>
+        <td class="borderDefault border-t"            ><span class="inline-block w-16 text-right">[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_undetermined_hosts_total / hosts.size) %]%[% ELSE %]00.000%[% END %]</span></td>
       </tr>
     </tbody>
   </table>

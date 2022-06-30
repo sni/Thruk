@@ -1,30 +1,28 @@
 ﻿[% USE date %]
 
 [% IF show_log_entries or full_log_entries %]
-    <div align="center" class='dataTitle'>[% IF service %]Service[% ELSE %]Host[% END %] Log Entries:</div><br>
-    <div align="center" class='infoMessage'>
-      <a href="avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host | uri %][% END %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF full_log_entries %]show_log_entries[% ELSE %]full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">[ View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries ]</a>
+  <div class="card mt-5 mx-auto min-w-[1000px] max-w-full overflow-hidden">
+    <div class='head justify-between'>
+      <h3>[% IF service %]Service[% ELSE %]Host[% END %] Log Entries</h3>
+      <a class="button" href="avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host | uri %][% END %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF full_log_entries %]show_log_entries[% ELSE %]full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries</a>
     </div>
-    <div align="center">
-      <table border="1" class='logEntries'>
-        <tr>
-          <th class='logEntries'>Event Start Time</th>
-          <th class='logEntries'>Event End Time</th>
-          <th class='logEntries'>Event Duration</th>
-          <th class='logEntries'>Event/State Type</th>
-          <th class='logEntries'>Event/State Information</th>
-        </tr>
-        [% FOR log IN logs %]
-        [% SET class = 'logEntriesEven' IF loop.odd  %]
-        [% SET class = 'logEntriesOdd'  IF loop.even %]
-        <tr class='[% class %]'>
-          <td class='[% class %]'>[% format_date(log.start, datetime_format) %]</td>
-          <td class='[% class %]'>[% format_date(log.end, datetime_format) %]</td>
-          <td class='[% class %]'>[% log.duration %]</td>
-          <td class='logEntries[% log.class %]'>[% log.type %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(log_line_plugin_output(log)) %][% ELSE %][% log_line_plugin_output(log) %][% END %]</td>
-        </tr>
-        [% END %]
-      </table>
-    </div>
+    <table class="body cellspacing-x striped">
+      <tr>
+        <th>Event Start Time</th>
+        <th>Event End Time</th>
+        <th>Event Duration</th>
+        <th>Event/State Type</th>
+        <th>Event/State Information</th>
+      </tr>
+      [% FOR log IN logs %]
+      <tr>
+        <td>[% format_date(log.start, datetime_format) %]</td>
+        <td>[% format_date(log.end, datetime_format) %]</td>
+        <td>[% log.duration %]</td>
+        <td class='[% log.class %]'>[% log.type %]</td>
+        <td class="max-w-[400px] truncate">[% IF escape_html_tags %][% escape_html(log_line_plugin_output(log)) %][% ELSE %][% log_line_plugin_output(log) %][% END %]</td>
+      </tr>
+      [% END %]
+    </table>
+  </div>
 [% END %]

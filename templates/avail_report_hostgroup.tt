@@ -2,37 +2,18 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-<div class="flexrow justify-between gap-1">
-  [% PROCESS _infobox.tt %]
-
-  <div class="flexcol gap-2 items-center">
-    <h1>
-      [% IF hostgroup == 'all' %]
-        All Hostgroups
-      [% ELSE %]
-        Hostgroup '[% hostgroup %]'
-      [% END %]
-    </h1>
-    <i class="fa-solid fa-chart-line" title='Availability Report'></i>
-    <div>
-      [% format_date(start, datetime_format) %] to [% format_date(end, datetime_format) %]
-    </div>
-    <div>
-      Duration: [% SET dur = end - start %][% duration(dur) %]
-    </div>
-  </div>
-
-  <div class="flex">
-    [% PROCESS avail_report_form_box.tt %]
-  </div>
-</div>
+[% WRAPPER _avail_report_header.tt %]
+  [% IF hostgroup == 'all' %]
+    All Hostgroups
+  [% ELSE %]
+    Hostgroup '[% hostgroup %]'
+  [% END %]
+[% END %]
 
 [% FOR groupname IN groups.keys.sort %]
     [% SET hostgroupname = groupname %]
     [% SET hosts         = groups.$groupname.hosts %]
     [% PROCESS avail_report_hosts_part.tt %]
 [% END %]
-
-<div class="w-full text-center my-5">[ Availability report completed in [% duration(time_token, 2) %] ]</div>
 
 [% PROCESS _footer.tt %]
