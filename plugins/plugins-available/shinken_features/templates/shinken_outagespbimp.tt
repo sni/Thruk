@@ -3,140 +3,134 @@
 [% PROCESS _blocks.tt %]
 [% has_bp = 0 %]
 
-    <table border="0" width="100%" cellspacing="0" cellpadding="0" class="infoboxrow">
-      <tr>
-        <td align="left" valign="top" width="33%">
-          [% PROCESS _infobox.tt %]
-        </td>
-        <td align="center" valign="top" width="33%"></td>
-        <td align="right" valign="bottom" width="33%">
-        </td>
-      </tr>
-    </table>
-    <div align="center">
-      <br>
-      <div class='statusTitle'>Problems <img src="[% url_prefix %]themes/[% theme %]/images/problem.png" alt="problems" style="vertical-align: text-bottom"></div>
-      <br>
+[% PROCESS _infobox.tt %]
 
-    [% SET counter = 0 %]
-    [% FOREACH crit IN prios.reverse %]
-    [% NEXT IF crit.count == 0 %]
-    [% counter = counter + 1 %]
-    <center>
-    <div class='statusTitle'>Priority: [% crit.text %] <img class="crit_icon" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Priority: [% crit.text %]"></div>
+<h1>Problems</h1>
 
-      <table border="0" class='status'>
-        <tr>
-          <th class='status'>Type</th>
-          <th class='status'>Host</th>
-          <th class='status'>Description</th>
-          <th class='status'>State</th>
-          <th class='status'>Notes</th>
-          <th class='status'>State Duration</th>
-          <th class='status'># Hosts Affected</th>
-          <th class='status'># Services Affected</th>
-          <th class='status'>Actions</th>
-        </tr>
-
-        [% SET num = 0 %]
-        [% FOREACH host = hst_pbs %]
-        [% IF host.criticity == crit.value %]
-
-        [% IF host.has_been_checked == 0 %]
-          [% statusClass='statusHOSTPENDING' %]
-          [% status ='PENDING' %]
-        [% ELSIF host.state == 0 %]
-          [% statusClass='statusHOSTUP' %]
-          [% status ='UP' %]
-        [% ELSIF host.state == 1 %]
-          [% statusClass='statusHOSTDOWN' %]
-          [% status ='DOWN' %]
-        [% ELSIF host.state == 2 %]
-          [% statusClass='statusHOSTUNREACHABLE' %]
-          [% status ='UNREACHABLE' %]
-        [% END %]
-
-        [% SET num = num + 1 %]
-        [% SET class = 'statusOdd'  IF num % 2 == 1 %]
-        [% SET class = 'statusEven' IF num % 2 == 0 %]
-        <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
-          <td class='[% class %]'>Host</td>
-          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">[% host.name | html %]</a></td>
-          <td class='[% class %]'></td>
-          <td class='[% statusClass %]'>[% status %]</td>
-          <td class='[% class %]'>
-            [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
-          </td>
-          <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
-          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_hosts %]</a></td>
-          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_services %]</a></td>
-          <td class='[% class %]'>
-            <a href="status.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
-            [% IF use_feature_trends %]<a href="trends.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href="history.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href="notifications.cgi?host=[% host.name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
-        </tr>
-        [% END %]
-        [% END %]
-
-        [% IF srv_pbs.size >= 1 %]
-        <tr><td colspan=9></td></tr>
-        [% END %]
-
-        [% FOREACH srv = srv_pbs %]
-        [% IF srv.criticity == crit.value %]
-
-
-        [% IF srv.has_been_checked == 0 %]
-          [% SET s_status = 'statusPENDING' %]
-          [% SET s_status_text = 'PENDING' %]
-        [% ELSIF srv.state == 0 %]
-          [% SET s_status = 'statusOK' %]
-          [% SET s_status_text = 'OK' %]
-        [% ELSIF srv.state == 1 %]
-          [% SET s_status = 'statusWARNING' %]
-          [% SET s_status_text = 'WARNING' %]
-        [% ELSIF srv.state == 2 %]
-          [% SET s_status = 'statusCRITICAL' %]
-          [% SET s_status_text = 'CRITICAL' %]
-        [% ELSIF srv.state == 3 %]
-          [% SET s_status = 'statusUNKNOWN' %]
-          [% SET s_status_text = 'UNKNOWN' %]
-        [% END %]
-
-        [% SET num = num + 1 %]
-        [% SET class = 'statusOdd'  IF num % 2 == 1 %]
-        [% SET class = 'statusEven' IF num % 2 == 0 %]
-        <tr class='[% class %]'[% IF loop.first %] id="dfl_r0"[% END %]>
-          <td class='[% class %]'>Service</td>
-          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]">[% srv.host_name | html %]</a></td>
-          <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]&amp;backend=[% srv.peer_key %]">[% srv.description | html %]</a></td>
-          <td class='[% s_status %]'>[% s_status_text %]</td>
-          <td class='[% class %]'>
-            [% PROCESS _status_service_attributes service=srv service_comment_count=srv.comment_count %]
-          </td>
-          <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
-          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_hosts %]</a> </td>
-          <td class='[% class %]'><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_services %]</a></td>
-          <td class='[% class %]'>
-            <a href="status.cgi?host=[% srv.host_name | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
-            [% IF use_feature_trends %]<a href="trends.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href="history.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href="notifications.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]"><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
-        </tr>
-        [% END %]
-        [% END %]
-      </table>
-      </center>
-      <br>
-    [% END %]
-
-    [% IF counter == 0 %]
-      <b>There are no problems at the moment</b>
-    [% END %]
-
+[% SET counter = 0 %]
+[% FOREACH crit IN prios.reverse %]
+  [% NEXT IF crit.count == 0 %]
+  [% counter = counter + 1 %]
+  <div class='card mt-5 mx-auto'>
+    <div class="head justify-between">
+      <h3>Priority: [% crit.text %]</h3>
+      <img src="[% url_prefix %]themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Priority: [% crit.text %]">
     </div>
-    <br><br>
 
+    <table class="body cellspacing-x">
+      <tr>
+        <th>Type</th>
+        <th>Host</th>
+        <th>Description</th>
+        <th>State</th>
+        <th>Notes</th>
+        <th>State Duration</th>
+        <th># Hosts Affected</th>
+        <th># Services Affected</th>
+        <th>Actions</th>
+      </tr>
+
+      [% FOREACH host = hst_pbs %]
+        [% IF host.criticity == crit.value %]
+          [% IF host.has_been_checked == 0 %]
+            [% status ='PENDING' %]
+          [% ELSIF host.state == 0 %]
+            [% status ='UP' %]
+          [% ELSIF host.state == 1 %]
+            [% status ='DOWN' %]
+          [% ELSIF host.state == 2 %]
+            [% status ='UNREACHABLE' %]
+          [% END %]
+
+          <tr>
+            <td>Host</td>
+            <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">[% host.name | html %]</a></td>
+            <td></td>
+            <td class='[% status %]'>[% status %]</td>
+            <td>
+              [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
+            </td>
+            <td>[% duration(date.now - host.last_state_change) %]</td>
+            <td><a class="link flex" href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_hosts %]</a></td>
+            <td><a class="link flex" href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_services %]</a></td>
+            <td>
+              <div class="flex gap-1 justify-center">
+                <a href="status.cgi?host=[% host.name | uri %]">
+                  <i class="fa-solid fa-bars small" title='View status detail for this host'></i>
+                </a>
+                [% IF use_feature_trends %]
+                  <a href="trends.cgi?host=[% host.name | uri %]">
+                    <i class="fa-solid fa-chart-simple" title='View trends for this host'></i>
+                  </a>
+                [% END %]
+                <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1">
+                  <i class="fa-solid fa-clock-rotate-left small" title='View alert history for this host'></i>
+                </a>
+                <a href="notifications.cgi?host=[% host.name | uri %]">
+                  <i class="fa-solid fa-volume-high small" title='View notifications for this host'></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+        [% END %]
+      [% END %]
+
+      [% IF srv_pbs.size >= 1 %]
+      <tr><td colspan=9></td></tr>
+      [% END %]
+
+      [% FOREACH srv = srv_pbs %]
+        [% IF srv.criticity == crit.value %]
+          [% IF srv.has_been_checked == 0 %]
+            [% SET s_status_text = 'PENDING' %]
+          [% ELSIF srv.state == 0 %]
+            [% SET s_status_text = 'OK' %]
+          [% ELSIF srv.state == 1 %]
+            [% SET s_status_text = 'WARNING' %]
+          [% ELSIF srv.state == 2 %]
+            [% SET s_status_text = 'CRITICAL' %]
+          [% ELSIF srv.state == 3 %]
+            [% SET s_status_text = 'UNKNOWN' %]
+          [% END %]
+
+          <tr>
+            <td>Service</td>
+            <td><a class="link flex" href="extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]">[% srv.host_name | html %]</a></td>
+            <td><a class="link flex" href="extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]&amp;backend=[% srv.peer_key %]">[% srv.description | html %]</a></td>
+            <td class='[% s_status_text %]'>[% s_status_text %]</td>
+            <td>
+              [% PROCESS _status_service_attributes service=srv service_comment_count=srv.comment_count %]
+            </td>
+            <td>[% duration(date.now - srv.last_state_change) %]</td>
+            <td><a class="link flex" href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_hosts %]</a> </td>
+            <td><a class="link flex" href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_services %]</a></td>
+            <td>
+              <div class="flex gap-1 justify-center">
+                <a href="status.cgi?host=[% srv.host_name | uri %]">
+                  <i class="fa-solid fa-bars small" title='View status detail for this host'></i>
+                </a>
+                [% IF use_feature_trends %]
+                  <a href="trends.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]">
+                    <i class="fa-solid fa-chart-simple" title='View trends for this service'></i>
+                  </a>
+                [% END %]
+                <a href="history.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]">
+                  <i class="fa-solid fa-clock-rotate-left small" title='View alert history for this service'></i>
+                </a>
+                <a href="notifications.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]">
+                  <i class="fa-solid fa-volume-high small" title='View notifications for this service'></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+        [% END %]
+      [% END %]
+    </table>
+  </div>
+[% END %]
+
+[% IF counter == 0 %]
+  <div class="w-full text-center textHINT">There are no problems at the moment</div>
+[% END %]
 
 [% PROCESS _footer.tt %]
