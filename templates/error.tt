@@ -26,19 +26,6 @@
     </div>
   [% END %]
 
-  [% IF errorDebugInfo && thruk_author %]
-    <div class='card text-left w-fit min-w-[400px]'>
-      <div class="head">
-        <h3>Details</h3>
-      </div>
-      <div class="body">
-        [% FOREACH deb IN errorDebugInfo.list %]
-          <pre class="w-full">[% escape_html(dump2str(deb, 0, 0)) %]</pre>
-        [% END %]
-      </div>
-    </div>
-  [% END %]
-
   [% IF stacktrace %]
     <div class="text-center w-fit">
       <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
@@ -53,13 +40,44 @@
         </a>
       [% END %]
     </div>
+  [% END %]
 
-    [% IF thruk_author %]
-    <div class="card p-2 mt-2 mx-auto">
-      <h3>Stacktrace</h3>
-      <pre class="text-left">[% escape_html(stacktrace) %]</pre>
+  [% IF thruk_author %]
+    <div class="flexrow justify-center">
+      [% IF stacktrace %]
+        <div class="card">
+          <div class="head justify-between">
+            <h3>Stacktrace</h3>
+            <div class="flexrow gap-1">
+              <button class="hoverable p-2 iconOnly" onclick='toggleElement("rawstack");toggleElement("nicestack"); return false;' title="show raw stacktrace">
+                <i class="fa-solid fa-code"></i>
+              </button>
+              <button class="hoverable p-2 iconOnly" onclick='hideElement("rawstack");showElement("nicestack");nice_stacktrace_expand(); return false;' title="expand stacktrace">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+              </button>
+            </div>
+          </div>
+          <div id="rawstack" style="display:none;" class="whitespace-pre">
+            [% escape_html(stacktrace) %]
+          </div>
+          <div id="nicestack">
+            [% nice_stacktrace(escape_html(stacktrace)) %]
+          </div>
+        </div>
+      [% END %]
+      [% IF errorDebugInfo %]
+        <div class='card w-fit min-w-[400px]'>
+          <div class="head">
+            <h3>Details</h3>
+          </div>
+          <div class="body">
+            [% FOREACH deb IN errorDebugInfo.list %]
+              <pre class="w-full">[% escape_html(dump2str(deb, 0, 0)) %]</pre>
+            [% END %]
+          </div>
+        </div>
+      [% END %]
     </div>
-    [% END %]
   [% END %]
 
 </div>
