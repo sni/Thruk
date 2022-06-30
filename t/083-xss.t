@@ -10,7 +10,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $filter = $ARGV[0];
 my $whitelist_vars = Thruk::Base::array2hash([qw/
     theme url_prefix logo_path_prefix filebranch thrukversion fileversion extjs_version
-     date.now pd referer cs j js jsfiles page pages class statusclass statusClass rowclass hostclass serviceclass
+     date.now pd referer cs j js jsfiles page pages class statusclass statusClass rowclass hostclass serviceclass s_status_text
     loopclass body_class param.breakdown url defaults.$key.link
     c.config.useragentcompat c.stash.last_graph_type c.config.notes_url_target
     c.config.action_url_target avgClass log.class rowclasses show_sitepanel extrabodyclass b.cls
