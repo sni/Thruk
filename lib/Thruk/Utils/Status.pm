@@ -246,6 +246,10 @@ sub get_search_from_param {
                 if($text_filter->{'type'} eq 'business impact' and defined $params->{ $prefix . '_value_sel' }->[$x]) {
                     $text_filter->{'value'} = $params->{ $prefix . '_value_sel' }->[$x];
                 }
+                if($x == 0 && $text_filter->{'type'} eq 'host' && $text_filter->{'op'} eq '=' && $text_filter->{'value'} eq '') {
+                    # skip empty first template filter
+                    next;
+                }
                 push @{ $search->{'text_filter'} }, $text_filter;
                 if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
             }
@@ -260,8 +264,12 @@ sub get_search_from_param {
             if(defined $params->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
                 $text_filter->{'value'} = $params->{ $prefix . '_value_sel'};
             }
-            push @{ $search->{'text_filter'} }, $text_filter;
-            if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
+            if($text_filter->{'type'} eq 'host' && $text_filter->{'op'} eq '=' && $text_filter->{'value'} eq '') {
+                # skip empty first template filter
+            } else {
+                push @{ $search->{'text_filter'} }, $text_filter;
+                if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
+            }
         }
     }
 
