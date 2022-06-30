@@ -1,5 +1,6 @@
 ﻿<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' class="maintheme" />
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/unicons/css/line.css' />
+[% PROCESS _common_css_fonts.tt %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/fontawesome/fontawesome-free-6.1.0-web/css/all.min.css' />
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/daterangepicker-3.0.5/daterangepicker.css' />
 [%+ IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css' />[% END %]

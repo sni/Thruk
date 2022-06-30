@@ -93,7 +93,7 @@
             [% FOREACH l = logblock %]
               [% PROCESS _logs_line %]
               <div class="logdate">
-                <img src="[% url_prefix %]themes/Thruk/images/[% pic %]">
+                <span class="w-4"><i class='[% pic %]' title='[% desc %]' class="w-4 max-w-[1rem]"></i></span>
                 [% format_date(l.time, reportDateTimeFormat) %]
                 <span class="logtype">[% IF has_type %][% l.type %][% END %]</span>
               </div>

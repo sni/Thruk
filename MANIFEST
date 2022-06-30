@@ -2674,6 +2674,7 @@ templates/_cmd_form.tt
 templates/_cmd_parts.tt
 templates/_comments_table.tt
 templates/_common_css.tt
+templates/_common_css_fonts.tt
 templates/_common_js.tt
 templates/_common_js_bugs.tt
 templates/_common_js_files.tt
