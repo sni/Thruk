@@ -59,6 +59,8 @@ sub index {
 
     $c->{'errored'} = 1;
 
+    $c->stash->{no_tt_trim} = 1;
+
     Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
@@ -254,6 +256,7 @@ sub index {
     if($c->stash->{'error_data'}) {
         if(!$c->stash->{'error_data'}->{'skip_escape'}) {
             Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});
+            $c->stash->{'error_data'}->{'skip_escape'} = 1;
         }
         $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";

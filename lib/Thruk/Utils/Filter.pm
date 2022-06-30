@@ -1235,6 +1235,9 @@ returns string from object
 =cut
 sub dump2str {
     my($any, $max_length, $flat) = @_;
+    if(ref $any eq "") {
+        return($any);
+    }
     return(Thruk::Utils::dump_params($any, $max_length, $flat));
 }
 
