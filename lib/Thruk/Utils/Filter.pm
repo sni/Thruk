@@ -933,60 +933,58 @@ returns icon path
 sub logline_icon {
     my($log) = @_;
 
-    my $pic  = 'info.png';
+    my $pic  = 'fa-solid fa-circle-info';
     my $desc = '';
     my $type = $log->{'type'} || '';
 
-    if($type eq 'CURRENT SERVICE STATE')               { $pic = "info.png";            $desc = "Informational Message"; }
-    elsif($type eq 'CURRENT HOST STATE')               { $pic = "info.png";            $desc = "Informational Message"; }
-    elsif($type eq 'SERVICE NOTIFICATION')             { $pic = "notify.gif";          $desc = "Service Notification"; }
-    elsif($type eq 'HOST NOTIFICATION')                { $pic = "notify.gif";          $desc = "Host Notification"; }
+    if($type eq 'CURRENT SERVICE STATE')               { $pic = "fa-solid fa-circle-info";   $desc = "Informational Message"; }
+    elsif($type eq 'CURRENT HOST STATE')               { $pic = "fa-solid fa-circle-info";   $desc = "Informational Message"; }
+    elsif($type eq 'SERVICE NOTIFICATION')             { $pic = "fa-solid fa-bell";          $desc = "Service Notification"; }
+    elsif($type eq 'HOST NOTIFICATION')                { $pic = "fa-solid fa-bell";          $desc = "Host Notification"; }
     elsif($type eq 'SERVICE ALERT') {
-                             if($log->{'state'} == 0)  { $pic = "recovery.png";        $desc = "Service Ok"; }
-                          elsif($log->{'state'} == 1)  { $pic = "warning.png";         $desc = "Service Warning"; }
-                          elsif($log->{'state'} == 2)  { $pic = "critical.png";        $desc = "Service Critical"; }
-                          elsif($log->{'state'} == 3)  { $pic = "unknown.png";         $desc = "Service Unknown"; }
+                             if($log->{'state'} == 0)  { $pic = "fa-solid fa-check round small green";           $desc = "Service Ok"; }
+                          elsif($log->{'state'} == 1)  { $pic = "fa-solid fa-exclamation round small yellow";    $desc = "Service Warning"; }
+                          elsif($log->{'state'} == 2)  { $pic = "fa-solid fa-exclamation round small red";       $desc = "Service Critical"; }
+                          elsif($log->{'state'} == 3)  { $pic = "fa-solid fa-exclamation round small bgUNKNOWN"; $desc = "Service Unknown"; }
     }
     elsif($type eq 'HOST ALERT') {
-                             if($log->{'state'} == 0)  { $pic = "recovery.png";        $desc = "Host Up"; }
-                          elsif($log->{'state'} == 1)  { $pic = "critical.png";        $desc = "Host Down"; }
-                          elsif($log->{'state'} == 2)  { $pic = "critical.png";        $desc = "Host Unreachable"; }
+                             if($log->{'state'} == 0)  { $pic = "fa-solid fa-check round small green";     $desc = "Host Up"; }
+                          elsif($log->{'state'} == 1)  { $pic = "fa-solid fa-exclamation round small red"; $desc = "Host Down"; }
+                          elsif($log->{'state'} == 2)  { $pic = "fa-solid fa-exclamation round small red"; $desc = "Host Unreachable"; }
     }
-    elsif($type eq 'SERVICE EVENT HANDLER')            { $pic = "serviceevent.gif";    $desc = "Service Event Handler"; }
-    elsif($type eq 'HOST EVENT HANDLER')               { $pic = "hostevent.gif";       $desc = "Host Event Handler"; }
-    elsif($type eq 'EXTERNAL COMMAND')                 { $pic = "command.png";         $desc = "External Command"; }
-    elsif($type eq 'PASSIVE SERVICE CHECK')            { $pic = "passiveonly.gif";     $desc = "Passive Service Check"; }
-    elsif($type eq 'PASSIVE HOST CHECK')               { $pic = "passiveonly.gif";     $desc = "Passive Host Check"; }
+    elsif($type eq 'SERVICE EVENT HANDLER')            { $pic = "fa-solid fa-rocket";              $desc = "Service Event Handler"; }
+    elsif($type eq 'HOST EVENT HANDLER')               { $pic = "fa-solid fa-rocket";              $desc = "Host Event Handler"; }
+    elsif($type eq 'EXTERNAL COMMAND')                 { $pic = "fa-solid fa-hand-point-right";    $desc = "External Command"; }
+    elsif($type eq 'PASSIVE SERVICE CHECK')            { $pic = "fa-solid fa-arrows-down-to-line"; $desc = "Passive Service Check"; }
+    elsif($type eq 'PASSIVE HOST CHECK')               { $pic = "fa-solid fa-arrows-down-to-line"; $desc = "Passive Host Check"; }
 
     elsif($type eq 'SERVICE FLAPPING ALERT') {
-           if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "flapping.gif";        $desc = "Service started flapping"; }
-        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "flapping.gif";        $desc = "Service stoppedflapping"; }
-        elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "flapping.gif";        $desc = "Service flap detection disabled"; }
+           if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service started flapping"; }
+        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service stoppedflapping"; }
+        elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "fa-solid fa-shuffle";        $desc = "Service flap detection disabled"; }
     }
     elsif($type eq 'HOST FLAPPING ALERT') {
-           if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "flapping.gif";        $desc = "Host started flapping"; }
-        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "flapping.gif";        $desc = "Host stoppedflapping"; }
-        elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "flapping.gif";        $desc = "Host flap detection disabled"; }
+           if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host started flapping"; }
+        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host stoppedflapping"; }
+        elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "fa-solid fa-shuffle";      $desc = "Host flap detection disabled"; }
     }
     elsif($type eq 'SERVICE DOWNTIME ALERT') {
-          if($log->{'message'} =~ m/;STARTED;/mx)      { $pic = "downtime.gif";        $desc = "Service entered a period of scheduled downtime"; }
-       elsif($log->{'message'} =~ m/;STOPPED;/mx)      { $pic = "downtime.gif";        $desc = "Service exited a period of scheduled downtime"; }
-       elsif($log->{'message'} =~ m/;CANCELLED;/mx)    { $pic = "downtime.gif";        $desc = "Service scheduled downtime has been cancelled"; }
+          if($log->{'message'} =~ m/;STARTED;/mx)      { $pic = "fa-solid fa-moon";         $desc = "Service entered a period of scheduled downtime"; }
+       elsif($log->{'message'} =~ m/;STOPPED;/mx)      { $pic = "fa-solid fa-moon";         $desc = "Service exited a period of scheduled downtime"; }
+       elsif($log->{'message'} =~ m/;CANCELLED;/mx)    { $pic = "fa-solid fa-moon";         $desc = "Service scheduled downtime has been cancelled"; }
     }
     elsif($type eq 'HOST DOWNTIME ALERT') {
-          if($log->{'message'} =~ m/;STARTED;/mx)      { $pic = "downtime.gif";        $desc = "Host entered a period of scheduled downtime"; }
-       elsif($log->{'message'} =~ m/;STOPPED;/mx)      { $pic = "downtime.gif";        $desc = "Host exited a period of scheduled downtime"; }
-       elsif($log->{'message'} =~ m/;CANCELLED;/mx)    { $pic = "downtime.gif";        $desc = "Host scheduled downtime has been cancelled"; }
+          if($log->{'message'} =~ m/;STARTED;/mx)      { $pic = "fa-solid fa-moon";         $desc = "Host entered a period of scheduled downtime"; }
+       elsif($log->{'message'} =~ m/;STOPPED;/mx)      { $pic = "fa-solid fa-moon";         $desc = "Host exited a period of scheduled downtime"; }
+       elsif($log->{'message'} =~ m/;CANCELLED;/mx)    { $pic = "fa-solid fa-moon";         $desc = "Host scheduled downtime has been cancelled"; }
     }
-    elsif($type eq 'LOG ROTATION')                     { $pic = "logrotate.png";       $desc = "Log Rotation"; }
-    elsif($type =~ m/TIMEPERIOD TRANSITION/mx)         { $pic = "info.png";            $desc = "Timeperiod Transition"; }
-    elsif($type =~ m/restarting\.\.\./mx)              { $pic = "restart.gif";         $desc = "Program Restart"; }
-    elsif($type =~ m/starting\.\.\./mx)                { $pic = "start.gif";           $desc = "Program Start"; }
-    elsif($type =~ m/shutting down\.\.\./mx)           { $pic = "stop.gif";            $desc = "Program End"; }
-    elsif($type =~ m/Bailing\ out/mx)                  { $pic = "stop.gif";            $desc = "Program End"; }
-    elsif($type =~ m/active mode\.\.\./mx)             { $pic = "active.gif";          $desc = "Active Mode"; }
-    elsif($type =~ m/standby mode\.\.\./mx)            { $pic = "standby.gif";         $desc = "Standby Mode"; }
-    else                                               { $pic = "info.png";            $desc = "Informational Message"; }
+    elsif($type eq 'LOG ROTATION')                     { $pic = "fa-solid fa-rotate";       $desc = "Log Rotation"; }
+    elsif($type =~ m/TIMEPERIOD TRANSITION/mx)         { $pic = "fa-solid fa-circle-info";  $desc = "Timeperiod Transition"; }
+    elsif($type =~ m/restarting\.\.\./mx)              { $pic = "fa-solid fa-arrows-spin";  $desc = "Program Restart"; }
+    elsif($type =~ m/starting\.\.\./mx)                { $pic = "fa-solid fa-play";         $desc = "Program Start"; }
+    elsif($type =~ m/shutting down\.\.\./mx)           { $pic = "fa-solid fa-power-off";    $desc = "Program End"; }
+    elsif($type =~ m/Bailing\ out/mx)                  { $pic = "fa-solid fa-power-off";    $desc = "Program End"; }
+    else                                               { $pic = "fa-solid fa-circle-info";  $desc = "Informational Message"; }
 
     return $pic;
 }

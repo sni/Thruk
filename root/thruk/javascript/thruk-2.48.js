@@ -8539,7 +8539,7 @@ function overcard(options) {
                 iframe = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
                 settings["document"] = iframe.document;
                 jQuery("HTML", iframe.document).css("background-color", "inherit");
-                jQuery("MAIN", iframe.document).css("padding", "0");
+                jQuery("MAIN", iframe.document)[0].style.setProperty("padding", "0", "important");
                 overcard(settings);
                 jQuery("#overcard", iframe.document).removeClass("shadow-float");
             });

@@ -31,7 +31,7 @@ TP.render_icon = function(v, td, item, row, col, store, view) {
 
 /* render log icon */
 TP.render_icon_log = function(v, td, item) {
-    return "<div style=\"width:20px;height:20px;background-image:url(../themes/"+theme+"/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>";
+    return "<i class=\""+v+"\" style=\"font-size:16px; line-height: 18px;\"><\/i>";
 }
 
 /* render site status icon */
@@ -280,26 +280,26 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(data != undefined) {
         d = data;
     }
-    if(d.notifications_enabled == 0)   { icons += '<i class="fa-solid fa-bell-slash" title="Notifications for this host have been disabled"><\/i>'; }
+    if(d.notifications_enabled == 0)   { icons += '<i class="fa-solid fa-bell-slash" style="font-size:16px; line-height: 18px;" title="Notifications for this host have been disabled"><\/i>'; }
     var passive_icon ='fa-solid fa-arrows-down-to-line';
     if(hide_passive_icon) {
         passive_icon ='';
     }
     if(strict_passive_mode) {
-        if(d.check_type == 0 && d.active_checks_enabled == 0) { icons += '<i class="fa-solid fa-xmark round small red" title="Checks of this host have been disabled"><\/i>'; }
-        if(d.check_type == 1 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" title="Checks of this host have been disabled"><\/i>'; }
-        if(d.check_type == 1 && d.accept_passive_checks == 1) { icons += '<i class="'+passive_icon+'" title="This host is checked passive"><\/i>'; }
+        if(d.check_type == 0 && d.active_checks_enabled == 0) { icons += '<i class="fa-solid fa-xmark round small red" style="font-size:16px; line-height: 18px;" title="Checks of this host have been disabled"><\/i>'; }
+        if(d.check_type == 1 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" style="font-size:16px; line-height: 18px;" title="Checks of this host have been disabled"><\/i>'; }
+        if(d.check_type == 1 && d.accept_passive_checks == 1) { icons += '<i class="'+passive_icon+'" style="font-size:16px; line-height: 18px;" title="This host is checked passive"><\/i>'; }
     } else {
-        if(d.active_checks_enabled == 0 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" title="Checks of this host have been disabled"><\/i>'; }
-        else if(d.active_checks_enabled == 0) { icons += '<i class="'+passive_icon+'" title="Active checks of the host have been disabled - only passive checks are being accepted"><\/i>'; }
+        if(d.active_checks_enabled == 0 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" style="font-size:16px; line-height: 18px;" title="Checks of this host have been disabled"><\/i>'; }
+        else if(d.active_checks_enabled == 0) { icons += '<i class="'+passive_icon+'" style="font-size:16px; line-height: 18px;" title="Active checks of the host have been disabled - only passive checks are being accepted"><\/i>'; }
     }
 
-    if(d.is_flapping)                       { icons += '<i class="fa-solid fa-shuffle" title="This host is flapping between states"><\/i>'; }
-    if(d.acknowledged)                      { icons += '<i class="fa-solid fa-person-digging" title="This host problem has been acknowledged"><\/i>'; }
-    if(d.comments && d.comments.length > 0) { icons += '<i class="fa-solid fa-comment clickable" title="This host has '+d.comments.length+' comments associated with it" onclick="return(host_comments_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
-    if(d.scheduled_downtime_depth > 0)      { icons += '<i class="fa-solid fa-moon clickable" title="This host is currently in a period of scheduled downtime" onclick="return(host_downtimes_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
-    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'><\/i><\/a>"; }
-    if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' target='_blank' title='View Extra Host Notes'><i class='fa-solid fa-clipboard'><\/i><\/a>"; }
+    if(d.is_flapping)                       { icons += '<i class="fa-solid fa-shuffle" style="font-size:16px; line-height: 18px;" title="This host is flapping between states"><\/i>'; }
+    if(d.acknowledged)                      { icons += '<i class="fa-solid fa-person-digging" style="font-size:16px; line-height: 18px;" title="This host problem has been acknowledged"><\/i>'; }
+    if(d.comments && d.comments.length > 0) { icons += '<i class="fa-solid fa-comment clickable" style="font-size:16px; line-height: 18px;" title="This host has '+d.comments.length+' comments associated with it" onclick="return(host_comments_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
+    if(d.scheduled_downtime_depth > 0)      { icons += '<i class="fa-solid fa-moon clickable" style="font-size:16px; line-height: 18px;" title="This host is currently in a period of scheduled downtime" onclick="return(host_downtimes_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
+    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><i class='fa-solid fa-chart-line clickable' style='font-size:16px; line-height: 18px;' title='Show Performance Chart'><\/i><\/a>"; }
+    if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' target='_blank' title='View Extra Host Notes'><i class='fa-solid fa-clipboard' style='font-size:16px; line-height: 18px;'><\/i><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu;
     if(d.THRUK_ACTION_MENU) {
@@ -320,26 +320,26 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(data != undefined) {
         d = data;
     }
-    if(d.notifications_enabled == 0)   { icons += '<i class="fa-solid fa-bell-slash" title="Notifications for this service have been disabled"><\/i>'; }
+    if(d.notifications_enabled == 0)   { icons += '<i class="fa-solid fa-bell-slash" style="font-size:16px; line-height: 18px;" title="Notifications for this service have been disabled"><\/i>'; }
     var passive_icon ='fa-solid fa-arrows-down-to-line';
     if(hide_passive_icon) {
         passive_icon ='';
     }
     if(strict_passive_mode) {
-        if(d.check_type == 0 && d.active_checks_enabled == 0) { icons += '<i class="fa-solid fa-xmark round small red" title="Checks of this service have been disabled"><\/i>'; }
-        if(d.check_type == 1 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" title="Checks of this service have been disabled"><\/i>'; }
-        if(d.check_type == 1 && d.accept_passive_checks == 1) { icons += '<i class="'+passive_icon+'" title="This service is checked passive"><\/i>'; }
+        if(d.check_type == 0 && d.active_checks_enabled == 0) { icons += '<i class="fa-solid fa-xmark round small red" style="font-size:16px; line-height: 18px;" title="Checks of this service have been disabled"><\/i>'; }
+        if(d.check_type == 1 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" style="font-size:16px; line-height: 18px;" title="Checks of this service have been disabled"><\/i>'; }
+        if(d.check_type == 1 && d.accept_passive_checks == 1) { icons += '<i class="'+passive_icon+'" style="font-size:16px; line-height: 18px;" title="This service is checked passive"><\/i>'; }
     } else {
-        if(d.active_checks_enabled == 0 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" title="Checks of this service have been disabled"><\/i>'; }
-        else if(d.active_checks_enabled == 0) { icons += '<i class="'+passive_icon+'" title="Active checks of the service have been disabled - only passive checks are being accepted"><\/i>'; }
+        if(d.active_checks_enabled == 0 && d.accept_passive_checks == 0) { icons += '<i class="fa-solid fa-xmark round small red" style="font-size:16px; line-height: 18px;" title="Checks of this service have been disabled"><\/i>'; }
+        else if(d.active_checks_enabled == 0) { icons += '<i class="'+passive_icon+'" style="font-size:16px; line-height: 18px;" title="Active checks of the service have been disabled - only passive checks are being accepted"><\/i>'; }
     }
 
-    if(d.is_flapping)                       { icons += '<i class="fa-solid fa-shuffle" title="This service is flapping between states"><\/i>'; }
-    if(d.acknowledged)                      { icons += '<i class="fa-solid fa-person-digging" title="This service problem has been acknowledged"><\/i>'; }
-    if(d.comments && d.comments.length > 0) { icons += '<i class="fa-solid fa-comment clickable" title="This service has '+d.comments.length+' comments associated with it" onclick="return(service_comments_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
-    if(d.scheduled_downtime_depth > 0)      { icons += '<i class="fa-solid fa-moon clickable" title="This service is currently in a period of scheduled downtime" onclick="return(service_downtimes_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
-    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'><\/i><\/a>"; }
-    if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' target='_blank' title='View Extra Service Notes'><i class='fa-solid fa-clipboard'><\/i><\/a>"; }
+    if(d.is_flapping)                       { icons += '<i class="fa-solid fa-shuffle" style="font-size:16px; line-height: 18px;" title="This service is flapping between states"><\/i>'; }
+    if(d.acknowledged)                      { icons += '<i class="fa-solid fa-person-digging" style="font-size:16px; line-height: 18px;" title="This service problem has been acknowledged"><\/i>'; }
+    if(d.comments && d.comments.length > 0) { icons += '<i class="fa-solid fa-comment clickable" style="font-size:16px; line-height: 18px;" title="This service has '+d.comments.length+' comments associated with it" onclick="return(service_comments_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
+    if(d.scheduled_downtime_depth > 0)      { icons += '<i class="fa-solid fa-moon clickable" style="font-size:16px; line-height: 18px;" title="This service is currently in a period of scheduled downtime" onclick="return(service_downtimes_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
+    if(d.action_url_expanded )              { icons += "<a href='"+d.action_url_expanded+"' target='_blank'><i class='fa-solid fa-chart-line clickable' style='font-size:16px; line-height: 18px;' title='Show Performance Chart'><\/i><\/a>"; }
+    if(d.notes_url_expanded )               { icons += "<a href='"+d.notes_url_expanded+"' style='font-size:16px; line-height: 18px;' target='_blank' title='View Extra Service Notes'><i class='fa-solid fa-clipboard'><\/i><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
     if(action_menu) {

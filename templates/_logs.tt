@@ -37,7 +37,7 @@
 
       [% PROCESS _logs_line %]
       <div class="flex gap-2 py-1 px-2 hoverable">
-        <span class="w-4"><img src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' class="w-4 max-w-[1rem]"></span>
+        <span class="w-4"><i class='[% pic %]' title='[% desc %]' class="w-4 max-w-[1rem]"></i></span>
         <span class="whitespace-nowrap">[[% format_date(l.time, datetime_format) %]]</span>
         [% IF showsites %]<span class="whitespace-nowrap">[[% l.peer_name %]]</span>[% END %]
         <span class="truncate">[% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]</span>
