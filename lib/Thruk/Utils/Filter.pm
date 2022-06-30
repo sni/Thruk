@@ -1413,22 +1413,22 @@ sub nice_stacktrace {
     my $nice = [];
     my $has_stack = 0;
     my $in_stack  = 0;
+    my $rowNum    = 0;
     for my $line (split(/\n/mx, $txt)) {
         # only fixup stracktrace lines
         if($line =~ m/^(.*)\ at\ (.*)\ line\ (\d+)\.?$/mx) {
             $in_stack++;
             my($msg, $file, $nr) = ($1, $2, $3);
             if($in_stack == 1) {
-                push @{$nice}, "<b>Stacktrace:</b><br>";
-                push @{$nice}, "<table class=\"stacktrace\">\n";
-                push @{$nice}, CORE::sprintf("<tr class='action clickable' onclick='nice_stacktrace_expand();'><th>Message</th><th>Location</th></tr>\n");
+                push @{$nice}, "<table class='body rowhover cellspacing-x'>\n";
+                push @{$nice}, CORE::sprintf("<tr><th>Message</th><th>Location</th></tr>\n");
             }
-            my $class = "external";
+            my $class = "external textHINTsoft";
             my $original = $file;
-            if($file =~ m%(lib/Thruk|/script/|/Thruk/plugins/|/templates/)%mxi) {
+            if($file =~ m%(lib/Thruk|/script/|/Thruk/plugins/|/templates/|eval)%mxi) {
                 $class = "internal";
                 $file =~ s%.*/Thruk/%Thruk/%gmx;
-                $file =~ s%^lib/%Thruk/lib%gmx;
+                $file =~ s%^lib/%Thruk/lib/%gmx;
                 $file =~ s%^\./%Thruk/%gmx;
                 $file =~ s%^Thruk/%../%gmx;
             }
@@ -1436,6 +1436,11 @@ sub nice_stacktrace {
             if($in_stack == 1) {
                 $class = "internal";
             }
+            if($rowNum == 0) {
+                $class .= " textHINT font-bold";
+            }
+            $rowNum++;
+            $msg =~ s/(Thruk::Context=HASH\(.*?\))/<i title="$1">\$c<\/i>/gmx;
             chomp($line);
             push @{$nice}, CORE::sprintf("<tr class='%s'><td>%s</td><td title='%s'>%s:%d</td></tr>\n", $class, $msg, $original, $file, $nr);
             $has_stack = 1;

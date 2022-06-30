@@ -254,15 +254,30 @@ sub index {
     # redirected from $c->detach_error()
     my $log_req;
     if($c->stash->{'error_data'}) {
+        $c->stash->{'raw_error_data'} = Thruk::Utils::dclone($c->stash->{'error_data'});
         if(!$c->stash->{'error_data'}->{'skip_escape'}) {
+            my $stack = delete $c->stash->{'error_data'}->{'stacktrace'};
             Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});
             $c->stash->{'error_data'}->{'skip_escape'} = 1;
+            $c->stash->{'error_data'}->{'stacktrace'}  = $stack if $stack;
         }
         $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
         $code                           = $c->stash->{'error_data'}->{'code'}  // 500;
         $log_req                        = $c->stash->{'error_data'}->{'log'} if defined $c->stash->{'error_data'}->{'log'};
         $c->stash->{errorDebugInfo}     = $c->stash->{'error_data'}->{'debug_information'} if $c->stash->{'error_data'}->{'debug_information'};
+        $c->stash->{'stacktrace'}      .= $c->stash->{'error_data'}->{'stacktrace'} if $c->stash->{'error_data'}->{'stacktrace'};
+    }
+
+    if($arg1 == 13 and $c->config->{'show_error_reports'}) {
+        for my $error ( @{ $c->error } ) {
+            $c->stash->{'stacktrace'} .= $error;
+        }
+        $c->stash->{'stacktrace'} .= "\n".longmess("stacktrace from error controller") unless $c->stash->{'stacktrace'} =~ m/Thruk.pm/gmx;
+    }
+
+    if(!$c->stash->{'stacktrace'} && $c->stash->{'thruk_author'}) {
+        $c->stash->{'stacktrace'} .= Carp::longmess("stacktrace from error controller");
     }
 
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
@@ -284,13 +299,6 @@ sub index {
     if(Thruk::Base->debug) {
         $c->stash->{errorDetails} .= "\n" if $c->stash->{errorDetails};
         $c->stash->{errorDetails} .= $errorDetails;
-    }
-
-    if($arg1 == 13 and $c->config->{'show_error_reports'}) {
-        for my $error ( @{ $c->error } ) {
-            $c->stash->{'stacktrace'} .= $error;
-        }
-        $c->stash->{'stacktrace'} .= "\n".longmess();
     }
 
     # clear errors to avoid invinite loops
@@ -334,8 +342,8 @@ sub index {
     }
 
     if(Thruk::Base->mode_cli() && (!defined $log_req || $log_req)) {
-        _error($c->stash->{errorMessage});
-        _error($c->stash->{errorDescription});
+        _error($c->stash->{'raw_error_data'}->{'msg'} // $c->stash->{errorMessage});
+        _error($c->stash->{'raw_error_data'}->{'descr'} // $c->stash->{errorDescription});
         _error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
         _error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
         if(Thruk::Base->verbose) {
