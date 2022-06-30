@@ -8,10 +8,10 @@
 <div class="flexcol w-full place-content-center items-center text-center mt-5">
   [% IF errorMessage %]
     <h1 class='textERROR'>[% errorMessage %]</h1>
-    <h2>[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
+    <h2 class="whitespace-normal">[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
   [% ELSE %]
     <h1 class='textERROR'>internal server error</h1>
-    <h2>internal server error occured, please look at your logfiles</h2>
+    <h2 class="whitespace-normal">internal server error occured, please look at your logfiles</h2>
     [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
   [% END %]
 
@@ -27,12 +27,14 @@
   [% END %]
 
   [% IF errorDebugInfo && thruk_author %]
-    <div class='card text-left w-fit'>
+    <div class='card text-left w-fit min-w-[400px]'>
       <div class="head">
         <h3>Details</h3>
       </div>
       <div class="body">
-        <pre class="text-left">[% escape_html(errorDebugInfo) %]</pre>
+        [% FOREACH deb IN errorDebugInfo.list %]
+          <pre class="w-full">[% escape_html(dump2str(deb, 0, 0)) %]</pre>
+        [% END %]
       </div>
     </div>
   [% END %]
