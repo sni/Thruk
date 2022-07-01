@@ -2878,13 +2878,17 @@ function do_table_search() {
     set_hash(value, 2);
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
-        var matches = table.className.match(/searchSubTable_([^\ ]*)/);
-        if(matches && matches[1]) {
-            jQuery(table).find("TABLE."+matches[1]).each(function(x, t) {
-                do_table_search_table(id, t, value);
-            });
+        if(table.tagName == "DIV") {
+            do_table_search_div(id, table, value);
         } else {
-            do_table_search_table(id, table, value);
+            var matches = table.className.match(/searchSubTable_([^\ ]*)/);
+            if(matches && matches[1]) {
+                jQuery(table).find("TABLE."+matches[1]).each(function(x, t) {
+                    do_table_search_table(id, t, value);
+                });
+            } else {
+                do_table_search_table(id, table, value);
+            }
         }
     });
 }
@@ -2985,6 +2989,30 @@ function updatePagerCount(table_id) {
         total++;
     });
     jQuery(".js-pager-totals").text(total);
+}
+
+function do_table_search_div(id, div, value) {
+    jQuery(div).children().each(function(i, row) {
+        if(jQuery(row).hasClass('table_search_skip')) {
+            return;
+        }
+        var found = 0;
+        /* if regex matching fails, use normal matching */
+        try {
+            if(row.innerHTML.toLowerCase().match(value)) {
+                found = 1;
+            }
+        } catch(err) {
+            if(row.innerHTML.toLowerCase().indexOf(value) != -1) {
+                found = 1;
+            }
+        }
+        if(found == 0) {
+            jQuery(row).addClass('filter_hidden');
+        } else {
+            jQuery(row).removeClass('filter_hidden');
+        }
+    });
 }
 
 /* show bug report icon */
