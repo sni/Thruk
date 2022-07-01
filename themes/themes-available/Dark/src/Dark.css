@@ -265,6 +265,9 @@ I.fa-solid, I.uil {
  &.yellow {
    @apply bg-yellow-300 text-black !important;
  }
+ &.orange {
+   @apply bg-orange-500 text-black !important;
+ }
  &.gray {
    @apply bg-gray-200 text-black !important;
  }
@@ -275,13 +278,16 @@ I.fa-solid, I.uil {
 */
 DIV.card.alert {
  &.yellow {
-   @apply text-yellow-700 bg-yellow-50 border-yellow-700;
+   @apply text-yellow-700 bg-yellow-50 border-yellow-700 !important;
  }
  &.red {
-   @apply text-red-700 bg-red-50 border-red-700;
+   @apply text-red-700 bg-red-50 border-red-700 !important;
+ }
+ &.orange {
+   @apply text-orange-700 bg-orange-200 border-orange-700 border !important;
  }
  &.green {
-   @apply text-green-700 bg-green-50 border-green-700;
+   @apply text-green-700 bg-green-50 border-green-700 !important;
  }
 }
 
