@@ -75,7 +75,7 @@
  }
 
  .UP, .OK, .YES, .ENABLED, .button_peerUP {
-   @apply !bg-green-500 !text-white;
+   @apply !bg-green-600 !text-white;
  }
  .WARNING {
    @apply !bg-yellow-500 !text-white;
@@ -84,10 +84,10 @@
    @apply !bg-orange-500 !text-white;
  }
  .DOWN, .CRITICAL, .NO, .DISABLED, .button_peerDOWN {
-   @apply !bg-red-500 !text-white;
+   @apply !bg-red-700 !text-white;
  }
  .UNREACHABLE {
-   @apply !bg-red-400 !text-white;
+   @apply !bg-red-600 !text-white;
  }
  .PENDING {
    @apply !bg-truegray-500 !text-white;
@@ -99,7 +99,7 @@
    @apply !bg-truegray-200 !text-white;
  }
  .PROBLEMS {
-   @apply !bg-yellow-200 !textDark;
+   @apply !bg-yellow-600 !textDark;
  }
  .CONSOLE {
    @apply text-lime-500 bg-black text-sm font-mono;
@@ -349,7 +349,7 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
  }
 
  &.red {
-   @apply bg-red-600 text-black hover:text-white;
+   @apply bg-red-600 text-white hover:bg-red-500;
  }
  &.hover-red {
    @apply hover:bg-red-600 hover:text-white;
@@ -396,7 +396,7 @@ DIV.deleteicon {
 
 
 DIV.spinner {
- @apply border-gray-600;
+ @apply border-gray-600 border-r-transparent;
 }
 
 /*******************************************************************************
