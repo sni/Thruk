@@ -427,7 +427,7 @@ I.fa-solid, I.uil {
     @apply bg-yellow-300 text-black;
   }
   &.orange {
-    @apply bg-orange-500 text-black;
+    @apply bg-orange-400 text-black;
   }
   &.gray {
     @apply bg-gray-200 text-black;
