@@ -10,9 +10,7 @@
  *       - change Options for Columns on Configuration page + make Host_name sticky
  *   - Bugs:
  *       - JS sets width when searching on filter field (reports or broadcast) -> refresh, table width not 100% anymore
- *       - sorting removed when changing filter
  *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
- *       - DOWN/UNREACHABLE Host in Services list blue hover color is too dark
  */
 
 @tailwind base;
@@ -353,6 +351,11 @@ HR {
     @apply hover:no-underline hover:textActive1;
   }
 }
+.DOWN, .UNREACHABLE, .CRITICAL {
+  A.link {
+    @apply hover:text-blue-200;
+  }
+}
 
 /* needed for comments page for example, because header has 50px height - CAN BE REMOVED NOW? */
 A.anchor-offset {
@@ -415,19 +418,19 @@ I.fa-solid, I.uil {
     }
   }
   &.red {
-    @apply bg-red-600 text-white;
+    @apply bg-red-600 !text-white;
   }
   &.green {
-    @apply bg-green-500 text-white;
+    @apply bg-green-500 !text-white;
   }
   &.yellow {
-    @apply bg-yellow-300 text-black;
+    @apply bg-yellow-300 !text-black;
   }
   &.orange {
-    @apply bg-orange-400 text-black;
+    @apply bg-orange-400 !text-black;
   }
   &.gray {
-    @apply bg-gray-200 text-black;
+    @apply bg-gray-200 !text-black;
   }
 }
 
