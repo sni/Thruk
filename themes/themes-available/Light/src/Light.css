@@ -10,7 +10,6 @@
  *       - change Options for Columns on Configuration page + make Host_name sticky
  *   - Bugs:
  *       - JS sets width when searching on filter field (reports or broadcast) -> refresh, table width not 100% anymore
- *       - Truncate in overcard doesn't work (e.g. minemap plugin output)
  */
 
 @tailwind base;
