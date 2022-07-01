@@ -401,7 +401,7 @@ A.anchor-offset {
  * icons as part of text links (ex. in action box container)
  */
 I.fa-solid, I.uil {
-  @apply inline-block text-center w-5 h-5 leading-5 text-lg;
+  @apply inline-block text-center w-5 h-5 leading-5 text-lg textBody;
   &.round {
     @apply rounded-full;
   }
