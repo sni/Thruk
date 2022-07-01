@@ -34,7 +34,7 @@
     <a href="reports2.cgi?action=edit&amp;report=new" class="button green w-40 mx-2">create new report</a>
   </div>
   <div class="mainTable">
-    <table class="mainTable striped" id="reportsTable">
+    <table class="mainTable js-striped" id="reportsTable">
       <thead>
         <tr>
           <th>Name</th>
@@ -182,7 +182,7 @@
         [% END %]
         [% IF reports.size == 0 %]
           <tr class="js-skip-count">
-            <td class="text-center" colspan="10">no reports defined yet</td>
+            <td class="text-center textHINT" colspan="10">no reports defined yet</td>
           </tr>
         [% END %]
       </tbody>

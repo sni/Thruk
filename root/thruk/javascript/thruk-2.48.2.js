@@ -205,6 +205,10 @@ function init_page() {
         }
     }
 
+    jQuery('.js-striped').each(function(i, el) {
+        applyRowStripes(el);
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
@@ -2989,6 +2993,10 @@ function updatePagerCount(table_id) {
         total++;
     });
     jQuery(".js-pager-totals").text(total);
+
+    if(jQuery("#"+table_id).hasClass("js-striped")) {
+        applyRowStripes(document.getElementById(table_id));
+    }
 }
 
 function do_table_search_div(id, div, value) {
@@ -8671,4 +8679,20 @@ function element_check_visibility(el) {
     });
 
     return;
+}
+
+// apply row strip manually
+function applyRowStripes(el) {
+    if(el.tagName == "TABLE") {
+        jQuery(el).find("TR").removeClass(["rowOdd", "rowEven"]);
+        var x = 0;
+        jQuery(el).find("TR:visible").each(function(i, row) {
+            if(x%2==0) {
+                jQuery(row).addClass("rowEven");
+            } else {
+                jQuery(row).addClass("rowOdd");
+            }
+            x++;
+        });
+    }
 }
