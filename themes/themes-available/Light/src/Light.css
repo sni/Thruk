@@ -2,8 +2,6 @@
 
 /* TODO
  *   - identical class and style in actionbox if no permissions (infoMessage? )
- *   - height fixen maintable und logs
- *   - multiple comments in comments TD in host/service details are multiline? Fix
  *   - Fix service/hostgroup missing right border in status_overview.tt - wenn weniger als 3 dann right border und 1/3 dann anpassen - rework?
  *   - extinfo type 0, make right-scrollable with sticky left header instead of new row after 3?
  */
