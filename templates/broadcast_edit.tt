@@ -157,7 +157,7 @@
                       class="w-full"
                       value="[% broadcast.contacts.join(', ') | html %]"
                       onfocus="this.click()"
-                      onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+                      onclick="ajax_search.init(this, 'contact', {url:'status.cgi?format=search&amp;type=contact', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contacts_wzd_btn', icon:'fa-wand-magic-sparkles' }]})"
                 >
               </td>
             </tr>
@@ -171,7 +171,7 @@
                       class="w-full"
                       value="[% broadcast.contactgroups.join(', ') | html %]"
                       onfocus="this.click()"
-                      onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'wand.png',cls:'wzd' }]})"
+                      onclick="ajax_search.init(this, 'contactgroup', {url:'status.cgi?format=search&amp;type=contactgroup', striped:false, autosubmit:false, list: '\\s*[,!\+]+\\s*', button_links:[{text: 'use list wizard', id:'id_contactgroups_wzd_btn', icon:'fa-wand-magic-sparkles' }]})"
                 >
               </td>
             </tr>

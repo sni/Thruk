@@ -94,7 +94,7 @@
                 </th>
                 <td>
                   [% IF last_changed %]
-                  <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+                    <i class='fa-solid fa-exclamation round small yellow' title='Core needs to be reloaded'></i>
                   [% END %]
                 </td>
                 <td class="px-2">
@@ -116,7 +116,7 @@
                 </th>
                 <td>
                   [% IF last_changed %]
-                  <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+                    <i class='fa-solid fa-exclamation round small yellow' title='Core needs to be reloaded'></i>
                   [% END %]
                 </td>
                 <td class="px-2">
