@@ -1,6 +1,6 @@
 ﻿[% PROCESS _blocks.tt %]
 
-<div class="flex place-items-end gap-1 mb-3">
+<div class="flexrow flex-nowrap gap-1 mb-2">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
   [% PROCESS _excel_export.tt columns=[ 'Time', 'Site', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 %]
@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div class="mainTable border-t-0" style="max-height: calc(100vh - 225px);">
+  <div class="mainTable border-t-0" style="max-height: calc(100vh - 220px);">
     [% SET last_hour = '' %]
     [% FOREACH l = data %]
       [% this_hour = format_date(l.time, '%Y-%m-%d  %H') _ ':00' %]
