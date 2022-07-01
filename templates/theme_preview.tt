@@ -15,197 +15,13 @@
   </div>
 </div>
 
-
-
-<div class="grid grid-cols-2 2xl:grid-cols-3 gap-5 mt-5">
-  <div class="card min-w-[300px]">
-    <div class="head">
-      <h3>Logos</h3>
-    </div>
-    <div class="body">
-      <table>
-        <tr>
-          <th>small</th>
-          <td><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" alt="Thruk" title="Thruk"></td>
-        </tr>
-        <tr>
-          <th>normal</th>
-          <td><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="card min-w-[300px]">
-    <div class="head">
-      <h3>.card</h3>
-    </div>
-    <div class="body">
-      <table>
-        <tr>
-          <th><a href='#'>table header</a></th>
-          <th><a href='#'>table header</a></th>
-        </tr>
-        <tr>
-          <td><a href='#'>table row</a></td>
-          <td><a href='#'>table row</a></td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="card shadow-float min-w-[300px]">
-    <div class="head">
-      <h3>.card .shadow-float</h3>
-    </div>
-    <div class="body">
-      <table>
-        <tr><td><span class="textBody">.textBody</span></td></tr>
-        <tr><td><span class="textCard">.textCard</span></td></tr>
-        <tr><td><span class="textTH">.textTH</span></td></tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="card min-w-[400px] text-center">
-    <div class="head">
-      <h3 class="text-left">Host Colors</h3>
-    </div>
-    <table class="w-full">
-      <tr>
-        <td class="UP textUP">UP</td>
-        <td class="UNREACHABLE textUNREACHABLE">UNREACHABLE</td>
-        <td class="DOWN textDOWN">DOWN</td>
-        <td class="PENDING textPENDING">PENDING</td>
-      </tr>
-      <tr>
-        <td class="bgUP">bgUP</td>
-        <td class="bgUNREACHABLE">bgUNREACHABLE</td>
-        <td class="bgDOWN">bgDOWN</td>
-        <td class="bgPENDING">bgPENDING</td>
-      </tr>
-    </table>
-  </div>
-
-  <div class="card min-w-[400px] text-center">
-    <div class="head">
-      <h3 class="text-left">Service Colors</h3>
-    </div>
-    <table class="w-full">
-      <tr>
-        <td class="OK textOK">OK</td>
-        <td class="WARNING textWARNING">WARNING</td>
-        <td class="UNKNOWN textUNKNOWN">UNKNOWN</td>
-        <td class="CRITICAL textCRITICAL">CRITICAL</td>
-        <td class="PENDING textPENDING">PENDING</td>
-      </tr>
-      <tr>
-        <td class="bgOK">bgOK</td>
-        <td class="bgWARNING">bgWARNING</td>
-        <td class="bgUNKNOWN">bgUNKNOWN</td>
-        <td class="bgCRITICAL">bgCRITICAL</td>
-        <td class="bgPENDING">bgPENDING</td>
-      </tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="head">
-      <h3>Progressbar</h3>
-    </div>
-    <div>
-      <div class="progressbar py-1 px-2">
-        <div class="description textBody font-semibold" style="width: 90px;">Description</div>
-        <div class="bar" style="height: 30px; width: 300px;">
-          <div style="background: #7FDBFF; width:20%"></div>
-          <div style="background: #FFDC00; width:25%"></div>
-          <div style="background: #FF851B; width:10%"></div>
-        </div>
-        <div class="percent" style="color: #FF851B"><span>66%</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card w-fit">
-    <div class="head">
-      <h3>Buttons</h3>
-    </div>
-    <div>
-      <table class="w-full cellborder cellspacing text-center">
-        <tr>
-          <th></th>
-          <th>small</th>
-          <th>(no class)</th>
-          <th>big</th>
-          <th>large</th>
-        </tr>
-        <tr>
-          <th>default</th>
-          <td></td>
-          <td><button>default</button></td>
-          <td><button class="big">big</button></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>with icon</th>
-          <td></td>
-          <td><button><i class="uil uil-grin"></i>default</button></td>
-          <td><button class="big"><i class="uil uil-grin"></i>big</button></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>.round</th>
-          <td><button class="small round"><i class="uil uil-grin"></i></button></td>
-          <td><button class="round"><i class="uil uil-grin"></i></button></td>
-          <td><button class="big round"><i class="uil uil-grin"></i></button></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>.secondary</th>
-          <td></td>
-          <td><button class="secondary">default</button></td>
-          <td><button class="big secondary">big</button></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>.green</th>
-          <td></td>
-          <td><button class="green">default</button></td>
-          <td><button class="big green">big</button></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>.round .secondary</th>
-          <td><button class="small round secondary"><i class="uil uil-grin"></i></button></td>
-          <td><button class="round secondary"><i class="uil uil-grin"></i></button></td>
-          <td><button class="big round secondary"><i class="uil uil-grin"></i></button></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>.iconOnly</th>
-          <td></td>
-          <td><button class="iconOnly"><i class="uil uil-grin"></i></button></td>
-          <td><button class="big iconOnly"><i class="uil uil-grin"></i></button></td>
-          <td><button class="large iconOnly"><i class="uil uil-grin"></i></button></td>
-        </tr>
-        <tr>
-          <th>.spinner</th>
-          <td></td>
-          <td colspan=3>
-            <button>
-              <div class="spinner mr-1"></div>processing commands...
-            </button>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
+<div class="flexrow mt-5">
   <div class="card overflow-hidden">
-    <div class="head">
-      <h3>Icons in Actionbox</h3>
+    <div class="head justify-between">
+      <h3>Icons</h3>
+      [% PROCESS _table_search_field.tt ids=["iconsBox"] %]
     </div>
-    <div class="actionbox">
+    <div class="actionbox" id="iconsBox">
       <!-- icons are updated automatically by running ./script/theme-icons-update.pl (do not change manually) -->
       <div><a><i class="fa-solid fa-align-center"></i>fa-solid fa-align-center</a></div>
       <div><a><i class="fa-solid fa-angle-right"></i>fa-solid fa-angle-right</a></div>
@@ -349,78 +165,300 @@
       <div><a><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
       <div><a><i class="uil-exclamation round yellow"></i>uil-exclamation round yellow</a></div>
       <div><a><i class="uil-info round"></i>uil-info round</a></div>
-<!-- end of "do not change manually" -->
+  <!-- end of "do not change manually" -->
       <div>
         <a>
-         <div class="spinner mr-2"></div>Spinner
+        <div class="spinner mr-2"></div>Spinner
         </a>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="head">
-      <h3>Forms</h3>
+  <div class="grid grid-cols-2 2xl:grid-cols-3 gap-5 h-fit">
+    <div class="card min-w-[300px]">
+      <div class="head">
+        <h3>Logos</h3>
+      </div>
+      <div class="body">
+        <table>
+          <tr>
+            <th>small</th>
+            <td><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" alt="Thruk" title="Thruk"></td>
+          </tr>
+          <tr>
+            <th>normal</th>
+            <td><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></td>
+          </tr>
+        </table>
+      </div>
     </div>
-    <div class="body">
-      <form>
-        <table class="cellspacing">
+
+    <div class="card min-w-[300px]">
+      <div class="head">
+        <h3>.card</h3>
+      </div>
+      <div class="body">
+        <table>
           <tr>
-            <th>Textfield</th>
-            <td><input type="text" class="w-full"></td>
+            <th><a href='#'>table header</a></th>
+            <th><a href='#'>table header</a></th>
           </tr>
           <tr>
-            <th class="required">Invalid</th>
-            <td><input type="text" class="w-full" name="test" required></td>
+            <td><a href='#'>table row</a></td>
+            <td><a href='#'>table row</a></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card shadow-float min-w-[300px]">
+      <div class="head">
+        <h3>.card .shadow-float</h3>
+      </div>
+      <div class="body">
+        <table>
+          <tr><td><span class="textBody">.textBody</span></td></tr>
+          <tr><td><span class="textCard">.textCard</span></td></tr>
+          <tr><td><span class="textTH">.textTH</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card min-w-[400px] text-center">
+      <div class="head">
+        <h3 class="text-left">Host Colors</h3>
+      </div>
+      <table class="w-full">
+        <tr>
+          <td class="UP textUP">UP</td>
+          <td class="UNREACHABLE textUNREACHABLE">UNREACHABLE</td>
+          <td class="DOWN textDOWN">DOWN</td>
+          <td class="PENDING textPENDING">PENDING</td>
+        </tr>
+        <tr>
+          <td class="bgUP">bgUP</td>
+          <td class="bgUNREACHABLE">bgUNREACHABLE</td>
+          <td class="bgDOWN">bgDOWN</td>
+          <td class="bgPENDING">bgPENDING</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card min-w-[400px] text-center">
+      <div class="head">
+        <h3 class="text-left">Service Colors</h3>
+      </div>
+      <table class="w-full">
+        <tr>
+          <td class="OK textOK">OK</td>
+          <td class="WARNING textWARNING">WARNING</td>
+          <td class="UNKNOWN textUNKNOWN">UNKNOWN</td>
+          <td class="CRITICAL textCRITICAL">CRITICAL</td>
+          <td class="PENDING textPENDING">PENDING</td>
+        </tr>
+        <tr>
+          <td class="bgOK">bgOK</td>
+          <td class="bgWARNING">bgWARNING</td>
+          <td class="bgUNKNOWN">bgUNKNOWN</td>
+          <td class="bgCRITICAL">bgCRITICAL</td>
+          <td class="bgPENDING">bgPENDING</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <h3>Progressbar</h3>
+      </div>
+      <div>
+        <div class="progressbar py-1 px-2">
+          <div class="description textBody font-semibold" style="width: 90px;">Description</div>
+          <div class="bar" style="height: 30px; width: 300px;">
+            <div style="background: #7FDBFF; width:20%"></div>
+            <div style="background: #FFDC00; width:25%"></div>
+            <div style="background: #FF851B; width:10%"></div>
+          </div>
+          <div class="percent" style="color: #FF851B"><span>66%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-3 grid-cols-2 h-fit w-fit">
+      <div class="card alert red relative">
+        <div class="head">
+          <h3>red alert</h3>
+        </div>
+        <div class="body">div.card.red.alert</div>
+      </div>
+
+      <div class="card alert yellow relative">
+        <div class="head">
+          <h3>yellow alert</h3>
+        </div>
+        <div class="body">div.card.yellow.alert</div>
+      </div>
+
+      <div class="card alert orange relative">
+        <div class="head">
+          <h3>orange alert</h3>
+        </div>
+        <div class="body">div.card.orange.alert</div>
+      </div>
+
+      <div class="card alert green relative">
+        <div class="head">
+          <h3>green alert</h3>
+        </div>
+        <div class="body">div.card.green.alert</div>
+      </div>
+    </div>
+
+    <div class="card w-fit">
+      <div class="head">
+        <h3>Buttons</h3>
+      </div>
+      <div>
+        <table class="w-full cellborder cellspacing text-center">
+          <tr>
+            <th></th>
+            <th>small</th>
+            <th>(no class)</th>
+            <th>big</th>
+            <th>large</th>
           </tr>
           <tr>
-            <th>Disabled</th>
-            <td><input type="text" value="disabled text" class="w-full" disabled></td>
+            <th>default</th>
+            <td></td>
+            <td><button>default</button></td>
+            <td><button class="big">big</button></td>
+            <td></td>
           </tr>
           <tr>
-            <th>Password</th>
-            <td><input type="password" class="w-full"></td>
+            <th>with icon</th>
+            <td></td>
+            <td><button><i class="uil uil-grin"></i>default</button></td>
+            <td><button class="big"><i class="uil uil-grin"></i>big</button></td>
+            <td></td>
           </tr>
           <tr>
-            <th>Search</th>
-            <td><input type="search" class="deletable" class="w-full"></td>
+            <th>.round</th>
+            <td><button class="small round"><i class="uil uil-grin"></i></button></td>
+            <td><button class="round"><i class="uil uil-grin"></i></button></td>
+            <td><button class="big round"><i class="uil uil-grin"></i></button></td>
+            <td></td>
           </tr>
           <tr>
-            <th>Submit</th>
-            <td><input type="submit" value="submit"></td>
+            <th>.secondary</th>
+            <td></td>
+            <td><button class="secondary">default</button></td>
+            <td><button class="big secondary">big</button></td>
+            <td></td>
           </tr>
           <tr>
-            <th>Dropdown</th>
-            <td>
-              <select>
-                <optgroup label="optgroup">
-                  <option>option</option>
-                  <option>option</option>
-                </optgroup>
-                <option>option</option>
-                <option>option</option>
-              </select>
-            </td>
+            <th>.green</th>
+            <td></td>
+            <td><button class="green">default</button></td>
+            <td><button class="big green">big</button></td>
+            <td></td>
           </tr>
           <tr>
-            <th>Radiobox</th>
-            <td>
-              <input type="radio" name="radio" value="1" checked><label class="ml-1">Option 1</label>
-              <input type="radio" name="radio" value="2" class="ml-2"><label class="ml-1">Option 2</label>
-            </td>
+            <th>.red</th>
+            <td></td>
+            <td><button class="red">default</button></td>
+            <td><button class="big red">big</button></td>
+            <td></td>
           </tr>
           <tr>
-            <th>Checkbox</th>
-            <td>
-              <input type="checkbox" name="check" value="1" checked><label class="ml-1">Option 1</label>
-              <input type="checkbox" name="check" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+            <th>.round .secondary</th>
+            <td><button class="small round secondary"><i class="uil uil-grin"></i></button></td>
+            <td><button class="round secondary"><i class="uil uil-grin"></i></button></td>
+            <td><button class="big round secondary"><i class="uil uil-grin"></i></button></td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>.iconOnly</th>
+            <td></td>
+            <td><button class="iconOnly"><i class="uil uil-grin"></i></button></td>
+            <td><button class="big iconOnly"><i class="uil uil-grin"></i></button></td>
+            <td><button class="large iconOnly"><i class="uil uil-grin"></i></button></td>
+          </tr>
+          <tr>
+            <th>.spinner</th>
+            <td></td>
+            <td colspan=3>
+              <button>
+                <div class="spinner mr-1"></div>processing commands...
+              </button>
             </td>
           </tr>
         </table>
-      </form>
+      </div>
     </div>
-  </div>
 
+    <div class="card">
+      <div class="head">
+        <h3>Forms</h3>
+      </div>
+      <div class="body">
+        <form>
+          <table class="cellspacing">
+            <tr>
+              <th>Textfield</th>
+              <td><input type="text" class="w-full"></td>
+            </tr>
+            <tr>
+              <th class="required">Invalid</th>
+              <td><input type="text" class="w-full" name="test" required></td>
+            </tr>
+            <tr>
+              <th>Disabled</th>
+              <td><input type="text" value="disabled text" class="w-full" disabled></td>
+            </tr>
+            <tr>
+              <th>Password</th>
+              <td><input type="password" class="w-full"></td>
+            </tr>
+            <tr>
+              <th>Search</th>
+              <td><input type="search" class="deletable" class="w-full"></td>
+            </tr>
+            <tr>
+              <th>Submit</th>
+              <td><input type="submit" value="submit"></td>
+            </tr>
+            <tr>
+              <th>Dropdown</th>
+              <td>
+                <select>
+                  <optgroup label="optgroup">
+                    <option>option</option>
+                    <option>option</option>
+                  </optgroup>
+                  <option>option</option>
+                  <option>option</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>Radiobox</th>
+              <td>
+                <input type="radio" name="radio" value="1" checked><label class="ml-1">Option 1</label>
+                <input type="radio" name="radio" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+              </td>
+            </tr>
+            <tr>
+              <th>Checkbox</th>
+              <td>
+                <input type="checkbox" name="check" value="1" checked><label class="ml-1">Option 1</label>
+                <input type="checkbox" name="check" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <div class="card w-full mt-5">
