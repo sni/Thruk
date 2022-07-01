@@ -3,7 +3,6 @@
 
 /* TODOs:
 *
-* darkmode for calender popup, e.g. notifications.cgi
 * fancytree currently broken (text has #000)
 */
 
@@ -476,4 +475,43 @@ BODY.loginpage {
      @apply border-white border-r-transparent;
    }
  }
+}
+
+/*******************************************************************************
+* calendar popup
+*/
+
+DIV.daterangepicker {
+  @apply bgCard textCard borderDefault !important;
+  DIV.calendar-table {
+    @apply bgCard borderDefault !important;
+  }
+  td.week, th.week {
+    color: #ccc;
+  }
+  td.off, td.off.in-range, td.off.start-date, td.off.end-date {
+    @apply !bg-[#252525];
+    color: #999 !important;
+  }
+  td.available:hover, th.available:hover {
+    background-color: #ccc !important;
+    color: #000 !important;
+  }
+  td.in-range {
+    background-color: #acacac;
+    color: #000;
+  }
+  .show-ranges.ltr .drp-calendar.left {
+    @apply borderDefault !important;
+  }
+}
+.daterangepicker .drp-buttons {
+  border-top: 1px solid #555 !important;
+}
+.daterangepicker.show-ranges.ltr .drp-calendar.left {
+  border-left: 1px solid #555 !important;
+}
+.daterangepicker .ranges li:hover {
+  background-color: #ccc !important;
+  color: #000 !important;
 }
