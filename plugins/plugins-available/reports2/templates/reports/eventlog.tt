@@ -94,7 +94,7 @@
             [% FOREACH l = logblock %]
               [% PROCESS _logs_line %]
               <div class="logdate">
-                <span class="w-4"><i class='[% pic %]' title='[% desc %]' class="w-4 max-w-[1rem]"></i></span>
+                <span class="w-4"><i class='[% pic %]' title='[% desc %]'></i></span>
                 [% format_date(l.time, reportDateTimeFormat) %]
                 <span class="logtype">[% IF has_type %][% l.type %][% END %]</span>
               </div>
