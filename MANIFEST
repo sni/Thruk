@@ -598,6 +598,12 @@ plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features
 plugins/plugins-available/shinken_features/preview.png
 plugins/plugins-available/shinken_features/root/businessview.css
 plugins/plugins-available/shinken_features/root/businessview.js
+plugins/plugins-available/shinken_features/root/images/criticity_0.png
+plugins/plugins-available/shinken_features/root/images/criticity_1.png
+plugins/plugins-available/shinken_features/root/images/criticity_2.png
+plugins/plugins-available/shinken_features/root/images/criticity_3.png
+plugins/plugins-available/shinken_features/root/images/criticity_4.png
+plugins/plugins-available/shinken_features/root/images/criticity_5.png
 plugins/plugins-available/shinken_features/root/images/go-next.png
 plugins/plugins-available/shinken_features/root/images/go-up.png
 plugins/plugins-available/shinken_features/routes
@@ -627,7 +633,6 @@ root/thruk/images/folder_red_mixed.png
 root/thruk/images/nofolder_gray.png
 root/thruk/images/nofolder_green.png
 root/thruk/images/nofolder_red.png
-root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/thruk-2.48.2.js
@@ -2925,12 +2930,6 @@ templates/void.tt
 templates/waiting_for_job.tt
 THANKS
 themes/themes-available/Dark/images/apple-touch-icon-180x180.png
-themes/themes-available/Dark/images/criticity_0.png
-themes/themes-available/Dark/images/criticity_1.png
-themes/themes-available/Dark/images/criticity_2.png
-themes/themes-available/Dark/images/criticity_3.png
-themes/themes-available/Dark/images/criticity_4.png
-themes/themes-available/Dark/images/criticity_5.png
 themes/themes-available/Dark/images/dropdown.png
 themes/themes-available/Dark/images/favicon-16x16.png
 themes/themes-available/Dark/images/favicon-32x32.png
@@ -2943,12 +2942,6 @@ themes/themes-available/Dark/images/logo_thruk_small.png
 themes/themes-available/Dark/images/logo_thruk_small_icon.png
 themes/themes-available/Dark/stylesheets/Dark.css
 themes/themes-available/Light/images/apple-touch-icon-180x180.png
-themes/themes-available/Light/images/criticity_0.png
-themes/themes-available/Light/images/criticity_1.png
-themes/themes-available/Light/images/criticity_2.png
-themes/themes-available/Light/images/criticity_3.png
-themes/themes-available/Light/images/criticity_4.png
-themes/themes-available/Light/images/criticity_5.png
 themes/themes-available/Light/images/dropdown.png
 themes/themes-available/Light/images/favicon-16x16.png
 themes/themes-available/Light/images/favicon-32x32.png

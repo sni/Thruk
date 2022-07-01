@@ -105,7 +105,7 @@
             [% prio = service.criticity %]
             <div class="flex items-center gap-1 mr-3">
               <span class="font-bold">Priority [% prio %]/5</span>
-              <img class="inline-block" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
+              <img class="inline-block" src="[% url_prefix %]plugins/shinken_features/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
             </div>
           [% END %]
           [% IF service.action_url_expanded %]
