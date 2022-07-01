@@ -4,9 +4,9 @@
 [% peer_key      = s.peer_key %]
 [% program_start = pi_detail.$peer_key.program_start %]
 
-<table class="cellspacing">
+<table class="cellspacing table-fixed">
   <tr>
-    <th>Status</th>
+    <th class="w-40">Status</th>
     <td><div class="badge [% serviceclass %] mr-2">[% state %]</div>(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td>
   </tr>
   [% IF s.state != 0 %]
@@ -41,7 +41,7 @@
   [% END %]
   <tr>
     <th>Plugin Output:<br></th>
-    <td class="truncate">
+    <td class="truncate max-w-full">
       [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
       [% IF escape_html_tags %]
           [% nl2br(escape_html(s.plugin_output)) %]<br>

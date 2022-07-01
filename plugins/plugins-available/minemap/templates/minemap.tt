@@ -41,12 +41,12 @@
   </div>
 
   <div class="mainTable">
-    <table class='mainTable sticky-2d striped' id="statusTable">
+    <table class='mainTable sticky-2d striped w-fit mx-auto' id="statusTable">
       <thead>
         <tr>
           <th class="vert"></th>
           [% FOREACH svc = services.keys.sort %]
-          <th class='vert' title="[% svc | html %]">
+          <th class='vert w-7' title="[% svc | html %]">
             <div class="vertical max-h-[180px] truncate"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% svc | html %]</a></div>
           </th>
           [% END %]
