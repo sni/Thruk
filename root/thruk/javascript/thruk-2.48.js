@@ -8559,7 +8559,7 @@ function overcard(options) {
                 'id':         'overcard-iframe',
                 'frameborder': 0,
                 'scrolling':  'no',
-                'style':      'border: 1px; position: absolute; z-index: 1000; border-radius: 8px; visibility: hidden;',
+                'style':      'border: 1px solid; position: absolute; z-index: 1000; border-radius: 8px; visibility: hidden;',
                 'class':      'borderDark',
                 'src':        'void.cgi'
             }).appendTo('BODY').on('load', function () {

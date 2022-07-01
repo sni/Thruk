@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE HTML>
-<html[% IF extrahtmlclass %] class="[% extrahtmlclass | html %] h-full w-full overflow-hidden"[% END %] lang="en">
+<html class="[% IF extrahtmlclass %][% extrahtmlclass | html %][% END %] h-full w-full overflow-hidden [% IF iframed %] iframed[% END %]" lang="en">
   <head>
     <title>[% title_prefix %][% escape_html(title) %]</title>
     [% PROCESS _favicon.tt %]
@@ -77,7 +77,7 @@
         </div>
       </header>
     [% END %]
-<main class="relative p-5 flex-grow scrollauto">
+<main class="relative [% IF !iframed %]p-5 scrollauto[% END %] flex-grow">
 [% IF show_top_pane %]
   <button class="iconOnly noprint big absolute p-0 m-0 top-7 right-7" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane"><i class="uil uil-arrow-to-bottom m-0"></i></button>
 [% END %]
