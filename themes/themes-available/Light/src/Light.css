@@ -426,6 +426,9 @@ I.fa-solid, I.uil {
   &.yellow {
     @apply bg-yellow-300 text-black;
   }
+  &.orange {
+    @apply bg-orange-500 text-black;
+  }
   &.gray {
     @apply bg-gray-200 text-black;
   }
@@ -575,15 +578,19 @@ DIV.card.alert {
   @apply shadow-float absolute text-center;
 
   &.yellow {
-    @apply text-yellow-700 bg-yellow-50 border-yellow-700 border;
+    @apply text-yellow-700 bg-yellow-50 border-yellow-700 border !important;
   }
 
   &.red {
-    @apply text-red-700 bg-red-50 border-red-700 border;
+    @apply text-red-700 bg-red-50 border-red-700 border !important;
+  }
+
+  &.orange {
+    @apply text-orange-700 bg-orange-200 border-orange-700 border !important;
   }
 
   &.green {
-    @apply text-green-700 bg-green-50 border-green-700 border;
+    @apply text-green-700 bg-green-50 border-green-700 border !important;
   }
 
   &.top-center {
@@ -703,7 +710,7 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
   }
 
   &.red {
-    @apply bg-red-600 text-black hover:text-white;
+    @apply bg-red-600 text-white hover:bg-red-500;
   }
   &.hover-red {
     @apply hover:bg-red-600 hover:text-white;
