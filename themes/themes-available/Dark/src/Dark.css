@@ -1,11 +1,6 @@
 /* Dark.css */
 @import '../../Light/src/Light.css';
 
-/* TODOs:
-*
-* fancytree currently broken (text has #000)
-*/
-
 /*******************************************************************************
  * basic colors for dark theme
  */
@@ -514,4 +509,23 @@ DIV.daterangepicker {
 .daterangepicker .ranges li:hover {
   background-color: #ccc !important;
   color: #000 !important;
+}
+
+.jstree-default .jstree-hovered {
+  background: #555 !important;
+}
+
+#site_panel_sections {
+  span.fancytree-focused span.fancytree-title {
+    background: #555 !important;
+  }
+  span.fancytree-active span.fancytree-title {
+    background: #555 !important;
+  }
+  span.fancytree-node:hover {
+    background: #555 !important;
+  }
+}
+span.fancytree-title {
+  color: #ddd !important;
 }
