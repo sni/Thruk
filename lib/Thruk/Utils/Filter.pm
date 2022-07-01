@@ -933,12 +933,12 @@ returns icon path
 sub logline_icon {
     my($log) = @_;
 
-    my $pic  = 'fa-solid fa-circle-info';
+    my $pic  = 'fa-solid fa-info';
     my $desc = '';
     my $type = $log->{'type'} || '';
 
-    if($type eq 'CURRENT SERVICE STATE')               { $pic = "fa-solid fa-circle-info";   $desc = "Informational Message"; }
-    elsif($type eq 'CURRENT HOST STATE')               { $pic = "fa-solid fa-circle-info";   $desc = "Informational Message"; }
+    if($type eq 'CURRENT SERVICE STATE')               { $pic = "fa-solid fa-info";   $desc = "Informational Message"; }
+    elsif($type eq 'CURRENT HOST STATE')               { $pic = "fa-solid fa-info";   $desc = "Informational Message"; }
     elsif($type eq 'SERVICE NOTIFICATION')             { $pic = "fa-solid fa-bell";          $desc = "Service Notification"; }
     elsif($type eq 'HOST NOTIFICATION')                { $pic = "fa-solid fa-bell";          $desc = "Host Notification"; }
     elsif($type eq 'SERVICE ALERT') {
@@ -979,12 +979,12 @@ sub logline_icon {
        elsif($log->{'message'} =~ m/;CANCELLED;/mx)    { $pic = "fa-solid fa-moon";         $desc = "Host scheduled downtime has been cancelled"; }
     }
     elsif($type eq 'LOG ROTATION')                     { $pic = "fa-solid fa-rotate";       $desc = "Log Rotation"; }
-    elsif($type =~ m/TIMEPERIOD TRANSITION/mx)         { $pic = "fa-solid fa-circle-info";  $desc = "Timeperiod Transition"; }
+    elsif($type =~ m/TIMEPERIOD TRANSITION/mx)         { $pic = "fa-solid fa-info";  $desc = "Timeperiod Transition"; }
     elsif($type =~ m/restarting\.\.\./mx)              { $pic = "fa-solid fa-arrows-spin";  $desc = "Program Restart"; }
     elsif($type =~ m/starting\.\.\./mx)                { $pic = "fa-solid fa-play";         $desc = "Program Start"; }
     elsif($type =~ m/shutting down\.\.\./mx)           { $pic = "fa-solid fa-power-off";    $desc = "Program End"; }
     elsif($type =~ m/Bailing\ out/mx)                  { $pic = "fa-solid fa-power-off";    $desc = "Program End"; }
-    else                                               { $pic = "fa-solid fa-circle-info";  $desc = "Informational Message"; }
+    else                                               { $pic = "fa-solid fa-info";  $desc = "Informational Message"; }
 
     return $pic;
 }
