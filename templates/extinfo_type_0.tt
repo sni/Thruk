@@ -43,7 +43,7 @@
       <h3>Process Commands</h3>
     </div>
     [% IF ! c.check_cmd_permissions('system') %]
-      <div class='font-semibold'>Your account does not have permissions to execute commands.</div>
+      <div class='p-2 text-center whitespace-normal textHINTsoft not-hoverable'>Your account does not have permissions to execute commands.</div>
     [% ELSE %]
       <div class="actionbox">
         [% IF !command_disabled(c, '14') %]

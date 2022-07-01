@@ -5,7 +5,7 @@
   </div>
   <div class="actionbox">
     [% UNLESS c.check_cmd_permissions('host', host.name) %]
-    <div class='text-center'>Your account does not have permissions to execute commands.</div>
+      <div class='p-2 text-center whitespace-normal textHINTsoft not-hoverable'>Your account does not have permissions to execute commands.</div>
     [% ELSE %]
       [% UNLESS command_disabled(c, 96) %]
         <div class="flex flex-nowrap">
