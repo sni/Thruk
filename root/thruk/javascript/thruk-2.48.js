@@ -3055,7 +3055,7 @@ function showBugReport(id, text) {
 
 /* show popup with the current error text */
 function showErrorTextPopup(text) {
-    text      = "<pre style='text-align:left;'>"+escapeHTML(text)+"<\/pre>";
+    text      = "<pre class='overflow-auto'>"+escapeHTML(text)+"<\/pre>";
     var title = "Error Report";
     try {
         overcard({'bodyCls': 'p-2', 'body': text, 'caption': title, 'width': 900 });
@@ -3686,7 +3686,9 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
                     }
                 });
                 jQuery(target).each(function(i, el) {
-                    base_table.appendChild(rowsToSort[el]);
+                    if(rowsToSort[el]) {
+                        base_table.appendChild(rowsToSort[el]);
+                    }
                 });
                 // remove the current column header and readd them in original order, so later ordering wont skip headers
                 var currentHeader = {};
@@ -3699,7 +3701,9 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
                     }
                 });
                 oldIndexes.forEach(function(el, i) {
-                    base_table.appendChild(currentHeader[el]);
+                    if(currentHeader[el]) {
+                        base_table.appendChild(currentHeader[el]);
+                    }
                 });
                 updateStatusColumns(pane_prefix, false);
             }
@@ -8589,7 +8593,7 @@ function overcard(options) {
     var container = doc.getElementById(containerId);
     if(!container) {
         var containerHTML = ""
-            +'<div class="fixed card shadow-float z-50" id="'+containerId+'">'
+            +'<div class="fixed card shadow-float z-50 max-w-full max-h-full" id="'+containerId+'">'
             +'<div class="head justify-between">'
             +'<h3 id="'+containerId+'_head"><\/h3>'
             +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
