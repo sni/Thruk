@@ -76,10 +76,10 @@
     <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
   </div>
   <div class="card w-[500px] mt-5">
-    <div class="head">
+    <div class="head justify-center">
       <h3>Thruk Monitoring Webinterface</h3>
     </div>
-    <table class="body cellspacing">
+    <table class="body cellspacing w-fit mx-auto">
       <tr>
         <th>Thruk Version</th>
         <td>[% thrukversion %]</td>
