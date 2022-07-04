@@ -537,9 +537,11 @@ function setBtnEnabled(btn) {
 
 function toggleAccordion(btn, cb) {
     var closed = jQuery(btn).next("DIV").css("max-height") == "0px";
-    closeAccordionAll(btn);
     if(closed) {
         openAccordion(btn, cb);
+        closeAccordionAllExcept(btn);
+    } else {
+        closeAccordionAll(btn);
     }
 }
 
@@ -569,6 +571,15 @@ function openAccordion(btn, cb) {
 function closeAccordionAll(btn) {
     jQuery(btn.parentNode).find('> BUTTON').next("DIV").css('max-height', '0').removeClass("active");
     jQuery(btn.parentNode).find('> BUTTON').removeClass("active");
+}
+
+function closeAccordionAllExcept(btn) {
+    jQuery(btn.parentNode).find('> BUTTON').each(function(i, b) {
+        if(b != btn) {
+            jQuery(b).next("DIV").css('max-height', '0').removeClass("active");
+            jQuery(b).removeClass("active");
+        }
+    });
 }
 
 function handleSortHeaderClick(el) {
