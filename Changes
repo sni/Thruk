@@ -1,7 +1,5 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-2.48.2   Fri Jul  1 14:36:30 CEST 2022
-          - make links clickable in comments and downtimes
 next 3.x:
           - deprecated configuration options:
             - use_pager
@@ -17,7 +15,8 @@ next 3.x:
           - add collapsable side navigation
           - add delete icon to comments/downtimes popup
 
-next:
+2.48.2   Fri Jul  1 14:36:30 CEST 2022
+          - make links clickable in comments and downtimes
           - fix sidebar search not showing all service names
           - Panorama:
             - support non-numeric dashboard file names
