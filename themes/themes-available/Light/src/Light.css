@@ -1004,7 +1004,7 @@ TABLE.mainTable {
   }
 }
 [type='checkbox']:focus,[type='radio']:focus {
-  @apply !ring-transparent;
+  @apply !ring-transparent ring-offset-transparent;
 }
 SELECT {
   @apply pr-6 cursor-pointer;
