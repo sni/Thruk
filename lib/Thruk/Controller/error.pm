@@ -89,11 +89,20 @@ sub index {
 
     # internal error but all backends failed redirects to "no backend available"
     if("$arg1" eq "13" # can be alphanumeric sometimes
-       and defined $c->stash->{'num_selected_backends'}
-       and (ref $c->stash->{'failed_backends'} eq 'HASH')
-       and (scalar keys %{$c->stash->{'failed_backends'}} >= $c->stash->{'num_selected_backends'})
-       and (scalar keys %{$c->stash->{'failed_backends'}} > 0)) {
-        $arg1 = 9;
+       && defined $c->stash->{'num_selected_backends'}
+       && (ref $c->stash->{'failed_backends'} eq 'HASH')
+       && defined $c->stash->{'selected_backends'}
+       && (ref $c->stash->{'selected_backends'} eq 'ARRAY')
+       && (scalar keys %{$c->stash->{'failed_backends'}} >= $c->stash->{'num_selected_backends'})
+       && (scalar keys %{$c->stash->{'failed_backends'}} > 0)) {
+        my $all_down = 1;
+        for my $key (@{$c->stash->{'selected_backends'}}) {
+            if(!$c->stash->{'failed_backends'}->{$key}) {
+                $all_down = 0;
+                last;
+            }
+        }
+        $arg1 = 9 if $all_down;
     }
 
     my $errors = {
@@ -311,11 +320,16 @@ sub index {
     if(defined $c->config->{'refresh_rate'} && (!defined $c->stash->{'no_auto_reload'} || $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->config->{'refresh_rate'};
     }
+    if($arg1 == 13) {
+        $c->stash->{'no_auto_reload'}        = 1;
+        $c->stash->{'refresh_rate'}          = 0;
+        $c->stash->{'hide_backends_chooser'} = 1;
+    }
 
     $c->stash->{'title'}        = "Error"  unless defined $c->stash->{'title'} and $c->stash->{'title'} ne '';
     $c->stash->{'page'}         = "status" unless defined $c->stash->{'page'};
     $c->stash->{'real_page'}    = 'error';
-    $c->stash->{'infoBoxTitle'} = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
+    $c->stash->{'infoBoxTitle'} = "Error"  unless $c->stash->{'infoBoxTitle'};
 
     $c->stash->{'navigation'}  = "";
     Thruk::Utils::Menu::read_navigation($c);
@@ -354,7 +368,9 @@ sub index {
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
-    $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
+    if(!$c->stash->{'hide_backends_chooser'}) {
+        $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
+    }
 
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');

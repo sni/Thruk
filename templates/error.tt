@@ -3,7 +3,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-[% PROCESS _infobox.tt %]
+[% PROCESS _infobox.tt has_proc_info=0 %]
 
 <div class="flexcol w-full place-content-center items-center text-center mt-5">
   [% IF errorMessage %]
@@ -28,15 +28,20 @@
 
   [% IF stacktrace %]
     <div class="text-center w-fit">
-      <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
+      <textarea class="w-full h-20" placeholder="please add any hints which might help to reproduce this issue..." onkeyup="el=document.getElementById('error_report_text'); el.innerHTML = el.innerHTML.replace(/Please describe what you did:.*Make sure the report does not contain/s, 'Please describe what you did:\n\n'+this.value+'\n\nMake sure the report does not contain')"></textarea>
+      <a
+        href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body="
+        class="button mt-1"
+        onmouseover="this.href=this.href.replace(/body=.*/, 'body='+encodeURIComponent(document.getElementById('error_report_text').innerText));"
+      >
         <i class="fa-solid fa-bug" title="Send Bug Report"></i>
-        Help making Thruk better and send a bug report.
+        Help making Thruk better by sending an anonymous bug report.
       </a>
       [% IF !make_test_mode && !thruk_author %]
-        <div>or</div>
-        <a href="#" onclick="document.getElementById('error_report_text').style.display=''; return false;" class="button">
-          <i class="uil uil-angle-down" title="open bug report preview"></i>
-          Preview error report text first
+        <a href="#" onclick="document.getElementById('error_report_card').style.display=''; return false;" class="button flexrow gap-0 justify-between mt-5">
+          <div class="w-5"></div>
+          <span>Preview included details</span>
+          <i class="uil uil-plus" title="open bug report preview"></i>
         </a>
       [% END %]
     </div>
@@ -90,21 +95,19 @@
 [%+ stacktrace +%]
 :error-->
 [% ELSE %]
-  <div class="flexcol w-full items-center">
-    <div class="card mt-2 mx-auto w-fit" style="display: none;;" id="error_report_text">
+  <div class="card mt-2 mx-auto w-fit" style="display: none;" id="error_report_card">
+    <div class="head">
       <h3>Bug Report Preview</h3>
-      <div>
-        <div class="flexrow w-fit align-middle">
-          <div class="flex self-center">Please report this issue by mail to:</div>
-          <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
-            <i class="fa-solid fa-envelope"></i>
-            [% bug_email_rcpt %]
-          </a>
-        </div>
-        <pre class="text-left mt-5">
-          [% PROCESS _error_report.tt | html %]
-        </pre>
+    </div>
+    <div class="body">
+      <div class="flexrow w-fit align-middle">
+        <div class="flex self-center">Please report this issue by mail to:</div>
+        <a href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]" class="button">
+          <i class="fa-solid fa-envelope"></i>
+          [% bug_email_rcpt %]
+        </a>
       </div>
+      <pre class="text-left mt-5" id="error_report_text">[% PROCESS _error_report.tt | html %]</pre>
     </div>
   </div>
 [% END %]
