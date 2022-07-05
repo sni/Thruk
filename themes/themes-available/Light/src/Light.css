@@ -1274,9 +1274,6 @@ DIV.actionbox {
   }
   A {
     @apply link;
-    I, INPUT {
-      color: initial;
-    }
   }
   I {
     @apply mr-1;

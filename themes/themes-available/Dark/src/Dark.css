@@ -256,7 +256,7 @@ TR:nth-child(even) TD.tableRowSelected {
 * icons as part of text links (ex. in action box container)
 */
 I.fa-solid, I.uil {
- @apply text-[#aaa];
+ @apply text-[#bbb];
 
  &.red {
    @apply bg-red-600 text-white !important;
@@ -443,17 +443,6 @@ IMG.action_icon {
  &.clickable {
    &.active {
      @apply ring-gray-400;
-   }
- }
-}
-
-/*******************************************************************************
-* commands / action box
-*/
-DIV.actionbox {
- A {
-   I, INPUT {
-     color: initial;
    }
  }
 }
