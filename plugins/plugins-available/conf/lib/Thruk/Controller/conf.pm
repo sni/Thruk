@@ -652,10 +652,10 @@ sub _process_users_page {
             }
             Thruk::Utils::store_user_data($c, $userdata, $name);
         }
-        if($send eq 'remove user profile data') {
+        if($send eq 'remove_user_profile') {
             if(!Thruk::Base::check_for_nasty_filename($name)) {
                 unlink($profile_file);
-                Thruk::Utils::set_message( $c, 'success_message', 'profile removed successfully' );
+                Thruk::Utils::set_message( $c, 'success_message', 'profile file removed successfully' );
             }
             return $c->redirect_to($redirect);
         }
@@ -862,6 +862,7 @@ sub _process_backends_page {
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
                 $backend->{'logcache_fetchlogs_command'} = $peer->{'peer_config'}->{'logcache_fetchlogs_command'} if defined $peer->{'peer_config'}->{'logcache_fetchlogs_command'};
+                $backend->{'authoritive'} = $peer->{'peer_config'}->{'authoritive'};
                 $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
             }
             $has_new = 1 if $x == 1;

@@ -7,7 +7,7 @@
         <td class="align-top">&lt;none&gt;</td>
       </tr>
     [% END %]
-    [% has_admin = c.check_user_roles("admin") %]
+    [% has_admin = profile_user.grep("authorized_for_admin").size > 0 %]
     [% FOREACH r = profile_user.roles.list.sort %]
       <tr[% IF has_admin && r != "authorized_for_admin" %] style="display: none;" class="js-hidden_roles"[% END %]>
         <td class="align-top">[% r %]</td>
@@ -15,8 +15,8 @@
           [% IF profile_user.roles_from_groups.exists(r) %](from group: [% profile_user.roles_from_groups.$r.join(', ') %])
           [% ELSIF profile_user.roles_from_cgi_cfg.exists(r) %](from cgi.cfg)
           [% ELSIF profile_user.roles_from_session.exists(r) %](from session)
-          [% ELSIF r == "authorized_for_read_only" && !profile_user.can_submit_commands %](from can_submit_commands)
-          [% ELSIF r != "authorized_for_admin" %](from authorized_for_admin)
+          [% ELSIF r == "authorized_for_read_only" %][% IF !profile_user.can_submit_commands %](from contacts can_submit_commands)[% END %]
+          [% ELSIF r != "authorized_for_admin" && has_admin %](from authorized_for_admin)
           [% ELSIF r == "authorized_for_admin" %](from authorized_for_system_commands and<br>authorized_for_configuration_information)
           [% END %]
         </td>

@@ -2518,6 +2518,7 @@ for details.
                         that there is a backend. Note that this implies
                         one extra backend request per page.
                         (**DEPRECATED** - please do not use)
+     ** `authoritive`   When having multiple backends, set this to true to gather autorization information only from this backend(s).
      ** `section`       to group backends/sites by different sections, enter a
                         section.
      ** `state_host`    **DEPRECATED** - please use link:lmd.html[LMD] when using multiple backends.

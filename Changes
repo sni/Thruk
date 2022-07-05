@@ -14,6 +14,7 @@ next 3.x:
             - statusmap
           - add collapsable side navigation
           - add delete icon to comments/downtimes popup
+          - add authoritive backend switch
 
 2.48.2   Fri Jul  1 14:36:30 CEST 2022
           - make links clickable in comments and downtimes

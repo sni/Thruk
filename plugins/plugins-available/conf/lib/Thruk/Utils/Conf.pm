@@ -393,6 +393,7 @@ sub get_component_as_string {
         $string .= "        groups  = ".$b->{'groups'}."\n"  if $b->{'groups'};
         $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
         $string .= "        logcache_fetchlogs_command = ".$b->{'logcache_fetchlogs_command'}."\n" if $b->{'logcache_fetchlogs_command'};
+        $string .= "        authoritive = ".$b->{'authoritive'}."\n" if defined $b->{'authoritive'};
         $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         for my $p (@{$b->{options}->{peer}}) {
         $string .= "            peer          = ".$p."\n";

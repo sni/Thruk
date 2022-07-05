@@ -64,7 +64,8 @@ sub new {
     # Is this user internal or an admin user?
     if($self->{'internal'} || $self->check_user_roles('admin')) {
         $self->grant('admin');
-        $self->{'can_submit_commands'} = 1;
+        $self->{'can_submit_commands'}     = 1;
+        $self->{'can_submit_commands_src'} = "admin role";
     }
 
     # ex.: user settings from var/users/<name>
@@ -105,22 +106,26 @@ sub set_dynamic_attributes {
         }
     } else {
         _debug("fetching user data from livestatus") if Thruk::Base->verbose;
-        my($alias, $email, $can_submit_commands, $groups) = $self->_fetch_user_data($c);
-        $data->{'alias'}               = $alias               if defined $alias;
-        $data->{'email'}               = $email               if defined $email;
-        $data->{'can_submit_commands'} = $can_submit_commands if defined $can_submit_commands;
-        $data->{'contactgroups'}       = $groups              if defined $groups;
-        $data->{'timestamp'}           = time();
+        my($alias, $email, $can_submit_commands, $groups,$src_peers) = $self->_fetch_user_data($c);
+        $data->{'alias'}                   = $alias               if defined $alias;
+        $data->{'email'}                   = $email               if defined $email;
+        $data->{'can_submit_commands'}     = $can_submit_commands if defined $can_submit_commands;
+        $data->{'can_submit_commands_src'} = "set as contact attribute" if defined $can_submit_commands;
+        $data->{'contact_src_peer'}        = $src_peers;
+        $data->{'contactgroups'}           = $groups              if defined $groups;
+        $data->{'timestamp'}               = time();
     }
 
     $self->_apply_user_data($c, $data);
 
-    $self->{'alias'}               = $data->{'alias'} // $self->{'alias'};
-    $self->{'email'}               = $data->{'email'} // $self->{'email'};
-    $self->{'roles_from_groups'}   = $data->{'roles_by_group'};
-    $self->{'groups'}              = $data->{'contactgroups'} || [];
-    $self->{'can_submit_commands'} = $data->{'can_submit_commands'};
-    $self->{'timestamp'}           = $data->{'timestamp'};
+    $self->{'alias'}                   = $data->{'alias'} // $self->{'alias'};
+    $self->{'email'}                   = $data->{'email'} // $self->{'email'};
+    $self->{'roles_from_groups'}       = $data->{'roles_by_group'};
+    $self->{'groups'}                  = $data->{'contactgroups'} || [];
+    $self->{'can_submit_commands'}     = $data->{'can_submit_commands'};
+    $self->{'can_submit_commands_src'} = $data->{'can_submit_commands_src'};
+    $self->{'contact_src_peer'}        = $data->{'contact_src_peer'} // [];
+    $self->{'timestamp'}               = $data->{'timestamp'};
     for my $role (@{$data->{'roles'}}) {
         push @{$self->{'roles'}}, $role;
     }
@@ -170,7 +175,8 @@ sub clean_roles {
 
     # update read-only flag
     if($readonly || $self->check_user_roles('authorized_for_read_only')) {
-        $self->{'can_submit_commands'} = 0;
+        $self->{'can_submit_commands'}     = 0;
+        $self->{'can_submit_commands_src'} = "read_only role";
     }
 
     # clean role origins
@@ -191,6 +197,7 @@ sub _fetch_user_data {
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$email);
+    my $src_peers = [];
     confess("no db") unless $c->db();
     my $data = $c->db->get_can_submit_commands($self->{'username'});
     if(defined $data) {
@@ -199,6 +206,7 @@ sub _fetch_user_data {
             $email = $dat->{'email'} if defined $dat->{'email'};
             if(defined $dat->{'can_submit_commands'} && (!defined $can_submit_commands || $dat->{'can_submit_commands'} == 0)) {
                 $can_submit_commands = $dat->{'can_submit_commands'};
+                push @{$src_peers} , $dat->{'peer_key'};
             }
         }
     }
@@ -206,16 +214,18 @@ sub _fetch_user_data {
     # add roles from groups in cgi.cfg
     my $groups = [sort keys %{$c->db->get_contactgroups_by_contact($self->{'username'})}];
 
-    return($alias, $email, $can_submit_commands, $groups);
+    return($alias, $email, $can_submit_commands, $groups, $src_peers);
 }
 
 ########################################
 sub _apply_user_data {
     my($self, $c, $data) = @_;
 
-    my $can_submit_commands = $data->{'can_submit_commands'};
+    my $can_submit_commands     = $data->{'can_submit_commands'};
+    my $can_submit_commands_src = $data->{'can_submit_commands_src'};
     if(!defined $can_submit_commands) {
-        $can_submit_commands = $c->config->{'can_submit_commands'} || 0;
+        $can_submit_commands     = $c->config->{'can_submit_commands'} || 0;
+        $can_submit_commands_src = "config default";
     }
 
     my $roles  = [];
@@ -249,17 +259,21 @@ sub _apply_user_data {
 
     # override can_submit_commands from cgi.cfg
     if(grep /authorized_for_all_host_commands/mx, @{$roles}) {
-        $can_submit_commands = 1;
+        $can_submit_commands     = 1;
+        $can_submit_commands_src = "all_host_commands role";
     }
     elsif(grep /authorized_for_all_service_commands/mx, @{$roles}) {
-        $can_submit_commands = 1;
+        $can_submit_commands     = 1;
+        $can_submit_commands_src = "all_service_commands role";
     }
     elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
-        $can_submit_commands = 1;
+        $can_submit_commands     = 1;
+        $can_submit_commands_src = "system_commands role";
     }
     elsif(grep /authorized_for_read_only/mx, @{$roles}) {
         # read_only role already supplied via cgi.cfg, enforce
         $can_submit_commands = 0;
+        $can_submit_commands_src = "read only role";
     }
 
     _debug("can_submit_commands: $can_submit_commands");
@@ -269,9 +283,10 @@ sub _apply_user_data {
         }
     }
 
-    $data->{'roles'}               = Thruk::Base::array_uniq($roles);
-    $data->{'can_submit_commands'} = $can_submit_commands;
-    $data->{'roles_by_group'}      = $roles_by_group;
+    $data->{'roles'}                   = Thruk::Base::array_uniq($roles);
+    $data->{'can_submit_commands'}     = $can_submit_commands;
+    $data->{'can_submit_commands_src'} = $can_submit_commands_src;
+    $data->{'roles_by_group'}          = $roles_by_group;
 
     return;
 }

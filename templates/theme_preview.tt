@@ -61,6 +61,7 @@
       <div><a><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
       <div><a><i class="fa-solid fa-exclamation round small red"></i>fa-solid fa-exclamation round small red</a></div>
       <div><a><i class="fa-solid fa-exclamation round small yellow"></i>fa-solid fa-exclamation round small yellow</a></div>
+      <div><a><i class="fa-solid fa-exclamation round small yellow'"></i>fa-solid fa-exclamation round small yellow'</a></div>
       <div><a><i class="fa-solid fa-expand"></i>fa-solid fa-expand</a></div>
       <div><a><i class="fa-solid fa-eye small"></i>fa-solid fa-eye small</a></div>
       <div><a><i class="fa-solid fa-file-circle-check"></i>fa-solid fa-file-circle-check</a></div>
@@ -76,7 +77,7 @@
       <div><a><i class="fa-solid fa-magnifying-glass-plus"></i>fa-solid fa-magnifying-glass-plus</a></div>
       <div><a><i class="fa-solid fa-maximize"></i>fa-solid fa-maximize</a></div>
       <div><a><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
-      <div><a><i class="fa-solid fa-pencil small"></i>fa-solid fa-pencil small</a></div>
+      <div><a><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
       <div><a><i class="fa-solid fa-person-digging"></i>fa-solid fa-person-digging</a></div>
       <div><a><i class="fa-solid fa-plus"></i>fa-solid fa-plus</a></div>
       <div><a><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
