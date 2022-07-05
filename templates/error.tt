@@ -20,9 +20,7 @@
       <div class="head">
         <h3>Details</h3>
       </div>
-      <div class="body">
-        [% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]
-      </div>
+      <div class="body whitespace-pre font-mono">[% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]</div>
     </div>
   [% END %]
 
@@ -62,7 +60,7 @@
               </button>
             </div>
           </div>
-          <div id="rawstack" style="display:none;" class="whitespace-pre p-2">[% escape_html(stacktrace) %]</div>
+          <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2">[% escape_html(stacktrace) %]</div>
           <div id="nicestack">
             [% nice_stacktrace(escape_html(stacktrace)) %]
           </div>
