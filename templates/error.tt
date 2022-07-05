@@ -28,6 +28,7 @@
 
   [% IF stacktrace %]
     <div class="text-center w-fit">
+      [% IF !make_test_mode && !thruk_author %]
       <textarea class="w-full h-20" placeholder="please add any hints which might help to reproduce this issue..." onkeyup="el=document.getElementById('error_report_text'); el.innerHTML = el.innerHTML.replace(/Please describe what you did:.*Make sure the report does not contain/s, 'Please describe what you did:\n\n'+this.value+'\n\nMake sure the report does not contain')"></textarea>
       <a
         href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body="
@@ -37,7 +38,6 @@
         <i class="fa-solid fa-bug" title="Send Bug Report"></i>
         Help making Thruk better by sending an anonymous bug report.
       </a>
-      [% IF !make_test_mode && !thruk_author %]
         <a href="#" onclick="document.getElementById('error_report_card').style.display=''; return false;" class="button flexrow gap-0 justify-between mt-5">
           <div class="w-5"></div>
           <span>Preview included details</span>
@@ -62,9 +62,7 @@
               </button>
             </div>
           </div>
-          <div id="rawstack" style="display:none;" class="whitespace-pre">
-            [% escape_html(stacktrace) %]
-          </div>
+          <div id="rawstack" style="display:none;" class="whitespace-pre p-2">[% escape_html(stacktrace) %]</div>
           <div id="nicestack">
             [% nice_stacktrace(escape_html(stacktrace)) %]
           </div>
