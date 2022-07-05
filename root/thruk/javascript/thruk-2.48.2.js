@@ -45,6 +45,8 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
  * - might be called multiple times, make sure events are not bound twice
  */
 function init_page() {
+    current_backend_states = {};
+    for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
     jQuery('input.deletable').each(function(i, el) {
         // do not add twice
         if(el && el.parentNode && jQuery(el.parentNode).hasClass("deleteicon")) {
@@ -1761,20 +1763,19 @@ function create_site_panel_popup_tree_data(d, current, tree) {
 
     // append folders
     jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
-        var icon;
-        icon = "../images/folder_green.png";
+        var iconCls = 'fa-solid fa-folder text-base textSUCCESS';
         if(d.sub[sectionname].down > 0 && d.sub[sectionname].disabled > 0) {
-            icon = "../images/folder_red_mixed.png";
+            iconCls = 'fa-solid fa-folder text-base textERROR-mixed';
         } else if(d.sub[sectionname].down > 0) {
-            icon = "../images/folder_red.png";
+            iconCls = 'fa-solid fa-folder text-base textERROR';
         } else if(d.sub[sectionname].up > 0 && d.sub[sectionname].disabled > 0) {
             if(backend_chooser == "switch") {
-                icon = "../images/folder_green.png";
+                iconCls = 'fa-solid fa-folder text-base textSUCCESS';
             } else {
-                icon = "../images/folder_green_mixed.png";
+                iconCls = 'fa-solid fa-folder text-base textSUCCESS-mixed';
             }
         } else if(d.sub[sectionname].up == 0) {
-            icon = "../images/folder_gray.png";
+            iconCls = 'fa-solid fa-folder text-base textGRAY';
         }
         var selected;
         if(d.sub[sectionname].disabled == 0) {
@@ -1785,17 +1786,17 @@ function create_site_panel_popup_tree_data(d, current, tree) {
         var key = current + '/' + sectionname;
         nodes.push({
             'key': key,
-            'title': sectionname,
+            'title': '<i class="'+iconCls+'"></i> '+sectionname,
             'folder': true,
             'children': create_site_panel_popup_tree_data(d.sub[sectionname], key, tree),
             'peers': d.sub[sectionname].peers,
-            'icon': icon,
+            'icon': false,
             'selected': selected,
             'extraClasses': d.sub[sectionname] ? 'has_sub' : 'has_no_sub'
         });
         if(tree) {
             var node  = tree.getNodeByKey(key);
-            node.icon = icon;
+            node.title = '<i class="'+iconCls+'"></i> '+node.title.replace(/<i.*<\/i>/, "");
             if(selected === true) {
                 node.setSelected(true, {noEvents: true});
             } else if(selected === false) {
@@ -1808,36 +1809,37 @@ function create_site_panel_popup_tree_data(d, current, tree) {
     // append root nodes
     if(current == "" && d.peers != undefined && d.peers.length > 0) {
         jQuery(d.peers).each(function(i, peer_key) {
-            var icon;
             var peer = initial_backends[peer_key];
             if(!peer) { return true; }
-            icon = "../images/nofolder_green.png";
+            var iconCls = 'fa-solid fa-circle text-base textSUCCESS';
             var selected = true; // checkbox enabled
-            if(current_backend_states[peer_key] == 1) {
-                icon = "../images/nofolder_red.png";
-            } else if(current_backend_states[peer_key] == 2) {
-                icon = "../images/nofolder_gray.png";
+            if(current_backend_states[peer_key] == 2) {
+                iconCls = 'fa-solid fa-circle text-base textGRAY';
                 selected = false; // checkbox off
+            } else {
+                if(current_backend_states[peer_key] == 1 || initial_backends[peer_key].state == 1) {
+                    iconCls = 'fa-solid fa-circle text-base textERROR';
+                }
             }
             if(backend_chooser == "switch") {
                 if(!array_contains(param_backend, peer_key)) {
-                    icon = "../images/nofolder_gray.png";
+                    iconCls = 'fa-solid fa-circle text-base textGRAY';
                     selected = false; // checkbox off
                 }
             }
             var key = '/'+peer_key;
             nodes.push({
                 'key': key,
-                'title': peer["name"],
+                'title': '<i class="'+iconCls+'"></i> '+peer["name"],
                 'folder': false,
                 'children': [],
                 'peers': [peer_key],
-                'icon': icon,
+                'icon': false,
                 'selected': selected
             });
             if(tree) {
                 var node  = tree.getNodeByKey(key);
-                node.icon = icon;
+                node.title = '<i class="'+iconCls+'"></i> '+node.title.replace(/<i.*<\/i>/, "");
                 if(selected === true) {
                     node.setSelected(true, {noEvents: true});
                 }

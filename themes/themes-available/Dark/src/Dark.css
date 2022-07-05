@@ -31,7 +31,7 @@
   .textPager {
     @apply text-gray-200;
   }
-  .textHINTsoft {
+  .textHINTsoft, .textGRAY {
     @apply text-gray-400;
   }
   .textNavBar {
@@ -52,6 +52,10 @@
  .textUP, .textOK, .textSUCCESS {
    @apply !text-green-600;
  }
+ .textSUCCESS-mixed {
+  @apply bg-gradient-to-br from-gray-400 textSUCCESS via-current to-gray-500 bg-clip-text fill-transparent;
+  -webkit-text-fill-color: transparent;
+ }
  .textWARNING {
    @apply !text-yellow-600;
  }
@@ -61,6 +65,10 @@
  .textDOWN, .textCRITICAL, .textERROR, .textALERT {
    @apply !text-red-500;
  }
+ .textERROR-mixed {
+  @apply bg-gradient-to-br from-gray-400 textERROR via-current to-gray-500 bg-clip-text fill-transparent;
+  -webkit-text-fill-color: transparent;
+  }
  .textUNREACHABLE {
    @apply !text-red-400;
  }
@@ -248,7 +256,7 @@ TR:nth-child(even) TD.tableRowSelected {
 * icons as part of text links (ex. in action box container)
 */
 I.fa-solid, I.uil {
- @apply text-[#aaa] !important;
+ @apply text-[#aaa];
 
  &.red {
    @apply bg-red-600 text-white !important;
@@ -516,6 +524,9 @@ DIV.daterangepicker {
 }
 
 #site_panel_sections {
+  SPAN {
+    color: #ddd !important;
+  }
   span.fancytree-focused span.fancytree-title {
     background: #555 !important;
   }
@@ -525,7 +536,7 @@ DIV.daterangepicker {
   span.fancytree-node:hover {
     background: #555 !important;
   }
-}
-span.fancytree-title {
-  color: #ddd !important;
+  span.fancytree-focused, span.fancytree-active {
+    background: #555 !important;
+  }
 }

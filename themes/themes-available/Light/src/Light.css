@@ -20,7 +20,7 @@
    .textPager {
      @apply text-gray-500;
    }
-   .textHINTsoft {
+   .textHINTsoft, .textGRAY {
      @apply text-gray-400;
    }
    .textNavBar {
@@ -37,6 +37,10 @@
   .textUP, .textOK, .textSUCCESS {
     @apply !text-green-600;
   }
+  .textSUCCESS-mixed {
+    @apply bg-gradient-to-br from-gray-200 textSUCCESS via-current to-gray-300 bg-clip-text fill-transparent;
+    -webkit-text-fill-color: transparent;
+  }
   .textWARNING {
     @apply !text-yellow-600;
   }
@@ -45,6 +49,10 @@
   }
   .textDOWN, .textCRITICAL, .textERROR, .textALERT {
     @apply !text-red-600;
+  }
+  .textERROR-mixed {
+    @apply bg-gradient-to-br from-gray-200 textERROR via-current to-gray-300 bg-clip-text fill-transparent;
+    -webkit-text-fill-color: transparent;
   }
   .textUNREACHABLE {
     @apply !text-red-500;
@@ -391,7 +399,7 @@ A.anchor-offset {
  * icons as part of text links (ex. in action box container)
  */
 I.fa-solid, I.uil {
-  @apply inline-block text-center w-5 h-5 leading-5 text-lg textBody;
+  @apply inline-block text-center w-5 h-5 leading-5 text-lg;
   &.round {
     @apply rounded-full;
   }
@@ -1092,17 +1100,55 @@ UL.ui-fancytree {
 }
 
 #site_panel_sections {
-  span.fancytree-focused span.fancytree-title {
-    @apply textActive1 bodyBG rounded;
+  .fancytree-node {
+    @apply clickable;
   }
-  span.fancytree-active span.fancytree-title {
-    @apply textActive1 bodyBG;
+  span.fancytree-title {
+    @apply p-px;
+  }
+  span.fancytree-focused, span.fancytree-active {
+    @apply textActive1 bodyBG rounded;
   }
   span.fancytree-node:hover {
     @apply bodyBG rounded;
     span.fancytree-title {
       @apply textActive1;
     }
+  }
+
+  span.fancytree-checkbox {
+    @apply bg-none text-base;
+    font-family: "unicons-line";
+    color: initial;
+    &::before { content: "\eaa2"; } /* unchecked */
+  }
+  .fancytree-selected span.fancytree-checkbox, span.fancytree-checkbox:hover {
+    &::before { content: "\e9b4"; } /* checked */
+  }
+  .fancytree-selected span.fancytree-checkbox:hover {
+    &::before { content: "\eaa2"; } /* unchecked */
+  }
+
+  .fancytree-expander {
+    @apply bg-none text-base -mt-px mx-0.5 pl-1.5;
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: initial;
+  }
+  .fancytree-exp-e span.fancytree-expander, .fancytree-exp-ed span.fancytree-expander {
+    &::before { content: "\f0d7"; }
+  }
+  .fancytree-exp-edl span.fancytree-expander, .fancytree-exp-el span.fancytree-expander {
+    &::before { content: "\f0d7"; }
+  }
+  .fancytree-exp-c span.fancytree-expander {
+    &::before { content: "\f0da"; }
+  }
+  .fancytree-exp-cl span.fancytree-expander:hover {
+    &::before { content: "\f0da"; }
+  }
+  .fancytree-exp-cl span.fancytree-expander {
+    &::before { content: "\f0da"; }
   }
 }
 

@@ -623,14 +623,6 @@ root/index.html
 root/robots.txt
 root/thruk/cache/thruk-2.48.2.js
 root/thruk/cache/thruk-panorama-2.48.2.js
-root/thruk/images/folder_gray.png
-root/thruk/images/folder_green.png
-root/thruk/images/folder_green_mixed.png
-root/thruk/images/folder_red.png
-root/thruk/images/folder_red_mixed.png
-root/thruk/images/nofolder_gray.png
-root/thruk/images/nofolder_green.png
-root/thruk/images/nofolder_red.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/thruk-2.48.2.js
