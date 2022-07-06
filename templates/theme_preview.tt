@@ -287,32 +287,32 @@
     </div>
 
     <div class="grid gap-3 grid-cols-2 h-fit w-fit">
-      <div class="card alert red relative">
+      <div class="card alert red relative w-36">
         <div class="head">
           <h3>red alert</h3>
         </div>
-        <div class="body">div.card.red.alert</div>
+        <div class="body text-left">div.card.red.alert</div>
       </div>
 
-      <div class="card alert yellow relative">
+      <div class="card alert yellow relative w-36">
         <div class="head">
           <h3>yellow alert</h3>
         </div>
-        <div class="body">div.card.yellow.alert</div>
+        <div class="body text-left">div.card.yellow.alert</div>
       </div>
 
-      <div class="card alert orange relative">
+      <div class="card alert orange relative w-36">
         <div class="head">
           <h3>orange alert</h3>
         </div>
-        <div class="body">div.card.orange.alert</div>
+        <div class="body text-left">div.card.orange.alert</div>
       </div>
 
-      <div class="card alert green relative">
+      <div class="card alert green relative w-36">
         <div class="head">
           <h3>green alert</h3>
         </div>
-        <div class="body">div.card.green.alert</div>
+        <div class="body text-left">div.card.green.alert</div>
       </div>
     </div>
 
