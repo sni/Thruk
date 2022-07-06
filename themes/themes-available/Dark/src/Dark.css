@@ -382,8 +382,8 @@ DIV.radiogroup {
 [type="checkbox"], [type="radio"] {
   @apply formsBG;
 }
-INPUT:disabled {
- @apply bg-gray-300;
+INPUT:disabled,BUTTON:disabled {
+  @apply bg-gray-300 hover:bg-gray-300 text-gray-500 hover:text-gray-500;
 }
 INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
  @apply ring-0 ring-red-500 border-red-500;

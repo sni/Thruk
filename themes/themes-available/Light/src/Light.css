@@ -715,7 +715,7 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
   }
 
   I.fa-solid, I.uil {
-    @apply h-auto w-auto mr-1;
+    @apply h-auto w-auto min-w-[18px] mr-1;
     font-size: 18px;
   }
 
@@ -1009,8 +1009,8 @@ TABLE.mainTable {
 SELECT {
   @apply pr-6 cursor-pointer;
 }
-INPUT:disabled {
-  @apply bg-gray-200 cursor-default;
+INPUT:disabled,BUTTON:disabled {
+  @apply bg-gray-200 !cursor-auto hover:bg-gray-200 text-gray-500 hover:text-gray-500;
 }
 INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
   @apply outline-none ring-0 ring-red-600 border-red-600;
@@ -1032,6 +1032,9 @@ INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA
   .drp-selected {
     @apply !hidden;
   }
+}
+DIV.daterangepicker {
+  @apply shadow-float;
 }
 
 DIV.deleteicon {
