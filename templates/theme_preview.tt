@@ -23,152 +23,151 @@
     </div>
     <div class="actionbox" id="iconsBox">
       <!-- icons are updated automatically by running ./script/theme-icons-update.pl (do not change manually) -->
-      <div><a><i class="fa-solid fa-align-center"></i>fa-solid fa-align-center</a></div>
-      <div><a><i class="fa-solid fa-angle-right"></i>fa-solid fa-angle-right</a></div>
-      <div><a><i class="fa-solid fa-arrow-left"></i>fa-solid fa-arrow-left</a></div>
-      <div><a><i class="fa-solid fa-arrow-right"></i>fa-solid fa-arrow-right</a></div>
-      <div><a><i class="fa-solid fa-arrow-right-to-bracket"></i>fa-solid fa-arrow-right-to-bracket</a></div>
-      <div><a><i class="fa-solid fa-arrow-rotate-left"></i>fa-solid fa-arrow-rotate-left</a></div>
-      <div><a><i class="fa-solid fa-arrow-turn-down"></i>fa-solid fa-arrow-turn-down</a></div>
-      <div><a><i class="fa-solid fa-arrow-up-right-from-square"></i>fa-solid fa-arrow-up-right-from-square</a></div>
-      <div><a><i class="fa-solid fa-arrows-rotate"></i>fa-solid fa-arrows-rotate</a></div>
-      <div><a><i class="fa-solid fa-arrows-turn-to-dots"></i>fa-solid fa-arrows-turn-to-dots</a></div>
-      <div><a><i class="fa-solid fa-backward-step"></i>fa-solid fa-backward-step</a></div>
-      <div><a><i class="fa-solid fa-bars"></i>fa-solid fa-bars</a></div>
-      <div><a><i class="fa-solid fa-bell"></i>fa-solid fa-bell</a></div>
-      <div><a><i class="fa-solid fa-bell-slash"></i>fa-solid fa-bell-slash</a></div>
-      <div><a><i class="fa-solid fa-bolt"></i>fa-solid fa-bolt</a></div>
-      <div><a><i class="fa-solid fa-bug"></i>fa-solid fa-bug</a></div>
-      <div><a><i class="fa-solid fa-business-time"></i>fa-solid fa-business-time</a></div>
-      <div><a><i class="fa-solid fa-chart-line"></i>fa-solid fa-chart-line</a></div>
-      <div><a><i class="fa-solid fa-chart-simple"></i>fa-solid fa-chart-simple</a></div>
-      <div><a><i class="fa-solid fa-check"></i>fa-solid fa-check</a></div>
-      <div><a><i class="fa-solid fa-check round small green"></i>fa-solid fa-check round small green</a></div>
-      <div><a><i class="fa-solid fa-circle-pause"></i>fa-solid fa-circle-pause</a></div>
-      <div><a><i class="fa-solid fa-circle-play"></i>fa-solid fa-circle-play</a></div>
-      <div><a><i class="fa-solid fa-circle-question"></i>fa-solid fa-circle-question</a></div>
-      <div><a><i class="fa-solid fa-circle-xmark"></i>fa-solid fa-circle-xmark</a></div>
-      <div><a><i class="fa-solid fa-clipboard"></i>fa-solid fa-clipboard</a></div>
-      <div><a><i class="fa-solid fa-clipboard-check"></i>fa-solid fa-clipboard-check</a></div>
-      <div><a><i class="fa-solid fa-clipboard-question"></i>fa-solid fa-clipboard-question</a></div>
-      <div><a><i class="fa-solid fa-clock"></i>fa-solid fa-clock</a></div>
-      <div><a><i class="fa-solid fa-clock-rotate-left small"></i>fa-solid fa-clock-rotate-left small</a></div>
-      <div><a><i class="fa-solid fa-clone"></i>fa-solid fa-clone</a></div>
-      <div><a><i class="fa-solid fa-code"></i>fa-solid fa-code</a></div>
-      <div><a><i class="fa-solid fa-code-commit"></i>fa-solid fa-code-commit</a></div>
-      <div><a><i class="fa-solid fa-comment"></i>fa-solid fa-comment</a></div>
-      <div><a><i class="fa-solid fa-copy small"></i>fa-solid fa-copy small</a></div>
-      <div><a><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
-      <div><a><i class="fa-solid fa-exclamation round small red"></i>fa-solid fa-exclamation round small red</a></div>
-      <div><a><i class="fa-solid fa-exclamation round small yellow"></i>fa-solid fa-exclamation round small yellow</a></div>
-      <div><a><i class="fa-solid fa-exclamation round small yellow'"></i>fa-solid fa-exclamation round small yellow'</a></div>
-      <div><a><i class="fa-solid fa-expand"></i>fa-solid fa-expand</a></div>
-      <div><a><i class="fa-solid fa-eye small"></i>fa-solid fa-eye small</a></div>
-      <div><a><i class="fa-solid fa-file-circle-check"></i>fa-solid fa-file-circle-check</a></div>
-      <div><a><i class="fa-solid fa-file-circle-plus"></i>fa-solid fa-file-circle-plus</a></div>
-      <div><a><i class="fa-solid fa-file-code"></i>fa-solid fa-file-code</a></div>
-      <div><a><i class="fa-solid fa-folder-open"></i>fa-solid fa-folder-open</a></div>
-      <div><a><i class="fa-solid fa-folder-tree"></i>fa-solid fa-folder-tree</a></div>
-      <div><a><i class="fa-solid fa-house"></i>fa-solid fa-house</a></div>
-      <div><a><i class="fa-solid fa-link small"></i>fa-solid fa-link small</a></div>
-      <div><a><i class="fa-solid fa-lock"></i>fa-solid fa-lock</a></div>
-      <div><a><i class="fa-solid fa-magnifying-glass-arrow-right"></i>fa-solid fa-magnifying-glass-arrow-right</a></div>
-      <div><a><i class="fa-solid fa-magnifying-glass-minus"></i>fa-solid fa-magnifying-glass-minus</a></div>
-      <div><a><i class="fa-solid fa-magnifying-glass-plus"></i>fa-solid fa-magnifying-glass-plus</a></div>
-      <div><a><i class="fa-solid fa-maximize"></i>fa-solid fa-maximize</a></div>
-      <div><a><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
-      <div><a><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
-      <div><a><i class="fa-solid fa-person-digging"></i>fa-solid fa-person-digging</a></div>
-      <div><a><i class="fa-solid fa-plus"></i>fa-solid fa-plus</a></div>
-      <div><a><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
-      <div><a><i class="fa-solid fa-question round small"></i>fa-solid fa-question round small</a></div>
-      <div><a><i class="fa-solid fa-rectangle-list"></i>fa-solid fa-rectangle-list</a></div>
-      <div><a><i class="fa-solid fa-reply-all"></i>fa-solid fa-reply-all</a></div>
-      <div><a><i class="fa-solid fa-right-from-bracket"></i>fa-solid fa-right-from-bracket</a></div>
-      <div><a><i class="fa-solid fa-rocket"></i>fa-solid fa-rocket</a></div>
-      <div><a><i class="fa-solid fa-save"></i>fa-solid fa-save</a></div>
-      <div><a><i class="fa-solid fa-shuffle"></i>fa-solid fa-shuffle</a></div>
-      <div><a><i class="fa-solid fa-sitemap"></i>fa-solid fa-sitemap</a></div>
-      <div><a><i class="fa-solid fa-square-caret-left"></i>fa-solid fa-square-caret-left</a></div>
-      <div><a><i class="fa-solid fa-square-minus false;"></i>fa-solid fa-square-minus false;</a></div>
-      <div><a><i class="fa-solid fa-tag"></i>fa-solid fa-tag</a></div>
-      <div><a><i class="fa-solid fa-thumbtack"></i>fa-solid fa-thumbtack</a></div>
-      <div><a><i class="fa-solid fa-trash"></i>fa-solid fa-trash</a></div>
-      <div><a><i class="fa-solid fa-truck-fast"></i>fa-solid fa-truck-fast</a></div>
-      <div><a><i class="fa-solid fa-up-right-and-down-left-from-center"></i>fa-solid fa-up-right-and-down-left-from-center</a></div>
-      <div><a><i class="fa-solid fa-user-pen"></i>fa-solid fa-user-pen</a></div>
-      <div><a><i class="fa-solid fa-volume-high small"></i>fa-solid fa-volume-high small</a></div>
-      <div><a><i class="fa-solid fa-wand-magic-sparkles"></i>fa-solid fa-wand-magic-sparkles</a></div>
-      <div><a><i class="fa-solid fa-wrench small"></i>fa-solid fa-wrench small</a></div>
-      <div><a><i class="fa-solid fa-xmark round small red"></i>fa-solid fa-xmark round small red</a></div>
-      <div><a><i class="uil uil-angle-double-left"></i>uil uil-angle-double-left</a></div>
-      <div><a><i class="uil uil-angle-double-right"></i>uil uil-angle-double-right</a></div>
-      <div><a><i class="uil uil-angle-down"></i>uil uil-angle-down</a></div>
-      <div><a><i class="uil uil-angle-left"></i>uil uil-angle-left</a></div>
-      <div><a><i class="uil uil-angle-right"></i>uil uil-angle-right</a></div>
-      <div><a><i class="uil uil-angle-up"></i>uil uil-angle-up</a></div>
-      <div><a><i class="uil uil-arrow-from-top false;"></i>uil uil-arrow-from-top false;</a></div>
-      <div><a><i class="uil uil-arrow-to-bottom"></i>uil uil-arrow-to-bottom</a></div>
-      <div><a><i class="uil uil-bolt"></i>uil uil-bolt</a></div>
-      <div><a><i class="uil uil-bookmark"></i>uil uil-bookmark</a></div>
-      <div><a><i class="uil uil-brush-alt"></i>uil uil-brush-alt</a></div>
-      <div><a><i class="uil uil-check"></i>uil uil-check</a></div>
-      <div><a><i class="uil uil-cog"></i>uil uil-cog</a></div>
-      <div><a><i class="uil uil-columns"></i>uil uil-columns</a></div>
-      <div><a><i class="uil uil-copy"></i>uil uil-copy</a></div>
-      <div><a><i class="uil uil-corner-down-right-alt"></i>uil uil-corner-down-right-alt</a></div>
-      <div><a><i class="uil uil-data-sharing"></i>uil uil-data-sharing</a></div>
-      <div><a><i class="uil uil-dialpad"></i>uil uil-dialpad</a></div>
-      <div><a><i class="uil uil-draggabledots"></i>uil uil-draggabledots</a></div>
-      <div><a><i class="uil uil-envelope-add"></i>uil uil-envelope-add</a></div>
-      <div><a><i class="uil uil-exclamation round yellow"></i>uil uil-exclamation round yellow</a></div>
-      <div><a><i class="uil uil-external-link-alt"></i>uil uil-external-link-alt</a></div>
-      <div><a><i class="uil uil-eye-slash"></i>uil uil-eye-slash</a></div>
-      <div><a><i class="uil uil-fast-mail"></i>uil uil-fast-mail</a></div>
-      <div><a><i class="uil uil-file-export"></i>uil uil-file-export</a></div>
-      <div><a><i class="uil uil-file-plus-alt"></i>uil uil-file-plus-alt</a></div>
-      <div><a><i class="uil uil-folder"></i>uil uil-folder</a></div>
-      <div><a><i class="uil uil-folder-minus"></i>uil uil-folder-minus</a></div>
-      <div><a><i class="uil uil-folder-open"></i>uil uil-folder-open</a></div>
-      <div><a><i class="uil uil-info round"></i>uil uil-info round</a></div>
-      <div><a><i class="uil uil-key-skeleton"></i>uil uil-key-skeleton</a></div>
-      <div><a><i class="uil uil-left-arrow-to-left small"></i>uil uil-left-arrow-to-left small</a></div>
-      <div><a><i class="uil uil-lightbulb"></i>uil uil-lightbulb</a></div>
-      <div><a><i class="uil uil-link"></i>uil uil-link</a></div>
-      <div><a><i class="uil uil-link-h"></i>uil uil-link-h</a></div>
-      <div><a><i class="uil uil-list-ul"></i>uil uil-list-ul</a></div>
-      <div><a><i class="uil uil-lock-open-alt"></i>uil uil-lock-open-alt</a></div>
-      <div><a><i class="uil uil-newspaper"></i>uil uil-newspaper</a></div>
-      <div><a><i class="uil uil-picture"></i>uil uil-picture</a></div>
-      <div><a><i class="uil uil-placeholder"></i>uil uil-placeholder</a></div>
-      <div><a><i class="uil uil-plus"></i>uil uil-plus</a></div>
-      <div><a><i class="uil uil-plus-circle"></i>uil uil-plus-circle</a></div>
-      <div><a><i class="uil uil-puzzle-piece"></i>uil uil-puzzle-piece</a></div>
-      <div><a><i class="uil uil-save"></i>uil uil-save</a></div>
-      <div><a><i class="uil uil-save'"></i>uil uil-save'</a></div>
-      <div><a><i class="uil uil-schedule"></i>uil uil-schedule</a></div>
-      <div><a><i class="uil uil-search"></i>uil uil-search</a></div>
-      <div><a><i class="uil uil-server"></i>uil uil-server</a></div>
-      <div><a><i class="uil uil-signout"></i>uil uil-signout</a></div>
-      <div><a><i class="uil uil-sliders-v"></i>uil uil-sliders-v</a></div>
-      <div><a><i class="uil uil-sliders-v-alt"></i>uil uil-sliders-v-alt</a></div>
-      <div><a><i class="uil uil-square-full"></i>uil uil-square-full</a></div>
-      <div><a><i class="uil uil-star"></i>uil uil-star</a></div>
-      <div><a><i class="uil uil-sync"></i>uil uil-sync</a></div>
-      <div><a><i class="uil uil-table"></i>uil uil-table</a></div>
-      <div><a><i class="uil uil-thunderstorm"></i>uil uil-thunderstorm</a></div>
-      <div><a><i class="uil uil-times"></i>uil uil-times</a></div>
-      <div><a><i class="uil uil-times-circle"></i>uil uil-times-circle</a></div>
-      <div><a><i class="uil uil-top-arrow-to-top"></i>uil uil-top-arrow-to-top</a></div>
-      <div><a><i class="uil uil-trash"></i>uil uil-trash</a></div>
-      <div><a><i class="uil uil-trash-alt"></i>uil uil-trash-alt</a></div>
-      <div><a><i class="uil uil-trowel"></i>uil uil-trowel</a></div>
-      <div><a><i class="uil uil-user"></i>uil uil-user</a></div>
-      <div><a><i class="uil uil-users-alt"></i>uil uil-users-alt</a></div>
-      <div><a><i class="uil uil-volume"></i>uil uil-volume</a></div>
-      <div><a><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
-      <div><a><i class="uil-exclamation round yellow"></i>uil-exclamation round yellow</a></div>
-      <div><a><i class="uil-info round"></i>uil-info round</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-align-center"></i>fa-solid fa-align-center</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-angle-right"></i>fa-solid fa-angle-right</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrow-left"></i>fa-solid fa-arrow-left</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrow-right"></i>fa-solid fa-arrow-right</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrow-right-to-bracket"></i>fa-solid fa-arrow-right-to-bracket</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrow-rotate-left"></i>fa-solid fa-arrow-rotate-left</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrow-turn-down"></i>fa-solid fa-arrow-turn-down</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrow-up-right-from-square"></i>fa-solid fa-arrow-up-right-from-square</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrows-rotate"></i>fa-solid fa-arrows-rotate</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-arrows-turn-to-dots"></i>fa-solid fa-arrows-turn-to-dots</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-backward-step"></i>fa-solid fa-backward-step</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-bars"></i>fa-solid fa-bars</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-bell"></i>fa-solid fa-bell</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-bell-slash"></i>fa-solid fa-bell-slash</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-bolt"></i>fa-solid fa-bolt</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-bug"></i>fa-solid fa-bug</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-business-time"></i>fa-solid fa-business-time</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-chart-line"></i>fa-solid fa-chart-line</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-chart-simple"></i>fa-solid fa-chart-simple</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-check"></i>fa-solid fa-check</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-check round small green"></i>fa-solid fa-check round small green</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-circle-pause"></i>fa-solid fa-circle-pause</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-circle-play"></i>fa-solid fa-circle-play</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-circle-question"></i>fa-solid fa-circle-question</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-circle-xmark"></i>fa-solid fa-circle-xmark</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-clipboard"></i>fa-solid fa-clipboard</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-clipboard-check"></i>fa-solid fa-clipboard-check</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-clipboard-question"></i>fa-solid fa-clipboard-question</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-clock"></i>fa-solid fa-clock</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-clock-rotate-left small"></i>fa-solid fa-clock-rotate-left small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-clone"></i>fa-solid fa-clone</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-code"></i>fa-solid fa-code</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-code-commit"></i>fa-solid fa-code-commit</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-comment"></i>fa-solid fa-comment</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-copy small"></i>fa-solid fa-copy small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-envelope"></i>fa-solid fa-envelope</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-exclamation round small red"></i>fa-solid fa-exclamation round small red</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-exclamation round small yellow"></i>fa-solid fa-exclamation round small yellow</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-exclamation round small yellow'"></i>fa-solid fa-exclamation round small yellow'</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-expand"></i>fa-solid fa-expand</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-eye small"></i>fa-solid fa-eye small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-file-circle-check"></i>fa-solid fa-file-circle-check</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-file-circle-plus"></i>fa-solid fa-file-circle-plus</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-file-code"></i>fa-solid fa-file-code</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-folder-open"></i>fa-solid fa-folder-open</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-folder-tree"></i>fa-solid fa-folder-tree</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-house"></i>fa-solid fa-house</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-link small"></i>fa-solid fa-link small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-lock"></i>fa-solid fa-lock</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-magnifying-glass-arrow-right"></i>fa-solid fa-magnifying-glass-arrow-right</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-magnifying-glass-minus"></i>fa-solid fa-magnifying-glass-minus</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-magnifying-glass-plus"></i>fa-solid fa-magnifying-glass-plus</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-maximize"></i>fa-solid fa-maximize</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-person-digging"></i>fa-solid fa-person-digging</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-plus"></i>fa-solid fa-plus</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-question round small"></i>fa-solid fa-question round small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-rectangle-list"></i>fa-solid fa-rectangle-list</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-reply-all"></i>fa-solid fa-reply-all</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-right-from-bracket"></i>fa-solid fa-right-from-bracket</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-rocket"></i>fa-solid fa-rocket</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-save"></i>fa-solid fa-save</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-shuffle"></i>fa-solid fa-shuffle</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-sitemap"></i>fa-solid fa-sitemap</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-square-caret-left"></i>fa-solid fa-square-caret-left</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-square-minus false;"></i>fa-solid fa-square-minus false;</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-tag"></i>fa-solid fa-tag</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-thumbtack"></i>fa-solid fa-thumbtack</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-trash"></i>fa-solid fa-trash</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-truck-fast"></i>fa-solid fa-truck-fast</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-up-right-and-down-left-from-center"></i>fa-solid fa-up-right-and-down-left-from-center</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-user-pen"></i>fa-solid fa-user-pen</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-volume-high small"></i>fa-solid fa-volume-high small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-wand-magic-sparkles"></i>fa-solid fa-wand-magic-sparkles</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-wrench small"></i>fa-solid fa-wrench small</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-xmark round small red"></i>fa-solid fa-xmark round small red</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-angle-double-left"></i>uil uil-angle-double-left</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-angle-double-right"></i>uil uil-angle-double-right</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-angle-down"></i>uil uil-angle-down</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-angle-left"></i>uil uil-angle-left</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-angle-right"></i>uil uil-angle-right</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-angle-up"></i>uil uil-angle-up</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-arrow-from-top false;"></i>uil uil-arrow-from-top false;</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-arrow-to-bottom"></i>uil uil-arrow-to-bottom</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-bolt"></i>uil uil-bolt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-bookmark"></i>uil uil-bookmark</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-brush-alt"></i>uil uil-brush-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-check"></i>uil uil-check</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-cog"></i>uil uil-cog</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-columns"></i>uil uil-columns</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-copy"></i>uil uil-copy</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-corner-down-right-alt"></i>uil uil-corner-down-right-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-data-sharing"></i>uil uil-data-sharing</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-dialpad"></i>uil uil-dialpad</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-draggabledots"></i>uil uil-draggabledots</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-envelope-add"></i>uil uil-envelope-add</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-exclamation round yellow"></i>uil uil-exclamation round yellow</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-external-link-alt"></i>uil uil-external-link-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-eye-slash"></i>uil uil-eye-slash</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-fast-mail"></i>uil uil-fast-mail</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-file-export"></i>uil uil-file-export</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-file-plus-alt"></i>uil uil-file-plus-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-folder"></i>uil uil-folder</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-folder-minus"></i>uil uil-folder-minus</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-folder-open"></i>uil uil-folder-open</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-info round"></i>uil uil-info round</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-key-skeleton"></i>uil uil-key-skeleton</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-left-arrow-to-left small"></i>uil uil-left-arrow-to-left small</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-lightbulb"></i>uil uil-lightbulb</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-link"></i>uil uil-link</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-link-h"></i>uil uil-link-h</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-list-ul"></i>uil uil-list-ul</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-lock-open-alt"></i>uil uil-lock-open-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-newspaper"></i>uil uil-newspaper</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-picture"></i>uil uil-picture</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-placeholder"></i>uil uil-placeholder</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-plus"></i>uil uil-plus</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-plus-circle"></i>uil uil-plus-circle</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-puzzle-piece"></i>uil uil-puzzle-piece</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-save"></i>uil uil-save</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-save'"></i>uil uil-save'</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-schedule"></i>uil uil-schedule</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-search"></i>uil uil-search</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-server"></i>uil uil-server</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-signout"></i>uil uil-signout</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-sliders-v"></i>uil uil-sliders-v</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-sliders-v-alt"></i>uil uil-sliders-v-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-square-full"></i>uil uil-square-full</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-star"></i>uil uil-star</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-sync"></i>uil uil-sync</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-table"></i>uil uil-table</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-thunderstorm"></i>uil uil-thunderstorm</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-times"></i>uil uil-times</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-times-circle"></i>uil uil-times-circle</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-top-arrow-to-top"></i>uil uil-top-arrow-to-top</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-trash-alt"></i>uil uil-trash-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-trowel"></i>uil uil-trowel</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-user"></i>uil uil-user</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-users-alt"></i>uil uil-users-alt</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-volume"></i>uil uil-volume</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
+      <div><a class="flex" href="#"><i class="uil-exclamation round yellow"></i>uil-exclamation round yellow</a></div>
+      <div><a class="flex" href="#"><i class="uil-info round"></i>uil-info round</a></div>
 <!-- end of "do not change manually" -->
       <div>
         <a>
@@ -428,7 +427,12 @@
             </tr>
             <tr>
               <th>Submit</th>
-              <td><input type="submit" value="submit"></td>
+              <td>
+                <div class="flexrow gap-2 flex-nowrap">
+                  <input type="submit" value="submit">
+                  <input type="submit" value="disabled" disabled>
+                </div>
+              </td>
             </tr>
             <tr>
               <th>Dropdown</th>
@@ -542,6 +546,11 @@ function switchTheme(sel) {
     this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
   });
 }
+
+jQuery("#iconsBox A").click(function(evt) {
+  copyCode(evt, jQuery(this).find("I").attr("class"));
+  return false;
+});
 </script>
 
 [% PROCESS _footer.tt %]
