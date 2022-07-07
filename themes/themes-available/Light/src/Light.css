@@ -188,11 +188,11 @@
     overflow-x-auto
     headerBG
   ;
-  scrollbar-color: #3B4D54 white;
+  scrollbar-color: #ccc white;
 }
 MAIN.scrollauto {
   @apply bodyBG;
-  scrollbar-color: #3B4D54 #ECEEf0;
+  scrollbar-color: #ccc #ECEEf0;
 }
 HTML.minimal {
   @apply overflow-auto;
@@ -201,11 +201,11 @@ HTML.minimal {
 }
 BODY {
   @apply
-    font-sans
     textBody
     text-default
     tracking-normal
   ;
+  font-family: Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 header.header {
