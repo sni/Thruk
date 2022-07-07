@@ -71,6 +71,11 @@ sub new {
     # ex.: user settings from var/users/<name>
     $self->{settings} = $self->{'internal'} ? {} : Thruk::Utils::get_user_data($c, $username);
 
+    if($self->{'internal'} && !$self->{'timestamp'}) {
+        $self->{'timestamp'}        = time();
+        $self->{'contact_src_peer'} = [];
+    }
+
     return $self;
 }
 

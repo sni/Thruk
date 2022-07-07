@@ -526,7 +526,7 @@ sub add_defaults {
            || !$c->user->{'timestamp'}
            || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
            || Thruk::Base->mode_cli()
-           || ($c->user->{'timestamp'} < (time() - 600))
+           || ($c->user->{'timestamp'} < (time() - 300))
         ) {
             # refresh dynamic roles and groups
             $c->user->set_dynamic_attributes($c);
