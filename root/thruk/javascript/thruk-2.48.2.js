@@ -5974,7 +5974,9 @@ function disableAllFormElement() {
 /* show this form row */
 function enableFormElement(id) {
     var obj = document.getElementById(id);
-    obj.style.display = "";
+    if(obj) {
+        obj.style.display = "";
+    }
 }
 
 
