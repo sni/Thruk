@@ -9,7 +9,7 @@
  */
  @layer base {
    .textBody {
-     @apply !text-river-bed-600;
+     @apply text-river-bed-600;
    }
    .textCard {
      @apply !text-gray-900;
@@ -342,7 +342,7 @@ HR {
 }
 
 @layer base {
-  .link {
+  .link:not(I) {
     @apply hover:no-underline hover:textActive1;
   }
 }
@@ -399,7 +399,7 @@ A.anchor-offset {
  * icons as part of text links (ex. in action box container)
  */
 I.fa-solid, I.uil {
-  @apply inline-block text-center w-5 h-5 leading-5 text-lg;
+  @apply inline-block text-center w-5 h-5 leading-5 text-lg textBody;
   &.round {
     @apply rounded-full;
   }
@@ -691,6 +691,10 @@ DIV.progressbar {
 
 BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
   @apply defaultButton;
+
+ I.fa-solid, I.uil {
+   @apply text-inherit !important;
+ }
 
   &.active, &:hover {
     @apply bg-gray-400 text-white cursor-pointer;
