@@ -45,7 +45,7 @@
           </div>
           [% PROCESS _header_broadcast.tt %]
 
-          <div class="flexrow w-fit gap-2 flex-nowrap">
+          <div class="flexrow w-fit gap-2 flex-nowrap main-header-button">
             [% IF c.user_exists %]
               <div class="flex items-center">
                 <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi">

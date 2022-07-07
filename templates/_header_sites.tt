@@ -49,7 +49,7 @@
               <input type='text' value='' placeholder="enter name" id="site_panel_bookmark_new" class="w-20" style="display: none;">
               <button id="site_panel_bookmark_new_save" class="w-20" style="display: none;" onclick="site_panel_bookmark_save()">save</button>
               <button id="site_panel_bookmark_plus" onClick='jQuery(this).hide(); jQuery("#site_panel_bookmark_new").show().val("").focus(); jQuery("#site_panel_bookmark_new_save").show();'><i class="uil uil-plus"></i>add</button>
-              <button onclick="jQuery(this).toggleClass('red')" id="site_panel_bookmark_delete"><i class="uil uil-trash-alt"></i>remove</button>
+              <button class="hover-red" onclick="jQuery(this).toggleClass('red')" id="site_panel_bookmark_delete"><i class="uil uil-trash-alt"></i>remove</button>
             </div>
         </div>
       [% END %]

@@ -351,13 +351,6 @@
             <td></td>
           </tr>
           <tr>
-            <th>.secondary</th>
-            <td></td>
-            <td><button class="secondary">default</button></td>
-            <td><button class="big secondary">big</button></td>
-            <td></td>
-          </tr>
-          <tr>
             <th>.green</th>
             <td></td>
             <td><button class="green">default</button></td>
@@ -369,13 +362,6 @@
             <td></td>
             <td><button class="red">default</button></td>
             <td><button class="big red">big</button></td>
-            <td></td>
-          </tr>
-          <tr>
-            <th>.round .secondary</th>
-            <td><button class="small round secondary"><i class="uil uil-grin"></i></button></td>
-            <td><button class="round secondary"><i class="uil uil-grin"></i></button></td>
-            <td><button class="big round secondary"><i class="uil uil-grin"></i></button></td>
             <td></td>
           </tr>
           <tr>

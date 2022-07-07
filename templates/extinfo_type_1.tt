@@ -179,7 +179,7 @@
         [% IF comments.size > 0 %]
           [% UNLESS command_disabled(c, '20') %]
             <div>
-              <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+              <a class="button hover-red js-modal-command-link" href="cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
                 <i class="fa-solid fa-trash mr-1"></i>Delete all
               </a>
             </div>
@@ -218,7 +218,7 @@
         [% IF downtimes %]
           [% UNLESS command_disabled(c, '5') %]
             <div>
-              <a class="button js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
+              <a class="button hover-red js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
                 <i class="fa-solid fa-trash mr-1"></i>Delete all
               </a>
             </div>

@@ -255,10 +255,9 @@ TR:nth-child(even) TD.tableRowSelected {
 /*******************************************************************************
 * icons as part of text links (ex. in action box container)
 */
-.fa-solid, .uil {
- @apply text-[#bbb];
-}
 I.fa-solid, I.uil {
+ @apply text-[#bbb];
+
  &.red {
    @apply bg-red-600 text-white !important;
  }
@@ -340,19 +339,12 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
    @apply bg-gray-400 text-white;
  }
 
- &.secondary {
-   @apply bg-sky-500 hover:bg-sky-600 text-white hover:text-sky-200;
- }
-
  &.green {
    @apply bg-green-500 text-white hover:text-white hover:bg-green-400;
  }
 
  &.red {
    @apply bg-red-600 text-white hover:bg-red-500;
- }
- &.hover-red {
-   @apply hover:bg-red-600 hover:text-white;
  }
  &.iconOnly {
   @apply bg-transparent text-inherit hover:text-inherit hover:bg-transparent;

@@ -689,6 +689,19 @@ DIV.progressbar {
   }
 }
 
+.hover-red:hover {
+  @apply !bg-red-600 !text-white;
+  I, A {
+    @apply !text-white;
+  }
+}
+.hover-red-text:hover {
+  @apply !textALERT;
+  I, A {
+    @apply !textALERT;
+  }
+}
+
 BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
   @apply defaultButton;
 
@@ -700,19 +713,12 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
     @apply bg-gray-400 text-white cursor-pointer;
   }
 
-  &.secondary {
-    @apply bg-sky-500 hover:bg-sky-600 text-white hover:text-sky-200;
-  }
-
   &.green {
     @apply bg-green-500 text-white hover:text-white hover:bg-green-400;
   }
 
   &.red {
     @apply bg-red-600 text-white hover:bg-red-500;
-  }
-  &.hover-red {
-    @apply hover:bg-red-600 hover:text-white;
   }
   &.not-clickable {
     @apply pointer-events-none;
@@ -802,11 +808,10 @@ DIV.accordion {
 .fa-trash, .uil-trash-alt {
   @apply hover:textALERT;
 }
-a:hover>.fa-trash, a:hover>.uil-trash-alt {
-  @apply textALERT;
-}
-BUTTON:hover>.fa-trash, BUTTON:hover>.uil-trash-alt {
-  @apply textALERT;
+A, BUTTON {
+  &:has(I.fa-trash), &:has(I.uil-trash-alt) {
+    @apply hover:textALERT;
+  }
 }
 
 /*******************************************************************************

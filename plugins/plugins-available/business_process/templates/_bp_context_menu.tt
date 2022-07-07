@@ -11,7 +11,7 @@
     <li><a href="#" onclick="bp_add_new_node()"><i class="fa-solid fa-plus text-xs"></i>Add New Node</a></li>
     <li id="bp_menu_clone_node" class="disabled"><a href="#" onclick="bp_clone_node()"><i class="fa-solid fa-copy text-xs"></i>Clone This Node</a></li>
     <li><hr></li>
-    <li id='bp_menu_remove_node'><a href="#" onclick="bp_show_remove()"><i class="fa-solid fa-trash text-xs"></i>Remove Node</a></li>
+    <li id='bp_menu_remove_node'><a class="hover-red" href="#" onclick="bp_show_remove()"><i class="fa-solid fa-trash text-xs"></i>Remove Node</a></li>
     <li id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><i class="fa-solid fa-tag text-xs"></i>Rename Node</a></li>
     <li><a href="#" onclick="bp_show_edit_node('current')"><i class="fa-solid fa-pencil text-xs"></i>Edit Node</a></li>
     [% ELSE %]

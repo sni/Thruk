@@ -58,32 +58,32 @@
               [% IF c.config.cmd_quick_status.downtime %]
                 <hr class="pt-px mb-px">
                 <div><a onclick="selectCommand(2); return false;" class="flex" href="#"><i class="fa-solid fa-moon"></i>Add Downtime</a></div>
-                <div><a onclick="selectCommand(5); return false;" class="flex hover:textALERT" href="#"><i class="fa-solid fa-moon"></i>Remove Downtimes</a></div>
+                <div><a onclick="selectCommand(5); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-moon"></i>Remove Downtimes</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.comment %]
                 <hr class="pt-px mb-px">
                 <div><a onclick="selectCommand(3); return false;" class="flex" href="#"><i class="fa-solid fa-comment"></i> Add Comment</a></div>
-                <div><a onclick="selectCommand(6); return false;" class="flex hover:textALERT" href="#"><i class="fa-solid fa-comment"></i>Remove Comments</a></div>
+                <div><a onclick="selectCommand(6); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-comment"></i>Remove Comments</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.acknowledgement %]
                 <hr class="pt-px mb-px">
                 <div><a onclick="selectCommand(4); return false;" class="flex" href="#"><i class="fa-solid fa-person-digging"></i> Add Acknowledgement</a></div>
-                <div><a onclick="selectCommand(7); return false;" class="flex hover:textALERT" href="#"><i class="fa-solid fa-person-digging"></i> Remove Acknowledgement</a></div>
+                <div><a onclick="selectCommand(7); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-person-digging"></i> Remove Acknowledgement</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.active_checks %]
                 <hr class="pt-px mb-px">
                 <div><a onclick="selectCommand(8); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i> Enable Active Checks</a></div>
-                <div><a onclick="selectCommand(9); return false;" class="flex hover:textALERT" href="#"><i class="fa-solid fa-xmark"></i> Disable Active Checks</a></div>
+                <div><a onclick="selectCommand(9); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i> Disable Active Checks</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.notifications %]
                 <hr class="pt-px mb-px">
                 <div><a onclick="selectCommand(10); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i> Enable Notifications</a></div>
-                <div><a onclick="selectCommand(11); return false;" class="flex hover:textALERT" href="#"><i class="fa-solid fa-xmark"></i> Disable Notifications</a></div>
+                <div><a onclick="selectCommand(11); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i> Disable Notifications</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.eventhandler %]
                 <hr class="pt-px mb-px">
                 <div><a onclick="selectCommand(15); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i> Enable Eventhandler</a></div>
-                <div><a onclick="selectCommand(16); return false;" class="flex hover:textALERT" href="#"><i class="fa-solid fa-xmark"></i> Disable Eventhandler</a></div>
+                <div><a onclick="selectCommand(16); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i> Disable Eventhandler</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.submit_result %]
                 <hr class="pt-px mb-px">
