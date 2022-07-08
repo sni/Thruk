@@ -11,8 +11,6 @@
   --body-bg:                  var(--color-river-bed-100);
   --card-bg:                  var(--color-white);
   --header-bg:                var(--color-white);
-  --navbar-bg:                var(--color-white);
-  --navbar-item-bg:           var(--color-river-bed-100);
   --hover-bg:                 var(--color-warmgray-100);
   --code-bg:                  var(--color-gray-50);
   --table-bg:                 var(--color-white);
@@ -30,7 +28,6 @@
   --text-body:                var(--color-river-bed-600);
   --text-card:                var(--color-river-bed-900);
   --text-th:                  var(--color-gray-600);
-  --text-navbar:              var(--color-gray-700);
   --text-hint:                var(--color-orange-600);
   --text-hint-soft:           var(--color-gray-400);
   --text-active1:             var(--color-blue-600);
@@ -39,7 +36,14 @@
   --text-alert:               var(--color-red-600);
   --text-unreachable:         var(--color-red-500);
   --text-mixed-gradient-from: var(--color-gray-200);
-  --text-mixed-gradient-to  : var(--color-gray-300);
+  --text-mixed-gradient-to:   var(--color-gray-300);
+
+  --navbar-fg:                var(--color-gray-700);
+  --navbar-bg:                var(--header-bg);
+  --navbar-item-fg:           var(--navbar-fg);
+  --navbar-item-bg:           var(--navbar-bg);
+  --navbar-item-hover-fg:     var(--text-active1);
+  --navbar-item-hover-bg:     var(--hover-bg);
 
   --forms-fg:                 var(--text-body);
   --forms-bg:                 var(--color-white);
@@ -155,9 +159,6 @@
   .textHINT {
     @apply !text-[color:var(--text-hint)];
   }
-  .textNavBar {
-    @apply !text-[color:var(--text-navbar)];
-  }
   .textActive1 {
     @apply !text-[color:var(--text-active1)];
   }
@@ -232,12 +233,6 @@
   }
   .headerBG {
     @apply bg-[color:var(--header-bg)];
-  }
-  .navBarBG {
-    @apply bg-[color:var(--navbar-bg)];
-  }
-  .navItemBG {
-    @apply bg-[color:var(--navbar-item-bg)];
   }
 
   .hoverBG {
@@ -540,6 +535,8 @@ I.fa-solid, I.uil {
  * sidebar
  */
 #nav-container {
+  @apply bg-[color:var(--navbar-bg)] text-[color:var(--navbar-fg)];
+
   &.collapsed {
     @apply w-[50px] !important;
     DIV.navsectionlinks {
@@ -547,9 +544,11 @@ I.fa-solid, I.uil {
     }
     UL.navsectionlinks {
       @apply overflow-visible hidden;
+      > LI {
+        @apply bg-[color:var(--navbar-item-bg)];
+      }
     }
     A.navsectiontitle {
-      @apply navBarBG;
       SPAN, I {
         @apply hidden;
       }
@@ -569,12 +568,18 @@ I.fa-solid, I.uil {
         @apply borderActive;
       }
       A.navsectiontitle {
+        @apply bg-[color:var(--navbar-item-bg)] hover:bg-[color:var(--navbar-item-bg)];
         SPAN {
-          @apply absolute left-[40px] top-0 block w-[200px] h-6 p-1 shadow-card rounded rounded-b-none navBarBG;
+          @apply absolute left-[40px] top-0 block w-[200px] h-6 p-1 shadow-card rounded rounded-b-none
+            bg-[color:var(--navbar-item-bg)]
+            text-[color:var(--navbar-item-fg)]
+            hover:bg-[color:var(--navbar-item-hover-bg)]
+            hover:text-[color:var(--navbar-item-hover-fg)]
+          ;
         }
       }
       UL.navsectionlinks {
-        @apply absolute left-[40px] top-6 shadow-card rounded rounded-t-none navBarBG w-[200px];
+        @apply absolute left-[40px] top-6 shadow-card rounded rounded-t-none w-[200px] overflow-hidden z-10;
         display: inherit;
       }
       A.navsectionsubtitle {
@@ -603,18 +608,36 @@ I.fa-solid, I.uil {
       }
     }
   }
-}
-.navsectionlinks {
-  @apply textNavBar navBarBG;
+  .collapse-btn {
+    @apply
+      bg-[color:var(--navbar-item-bg)]
+      text-[color:var(--navbar-item-fg)]
+      hover:bg-[color:var(--navbar-item-hover-bg)]
+      hover:text-[color:var(--navbar-item-fg)]
+    ;
+  }
 }
 .navitem {
-  @apply hover:navItemBG rounded transition duration-100 ease-in-out cursor-pointer hover:textActive1;
-  &.active {
-    @apply textActive1 navItemBG;
+  @apply transition duration-100 ease-in-out cursor-pointer bg-[color:var(--navbar-item-bg)] text-[color:var(--navbar-item-fg)];
+  &.active, &:hover {
+    @apply rounded bg-[color:var(--navbar-item-hover-bg)] text-[color:var(--navbar-item-hover-fg)];
   }
 }
 .navsectiontitle {
-  @apply flex items-center text-sm p-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap hover:text-inherit navBarBG;
+  @apply
+    flex
+    items-center
+    text-sm
+    p-1
+    overflow-hidden
+    font-semibold
+    text-ellipsis
+    whitespace-nowrap
+    bg-[color:var(--navbar-item-bg)]
+    text-[color:var(--navbar-item-fg)]
+    hover:bg-[color:var(--navbar-item-hover-bg)]
+    hover:text-[color:var(--navbar-item-hover-fg)]
+  ;
   line-height: inherit;
 }
 .navsectionsubtitle {

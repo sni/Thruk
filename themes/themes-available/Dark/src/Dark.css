@@ -8,8 +8,6 @@
   --body-bg:                  #252525;
   --card-bg:                  #444;
   --header-bg:                #444;
-  --navbar-bg:                #444;
-  --navbar-item-bg:           #555;
   --hover-bg:                 #555;
   --code-bg:                  #333;
   --table-bg:                 #444;
@@ -27,7 +25,6 @@
   --text-body:                #f2f2f2;
   --text-card:                #ddd;
   --text-th:                  #eee;
-  --text-navbar:              #d4d4d4;
   --text-hint:                var(--color-orange-600);
   --text-hint-soft:           var(--color-gray-400);
   --text-active1:             var(--color-blue-400);
@@ -37,6 +34,13 @@
   --text-unreachable:         var(--color-red-500);
   --text-mixed-gradient-from: var(--color-gray-400);
   --text-mixed-gradient-to  : var(--color-gray-500);
+
+  --navbar-fg:                var(--text-body);
+  --navbar-bg:                var(--header-bg);
+  --navbar-item-fg:           var(--navbar-fg);
+  --navbar-item-bg:           var(--navbar-bg);
+  --navbar-item-hover-fg:     var(--text-active1);
+  --navbar-item-hover-bg:     var(--hover-bg);
 
   --forms-fg:                 #f2f2f2;
   --forms-bg:                 #444;
