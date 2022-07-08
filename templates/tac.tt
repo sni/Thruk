@@ -91,6 +91,9 @@
             [% host_health_cls = 'DOWN' %]
             [% host_perc = 5 %]
           [% END %]
+          [% IF host_stats.total == 0 %]
+            [% host_health_cls = 'UP' %]
+          [% END %]
           <div class="description"><span>Host Health</span></div>
           <div class="bar"><div style="width:[% host_perc %]%" class="[% host_health_cls %]"></div></div>
           <div class="percent"><span>[% host_health %]%</span></div>
@@ -112,6 +115,9 @@
           [% ELSE %]
             [% service_health_cls = 'CRITICAL' %]
             [% service_perc = 5 %]
+          [% END %]
+          [% IF service_stats.total == 0 %]
+            [% service_health_cls = 'UP' %]
           [% END %]
           <div class="description"><span>Service Health</span></div>
           <div class="bar"><div style="width:[% service_perc %]%" class="[% service_health_cls %]"></div></div>
