@@ -1061,7 +1061,7 @@ DIV.mainTableFooter {
 
 DIV.mainTable {
   @apply w-full overflow-auto border-t border-b borderDefault;
-  DIV {
+  DIV:not(.spinner) {
     @apply borderDefault;
   }
   max-height: calc(100vh - 260px);
