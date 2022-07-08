@@ -64,6 +64,7 @@ my_templates/
 panorama_default_view
 themes/themes-available/.*/images/logos/.*server.png
 themes/themes-available/.*/node_modules/
+themes/themes-available/.*/node/
 themes/themes-available/.*/Makefile
 themes/themes-available/.*/package-lock.json
 themes/themes-available/.*/package.json
