@@ -71,7 +71,7 @@
   [% END %]
   [% IF comments.size == 0 %]
   <tr>
-    <td class='text-center textERROR' colspan="10">There are no comments</td>
+    <td class='text-center textALERT' colspan="10">There are no comments</td>
   </tr>
   [% END %]
 </table>

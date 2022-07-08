@@ -53,7 +53,7 @@
     <a href="[% url_prefix %]#[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness" class="w-full">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
       <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph" class="mx-auto">
-      <div id="pnperr" style="display:none" class="textERROR text-center py-2">Could not retrieve graph data</div>
+      <div id="pnperr" style="display:none" class="textALERT text-center py-2">Could not retrieve graph data</div>
     </a>
   </div>
 </div>

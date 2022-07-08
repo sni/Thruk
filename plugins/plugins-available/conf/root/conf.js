@@ -248,7 +248,7 @@ function update_command_line(id) {
         error: function(jqXHR, textStatus, errorThrown) {
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             hideElement(id + 'wait');
-            document.getElementById(id + 'command_line').innerHTML = '<font class="textERROR"><b>error<\/b><\/font>';
+            document.getElementById(id + 'command_line').innerHTML = '<font class="textALERT"><b>error<\/b><\/font>';
         }
     });
 

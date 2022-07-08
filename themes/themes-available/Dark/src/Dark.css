@@ -1,521 +1,157 @@
 /* Dark.css */
-@import '../../Light/src/Light.css';
+@import '../../../base.css';
 
 /*******************************************************************************
- * basic colors for dark theme
+ * all used colors are set here
  */
+:root {
+  --body-bg:                  #252525;
+  --card-bg:                  #444;
+  --header-bg:                #444;
+  --navbar-bg:                #444;
+  --navbar-item-bg:           #555;
+  --hover-bg:                 #555;
+  --code-bg:                  #333;
+  --table-bg:                 #444;
+  --row-even-bg:              #444;
+  --row-odd-bg:               #303030;
+  --modal-bg:                 var(--color-black);
 
- :root {
+  --border:                   #555;
+  --border-dark:              #444;
+  --border-active:            var(--color-blue-500);
+  --border-error:             var(--color-red-500);
+
+  --scrollbar:                #555;
+
+  --text-body:                #f2f2f2;
+  --text-card:                #ddd;
+  --text-th:                  #eee;
+  --text-navbar:              #d4d4d4;
+  --text-hint:                var(--color-orange-600);
+  --text-hint-soft:           var(--color-gray-400);
+  --text-active1:             var(--color-blue-400);
+  --text-active2:             var(--color-red-500);
+  --text-success:             var(--color-green-500);
+  --text-alert:               var(--color-red-500);
+  --text-unreachable:         var(--color-red-500);
+  --text-mixed-gradient-from: var(--color-gray-400);
+  --text-mixed-gradient-to  : var(--color-gray-500);
+
+  --forms-fg:                 #f2f2f2;
+  --forms-bg:                 #444;
+
+  --text-pager:               #ccc;
+  --text-pager-hover:         #ccc;
+  --button-pager-bg:          #555;
+  --button-pager-bg-hover:    #666;
+
+  --badge-fg:                 #333;
+  --badge-bg:                 var(--color-gray-200);
+  --badge-ok-bg:              var(--color-green-600);
+  --badge-ok-fg:              var(--text-body);
+  --badge-warning-bg:         var(--color-yellow-500);
+  --badge-warning-fg:         var(--text-body);
+  --badge-critical-bg:        var(--color-red-700);
+  --badge-critical-fg:        var(--text-body);
+  --badge-unknown-bg:         var(--color-orange-500);
+  --badge-unknown-fg:         var(--text-body);
+  --badge-up-bg:              var(--color-green-600);
+  --badge-up-fg:              var(--text-body);
+  --badge-down-bg:            var(--color-red-700);
+  --badge-down-fg:            var(--text-body);
+  --badge-unreachable-bg:     var(--color-red-600);
+  --badge-unreachable-fg:     var(--text-body);
+  --badge-pending-bg:         var(--color-truegray-500);
+  --badge-pending-fg:         var(--text-body);
+  --badge-problems-bg:        var(--color-yellow-600);
+  --badge-problems-fg:        #333;
+
+  --console-fg:               var(--color-lime-500);
+  --console-bg:               var(--color-black);
+
+  --peer-up-bg:               var(--color-green-600);
+  --peer-up-fg:               var(--text-body);
+  --peer-dis-bg:              #777;
+  --peer-dis-fg:              var(--text-body);
+  --peer-hid-bg:              var(--color-truegray-200);
+  --peer-hid-fg:              var(--text-body);
+
+  --progessbar-fg:            var(--color-sky-800);
+  --progessbar-bg:            var(--color-warmgray-500);
+
+  --row-selected-fg:          var(--color-gray-700);
+  --row-selected-even-bg:     var(--color-yellow-100);
+  --row-selected-odd-bg:      var(--color-yellow-200);
+
+  --tooltip-fg:               var(--text-body);
+  --tooltip-bg:               #888;
+
+  --alert-green-fg:           var(--color-green-700);
+  --alert-green-bg:           var(--color-green-50);
+  --alert-yellow-fg:          var(--color-yellow-700);
+  --alert-yellow-bg:          var(--color-yellow-50);
+  --alert-red-fg:             var(--color-red-700);
+  --alert-red-bg:             var(--color-red-50);
+  --alert-orange-fg:          var(--color-orange-700);
+  --alert-orange-bg:          var(--color-orange-200);
+
+  --icon-red-fg:              var(--text-body);
+  --icon-red-bg:              var(--color-red-600);
+  --icon-green-fg:            var(--text-body);
+  --icon-green-bg:            var(--color-green-500);
+  --icon-yellow-fg:           var(--color-black);
+  --icon-yellow-bg:           var(--color-yellow-300);
+  --icon-orange-fg:           var(--color-black);
+  --icon-orange-bg:           var(--color-orange-500);
+  --icon-gray-fg:             var(--color-black);
+  --icon-gray-bg:             var(--color-gray-200);
+
+  --perfbar-green-bg:         var(--color-green-500);
+  --perfbar-green-border:     var(--color-green-700);
+  --perfbar-yellow-bg:        var(--color-yellow-500);
+  --perfbar-yellow-border:    var(--color-yellow-700);
+  --perfbar-red-bg:           var(--color-red-500);
+  --perfbar-red-border:       var(--color-red-700);
+  --perfbar-gray-bg:          var(--color-gray-400);
+  --perfbar-gray-border:      var(--color-gray-500);
+  --perfbar-bg:               var(--color-gray-200);
+
+  --button-fg:                #f2f2f2;
+  --button-bg:                #777;
+  --button-hover-fg:          #f2f2f2;
+  --button-hover-bg:          #666;
+  --button-red-fg:            var(--text-body);
+  --button-red-bg:            var(--color-red-600);
+  --button-red-hover-fg:      var(--text-body);
+  --button-red-hover-bg:      var(--color-red-500);
+  --button-green-fg:          var(--text-body);
+  --button-green-bg:          var(--color-green-500);
+  --button-green-hover-fg:    var(--text-body);
+  --button-green-hover-bg:    var(--color-green-400);
+  --button-disabled-fg:       #ccc;
+  --button-disabled-bg:       #555;
+}
+
+/*******************************************************************************
+* dark theme overrides
+*/
+:root {
   color-scheme: dark;
  }
 
- ::selection {
-  background: #84c9fd; /* WebKit/Blink Browsers */
-  color: white;
+::selection {
+  background: #0c62a3; /* WebKit/Blink Browsers */
+  color: var(--text-body);
 }
 ::-moz-selection {
-  background: #84c9fd; /* Gecko Browsers */
-  color: white;
-}
-
- @layer base {
-  .textBody {
-    @apply text-[#f2f2f2];
-  }
-  .textCard {
-    @apply !text-[#ddd];
-  }
-  .textTH {
-    @apply !text-[#eee];
-  }
-  .textPager {
-    @apply text-gray-200;
-  }
-  .textHINTsoft, .textGRAY {
-    @apply text-gray-400;
-  }
-  .textNavBar {
-    @apply text-[#d4d4d4];
-  }
-  /* only exists in darkmode, used on bright backgrounds like problems, badge, etc. */
-  .textDark {
-    @apply text-[#333];
-  }
-
-  .textActive1 {
-    @apply text-blue-400;
-  }
-  .textActive2 {
-    @apply text-red-500 !important;
-  }
-
- .textUP, .textOK, .textSUCCESS {
-   @apply !text-green-600;
- }
- .textSUCCESS-mixed {
-  @apply bg-gradient-to-br from-gray-400 textSUCCESS via-current to-gray-500 bg-clip-text fill-transparent;
-  -webkit-text-fill-color: transparent;
- }
- .textWARNING {
-   @apply !text-yellow-600;
- }
- .textUNKNOWN, .textHINT {
-   @apply !text-orange-600;
- }
- .textDOWN, .textCRITICAL, .textERROR, .textALERT {
-   @apply !text-red-500;
- }
- .textERROR-mixed {
-  @apply bg-gradient-to-br from-gray-400 textERROR via-current to-gray-500 bg-clip-text fill-transparent;
-  -webkit-text-fill-color: transparent;
-  }
- .textUNREACHABLE {
-   @apply !text-red-400;
- }
- .textPENDING {
-   @apply !text-truegray-600;
- }
-
- .UP, .OK, .YES, .ENABLED, .button_peerUP {
-   @apply !bg-green-600 !text-white;
- }
- .WARNING {
-   @apply !bg-yellow-500 !text-white;
- }
- .UNKNOWN {
-   @apply !bg-orange-500 !text-white;
- }
- .DOWN, .CRITICAL, .NO, .DISABLED, .button_peerDOWN {
-   @apply !bg-red-700 !text-white;
- }
- .UNREACHABLE {
-   @apply !bg-red-600 !text-white;
- }
- .PENDING {
-   @apply !bg-truegray-500 !text-white;
- }
- .button_peerDIS {
-   @apply !bg-truegray-300 !text-white;
- }
- .button_peerHID {
-   @apply !bg-truegray-200 !text-white;
- }
- .PROBLEMS {
-   @apply !bg-yellow-600 !textDark;
- }
- .CONSOLE {
-   @apply text-lime-500 bg-black text-sm font-mono;
- }
-
- .bgUP, .bgOK, .bgSUCCESS {
-   @apply !bg-green-200 !textDark;
- }
- .bgWARNING {
-   @apply !bg-yellow-200 !textDark;
- }
- .bgUNKNOWN, .bgHINT {
-   @apply !bg-orange-200 !textDark;
- }
- .bgDOWN, .bgCRITICAL {
-   @apply !bg-red-300 !textDark;
- }
- .bgUNREACHABLE {
-   @apply !bg-red-100 !textDark;
- }
- .bgPENDING {
-   @apply !bg-truegray-200 !textDark;
- }
- .bgPROBLEMS {
-   @apply !bg-yellow-200 !textDark;
- }
-
- .bgCard {
-  @apply bg-[#444];
- }
-
- .bodyBG {
-   @apply !bg-[#252525];
- }
- .headerBG {
-   @apply bg-[#444];
- }
-
- .navBarBG {
-   @apply bg-[#444];
- }
- .navItemBG  {
-   @apply bg-[#555];
- }
-
- .formsBG  {
-   @apply bg-[#aaa];
- }
-
- .codeBG {
-   @apply bg-[#333];
- }
-
- .hoverBG1 {
-   @apply bg-[#555];
- }
-
- /* Because of a browser bug the bottom border of a sticky TH would scroll up and disappear, this sets a shadow with inset #E5E7EB = border-gray-200 */
- .shadow-as-border-bottom {
-   box-shadow: inset 0px -1px 0 #555;
- }
- .shadow-as-border-right {
-   box-shadow: inset -1px 0px 0 #555;
- }
- .shadow-as-border {
-   box-shadow: inset -1px -1px 0 #555;
- }
-
- .bgTable {
-   @apply bg-[#444];
- }
-
- .rowOdd {
-   @apply bg-[#303030];
- }
-
- .rowEven {
-   @apply bg-[#444];
- }
-
- .borderDefault {
-   @apply border-[#555];
- }
- .borderDark {
-   @apply border-gray-400;
- }
-
- .borderActive {
-   @apply border-blue-400;
- }
-
- .borderError {
-   @apply border-red-500;
- }
-}
-
-/*******************************************************************************
-* general
-*/
-.scrollauto {
- /* avoid flickering and moving elements if scrollbar is required for dynamic elements */
- scrollbar-color: #555 #444;
-}
-MAIN.scrollauto {
- scrollbar-color: #555 #444;
-}
-
-.modalBG {
- @apply bg-black opacity-50;
-}
-
-TH {
- a.sort-by {
-   &:before {
-     border-bottom-color: #ccc;
-   }
-   &:after {
-     border-top-color: #ccc;
-   }
- }
-}
-
-TR:nth-child(odd) TD.tableRowSelected{
-  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
-    @apply bg-yellow-300 bg-opacity-70  text-gray-700 !important;
-  }
-}
-TR:nth-child(even) TD.tableRowSelected {
-  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
-    @apply bg-yellow-300 bg-opacity-80 text-gray-700 !important;
-  }
-}
-
-.badge {
- @apply bg-gray-200 textDark;
-}
-
-.pager-entries, .display-filter, A.button.header-button, BUTTON.header-button {
- @apply bg-gray-300 hover:textDark hover:bg-gray-400 text-[#666];
-}
-
-.tooltiptext {
- background-color: #888;
- color: #fff;
-}
-
-.tooltiptext::after {
- border-color: #888 transparent transparent transparent;
-}
-
-/*******************************************************************************
-* icons as part of text links (ex. in action box container)
-*/
-I.fa-solid, I.uil {
- @apply text-[#bbb];
-
- &.red {
-   @apply bg-red-600 text-white !important;
- }
- &.green {
-   @apply bg-green-500 text-white !important;
- }
- &.yellow {
-   @apply bg-yellow-300 text-black !important;
- }
- &.orange {
-   @apply bg-orange-500 text-black !important;
- }
- &.gray {
-   @apply bg-gray-200 text-black !important;
- }
-}
-
-/*******************************************************************************
-* floating alerts
-*/
-DIV.card.alert {
- &.yellow {
-   @apply text-yellow-700 bg-yellow-50 border-yellow-700 !important;
- }
- &.red {
-   @apply text-red-700 bg-red-50 border-red-700 !important;
- }
- &.orange {
-   @apply text-orange-700 bg-orange-200 border-orange-700 border !important;
- }
- &.green {
-   @apply text-green-700 bg-green-50 border-green-700 !important;
- }
-}
-
-/*******************************************************************************
-* progress bar (ex.: on tac page)
-*/
-DIV.progressbar {
- DIV.bar {
-   DIV {
-     @apply bg-sky-400;
-   }
- }
-}
-
-/*******************************************************************************
-* perf bar (ex.: on service/hosts lists)
-*/
-.perf-bar-container {
- .ok,.green {
-   @apply bg-green-500 border-green-700;
- }
- .warn,.yellow {
-   @apply bg-yellow-500 border-yellow-700;
- }
- .crit,.red {
-   @apply bg-red-500 border-red-700;
- }
- .gray {
-   @apply bg-gray-400 border-gray-500;
- }
-}
-
-/*******************************************************************************
-* buttons
-*/
-@layer base {
- .defaultButton {
-   @apply
-     bg-gray-300
-     text-gray-700
-   ;
- }
-}
-
-BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"] {
- &.active, &:hover {
-   @apply bg-gray-400 text-white;
- }
-
- &.green {
-   @apply bg-green-500 text-white hover:text-white hover:bg-green-400;
- }
-
- &.red {
-   @apply bg-red-600 text-white hover:bg-red-500;
- }
- &.iconOnly {
-  @apply bg-transparent text-inherit hover:text-inherit hover:bg-transparent;
- }
-}
-
-DIV.buttongroup {
-  BUTTON {
-    @apply border-[#555] textDark;
-  }
-}
-
-DIV.radiogroup {
- INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
-   @apply bg-gray-400 text-white;
- }
-}
-
-/*******************************************************************************
-* forms
-*/
-[type="text"], [type="email"], [type="url"], [type="password"], [type="number"], [type="date"], [type="datetime-local"], [type="month"], [type="search"], [type="tel"], [type="time"], [type="week"], [multiple], textarea, select {
-  @apply textDark formsBG;
-}
-[type="checkbox"], [type="radio"] {
-  @apply formsBG;
-}
-INPUT:disabled,BUTTON:disabled {
-  @apply bg-gray-300 hover:bg-gray-300 text-gray-500 hover:text-gray-500;
-}
-INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
- @apply ring-0 ring-red-500 border-red-500;
-}
-
-
-DIV.deleteicon {
- BUTTON {
-   @apply hover:text-black;
- }
-}
-
-
-DIV.spinner {
- @apply border-gray-600 border-r-transparent;
-}
-
-/*******************************************************************************
-* site panel / backends
-*/
-#site_panel .button_peer, div.backends BUTTON, #site_panel .btn_sites {
- @apply !text-gray-700 hover:!text-white hover:brightness-95;
-}
-
-/*******************************************************************************
-* search results
-*/
-DIV#search-results {
- @apply border-gray-400;
- LI {
-   &.ajax_search_selected {
-     @apply bg-yellow-200;
-   }
-   &.toomany {
-     @apply text-orange-600;
-   }
-   &.error {
-     @apply text-red-600;
-   }
- }
- .disabled {
-   @apply ml-5 text-orange-600 opacity-100;
- }
-}
-
-/*******************************************************************************
-* action menu
-*/
-
-DIV.action_menu, DIV.context_menu {
- INPUT {
-   color: initial;
- }
-}
-
-IMG.action_icon {
- &.clickable {
-   &.active {
-     @apply ring-gray-400;
-   }
- }
+  background: #0c62a3; /* Gecko Browsers */
+  color: var(--text-body);
 }
 
 /*******************************************************************************
 * login page
 */
 BODY.loginpage {
- @apply bg-gradient-to-t from-[#111] via-[#222] to-[#111];
-
- DIV.loginmask {
-   @apply bg-[#444];
-
-   BUTTON, A.button {
-     @apply bg-gray-300 text-gray-700 hover:bg-gray-400 hover:text-white;
-   }
-
-   I.togglePassword {
-     @apply textDark;
-   }
-   DIV.spinner {
-     @apply border-white border-r-transparent;
-   }
- }
-}
-
-/*******************************************************************************
-* calendar popup
-*/
-
-DIV.daterangepicker {
-  @apply bgCard textCard borderDefault !important;
-  DIV.calendar-table {
-    @apply bgCard borderDefault !important;
-  }
-  td.week, th.week {
-    color: #ccc;
-  }
-  td.off, td.off.in-range, td.off.start-date, td.off.end-date {
-    @apply !bg-[#252525];
-    color: #999 !important;
-  }
-  td.available:hover, th.available:hover {
-    background-color: #ccc !important;
-    color: #000 !important;
-  }
-  td.in-range {
-    background-color: #acacac;
-    color: #000;
-  }
-  .show-ranges.ltr .drp-calendar.left {
-    @apply borderDefault !important;
-  }
-}
-.daterangepicker .drp-buttons {
-  border-top: 1px solid #555 !important;
-}
-.daterangepicker.show-ranges.ltr .drp-calendar.left {
-  border-left: 1px solid #555 !important;
-}
-.daterangepicker .ranges li:hover {
-  background-color: #ccc !important;
-  color: #000 !important;
-}
-
-.jstree-default .jstree-hovered {
-  background: #555 !important;
-}
-
-#site_panel_sections {
-  SPAN {
-    color: #ddd !important;
-  }
-  span.fancytree-focused span.fancytree-title {
-    background: #555 !important;
-  }
-  span.fancytree-active span.fancytree-title {
-    background: #555 !important;
-  }
-  span.fancytree-node:hover {
-    background: #555 !important;
-  }
-  span.fancytree-focused, span.fancytree-active {
-    background: #555 !important;
-  }
+ @apply bg-gradient-to-t from-[#111] via-[#444] to-[#111];
 }

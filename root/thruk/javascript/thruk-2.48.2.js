@@ -646,7 +646,7 @@ function openModalWindowUrl(url, callback) {
 
     jQuery('#modalFG').load(url, {}, function(text, status, req) {
         if(status == "error") {
-            jQuery('#modalFG DIV.body').prepend('<div class="textERROR">'+req.status+': '+req.statusText+'<\/div>');
+            jQuery('#modalFG DIV.body').prepend('<div class="textALERT">'+req.status+': '+req.statusText+'<\/div>');
             jQuery('#modalFG DIV.spinner').remove();
         } else {
             init_page();
@@ -1318,7 +1318,7 @@ function reloadPage(delay, withReloadButton, freshReload) {
     if(!delay) { delay = 50; }
     if(delay < 100 && withReloadButton) {
         // update button earlier
-        jQuery("#refresh_button").html('<div class="spinner w-5 h-5"><\/div>');
+        jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
         withReloadButton = false;
     }
     window.clearTimeout(reloadPageTimer);
@@ -1331,6 +1331,7 @@ function reloadPageDo(withReloadButton, freshReload) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
         jQuery("#refresh_button").removeClass("red");
+        jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
         jQuery("#refresh_button").find("I").css("display", "none");
         jQuery("#refresh_button").find('div.spinner').remove();
         jQuery("#refresh_button").find('I.uil-exclamation').remove();
@@ -1375,6 +1376,7 @@ function reloadPageDo(withReloadButton, freshReload) {
         error: function(jqXHR, textStatus, errorThrown) {
             isReloading = false;
             jQuery("#refresh_button").addClass("red");
+            jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
             jQuery("#refresh_button").find('div.spinner').remove();
             jQuery("#refresh_button").find('I.uil-exclamation').remove();
             jQuery("#refresh_button").find("I").css("display", "none");
@@ -1765,9 +1767,9 @@ function create_site_panel_popup_tree_data(d, current, tree) {
     jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
         var iconCls = 'fa-solid fa-folder text-base textSUCCESS';
         if(d.sub[sectionname].down > 0 && d.sub[sectionname].disabled > 0) {
-            iconCls = 'fa-solid fa-folder text-base textERROR-mixed';
+            iconCls = 'fa-solid fa-folder text-base textALERT-mixed';
         } else if(d.sub[sectionname].down > 0) {
-            iconCls = 'fa-solid fa-folder text-base textERROR';
+            iconCls = 'fa-solid fa-folder text-base textALERT';
         } else if(d.sub[sectionname].up > 0 && d.sub[sectionname].disabled > 0) {
             if(backend_chooser == "switch") {
                 iconCls = 'fa-solid fa-folder text-base textSUCCESS';
@@ -1818,7 +1820,7 @@ function create_site_panel_popup_tree_data(d, current, tree) {
                 selected = false; // checkbox off
             } else {
                 if(current_backend_states[peer_key] == 1 || initial_backends[peer_key].state == 1) {
-                    iconCls = 'fa-solid fa-circle text-base textERROR';
+                    iconCls = 'fa-solid fa-circle text-base textALERT';
                 }
             }
             if(backend_chooser == "switch") {

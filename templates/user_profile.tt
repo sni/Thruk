@@ -6,7 +6,7 @@
 <h1>User Profile</h1>
 
 [% IF new_private_key %]
-<div id="new_key_alert" class="card bgSUCCESS shadow-float absolute p-1 z-50 min-w-[600px] top-4 left-1/2 transform -translate-x-1/2">
+<div id="new_key_alert" class="card green alert top-center min-w-[600px]">
   <div class="head justify-between">
     <h3>New API Key Created</h3>
     <div class="w-5">

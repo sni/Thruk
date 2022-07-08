@@ -168,7 +168,7 @@ sub _format_html_row {
             $elapsed =~ s/^~//gmx;
             my $perc = $elapsed / $self->{'total_time'};
             $output .= "<td class='text-right relative' style='width: 50px'>";
-            $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 20px;' class='bgPROBLEMS absolute top-0 right-0'></div>";
+            $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 20px;' class='WARNING absolute top-0 right-0'></div>";
             $output .= "<span class='absolute top-0 right-0' style='margin-right: 3px;'>".sprintf("%.1f", $perc*100)."%</span>";
             $output .= "</td>\n";
         } else {

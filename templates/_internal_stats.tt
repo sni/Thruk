@@ -2,7 +2,7 @@
 <div class="card clickable z-50 fixed bottom-0 right-0 m-2" onclick="stopRefresh(); toggleElement('stats_details', undefined, true);">
   <div class="progressbar py-1 px-2">
     <div class="description textBody font-semibold" style="width: 90px;">Time: [% sprintf("%.3fs", time_total) %]</div>
-    <div class="bar bgPENDING flex" style="height: 12px; width: 100px;">
+    <div class="bar PENDING flex" style="height: 12px; width: 100px;">
       <div style="height: 12px; background: #7FDBFF; width: [% sprintf("%d", total_backend_waited / total * 200) %]px"></div>
       <div style="height: 12px; background: #FFDC00; width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></div>
       <div style="height: 12px; background: #FF851B; width: [% sprintf("%d", total_render_waited / total * 200) %]px"></div>
@@ -29,10 +29,10 @@
         <td>
           [% FOREACH p = profile %]
             [% IF p.list.size > 1 %]
-              <div class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</div>
+              <div class="profiles overflow-y-auto w-[820px]"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</div>
               <div style="display: none;">[% p.1 %]</div>
             [% ELSE %]
-              <div class="profiles"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</div>
+              <div class="profiles overflow-y-auto w-[820px]"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</div>
             [% END %]
           [% END %]
         </td>
@@ -43,17 +43,17 @@
         <tr>
           <td class="pr-2">Backend</td>
           <td class="pr-2"><div class="thruk_dev_panel_square" style="background: #7FDBFF;"></div>[% sprintf("%.3f", total_backend_waited) %]s ([% perc = total_backend_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
-          <td><div class="progressbar" style="padding-top: 4px; width: 100px;"><div class="bar bgPENDING" style="height: 12px;"><div style="height: 12px; background: #7FDBFF; width: [% sprintf("%d", perc) %]px"></div></div></div></td>
+          <td><div class="progressbar" style="padding-top: 4px; width: 100px;"><div class="bar PENDING" style="height: 12px;"><div style="height: 12px; background: #7FDBFF; width: [% sprintf("%d", perc) %]px"></div></div></div></td>
         </tr>
         <tr>
           <td class="pr-2">Controller</td>
           <td class="pr-2"><div class="thruk_dev_panel_square" style="background: #FFDC00;"></div>[% time_controler = time_total - total_backend_waited - total_render_waited;  sprintf("%.3f", time_controler) %]s ([% perc = time_controler / time_total * 100; sprintf("%.0f", perc) %]%)</td>
-          <td><div class="progressbar" style="padding-top: 4px;"><div class="bar bgPENDING" style="height: 12px;"><div style="height: 12px; background: #FFDC00; width: [% sprintf("%d", perc) %]px"></div></div></div></td>
+          <td><div class="progressbar" style="padding-top: 4px;"><div class="bar PENDING" style="height: 12px;"><div style="height: 12px; background: #FFDC00; width: [% sprintf("%d", perc) %]px"></div></div></div></td>
         </tr>
         <tr>
           <td class="pr-2">View</td>
           <td class="pr-2"><div class="thruk_dev_panel_square" style="background: #FF851B;"></div>[% sprintf("%.3f", total_render_waited) %]s ([% perc = total_render_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
-          <td><div class="progressbar" style="padding-top: 4px;"><div class="bar bgPENDING" style="height: 12px;"><div style="height: 12px; background: #FF851B; width: [% sprintf("%d", perc) %]px"></div></div></div></td>
+          <td><div class="progressbar" style="padding-top: 4px;"><div class="bar PENDING" style="height: 12px;"><div style="height: 12px; background: #FF851B; width: [% sprintf("%d", perc) %]px"></div></div></div></td>
         </tr>
       </table>
     </div>

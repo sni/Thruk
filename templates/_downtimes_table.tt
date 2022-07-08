@@ -80,7 +80,7 @@
     [% END %]
     [% IF downtimes.size == 0 %]
     <tr>
-      <td class='text-center textERROR' colspan="13">There are no downtimes</td>
+      <td class='text-center textALERT' colspan="13">There are no downtimes</td>
     </tr>
   [% END %]
 </table>

@@ -1,4 +1,5 @@
-﻿[% PROCESS _header.tt %]
+﻿[% USE date %]
+[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
 <div class="flexrow justify-between">
@@ -233,16 +234,10 @@
       </div>
       <table class="w-full">
         <tr>
-          <td class="UP textUP">UP</td>
-          <td class="UNREACHABLE textUNREACHABLE">UNREACHABLE</td>
-          <td class="DOWN textDOWN">DOWN</td>
-          <td class="PENDING textPENDING">PENDING</td>
-        </tr>
-        <tr>
-          <td class="bgUP">bgUP</td>
-          <td class="bgUNREACHABLE">bgUNREACHABLE</td>
-          <td class="bgDOWN">bgDOWN</td>
-          <td class="bgPENDING">bgPENDING</td>
+          <td class="UP">UP</td>
+          <td class="UNREACHABLE">UNREACHABLE</td>
+          <td class="DOWN">DOWN</td>
+          <td class="PENDING">PENDING</td>
         </tr>
       </table>
     </div>
@@ -253,18 +248,11 @@
       </div>
       <table class="w-full">
         <tr>
-          <td class="OK textOK">OK</td>
-          <td class="WARNING textWARNING">WARNING</td>
-          <td class="UNKNOWN textUNKNOWN">UNKNOWN</td>
-          <td class="CRITICAL textCRITICAL">CRITICAL</td>
-          <td class="PENDING textPENDING">PENDING</td>
-        </tr>
-        <tr>
-          <td class="bgOK">bgOK</td>
-          <td class="bgWARNING">bgWARNING</td>
-          <td class="bgUNKNOWN">bgUNKNOWN</td>
-          <td class="bgCRITICAL">bgCRITICAL</td>
-          <td class="bgPENDING">bgPENDING</td>
+          <td class="OK">OK</td>
+          <td class="WARNING">WARNING</td>
+          <td class="UNKNOWN">UNKNOWN</td>
+          <td class="CRITICAL">CRITICAL</td>
+          <td class="PENDING">PENDING</td>
         </tr>
       </table>
     </div>
@@ -273,15 +261,18 @@
       <div class="head">
         <h3>Progressbar</h3>
       </div>
-      <div>
-        <div class="progressbar py-1 px-2">
+      <div class="body">
+        <div class="progressbar">
           <div class="description textBody font-semibold" style="width: 90px;">Description</div>
           <div class="bar" style="height: 30px; width: 300px;">
-            <div style="background: #7FDBFF; width:20%"></div>
-            <div style="background: #FFDC00; width:25%"></div>
-            <div style="background: #FF851B; width:10%"></div>
+            <div class="UP" style="width:20%"></div>
+            <div class="WARNING" style="width:25%"></div>
+            <div class="CRITICAL" style="width:10%"></div>
           </div>
-          <div class="percent" style="color: #FF851B"><span>66%</span></div>
+          <div class="percent"><span>66%</span></div>
+        </div>
+        <div class="progressbar w-full mt-5" style="height:20px;">
+          <div class="bar" style="height:20px;"><div style="width:33%; height:20px;"></div></div>
         </div>
       </div>
     </div>
@@ -372,6 +363,24 @@
             <td><button class="large iconOnly"><i class="uil uil-grin"></i></button></td>
           </tr>
           <tr>
+            <th>buttongroup</th>
+            <td></td>
+            <td colspan=3>
+              <div class="buttongroup">
+                <button>btn1</button>
+                <button>btn2</button>
+                <button>btn3</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th>disabled</th>
+            <td></td>
+            <td><button disabled>disabled</button></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
             <th>.spinner</th>
             <td></td>
             <td colspan=3>
@@ -436,8 +445,14 @@
             <tr>
               <th>Radiobox</th>
               <td>
-                <input type="radio" name="radio" value="1" checked><label class="ml-1">Option 1</label>
-                <input type="radio" name="radio" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+                <div class="flexrow gap-0 flex-nowrap">
+                  <input type="radio" name="radio" value="1" checked><label class="ml-1">Option 1</label>
+                  <input type="radio" name="radio" value="2" class="ml-2"><label class="ml-1">Option 2</label>
+                  <div class="radiogroup ml-5">
+                    <input type="radio" name="radiog" value="1" checked><label>Option 1</label>
+                    <input type="radio" name="radiog" value="2"><label>Option 2</label>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -449,6 +464,22 @@
             </tr>
           </table>
         </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <h3>Console</h3>
+      </div>
+      <div class="body">
+        <textarea class="CONSOLE w-[300px] h-[80px]">#> whoami
+          root</textarea>
+      </div>
+    </div>
+
+    <div>
+      <div class="body">
+        [% PROCESS _log_date_select.tt start=date.now-86400 end=date.now  %]
       </div>
     </div>
 

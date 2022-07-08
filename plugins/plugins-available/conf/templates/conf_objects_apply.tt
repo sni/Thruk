@@ -29,7 +29,7 @@
                   <td class="px-2">
                     <ul class="overflow-x-auto max-w-[60vw]">
                       [% FOREACH err IN parse_errors %]
-                        <li class="textERROR">[% err %]</li>
+                        <li class="textALERT">[% err %]</li>
                       [% END %]
                     </ul>
                   </td>

@@ -91,9 +91,9 @@
             [% host_health_cls = 'DOWN' %]
             [% host_perc = 5 %]
           [% END %]
-          <div class="description"><span class="text[% host_health_cls %] bg[% host_health_cls %]">Host Health</span></div>
-          <div class="bar bg[% host_health_cls %]"><div style="width:[% host_perc %]%" class="[% host_health_cls %]"></div></div>
-          <div class="percent"><span class="text[% host_health_cls %]">[% host_health %]%</span></div>
+          <div class="description"><span>Host Health</span></div>
+          <div class="bar"><div style="width:[% host_perc %]%" class="[% host_health_cls %]"></div></div>
+          <div class="percent"><span>[% host_health %]%</span></div>
         </div>
         <div class="progressbar mt-1">
           [% IF empty || (service_stats.total-service_stats.pending) == 0 %]
@@ -113,9 +113,9 @@
             [% service_health_cls = 'CRITICAL' %]
             [% service_perc = 5 %]
           [% END %]
-          <div class="description"><span class="text[% service_health_cls %] bg[% service_health_cls %]">Service Health</span></div>
-          <div class="bar bg[% service_health_cls %]"><div style="width:[% service_perc %]%" class="[% service_health_cls %]"></div></div>
-          <div class="percent"><span class="text[% service_health_cls %]">[% service_health %]%</span></div>
+          <div class="description"><span>Service Health</span></div>
+          <div class="bar"><div style="width:[% service_perc %]%" class="[% service_health_cls %]"></div></div>
+          <div class="percent"><span>[% service_health %]%</span></div>
         </div>
       </div>
     </div>

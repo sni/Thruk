@@ -154,7 +154,7 @@
         [% IF data.size == 0 %]
           <tr>
             <td colspan="8">
-              <div class='textERROR text-center'>
+              <div class='textALERT text-center'>
                 [% IF contact != '' %]
                   No notifications have been recorded for this contact in the current timeperiod
                 [% ELSIF host != '' and service != '' %]

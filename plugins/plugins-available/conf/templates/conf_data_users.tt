@@ -3,7 +3,7 @@
 
 [% IF readonly %]
 <div class="card red alert top-center w-fit">
-  <div class="body textERROR"><b>Readonly:</b> Make sure the config file is writable!</div>
+  <div class="body textALERT"><b>Readonly:</b> Make sure the config file is writable!</div>
 </div>
 [% END %]
 

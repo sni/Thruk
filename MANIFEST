@@ -2919,6 +2919,7 @@ templates/user_profile.tt
 templates/void.tt
 templates/waiting_for_job.tt
 THANKS
+themes/base.css
 themes/themes-available/Dark/images/apple-touch-icon-180x180.png
 themes/themes-available/Dark/images/dropdown.png
 themes/themes-available/Dark/images/favicon-16x16.png

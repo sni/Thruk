@@ -7,7 +7,7 @@
 
 [% IF form_errors.size > 0 %]
   <div class="card shadow-float fixed p-1 z-50 min-w-[600px] top-14 left-1/2 transform -translate-x-1/2 text-center">
-    <span class="font-semibold textERROR">Please correct the following errors:</span>
+    <span class="font-semibold textALERT">Please correct the following errors:</span>
     <div class="flex justify-center">
       <ul class="w-fit text-left">
       [% FOREACH e = form_errors %]

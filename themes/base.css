@@ -1,0 +1,1557 @@
+/* base.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*******************************************************************************
+ * all used colors are set here
+ */
+:root {
+  --body-bg:                  var(--color-river-bed-100);
+  --card-bg:                  var(--color-white);
+  --header-bg:                var(--color-white);
+  --navbar-bg:                var(--color-white);
+  --navbar-item-bg:           var(--color-river-bed-100);
+  --hover-bg:                 var(--color-warmgray-100);
+  --code-bg:                  var(--color-gray-50);
+  --table-bg:                 var(--color-white);
+  --row-even-bg:              var(--color-white);
+  --row-odd-bg:               var(--color-warmgray-100);
+  --modal-bg:                 var(--color-black);
+
+  --border:                   var(--color-gray-200);
+  --border-dark:              var(--color-gray-400);
+  --border-active:            var(--color-blue-600);
+  --border-error:             var(--color-red-600);
+
+  --scrollbar:                var(--color-gray-300);
+
+  --text-body:                var(--color-river-bed-600);
+  --text-card:                var(--color-river-bed-900);
+  --text-th:                  var(--color-gray-600);
+  --text-navbar:              var(--color-gray-700);
+  --text-hint:                var(--color-orange-600);
+  --text-hint-soft:           var(--color-gray-400);
+  --text-active1:             var(--color-blue-600);
+  --text-active2:             var(--color-red-600);
+  --text-success:             var(--color-green-600);
+  --text-alert:               var(--color-red-600);
+  --text-unreachable:         var(--color-red-500);
+  --text-mixed-gradient-from: var(--color-gray-200);
+  --text-mixed-gradient-to  : var(--color-gray-300);
+
+  --forms-fg:                 var(--text-body);
+  --forms-bg:                 var(--color-white);
+
+  --text-pager:               var(--color-gray-500);
+  --text-pager-hover:         var(--color-gray-500);
+  --button-pager-bg:          var(--color-gray-100);
+  --button-pager-bg-hover:    var(--color-gray-200);
+
+  --badge-fg:                 initial;
+  --badge-bg:                 var(--color-gray-200);
+  --badge-ok-bg:              var(--color-green-500);
+  --badge-ok-fg:              var(--color-white);
+  --badge-warning-bg:         var(--color-yellow-500);
+  --badge-warning-fg:         var(--color-white);
+  --badge-critical-bg:        var(--color-red-500);
+  --badge-critical-fg:        var(--color-white);
+  --badge-unknown-bg:         var(--color-orange-500);
+  --badge-unknown-fg:         var(--color-white);
+  --badge-up-bg:              var(--color-green-500);
+  --badge-up-fg:              var(--color-white);
+  --badge-down-bg:            var(--color-red-500);
+  --badge-down-fg:            var(--color-white);
+  --badge-unreachable-bg:     var(--color-red-400);
+  --badge-unreachable-fg:     var(--color-white);
+  --badge-pending-bg:         var(--color-truegray-500);
+  --badge-pending-fg:         var(--color-white);
+  --badge-problems-bg:        var(--color-yellow-200);
+  --badge-problems-fg:        initial;
+
+  --console-fg:               var(--color-lime-500);
+  --console-bg:               var(--color-black);
+
+  --peer-up-bg:               var(--color-green-500);
+  --peer-up-fg:               var(--color-white);
+  --peer-dis-bg:              var(--color-truegray-300);
+  --peer-dis-fg:              var(--color-white);
+  --peer-hid-bg:              var(--color-truegray-200);
+  --peer-hid-fg:              var(--color-white);
+
+  --progessbar-fg:            var(--color-sky-500);
+  --progessbar-bg:            var(--color-gray-200);
+
+  --row-selected-fg:          var(--color-gray-700);
+  --row-selected-even-bg:     var(--color-yellow-100);
+  --row-selected-odd-bg:      var(--color-yellow-200);
+
+  --tooltip-fg:               var(--color-white);
+  --tooltip-bg:               var(--color-slate-700);
+
+  --alert-green-fg:           var(--color-green-700);
+  --alert-green-bg:           var(--color-green-50);
+  --alert-yellow-fg:          var(--color-yellow-700);
+  --alert-yellow-bg:          var(--color-yellow-50);
+  --alert-red-fg:             var(--color-red-700);
+  --alert-red-bg:             var(--color-red-50);
+  --alert-orange-fg:          var(--color-orange-700);
+  --alert-orange-bg:          var(--color-orange-200);
+
+  --icon-red-fg:              var(--color-white);
+  --icon-red-bg:              var(--color-red-600);
+  --icon-green-fg:            var(--color-white);
+  --icon-green-bg:            var(--color-green-500);
+  --icon-yellow-fg:           var(--color-black);
+  --icon-yellow-bg:           var(--color-yellow-300);
+  --icon-orange-fg:           var(--color-black);
+  --icon-orange-bg:           var(--color-orange-400);
+  --icon-gray-fg:             var(--color-black);
+  --icon-gray-bg:             var(--color-gray-200);
+
+  --perfbar-green-bg:         var(--color-green-500);
+  --perfbar-green-border:     var(--color-green-700);
+  --perfbar-yellow-bg:        var(--color-yellow-500);
+  --perfbar-yellow-border:    var(--color-yellow-700);
+  --perfbar-red-bg:           var(--color-red-500);
+  --perfbar-red-border:       var(--color-red-700);
+  --perfbar-gray-bg:          var(--color-gray-400);
+  --perfbar-gray-border:      var(--color-gray-500);
+  --perfbar-bg:               var(--color-gray-200);
+
+  --button-fg:                var(--color-gray-700);
+  --button-bg:                var(--color-gray-300);
+  --button-hover-fg:          var(--color-white);
+  --button-hover-bg:          var(--color-gray-400);
+  --button-red-fg:            var(--color-white);
+  --button-red-bg:            var(--color-red-600);
+  --button-red-hover-fg:      var(--color-white);
+  --button-red-hover-bg:      var(--color-red-500);
+  --button-green-fg:          var(--color-white);
+  --button-green-bg:          var(--color-green-500);
+  --button-green-hover-fg:    var(--color-white);
+  --button-green-hover-bg:    var(--color-green-400);
+  --button-disabled-fg:       var(--color-gray-500);
+  --button-disabled-bg:       var(--color-gray-200);
+}
+
+ @layer base {
+  .textBody {
+    @apply text-[color:var(--text-body)];
+   }
+  .textCard {
+    @apply !text-[color:var(--text-card)];
+  }
+  .textTH {
+    @apply !text-[color:var(--text-th)];
+  }
+  .textPager {
+    @apply !text-[color:var(--text-pager)];
+  }
+  .textHINTsoft, .textGRAY {
+    @apply !text-[color:var(--text-hint-soft)];
+  }
+  .textHINT {
+    @apply !text-[color:var(--text-hint)];
+  }
+  .textNavBar {
+    @apply !text-[color:var(--text-navbar)];
+  }
+  .textActive1 {
+    @apply !text-[color:var(--text-active1)];
+  }
+  .textActive2 {
+    @apply !text-[color:var(--text-active2)];
+  }
+  .textSUCCESS {
+    @apply !text-[color:var(--text-success)];
+  }
+  .textSUCCESS-mixed {
+    @apply bg-gradient-to-br from-[color:var(--text-mixed-gradient-from)] textSUCCESS via-current to-[color:var(--text-mixed-gradient-from)] bg-clip-text fill-transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .textALERT {
+    @apply !text-[color:var(--text-alert)];
+  }
+  .textALERT-mixed {
+    @apply bg-gradient-to-br from-[color:var(--text-mixed-gradient-from)] textALERT via-current to-[color:var(--text-mixed-gradient-from)] bg-clip-text fill-transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .OK, .YES, .ENABLED {
+    @apply !bg-[color:var(--badge-ok-bg)] !text-[color:var(--badge-ok-fg)];
+  }
+  .WARNING {
+    @apply !bg-[color:var(--badge-warning-bg)] !text-[color:var(--badge-warning-fg)];
+  }
+  .UNKNOWN {
+    @apply !bg-[color:var(--badge-unknown-bg)] !text-[color:var(--badge-unknown-fg)];
+  }
+  .CRITICAL, .NO, .DISABLED, .button_peerDOWN {
+    @apply !bg-[color:var(--badge-critical-bg)] !text-[color:var(--badge-critical-fg)];
+  }
+
+  .UP {
+    @apply !bg-[color:var(--badge-up-bg)] !text-[color:var(--badge-up-fg)];
+  }
+  .DOWN {
+    @apply !bg-[color:var(--badge-down-bg)] !text-[color:var(--badge-down-fg)];
+  }
+  .UNREACHABLE {
+    @apply !bg-[color:var(--badge-unreachable-bg)] !text-[color:var(--badge-unreachable-fg)];
+  }
+
+  .PENDING {
+    @apply !bg-[color:var(--badge-pending-bg)] !text-[color:var(--badge-pending-fg)];
+  }
+
+  .CONSOLE {
+    @apply !bg-[color:var(--console-bg)] !text-[color:var(--console-fg)] font-mono;
+  }
+
+  .button_peerUP {
+    @apply !bg-[color:var(--peer-up-bg)] !text-[color:var(--peer-up-fg)];
+  }
+  .button_peerDIS {
+    @apply !bg-[color:var(--peer-dis-bg)] !text-[color:var(--peer-dis-fg)];
+  }
+  .button_peerHID {
+    @apply !bg-[color:var(--peer-hid-bg)] !text-[color:var(--peer-hid-fg)];
+  }
+
+  .PROBLEMS {
+    @apply !bg-[color:var(--badge-problems-bg)] !text-[color:var(--badge-problems-fg)];
+  }
+
+  .bgCard {
+    @apply bg-[color:var(--card-bg)];
+  }
+  .bodyBG {
+    @apply bg-[color:var(--body-bg)];
+  }
+  .headerBG {
+    @apply bg-[color:var(--header-bg)];
+  }
+  .navBarBG {
+    @apply bg-[color:var(--navbar-bg)];
+  }
+  .navItemBG {
+    @apply bg-[color:var(--navbar-item-bg)];
+  }
+
+  .hoverBG {
+    @apply bg-[color:var(--hover-bg)];
+  }
+  .codeBG {
+    @apply bg-[color:var(--code-bg)];
+  }
+
+  /* Because of a browser bug the bottom border of a sticky TH would scroll up and disappear, this sets a shadow with inset border color */
+  .shadow-as-border-bottom {
+    box-shadow: inset 0px -1px 0 var(--border);
+  }
+  .shadow-as-border-right {
+    box-shadow: inset -1px 0px 0 var(--border);
+  }
+  .shadow-as-border {
+    box-shadow: inset -1px -1px 0 var(--border);
+  }
+
+  .bgTable {
+    @apply bg-[color:var(--table-bg)];
+  }
+
+  .rowOdd {
+    @apply bg-[color:var(--row-odd-bg)];
+  }
+  .rowEven {
+    @apply bg-[color:var(--row-even-bg)];
+  }
+
+  .borderDefault {
+    @apply border-[color:var(--border)];
+  }
+  .borderDark {
+    @apply border-[color:var(--border-dark)];
+  }
+
+  .borderActive {
+    @apply border-[color:var(--border-active)];
+  }
+
+  .borderError {
+    @apply border-[color:var(--border-error)];
+  }
+}
+
+/*******************************************************************************
+ * general
+ */
+.scrollauto {
+  /* avoid flickering and moving elements if scrollbar is required for dynamic elements */
+  @apply
+    overflow-y-scroll
+    overflow-x-auto
+    headerBG
+  ;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+MAIN.scrollauto {
+  @apply bodyBG;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+HTML.minimal {
+  @apply overflow-auto;
+  overflow: inherit;
+  scrollbar-color: auto;
+}
+BODY {
+  @apply
+    textBody
+    text-default
+    tracking-normal
+  ;
+  font-family: Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+header.header {
+  @apply sticky block top-0 z-30 px-5 headerBG h-[50px];
+  IMG.collapsed-only {
+    @apply hidden;
+  }
+}
+
+.modalBG {
+  @apply fixed top-0 left-0 w-full h-full bg-[color:var(--modal-bg)] opacity-50 z-50;
+}
+
+.modalFG {
+  @apply m-auto w-[600px] fixed z-50 top-0 left-0 right-0 bottom-0 h-max;
+}
+
+TH {
+  &.text-center{
+    a.sort-by {
+      @apply pl-[18px];
+    }
+  }
+  a.sort-by {
+    @apply block relative pr-[18px];
+
+    &:before, &:after {
+      border: 4px solid transparent;
+      content: "";
+      display: block;
+      height: 0;
+      right: 3px;
+      top: 50%;
+      position: absolute;
+      width: 0;
+      opacity: 0.4;
+    }
+    &:before {
+      border-bottom-color: var(--border);
+      margin-top: -9px;
+    }
+    &:after {
+      border-top-color: var(--border);
+      margin-top: 1px;
+    }
+    &.sort2:before {
+      opacity: 1;
+    }
+    &.sort1:after {
+      opacity: 1;
+    }
+  }
+}
+
+TR:nth-child(odd) TD.tableRowSelected{
+  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
+    @apply bg-[color:var(--row-selected-odd-bg)] text-[color:var(--row-selected-fg)] !important;
+  }
+}
+TR:nth-child(even) TD.tableRowSelected {
+  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
+    @apply bg-[color:var(--row-selected-even-bg)] text-[color:var(--row-selected-fg)] !important;
+  }
+}
+
+@media print {
+  .noprint {
+    @apply hidden;
+  }
+}
+
+.clickable:hover {
+  @apply cursor-pointer;
+}
+.not-clickable {
+  @apply cursor-default;
+}
+
+@layer base {
+  .no-hover {
+    @apply hover:bg-transparent !important;
+  }
+  .hoverable {
+    @apply hover:hoverBG;
+  }
+  .not-hoverable {
+    @apply hover:bg-inherit !important;
+  }
+
+  .vertical {
+    -ms-writing-mode: tb-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+}
+
+.disabled {
+  @apply opacity-30;
+}
+
+.mightOverflowBlock {
+  @apply overflow-hidden block text-ellipsis whitespace-nowrap;
+}
+
+@layer base {
+  .flexrow {
+    @apply flex flex-row flex-wrap gap-5;
+  }
+  .flexcol {
+    @apply flex flex-col gap-5;
+  }
+}
+
+H1,H2,H3,H4 {
+  @apply whitespace-nowrap font-semibold;
+}
+
+H1 {
+  @apply text-xl text-center;
+}
+
+H3 {
+  @apply text-header;
+}
+
+H4 {
+  @apply text-default leading-6;
+}
+
+HR {
+  @apply borderDefault;
+}
+
+.badge {
+  @apply text-center inline-block py-[0.05rem] rounded-[3px] px-1 min-w-[5rem] bg-[color:var(--badge-bg)] text-[color:var(--badge-fg)];
+}
+
+@layer base {
+  .link:not(I) {
+    @apply hover:no-underline hover:textActive1;
+  }
+}
+
+/* needed for comments page for example, because header has 50px height - CAN BE REMOVED NOW? */
+A.anchor-offset {
+  @apply block relative invisible top-[-50px];
+}
+
+.pager {
+  @apply text-[color:var(--text-pager)] hover:hoverBG;
+}
+
+.pager-entries, .display-filter, A.button.header-button, BUTTON.header-button {
+  @apply text-[color:var(--text-pager)] hover:text-[color:var(--text-pager-hover)] bg-[color:var(--button-pager-bg)] hover:bg-[color:var(--button-pager-bg-hover)];
+}
+
+.tooltiptext {
+  visibility: hidden;
+  width: auto;
+  height: 22px;
+  line-height: 13px;
+  white-space: nowrap;
+  padding: 4px;
+  background-color: var(--tooltip-bg);
+  color: var(--tooltip-fg);
+  text-align: center;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 100;
+  bottom: 150%;
+  left: 50%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--tooltip-bg) transparent transparent transparent;
+}
+
+/*******************************************************************************
+ * icons as part of text links (ex. in action box container)
+ */
+I.fa-solid, I.uil {
+  @apply inline-block text-center w-5 h-5 leading-5 text-lg textBody;
+  &.round {
+    @apply rounded-full;
+  }
+  &.small {
+    @apply h-5 w-5 text-base;
+    &.uil {
+      @apply text-xl leading-4;
+    }
+    &.fa-solid {
+      @apply text-sm;
+    }
+  }
+
+  &.red {
+    @apply bg-[color:var(--icon-red-bg)] !text-[color:var(--icon-red-fg)];
+  }
+  &.green {
+    @apply bg-[color:var(--icon-green-bg)] !text-[color:var(--icon-green-fg)];
+  }
+  &.yellow {
+    @apply bg-[color:var(--icon-yellow-bg)] !text-[color:var(--icon-yellow-fg)];
+  }
+  &.orange {
+    @apply bg-[color:var(--icon-orange-bg)] !text-[color:var(--icon-orange-fg)];
+  }
+  &.gray {
+    @apply bg-[color:var(--icon-gray-bg)] !text-[color:var(--icon-gray-fg)];
+  }
+}
+
+/*******************************************************************************
+ * sidebar
+ */
+#nav-container {
+  &.collapsed {
+    @apply w-[50px] !important;
+    DIV.navsectionlinks {
+      @apply !overflow-visible;
+    }
+    UL.navsectionlinks {
+      @apply overflow-visible hidden;
+    }
+    A.navsectiontitle {
+      @apply navBarBG;
+      SPAN, I {
+        @apply hidden;
+      }
+      I:first-child {
+        @apply absolute inline-block left-0 top-0 border-l-4 pl-0 border-transparent !text-2xl;
+      }
+    }
+    I.navsectionsubtoggle {
+      @apply !mr-0;
+    }
+    DIV.navsectionlinks > UL > LI {
+      @apply relative left-[5px] top-0 min-h-[50px] border border-transparent;
+    }
+    DIV.navsectionlinks > UL > LI:hover {
+      @apply w-[200px];
+      I:first-child {
+        @apply borderActive;
+      }
+      A.navsectiontitle {
+        SPAN {
+          @apply absolute left-[40px] top-0 block w-[200px] h-6 p-1 shadow-card rounded rounded-b-none navBarBG;
+        }
+      }
+      UL.navsectionlinks {
+        @apply absolute left-[40px] top-6 shadow-card rounded rounded-t-none navBarBG w-[200px];
+        display: inherit;
+      }
+      A.navsectionsubtitle {
+        @apply pl-1;
+      }
+      UL.navsectionsublinks {
+        @apply pl-1;
+      }
+      .sublink {
+        @apply pl-3;
+      }
+      FORM {
+        @apply !px-1 !pb-1;
+      }
+    }
+    .collapse-btn {
+      @apply rotate-180;
+    }
+    header.header {
+      @apply px-0;
+      IMG {
+        @apply hidden;
+      }
+      IMG.collapsed-only {
+        @apply block;
+      }
+    }
+  }
+}
+.navsectionlinks {
+  @apply textNavBar navBarBG;
+}
+.navitem {
+  @apply hover:navItemBG rounded transition duration-100 ease-in-out cursor-pointer hover:textActive1;
+  &.active {
+    @apply textActive1 navItemBG;
+  }
+}
+.navsectiontitle {
+  @apply flex items-center text-sm p-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap hover:text-inherit navBarBG;
+  line-height: inherit;
+}
+.navsectionsubtitle {
+  @apply flex items-center py-1 pl-7 pr-1 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+.sublink {
+  @apply flex items-center py-1 pr-1 pl-8 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+.searchlabel {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap;
+}
+.collapse-btn {
+  @apply mx-auto;
+}
+
+/*******************************************************************************
+ * Message popup
+ */
+.info_message {
+}
+.success_message {
+  @apply textSUCCESS;
+}
+.fail_message {
+  @apply textALERT;
+}
+
+/*******************************************************************************
+ * Cards
+ */
+@layer base {
+  .card {
+    @apply w-min h-min text-left rounded-lg textCard bgCard shadow-card;
+    DIV.head {
+      @apply h-[40px] px-2 border-b borderDefault items-center flex;
+      SPAN.tabs {
+        @apply text-sm inline-block px-4 py-1.5 hover:hoverBG h-full w-fit align-middle border-y-2 border-transparent whitespace-nowrap;
+        &.active, &:hover {
+          @apply border-b-2 borderActive border-t-transparent textActive1;
+        }
+      }
+    }
+    DIV.body {
+      @apply p-2 w-full;
+    }
+    TABLE.body {
+      >TBODY > TR, >THEAD > TR, > TR {
+        >TH, >TD {
+          @apply first:pl-2 last:pr-2 !important;
+        }
+      }
+    }
+    DIV.footer {
+      @apply h-[40px] px-2 border-t borderDefault items-center flex;
+    }
+  }
+}
+
+/*******************************************************************************
+ * floating alerts
+ */
+DIV.card.alert {
+  @apply shadow-float absolute text-center;
+
+  &.yellow {
+    @apply bg-[color:var(--alert-yellow-bg)] border-[color:var(--alert-yellow-fg)] text-[color:var(--alert-yellow-fg)] border !important;
+  }
+
+  &.red {
+    @apply bg-[color:var(--alert-red-bg)] border-[color:var(--alert-red-fg)] text-[color:var(--alert-red-fg)] border !important;
+  }
+
+  &.orange {
+    @apply bg-[color:var(--alert-orange-bg)] border-[color:var(--alert-orange-fg)] text-[color:var(--alert-orange-fg)] border !important;
+  }
+
+  &.green {
+    @apply bg-[color:var(--alert-green-bg)] border-[color:var(--alert-green-fg)] text-[color:var(--alert-green-fg)] border !important;
+  }
+
+  &.top-center {
+    @apply mx-auto left-0 right-0;
+    top: 7px;
+  }
+}
+
+
+
+/*******************************************************************************
+ * progress bar (ex.: on tac page)
+ */
+DIV.card > DIV.progressbar:first-child {
+  @apply pb-0 pt-2;
+}
+DIV.card > DIV.progressbar:last-child {
+  @apply pb-2 pt-0;
+}
+DIV.progressbar {
+  @apply flex flex-row gap-x-1;
+
+  DIV.description {
+    @apply flex-none w-32 self-center;
+    SPAN {
+      @apply py-1 px-2 text-xs font-semibold inline-block uppercase rounded-full w-full text-center;
+    }
+  }
+  DIV.bar {
+    @apply h-2 text-xs place-self-center flex-auto flex justify-start rounded bg-[color:var(--progessbar-bg)];
+    DIV {
+      @apply h-full bg-[color:var(--progessbar-fg)];
+    }
+    DIV:first-child {
+      @apply rounded-l;
+    }
+    DIV:last-child {
+      @apply rounded-r;
+    }
+  }
+  DIV.percent {
+    @apply w-8 text-right self-center;
+    SPAN {
+      @apply text-xs font-semibold inline-block;
+    }
+  }
+}
+
+/*******************************************************************************
+ * perf bar (ex.: on service/hosts lists)
+ */
+.perf-bar-container {
+  @apply block w-[75px] h-5 relative;
+  SPAN {
+    @apply block;
+  }
+
+  .ok,.green {
+    @apply bg-[color:var(--perfbar-green-bg)] border-[color:var(--perfbar-green-border)];
+  }
+  .warn,.yellow {
+    @apply bg-[color:var(--perfbar-yellow-bg)] border-[color:var(--perfbar-yellow-border)];
+  }
+  .crit,.red {
+    @apply bg-[color:var(--perfbar-red-bg)] border-[color:var(--perfbar-red-border)];
+  }
+  .gray {
+    @apply bg-[color:var(--perfbar-gray-bg)] border-[color:var(--perfbar-gray-border)];
+  }
+  .bg {
+    @apply absolute left-0 top-0 h-full w-full rounded bg-[color:var(--perfbar-bg)] border borderDark;
+  }
+  .threshold {
+    @apply border w-[3px] h-full rounded-none absolute left-0 top-0;
+  }
+  .bar {
+    @apply border h-full rounded absolute left-0 top-0;
+  }
+}
+
+/*******************************************************************************
+ * buttons
+ */
+@layer base {
+  .defaultButton {
+    @apply
+      flex
+      rounded
+      px-2 py-1 m-0
+      font-medium
+      whitespace-nowrap
+      truncate
+      text-sm
+      text-center
+      justify-center
+      bg-[color:var(--button-bg)]
+      text-[color:var(--button-fg)]
+      hover:bg-[color:var(--button-hover-bg)]
+      hover:text-[color:var(--button-hover-fg)]
+      ease-in-out
+      transition
+      items-center
+    ;
+  }
+}
+
+.hover-red:hover {
+  @apply !bg-[color:var(--button-red-bg)] !text-[color:var(--button-red-fg)];
+  I, A {
+    @apply !text-[color:var(--button-red-fg)];
+  }
+}
+.hover-red-text:hover {
+  @apply !textALERT;
+  I, A {
+    @apply !textALERT;
+  }
+}
+
+BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=submit] {
+  @apply defaultButton;
+
+ I.fa-solid, I.uil {
+   @apply text-inherit !important;
+ }
+
+  &.active, &:hover {
+    @apply bg-[color:var(--button-hover-bg)] text-[color:var(--button-hover-fg)] cursor-pointer;
+  }
+
+  &.green {
+    @apply bg-[color:var(--button-green-bg)] text-[color:var(--button-green-fg)] hover:bg-[color:var(--button-green-hover-bg)] hover:text-[color:var(--button-green-hover-fg)];
+  }
+
+  &.red {
+    @apply bg-[color:var(--button-red-bg)] text-[color:var(--button-red-fg)] hover:bg-[color:var(--button-red-hover-bg)] hover:text-[color:var(--button-red-hover-fg)];
+  }
+  &.not-clickable {
+    @apply pointer-events-none;
+  }
+
+  I.fa-solid, I.uil {
+    @apply h-auto w-auto min-w-[18px] mr-1;
+    font-size: 18px;
+  }
+
+  &.big {
+    @apply font-semibold;
+  }
+
+  &.round {
+    @apply w-8 h-8 text-xl rounded-full text-center justify-center;
+    align-items: center;
+
+    I.fa-solid, I.uil {
+      @apply mr-0;
+      font-size: inherit;
+    }
+
+    &.big {
+        @apply w-10 h-10 text-2xl;
+    }
+    &.small {
+        @apply w-6 h-6 text-sm;
+    }
+  }
+
+  &.iconOnly {
+    @apply p-0 bg-transparent border-none hover:text-inherit;
+
+    I.fa-solid, I.uil, DIV.spinner {
+      @apply text-base mr-0;
+    }
+
+    &.medium I {
+      @apply text-xl leading-5;
+    }
+    &.big  I {
+      @apply text-2xl leading-6;
+    }
+    &.large I {
+      @apply text-3xl leading-[30px];
+    }
+  }
+}
+
+DIV.buttongroup {
+  @apply flex flex-row flex-nowrap w-fit;
+  BUTTON {
+    @apply border border-r-0 borderDark rounded-none first:rounded-l last:rounded-r last:border-r;
+  }
+}
+
+DIV.radiogroup {
+  @apply flex flex-row flex-nowrap w-fit gap-0;
+  INPUT[type="radio"] {
+    @apply invisible w-0 border-0;
+  }
+  INPUT[type="radio"] + label {
+    @apply defaultButton clickable border border-r-0 borderDark rounded-none second:rounded-l last:rounded-r last:border-r grow basis-0 min-w-fit;
+  }
+  INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
+    @apply bg-[color:var(--button-hover-bg)] text-[color:var(--button-hover-fg)] cursor-pointer;
+  }
+}
+
+DIV.accordion {
+  @apply borderDefault border rounded overflow-hidden;
+  > BUTTON {
+    @apply border-0 rounded-none first:rounded-t last:rounded-b;
+  }
+  > BUTTON.active {
+    @apply last:rounded-b-none;
+  }
+  > DIV {
+    @apply overflow-hidden max-h-0;
+    &.active {
+      @apply p-2 overflow-auto;
+    }
+  }
+}
+
+.fa-trash, .uil-trash-alt {
+  @apply hover:textALERT;
+}
+A, BUTTON {
+  &:has(I.fa-trash), &:has(I.uil-trash-alt) {
+    @apply hover:textALERT;
+  }
+}
+
+/*******************************************************************************
+ * tables
+ */
+
+.links a {
+  @apply block hoverable;
+}
+
+TABLE {
+  @apply table-auto w-full border-collapse;
+}
+
+TD, TH {
+  @apply whitespace-nowrap;
+}
+
+TH {
+  @apply textTH font-semibold;
+}
+
+TABLE.cellborder {
+  TD, TH {
+    @apply border borderDefault;
+  }
+}
+
+TABLE.innercellborder {
+  TD, TH {
+    @apply border borderDefault px-2 py-1;
+  }
+  TR:first-child {
+    TD, TH {
+      @apply border-t-0;
+    }
+  }
+  TR:last-child {
+    TD, TH {
+      @apply border-b-0;
+    }
+  }
+  TD:first-child, TH:first-child {
+    @apply border-l-0;
+  }
+  TD:last-child, TH:last-child {
+    @apply border-r-0;
+  }
+}
+
+TABLE.cellspacing {
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply py-1 px-2 first:pl-1 last:pr-1;
+      }
+    }
+  }
+}
+TABLE.cellspacing-none {
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply p-0 first:p-0 last:p-0;
+      }
+    }
+  }
+}
+
+TABLE.cellspacing-y {
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply py-1;
+      }
+    }
+  }
+}
+TABLE.cellspacing-x {
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply px-2;
+      }
+    }
+    > TR:first-child {
+      > TD, > TH {
+        @apply pt-2;
+      }
+    }
+    > TR:last-child {
+      > TD, > TH {
+        @apply pb-2;
+      }
+    }
+  }
+}
+
+TABLE.cellspacing-0\.25 {
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply p-[1px] first:pt-0 last:pb-0;
+      }
+    }
+  }
+}
+
+TABLE.striped {
+  > TBODY {
+    > TR:nth-child(even){
+      @apply rowEven;
+    }
+    > TR:nth-child(odd) {
+      @apply rowOdd;
+    }
+  }
+}
+
+TABLE.rowhover > TBODY > TR, TBODY.rowhover > TR {
+  @apply hover:hoverBG;
+}
+
+DIV.mainTableHeader {
+  @apply flex px-1.5 py-1;
+  >DIV:first-of-type {
+    @apply flex flex-1 self-center;
+  }
+  >DIV:last-of-type {
+    @apply flex flex-1 justify-end;
+  }
+}
+
+DIV.mainTableFooter {
+  @apply px-1.5;
+}
+
+DIV.mainTable {
+  @apply w-full overflow-auto border-t border-b borderDefault;
+  DIV {
+    @apply borderDefault;
+  }
+  max-height: calc(100vh - 260px);
+}
+
+TABLE.mainTable {
+  @apply bgTable borderDefault;
+  TH:first-child,TD:first-child {
+    @apply border-l-0;
+  }
+
+  THEAD>TR {
+    @apply bgTable;
+    TH{
+      @apply borderDefault align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit;
+    }
+  }
+  TBODY {
+    TR {
+      @apply borderDefault;
+    }
+    TD,TH {
+      @apply borderDefault border-t border-l border-b text-left px-1.5 py-0.5 h-[25px] align-middle;
+    }
+    TR:first-child TD, TR:first-child TH {
+      @apply border-t-0;
+    }
+    TR:last-child TD, TR:last-child TH {
+      @apply border-b-0;
+    }
+  }
+
+  &.sticky-2d {
+    THEAD TR:first-child TH:first-child {
+      @apply z-[11] left-0 bgTable shadow-as-border min-w-[32px];
+    }
+    THEAD TH {
+      @apply bgTable hover:bgTable second:border-l-0;
+      &.vert {
+        @apply align-bottom py-2 px-1;
+      }
+    }
+    TBODY TR TD:first-child, TBODY TR TH:first-child {
+      @apply left-0 px-1.5 z-[9] sticky bg-inherit shadow-as-border-right;
+    }
+    TR TD {
+      @apply second:border-l-0;
+    }
+  }
+}
+
+/*******************************************************************************
+ * forms
+ */
+[type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select {
+  @apply rounded-[5px] leading-tight p-1 text-[color:var(--forms-fg)] bg-[color:var(--forms-bg)] text-default outline-none;
+  &:focus {
+    @apply borderActive ring-transparent;
+  }
+}
+[type='checkbox']:focus,[type='radio']:focus {
+  @apply !ring-transparent ring-offset-transparent;
+}
+[type='checkbox'] {
+  @apply bg-[color:var(--forms-bg)];
+}
+[type='checkbox']:checked {
+  @apply bg-[color:var(--border-active)];
+}
+SELECT {
+  @apply pr-6 cursor-pointer;
+}
+OPTION {
+  @apply text-[color:var(--forms-fg)] bg-[color:var(--forms-bg)];
+}
+INPUT:disabled,BUTTON:disabled {
+  @apply bg-[color:var(--button-disabled-bg)] !cursor-auto hover:bg-[color:var(--button-disabled-bg)] text-[color:var(--button-disabled-fg)] hover:text-[color:var(--button-disabled-fg)];
+}
+INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
+  @apply outline-none ring-0 ring-[color:var(--border-error)] border-[color:var(--border-error)];
+  &.silent {
+    @apply outline-none ring-0 ring-inherit border-inherit;
+  }
+}
+.required {
+  @apply textALERT;
+}
+
+.daterangepicker {
+  DIV.drp-buttons {
+    @apply !flex justify-center gap-5;
+  }
+  .applyBtn {
+    @apply w-40;
+  }
+  .drp-selected {
+    @apply !hidden;
+  }
+}
+DIV.daterangepicker {
+  @apply shadow-float;
+}
+
+DIV.deleteicon {
+  @apply relative w-fit;
+  BUTTON {
+    @apply absolute pr-2 right-0 top-0 hover:bg-inherit hover:textBody;
+  }
+  /* hide browser specific clear icon */
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply opacity-0 pointer-events-none;
+    -webkit-appearance: none;
+  }
+  INPUT {
+    @apply pr-5;
+  }
+}
+
+.filter_hidden {
+  @apply hidden;
+}
+
+DIV.singlefilterpane {
+  @apply border-l border-b;
+  &:first-child {
+    @apply border-l-0;
+  }
+}
+
+OPTION.even {
+  @apply rowEven;
+}
+OPTION.odd {
+  @apply rowOdd;
+}
+
+INPUT.header_inline_edit {
+  @apply py-0 my-0 w-full min-w-[50px];
+}
+
+DIV.spinner {
+  @apply animate-spin inline-block w-4 h-4 border-[color:var(--text-body)] border-2 border-r-transparent rounded-full align-sub self-center;
+  animation-duration: 1500ms;
+}
+
+/*******************************************************************************
+ * site panel / backends
+ */
+#site_panel .button_peer, div.backends BUTTON, #site_panel .btn_sites {
+  @apply px-0.5 w-24 block truncate h-max !text-[color:var(--button-fg)] hover:!text-[color:var(--button-hover-fg)] hover:brightness-90;
+}
+UL.ui-fancytree {
+  IMG {
+    display: initial;
+    vertical-align: initial;
+  }
+}
+
+#site_panel_sections {
+  ul.fancytree-container, ul.fancytree-treefocus, span.fancytree-selected span.fancytree-title, .fancytree-plain span.fancytree-title {
+    font-family: inherit;
+    background-color: inherit;
+    border: 0;
+    border-color: inherit;
+    outline: 0;
+  }
+
+  SPAN {
+    color: var(--card-text) !important;
+  }
+  span.fancytree-focused span.fancytree-title {
+    background: var(--card-bg) !important;
+  }
+  span.fancytree-active span.fancytree-title {
+    background: var(--hover-bg) !important;
+  }
+  span.fancytree-node:hover {
+    background: var(--hover-bg) !important;
+  }
+  span.fancytree-focused, span.fancytree-active {
+    background: var(--hover-bg) !important;
+  }
+
+  .fancytree-node {
+    @apply clickable;
+  }
+  span.fancytree-title {
+    @apply p-px;
+  }
+  span.fancytree-focused, span.fancytree-active {
+    @apply textActive1 bodyBG rounded;
+    span.fancytree-checkbox {
+      @apply textCard;
+    }
+  }
+  span.fancytree-node:hover {
+    @apply bodyBG rounded;
+    span.fancytree-title {
+      @apply textActive1;
+    }
+  }
+
+  span.fancytree-checkbox {
+    @apply bg-none text-base;
+    font-family: "unicons-line";
+    color: initial;
+    &::before { content: "\eaa2"; } /* unchecked */
+  }
+  .fancytree-selected span.fancytree-checkbox, span.fancytree-checkbox:hover {
+    &::before { content: "\e9b4"; } /* checked */
+  }
+  .fancytree-selected span.fancytree-checkbox:hover {
+    &::before { content: "\eaa2"; } /* unchecked */
+  }
+
+  .fancytree-expander {
+    @apply bg-none text-base -mt-px mx-0.5 pl-1.5;
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: initial;
+  }
+  .fancytree-exp-e span.fancytree-expander, .fancytree-exp-ed span.fancytree-expander {
+    &::before { content: "\f0d7"; }
+  }
+  .fancytree-exp-edl span.fancytree-expander, .fancytree-exp-el span.fancytree-expander {
+    &::before { content: "\f0d7"; }
+  }
+  .fancytree-exp-c span.fancytree-expander {
+    &::before { content: "\f0da"; }
+  }
+  .fancytree-exp-cl span.fancytree-expander:hover {
+    &::before { content: "\f0da"; }
+  }
+  .fancytree-exp-cl span.fancytree-expander {
+    &::before { content: "\f0da"; }
+  }
+}
+
+/*******************************************************************************
+ * search results
+ */
+DIV#search-results {
+  @apply card shadow-float z-[60] absolute border borderDark top-0 left-0 w-40 whitespace-nowrap overflow-hidden;
+
+  UL {
+    @apply list-none block m-0 p-0;
+  }
+  LI {
+    @apply px-1 py-0.5;
+    &.res {
+      @apply hover:hoverBG hover:cursor-pointer;
+    }
+    &.ajax_search_selected {
+      @apply bg-[color:var(--row-selected-odd-bg)]
+    }
+    &.category {
+      @apply font-semibold;
+    }
+    &.more {
+      @apply hover:hoverBG hover:cursor-pointer font-semibold;
+    }
+    &.toomany {
+      @apply textHINT font-semibold;
+    }
+    &.error {
+      @apply textALERT font-semibold;
+    }
+  }
+  .disabled {
+    @apply ml-5 textHINT opacity-100;
+  }
+  IMG {
+    @apply inline-block align-text-bottom mr-1 w-4 h-4;
+  }
+}
+
+INPUT.headersearch {
+  @apply w-20 transition-all ease-linear duration-100;
+  &.expanded, &:focus, &:active {
+    @apply w-48;
+  }
+}
+
+/*******************************************************************************
+ * action menu
+ */
+
+DIV.action_menu, DIV.context_menu {
+  @apply absolute z-50 overflow-visible;
+  UL {
+    @apply card shadow-float min-w-[120px] whitespace-nowrap overflow-visible;
+    LI {
+      @apply relative first:rounded-t-lg last:rounded-b-lg hover:hoverBG hover:textActive1;
+      &.disabled {
+        @apply hover:text-inherit cursor-default;
+      }
+
+      HR {
+        @apply my-1;
+      }
+
+      A {
+        @apply flex p-1 w-full gap-1;
+
+        SPAN.icon {
+          @apply inline-flex w-[20px] h-[20px];
+        }
+      }
+      &.no-hover {
+        @apply hover:bg-inherit;
+      }
+    }
+    .submenu {
+      @apply absolute min-w-[120px] z-[51];
+    }
+    LI:hover > UL.submenu.autoopen {
+      display: initial !important;
+    }
+    SPAN.expandable {
+      @apply ml-auto;
+    }
+  }
+  INPUT {
+    color: initial;
+  }
+}
+I.action_icon {
+  &.clickable {
+    @apply hover:hoverBG hover:rounded;
+    &.active {
+      @apply hoverBG rounded;
+    }
+  }
+}
+IMG.action_icon {
+  &.clickable {
+    &.active {
+      @apply ring-1 ring-[color:var(--border-dark)];
+    }
+  }
+}
+
+/*******************************************************************************
+ * commands / action box
+ */
+DIV.actionbox {
+  >DIV {
+    @apply whitespace-nowrap px-2 py-1 hover:hoverBG;
+  }
+  >DIV.active {
+    @apply hoverBG;
+  }
+  >DIV:first-child {
+    @apply pt-2;
+  }
+  >DIV:last-child {
+    @apply pb-2;
+  }
+  A {
+    @apply link;
+  }
+  I {
+    @apply mr-1;
+    font-size: 18px;
+  }
+  &.less-padding{
+    >DIV {
+      @apply py-0.5;
+      &:first-child{
+        @apply pt-1;
+      }
+      &:last-child{
+        @apply pb-1;
+      }
+    }
+  }
+}
+
+/*******************************************************************************
+ * login page
+ */
+BODY.loginpage {
+  DIV.loginmask {
+    DIV.spinner {
+      @apply w-5 h-5 mr-1;
+    }
+  }
+}
+
+/*******************************************************************************
+ * status page
+ */
+DIV.card.statusTotals {
+  @apply overflow-hidden w-[350px];
+  >TABLE {
+    TD, TH {
+      @apply text-center;
+    }
+    TH A, TD A {
+      @apply block py-1;
+    }
+  }
+}
+
+
+/*
+* host/service status total
+*/
+
+DIV.status-summary {
+  >DIV {
+    @apply px-1.5 py-1.5 text-center;
+    >A {
+      @apply block;
+    }
+  }
+}
+
+/*******************************************************************************
+ * tactical overview
+ */
+BODY.page_tac {
+  TD.featureBlock {
+    @apply p-0 w-48 min-h-[9rem] h-36 font-semibold;
+    >DIV {
+      @apply flexrow flex-nowrap gap-0 h-full pl-px w-48;
+    }
+  }
+  DIV.vbadge {
+    @apply p-0 w-6 h-full relative hover:opacity-75;
+    SPAN {
+      @apply vertical block w-full h-full absolute bottom-0 text-center font-semibold leading-5;
+    }
+  }
+  .itemblock {
+    @apply block w-full px-2 py-1 mt-px first:mt-0 font-semibold;
+  }
+  .importantProblem {
+    @apply DOWN hover:!bg-opacity-80;
+  }
+  .unimportantProblem {
+    @apply UNREACHABLE hover:!bg-opacity-80;
+  }
+}
+
+/*******************************************************************************
+* calendar popup
+*/
+
+DIV.daterangepicker {
+  @apply bgCard textCard borderDefault !important;
+  DIV.calendar-table {
+    @apply bgCard borderDefault !important;
+  }
+  td.week, th.week {
+    @apply textActive1 !important;
+  }
+  td.off, td.off.in-range, td.off.start-date, td.off.end-date {
+    @apply bgCard textCard opacity-60 !important;
+  }
+  td.available:hover, th.available:hover {
+    @apply hoverBG textCard !important;
+  }
+  td.in-range {
+    @apply bg-[color:var(--row-selected-even-bg)] text-[color:var(--row-selected-fg)] !important;
+  }
+  .show-ranges.ltr .drp-calendar.left {
+    @apply borderDefault !important;
+  }
+}
+.daterangepicker .drp-buttons {
+  border-top: 1px solid var(--border) !important;
+}
+.daterangepicker.show-ranges.ltr .drp-calendar.left {
+  border-left: 1px solid var(--border) !important;
+}
+DIV.daterangepicker .ranges li:hover {
+  @apply hoverBG textCard !important;
+}
+
+DIV.daterangepicker SELECT {
+  @apply text-[color:var(--forms-fg)] bg-[color:var(--forms-bg)] !important;
+  background: var(--forms-bg) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.daterangepicker .calendar-table .next span, .daterangepicker .calendar-table .prev span {
+  @apply border-[color:var(--text-card)] !important;
+}
+
+.jstree-default .jstree-hovered {
+  background: var(--card-bg) !important;
+}

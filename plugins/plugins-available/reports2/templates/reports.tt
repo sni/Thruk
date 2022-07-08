@@ -65,7 +65,7 @@
             [% IF r.var.exists('is_waiting') && r.var.is_waiting %]
               queued
             [% ELSIF r.failed %]
-              <span class="textERROR">failed</span>
+              <span class="textALERT">failed</span>
             [% ELSE %]
               [% IF r.var.start_time %]
                 [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
@@ -153,7 +153,7 @@
         [% IF r.failed %]
           <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
-            <td colspan=9 class="textERROR">
+            <td colspan=9 class="textALERT">
               [% IF r.exists('long_error') && r.long_error != "" %]
                 <i class="uil uil-arrow-from-top clickable" id='long_error_icon_[% r.nr %]' title="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;"></i>
               [% END %]
@@ -169,7 +169,7 @@
         [% IF r.exists("var") && r.var.exists("opt_errors") %]
           <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
-            <td colspan=9 class="textERROR">
+            <td colspan=9 class="textALERT">
               Error(s) in report options:
               <ul>
               [% FOREACH e = r.var.opt_errors %]

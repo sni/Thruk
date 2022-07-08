@@ -425,7 +425,7 @@
                 <td>
                   <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()">
                   <span class="ml-5">(The first/main node will always be linked automatically.)</span>
-                  <span class='create_obj_nok textERROR'>Cannot create link, link with same label already exists.</span>
+                  <span class='create_obj_nok textALERT'>Cannot create link, link with same label already exists.</span>
                 </td>
               </tr>
               <tr>
