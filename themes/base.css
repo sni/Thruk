@@ -1191,7 +1191,7 @@ DIV.daterangepicker {
 DIV.deleteicon {
   @apply relative w-fit;
   BUTTON {
-    @apply absolute pr-2 right-0 top-0 hover:bg-inherit hover:textBody;
+    @apply absolute pr-2 right-0 top-0 hover:bg-inherit !text-[color:var(--forms-fg)] hover:!text-[color:var(--forms-fg)];
   }
   /* hide browser specific clear icon */
   input[type="search"]::-webkit-search-cancel-button {
