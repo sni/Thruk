@@ -3417,6 +3417,10 @@ function preserve_hash() {
 
 /* fetch content by ajax and replace content */
 function load_overcard_content(id, url, add_pre) {
+    var el = document.getElementById(id);
+    if(el) {
+        el.innerHTML = "<div class='spinner w-8 h-8'><\/div>";
+    }
     jQuery.ajax({
         url: url,
         type: 'POST',
@@ -8561,6 +8565,7 @@ function overcard(options) {
     var settings = {
         'document': null,
         'body':     '',
+        'bodyEl':   null,
         'bodyCls':  '',
         'caption':  '',
         'width':    '',
@@ -8636,7 +8641,20 @@ function overcard(options) {
     if(settings["minWidth"]) { container.style.minWidth = settings["minWidth"]+'px'; }
 
     var body = doc.getElementById(containerId+"_body");
-    body.innerHTML = settings["body"];
+    if(settings["bodyEl"]) {
+        if(settings["bodyEl"] && settings["bodyEl"].tagName) {
+            jQuery(body).append(jQuery(settings["bodyEl"]));
+            settings["bodyEl"].style.display = "";
+        } else {
+            var bodyEl = doc.getElementById(settings["bodyEl"]);
+            bodyEl.style.display = "";
+            if(bodyEl) {
+                jQuery(body).append(jQuery(bodyEl));
+            }
+        }
+    } else {
+        body.innerHTML = settings["body"];
+    }
 
     // place it next to the mouse position
     var posX = mouseX + document.documentElement.scrollLeft + 50;
