@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 NAME=$(notdir $(abspath .))
-N_PREFIX=$(shell pwd)/node_modules
+N_PREFIX=$(shell pwd)/node
 
 build: stylesheets/$(NAME).css
 
@@ -10,7 +10,7 @@ stylesheets/$(NAME).css: node_modules src/$(NAME).css
 	N_PREFIX=$(N_PREFIX) \
 		./node_modules/.bin/n exec stable \
 			npx tailwindcss -o stylesheets/${NAME}.css --input ./src/${NAME}.css --postcss ./postcss.config.js --minify
-	touch -r src/${NAME}.css stylesheets/${NAME}.css
+	touch stylesheets/${NAME}.css
 
 dev: node_modules
 	mkdir -p stylesheets
@@ -26,10 +26,14 @@ watch: node_modules
 		./node_modules/.bin/n exec stable \
 			npx tailwindcss -o stylesheets/${NAME}.css --input ./src/${NAME}.css --postcss ./postcss.config.js --watch
 
-node_modules:
+node: node_modules/.bin/n
+
+node_modules/.bin/n:
 	npm install n
 	N_PREFIX=$(N_PREFIX) \
 		./node_modules/.bin/n stable
+
+node_modules: node
 	N_PREFIX=$(N_PREFIX) \
 		./node_modules/.bin/n exec stable npm i -D \
 			tailwindcss@latest \
@@ -37,9 +41,12 @@ node_modules:
 			autoprefixer@latest \
 			postcss-import@latest \
 			@tailwindcss/forms@latest \
+	# sometimes .bin dissapears after installing modules
+	test -e ./node_modules/.bin/n || $(MAKE) node
 
 clean:
 	rm -rf \
+		node \
 		node_modules \
 		package.json \
 		package-lock.json \
