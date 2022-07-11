@@ -66,7 +66,6 @@
             <button class="noprint big primary round" title="reload page" id="refresh_button" onClick="refresh_button()"><i class="uil uil-sync"></i></button>
             [% IF c.user_exists %]
               <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="uil uil-cog"></i></button>
-              <div id="pref_pane" class="card z-50 shadow-float fixed left-0 md:left-auto md:right-0 top-[50px] mt-0 min-h-[150px] w-full md:w-[500px] rounded-t-none rounded-r-none" style="display: none;"></div>
               [% IF cookie_auth && show_logout_button %]
                 <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top' style="display: initial;">
                   <button class="noprint big primary round" title="sign out"><i class="uil uil-signout"></i></button>
@@ -74,6 +73,9 @@
               [% END %]
             [% END %]
           </div>
+          [% IF c.user_exists %]
+            <div id="pref_pane" class="card z-50 shadow-float fixed left-0 md:left-auto md:right-0 top-[50px] mt-0 min-h-[150px] w-full md:w-[500px] rounded-t-none rounded-r-none" style="display: none;"></div>
+          [% END %]
         </div>
       </header>
     [% END %]
