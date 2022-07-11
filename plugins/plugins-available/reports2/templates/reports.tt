@@ -44,7 +44,7 @@
           <th class="text-center">Mail</th>
           <th class="text-center">Schedule</th>
           <th class="text-center">Last Time Run</th>
-          <th class="text-center">Duration</th>
+          <th class="text-center w-48">Duration</th>
           <th></th>
           <th></th>
           <th></th>

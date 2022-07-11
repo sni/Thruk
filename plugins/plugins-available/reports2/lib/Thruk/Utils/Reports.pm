@@ -1739,6 +1739,8 @@ sub _convert_to_pdf {
 
     local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
+    _debug("converting env: PHANTOMJSSCRIPTOPTIONS: %s", $ENV{PHANTOMJSSCRIPTOPTIONS}//'');
+    _debug("converting to pdf: ".$cmd);
     my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
     # try again to avoid occasionally qt errors

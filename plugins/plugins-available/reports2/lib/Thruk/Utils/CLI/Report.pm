@@ -152,7 +152,9 @@ sub _cmd_report {
     if(defined $report_file and $report_file eq '-2') {
         return($Thruk::Utils::Reports::error // "[".$nr.".rpt] report is running on another node already\n", 0);
     } elsif(defined $report_file and -f $report_file) {
-        return("[".$nr.".rpt] report calculated successfully", 0) if $ENV{'THRUK_CRON'}; # avoid pdf being printed to logfile
+        ## no critic
+        return("[".$nr.".rpt] report calculated successfully", 0) if(-t 0 || $ENV{'THRUK_CRON'}); # avoid pdf being printed to logfile
+        ## use critic
         $c->res->headers->content_type('application/octet-stream');
         return(Thruk::Utils::IO::read($report_file), 0);
     }
