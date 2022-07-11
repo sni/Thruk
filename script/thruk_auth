@@ -250,19 +250,23 @@ sub process {
         $SIG{'ALRM'} = sub { die("timeout during auth check"); };
         eval {
             alarm($login_timeout);
-            $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1);
+            $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user, $login_timeout-1, 1);
         };
         my $err = $@;
         alarm(0);
-        if($err || $rc == -1) {
+        if($err) {
             _debug("technical problem during login for ".$user) if $verbose;
-            _error($err) if $err;
+            _warn($err);
+            # do not log out on temporary errors...
+        }
+        elsif($rc == -1) {
+            _debug("technical problem during login for ".$user) if $verbose;
             _audit_log("session", "technical issue during session revalidation, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
             return $loginurl."?problem&".$path;
         }
-        if($rc == 0) {
+        elsif($rc == 0) {
             _debug("basic auth verify failed for ".$user) if $verbose;
             _audit_log("session", "session revalidation failed, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
