@@ -31,8 +31,8 @@ DIV.page.content_page TD.header DIV.title {
 DIV.page.content_page TD.header DIV.titletext {
   font-size: 20px;
   color: white;
-  bottom: 0px;
-  left: 3px;
+  top: 10px;
+  left: 5px;
   position: absolute;
 }
 DIV.subtitle {
@@ -50,16 +50,15 @@ DIV.subtitle {
 TD.header DIV.title {
   position: relative;
   height: 200px;
-  background: #6393c1;
-  background: -moz-linear-gradient(45deg, #6393c1 0%, #cfe7fa 100%);
-  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#6393c1), color-stop(100%,#cfe7fa));
-  background: -webkit-linear-gradient(45deg, #6393c1 0%,#cfe7fa 100%);
+  background: rgb(99,147,193);
+  background: linear-gradient(90deg, rgba(99,147,193,1) 0%, rgba(207,231,250,1) 90%, rgba(207,231,250,1) 100%);
+  border-radius: 5px;
 }
 DIV.cover TD.header DIV.titletext {
   font-size: 30px;
   color: white;
   bottom: 0px;
-  left: 3px;
+  left: 5px;
   position: absolute;
 }
 DIV.cover TD.header DIV.title_bar {
