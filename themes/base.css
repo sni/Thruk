@@ -1527,10 +1527,10 @@ BODY.page_tac {
     @apply block w-full px-2 py-1 mt-px first:mt-0 font-semibold;
   }
   .importantProblem {
-    @apply bg-[color:var(--badge-down-bg)] text-[color:var(--badge-down-fg)] hover:bg-opacity-80 !important;
+    @apply bg-[color:var(--badge-down-bg)] text-[color:var(--badge-down-fg)] hover:opacity-80 !important;
   }
   .unimportantProblem {
-    @apply bg-[color:var(--badge-unreachable-bg)] text-[color:var(--badge-unreachable-fg)] hover:bg-opacity-80 !important;
+    @apply bg-[color:var(--badge-unreachable-bg)] text-[color:var(--badge-unreachable-fg)] hover:opacity-80 !important;
   }
 }
 
