@@ -131,11 +131,11 @@
   --button-red-fg:            var(--color-white);
   --button-red-bg:            var(--color-red-600);
   --button-red-hover-fg:      var(--color-white);
-  --button-red-hover-bg:      var(--color-red-500);
+  --button-red-hover-bg:      var(--color-red-700);
   --button-green-fg:          var(--color-white);
-  --button-green-bg:          var(--color-green-500);
+  --button-green-bg:          var(--color-green-600);
   --button-green-hover-fg:    var(--color-white);
-  --button-green-hover-bg:    var(--color-green-400);
+  --button-green-hover-bg:    var(--color-green-700);
   --button-disabled-fg:       var(--color-gray-500);
   --button-disabled-bg:       var(--color-gray-200);
 }
@@ -871,7 +871,7 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=
     align-items: center;
 
     I.fa-solid, I.uil {
-      @apply mr-0;
+      @apply mr-0 contents;
       font-size: inherit;
     }
 

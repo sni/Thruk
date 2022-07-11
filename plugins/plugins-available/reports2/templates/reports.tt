@@ -33,22 +33,22 @@
     <div class="grow"></div>
     <a href="reports2.cgi?action=edit&amp;report=new" class="button green w-40 mx-2">create new report</a>
   </div>
-  <div class="mainTable">
+  <div class="mainTable"  style="display: none;">
     <table class="mainTable js-striped" id="reportsTable">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th class="text-center">Public</th>
-          <th class="text-center js-usercol">Owner</th>
-          <th class="text-center">Mail</th>
-          <th class="text-center">Schedule</th>
-          <th class="text-center">Last Time Run</th>
+          <th class="w-56">Name</th>
+          <th class="min-w-[250px]">Description</th>
+          <th class="text-center w-20">Public</th>
+          <th class="text-center w-28 js-usercol">Owner</th>
+          <th class="text-center w-28">Mail</th>
+          <th class="text-center w-48">Schedule</th>
+          <th class="text-center w-28">Last Time Run</th>
           <th class="text-center w-48">Duration</th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
+          <th class="w-6"></th>
+          <th class="w-6"></th>
+          <th class="w-[60px]"></th>
+          <th class="w-6"></th>
         </tr>
       </thead>
       <tbody>
@@ -100,7 +100,7 @@
               [% END %]
             [% END %]
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             <form action="reports2.cgi" method="POST">
               <div class="flexrow flex-nowrap gap-1">
                 <input type="hidden" name="report" value="[% r.nr %]">
@@ -119,12 +119,12 @@
               </div>
             </form>
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             [% IF ! r.readonly %]
               <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><i class="fa-solid fa-pencil text-sm" title='Change Report'></i></a>
             [% END %]
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             <div class="flexrow flex-nowrap gap-1">
               [% IF r.var.file_exists && r.var.is_running == 0 %]
                 [% PROCESS _reports_icon.tt r=r %]
@@ -141,12 +141,12 @@
               [% END %]
             </div>
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             [% IF ! r.readonly %]
               <form action="reports2.cgi" method="POST">
                 <input type="hidden" name="report" value="[% r.nr %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                <a class="hover-red" href="#" onclick="if(confirm('really remove?')) { return send_form_in_background_and_reload(this, {action: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete Report'></i></a>
+                <a href="#" onclick="if(confirm('really remove?')) { return send_form_in_background_and_reload(this, {action: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete Report'></i></a>
               </form>
             [% END %]
           </td>
@@ -202,6 +202,7 @@
     var typ = get_hash(1);
     if(typ == undefined) { typ = 'my' }
     if(typ == "")        { typ = 'my' }
+    jQuery("DIV.mainTable").css("display", "");
     reports_view(typ);
     [% IF highlight %]
     jQuery('TR.report[% escape_quotes(highlight) +%] TD').effect('highlight', {}, 2000, function() {

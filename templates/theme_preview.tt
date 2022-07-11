@@ -312,7 +312,7 @@
         <h3>Buttons</h3>
       </div>
       <div>
-        <table class="w-full cellborder cellspacing text-center">
+        <table class="w-full innercellborder cellspacing text-center">
           <tr>
             <th></th>
             <th>small</th>

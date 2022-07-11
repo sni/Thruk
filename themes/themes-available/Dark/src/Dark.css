@@ -91,13 +91,13 @@
   --tooltip-fg:               var(--text-body);
   --tooltip-bg:               #888;
 
-  --alert-green-fg:           var(--color-green-700);
-  --alert-green-bg:           var(--color-green-50);
-  --alert-yellow-fg:          var(--color-yellow-700);
-  --alert-yellow-bg:          var(--color-yellow-50);
-  --alert-red-fg:             var(--color-red-700);
-  --alert-red-bg:             var(--color-red-50);
-  --alert-orange-fg:          var(--color-orange-700);
+  --alert-green-fg:           var(--color-green-800);
+  --alert-green-bg:           var(--color-green-200);
+  --alert-yellow-fg:          var(--color-yellow-800);
+  --alert-yellow-bg:          var(--color-yellow-200);
+  --alert-red-fg:             var(--color-red-800);
+  --alert-red-bg:             var(--color-red-200);
+  --alert-orange-fg:          var(--color-orange-800);
   --alert-orange-bg:          var(--color-orange-200);
 
   --icon-red-fg:              var(--text-body);
@@ -126,13 +126,13 @@
   --button-hover-fg:          #f2f2f2;
   --button-hover-bg:          #666;
   --button-red-fg:            var(--text-body);
-  --button-red-bg:            var(--color-red-600);
+  --button-red-bg:            var(--color-red-700);
   --button-red-hover-fg:      var(--text-body);
-  --button-red-hover-bg:      var(--color-red-500);
+  --button-red-hover-bg:      var(--color-red-800);
   --button-green-fg:          var(--text-body);
-  --button-green-bg:          var(--color-green-500);
+  --button-green-bg:          var(--color-green-700);
   --button-green-hover-fg:    var(--text-body);
-  --button-green-hover-bg:    var(--color-green-400);
+  --button-green-hover-bg:    var(--color-green-800);
   --button-disabled-fg:       #ccc;
   --button-disabled-bg:       #555;
 }

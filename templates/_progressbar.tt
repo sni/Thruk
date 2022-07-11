@@ -5,7 +5,7 @@
   [% IF pb_options.show_message %]onmouseover="return pb_overcard_[% pb_options.id %]()"
   [% ELSE %]onmouseover="return pb_overin_[% pb_options.id %]()"[% END %]
   onmouseout="return pb_overout_[% pb_options.id %]()"
-  class="flexrow flex-nowrap justify-between my-2"
+  class="flexrow flex-nowrap justify-between my-0"
 >
   <div class="progressbar w-full" style="height:[% pb_options.height %]px;">
     <div class="bar" style="height:[% pb_options.height %]px;"><div style="width:0%; height:[% pb_options.height %]px;" id="bar_[% pb_options.id %]"></div></div>
@@ -24,7 +24,7 @@
   </div>
 </div>
 [% IF pb_options.defined("show_console") && pb_options.show_console %]
-<div class="continue_[% pb_options.id %] my-2" style="display: none; height:[% pb_options.height %]px;"><button onclick="reloadPage(); return false;">job finished, continue</button></div>
+<div class="continue_[% pb_options.id %] my-0" style="display: none; height:[% pb_options.height %]px;"><button onclick="reloadPage(); return false;">job finished, continue</button></div>
 <textarea id="console_[% pb_options.id %]" class="CONSOLE w-[80%] h-[600px] my-2" readonly>
 </textarea>
 [% END %]
