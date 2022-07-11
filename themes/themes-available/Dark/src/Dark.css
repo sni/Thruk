@@ -135,6 +135,10 @@
   --button-green-hover-bg:    var(--color-green-800);
   --button-disabled-fg:       #ccc;
   --button-disabled-bg:       #555;
+
+  --stats-time-backend:       var(--color-sky-600);
+  --stats-time-controler:     var(--color-yellow-600);
+  --stats-time-view:          var(--color-orange-600);
 }
 
 /*******************************************************************************
