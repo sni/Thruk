@@ -541,6 +541,42 @@ I.fa-solid, I.uil {
 /*******************************************************************************
  * sidebar
  */
+#navbar {
+  @apply w-fit h-[calc(100vh-50px)] z-50 mt-[50px] hidden absolute;
+}
+BODY:not(.topnav) {
+  #navbar {
+    @apply lg:h-screen lg:mt-0 lg:block lg:relative;
+  }
+  #mainNavBtn {
+    @apply lg:hidden;
+  }
+}
+BODY.topnav {
+  #navbar {
+    @apply h-screen mt-0 hidden absolute;
+  }
+  #mainNavBtn {
+    @apply block;
+  }
+}
+BODY.topNavOpen {
+  #navbar {
+    @apply !flex !pt-[50px];
+  }
+  #nav-container HEADER {
+    @apply !hidden;
+  }
+  HEADER.header {
+    @apply z-50;
+  }
+  .btn-nav-hide {
+    @apply rotate-180;
+  }
+  MAIN, #pageStats {
+    @apply !brightness-50;
+  }
+}
 #nav-container {
   @apply bg-[color:var(--navbar-bg)] text-[color:var(--navbar-fg)];
 
@@ -614,14 +650,9 @@ I.fa-solid, I.uil {
         @apply block;
       }
     }
-  }
-  .collapse-btn {
-    @apply
-      bg-[color:var(--navbar-item-bg)]
-      text-[color:var(--navbar-item-fg)]
-      hover:bg-[color:var(--navbar-item-hover-bg)]
-      hover:text-[color:var(--navbar-item-fg)]
-    ;
+    .btn-nav-hide {
+      @apply !hidden;
+    }
   }
 }
 .navitem {
@@ -655,9 +686,6 @@ I.fa-solid, I.uil {
 }
 .searchlabel {
   @apply overflow-hidden text-ellipsis whitespace-nowrap;
-}
-.collapse-btn {
-  @apply mx-auto;
 }
 
 /*******************************************************************************

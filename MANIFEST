@@ -2715,7 +2715,6 @@ templates/_proxy_header.tt
 templates/_service_command_box.tt
 templates/_service_status_details_box.tt
 templates/_show_link.tt
-templates/_side_js.tt
 templates/_sounds.tt
 templates/_status_cmd_pane.tt
 templates/_status_column_select.tt

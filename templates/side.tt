@@ -75,11 +75,15 @@
   </div>
 
   <div class="h-8 flex-shrink-0 mt-auto w-full m-0 hidden lg:block collapse-btn">
-    <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 rounded-none h-full block text-left js-menu-collapse">
-      <i class="uil uil-angle-double-left text-2xl contents" title="collapse navigation"></i>
-    </button>
+    <div class="flexrow flex-nowrap gap-0">
+      <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 h-8 block text-left hoverable js-menu-collapse" title="toggle collapsed side navigation.">
+        <i class="uil uil-angle-double-left text-2xl contents" title="collapse navigation"></i>
+      </button>
+      <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 h-8 block hoverable btn-nav-hide js-menu-hide" title="toggle hover side navigation.">
+        <i class="uil uil-angle-double-up text-2xl contents" title="hide navigation"></i>
+      </button>
+    </div>
   </div>
 </div>
 
 [% PROCESS _ajax_search.tt %]
-[% PROCESS _side_js.tt %]

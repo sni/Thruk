@@ -41,6 +41,7 @@
   var maximum_search_boxes = [% c.config.maximum_search_boxes %];
   var escape_html_tags    = [% IF escape_html_tags %]true[% ELSE %]false[% END %];
   var sort_options        = [% json_encode(data_sorted) %];
+  var menuState           = [% json_encode(menu_states) %];
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]

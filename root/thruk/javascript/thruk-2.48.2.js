@@ -211,6 +211,8 @@ function init_page() {
         applyRowStripes(el);
     });
 
+    initNavigation();
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
@@ -400,6 +402,12 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   toogleIconImage(icon);
 
   if(bodyclose) {
+    add_body_close(id, icon, bodycloseelement, bodyclosecallback);
+  }
+}
+
+/* */
+function add_body_close(id, icon, bodycloseelement, bodyclosecallback) {
     remove_close_element(id);
     window.setTimeout(function() {
         addEvent(document, 'click', close_and_remove_event);
@@ -413,7 +421,6 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
             close_elements.push([id, icon, bodycloseelement, bodyclosecallback])
         }
     }, 50);
-  }
 }
 
 function toogleIconImage(icon) {
@@ -806,6 +813,94 @@ function check_side_nav_active_item(ctx) {
     });
 }
 
+/* set navigation style (from header prefs */
+function setNavigationStyle(val) {
+    menuState['cl'] = val;
+
+    jQuery("input[type='radio'][name='navigation']").prop("checked", false);
+    jQuery("#nav"+val).prop("checked", true);
+
+    // reset
+    showElement("navbar");
+    remove_close_element('navbar');
+    jQuery('BODY').removeClass(['topnav', 'topNavOpen']);
+    jQuery('#nav-container').removeClass('collapsed');
+
+    // collapsed menu
+    if(val == 1) {
+        jQuery('#nav-container').addClass('collapsed');
+        jQuery("UL.navsectionlinks").css("display", "");
+    }
+    // hover menu
+    if(val == 2) {
+        jQuery('BODY').addClass('topnav');
+    }
+
+    cookieSave('thruk_side', toQueryString(menuState));
+}
+
+/* initialize navigation buttons */
+function initNavigation() {
+    // make them toggle
+    jQuery('A.navsectiontitle').click(function() {
+        var title = this.text.trim().toLowerCase().replace(/ /g, '_');
+        if(jQuery('#nav-container').hasClass('collapsed')) { return; }
+        jQuery(this).parent().children("UL.navsectionlinks").slideToggle('fast', function() {
+            menuState[title] = this.style.display == 'none' ? 0 : 1;
+            cookieSave('thruk_side', toQueryString(menuState));
+        });
+    });
+
+    jQuery('UL.navsectionlinks A').click(function() {
+        jQuery('UL.navsectionlinks A').removeClass("active");
+        jQuery(this).addClass("active");
+    });
+
+    jQuery('I.navsectionsubtoggle').click(function() {
+        var title   = jQuery(this).prev("A").text().trim().toLowerCase().replace(/ /g, '_');
+        var section = jQuery(this).parent("LI").parents("LI").first().find('A').first().text().trim().toLowerCase().replace(/ /g, '_');
+        title = section+'.'+title;
+        jQuery(this).next("UL").slideToggle('fast', function() {
+            menuState[title] = this.style.display == 'none' ? 0 : 1;
+            cookieSave('thruk_side', toQueryString(menuState));
+        });
+    });
+
+    // button to collapse side menu
+    jQuery('.js-menu-collapse').click(function() {
+        jQuery('#nav-container').toggleClass('collapsed');
+        if(jQuery('#nav-container').hasClass('collapsed')) {
+            setNavigationStyle(1);
+        } else {
+            setNavigationStyle(0);
+        }
+    });
+    // button to enable overlay menu
+    jQuery('.js-menu-hide').click(function() {
+        jQuery('BODY').toggleClass('topnav');
+        if(jQuery('BODY').hasClass('topnav')) {
+            setNavigationStyle(2);
+        } else {
+            setNavigationStyle(0);
+        }
+    });
+    // toggle overlay menu button display
+    jQuery('#mainNavBtn').click(function() {
+        toggleClass('BODY', 'topNavOpen');
+        showElement("navbar");
+        if(jQuery('BODY').hasClass('topNavOpen')) {
+            add_body_close('navbar', null, null, function() {
+                jQuery('BODY').removeClass('topNavOpen');
+            });
+        }
+        return false;
+    });
+
+    if(jQuery('#nav-container').hasClass('collapsed')) {
+        jQuery("UL.navsectionlinks").css("display", "");
+    }
+}
+
 /* remove element from close elements list */
 function remove_close_element(id) {
     var new_elems = [];
@@ -976,15 +1071,6 @@ function prefSubmitTheme(current_theme) {
 function prefSubmitSound(url, value) {
   cookieSave('thruk_sounds', value);
   reloadPage(50, true);
-}
-
-function checkNavBackground() {
-    if(jQuery('#navbar').hasClass('hidden')) {
-        jQuery("MAIN").removeClass("brightness-50");
-    } else {
-        jQuery('#nav-container').removeClass('collapsed');
-        jQuery("MAIN").addClass("brightness-50");
-    }
 }
 
 /* save something in a cookie */

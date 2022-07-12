@@ -16,14 +16,14 @@
   <!-- Produced by Thruk (http://www.thruk.org).
       Copyright (c) 2009-present Thruk Developer Team.
   -->
-  <body class="h-screen w-screen overflow-hidden [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
+  <body class="h-screen w-screen overflow-hidden [% IF menu_states.exists('cl') && menu_states.cl == 2 %]topnav[% END %] [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
   <div style="display:none;" id="search-results"></div>
 
   <div class="flexrow flex-nowrap gap-0 h-screen w-screen overflow-hidden">
     [% IF show_nav == 1 %]
-      <div id="navbar" class="navbar w-fit h-[calc(100vh-50px)] lg:h-screen z-50 lg:mt-0 mt-[50px] lg:block hidden lg:relative absolute">
+      <div id="navbar">
         [% PROCESS side.tt %]
       </div>
     [% END %]
@@ -39,7 +39,7 @@
     [% UNLESS minimal %]
       <header class="header">
         <div class="h-[50px] flexrow flex-nowrap items-center">
-          <button class="big iconOnly w-10 h-10 ml-[-10px] block lg:hidden hoverable min-w-[30px]" onclick="toggleElement('navbar', null, true, null, checkNavBackground); checkNavBackground(); return false;"><i class="fa-solid fa-bars"></i></button>
+          <button id="mainNavBtn" class="big iconOnly w-10 h-10 ml-[-10px] clickable min-w-[30px]"><i class="fa-solid fa-bars"></i></button>
           <div class="flex-grow h-min">
             [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
           </div>
