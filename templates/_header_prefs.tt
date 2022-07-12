@@ -17,7 +17,7 @@
     <th class="align-middle"><i class="uil uil-brush-alt"></i></th>
     <th class="align-middle">Theme</th>
     <td class="flex gap-x-1">
-      [% IF c.config.themes.size > 3 %]
+      [% IF c.config.themes.size > 4 %]
         <select name="theme" id="pref_theme" class="w-40" onchange="switchTheme(this)">
           [% FOR t = c.config.themes %]
           <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
