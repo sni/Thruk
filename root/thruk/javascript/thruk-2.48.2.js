@@ -901,6 +901,21 @@ function initNavigation() {
     }
 }
 
+function switchTheme(sel) {
+    var theme = sel;
+    if(sel && sel.tagName) {
+        theme = jQuery(sel).val();
+    }
+    if(is_array(theme)) {
+        theme = theme[0];
+    }
+    cookieSave('thruk_theme', theme);
+    jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
+    jQuery("IMG").each(function() {
+      this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
+    });
+}
+
 /* remove element from close elements list */
 function remove_close_element(id) {
     var new_elems = [];
@@ -1055,16 +1070,6 @@ function is_el_subelement(obj_a, obj_b) {
         }
     }
     return false;
-}
-
-/* save theme settings in a cookie */
-function prefSubmitTheme(current_theme) {
-  var sel = document.getElementById('pref_theme')
-  if(current_theme != sel.value) {
-    removeParams['theme'] = true;
-    cookieSave('thruk_theme', sel.value);
-    reloadPage(50, true, true);
-  }
 }
 
 /* save settings in a cookie */

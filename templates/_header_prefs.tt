@@ -17,12 +17,19 @@
     <th class="align-middle"><i class="uil uil-brush-alt"></i></th>
     <th class="align-middle">Theme</th>
     <td class="flex gap-x-1">
-      <select name="theme" id="pref_theme" class="w-40">
+      [% IF c.config.themes.size > 3 %]
+        <select name="theme" id="pref_theme" class="w-40" onchange="switchTheme(this)">
+          [% FOR t = c.config.themes %]
+          <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+          [% END %]
+        </select>
+      [% ELSE %]
+      <div class="radiogroup min-w-[18rem]">
         [% FOR t = c.config.themes %]
-        <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+        <input type="radio" name="theme" value="[% t | html %]" id="theme-[% t | html %]" onchange="switchTheme('[% t | html %]')" [% IF t == theme %]checked[% END %]><label for="theme-[% t | html %]">[% t | html %]</label>
         [% END %]
-      </select>
-      <input type="button" name="submit" value="change" onClick="prefSubmitTheme('[% theme %]')">
+      </div>
+      [% END %]
     </td>
   </tr>
   [% IF show_sounds %]

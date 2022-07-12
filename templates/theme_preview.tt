@@ -569,15 +569,6 @@
 </div>
 
 <script>
-function switchTheme(sel) {
-  var theme = jQuery(sel).val()[0];
-  cookieSave('thruk_theme', theme);
-  jQuery("LINK.maintheme").attr("href", "[% url_prefix %]themes/"+theme+"/stylesheets/"+theme+".css");
-  jQuery("IMG").each(function() {
-    this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
-  });
-}
-
 jQuery("#iconsBox A").click(function(evt) {
   copyCode(evt, jQuery(this).find("I").attr("class"));
   return false;
