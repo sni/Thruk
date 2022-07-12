@@ -706,7 +706,7 @@ function closeModalWindowOnEscape(evt) {
 function check_side_nav_active_item(ctx) {
     if(jQuery('#nav-container').hasClass('collapsed')) { return; }
     var urlArgs = toQueryParams();
-    var page    = window.location.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+    var page    = window.location.href.toString().replace(/\#.*/, '').replace(/^.*\//, '').replace(/\?.*$/, '');
 
     // compare complete url
     var found   = false;
@@ -754,7 +754,7 @@ function check_side_nav_active_item(ctx) {
             if(Object.keys(navArgs).length == 0) { return(true); }
             found = true;
             for(var key in navArgs) {
-                if(!urlArgs[key]) {
+                if(!urlArgs[key] || urlArgs[key] != navArgs[key]) {
                     found = false;
                 }
             }
@@ -796,10 +796,12 @@ function check_side_nav_active_item(ctx) {
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
-            found = true;
-            jQuery('UL.navsectionlinks A', ctx).removeClass("active");
-            jQuery(el).addClass("active");
-            return false;
+            if(page != "extinfo.cgi") {
+                found = true;
+                jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+                jQuery(el).addClass("active");
+                return false;
+            }
         }
     });
 }
