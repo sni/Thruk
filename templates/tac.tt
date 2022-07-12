@@ -8,7 +8,7 @@
     <div class="flexcol">
       [% PROCESS _infobox.tt %]
       <div class="flex gap-x-1">
-        [% PROCESS _status_filter.tt %]
+        [% PROCESS _status_filter.tt small_button = 1 %]
         [% PROCESS _json_export.tt %]
       </div>
     </div>

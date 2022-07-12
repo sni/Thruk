@@ -353,9 +353,10 @@
     [% END %]
     <!-- NEW FILTER -->
     <tr>
-      <td colspan=3 class='clickable hoverable text-center p-0 rounded-bl-lg' id="[% filterprefix %]_add_new_filter_button" onClick="add_new_filter(this.id, '[% paneprefix %]filterTable'); [% onchange %]">
+      <td colspan=2 class='clickable hoverable text-center p-0 rounded-bl-lg' id="[% filterprefix %]_add_new_filter_button" onClick="add_new_filter(this.id, '[% paneprefix %]filterTable'); [% onchange %]">
         <i class="uil uil-angle-down text-lg leading-3" title="add new filter"></i> and
       </td>
+      <td><div class="w-5 h-1">[%# panel close button is outside the box otherwise  #%]</div></td>
     </tr>
   </table>
 </div>

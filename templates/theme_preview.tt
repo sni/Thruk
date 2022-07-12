@@ -363,6 +363,20 @@
             <td><button class="large iconOnly"><i class="uil uil-grin"></i></button></td>
           </tr>
           <tr>
+            <th>.iconOnly</th>
+            <td><button class="iconOnly"><i class="fa-solid fa-check round small green"></i></button></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>.iconOnly submit</th>
+            <td><button class="iconOnly" type="submit"><i class="fa-solid fa-check round small green"></i></button></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
             <th>buttongroup</th>
             <td></td>
             <td colspan=3>

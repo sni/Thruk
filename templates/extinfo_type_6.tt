@@ -25,7 +25,7 @@
   <div class="mainTableHeader">
     <div class="relative">
       <button
-        class="w-36 text-sm rounded-[5px] border-0 font-medium display-filter [% IF has_filter %]textActive2[% END %] hover:textActive2"
+        class="w-36 text-sm rounded-[5px] border-0 font-medium header-button [% IF has_filter %]textActive2[% END %] hover:textActive2"
         onClick="toggleElement('filterForm', null, true, null, function() { submitFormIfChanged('#filterForm'); return false; }); return false;">[% IF has_filter %]Filters active[% ELSE %]Display Filter[% END %]
       </button>
       <form action="extinfo.cgi" method="GET" onsubmit="setFormBtnSpinner(this)" id="filterForm" class="absolute top-8 z-40 hidden">

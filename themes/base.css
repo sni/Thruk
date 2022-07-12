@@ -508,13 +508,16 @@ I.fa-solid, I.uil {
   &.round {
     @apply rounded-full;
   }
+  &.clickable:hover {
+    @apply opacity-80;
+  }
   &.small {
-    @apply h-5 w-5 text-base;
+    @apply h-5 w-5 !text-base;
     &.uil {
-      @apply text-xl leading-4;
+      @apply !text-xl !leading-4;
     }
     &.fa-solid {
-      @apply text-sm;
+      @apply !text-sm;
     }
   }
 
@@ -842,8 +845,10 @@ DIV.progressbar {
 BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=submit] {
   @apply defaultButton;
 
- I.fa-solid, I.uil {
-   @apply text-inherit !important;
+ &:not(.iconOnly) {
+  I.fa-solid, I.uil {
+    @apply text-inherit !important;
+  }
  }
 
   &.active, &:hover {
@@ -862,8 +867,10 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=
   }
 
   I.fa-solid, I.uil {
-    @apply h-auto w-auto min-w-[18px] mr-1;
-    font-size: 18px;
+    &:not(.round) {
+      @apply h-auto w-auto min-w-[18px] mr-1;
+      font-size: 18px;
+    }
   }
 
   &.big {
@@ -891,7 +898,10 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=
     @apply p-0 bg-transparent border-none hover:text-inherit;
 
     I.fa-solid, I.uil, DIV.spinner {
-      @apply text-base mr-0;
+      @apply text-base leading-4 mr-0;
+      &:hover {
+        @apply opacity-80;
+      }
     }
 
     &.medium I {
