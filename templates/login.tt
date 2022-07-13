@@ -50,7 +50,7 @@
           <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
             <input type="hidden" name="referer" value="[% referer | html %]">
             <input type="hidden" name="oauth" value="[% loop.index %]">
-            <button class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
+            <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
               <div class="w-5"><i class="[% IF auth.defined("icon") %][% auth.icon | html %][% ELSE %]uil uil-placeholder[% END %]"></i></div>
               [% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]
               <div class="w-5"></div>
