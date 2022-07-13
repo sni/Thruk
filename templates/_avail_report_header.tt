@@ -1,7 +1,7 @@
-﻿<div class="flexrow justify-between gap-1">
+﻿<div class="flexrow justify-between gap-x-1">
   [% PROCESS _infobox.tt extra_classes="min-h-[180px] min-w-[430px]" %]
 
-  <div class="card  min-w-[430px] min-h-[180px]">
+  <div class="card min-w-[430px] min-h-[180px]">
     <div class="head justify-between">
       <h3>[% content %]</h3>
       <i class="fa-solid fa-chart-line" title='Availability Report'></i>

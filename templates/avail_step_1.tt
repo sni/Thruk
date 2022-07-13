@@ -4,11 +4,9 @@
 
 <h1 class="mt-5">Availability Report</h1>
 
-<div class="card mx-auto w-[800px] mt-5">
-  <div class="head">
-    <h3>
-      <span class="tabs w-40 active"><a class="flex" href="#">1. Report Type</a></span>
-    </h3>
+<div class="card mx-auto w-[800px] mt-5 overflow-hidden">
+  <div class="head p-0">
+    <span class="tabs w-40 active"><a class="flex" href="#">1. Report Type</a></span>
   </div>
 
   <form method="get" action="avail.cgi">

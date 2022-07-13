@@ -709,7 +709,7 @@ BODY.topNavOpen {
     DIV.head {
       @apply h-[40px] px-2 border-b borderDefault items-center flex;
       SPAN.tabs {
-        @apply text-sm inline-block px-4 py-1.5 hover:hoverBG h-full w-fit align-middle border-y-2 border-transparent whitespace-nowrap;
+        @apply text-base inline-block px-4 py-1.5 hover:hoverBG h-full w-fit align-middle border-y-2 border-transparent whitespace-nowrap;
         &.active, &:hover {
           @apply border-b-2 borderActive border-t-transparent textActive1;
         }

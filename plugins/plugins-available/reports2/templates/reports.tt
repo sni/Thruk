@@ -24,9 +24,9 @@
     </div>
     <div class="grow"></div>
     [% IF !filtered %]
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view1" onclick="reports_view('my')    ; return false;"><a class="block" href="#">My Reports</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view2" onclick="reports_view('public'); return false;"><a class="block" href="#">Public  Reports</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view3" onclick="reports_view('all')   ; return false;"><a class="block" href="#">All  Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center js-tabs" id="view1" onclick="reports_view('my')    ; return false;"><a class="block" href="#">My Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center js-tabs" id="view2" onclick="reports_view('public'); return false;"><a class="block" href="#">Public  Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center js-tabs" id="view3" onclick="reports_view('all')   ; return false;"><a class="block" href="#">All  Reports</a></span>
     [% ELSE %]
       <a href="reports2.cgi" class="button">Show all reports</a>
     [% END %]
