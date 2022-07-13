@@ -661,6 +661,11 @@ sub translate_request_path {
     my $product_prefix = $config->{'product_prefix'};
     if($ENV{'OMD_SITE'}) {
         $path_info =~ s|^/\Q$ENV{'OMD_SITE'}\E/|/|mx;
+    } else {
+        my $url_prefix = $config->{'url_prefix'} // '/';
+        if($url_prefix ne '/') {
+            $path_info =~ s|^\Q$url_prefix\E|/thruk/|mx;
+        }
     }
     if($product_prefix ne 'thruk') {
         $path_info =~ s|^/\Q$product_prefix\E|/thruk|mx;
