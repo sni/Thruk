@@ -406,19 +406,42 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   }
 }
 
-/* */
+/* add_body_close(id, icon, bodycloseelement, bodyclosecallback)
+ *
+ * adds element to document click close watcher
+ * arguments:
+ *  - id:                id of the element to hide
+ *  - icon:              icon will be toggled (optional)
+ *  - bodycloseelement:  jquery selector to test if click is inside those elements (optional)
+ *  - bodyclosecallback: callback will be run after element got closed (optional)
+ */
 function add_body_close(id, icon, bodycloseelement, bodyclosecallback) {
     remove_close_element(id);
     window.setTimeout(function() {
-        addEvent(document, 'click', close_and_remove_event);
         var found = false;
-        jQuery.each(close_elements, function(key, value) {
-            if(value[0] == id) {
+        jQuery.each(close_elements, function(key, el) {
+            if(el.id == id) {
                 found = true;
             }
         });
         if(!found) {
-            close_elements.push([id, icon, bodycloseelement, bodyclosecallback])
+            // close all other close elements, unless this one is a sub item of it
+            jQuery(close_elements).each(function(i, el) {
+                var inside = is_el_subelement(document.getElementById(id), document.getElementById(el.id));
+                if(!inside) {
+                    close_and_remove_event_run(el);
+                    remove_close_element(el.id);
+                }
+            });
+
+            close_elements.push({
+                "id":       id,
+                "icon":     icon,
+                "elements": bodycloseelement,
+                "close_cb": bodyclosecallback
+            })
+            addEvent(document, 'click', close_and_remove_event);
+            addEvent(document, 'keyup', close_and_remove_event);
         }
     }, 50);
 }
@@ -921,14 +944,15 @@ function switchTheme(sel) {
 /* remove element from close elements list */
 function remove_close_element(id) {
     var new_elems = [];
-    jQuery.each(close_elements, function(key, value) {
-        if(value[0] != id) {
-            new_elems.push(value);
+    jQuery.each(close_elements, function(key, el) {
+        if(el.id != id) {
+            new_elems.push(el);
         }
     });
     close_elements = new_elems;
     if(new_elems.length == 0) {
         removeEvent(document, 'click', close_and_remove_event);
+        removeEvent(document, 'keyup', close_and_remove_event);
     }
 }
 
@@ -938,6 +962,19 @@ function close_and_remove_event(evt) {
     if(close_elements.length == 0) {
         return;
     }
+
+    // close on level of items on escape
+    var keyCode = evt.keyCode;
+    if(keyCode == 27) {
+        if(!evt.target || evt.target.tagName != "INPUT") {
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+
+            var toClose = close_elements.pop();
+            close_and_remove_event_run(toClose);
+            return false;
+        }
+    }
+
     var x,y;
     if(evt) {
         evt = jQuery.event.fix(evt); // make pageX/Y available in IE
@@ -947,50 +984,81 @@ function close_and_remove_event(evt) {
         // hilight click itself
         //hilight_area(x-5, y-5, x + 5, y + 5, 1000, 'blue');
     }
-    var new_elems = [];
-    jQuery.each(close_elements, function(key, value) {
-        var obj    = document.getElementById(value[0]);
-        if(value[2]) {
-            obj = jQuery(value[2])[0];
-        }
-        var inside = false;
-        if(x && y && obj) {
-            var width  = jQuery(obj).outerWidth();
-            var height = jQuery(obj).outerHeight();
-            var offset = jQuery(obj).offset();
 
-            var x1 = offset['left'] - 15;
-            var x2 = offset['left'] + width  + 15;
-            var y1 = offset['top']  - 15;
-            var y2 = offset['top']  + height + 15;
+    var toClose = close_elements.pop();
+    var obj = document.getElementById(toClose.id);
+    var inside = checkEvtinElement(obj, evt, x, y);
 
-            // check if we clicked inside or outside the object we have to close
-            if( x >= x1 && x <= x2 && y >= y1 && y <= y2 ) {
-                inside = true;
+    if(!inside && toClose.elements) {
+        jQuery(toClose.elements).each(function(i, el) {
+            inside = checkEvtinElement(el, evt, x, y);
+            if(inside) {
+                return false; // break jQuery each loop
             }
-
-            // hilight checked area
-            //hilight_area(x1, y1, x2, y2, 1000, inside ? 'green' : 'red');
-        }
-
-        // make sure our event target is not a subelement of the panel to close
-        if(!inside && evt) {
-            inside = is_el_subelement(evt.target, obj);
-        }
-
-        if(evt && inside) {
-            new_elems.push(value);
-        } else {
-            hideElement(value[0], value[1]); // must before the callback because they might check visibility
-            if(value[3]) {
-                value[3]();
-            }
-        }
-    });
-    close_elements = new_elems;
-    if(new_elems.length == 0) {
-        removeEvent(document, 'click', close_and_remove_event);
+        });
     }
+
+    if(evt && inside) {
+        close_elements.push(toClose);
+    } else {
+        close_and_remove_event_run(toClose);
+    }
+
+    if(close_elements.length == 0) {
+        removeEvent(document, 'click', close_and_remove_event);
+        removeEvent(document, 'keyup', close_and_remove_event);
+    }
+}
+
+function close_and_remove_event_run(toClose) {
+    hideElement(toClose.id, toClose.icon); // must before the callback because they might check visibility
+    if(toClose.close_cb) {
+        toClose.close_cb();
+    }
+}
+
+/* returns true if x/y coords are inside the area of the object */
+function checkEvtinElement(obj, evt, x, y) {
+    var inside = false;
+    if(x && y && obj) {
+        inside = checkXYinElement(obj, x, y);
+    }
+
+    // make sure our event target is not a subelement of the panel to close
+    if(!inside && evt) {
+        inside = is_el_subelement(evt.target, obj);
+        if(inside) {
+            //hilight_obj_area(evt.target, 1000, 'green');
+            //hilight_obj_area(obj, 1000, 'green');
+        }
+    }
+    return(inside);
+}
+
+/* returns true if x/y coords are inside the area of the object */
+function checkXYinElement(obj, x, y) {
+    var inside = false;
+    var width  = jQuery(obj).outerWidth();
+    var height = jQuery(obj).outerHeight();
+    var offset = jQuery(obj).offset();
+
+    var x1 = offset['left'] - 5;
+    var x2 = offset['left'] + width  + 5;
+    var y1 = offset['top']  - 5;
+    var y2 = offset['top']  + height + 5;
+
+    // check if we clicked inside or outside the object we have to close
+    if( x >= x1 && x <= x2 && y >= y1 && y <= y2 ) {
+        inside = true;
+    }
+
+    // hilight checked area
+    //hilight_area(x1, y1, x2, y2, 1000, inside ? 'green' : 'red');
+    return(inside);
+}
+
+function toggleFilterPopup(id) {
+    toggleElement(id, null, true, '#search-results');
 }
 
 /* toggle a element by id and load content from remote */
@@ -1042,11 +1110,20 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
     // but only if the element to close is not a subset of an existing to_close_element
     var inside = false;
     jQuery.each(close_elements, function(key, value) {
-        var obj    = document.getElementById(value[0]);
-        if(value[2]) {
-            obj = jQuery(value[2])[0];
-        }
+        var obj = document.getElementById(value.id);
         inside = is_el_subelement(pane, obj);
+        if(inside) {
+            return false; // break jQuery.each
+        }
+
+        if(value.elements) {
+            jQuery(value.elements).each(function(i, e) {
+                inside = is_el_subelement(pane, e);
+                if(inside) {
+                    return false; // break jQuery.each
+                }
+            });
+        }
         if(inside) {
             return false; // break jQuery.each
         }
@@ -3342,8 +3419,22 @@ function hilight_area(x1, y1, x2, y2, duration, color) {
     jQuery(document.body).append('<div id="hilight_area'+rnd+'" style="width:'+(x2-x1)+'px; height:'+(y2-y1)+'px; position: absolute; background-color: '+color+'; opacity:0.2; top: '+y1+'px; left: '+x1+'px; z-index:10000;">&nbsp;<\/div>');
 
     window.setTimeout(function() {
-       fade('hilight_area'+rnd, 1000);
+       fade('hilight_area'+rnd, 1000, true);
     }, duration);
+}
+
+/* hilight area of screen for given object */
+function hilight_obj_area(obj, duration, color) {
+    var width  = jQuery(obj).outerWidth();
+    var height = jQuery(obj).outerHeight();
+    var offset = jQuery(obj).offset();
+
+    var x1 = offset['left'] - 5;
+    var x2 = offset['left'] + width  + 5;
+    var y1 = offset['top']  - 5;
+    var y2 = offset['top']  + height + 5;
+
+    hilight_area(x1, y1, x2, y2, duration, color);
 }
 
 /* fade element away and optionally remove it */
