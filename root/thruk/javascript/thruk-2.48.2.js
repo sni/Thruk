@@ -888,9 +888,11 @@ function initNavigation() {
     jQuery('#mainNavBtn').click(function() {
         toggleClass('BODY', 'topNavOpen');
         showElement("navbar");
+        jQuery('#nav-container').removeClass('collapsed');
         if(jQuery('BODY').hasClass('topNavOpen')) {
             add_body_close('navbar', null, null, function() {
                 jQuery('BODY').removeClass('topNavOpen');
+                showElement("navbar");
             });
         }
         return false;

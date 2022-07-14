@@ -562,7 +562,7 @@ BODY.topnav {
 }
 BODY.topNavOpen {
   #navbar {
-    @apply !flex !pt-[50px];
+    @apply !flex !pt-[50px] !h-screen !mt-0;
   }
   #nav-container HEADER {
     @apply !hidden;
