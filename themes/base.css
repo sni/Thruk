@@ -350,11 +350,11 @@ TH {
       opacity: 0.4;
     }
     &:before {
-      border-bottom-color: var(--border);
+      border-bottom-color: var(--text-card);
       margin-top: -9px;
     }
     &:after {
-      border-top-color: var(--border);
+      border-top-color: var(--text-card);
       margin-top: 1px;
     }
     &.sort2:before {
