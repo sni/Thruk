@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add short links option for custom links
+          - replace markup link links in comments and downtimes
           - Reporting:
             - fix last day missing in graph when breaking down by days (#1172)
 

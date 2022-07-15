@@ -95,6 +95,7 @@ my $base_defaults = {
     'show_backends_in_table'                => 0,
     'show_logout_button'                    => 0,
     'logout_link'                           => '/thruk/cgi-bin/login.cgi?logout',
+    'short_link'                            => [],
     'commandline_obfuscate_pattern'         => [],
     'backends_with_obj_config'              => {},
     'use_feature_statusmap'                 => 0,
@@ -1061,7 +1062,7 @@ sub _parse_rows {
     $cur_line = 0 unless defined $cur_line;
     while(my $line = shift @{$rows}) {
         $cur_line++;
-        $line =~ s|(?<!\\)\#.*$||gmxo;
+        $line =~ s/(^|\s)\#.*$//gmxo;
         $line =~ s|^\s+||gmxo;
         $line =~ s|\s+$||gmxo;
         $line =~ s|\\\#|#|gmxo;
