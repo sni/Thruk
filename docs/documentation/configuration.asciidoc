@@ -1195,6 +1195,21 @@ ex.:
   show_host_attempts = 1
 
 
+=== short_link
+
+Define pattern to be replaced with links in comments and downtimes.
+Syntax is: | regex pattern | [link name](link target) |
+Can be set multiple times.
+
+ex.:
+  short_link = |INC(\d+)|[$1](https://tickets.company.com/ticket/$1)|
+  short_link = |GH#(\d+)|[Issue $1](https://github.com/sni/Thruk/issues/$1)|
+
+Replaces the string "INC12345" with the link ```<a href="https://tickets.company.com/ticket/12345">12345</a>```.
+
+Replaces the string "GH#123" with the link ```<a href="https://github.com/sni/Thruk/issues/123">123</a>```.
+
+
 === perf_bar_mode
 This option enables a performance bar inside the status/host list which
 create a graph from the performance data of the plugin output. Available
