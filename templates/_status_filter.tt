@@ -11,9 +11,9 @@
 <div class="relative">
   [% DEFAULT small_button = "" %]
   [% IF small_button && !show_filter_table %]
-    <button class="round small [% IF show_filter_table %] textActive2 hover:textActive2[% END %]" onClick="toggleFilterPopup('[% paneprefix %]_all_filter_card'); return false;"><i class="uil uil-filter"></i></button>
+    <button title="Display Filter Options" class="round small [% IF show_filter_table %] textActive2 hover:textActive2[% END %]" onClick="toggleFilterPopup('[% paneprefix %]_all_filter_card'); return false;"><i class="uil uil-filter"></i></button>
   [% ELSE %]
-    <button class="w-36 text-sm rounded border-0 font-medium display-filter [% IF show_filter_table %]textActive2 hover:textActive2[% END %]" onClick="toggleFilterPopup('[% paneprefix %]_all_filter_card'); return false;">[% IF show_filter_table %]Filters active[% ELSE %]Display Filter[% END %]</button>
+    <button title="Display Filter Options" class="w-36 text-sm rounded border-0 font-medium display-filter [% IF show_filter_table %]textActive2 hover:textActive2[% END %]" onClick="toggleFilterPopup('[% paneprefix %]_all_filter_card'); return false;">[% IF show_filter_table %]Filters active[% ELSE %]Display Filter[% END %]</button>
   [% END %]
   <div class="absolute w-[90vw]">
     <div class="card z-30 absolute shadow-float w-auto max-w-[95%]" style="display:none;" id="[% paneprefix %]_all_filter_card" onclick="resetRefresh()">
