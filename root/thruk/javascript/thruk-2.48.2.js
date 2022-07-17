@@ -10,19 +10,17 @@
 *******************************************************************************/
 
 var refreshPage      = 1;
-var cmdPaneState     = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Object();
 var removeParams     = new Object();
-var refreshTimer;
 var lastRowSelected;
 var lastRowHighlighted;
-var verifyTimer;
-var sortClickTimer;
 var iPhone           = false;
 if(window.navigator && window.navigator.userAgent) {
     iPhone           = window.navigator.userAgent.match(/iPhone|iPad/i) ? true : false;
 }
+
+// thruk global variables
 var thrukState = window.thrukState || {};
 thrukState.lastPageLoaded = (new Date()).getTime();
 thrukState.lastPageFocus  = thrukState.lastPageFocus || (new Date()).getTime();
@@ -114,8 +112,8 @@ function init_page() {
             return false;
         }
         var This = this;
-        sortClickTimer = window.setTimeout(function() {
-            window.clearTimeout(sortClickTimer);
+        thrukState.sortClickTimer = window.setTimeout(function() {
+            window.clearTimeout(thrukState.sortClickTimer);
             handleSortHeaderClick(This);
         }, 300);
         return(false);
@@ -1317,8 +1315,8 @@ function setRefreshRate(rate) {
     }
     if(rate > 0) {
       newRate = rate - 1;
-      window.clearTimeout(refreshTimer);
-      refreshTimer = window.setTimeout(function() {
+      window.clearTimeout(thrukState.refreshTimer);
+      thrukState.refreshTimer = window.setTimeout(function() {
           setRefreshRate(newRate);
       }, 1000);
     }
@@ -1327,7 +1325,7 @@ function setRefreshRate(rate) {
 
 /* reset refresh interval */
 function resetRefresh() {
-  window.clearTimeout(refreshTimer);
+  window.clearTimeout(thrukState.refreshTimer);
   if( typeof refresh_rate == "number" ) {
     refreshPage = 1;
     setRefreshRate(refresh_rate);
@@ -1342,7 +1340,7 @@ function stopRefresh(silent) {
   if(!silent) {
     jQuery("#refresh_label").html(" <span class='textALERT'>(stopped)<\/span>");
   }
-  window.clearTimeout(refreshTimer);
+  window.clearTimeout(thrukState.refreshTimer);
   setRefreshRate(silent ? -1 : 0);
 }
 
@@ -2730,8 +2728,8 @@ function hide_activity_icons() {
 /* verify time */
 var verification_errors = new Object();
 function verify_time(id, duration_id) {
-    window.clearTimeout(verifyTimer);
-    verifyTimer = window.setTimeout(function() {
+    window.clearTimeout(thrukState.verifyTimer);
+    thrukState.verifyTimer = window.setTimeout(function() {
         verify_time_do(id, duration_id);
     }, 500);
 }
@@ -3944,7 +3942,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
         evt.preventDefault();
         evt.stopImmediatePropagation();
         evt.stopPropagation();
-        window.clearTimeout(sortClickTimer);
+        window.clearTimeout(thrukState.sortClickTimer);
         var th   = evt.target;
         if(th.tagName == "A") { th = th.parentNode; }
         var text = (th.innerText || '').replace(/\s*$/, '');
@@ -5947,11 +5945,9 @@ function selectAllHosts(state, pane_prefix) {
 function toggleCmdPane(state) {
   if(state == 1) {
     showElement('cmd_pane');
-    cmdPaneState = 1;
   }
   else {
     hideElement('cmd_pane');
-    cmdPaneState = 0;
   }
 }
 
