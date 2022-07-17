@@ -23,6 +23,12 @@ var iPhone           = false;
 if(window.navigator && window.navigator.userAgent) {
     iPhone           = window.navigator.userAgent.match(/iPhone|iPad/i) ? true : false;
 }
+if(window.thrukState == undefined) {
+    window.thrukState = {
+        lastPageFocus: (new Date()).getTime()
+    };
+}
+thrukState.lastPageLoaded = (new Date()).getTime();
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -212,6 +218,17 @@ function init_page() {
     });
 
     initNavigation();
+
+    thrukState.lastPageLoaded = (new Date()).getTime();
+    jQuery(window).on("blur", function() {
+        thrukState.lastPageFocus = (new Date()).getTime();
+    });
+    jQuery(window).on("focus", function() {
+        thrukState.lastPageFocus = (new Date()).getTime();
+        if(refreshPage && curRefreshVal <= 5) {
+            reloadPage();
+        }
+    });
 
     // break from old frame mode
     try {
@@ -1245,8 +1262,8 @@ function setRefreshRate(rate) {
           lastUserInteraction = undefined;
           rate = 20;
       }
-      // background tab, do not refresh unnecessarily
-      if(document.visibilityState && document.visibilityState != 'visible') {
+      // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min)
+      if(document.visibilityState && document.visibilityState != 'visible' && thrukState.lastPageFocus < ((new Date).getTime() - 180000)) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
         rate = 2;
       }
