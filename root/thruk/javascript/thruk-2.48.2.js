@@ -23,12 +23,9 @@ var iPhone           = false;
 if(window.navigator && window.navigator.userAgent) {
     iPhone           = window.navigator.userAgent.match(/iPhone|iPad/i) ? true : false;
 }
-if(window.thrukState == undefined) {
-    window.thrukState = {
-        lastPageFocus: (new Date()).getTime()
-    };
-}
+var thrukState = window.thrukState || {};
 thrukState.lastPageLoaded = (new Date()).getTime();
+thrukState.lastPageFocus  = thrukState.lastPageFocus || (new Date()).getTime();
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
