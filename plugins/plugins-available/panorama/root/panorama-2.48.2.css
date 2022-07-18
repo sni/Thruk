@@ -164,7 +164,12 @@ TD.icon_column DIV.x-grid-cell-inner {
 }
 
 TD.icon_column IMG {
-  margin-right: 3px;
+  margin-left: 3px;
+}
+
+TD.icon_column I {
+  margin-left: 3px;
+  color: black;
 }
 
 .clickable:hover {

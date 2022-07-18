@@ -310,6 +310,7 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.name, undefined, view);
     }
+    td.tdCls += " icon_column";
     return icons;
 }
 
@@ -345,6 +346,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description, view);
     }
+    td.tdCls += " icon_column";
     return icons;
 }
 
@@ -429,7 +431,7 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     }
     var r =  perf_table_data({'state': item.data.state, 'pluginOutput': item.data.plugin_output, 'perfdata': item.data.perf_data, 'checkCommand': item.data.check_command });
     if(r == false) { return ""; }
-    td.tdCls = "less_padding";
+    td.tdCls += " less_padding";
     return r;
 }
 
