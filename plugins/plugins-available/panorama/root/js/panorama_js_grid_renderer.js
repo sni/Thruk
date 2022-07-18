@@ -557,7 +557,7 @@ TP.addActionIconsFromMenu = function(action_menu_name, host, service, view) {
         view = parent;
     }
     var icons = "";
-    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', panel, '', {}, true);
+    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', panel, '', {}, true, host, service);
     if(menuData === false) {
         return(icons);
     }
@@ -585,14 +585,17 @@ TP.addActionIcon = function(menuData, menuName, host, service) {
             href = "menu://"+menuName;
         }
     }
-    var icon = '<a href="'+href+'" target="'+(menuData.target || '')
+    var options = { host: host, service: service};
+    var img     = action_menu_icon(menuData.icon, options);
+    img.title   = replace_macros(menuData.title||menuData.label, undefined, options);
+    var link = '<a href="'+href+'" target="'+(menuData.target || '')
                     +'" onclick="return(TP.checkActionLink(this))" data-host="'+encodeURIComponent(host||'')
                     +'" data-service="'+encodeURIComponent(service||'')
                     +(menuName === null ? '" data-menu="'+encodeURIComponent(Ext.JSON.encode(menuData) ||'') : '')
                 +'">'
-              +'<img src="'+replace_macros(menuData.icon)+'" alt="'+replace_macros(menuData.title||menuData.label)+'" border="0" height="20" width="20">'
-              +'</a>';
-    return(icon);
+                + img.outerHTML
+                + '</a>';
+    return(link);
 }
 
 TP.checkActionLink = function(a) {

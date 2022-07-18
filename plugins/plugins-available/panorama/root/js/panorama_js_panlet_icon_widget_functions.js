@@ -300,7 +300,7 @@ TP.iconClickHandlerDo = function(id) {
 }
 
 /* open link or special action for given link */
-TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions) {
+TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions, host, service) {
     if(!link) { return; }
     if(config       == undefined) { config       = {}; }
     if(extraOptions == undefined) { extraOptions = {}; }
@@ -376,11 +376,11 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
         return(false);
     }
     if(menu && menu[1]) {
-        var menuData = TP.parseActionMenuItemsStr(menu[1], id, panel, target, extraOptions);
+        var menuData = TP.parseActionMenuItemsStr(menu[1], id, panel, target, extraOptions, undefined, host, service);
         if(!menuData) {
             return(false);
         }
-        TP.showIconMenu(menuData, id, panel, target, extraOptions);
+        TP.showIconMenu(menuData, id, panel, target, extraOptions, host, service);
         return(false);
     }
     if(link) {
@@ -424,10 +424,10 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
     return(true);
 };
 
-TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
+TP.showIconMenu = function(menuData, id, panel, target, extraOptions, host, service) {
     if(menuData && menuData.then) {
         menuData.then(function(items) {
-            var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
+            var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions, host, service);
             TP.showIconMenu(parsed, id, panel, target, extraOptions);
             return(false);
         });
@@ -435,7 +435,7 @@ TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
     }
     var autoOpen = false;
     if(!Ext.isArray(menuData)) {
-        menuData = TP.parseActionMenuItems(menuData, id, panel, target, extraOptions);
+        menuData = TP.parseActionMenuItems(menuData, id, panel, target, extraOptions, host, service);
         autoOpen = true;
     }
     TP.suppressIconTip = true;
@@ -463,7 +463,7 @@ TP.showIconMenu = function(menuData, id, panel, target, extraOptions) {
 }
 
 /* parse action menu from json string data */
-TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plain) {
+TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plain, host, service) {
     var tmp = str.split(/\//);
     var menuName = tmp.shift();
     var menuArgs = tmp;
@@ -479,7 +479,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
         str = extraOptions.menu;
     }
     // menu might be json string
-    if(!menu) {
+    if(!menu && str.match(/^(\[|\{)/)) {
         try {
             menuData  = Ext.JSON.decode(str);
         } catch(e) {
@@ -494,8 +494,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
         }
     }
     if(!menu) {
-        TP.Msg.msg("fail_message~~no such menu: "+str);
-        return(false);
+        return([{"icon": "uil uil-exclamation round yellow", "title": "no such menu: "+str}]);
     }
     if(menuData) {
     }
@@ -504,24 +503,25 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
             var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions, args: menuArgs });
             menuData = window[menu["function"]](args);
         } catch(e) {
-            TP.Msg.msg("fail_message~~menu "+str+": failed to run js menu - "+e);
-            return(false);
+            console.error(e);
+            return([{"icon": "uil uil-exclamation round yellow", "title": "failed to run js menu: "+e}]);
         }
     } else {
         try {
             menuData  = Ext.JSON.decode(menu.data);
         } catch(e) {
-            TP.Msg.msg("fail_message~~menu "+str+": failed to parse json - "+e);
-            return(false);
+            console.error(str);
+            console.error(e);
+            return([{"icon": "uil uil-exclamation round yellow", "title": "failed to parse json string: "+e}]);
         }
     }
     if(!menuData['menu'] || plain) {
         return(menuData);
     }
-    return(TP.parseActionMenuItems(menuData['menu'], id, panel, target, extraOptions));
+    return(TP.parseActionMenuItems(menuData['menu'], id, panel, target, extraOptions, host, service));
 }
 
-TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
+TP.parseActionMenuItems = function(items, id, panel, target, extraOptions, host, service) {
     if(typeof items === "function") {
         var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions });
         return(items(args));
@@ -532,9 +532,15 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
             /* probably a separator, like '-' */
             menuItems.push(i);
         } else {
+            var options = { host: host, service: service};
+            var img = (i.icon ? action_menu_icon(i.icon, options) : null);
+            if(img) {
+                img.style.position = "absolute";
+                img.style.left     = "2px";
+                img.style.top      = "2px";
+            }
             var menuItem = {
-                text:    i.label,
-                icon:    replace_macros(i.icon)
+                text:    (img ? img.outerHTML : '') + replace_macros(i.label, undefined, options)
             };
             var handler = function(This, evt) {
                 if(i.target) {
@@ -587,7 +593,7 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
                             beforeshow: function(This, eOpts) {
                                 var args = TP.getMenuArgs(panel, target, {menu_id: id, extraOptions: extraOptions });
                                 jQuery.when(i.menu(args)).then(function(items) {
-                                    var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions);
+                                    var parsed = TP.parseActionMenuItems(items, id, panel, target, extraOptions, host, service);
                                     This.removeAll();
                                     Ext.Array.each(parsed, function(i) {
                                         This.add(i);
@@ -598,7 +604,7 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions) {
                     };
                 } else {
                     menuItem.menu = {
-                        items: TP.parseActionMenuItems(i.menu, id, panel, target, extraOptions)
+                        items: TP.parseActionMenuItems(i.menu, id, panel, target, extraOptions, host, service)
                     }
                 }
             }

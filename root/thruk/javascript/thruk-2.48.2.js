@@ -4591,7 +4591,7 @@ function print_action_menu(src, options) {
 
 /* create icon item */
 function action_menu_icon(iconUrl, options) {
-    if(iconUrl.match(/^uil\-/)) {
+    if(iconUrl.match(/^(uil\-|uil\s+)/)) {
         var icon = document.createElement('i');
         icon.className = "uil "+iconUrl;
         return(icon);
@@ -4604,6 +4604,8 @@ function action_menu_icon(iconUrl, options) {
     var icon = document.createElement('img');
     iconUrl  = replace_macros(iconUrl, undefined, options);
     icon.src = iconUrl;
+    icon.style.width  = "20px";
+    icon.style.height = "20px";
     try {
         // use data url in reports
         if(action_images[iconUrl]) {

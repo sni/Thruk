@@ -983,7 +983,7 @@ function openActionUrlWithFakePanel(alignTo, panel, action_link, host, service, 
                 if(menuData) {
                     options.menu = menuData;
                 }
-                TP.iconClickHandlerExec(This.id, action_link, This, target, undefined, options);
+                TP.iconClickHandlerExec(This.id, action_link, This, target, undefined, options, host, service);
             }
         }
     });

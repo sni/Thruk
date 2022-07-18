@@ -908,3 +908,20 @@ DIV.maintenance .x-mask-msg-text {
 DIV.maintenance .show {
   font-size: 11px;
 }
+
+I {
+  display: inline-block;
+  text-align: center;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+I.round {
+  border-radius: 9999px;
+}
+
+I.yellow {
+  background-color: #FFDE00;
+}
