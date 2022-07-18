@@ -2316,6 +2316,7 @@ wait up to 30 seconds till the core responds
 
 sub wait_after_reload {
     my($c, $pkey, $last_reload) = @_;
+    my $max_wait = 30;
     $c->stats->profile(begin => "wait_after_reload");
     $pkey = $c->stash->{'param_backend'} unless $pkey;
     my $start = time();
@@ -2339,7 +2340,7 @@ sub wait_after_reload {
         };
     }
     my $msg;
-    while($start > time() - 30) {
+    while($start > time() - $max_wait) {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };

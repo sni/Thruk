@@ -317,12 +317,12 @@ sub save_bp_objects {
             }
         }
 
-        my $last_reload = time() - 1;
+        my $last_reload = time();
         if($pkey) {
             $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
             if(!$last_reload) {
                 my $processinfo = $c->db->get_processinfo(backends => $pkey);
-                $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time() - 1);
+                $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
             }
             sleep(1) if $last_reload == time();
         }
