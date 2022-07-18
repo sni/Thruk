@@ -419,8 +419,9 @@ DIV.msg A.x-tab-close-btn {
 
  .perf-bar-container {
   position: relative;
-  height: 1.25rem;
   width: 75px;
+  height: 18px;
+  display: block;
 }
 
 .perf-bar-container .ok, .perf-bar-container .green {
