@@ -1639,14 +1639,15 @@ sub _rest_get_sites {
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
         chomp($error);
         my $peer = $c->db->get_peer_by_key($key);
+        $error = '' if($error && $error eq 'OK');
         push @{$data}, {
             addr             => $addr,
             id               => $key,
             name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
             section          => $c->stash->{'backend_detail'}->{$key}->{'section'},
             type             => $c->stash->{'backend_detail'}->{$key}->{'type'},
-            status           => ($error ne 'OK' && $error ne '') ? 1 : 0,
-            last_error       => $error ne 'OK' ? $error : '',
+            status           => $error ? 0 : 1,
+            last_error       => $error,
             connected        => $error ? 0 : 1,
             federation_key   => $peer->{'fed_info'}->{'key'}  || [ $peer->{'key'} ],
             federation_name  => $peer->{'fed_info'}->{'name'} || [ $peer->{'name'} ],
