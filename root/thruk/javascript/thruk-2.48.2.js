@@ -216,7 +216,7 @@ function init_page() {
 
     thrukState.lastPageLoaded = (new Date()).getTime();
     jQuery(window).off("focus").on("focus", function() {
-        if(refreshPage && curRefreshVal <= 5) {
+        if(refresh_rate != null && refreshPage && curRefreshVal <= 5) {
             reloadPage();
         }
     });
@@ -6776,6 +6776,7 @@ function verify_op(event) {
   } else {
     selElem = document.getElementById(this.id);
   }
+  if(!selElem) { return; }
 
   // get operator select
   var opElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 1) + 'o');

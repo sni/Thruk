@@ -28,6 +28,8 @@ function update_reports_type_step2() {
     jQuery([document.documentElement, document.body]).animate({
         scrollTop: jQuery("#report_type").offset().top
     }, 1000);
+
+    jQuery(".js-type-filter").change();
 }
 
 /* show hide specific types of reports */

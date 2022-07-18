@@ -22,7 +22,7 @@
         <table class="body cellspacing striped">
           <tbody>
             <tr>
-              <th>Name <span class="required">*</span></th>
+              <th class="min-w-[240px]">Name <span class="required">*</span></th>
               <td colspan=2><input type="text" name="name" value="[% r.name | html %]" class="w-full"></td>
             </tr>
             <tr>
