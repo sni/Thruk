@@ -8790,7 +8790,7 @@ function overcard(options) {
                 'frameborder': 0,
                 'scrolling':  'no',
                 'style':      'border: 1px solid; position: absolute; z-index: 1000; border-radius: 8px; visibility: hidden;',
-                'class':      'borderDark',
+                'class':      'borderDark iframed',
                 'src':        'void.cgi'
             }).appendTo('BODY').on('load', function () {
                 var iframe = document.getElementById("overcard-iframe");
@@ -8811,7 +8811,7 @@ function overcard(options) {
     var container = doc.getElementById(containerId);
     if(!container) {
         var containerHTML = ""
-            +'<div class="fixed card shadow-float z-50 max-w-full max-h-full" id="'+containerId+'">'
+            +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen" id="'+containerId+'">'
             +'<div class="head justify-between">'
             +'<h3 id="'+containerId+'_head"><\/h3>'
             +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
@@ -8910,7 +8910,7 @@ function element_check_visibility(el) {
     if(!window.parent.document) { return; }
     jQuery("#overcard-iframe", window.parent.document).css({
         'width': el.offsetWidth+'px',
-        'height': el.offsetHeight+'px'
+        'height': (el.offsetHeight+2)+'px'
     });
 
     return;
