@@ -21,9 +21,11 @@ if(window.navigator && window.navigator.userAgent) {
 }
 
 // thruk global variables
-var thrukState = window.thrukState || {};
+var thrukState = window.thrukState || {
+    lastUserInteraction: (new Date()).getTime(),
+    lastPageFocus:       (new Date()).getTime()
+};
 thrukState.lastPageLoaded = (new Date()).getTime();
-thrukState.lastPageFocus  = thrukState.lastPageFocus || (new Date()).getTime();
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -199,9 +201,6 @@ function init_page() {
             } else {
                 refreshPage = 1;
                 setRefreshRate(refresh_rate);
-                jQuery(window)
-                    .off("mousewheel DOMMouseScroll click keyup")
-                    .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
             }
         } catch(err) {
             console.log(err);
@@ -212,14 +211,11 @@ function init_page() {
         applyRowStripes(el);
     });
 
+    initLastUserInteraction();
     initNavigation();
 
     thrukState.lastPageLoaded = (new Date()).getTime();
-    jQuery(window).on("blur", function() {
-        thrukState.lastPageFocus = (new Date()).getTime();
-    });
-    jQuery(window).on("focus", function() {
-        thrukState.lastPageFocus = (new Date()).getTime();
+    jQuery(window).off("focus").on("focus", function() {
         if(refreshPage && curRefreshVal <= 5) {
             reloadPage();
         }
@@ -236,6 +232,20 @@ function init_page() {
         }
     } catch(err) { console.log(err); }
 }
+
+function initLastUserInteraction() {
+    jQuery(window)
+        .off("mousewheel DOMMouseScroll click keyup")
+        .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
+
+    jQuery(window).off("blur").on("blur", function() {
+        thrukState.lastPageFocus = (new Date()).getTime();
+    });
+    jQuery(window).off("focus").on("focus", function() {
+        thrukState.lastPageFocus = (new Date()).getTime();
+    });
+}
+
 
 function applyScroll(scrollTo) {
     var scrolls = scrollTo.split("_");
@@ -346,9 +356,8 @@ function cleanUnderscore(str) {
     return(str);
 }
 
-var lastUserInteraction;
 function updateLastUserInteraction() {
-    lastUserInteraction = (new Date()).getTime();
+    thrukState.lastUserInteraction = (new Date()).getTime();
 }
 
 /* save scroll value */
@@ -1253,12 +1262,11 @@ function setRefreshRate(rate) {
   }
   if(rate >= 0 && rate < 20) {
       // check lastUserInteraction date to not refresh while user is interacting with the page
-      if(lastUserInteraction > ((new Date).getTime() - 20000)) {
-          lastUserInteraction = undefined;
+      if(thrukState.lastUserInteraction > ((new Date).getTime() - 20000)) {
           rate = 20;
       }
-      // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min)
-      if(document.visibilityState && document.visibilityState != 'visible' && thrukState.lastPageFocus < ((new Date).getTime() - 180000)) {
+      // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min), but refresh at least every 3 hours
+      if(document.visibilityState && document.visibilityState != 'visible' && thrukState.lastPageFocus < ((new Date).getTime() - 180000) && thrukState.lastPageLoaded > ((new Date).getTime() - (3*3600*1000))) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
         rate = 2;
       }

@@ -1310,6 +1310,12 @@ var TP = {
         // background tabs are refreshed separately
         if(!tab.rendered) { return; }
 
+        // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min), but refresh at least every 3 hours
+        if(document.visibilityState && document.visibilityState != 'visible' && thrukState.lastPageFocus < ((new Date).getTime() - 180000)) {
+            //} && thrukState.lastPageLoaded > ((new Date).getTime() - (3*3600*1000))) {
+            return;
+        }
+
         /* Delay update if not all icons are rendered yet.
          * Those icons would be missing from getStatusReq()
          */
@@ -1372,6 +1378,9 @@ var TP = {
             CSRFtoken:   CSRFtoken
         };
         TP.iconUpdateRunning[tab.id] = true;
+        if(!id) {
+            tab.last_full_refresh = (new Date()).getTime();
+        }
         var subReqs = {};
         if(!id || withSubDashboards) {
             // add dashboard icons status request
