@@ -1508,8 +1508,9 @@ var isReloading = false;
 var reloadPageTimer;
 function reloadPage(delay, withReloadButton, freshReload) {
     if(!delay) { delay = 50; }
-    if(delay < 100 && withReloadButton) {
+    if(delay < 500 && withReloadButton) {
         // update button earlier
+        resetRefreshButton();
         jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
         withReloadButton = false;
     }
@@ -1519,15 +1520,18 @@ function reloadPage(delay, withReloadButton, freshReload) {
     }, delay);
 }
 
+function resetRefreshButton() {
+    jQuery("#refresh_button").removeClass("red");
+    jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
+    jQuery("#refresh_button").find("I").css("display", "");
+    jQuery("#refresh_button").find('I.uil-exclamation').remove();
+    jQuery("#refresh_button").attr("title", "reload page");
+}
+
 function reloadPageDo(withReloadButton, freshReload) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
-        jQuery("#refresh_button").removeClass("red");
-        jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
-        jQuery("#refresh_button").find("I").css("display", "none");
-        jQuery("#refresh_button").find('div.spinner').remove();
-        jQuery("#refresh_button").find('I.uil-exclamation').remove();
-        jQuery("#refresh_button").prepend('<div class="spinner w-5 h-5"><\/div>');
+        resetRefreshButton();
     }
     isReloading = true;
     stopRefresh(true);
@@ -1567,12 +1571,11 @@ function reloadPageDo(withReloadButton, freshReload) {
         },
         error: function(jqXHR, textStatus, errorThrown) {
             isReloading = false;
+            resetRefreshButton();
             jQuery("#refresh_button").addClass("red");
-            jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
-            jQuery("#refresh_button").find('div.spinner').remove();
-            jQuery("#refresh_button").find('I.uil-exclamation').remove();
             jQuery("#refresh_button").find("I").css("display", "none");
             jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
+            jQuery("#refresh_button").attr("title", "refreshing page failed: "+textStatus+"\nlast contact: "+duration(((new Date()).getTime()-thrukState.lastPageLoaded)/1000)+" ago");
             thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
         }
     });
