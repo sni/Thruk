@@ -1295,7 +1295,7 @@ UL.ui-fancytree {
   }
 
   SPAN {
-    color: var(--card-text) !important;
+    color: var(--text-card) !important;
   }
   span.fancytree-focused span.fancytree-title {
     background: var(--card-bg) !important;
