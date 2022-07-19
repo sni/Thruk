@@ -21,7 +21,7 @@ use File::Copy;
 use MIME::Lite;
 use POSIX ();
 use Storable qw/dclone/;
-use Time::HiRes qw/sleep/;
+use Time::HiRes qw/sleep time/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::External ();

@@ -684,8 +684,7 @@ sub save_profile {
         $nr++;
     }
 
-    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
-    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
+    $c->set_stats_common_totals();
 
     my $profile = "";
     eval {

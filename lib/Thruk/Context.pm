@@ -879,8 +879,7 @@ sub finalize_request {
 
     my $elapsed = tv_interval($c->stash->{'time_begin'});
     $c->stats->profile(end => "finalize_request");
-    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
-    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
+    $c->set_stats_common_totals();
     $c->stash->{'time_total'} = $elapsed;
 
     my $h = Plack::Util::headers($res->[1]);
@@ -971,6 +970,24 @@ sub finalize_request {
         }
     }
 
+    return;
+}
+
+###################################################
+
+=head2 set_stats_common_totals
+
+$c->set_stats_common_totals
+
+adds common statistics
+
+=cut
+sub set_stats_common_totals {
+    my($c) = @_;
+    $c->stats->totals(
+        { '*total time waited on backends'  => $c->stash->{'total_backend_waited'} },
+        { '*total time waited on rendering' => $c->stash->{'total_render_waited'}  },
+    );
     return;
 }
 
