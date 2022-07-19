@@ -106,7 +106,7 @@
                 <input type="hidden" name="report" value="[% r.nr %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
-                  <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'cancel'})"><i class="fa-solid fa-circle-xmark text-sm" title='Cancel Report'></i></a>
+                  <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'cancel'})"><i class="fa-solid fa-circle-xmark text-sm hover-red-text" title='Cancel Report'></i></a>
                 [% ELSE %]
                   <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'update'})"><i class="fa-solid fa-arrows-rotate text-sm" title='Regenerate Report'></i></a>
                   [% IF debug %]
