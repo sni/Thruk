@@ -92,7 +92,7 @@ sub begin {
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $theme = 'Light'                       unless defined $available_themes->{$theme};
     $theme = $c->config->{'themes'}->[0]   unless defined $available_themes->{$theme};
-    $c->stash->{'theme'} = $theme;
+    $c->stash->{'theme'} = $theme || 'None';
 
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;

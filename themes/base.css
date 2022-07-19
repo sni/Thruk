@@ -537,6 +537,9 @@ I.fa-solid, I.uil {
     @apply bg-[color:var(--icon-gray-bg)] !text-[color:var(--icon-gray-fg)];
   }
 }
+A I.fa-solid, A I.uil {
+    @apply hover:opacity-80;
+}
 
 /*******************************************************************************
  * sidebar

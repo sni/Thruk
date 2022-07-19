@@ -203,6 +203,7 @@ $data contains:
         code                http return code, defaults to 500;
         log                 flag wether error should be logged. Error codes > 500 are automatically logged if `log` is undefined
         debug_information   more details which will be logged, (string / array)
+        skip_escape         skip escaping html
 }
 
 =cut

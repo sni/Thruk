@@ -1849,8 +1849,8 @@ sub _report_die {
 
     # redirect from $c->detach_error
     if($c->stash->{'error_data'} && $c->{'detached'}) {
-        $err = $c->stash->{'error_data'}->{'msg'}."\n";
-        $err .= $c->stash->{'error_data'}->{'descr'}."\n" if $c->stash->{'error_data'}->{'descr'};
+        $err  = ($c->stash->{'raw_error_data'}->{'msg'}   // $c->stash->{'error_data'}->{'msg'})."\n";
+        $err .= ($c->stash->{'raw_error_data'}->{'descr'} // $c->stash->{'error_data'}->{'descr'})."\n" if $c->stash->{'error_data'}->{'descr'};
     }
 
     _error($err);

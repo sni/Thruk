@@ -155,10 +155,12 @@
           <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
             <td colspan=9 class="textALERT">
-              [% IF r.exists('long_error') && r.long_error != "" %]
-                <i class="uil uil-arrow-from-top clickable" id='long_error_icon_[% r.nr %]' title="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;"></i>
-              [% END %]
-              [% escape_html(r.error) | nl2br %]
+              <span class="clickable" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;">
+                [% IF r.exists('long_error') && r.long_error != "" %]
+                  <i class="uil uil-arrow-from-top" id='long_error_icon_[% r.nr %]' title="show long error output"></i>
+                [% END %]
+                [% escape_html(r.error) | nl2br %]
+              </span>
               [% IF r.exists('long_error') %]
                 <div id='long_error_[% r.nr %]' class="truncate max-w-[70%]" style="display:none;">
                 [% escape_html(r.long_error) | nl2br %]

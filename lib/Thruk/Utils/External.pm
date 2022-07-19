@@ -629,7 +629,7 @@ sub job_page {
 
         # passthrough $c->detach_error from jobs
         if($stash && $stash->{'error_data'}) {
-            return($c->detach_error($stash->{'error_data'}));
+            return($c->detach_error($c->stash->{'raw_error_data'}//$stash->{'error_data'}));
         }
 
         # other errors

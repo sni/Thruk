@@ -22,11 +22,12 @@ Thruk Controller.
 
     detailed errors:
         return $c->detach_error({
-            msg         => "main error",
-            descr       => "more descriptive details",
-            code        => http code,
-            log         => 0|1, #  force logging
-            skip_escape => 0|1, # skip html escape of data
+            msg                 "main error",
+            descr               "more descriptive details",
+            code                http code,
+            log                 0|1, #  force logging
+            debug_information   more details which will be logged, (string / array)
+            skip_escape         0|1, # skip html escape of data
         });
 
 
