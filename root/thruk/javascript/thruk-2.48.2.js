@@ -2116,6 +2116,7 @@ function site_panel_bookmark_save() {
             sections:  sections
         },
         success: function(data) {
+            setBtnSuccess("#site_panel_bookmark_new_save", "bookmark saved");
             jQuery("#site_panel_bookmark_new_save").attr('disabled', false).html("save");
             create_site_panel_popup_tree_make_bookmarks_sortable();
             jQuery("#site_panel_bookmark_new").val("").hide();

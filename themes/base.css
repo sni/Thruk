@@ -1365,6 +1365,10 @@ UL.ui-fancytree {
   }
 }
 
+.delete-mode BUTTON {
+  @apply outline-2 outline-[color:var(--button-red-bg)] outline-dotted hover:bg-[color:var(--button-red-hover-bg)];
+}
+
 /*******************************************************************************
  * search results
  */
