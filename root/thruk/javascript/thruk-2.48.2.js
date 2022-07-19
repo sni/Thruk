@@ -6408,6 +6408,10 @@ function toggleFilterPaneSelector(search_prefix, id) {
     remove_close_element(search_prefix+panel);
   } {
     set_filter_types(search_prefix, input_name, checkbox_prefix);
+
+    // align to parent element
+    var pos = jQuery('#'+search_prefix+panel).closest("TD").offset();
+    jQuery('#'+search_prefix+panel).css({'top': pos.top, 'left': pos.left});
   }
 }
 

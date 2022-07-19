@@ -109,6 +109,7 @@ function reports_update_affected_sla_objects(input) {
 
     form = jQuery(form).clone();
     jQuery(form).find(".template").remove();
+    jQuery(form).find(".js-filter-attributes-pane").remove();
 
     var data = {
         action:         'check_affected_objects',
