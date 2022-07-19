@@ -762,7 +762,7 @@ sub cmd {
             if($cmd !~ m|2>&1|mx) {
                 _warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
             }
-            `$cmd`;
+            $output = `$cmd`;
             $rc = $?;
             # rc will be -1 otherwise when ignoring SIGCHLD
             $rc = 0 if $rc == -1;
