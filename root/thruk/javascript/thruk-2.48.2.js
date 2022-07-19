@@ -986,14 +986,17 @@ function close_and_remove_event(evt) {
 
     // close on level of items on escape
     var keyCode = evt.keyCode;
-    if(keyCode == 27) {
-        if(!evt.target || evt.target.tagName != "INPUT") {
-            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+    if(keyCode != undefined) {
+        if(keyCode == 27) {
+            if(!evt.target || evt.target.tagName != "INPUT") {
+                evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
 
-            var toClose = close_elements.pop();
-            close_and_remove_event_run(toClose);
-            return false;
+                var toClose = close_elements.pop();
+                close_and_remove_event_run(toClose);
+                return false;
+            }
         }
+        return;
     }
 
     var x,y;
