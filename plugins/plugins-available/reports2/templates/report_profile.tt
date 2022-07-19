@@ -1,0 +1,16 @@
+﻿[% IF profiles.list.size > 1 %]
+  <nav class="inline-flex -space-x-px h-7 absolute" style="top: 6px; left: 110px;">
+    <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list(-1, 'DIV.profiles');"><i class="uil uil-angle-left  contents text-lg"></i></a>
+    <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list( 1, 'DIV.profiles');"><i class="uil uil-angle-right contents text-lg"></i></a>
+  </nav>
+[% END %]
+<pre>
+  [% FOREACH p = profiles.list %]
+    [% IF p.list.size > 1 %]
+      <div class="profiles overflow-y-auto w-[800px]"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p.0 %]</div>
+      <div style="display: none;">[% p.1 %]</div>
+    [% ELSE %]
+      <div class="profiles overflow-y-auto w-[800px]"[% IF !loop.first %] style="display: none;"[% END %]>[% loop.count %]/[% loop.size %] [% p %]</div>
+    [% END %]
+  [% END %]
+</pre>

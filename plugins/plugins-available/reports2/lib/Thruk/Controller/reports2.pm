@@ -381,11 +381,17 @@ sub report_profile {
     if($report) {
         if($report->{'var'}->{'profile'}) {
             $data = $report->{'var'}->{'profile'};
+            if(scalar @{$data} == 1) { $data = shift(@{$data}); }
         } else {
             $data = "no profile information available";
         }
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    }
+    if($c->req->parameters->{'view'} && $c->req->parameters->{'view'} eq 'html') {
+        $c->stash->{'profiles'} = $data;
+        $c->stash->{'template'} = "report_profile.tt";
+        return;
     }
     my $json = { 'data' => $data };
     return $c->render(json => $json);

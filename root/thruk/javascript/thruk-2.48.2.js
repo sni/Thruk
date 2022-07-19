@@ -3643,7 +3643,11 @@ function load_overcard_content(id, url, add_pre) {
             if(add_pre) {
                 data.data = "<pre>"+data.data+"<\/pre>";
             }
-            el.innerHTML = data.data;
+            if(typeof(data) == "string") {
+                el.innerHTML = data;
+            } else {
+                el.innerHTML = data.data;
+            }
         },
         error: ajax_xhr_error_logonly
     });
