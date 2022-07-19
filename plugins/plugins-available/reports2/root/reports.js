@@ -3,11 +3,16 @@
 var tmpDiv;
 var updateRetries;
 function update_reports_type(nr, tpl) {
+
+    jQuery('TR.js-report-options').css('visibility', 'hidden');
+    jQuery('#reports_expected_objects').css('visibility', 'hidden');
+    jQuery('<tr class="js-report-options"><td colspan=2 align="center"><div class="spinner w-10 h-10"></div></td></tr>').insertAfter('#new_reports_options')
+
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
     tmpDiv = jQuery("<div></div>").load('reports2.cgi?report='+nr+'&template='+tpl+'&action=edit2&_=' + ts);
     updateRetries = 0;
-    window.setTimeout(update_reports_type_step2, 100);
+    window.setTimeout(update_reports_type_step2, 200);
 }
 function update_reports_type_step2() {
     updateRetries = updateRetries + 1;
@@ -25,9 +30,9 @@ function update_reports_type_step2() {
 
     // scroll to report settings
     jQuery('TR.js-report-options TD').effect('highlight', {}, 1000);
-    jQuery([document.documentElement, document.body]).animate({
+    jQuery('#report_attributes').animate({
         scrollTop: jQuery("#report_type").offset().top
-    }, 1000);
+    }, 300);
 
     jQuery(".js-type-filter").change();
 }
