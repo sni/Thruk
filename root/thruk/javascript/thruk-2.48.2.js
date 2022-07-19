@@ -3636,12 +3636,14 @@ function load_overcard_content(id, url, add_pre) {
         type: 'POST',
         success: function(data) {
             var el = document.getElementById(id);
-            if(el) {
-                if(add_pre) {
-                    data.data = "<pre>"+data.data+"<\/pre>";
-                }
-                el.innerHTML = data.data;
+            if(!el) {
+                if(thruk_debug_js) { alert("ERROR: no container found load_overcard_content(): " + id); }
+                return;
             }
+            if(add_pre) {
+                data.data = "<pre>"+data.data+"<\/pre>";
+            }
+            el.innerHTML = data.data;
         },
         error: ajax_xhr_error_logonly
     });
