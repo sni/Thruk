@@ -1264,9 +1264,11 @@ function setRefreshRate(rate) {
     jQuery("#refresh_label").html(" (&infin;"+refresh_rate+"s)");
   }
   if(rate >= 0 && rate < 20) {
+      var newRate = 20;
+      if(refresh_rate < 20) { newRate = refresh_rate; }
       // check lastUserInteraction date to not refresh while user is interacting with the page
       if(thrukState.lastUserInteraction > ((new Date).getTime() - 20000)) {
-          rate = 20;
+          rate = newRate;
       }
       // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min), but refresh at least every 3 hours
       if(document.visibilityState && document.visibilityState != 'visible' && thrukState.lastPageFocus < ((new Date).getTime() - 180000) && thrukState.lastPageLoaded > ((new Date).getTime() - (3*3600*1000))) {
@@ -1276,12 +1278,12 @@ function setRefreshRate(rate) {
       // do not refresh when modal window is open
       if(document.getElementById('modalBG')) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
-        rate = 20;
+        rate = newRate;
       }
       // do not refresh when dev tools are open
       if((window.outerHeight-window.innerHeight)>250 || (window.outerWidth-window.innerWidth)>250) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(dev tools open, paused)<\/span>");
-        rate = 20;
+        rate = newRate;
       }
   }
   remainingRefresh = rate;
@@ -1574,12 +1576,22 @@ function reloadPageDo(withReloadButton, freshReload) {
         },
         error: function(jqXHR, textStatus, errorThrown) {
             isReloading = false;
-            resetRefreshButton();
-            jQuery("#refresh_button").addClass("red");
-            jQuery("#refresh_button").find("I").css("display", "none");
-            jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
-            jQuery("#refresh_button").attr("title", "refreshing page failed: "+textStatus+"\nlast contact: "+duration(((new Date()).getTime()-thrukState.lastPageLoaded)/1000)+" ago");
-            thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
+            // show error response if its a valid error page
+            if(jqXHR.responseText && jqXHR.responseText.match(/init_page\(\)/)) {
+                setInnerHTMLWithScripts(document.documentElement, jqXHR.responseText);
+                init_page();
+            } else {
+                // otherwise show error message
+                resetRefreshButton();
+                jQuery("#refresh_button").addClass("red");
+                jQuery("#refresh_button").find("I").css("display", "none");
+                jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
+                jQuery("#refresh_button").attr("title", "refreshing page failed: "+textStatus+"\nlast contact: "+duration(((new Date()).getTime()-thrukState.lastPageLoaded)/1000)+" ago");
+                thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
+                if(typeof refresh_rate == "number" && refresh_rate > 0) {
+                    resetRefresh();
+                }
+            }
         }
     });
 }
