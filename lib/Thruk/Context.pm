@@ -616,7 +616,7 @@ sub redirect_to {
     $c->{'rendered'} = 1;
     if($url =~ m/ARRAY\(/mx) {
         require Data::Dumper;
-        confess("invalid redirect url: ".Dumper($url))
+        confess("invalid redirect url: ".Dumper($url));
     }
     $c->stash->{'last_redirect_to'} = $url;
     return(1);
