@@ -2931,6 +2931,7 @@ themes/themes-available/Dark/images/logo.svg
 themes/themes-available/Dark/images/logo_thruk.png
 themes/themes-available/Dark/images/logo_thruk_small.png
 themes/themes-available/Dark/images/logo_thruk_small_icon.png
+themes/themes-available/Dark/src/Dark.css
 themes/themes-available/Dark/stylesheets/Dark.css
 themes/themes-available/Light/images/apple-touch-icon-180x180.png
 themes/themes-available/Light/images/dropdown.png
@@ -2943,6 +2944,7 @@ themes/themes-available/Light/images/logo.svg
 themes/themes-available/Light/images/logo_thruk.png
 themes/themes-available/Light/images/logo_thruk_small.png
 themes/themes-available/Light/images/logo_thruk_small_icon.png
+themes/themes-available/Light/src/Light.css
 themes/themes-available/Light/stylesheets/Light.css
 themes/themes-enabled/Dark
 themes/themes-enabled/Light
