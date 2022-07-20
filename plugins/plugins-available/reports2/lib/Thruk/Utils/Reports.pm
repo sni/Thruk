@@ -647,7 +647,7 @@ sub generate_report {
     }
     elsif($Thruk::Utils::PDF::ctype eq 'html2pdf') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
-        _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
+        _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile, 1);
     }
 
     # set error if not already set
@@ -1710,7 +1710,9 @@ sub _verify_fields {
 
 ##########################################################
 sub _convert_to_pdf {
-    my($c, $reportdata, $attachment, $nr, $logfile) = @_;
+    my($c, $reportdata, $attachment, $nr, $logfile, $nodelay) = @_;
+    $c->stats->profile(begin => "_convert_to_pdf()");
+
     my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
 
     my $htmlonly = 0;
@@ -1733,6 +1735,7 @@ sub _convert_to_pdf {
 
     if($htmlonly) {
         Thruk::Utils::IO::touch($attachment);
+        $c->stats->profile(end => "_convert_to_pdf()");
         return;
     }
 
@@ -1742,7 +1745,9 @@ sub _convert_to_pdf {
         $autoscale = 1;
     }
 
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
+    local $ENV{PHANTOMJSSCRIPTOPTIONS}  = '';
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} .= ' --autoscale=1' if $autoscale;
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} .= ' --nodelay=1'   if $nodelay;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
     _debug("converting env: PHANTOMJSSCRIPTOPTIONS: %s", $ENV{PHANTOMJSSCRIPTOPTIONS}//'');
     _debug("converting to pdf: ".$cmd);
@@ -1766,6 +1771,8 @@ sub _convert_to_pdf {
 
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
+
+    $c->stats->profile(end => "_convert_to_pdf()");
     return;
 }
 

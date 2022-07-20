@@ -13,7 +13,7 @@
   <div class="flexrow flex-nowrap justify-between z-30 absolute w-full">
     <div class="w-6"></div>
     <div class="job_time text-center" style="line-height: [% pb_options.lineheight %]px;">
-      [% pb_options.time %]s
+      [% IF pb_options.time < 0; "0"; ELSE; sprintf("%d", pb_options.time); END %]s
       [% IF pb_options.show_message && pb_options.exists('message') && pb_options.message %] - [% pb_options.message %][% END %]
     </div>
     <div class="w-6">

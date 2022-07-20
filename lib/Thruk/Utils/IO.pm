@@ -686,7 +686,7 @@ sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode) = @_;
     if(defined $c && !defined $cmd) {
         $cmd = $c;
-        $c = undef;
+        $c = $Thruk::Globals::c || undef;
     }
     $c->stats->profile(begin => "IO::cmd") if $c;
 
