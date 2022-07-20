@@ -892,11 +892,25 @@ sub finalize_request {
         require Thruk::Template::Context;
         unshift @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $Thruk::Globals::tt_profiling;
         unshift @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
-        my $stats = "";
-        Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
-        $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';
-        Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
-        $h->remove("Content-Length");
+        if($c->{'session'} && $c->{'session'}->{'profiles'}) {
+            push @{$c->stash->{'profile'}},  @{$c->{'session'}->{'profiles'}};
+            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { profiles => undef });
+        }
+
+        if($res->[0] != 302 && ref $res->[2] eq 'ARRAY' && $res->[2]->[0] =~ m/<\/body>/mx) {
+            my $stats = "";
+            Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
+            Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
+            $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;
+            $h->remove("Content-Length");
+        } else {
+            # redirected page, save stats for next page to show
+            if($c->{'session'} && $c->{'session'}->{'file'}) {
+                $c->{'session'}->{'profiles'} = [] unless $c->{'session'}->{'profiles'};
+                push @{$c->{'session'}->{'profiles'}}, @{$c->stash->{'profile'}};
+                Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { profiles => $c->{'session'}->{'profiles'} });
+            }
+        }
     }
     # slow pages log
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0 && $elapsed > $c->config->{'slow_page_log_threshold'}) {
