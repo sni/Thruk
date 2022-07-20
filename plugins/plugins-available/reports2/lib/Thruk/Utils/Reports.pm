@@ -1745,9 +1745,10 @@ sub _convert_to_pdf {
         $autoscale = 1;
     }
 
-    local $ENV{PHANTOMJSSCRIPTOPTIONS}  = '';
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} .= ' --autoscale=1' if $autoscale;
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} .= ' --nodelay=1'   if $nodelay;
+    my $phantomjsscriptoptions  = '';
+       $phantomjsscriptoptions .= ' --autoscale=1' if $autoscale;
+       $phantomjsscriptoptions .= ' --nodelay=1'   if $nodelay;
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} = $phantomjsscriptoptions if $phantomjsscriptoptions;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
     _debug("converting env: PHANTOMJSSCRIPTOPTIONS: %s", $ENV{PHANTOMJSSCRIPTOPTIONS}//'');
     _debug("converting to pdf: ".$cmd);
