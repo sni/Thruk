@@ -53,7 +53,7 @@
       [% END %]
       <td class='text-center'>[% date_format(c, com.entry_time) %]</td>
       <td >[% com.author %]</td>
-      <td style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+      <td style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(com.comment) | replace_links %][% ELSE %][% com.comment | replace_links %][% END %]</td>
       <td class='text-center'>[% com.id %]</td>
       <td class='text-center'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
       <td >[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
