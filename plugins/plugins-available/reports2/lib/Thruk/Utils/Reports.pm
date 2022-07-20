@@ -44,6 +44,8 @@ return list of all reports for this user
 sub get_report_list {
     my($c, $noauth, $number_filter) = @_;
 
+    $c->stats->profile(begin => "Utils::Reports::get_report_list(".($number_filter//'all').")");
+
     my $reports = [];
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
@@ -66,6 +68,7 @@ sub get_report_list {
     # sort by name
     @{$reports} = sort { $a->{'name'} cmp $b->{'name'} } @{$reports};
 
+    $c->stats->profile(end => "Utils::Reports::get_report_list(".($number_filter//'all').")");
     return $reports;
 }
 
@@ -1101,6 +1104,7 @@ return available report templates
 =cut
 sub get_report_templates {
     my($c) = @_;
+    $c->stats->profile(begin => "Utils::Reports::get_report_templates()");
     my $templates = {};
     for my $path (@{$c->get_tt_template_paths()}) {
         for my $file (glob($path.'/reports/*.tt')) {
@@ -1116,6 +1120,7 @@ sub get_report_templates {
             };
         }
     }
+    $c->stats->profile(end => "Utils::Reports::get_report_templates()");
     return($templates);
 }
 
