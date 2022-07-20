@@ -744,11 +744,9 @@ function closeModalWindowOnEscape(evt) {
     evt = (evt) ? evt : ((window.event) ? event : null);
     var keyCode = evt.keyCode;
     if(keyCode == 27) {
-        if(!evt.target || evt.target.tagName != "INPUT") {
-            closeModalWindow();
-            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
-            return false;
-        }
+        closeModalWindow();
+        evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+        return false;
     }
     return(true);
 }
@@ -988,13 +986,10 @@ function close_and_remove_event(evt) {
     var keyCode = evt.keyCode;
     if(keyCode != undefined) {
         if(keyCode == 27) {
-            if(!evt.target || evt.target.tagName != "INPUT") {
-                evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
-
-                var toClose = close_elements.pop();
-                close_and_remove_event_run(toClose);
-                return false;
-            }
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+            var toClose = close_elements.pop();
+            close_and_remove_event_run(toClose);
+            return false;
         }
         return;
     }
