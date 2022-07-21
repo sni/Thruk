@@ -91,7 +91,7 @@ return peer address list
 
 sub peer_list {
     my($self) = @_;
-    if($self->{'peer_list'}) {
+    if($self->{'peer_list'} && scalar @{$self->{'peer_list'}} > 0) {
         my $list = [@{$self->{'peer_list'}}]; # create clone of list
         if($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
             push @{$list}, $self->{'class'}->{'config'}->{'options'}->{'fallback_peer'};
