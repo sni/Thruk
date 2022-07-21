@@ -89,6 +89,26 @@ sub peer_order {
 
 ##########################################################
 
+=head2 authoritive_peer_keys
+
+returns list of authoritive peers (used to fetch can_submit_commands / groups)
+
+=cut
+
+sub authoritive_peer_keys {
+    my($self) = @_;
+    my @keys;
+    for my $peer ( @{ $self->get_peers() } ) {
+        push @keys, $peer->{'key'} if $peer->{'authoritive'};
+    }
+    if(scalar @keys == 0) {
+        return $self->peer_key();
+    }
+    return \@keys;
+}
+
+##########################################################
+
 =head2 lmd_peer
 
 returns pools lmd_peer
@@ -643,7 +663,7 @@ sub get_contactgroups_by_contact {
     if($self->{'get_contactgroups_by_contact_cache'}) {
         return($self->{'get_contactgroups_by_contact_cache'}->{$username} // {});
     }
-    my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ], undef, $self->get_default_backends());
+    my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ], undef, $self->authoritive_peer_keys());
     my $contactgroups = {};
     for my $group (@{$data}) {
         $contactgroups->{$group->{'name'}} = 1;
@@ -2667,7 +2687,7 @@ fills cached used by get_can_submit_commands
 
 sub fill_get_can_submit_commands_cache {
     my($self) = @_;
-    my $data = $self->get_contacts(columns => [qw/name email alias can_submit_commands/]);
+    my $data = $self->get_contacts(columns => [qw/name email alias can_submit_commands/], "backends" => $self->authoritive_peer_keys() );
     my $hashed = {};
     for my $d (@{$data}) {
         $hashed->{$d->{'name'}} = [] unless defined $hashed->{$d->{'name'}};
@@ -2692,7 +2712,7 @@ sub get_can_submit_commands {
     if($self->{'get_can_submit_commands_cache'} && scalar @args == 1) {
         return($self->{'get_can_submit_commands_cache'}->{$args[0]} // []);
     }
-    return $self->_do_on_peers('get_can_submit_commands', \@args );
+    return $self->_do_on_peers('get_can_submit_commands', \@args, undef, $self->authoritive_peer_keys() );
 }
 
 ########################################
@@ -2707,7 +2727,7 @@ fills cached used by get_contactgroups_by_contact
 
 sub fill_get_contactgroups_by_contact_cache {
     my($self) = @_;
-    my $contactgroups = $self->get_contactgroups(columns => [qw/name members/]);
+    my $contactgroups = $self->get_contactgroups(columns => [qw/name members/], "backends" => $self->authoritive_peer_keys());
     my $groups = {};
     for my $group (@{$contactgroups}) {
         for my $member (@{$group->{'members'}}) {

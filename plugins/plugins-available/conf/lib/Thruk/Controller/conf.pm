@@ -868,6 +868,7 @@ sub _process_backends_page {
                 $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
                 $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
                 $backend->{'logcache_fetchlogs_command'} = $peer->{'peer_config'}->{'logcache_fetchlogs_command'} if defined $peer->{'peer_config'}->{'logcache_fetchlogs_command'};
+                $backend->{'authoritive'} = $peer->{'peer_config'}->{'authoritive'};
                 $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
             }
             $has_new = 1 if $x == 1;

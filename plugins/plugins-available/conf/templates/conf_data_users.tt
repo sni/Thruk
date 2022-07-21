@@ -1,4 +1,5 @@
-﻿[% WRAPPER _conf_frame.tt %]
+﻿[% USE date %]
+[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
 <form action="conf.cgi" method="GET">

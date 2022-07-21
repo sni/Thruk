@@ -182,6 +182,7 @@ sub _initialise_peer {
     $self->{'configtool'}    = $peer_config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
+    $self->{'authoritive'}   = $peer_config->{'authoritive'};
 
     # shorten backend id
     my $key = $peer_config->{'id'};
