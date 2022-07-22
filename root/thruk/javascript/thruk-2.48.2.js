@@ -1005,8 +1005,8 @@ function close_and_remove_event(evt) {
     }
 
     var toClose = close_elements.pop();
-    var obj = document.getElementById(toClose.id);
-    var inside = checkEvtinElement(obj, evt, x, y);
+    var obj     = document.getElementById(toClose.id);
+    var inside  = checkEvtinElement(obj, evt, x, y);
 
     if(!inside && toClose.elements) {
         jQuery(toClose.elements).each(function(i, el) {
@@ -1020,6 +1020,9 @@ function close_and_remove_event(evt) {
     if(evt && inside) {
         close_elements.push(toClose);
     } else {
+        if(evt) {
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+        }
         close_and_remove_event_run(toClose);
     }
 
