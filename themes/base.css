@@ -315,7 +315,7 @@ BODY {
 }
 
 header.header {
-  @apply sticky block top-0 z-30 px-5 headerBG h-[50px];
+  @apply sticky block top-0 z-30 px-5 headerBG h-[50px] shrink-0 overflow-x-auto;
   IMG.collapsed-only {
     @apply hidden;
   }

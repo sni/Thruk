@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <div class="flexcol mx-auto w-fit max-w-full mt-5">
-  <form action="conf.cgi" method="GET" class="self-center">
+  <form action="conf.cgi" method="GET" class="lg:self-center">
     <input type="hidden" name="sub" value="objects">
     <div class="card overflow-hidden">
       <div class="head p-0 justify-between">

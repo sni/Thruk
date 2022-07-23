@@ -103,7 +103,7 @@
   [% PROCESS _excel_export.tt columns=[ 'Host', 'Service', 'Site', 'Type', 'Time', 'Contact', 'Command', 'Information' ] with_custom_vars=0 %]
 </div>
 
-<div class="card w-full mt-2">
+<div class="card w-full mt-2 min-w-[800px]">
   <div class="mainTableHeader">
     <div></div>
     <div>

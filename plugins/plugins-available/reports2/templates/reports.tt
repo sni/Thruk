@@ -17,7 +17,7 @@
 </div>
 [% END %]
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 min-w-[800px]">
   <div class="head p-0 justify-between border-0">
     <div class="mx-2">
       [% PROCESS _table_search_field.tt ids=["reportsTable"] %]

@@ -23,7 +23,7 @@
   </div>
 [% END %]
 
-<div class="card w-full">
+<div class="card w-full min-w-[800px]">
   <div class="mainTableHeader">
     <div>[% PROCESS _status_filter.tt %]</div>
     <div>[% PROCESS _pager.tt %]</div>

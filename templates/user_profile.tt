@@ -22,7 +22,7 @@
 </div>
 [% END %]
 
-<div class="flex place-content-center mt-5">
+<div class="flex lg:place-content-center mt-5">
 
   <div class="card min-w-[900px]">
     <div class="head p-0">

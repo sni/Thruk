@@ -16,7 +16,7 @@
 
 <div class="flexrow">
   <div class="card">
-    <div class="head justify-between">
+    <div class="head lg:justify-between">
       <h3>Process Information</h3>
       <div class="flex gap-x-2 items-center">
         [% IF backends.size > 1 %]

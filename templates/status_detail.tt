@@ -95,7 +95,7 @@
   </div>
 [% END %]
 
-<div class="card w-full">
+<div class="card w-full min-w-[800px]">
   <div class="mainTableHeader">
     <div>
       <div class="flex flex-nowrap gap-x-2 items-center">

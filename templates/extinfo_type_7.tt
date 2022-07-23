@@ -18,7 +18,7 @@
 
 <h1 class='py-4'>Scheduling Queue</h1>
 
-<div class="card w-full">
+<div class="card w-full min-w-[800px]">
   <div class="mainTableHeader">
     <div></div>
     <div>

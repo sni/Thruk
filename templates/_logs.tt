@@ -6,7 +6,7 @@
   [% PROCESS _excel_export.tt columns=[ 'Time', 'Site', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 %]
 </div>
 
-<div class="card w-full min-w-[400px]">
+<div class="card w-full min-w-[800px]">
   <div class="mainTableHeader">
     <div></div>
     <div>

@@ -5,7 +5,7 @@
 
 [% PROCESS _infobox.tt has_proc_info=0 %]
 
-<div class="flexcol w-full place-content-center items-center text-center mt-5">
+<div class="flexcol w-full lg:place-content-center lg:items-center text-center mt-5">
   [% IF errorMessage %]
     <h1 class='textALERT'>[% errorMessage %]</h1>
     <h2 class="whitespace-normal">[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
@@ -46,7 +46,7 @@
   [% END %]
 
   [% IF thruk_author %]
-    <div class="flexrow justify-center">
+    <div class="flexrow lg:justify-center">
       [% IF stacktrace %]
         <div class="card">
           <div class="head justify-between">

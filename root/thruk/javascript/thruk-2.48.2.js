@@ -7458,7 +7458,9 @@ var ajax_search = {
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
-        if(!iPhone) {
+        if(iPhone) {
+            addEvent(input, 'change', ajax_search.suggest);
+        } else {
             addEvent(input, 'keyup', ajax_search.suggest);
             addEvent(input, 'blur',  ajax_search.hide_results);
         }

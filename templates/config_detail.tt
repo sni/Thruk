@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-<div class="flexrow justify-between">
+<div class="flexrow lg:justify-between">
   [% PROCESS _infobox.tt %]
   <div class="card">
     <div class="head">
@@ -50,7 +50,7 @@
 
 <h1 class="mt-5">Configuration</h1>
 
-<div class="card w-full mt-5 overflow-hidden">
+<div class="card w-full min-w-[800px] mt-5 overflow-hidden">
   <div class="head p-0 justify-between overflow-x-auto">
     <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Hosts' %] active[% END %]"><a class="block" href="config.cgi?type=hosts">Hosts</a></span>
     <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Host Groups' %] active[% END %]"><a class="block" href="config.cgi?type=hostgroups">Host Groups</a></span>
