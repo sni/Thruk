@@ -909,9 +909,7 @@ sub finalize_request {
             $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report()});
             if($Thruk::Globals::tt_profiling) {
                 require Thruk::Template::Context;
-                for my $p (@{Thruk::Template::Context::get_profiles()}) {
-                    $c->add_profile({name => 'TT '.$p->[0], text => $p->[1]});
-                }
+                $c->add_profile(Thruk::Template::Context::get_profiles());
             }
         }
 

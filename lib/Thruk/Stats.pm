@@ -146,7 +146,7 @@ sub report_html {
     my($self) = @_;
     my $result = $self->_result();
     my $report = "";
-    $report .= "<table class='cellborder rounded overflow-hidden rowhover' style='width: 800px;'>";
+    $report .= "<table class='cellborder rowhover' style='width: 800px;'>";
 
     $self->totals({'*total time' => $self->{'total_time'} });
     for my $total (@{$self->{'totals'}}) {

@@ -17,7 +17,7 @@
     </div>
     <button class="iconOnly medium" onClick="toggleElement('stats_details'); return false;"><i class="uil uil-times"></i></button>
   </div>
-  <div class="body">
+  <div>
     [% PROCESS _profiles.tt profiles=page_profiles id='stats_details' %]
     <div style="text-align: right; margin-bottom: 24px; border-bottom: 1px solid gray;" class="flex justify-end font-semibold textBody">
       <table class="w-[100px] my-2">

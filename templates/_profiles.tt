@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 <div class="flexrow flex-nowrap gap-3" id="[% id %]">
-  <div class="w-60 actionbox border borderDefault rounded overflow-hidden" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
+  <div class="w-60 actionbox border-r borderDefault overflow-hidden" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
     <nav class="inline-flex -space-x-px h-7">
       <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list(-1, '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head');"><i class="uil uil-angle-left  contents text-lg"></i></a>
       <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list( 1, '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head');"><i class="uil uil-angle-right contents text-lg"></i></a>
@@ -12,7 +12,7 @@
   <div class="grow min-w-[600px] min-h-[400px] overflow-y-auto w-[820px]">
     [% FOREACH p = profiles %]
       <div class="profiles w-[800px]"[% IF !loop.first %] style="display: none;"[% END %]>
-        <div class="head p-0" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
+        <div class="head p-0 mb-2" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
           <span class="tabs text-sm active">[% p.name %]</span>
         </div>
         [% IF p.defined("html") %]
