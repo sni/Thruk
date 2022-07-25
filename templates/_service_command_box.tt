@@ -40,11 +40,11 @@
           <div>
             [% IF service.acknowledged %]
             <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=52&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-              <i class="fa-solid fa-clipboard"></i>Remove problem acknowledgement
+              <i class="fa-solid fa-person-digging hover-red-text"></i>Remove problem acknowledgement
             </a>
             [% ELSE %]
             <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=34&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-              <i class="fa-solid fa-clipboard-check"></i>Acknowledge this service problem
+              <i class="fa-solid fa-person-digging"></i>Acknowledge this service problem
             </a>
             [% END %]
           </div>
