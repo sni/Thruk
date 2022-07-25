@@ -89,10 +89,10 @@
                       %]
                 [% ELSE %]
                   [% IF c.check_user_roles('admin') %]
-                    <span class="clickable" onclick="overcard({ 'bodyEl': 'report_profile[% loop.index %]', 'caption': 'report profile', 'width': 820 }); load_overcard_content('report_profile[% loop.index %]', 'reports2.cgi?report=[% r.nr %]&amp;action=profile&view=html');">
+                    <span class="clickable" onclick="overcard({ 'bodyEl': 'report_profile[% loop.index %]', 'caption': 'report profile' }); load_overcard_content('report_profile[% loop.index %]', 'reports2.cgi?report=[% r.nr %]&amp;action=profile&view=html');">
                     [% duration(job_time, 3) %]
                     </span>
-                    <div id='report_profile[% loop.index %]' class='p-2 overflow-y-auto max-h-[80vh] max-w-[80vw]' style="display:none;"></div>
+                    <div id='report_profile[% loop.index %]' class='p-2 max-h-[80vh] max-w-[80vw] min-w-[800px] flex hidden'></div>
                   [% ELSE %]
                       [% duration(job_time, 3) %]
                   [% END %]

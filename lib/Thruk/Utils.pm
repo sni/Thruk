@@ -78,6 +78,10 @@ sub format_date {
     my($timestamp, $format) = @_;
     confess("no format") unless defined $format;
     confess("no timestamp") unless defined $timestamp;
+    if($format =~ m/%MILLI/mx) {
+        my $millis = sprintf("%03d", ($timestamp-int($timestamp))*1000);
+        $format =~ s|%MILLI|$millis|gmx;
+    }
     my $date = POSIX::strftime($format, localtime($timestamp));
     return $date;
 }

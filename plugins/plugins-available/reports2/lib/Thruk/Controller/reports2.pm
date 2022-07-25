@@ -389,8 +389,17 @@ sub report_profile {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
     if($c->req->parameters->{'view'} && $c->req->parameters->{'view'} eq 'html') {
-        $c->stash->{'profiles'} = $data;
-        $c->stash->{'template'} = "report_profile.tt";
+        if(ref $data eq 'ARRAY' && scalar @{$data} >= 1 && ref $data->[0] eq 'ARRAY') {
+            # convert legacy profile format
+            my $newdata = [];
+            for my $d (@{$data}) {
+                push @{$newdata}, { name => 'report', html => $d->[0], text => $d->[1], time => $report->{'var'}->{'end_time'} };
+            }
+            $data = $newdata;
+        }
+        $c->stash->{'report_profiles'} = $data;
+        $c->stash->{'nr'}              = $report_nr;
+        $c->stash->{'template'}        = "report_profile.tt";
         return;
     }
     my $json = { 'data' => $data };

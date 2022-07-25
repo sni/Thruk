@@ -17,6 +17,7 @@ sub process {
     $template = $template->name || $template;
   }
 
+  my $toplvl = scalar @stack == 0 ? 1 : 0;
   push @stack, [time, times];
 
   my @return = wantarray ?
@@ -34,22 +35,22 @@ sub process {
   # count of calls
   $totals{$template}[5] ++;
 
-  unless(@stack) {
+  if($toplvl) {
     my $out = "";
     ## top level again, time to display results
     $out .= "TT ".$template. ":\n";
-    $out .= sprintf("%3s %6s %3s %6s %6s %6s %6s %s\n", qw(cnt percent clk user sys cuser csys template));
+    $out .= sprintf("%3s %7s %3s %6s %6s %6s %6s %s\n", qw(cnt percent clk user sys cuser csys template));
     my $total = 0;
     for my $template (keys %totals) { $total += $totals{$template}->[1]; }
     for my $template (sort { $totals{$b}->[1] <=> $totals{$a}->[1] } keys %totals) {
       my @values  = @{$totals{$template}};
       my $percent = $total > 0 ? $values[1]/$total*100 : 0;
-      $out .= sprintf("%3d %5d %% %3d %6.2f %6.2f %6.2f %6.2f %s\n", $values[5], $percent , @values[0..4], $template);
+      $out .= sprintf("%-3s %4d %%  %3d %6.2f %6.2f %6.2f %6.2f %s\n", $values[5], $percent, @values[0..4], $template);
     }
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 3) {
       print STDERR $out;
     }
-    push @{$profiles}, $out;
+    push @{$profiles}, [$template, $out];
 
     # clear out results
     %totals = ();
@@ -65,6 +66,12 @@ sub get_profiles {
 
 sub reset_profiles {
   $profiles = [];
+  @stack    = ();
+  return;
+}
+
+sub reset_stack {
+  @stack = ();
   return;
 }
 
@@ -95,6 +102,10 @@ return list of profiles
 =head2 reset_profiles
 
 reset saved profiles
+
+=head2 reset_stack
+
+reset initial stack
 
 =cut
 

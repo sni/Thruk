@@ -3657,12 +3657,19 @@ function load_overcard_content(id, url, add_pre) {
                 data.data = "<pre>"+data.data+"<\/pre>";
             }
             if(typeof(data) == "string") {
-                el.innerHTML = data;
+                setInnerHTMLWithScripts(el, data);
             } else {
                 el.innerHTML = data.data;
             }
         },
-        error: ajax_xhr_error_logonly
+        error: function(jqXHR, textStatus, errorThrown) {
+            var el  = document.getElementById(id);
+            var msg = getXHRerrorMsg('', textStatus, jqXHR, errorThrown);
+            if(el) {
+                el.innerHTML = "<span class='textALERT'>"+msg+"</span>";
+            }
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
+        }
     });
 }
 
@@ -3671,6 +3678,16 @@ function ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown) {
 }
 
 function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, logOnly, closeTimeout) {
+    var msg = getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown);
+    if(logOnly) {
+        console.log(prefix + msg);
+    } else {
+        thruk_message(1, prefix + msg, closeTimeout);
+    }
+}
+
+// extract error message from js request
+function getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown) {
     var cookie = readCookie('thruk_message');
     var matches;
     var msg;
@@ -3696,12 +3713,7 @@ function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, l
     else {
         msg = textStatus;
     }
-
-    if(logOnly) {
-        console.log(prefix + msg);
-    } else {
-        thruk_message(1, prefix + msg, closeTimeout);
-    }
+    return(msg);
 }
 
 /* update permanent link of excel export */
@@ -4379,7 +4391,7 @@ function looks_like_regex(str) {
     return(false);
 }
 
-function show_list(incr, selector) {
+function show_list(incr, selector, head_selector) {
     var elements = jQuery(selector);
     var curIdx = 0;
     jQuery(elements).each(function(i, n) {
@@ -4390,6 +4402,10 @@ function show_list(incr, selector) {
         }
     });
     var newIdx = curIdx+incr;
+    var matches = String(incr).match(/^#(\d+)/);
+    if(matches && matches.length > 1) {
+        newIdx = matches[1];
+    }
     if(elements[newIdx] == undefined) {
         jQuery(elements[curIdx]).show();
         return;
@@ -4403,6 +4419,12 @@ function show_list(incr, selector) {
     if(newIdx == 0) {
         jQuery("DIV.controls BUTTON.previous").css('visibility', 'hidden');
     }
+
+    if(head_selector) {
+        jQuery(head_selector).removeClass("active");
+        jQuery(jQuery(head_selector)[newIdx]).addClass("active");
+    }
+
 }
 
 /* split that works more like the perl split and appends the remaining str to the last element, doesn't work with regex */
@@ -8880,11 +8902,14 @@ function overcard(options) {
     if(settings["bodyEl"]) {
         if(settings["bodyEl"] && settings["bodyEl"].tagName) {
             jQuery(body).append(jQuery(settings["bodyEl"]));
-            settings["bodyEl"].style.display = "";
+            showElement(settings["bodyEl"]);
         } else {
             var bodyEl = doc.getElementById(settings["bodyEl"]);
-            bodyEl.style.display = "";
             if(bodyEl) {
+                jQuery(body).children().each(function(i, el) {
+                    hideElement(el);
+                });
+                showElement(bodyEl);
                 jQuery(body).append(jQuery(bodyEl));
             }
         }

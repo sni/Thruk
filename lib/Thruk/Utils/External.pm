@@ -17,7 +17,7 @@ use Data::Dumper qw/Dumper/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
 use Storable qw/store retrieve/;
-use Time::HiRes ();
+use Time::HiRes qw/time/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Crypt ();
@@ -412,14 +412,14 @@ sub get_status {
 
     my $is_running = _is_running($c, $dir);
     my $percent    = 0;
-    my @start      = stat($dir.'/start');
+    my @start      = Time::HiRes::stat($dir.'/start');
     if(!defined $start[9]) {
         return($is_running,0,$percent,"not started",undef,undef,$user);
     }
     my $time       = time() - $start[9];
     if($is_running == 0) {
         $percent = 100;
-        my @end  = stat($dir."/stdout");
+        my @end  = Time::HiRes::stat($dir."/stdout");
         $end[9]  = time() unless defined $end[9];
         $time    = $end[9] - $start[9];
     } elsif(-f $dir."/status") {
@@ -513,16 +513,16 @@ sub get_result {
     $err =~ s|^\s*\n||gmx;
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = stat($dir.'/start');
+    my @start = Time::HiRes::stat($dir.'/start');
     my @end;
     my $retries = 10;
     while($retries > 0) {
         if(-f $dir."/stdout") {
-            @end = stat($dir."/stdout");
+            @end = Time::HiRes::stat($dir."/stdout");
         } elsif(-f $dir."/stderr") {
-            @end = stat($dir."/stderr");
+            @end = Time::HiRes::stat($dir."/stderr");
         } elsif(-f $dir."/rc") {
-            @end = stat($dir."/rc");
+            @end = Time::HiRes::stat($dir."/rc");
         }
         if(!defined $end[9]) {
             sleep(1);
@@ -556,12 +556,12 @@ sub get_result {
         chomp($text);
         my $htmlfile = $p;
         $htmlfile =~ s/\.log\./.html./gmx;
-        if(-e $htmlfile) {
-            my $html = Thruk::Utils::IO::read($htmlfile);
-            push @{$profiles}, [$html, $text];
-        } else {
-            push @{$profiles}, $text;
-        }
+        push @{$profiles}, {
+            name => "Job ".$id,
+            time => $end[9] // $start[9],
+            html => -e $htmlfile ? Thruk::Utils::IO::read($htmlfile) : undef,
+            text => $text,
+        };
     }
 
     return($out,$err,$time,$dir,$stash,$rc,$profiles,$start[9],$end[9],$perl_res);
@@ -622,9 +622,9 @@ sub job_page {
         $c->stash->{template}             = 'waiting_for_job.tt';
     } else {
         # job finished, display result
-        my($out,$err,$time,$dir,$stash,$rc,$profiles) = get_result($c, $job);
+        my($out,$err,$time,$dir,$stash,$rc,$profile) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
-        push @{$c->stash->{'profile'}}, @{$profiles} if $profiles;
+        $c->add_profile($profile) if $profile;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
 
         # passthrough $c->detach_error from jobs

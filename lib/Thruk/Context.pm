@@ -888,13 +888,17 @@ sub finalize_request {
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
         # inject stats into html page
+        $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report()});
         require Thruk::Views::ToolkitRenderer;
         require Thruk::Template::Context;
-        unshift @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $Thruk::Globals::tt_profiling;
-        unshift @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
-        if($c->{'session'} && $c->{'session'}->{'profiles'}) {
-            push @{$c->stash->{'profile'}},  @{$c->{'session'}->{'profiles'}};
-            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { profiles => undef });
+        if($Thruk::Globals::tt_profiling) {
+            for my $p (@{Thruk::Template::Context::get_profiles()}) {
+                $c->add_profile({name => 'TT '.$p->[0], text => $p->[1]});
+            }
+        }
+        if($c->{'session'} && $c->{'session'}->{'page_profiles'}) {
+            $c->add_profile($c->{'session'}->{'page_profiles'});
+            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => undef });
         }
 
         if($res->[0] != 302 && ref $res->[2] eq 'ARRAY' && $res->[2]->[0] =~ m/<\/body>/mx) {
@@ -906,9 +910,9 @@ sub finalize_request {
         } else {
             # redirected page, save stats for next page to show
             if($c->{'session'} && $c->{'session'}->{'file'}) {
-                $c->{'session'}->{'profiles'} = [] unless $c->{'session'}->{'profiles'};
-                push @{$c->{'session'}->{'profiles'}}, @{$c->stash->{'profile'}};
-                Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { profiles => $c->{'session'}->{'profiles'} });
+                $c->{'session'}->{'page_profiles'} = [] unless $c->{'session'}->{'page_profiles'};
+                push @{$c->{'session'}->{'page_profiles'}}, @{$c->stash->{'page_profiles'}};
+                Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => $c->{'session'}->{'page_profiles'} });
             }
         }
     }
@@ -949,9 +953,10 @@ sub finalize_request {
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
         my $waited = [];
-        push @{$waited}, $c->stash->{'total_backend_waited'} ? sprintf("%.3fs", $c->stash->{'total_backend_waited'}) : '-';
-        push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("%.3fs", $c->stash->{'total_render_waited'}) : '-';
-        _info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
+        push @{$waited}, $c->stash->{'total_backend_waited'} ? sprintf("M:%.3fs", $c->stash->{'total_backend_waited'}) : '-';
+        push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("V:%.3fs", $c->stash->{'total_render_waited'}) : '-';
+        _info(sprintf("[%s] pid: %5d req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
+                                Thruk::Utils::format_date(Time::HiRes::time(), "%H:%M:%S.%MILLI"),
                                 $$,
                                 $Thruk::Globals::COUNT,
                                 $c->stash->{'memory_end'},
@@ -1005,6 +1010,37 @@ sub set_stats_common_totals {
         { '*total time waited on rendering' => $c->stash->{'total_render_waited'}  },
     );
     return;
+}
+
+###################################################
+
+=head2 add_profile
+
+$c->add_profile({ name => ..., [ text => \@txtprofiles ], [ html => \@htmlprofiles ] })
+
+add profile to stash
+
+=cut
+sub add_profile {
+    my($c, $options) = @_;
+    if(ref $options eq 'HASH') {
+        confes("no name in profile") unless $options->{'name'};
+        $options->{'time'} = Time::HiRes::time() unless $options->{'time'};
+        push @{$c->stash->{'page_profiles'}}, $options;
+
+        # clean up if more than 10
+        while(scalar @{$c->stash->{'page_profiles'}} > 10) {
+            shift @{$c->stash->{'page_profiles'}};
+        }
+        return;
+    }
+    if(ref $options eq 'ARRAY') {
+        for my $p (@{$options}) {
+            $c->add_profile($p);
+        }
+        return;
+    }
+    confess("either add arrays or hashes to profiles");
 }
 
 ###################################################
