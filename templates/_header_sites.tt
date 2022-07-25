@@ -32,7 +32,7 @@
     </div>
   [% END %]
 
-  <div id="site_panel" class="card shadow-float absolute left-0 lg:left-auto w-full lg:w-fit min-w-[400px] site_panel_[% show_sitepanel %] hidden">
+  <div id="site_panel" class="card shadow-float fixed left-0 lg:left-auto w-full lg:w-fit min-w-[400px] site_panel_[% show_sitepanel %] hidden">
     <div class="head justify-between gap-5">
       <h3>[% IF backend_chooser == "switch" %]Choose Active Site[% ELSE %]Toggle Site Visibility[% END %]</h3>
       [% IF show_sitepanel == 'tree' %]
@@ -49,7 +49,7 @@
               <input type='text' value='' placeholder="enter name" id="site_panel_bookmark_new" class="w-20" style="display: none;">
               <button id="site_panel_bookmark_new_save" class="w-20" style="display: none;" onclick="site_panel_bookmark_save()">save</button>
               <button id="site_panel_bookmark_plus" onClick='jQuery(this).hide(); jQuery("#site_panel_bookmark_new").show().val("").focus(); jQuery("#site_panel_bookmark_new_save").show();'><i class="uil uil-plus"></i>add</button>
-              <button class="hover-red" onclick="jQuery(this).toggleClass('red'); jQuery('#site_panel_bookmark_list_container').toggleClass('delete-mode')" id="site_panel_bookmark_delete"><i class="uil uil-trash-alt"></i>remove</button>
+              <button [% IF !user_data.exists('site_panel_bookmarks') || user_data.site_panel_bookmarks.size == 0 %]disabled[% ELSE %]class="hover-red" onclick="jQuery(this).toggleClass('red'); jQuery('#site_panel_bookmark_list_container').toggleClass('delete-mode')"[% END %] id="site_panel_bookmark_delete"><i class="uil uil-trash-alt"></i>remove</button>
             </div>
         </div>
       [% END %]
