@@ -381,7 +381,7 @@ sub report_profile {
     if($report) {
         if($report->{'var'}->{'profile'}) {
             $data = $report->{'var'}->{'profile'};
-            if(scalar @{$data} == 1) { $data = shift(@{$data}); }
+            if(scalar @{$data} == 1 && ref $data->[0] eq 'ARRAY') { $data = shift(@{$data}); }
         } else {
             $data = "no profile information available";
         }

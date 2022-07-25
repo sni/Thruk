@@ -40,6 +40,7 @@ sub enable {
 sub clear {
     $_[0]->{'profile'} = [];
     $_[0]->{'totals'}  = [];
+    delete $_[0]->{'_saved_to'};
     return;
 }
 
@@ -144,8 +145,8 @@ sub _calc_total {
 sub report_html {
     my($self) = @_;
     my $result = $self->_result();
-    my $report = "Profile:\n";
-    $report .= "<table class='cellborder rowhover' style='width: 800px;'>";
+    my $report = "";
+    $report .= "<table class='cellborder rounded overflow-hidden rowhover' style='width: 800px;'>";
 
     $self->totals({'*total time' => $self->{'total_time'} });
     for my $total (@{$self->{'totals'}}) {
@@ -167,7 +168,7 @@ sub report {
     my($self) = @_;
     my $result = $self->_result();
     $self->totals({'*total time' => $self->{'total_time'} });
-    my $report = "Profile:\n";
+    my $report = "";
     $report .= '+'.("-"x82)."+-------------+\n";
     for my $total (@{$self->{'totals'}}) {
         my $r = _total2row($total);

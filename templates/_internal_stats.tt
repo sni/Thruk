@@ -10,7 +10,7 @@
   </div>
 </div>
 
-<div class="card shadow-float z-40 fixed bottom-0 right-0 m-2 font-mono" style="display: none;" id="stats_details">
+<div class="card shadow-float z-40 fixed bottom-0 right-0 m-2 font-mono max-h-full max-w-full" style="display: none;" id="stats_details">
   <div class="head justify-between">
     <div class="flexrow gap-1 flex-nowrap items-center">
       <h3 class="h-min">Page Profile</h3>

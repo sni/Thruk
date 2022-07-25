@@ -887,33 +887,46 @@ sub finalize_request {
     my $h = Plack::Util::headers($res->[1]);
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
-        # inject stats into html page
-        $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report()});
-        require Thruk::Views::ToolkitRenderer;
-        require Thruk::Template::Context;
-        if($Thruk::Globals::tt_profiling) {
-            for my $p (@{Thruk::Template::Context::get_profiles()}) {
-                $c->add_profile({name => 'TT '.$p->[0], text => $p->[1]});
-            }
+
+        my $save_for_later = 0;
+        my $inject         = 0;
+        if($res->[0] == 302 && $c->{'session'} && $c->{'session'}->{'file'}) {
+            $save_for_later = 1;
         }
-        if($c->{'session'} && $c->{'session'}->{'page_profiles'}) {
-            $c->add_profile($c->{'session'}->{'page_profiles'});
-            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => undef });
+        if(!$save_for_later && ref $res->[2] eq 'ARRAY' && $res->[2]->[0] =~ m/<\/body>/mx) {
+            $inject = 1;
         }
 
-        if($res->[0] != 302 && ref $res->[2] eq 'ARRAY' && $res->[2]->[0] =~ m/<\/body>/mx) {
+        if($inject) {
+            # add previously saved profiles
+            if($c->{'session'} && $c->{'session'}->{'page_profiles'}) {
+                $c->add_profile($c->{'session'}->{'page_profiles'});
+                Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => undef });
+            }
+        }
+        if($inject || $save_for_later) {
+            # inject current page stats into html
+            $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report()});
+            if($Thruk::Globals::tt_profiling) {
+                require Thruk::Template::Context;
+                for my $p (@{Thruk::Template::Context::get_profiles()}) {
+                    $c->add_profile({name => 'TT '.$p->[0], text => $p->[1]});
+                }
+            }
+        }
+
+        if($inject) {
             my $stats = "";
+            require Thruk::Views::ToolkitRenderer;
             Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
             Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
             $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;
             $h->remove("Content-Length");
-        } else {
+        } elsif($save_for_later) {
             # redirected page, save stats for next page to show
-            if($c->{'session'} && $c->{'session'}->{'file'}) {
-                $c->{'session'}->{'page_profiles'} = [] unless $c->{'session'}->{'page_profiles'};
-                push @{$c->{'session'}->{'page_profiles'}}, @{$c->stash->{'page_profiles'}};
-                Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => $c->{'session'}->{'page_profiles'} });
-            }
+            $c->{'session'}->{'page_profiles'} = [] unless $c->{'session'}->{'page_profiles'};
+            push @{$c->{'session'}->{'page_profiles'}}, @{$c->stash->{'page_profiles'}};
+            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => $c->{'session'}->{'page_profiles'} });
         }
     }
     # slow pages log
@@ -1025,6 +1038,7 @@ sub add_profile {
     my($c, $options) = @_;
     if(ref $options eq 'HASH') {
         confes("no name in profile") unless $options->{'name'};
+        return if $options->{'name'} eq 'TT get_variable.tt';
         $options->{'time'} = Time::HiRes::time() unless $options->{'time'};
         push @{$c->stash->{'page_profiles'}}, $options;
 

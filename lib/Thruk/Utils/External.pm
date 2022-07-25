@@ -672,16 +672,22 @@ sub update_status {
 
   save_profile($c, $dir)
 
-save profile to profile.log.<nr> of this job
+save profile to profile.log.$pid.<nr> of this job
 
 =cut
 sub save_profile {
     my($c, $dir) = @_;
 
     my $nr   = 0;
-    my $base = $dir.'/profile.log';
-    while(-e $base.".".$nr) {
+    my $base = $dir.'/profile.log.'.$$;
+    while(-e $base.'.'.$nr) {
         $nr++;
+    }
+    my $file = $base.'.'.$nr;
+
+    # update/extend previously written profile
+    if($c->stats->{'_saved_to'}) {
+        $file = $c->stats->{'_saved_to'};
     }
 
     $c->set_stats_common_totals();
@@ -691,14 +697,16 @@ sub save_profile {
         $profile = $c->stats->report()."\n";
     };
     $profile = $@."\n" if $@;
-    Thruk::Utils::IO::write($dir.'/profile.log.'.$nr, $profile);
+    Thruk::Utils::IO::write($file, $profile);
+    $c->stats->{'_saved_to'} = $file;
 
     $profile = "";
     eval {
         $profile = $c->stats->report_html();
     };
     $profile = $@."\n" if $@;
-    Thruk::Utils::IO::write($dir.'/profile.html.'.$nr, $profile);
+    $file =~ s/profile\.log/profile.html/gmx;
+    Thruk::Utils::IO::write($file, $profile);
 
     return;
 }
