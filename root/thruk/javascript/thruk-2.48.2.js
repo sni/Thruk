@@ -4309,7 +4309,16 @@ function refreshNavSections(id) {
     return(false);
 }
 
-function submitFormInBackground(form, cb) {
+function submitFormInBackground(form, cb, extraData) {
+    if(extraData) {
+        for(var key in extraData) {
+            jQuery('<input />', {
+                type:  'hidden',
+                name:   key,
+                value:  extraData[key]
+            }).appendTo(form);
+        }
+    }
     var data = jQuery(form).serializeArray();
     var url  = jQuery(form).attr("action");
     jQuery.ajax({
@@ -4331,16 +4340,7 @@ function submitFormInBackground(form, cb) {
 
 function send_form_in_background_and_reload(btn, extraData) {
     var form = jQuery(btn).parents('FORM');
-    if(extraData) {
-        for(var key in extraData) {
-            jQuery('<input />', {
-                type:  'hidden',
-                name:   key,
-                value:  extraData[key]
-            }).appendTo(form);
-        }
-    }
-    submitFormInBackground(form, reloadPage);
+    submitFormInBackground(form, reloadPage, extraData);
     setBtnSpinner(btn);
     return(false);
 }
