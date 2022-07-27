@@ -262,4 +262,53 @@ sub logcache {
 
 ##########################################################
 
+=head2 cmd
+
+  cmd($c, $cmd)
+
+return result of cmd
+
+=cut
+sub cmd {
+    my($self, $c, $cmd) = @_;
+    my($rc, $out);
+    if($self->{'type'} eq 'http') {
+        if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
+            ($rc, $out) = (1, "federated sites not supported");
+            require Thruk::Utils;
+            my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
+
+            my $options = {
+                'action'      => 'raw',
+                'sub'         => 'Thruk::Utils::IO::cmd',
+                'remote_name' => $self->{'class'}->{'remote_name'},
+                'args'        => $cmd,
+            };
+            require Cpanel::JSON::XS;
+            my $postdata = Cpanel::JSON::XS::encode_json({ data => Cpanel::JSON::XS::encode_json({
+                credential => $self->{'class'}->{'auth'},
+                options    => $options,
+            })});
+
+            require HTTP::Request;
+            my $header = ['Content-Type' => 'application/json; charset=UTF-8'];
+            my $req    = HTTP::Request->new('POST', $url.'cgi-bin/remote.cgi', $header, $postdata);
+
+            require Thruk::Controller::proxy;
+            my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
+            my $result = Cpanel::JSON::XS::decode_json($res->content());
+            ($rc, $out) = @{$result->{'output'}};
+        } else {
+            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", ['Thruk::Context', $cmd], { timeout => 120 })};
+        }
+
+    } else {
+        require Thruk::Utils::IO;
+        ($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+    }
+    return($rc, $out);
+}
+
+##########################################################
+
 1;
