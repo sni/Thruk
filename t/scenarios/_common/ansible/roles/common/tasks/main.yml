@@ -1,5 +1,5 @@
 - name: "yum clean all"
-  shell: yum clean all
+  shell: "yum clean all || :"
   args:
     warn: false
 - name: "run set_admin_password"
