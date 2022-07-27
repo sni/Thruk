@@ -4330,10 +4330,15 @@ function submitFormInBackground(form, cb, extraData) {
         },
         success: function(data, textStatus, jqXHR) {
             if(cb) {
-                cb(form);
+                cb(form, true, data, textStatus, jqXHR);
             }
         },
-        error: ajax_xhr_error_logonly
+        error: function(jqXHR, textStatus, errorThrown) {
+            if(cb) {
+                cb(form, false, null, textStatus, jqXHR);
+            }
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
+        }
     });
     return(false);
 }
