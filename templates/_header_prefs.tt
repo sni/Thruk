@@ -17,12 +17,19 @@
     <th class="align-middle"><i class="uil uil-brush-alt"></i></th>
     <th class="align-middle">Theme</th>
     <td class="flex gap-x-1">
-      <select name="theme" id="pref_theme" class="w-40">
+      [% IF c.config.themes.size > 4 %]
+        <select name="theme" id="pref_theme" class="w-40" onchange="switchTheme(this)">
+          [% FOR t = c.config.themes %]
+          <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+          [% END %]
+        </select>
+      [% ELSE %]
+      <div class="radiogroup min-w-[18rem]">
         [% FOR t = c.config.themes %]
-        <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+        <input type="radio" name="theme" value="[% t | html %]" id="theme-[% t | html %]" onchange="switchTheme('[% t | html %]')" [% IF t == theme %]checked[% END %]><label for="theme-[% t | html %]">[% t | html %]</label>
         [% END %]
-      </select>
-      <input type="button" name="submit" value="change" onClick="prefSubmitTheme('[% theme %]')">
+      </div>
+      [% END %]
     </td>
   </tr>
   [% IF show_sounds %]
@@ -43,6 +50,17 @@
     <th class="align-middle">Favicon</th>
     <td>
       <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')" class="w-40">
+    </td>
+  </tr>
+  <tr>
+    <th class="align-middle"><i class="uil uil-web-section-alt"></i></th>
+    <th class="align-middle">Navigation</th>
+    <td>
+      <div class="radiogroup w-72">
+        <input type="radio" name="navigation" value="0" id="nav0" onchange="setNavigationStyle(0)" [% IF menu_states.exists('cl') && menu_states.cl == 0 %]checked[% END %]><label for="nav0">Default</label>
+        <input type="radio" name="navigation" value="1" id="nav1" onchange="setNavigationStyle(1)" [% IF menu_states.exists('cl') && menu_states.cl == 1 %]checked[% END %]><label for="nav1">Collapsed</label>
+        <input type="radio" name="navigation" value="2" id="nav2" onchange="setNavigationStyle(2)" [% IF menu_states.exists('cl') && menu_states.cl == 2 %]checked[% END %]><label for="nav2">Hover</label>
+      </div>
     </td>
   </tr>
   <tr>

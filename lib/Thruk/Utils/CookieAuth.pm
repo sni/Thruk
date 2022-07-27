@@ -116,7 +116,7 @@ sub external_authentication {
 
 =head2 verify_basic_auth
 
-    verify_basic_auth($config, $basic_auth)
+    verify_basic_auth($config, $basic_auth, $login, $timeout, $revalidation)
 
 verify authentication by sending request with basic auth header.
 
@@ -126,7 +126,7 @@ returns  0 if unsuccessful
 
 =cut
 sub verify_basic_auth {
-    my($config, $basic_auth, $login, $timeout) = @_;
+    my($config, $basic_auth, $login, $timeout, $revalidation) = @_;
     confess("no basic auth data to verify") unless $basic_auth;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
 
@@ -146,7 +146,7 @@ sub verify_basic_auth {
         if($res->{'_headers'}->{'location'} eq $authurl_https) {
             _debug("basic auth redirects to %s\n", $authurl_https) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 1);
             $config->{'cookie_auth_restricted_url'} = $authurl_https;
-            return(verify_basic_auth($config, $basic_auth, $login));
+            return(verify_basic_auth($config, $basic_auth, $login, $revalidation));
         }
     }
     _debug("basic auth code: %d\n", $res->code) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 2);
@@ -156,6 +156,12 @@ sub verify_basic_auth {
         }
     }
     _debug("basic auth result: %s\n", $res->decoded_content) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
+    if($revalidation) {
+        if($res->code < 400 || $res->code >= 500) {
+            # do not log out on temporary errors...
+            return 1;
+        }
+    }
     if($res->code == 500 && $res->decoded_content =~ m/(\Qtimeout during auth check\E|\Qread timeout at\E)/mx) {
         return -1;
     }

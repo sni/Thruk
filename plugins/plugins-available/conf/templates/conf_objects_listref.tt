@@ -22,7 +22,7 @@
             [% PROCESS _button btn = {
               skipform => 1,
               data     => { sub => 'objects', 'data.id' => object.get_id(), force => 1, action => "delete", CSRFtoken => get_user_token(c) },
-              button   => { class => 'mx-auto my-5', html => "<i class='uil uil-trash-alt'></\i> Remove this " _ object.get_type().ucfirst _ " along with all selected references" },
+              button   => { class => 'mx-auto my-5 hover-red', html => "<i class='uil uil-trash-alt'></\i> Remove this " _ object.get_type().ucfirst _ " along with all selected references" },
             }%]
           </td>
         </tr>

@@ -6,7 +6,7 @@
 <h1>User Profile</h1>
 
 [% IF new_private_key %]
-<div id="new_key_alert" class="card bgSUCCESS shadow-float absolute p-1 z-50 min-w-[600px] top-4 left-1/2 transform -translate-x-1/2">
+<div id="new_key_alert" class="card green alert top-center min-w-[600px]">
   <div class="head justify-between">
     <h3>New API Key Created</h3>
     <div class="w-5">
@@ -22,7 +22,7 @@
 </div>
 [% END %]
 
-<div class="flex place-content-center mt-5">
+<div class="flex lg:place-content-center mt-5">
 
   <div class="card min-w-[900px]">
     <div class="head p-0">
@@ -30,20 +30,41 @@
       <span class="tabs text-center font-medium text-base" id="sub_2" onclick="set_sub(2, 'apikeys')">API Keys</span>
     </div>
     <div class="body sub_1">
-      <table class="cellspacing-y w-full table-fixed">
+      <table class="cellspacing w-full table-fixed">
         <tr>
-          <th class="w-36">Username</th>
+          <th class="w-40">Username</th>
           <td class="font-semibold">[% remote_user %]</td>
         </tr>
         <tr>
           <th class="align-top">Contactgroups</th>
           <td>
-            [% IF profile_user.groups.size > 0; profile_user.groups.sort.join(', '); ELSE %]&lt;none&gt;[% END %]
+            <div class="flexrow flex-nowrap gap-1 justify-between">
+              <span>[% IF profile_user.groups.size > 0; profile_user.groups.sort.join(', '); ELSE %]&lt;none&gt;[% END %]</span>
+              [% cache_age = date.now() - profile_user.timestamp; IF cache_age > 5 %]<span class="textHINTsoft" title="auth cache last updated: [% date_format(c, profile_user.timestamp, datetime_format) %]">(auth cache updated [% duration(cache_age, 6) %] ago)</span>[% END %]
+            </div>
           </td>
         </tr>
         <tr>
           <th class="align-top">Effective Roles</th>
           <td>[% PROCESS _user_roles.tt %]</td>
+        </tr>
+        <tr>
+          <th class="align-top">Can Submit Commands</th>
+          <td>
+            <div class="flexrow flex-nowrap gap-1 justify-between">
+              <span>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</span>
+              [% IF profile_user.defined("can_submit_commands_src"); %]<span class="textHINTsoft">reason: [% profile_user.can_submit_commands_src | html %]</span>[% END %]
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th class="align-top">Contact Exists</th>
+          <td>
+            <div class="flexrow flex-nowrap gap-2">
+              <div>[% IF profile_user.contact_src_peer.size > 0 %]Yes[% ELSE %]No[% END %]</div>
+              <div class="truncate max-w-[400px]">(backend: [% FOREACH peer_key IN profile_user.contact_src_peer %][% IF !loop.first %], [% END %]<span title="[% peer_key %]">[% peer_name(peer_key) %]</span>[% END %])</div>
+            </div>
+          </td>
         </tr>
       </table>
     </div>
@@ -53,9 +74,9 @@
       <h3>Timezone</h3>
     </div>
     <div class="body sub_1">
-      <table class="cellspacing-y w-full table-fixed">
+      <table class="cellspacing w-full table-fixed">
         <tr>
-          <th class="w-36 align-top">Set Timezone</th>
+          <th class="w-40 align-top">Set Timezone</th>
           <td>
             <form action="user.cgi" method="POST">
               <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
@@ -72,7 +93,7 @@
                 <div>
                   <button onclick="setBtnSpinner(this);"><i class="uil uil-save"></i>Save changes</button>
                 </div>
-                <div>
+                <div class="min-w-[140px]">
                   <span>Server: <span id="server_tz">[% c.config._server_timezone %]</span></span><br>
                   <span>Browser: <span id="browser_tz"></span></span>
                 </div>
@@ -89,9 +110,9 @@
       <h3>Password</h3>
     </div>
     <div class="body sub_1">
-      <table class="cellspacing-y w-full table-fixed">
+      <table class="cellspacing w-full table-fixed">
       <tr>
-        <th class="w-36">Change Password</th>
+        <th class="w-40">Change Password</th>
         <td>
           <a class="button w-fit" href="[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]"><i class="uil uil-key-skeleton"></i> Update password</a>
         </td>
@@ -104,9 +125,9 @@
       <h3>Advanced Settings</h3>
     </div>
     <div class="body sub_1">
-      <table class="cellspacing-y w-full table-fixed">
+      <table class="cellspacing w-full table-fixed">
         <tr>
-          <th class="w-36 align-top">Debug Profiles</th>
+          <th class="w-40 align-top">Debug Profiles</th>
           <td>
             <div class="flexrow gap-1">
               <input type="radio" name="submit" value="0" id="profile_off" onClick="cookieSave('thruk_profiling', 0, 0); thruk_message(0, 'profiling disabled'); reloadPage();" [% IF !user_profiling %] checked[% END %]>

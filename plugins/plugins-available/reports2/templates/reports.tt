@@ -17,38 +17,38 @@
 </div>
 [% END %]
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 min-w-[800px]">
   <div class="head p-0 justify-between border-0">
     <div class="mx-2">
       [% PROCESS _table_search_field.tt ids=["reportsTable"] %]
     </div>
     <div class="grow"></div>
     [% IF !filtered %]
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view1" onclick="reports_view('my')    ; return false;"><a class="block" href="#">My Reports</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view2" onclick="reports_view('public'); return false;"><a class="block" href="#">Public  Reports</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base js-tabs" id="view3" onclick="reports_view('all')   ; return false;"><a class="block" href="#">All  Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center js-tabs" id="view1" onclick="reports_view('my')    ; return false;"><a class="block" href="#">My Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center js-tabs" id="view2" onclick="reports_view('public'); return false;"><a class="block" href="#">Public  Reports</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center js-tabs" id="view3" onclick="reports_view('all')   ; return false;"><a class="block" href="#">All  Reports</a></span>
     [% ELSE %]
       <a href="reports2.cgi" class="button">Show all reports</a>
     [% END %]
     <div class="grow"></div>
     <a href="reports2.cgi?action=edit&amp;report=new" class="button green w-40 mx-2">create new report</a>
   </div>
-  <div class="mainTable">
+  <div class="mainTable"  style="display: none;">
     <table class="mainTable js-striped" id="reportsTable">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th class="text-center">Public</th>
-          <th class="text-center js-usercol">Owner</th>
-          <th class="text-center">Mail</th>
-          <th class="text-center">Schedule</th>
-          <th class="text-center">Last Time Run</th>
-          <th class="text-center">Duration</th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
+          <th class="w-56">Name</th>
+          <th class="min-w-[250px]">Description</th>
+          <th class="text-center w-20">Public</th>
+          <th class="text-center w-28 js-usercol">Owner</th>
+          <th class="text-center w-28">Mail</th>
+          <th class="text-center w-48">Schedule</th>
+          <th class="text-center w-28">Last Time Run</th>
+          <th class="text-center w-48">Duration</th>
+          <th class="w-6"></th>
+          <th class="w-6"></th>
+          <th class="w-[60px]"></th>
+          <th class="w-6"></th>
         </tr>
       </thead>
       <tbody>
@@ -65,7 +65,7 @@
             [% IF r.var.exists('is_waiting') && r.var.is_waiting %]
               queued
             [% ELSIF r.failed %]
-              <span class="textERROR">failed</span>
+              <span class="textALERT">failed</span>
             [% ELSE %]
               [% IF r.var.start_time %]
                 [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
@@ -89,9 +89,10 @@
                       %]
                 [% ELSE %]
                   [% IF c.check_user_roles('admin') %]
-                    <span class="clickable" onclick="overcard({ 'body': '<div id=\'report_profile\'><div class=\'spinner w-8 h-8\'><\/div>', 'caption': 'report profile', 'width': 800 }); load_overcard_content('report_profile', 'reports2.cgi?report=[% r.nr %]&amp;action=profile', true);">
+                    <span class="clickable" onclick="overcard({ 'bodyEl': 'report_profile[% loop.index %]', 'caption': 'report profile' }); load_overcard_content('report_profile[% loop.index %]', 'reports2.cgi?report=[% r.nr %]&amp;action=profile&view=html');">
                     [% duration(job_time, 3) %]
                     </span>
+                    <div id='report_profile[% loop.index %]' class='p-2 min-w-[800px] flex hidden'></div>
                   [% ELSE %]
                       [% duration(job_time, 3) %]
                   [% END %]
@@ -99,13 +100,13 @@
               [% END %]
             [% END %]
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             <form action="reports2.cgi" method="POST">
               <div class="flexrow flex-nowrap gap-1">
                 <input type="hidden" name="report" value="[% r.nr %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
-                  <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'cancel'})"><i class="fa-solid fa-circle-xmark text-sm" title='Cancel Report'></i></a>
+                  <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'cancel'})"><i class="fa-solid fa-circle-xmark text-sm hover-red-text" title='Cancel Report'></i></a>
                 [% ELSE %]
                   <a href="#" onclick="return send_form_in_background_and_reload(this, {action: 'update'})"><i class="fa-solid fa-arrows-rotate text-sm" title='Regenerate Report'></i></a>
                   [% IF debug %]
@@ -118,12 +119,12 @@
               </div>
             </form>
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             [% IF ! r.readonly %]
               <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><i class="fa-solid fa-pencil text-sm" title='Change Report'></i></a>
             [% END %]
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             <div class="flexrow flex-nowrap gap-1">
               [% IF r.var.file_exists && r.var.is_running == 0 %]
                 [% PROCESS _reports_icon.tt r=r %]
@@ -140,7 +141,7 @@
               [% END %]
             </div>
           </td>
-          <td class="text-center w-5">
+          <td class="text-center">
             [% IF ! r.readonly %]
               <form action="reports2.cgi" method="POST">
                 <input type="hidden" name="report" value="[% r.nr %]">
@@ -153,11 +154,13 @@
         [% IF r.failed %]
           <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
-            <td colspan=9 class="textERROR">
-              [% IF r.exists('long_error') && r.long_error != "" %]
-                <i class="uil uil-arrow-from-top clickable" id='long_error_icon_[% r.nr %]' title="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;"></i>
-              [% END %]
-              [% escape_html(r.error) | nl2br %]
+            <td colspan=9 class="textALERT">
+              <span class="clickable" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;">
+                [% IF r.exists('long_error') && r.long_error != "" %]
+                  <i class="uil uil-arrow-from-top" id='long_error_icon_[% r.nr %]' title="show long error output"></i>
+                [% END %]
+                [% escape_html(r.error) | nl2br %]
+              </span>
               [% IF r.exists('long_error') %]
                 <div id='long_error_[% r.nr %]' class="truncate max-w-[70%]" style="display:none;">
                 [% escape_html(r.long_error) | nl2br %]
@@ -169,7 +172,7 @@
         [% IF r.exists("var") && r.var.exists("opt_errors") %]
           <tr class="report[% r.nr +%] js-skip-count [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
             <td></td>
-            <td colspan=9 class="textERROR">
+            <td colspan=9 class="textALERT">
               Error(s) in report options:
               <ul>
               [% FOREACH e = r.var.opt_errors %]
@@ -201,6 +204,7 @@
     var typ = get_hash(1);
     if(typ == undefined) { typ = 'my' }
     if(typ == "")        { typ = 'my' }
+    jQuery("DIV.mainTable").css("display", "");
     reports_view(typ);
     [% IF highlight %]
     jQuery('TR.report[% escape_quotes(highlight) +%] TD').effect('highlight', {}, 2000, function() {

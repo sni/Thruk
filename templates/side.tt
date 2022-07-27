@@ -1,4 +1,4 @@
-﻿<div class="flexcol flex-nowrap gap-0 w-[200px] h-screen [% IF menu_states.exists('cl') && menu_states.cl == 1 %]collapsed[% END %]" id="nav-container" onmouseover="resetRefresh()">
+﻿<div class="flexcol flex-nowrap gap-0 w-[200px] h-full [% IF menu_states.exists('cl') && menu_states.cl == 1 %]collapsed[% END %]" id="nav-container" onmouseover="resetRefresh()">
 
   <header class="header flex-shrink-0 hidden lg:flex h-[50px]">
     <a href="[% c.config.home_link %]" target="_blank" class="m-auto block">
@@ -74,12 +74,16 @@
     </ul>
   </div>
 
-  <div class="h-8 flex-shrink-0 mt-auto w-full m-0 hidden lg:block collapse-btn navBarBG">
-    <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 rounded-none h-full textNavBar hover:navItemBG block text-left js-menu-collapse">
-      <i class="uil uil-angle-double-left text-2xl contents" title="collapse navigation"></i>
-    </button>
+  <div class="h-8 flex-shrink-0 mt-auto w-full m-0 hidden lg:block collapse-btn">
+    <div class="flexrow flex-nowrap gap-0">
+      <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 h-8 block text-left hoverable js-menu-collapse" title="toggle collapsed side navigation.">
+        <i class="uil uil-angle-double-left text-2xl contents" title="collapse navigation"></i>
+      </button>
+      <button class="iconOnly w-full py-0 px-1.5 pl-[15px] m-0 h-8 block hoverable btn-nav-hide js-menu-hide" title="toggle hover side navigation.">
+        <i class="uil uil-angle-double-up text-2xl contents" title="hide navigation"></i>
+      </button>
+    </div>
   </div>
 </div>
 
 [% PROCESS _ajax_search.tt %]
-[% PROCESS _side_js.tt %]

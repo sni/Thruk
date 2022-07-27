@@ -23,9 +23,9 @@
 <h1 class="py-4">Program-Wide Performance Information</h1>
 
 <div class="w-fit mx-auto">
-  <div class="flexrow justify-center">
+  <div class="flexrow lg:justify-center">
     <div>
-      <div class="flexrow justify-center">
+      <div class="flexrow lg:justify-center">
         <div class="card w-[400px] h-auto">
           <div class="head">
             <h3>Hosts Actively Checked</h3>
@@ -96,7 +96,7 @@
       </div>
 
 
-      <div class="flexrow justify-center mt-5">
+      <div class="flexrow lg:justify-center mt-5">
         <div class="card w-[400px] h-auto">
           <div class="head">
             <h3>Hosts Passively Checked</h3>
@@ -156,7 +156,7 @@
     </div>
 
     <div>
-      <div class="flexrow justify-center">
+      <div class="flexrow lg:justify-center">
         <div class="card w-[400px] h-auto">
           <div class="head">
             <h3>Services Actively Checked</h3>
@@ -226,7 +226,7 @@
         </div>
       </div>
 
-      <div class="flexrow justify-center mt-5">
+      <div class="flexrow lg:justify-center mt-5">
         <div class="card w-[400px] h-auto">
           <div class="head">
             <h3>Services Passively Checked</h3>
@@ -286,7 +286,7 @@
     </div>
   </div>
 
-  <div class="flexrow justify-center mt-5">
+  <div class="flexrow lg:justify-center mt-5">
     <div class="card w-[400px]">
       <div class="head">
         <h3>Livestatus Statistics</h3>
@@ -346,7 +346,7 @@
     </div>
 
     [% IF ( has_logcache || logcache_error ) && has_lmd %]
-    <div class="flexrow justify-center xl:min-w-[1240px]">
+    <div class="flexrow lg:justify-center xl:min-w-[1240px]">
     [% END %]
     [% IF has_logcache || logcache_error %]
     <div class="card w-fit h-auto">
@@ -366,7 +366,7 @@
           </tr>
           [% IF logcache_error %]
             <tr>
-              <td colspan=6 class="whitespace-normal"><div class="textERROR">[% logcache_error %]</div></td>
+              <td colspan=6 class="whitespace-normal"><div class="textALERT">[% logcache_error %]</div></td>
             </tr>
           [% ELSE %]
             [% FOREACH s = logcache_stats %]

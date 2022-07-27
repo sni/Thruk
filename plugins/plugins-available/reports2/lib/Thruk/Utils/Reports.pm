@@ -21,7 +21,7 @@ use File::Copy;
 use MIME::Lite;
 use POSIX ();
 use Storable qw/dclone/;
-use Time::HiRes qw/sleep/;
+use Time::HiRes qw/sleep time/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::External ();
@@ -43,6 +43,8 @@ return list of all reports for this user
 =cut
 sub get_report_list {
     my($c, $noauth, $number_filter) = @_;
+
+    $c->stats->profile(begin => "Utils::Reports::get_report_list(".($number_filter//'all').")");
 
     my $reports = [];
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
@@ -66,6 +68,7 @@ sub get_report_list {
     # sort by name
     @{$reports} = sort { $a->{'name'} cmp $b->{'name'} } @{$reports};
 
+    $c->stats->profile(end => "Utils::Reports::get_report_list(".($number_filter//'all').")");
     return $reports;
 }
 
@@ -644,7 +647,7 @@ sub generate_report {
     }
     elsif($Thruk::Utils::PDF::ctype eq 'html2pdf') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
-        _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
+        _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile, 1);
     }
 
     # set error if not already set
@@ -1101,6 +1104,7 @@ return available report templates
 =cut
 sub get_report_templates {
     my($c) = @_;
+    $c->stats->profile(begin => "Utils::Reports::get_report_templates()");
     my $templates = {};
     for my $path (@{$c->get_tt_template_paths()}) {
         for my $file (glob($path.'/reports/*.tt')) {
@@ -1116,6 +1120,7 @@ sub get_report_templates {
             };
         }
     }
+    $c->stats->profile(end => "Utils::Reports::get_report_templates()");
     return($templates);
 }
 
@@ -1705,7 +1710,9 @@ sub _verify_fields {
 
 ##########################################################
 sub _convert_to_pdf {
-    my($c, $reportdata, $attachment, $nr, $logfile) = @_;
+    my($c, $reportdata, $attachment, $nr, $logfile, $nodelay) = @_;
+    $c->stats->profile(begin => "_convert_to_pdf()");
+
     my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
 
     my $htmlonly = 0;
@@ -1728,6 +1735,7 @@ sub _convert_to_pdf {
 
     if($htmlonly) {
         Thruk::Utils::IO::touch($attachment);
+        $c->stats->profile(end => "_convert_to_pdf()");
         return;
     }
 
@@ -1737,8 +1745,13 @@ sub _convert_to_pdf {
         $autoscale = 1;
     }
 
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--autoscale=1' if $autoscale;
+    my $phantomjsscriptoptions  = '';
+       $phantomjsscriptoptions .= ' --autoscale=1' if $autoscale;
+       $phantomjsscriptoptions .= ' --nodelay=1'   if $nodelay;
+    local $ENV{PHANTOMJSSCRIPTOPTIONS} = $phantomjsscriptoptions if $phantomjsscriptoptions;
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
+    _debug("converting env: PHANTOMJSSCRIPTOPTIONS: %s", $ENV{PHANTOMJSSCRIPTOPTIONS}//'');
+    _debug("converting to pdf: ".$cmd);
     my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
     # try again to avoid occasionally qt errors
@@ -1759,6 +1772,8 @@ sub _convert_to_pdf {
 
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
+
+    $c->stats->profile(end => "_convert_to_pdf()");
     return;
 }
 
@@ -1847,8 +1862,8 @@ sub _report_die {
 
     # redirect from $c->detach_error
     if($c->stash->{'error_data'} && $c->{'detached'}) {
-        $err = $c->stash->{'error_data'}->{'msg'}."\n";
-        $err .= $c->stash->{'error_data'}->{'descr'}."\n" if $c->stash->{'error_data'}->{'descr'};
+        $err  = ($c->stash->{'raw_error_data'}->{'msg'}   // $c->stash->{'error_data'}->{'msg'})."\n";
+        $err .= ($c->stash->{'raw_error_data'}->{'descr'} // $c->stash->{'error_data'}->{'descr'})."\n" if $c->stash->{'error_data'}->{'descr'};
     }
 
     _error($err);

@@ -164,7 +164,12 @@ TD.icon_column DIV.x-grid-cell-inner {
 }
 
 TD.icon_column IMG {
-  margin-right: 3px;
+  margin-left: 3px;
+}
+
+TD.icon_column I {
+  margin-left: 3px;
+  color: black;
 }
 
 .clickable:hover {
@@ -414,8 +419,9 @@ DIV.msg A.x-tab-close-btn {
 
  .perf-bar-container {
   position: relative;
-  height: 1.25rem;
   width: 75px;
+  height: 18px;
+  display: block;
 }
 
 .perf-bar-container .ok, .perf-bar-container .green {
@@ -901,4 +907,21 @@ DIV.maintenance .x-mask-msg-text {
 
 DIV.maintenance .show {
   font-size: 11px;
+}
+
+I {
+  display: inline-block;
+  text-align: center;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+I.round {
+  border-radius: 9999px;
+}
+
+I.yellow {
+  background-color: #FFDE00;
 }

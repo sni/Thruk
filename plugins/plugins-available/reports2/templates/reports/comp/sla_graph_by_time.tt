@@ -11,6 +11,10 @@
       },
       data: [% encode_json_obj(data.tvalues) %]
   }
+  if(d1.data.length > 2) {
+    var tickDur = d1.data[d1.data.length-1][0] - d1.data[d1.data.length-2][0];
+    d1.data.push([d1.data[d1.data.length-1][0]+tickDur, 0]); // add fake day, otherwise last day would not be plotted completely
+  }
   var d2 = {
       color: "rgb(236, 193, 77)",
       lines: { show: true },
@@ -49,15 +53,24 @@
         var ts  = pt[0];
         var d   = new Date(ts);
         var day = d.getUTCDate()+1;
+
+        var tick = [ts, ''];
+        ticks.push(tick);
+
         if(day-1 == 1) {
-          ticks.push([ts-86400000, monthNames[d.getUTCMonth()]]);
+          if(ticks.length >= 2) {
+            ticks[ticks.length-2][1] = monthNames[d.getUTCMonth()];
+          } else {
+            ticks.push([ts-86400000, monthNames[d.getUTCMonth()]]);
+          }
+          if(ticks.length >= 3) {
+            ticks[ticks.length-3][1] = ""; // avoid overlapping axis text, remove day 30
+          }
           markings.push({ xaxis: { from: ts-86400000, to: ts-86400000 }, color: "#FF0000", lineWidth: 2 });
         }
-        if(day%5 == 0 && day != 30) {
-          ticks.push([ts, day]);
+        else if(day%5 == 0) {
+          tick[1] = day;
           markings.push({ xaxis: { from: ts, to: ts }, color: "#000000" });
-        } else {
-          ticks.push([ts, '']);
         }
       });
     }

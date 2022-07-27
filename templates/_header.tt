@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE HTML>
-<html class="[% IF extrahtmlclass %][% extrahtmlclass | html %][% END %] h-full w-full overflow-hidden [% IF iframed %] iframed[% END %]" lang="en">
+<html [% IF extrahtmlclass %]class="[% extrahtmlclass | html %]"[% END %] lang="en">
   <head>
     <title>[% title_prefix %][% escape_html(title) %]</title>
     [% PROCESS _favicon.tt %]
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.8" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [%- SET page = 'status' IF page == '' -%]
     [%- PROCESS _common_css.tt %]
@@ -16,14 +16,14 @@
   <!-- Produced by Thruk (http://www.thruk.org).
       Copyright (c) 2009-present Thruk Developer Team.
   -->
-  <body class="h-screen w-screen overflow-hidden [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
+  <body class="h-screen w-screen overflow-visible [% IF menu_states.exists('cl') && menu_states.cl == 2 %]topnav[% END %] [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
   <div style="display:none;" id="search-results"></div>
 
-  <div class="flexrow flex-nowrap gap-0 h-screen w-screen overflow-hidden">
+  <div class="flexrow flex-nowrap gap-0 h-screen w-screen overflow-visible">
     [% IF show_nav == 1 %]
-      <div id="navbar" class="navbar w-fit h-screen z-50 lg:mt-0 mt-[50px] lg:block hidden lg:relative absolute">
+      <div id="navbar">
         [% PROCESS side.tt %]
       </div>
     [% END %]
@@ -31,21 +31,21 @@
     <div class="flexcol gap-0 flex-grow w-0 h-screen" id="mainframe">
     [% IF minimal == 2 %]
       <header class="header">
-        <div class="h-[50px] flexrow flex-nowrap items-center">
+        <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center">
           [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
         </div>
       </header>
     [% END %]
     [% UNLESS minimal %]
       <header class="header">
-        <div class="h-[50px] flexrow flex-nowrap items-center">
-          <button class="big iconOnly w-10 h-10 ml-[-10px] block lg:hidden hoverable min-w-[30px]" onclick="toggleElement('navbar', null, true, null, checkNavBackground); checkNavBackground(); return false;"><i class="fa-solid fa-bars"></i></button>
+        <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center">
+          <button id="mainNavBtn" class="big iconOnly w-10 h-10 ml-[-10px] clickable min-w-[30px]"><i class="fa-solid fa-bars"></i></button>
           <div class="flex-grow h-min">
             [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
           </div>
           [% PROCESS _header_broadcast.tt %]
 
-          <div class="flexrow w-fit gap-2 flex-nowrap">
+          <div class="flexrow w-fit gap-2 flex-nowrap main-header-button">
             [% IF c.user_exists %]
               <div class="flex items-center">
                 <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi">
@@ -66,7 +66,6 @@
             <button class="noprint big primary round" title="reload page" id="refresh_button" onClick="refresh_button()"><i class="uil uil-sync"></i></button>
             [% IF c.user_exists %]
               <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="uil uil-cog"></i></button>
-              <div id="pref_pane" class="card z-50 shadow-float fixed left-0 md:left-auto md:right-0 top-[50px] mt-0 min-h-[150px] w-full md:w-[500px] rounded-t-none rounded-r-none" style="display: none;"></div>
               [% IF cookie_auth && show_logout_button %]
                 <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top' style="display: initial;">
                   <button class="noprint big primary round" title="sign out"><i class="uil uil-signout"></i></button>
@@ -74,6 +73,9 @@
               [% END %]
             [% END %]
           </div>
+          [% IF c.user_exists %]
+            <div id="pref_pane" class="card z-50 shadow-float fixed left-0 md:left-auto md:right-0 top-[50px] mt-0 min-h-[150px] w-full md:w-[500px] rounded-t-none rounded-r-none" style="display: none;"></div>
+          [% END %]
         </div>
       </header>
     [% END %]

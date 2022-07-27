@@ -20,7 +20,7 @@ use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use File::Copy qw/move copy/;
 use IO::Select ();
 use IPC::Open3 qw/open3/;
-use POSIX ();
+use POSIX ":sys_wait_h";
 use Time::HiRes qw/sleep/;
 
 use Thruk::Utils::Log qw/:all/;
@@ -686,7 +686,7 @@ sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode) = @_;
     if(defined $c && !defined $cmd) {
         $cmd = $c;
-        $c = undef;
+        $c = $Thruk::Globals::c || undef;
     }
     $c->stats->profile(begin => "IO::cmd") if $c;
 
@@ -755,21 +755,24 @@ sub cmd {
         confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
         _debug( "running cmd: ". $cmd ) if $c;
-        local $SIG{CHLD} = 'IGNORE' if $cmd =~ m/&\s*$/mx; # let the system reap the childs, we don't care
 
         # background process?
         if($cmd =~ m/&\s*$/mx) {
+            local $SIG{CHLD} = 'IGNORE'; # let the system reap the childs, we don't care
             if($cmd !~ m|2>&1|mx) {
                 _warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
             }
+            $output = `$cmd`;
+            $rc = $?;
+            # rc will be -1 otherwise when ignoring SIGCHLD
+            $rc = 0 if $rc == -1;
+        } else {
+            $output = `$cmd`;
+            $rc     = $?;
+            $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
         }
-
-        $output = `$cmd`;
-        $rc     = $?;
-        $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
-        # rc will be -1 otherwise when ignoring SIGCHLD
-        $rc = 0 if($rc == -1 && defined $SIG{CHLD} && $SIG{CHLD} eq 'IGNORE');
     }
+
     if($rc == -1) {
         $output .= "[".$!."]";
     } else {

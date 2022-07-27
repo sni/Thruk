@@ -133,7 +133,13 @@ sub _rest_get_external_command {
             if($arg eq 'sticky_ack')         { $val = 1; }
             if($arg eq 'send_notification')  { $val = $c->config->{'cmd_defaults'}->{'send_notification'} // 1; }
             if($arg eq 'sticky_ack')         { $val = $c->config->{'cmd_defaults'}->{'sticky_ack'} // 1; }
-            if($arg eq 'persistent_comment') { $val = $c->config->{'cmd_defaults'}->{'persistent_comment'} // 1; }
+            if($arg eq 'persistent_comment') {
+                if($cmd_name =~ m/^acknowledge_/mx) {
+                    $val = $c->config->{'cmd_defaults'}->{'persistent_ack'} // 0;
+                } else {
+                    $val = $c->config->{'cmd_defaults'}->{'persistent_comment'} // 1;
+                }
+            }
         }
         # still not defined?
         if(!defined $val) {

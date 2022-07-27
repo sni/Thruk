@@ -5,7 +5,7 @@
 <div class="flexrow 2xl:justify-between h-full">
   [% PROCESS _infobox.tt %]
 
-  <form action="reports2.cgi" method="POST" class="w-[700px] h-full">
+  <form action="reports2.cgi" method="POST" class="w-[800px] h-full">
     <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
     <input type="hidden" name="action" value="save">
     <input type="hidden" name="report" value="[% r.nr %]">
@@ -18,11 +18,11 @@
         <h3>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</h3>
         <div class="w-[70px]"></div>
       </div>
-      <div class="grow h-full overflow-auto">
+      <div class="h-full overflow-auto" id="report_attributes">
         <table class="body cellspacing striped">
           <tbody>
             <tr>
-              <th>Name <span class="required">*</span></th>
+              <th class="min-w-[240px]">Name <span class="required">*</span></th>
               <td colspan=2><input type="text" name="name" value="[% r.name | html %]" class="w-full"></td>
             </tr>
             <tr>

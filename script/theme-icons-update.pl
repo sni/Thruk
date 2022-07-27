@@ -107,7 +107,7 @@ if(!$options->{'dry'}) {
     my @newicons;
     for my $class (sort { $icons->{$a}->{'class'} cmp $icons->{$b}->{'class'} } keys %{$icons}) {
         #next if $icons->{$class}->{'used'} == 1;
-        push @newicons, '      <div><a><i class="'.$icons->{$class}->{'class'}.'"></i>'.$icons->{$class}->{'class'}.'</a></div>';
+        push @newicons, '      <div><a class="flex" href="#"><i class="'.$icons->{$class}->{'class'}.'"></i>'.$icons->{$class}->{'class'}.'</a></div>';
     }
     my $newicons = join("\n", @newicons);
     $content =~ s/-->.*?<\!--/-->\n$newicons\n<!--/gmxs;

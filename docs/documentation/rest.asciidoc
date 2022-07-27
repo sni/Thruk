@@ -1525,7 +1525,7 @@ lists configured backends
 |localtime                         | current local unix timestamp of thruk host
 |name                              | name of the backend
 |section                           | section name
-|status                            | 0 if the site is online, 1 if the site is down
+|status                            | 0 (OK), 1 (DOWN)
 |type                              | type of the backend
 |===========================================
 
@@ -2093,4 +2093,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

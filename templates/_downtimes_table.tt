@@ -59,7 +59,7 @@
       [% END %]
       <td class='text-center'>[% date_format(c, d.entry_time) %]</td>
       <td >[% d.author %]</td>
-      <td style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
+      <td style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(d.comment) | replace_links %][% ELSE %][% d.comment | replace_links %][% END %]</td>
       <td class='text-center'>[% date_format(c, d.start_time) %]</td>
       <td class='text-center'>[% date_format(c, d.end_time) %]</td>
       <td class='text-center'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
@@ -80,7 +80,7 @@
     [% END %]
     [% IF downtimes.size == 0 %]
     <tr>
-      <td class='text-center textERROR' colspan="13">There are no downtimes</td>
+      <td class='text-center textALERT' colspan="13">There are no downtimes</td>
     </tr>
   [% END %]
 </table>

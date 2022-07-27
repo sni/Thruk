@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-<div class="flexrow justify-between">
+<div class="flexrow lg:justify-between">
   [% PROCESS _infobox.tt %]
   <div class="card">
     <div class="head">
@@ -50,16 +50,16 @@
 
 <h1 class="mt-5">Configuration</h1>
 
-<div class="card w-full mt-5">
-  <div class="head p-0 justify-between">
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Hosts' %] active[% END %]"><a class="block" href="config.cgi?type=hosts">Hosts</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Host Groups' %] active[% END %]"><a class="block" href="config.cgi?type=hostgroups">Host Groups</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Services' %] active[% END %]"><a class="block" href="config.cgi?type=services">Services</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Service Groups' %] active[% END %]"><a class="block" href="config.cgi?type=servicegroups">Service Groups</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Contacts' %] active[% END %]"><a class="block" href="config.cgi?type=contacts">Contacts</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Contact Groups' %] active[% END %]"><a class="block" href="config.cgi?type=contactgroups">Contact Groups</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Time Periods' %] active[% END %]"><a class="block" href="config.cgi?type=timeperiods">Timeperiods</a></span>
-    <span class="tabs min-w-[140px] w-52 px-2 text-center font-medium text-base[% IF dataTitle == 'Commands' %] active[% END %]"><a class="block" href="config.cgi?type=commands">Commands</a></span>
+<div class="card w-full min-w-[800px] mt-5 overflow-hidden">
+  <div class="head p-0 justify-between overflow-x-auto">
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Hosts' %] active[% END %]"><a class="block" href="config.cgi?type=hosts">Hosts</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Host Groups' %] active[% END %]"><a class="block" href="config.cgi?type=hostgroups">Host Groups</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Services' %] active[% END %]"><a class="block" href="config.cgi?type=services">Services</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Service Groups' %] active[% END %]"><a class="block" href="config.cgi?type=servicegroups">Service Groups</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Contacts' %] active[% END %]"><a class="block" href="config.cgi?type=contacts">Contacts</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Contact Groups' %] active[% END %]"><a class="block" href="config.cgi?type=contactgroups">Contact Groups</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Commands' %] active[% END %]"><a class="block" href="config.cgi?type=commands">Commands</a></span>
+    <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Time Periods' %] active[% END %]"><a class="block" href="config.cgi?type=timeperiods">Timeperiods</a></span>
   </div>
   <div class="mainTableHeader">
     <div>

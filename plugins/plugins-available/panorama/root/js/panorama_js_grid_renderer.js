@@ -310,6 +310,7 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.name, undefined, view);
     }
+    td.tdCls += " icon_column";
     return icons;
 }
 
@@ -345,6 +346,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(action_menu) {
         icons += TP.addActionIconsFromMenu(action_menu, d.host_name, d.description, view);
     }
+    td.tdCls += " icon_column";
     return icons;
 }
 
@@ -429,7 +431,7 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     }
     var r =  perf_table_data({'state': item.data.state, 'pluginOutput': item.data.plugin_output, 'perfdata': item.data.perf_data, 'checkCommand': item.data.check_command });
     if(r == false) { return ""; }
-    td.tdCls = "less_padding";
+    td.tdCls += " less_padding";
     return r;
 }
 
@@ -555,7 +557,7 @@ TP.addActionIconsFromMenu = function(action_menu_name, host, service, view) {
         view = parent;
     }
     var icons = "";
-    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', panel, '', {}, true);
+    var menuData = TP.parseActionMenuItemsStr(action_menu_name, '', panel, '', {}, true, host, service);
     if(menuData === false) {
         return(icons);
     }
@@ -583,14 +585,17 @@ TP.addActionIcon = function(menuData, menuName, host, service) {
             href = "menu://"+menuName;
         }
     }
-    var icon = '<a href="'+href+'" target="'+(menuData.target || '')
+    var options = { host: host, service: service};
+    var img     = action_menu_icon(menuData.icon, options);
+    img.title   = replace_macros(menuData.title||menuData.label, undefined, options);
+    var link = '<a href="'+href+'" target="'+(menuData.target || '')
                     +'" onclick="return(TP.checkActionLink(this))" data-host="'+encodeURIComponent(host||'')
                     +'" data-service="'+encodeURIComponent(service||'')
                     +(menuName === null ? '" data-menu="'+encodeURIComponent(Ext.JSON.encode(menuData) ||'') : '')
                 +'">'
-              +'<img src="'+replace_macros(menuData.icon)+'" alt="'+replace_macros(menuData.title||menuData.label)+'" border="0" height="20" width="20">'
-              +'</a>';
-    return(icon);
+                + img.outerHTML
+                + '</a>';
+    return(link);
 }
 
 TP.checkActionLink = function(a) {

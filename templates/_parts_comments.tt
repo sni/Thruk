@@ -15,7 +15,7 @@
     <tr>
       <td class="align-top pl-2">[% date_format(c, com.entry_time) %]</td>
       <td class="align-top">[% escape_quotes(com.author) %]</td>
-      <td class="align-top whitespace-normal">[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+      <td class="align-top whitespace-normal">[% IF escape_html_tags %][% escape_html(com.comment) | replace_links %][% ELSE %][% com.comment | replace_links %][% END %]</td>
       <td class="align-top">[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
       [% UNLESS command_disabled(c, 2) && command_disabled(c, 4) %]
         <td class="align-top">

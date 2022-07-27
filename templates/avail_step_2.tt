@@ -4,25 +4,23 @@
 
 <h1 class="mt-5">Availability Report</h1>
 
-<div class="card mx-auto w-[800px] mt-5">
-  <div class="head">
-    <h3>
-      <span class="tabs w-44"><a class="flex" href="avail.cgi">1. Report Type</a></span>
-      <i class="fa-solid fa-angle-right text-sm"></i>
-      <span class="tabs w-44 active">
-        <a class="flex" href="#">
-          [% IF report_type == 'hosts' %]
-          2. Select Host
-          [% ELSIF report_type == 'hostgroups' %]
-          2. Select Hostgroup
-          [% ELSIF report_type == 'services' %]
-          2. Select Service
-          [% ELSIF report_type == 'servicegroups' %]
-          2. Select Servicegroup
-          [% END %]
-        </a>
-      </span>
-    </h3>
+<div class="card mx-auto w-[800px] mt-5 overflow-hidden">
+  <div class="head p-0">
+    <span class="tabs w-44"><a class="flex" href="avail.cgi">1. Report Type</a></span>
+    <i class="fa-solid fa-angle-right text-sm"></i>
+    <span class="tabs w-44 active">
+      <a class="flex" href="#">
+        [% IF report_type == 'hosts' %]
+        2. Select Host
+        [% ELSIF report_type == 'hostgroups' %]
+        2. Select Hostgroup
+        [% ELSIF report_type == 'services' %]
+        2. Select Service
+        [% ELSIF report_type == 'servicegroups' %]
+        2. Select Servicegroup
+        [% END %]
+      </a>
+    </span>
   </div>
 
   <form method="get" action="avail.cgi">

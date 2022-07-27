@@ -203,12 +203,13 @@ $data contains:
         code                http return code, defaults to 500;
         log                 flag wether error should be logged. Error codes > 500 are automatically logged if `log` is undefined
         debug_information   more details which will be logged, (string / array)
+        skip_escape         skip escaping html
 }
 
 =cut
 sub detach_error {
     my($c, $data) = @_;
-    $data->{'stacktrace'} .= Carp::longmess("stack") if(!$data->{'stacktrace'} && $c->stash->{'thruk_author'});
+    $data->{'stacktrace'} .= Carp::longmess("detach_error()") if(!$data->{'stacktrace'} && $c->stash->{'thruk_author'});
     $c->stash->{'error_data'} = $data;
     my($package, $filename, $line) = caller;
     $c->stats->profile(comment => 'detach_eror from '.$package.':'.$line);
@@ -613,8 +614,10 @@ sub redirect_to {
     $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
-    require Data::Dumper;
-    confess("invalid redirect url: ".Dumper($url)) if $url =~ m/ARRAY\(/mx;
+    if($url =~ m/ARRAY\(/mx) {
+        require Data::Dumper;
+        confess("invalid redirect url: ".Dumper($url));
+    }
     $c->stash->{'last_redirect_to'} = $url;
     return(1);
 }
@@ -663,6 +666,11 @@ sub translate_request_path {
     my $product_prefix = $config->{'product_prefix'};
     if($ENV{'OMD_SITE'}) {
         $path_info =~ s|^/\Q$ENV{'OMD_SITE'}\E/|/|mx;
+    } else {
+        my $url_prefix = $config->{'url_prefix'} // '/';
+        if($url_prefix ne '/') {
+            $path_info =~ s|^\Q$url_prefix\E|/thruk/|mx;
+        }
     }
     if($product_prefix ne 'thruk') {
         $path_info =~ s|^/\Q$product_prefix\E|/thruk|mx;
@@ -873,23 +881,51 @@ sub finalize_request {
 
     my $elapsed = tv_interval($c->stash->{'time_begin'});
     $c->stats->profile(end => "finalize_request");
-    $c->stats->profile(comment => 'total time waited on backends:  '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if $c->stash->{'total_backend_waited'};
-    $c->stats->profile(comment => 'total time waited on rendering: '.sprintf('%.2fs', $c->stash->{'total_render_waited'}))  if $c->stash->{'total_render_waited'};
+    $c->set_stats_common_totals();
     $c->stash->{'time_total'} = $elapsed;
 
     my $h = Plack::Util::headers($res->[1]);
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->stash->{'inject_stats'} && !$ENV{'THRUK_PERFORMANCE_COLLECT_ONLY'}) {
-        # inject stats into html page
-        require Thruk::Views::ToolkitRenderer;
-        require Thruk::Template::Context;
-        unshift @{$c->stash->{'profile'}}, @{Thruk::Template::Context::get_profiles()} if $Thruk::Globals::tt_profiling;
-        unshift @{$c->stash->{'profile'}}, [$c->stats->report_html(), $c->stats->report()];
-        my $stats = "";
-        Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
-        $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx if ref $res->[2] eq 'ARRAY';
-        Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
-        $h->remove("Content-Length");
+
+        my $save_for_later = 0;
+        my $inject         = 0;
+        if($res->[0] == 302 && $c->{'session'} && $c->{'session'}->{'file'}) {
+            $save_for_later = 1;
+        }
+        if(!$save_for_later && ref $res->[2] eq 'ARRAY' && $res->[2]->[0] =~ m/<\/body>/mx) {
+            $inject = 1;
+        }
+
+        if($inject) {
+            # add previously saved profiles
+            if($c->{'session'} && $c->{'session'}->{'page_profiles'}) {
+                $c->add_profile($c->{'session'}->{'page_profiles'});
+                Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => undef });
+            }
+        }
+        if($inject || $save_for_later) {
+            # inject current page stats into html
+            $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report()});
+            if($Thruk::Globals::tt_profiling) {
+                require Thruk::Template::Context;
+                $c->add_profile(Thruk::Template::Context::get_profiles());
+            }
+        }
+
+        if($inject) {
+            my $stats = "";
+            require Thruk::Views::ToolkitRenderer;
+            Thruk::Views::ToolkitRenderer::render($c, "_internal_stats.tt", $c->stash, \$stats);
+            Thruk::Template::Context::reset_profiles() if $Thruk::Globals::tt_profiling;
+            $res->[2]->[0] =~ s/<\/body>/$stats<\/body>/gmx;
+            $h->remove("Content-Length");
+        } elsif($save_for_later) {
+            # redirected page, save stats for next page to show
+            $c->{'session'}->{'page_profiles'} = [] unless $c->{'session'}->{'page_profiles'};
+            push @{$c->{'session'}->{'page_profiles'}}, @{$c->stash->{'page_profiles'}};
+            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => $c->{'session'}->{'page_profiles'} });
+        }
     }
     # slow pages log
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0 && $elapsed > $c->config->{'slow_page_log_threshold'}) {
@@ -928,9 +964,10 @@ sub finalize_request {
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
         my $waited = [];
-        push @{$waited}, $c->stash->{'total_backend_waited'} ? sprintf("%.3fs", $c->stash->{'total_backend_waited'}) : '-';
-        push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("%.3fs", $c->stash->{'total_render_waited'}) : '-';
-        _info(sprintf("%5d Req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
+        push @{$waited}, $c->stash->{'total_backend_waited'} ? sprintf("M:%.3fs", $c->stash->{'total_backend_waited'}) : '-';
+        push @{$waited}, $c->stash->{'total_render_waited'} ? sprintf("V:%.3fs", $c->stash->{'total_render_waited'}) : '-';
+        _info(sprintf("[%s] pid: %5d req: %03d   mem:%7s MB %6s MB   dur:%6ss %16s   size:% 12s   stat: %d   url: %s",
+                                Thruk::Utils::format_date(Time::HiRes::time(), "%H:%M:%S.%MILLI"),
                                 $$,
                                 $Thruk::Globals::COUNT,
                                 $c->stash->{'memory_end'},
@@ -966,6 +1003,56 @@ sub finalize_request {
     }
 
     return;
+}
+
+###################################################
+
+=head2 set_stats_common_totals
+
+$c->set_stats_common_totals
+
+adds common statistics
+
+=cut
+sub set_stats_common_totals {
+    my($c) = @_;
+    $c->stats->totals(
+        { '*total time waited on backends'  => $c->stash->{'total_backend_waited'} },
+        { '*total time waited on rendering' => $c->stash->{'total_render_waited'}  },
+    );
+    return;
+}
+
+###################################################
+
+=head2 add_profile
+
+$c->add_profile({ name => ..., [ text => \@txtprofiles ], [ html => \@htmlprofiles ] })
+
+add profile to stash
+
+=cut
+sub add_profile {
+    my($c, $options) = @_;
+    if(ref $options eq 'HASH') {
+        confes("no name in profile") unless $options->{'name'};
+        return if $options->{'name'} eq 'TT get_variable.tt';
+        $options->{'time'} = Time::HiRes::time() unless $options->{'time'};
+        push @{$c->stash->{'page_profiles'}}, $options;
+
+        # clean up if more than 10
+        while(scalar @{$c->stash->{'page_profiles'}} > 10) {
+            shift @{$c->stash->{'page_profiles'}};
+        }
+        return;
+    }
+    if(ref $options eq 'ARRAY') {
+        for my $p (@{$options}) {
+            $c->add_profile($p);
+        }
+        return;
+    }
+    confess("either add arrays or hashes to profiles");
 }
 
 ###################################################

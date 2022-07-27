@@ -39,6 +39,8 @@ sub enable {
 
 sub clear {
     $_[0]->{'profile'} = [];
+    $_[0]->{'totals'}  = [];
+    delete $_[0]->{'_saved_to'};
     return;
 }
 
@@ -75,9 +77,9 @@ sub _result {
             }
             if($cur && $cur->{'name'} eq $val) {
                 $cur->{'end'} = $time;
-                if(!defined $cur->{'parent'}->{'name'}) {
+                if(!$cur->{'parent'} || !$cur->{'parent'}->{'name'}) {
                     # add to result root
-                    $cur    = $entry;
+                    $cur    = undef;
                     $childs = $result;
                 } else {
                     $cur    = $cur->{'parent'};
@@ -101,18 +103,61 @@ sub _result {
             push @{$childs}, $entry;
         }
     }
+    $self->_calc_total($result);
     return($result);
+}
+
+sub totals {
+    my($self, @totals) = @_;
+    $self->{'totals'} = [] unless $self->{'totals'};
+
+    # add total but do not add duplicates
+    for my $t (@totals) {
+        my $name = (keys %{$t})[0];
+        my $time = $t->{$name};
+        my $duplicate = 0;
+        for my $n (@{$self->{'totals'}}) {
+            if($n->[0] eq $name) {
+                $n->[1] = $time if $n->[1] < $time;
+                $duplicate = 1;
+                last;
+            }
+        }
+        next if $duplicate;
+        push @{$self->{'totals'}}, [$name, $time];
+    }
+
+    return;
+}
+
+sub _calc_total {
+    my($self, $result) = @_;
+    $self->{'total_time'} = 0;
+    for my $rootrow (@{$result}) {
+        my $elapsed = _row_elapsed($rootrow);
+        $elapsed =~ s/s$//gmx if $elapsed;
+        $elapsed =~ s/^~//gmx if $elapsed;
+        $self->{'total_time'} += $elapsed if $elapsed;
+    }
+    return;
 }
 
 sub report_html {
     my($self) = @_;
     my $result = $self->_result();
-    my $report = "Profile:\n";
+    my $report = "";
     $report .= "<table class='cellborder rowhover' style='width: 800px;'>";
-    $self->{'total_time'} = _row_elapsed($result->[0]);
-    $self->{'total_time'} =~ s/s$//gmx if $self->{'total_time'};
-    $self->{'total_time'} =~ s/^~//gmx if $self->{'total_time'};
+
+    $self->totals({'*total time' => $self->{'total_time'} });
+    for my $total (@{$self->{'totals'}}) {
+        my $r = _total2row($total);
+        $report .= $self->_format_html_row($r) if $r->{'name'} eq '*total time';
+    }
     for my $r (@{$result}) {
+        $report .= $self->_format_html_row($r);
+    }
+    for my $total (@{$self->{'totals'}}) {
+        my $r = _total2row($total);
         $report .= $self->_format_html_row($r);
     }
     $report .= "</table>";
@@ -122,13 +167,23 @@ sub report_html {
 sub report {
     my($self) = @_;
     my $result = $self->_result();
-    my $report = "Profile:\n";
+    $self->totals({'*total time' => $self->{'total_time'} });
+    my $report = "";
+    $report .= '+'.("-"x82)."+-------------+\n";
+    for my $total (@{$self->{'totals'}}) {
+        my $r = _total2row($total);
+        $report .= $self->_format_text_row($r) if $r->{'name'} eq '*total time';
+    }
     $report .= '+'.("-"x82)."+-------------+\n";
     for my $r (@{$result}) {
         $report .= $self->_format_text_row($r);
     }
     $report .= '+'.("-"x82)."+-------------+\n";
-
+    for my $total (@{$self->{'totals'}}) {
+        my $r = _total2row($total);
+        $report .= $self->_format_text_row($r);
+    }
+    $report .= '+'.("-"x82)."+-------------+\n";
     return($report);
 }
 
@@ -137,7 +192,9 @@ sub _format_text_row {
     my $output  = "";
     my $indent  = " "x(2*($row->{'level'}-1));
     my $elapsed = _row_elapsed($row);
-    my $name    = substr($indent.$row->{'name'}, 0, 78);
+    my $name    = $row->{'name'};
+       $name    =~ s/^\*//gmx;
+       $name    = substr($indent.$name, 0, 78);
     $output .= sprintf("| %-80s | %11s |\n", $name, $elapsed);
     if($row->{'childs'} && scalar @{$row->{'childs'}} > 0) {
         for my $r (@{$row->{'childs'}}) {
@@ -154,21 +211,29 @@ sub _format_html_row {
     $id++;
     my $indent  = " "x(2*($row->{'level'}-1));
     my $elapsed = _row_elapsed($row);
-    my $name    = substr($indent.$row->{'name'}, 0, 78);
+    my $name    = $row->{'name'};
+    my $bold    = ($name =~ m/^\*/mx) ? 1 : 0;
+       $name    =~ s/^\*//gmx;
+       $name    = substr($indent.$name, 0, 78);
     my $output  = "<tr>";
     my $onclick = '';
     if($row->{'stack'}) {
         $onclick = "onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")'";
     }
-    $output .= "<td class='whitespace-pre ".($onclick ? 'clickable' : '')."' ".$onclick.">".$name."</td>\n";
+    $output .= "<td class='whitespace-pre ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' ".$onclick.">".$name."</td>\n";
     $output .= "<td class='text-right'>".$elapsed."</td>\n";
     if($self->{'total_time'}) {
-        if($elapsed && $row->{'level'} > 1) {
+        if($elapsed && $row->{'level'} > 0) {
             $elapsed =~ s/s$//gmx;
             $elapsed =~ s/^~//gmx;
             my $perc = $elapsed / $self->{'total_time'};
+            my $class = "WARNING";
+            if($perc > 1) {
+                $perc  = 1;
+                $class = "UNKNOWN" if $perc > 1.05;
+            }
             $output .= "<td class='text-right relative' style='width: 50px'>";
-            $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 20px;' class='bgPROBLEMS absolute top-0 right-0'></div>";
+            $output .= "<div style='width: ".sprintf("%.0f", 100*$perc)."%; height: 20px;' class='".$class." absolute top-0 right-0'></div>";
             $output .= "<span class='absolute top-0 right-0' style='margin-right: 3px;'>".sprintf("%.1f", $perc*100)."%</span>";
             $output .= "</td>\n";
         } else {
@@ -211,8 +276,23 @@ sub _format_html_row {
     return($output);
 }
 
+sub _total2row {
+    my($total) = @_;
+    my $name = $total->[0];
+    my $time = $total->[1];
+    my $row = {
+        name    => $name,
+        elapsed => $time,
+        level   => 1,
+    };
+    return($row);
+}
+
 sub _row_elapsed {
     my($row) = @_;
+    if(defined $row->{elapsed}) {
+        return(sprintf("%.5fs", $row->{elapsed}));
+    }
     if(!$row->{start}) {
         return("");
     }
@@ -262,6 +342,12 @@ return new stats object
     profile(comment => $text)
 
 sets breakpoint with message
+
+=head2 totals
+
+    totals({ name => time })
+
+add total time
 
 =head2 enable
 

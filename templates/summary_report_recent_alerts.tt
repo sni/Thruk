@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 overflow-hidden">
   <div class="mainTable">
     <table class="mainTable striped">
       <thead>

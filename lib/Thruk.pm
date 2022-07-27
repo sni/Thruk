@@ -24,7 +24,7 @@ use Module::Load qw/load/;
 
 ###################################################
 # clean up env
-$Thruk::Globals::tt_profiling = 0;
+$Thruk::Globals::tt_profiling = 0 unless defined $Thruk::Globals::tt_profiling;
 BEGIN {
     ## no critic
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 3) {

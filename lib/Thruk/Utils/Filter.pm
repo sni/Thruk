@@ -1538,13 +1538,46 @@ sub get_browser_user_agent {
     replace_links()
 
 return text with http/https links replaced with real links
+also replace [link text](https://url...) like markup links
 
 =cut
 sub replace_links {
     my($txt) = @_;
+
+    my $c = $Thruk::Globals::c or die("not initialized!");
+
+    # short links
+    for my $pattern (@{$c->config->{'short_link'}}) {
+        my @blocks = split(/\|/mx, $pattern);
+        shift @blocks if $blocks[0] eq '';
+        ## no critic
+        my $re1 = qr($blocks[0]);
+        my $re2 = $blocks[1];
+        $txt =~ s|$re1|&_replace_dollars($re2, $1, $2, $3, $4, $5)|ge;
+        ## use critic
+    }
+
+    # markup link: [link text](https://url...)
+    $txt =~ s/\[([^\]]+)\]\((\w+:[^\)]+)\)
+             /<a class="link" href="$2" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
+             /gmx;
+
+    # standard text link: https;//link.domain/...
     $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
              /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
              /gmx;
+    return($txt);
+}
+
+########################################
+sub _replace_dollars {
+    my($txt, @replace) = @_;
+    my $x = 0;
+    for my $re (@replace) {
+        $x++;
+        next unless defined $re;
+        $txt =~ s|\$$x|$re|gmx;
+    }
     return($txt);
 }
 

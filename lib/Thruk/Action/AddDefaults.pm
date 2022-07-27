@@ -92,7 +92,7 @@ sub begin {
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $theme = 'Light'                       unless defined $available_themes->{$theme};
     $theme = $c->config->{'themes'}->[0]   unless defined $available_themes->{$theme};
-    $c->stash->{'theme'} = $theme;
+    $c->stash->{'theme'} = $theme || 'None';
 
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;
@@ -526,7 +526,7 @@ sub add_defaults {
            || !$c->user->{'timestamp'}
            || $c->stash->{'last_program_restart'} > $c->user->{'timestamp'}
            || Thruk::Base->mode_cli()
-           || ($c->user->{'timestamp'} < (time() - 600))
+           || ($c->user->{'timestamp'} < (time() - 300))
         ) {
             # refresh dynamic roles and groups
             $c->user->set_dynamic_attributes($c);

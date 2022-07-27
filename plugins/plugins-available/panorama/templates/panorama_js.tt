@@ -74,6 +74,18 @@ Ext.onReady(function() {
     TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
     [% END %]
     cleanUnderscoreUrl();
+    initLastUserInteraction();
+
+    jQuery(window).off("focus").on("focus", function() {
+        // refresh current tab when switching browser tabs and last refresh is older than 10min
+        var tabbar = Ext.getCmp('tabbar');
+        var tab = tabbar.getActiveTab();
+        if(tab && (!tab.last_full_refresh || tab.last_full_refresh < (new Date()).getTime() - 600000)) {
+            if(tab.xdata && tab.xdata.refresh > 0) {
+                TP.updateAllIcons(tab);
+            }
+        }
+    });
 
     /* disable backspace on body to prevent accidentally leaving the page */
     Ext.EventManager.on(document, 'keydown', function(evt, t) {

@@ -10,19 +10,22 @@
 *******************************************************************************/
 
 var refreshPage      = 1;
-var cmdPaneState     = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Object();
 var removeParams     = new Object();
-var refreshTimer;
 var lastRowSelected;
 var lastRowHighlighted;
-var verifyTimer;
-var sortClickTimer;
 var iPhone           = false;
 if(window.navigator && window.navigator.userAgent) {
     iPhone           = window.navigator.userAgent.match(/iPhone|iPad/i) ? true : false;
 }
+
+// thruk global variables
+var thrukState = window.thrukState || {
+    lastUserInteraction: (new Date()).getTime(),
+    lastPageFocus:       (new Date()).getTime()
+};
+thrukState.lastPageLoaded = (new Date()).getTime();
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -45,6 +48,8 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
  * - might be called multiple times, make sure events are not bound twice
  */
 function init_page() {
+    current_backend_states = {};
+    for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
     jQuery('input.deletable').each(function(i, el) {
         // do not add twice
         if(el && el.parentNode && jQuery(el.parentNode).hasClass("deleteicon")) {
@@ -109,8 +114,8 @@ function init_page() {
             return false;
         }
         var This = this;
-        sortClickTimer = window.setTimeout(function() {
-            window.clearTimeout(sortClickTimer);
+        thrukState.sortClickTimer = window.setTimeout(function() {
+            window.clearTimeout(thrukState.sortClickTimer);
             handleSortHeaderClick(This);
         }, 300);
         return(false);
@@ -196,9 +201,6 @@ function init_page() {
             } else {
                 refreshPage = 1;
                 setRefreshRate(refresh_rate);
-                jQuery(window)
-                    .off("mousewheel DOMMouseScroll click keyup")
-                    .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
             }
         } catch(err) {
             console.log(err);
@@ -207,6 +209,16 @@ function init_page() {
 
     jQuery('.js-striped').each(function(i, el) {
         applyRowStripes(el);
+    });
+
+    initLastUserInteraction();
+    initNavigation();
+
+    thrukState.lastPageLoaded = (new Date()).getTime();
+    jQuery(window).off("focus").on("focus", function() {
+        if(refresh_rate != null && refreshPage && curRefreshVal <= 5) {
+            reloadPage();
+        }
     });
 
     // break from old frame mode
@@ -220,6 +232,20 @@ function init_page() {
         }
     } catch(err) { console.log(err); }
 }
+
+function initLastUserInteraction() {
+    jQuery(window)
+        .off("mousewheel DOMMouseScroll click keyup")
+        .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
+
+    jQuery(window).off("blur").on("blur", function() {
+        thrukState.lastPageFocus = (new Date()).getTime();
+    });
+    jQuery(window).off("focus").on("focus", function() {
+        thrukState.lastPageFocus = (new Date()).getTime();
+    });
+}
+
 
 function applyScroll(scrollTo) {
     var scrolls = scrollTo.split("_");
@@ -330,9 +356,8 @@ function cleanUnderscore(str) {
     return(str);
 }
 
-var lastUserInteraction;
 function updateLastUserInteraction() {
-    lastUserInteraction = (new Date()).getTime();
+    thrukState.lastUserInteraction = (new Date()).getTime();
 }
 
 /* save scroll value */
@@ -398,20 +423,48 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   toogleIconImage(icon);
 
   if(bodyclose) {
+    add_body_close(id, icon, bodycloseelement, bodyclosecallback);
+  }
+}
+
+/* add_body_close(id, icon, bodycloseelement, bodyclosecallback)
+ *
+ * adds element to document click close watcher
+ * arguments:
+ *  - id:                id of the element to hide
+ *  - icon:              icon will be toggled (optional)
+ *  - bodycloseelement:  jquery selector to test if click is inside those elements (optional)
+ *  - bodyclosecallback: callback will be run after element got closed (optional)
+ */
+function add_body_close(id, icon, bodycloseelement, bodyclosecallback) {
     remove_close_element(id);
     window.setTimeout(function() {
-        addEvent(document, 'click', close_and_remove_event);
         var found = false;
-        jQuery.each(close_elements, function(key, value) {
-            if(value[0] == id) {
+        jQuery.each(close_elements, function(key, el) {
+            if(el.id == id) {
                 found = true;
             }
         });
         if(!found) {
-            close_elements.push([id, icon, bodycloseelement, bodyclosecallback])
+            // close all other close elements, unless this one is a sub item of it
+            jQuery(close_elements).each(function(i, el) {
+                var inside = is_el_subelement(document.getElementById(id), document.getElementById(el.id));
+                if(!inside) {
+                    close_and_remove_event_run(el);
+                    remove_close_element(el.id);
+                }
+            });
+
+            close_elements.push({
+                "id":       id,
+                "icon":     icon,
+                "elements": bodycloseelement,
+                "close_cb": bodyclosecallback
+            })
+            addEvent(document, 'click', close_and_remove_event);
+            addEvent(document, 'keyup', close_and_remove_event);
         }
     }, 50);
-  }
 }
 
 function toogleIconImage(icon) {
@@ -537,9 +590,11 @@ function setBtnEnabled(btn) {
 
 function toggleAccordion(btn, cb) {
     var closed = jQuery(btn).next("DIV").css("max-height") == "0px";
-    closeAccordionAll(btn);
     if(closed) {
         openAccordion(btn, cb);
+        closeAccordionAllExcept(btn);
+    } else {
+        closeAccordionAll(btn);
     }
 }
 
@@ -569,6 +624,15 @@ function openAccordion(btn, cb) {
 function closeAccordionAll(btn) {
     jQuery(btn.parentNode).find('> BUTTON').next("DIV").css('max-height', '0').removeClass("active");
     jQuery(btn.parentNode).find('> BUTTON').removeClass("active");
+}
+
+function closeAccordionAllExcept(btn) {
+    jQuery(btn.parentNode).find('> BUTTON').each(function(i, b) {
+        if(b != btn) {
+            jQuery(b).next("DIV").css('max-height', '0').removeClass("active");
+            jQuery(b).removeClass("active");
+        }
+    });
 }
 
 function handleSortHeaderClick(el) {
@@ -633,7 +697,7 @@ function openModalWindowUrl(url, callback) {
 
     jQuery('#modalFG').load(url, {}, function(text, status, req) {
         if(status == "error") {
-            jQuery('#modalFG DIV.body').prepend('<div class="textERROR">'+req.status+': '+req.statusText+'<\/div>');
+            jQuery('#modalFG DIV.body').prepend('<div class="textALERT">'+req.status+': '+req.statusText+'<\/div>');
             jQuery('#modalFG DIV.spinner').remove();
         } else {
             init_page();
@@ -680,11 +744,9 @@ function closeModalWindowOnEscape(evt) {
     evt = (evt) ? evt : ((window.event) ? event : null);
     var keyCode = evt.keyCode;
     if(keyCode == 27) {
-        if(!evt.target || evt.target.tagName != "INPUT") {
-            closeModalWindow();
-            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
-            return false;
-        }
+        closeModalWindow();
+        evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+        return false;
     }
     return(true);
 }
@@ -693,7 +755,7 @@ function closeModalWindowOnEscape(evt) {
 function check_side_nav_active_item(ctx) {
     if(jQuery('#nav-container').hasClass('collapsed')) { return; }
     var urlArgs = toQueryParams();
-    var page    = window.location.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
+    var page    = window.location.href.toString().replace(/\#.*/, '').replace(/^.*\//, '').replace(/\?.*$/, '');
 
     // compare complete url
     var found   = false;
@@ -741,7 +803,7 @@ function check_side_nav_active_item(ctx) {
             if(Object.keys(navArgs).length == 0) { return(true); }
             found = true;
             for(var key in navArgs) {
-                if(!urlArgs[key]) {
+                if(!urlArgs[key] || urlArgs[key] != navArgs[key]) {
                     found = false;
                 }
             }
@@ -783,25 +845,133 @@ function check_side_nav_active_item(ctx) {
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
-            found = true;
-            jQuery('UL.navsectionlinks A', ctx).removeClass("active");
-            jQuery(el).addClass("active");
-            return false;
+            if(page != "extinfo.cgi") {
+                found = true;
+                jQuery('UL.navsectionlinks A', ctx).removeClass("active");
+                jQuery(el).addClass("active");
+                return false;
+            }
         }
+    });
+}
+
+/* set navigation style (from header prefs */
+function setNavigationStyle(val) {
+    menuState['cl'] = val;
+
+    jQuery("input[type='radio'][name='navigation']").prop("checked", false);
+    jQuery("#nav"+val).prop("checked", true);
+
+    // reset
+    showElement("navbar");
+    remove_close_element('navbar');
+    jQuery('BODY').removeClass(['topnav', 'topNavOpen']);
+    jQuery('#nav-container').removeClass('collapsed');
+
+    // collapsed menu
+    if(val == 1) {
+        jQuery('#nav-container').addClass('collapsed');
+        jQuery("UL.navsectionlinks").css("display", "");
+    }
+    // hover menu
+    if(val == 2) {
+        jQuery('BODY').addClass('topnav');
+    }
+
+    cookieSave('thruk_side', toQueryString(menuState));
+}
+
+/* initialize navigation buttons */
+function initNavigation() {
+    // make them toggle
+    jQuery('A.navsectiontitle').off("click").click(function() {
+        var title = this.text.trim().toLowerCase().replace(/ /g, '_');
+        if(jQuery('#nav-container').hasClass('collapsed')) { return; }
+        jQuery(this).parent().children("UL.navsectionlinks").slideToggle('fast', function() {
+            menuState[title] = this.style.display == 'none' ? 0 : 1;
+            cookieSave('thruk_side', toQueryString(menuState));
+        });
+    });
+
+    jQuery('UL.navsectionlinks A').off("click").click(function() {
+        jQuery('UL.navsectionlinks A').removeClass("active");
+        jQuery(this).addClass("active");
+    });
+
+    jQuery('I.navsectionsubtoggle').off("click").click(function() {
+        var title   = jQuery(this).prev("A").text().trim().toLowerCase().replace(/ /g, '_');
+        var section = jQuery(this).parent("LI").parents("LI").first().find('A').first().text().trim().toLowerCase().replace(/ /g, '_');
+        title = section+'.'+title;
+        jQuery(this).next("UL").slideToggle('fast', function() {
+            menuState[title] = this.style.display == 'none' ? 0 : 1;
+            cookieSave('thruk_side', toQueryString(menuState));
+        });
+    });
+
+    // button to collapse side menu
+    jQuery('.js-menu-collapse').off("click").click(function() {
+        jQuery('#nav-container').toggleClass('collapsed');
+        if(jQuery('#nav-container').hasClass('collapsed')) {
+            setNavigationStyle(1);
+        } else {
+            setNavigationStyle(0);
+        }
+    });
+    // button to enable overlay menu
+    jQuery('.js-menu-hide').off("click").click(function() {
+        jQuery('BODY').toggleClass('topnav');
+        if(jQuery('BODY').hasClass('topnav')) {
+            setNavigationStyle(2);
+        } else {
+            setNavigationStyle(0);
+        }
+    });
+    // toggle overlay menu button display
+    jQuery('#mainNavBtn').off("click").click(function() {
+        toggleClass('BODY', 'topNavOpen');
+        showElement("navbar");
+        jQuery('#nav-container').removeClass('collapsed');
+        if(jQuery('BODY').hasClass('topNavOpen')) {
+            add_body_close('navbar', null, null, function() {
+                jQuery('BODY').removeClass('topNavOpen');
+                showElement("navbar");
+            });
+        }
+        return false;
+    });
+
+    if(jQuery('#nav-container').hasClass('collapsed')) {
+        jQuery("UL.navsectionlinks").css("display", "");
+    }
+}
+
+function switchTheme(sel) {
+    var theme = sel;
+    if(sel && sel.tagName) {
+        theme = jQuery(sel).val();
+    }
+    if(is_array(theme)) {
+        theme = theme[0];
+    }
+    cookieSave('thruk_theme', theme);
+    jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
+    jQuery("IMG").each(function() {
+      this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
     });
 }
 
 /* remove element from close elements list */
 function remove_close_element(id) {
     var new_elems = [];
-    jQuery.each(close_elements, function(key, value) {
-        if(value[0] != id) {
-            new_elems.push(value);
+    jQuery.each(close_elements, function(key, el) {
+        if(el.id != id) {
+            new_elems.push(el);
         }
     });
     close_elements = new_elems;
     if(new_elems.length == 0) {
         removeEvent(document, 'click', close_and_remove_event);
+        removeEvent(document, 'keyup', close_and_remove_event);
     }
 }
 
@@ -811,6 +981,19 @@ function close_and_remove_event(evt) {
     if(close_elements.length == 0) {
         return;
     }
+
+    // close on level of items on escape
+    var keyCode = evt.keyCode;
+    if(keyCode != undefined) {
+        if(keyCode == 27) {
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+            var toClose = close_elements.pop();
+            close_and_remove_event_run(toClose);
+            return false;
+        }
+        return;
+    }
+
     var x,y;
     if(evt) {
         evt = jQuery.event.fix(evt); // make pageX/Y available in IE
@@ -820,50 +1003,84 @@ function close_and_remove_event(evt) {
         // hilight click itself
         //hilight_area(x-5, y-5, x + 5, y + 5, 1000, 'blue');
     }
-    var new_elems = [];
-    jQuery.each(close_elements, function(key, value) {
-        var obj    = document.getElementById(value[0]);
-        if(value[2]) {
-            obj = jQuery(value[2])[0];
-        }
-        var inside = false;
-        if(x && y && obj) {
-            var width  = jQuery(obj).outerWidth();
-            var height = jQuery(obj).outerHeight();
-            var offset = jQuery(obj).offset();
 
-            var x1 = offset['left'] - 15;
-            var x2 = offset['left'] + width  + 15;
-            var y1 = offset['top']  - 15;
-            var y2 = offset['top']  + height + 15;
+    var toClose = close_elements.pop();
+    var obj     = document.getElementById(toClose.id);
+    var inside  = checkEvtinElement(obj, evt, x, y);
 
-            // check if we clicked inside or outside the object we have to close
-            if( x >= x1 && x <= x2 && y >= y1 && y <= y2 ) {
-                inside = true;
+    if(!inside && toClose.elements) {
+        jQuery(toClose.elements).each(function(i, el) {
+            inside = checkEvtinElement(el, evt, x, y);
+            if(inside) {
+                return false; // break jQuery each loop
             }
-
-            // hilight checked area
-            //hilight_area(x1, y1, x2, y2, 1000, inside ? 'green' : 'red');
-        }
-
-        // make sure our event target is not a subelement of the panel to close
-        if(!inside && evt) {
-            inside = is_el_subelement(evt.target, obj);
-        }
-
-        if(evt && inside) {
-            new_elems.push(value);
-        } else {
-            hideElement(value[0], value[1]); // must before the callback because they might check visibility
-            if(value[3]) {
-                value[3]();
-            }
-        }
-    });
-    close_elements = new_elems;
-    if(new_elems.length == 0) {
-        removeEvent(document, 'click', close_and_remove_event);
+        });
     }
+
+    if(evt && inside) {
+        close_elements.push(toClose);
+    } else {
+        if(evt) {
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+        }
+        close_and_remove_event_run(toClose);
+    }
+
+    if(close_elements.length == 0) {
+        removeEvent(document, 'click', close_and_remove_event);
+        removeEvent(document, 'keyup', close_and_remove_event);
+    }
+}
+
+function close_and_remove_event_run(toClose) {
+    hideElement(toClose.id, toClose.icon); // must before the callback because they might check visibility
+    if(toClose.close_cb) {
+        toClose.close_cb();
+    }
+}
+
+/* returns true if x/y coords are inside the area of the object */
+function checkEvtinElement(obj, evt, x, y) {
+    var inside = false;
+    if(x && y && obj) {
+        inside = checkXYinElement(obj, x, y);
+    }
+
+    // make sure our event target is not a subelement of the panel to close
+    if(!inside && evt) {
+        inside = is_el_subelement(evt.target, obj);
+        if(inside) {
+            //hilight_obj_area(evt.target, 1000, 'green');
+            //hilight_obj_area(obj, 1000, 'green');
+        }
+    }
+    return(inside);
+}
+
+/* returns true if x/y coords are inside the area of the object */
+function checkXYinElement(obj, x, y) {
+    var inside = false;
+    var width  = jQuery(obj).outerWidth();
+    var height = jQuery(obj).outerHeight();
+    var offset = jQuery(obj).offset();
+
+    var x1 = offset['left'] - 5;
+    var x2 = offset['left'] + width  + 5;
+    var y1 = offset['top']  - 5;
+    var y2 = offset['top']  + height + 5;
+
+    // check if we clicked inside or outside the object we have to close
+    if( x >= x1 && x <= x2 && y >= y1 && y <= y2 ) {
+        inside = true;
+    }
+
+    // hilight checked area
+    //hilight_area(x1, y1, x2, y2, 1000, inside ? 'green' : 'red');
+    return(inside);
+}
+
+function toggleFilterPopup(id) {
+    toggleElement(id, null, true, '#search-results');
 }
 
 /* toggle a element by id and load content from remote */
@@ -915,11 +1132,20 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
     // but only if the element to close is not a subset of an existing to_close_element
     var inside = false;
     jQuery.each(close_elements, function(key, value) {
-        var obj    = document.getElementById(value[0]);
-        if(value[2]) {
-            obj = jQuery(value[2])[0];
-        }
+        var obj = document.getElementById(value.id);
         inside = is_el_subelement(pane, obj);
+        if(inside) {
+            return false; // break jQuery.each
+        }
+
+        if(value.elements) {
+            jQuery(value.elements).each(function(i, e) {
+                inside = is_el_subelement(pane, e);
+                if(inside) {
+                    return false; // break jQuery.each
+                }
+            });
+        }
         if(inside) {
             return false; // break jQuery.each
         }
@@ -947,29 +1173,10 @@ function is_el_subelement(obj_a, obj_b) {
     return false;
 }
 
-/* save theme settings in a cookie */
-function prefSubmitTheme(current_theme) {
-  var sel = document.getElementById('pref_theme')
-  if(current_theme != sel.value) {
-    removeParams['theme'] = true;
-    cookieSave('thruk_theme', sel.value);
-    reloadPage(50, true, true);
-  }
-}
-
 /* save settings in a cookie */
 function prefSubmitSound(url, value) {
   cookieSave('thruk_sounds', value);
   reloadPage(50, true);
-}
-
-function checkNavBackground() {
-    if(jQuery('#navbar').hasClass('hidden')) {
-        jQuery("MAIN").removeClass("brightness-50");
-    } else {
-        jQuery('#nav-container').removeClass('collapsed');
-        jQuery("MAIN").addClass("brightness-50");
-    }
 }
 
 /* save something in a cookie */
@@ -1055,25 +1262,26 @@ function setRefreshRate(rate) {
     jQuery("#refresh_label").html(" (&infin;"+refresh_rate+"s)");
   }
   if(rate >= 0 && rate < 20) {
+      var newRate = 20;
+      if(refresh_rate < 20) { newRate = refresh_rate; }
       // check lastUserInteraction date to not refresh while user is interacting with the page
-      if(lastUserInteraction > ((new Date).getTime() - 20000)) {
-          lastUserInteraction = undefined;
-          rate = 20;
+      if(thrukState.lastUserInteraction > ((new Date).getTime() - 20000)) {
+          rate = newRate;
       }
-      // background tab, do not refresh unnecessarily
-      if(document.visibilityState && document.visibilityState != 'visible') {
+      // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min), but refresh at least every 3 hours
+      if(document.visibilityState && document.visibilityState != 'visible' && thrukState.lastPageFocus < ((new Date).getTime() - 180000) && thrukState.lastPageLoaded > ((new Date).getTime() - (3*3600*1000))) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
         rate = 2;
       }
       // do not refresh when modal window is open
       if(document.getElementById('modalBG')) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(paused)<\/span>");
-        rate = 20;
+        rate = newRate;
       }
       // do not refresh when dev tools are open
       if((window.outerHeight-window.innerHeight)>250 || (window.outerWidth-window.innerWidth)>250) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(dev tools open, paused)<\/span>");
-        rate = 20;
+        rate = newRate;
       }
   }
   remainingRefresh = rate;
@@ -1118,8 +1326,8 @@ function setRefreshRate(rate) {
     }
     if(rate > 0) {
       newRate = rate - 1;
-      window.clearTimeout(refreshTimer);
-      refreshTimer = window.setTimeout(function() {
+      window.clearTimeout(thrukState.refreshTimer);
+      thrukState.refreshTimer = window.setTimeout(function() {
           setRefreshRate(newRate);
       }, 1000);
     }
@@ -1128,7 +1336,7 @@ function setRefreshRate(rate) {
 
 /* reset refresh interval */
 function resetRefresh() {
-  window.clearTimeout(refreshTimer);
+  window.clearTimeout(thrukState.refreshTimer);
   if( typeof refresh_rate == "number" ) {
     refreshPage = 1;
     setRefreshRate(refresh_rate);
@@ -1143,7 +1351,7 @@ function stopRefresh(silent) {
   if(!silent) {
     jQuery("#refresh_label").html(" <span class='textALERT'>(stopped)<\/span>");
   }
-  window.clearTimeout(refreshTimer);
+  window.clearTimeout(thrukState.refreshTimer);
   setRefreshRate(silent ? -1 : 0);
 }
 
@@ -1303,9 +1511,10 @@ var isReloading = false;
 var reloadPageTimer;
 function reloadPage(delay, withReloadButton, freshReload) {
     if(!delay) { delay = 50; }
-    if(delay < 100 && withReloadButton) {
+    if(delay < 500 && withReloadButton) {
         // update button earlier
-        jQuery("#refresh_button").html('<div class="spinner w-5 h-5"><\/div>');
+        resetRefreshButton();
+        jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
         withReloadButton = false;
     }
     window.clearTimeout(reloadPageTimer);
@@ -1314,14 +1523,18 @@ function reloadPage(delay, withReloadButton, freshReload) {
     }, delay);
 }
 
+function resetRefreshButton() {
+    jQuery("#refresh_button").removeClass("red");
+    jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
+    jQuery("#refresh_button").find("I").css("display", "");
+    jQuery("#refresh_button").find('I.uil-exclamation').remove();
+    jQuery("#refresh_button").attr("title", "reload page");
+}
+
 function reloadPageDo(withReloadButton, freshReload) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
-        jQuery("#refresh_button").removeClass("red");
-        jQuery("#refresh_button").find("I").css("display", "none");
-        jQuery("#refresh_button").find('div.spinner').remove();
-        jQuery("#refresh_button").find('I.uil-exclamation').remove();
-        jQuery("#refresh_button").prepend('<div class="spinner w-5 h-5"><\/div>');
+        resetRefreshButton();
     }
     isReloading = true;
     stopRefresh(true);
@@ -1361,12 +1574,22 @@ function reloadPageDo(withReloadButton, freshReload) {
         },
         error: function(jqXHR, textStatus, errorThrown) {
             isReloading = false;
-            jQuery("#refresh_button").addClass("red");
-            jQuery("#refresh_button").find('div.spinner').remove();
-            jQuery("#refresh_button").find('I.uil-exclamation').remove();
-            jQuery("#refresh_button").find("I").css("display", "none");
-            jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
-            thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
+            // show error response if its a valid error page
+            if(jqXHR.responseText && jqXHR.responseText.match(/init_page\(\)/)) {
+                setInnerHTMLWithScripts(document.documentElement, jqXHR.responseText);
+                init_page();
+            } else {
+                // otherwise show error message
+                resetRefreshButton();
+                jQuery("#refresh_button").addClass("red");
+                jQuery("#refresh_button").find("I").css("display", "none");
+                jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
+                jQuery("#refresh_button").attr("title", "refreshing page failed: "+textStatus+"\nlast contact: "+duration(((new Date()).getTime()-thrukState.lastPageLoaded)/1000)+" ago");
+                thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
+                if(typeof refresh_rate == "number" && refresh_rate > 0) {
+                    resetRefresh();
+                }
+            }
         }
     });
 }
@@ -1750,20 +1973,19 @@ function create_site_panel_popup_tree_data(d, current, tree) {
 
     // append folders
     jQuery(keys(d.sub).sort()).each(function(i, sectionname) {
-        var icon;
-        icon = "../images/folder_green.png";
+        var iconCls = 'fa-solid fa-folder text-base textSUCCESS';
         if(d.sub[sectionname].down > 0 && d.sub[sectionname].disabled > 0) {
-            icon = "../images/folder_red_mixed.png";
+            iconCls = 'fa-solid fa-folder text-base textALERT-mixed';
         } else if(d.sub[sectionname].down > 0) {
-            icon = "../images/folder_red.png";
+            iconCls = 'fa-solid fa-folder text-base textALERT';
         } else if(d.sub[sectionname].up > 0 && d.sub[sectionname].disabled > 0) {
             if(backend_chooser == "switch") {
-                icon = "../images/folder_green.png";
+                iconCls = 'fa-solid fa-folder text-base textSUCCESS';
             } else {
-                icon = "../images/folder_green_mixed.png";
+                iconCls = 'fa-solid fa-folder text-base textSUCCESS-mixed';
             }
         } else if(d.sub[sectionname].up == 0) {
-            icon = "../images/folder_gray.png";
+            iconCls = 'fa-solid fa-folder text-base textGRAY';
         }
         var selected;
         if(d.sub[sectionname].disabled == 0) {
@@ -1774,17 +1996,17 @@ function create_site_panel_popup_tree_data(d, current, tree) {
         var key = current + '/' + sectionname;
         nodes.push({
             'key': key,
-            'title': sectionname,
+            'title': '<i class="'+iconCls+'"></i> '+sectionname,
             'folder': true,
             'children': create_site_panel_popup_tree_data(d.sub[sectionname], key, tree),
             'peers': d.sub[sectionname].peers,
-            'icon': icon,
+            'icon': false,
             'selected': selected,
             'extraClasses': d.sub[sectionname] ? 'has_sub' : 'has_no_sub'
         });
         if(tree) {
             var node  = tree.getNodeByKey(key);
-            node.icon = icon;
+            node.title = '<i class="'+iconCls+'"></i> '+node.title.replace(/<i.*<\/i>/, "");
             if(selected === true) {
                 node.setSelected(true, {noEvents: true});
             } else if(selected === false) {
@@ -1797,36 +2019,37 @@ function create_site_panel_popup_tree_data(d, current, tree) {
     // append root nodes
     if(current == "" && d.peers != undefined && d.peers.length > 0) {
         jQuery(d.peers).each(function(i, peer_key) {
-            var icon;
             var peer = initial_backends[peer_key];
             if(!peer) { return true; }
-            icon = "../images/nofolder_green.png";
+            var iconCls = 'fa-solid fa-circle text-base textSUCCESS';
             var selected = true; // checkbox enabled
-            if(current_backend_states[peer_key] == 1) {
-                icon = "../images/nofolder_red.png";
-            } else if(current_backend_states[peer_key] == 2) {
-                icon = "../images/nofolder_gray.png";
+            if(current_backend_states[peer_key] == 2) {
+                iconCls = 'fa-solid fa-circle text-base textGRAY';
                 selected = false; // checkbox off
+            } else {
+                if(current_backend_states[peer_key] == 1 || initial_backends[peer_key].state == 1) {
+                    iconCls = 'fa-solid fa-circle text-base textALERT';
+                }
             }
             if(backend_chooser == "switch") {
                 if(!array_contains(param_backend, peer_key)) {
-                    icon = "../images/nofolder_gray.png";
+                    iconCls = 'fa-solid fa-circle text-base textGRAY';
                     selected = false; // checkbox off
                 }
             }
             var key = '/'+peer_key;
             nodes.push({
                 'key': key,
-                'title': peer["name"],
+                'title': '<i class="'+iconCls+'"></i> '+peer["name"],
                 'folder': false,
                 'children': [],
                 'peers': [peer_key],
-                'icon': icon,
+                'icon': false,
                 'selected': selected
             });
             if(tree) {
                 var node  = tree.getNodeByKey(key);
-                node.icon = icon;
+                node.title = '<i class="'+iconCls+'"></i> '+node.title.replace(/<i.*<\/i>/, "");
                 if(selected === true) {
                     node.setSelected(true, {noEvents: true});
                 }
@@ -1906,6 +2129,7 @@ function site_panel_bookmark_save() {
             sections:  sections
         },
         success: function(data) {
+            setBtnSuccess("#site_panel_bookmark_new_save", "bookmark saved");
             jQuery("#site_panel_bookmark_new_save").attr('disabled', false).html("save");
             create_site_panel_popup_tree_make_bookmarks_sortable();
             jQuery("#site_panel_bookmark_new").val("").hide();
@@ -2529,8 +2753,8 @@ function hide_activity_icons() {
 /* verify time */
 var verification_errors = new Object();
 function verify_time(id, duration_id) {
-    window.clearTimeout(verifyTimer);
-    verifyTimer = window.setTimeout(function() {
+    window.clearTimeout(thrukState.verifyTimer);
+    thrukState.verifyTimer = window.setTimeout(function() {
         verify_time_do(id, duration_id);
     }, 500);
 }
@@ -3232,8 +3456,22 @@ function hilight_area(x1, y1, x2, y2, duration, color) {
     jQuery(document.body).append('<div id="hilight_area'+rnd+'" style="width:'+(x2-x1)+'px; height:'+(y2-y1)+'px; position: absolute; background-color: '+color+'; opacity:0.2; top: '+y1+'px; left: '+x1+'px; z-index:10000;">&nbsp;<\/div>');
 
     window.setTimeout(function() {
-       fade('hilight_area'+rnd, 1000);
+       fade('hilight_area'+rnd, 1000, true);
     }, duration);
+}
+
+/* hilight area of screen for given object */
+function hilight_obj_area(obj, duration, color) {
+    var width  = jQuery(obj).outerWidth();
+    var height = jQuery(obj).outerHeight();
+    var offset = jQuery(obj).offset();
+
+    var x1 = offset['left'] - 5;
+    var x2 = offset['left'] + width  + 5;
+    var y1 = offset['top']  - 5;
+    var y2 = offset['top']  + height + 5;
+
+    hilight_area(x1, y1, x2, y2, duration, color);
 }
 
 /* fade element away and optionally remove it */
@@ -3402,19 +3640,36 @@ function preserve_hash() {
 
 /* fetch content by ajax and replace content */
 function load_overcard_content(id, url, add_pre) {
+    var el = document.getElementById(id);
+    if(el) {
+        el.innerHTML = "<div class='spinner w-8 h-8'><\/div>";
+    }
     jQuery.ajax({
         url: url,
         type: 'POST',
         success: function(data) {
             var el = document.getElementById(id);
-            if(el) {
-                if(add_pre) {
-                    data.data = "<pre>"+data.data+"<\/pre>";
-                }
+            if(!el) {
+                if(thruk_debug_js) { alert("ERROR: no container found load_overcard_content(): " + id); }
+                return;
+            }
+            if(add_pre) {
+                data.data = "<pre>"+data.data+"<\/pre>";
+            }
+            if(typeof(data) == "string") {
+                setInnerHTMLWithScripts(el, data);
+            } else {
                 el.innerHTML = data.data;
             }
         },
-        error: ajax_xhr_error_logonly
+        error: function(jqXHR, textStatus, errorThrown) {
+            var el  = document.getElementById(id);
+            var msg = getXHRerrorMsg('', textStatus, jqXHR, errorThrown);
+            if(el) {
+                el.innerHTML = "<span class='textALERT'>"+msg+"</span>";
+            }
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
+        }
     });
 }
 
@@ -3423,6 +3678,16 @@ function ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown) {
 }
 
 function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, logOnly, closeTimeout) {
+    var msg = getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown);
+    if(logOnly) {
+        console.log(prefix + msg);
+    } else {
+        thruk_message(1, prefix + msg, closeTimeout);
+    }
+}
+
+// extract error message from js request
+function getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown) {
     var cookie = readCookie('thruk_message');
     var matches;
     var msg;
@@ -3448,12 +3713,7 @@ function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, l
     else {
         msg = textStatus;
     }
-
-    if(logOnly) {
-        console.log(prefix + msg);
-    } else {
-        thruk_message(1, prefix + msg, closeTimeout);
-    }
+    return(msg);
 }
 
 /* update permanent link of excel export */
@@ -3725,7 +3985,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
         evt.preventDefault();
         evt.stopImmediatePropagation();
         evt.stopPropagation();
-        window.clearTimeout(sortClickTimer);
+        window.clearTimeout(thrukState.sortClickTimer);
         var th   = evt.target;
         if(th.tagName == "A") { th = th.parentNode; }
         var text = (th.innerText || '').replace(/\s*$/, '');
@@ -4049,7 +4309,16 @@ function refreshNavSections(id) {
     return(false);
 }
 
-function submitFormInBackground(form, cb) {
+function submitFormInBackground(form, cb, extraData) {
+    if(extraData) {
+        for(var key in extraData) {
+            jQuery('<input />', {
+                type:  'hidden',
+                name:   key,
+                value:  extraData[key]
+            }).appendTo(form);
+        }
+    }
     var data = jQuery(form).serializeArray();
     var url  = jQuery(form).attr("action");
     jQuery.ajax({
@@ -4071,16 +4340,7 @@ function submitFormInBackground(form, cb) {
 
 function send_form_in_background_and_reload(btn, extraData) {
     var form = jQuery(btn).parents('FORM');
-    if(extraData) {
-        for(var key in extraData) {
-            jQuery('<input />', {
-                type:  'hidden',
-                name:   key,
-                value:  extraData[key]
-            }).appendTo(form);
-        }
-    }
-    submitFormInBackground(form, reloadPage);
+    submitFormInBackground(form, reloadPage, extraData);
     setBtnSpinner(btn);
     return(false);
 }
@@ -4131,7 +4391,7 @@ function looks_like_regex(str) {
     return(false);
 }
 
-function show_list(incr, selector) {
+function show_list(incr, selector, head_selector) {
     var elements = jQuery(selector);
     var curIdx = 0;
     jQuery(elements).each(function(i, n) {
@@ -4142,6 +4402,10 @@ function show_list(incr, selector) {
         }
     });
     var newIdx = curIdx+incr;
+    var matches = String(incr).match(/^#(\d+)/);
+    if(matches && matches.length > 1) {
+        newIdx = matches[1];
+    }
     if(elements[newIdx] == undefined) {
         jQuery(elements[curIdx]).show();
         return;
@@ -4155,6 +4419,12 @@ function show_list(incr, selector) {
     if(newIdx == 0) {
         jQuery("DIV.controls BUTTON.previous").css('visibility', 'hidden');
     }
+
+    if(head_selector) {
+        jQuery(head_selector).removeClass("active");
+        jQuery(jQuery(head_selector)[newIdx]).addClass("active");
+    }
+
 }
 
 /* split that works more like the perl split and appends the remaining str to the last element, doesn't work with regex */
@@ -4363,7 +4633,7 @@ function print_action_menu(src, options) {
 
 /* create icon item */
 function action_menu_icon(iconUrl, options) {
-    if(iconUrl.match(/^uil\-/)) {
+    if(iconUrl.match(/^(uil\-|uil\s+)/)) {
         var icon = document.createElement('i');
         icon.className = "uil "+iconUrl;
         return(icon);
@@ -4376,6 +4646,8 @@ function action_menu_icon(iconUrl, options) {
     var icon = document.createElement('img');
     iconUrl  = replace_macros(iconUrl, undefined, options);
     icon.src = iconUrl;
+    icon.style.width  = "20px";
+    icon.style.height = "20px";
     try {
         // use data url in reports
         if(action_images[iconUrl]) {
@@ -5728,11 +6000,9 @@ function selectAllHosts(state, pane_prefix) {
 function toggleCmdPane(state) {
   if(state == 1) {
     showElement('cmd_pane');
-    cmdPaneState = 1;
   }
   else {
     hideElement('cmd_pane');
-    cmdPaneState = 0;
   }
 }
 
@@ -5961,7 +6231,9 @@ function disableAllFormElement() {
 /* show this form row */
 function enableFormElement(id) {
     var obj = document.getElementById(id);
-    obj.style.display = "";
+    if(obj) {
+        obj.style.display = "";
+    }
 }
 
 
@@ -6177,6 +6449,10 @@ function toggleFilterPaneSelector(search_prefix, id) {
     remove_close_element(search_prefix+panel);
   } {
     set_filter_types(search_prefix, input_name, checkbox_prefix);
+
+    // align to parent element
+    var pos = jQuery('#'+search_prefix+panel).closest("TD").offset();
+    jQuery('#'+search_prefix+panel).css({'top': pos.top, 'left': pos.left});
   }
 }
 
@@ -6546,6 +6822,7 @@ function verify_op(event) {
   } else {
     selElem = document.getElementById(this.id);
   }
+  if(!selElem) { return; }
 
   // get operator select
   var opElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 1) + 'o');
@@ -7203,7 +7480,9 @@ var ajax_search = {
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
-        if(!iPhone) {
+        if(iPhone) {
+            addEvent(input, 'change', ajax_search.suggest);
+        } else {
             addEvent(input, 'keyup', ajax_search.suggest);
             addEvent(input, 'blur',  ajax_search.hide_results);
         }
@@ -8544,6 +8823,7 @@ function overcard(options) {
     var settings = {
         'document': null,
         'body':     '',
+        'bodyEl':   null,
         'bodyCls':  '',
         'caption':  '',
         'width':    '',
@@ -8572,7 +8852,7 @@ function overcard(options) {
                 'frameborder': 0,
                 'scrolling':  'no',
                 'style':      'border: 1px solid; position: absolute; z-index: 1000; border-radius: 8px; visibility: hidden;',
-                'class':      'borderDark',
+                'class':      'borderDark iframed',
                 'src':        'void.cgi'
             }).appendTo('BODY').on('load', function () {
                 var iframe = document.getElementById("overcard-iframe");
@@ -8593,7 +8873,7 @@ function overcard(options) {
     var container = doc.getElementById(containerId);
     if(!container) {
         var containerHTML = ""
-            +'<div class="fixed card shadow-float z-50 max-w-full max-h-full" id="'+containerId+'">'
+            +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen" id="'+containerId+'">'
             +'<div class="head justify-between">'
             +'<h3 id="'+containerId+'_head"><\/h3>'
             +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
@@ -8619,7 +8899,23 @@ function overcard(options) {
     if(settings["minWidth"]) { container.style.minWidth = settings["minWidth"]+'px'; }
 
     var body = doc.getElementById(containerId+"_body");
-    body.innerHTML = settings["body"];
+    if(settings["bodyEl"]) {
+        if(settings["bodyEl"] && settings["bodyEl"].tagName) {
+            jQuery(body).append(jQuery(settings["bodyEl"]));
+            showElement(settings["bodyEl"]);
+        } else {
+            var bodyEl = doc.getElementById(settings["bodyEl"]);
+            if(bodyEl) {
+                jQuery(body).children().each(function(i, el) {
+                    hideElement(el);
+                });
+                showElement(bodyEl);
+                jQuery(body).append(jQuery(bodyEl));
+            }
+        }
+    } else {
+        body.innerHTML = settings["body"];
+    }
 
     // place it next to the mouse position
     var posX = mouseX + document.documentElement.scrollLeft + 50;
@@ -8679,7 +8975,7 @@ function element_check_visibility(el) {
     if(!window.parent.document) { return; }
     jQuery("#overcard-iframe", window.parent.document).css({
         'width': el.offsetWidth+'px',
-        'height': el.offsetHeight+'px'
+        'height': (el.offsetHeight+2)+'px'
     });
 
     return;

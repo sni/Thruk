@@ -1,8 +1,9 @@
-﻿[% WRAPPER _conf_frame.tt %]
+﻿[% USE date %]
+[% WRAPPER _conf_frame.tt %]
 
 [% IF readonly %]
 <div class="card red alert top-center w-fit">
-  <div class="body textERROR"><b>Readonly:</b> Make sure the config file is writable!</div>
+  <div class="body textALERT"><b>Readonly:</b> Make sure the config file is writable!</div>
 </div>
 [% END %]
 
@@ -95,7 +96,7 @@
             [% ELSE %]
             <tr>
               <th>Account is not Locked</th>
-              <td><input type="submit" name="send" value="lock account" class="w-full"></td>
+              <td><input type="submit" name="send" value="lock account" class="w-full hover-red"></td>
             </tr>
             [% END %]
             [% IF profile_user.settings.exists('login') && profile_user.settings.login.exists('last_failed') %]
@@ -108,25 +109,36 @@
             </tr>
             [% END %]
             [% IF conf_config.exists('cgi.cfg') %]
-            <tr>
-              <th colspan=2 >Roles (cgi.cfg)</th>
-            </tr>
-            [% FOR auth = role_keys %]
-            <tr>
-              <th>[% auth | html %]</th>
-              <td>
-                <input type="radio" name="data.[% auth | html %]" id="data.[% auth | html %]_0" value="0"[% IF roles.$auth == 0 %] checked[% END %]><label class="clickable pl-1 pr-3" for="data.[% auth | html %]_0">No</label>
-                <input type="radio" name="data.[% auth | html %]" id="data.[% auth | html %]_1" value="1"[% IF roles.$auth == 1 %] checked[% END %]><label class="clickable px-1" for="data.[% auth | html %]_1">Yes</label>
-              </td>
-            </tr>
-            [% END %]
+              <tr>
+                <th colspan=2 >Roles (cgi.cfg)</th>
+              </tr>
+              [% FOR auth = role_keys %]
+                <tr class="hoverable">
+                  <th>[% auth | html %]</th>
+                  <td>
+                    <input type="radio" name="data.[% auth | html %]" id="data.[% auth | html %]_0" value="0"[% IF roles.$auth == 0 %] checked[% END %]><label class="clickable pl-1 pr-3" for="data.[% auth | html %]_0">No</label>
+                    <input type="radio" name="data.[% auth | html %]" id="data.[% auth | html %]_1" value="1"[% IF roles.$auth == 1 %] checked[% END %]><label class="clickable px-1" for="data.[% auth | html %]_1">Yes</label>
+                  </td>
+                </tr>
+              [% END %]
             [% END %]
           </table>
 
           <div class="flexcol">
-            <table>
+            <table class="min-w-[650px] rowhover">
               <tr>
-                <th colspan=2 >Contact Information</th>
+                <th colspan=2 >
+                  <div class="flexrow flex-nowrap gap-1 justify-between">
+                    <span>Contact Information</span>
+                    [% cache_age = date.now() - profile_user.timestamp; IF cache_age > 5 %]<span class="textHINTsoft" title="auth cache last updated: [% date_format(c, profile_user.timestamp, datetime_format) %]">(auth cache updated [% duration(cache_age, 6) %] ago)</span>[% END %]
+                  </div>
+                </th>
+              </tr>
+              <tr>
+                <th class="w-48 align-top">Authoritive Backends</th>
+                <td>
+                  <div class="truncate max-w-[400px]">[% FOREACH peer_key IN profile_user.contact_src_peer %][% IF !loop.first %], [% END %]<span title="[% peer_key %]">[% peer_name(peer_key) %]</span>[% END %]</div>
+                </td>
               </tr>
               <tr>
                 <th>Groups</th>
@@ -166,10 +178,15 @@
               [% END %]
               <tr>
                 <th>Can Submit Commands</th>
-                <td>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
+                <td>
+                  <div class="flexrow flex-nowrap gap-1 justify-between">
+                    <span>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</span>
+                    [% IF profile_user.defined("can_submit_commands_src"); %]<span class="textHINTsoft">reason: [% profile_user.can_submit_commands_src | html %]</span>[% END %]
+                  </div>
+                </td>
               </tr>
-              <tr>
-                <th>Effective Roles</th>
+                <tr class="no-hover">
+                <th class="align-top">Effective Roles</th>
                 <td>
                   [% PROCESS _user_roles.tt %]
                 </td>
@@ -184,8 +201,10 @@
               <tr>
                 <th class="align-top">Remove</th>
                 <td>
-                  <input type="submit" name="send" value="remove user profile data"[% IF !profile_file_exists %] disabled[% END %]><br>
-                  <i>[% profile_file %][% IF !profile_file_exists %] (does not exist)[% END %]</i>
+                  <div class="flexcol gap-1">
+                    <button class="w-fit hover-red" name="send" value="remove_user_profile" [% IF !profile_file_exists %] disabled[% END %]><i class="uil uil-trash-alt"></i>remove user profile data</button>
+                    <span>Location: [% profile_file %][% IF !profile_file_exists %]<i class="ml-3">(profile file does not exist)</i>[% END %]</span>
+                  </div>
                 </td>
               </tr>
             </table>
@@ -193,7 +212,7 @@
         </div>
         <div class="footer flexrow justify-evenly">
           <a class="button" style="width:80px" href="conf.cgi?sub=users">cancel</a>
-          <button class="submit" style="width:120px"[% IF readonly %] disabled[% END %]><i class="uil uil-save"></i>save</button>
+          <button class="submit green" style="width:120px"[% IF readonly %] disabled[% END %]><i class="uil uil-save"></i>save</button>
         </div>
       </div>
     </form>

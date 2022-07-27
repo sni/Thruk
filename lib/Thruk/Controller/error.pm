@@ -22,11 +22,12 @@ Thruk Controller.
 
     detailed errors:
         return $c->detach_error({
-            msg         => "main error",
-            descr       => "more descriptive details",
-            code        => http code,
-            log         => 0|1, #  force logging
-            skip_escape => 0|1, # skip html escape of data
+            msg                 "main error",
+            descr               "more descriptive details",
+            code                http code,
+            log                 0|1, #  force logging
+            debug_information   more details which will be logged, (string / array)
+            skip_escape         0|1, # skip html escape of data
         });
 
 
@@ -89,11 +90,20 @@ sub index {
 
     # internal error but all backends failed redirects to "no backend available"
     if("$arg1" eq "13" # can be alphanumeric sometimes
-       and defined $c->stash->{'num_selected_backends'}
-       and (ref $c->stash->{'failed_backends'} eq 'HASH')
-       and (scalar keys %{$c->stash->{'failed_backends'}} >= $c->stash->{'num_selected_backends'})
-       and (scalar keys %{$c->stash->{'failed_backends'}} > 0)) {
-        $arg1 = 9;
+       && defined $c->stash->{'num_selected_backends'}
+       && (ref $c->stash->{'failed_backends'} eq 'HASH')
+       && defined $c->stash->{'selected_backends'}
+       && (ref $c->stash->{'selected_backends'} eq 'ARRAY')
+       && (scalar keys %{$c->stash->{'failed_backends'}} >= $c->stash->{'num_selected_backends'})
+       && (scalar keys %{$c->stash->{'failed_backends'}} > 0)) {
+        my $all_down = 1;
+        for my $key (@{$c->stash->{'selected_backends'}}) {
+            if(!$c->stash->{'failed_backends'}->{$key}) {
+                $all_down = 0;
+                last;
+            }
+        }
+        $arg1 = 9 if $all_down;
     }
 
     my $errors = {
@@ -153,7 +163,7 @@ sub index {
         },
         '9'  => {
             'mess'    => 'No Backend available',
-            'dscr'    => 'None of the configured Backends could be reached, please have a look at the logfile for detailed information and make sure the core is up and running.',
+            'dscr'    => 'None of the selected Backends could be reached, please have a look at the logfile for detailed information and make sure the core is up and running.',
             'details' => _get_connection_details($c),
             'code'    => 503, # Service Unavailable
         },
@@ -311,11 +321,16 @@ sub index {
     if(defined $c->config->{'refresh_rate'} && (!defined $c->stash->{'no_auto_reload'} || $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->config->{'refresh_rate'};
     }
+    if($arg1 == 13) {
+        $c->stash->{'no_auto_reload'}        = 1;
+        $c->stash->{'refresh_rate'}          = 0;
+        $c->stash->{'hide_backends_chooser'} = 1;
+    }
 
     $c->stash->{'title'}        = "Error"  unless defined $c->stash->{'title'} and $c->stash->{'title'} ne '';
     $c->stash->{'page'}         = "status" unless defined $c->stash->{'page'};
     $c->stash->{'real_page'}    = 'error';
-    $c->stash->{'infoBoxTitle'} = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
+    $c->stash->{'infoBoxTitle'} = "Error"  unless $c->stash->{'infoBoxTitle'};
 
     $c->stash->{'navigation'}  = "";
     Thruk::Utils::Menu::read_navigation($c);
@@ -354,7 +369,9 @@ sub index {
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
-    $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
+    if(!$c->stash->{'hide_backends_chooser'}) {
+        $c->stash->{'hide_backends_chooser'} = ref $c->stash->{'sites'} ne 'ARRAY' ? 1 : 0;
+    }
 
     # do not download errors
     $c->res->headers->header('Content-Disposition', '');
@@ -373,6 +390,7 @@ sub _get_connection_details {
     }
 
     my $listed = {};
+    my $selected = Thruk::Base::array2hash($c->stash->{'selected_backends'});
     for my $pd (sort keys %{$c->stash->{'failed_backends'}}) {
         my $peer = $c->db->get_peer_by_key($pd);
         my $name = $pd;
@@ -380,17 +398,34 @@ sub _get_connection_details {
             $name = $peer->{'name'};
         }
         $listed->{$pd} = 1;
-        $detail .= $name.': '.($c->stash->{'failed_backends'}->{$pd}//'')." (".$peer->{'addr'}."))\n";
+        $detail .= sprintf("%-10s: %-6s %s (addr: %s)\n",
+                                $name,
+                                _state2txt($c->stash->{'backend_detail'}->{$pd}->{'state'}),
+                                ($c->stash->{'failed_backends'}->{$pd}//''),
+                                $peer->{'addr'},
+                    );
     }
 
     for my $pd (sort keys %{$c->stash->{'backend_detail'}}) {
         next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
         next if $listed->{$pd};
-        $detail .= ($c->stash->{'backend_detail'}->{$pd}->{'name'} // $pd).': '
-                    .($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '')
-                    .' ('.($c->stash->{'backend_detail'}->{$pd}->{'addr'} || '').")\n";
+        next unless $selected->{$pd};
+        $detail .= sprintf("%-10s: %-6s %s (addr: %s)\n",
+                                ($c->stash->{'backend_detail'}->{$pd}->{'name'} // $pd),
+                                _state2txt($c->stash->{'backend_detail'}->{$pd}->{'state'}),
+                                ($c->stash->{'failed_backends'}->{$pd} || $c->stash->{'backend_detail'}->{$pd}->{'last_error'} || ''),
+                                ($c->stash->{'backend_detail'}->{$pd}->{'addr'} || ''),
+                    );
     }
     return $detail;
+}
+
+sub _state2txt {
+    my($state) = @_;
+    if($state == 1) {
+        return("DOWN");
+    }
+    return("OK");
 }
 
 1;

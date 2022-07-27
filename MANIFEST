@@ -551,6 +551,7 @@ plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t
 plugins/plugins-available/reports2/templates/_reports_icon.tt
 plugins/plugins-available/reports2/templates/custom_reports_edit_step2.tt
+plugins/plugins-available/reports2/templates/report_profile.tt
 plugins/plugins-available/reports2/templates/reports.tt
 plugins/plugins-available/reports2/templates/reports/comp/backend_error_page.tt
 plugins/plugins-available/reports2/templates/reports/comp/mail.tt
@@ -622,17 +623,7 @@ root/favicon.ico
 root/index.html
 root/robots.txt
 root/thruk/cache/thruk-2.48.2.js
-root/thruk/cache/thruk-2.48.js
 root/thruk/cache/thruk-panorama-2.48.2.js
-root/thruk/cache/thruk-panorama-2.48.js
-root/thruk/images/folder_gray.png
-root/thruk/images/folder_green.png
-root/thruk/images/folder_green_mixed.png
-root/thruk/images/folder_red.png
-root/thruk/images/folder_red_mixed.png
-root/thruk/images/nofolder_gray.png
-root/thruk/images/nofolder_green.png
-root/thruk/images/nofolder_red.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/thruk-2.48.2.js
@@ -2720,12 +2711,12 @@ templates/_parts_service_info_popup.tt
 templates/_perfdata_human.tt
 templates/_permission_edit.tt
 templates/_pnp_graph.tt
+templates/_profiles.tt
 templates/_progressbar.tt
 templates/_proxy_header.tt
 templates/_service_command_box.tt
 templates/_service_status_details_box.tt
 templates/_show_link.tt
-templates/_side_js.tt
 templates/_sounds.tt
 templates/_status_cmd_pane.tt
 templates/_status_column_select.tt
@@ -2929,6 +2920,7 @@ templates/user_profile.tt
 templates/void.tt
 templates/waiting_for_job.tt
 THANKS
+themes/base.css
 themes/themes-available/Dark/images/apple-touch-icon-180x180.png
 themes/themes-available/Dark/images/dropdown.png
 themes/themes-available/Dark/images/favicon-16x16.png
@@ -2940,6 +2932,7 @@ themes/themes-available/Dark/images/logo.svg
 themes/themes-available/Dark/images/logo_thruk.png
 themes/themes-available/Dark/images/logo_thruk_small.png
 themes/themes-available/Dark/images/logo_thruk_small_icon.png
+themes/themes-available/Dark/src/Dark.css
 themes/themes-available/Dark/stylesheets/Dark.css
 themes/themes-available/Light/images/apple-touch-icon-180x180.png
 themes/themes-available/Light/images/dropdown.png
@@ -2952,6 +2945,7 @@ themes/themes-available/Light/images/logo.svg
 themes/themes-available/Light/images/logo_thruk.png
 themes/themes-available/Light/images/logo_thruk_small.png
 themes/themes-available/Light/images/logo_thruk_small_icon.png
+themes/themes-available/Light/src/Light.css
 themes/themes-available/Light/stylesheets/Light.css
 themes/themes-enabled/Dark
 themes/themes-enabled/Light

@@ -39,11 +39,11 @@
           <div>
             [% IF host.acknowledged %]
             <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=51&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
-              <i class="fa-solid fa-clipboard"></i>Remove problem acknowledgement
+              <i class="fa-solid fa-person-digging hover-red-text"></i>Remove problem acknowledgement
             </a>
             [% ELSE %]
             <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=33&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
-              <i class="fa-solid fa-clipboard-check"></i>Acknowledge this host problem
+              <i class="fa-solid fa-person-digging"></i>Acknowledge this host problem
             </a>
             [% END %]
           </div>

@@ -26,7 +26,8 @@ if (system.args.length < 3) {
     console.log('  --width=<width>       (in px)');
     console.log('  --height=<height>     (in px)');
     console.log('  --format=<pdf|png>');
-    console.log('  --autoscale');
+    console.log('  --autoscale=1');
+    console.log('  --nodelay=1');
     console.log('  --cookie=<name>,<value>');
     console.log('  --header=<name>:<value>');
     phantom.exit(1);
@@ -121,12 +122,16 @@ if (system.args.length < 3) {
                     }
                 }, 50);
             } else {
+                var delay = 3000;
+                if(options.nodelay) {
+                    delay = 50;
+                }
                 window.setTimeout(function () {
                     debug('page render');
                     page.render(output, {format: options.format, quality: 100});
                     debug('page render done');
                     phantom.exit();
-                }, 3000);
+                }, delay);
             }
         }
     });

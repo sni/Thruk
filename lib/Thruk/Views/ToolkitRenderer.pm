@@ -103,6 +103,11 @@ sub render {
     # update Template::Provider include paths
     $template_provider_user->include_path([$c->config->{'user_template_path'}]) if $template_provider_user;
 
+    if($Thruk::Globals::tt_profiling) {
+        require Thruk::Template::Context;
+        Thruk::Template::Context::reset_stack();
+    }
+
     $tt->process(
         $template,
         ($stash || $c->stash),

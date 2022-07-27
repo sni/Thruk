@@ -29,7 +29,7 @@
                   <td class="px-2">
                     <ul class="overflow-x-auto max-w-[60vw]">
                       [% FOREACH err IN parse_errors %]
-                        <li class="textERROR">[% err %]</li>
+                        <li class="textALERT">[% err %]</li>
                       [% END %]
                     </ul>
                   </td>
@@ -139,7 +139,7 @@
                   </th>
                   <td></td>
                   <td class="px-2">
-                    <button class="submit w-full hover:textALERT" onclick="if(confirm('really discard all unsaved changes?')) { send_form_in_background_and_reload(this, { discard: true }); return false; } else { return false; }">
+                    <button class="submit w-full hover-red" onclick="if(confirm('really discard all unsaved changes?')) { send_form_in_background_and_reload(this, { discard: true }); return false; } else { return false; }">
                       <i class="uil uil-trash-alt"></i>
                       discard all unsaved changes
                     </button>

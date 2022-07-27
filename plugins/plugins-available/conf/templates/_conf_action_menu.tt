@@ -87,7 +87,7 @@
           </form>
         </div>
         [% END %]
-        <div>
+        <div class="hover-red">
           <form action='conf.cgi' method='POST'>
             <input type='hidden' name='sub' value='objects'>
             <input type='hidden' name='action' value='delete'>

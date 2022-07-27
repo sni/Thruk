@@ -3,11 +3,16 @@
 var tmpDiv;
 var updateRetries;
 function update_reports_type(nr, tpl) {
+
+    jQuery('TR.js-report-options').css('visibility', 'hidden');
+    jQuery('#reports_expected_objects').css('visibility', 'hidden');
+    jQuery('<tr class="js-report-options"><td colspan=2 align="center"><div class="spinner w-10 h-10"></div></td></tr>').insertAfter('#new_reports_options')
+
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
     tmpDiv = jQuery("<div></div>").load('reports2.cgi?report='+nr+'&template='+tpl+'&action=edit2&_=' + ts);
     updateRetries = 0;
-    window.setTimeout(update_reports_type_step2, 100);
+    window.setTimeout(update_reports_type_step2, 200);
 }
 function update_reports_type_step2() {
     updateRetries = updateRetries + 1;
@@ -25,9 +30,11 @@ function update_reports_type_step2() {
 
     // scroll to report settings
     jQuery('TR.js-report-options TD').effect('highlight', {}, 1000);
-    jQuery([document.documentElement, document.body]).animate({
+    jQuery('#report_attributes').animate({
         scrollTop: jQuery("#report_type").offset().top
-    }, 1000);
+    }, 300);
+
+    jQuery(".js-type-filter").change();
 }
 
 /* show hide specific types of reports */
@@ -102,6 +109,7 @@ function reports_update_affected_sla_objects(input) {
 
     form = jQuery(form).clone();
     jQuery(form).find(".template").remove();
+    jQuery(form).find(".js-filter-attributes-pane").remove();
 
     var data = {
         action:         'check_affected_objects',
@@ -136,14 +144,14 @@ function reports_update_affected_sla_objects(input) {
             else if(data.hosts == 0 && data.services > 0) {
                 msg = data.services+" service"+(data.services == 1 ? '' : 's');
             }
-            span1.removeClass('textERROR');
-            span2.removeClass('textERROR');
+            span1.removeClass('textALERT');
+            span2.removeClass('textALERT');
             span1.attr('title', '');
             span2.attr('title', '');
             span2.html(msg);
             if(data['too_many'] != undefined && data['too_many'] == 1) {
-                span1.addClass('textERROR');
-                span2.addClass('textERROR');
+                span1.addClass('textALERT');
+                span2.addClass('textALERT');
                 span1.attr('title', 'too many objects, please use more specific filter');
                 span2.attr('title', 'too many objects, please use more specific filter');
             }

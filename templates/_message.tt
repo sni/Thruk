@@ -1,6 +1,6 @@
 ﻿[% SET message = get_message(c) %]
 [% IF message %]
-<div id="thruk_message" class="card shadow-float absolute p-1 z-50 min-w-[600px] max-w-[90vw] top-14 left-1/2 transform -translate-x-1/2">
+<div id="thruk_message" class="card shadow-float absolute p-1 z-50 min-w-full lg:min-w-[600px] max-w-[90vw] top-14 left-1/2 transform -translate-x-1/2">
   <div class="flexrow flex-nowrap gap-2 justify-center">
     <div class="w-5">
       [% IF message.0 == 'fail_message' %]<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>[% END %]

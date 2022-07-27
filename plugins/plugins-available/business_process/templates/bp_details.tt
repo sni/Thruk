@@ -157,7 +157,7 @@
           <div>
             <a href='bp.cgi?action=clone&amp;bp=[% bp.id %]'><i class="fa-solid fa-copy"></i>Clone this Business Process</a>
           </div>
-          <div>
+          <div class="hover-red">
             <form action='bp.cgi' method='POST' style="display: inline;">
               <input type='hidden' name='action' value='remove'>
               <input type="hidden" name="bp" value="[% bp.id %]">

@@ -21,13 +21,14 @@
     [% PROCESS _message.tt %]
 
     <div class="w-[300px] card rounded-xl shadow-float h-fit z-10 p-8 flexcol flex-nowrap gap-y-0 loginmask">
-      <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" class="mb-5"></a>
+      <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" class="mb-5 mx-auto"></a>
       [% IF c.config.basic_auth_enabled %]
         <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
           <input type="hidden" name="referer" value="[% referer | html %]">
-          <input type="text" name="login" placeholder="User" id="loginuser" required class="w-full text-lg silent mt-2" />
+          <div class="relative"><i class="uil uil-user absolute opacity-50 top-4 left-2"></i><input type="text" name="login" placeholder="User" id="loginuser" required class="w-full text-lg silent mt-2 pl-8" /></div>
           <div class="togglePassword relative mt-2">
-            <input type="password" name="password" placeholder="Password" required class="w-full text-lg silent" />
+            <i class="uil uil-key-skeleton opacity-50 absolute top-2 left-2"></i>
+            <input type="password" name="password" placeholder="Password" required class="w-full text-lg silent px-8" />
             <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 my-1.5 opacity-50 text-lg togglePassword"></i>
           </div>
           <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
@@ -49,7 +50,7 @@
           <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
             <input type="hidden" name="referer" value="[% referer | html %]">
             <input type="hidden" name="oauth" value="[% loop.index %]">
-            <button class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
+            <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
               <div class="w-5"><i class="[% IF auth.defined("icon") %][% auth.icon | html %][% ELSE %]uil uil-placeholder[% END %]"></i></div>
               [% IF auth.defined("login") %][% auth.login %][% ELSE %]Login with OAuth[% END %]
               <div class="w-5"></div>

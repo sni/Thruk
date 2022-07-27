@@ -1,10 +1,10 @@
 ﻿<div class="flex relative">
   <button class="round small" title="Manager user bookmarks" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><i class="uil uil-bookmark"></i></button>
 
-  <div class="card shadow-float absolute z-20 top-7 w-[550px]" style="display: none;" id="add_bookmark">
+  <div class="card shadow-float absolute z-20 top-7 w-[550px] overflow-hidden" style="display: none;" id="add_bookmark">
     <div class="head p-0">
-      <span class="tabs active" id="sub_2" onclick="set_sub(2)">Add New</span>
-      <span class="tabs" id="sub_1" onclick="set_sub(1)">Remove Bookmarks</span>
+      <span class="tabs text-sm active" id="sub_2" onclick="set_sub(2)">Add New</span>
+      <span class="tabs text-sm" id="sub_1" onclick="set_sub(1)">Remove Bookmarks</span>
       <button class="iconOnly medium absolute right-2 top-2" onClick="toggleElement('add_bookmark'); return false;"><i class="uil uil-times"></i></button>
     </div>
 

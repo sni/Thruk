@@ -148,11 +148,14 @@ sub _cmd_report {
     }
 
     my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+    my $options     = Thruk::Utils::Reports::read_report_file($c, $nr);
     _debug("finished creating report");
     if(defined $report_file and $report_file eq '-2') {
         return($Thruk::Utils::Reports::error // "[".$nr.".rpt] report is running on another node already\n", 0);
     } elsif(defined $report_file and -f $report_file) {
-        return("[".$nr.".rpt] report calculated successfully", 0) if $ENV{'THRUK_CRON'}; # avoid pdf being printed to logfile
+        ## no critic
+        return(sprintf("[%s.rpt] report calculated successfully in %.1fs\n", $nr, $options->{'var'}->{'end_time'}-$options->{'var'}->{'start_time'}), 0) if(-t 0 || $ENV{'THRUK_CRON'}); # avoid pdf being printed to logfile
+        ## use critic
         $c->res->headers->content_type('application/octet-stream');
         return(Thruk::Utils::IO::read($report_file), 0);
     }

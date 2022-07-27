@@ -50,6 +50,11 @@ fix_phantomjs_location:
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: zlib"    >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libjpeg" >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: openssl" >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library libjpeg usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"  >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library libpng usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"   >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library openssl usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"  >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library sqlite usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"   >> debian/thruk-plugin-reporting.lintian-overrides
+	echo "thruk-plugin-reporting: embedded-library zlib usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"     >> debian/thruk-plugin-reporting.lintian-overrides
 	echo "thruk-plugin-reporting: hardening-no-relro usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"        >> debian/thruk-plugin-reporting.lintian-overrides
 	sed -e 's|phantomjs,||' -i debian/control
 

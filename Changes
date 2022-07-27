@@ -14,6 +14,12 @@ next 3.x:
             - statusmap
           - add collapsable side navigation
           - add delete icon to comments/downtimes popup
+          - add authoritive backend switch
+next:
+          - add short links option for custom links
+          - replace markup link links in comments and downtimes
+          - Reporting:
+            - fix last day missing in graph when breaking down by days (#1172)
 
 2.48.2   Fri Jul  1 14:36:30 CEST 2022
           - make links clickable in comments and downtimes
