@@ -29,7 +29,7 @@ use Thruk::Utils::Log qw/:all/;
 
   check_proc($config, [$c], [$log_missing])
 
-makes sure lmd process is running
+makes sure lmd process is running. Returns undef or the lmd pid.
 
 =cut
 
@@ -43,6 +43,7 @@ sub check_proc {
     my $size       = -s $logfile;
     my $keep       = $config->{'lmd_rotate_keep_logs'} || 3;
     my $rotatesize = ($config->{'lmd_rotate_size'} || 20 ) *1024*1024; # rotate logfile if its more than 20mb
+    my $pid;
     if($size && $size > $rotatesize) {
         if(-e $logfile.'.'.$keep) {
             unlink($logfile.'.'.$keep);
@@ -59,8 +60,8 @@ sub check_proc {
         Thruk::Utils::IO::write($logfile, '');
         _debug(sprintf("moved %s to %s.1", $logfile, $logfile));
     }
-    if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-        return;
+    if(-e $lmd_dir.'/live.sock' && ($pid = check_pid($lmd_dir.'/pid'))) {
+        return($pid);
     }
 
     # only start it once
@@ -76,8 +77,8 @@ sub check_proc {
 
     eval {
         # now that we have the lock, check pid again, it might have been restarted meanwhile
-        if(-e $lmd_dir.'/live.sock' && check_pid($lmd_dir.'/pid')) {
-            return;
+        if(-e $lmd_dir.'/live.sock' && ($pid = check_pid($lmd_dir.'/pid'))) {
+            return($pid);
         }
 
         write_lmd_config($c, $config);
@@ -94,7 +95,8 @@ sub check_proc {
         if($config->{'lmd_options'}) {
             $cmd .= ' '.$config->{'lmd_options'}.' ';
         }
-        $cmd .= ' >/dev/null 2>&1 &';
+        my $startlog = $lmd_dir.'/startup.log';
+        $cmd .= ' >'.$startlog.' 2>&1 &';
 
         _debug("start cmd: ". $cmd);
         my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
@@ -102,7 +104,6 @@ sub check_proc {
             _error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
         } else {
             # wait up to 5 seconds for pid file
-            my $pid;
             my $retries = 0;
             while(!$pid) {
                 $pid = check_pid($lmd_dir.'/pid');
@@ -115,7 +116,11 @@ sub check_proc {
             if($pid) {
                 _debug(sprintf('lmd started with pid %d', $pid));
             } else {
-                _warn(sprintf('lmd failed to start, you may find details in the lmd.log file.'));
+                if(-s $startlog) {
+                    my $starterr = Thruk::Utils::IO::read($startlog);
+                    _warn($starterr);
+                }
+                _warn(sprintf('lmd failed to start, you may find details in the lmd.log or in '.$startlog));
             }
         }
     };
@@ -127,7 +132,7 @@ sub check_proc {
     confess($err) if $err;
 
     #&timing_breakpoint('check_proc');
-    return;
+    return($pid);
 }
 
 ########################################
