@@ -673,6 +673,19 @@ sub json_encode {
 
 ########################################
 
+=head2 json_encode_pretty
+
+  json_encode_pretty(array|hash)
+
+returns pretty json encoded string
+
+=cut
+sub json_encode_pretty {
+    return _escape_tags_js(Cpanel::JSON::XS->new->pretty->canonical->encode($_[0]));
+}
+
+########################################
+
 =head2 encode_json_obj
 
   encode_json_obj(array, [decode])
