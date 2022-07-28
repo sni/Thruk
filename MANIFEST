@@ -2422,6 +2422,9 @@ t/scenarios/lmd_federation_multitier_e2e/tier2c/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier2d/Dockerfile
 t/scenarios/lmd_federation_multitier_e2e/tier2d/playbook.yml
 t/scenarios/lmd_federation_multitier_e2e/tier2d/thruk_local.conf
+t/scenarios/lmd_federation_multitier_e2e/tier2e/Dockerfile
+t/scenarios/lmd_federation_multitier_e2e/tier2e/playbook.yml
+t/scenarios/lmd_federation_multitier_e2e/tier2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier3a/1.tbp
 t/scenarios/lmd_federation_multitier_e2e/tier3a/Dockerfile
 t/scenarios/lmd_federation_multitier_e2e/tier3a/playbook.yml
