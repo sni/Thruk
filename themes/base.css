@@ -1627,3 +1627,15 @@ DIV.daterangepicker SELECT {
 .jstree-default .jstree-hovered {
   background: var(--card-bg) !important;
 }
+
+/*******************************************************************************
+* lined text editor popup
+*/
+
+DIV.linedwrap {
+  display: flex;
+}
+
+DIV.linedtextarea {
+  width: 100%;
+}
