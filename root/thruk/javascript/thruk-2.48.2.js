@@ -8993,6 +8993,9 @@ function element_check_visibility(el) {
 
 // apply row strip manually
 function applyRowStripes(el) {
+    if(!el) {
+        return;
+    }
     if(el.tagName == "TABLE") {
         jQuery(el).find("TR").removeClass(["rowOdd", "rowEven"]);
         var x = 0;
