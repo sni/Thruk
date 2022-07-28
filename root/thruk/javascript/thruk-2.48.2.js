@@ -4310,17 +4310,22 @@ function refreshNavSections(id) {
 }
 
 function submitFormInBackground(form, cb, extraData) {
+    var removeEls = [];
     if(extraData) {
         for(var key in extraData) {
-            jQuery('<input />', {
+            var el = jQuery('<input />', {
                 type:  'hidden',
                 name:   key,
                 value:  extraData[key]
             }).appendTo(form);
+            removeEls.push(el[0]);
         }
     }
     var data = jQuery(form).serializeArray();
     var url  = jQuery(form).attr("action");
+    jQuery(removeEls).each(function(i, el) {
+        jQuery(el).remove();
+    });
     jQuery.ajax({
         url:   url,
         data: data,
