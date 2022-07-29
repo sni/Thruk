@@ -3383,6 +3383,26 @@ function sendJSError(scripturl, text) {
     return;
 }
 
+// show popup with job output
+function showJobOutputPopup(jobid, peerid) {
+    var id    = "job_popup_"+jobid;
+    var title = "Job";
+    var text  = "<div id='"+id+"'></div>";
+    overcard({'bodyCls': 'p-2', 'body': text, 'caption': title, 'width': 'auto' });
+    load_overcard_content(id, url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid);
+
+    if(!has_jquery_ui()) {
+        load_jquery_ui(function() {
+            jQuery('#'+id).parents('.card').draggable({ handle: "H3, .head" });
+        });
+    } else {
+        jQuery('#'+id).parents('.card').draggable({ handle: "H3, .head" });
+    }
+    jQuery('#'+id).parents('.card').find("DIV.head").css("cursor", "move");
+    return(false);
+}
+
+
 /* return shortened string */
 function shortenSource(text) {
     if(text.length > 100) {
@@ -4351,10 +4371,10 @@ function submitFormInBackground(form, cb, extraData) {
     return(false);
 }
 
-function send_form_in_background_and_reload(btn, extraData) {
+function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
     var form = jQuery(btn).parents('FORM');
     submitFormInBackground(form, reloadPage, extraData);
-    setBtnSpinner(btn);
+    setBtnSpinner(btn, skipTimeout);
     return(false);
 }
 

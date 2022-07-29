@@ -2892,6 +2892,7 @@ templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
 templates/extra_headers.tt
 templates/get_variable.tt
+templates/job_popup.tt
 templates/login.tt
 templates/main.tt
 templates/notifications.tt

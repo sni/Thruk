@@ -264,17 +264,16 @@ sub logcache {
 
 =head2 cmd
 
-  cmd($c, $cmd)
+  cmd($c, $cmd, [$background])
 
 return result of cmd
 
 =cut
 sub cmd {
-    my($self, $c, $cmd) = @_;
-    my($rc, $out);
+    my($self, $c, $cmd, $background) = @_;
+    my($rc, $out) = (0, "");
     if($self->{'type'} eq 'http') {
         if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
-            ($rc, $out) = (1, "federated sites not supported");
             require Thruk::Utils;
             my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
 
@@ -282,8 +281,12 @@ sub cmd {
                 'action'      => 'raw',
                 'sub'         => 'Thruk::Utils::IO::cmd',
                 'remote_name' => $self->{'class'}->{'remote_name'},
-                'args'        => $cmd,
+                'args'        => [$cmd],
             };
+            if($background) {
+                $options->{'sub'}  = 'Thruk::Utils::External::cmd';
+                $options->{'args'} = ['Thruk::Context', { cmd => $cmd, background => 1 }];
+            }
             require Cpanel::JSON::XS;
             my $postdata = Cpanel::JSON::XS::encode_json({ data => Cpanel::JSON::XS::encode_json({
                 credential => $self->{'class'}->{'auth'},
@@ -298,15 +301,75 @@ sub cmd {
             my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
             my $result = Cpanel::JSON::XS::decode_json($res->content());
             ($rc, $out) = @{$result->{'output'}};
+            if($background) {
+                ($out) = @{$result->{'output'}};
+            }
         } else {
-            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", ['Thruk::Context', $cmd], { timeout => 120 })};
+            if($background) {
+                ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', { cmd => $cmd, background => 1 }], { timeout => 120 })};
+            } else {
+                ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", ['Thruk::Context', $cmd], { timeout => 120 })};
+            }
         }
 
     } else {
-        require Thruk::Utils::IO;
-        ($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+        if($background) {
+            require Thruk::Utils::External;
+            $out = Thruk::Utils::External::cmd($c, { cmd => $cmd, background => 1 });
+        } else {
+            require Thruk::Utils::IO;
+            ($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+        }
     }
+
     return($rc, $out);
+}
+
+##########################################################
+
+=head2 job_data
+
+  job_data($c, $jobid)
+
+return job data
+
+=cut
+sub job_data {
+    my($self, $c, $jobid) = @_;
+    my $data;
+    if($self->{'type'} eq 'http') {
+        if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
+            require Thruk::Utils;
+            my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
+
+            my $options = {
+                'action'      => 'raw',
+                'sub'         => 'Thruk::Utils::External::read_job',
+                'remote_name' => $self->{'class'}->{'remote_name'},
+                'args'        => ['Thruk::Context', $jobid],
+            };
+            require Cpanel::JSON::XS;
+            my $postdata = Cpanel::JSON::XS::encode_json({ data => Cpanel::JSON::XS::encode_json({
+                credential => $self->{'class'}->{'auth'},
+                options    => $options,
+            })});
+
+            require HTTP::Request;
+            my $header = ['Content-Type' => 'application/json; charset=UTF-8'];
+            my $req    = HTTP::Request->new('POST', $url.'cgi-bin/remote.cgi', $header, $postdata);
+
+            require Thruk::Controller::proxy;
+            my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
+            my $result = Cpanel::JSON::XS::decode_json($res->content());
+            ($data) = @{$result->{'output'}};
+        } else {
+            ($data) = @{$self->{'class'}->request("Thruk::Utils::External::read_job", ['Thruk::Context', $jobid])};
+        }
+    } else {
+        require Thruk::Utils::External;
+        $data = Thruk::Utils::External::read_job($c, $jobid);
+    }
+    return($data);
 }
 
 ##########################################################

@@ -580,10 +580,19 @@ sub job_page {
     my($c) = @_;
 
     my $job    = $c->req->parameters->{'job'};
+    my $peerid = $c->req->parameters->{'peer'};
     my $json   = $c->req->parameters->{'json'}   || 0;
     my $cancel = $c->req->parameters->{'cancel'} || 0;
     $c->stash->{no_auto_reload} = 1;
     return $c->detach('/error/index/22') unless defined $job;
+
+    if($peerid) {
+        my $peer = $c->db->get_peer_by_key($peerid);
+        my $data = $peer->job_data($c, $job);
+        $c->stash->{data}     = $data // {};
+        $c->stash->{template} = 'job_popup.tt';
+        return;
+    }
 
     if($cancel) {
         cancel($c, $job);
