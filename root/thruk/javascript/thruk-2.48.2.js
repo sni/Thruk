@@ -3384,12 +3384,13 @@ function sendJSError(scripturl, text) {
 }
 
 // show popup with job output
-function showJobOutputPopup(jobid, peerid) {
+function showJobOutputPopup(jobid, peerid, title) {
     var id    = "job_popup_"+jobid;
-    var title = "Job";
-    var text  = "<div id='"+id+"'></div>";
+    var title = title || "Job"+jobid;
+    var text  = "<div id='"+id+"'><div class='spinner w-8 h-8'></div></div><div class='footer'><button class='w-24 mx-auto' onclick='return(closeOvercard());'>OK</button></div>";
     overcard({'bodyCls': 'p-2', 'body': text, 'caption': title, 'width': 'auto' });
-    load_overcard_content(id, url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid);
+
+    showJobOutputPopupUpdate(jobid, peerid, id);
 
     if(!has_jquery_ui()) {
         load_jquery_ui(function() {
@@ -3400,6 +3401,40 @@ function showJobOutputPopup(jobid, peerid) {
     }
     jQuery('#'+id).parents('.card').find("DIV.head").css("cursor", "move");
     return(false);
+}
+
+function closeOvercard() {
+    toggleElement('overcard');
+    removeOvercardIframe();
+    return false;
+}
+
+function showJobOutputPopupUpdate(jobid, peerid, divid) {
+    jQuery.get(url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&json=1", {}, function(data, status, req) {
+        jQuery('#'+divid).html("");
+        if(!data) {
+            return;
+        }
+
+        var head = jQuery('#'+divid).parents('.card').find("DIV.head");
+        head.find("DIV.spinner").remove();
+        head.find("I.fa-check").remove();
+        head.find("I.fa-exclamation").remove();
+        jQuery('#'+divid).text(data.stdout+data.stderr).addClass("whitespace-pre");
+
+        if(data['is_running']) {
+            head.prepend('<div class="spinner mr-2"><\/div>');
+            window.setTimeout(function() {
+                showJobOutputPopupUpdate(jobid, peerid, divid);
+            }, 1000)
+        } else {
+            if(data['rc'] == 0) {
+                head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
+            } else {
+                head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
+            }
+        }
+    });
 }
 
 

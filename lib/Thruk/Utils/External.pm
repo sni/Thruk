@@ -591,6 +591,7 @@ sub job_page {
         my $data = $peer->job_data($c, $job);
         $c->stash->{data}     = $data // {};
         $c->stash->{template} = 'job_popup.tt';
+        return $c->render(json => $data) if $json;
         return;
     }
 
