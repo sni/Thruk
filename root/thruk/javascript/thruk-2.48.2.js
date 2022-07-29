@@ -248,6 +248,9 @@ function initLastUserInteraction() {
 
 
 function applyScroll(scrollTo) {
+    if(!scrollTo) {
+        return;
+    }
     var scrolls = scrollTo.split("_");
     for(var i = 0; i < scrolls.length; i++) { scrolls[i] = Number(scrolls[i]); }
     if(scrolls[0] > 0 || scrolls[1] > 0) {
