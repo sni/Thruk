@@ -99,10 +99,10 @@ sub core_scheduling_page {
     }
 
     my $queue = [
-        { label => "",               color => "#E0AF1B", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
-        { label => "host checks",    color => "#EDC240", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
-        { label => "",               color => "#59B2F8", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
-        { label => "service checks", color => "#AFD8F8", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+        { label => "hosts running",    color => "#D1A317", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+        { label => "hosts planned",    color => "#FCD666", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+        { label => "services running", color => "#33A7FF", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+        { label => "services planned", color => "#B6DDFC", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
     ];
     my $markings = [
         { color => '#990000', lineWidth => 1, xaxis => { from => $now*1000, to => $now*1000 } },

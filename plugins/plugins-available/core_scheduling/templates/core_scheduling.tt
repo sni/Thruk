@@ -20,7 +20,7 @@
 <div class="card mx-auto w-[1000px] mt-5">
   <div class="head justify-between">
     [% PROCESS _status_filter.tt %]
-    <button id="reschedule_btn" class="green">
+    <button id="reschedule_btn">
       <i class="fa-solid fa-wand-magic-sparkles"></i>
       balance all hosts and services
     </button>
