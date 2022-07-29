@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 29;
+plan tests => 37;
 
 TestUtils::test_command({
     cmd     => "./script/check_thruk_rest t/data/check_thruk_rest/nested.json",
@@ -44,5 +44,17 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => "./script/check_thruk_rest t/data/check_thruk_rest/kibana.json -o '{STATUS} - hits {hits::total::value}' -w 'hits.total.value:10' -c '{hits::total::value}20'",
     like    => [qr/OK - hits 0\|/, qr/\Q'hits::total::value'=0;10;20;;\E/, qr/\Q'hits::max_score'=U;;;;\E/],
+    exit    => 0,
+});
+
+TestUtils::test_command({
+    cmd     => "./script/check_thruk_rest '{ \"count\" : 1 }' '[ { \"id\" : \"1234\", \"name\" : \"test\" } ]' -o '{STATUS} - Disconnected Backends {2:0::name}'",
+    like    => [qr/^\QOK - Disconnected Backends test|'count'=1;;;;\E$/],
+    exit    => 0,
+});
+
+TestUtils::test_command({
+    cmd     => "./script/check_thruk_rest '{ \"count\" : 1 }' '[ { \"name\" : \"test\" } ]' -o '{STATUS} - Disconnected Backends {2:0}'",
+    like    => [qr/^\QOK - Disconnected Backends {"name":"test"}|'count'=1;;;;\E$/],
     exit    => 0,
 });
