@@ -17,7 +17,7 @@
   </div>
 </div>
 
-<div class="card mx-auto min-w-[1000px] overflow-hidden">
+<div class="card mx-auto mt-5 min-w-[1000px] overflow-hidden">
   <div class='head'><h3>Host State Breakdowns</h3></div>
   <div>
     [% IF use_feature_trends %]
