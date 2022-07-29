@@ -16,3 +16,8 @@
     line: "    cps         = 10000 3"
     regexp: '^\s*cps'
   when: xinetd_livestatus.stat.exists == true
+- name: reduce naemon worker
+  lineinfile:
+    path: /opt/omd/sites/{{ site }}/etc/naemon/naemon.cfg
+    regexp: '^check_workers='
+    line: "check_workers=2"

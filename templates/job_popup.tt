@@ -1,2 +1,2 @@
-﻿[% ID data.defined("stdout"); data.stdout; END %]
-[% ID data.defined("stderr"); data.stderr; END %]
+﻿[% IF data.defined("stdout"); data.stdout; END %]
+[% IF data.defined("stderr"); data.stderr; END %]
