@@ -82,7 +82,7 @@
       [% UNLESS authorized_for_read_only %]
       <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
       <div class="hint text-center font-medium pb-1">Select all:</div>
-      <div class="hint flex place-content-center gap-x-0.5">
+      <div class="hint flex gap-x-0.5">
         <button class="min-w-[110px]" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">Hosts</button>
         <button class="min-w-[110px]" onclick="selectAllServices(true,'[% paneprefix %]');return false;">Services</button>
         <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.CRITICAL','.WARNING','.UNKNOWN'));return false;">Problems</button>
@@ -95,7 +95,7 @@
   </div>
 [% END %]
 
-<div class="card w-full min-w-[800px]">
+<div class="card w-full min-w-[375px]">
   <div class="mainTableHeader">
     <div>
       <div class="flex flex-nowrap gap-x-2 items-center">

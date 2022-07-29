@@ -53,7 +53,7 @@
       [% UNLESS authorized_for_read_only %]
       <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
       <div class="hint text-center font-medium pb-1">Select all:</div>
-      <div class="hint flex place-content-center gap-x-0.5">
+      <div class="hint flex gap-x-0.5">
         <button class="min-w-[110px]" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">Hosts</button>
         <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.DOWN','.UNREACHABLE'));return false;">Problems</button>
         <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">With Downtime</button>

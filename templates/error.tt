@@ -5,28 +5,27 @@
 
 [% PROCESS _infobox.tt has_proc_info=0 %]
 
-<div class="flexcol w-full lg:place-content-center lg:items-center text-center mt-5">
-  [% IF errorMessage %]
-    <h1 class='textALERT'>[% errorMessage %]</h1>
-    <h2 class="whitespace-normal">[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
-  [% ELSE %]
-    <h1 class='textALERT'>internal server error</h1>
-    <h2 class="whitespace-normal">internal server error occured, please look at your logfiles</h2>
-    [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
-  [% END %]
+[% IF errorMessage %]
+  <h1 class='textALERT mt-5'>[% errorMessage %]</h1>
+  <h2 class="whitespace-normal text-center">[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
+[% ELSE %]
+  <h1 class='textALERT mt-5'>internal server error</h1>
+  <h2 class="whitespace-normal text-center">internal server error occured, please look at your logfiles</h2>
+  [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
+[% END %]
 
-  [% IF errorDetails %]
-    <div class='card text-left w-fit'>
-      <div class="head">
-        <h3>Details</h3>
-      </div>
-      <div class="body whitespace-pre font-mono">[% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]</div>
+[% IF errorDetails %]
+  <div class='card text-left w-fit mx-auto mt-2'>
+    <div class="head">
+      <h3>Details</h3>
     </div>
-  [% END %]
+    <div class="body whitespace-pre font-mono">[% nice_stacktrace(escape_html(dump2str(errorDetails, 0, 0))) %]</div>
+  </div>
+[% END %]
 
-  [% IF stacktrace %]
-    <div class="text-center w-fit">
-      [% IF !make_test_mode && !thruk_author %]
+[% IF stacktrace %]
+  [% IF !make_test_mode && !thruk_author %]
+    <div class="text-center w-fit mx-auto mt-2">
       <textarea class="w-full h-20" placeholder="please add any hints which might help to reproduce this issue..." onkeyup="el=document.getElementById('error_report_text'); el.innerHTML = el.innerHTML.replace(/Please describe what you did:.*Make sure the report does not contain/s, 'Please describe what you did:\n\n'+this.value+'\n\nMake sure the report does not contain')"></textarea>
       <a
         href="mailto:[% bug_email_rcpt %]?subject=Thruk%20Error%20Report&amp;body="
@@ -36,52 +35,48 @@
         <i class="fa-solid fa-bug" title="Send Bug Report"></i>
         Help making Thruk better by sending an anonymous bug report.
       </a>
-        <a href="#" onclick="document.getElementById('error_report_card').style.display=''; return false;" class="button flexrow gap-0 justify-between mt-5">
-          <div class="w-5"></div>
-          <span>Preview included details</span>
-          <i class="uil uil-plus" title="open bug report preview"></i>
-        </a>
-      [% END %]
+      <a href="#" onclick="document.getElementById('error_report_card').style.display=''; return false;" class="button flexrow gap-0 justify-between mt-5">
+        <div class="w-5"></div>
+        <span>Preview included details</span>
+        <i class="uil uil-plus" title="open bug report preview"></i>
+      </a>
     </div>
   [% END %]
+[% END %]
 
-  [% IF thruk_author %]
-    <div class="flexrow lg:justify-center">
-      [% IF stacktrace %]
-        <div class="card">
-          <div class="head justify-between">
-            <h3>Stacktrace</h3>
-            <div class="flexrow gap-1">
-              <button class="hoverable p-2 iconOnly" onclick='toggleElement("rawstack");toggleElement("nicestack"); return false;' title="show raw stacktrace">
-                <i class="fa-solid fa-code"></i>
-              </button>
-              <button class="hoverable p-2 iconOnly" onclick='hideElement("rawstack");showElement("nicestack");nice_stacktrace_expand(); return false;' title="expand stacktrace">
-                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-              </button>
-            </div>
-          </div>
-          <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2">[% escape_html(stacktrace) %]</div>
-          <div id="nicestack">
-            [% nice_stacktrace(escape_html(stacktrace)) %]
-          </div>
+[% IF thruk_author %]
+  [% IF !stacktrace %]
+    <div class="card mx-auto mt-2">
+      <div class="head justify-between">
+        <h3>Stacktrace</h3>
+        <div class="flexrow gap-1">
+          <button class="hoverable p-2 iconOnly" onclick='toggleElement("rawstack");toggleElement("nicestack"); return false;' title="show raw stacktrace">
+            <i class="fa-solid fa-code"></i>
+          </button>
+          <button class="hoverable p-2 iconOnly" onclick='hideElement("rawstack");showElement("nicestack");nice_stacktrace_expand(); return false;' title="expand stacktrace">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+          </button>
         </div>
-      [% END %]
-      [% IF errorDebugInfo %]
-        <div class='card w-fit min-w-[400px]'>
-          <div class="head">
-            <h3>Details</h3>
-          </div>
-          <div class="body">
-            [% FOREACH deb IN errorDebugInfo.list %]
-              <pre class="w-full">[% escape_html(dump2str(deb, 0, 0)) %]</pre>
-            [% END %]
-          </div>
-        </div>
-      [% END %]
+      </div>
+      <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2">[% escape_html(stacktrace) %]</div>
+      <div id="nicestack">
+        [% nice_stacktrace(escape_html(stacktrace)) %]
+      </div>
     </div>
   [% END %]
-
-</div>
+  [% IF !errorDebugInfo %]
+    <div class='card w-fit min-w-[400px] mx-auto mt-2'>
+      <div class="head">
+        <h3>Details</h3>
+      </div>
+      <div class="body">
+        [% FOREACH deb IN errorDebugInfo.list %]
+          <pre class="w-full">[% escape_html(dump2str(deb, 0, 0)) %]</pre>
+        [% END %]
+      </div>
+    </div>
+  [% END %]
+[% END %]
 
 
 [% IF make_test_mode || thruk_author %]

@@ -457,9 +457,10 @@ HR {
   }
 }
 
-/* needed for comments page for example, because header has 50px height - CAN BE REMOVED NOW? */
-A.anchor-offset {
-  @apply block relative invisible top-[-50px];
+a.pager.small-pager{
+  @media screen and (max-width: 785px) {
+    @apply !hidden;
+  }
 }
 
 .pager {
