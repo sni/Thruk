@@ -327,6 +327,63 @@ sub cmd {
 
 ##########################################################
 
+=head2 rpc
+
+  rpc($c, $sub, $args)
+
+return result of sub call
+
+=cut
+sub rpc {
+    my($self, $c, $sub, @args) = @_;
+    my @res;
+    if($self->{'type'} eq 'http') {
+        if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
+            require Thruk::Utils;
+            my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
+
+            my $options = {
+                'action'      => 'raw',
+                'sub'         => $sub,
+                'remote_name' => $self->{'class'}->{'remote_name'},
+                'args'        => \@args,
+            };
+            require Cpanel::JSON::XS;
+            my $postdata = Cpanel::JSON::XS::encode_json({ data => Cpanel::JSON::XS::encode_json({
+                credential => $self->{'class'}->{'auth'},
+                options    => $options,
+            })});
+
+            require HTTP::Request;
+            my $header = ['Content-Type' => 'application/json; charset=UTF-8'];
+            my $req    = HTTP::Request->new('POST', $url.'cgi-bin/remote.cgi', $header, $postdata);
+
+            require Thruk::Controller::proxy;
+            my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
+            my $result = Cpanel::JSON::XS::decode_json($res->content());
+            @res = @{$result->{'output'}};
+        } else {
+            @res = @{$self->{'class'}->request($sub, \@args, { timeout => 120 })};
+        }
+
+    } else {
+        my $pkg_name     = $sub;
+        $pkg_name        =~ s%::[^:]+$%%mx;
+        my $function_ref = \&{$sub};
+        eval {
+            if($pkg_name && $pkg_name !~ m/^CORE/mx) {
+                require Module::Load;
+                Module::Load::load($pkg_name);
+            }
+            @res = &{$function_ref}(@args);
+        };
+    }
+
+    return(@res);
+}
+
+##########################################################
+
 =head2 job_data
 
   job_data($c, $jobid)

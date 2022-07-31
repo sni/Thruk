@@ -3410,30 +3410,39 @@ function closeOvercard() {
 }
 
 function showJobOutputPopupUpdate(jobid, peerid, divid) {
-    jQuery.get(url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&json=1", {}, function(data, status, req) {
-        jQuery('#'+divid).html("");
-        if(!data) {
-            return;
-        }
+    jQuery.ajax({
+        url:       url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&json=1",
+        success:   function(data, textStatus, jqXHR) {
+            jQuery('#'+divid).html("");
+            if(!data) {
+                return;
+            }
 
-        var head = jQuery('#'+divid).parents('.card').find("DIV.head");
-        head.find("DIV.spinner").remove();
-        head.find("I.fa-check").remove();
-        head.find("I.fa-exclamation").remove();
-        jQuery('#'+divid).text(data.stdout+data.stderr);
-        jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
+            var head = jQuery('#'+divid).parents('.card').find("DIV.head");
+            head.find("DIV.spinner").remove();
+            head.find("I.fa-check").remove();
+            head.find("I.fa-exclamation").remove();
+            jQuery('#'+divid).text(data.stdout+data.stderr);
+            jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
 
-        if(data['is_running']) {
-            head.prepend('<div class="spinner mr-2"><\/div>');
+            if(data['is_running']) {
+                head.prepend('<div class="spinner mr-2"><\/div>');
+                window.setTimeout(function() {
+                    showJobOutputPopupUpdate(jobid, peerid, divid);
+                }, 1000)
+            } else {
+                if(data['rc'] == 0) {
+                    head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
+                } else {
+                    head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
+                }
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             window.setTimeout(function() {
                 showJobOutputPopupUpdate(jobid, peerid, divid);
-            }, 1000)
-        } else {
-            if(data['rc'] == 0) {
-                head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
-            } else {
-                head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
-            }
+            }, 3000)
         }
     });
 }
