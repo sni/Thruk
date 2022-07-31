@@ -3387,7 +3387,7 @@ function sendJSError(scripturl, text) {
 function showJobOutputPopup(jobid, peerid, title) {
     var id    = "job_popup_"+jobid;
     var title = title || "Job"+jobid;
-    var text  = "<div id='"+id+"'><div class='spinner w-8 h-8'></div></div><div class='footer'><button class='w-24 mx-auto' onclick='return(closeOvercard());'>OK</button></div>";
+    var text  = "<div class='CONSOLE overflow-y-scroll min-w-[300px] max-w-[1000px] min-h-[150px] max-h-80 whitespace-pre' id='"+id+"'><div class='spinner w-8 h-8'></div></div><div class='footer'><button class='w-24 mx-auto' onclick='return(closeOvercard());'>OK</button></div>";
     overcard({'bodyCls': 'p-2', 'body': text, 'caption': title, 'width': 'auto' });
 
     showJobOutputPopupUpdate(jobid, peerid, id);
@@ -3420,7 +3420,8 @@ function showJobOutputPopupUpdate(jobid, peerid, divid) {
         head.find("DIV.spinner").remove();
         head.find("I.fa-check").remove();
         head.find("I.fa-exclamation").remove();
-        jQuery('#'+divid).text(data.stdout+data.stderr).addClass("whitespace-pre");
+        jQuery('#'+divid).text(data.stdout+data.stderr);
+        jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
 
         if(data['is_running']) {
             head.prepend('<div class="spinner mr-2"><\/div>');
