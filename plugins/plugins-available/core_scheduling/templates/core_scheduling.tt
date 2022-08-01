@@ -20,7 +20,7 @@
 <div class="card mx-auto w-[1000px] mt-5">
   <div class="head justify-between">
     [% PROCESS _status_filter.tt %]
-    <button id="reschedule_btn">
+    <button id="reschedule_btn" class="header-button">
       <i class="fa-solid fa-wand-magic-sparkles"></i>
       balance all hosts and services
     </button>
@@ -51,7 +51,7 @@
           </tr>
           <tr>
             <th>Update interval</th>
-            <td><input class="w-16" type="text" id="update_interval" value=3 onchange="updateGraphDelayed()"> s</td>
+            <td><input class="w-16" type="text" id="update_interval" value=5 onchange="updateGraphDelayed()"> s</td>
           </tr>
         </table>
       </form>
@@ -64,8 +64,8 @@
           <td colspan=2><hr class="pb-1 mt-1"></td>
         </tr>
         <tr>
-          <th>Interval</th>
-          <th>Number of Checks</th>
+          <th class="text-right">Interval</th>
+          <th class="text-right">Checks</th>
         </tr>
         [% FOREACH interval = intervals.keys.nsort %]
           <tr>
@@ -73,23 +73,44 @@
             <td class="text-right">[% intervals.$interval %]</td>
           </tr>
         [% END %]
+        <tr>
+          <th class="text-right border-t borderDefault">Average: [% sprintf("%.2f", interval_avg) %] min</th>
+          <td class="text-right border-t borderDefault">[% count_all %]</td>
+        </tr>
       </table>
 
       <div class="flexcol gap-3">
-        <table class="w-fit cellspacing-x">
+        <table class="w-fit">
           <tr>
-            <th colspan=2 class="text-center">Checks per Second</th>
+            <th colspan=3 class="text-center">Check Statistics</th>
           </tr>
           <tr>
-            <td colspan=2><hr class="pb-1 mt-1"></td>
+            <td colspan=3><hr class="pb-1 mt-1"></td>
           </tr>
-          <tr>
-            <th class="text-right">Calculated Average</th>
-            <td>[% sprintf("%.2f", average) %]/s</td>
+          <tr title="This is the estimated average rate of checks per seconds, based on the check interval and the number of host/service checks.">
+            <th class="text-right">Estimated Check Rate</th>
+            <td class="text-right pl-2">[% sprintf("%.2f", check_rate) %]</td>
+            <td>/s</td>
           </tr>
-          <tr>
+          <tr title="This is the rolling average of finished checks per second.">
             <th class="text-right">Current Rate</th>
-            <td id="current_rate">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]/s</td>
+            <td id="current_rate" class="text-right pl-2">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]</td>
+            <td>/s</td>
+          </tr>
+          <tr>
+            <th class="text-right pt-5">Average Latency</th>
+            <td id="current_latency" class="text-right pl-2 pt-5">[% sprintf("%.2f", latency_avg) %]</td>
+            <td class="pt-5">s</td>
+          </tr>
+          <tr>
+            <th class="text-right">Average Execution Time</th>
+            <td id="current_exec_time" class="text-right pl-2">[% sprintf("%.2f", execution_time_avg) %]</td>
+            <td>s</td>
+          </tr>
+          <tr title="This amount of checks will run concurrently, based on execution_time and check_interval. Basically the amount of required worker when using mod-gearman.">
+            <th class="text-right pt-5">Concurrent Checks</th>
+            <td class="text-right pl-2 pt-5">[% sprintf("%.2f", concurrent_rate) %]</td>
+            <td></td>
           </tr>
         </table>
       </div>
@@ -189,7 +210,9 @@ function updateGraph(reschedule) {
         var queue_series = data['queue'];
         var markings     = data['markings'];
         queue_options.grid.markings = markings;
-        jQuery("#current_rate").html(data['rate']+"/s");
+        jQuery("#current_rate").html(data['rate']);
+        jQuery("#current_latency").html(data['latency_avg']);
+        jQuery("#current_exec_time").html(data['execution_time_avg']);
 
         var queue_plot = jQuery.plot('#queue_graph', queue_series, queue_options);
         queue_plot.draw();
