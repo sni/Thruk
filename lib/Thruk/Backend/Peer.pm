@@ -264,14 +264,18 @@ sub logcache {
 
 =head2 cmd
 
-  cmd($c, $cmd, [$background])
+  cmd($c, $cmd, [$background_options])
 
 return result of cmd
 
 =cut
 sub cmd {
-    my($self, $c, $cmd, $background) = @_;
+    my($self, $c, $cmd, $background_options) = @_;
     my($rc, $out) = (0, "");
+    if($background_options) {
+        $background_options->{"background"} = 1;
+        $background_options->{"cmd"}        = $cmd;
+    }
     if($self->{'type'} eq 'http') {
         if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
             require Thruk::Utils;
@@ -283,9 +287,9 @@ sub cmd {
                 'remote_name' => $self->{'class'}->{'remote_name'},
                 'args'        => [$cmd],
             };
-            if($background) {
+            if($background_options) {
                 $options->{'sub'}  = 'Thruk::Utils::External::cmd';
-                $options->{'args'} = ['Thruk::Context', { cmd => $cmd, background => 1 }];
+                $options->{'args'} = ['Thruk::Context', $background_options];
             }
             require Cpanel::JSON::XS;
             my $postdata = Cpanel::JSON::XS::encode_json({ data => Cpanel::JSON::XS::encode_json({
@@ -301,21 +305,21 @@ sub cmd {
             my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
             my $result = Cpanel::JSON::XS::decode_json($res->content());
             ($rc, $out) = @{$result->{'output'}};
-            if($background) {
+            if($background_options) {
                 ($out) = @{$result->{'output'}};
             }
         } else {
-            if($background) {
-                ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', { cmd => $cmd, background => 1 }], { timeout => 120 })};
+            if($background_options) {
+                ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', $background_options], { timeout => 120 })};
             } else {
                 ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", ['Thruk::Context', $cmd], { timeout => 120 })};
             }
         }
 
     } else {
-        if($background) {
+        if($background_options) {
             require Thruk::Utils::External;
-            $out = Thruk::Utils::External::cmd($c, { cmd => $cmd, background => 1 });
+            $out = Thruk::Utils::External::cmd($c, $background_options);
         } else {
             require Thruk::Utils::IO;
             ($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);

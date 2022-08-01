@@ -701,7 +701,7 @@ function openModalWindowUrl(url, callback) {
     jQuery('#modalFG').load(url, {}, function(text, status, req) {
         if(status == "error") {
             jQuery('#modalFG DIV.body').prepend('<div class="textALERT">'+req.status+': '+req.statusText+'<\/div>');
-            jQuery('#modalFG DIV.spinner').remove();
+            jQuery('#modalFG DIV.spinner').hide();
         } else {
             init_page();
             jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
@@ -3384,67 +3384,61 @@ function sendJSError(scripturl, text) {
 }
 
 // show popup with job output
-function showJobOutputPopup(jobid, peerid, title) {
-    var id    = "job_popup_"+jobid;
-    var title = title || "Job"+jobid;
-    var text  = "<div class='CONSOLE overflow-y-scroll min-w-[300px] max-w-[1000px] min-h-[150px] max-h-80 whitespace-pre' id='"+id+"'><div class='spinner w-8 h-8'></div></div><div class='footer'><button class='w-24 mx-auto' onclick='return(closeOvercard());'>OK</button></div>";
-    overcard({'bodyCls': 'p-2', 'body': text, 'caption': title, 'width': 'auto' });
-
-    showJobOutputPopupUpdate(jobid, peerid, id);
-
-    if(!has_jquery_ui()) {
-        load_jquery_ui(function() {
-            jQuery('#'+id).parents('.card').draggable({ handle: "H3, .head" });
-        });
-    } else {
-        jQuery('#'+id).parents('.card').draggable({ handle: "H3, .head" });
-    }
-    jQuery('#'+id).parents('.card').find("DIV.head").css("cursor", "move");
+function showJobOutputPopup(jobid, peerid) {
+    var url = url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&modal=1";
+    openModalWindowUrl(url, function(text, status, req) {
+        if(status == "error") {
+            jQuery('#modalFG DIV.spinner').show();
+            jQuery('#modalFG .textALERT').text("retrying...");
+            window.setTimeout(function() {
+                closeModalWindow();
+                showJobOutputPopup(jobid, peerid);
+            }, 3000);
+        }
+    });
     return(false);
 }
 
-function closeOvercard() {
-    toggleElement('overcard');
-    removeOvercardIframe();
-    return false;
-}
-
-function showJobOutputPopupUpdate(jobid, peerid, divid) {
+function showJobOutputPopupFetch(jobid, peerid, divid) {
     jQuery.ajax({
         url:       url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&json=1",
         success:   function(data, textStatus, jqXHR) {
-            jQuery('#'+divid).html("");
-            if(!data) {
-                return;
-            }
-
-            var head = jQuery('#'+divid).parents('.card').find("DIV.head");
-            head.find("DIV.spinner").remove();
-            head.find("I.fa-check").remove();
-            head.find("I.fa-exclamation").remove();
-            jQuery('#'+divid).text(data.stdout+data.stderr);
-            jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
-
-            if(data['is_running']) {
-                head.prepend('<div class="spinner mr-2"><\/div>');
-                window.setTimeout(function() {
-                    showJobOutputPopupUpdate(jobid, peerid, divid);
-                }, 1000)
-            } else {
-                if(data['rc'] == 0) {
-                    head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
-                } else {
-                    head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
-                }
-            }
+            showJobOutputPopupUpdate(jobid, peerid, divid, data);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
             window.setTimeout(function() {
-                showJobOutputPopupUpdate(jobid, peerid, divid);
+                showJobOutputPopupFetch(jobid, peerid, divid);
             }, 3000)
         }
     });
+}
+
+function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
+    jQuery('#'+divid).html("");
+    if(!data) {
+        return;
+    }
+
+    var head = jQuery('#'+divid).parents('.card').find("DIV.head");
+    head.find("DIV.spinner").remove();
+    head.find("I.fa-check").remove();
+    head.find("I.fa-exclamation").remove();
+    jQuery('#'+divid).text(data.stdout+data.stderr);
+    jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
+
+    if(data['is_running']) {
+        head.prepend('<div class="spinner mr-2"><\/div>');
+        window.setTimeout(function() {
+            showJobOutputPopupFetch(jobid, peerid, divid);
+        }, 1000)
+    } else {
+        if(data['rc'] == 0) {
+            head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
+        } else {
+            head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
+        }
+    }
 }
 
 
@@ -9019,6 +9013,12 @@ function overcard(options) {
         settings['callback'](doc);
     }
     return;
+}
+
+function closeOvercard() {
+    toggleElement('overcard');
+    removeOvercardIframe();
+    return false;
 }
 
 function removeOvercardIframe() {

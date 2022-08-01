@@ -960,7 +960,7 @@ sub _process_perf_info_logcache_details {
         if($action eq 'update' || $action eq 'clean' || $action eq 'compact') {
             return(Thruk::Utils::External::cmd($c, {
                 cmd            => $c->config->{'thruk_bin'}." logcache $action -v --local -b $peer_key 2>&1",
-                wait_message   => 'logcache will be '.$action.'ed...',
+                message        => 'logcache will be '.$action.'ed...',
                 forward        => 'extinfo.cgi?type=4&logcachedetails='.$peer_key,
                 show_output    => 1,
             }));
@@ -968,7 +968,7 @@ sub _process_perf_info_logcache_details {
         if($action eq 'optimize') {
             return(Thruk::Utils::External::cmd($c, {
                 cmd            => $c->config->{'thruk_bin'}." logcache optimize -v -f --local -b $peer_key 2>&1",
-                wait_message   => 'logcache will be optimized...',
+                message        => 'logcache will be optimized...',
                 forward        => 'extinfo.cgi?type=4&logcachedetails='.$peer_key,
                 show_output    => 1,
             }));
