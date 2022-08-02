@@ -125,6 +125,7 @@ sub core_scheduling_page {
         { label => "hosts planned",    color => "#FCD666", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
         { label => "services running", color => "#33A7FF", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
         { label => "services planned", color => "#B6DDFC", data => [], bars => { show => 1, barWidth => $group_seconds*1000 }, stack => 1 },
+        { label => "moving average",   color => "#990000", data => [], lines => { show => 1, lineWidth => 1 }, shadowSize => 0 },
     ];
     my $markings = [
         { color => '#990000', lineWidth => 1, xaxis => { from => $now*1000, to => $now*1000 } },
@@ -136,6 +137,26 @@ sub core_scheduling_page {
         push @{$queue->[2]->{'data'}}, [$time, $grouped->{$time}->{services_running}];
         push @{$queue->[3]->{'data'}}, [$time, $grouped->{$time}->{services}];
     }
+
+    my $start = ($now - $look_back) * 1000;
+    my $end   = ($now + $look_ahead) * 1000;
+    my $time  = $start;
+    my @keys = sort keys %{$grouped};
+    my $smooth_nr = 9;
+    while($time <= $end) {
+        my $val = 0;
+        for my $x ((-1*$smooth_nr)..($smooth_nr)) {
+            my $t = $time + (($x * $group_seconds)*1000);
+            $val += ($grouped->{$t}->{hosts_running}//0)
+                 +  ($grouped->{$t}->{hosts}//0)
+                 +  ($grouped->{$t}->{services_running}//0)
+                 +  ($grouped->{$t}->{services}//0);
+        }
+        $val = $val / (($smooth_nr*2)+1);
+        push @{$queue->[4]->{'data'}}, [$time, $val] if $time >= ($now*1000);
+        $time += ($group_seconds * 1000);
+    }
+
 
     my $latency_avg        = 0;
     my $execution_time_avg = 0;

@@ -97,12 +97,12 @@
             <td id="current_rate" class="text-right pl-2">[% sprintf("%.2f", perf_stats.host_checks_rate + perf_stats.service_checks_rate) %]</td>
             <td>/s</td>
           </tr>
-          <tr>
+          <tr title="Average latency over all hosts and services.">
             <th class="text-right pt-5">Average Latency</th>
             <td id="current_latency" class="text-right pl-2 pt-5">[% sprintf("%.2f", latency_avg) %]</td>
             <td class="pt-5">s</td>
           </tr>
-          <tr>
+          <tr title="Average execution time over all hosts and services.">
             <th class="text-right">Average Execution Time</th>
             <td id="current_exec_time" class="text-right pl-2">[% sprintf("%.2f", execution_time_avg) %]</td>
             <td>s</td>
@@ -119,9 +119,20 @@
 
 </div>
 
+<div id='tooltip'></div>"
+
 <style>
   DIV.legend TABLE {
     width: auto !important;
+  }
+  #tooltip {
+    position: absolute;
+    display: none;
+    padding: 8px;
+    background-color: var(--tooltip-bg);
+    color: var(--tooltip-fg);
+    opacity: 0.80;
+    border-radius: 5px;
   }
 </style>
 
@@ -130,7 +141,8 @@
 var updateInterval = 5000;
 var standard_grid = {
     backgroundColor: "#F0F0ED",
-    markings: [% encode_json_obj(markings) %]
+    markings: [% encode_json_obj(markings) %],
+    hoverable: true
 };
 var standard_legend = {
     position: 'ne',
@@ -235,11 +247,31 @@ function updateGraph(reschedule) {
       error:  function(jqXHR, textStatus, errorThrown) {
         window.clearTimeout(updateTimer);
         updateTimer = window.setTimeout(updateGraph, updateInterval*2);
-        jQuery("#now_label").html("update error: "+textStatus);
-        setBtnError('#reschedule_btn');
+        var msg = getXHRerrorMsg('', textStatus, jqXHR, errorThrown);
+        jQuery("#now_label").html("<i class='fa-solid fa-exclamation round small yellow'></i> update error: "+msg);
       }
   });
 }
+
+jQuery("#queue_graph").bind("plothover", function (event, pos, item) {
+  if (!pos.x || !pos.y) {
+    return;
+  }
+  if (item) {
+    var x = item.datapoint[0].toFixed(2),
+    y = item.datapoint[1].toFixed(2);
+
+    jQuery("#tooltip").html(item.series.label + ": " + y)
+      .css({top: item.pageY+5, left: item.pageX+5})
+      .fadeIn(200);
+  } else {
+    jQuery("#tooltip").hide();
+  }
+});
+
+jQuery("#queue_graph").bind("plothovercleanup", function (event, pos, item) {
+  jQuery("#tooltip").hide();
+});
 
 -->
 </script>
