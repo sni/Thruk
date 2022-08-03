@@ -1145,7 +1145,7 @@ TABLE.mainTable {
   THEAD>TR {
     @apply bgTable;
     TH{
-      @apply borderDefault align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit;
+      @apply borderDefault align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit bg-clip-padding;
     }
   }
   TBODY {
