@@ -5,16 +5,8 @@
     - role: service_sshd
     - role: ssh_site_login
     - role: thruk_plugin_editor
+    - role: node_control_client
   tasks:
-  - yum:
-      name:
-        - tmux
-      state: present
-  - name: add sudo permissions
-    lineinfile:
-      path: /etc/sudoers
-      regexp: '^demo.*yum'
-      line: "demo  ALL=(ALL) NOPASSWD: /usr/bin/omd, NOPASSWD: /usr/bin/dnf"
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"

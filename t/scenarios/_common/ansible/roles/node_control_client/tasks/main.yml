@@ -1,0 +1,10 @@
+- name: install tmux
+  package:
+    name:
+      - tmux
+    state: present
+- name: add sudo permissions
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^{{site}}.*yum'
+    line: "{{site}}  ALL=(ALL) NOPASSWD: /usr/bin/omd, NOPASSWD: /usr/bin/dnf, NOPASSWD:SETENV: /usr/bin/apt-get"
