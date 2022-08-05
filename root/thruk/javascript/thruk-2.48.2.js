@@ -7141,13 +7141,15 @@ function toggleTopPane() {
     if(formInput) {
         formInput.value = 0;
     }
-    hideElement("btn_toggle_top_pane");
+    hideElement("btn_toggle_top_pane_down");
+    showElement("btn_toggle_top_pane_up");
   } else {
     additionalParams['hidetop'] = 1;
     if(formInput) {
         formInput.value = 1;
     }
-    showElement("btn_toggle_top_pane");
+    showElement("btn_toggle_top_pane_down");
+    hideElement("btn_toggle_top_pane_up");
   }
   updateUrl();
 }

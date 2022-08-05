@@ -1,5 +1,5 @@
 ﻿[% UNLESS minimal %]
-  <div class="flexrow gap-x-1" id="top_pane" [% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+  <div class="flexrow gap-x-1 mb-2" id="top_pane" [% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
     <div class="flexcol">
       [% PROCESS _infobox.tt %]
       [% content %]
@@ -13,4 +13,14 @@
       </div>
     </div>
   </div>
+
+  [% IF show_top_pane %]
+    <button class="mx-auto big iconOnly noprint" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
+      <i class="uil uil-angle-up" title="Hide top row"></i>
+    </button>
+    <button class="mx-auto big iconOnly noprint" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane_down">
+      <i class="uil uil-angle-down" title="Show top row"></i>
+    </button>
+  [% END %]
+
 [% END %]

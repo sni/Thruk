@@ -80,6 +80,3 @@
       </header>
     [% END %]
 <main class="relative [% IF !iframed %]p-5 scrollauto[% END %] flex-grow">
-[% IF show_top_pane %]
-  <button class="iconOnly noprint big absolute p-0 m-0 top-7 right-7" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane"><i class="uil uil-arrow-to-bottom m-0"></i></button>
-[% END %]
