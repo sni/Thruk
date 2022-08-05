@@ -1,12 +1,12 @@
 ﻿[% PROCESS _blocks.tt %]
 
-<div class="flexrow flex-nowrap gap-1 mb-2">
+<div class="flexrow flex-nowrap gap-1 my-2">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
   [% PROCESS _excel_export.tt columns=[ 'Time', 'Site', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 %]
 </div>
 
-<div class="card w-full min-w-[800px]">
+<div class="card w-full min-w-[420px]">
   <div class="mainTableHeader">
     <div></div>
     <div>

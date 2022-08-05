@@ -6,10 +6,10 @@
   <input type="hidden" name="entries" value="[% c.request.parameters.entries | html %]">
   [% END %]
 
-  <div class="flexrow justify-between gap-1">
-    <div class="flexcol gap-1">
+  <div class="flexrow justify-between gap-x-1">
+    <div class="flexcol gap-x-1">
       [% PROCESS _infobox.tt %]
-      <div class="card mt-5 min-w-[350px] overflow-hidden">
+      <div class="card min-w-[350px] overflow-hidden">
         <div class="actionbox less-padding">
           [% IF service != '' and host != 'all' %]
           <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
@@ -81,21 +81,19 @@
   </div>
 </form>
 
-<div>
-  <h1 class="py-4">
-    [% IF service != '' and host != '' %]
-    Service '[% service | html %]' On Host '[% host | html %]'
-    [% ELSIF host != '' %]
-    Host '[% host | html %]'
+<h1 class="mt-5">
+  [% IF service != '' and host != '' %]
+  Service '[% service | html %]' On Host '[% host | html %]'
+  [% ELSIF host != '' %]
+  Host '[% host | html %]'
+  [% ELSE %]
+    [% IF type == "" %]
+      Log File Entries
     [% ELSE %]
-      [% IF type == "" %]
-        Log File Entries
-      [% ELSE %]
-        All Hosts and Services
-      [% END %]
+      All Hosts and Services
     [% END %]
-  </h1>
-</div>
+  [% END %]
+</h1>
 
 [% IF logs_from_compacted_zone %]
 <div id="compact_log_alert" class="card alert yellow closable top-center w-[600px]">
