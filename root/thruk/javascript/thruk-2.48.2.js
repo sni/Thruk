@@ -3391,8 +3391,11 @@ function showJobOutputPopup(jobid, peerid) {
             jQuery('#modalFG DIV.spinner').show();
             jQuery('#modalFG .textALERT').text("retrying...");
             window.setTimeout(function() {
-                closeModalWindow();
-                showJobOutputPopup(jobid, peerid);
+                // only show if not closed meanwhile
+                if(document.getElementById('modalFG')) {
+                    closeModalWindow();
+                    showJobOutputPopup(jobid, peerid);
+                }
             }, 3000);
         }
     });
