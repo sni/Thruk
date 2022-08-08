@@ -33,14 +33,7 @@
   </div>
   [% END %]
 
-  <h1 class="mt-5">
-    [% IF hostgroup       == 'all' %]Status Summary For All Host Groups
-    [% ELSIF hostgroup    != ''    %]Status Summary For Host Group '[% hostgroup | html %]'
-    [% ELSIF servicegroup == 'all' %]Status Summary For All Service Groups
-    [% ELSIF servicegroup != ''    %]Status Summary For Service Group '[% servicegroup | html %]'
-    [% ELSE                        %]Status Summary
-    [% END %]
-
+  <h1 class="mt-2">
     [% IF hostgroup == 'all' %]Service Grid For All Host Groups
     [% ELSIF hostgroup != '' %]Service Grid For Host Group '[% hostgroup | html %]'
     [% ELSIF servicegroup == 'all' %]Service Grid For All Service Groups
@@ -54,7 +47,7 @@
     [% PROCESS _show_link.tt %]
   </div>
 
-  <div class="card w-full min-w-[800px]">
+  <div class="card w-full min-w-[420px]">
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">

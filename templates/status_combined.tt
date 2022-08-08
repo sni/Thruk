@@ -5,7 +5,7 @@
 [% authorized_for_read_only = 0 %][% IF c.check_user_roles('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
 [% PROCESS _status_cmd_pane.tt %]
-<div class="mb-3"[% IF hidetop == 1 %] style="visibility:hidden; display:none;"[% END %]>
+<div class="mb-5"[% IF hidetop == 1 %] style="visibility:hidden; display:none;"[% END %]>
   [% PROCESS _infobox.tt %]
 </div>
 
@@ -25,7 +25,7 @@
       [% END %]
     </h1>
 
-    <div class="flexrow flex-nowrap my-2">
+    <div class="flexrow sm:flex-nowrap my-2 gap-y-1">
       <div class="flex basis-1/3 self-end gap-1">
         [% PROCESS _add_bookmark.tt style='combined' %]
         [% PROCESS _show_link.tt    style='combined' %]
@@ -37,21 +37,33 @@
       </div>
       <div class="basis-1/3">
         [% UNLESS authorized_for_read_only %]
-        <div class="hint text-center text-xs whitespace-nowrap">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
-        <div class="hint text-center font-medium pb-1">Select all:</div>
-        <div class="hint flex gap-x-0.5">
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');return false;">Hosts</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(['.DOWN','.UNREACHABLE']);return false;">Problems</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(['.has_downtime']);return false;">With Downtime</button>
-          <button class="min-w-[110px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');return false;">Unselect all</button>
+        <div class="hint flex gap-x-0.5 justify-center">
+          <button class="min-w-[100px]" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');return false;">Hosts</button>
+          <button class="min-w-[100px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(['.DOWN','.UNREACHABLE']);return false;">Problems</button>
+          <button class="min-w-[100px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(['.has_downtime']);return false;">In Downtime</button>
+          <button class="min-w-[100px]" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');return false;">Unselect all</button>
         </div>
         [% END %]
       </div>
-      <div class="basis-1/3"></div>
+      <div class="basis-1/3 hidden sm:flex self-end justify-end relative">
+        <button class="round small gray text-lg relative" onclick="toggleElement('show_table_info_hst', undefined, true); return false;" title="Toggle help">
+          <i class="uil uil-info"></i>
+        </button>
+        <div class="card shadow-float absolute z-20 top-7" style="visibility: hidden;" id="show_table_info_hst">
+          <div class="head justify-between">
+            <h3>Info</h3>
+            <button class="iconOnly medium" onclick="toggleElement('show_table_info_hst'); return false;"><i class="uil uil-times"></i></button>
+          </div>
+          <div class="body">
+            <div class="whitespace-nowrap">You can select hosts with leftclick to send multiple commands.</div>
+            <div class="whitespace-nowrap">Select multiple by holding shift + leftclick</div>
+          </div>
+        </div>
+      </div>
     </div>
   [% END %]
 
-  <div class="card w-full min-w-[800px]">
+  <div class="card w-full min-w-[420px] mb-5">
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">
@@ -78,22 +90,38 @@
 
 
   [% UNLESS minimal %]
-    <div class="my-2">
-      [% UNLESS authorized_for_read_only %]
-        <div class="hint text-center text-xs whitespace-nowrap">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
-        <div class="hint text-center font-medium pb-1">Select all:</div>
-        <div class="hint flex gap-x-0.5">
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(true,'svc_');return false;">Hosts</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');return false;">Services</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(['.CRITICAL','.WARNING','.UNKNOWN']);return false;">Problems</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectHostsByClass(['.has_downtime']);selectServicesByClass(['.has_downtime']);return false;">With Downtime</button>
-          <button class="min-w-[110px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');;return false;">Unselect all</button>
+    <div class="flexrow sm:flex-nowrap my-2 gap-y-1">
+      <div class="basis-1/3 hidden sm:flex"></div>
+      <div class="basis-1/3">
+        [% UNLESS authorized_for_read_only %]
+          <div class="hint flex gap-x-0.5 justify-center">
+            <button class="sm:min-w-[100px]" onclick="pagetype='servicedetail';selectAllHosts(true,'svc_');return false;">Hosts</button>
+            <button class="sm:min-w-[100px]" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');return false;">Services</button>
+            <button class="sm:min-w-[100px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(['.CRITICAL','.WARNING','.UNKNOWN']);return false;">Problems</button>
+            <button class="sm:min-w-[100px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectHostsByClass(['.has_downtime']);selectServicesByClass(['.has_downtime']);return false;">In Downtime</button>
+            <button class="sm:min-w-[100px]" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');;return false;">Unselect all</button>
+          </div>
+        [% END %]
+      </div>
+      <div class="basis-1/3 hidden sm:flex self-end justify-end relative">
+        <button class="round small gray text-lg relative" onclick="toggleElement('show_table_info_svc', undefined, true); return false;" title="Toggle help">
+          <i class="uil uil-info"></i>
+        </button>
+        <div class="card shadow-float absolute z-20 top-7" style="visibility: hidden;" id="show_table_info_svc">
+          <div class="head justify-between">
+            <h3>Info</h3>
+            <button class="iconOnly medium" onclick="toggleElement('show_table_info_svc'); return false;"><i class="uil uil-times"></i></button>
+          </div>
+          <div class="body">
+            <div class="whitespace-nowrap">You can select hosts / services with leftclick to send multiple commands.</div>
+            <div class="whitespace-nowrap">Select multiple by holding shift + leftclick</div>
+          </div>
         </div>
-      [% END %]
+      </div>
     </div>
   [% END %]
 
-  <div class="card w-full min-w-[800px]">
+  <div class="card w-full min-w-[420px]">
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">
