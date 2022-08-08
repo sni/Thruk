@@ -85,6 +85,7 @@ my $base_defaults = {
     'show_notification_number'              => 1,
     'strict_passive_mode'                   => 1,
     'hide_passive_icon'                     => 0,
+    'hide_top'                              => 'auto',
     'show_full_commandline'                 => 1,
     'show_modified_attributes'              => 1,
     'show_contacts'                         => 1,

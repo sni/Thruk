@@ -33,7 +33,7 @@
               [% END %]
           [% ELSE %]
               [% FOREACH svc = d.service %]
-                  <a class="link" href='status.cgi?hidetop=&amp;style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
+                  <a class="link" href='status.cgi?style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
                   [% UNLESS loop.last %], [% END %]
               [% END %]
           [% END %]

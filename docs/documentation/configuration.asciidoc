@@ -1437,7 +1437,23 @@ if their last result is passive.
 With this option, passive icon will be hidden in status details.
 
 ex.:
+
   hide_passive_icon = 0
+
+
+=== hide_top
+{% include new_since.ad version="3.00" %}
+hide_top sets the default value for showing/hiding the totals header
+on status pages. It can be set to one of:
+
+ - `auto` (default) hides header initially on small screens
+ - `1`              always hide header initially
+ - `0`              always show header initially
+
+ex.:
+
+  hide_top = auto
+
 
 
 === sitepanel
