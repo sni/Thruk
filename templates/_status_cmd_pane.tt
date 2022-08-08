@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-<div class="card z-50 fixed right-0 top-[50px] mt-0 w-[500px] rounded-t-none rounded-r-none" style="display: none;" id="cmd_pane">
+<div class="card z-50 fixed right-0 top-[50px] mt-0 w-full md:w-[500px] rounded-t-none rounded-r-none" style="display: none;" id="cmd_pane">
   <div class="head">
     <h3>Quick Commands</h3>
     <button class="iconOnly medium absolute right-2 top-2" onClick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');return false;"><i class="uil uil-times"></i></button>
