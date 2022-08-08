@@ -15,10 +15,10 @@
   </div>
 
   [% IF show_top_pane %]
-    <button class="mx-auto big iconOnly noprint" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
+    <button class="mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
       <i class="uil uil-angle-up" title="Hide top row"></i>
     </button>
-    <button class="mx-auto big iconOnly noprint" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane_down">
+    <button class="mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane_down">
       <i class="uil uil-angle-down" title="Show top row"></i>
     </button>
   [% END %]
