@@ -135,18 +135,17 @@
         [% PROCESS _extinfo_host_service_details.tt obj=service %]
       </div>
     </div>
-    <div>
-      [% IF pnp_url %]
-        [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
-      [% ELSIF histou_url %]
-        [% PROCESS _histou_graph.tt hst=service.host_name svc=service.description %]
-      [% ELSE %]
-        [% graph_url = get_graph_url(c, service, 1)%]
-        [% IF graph_url %]
-          [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
-        [% END %]
+
+    [% IF pnp_url %]
+      <div>[% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]</div>
+    [% ELSIF histou_url %]
+      <div>[% PROCESS _histou_graph.tt hst=service.host_name svc=service.description %]</div>
+    [% ELSE %]
+      [% graph_url = get_graph_url(c, service, 1)%]
+      [% IF graph_url %]
+        <div>[% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]</div>
       [% END %]
-    </div>
+    [% END %]
   </div>
 
   <div class="hidden 2xl:block order-2 2xl:order-3">
