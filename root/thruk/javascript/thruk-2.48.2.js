@@ -1227,6 +1227,14 @@ function cookieRemoveAll(name) {
         paths.push(path+"/");
     });
 
+    // do not split ip addresses
+    if(String(document.location.hostname).match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        jQuery.each(paths, function(key2, path) {
+            document.cookie = name+"=del; path="+path+";domain="+String(document.location.hostname)+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+        });
+        return;
+    }
+
     var domain = "";
     jQuery.each(document.location.hostname.split(".").reverse(), function(key, hostpart) {
         if(domain == "") {
