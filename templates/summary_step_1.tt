@@ -3,138 +3,134 @@
 
 [% PROCESS _infobox.tt %]
 
-<div class="flexcol lg:items-center pt-5">
-  <div class="flexcol w-fit min-w-[650px]">
-    <h1>Alert Summary Report</h1>
+<h1 class="mt-5 ">Alert Summary Report</h1>
 
-    <div class="card w-full">
-      <div class="head">
-        <h3>Standard Reports</h3>
-      </div>
-      <div class="body">
-        <form method="GET" action="summary.cgi">
-          <input type='hidden' name='report' value='1'>
-          <table class="cellspacing">
-            <tr>
-              <th class="w-36">Report Type</th>
-              <td>
-                <select name='standardreport' class="w-full">
-                  <option value="1">25 Most Recent Hard Alerts</option>
-                  <option value="2">25 Most Recent Hard Host Alerts</option>
-                  <option value="3">25 Most Recent Hard Service Alerts</option>
-                  <option value="4">Top 25 Hard Host Alert Producers</option>
-                  <option value="5">Top 25 Hard Service Alert Producers</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-              <td><input type='submit' value='Create Summary Report'></td>
-            </tr>
-          </table>
-        </form>
-      </div>
-    </div>
+<div class="card min-w-[420px] max-w-[650px] w-full mt-5 mx-auto">
+  <div class="head">
+    <h3>Standard Reports</h3>
+  </div>
+  <div class="body">
+    <form method="GET" action="summary.cgi">
+      <input type='hidden' name='report' value='1'>
+      <table class="cellspacing">
+        <tr>
+          <th class="w-36">Report Type</th>
+          <td>
+            <select name='standardreport' class="w-full">
+              <option value="1">25 Most Recent Hard Alerts</option>
+              <option value="2">25 Most Recent Hard Host Alerts</option>
+              <option value="3">25 Most Recent Hard Service Alerts</option>
+              <option value="4">Top 25 Hard Host Alert Producers</option>
+              <option value="5">Top 25 Hard Service Alert Producers</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><input type='submit' value='Create Summary Report'></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
 
-    <div class="card w-full">
-      <div class="head">
-        <h3>Custom Reports</h3>
-      </div>
-      <div class="body">
-        <form method="get" action="summary.cgi">
-          <input type='hidden' name='report' value='1'>
-          <table class="cellspacing">
-            <tr>
-              <th class="w-36">Report Type</th>
-              <td>
-                <select name="displaytype" class="w-full">
-                  <option value="1">Most Recent Alerts</option>
-                  <option value="2">Alert Totals</option>
-                  <option value="4">Alert Totals By Hostgroup</option>
-                  <option value="5">Alert Totals By Host</option>
-                  <option value="7">Alert Totals By Servicegroup</option>
-                  <option value="6">Alert Totals By Service</option>
-                  <option value="3">Top Alert Producers</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>Report Period</th>
-              <td>
-                [% t1 = date.now - 86400 %]
-                [% t2 = date.now %]
-                [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" custom=1 name="timeperiod" t1=t1 t2=t2 current=0 show_hint=1 %]
-              </td>
-            </tr>
-            <tr>
-              <th>Limit To Hostgroup</th>
-              <td><input class="w-full" type='text' name='hostgroup' id='hostgroup' value="" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroup', autosubmit:false })" placeholder="hostgroup name"></td>
-            </tr>
-            <tr>
-              <th>Limit To Servicegroup</th>
-              <td><input class="w-full" type='text' name='servicegroup' id='servicegroup' value="" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroup', autosubmit:false })" placeholder="servicegroup name"></td>
-            </tr>
-            <tr>
-              <th>Limit To Host</th>
-              <td><input class="w-full" type='text' name='host' id='host' value="" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name"></td>
-            </tr>
-            <tr>
-              <th>Alert Types</th>
-              <td>
-                <select name="alerttypes" class="w-full">
-                  <option value="3" selected>Host and Service Alerts</option>
-                  <option value="1">Host Alerts</option>
-                  <option value="2">Service Alerts</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>State Types</th>
-              <td>
-                <select name="statetypes" class="w-full">
-                  <option value="3" selected>Hard and Soft States</option>
-                  <option value="2">Hard States</option>
-                  <option value="1">Soft States</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>Host States</th>
-              <td>
-                <select name="hoststates" class="w-full">
-                  <option value="7">All Host States</option>
-                  <option value="3">Host Problem States</option>
-                  <option value="4">Host Up States</option>
-                  <option value="1">Host Down States</option>
-                  <option value="2">Host Unreachable States</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>Service States</th>
-              <td>
-                <select name="servicestates" class="w-full">
-                  <option value="120">All Service States</option>
-                  <option value="56">Service Problem States</option>
-                  <option value="64">Service Ok States</option>
-                  <option value="8">Service Warning States</option>
-                  <option value="16">Service Unknown States</option>
-                  <option value="32">Service Critical States</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>Max List Items</th>
-              <td><input type='text' name='limit' size='3' maxlength='3' value='25'></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td><input type='submit' value='Create Summary Report'></td>
-            </tr>
-          </table>
-        </form>
-      </div>
-    </div>
+<div class="card min-w-[420px] max-w-[650px] w-full mt-5 mx-auto">
+  <div class="head">
+    <h3>Custom Reports</h3>
+  </div>
+  <div class="body">
+    <form method="get" action="summary.cgi">
+      <input type='hidden' name='report' value='1'>
+      <table class="cellspacing">
+        <tr>
+          <th class="w-36">Report Type</th>
+          <td>
+            <select name="displaytype" class="w-full">
+              <option value="1">Most Recent Alerts</option>
+              <option value="2">Alert Totals</option>
+              <option value="4">Alert Totals By Hostgroup</option>
+              <option value="5">Alert Totals By Host</option>
+              <option value="7">Alert Totals By Servicegroup</option>
+              <option value="6">Alert Totals By Service</option>
+              <option value="3">Top Alert Producers</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Report Period</th>
+          <td>
+            [% t1 = date.now - 86400 %]
+            [% t2 = date.now %]
+            [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" custom=1 name="timeperiod" t1=t1 t2=t2 current=0 show_hint=1 %]
+          </td>
+        </tr>
+        <tr>
+          <th>Limit To Hostgroup</th>
+          <td><input class="w-full" type='text' name='hostgroup' id='hostgroup' value="" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroup', autosubmit:false })" placeholder="hostgroup name"></td>
+        </tr>
+        <tr>
+          <th>Limit To Servicegroup</th>
+          <td><input class="w-full" type='text' name='servicegroup' id='servicegroup' value="" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroup', autosubmit:false })" placeholder="servicegroup name"></td>
+        </tr>
+        <tr>
+          <th>Limit To Host</th>
+          <td><input class="w-full" type='text' name='host' id='host' value="" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })" placeholder="host name"></td>
+        </tr>
+        <tr>
+          <th>Alert Types</th>
+          <td>
+            <select name="alerttypes" class="w-full">
+              <option value="3" selected>Host and Service Alerts</option>
+              <option value="1">Host Alerts</option>
+              <option value="2">Service Alerts</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>State Types</th>
+          <td>
+            <select name="statetypes" class="w-full">
+              <option value="3" selected>Hard and Soft States</option>
+              <option value="2">Hard States</option>
+              <option value="1">Soft States</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Host States</th>
+          <td>
+            <select name="hoststates" class="w-full">
+              <option value="7">All Host States</option>
+              <option value="3">Host Problem States</option>
+              <option value="4">Host Up States</option>
+              <option value="1">Host Down States</option>
+              <option value="2">Host Unreachable States</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Service States</th>
+          <td>
+            <select name="servicestates" class="w-full">
+              <option value="120">All Service States</option>
+              <option value="56">Service Problem States</option>
+              <option value="64">Service Ok States</option>
+              <option value="8">Service Warning States</option>
+              <option value="16">Service Unknown States</option>
+              <option value="32">Service Critical States</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Max List Items</th>
+          <td><input type='text' name='limit' size='3' maxlength='3' value='25'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><input type='submit' value='Create Summary Report'></td>
+        </tr>
+      </table>
+    </form>
   </div>
 </div>
 

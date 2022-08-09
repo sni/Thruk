@@ -4,16 +4,16 @@
 
 <h1 class="mt-5">Host and Service State Trends</h1>
 
-<div class="card mx-auto w-[800px] mt-5 overflow-hidden">
+<div class="card mx-auto min-w-[420px] max-w-[800px] w-full mt-5 overflow-hidden">
   <div class="head p-0">
-    <span class="tabs w-40"><a class="flex" href="trends.cgi">1. Report Type</a></span>
+    <span class="tabs w-40 px-2"><a class="flex" href="trends.cgi">1. Report Type</a></span>
     <i class="fa-solid fa-angle-right text-sm"></i>
-    <span class="tabs w-40"><a class="flex" href="trends.cgi?[% IF ! service %]input=gethost[% ELSE %]input=getservice[% END %]">2. Select [% IF ! service %]Host[% ELSE %]Service[% END %]</a></span>
+    <span class="tabs w-40 px-2"><a class="flex" href="trends.cgi?[% IF ! service %]input=gethost[% ELSE %]input=getservice[% END %]">2. Select [% IF ! service %]Host[% ELSE %]Service[% END %]</a></span>
     <i class="fa-solid fa-angle-right text-sm"></i>
-    <span class="tabs w-40 active"><a class="flex" href="#">3. Report Options</a></span>
+    <span class="tabs w-40 px-2 active"><a class="flex" href="#">3. Report Options</a></span>
   </div>
 
-  <form method="get" action="trends.cgi">
+  <form method="get" action="trends.cgi" class="overflow-x-auto">
     [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
     [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
     <div class="body">

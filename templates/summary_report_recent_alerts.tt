@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 
-<div class="card w-full mt-5 overflow-hidden">
+<div class="card min-w-[420px] w-full mt-5 overflow-hidden">
   <div class="mainTable">
     <table class="mainTable striped">
       <thead>
@@ -9,8 +9,8 @@
           <th>Alert Type</th>
           <th>Host</th>
           <th>Service</th>
-          <th>State</th>
-          <th>State Type</th>
+          <th class="text-center">State</th>
+          <th class="text-center">State Type</th>
           <th>Information</th>
         </tr>
       </thead>
@@ -26,7 +26,7 @@
           <td>Service Alert</td>
           <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
           <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]">[% d.service_description | html %]</a></td>
-          <td class='text-center [% status %]'>[% status %]</td>
+          <td class="text-center [% status %]">[% status %]</td>
           [% ELSE %]
           [% SET status = 'UP'          IF d.state == 0 %]
           [% SET status = 'DOWN'        IF d.state == 1 %]
@@ -34,9 +34,9 @@
           <td>Host Alert</td>
           <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]">[% d.host_name | html %]</a></td>
           <td>N/A</td>
-          <td class='text-center [% status %]'>[% status %]</td>
+          <td class="text-center [% status %]">[% status %]</td>
           [% END %]
-          <td>[% d.state_type %]</td>
+          <td class="text-center">[% d.state_type %]</td>
           <td class="truncate w-1/2 max-w-xs">[% IF escape_html_tags %][% escape_html(log_line_plugin_output(d)) %][% ELSE %][% log_line_plugin_output(d) %][% END %]</td>
         </tr>
         [% END %]

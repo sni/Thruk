@@ -89,7 +89,7 @@
       </div>
     </div>
 
-    <div class="card  min-w-[430px] min-h-[190px]">
+    <div class="card min-w-[400px] min-h-[190px]">
       <div class="head justify-between">
         <h3>
           [% IF service %]
@@ -98,10 +98,13 @@
           Host '[% host | html %]'
           [% END %]
         </h3>
-        <i class="fa-solid fa-chart-line" title='[% IF service %]Service[% ELSE %]Host[% END %] State Trends'></i>
       </div>
-      <div class="body flexcol gap-2 justify-center items-center">
-        <h3 class="w-full text-center">[% format_date(start, datetime_format) %]<br>to<br>[% format_date(end, datetime_format) %]</h3>
+      <div class="body flexcol gap-2 items-center">
+        <h3 class="text-center">
+          <span class="block">[% format_date(start, datetime_format) %]</span>
+          <span class="block">to</span>
+          <span class="block">[% format_date(end, datetime_format) %]</span>
+        </h3>
         <div>Duration: [% SET dur = end - start %][% duration(dur) %]</div>
       </div>
     </div>
@@ -202,7 +205,7 @@
   </map>
 [% END %]
 
-<div class="mt-5 w-fit mx-auto">
+<div class="mt-5 w-fit mx-auto min-w-[420px]">
   <img
     src="trends.cgi?createimage&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;backtrack=[% backtrack | uri %]&amp;zoom=[% zoom | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %][% IF ! c.config.no_external_job_forks %]&amp;job_id=[% job_id | uri %][% END %]"
     usemap='#trendsmap'
