@@ -164,7 +164,7 @@
 
 <div class="card w-full mt-5">
   <div class="head justify-between">
-    <h3>Service Comments</h3>
+    <h3>Host Comments</h3>
     [% IF c.check_cmd_permissions('host', host.name) %]
       <div class="flex gap-1">
         [% UNLESS command_disabled(c, '1') %]
