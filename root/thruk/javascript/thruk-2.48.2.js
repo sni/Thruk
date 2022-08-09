@@ -248,7 +248,7 @@ function initLastUserInteraction() {
 
 
 function applyScroll(scrollTo) {
-    if(!scrollTo) {
+    if(!scrollTo || !scrollTo.split) {
         return;
     }
     var scrolls = scrollTo.split("_");
