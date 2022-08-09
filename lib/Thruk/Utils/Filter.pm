@@ -1431,7 +1431,7 @@ sub nice_stacktrace {
             $in_stack++;
             my($msg, $file, $nr) = ($1, $2, $3);
             if($in_stack == 1) {
-                push @{$nice}, "<table class='body rowhover cellspacing-x'>\n";
+                push @{$nice}, "<table class='body rowhover cellspacing-x max-w-full'>\n";
                 push @{$nice}, CORE::sprintf("<tr><th>Message</th><th>Location</th></tr>\n");
             }
             my $class = "external textHINTsoft";
@@ -1453,14 +1453,15 @@ sub nice_stacktrace {
             $rowNum++;
             $msg =~ s/(Thruk::Context=HASH\(.*?\))/<i title="$1">\$c<\/i>/gmx;
             chomp($line);
-            push @{$nice}, CORE::sprintf("<tr class='%s'><td>%s</td><td title='%s'>%s:%d</td></tr>\n", $class, $msg, $original, $file, $nr);
+            push @{$nice}, CORE::sprintf("<tr class='%s'><td class='max-w-[60vw] truncate'>%s</td><td class='truncate' style='max-width: 240px;' title='%s'>%s:%d</td></tr>\n", $class, $msg, $original, $file, $nr);
             $has_stack = 1;
         } else {
             if($in_stack) {
                 $in_stack = 0;
                 push @{$nice}, "</table>";
             }
-            push @{$nice}, $line."<br>";
+            chomp($line);
+            push @{$nice}, "<span class='p-2 textHINT font-bold'>".$line."</span><br>";
         }
     }
     if($in_stack) {
