@@ -33,7 +33,7 @@ use Thruk::Views::ToolkitRenderer ();
   cmd($c, {
             cmd          => "command line to execute",
             allow        => all|user,
-            wait_message => "display message while running the job"
+            message      => "display message while running the job"
             forward      => "forward on success"
             background   => "return $jobid if set, or redirect otherwise"
             nofork       => "don't fork"
@@ -86,7 +86,7 @@ sub cmd {
   perl($c, {
             expr         => "perl expression to execute",
             allow        => all|user,
-            wait_message => "display message while running the job"
+            message      => "display message while running the job"
             forward      => "forward on success"
             backends     => "list of selected backends (keys)"
             nofork       => "don't fork"
@@ -580,10 +580,22 @@ sub job_page {
     my($c) = @_;
 
     my $job    = $c->req->parameters->{'job'};
+    my $peerid = $c->req->parameters->{'peer'};
     my $json   = $c->req->parameters->{'json'}   || 0;
     my $cancel = $c->req->parameters->{'cancel'} || 0;
     $c->stash->{no_auto_reload} = 1;
     return $c->detach('/error/index/22') unless defined $job;
+
+    if($peerid) {
+        my $peer = $c->db->get_peer_by_key($peerid);
+        my $data = $peer->job_data($c, $job);
+        return $c->detach('/error/index/22') unless defined $data;
+        $c->stash->{job}      = $data   // {};
+        $c->stash->{peer}     = $peerid // '';
+        $c->stash->{template} = 'job_popup.tt';
+        return $c->render(json => $data // {}) if $json;
+        return;
+    }
 
     if($cancel) {
         cancel($c, $job);

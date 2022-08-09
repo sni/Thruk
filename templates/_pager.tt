@@ -11,6 +11,8 @@
         [% class = "" %]
         [% IF page == pager.page %]
           [% class = " textActive2" %]
+        [% ELSE %]
+          [% class = " small-pager" %]
         [% END %]
         <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
         [% page  = page + 1 %]
@@ -22,39 +24,45 @@
           [% class = "" %]
           [% IF page == pager.page %]
             [% class = " textActive2" %]
+          [% ELSE %]
+            [% class = " small-pager" %]
           [% END %]
           <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
           [% page  = page + 1 %]
         [% END %]
-        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
-        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, 'page' => pager.total_pages) %]">[% pager.total_pages %]</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default small-pager">...</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] small-pager" href="[% uri_with(c, 'page' => pager.total_pages) %]">[% pager.total_pages %]</a>
       [% ELSIF pager.page > pager.total_pages - 8 %]
-        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, page => 1) %]">1</a>
-        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] small-pager" href="[% uri_with(c, page => 1) %]">1</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default small-pager">...</a>
         [% page  = pager.total_pages - 8 %]
         [% WHILE page <= pager.total_pages %]
           [% class = "" %]
           [% IF page == pager.page %]
             [% class = " textActive2" %]
+          [% ELSE %]
+            [% class = " small-pager" %]
           [% END %]
           <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
           [% page  = page + 1 %]
         [% END %]
       [% ELSE %]
-        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, page => 1) %]">1</a>
-        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] small-pager" href="[% uri_with(c, page => 1) %]">1</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default small-pager">...</a>
         [% page  = pager.page - 3 %]
         [% endpage = pager.page + 3 %]
         [% WHILE page <= endpage %]
           [% class = "" %]
           [% IF page == pager.page %]
             [% class = " textActive2" %]
+          [% ELSE %]
+            [% class = " small-pager" %]
           [% END %]
           <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem][% class %]" href="[% uri_with(c, 'page' => page) %]">[% page %]</a>
           [% page  = page + 1 %]
         [% END %]
-        <a class="text4 rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default">...</a>
-        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem]" href="[% uri_with(c, 'page' => pager.total_pages) %]">[% pager.total_pages %]</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] bg-transparent cursor-default small-pager">...</a>
+        <a class="pager rounded-md inline-flex items-center font-medium justify-center px-1.5 min-w-[2rem] small-pager" href="[% uri_with(c, 'page' => pager.total_pages) %]">[% pager.total_pages %]</a>
       [% END %]
     [% END %]
 

@@ -45,6 +45,26 @@ sub index {
         return $c->redirect_to($url);
     }
 
+    my $res = proxy_request($c, $site, $url, $c->req);
+
+    $c->res->status($res->code);
+    $c->res->headers($res->headers);
+    $c->res->body($res->content);
+    $c->{'rendered'} = 1;
+    $c->stash->{'inject_stats'} = 0;
+    return;
+
+}
+
+##########################################################
+
+=head2 proxy_request
+
+=cut
+
+sub proxy_request {
+    my($c, $site, $url, $base_req) = @_;
+
     my $peer = $c->db->get_peer_by_key($site);
     if(!$peer) {
         # might be a not yet be populated federated backend
@@ -69,11 +89,11 @@ sub index {
         $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
     }
 
-    if($c->req->{'env'}->{'QUERY_STRING'}) {
-        $request_url = $request_url.'?'.$c->req->{'env'}->{'QUERY_STRING'};
+    if($base_req->{'env'}->{'QUERY_STRING'}) {
+        $request_url = $request_url.'?'.$base_req->{'env'}->{'QUERY_STRING'};
     }
-    my $req = HTTP::Request->new($c->req->method, $request_url, $c->req->headers->clone);
-    $req->content($c->req->content());
+    my $req = HTTP::Request->new($base_req->method, $request_url, $base_req->headers->clone);
+    $req->content($base_req->content());
     # cleanup a few headers
     for my $h (qw/host via x-forwarded-for referer/) {
         $req->header($h, undef);
@@ -106,12 +126,7 @@ sub index {
     }
 
     _cleanup_response($c, $peer, $url, $res);
-    $c->res->status($res->code);
-    $c->res->headers($res->headers);
-    $c->res->body($res->content);
-    $c->{'rendered'} = 1;
-    $c->stash->{'inject_stats'} = 0;
-    return;
+    return($res);
 }
 
 ##########################################################

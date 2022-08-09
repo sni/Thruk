@@ -34,12 +34,21 @@
     </div>
   [% END %]
 
+  <h1 class="mt-2">
+    [% IF hostgroup == 'all' %]Service Overview For All Host Groups
+    [% ELSIF hostgroup != '' %]Service Overview For Host Group '[% hostgroup | html %]'
+    [% ELSIF servicegroup == 'all' %]Service Overview For All Service Groups
+    [% ELSIF servicegroup != '' %]Service Overview For Service Group '[% servicegroup | html %]'
+    [% ELSE %]Service Overview
+    [% END %]
+  </h1>
+
   <div class="my-2 flex gap-1">
     [% PROCESS _add_bookmark.tt %]
     [% PROCESS _show_link.tt %]
   </div>
 
-  <div class="card w-full min-w-[800px]">
+  <div class="card w-full min-w-[420px]">
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">

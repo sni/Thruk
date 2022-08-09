@@ -583,8 +583,11 @@ sub _replace_output {
 # return $val, $ok. $ok is true if a value was found
 sub _get_value {
     my($data, $key) = @_;
-    if(exists $data->{$key}) {
-        return($data->{$key}, 1);
+    if(ref $data eq 'HASH' && exists $data->{$key}) {
+        return(_get_value_ref_check($data->{$key}), 1);
+    }
+    if(ref $data eq 'ARRAY' && $key =~ m/^\d+$/mx && exists $data->[$key]) {
+        return(_get_value_ref_check($data->[$key]), 1);
     }
     # traverse into nested hashes and lists
     my @parts = split(/\.|::/mx, $key);
@@ -604,7 +607,16 @@ sub _get_value {
         }
     }
 
-    return($val, 1);
+    return(_get_value_ref_check($val), 1);
+}
+
+##############################################
+sub _get_value_ref_check {
+    my($val) = @_;
+    if(ref $val) {
+        return(Cpanel::JSON::XS->new->ascii->canonical->encode($val));
+    }
+    return($val);
 }
 
 ##############################################

@@ -31,7 +31,7 @@
     </div>
   [% END %]
 
-  <h1 class="mt-5">
+  <h1 class="mt-2">
     [% IF custom_title != '' %][% custom_title %]
     [% ELSIF hostgroup == 'all' %]Host Status Details For All Host Groups
     [% ELSIF hostgroup != '' %]Host Status Details For Host Group '[% hostgroup | html %]'
@@ -39,7 +39,7 @@
     [% END %]
   </h1>
 
-  <div class="flexrow flex-nowrap my-2">
+  <div class="flexrow sm:flex-nowrap my-2 gap-y-1">
     <div class="flex basis-1/3 self-end gap-1">
       <div class="flex place-items-end gap-1">
         [% PROCESS _add_bookmark.tt %]
@@ -51,21 +51,33 @@
     </div>
     <div class="basis-1/3">
       [% UNLESS authorized_for_read_only %]
-      <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
-      <div class="hint text-center font-medium pb-1">Select all:</div>
-      <div class="hint flex place-content-center gap-x-0.5">
-        <button class="min-w-[110px]" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">Hosts</button>
-        <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.DOWN','.UNREACHABLE'));return false;">Problems</button>
-        <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">With Downtime</button>
-        <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');return false;">Unselect all</button>
+      <div class="hint flex gap-x-0.5 sm:justify-center">
+        <button class="min-w-[100px]" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">Hosts</button>
+        <button class="min-w-[100px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.DOWN','.UNREACHABLE'));return false;">Problems</button>
+        <button class="min-w-[100px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">In Downtime</button>
+        <button class="min-w-[100px]" onclick="selectAllHosts(false,'[% paneprefix %]');return false;">Unselect all</button>
       </div>
       [% END %]
     </div>
-    <div class="basis-1/3"></div>
+    <div class="basis-1/3 hidden sm:flex self-end justify-end relative">
+      <button class="round small gray text-lg relative" onclick="toggleElement('show_table_info_hst', undefined, true); return false;" title="Toggle help">
+        <i class="uil uil-info"></i>
+      </button>
+      <div class="card shadow-float absolute z-20 top-7" style="visibility: hidden;" id="show_table_info_hst">
+        <div class="head justify-between">
+          <h3>Info</h3>
+          <button class="iconOnly medium" onclick="toggleElement('show_table_info_hst'); return false;"><i class="uil uil-times"></i></button>
+        </div>
+        <div class="body">
+          <div class="whitespace-nowrap">You can select hosts with leftclick to send multiple commands.</div>
+          <div class="whitespace-nowrap">Select multiple by holding shift + leftclick</div>
+        </div>
+      </div>
+    </div>
   </div>
 [% END %]
 
-<div class="card w-full min-w-[800px]">
+<div class="card w-full min-w-[420px]">
   <div class="mainTableHeader">
     <div>
       <div class="flex flex-nowrap gap-x-2 items-center">

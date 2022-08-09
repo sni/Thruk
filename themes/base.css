@@ -326,7 +326,7 @@ header.header {
 }
 
 .modalFG {
-  @apply m-auto w-[600px] fixed z-50 top-0 left-0 right-0 bottom-0 h-max;
+  @apply m-auto w-[600px] min-w-fit fixed z-50 top-0 left-0 right-0 bottom-0 h-max;
 }
 
 TH {
@@ -457,9 +457,10 @@ HR {
   }
 }
 
-/* needed for comments page for example, because header has 50px height - CAN BE REMOVED NOW? */
-A.anchor-offset {
-  @apply block relative invisible top-[-50px];
+a.pager.small-pager{
+  @media screen and (max-width: 785px) {
+    @apply !hidden;
+  }
 }
 
 .pager {
@@ -1144,7 +1145,7 @@ TABLE.mainTable {
   THEAD>TR {
     @apply bgTable;
     TH{
-      @apply borderDefault align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit;
+      @apply borderDefault align-middle px-1.5 pt-2 pb-1 border-l tracking-wide hoverable sticky top-0 shadow-as-border-bottom z-10 bg-inherit bg-clip-padding;
     }
   }
   TBODY {
@@ -1626,4 +1627,16 @@ DIV.daterangepicker SELECT {
 
 .jstree-default .jstree-hovered {
   background: var(--card-bg) !important;
+}
+
+/*******************************************************************************
+* lined text editor popup
+*/
+
+DIV.linedwrap {
+  display: flex;
+}
+
+DIV.linedtextarea {
+  width: 100%;
 }

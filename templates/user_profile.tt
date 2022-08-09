@@ -3,7 +3,7 @@
 
 [% PROCESS _infobox.tt %]
 
-<h1>User Profile</h1>
+<h1 class="mt-5">User Profile</h1>
 
 [% IF new_private_key %]
 <div id="new_key_alert" class="card green alert top-center min-w-[600px]">
@@ -17,14 +17,14 @@
     Store this key to a safe place, it won't be shown again.<br><br>
     <span class="font-semibold">[%- new_private_key -%]</span>
     <br><br>
-    <button title="close this message" onclick="fade('new_key_alert', 500, true);return false;">dismiss</button>
+    <button class="mx-auto" title="close this message" onclick="fade('new_key_alert', 500, true);return false;">dismiss</button>
   </div>
 </div>
 [% END %]
 
-<div class="flex lg:place-content-center mt-5">
+<div class="mt-2">
 
-  <div class="card min-w-[900px]">
+  <div class="card min-w-[900px] mx-auto">
     <div class="head p-0">
       <span class="tabs text-center font-medium text-base active" id="sub_1" onclick="set_sub(1, 'user')">User Profile</span>
       <span class="tabs text-center font-medium text-base" id="sub_2" onclick="set_sub(2, 'apikeys')">API Keys</span>

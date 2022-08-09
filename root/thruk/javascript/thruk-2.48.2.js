@@ -248,6 +248,9 @@ function initLastUserInteraction() {
 
 
 function applyScroll(scrollTo) {
+    if(!scrollTo) {
+        return;
+    }
     var scrolls = scrollTo.split("_");
     for(var i = 0; i < scrolls.length; i++) { scrolls[i] = Number(scrolls[i]); }
     if(scrolls[0] > 0 || scrolls[1] > 0) {
@@ -698,7 +701,7 @@ function openModalWindowUrl(url, callback) {
     jQuery('#modalFG').load(url, {}, function(text, status, req) {
         if(status == "error") {
             jQuery('#modalFG DIV.body').prepend('<div class="textALERT">'+req.status+': '+req.statusText+'<\/div>');
-            jQuery('#modalFG DIV.spinner').remove();
+            jQuery('#modalFG DIV.spinner').hide();
         } else {
             init_page();
             jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
@@ -3380,6 +3383,68 @@ function sendJSError(scripturl, text) {
     return;
 }
 
+// show popup with job output
+function showJobOutputPopup(jobid, peerid) {
+    var url = url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&modal=1";
+    openModalWindowUrl(url, function(text, status, req) {
+        if(status == "error") {
+            jQuery('#modalFG DIV.spinner').show();
+            jQuery('#modalFG .textALERT').text("retrying...");
+            window.setTimeout(function() {
+                // only show if not closed meanwhile
+                if(document.getElementById('modalFG')) {
+                    closeModalWindow();
+                    showJobOutputPopup(jobid, peerid);
+                }
+            }, 3000);
+        }
+    });
+    return(false);
+}
+
+function showJobOutputPopupFetch(jobid, peerid, divid) {
+    jQuery.ajax({
+        url:       url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&json=1",
+        success:   function(data, textStatus, jqXHR) {
+            showJobOutputPopupUpdate(jobid, peerid, divid, data);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
+            window.setTimeout(function() {
+                showJobOutputPopupFetch(jobid, peerid, divid);
+            }, 3000)
+        }
+    });
+}
+
+function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
+    jQuery('#'+divid).html("");
+    if(!data) {
+        return;
+    }
+
+    var head = jQuery('#'+divid).parents('.card').find("DIV.head");
+    head.find("DIV.spinner").remove();
+    head.find("I.fa-check").remove();
+    head.find("I.fa-exclamation").remove();
+    jQuery('#'+divid).text(data.stdout+data.stderr);
+    jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
+
+    if(data['is_running']) {
+        head.prepend('<div class="spinner mr-2"><\/div>');
+        window.setTimeout(function() {
+            showJobOutputPopupFetch(jobid, peerid, divid);
+        }, 1000)
+    } else {
+        if(data['rc'] == 0) {
+            head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
+        } else {
+            head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
+        }
+    }
+}
+
+
 /* return shortened string */
 function shortenSource(text) {
     if(text.length > 100) {
@@ -4310,17 +4375,22 @@ function refreshNavSections(id) {
 }
 
 function submitFormInBackground(form, cb, extraData) {
+    var removeEls = [];
     if(extraData) {
         for(var key in extraData) {
-            jQuery('<input />', {
+            var el = jQuery('<input />', {
                 type:  'hidden',
                 name:   key,
                 value:  extraData[key]
             }).appendTo(form);
+            removeEls.push(el[0]);
         }
     }
     var data = jQuery(form).serializeArray();
     var url  = jQuery(form).attr("action");
+    jQuery(removeEls).each(function(i, el) {
+        jQuery(el).remove();
+    });
     jQuery.ajax({
         url:   url,
         data: data,
@@ -4330,18 +4400,23 @@ function submitFormInBackground(form, cb, extraData) {
         },
         success: function(data, textStatus, jqXHR) {
             if(cb) {
-                cb(form);
+                cb(form, true, data, textStatus, jqXHR);
             }
         },
-        error: ajax_xhr_error_logonly
+        error: function(jqXHR, textStatus, errorThrown) {
+            if(cb) {
+                cb(form, false, null, textStatus, jqXHR);
+            }
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
+        }
     });
     return(false);
 }
 
-function send_form_in_background_and_reload(btn, extraData) {
+function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
     var form = jQuery(btn).parents('FORM');
     submitFormInBackground(form, reloadPage, extraData);
-    setBtnSpinner(btn);
+    setBtnSpinner(btn, skipTimeout);
     return(false);
 }
 
@@ -7066,13 +7141,15 @@ function toggleTopPane() {
     if(formInput) {
         formInput.value = 0;
     }
-    hideElement("btn_toggle_top_pane");
+    hideElement("btn_toggle_top_pane_down");
+    showElement("btn_toggle_top_pane_up");
   } else {
     additionalParams['hidetop'] = 1;
     if(formInput) {
         formInput.value = 1;
     }
-    showElement("btn_toggle_top_pane");
+    showElement("btn_toggle_top_pane_down");
+    hideElement("btn_toggle_top_pane_up");
   }
   updateUrl();
 }
@@ -8943,6 +9020,12 @@ function overcard(options) {
     return;
 }
 
+function closeOvercard() {
+    toggleElement('overcard');
+    removeOvercardIframe();
+    return false;
+}
+
 function removeOvercardIframe() {
     if(!window.parent) { return; }
     if(!window.parent.document) { return; }
@@ -8983,6 +9066,9 @@ function element_check_visibility(el) {
 
 // apply row strip manually
 function applyRowStripes(el) {
+    if(!el) {
+        return;
+    }
     if(el.tagName == "TABLE") {
         jQuery(el).find("TR").removeClass(["rowOdd", "rowEven"]);
         var x = 0;

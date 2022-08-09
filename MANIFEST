@@ -2091,6 +2091,8 @@ t/scenarios/_common/ansible/roles/grafana_node_puppeteer/vars/main.yml
 t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
 t/scenarios/_common/ansible/roles/naemon_fake_logs/tasks/main.yml
 t/scenarios/_common/ansible/roles/naemon_fake_logs/vars/main.yml
+t/scenarios/_common/ansible/roles/node_control_client/tasks/main.yml
+t/scenarios/_common/ansible/roles/node_control_client/vars/main.yml
 t/scenarios/_common/ansible/roles/service_sshd/tasks/main.yml
 t/scenarios/_common/ansible/roles/ssh_site_login/tasks/main.yml
 t/scenarios/_common/ansible/roles/test-config-generator/tasks/main.yml
@@ -2422,6 +2424,9 @@ t/scenarios/lmd_federation_multitier_e2e/tier2c/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier2d/Dockerfile
 t/scenarios/lmd_federation_multitier_e2e/tier2d/playbook.yml
 t/scenarios/lmd_federation_multitier_e2e/tier2d/thruk_local.conf
+t/scenarios/lmd_federation_multitier_e2e/tier2e/Dockerfile
+t/scenarios/lmd_federation_multitier_e2e/tier2e/playbook.yml
+t/scenarios/lmd_federation_multitier_e2e/tier2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier3a/1.tbp
 t/scenarios/lmd_federation_multitier_e2e/tier3a/Dockerfile
 t/scenarios/lmd_federation_multitier_e2e/tier3a/playbook.yml
@@ -2889,6 +2894,7 @@ templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
 templates/extra_headers.tt
 templates/get_variable.tt
+templates/job_popup.tt
 templates/login.tt
 templates/main.tt
 templates/notifications.tt

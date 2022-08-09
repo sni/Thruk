@@ -39,7 +39,7 @@
     </div>
   [% END %]
 
-  <div class="flex flex-row mt-5">
+  <div class="flex flex-row mt-2">
     <div class="basis-1/3">
 
     </div>
@@ -70,7 +70,7 @@
     </div>
   </div>
 
-  <div class="flexrow flex-nowrap my-2">
+  <div class="flexrow sm:flex-nowrap my-2 gap-y-1">
     <div class="flex basis-1/3 self-end gap-1">
         [% PROCESS _add_bookmark.tt %]
         [% PROCESS _show_link.tt %]
@@ -80,22 +80,34 @@
     </div>
     <div class="basis-1/3">
       [% UNLESS authorized_for_read_only %]
-      <div class="hint text-center text-xs">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
-      <div class="hint text-center font-medium pb-1">Select all:</div>
-      <div class="hint flex place-content-center gap-x-0.5">
-        <button class="min-w-[110px]" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">Hosts</button>
-        <button class="min-w-[110px]" onclick="selectAllServices(true,'[% paneprefix %]');return false;">Services</button>
-        <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.CRITICAL','.WARNING','.UNKNOWN'));return false;">Problems</button>
-        <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));return false;">With Downtime</button>
-        <button class="min-w-[110px]" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');return false;">Unselect all</button>
+      <div class="hint flex gap-x-0.5 justify-center">
+        <button class="sm:min-w-[100px]" title="Select all Hosts" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">Hosts</button>
+        <button class="sm:min-w-[100px]" title="Select all Services" onclick="selectAllServices(true,'[% paneprefix %]');return false;">Services</button>
+        <button class="sm:min-w-[100px]" title="Select all Services with Problems" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.CRITICAL','.WARNING','.UNKNOWN'));return false;">Problems</button>
+        <button class="sm:min-w-[100px]" title="Select all Services in Downtime" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));return false;">In Downtime</button>
+        <button class="sm:min-w-[100px]" title="Unselect all Hosts/Services" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');return false;">Unselect all</button>
       </div>
       [% END %]
     </div>
-    <div class="basis-1/3"></div>
+    <div class="basis-1/3 hidden sm:flex self-end justify-end relative">
+      <button class="round small gray text-lg relative" onclick="toggleElement('show_table_info_svc', undefined, true); return false;" title="Toggle help">
+        <i class="uil uil-info"></i>
+      </button>
+      <div class="card shadow-float absolute z-20 top-7" style="visibility: hidden;" id="show_table_info_svc">
+        <div class="head justify-between">
+          <h3>Info</h3>
+          <button class="iconOnly medium" onclick="toggleElement('show_table_info_svc'); return false;"><i class="uil uil-times"></i></button>
+        </div>
+        <div class="body">
+          <div class="whitespace-nowrap">You can select hosts / services with leftclick to send multiple commands.</div>
+          <div class="whitespace-nowrap">Select multiple by holding shift + leftclick</div>
+        </div>
+      </div>
+    </div>
   </div>
 [% END %]
 
-<div class="card w-full min-w-[800px]">
+<div class="card w-full min-w-[420px]">
   <div class="mainTableHeader">
     <div>
       <div class="flex flex-nowrap gap-x-2 items-center">

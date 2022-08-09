@@ -135,6 +135,20 @@ services:
     hostname: tier2d
     domainname: tier2.test.local
 
+  tier2e:
+    build: tier2e/
+    environment:
+        - PREFIX=tier2e
+    volumes:
+        - .:/scenario:ro
+        - ../../../:/thruk:ro
+    networks:
+      tier2.test.local:
+        aliases:
+          - tier2e.tier2.test.local
+    hostname: tier2e
+    domainname: tier2.test.local
+
   tier3a:
     build: tier3a/
     environment:

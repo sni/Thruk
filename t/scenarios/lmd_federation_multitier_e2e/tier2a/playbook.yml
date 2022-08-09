@@ -2,8 +2,10 @@
 - hosts: all
   roles:
     - role: common
-    - role: thruk_developer
+    - role: service_sshd
+    - role: ssh_site_login
     - role: thruk_plugin_editor
+    - role: node_control_client
   tasks:
   - copy:
       src: "/root/thruk_local.conf"

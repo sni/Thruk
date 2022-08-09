@@ -34,7 +34,7 @@ SKIP: {
 };
 
 my $pages = [
-    { url => '/thruk/cgi-bin/core_scheduling.cgi', like => ['Checks per Second', 'Graph Options', ''] },
+    { url => '/thruk/cgi-bin/core_scheduling.cgi', like => ['Check Statistics', 'Graph Options', ''] },
 ];
 
 for my $test (@{$pages}) {

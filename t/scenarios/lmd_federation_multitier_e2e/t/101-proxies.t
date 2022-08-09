@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 105;
+    plan tests => 115;
 }
 
 
@@ -28,7 +28,7 @@ my $test = TestUtils::test_page(
 );
 my $procinfo = Cpanel::JSON::XS::decode_json($test->{'content'});
 my $ids      = {map { $_->{'peer_name'} => $_->{'peer_key'} } values %{$procinfo}};
-is(scalar keys %{$ids}, 10, 'got backend ids') || die("all backends required");
+is(scalar keys %{$ids}, 11, 'got backend ids') || die("all backends required");
 ok(defined $ids->{'tier1a'}, 'got backend ids II');
 
 ###############################################################################
@@ -47,7 +47,7 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
     @matches = grep(/(srv|service|)=Load/mx, @matches);
     @matches = grep(!/\/popup/mx, @matches);
     @matches = grep(!/-solo\//, @matches);
-    is(scalar @matches, 10, 'got all proxy links');
+    is(scalar @matches, 11, 'got all proxy links');
     for my $url (sort @matches) {
         $url =~ s|'||gmx;
         next if $url =~ m/tier1d/mx; # does not work with basic auth

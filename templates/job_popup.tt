@@ -1,0 +1,18 @@
+﻿<div class="card shadow-float">
+  <div class="head justify-between">
+    <h3>[% IF job.defined("message"); job.message; ELSE; "Job: " _ job.id; END %]</h3>
+    <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+  </div>
+  <div class="body">
+    <div class='CONSOLE p-1 overflow-y-scroll min-w-[300px] max-w-[1000px] min-h-[150px] max-h-80 whitespace-pre' id='job_popup_[% job.id %]'>
+      [% IF job.defined("stdout"); job.stdout; END %]
+      [% IF job.defined("stderr"); job.stderr; END %]
+    </div>
+  <div class='footer'>
+    <button class='w-24 mx-auto' onclick='return(closeModalWindow());'>OK</button>
+  </div>
+</div>
+
+<script>
+  showJobOutputPopupUpdate("[% job.id %]", "[% peer %]", "job_popup_[% job.id %]", [% json_encode(job) %]);
+</script>

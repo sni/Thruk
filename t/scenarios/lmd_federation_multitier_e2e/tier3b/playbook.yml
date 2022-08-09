@@ -2,7 +2,6 @@
 - hosts: all
   roles:
     - role: common
-    - role: thruk_developer
   tasks:
   - shell: "omd config demo set PNP4NAGIOS off"
   - shell: "omd config demo set GRAFANA on"

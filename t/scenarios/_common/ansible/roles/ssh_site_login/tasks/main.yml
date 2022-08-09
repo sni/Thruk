@@ -1,4 +1,4 @@
-- yum:
+- package:
     name:
       - passwd
     state: present

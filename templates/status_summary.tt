@@ -34,7 +34,7 @@
     </div>
   [% END %]
 
-  <h1 class="mt-5">
+  <h1 class="mt-2">
     [% IF hostgroup       == 'all' %]Status Summary For All Host Groups
     [% ELSIF hostgroup    != ''    %]Status Summary For Host Group '[% hostgroup | html %]'
     [% ELSIF servicegroup == 'all' %]Status Summary For All Service Groups
@@ -48,7 +48,7 @@
     [% PROCESS _show_link.tt %]
   </div>
 
-  <div class="card w-full min-w-[800px]">
+  <div class="card w-full min-w-[420px]">
     <div class="mainTableHeader">
       <div>
         <div class="flex flex-nowrap gap-x-1 items-center">
@@ -93,7 +93,7 @@
           </div>
 
           <div class="flex">
-            <div class="w-1/2 mr-10">
+            <div class="basis-1/2 mr-5">
               <div class="px-2 text-center"><h4>Hosts Summary</h4></div>
               <table>
                 <tbody>
@@ -137,7 +137,7 @@
               </table>
             </div>
 
-            <div class="w-1/2 ml-10">
+            <div class="basis-1/2 ml-5">
               <div class="px-2 text-center"><h4>Services Summary</h4></div>
               [% IF group.services_ok + group.services_warning + group.services_unknown + group.services_critical + group.services_pending == 0 %]
                 <div class="text-center">No matching services</div>

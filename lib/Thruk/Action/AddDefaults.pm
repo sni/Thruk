@@ -18,6 +18,7 @@ creates backend manager
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Scalar::Util qw/weaken/;
@@ -233,6 +234,20 @@ sub end {
     if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
         if(!$c->stash->{'skip_navigation'}) {
             Thruk::Utils::Menu::read_navigation($c);
+        }
+    }
+
+    $c->stash->{hidetop} = $c->stash->{hidetop} // $c->config->{hidetop} // 'auto';
+    if($c->stash->{hidetop} eq 'auto' || $c->stash->{hidetop} eq '') {
+        $c->stash->{hidetop} = 1;
+        if($c->cookies('thruk_screen')) {
+            my $screen;
+            eval {
+                $screen = decode_json($c->cookies('thruk_screen'));
+            };
+            if($screen->{'width'} && $screen->{'width'} =~ m/^\d+$/gmx && $screen->{'width'} > 1300) {
+                $c->stash->{hidetop} = 0;
+            }
         }
     }
 

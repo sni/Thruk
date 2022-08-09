@@ -1223,13 +1223,14 @@ sub proxifiy_url {
     if(!$c->config->{'http_backend_reverse_proxy'}) {
         return($url);
     }
-    my $peer = $c->db->get_peer_by_key($obj->{'peer_key'});
+    my $peer_key = ref $obj eq 'HASH' ? $obj->{'peer_key'} : $obj;
+    my $peer     = $c->db->get_peer_by_key($peer_key);
     return($url) unless $peer;
     if($peer->{'type'} ne 'http') {
         return($url);
     }
 
-    my $proxy_prefix = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$obj->{'peer_key'};
+    my $proxy_prefix = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$peer_key;
 
     # fix pnp/grafana url hacks
     $url =~ s%(\s+rel=)('|")%$1$2$proxy_prefix%gmx;

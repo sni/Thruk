@@ -12,102 +12,100 @@
   </div>
 </div>
 
-<div class="flex place-content-center">
-  <div class="flexcol w-fit">
-    <h1 class='mainTitle'>Cluster Status</h1>
+<h1 class="mt-5">Cluster Status</h1>
 
-    <div class="card mb-4">
-      <h3>Thruk Nodes</h3>
-
-      <table class="cellspacing innercellborder">
-        <tr>
-          <th>Node</th>
-          <th>Status</th>
-          <th>Response Time</th>
-          <th>Last Contact</th>
-          <th>Version</th>
-          <th>Actions</th>
-        </tr>
-        [% FOREACH n = c.cluster.nodes %]
-        <tr id="row_node_[% loop.index %]">
-          <td><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
-          <td style="text-align: center;">
-            [% IF c.cluster.maint(n) %]
-              <i class="fa-solid fa-business-time" title="node is in maintenance mode"></i>
-            [% ELSIF c.cluster.is_it_me(n) %]
-              <i class="fa-solid fa-check round green" title="ok"></i>
-            [% ELSIF n.last_contact == 0 %]
-              <div class="spinner w-5 h-5" title="waiting for initial response"></div>
-            [% ELSIF n.last_error != "" %]
-              <i class="uil uil-exclamation round yellow" title="[% n.last_error | html %]"></i>
-            [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout %]
-              <i class="uil uil-exclamation round yellow" title="error"></i>
-            [% ELSE %]
-              <i class="fa-solid fa-check round green" title="ok"></i>
-            [% END %]
-          </td>
-          [% IF n.last_error != "" %]
-            <td style="text-align: left;" colspan="3">
-              [% n.last_error | html %]
-            </td>
-          [% ELSE %]
-            <td style="text-align: center;">
-              [% IF c.cluster.is_it_me(n) %]
-                0.000s
-              [% ELSE %]
-              [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
-              [% END %]
-            </td>
-            <td style="text-align: center;">
-              [% IF c.cluster.is_it_me(n) %]
-                0s ago
-              [% ELSE %]
-                [% IF n.last_contact > 0 %]
-                  [% IF date.now - n.last_contact < 120 %]
-                    [% date.now - n.last_contact %]s ago
-                  [% ELSE %]
-                    [% date_format(c, n.last_contact) %]
-                  [% END %]
-                [% ELSE %]
-                never
-                [% END %]
-              [% END %]
-            </td>
-            <td style="text-align: center;">
-              [% IF c.cluster.is_it_me(n) %]
-                [% thrukversion %]
-              [% ELSE %]
-                [% n.version %]
-                [% IF n.version != thrukversion %]
-                  <i class="uil uil-exclamation round yellow" title="version mismatch"></i>
-                [% END %]
-              [% END %]
-            </td>
-          [% END %]
-          <td style="text-align: center;">
-            <form action='extinfo.cgi' method='POST'>
-              <input type='hidden' name='type' value='4'>
-              <input type='hidden' name='cluster' value='1'>
-              <input type='hidden' name='node' value="[% n.node_id | html %]">
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              [% IF c.cluster.maint(n) %]
-                <input type='hidden' name='maint' value='0'>
-                <button class="iconOnly">
-                  <i class="fa-solid fa-bell" title="Remove maintenance mode for this node"></i>
-                </button>
-              [% ELSE %]
-                <input type='hidden' name='maint' value='1'>
-                <button class="iconOnly">
-                  <i class="fa-solid fa-bell-slash" title="Put this node into maintenance mode"></i>
-                </button>
-              [% END %]
-            </form>
-          </td>
-        </tr>
-        [% END %]
-      </table>
-    </div>
+<div class="card mt-2 mb-4 mx-auto">
+  <div class="head">
+    <h3>Thruk Nodes</h3>
   </div>
+
+  <table class="cellspacing innercellborder">
+    <tr>
+      <th>Node</th>
+      <th>Status</th>
+      <th>Response Time</th>
+      <th>Last Contact</th>
+      <th>Version</th>
+      <th>Actions</th>
+    </tr>
+    [% FOREACH n = c.cluster.nodes %]
+    <tr id="row_node_[% loop.index %]">
+      <td><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
+      <td style="text-align: center;">
+        [% IF c.cluster.maint(n) %]
+          <i class="fa-solid fa-business-time" title="node is in maintenance mode"></i>
+        [% ELSIF c.cluster.is_it_me(n) %]
+          <i class="fa-solid fa-check round green" title="ok"></i>
+        [% ELSIF n.last_contact == 0 %]
+          <div class="spinner w-5 h-5" title="waiting for initial response"></div>
+        [% ELSIF n.last_error != "" %]
+          <i class="uil uil-exclamation round yellow" title="[% n.last_error | html %]"></i>
+        [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout %]
+          <i class="uil uil-exclamation round yellow" title="error"></i>
+        [% ELSE %]
+          <i class="fa-solid fa-check round green" title="ok"></i>
+        [% END %]
+      </td>
+      [% IF n.last_error != "" %]
+        <td style="text-align: left;" colspan="3">
+          [% n.last_error | html %]
+        </td>
+      [% ELSE %]
+        <td style="text-align: center;">
+          [% IF c.cluster.is_it_me(n) %]
+            0.000s
+          [% ELSE %]
+          [% IF n.response_time != ""; sprintf("%.3fs", n.response_time); END %]
+          [% END %]
+        </td>
+        <td style="text-align: center;">
+          [% IF c.cluster.is_it_me(n) %]
+            0s ago
+          [% ELSE %]
+            [% IF n.last_contact > 0 %]
+              [% IF date.now - n.last_contact < 120 %]
+                [% date.now - n.last_contact %]s ago
+              [% ELSE %]
+                [% date_format(c, n.last_contact) %]
+              [% END %]
+            [% ELSE %]
+            never
+            [% END %]
+          [% END %]
+        </td>
+        <td style="text-align: center;">
+          [% IF c.cluster.is_it_me(n) %]
+            [% thrukversion %]
+          [% ELSE %]
+            [% n.version %]
+            [% IF n.version != thrukversion %]
+              <i class="uil uil-exclamation round yellow" title="version mismatch"></i>
+            [% END %]
+          [% END %]
+        </td>
+      [% END %]
+      <td style="text-align: center;">
+        <form action='extinfo.cgi' method='POST'>
+          <input type='hidden' name='type' value='4'>
+          <input type='hidden' name='cluster' value='1'>
+          <input type='hidden' name='node' value="[% n.node_id | html %]">
+          <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+          [% IF c.cluster.maint(n) %]
+            <input type='hidden' name='maint' value='0'>
+            <button class="iconOnly">
+              <i class="fa-solid fa-bell" title="Remove maintenance mode for this node"></i>
+            </button>
+          [% ELSE %]
+            <input type='hidden' name='maint' value='1'>
+            <button class="iconOnly">
+              <i class="fa-solid fa-bell-slash" title="Put this node into maintenance mode"></i>
+            </button>
+          [% END %]
+        </form>
+      </td>
+    </tr>
+    [% END %]
+  </table>
 </div>
 
 [% PROCESS _footer.tt %]

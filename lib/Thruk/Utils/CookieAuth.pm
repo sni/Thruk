@@ -61,6 +61,7 @@ sub external_authentication {
     $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
     $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
+    _debug("auth post1:\n%s\n", $res->as_string()) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
     if($res->code == 302 && $authurl =~ m|^http:|mx) {
         (my $authurl_https = $authurl) =~ s|^http:|https:|gmx;
         if($res->{'_headers'}->{'location'} eq $authurl_https) {
@@ -85,6 +86,7 @@ sub external_authentication {
             $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;
             $res = $ua->post($authurl);
             $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
+            _debug("auth post2:\n%s\n", $res->as_string()) if ($ENV{'THRUK_COOKIE_AUTH_VERBOSE'} && $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} > 3);
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
                 if(ref $login eq 'HASH') { $login = $1; }
                 if($1 eq Thruk::Authentication::User::transform_username($config, $login)) {

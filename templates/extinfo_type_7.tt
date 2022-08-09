@@ -4,15 +4,13 @@
 <div class="flexcol">
   [% PROCESS _infobox.tt %]
   [% IF c.config.use_feature_core_scheduling %]
-  <div class="card">
-    <table>
-      <tr>
-        <td class='linkBox'>
+    <div class="card overflow-hidden">
+      <div class="actionbox">
+        <div>
           <a href="[% c.config.use_feature_core_scheduling %]?action=scheduling">Core Scheduling Graph</a><br>
-        </td>
-      </tr>
-    </table>
-  </div>
+        </div>
+      </div>
+    </div>
   [% END %]
 </div>
 

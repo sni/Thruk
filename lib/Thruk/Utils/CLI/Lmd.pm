@@ -71,16 +71,18 @@ sub cmd {
         if($started && $status->[0] && $status->[0]->{'pid'}) {
             return("FAILED - lmd already running with pid ".$status->[0]->{'pid'}."\n", 1);
         }
-        Thruk::Utils::LMD::check_proc($c->config, $c, 0);
+        my $pid = Thruk::Utils::LMD::check_proc($c->config, $c, 0);
         # wait for the startup
-        for(my $x = 0; $x <= 200; $x++) {
-            eval {
-                ($status, $started) = Thruk::Utils::LMD::status($c->config);
-            };
-            last if($status && scalar @{$status} == $started);
-            Time::HiRes::sleep(0.1);
+        if($pid) {
+            for(my $x = 0; $x <= 200; $x++) {
+                eval {
+                    ($status, $started) = Thruk::Utils::LMD::status($c->config);
+                };
+                last if($status && scalar @{$status} == $started);
+                Time::HiRes::sleep(0.1);
+            }
+            return("OK - lmd started\n", 0) if(defined $started and $started > 0);
         }
-        return("OK - lmd started\n", 0) if(defined $started and $started > 0);
         return("FAILED - starting lmd failed\n", 1);
     }
     elsif($mode eq 'stop') {
