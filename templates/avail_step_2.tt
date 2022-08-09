@@ -4,7 +4,7 @@
 
 <h1 class="mt-5">Availability Report</h1>
 
-<div class="card mx-auto w-[800px] mt-5 overflow-hidden">
+<div class="card mx-auto min-w-[420px] max-w-[800px] w-full mt-5 overflow-hidden">
   <div class="head p-0">
     <span class="tabs w-44"><a class="flex" href="avail.cgi">1. Report Type</a></span>
     <i class="fa-solid fa-angle-right text-sm"></i>

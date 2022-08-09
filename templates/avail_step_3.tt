@@ -5,11 +5,11 @@
 
 <h1 class="mt-5">Availability Report</h1>
 
-<div class="card mx-auto w-[800px] mt-5 overflow-hidden">
+<div class="card mx-auto min-w-[420px] max-w-[800px] w-full mt-5 overflow-hidden">
   <div class="head p-0">
-    <span class="tabs w-44"><a class="flex" href="avail.cgi">1. Report Type</a></span>
+    <span class="tabs w-44 px-2"><a class="flex" href="avail.cgi">1. Report Type</a></span>
     <i class="fa-solid fa-angle-right text-sm"></i>
-    <span class="tabs w-44">
+    <span class="tabs w-44 px-2">
       [% IF host %]
         <a class="flex" href="avail.cgi?report_type=hosts">2. Select Host</a>
       [% ELSIF hostgroup %]
@@ -21,10 +21,10 @@
       [% END %]
     </span>
     <i class="fa-solid fa-angle-right text-sm"></i>
-    <span class="tabs w-44 active"><a class="flex" href="#">3. Report Options</a></span>
+    <span class="tabs w-44 active px-2"><a class="flex" href="#">3. Report Options</a></span>
   </div>
 
-  <form method="get" action="avail.cgi" id="avail_form">
+  <form method="get" action="avail.cgi" id="avail_form" class="overflow-x-auto">
     <input type='hidden' name='show_log_entries' value=''>
     [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
     [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
@@ -133,14 +133,20 @@
   </form>
 
   <div class="footer justify-center h-fit flexcol gap-2">
-    <h4 class=" self-start">Other options:</h4>
+    <h4 class="self-start mt-1">Other options:</h4>
     <div class="w-full">
       <table>
         <tr>
-          <th>Permanent url for this report:</th>
-          <td><a class="link truncate max-w-[450px] block" target="_blank" href="" id="permalink"></a></td>
-          <td>
-            <button class="iconOnly px-1 copy_button" onclick="copyCode(event, String(document.getElementById('permalink').href)); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>
+          <th class="w-1/4">Permanent url for this report:</th>
+          <td class="w-3/4 max-w-[10rem]">
+            <div class="flex">
+              <div class="truncate flex-1">
+                <a class="link" target="_blank" href="" id="permalink"></a>
+              </div>
+              <div>
+                <button class="iconOnly px-1 copy_button" onclick="copyCode(event, String(document.getElementById('permalink').href)); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>
+              </div>
+            </div>
           </td>
         </tr>
       </table>
