@@ -445,6 +445,8 @@ sub _process_details_page {
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
     my $selected_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
+    $c->stash->{'comments_by_host'}          = {};
+    $c->stash->{'comments_by_host_service'}  = {};
     if($selected_columns) {
         Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/mx || $c->req->parameters->{'autoShow'});
         $has_columns = 1;
@@ -594,6 +596,8 @@ sub _process_hostdetails_page {
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
+    $c->stash->{'comments_by_host'}          = {};
+    $c->stash->{'comments_by_host_service'}  = {};
     if($selected_columns) {
         Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/mx || $c->req->parameters->{'autoShow'});
         $has_columns = 1;
@@ -1076,6 +1080,8 @@ sub _process_combined_page {
     $c->stash->{'default_columns'}->{'svc_'} = Thruk::Utils::Status::get_service_columns($c);
     $c->stash->{'table_columns'}->{'hst_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'hst_'}, $selected_hst_columns);
     $c->stash->{'table_columns'}->{'svc_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'svc_'}, $selected_svc_columns);
+    $c->stash->{'comments_by_host'}          = {};
+    $c->stash->{'comments_by_host_service'}  = {};
     if($selected_hst_columns || $selected_svc_columns) {
         $has_columns = 1;
         if(   ($selected_hst_columns && $selected_hst_columns =~ m/comments/mx)
