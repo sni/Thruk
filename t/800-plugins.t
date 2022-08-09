@@ -30,6 +30,7 @@ my $filter = $ARGV[0];
 my $extra_tests = [
   't/081-modules.t',
   't/083-xss.t',
+  't/data/800-plugins/01-css.t',
   't/088-remove_after.t',
   't/092-todo.t',
   't/094-template_encoding.t',
