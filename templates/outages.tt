@@ -5,7 +5,7 @@
 
   <h1 class="mt-5">Blocking Outages</h1>
 
-  <div class="card w-full mt-5 overflow-hidden">
+  <div class="card min-w-[420px] w-full mt-2 overflow-hidden">
     <div class="mainTable border-t-0">
       <table class="mainTable striped">
         <thead>

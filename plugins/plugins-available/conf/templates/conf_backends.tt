@@ -6,49 +6,47 @@
 </div>
 [% END %]
 
-<div class="flexcol justify-center items-center mt-5">
-  <form action="conf.cgi" method="POST" class="w-fit">
-    <input type="hidden" name="sub" value="backends">
-    [%# make sure IE can submit form by pressing enter #%]
-    <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
-    <input type="hidden" name="action" value="save">
-    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-    <div class="card w-[450px]">
-      <div class="head justify-between">
-        <h3>Backends Configuration</h3>
-        <button class="w-32" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
-          <i class="uil uil-save"></i>Save Changes
-        </button>
-      </div>
-      <div class="body">
-        <span class="textHINT block text-center">Note: some options are not accessible here for security reasons.</span>
-      </div>
-      <table class="cellspacing-0.25">
-        [% x = 0 %]
-        [% FOREACH b = conf_sites %]
-          [% x = x + 1 %]
-          [% PROCESS _conf_backends_backend.tt %]
-        [% END %]
-        <tr class="backend_conf_0_add">
-          <td colspan=3 class="clickable hoverable text-center" onclick="conf_sites_add(); return false;">
-            <i class="fa-solid fa-plus"></i>add new connection
-          </td>
-        </tr>
-        <tr>
-          <td colspan=3><hr></td>
-        </tr>
-        [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '' } x = 0 %]
-        <tr>
-          <td colspan=3>
-            <button class="w-32 mx-auto m-2" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
-              <i class="uil uil-save"></i>Save Changes
-            </button>
-          </td>
-        </tr>
-      </table>
+<form action="conf.cgi" method="POST" class="min-w-[420px] max-w-[600px] w-full mt-5 mx-auto">
+  <input type="hidden" name="sub" value="backends">
+  [%# make sure IE can submit form by pressing enter #%]
+  <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
+  <input type="hidden" name="action" value="save">
+  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+  <div class="card w-full">
+    <div class="head justify-between">
+      <h3>Backends Configuration</h3>
+      <button class="w-32" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
+        <i class="uil uil-save"></i>Save Changes
+      </button>
     </div>
-  </form>
-</div>
+    <div class="body">
+      <span class="textHINT block text-center">Note: some options are not accessible here for security reasons.</span>
+    </div>
+    <table class="cellspacing-0.25">
+      [% x = 0 %]
+      [% FOREACH b = conf_sites %]
+        [% x = x + 1 %]
+        [% PROCESS _conf_backends_backend.tt %]
+      [% END %]
+      <tr class="backend_conf_0_add">
+        <td colspan=3 class="clickable hoverable text-center" onclick="conf_sites_add(); return false;">
+          <i class="fa-solid fa-plus"></i>add new connection
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3><hr></td>
+      </tr>
+      [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '' } x = 0 %]
+      <tr>
+        <td colspan=3>
+          <button class="w-32 mx-auto m-2" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
+            <i class="uil uil-save"></i>Save Changes
+          </button>
+        </td>
+      </tr>
+    </table>
+  </div>
+</form>
 
 <script>
 <!--

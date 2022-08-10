@@ -5,7 +5,7 @@
   <div class="flexrow 2xl:justify-between h-full">
     [% PROCESS _infobox.tt %]
 
-    <div class="card w-[800px] overflow-x-auto">
+    <div class="card min-w-[420px] max-w-[800px] w-full overflow-x-auto">
       <div class="head justify-between">
         <a href="broadcast.cgi" class="button header-button rounded w-[70px]" title="Go back to broadcast list">
           <i class="uil uil-angle-double-left"></i>Back
@@ -37,8 +37,8 @@
             </tr>
           [% END %]
             <tr>
-              <th>Save as Template</th>
-              <td><input type="checkbox" value="1" name="template" id="template"[% IF broadcast.template %] checked[% END %]> <label for="template">Templates will never be displayed but can be cloned.</label></td>
+              <th class="align-top">Save as Template</th>
+              <td class="whitespace-normal"><input type="checkbox" value="1" name="template" id="template"[% IF broadcast.template %] checked[% END %]> <label for="template">Templates will never be displayed but can be cloned.</label></td>
             </tr>
             <tr>
               <th>Name</th>
@@ -182,8 +182,8 @@
               </td>
             </tr>
             <tr>
-                <th>Login Page</th>
-                <td>
+                <th class="align-top">Login Page</th>
+                <td class="whitespace-normal">
                     <input type="checkbox" value="1" name="loginpage"[% IF broadcast.loginpage %] checked[% END %]> Display on login page for unauthenticated users.
                 </td>
               </tr>

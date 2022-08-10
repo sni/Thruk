@@ -3,7 +3,7 @@
 [% WRAPPER _bp_frame.tt subtitle=subtitle %]
 [% USE date %]
 
-<div class="card w-full mt-5">
+<div class="card w-full min-w-[420px] mt-5">
   <div class="head justify-between">
     <div class="flexrow gap-1 flex-nowrap w-52">
       [% PROCESS _json_export.tt %]

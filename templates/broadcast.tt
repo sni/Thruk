@@ -5,7 +5,7 @@
 
   <h1 class="mt-5">Broadcasts</h1>
 
-  <div class="card w-full mt-2">
+  <div class="card w-full min-w-[420px] mt-2">
     <div class="head justify-between">
       <div>
         [% PROCESS _table_search_field.tt ids=["statusTable"] %]

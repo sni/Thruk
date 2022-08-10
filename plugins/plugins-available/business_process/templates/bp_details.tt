@@ -45,7 +45,7 @@
       <table class="body cellspacing table-fixed">
         <tr>
           <th class="w-28">Label</th>
-          <td>
+          <td class="whitespace-normal">
             <div class="flexrow flex-nowrap gap-1 justify-between">
               <div id="bp_status_label"></div>
               <div class="bp_status_extinfo_link"></div>
@@ -98,7 +98,7 @@
       </table>
     </div>
 
-    <div class="card mt-5 w-full">
+    <div class="card mt-5 w-full overflow-hidden">
       <div class="head">
         <h3>Actions</h3>
       </div>
@@ -149,7 +149,7 @@
     </div>
 
     [% IF editmode %]
-      <div class="card mt-5 w-full">
+      <div class="card mt-5 w-full overflow-hidden">
         <div class="head">
           <h3>Edit Actions</h3>
         </div>
@@ -157,12 +157,12 @@
           <div>
             <a href='bp.cgi?action=clone&amp;bp=[% bp.id %]'><i class="fa-solid fa-copy"></i>Clone this Business Process</a>
           </div>
-          <div class="hover-red">
+          <div>
             <form action='bp.cgi' method='POST' style="display: inline;">
               <input type='hidden' name='action' value='remove'>
               <input type="hidden" name="bp" value="[% bp.id %]">
               <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href='bp.cgi' onClick="confirm('A removed business process cannot be restored. Really remove?') && jQuery(this).closest('FORM').submit(); return false;"><i class="fa-solid fa-trash"></i>Delete this Business Process</a>
+              <a class="hover-red-text" href='bp.cgi' onClick="confirm('A removed business process cannot be restored. Really remove?') && jQuery(this).closest('FORM').submit(); return false;"><i class="fa-solid fa-trash"></i>Delete this Business Process</a>
             </form>
           </div>
           <div>

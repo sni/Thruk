@@ -11,7 +11,7 @@
         [% END %]
         [% y = y + 1 %]
     [% END %]
-<table class='procInfoTable search_vertical search_hide_empty cellspacing-x rowhover' id="procInfoTable">
+<table class='procInfoTable search_vertical search_hide_empty cellspacing-x rowhover sticky-th-left' id="procInfoTable">
   <tr>
     <th>Backend Name</th>
     [% FOREACH pd IN tmpbackends %]

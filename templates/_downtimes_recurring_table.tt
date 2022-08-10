@@ -1,6 +1,6 @@
 ﻿
 <table class='mainTable striped [% IF names %] hoverable[% END %]' id="recurring_downtimes_table_[% type | html %]">
-  <thead title="click to sort">
+  <thead>
     <tr>
       <th>Type</th>
       <th colspan="2">Names</th>
