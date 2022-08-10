@@ -6,6 +6,8 @@ use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
+
 my $cmds = [
   "grep -nr '`' lib/ plugins/plugins-available/*/lib/",
 ];
@@ -19,6 +21,7 @@ for my $cmd (@{$cmds}) {
     chomp($line);
     $line =~ s/'.*?'//gmx;
     $line =~ s/\#.*$//gmx;
+    next if($filter && $line !~ m%$filter%mx);
     next if $line =~ m%\QThruk/Utils/IO.pm:\E%mx;
     next if $line =~ m/(CREATE|ALTER|TRUNCATE|OPTIMIZE|DROP|LOCK)\ TABLE/mx;
     next if $line =~ m/LEFT\ JOIN/mx;

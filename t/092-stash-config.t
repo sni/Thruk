@@ -13,6 +13,8 @@ my $cmds = [
   "grep -nr '\$c->{\"config\"}'   lib/ plugins/plugins-available/*/lib/",
 ];
 
+my $filter = $ARGV[0];
+
 # find all missed debug outputs
 for my $cmd (@{$cmds}) {
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
@@ -20,6 +22,7 @@ for my $cmd (@{$cmds}) {
   while(<$ph>) {
     my $line = $_;
     chomp($line);
+    next if($filter && $line !~ m%$filter%mx);
     fail($line);
   }
   close($ph);

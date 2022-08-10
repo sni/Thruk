@@ -30,8 +30,16 @@ my $filter = $ARGV[0];
 my $extra_tests = [
   't/081-modules.t',
   't/083-xss.t',
+  't/085-json_xs.t',
   't/data/800-plugins/01-css.t',
+  't/087-trailing_whitespace.t',
+  't/090-io.t',
+  't/092-backticks.t',
   't/088-remove_after.t',
+  't/092-clean_debug.t',
+  't/092-private_subs.t',
+  't/092-stash-config.t',
+  't/092-thruk-view-json.t',
   't/092-todo.t',
   't/094-template_encoding.t',
   't/099-Perl-Critic.t',
@@ -44,6 +52,7 @@ TestUtils::test_command({
     exit    => 0,
 });
 
+my $failed = {};
 for my $p (@{$plugins}) {
     next if($filter && $p->{'name'} ne $filter);
 
@@ -92,13 +101,14 @@ for my $p (@{$plugins}) {
         next if($p->{'skip_tests'} && $testfile =~ $p->{'skip_tests'});
         my $testsource = Thruk::Utils::IO::read($testfile);
         Thruk::Config::set_config_env();
-        subtest $testfile => sub {
+        my $rc = subtest $testfile => sub {
             # required for ex.: t/092-todo.t
             local @ARGV = (sprintf("plugins/plugins-available/%s", $p->{'name'}));
             $testsource =~ s/^\Quse warnings;\E//gmx;
             no warnings qw(redefine);
             eval("#line 1 $testfile\n".$testsource);
         };
+        $failed->{$p->{'name'}}->{$testfile} = 1 unless $rc;
     }
 
     # remove additional test config again
@@ -122,6 +132,13 @@ for my $p (@{$plugins}) {
             like    => ['/disabled plugin/' ],
             exit    => 0,
         });
+    }
+}
+
+# show summary
+for my $p (sort keys %{$failed}) {
+    for my $file (sort keys %{$failed->{$p}}) {
+        fail("failed plugin: $p at test $file");
     }
 }
 

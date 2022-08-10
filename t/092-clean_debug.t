@@ -4,6 +4,8 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
+
 my $cmds = {
   "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/ t/" => {},
   "grep -nr 'use Thruk::Timer' lib/ plugins/plugins-available/ t/"    => { 'skip_comments' => 1, exclude => [qr/^lib\/Thruk\/Timer\.pm:/] },
@@ -23,6 +25,8 @@ for my $cmd (keys %{$cmds}) {
     $line =~ s|//|/|gmx;
 
     next if $line =~ m|092\-clean_debug\.t|mx;
+
+    next if($filter && $line !~ m%$filter%mx);
 
     if($opt->{'skip_comments'}) {
         if($line =~ m|^[a-zA-Z\./\-]+:\d+:\s*\#|mx) { next; }
