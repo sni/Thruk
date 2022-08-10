@@ -66,6 +66,7 @@
               [% ELSE %]
                 <div>No</div>
               [% END %]
+            </div>
           </div>
         </td>
       </tr>
