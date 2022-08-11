@@ -7,7 +7,8 @@
   [% END +%]
 
   jQuery(document).ready(function() {
-    jQuery("TR.clickable").each(function(nr, elem) {
+    jQuery("TBODY > TR.js-downtime-row").each(function(nr, elem) {
+      jQuery(elem).addClass("clickable");
       elem.onclick=toggle_comment;
     });
   });
