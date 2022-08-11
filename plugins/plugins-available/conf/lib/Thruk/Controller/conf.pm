@@ -89,6 +89,7 @@ sub index {
     $c->stash->{no_tt_trim}            = 1;
     $c->stash->{post_obj_save_cmd}     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}   // '';
     $c->stash->{show_summary_prompt}   = $c->config->{'Thruk::Plugin::ConfigTool'}->{'show_summary_prompt'} // 1;
+    $c->stash->{'plugin_name'}         = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
 
     Thruk::Utils::ssi_include($c);
 

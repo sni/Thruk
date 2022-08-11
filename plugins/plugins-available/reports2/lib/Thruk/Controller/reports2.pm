@@ -54,6 +54,7 @@ sub index {
     $c->stash->{'phantomjs'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{'filtered'}            = 0;
+    $c->stash->{'plugin_name'}         = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
 
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';

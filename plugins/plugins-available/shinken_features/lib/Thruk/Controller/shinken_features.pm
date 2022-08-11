@@ -40,6 +40,7 @@ sub outages_pbimp_index {
 
     _process_outagespbimp($c);
 
+    $c->stash->{'plugin_name'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
     Thruk::Utils::ssi_include($c);
 
     return 1;
@@ -64,6 +65,7 @@ sub shinken_status {
 
     _process_bothtypes_page($c);
 
+    $c->stash->{'plugin_name'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
     Thruk::Utils::ssi_include($c);
 
     return 1;
@@ -339,6 +341,7 @@ sub businessview_index {
     $c->stash->{page}           = 'businessview';
     $c->stash->{template}       = 'shinken_businessview.tt';
 
+    $c->stash->{'plugin_name'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
     Thruk::Utils::ssi_include($c);
 
     return 1;

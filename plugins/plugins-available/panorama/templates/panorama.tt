@@ -12,7 +12,7 @@
     [% PROCESS _favicon.tt %]
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]vendor/extjs-[% extjs_version %]/resources/css/ext-all-gray.css">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% fileversion %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/[% plugin_name %]/panorama-[% fileversion %].css' />
     [% PROCESS _common_css_fonts.tt %]
     [% IF thruk_author %]
       <script charset="UTF-8" src="[% url_prefix %]vendor/extjs-[% extjs_version %]/ext-all-debug.js"></script>
@@ -26,7 +26,7 @@
       [% FOREACH js = get_static_panorama_files(c.config) %]
         <script charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]
-      <script charset="UTF-8" src="[% url_prefix %]plugins/panorama/js/panorama_js_track_timers.js"></script>
+      <script charset="UTF-8" src="[% url_prefix %]plugins/[% plugin_name %]/js/panorama_js_track_timers.js"></script>
     [% ELSE %]
       <script charset="UTF-8" src="[% url_prefix %]cache/thruk-panorama-[% fileversion %].js"></script>
     [% END %]
@@ -49,7 +49,7 @@ window.setTimeout(function() {
 
 function preloader() {
     if(document.images) {
-        var img_url = url_prefix+'plugins/panorama/images/';
+        var img_url = url_prefix+'plugins/[% plugin_name %]/images/';
         /* no var here, otherwise browser would clean the preloaded images from cache */
 [%+ FOREACH i = preload_img %]
         img[% loop.index %] = new Image(); img[% loop.index %].src = img_url+"[% i %]";

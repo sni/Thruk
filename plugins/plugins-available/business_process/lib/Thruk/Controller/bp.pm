@@ -54,6 +54,7 @@ sub index {
     $c->stash->{template}              = 'bp.tt';
     $c->stash->{subtitle}              = 'Business Process';
     $c->stash->{infoBoxTitle}          = 'Business Process';
+    $c->stash->{'plugin_name'}         = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{editmode}              = 0;
