@@ -223,7 +223,8 @@ sub report_send {
         return 2;
     }
 
-    $c->stash->{'block'} = 'mail';
+    $c->stash->{'block'}       = 'mail';
+    $c->stash->{'plugin_name'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
     my $mailtext;
     eval {
         $c->stash->{'start'} = '' unless defined $c->stash->{'start'};
@@ -610,6 +611,8 @@ sub generate_report {
     # disable tt cache to read custom templates every time
     my $orig_stat_ttl = $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'};
     $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = 0;
+
+    $c->stash->{'plugin_name'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
 
     # prepare stage, functions here could still change stash
     eval {
