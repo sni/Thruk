@@ -324,7 +324,7 @@ sub save_bp_objects {
                 my $processinfo = $c->db->get_processinfo(backends => $pkey);
                 $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
             }
-            sleep(1) if $last_reload == time();
+            sleep(1) if int($last_reload) == int(time());
         }
 
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};

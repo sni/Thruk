@@ -2340,7 +2340,7 @@ sub wait_after_reload {
                 'header' => {
                     'WaitTimeout'   => 2000,
                     'WaitTrigger'   => 'all', # using something else seems not to work all the time
-                    'WaitCondition' => "program_start > ".$last_reload,
+                    'WaitCondition' => "program_start >= ".$last_reload,
                 },
         };
     }
@@ -2375,6 +2375,12 @@ sub wait_after_reload {
                 } else {
                     $msg = 'still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'}));
                     _debug($msg);
+                }
+                # assume reload worked if last restart is exactly the time we started to wait
+                if(int($procinfo->{$pkey}->{'program_start'}) == int($last_reload) && $start <= (time() - 3)) {
+                    $done = 1;
+                    _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+                    last;
                 }
             }
         }

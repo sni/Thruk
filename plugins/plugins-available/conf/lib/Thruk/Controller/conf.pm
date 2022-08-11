@@ -2738,7 +2738,7 @@ sub _config_reload {
     if(!$last_reload) {
         my $processinfo = $c->db->get_processinfo(backends => $pkey);
         $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
-        sleep(1) if $last_reload == time();
+        sleep(1) if int($last_reload) == int(time());
     }
 
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
