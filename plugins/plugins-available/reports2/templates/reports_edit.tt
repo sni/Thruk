@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt js="plugins/" _ plugin_name _ "/reports.js" %]
+﻿[% PROCESS _header.tt js="plugins/${plugin_name}/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 

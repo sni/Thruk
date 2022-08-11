@@ -7,8 +7,8 @@
 [% END %]
 [% PROCESS _header.tt
     extra_header => statusmap_header
-    js           => "plugins/" _ plugin_name _ "/businessview.js"
-    css          => "plugins/" _ plugin_name _ "/businessview.css"
+    js           => "plugins/${plugin_name}/businessview.js"
+    css          => "plugins/${plugin_name}/businessview.css"
 %]
 
 [% PROCESS _infobox.tt %]
