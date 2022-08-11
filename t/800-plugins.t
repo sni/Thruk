@@ -31,7 +31,6 @@ my $extra_tests = [
   't/081-modules.t',
   't/083-xss.t',
   't/085-json_xs.t',
-  't/data/800-plugins/01-css.t',
   't/087-trailing_whitespace.t',
   't/090-io.t',
   't/092-backticks.t',
@@ -41,9 +40,11 @@ my $extra_tests = [
   't/092-stash-config.t',
   't/092-thruk-view-json.t',
   't/092-todo.t',
+  't/094-plugin-root-path.t',
   't/094-template_encoding.t',
   't/099-Perl-Critic.t',
   't/900-javascript_syntax.t',
+  glob('t/data/800-plugins/*.t'),
 ];
 
 TestUtils::test_command({

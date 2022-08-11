@@ -1918,6 +1918,7 @@ t/092-stash-config.t
 t/092-thruk-view-json.t
 t/092-todo.t
 t/093-manifest.t
+t/094-plugin-root-path.t
 t/094-template_encoding.t
 t/095-doc_coverage.t
 t/095-doc_rest.t
