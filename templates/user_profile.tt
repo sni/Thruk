@@ -90,7 +90,7 @@
               <div class="grow">
                 <select name="timezone" class="w-full">
                   [% FOR tz = timezones %]
-                    <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text | html %]</option>
+                    <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text | html %][% IF tz.text == "Server Setting" %]&nbsp;&nbsp;&nbsp;&nbsp;([% c.config._server_timezone %])[% END %]</option>
                   [% END %]
                 </select>
               </div>
@@ -98,7 +98,7 @@
                 <button onclick="setBtnSpinner(this);"><i class="uil uil-save"></i>Save changes</button>
               </div>
               <div class="min-w-[140px]">
-                <span>Server: <span id="server_tz">[% c.config._server_timezone %]</span></span><br>
+                <span>Server: [% c.config._server_timezone %]</span><br>
                 <span>Browser: <span id="browser_tz"></span></span>
               </div>
             </div>
