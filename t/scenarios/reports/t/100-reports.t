@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 241;
+    plan tests => 245;
 
     use lib('t');
     require TestUtils;

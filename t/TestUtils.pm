@@ -275,7 +275,9 @@ sub test_page {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
-        while($now < $start + $waitmax) {
+        my $end     = $start + $waitmax;
+        ok(1, "waiting for $waitfor to appear till ".(scalar localtime $end));
+        while($now < $end) {
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
@@ -741,7 +743,9 @@ sub test_command {
         local $test->{'like'}    = '/.*/';
         local $test->{'errlike'} = '/.*/';
         my $expr = '';
-        while($now < $start + 30) {
+        my $end  = $start + 30;
+        ok(1, "waiting for $waitfor to appear till ".(scalar localtime $end));
+        while($now <= $end) {
             alarm(15);
             $expr = $waitfor;
             eval {

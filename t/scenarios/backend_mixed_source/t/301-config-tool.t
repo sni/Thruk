@@ -4,7 +4,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Test::More;
 
 BEGIN {
-    plan tests => 246;
+    plan tests => 247;
 
     use lib('t');
     require TestUtils;

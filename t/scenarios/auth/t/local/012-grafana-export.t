@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 47;
+plan tests => 48;
 
 ###########################################################
 # verify that we use the correct thruk binary

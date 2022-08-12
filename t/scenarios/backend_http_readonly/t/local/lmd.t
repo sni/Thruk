@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 34;
+plan tests => 35;
 
 ###########################################################
 # test thruks script path
