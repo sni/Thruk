@@ -31,14 +31,13 @@ yet finished) enabled.
  ├── plugins-available
  │   ├── conf
  │   ├── minemap
- │   ├── mobile
- │   ├── shinken_features
- │   └── statusmap
+ │   ├── reports2
+ │   └── node-control
  └── plugins-enabled
      ├── conf             -> ../plugins-available/conf
      ├── minemap          -> ../plugins-available/minemap
-     ├── shinken_features -> ../plugins-available/shinken_features
-     └── statusmap        -> ../plugins-available/statusmap
+     ├── reportss         -> ../plugins-available/reports2
+     └── node-control     -> ../plugins-available/node-control
 </pre>
 ++++
 
@@ -66,8 +65,8 @@ tool' plugin to select your plugins.
 ++++
 
 
-Builtin Plugins
----------------
+Builtin Core Plugins
+--------------------
 
 
 Business Process
@@ -164,28 +163,6 @@ set of hosts with lots of common services.
 
 
 
-Mobile
-~~~~~~
-
-----
- Author:      Sven Nierlein
- Description: Webinterface for mobile devices
- Download:    This plugin is builtin and shipped with Thruk
-----
-
-The mobile interface is a perfect way to get a quick overview and
-provides an easy way to acknowledge problems. When enabled, you will
-be asked on the startpage and on the host/service details page to use
-the mobile interface (once per session).
-
-++++
-<a title="mobile" rel="lightbox[plugins]" href="plugins/mobile1.png"><img src="plugins/mobile1.png" alt="mobile " width="16%" height="16%" /></a>
-<a title="mobile" rel="lightbox[plugins]" href="plugins/mobile2.png"><img src="plugins/mobile2.png" alt="mobile " width="16%" height="16%" /></a>
-<br style="clear: both;">
-++++
-
-
-
 
 Panorama
 ~~~~~~~~
@@ -252,54 +229,9 @@ priority.
 
 ++++
 <a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business1.png"><img src="plugins/shinken-business1.png" alt="shinken features " width="30%" height="30%" /></a>
-<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business2.png"><img src="plugins/shinken-business2.png" alt="shinken features " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
-
-
-
-
-Statusmap
-~~~~~~~~~
-
-----
- Author:      Sven Nierlein
- Description: Display a statusmap for hosts
- Download:    This plugin is builtin and shipped with Thruk
-----
-
-The Statusmap plugin replaces the traditional map. It is designed to
-provide usefull information (even in bigger installations) without the
-need of extra configuration. Your hosts can be grouped by ip address,
-domain, hostgroup, servicegroup or parent relation. Therefor it uses
-information which is already specified.
-
-++++
-<a title="statusmap" rel="lightbox[plugins]" href="plugins/statusmap1.png"><img src="plugins/statusmap1.png" alt="statusmap " width="30%" height="30%" /></a>
-<a title="statusmap" rel="lightbox[plugins]" href="plugins/statusmap2.png"><img src="plugins/statusmap2.png" alt="statusmap " width="30%" height="30%" /></a>
-<br style="clear: both;">
-++++
-
-
-
-
-WML
-~~~
-
-----
- Author:      Franky Van Liedekerke
- Description: Minimal replacement for statuswml.cgi
- Download:    This plugin is builtin and shipped with Thruk
-----
-
-The wml plugin renders a minimal statuswml.cgi page in order to
-support addons based on fetching status from the wml page. The
-http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Windows-Interfaces/NTray/details[NTray]
-Addon has been successfully tested.
-
-This addon is shipped with Thruk since version 1.26 but not enabled by
-default.
 
 
 
@@ -321,24 +253,49 @@ way to define further custom actions for each file type, like syntax check
 etc...
 
 ++++
-<a title="omd" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
+<a title="editor" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
 
 
-
-Hello World Plugin
-~~~~~~~~~~~~~~~~~~
+Node-Control
+~~~~~~~~~~~~
 
 ----
- Author:      Mikael Nordin
- Description: Hello World Plugin
- Download:    https://github.com/mickenordin/thruk_hello
+ Author:      Sven Nierlein
+ Description: Install OMD/OS Updates
+ Download:    https://github.com/sni/thruk-plugin-node-control
 ----
 
-The hello world plugin should get you started if you want to
-write your own plugin.
+The node control plugin allows you to control omd nodes and install/update new
+omd versions. The plugin also supports installing os updates and shows a brief
+summary of the main node ressouces.
+
+++++
+<a title="node-control" rel="lightbox[plugins]" href="plugins/node-control1.png"><img src="plugins/node-control1.png" alt="reporting " width="30%" height="30%" /></a>
+<a title="node-control" rel="lightbox[plugins]" href="plugins/node-control2.png"><img src="plugins/node-control2.png" alt="reporting " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+Woshsh
+~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Generic Text Editor
+ Download:    https://github.com/sni/thruk-plugin-woshsh
+----
+
+The woshsh plugin allows you to edit xls files, mainly to provide a datasource
+for the coshsh configuration generator.
+
+++++
+<a title="woshsh" rel="lightbox[plugins]" href="plugins/woshsh1.png"><img src="plugins/woshsh1.png" alt="woshsh plugin" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
 
 
 
@@ -362,6 +319,40 @@ sorted and filtered.
 <br style="clear: both;">
 ++++
 
+
+Pansnaps
+~~~~~~~~
+
+----
+ Author:      Danijel Tasov
+ Description: Generic Text Editor
+ Download:    https://github.com/ConSol/thruk-plugin-pansnaps
+----
+
+The pansnaps plugin allows you to export panorama dashboards as static images.
+
+++++
+<a title="pansnaps" rel="lightbox[plugins]" href="plugins/pansnaps.png"><img src="plugins/pansnaps.png" alt="editor plugin" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+
+
+Hello World Plugin
+~~~~~~~~~~~~~~~~~~
+
+----
+ Author:      Mikael Nordin
+ Description: Hello World Plugin
+ Download:    https://github.com/mickenordin/thruk_hello
+----
+
+The hello world plugin should get you started if you want to
+write your own plugin.
 
 
 

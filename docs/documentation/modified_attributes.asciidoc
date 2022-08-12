@@ -24,7 +24,7 @@ With the modfied attributes filter a list of host and services can be
 created which have modified attributes. And they can be reset by a
 quick command or by a normal host/service command.
 
-Nagios will then use the settings from the config file on the next reload.
+Naemon will then use the settings from the config file on the next reload.
 
 ++++
 <a title="attributes" rel="lightbox[advanced]" href="advanced/attributes1.png"><img src="advanced/attributes1.png" alt="modified attributes 1" width="30%" height="30%" /></a>
