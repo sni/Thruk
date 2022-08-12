@@ -2340,7 +2340,7 @@ sub wait_after_reload {
                 'header' => {
                     'WaitTimeout'   => 2000,
                     'WaitTrigger'   => 'all', # using something else seems not to work all the time
-                    'WaitCondition' => "program_start >= ".$last_reload,
+                    'WaitCondition' => "program_start > ".$last_reload,
                 },
         };
     }
