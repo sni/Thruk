@@ -1,7 +1,7 @@
 ﻿[% broadcasts = get_broadcasts(c) %]
 [% IF c.stash.defined("broadcast"); broadcasts = [broadcast]; END %]
 [% IF broadcasts.size > 0 %]
-  <div class="card mt-1 min-w-[200px] shadow-float rounded-t-none absolute -top-1 right-96 z-10 js-broadcast-panel noprint">
+  <div class="card mt-1 min-w-[200px] shadow-float rounded-t-none fixed -top-1 right-96 z-10 js-broadcast-panel noprint">
     [% IF broadcasts.size > 1 %]
     <div class="flexrow gap-0 flex-nowrap justify-between">
       <div>
@@ -13,9 +13,9 @@
       [% END %]
     </div>
     [% END %]
-    <div class="body flex justify-between">
+    <div class="body">
       [% IF c.user_exists && broadcasts.size == 1 %]
-        <a class="button iconOnly medium hoverable p-1 absolute right-1 top-1" href="#" onclick="broadcast_dismiss(); return(false);"><i class="uil uil-times"></i></a>
+        <a class="button iconOnly medium hoverable block" style="float: right; clear: both;" href="#" onclick="broadcast_dismiss(); return(false);"><i class="uil uil-times"></i></a>
       [% END %]
       <div class="w-full">
         [% FOREACH n = broadcasts %]

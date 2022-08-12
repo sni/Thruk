@@ -267,7 +267,7 @@
             [% escape_html(backend_detail.$pd.last_error) %]
           [% END %]
         [% END %]
-    </span>
+      </div>
     </td>
     [% END %]
   </tr>

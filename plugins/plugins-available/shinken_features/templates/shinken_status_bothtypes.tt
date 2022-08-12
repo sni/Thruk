@@ -8,7 +8,7 @@
   [% IF custom_title != '' %][% custom_title %][% END %]
 </h1>
 
-<div class="card mx-auto">
+<div class="card mx-auto mt-5">
   <table class="body cellspacing-x">
     <tr>
       <th>Type</th>
