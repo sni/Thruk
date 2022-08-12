@@ -17,7 +17,7 @@
   </div>
 </div>
 
-<div class="card mx-auto min-w-[1000px] overflow-hidden">
+<div class="card mx-auto min-w-[1000px] overflow-hidden mt-5">
   <div class='head'><h3>Service State Breakdowns</h3></div>
   <div>
     [% IF use_feature_trends %]

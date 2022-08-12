@@ -68,7 +68,6 @@
 
 
 
-<form action="showlog.cgi" method="GET" id="date_form">
   <div class="flexrow justify-between gap-x-1">
     <div class="flexcol gap-x-1">
       [% PROCESS _infobox.tt %]
@@ -191,7 +190,6 @@
       </div>
     </div>
   </div>
-</form>
 
 
 [% UNLESS nomap %]
