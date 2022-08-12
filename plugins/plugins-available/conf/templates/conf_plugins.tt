@@ -37,7 +37,7 @@
                     <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
                   </div>
                 </th>
-                <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
+                <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | html %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
                 <td class='align-top whitespace-normal'>[% plugin.description %][% IF plugin.url %]<br><br><a class="link" href="[% plugin.url %]">view plugin page</a>[% END %]</td>
               </tr>
             [% END %]
@@ -56,7 +56,7 @@
                     <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
                   </div>
                 </th>
-                <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
+                <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | html %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
                 <td class='align-top whitespace-normal'>[% plugin.description %]</td>
               </tr>
             [% END %]
