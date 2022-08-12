@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.48.3   Fri Aug 12 19:01:13 CEST 2022
           - add short links option for custom links
           - replace markup link links in comments and downtimes
           - add authoritive backend switch
