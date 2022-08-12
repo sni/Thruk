@@ -751,6 +751,11 @@ sub _process_plugins_page {
         if(!-e $path) {
             $path = $plugin_available_dir.'/'.$pic.'/preview.png';
         }
+        if($c->req->parameters->{'modal'}) {
+            $c->stash->{'plugin'}   = $plugins->{$pic};
+            $c->stash->{'template'} = 'conf_plugins_preview.tt';
+            return 1;
+        }
         $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
         if(-e $path) {

@@ -690,7 +690,10 @@ function openModalWindowUrl(url, callback) {
     }
     var content = ''
         +'  <div class="card w-[200px] mx-auto">'
-        +'    <div class="head"><h3>Loading...<\/h3><\/div>'
+        +'    <div class="head justify-between">'
+        +'      <h3>Loading...<\/h3>'
+        +'      <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"><\/i><\/button>'
+        +'    <\/div>'
         +'    <div class="body flexcol">'
         +'      <div class="spinner w-10 h-10"><\/div>'
         +'      <button class="w-20 self-center" onclick="closeModalWindow()">Cancel<\/button>'
