@@ -31,7 +31,7 @@
     <a href="#" onclick="fade('new_key_alert', 500);return false;">dismiss</a>
   </div>
   [% END %]
-  <div style="width: 600px; position: relative;">
+  <div style="width: 600px; position: relative; min-width: max-content;">
   <button class="thruk_button thruk_button_save" style="position: absolute; right: 0; top: -30px;">Save changes</button>
   <table border="0" class='data conftooluserprofile' style="width:600px;">
     <tr><th colspan=2 class='data conftoolheader' style="text-align:center">User Information</th></tr>
