@@ -3710,8 +3710,13 @@ function get_hash(nr) {
 }
 
 function preserve_hash() {
-    // save hash value for 30 seconds
-    cookieSave('thruk_preserve_hash', get_hash(), 60);
+    // save hash value for 60 seconds
+    var val = get_hash();
+    if(val != undefined) {
+        cookieSave('thruk_preserve_hash', val, 60);
+    } else {
+        cookieRemove('thruk_preserve_hash');
+    }
 }
 
 /* fetch content by ajax and replace content */
