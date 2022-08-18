@@ -1,6 +1,6 @@
 TP.graphStore = Ext.create('Ext.data.Store', {
     pageSize:     10,
-    model:       'TP_GraphModell',
+    model:       'TP_GraphModel',
     remoteSort:   true,
     remoteFilter: true,
     proxy: {
