@@ -154,12 +154,12 @@ Ext.define('TP.TabBar', {
                         text: 'Settings',
                         icon: url_prefix+'plugins/panorama/images/cog.png',
                         handler: function() { TP.tabSettingsWindow() },
-                        hidden: readonly
+                        disabled: readonly
                     }, {
                         text: 'Dashboard Management',
                         icon: url_prefix+'plugins/panorama/images/new_tab.gif',
                         handler: function() { TP.dashboardsWindow() },
-                        hidden: readonly
+                        disabled: readonly
                     }, '-', {
                         text:   'Save Active Dashboard',
                         icon:    url_prefix+'plugins/panorama/images/disk.png',
