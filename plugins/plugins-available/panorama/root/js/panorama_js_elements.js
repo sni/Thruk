@@ -611,7 +611,7 @@ Ext.define('Ext.ux.SearchStore', {
     proxy: {
         type:   'ajax',
         url:    'status.cgi',
-        method: 'POST',
+        actionMethods: {create: 'POST', read: 'POST', update: 'POST', destroy: 'POST'},
         reader: {
             type: 'json',
             root: 'data'

@@ -24,7 +24,7 @@ TP.grafanaStore = Ext.create('Ext.data.Store', {
     proxy: {
         type:   'ajax',
         url:    'panorama.cgi?task=grafana_graphs',
-        method: 'POST',
+        actionMethods: {create: 'POST', read: 'POST', update: 'POST', destroy: 'POST'},
         params: {},
         reader: {
             type: 'json',
