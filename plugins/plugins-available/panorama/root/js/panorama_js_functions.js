@@ -1419,6 +1419,7 @@ var TP = {
             method: 'POST',
             params: params,
             callback: function(options, success, response) {
+                tab = Ext.getCmp(tab.id);
                 TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
                 if(tab) { tab.removeMask(); }
