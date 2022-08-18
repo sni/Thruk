@@ -2436,9 +2436,11 @@ sub _task_pnp_graphs {
 
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
-    my $search = $c->req->parameters->{'query'};
-    my $graphs = [];
-    my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my $search  = $c->req->parameters->{'query'};
+    my $graphs  = [];
+    my $current;
+
+    my $data = _fetch_graph_hosts($c, $search, $c->config->{'pnp_url_regex'});
     for my $hst (@{$data}) {
         my $text = $hst->{'name'}.';_HOST_';
         next if($search and $text !~ m/$search/mxi);
@@ -2451,7 +2453,7 @@ sub _task_pnp_graphs {
         }
     }
 
-    $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    $data = _fetch_graph_services($c, $search, $c->config->{'pnp_url_regex'});
     for my $svc (@{$data}) {
         my $text = $svc->{'host_name'}.';'.$svc->{'description'};
         next if($search and $text !~ m/$search/mxi);
@@ -2465,6 +2467,9 @@ sub _task_pnp_graphs {
     }
     $graphs = Thruk::Backend::Manager::sort_result({}, $graphs, 'text');
     Thruk::Utils::page_data($c, $graphs);
+
+    # make sure current graph is always part of the result
+    push @{$c->stash->{'data'}}, $current if $current;
 
     my $json = {
         data        => $c->stash->{'data'},
@@ -2484,9 +2489,10 @@ sub _task_grafana_graphs {
     $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     my $search  = $c->req->parameters->{'query'};
     my $search2 = $c->req->parameters->{'query2'}; # current selected graph should always be returned, otherwise text/alias replacement does not work on paging
-    my $graphs = [];
+    my $graphs  = [];
     my $current;
-    my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+
+    my $data = _fetch_graph_hosts($c, $search, $c->config->{'grafana_url_regex'});
     for my $hst (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $hst, 1);
         if($url ne '') {
@@ -2508,7 +2514,7 @@ sub _task_grafana_graphs {
         }
     }
 
-    $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    $data = _fetch_graph_services($c, $search, $c->config->{'grafana_url_regex'});
     for my $svc (@{$data}) {
         my $url = Thruk::Utils::get_histou_url($c, $svc, 1);
         if($url ne '') {
@@ -2543,6 +2549,53 @@ sub _task_grafana_graphs {
     };
 
     return $c->render(json => $json);
+}
+
+##########################################################
+sub _fetch_graph_hosts {
+    my($c, $search, $url_regex) = @_;
+    my $data = [];
+
+    my $graphfilter = { '-or' => [
+        { action_url_expanded => { '~~' => $url_regex } },
+        { notes_url_expanded  => { '~~' => $url_regex } },
+    ]};
+    my($hostfilter, $servicefilter) = split(/;/mx, ($search//''), 2);
+    my $filter = [];
+    if($hostfilter) {
+        push @{$filter}, { name => { '~~' => $hostfilter } };
+    }
+    if(!$servicefilter || '_HOST_' =~ m/$servicefilter/mxi) {
+        $data = $c->db->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $graphfilter, $filter ],
+                                  columns => [qw/name action_url_expanded notes_url_expanded/],
+                                  limit   => 1000, # avoid timeouts and unresponsive js
+                                 );
+    }
+    return($data);
+}
+
+##########################################################
+sub _fetch_graph_services {
+    my($c, $search, $url_regex) = @_;
+    my $data = [];
+
+    my $graphfilter = { '-or' => [
+        { action_url_expanded => { '~~' => $url_regex } },
+        { notes_url_expanded  => { '~~' => $url_regex } },
+    ]};
+    my($hostfilter, $servicefilter) = split(/;/mx, ($search//''), 2);
+    my $filter = [];
+    if($hostfilter) {
+        push @{$filter}, { host_name => { '~~' => $hostfilter } };
+    }
+    if($servicefilter) {
+        push @{$filter}, { description => { '~~' => $servicefilter } };
+    }
+    $data = $c->db->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $graphfilter, $filter ],
+                                 columns => [qw/host_name description action_url_expanded notes_url_expanded/],
+                                 limit   => 1000, # avoid timeouts and unresponsive js
+                                );
+    return($data);
 }
 
 ##########################################################

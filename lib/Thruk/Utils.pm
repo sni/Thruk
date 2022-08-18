@@ -1304,10 +1304,9 @@ sub get_pnp_url {
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        for my $regex (qw|/pnp[^/]*/|) {
-            if($obj->{$type} =~ m|(^.*?$regex)|mx) {
-                return(proxifiy_url($c, $obj, $1.'/index.php'));
-            }
+        my $regex = $c->config->{'pnp_url_regex'};
+        if($obj->{$type} =~ m%(^.*?$regex)%mx) {
+            return(proxifiy_url($c, $obj, $1.'/index.php'));
         }
     }
 
@@ -1331,7 +1330,8 @@ sub get_histou_url {
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        if($obj->{$type} =~ m%histou\.js\?|/grafana/%mx) {
+        my $regex = $c->config->{'grafana_url_regex'};
+        if($obj->{$type} =~ m%$regex%mx) {
             return(proxifiy_url($c, $obj, $obj->{$type}));
         }
     }
