@@ -1529,11 +1529,25 @@ var isReloading = false;
 var reloadPageTimer;
 function reloadPage(delay, withReloadButton, freshReload) {
     if(!delay) { delay = 50; }
-    if(delay < 500 && withReloadButton) {
-        // update button earlier
-        resetRefreshButton();
-        jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
-        withReloadButton = false;
+    if(withReloadButton) {
+        if(delay < 500) {
+            // update button earlier
+            resetRefreshButton();
+            jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
+            withReloadButton = false;
+        } else {
+            var timer = jQuery('#reload-timer')[0];
+            jQuery(timer).addClass("hidden");
+            jQuery(timer).removeClass("scale-x-0");
+            jQuery(timer).addClass("scale-x-100");
+            timer.style.setProperty("transition-duration", delay+"ms", "important");
+            window.setTimeout(function() {
+                jQuery(timer).removeClass("hidden");
+            }, 20);
+            window.setTimeout(function() {
+                jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
+            }, 50);
+        }
     }
     window.clearTimeout(reloadPageTimer);
     reloadPageTimer = window.setTimeout(function() {
@@ -1553,6 +1567,7 @@ function reloadPageDo(withReloadButton, freshReload) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
         resetRefreshButton();
+        jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
     }
     isReloading = true;
     stopRefresh(true);
@@ -2238,7 +2253,7 @@ function toggleBackend(backend, state, skip_update) {
     jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
     cookieSave('thruk_conf', backend);
     removeParams['backends'] = true;
-    reloadPage(50, true);
+    reloadPage(50, true, true);
     return;
   }
 
@@ -2275,12 +2290,12 @@ function toggleBackend(backend, state, skip_update) {
   // remove &backends=... from url, they would overwrite cookie settings
   removeParams['backends'] = true;
 
-  var delay = 2;
+  var delay = 1.5;
   if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
   if(show_sitepanel == 'collapsed') { delay = 20; }
   if(show_sitepanel == 'tree')      { delay = 30; }
   if(show_sitepanel == 'list') {
-    reloadPage(delay*1000, true);
+    reloadPage(delay*1000, true, true);
   } else {
     setRefreshRate(delay);
   }

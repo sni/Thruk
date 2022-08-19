@@ -31,7 +31,7 @@
     <div class="flexcol gap-0 flex-grow w-0 h-screen" id="mainframe">
     [% IF minimal == 2 %]
       <header class="header">
-        <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center">
+        <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center relative">
           [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
         </div>
       </header>
@@ -40,7 +40,7 @@
       <header class="header">
         <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center">
           <button id="mainNavBtn" class="big iconOnly w-10 h-10 ml-[-10px] clickable min-w-[30px]"><i class="fa-solid fa-bars"></i></button>
-          <div class="flex-grow h-min">
+          <div class="flex-grow h-min relative">
             [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]
           </div>
           [% PROCESS _header_broadcast.tt %]
