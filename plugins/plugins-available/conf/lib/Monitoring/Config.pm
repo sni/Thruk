@@ -793,8 +793,13 @@ sub get_services_for_host {
 
         my $name = $svc->get_name();
         if(defined $name) {
-            if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
-                $services->{'host'}->{$name} = $svc;
+            if(defined $svc_config->{'host_name'}) {
+                for my $hst (@{$svc_config->{'host_name'}}) {
+                    if(Thruk::Base::wildcard_match($name, $hst)) {
+                        $services->{'host'}->{$name} = $svc;
+                        last;
+                    }
+                }
             }
             if(defined $svc_config->{'hostgroup_name'}) {
                 for my $group (@{$groups}) {

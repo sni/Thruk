@@ -1701,6 +1701,8 @@ sub _get_context_object {
         my $objs = $c->{'obj_db'}->get_services_by_name($c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         if(defined $objs->[0]) {
             $c->stash->{'data_id'} = $objs->[0]->get_id();
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Cannot find object' );
         }
     }
     elsif(defined $c->req->parameters->{'host'}) {

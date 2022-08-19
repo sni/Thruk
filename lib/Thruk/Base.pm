@@ -474,7 +474,7 @@ sub trim_whitespace {
 
 =head2 wildcard_match
 
-    wildcard_match($str, $pattern)
+    wildcard_match($str, $wildcardpattern)
 
 returns true if string matches given wildcard pattern
 
