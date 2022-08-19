@@ -6,13 +6,20 @@ use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
+
 ################################################################################
 my @files = Thruk::Utils::IO::all_perl_files("./script", "./lib", glob("./plugins/plugins-available/*/lib"));
-plan( tests => scalar @files);
+my @filtered;
 for my $file (@files) {
+    next if($filter && $file !~ m%$filter%mx);
+    push @filtered, $file;
+
+}
+plan( tests => scalar @filtered);
+for my $file (@filtered) {
     check_private_subs($file);
 }
-exit;
 
 ################################################################################
 sub check_private_subs {

@@ -201,18 +201,20 @@
           <td class='comments' style="display: none;">
             [% host_name = s.host_name %]
             [% IF lasthost != s.host_name %]
-              [% IF comments_by_host.defined(host_name) %]
-                [% FOREACH com = comments_by_host.$host_name %]
-                  [% IF com.defined("start_time") %]
-                    Host Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
-                  [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
-                    [% IF com.entry_type == 1 %]Host Comment[% ELSIF com.entry_type == 4 %]Host Acknowledgement[% END %]: [% com.author | html %]: [% com.comment | html %]<br>
+              [% FOREACH h_peer_key = comments_by_host.keys %]
+                [% IF comments_by_host.$h_peer_key.defined(host_name) %]
+                  [% FOREACH com = comments_by_host.$h_peer_key.$host_name %]
+                    [% IF com.defined("start_time") %]
+                      Host Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+                    [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
+                      [% IF com.entry_type == 1 %]Host Comment[% ELSIF com.entry_type == 4 %]Host Acknowledgement[% END %]: [% com.author | html %]: [% com.comment | html %]<br>
+                    [% END %]
                   [% END %]
                 [% END %]
               [% END %]
             [% END %]
-            [% service_description = s.description; IF comments_by_host_service.defined(host_name) && comments_by_host_service.$host_name.defined(service_description) %]
-              [% FOREACH com = comments_by_host_service.$host_name.$service_description %]
+            [% service_description = s.description; IF comments_by_host_service.defined(peer_key) && comments_by_host_service.$peer_key.defined(host_name) && comments_by_host_service.$peer_key.$host_name.defined(service_description) %]
+              [% FOREACH com = comments_by_host_service.$peer_key.$host_name.$service_description %]
                 [% IF com.defined("start_time") %]
                   Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
                 [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]

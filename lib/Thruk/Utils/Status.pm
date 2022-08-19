@@ -2543,27 +2543,27 @@ sub set_comments_and_downtimes {
     my($c) = @_;
 
     # add comments and downtimes
-    my $comments  = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
+    my $comments  = $c->db->get_comments(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments'  ) ] );
     my $downtimes = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
     my $comments_by_host         = {};
     my $comments_by_host_service = {};
     if($downtimes) {
         for my $downtime ( @{$downtimes} ) {
-            if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
-                push @{ $comments_by_host_service->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
+            if($downtime->{'service_description'}) {
+                push @{ $comments_by_host_service->{$downtime->{'peer_key'}}->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
             }
             else {
-                push @{ $comments_by_host->{ $downtime->{'host_name'} } }, $downtime;
+                push @{ $comments_by_host->{$downtime->{'peer_key'}}->{ $downtime->{'host_name'} } }, $downtime;
             }
         }
     }
     if($comments) {
         for my $comment ( @{$comments} ) {
-            if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
-                push @{ $comments_by_host_service->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
+            if($comment->{'service_description'}) {
+                push @{ $comments_by_host_service->{$comment->{'peer_key'}}->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
             }
             else {
-                push @{ $comments_by_host->{ $comment->{'host_name'} } }, $comment;
+                push @{ $comments_by_host->{$comment->{'peer_key'}}->{ $comment->{'host_name'} } }, $comment;
             }
         }
     }

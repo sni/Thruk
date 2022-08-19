@@ -1,6 +1,6 @@
 ﻿
 <table class='mainTable striped [% IF names %] hoverable[% END %]' id="recurring_downtimes_table_[% type | html %]">
-  <thead title="click to sort">
+  <thead>
     <tr>
       <th>Type</th>
       <th colspan="2">Names</th>
@@ -13,80 +13,82 @@
     </tr>
   </thead>
 
-  [%  FOREACH d = downtimes %]
-    <tr id="recurring_[% d.file | html %]">
-      <td>[% d.target | ucfirst %]</td>
-      <td[% IF d.target != 'service' %] colspan=2[% END %]>
-        [% IF d.target == 'host' %]
-          [% FOREACH hst = d.host %]
-              <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
+  <tbody>
+    [%  FOREACH d = downtimes %]
+      <tr id="recurring_[% d.file | html %]" class="js-downtime-row">
+        <td>[% d.target | ucfirst %]</td>
+        <td[% IF d.target != 'service' %] colspan=2[% END %]>
+          [% IF d.target == 'host' %]
+            [% FOREACH hst = d.host %]
+                <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
+          [% ELSIF d.target == 'service' %]
+            [% FOREACH hst = d.host %]
+                <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
+            </td><td>
+            [% IF d.host.size == 1 %]
+                [% hst = d.host.0 %]
+                [% FOREACH svc = d.service %]
+                    <a class="link" href="extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]">[% svc | html %]</a>[% UNLESS loop.last %], [% END %]
+                [% END %]
+            [% ELSE %]
+                [% FOREACH svc = d.service %]
+                    <a class="link" href='status.cgi?style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
+                    [% UNLESS loop.last %], [% END %]
+                [% END %]
+            [% END %]
+          [% ELSIF d.target == 'hostgroup' %]
+            [% FOREACH grp = d.hostgroup %]
+                <a class="link" href="status.cgi?hostgroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
+          [% ELSIF d.target == 'servicegroup' %]
+            [% FOREACH grp = d.servicegroup %]
+                <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
           [% END %]
-        [% ELSIF d.target == 'service' %]
-          [% FOREACH hst = d.host %]
-              <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
-          [% END %]
-          </td><td>
-          [% IF d.host.size == 1 %]
-              [% hst = d.host.0 %]
-              [% FOREACH svc = d.service %]
-                  <a class="link" href="extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]">[% svc | html %]</a>[% UNLESS loop.last %], [% END %]
-              [% END %]
-          [% ELSE %]
-              [% FOREACH svc = d.service %]
-                  <a class="link" href='status.cgi?style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
-                  [% UNLESS loop.last %], [% END %]
-              [% END %]
-          [% END %]
-        [% ELSIF d.target == 'hostgroup' %]
-          [% FOREACH grp = d.hostgroup %]
-              <a class="link" href="status.cgi?hostgroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
-          [% END %]
-        [% ELSIF d.target == 'servicegroup' %]
-          [% FOREACH grp = d.servicegroup %]
-              <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
-          [% END %]
-        [% END %]
-      </td>
-      <td>
-        [% IF d.schedule.size == 0 %]
-          never
-        [% ELSE %]
-          [% FOREACH cr = d.schedule %]
-            <div>[% format_cronentry(c, cr) %]</div>
-          [% END %]
-        [% END %]
-      </td>
-      <td>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
-      <td class="text-center">[% duration(d.duration * 60) %]</td>
-      <td>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-      <td>[% d.edited_by | html %] ([% date_format(c, d.last_changed) %])</td>
-      <td>
-        <div class="flex gap-x-1 justify-center">
-          <a href="extinfo.cgi?type=6&amp;nr=[% d.file | uri %]&amp;recurring=edit">
-            <i class="fa-solid fa-pencil small" title='Edit recurring downtime'></i>
-          </a>
-          <form action="extinfo.cgi" method="POST">
-            <input type="hidden" name="nr" value="[% d.file | html %]">
-            <input type="hidden" name="type" value="6">
-            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a href="#" onclick="if(confirm('Do you really want to delete this downtime?')) { return send_form_in_background_and_reload(this, {recurring: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete recurring downtime'></i></a>
-          </form>
-        </div>
-      </td>
-    </tr>
-    [% IF d.exists('error') %]
-      <tr>
-        <td></td>
-        <td colspan=6 style="color: red; text-align: left;">
-          [% escape_html(d.error) | nl2br %]
         </td>
-        <td></td>
+        <td>
+          [% IF d.schedule.size == 0 %]
+            never
+          [% ELSE %]
+            [% FOREACH cr = d.schedule %]
+              <div>[% format_cronentry(c, cr) %]</div>
+            [% END %]
+          [% END %]
+        </td>
+        <td>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
+        <td class="text-center">[% duration(d.duration * 60) %]</td>
+        <td>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
+        <td>[% d.edited_by | html %] ([% date_format(c, d.last_changed) %])</td>
+        <td>
+          <div class="flex gap-x-1 justify-center">
+            <a href="extinfo.cgi?type=6&amp;nr=[% d.file | uri %]&amp;recurring=edit">
+              <i class="fa-solid fa-pencil small" title='Edit recurring downtime'></i>
+            </a>
+            <form action="extinfo.cgi" method="POST">
+              <input type="hidden" name="nr" value="[% d.file | html %]">
+              <input type="hidden" name="type" value="6">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+              <a href="#" onclick="if(confirm('Do you really want to delete this downtime?')) { return send_form_in_background_and_reload(this, {recurring: 'remove'}) }; return false;"><i class="fa-solid fa-trash text-sm" title='Delete recurring downtime'></i></a>
+            </form>
+          </div>
+        </td>
+      </tr>
+      [% IF d.exists('error') %]
+        <tr>
+          <td></td>
+          <td colspan=6 style="color: red; text-align: left;">
+            [% escape_html(d.error) | nl2br %]
+          </td>
+          <td></td>
+        </tr>
+      [% END %]
+    [% END %]
+    [% IF downtimes.size == 0 %]
+      <tr>
+        <td class='text-center textALERT' colspan="9">There are no recurring [% IF type != 'all'; type; END %] downtimes</td>
       </tr>
     [% END %]
-  [% END %]
-  [% IF downtimes.size == 0 %]
-    <tr>
-      <td class='text-center textALERT' colspan="9">There are no recurring [% IF type != 'all'; type; END %] downtimes</td>
-    </tr>
-  [% END %]
+  </tbody>
 </table>

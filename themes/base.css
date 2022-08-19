@@ -1182,6 +1182,11 @@ TABLE.mainTable {
   }
 }
 
+TABLE.sticky-th-left {
+  TH {
+    @apply sticky left-0 z-10 bgTable hover:hoverBG;
+  }
+}
 /*******************************************************************************
  * forms
  */

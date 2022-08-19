@@ -160,7 +160,7 @@ Curl requires you to set the `globoff` option:
   %> curl -gk 'https://user:pass@localhost/thruk/r/hosts?name[regex]=^t'
 ------
 
-ex.: numeric filter using the operators `<`, `>`, `>=` or `<=` will be expanded
+ex.: numeric filter using the operators `<`, `>`, `>=` or `+++<=+++` will be expanded
 like described in link:rest_commands.html#relative-timestamps[relative timestamps].
 
 list session which had been active within the last 10minutes
@@ -174,17 +174,17 @@ Possible operators with their alias:
 [options="header",halign="center"]
 |==========================
 |Operator    |Alias    |Description
-| `=`        | eq      |Equal match
-| `!=`       | ne      |Not equal match
-| `~`        |         |Regular expression match (case-sensitive)
-| `!~`       |         |Negated regular expression match (case-sensitive)
-| `~~`       | regex   |Regular expression match (case-insensitive)
-| `!~`       | nregex  |Negated regular expression match (case-insensitive)
-| `>`        | gt      |Greater than numeric comparisson
-| `<`        | lt      |Lower than numeric comparisson
-| `>=`       | gte     |Greater or equal numeric comparisson. `contains` in list context
-| `<=`       | lte     |Lower or equal numeric comparisson. `contains not` in list context
-| `!>=`      | notin   |`contains not` in list context
+|+++ =     +++| eq      |Equal match
+|+++ !=    +++| ne      |Not equal match
+|+++ ~     +++|         |Regular expression match (case-sensitive)
+|+++ !~    +++|         |Negated regular expression match (case-sensitive)
+|+++ ~~    +++| regex   |Regular expression match (case-insensitive)
+|+++ !~    +++| nregex  |Negated regular expression match (case-insensitive)
+|+++ >     +++| gt      |Greater than numeric comparisson
+|+++ <     +++| lt      |Lower than numeric comparisson
+|+++ >=    +++| gte     |Greater or equal numeric comparisson. `contains` in list context
+|+++ <=    +++| lte     |Lower or equal numeric comparisson. `contains not` in list context
+|+++ !>=   +++| notin   |`contains not` in list context
 |==========================
 
 You can use the alias name to workaround urlencoding issues.

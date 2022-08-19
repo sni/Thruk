@@ -347,6 +347,7 @@ plugins/plugins-available/conf/templates/conf_objects_tools.tt
 plugins/plugins-available/conf/templates/conf_objects_tree.tt
 plugins/plugins-available/conf/templates/conf_objects_tree_objects.tt
 plugins/plugins-available/conf/templates/conf_plugins.tt
+plugins/plugins-available/conf/templates/conf_plugins_preview.tt
 plugins/plugins-available/conf/templates/conf_user_password.tt
 plugins/plugins-available/core_scheduling/description.txt
 plugins/plugins-available/core_scheduling/lib/Thruk/Controller/core_scheduling.pm
@@ -1918,6 +1919,7 @@ t/092-stash-config.t
 t/092-thruk-view-json.t
 t/092-todo.t
 t/093-manifest.t
+t/094-plugin-root-path.t
 t/094-template_encoding.t
 t/095-doc_coverage.t
 t/095-doc_rest.t
@@ -2013,6 +2015,7 @@ t/800-plugins.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
 t/ci/thruk_local.conf
+t/data/800-plugins/01-css.t
 t/data/broken_config/a.conf
 t/data/broken_config/b.conf
 t/data/broken_config2/a.conf

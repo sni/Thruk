@@ -998,12 +998,18 @@ Ext.define('TP.Pantab', {
         /* schedule update, which also remove the mask from above */
         var removeMaskTimer = window.setTimeout(function() {
             if(TP.iconUpdateRunning && TP.iconUpdateRunning[tab.id]) { return; }
-            tab.removeMask();
+            tab = Ext.getCmp(tab.id);
+            if(tab) {
+                tab.removeMask();
+            }
         }, 3000);
         if(changed) { /* leads to double status update on inital page render */
             TP.updateAllIcons(tab, null, null, null, function() {
                 window.clearTimeout(removeMaskTimer);
-                tab.removeMask();
+                tab = Ext.getCmp(tab.id);
+                if(tab) {
+                    tab.removeMask();
+                }
             });
         }
     },

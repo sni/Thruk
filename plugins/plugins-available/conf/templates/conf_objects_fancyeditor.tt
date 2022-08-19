@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
-<link rel="stylesheet" href="[% url_prefix %]plugins/editor/editor.css">
-<script src="[% url_prefix %]plugins/editor/vendor/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="[% url_prefix %]plugins/editor/vendor/ace-builds/src-min-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" href="[% url_prefix %]plugins/[% plugin_editor_path %]/editor.css">
+<script src="[% url_prefix %]plugins/[% plugin_editor_path %]/vendor/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="[% url_prefix %]plugins/[% plugin_editor_path %]/vendor/ace-builds/src-min-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 
 <form action="conf.cgi" method="POST" id="saveform" class="w-full h-[calc(100%_-_170px)] mt-5">
   <input type="hidden" name="sub" value="objects">

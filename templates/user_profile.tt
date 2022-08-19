@@ -6,7 +6,7 @@
 <h1 class="mt-5">User Profile</h1>
 
 [% IF new_private_key %]
-<div id="new_key_alert" class="card green alert top-center min-w-[600px]">
+<div id="new_key_alert" class="card green alert top-center">
   <div class="head justify-between">
     <h3>New API Key Created</h3>
     <div class="w-5">
@@ -22,228 +22,231 @@
 </div>
 [% END %]
 
-<div class="mt-2">
-
-  <div class="card min-w-[900px] mx-auto">
-    <div class="head p-0">
-      <span class="tabs text-center font-medium text-base active" id="sub_1" onclick="set_sub(1, 'user')">User Profile</span>
-      <span class="tabs text-center font-medium text-base" id="sub_2" onclick="set_sub(2, 'apikeys')">API Keys</span>
-    </div>
-    <div class="body sub_1">
-      <table class="cellspacing w-full table-fixed">
-        <tr>
-          <th class="w-40">Username</th>
-          <td class="font-semibold">[% remote_user %]</td>
-        </tr>
-        <tr>
-          <th class="align-top">Contactgroups</th>
-          <td>
-            <div class="flexrow flex-nowrap gap-1 justify-between">
-              <span>[% IF profile_user.groups.size > 0; profile_user.groups.sort.join(', '); ELSE %]&lt;none&gt;[% END %]</span>
-              [% cache_age = date.now() - profile_user.timestamp; IF cache_age > 5 %]<span class="textHINTsoft" title="auth cache last updated: [% date_format(c, profile_user.timestamp, datetime_format) %]">(auth cache updated [% duration(cache_age, 6) %] ago)</span>[% END %]
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th class="align-top">Effective Roles</th>
-          <td>[% PROCESS _user_roles.tt %]</td>
-        </tr>
-        <tr>
-          <th class="align-top">Can Submit Commands</th>
-          <td>
-            <div class="flexrow flex-nowrap gap-1 justify-between">
-              <span>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</span>
-              [% IF profile_user.defined("can_submit_commands_src"); %]<span class="textHINTsoft">reason: [% profile_user.can_submit_commands_src | html %]</span>[% END %]
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th class="align-top">Contact Exists</th>
-          <td>
-            <div class="flexrow flex-nowrap gap-2">
-              <div>[% IF profile_user.contact_src_peer.size > 0 %]Yes[% ELSE %]No[% END %]</div>
-              <div class="truncate max-w-[400px]">(backend: [% FOREACH peer_key IN profile_user.contact_src_peer %][% IF !loop.first %], [% END %]<span title="[% peer_key %]">[% peer_name(peer_key) %]</span>[% END %])</div>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-
-    <div class="head sub_1">
-      <h3>Timezone</h3>
-    </div>
-    <div class="body sub_1">
-      <table class="cellspacing w-full table-fixed">
-        <tr>
-          <th class="w-40 align-top">Set Timezone</th>
-          <td>
-            <form action="user.cgi" method="POST">
-              <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
-              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <input type="hidden" name="action" value="save">
-              <div class="flexrow">
-                <div class="grow">
-                  <select name="timezone" class="w-full">
-                    [% FOR tz = timezones %]
-                      <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text | html %]</option>
-                    [% END %]
-                  </select>
-                </div>
-                <div>
-                  <button onclick="setBtnSpinner(this);"><i class="uil uil-save"></i>Save changes</button>
-                </div>
-                <div class="min-w-[140px]">
-                  <span>Server: <span id="server_tz">[% c.config._server_timezone %]</span></span><br>
-                  <span>Browser: <span id="browser_tz"></span></span>
-                </div>
-              </div>
-            </form>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-
-    [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
-    <div class="head sub_1">
-      <h3>Password</h3>
-    </div>
-    <div class="body sub_1">
-      <table class="cellspacing w-full table-fixed">
+<div class="card min-w-[420px] max-w-[900px] w-full overflow-hidden mx-auto mt-2">
+  <div class="head p-0">
+    <span class="tabs text-center font-medium text-base active" id="sub_1" onclick="set_sub(1, 'user')">User Profile</span>
+    <span class="tabs text-center font-medium text-base" id="sub_2" onclick="set_sub(2, 'apikeys')">API Keys</span>
+  </div>
+  <div class="body sub_1">
+    <table class="cellspacing w-full table-fixed">
       <tr>
-        <th class="w-40">Change Password</th>
+        <th class="w-40">Username</th>
+        <td class="font-semibold">[% remote_user %]</td>
+      </tr>
+      <tr>
+        <th class="align-top">Contactgroups</th>
         <td>
-          <a class="button w-fit" href="[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]"><i class="uil uil-key-skeleton"></i> Update password</a>
+          <div class="flexrow flex-nowrap gap-1 justify-between">
+            <span>[% IF profile_user.groups.size > 0; profile_user.groups.sort.join(', '); ELSE %]&lt;none&gt;[% END %]</span>
+            [% cache_age = date.now() - profile_user.timestamp; IF cache_age > 5 %]<span class="textHINTsoft" title="auth cache last updated: [% date_format(c, profile_user.timestamp, datetime_format) %]">(auth cache updated [% duration(cache_age, 6) %] ago)</span>[% END %]
+          </div>
         </td>
       </tr>
-      </table>
-    </div>
-    [% END %]
-
-    <div class="head sub_1">
-      <h3>Advanced Settings</h3>
-    </div>
-    <div class="body sub_1">
-      <table class="cellspacing w-full table-fixed">
-        <tr>
-          <th class="w-40 align-top">Debug Profiles</th>
-          <td>
-            <div class="flexrow gap-1">
-              <input type="radio" name="submit" value="0" id="profile_off" onClick="cookieSave('thruk_profiling', 0, 0); thruk_message(0, 'profiling disabled'); reloadPage();" [% IF !user_profiling %] checked[% END %]>
-              <label for="profile_off" class="clickable mr-4">Off</label>
-
-              <input type="radio" name="submit" value="1" id="profile_on" onClick="cookieSave('thruk_profiling', 1, 0); thruk_message(0, 'profiling enabled'); reloadPage();" [% IF user_profiling == 1 %] checked[% END %]>
-              <label for="profile_on" class="clickable mr-4">On</label>
-
-              <input type="radio" name="submit" value="2" id="profile_stack" onClick="cookieSave('thruk_profiling', 2, 0); thruk_message(0, 'profiling enabled with stacktraces'); reloadPage();" [% IF user_profiling == 2 %] checked[% END %]>
-              <label for="profile_stack" class="clickable">Incl. Stacktrace</label>
-
-              <span class="ml-10">(current browser session only)</span>
+      <tr>
+        <th class="align-top">Effective Roles</th>
+        <td>[% PROCESS _user_roles.tt %]</td>
+      </tr>
+      <tr>
+        <th class="align-top">Can Submit Commands</th>
+        <td>
+          <div class="flexrow flex-nowrap gap-1 justify-between">
+            <span>[% IF profile_user.can_submit_commands %]Yes[% ELSE %]No[% END %]</span>
+            [% IF profile_user.defined("can_submit_commands_src"); %]<span class="textHINTsoft">reason: [% profile_user.can_submit_commands_src | html %]</span>[% END %]
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th class="align-top">Contact Exists</th>
+        <td>
+          <div class="flexrow flex-nowrap gap-2">
+            <div>
+              [% IF profile_user.contact_src_peer.size > 0 %]
+                <div>Yes</div>
+                <div class="truncate max-w-[400px]">(backend: [% FOREACH peer_key IN profile_user.contact_src_peer %][% IF !loop.first %], [% END %]<span title="[% peer_key %]">[% peer_name(peer_key) %]</span>[% END %])</div>
+              [% ELSE %]
+                <div>No</div>
+              [% END %]
             </div>
-          </td>
-        </tr>
-      </table>
-    </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
 
-    <div class="body sub_2" style="display: none;">
-        [% list_api_keys = 0 %]
-        [% IF !c.config.api_keys_enabled %]
-          <span class="textHINT">API keys have to be enabled in the thruk_local.conf via <i>api_keys_enabled=1</i></span>
-        [% ELSIF c.check_user_roles("authorized_for_read_only") %]
-          <span class="textHINT">Read-Only sessions cannot create API keys.</span>
-        [% ELSE %]
-          [% list_api_keys = 1 %]
+
+  <div class="head sub_1">
+    <h3>Timezone</h3>
+  </div>
+  <div class="body sub_1">
+    <table class="cellspacing w-full table-fixed">
+      <tr>
+        <th class="w-40 align-top">Set Timezone</th>
+        <td>
           <form action="user.cgi" method="POST">
-            <input type="hidden" name="action" value="create">
+            <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <div class="flexrow gap-1">
-              <input type="text" name="comment" value="" placeholder="comment" class="grow">
-              <button class="w-44" onclick="setBtnSpinner(this);"><i class="uil uil-plus"></i>Create New API Key</button>
-            </div>
-            <div class="pt-1">
-              <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
-              <label for="superuser" title="Enable to create a global shared api key, which is not bound to this user." class="font-semibold [% IF !c.check_user_roles("admin") %]disabled[% END %]">Superuser Key</label>
-              <a class="link ml-5" href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(<i class="uil uil-external-link-alt"></i> read more about superuser keys)</a>
-            </div>
-
-            <div class="pt-1">
-              <input type="hidden" name="restrict_only" value="1">
-              <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { showElement('restricted_roles'); } else { hideElement('restricted_roles'); } ">
-              <b><label for="restrict" title="Enable to select roles. Otherwise this API key will get the same roles as the user itself." class="clickable hoverable">Select Roles</label></b><br>
-
-              <div id="restricted_roles" style="display: none;" class="flexcol gap-px">
-                [% FOREACH r = available_roles %]
-                <div>
-                  <input type="checkbox" id="role.[% r | html %]" name="roles" value="[% r | html %]"[% IF !c.user.check_role_permissions(r) %] disabled[% END %][% IF c.check_user_roles(r) %] checked[% END %]>
-                  <label for="role.[% r | html %]"[% IF !c.user.check_role_permissions(r) %] class="disabled"[% ELSE %] class="clickable hoverable"[% END %]>[% r | html %]</label><br>
-                </div>
-                [% END %]
+            <input type="hidden" name="action" value="save">
+            <div class="flexrow">
+              <div class="grow">
+                <select name="timezone" class="w-full">
+                  [% FOR tz = timezones %]
+                    <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text | html %][% IF tz.text == "Server Setting" %]&nbsp;&nbsp;&nbsp;&nbsp;([% c.config._server_timezone %])[% END %]</option>
+                  [% END %]
+                </select>
+              </div>
+              <div>
+                <button onclick="setBtnSpinner(this);"><i class="uil uil-save"></i>Save changes</button>
+              </div>
+              <div class="min-w-[140px]">
+                <span>Server: [% c.config._server_timezone %]</span><br>
+                <span>Browser: <span id="browser_tz"></span></span>
               </div>
             </div>
           </form>
-        [% END %]
-    </div>
-
-    [% IF list_api_keys  && (api_keys.size > 0 || superuser_keys.size > 0) %]
-    <div class="head sub_2" style="display: none;">
-      <h3>API Keys</h3>
-    </div>
-    <div class="body sub_2" style="display: none;">
-      <table class="innercellborder w-full">
-        <tr>
-          <th>Superuser</th>
-          <th>Role Restriction</th>
-          <th>Comment</th>
-          <th>Created At</th>
-          <th>Last Used</th>
-          <th></th>
-        </tr>
-        [% BLOCK key_block %]
-        <tr class="hoverable">
-          <td class="align-top text-center">
-            [% IF key.exists('superuser') && key.superuser %]
-              <i class="uil uil-check" title="superuser key"></i>
-            [% ELSE %]
-              <i class="uil uil-square-full" title="user key"></i>
-            [% END %]
-          </td>
-          <td class="align-top truncate max-w-[300px]">[% IF key.exists('roles') %]
-                [% IF contains(key.roles, 'authorized_for_admin') %]
-                  &lt;admin&gt;
-                [% ELSE %]
-                  [% key.roles.join(',<br>') %]
-                [% END %]
-              [% ELSE %]
-                &lt;no restriction&gt;
-              [% END %]
-          </td>
-          <td class="align-top truncate max-w-[300px]">[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
-          <td class="align-top">[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
-          <td class="align-top">[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
-          <td class="align-top">
-            <a href="user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key" onClick="if(confirm('Really remove?')) { setBtnSpinner(this); return true; } else { return false; }">
-              <i class="fa-solid fa-trash text-base" title="delete this api key"></i>
-            </a>
-          </td>
-        </tr>
-        [% END %]
-        [% FOREACH key = superuser_keys %]
-          [% PROCESS key_block %]
-        [% END %]
-        [% IF api_keys.size > 0 && superuser_keys.size > 0 %]
-        <tr>
-          <td colspan="5" class="h-5"></td>
-        </tr>
-        [% END %]
-        [% FOREACH key = api_keys %]
-          [% PROCESS key_block %]
-        [% END %]
-      </table>
-    </div>
-    [% END %]
-
+        </td>
+      </tr>
+    </table>
   </div>
+
+
+  [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
+  <div class="head sub_1">
+    <h3>Password</h3>
+  </div>
+  <div class="body sub_1">
+    <table class="cellspacing w-full table-fixed">
+    <tr>
+      <th class="w-40">Change Password</th>
+      <td>
+        <a class="button w-fit" href="[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]"><i class="uil uil-key-skeleton"></i> Update password</a>
+      </td>
+    </tr>
+    </table>
+  </div>
+  [% END %]
+
+  <div class="head sub_1">
+    <h3>Advanced Settings</h3>
+  </div>
+  <div class="body sub_1">
+    <table class="cellspacing w-full table-fixed">
+      <tr>
+        <th class="w-40 align-top">Debug Profiles</th>
+        <td>
+          <div class="flexrow gap-1">
+            <input type="radio" name="submit" value="0" id="profile_off" onClick="cookieSave('thruk_profiling', 0, 0); thruk_message(0, 'profiling disabled'); reloadPage();" [% IF !user_profiling %] checked[% END %]>
+            <label for="profile_off" class="clickable mr-4">Off</label>
+
+            <input type="radio" name="submit" value="1" id="profile_on" onClick="cookieSave('thruk_profiling', 1, 0); thruk_message(0, 'profiling enabled'); reloadPage();" [% IF user_profiling == 1 %] checked[% END %]>
+            <label for="profile_on" class="clickable mr-4">On</label>
+
+            <input type="radio" name="submit" value="2" id="profile_stack" onClick="cookieSave('thruk_profiling', 2, 0); thruk_message(0, 'profiling enabled with stacktraces'); reloadPage();" [% IF user_profiling == 2 %] checked[% END %]>
+            <label for="profile_stack" class="clickable">Incl. Stacktrace</label>
+
+            <span class="ml-10">(current browser session only)</span>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="body sub_2" style="display: none;">
+      [% list_api_keys = 0 %]
+      [% IF !c.config.api_keys_enabled %]
+        <span class="textHINT">API keys have to be enabled in the thruk_local.conf via <i>api_keys_enabled=1</i></span>
+      [% ELSIF c.check_user_roles("authorized_for_read_only") %]
+        <span class="textHINT">Read-Only sessions cannot create API keys.</span>
+      [% ELSE %]
+        [% list_api_keys = 1 %]
+        <form action="user.cgi" method="POST">
+          <input type="hidden" name="action" value="create">
+          <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+          <div class="flexrow gap-1">
+            <input type="text" name="comment" value="" placeholder="comment" class="grow">
+            <button class="w-44" onclick="setBtnSpinner(this);"><i class="uil uil-plus"></i>Create New API Key</button>
+          </div>
+          <div class="pt-1">
+            <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
+            <label for="superuser" title="Enable to create a global shared api key, which is not bound to this user." class="font-semibold [% IF !c.check_user_roles("admin") %]disabled[% END %]">Superuser Key</label>
+            <a class="link ml-5" href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(<i class="uil uil-external-link-alt"></i> read more about superuser keys)</a>
+          </div>
+
+          <div class="pt-1">
+            <input type="hidden" name="restrict_only" value="1">
+            <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { showElement('restricted_roles'); } else { hideElement('restricted_roles'); } ">
+            <b><label for="restrict" title="Enable to select roles. Otherwise this API key will get the same roles as the user itself." class="clickable hoverable">Select Roles</label></b><br>
+
+            <div id="restricted_roles" style="display: none;" class="flexcol gap-px">
+              [% FOREACH r = available_roles %]
+              <div>
+                <input type="checkbox" id="role.[% r | html %]" name="roles" value="[% r | html %]"[% IF !c.user.check_role_permissions(r) %] disabled[% END %][% IF c.check_user_roles(r) %] checked[% END %]>
+                <label for="role.[% r | html %]"[% IF !c.user.check_role_permissions(r) %] class="disabled"[% ELSE %] class="clickable hoverable"[% END %]>[% r | html %]</label><br>
+              </div>
+              [% END %]
+            </div>
+          </div>
+        </form>
+      [% END %]
+  </div>
+
+  [% IF list_api_keys  && (api_keys.size > 0 || superuser_keys.size > 0) %]
+  <div class="head sub_2" style="display: none;">
+    <h3>API Keys</h3>
+  </div>
+  <div class="overflow-auto sub_2" style="display: none;">
+    <table class="innercellborder w-full">
+      <tr>
+        <th class="text-center">Superuser</th>
+        <th>Role Restriction</th>
+        <th>Comment</th>
+        <th>Created At</th>
+        <th>Last Used</th>
+        <th class="text-center">Actions</th>
+      </tr>
+      [% BLOCK key_block %]
+      <tr class="hoverable">
+        <td class="align-top text-center">
+          [% IF key.exists('superuser') && key.superuser %]
+            <i class="uil uil-check" title="superuser key"></i>
+          [% ELSE %]
+            <i class="uil uil-square-full" title="user key"></i>
+          [% END %]
+        </td>
+        <td class="align-top truncate max-w-[300px]">[% IF key.exists('roles') %]
+              [% IF contains(key.roles, 'authorized_for_admin') %]
+                &lt;admin&gt;
+              [% ELSE %]
+                [% key.roles.join(',<br>') %]
+              [% END %]
+            [% ELSE %]
+              &lt;no restriction&gt;
+            [% END %]
+        </td>
+        <td class="align-top truncate max-w-[300px]">[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
+        <td class="align-top">[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
+        <td class="align-top">[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
+        <td class="align-top text-center">
+          <a href="user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key" onClick="if(confirm('Really remove?')) { setBtnSpinner(this); return true; } else { return false; }" title="delete this api key">
+            <i class="fa-solid fa-trash text-base"></i>
+          </a>
+        </td>
+      </tr>
+      [% END %]
+      [% FOREACH key = superuser_keys %]
+        [% PROCESS key_block %]
+      [% END %]
+      [% IF api_keys.size > 0 && superuser_keys.size > 0 %]
+      <tr>
+        <td colspan="5" class="h-5"></td>
+      </tr>
+      [% END %]
+      [% FOREACH key = api_keys %]
+        [% PROCESS key_block %]
+      [% END %]
+    </table>
+  </div>
+  [% END %]
+
 </div>
 
 <script>

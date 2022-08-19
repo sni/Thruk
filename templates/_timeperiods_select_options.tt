@@ -1,6 +1,6 @@
-﻿<select class="w-56" name="[% name | html %]" onchange="if(this.value == 'custom') { showElement('[% name | html %]_custom_timeperiod') } else { hideElement('[% name | html %]_custom_timeperiod') }">
+﻿<select class="w-[135px]" name="[% name | html %]" onchange="if(this.value == 'custom') { showElement('[% name | html %]_custom_timeperiod') } else { hideElement('[% name | html %]_custom_timeperiod') }">
   [% IF current %]
-  <option value="current"[% IF      selected_timeperiod == 'current'      %] selected[% END %]>[ Current time range ]</option>
+  <option value="current"[% IF      selected_timeperiod == 'current'      %] selected[% END %]>Current timerange</option>
   [% END %]
   <option value="today"[% IF        selected_timeperiod == 'today'        %] selected[% END %]>Today</option>
   <option value="last24hours"[% IF  selected_timeperiod == 'last24hours'  %] selected[% END %]>Last 24 Hours</option>

@@ -1,7 +1,7 @@
 ﻿[%+ PROCESS _common_js_bugs.tt +%]
 
 Ext.namespace("TP");
-Ext.BLANK_IMAGE_URL     = url_prefix+'plugins/panorama/images/s.gif';
+Ext.BLANK_IMAGE_URL     = url_prefix+'plugins/[% plugin_name %]/images/s.gif';
 var default_dashboard   = [% json_encode(default_dashboard) %];
 var initial_shapes      = [% json_encode(shapes) %];
 var default_state_order = [% json_encode(default_state_order) %];

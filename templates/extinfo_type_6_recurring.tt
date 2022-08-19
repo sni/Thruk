@@ -16,7 +16,7 @@
   <div class="basis-1/3 flex"></div>
 </div>
 
-<div class="card w-full mt-2">
+<div class="card w-full min-w-[420px] mt-2">
   <div class="mainTableHeader">
     <div>
       [% PROCESS _table_search_field.tt ids=["recurring_downtimes_table_all"] %]

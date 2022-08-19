@@ -16,7 +16,7 @@
 
 <h1 class='py-4'>Scheduling Queue</h1>
 
-<div class="card w-full min-w-[800px]">
+<div class="card w-full min-w-[420px] overflow-auto">
   <div class="mainTableHeader">
     <div></div>
     <div>
@@ -118,8 +118,8 @@
                   [% END %]
                 [% END %]
                 [% UNLESS command_disabled(c, '96') %]
-                <a href="cmd.cgi?cmd_typ=96&amp;host=[% q.host_name | uri %]&amp;force_check">
-                  <i class="fa-solid fa-clock round small text-xl leading-5" title="Re-schedule This Host Check"></i>
+                <a class="button iconOnly medium" href="cmd.cgi?cmd_typ=96&amp;host=[% q.host_name | uri %]&amp;force_check">
+                  <i class="fa-solid fa-clock" title="Re-schedule This Host Check"></i>
                 </a>
                 [% END %]
               [% END %]

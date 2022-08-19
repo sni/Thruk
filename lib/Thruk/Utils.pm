@@ -1309,10 +1309,9 @@ sub get_pnp_url {
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        for my $regex (qw|/pnp[^/]*/|) {
-            if($obj->{$type} =~ m|(^.*?$regex)|mx) {
-                return(proxifiy_url($c, $obj, $1.'/index.php'));
-            }
+        my $regex = $c->config->{'pnp_url_regex'};
+        if($obj->{$type} =~ m%(^.*?$regex)%mx) {
+            return(proxifiy_url($c, $obj, $1.'/index.php'));
         }
     }
 
@@ -1336,7 +1335,8 @@ sub get_histou_url {
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        if($obj->{$type} =~ m%histou\.js\?|/grafana/%mx) {
+        my $regex = $c->config->{'grafana_url_regex'};
+        if($obj->{$type} =~ m%$regex%mx) {
             return(proxifiy_url($c, $obj, $obj->{$type}));
         }
     }
@@ -2375,6 +2375,12 @@ sub wait_after_reload {
                 } else {
                     $msg = 'still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'}));
                     _debug($msg);
+                }
+                # assume reload worked if last restart is exactly the time we started to wait
+                if(int($procinfo->{$pkey}->{'program_start'}) == int($last_reload) && $start <= (time() - 3)) {
+                    $done = 1;
+                    _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+                    last;
                 }
             }
         }

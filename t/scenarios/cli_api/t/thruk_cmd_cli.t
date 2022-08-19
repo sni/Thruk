@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 167;
+plan tests => 168;
 delete $ENV{'THRUK_TEST_NO_AUDIT_LOG'};
 
 ###########################################################

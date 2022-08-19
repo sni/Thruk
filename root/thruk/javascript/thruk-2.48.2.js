@@ -248,7 +248,7 @@ function initLastUserInteraction() {
 
 
 function applyScroll(scrollTo) {
-    if(!scrollTo) {
+    if(!scrollTo || !scrollTo.split) {
         return;
     }
     var scrolls = scrollTo.split("_");
@@ -504,12 +504,16 @@ function setBtnSpinner(btn, skipTimeout) {
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
     } else {
-        jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
+        jQuery(btn).addClass("relative");
+        jQuery(btn).prepend('<div class="spinner mr-1 absolute left-2"><\/div>');
     }
     var disableTimer = window.setTimeout(function() {
         // disable delayed, otherwise chrome won't send the form
         setBtnDisabled(btn);
     }, 300);
+    jQuery(window).on('beforeunload unload', function(e){
+        setBtnDisabled(btn); // set as soon as possible
+    });
     jQuery(btn).data("distimer", disableTimer);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
@@ -521,7 +525,7 @@ function setBtnSpinner(btn, skipTimeout) {
         var timer = window.setTimeout(function() {
             // seomthing didn't work, reset
             setBtnError(btn, "timeout while processing the request");
-        }, 30000);
+        }, 60000);
         jQuery(btn).data("timer", timer);
     }
 }
@@ -690,7 +694,10 @@ function openModalWindowUrl(url, callback) {
     }
     var content = ''
         +'  <div class="card w-[200px] mx-auto">'
-        +'    <div class="head"><h3>Loading...<\/h3><\/div>'
+        +'    <div class="head justify-between">'
+        +'      <h3>Loading...<\/h3>'
+        +'      <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"><\/i><\/button>'
+        +'    <\/div>'
         +'    <div class="body flexcol">'
         +'      <div class="spinner w-10 h-10"><\/div>'
         +'      <button class="w-20 self-center" onclick="closeModalWindow()">Cancel<\/button>'
@@ -1227,6 +1234,14 @@ function cookieRemoveAll(name) {
         paths.push(path+"/");
     });
 
+    // do not split ip addresses
+    if(String(document.location.hostname).match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        jQuery.each(paths, function(key2, path) {
+            document.cookie = name+"=del; path="+path+";domain="+String(document.location.hostname)+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+        });
+        return;
+    }
+
     var domain = "";
     jQuery.each(document.location.hostname.split(".").reverse(), function(key, hostpart) {
         if(domain == "") {
@@ -1514,11 +1529,25 @@ var isReloading = false;
 var reloadPageTimer;
 function reloadPage(delay, withReloadButton, freshReload) {
     if(!delay) { delay = 50; }
-    if(delay < 500 && withReloadButton) {
-        // update button earlier
-        resetRefreshButton();
-        jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
-        withReloadButton = false;
+    if(withReloadButton) {
+        if(delay < 500) {
+            // update button earlier
+            resetRefreshButton();
+            jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
+            withReloadButton = false;
+        } else {
+            var timer = jQuery('#reload-timer')[0];
+            jQuery(timer).addClass("hidden");
+            jQuery(timer).removeClass("scale-x-0");
+            jQuery(timer).addClass("scale-x-100");
+            timer.style.setProperty("transition-duration", delay+"ms", "important");
+            window.setTimeout(function() {
+                jQuery(timer).removeClass("hidden");
+            }, 20);
+            window.setTimeout(function() {
+                jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
+            }, 50);
+        }
     }
     window.clearTimeout(reloadPageTimer);
     reloadPageTimer = window.setTimeout(function() {
@@ -1538,6 +1567,7 @@ function reloadPageDo(withReloadButton, freshReload) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
         resetRefreshButton();
+        jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
     }
     isReloading = true;
     stopRefresh(true);
@@ -2223,7 +2253,7 @@ function toggleBackend(backend, state, skip_update) {
     jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
     cookieSave('thruk_conf', backend);
     removeParams['backends'] = true;
-    reloadPage(50, true);
+    reloadPage(50, true, true);
     return;
   }
 
@@ -2260,12 +2290,12 @@ function toggleBackend(backend, state, skip_update) {
   // remove &backends=... from url, they would overwrite cookie settings
   removeParams['backends'] = true;
 
-  var delay = 2;
+  var delay = 1.5;
   if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
   if(show_sitepanel == 'collapsed') { delay = 20; }
   if(show_sitepanel == 'tree')      { delay = 30; }
   if(show_sitepanel == 'list') {
-    reloadPage(delay*1000, true);
+    reloadPage(delay*1000, true, true);
   } else {
     setRefreshRate(delay);
   }
@@ -3699,8 +3729,13 @@ function get_hash(nr) {
 }
 
 function preserve_hash() {
-    // save hash value for 30 seconds
-    cookieSave('thruk_preserve_hash', get_hash(), 60);
+    // save hash value for 60 seconds
+    var val = get_hash();
+    if(val != undefined) {
+        cookieSave('thruk_preserve_hash', val, 60);
+    } else {
+        cookieRemove('thruk_preserve_hash');
+    }
 }
 
 /* fetch content by ajax and replace content */
@@ -8330,7 +8365,12 @@ var ajax_search = {
             while(tmpElem && tmpElem.parentNode) {
                 tmpElem = tmpElem.parentNode;
                 if(tmpElem.tagName == 'FORM') {
-                    tmpElem.submit();
+                    var btn = tmpElem.querySelector('[type="submit"]');
+                    if(tmpElem.onsubmit && btn) {
+                        btn.click(); // click to trigger onsubmit event
+                    } else {
+                        tmpElem.submit();
+                    }
                     return false;
                 }
             }

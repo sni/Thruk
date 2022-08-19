@@ -15,8 +15,8 @@
 </div>
 
 <div class="flexrow">
-  <div class="card">
-    <div class="head lg:justify-between">
+  <div class="card overflow-hidden min-w-[420px]">
+    <div class="head justify-between gap-x-1">
       <h3>Process Information</h3>
       <div class="flex gap-x-2 items-center">
         [% IF backends.size > 1 %]
@@ -29,7 +29,7 @@
         [% END %]
       </div>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-auto">
       [% IF list_mode == "list" %]
         [% PROCESS _extinfo_type_0_table.tt %]
       [% ELSE %]

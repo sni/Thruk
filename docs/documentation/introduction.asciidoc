@@ -173,13 +173,3 @@ hosts. Otherwise use hostgroups or servicegroups for nice results.
 Normal filtering is possible too.
 
 image:source/MineMap.png[Mine Map]
-
-
-== Mobile Interface
-
-The Mobile interface gives you access to the most important things
-and allows you to quickly view and acknowledge problems.
-
-image:source/Mobile.png[Mobile Interface]
-
-

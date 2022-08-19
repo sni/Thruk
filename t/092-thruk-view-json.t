@@ -4,6 +4,8 @@ use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
+
 my $cmds = [
   "grep -nr 'View::JSON' lib/ plugins/plugins-available/*/lib/ | grep -v Thruk::View::JSON",
 ];
@@ -16,6 +18,7 @@ for my $cmd (@{$cmds}) {
     my $line = $_;
     chomp($line);
     next if $line !~ m/(detach|forward)/mx;
+    next if($filter && $line !~ m%$filter%mx);
     fail($line);
   }
   close($ph);

@@ -50,7 +50,7 @@
                 <option hidden value="14" [% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END%]>Reset Modified Attributes</option>
               [% END %]
             </select>
-            <div class="card shadow-float absolute w-[376px] rounded-t-none" style="display: none;" id="command_select">
+            <div class="card shadow-float absolute w-[376px] rounded-t-none overflow-hidden" style="display: none;" id="command_select">
               <div class="actionbox less-padding">
               [% IF c.config.cmd_quick_status.reschedule %]
                 <div><a onclick="selectCommand(1); return false;" class="flex" href="#"><i class="fa-solid fa-clock"></i> Reschedule Next Check</a></div>

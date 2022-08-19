@@ -1,12 +1,12 @@
 TP.graphStore = Ext.create('Ext.data.Store', {
     pageSize:     10,
-    model:       'TP_GraphModell',
+    model:       'TP_GraphModel',
     remoteSort:   true,
     remoteFilter: true,
     proxy: {
         type:   'ajax',
         url:    'panorama.cgi?task=pnp_graphs',
-        method: 'POST',
+        actionMethods: {create: 'POST', read: 'POST', update: 'POST', destroy: 'POST'},
         params: {},
         reader: {
             type: 'json',

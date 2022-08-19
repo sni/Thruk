@@ -1,0 +1,10 @@
+﻿<div class="card w-fit mx-auto shadow-float">
+  <div class="head justify-between">
+    <h3>Plugin: [% plugin.name | html %]</h3>
+    <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+  </div>
+  <div class="body flexcol">
+    <img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% plugin.name | html %]" class="w-[512px]">
+    <button class="w-20 self-center" onclick="closeModalWindow()">Close</button>
+  </div>
+</div>

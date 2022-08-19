@@ -1,4 +1,4 @@
-﻿<form method="GET" action="avail.cgi">
+﻿<form method="GET" action="avail.cgi" class="h-auto">
   [% IF host %]<input type='hidden' name='host' value="[% host | html %]">[% END %]
   [% IF hostgroup %]<input type='hidden' name='hostgroup' value="[% hostgroup | html %]">[% END %]
   [% IF service %]<input type='hidden' name='service' value="[% service | html %]">[% END %]
@@ -10,7 +10,7 @@
   <input type='hidden' name='assumestatesduringnotrunning' value="[% assumestatesduringnotrunning | html %]">
   <input type='hidden' name='includesoftstates' value="[% includesoftstates | html %]">
   [% IF report_type %]<input type='hidden' name='report_type' value="[% report_type | html %]">[% END %]
-  <div class="card">
+  <div class="card h-full">
     <div class="head">
       <h3>Options</h3>
     </div>

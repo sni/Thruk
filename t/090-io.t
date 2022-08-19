@@ -7,6 +7,8 @@ use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $filter = $ARGV[0];
+
 BEGIN {
     use lib('t');
     require TestUtils;
@@ -38,6 +40,7 @@ while(scalar @{$cmds} > 0) {
     chomp($line);
     $line =~ s|//|/|gmx;
 
+    next if($filter && $line !~ m%$filter%mx);
     next unless $line =~ m/\.pm:\d+/mx;
     next if $line =~ m|STDERR|mx;
     next if $line =~ m|STDOUT|mx;
@@ -51,6 +54,7 @@ while(scalar @{$cmds} > 0) {
     next if $line =~ m|\Qmake sure the core can read it\E|mx;
     next if $line =~ m|secretfile|mx;
     next if $line =~ m|_close|mx;
+    next if $line =~ m|\->close|mx;
     next if $line =~ m|Time::HiRes|mx;
 
     push @fails, $desc." in\n".$line;

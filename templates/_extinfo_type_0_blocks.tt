@@ -11,7 +11,7 @@
         [% END %]
         [% y = y + 1 %]
     [% END %]
-<table class='procInfoTable search_vertical search_hide_empty cellspacing-x rowhover' id="procInfoTable">
+<table class='procInfoTable search_vertical search_hide_empty cellspacing-x rowhover sticky-th-left' id="procInfoTable">
   <tr>
     <th>Backend Name</th>
     [% FOREACH pd IN tmpbackends %]
@@ -258,14 +258,16 @@
   <tr>
     <th>Data Source Version</th>
     [% FOREACH pd IN tmpbackends %]
-    <td class="truncate">
-      [% IF backend_detail.$pd.running %]
-        [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
-      [% ELSE %]
-        [% IF backend_detail.$pd.last_error != "OK" %]
-          [% escape_html(backend_detail.$pd.last_error) %]
+    <td>
+      <div class="max-w-[200px] truncate">
+        [% IF backend_detail.$pd.running %]
+          [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
+        [% ELSE %]
+          [% IF backend_detail.$pd.last_error != "OK" %]
+            [% escape_html(backend_detail.$pd.last_error) %]
+          [% END %]
         [% END %]
-      [% END %]
+      </div>
     </td>
     [% END %]
   </tr>

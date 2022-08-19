@@ -1,29 +1,30 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-[% IF readonly %]
-<div class="card red alert top-center w-fit">
-  <div class="body textALERT"><b>Readonly:</b> Make sure the config file is writable!</div>
-</div>
-[% END %]
-
-<form action="conf.cgi" method="POST">
+<form action="conf.cgi" method="POST" class="mt-5 flexcol 2xl:mx-auto w-fit h-[calc(100vh-275px)]">
   <input type="hidden" name="sub" value="plugins">
   <input type="hidden" name="action" value="save">
   <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-  <div class="card mx-auto">
+
+  [% IF readonly %]
+  <div class="card red alert top-center w-fit">
+    <div class="body textALERT"><b>Readonly:</b> Make sure the config file is writable!</div>
+  </div>
+  [% END %]
+
+  <div class="card flex-grow max-h-full min-h-[600px] flexcol gap-0 overflow-hidden">
     [% IF !readonly %]
-      <div class="head justify-center gap-3">
+      <div class="head justify-center gap-3" style="flex: 0 0 40px;">
         <button onclick="return save_plugins(this);" class="submit"><i class="uil uil-save"></i>Save Changes</button>
         <div>Don't forget to restart Thruk after changing plugins.</div>
       </div>
     [% END %]
-    <table class="body cellspacing-x">
-      <tr>
-        <th class="w-1/2 text-center"><h3>Enabled Plugins</h3></th>
-        <th class="w-1/2 text-center"><h3>Available Plugins</h3></th>
-      </tr>
-      <tr>
-        <td class="align-top borderDefault border-r">
+    <div class="body flexcol gap-y-1 h-full">
+      <div class="flexrow flex-nowrap" style="flex: 0 0 30px;">
+        <h3 class="w-1/2 text-center">Enabled Plugins</h3>
+        <h3 class="w-1/2 text-center">Available Plugins</h3>
+      </div>
+      <div class="flex-grow flexrow flex-nowrap gap-0 h-[calc(100%-45px)] borderDefault divide-x">
+        <div class="overflow-y-auto w-[620px] h-[calc(100%-45px)]">
           <table class="w-[600px] cellspacing-x">
             [% FOREACH name = plugins.keys.sort %]
               [% plugin = plugins.$name %]
@@ -36,13 +37,13 @@
                     <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
                   </div>
                 </th>
-                <td class="align-top w-[200px]"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
+                <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | html %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
                 <td class='align-top whitespace-normal'>[% plugin.description %][% IF plugin.url %]<br><br><a class="link" href="[% plugin.url %]">view plugin page</a>[% END %]</td>
               </tr>
             [% END %]
           </table>
-        </td>
-        <td class="align-top borderDefault border-l">
+        </div>
+        <div class="overflow-y-auto w-[620px] h-[calc(100%-45px)]">
           <table class="w-[600px] cellspacing-x">
             [% FOREACH name = plugins.keys.sort %]
               [% plugin = plugins.$name %]
@@ -55,20 +56,14 @@
                     <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
                   </div>
                 </th>
-                <td class="align-top w-[200px]"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
+                <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | html %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
                 <td class='align-top whitespace-normal'>[% plugin.description %]</td>
               </tr>
             [% END %]
           </table>
-        </td>
-      </tr>
-    </table>
-    [% IF !readonly %]
-      <div class="footer justify-center gap-3">
-        <button onclick="return save_plugins(this);" class="submit"><i class="uil uil-save"></i>Save Changes</button>
-        <div>Don't forget to restart Thruk after changing plugins.</div>
+        </div>
       </div>
-    [% END %]
+    </div>
   </div>
 </form>
 

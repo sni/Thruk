@@ -45,8 +45,8 @@
 [% END %]
 
 [% IF thruk_author %]
-  [% IF !stacktrace %]
-    <div class="card mx-auto mt-2">
+  [% IF stacktrace %]
+    <div class="card mx-auto mt-2 max-w-full">
       <div class="head justify-between">
         <h3>Stacktrace</h3>
         <div class="flexrow gap-1">
@@ -58,13 +58,13 @@
           </button>
         </div>
       </div>
-      <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2">[% escape_html(stacktrace) %]</div>
+      <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2 overflow-auto">[% escape_html(stacktrace) %]</div>
       <div id="nicestack">
         [% nice_stacktrace(escape_html(stacktrace)) %]
       </div>
     </div>
   [% END %]
-  [% IF !errorDebugInfo %]
+  [% IF errorDebugInfo.list.size > 0 %]
     <div class='card w-fit min-w-[400px] mx-auto mt-2'>
       <div class="head">
         <h3>Details</h3>

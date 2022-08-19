@@ -11,3 +11,5 @@ page: /thruk/cgi-bin/businessview.cgi
 $routes->{'/thruk/cgi-bin/shinken_status.cgi'} = 'Thruk::Controller::shinken_features::shinken_status';
 $routes->{'/thruk/cgi-bin/outagespbimp.cgi'}   = 'Thruk::Controller::shinken_features::outages_pbimp_index';
 $routes->{'/thruk/cgi-bin/businessview.cgi'}   = 'Thruk::Controller::shinken_features::businessview_index';
+
+$app->config->{'shinken_features_path'}        = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);

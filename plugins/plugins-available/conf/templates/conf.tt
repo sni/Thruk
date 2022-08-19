@@ -1,76 +1,74 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-<div class="flexcol mt-5 items-center">
-  <div class="card w-[480px]">
-    <div class="head">
-      <h3>General Configuration</h3>
+<div class="card w-[480px] mt-5 mx-auto">
+  <div class="head">
+    <h3>General Configuration</h3>
+  </div>
+  <div class="actionbox">
+    [% IF conf_config.exists('thruk') %]
+    <div>
+      <a href="conf.cgi?sub=thruk">
+        <i class="uil uil-sliders-v-alt"></i>
+        <span class="inline-block w-32 font-semibold">Thruk Settings</span>
+        <span>Thruks settings from the thruk_local.conf</span>
+      </a>
     </div>
-    <div class="actionbox">
-      [% IF conf_config.exists('thruk') %]
-      <div>
-        <a href="conf.cgi?sub=thruk">
-          <i class="uil uil-sliders-v-alt"></i>
-          <span class="inline-block w-32 font-semibold">Thruk Settings</span>
-          <span>Thruks settings from the thruk_local.conf</span>
-        </a>
-      </div>
-      <div>
-        <a href="conf.cgi?sub=backends">
-          <i class="uil uil-data-sharing"></i>
-          <span class="inline-block w-32 font-semibold">Backends / Sites</span>
-          <span>Configure Backends Connections</span>
-        </a>
-      </div>
-      [% END %]
-      [% IF conf_config.exists('cgi.cfg') %]
-      <div>
-        <a href="conf.cgi?sub=cgi">
-          <i class="uil uil-lock-open-alt"></i>
-          <span class="inline-block w-32 font-semibold">CGI &amp; Access</span>
-          <span>Change CGI and access settings from your cgi.cfg</span>
-        </a>
-      </div>
-      [% END %]
-      [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
-      <div>
-        <a href="conf.cgi?sub=users">
-          <i class="uil uil-users-alt"></i>
-          <span class="inline-block w-32 font-semibold">User settings</span>
-          <span>User settings, passwords and permissions</span>
-        </a>
-      </div>
-      [% END %]
-      <div>
-        <a href="conf.cgi?sub=plugins">
-          <i class="uil uil-puzzle-piece"></i>
-          <span class="inline-block w-32 font-semibold">Plugins</span>
-          <span>Plugin Manager for Thruk Addons</span>
-        </a>
-      </div>
+    <div>
+      <a href="conf.cgi?sub=backends">
+        <i class="uil uil-data-sharing"></i>
+        <span class="inline-block w-32 font-semibold">Backends / Sites</span>
+        <span>Configure Backends Connections</span>
+      </a>
+    </div>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') %]
+    <div>
+      <a href="conf.cgi?sub=cgi">
+        <i class="uil uil-lock-open-alt"></i>
+        <span class="inline-block w-32 font-semibold">CGI &amp; Access</span>
+        <span>Change CGI and access settings from your cgi.cfg</span>
+      </a>
+    </div>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
+    <div>
+      <a href="conf.cgi?sub=users">
+        <i class="uil uil-users-alt"></i>
+        <span class="inline-block w-32 font-semibold">User settings</span>
+        <span>User settings, passwords and permissions</span>
+      </a>
+    </div>
+    [% END %]
+    <div>
+      <a href="conf.cgi?sub=plugins">
+        <i class="uil uil-puzzle-piece"></i>
+        <span class="inline-block w-32 font-semibold">Plugins</span>
+        <span>Plugin Manager for Thruk Addons</span>
+      </a>
     </div>
   </div>
+</div>
 
 
-  <div class="card w-[480px]">
-    <div class="head">
-      <h3>Site Configuration</h3>
-    </div>
-    <div class="actionbox">
-      <div>
-        [% IF has_obj_conf %]
-          <a class="link" href="conf.cgi?sub=objects">
-            <i class="uil uil-server"></i>
-            <span class="inline-block w-32 font-semibold">Object settings</span>
-            <span>Host, service, timeperiods and notification settings</span>
-          </a>
-        [% END %]
-        [% IF !has_obj_conf %]
-          <span class="textALERT">
-            No object configuration enabled, see
-            <a class="link" href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation<i class="uil uil-external-link-alt text-sm m-0"></i></a>
-          </span>
-        [% END %]
-      </div>
+<div class="card w-[480px] mt-5 mx-auto">
+  <div class="head">
+    <h3>Site Configuration</h3>
+  </div>
+  <div class="actionbox">
+    <div>
+      [% IF has_obj_conf %]
+        <a class="link" href="conf.cgi?sub=objects">
+          <i class="uil uil-server"></i>
+          <span class="inline-block w-32 font-semibold">Object settings</span>
+          <span>Host, service, timeperiods and notification settings</span>
+        </a>
+      [% END %]
+      [% IF !has_obj_conf %]
+        <span class="textALERT">
+          No object configuration enabled, see
+          <a class="link" href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation<i class="uil uil-external-link-alt text-sm m-0"></i></a>
+        </span>
+      [% END %]
     </div>
   </div>
 </div>

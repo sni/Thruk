@@ -1035,6 +1035,8 @@ sub _finished_job_page {
         # merge stash
             for my $key (keys %{$stash}) {
             next if $key eq 'theme';
+            next if $key eq 'total_backend_waited';
+            next if $key eq 'total_render_waited';
             $c->stash->{$key} = $stash->{$key};
             $c->stash->{'time_begin'} = [Time::HiRes::gettimeofday()]; # trigger slow page log otherwise
         }

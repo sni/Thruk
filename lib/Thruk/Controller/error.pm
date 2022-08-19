@@ -259,7 +259,7 @@ sub index {
     }
 
     my $errorDetails = join("\n", @{$c->error});
-    $c->stash->{errorDebugInfo} = '' unless $c->stash->{errorDebugInfo};
+    $c->stash->{errorDebugInfo} = [] unless $c->stash->{errorDebugInfo};
 
     # redirected from $c->detach_error()
     my $log_req;

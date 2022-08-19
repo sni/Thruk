@@ -7,7 +7,7 @@ Ext.define('TP_Sources', {
     ]
 });
 
-Ext.define('TP_GraphModell', {
+Ext.define('TP_GraphModel', {
     extend: 'Ext.data.Model',
     fields: [
         {name: 'text',       type: 'string'},
@@ -18,13 +18,13 @@ Ext.define('TP_GraphModell', {
 
 TP.grafanaStore = Ext.create('Ext.data.Store', {
     pageSize:     10,
-    model:       'TP_GraphModell',
+    model:       'TP_GraphModel',
     remoteSort:   true,
     remoteFilter: true,
     proxy: {
         type:   'ajax',
         url:    'panorama.cgi?task=grafana_graphs',
-        method: 'POST',
+        actionMethods: {create: 'POST', read: 'POST', update: 'POST', destroy: 'POST'},
         params: {},
         reader: {
             type: 'json',

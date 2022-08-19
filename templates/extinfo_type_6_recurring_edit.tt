@@ -5,7 +5,7 @@
 <div class="flexrow 2xl:justify-between">
   [% PROCESS _infobox.tt %]
 
-  <form action="extinfo.cgi" method="POST" class="min-w-[450px] w-[550px]">
+  <form action="extinfo.cgi" method="POST" class="min-w-[420px] max-w-[550px] w-full">
     <div class="card w-full">
       <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
       <input type="hidden" name="nr" value="[% rd.file | html %]">

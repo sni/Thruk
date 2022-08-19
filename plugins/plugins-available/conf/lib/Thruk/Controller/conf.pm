@@ -89,6 +89,7 @@ sub index {
     $c->stash->{no_tt_trim}            = 1;
     $c->stash->{post_obj_save_cmd}     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}   // '';
     $c->stash->{show_summary_prompt}   = $c->config->{'Thruk::Plugin::ConfigTool'}->{'show_summary_prompt'} // 1;
+    $c->stash->{'plugin_name'}         = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
 
     Thruk::Utils::ssi_include($c);
 
@@ -749,6 +750,11 @@ sub _process_plugins_page {
         my $path = $plugin_enabled_dir.'/'.$pic.'/preview.png';
         if(!-e $path) {
             $path = $plugin_available_dir.'/'.$pic.'/preview.png';
+        }
+        if($c->req->parameters->{'modal'}) {
+            $c->stash->{'plugin'}   = $plugins->{$pic};
+            $c->stash->{'template'} = 'conf_plugins_preview.tt';
+            return 1;
         }
         $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
@@ -1695,6 +1701,8 @@ sub _get_context_object {
         my $objs = $c->{'obj_db'}->get_services_by_name($c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         if(defined $objs->[0]) {
             $c->stash->{'data_id'} = $objs->[0]->get_id();
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Cannot find object' );
         }
     }
     elsif(defined $c->req->parameters->{'host'}) {
@@ -2737,7 +2745,7 @@ sub _config_reload {
     if(!$last_reload) {
         my $processinfo = $c->db->get_processinfo(backends => $pkey);
         $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
-        sleep(1) if $last_reload == time();
+        sleep(1) if int($last_reload) == int(time());
     }
 
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {

@@ -20,20 +20,31 @@ my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 $BIN    = $BIN.' --local';
 
 my $plugins = [
-    { name => 'editor',   'tarball' => 'https://github.com/sni/thruk-plugin-editor/archive/refs/heads/master.tar.gz' },
-    { name => 'omd',      'tarball' => 'https://github.com/sni/thruk-plugin-omd/archive/refs/heads/master.tar.gz' },
-    { name => 'pansnaps', 'tarball' => 'https://github.com/ConSol/thruk-plugin-pansnaps/archive/refs/heads/master.tar.gz' },
-    { name => 'woshsh',   'tarball' => 'https://github.com/sni/thruk-plugin-woshsh/archive/refs/heads/master.tar.gz' },
+    { name => 'editor',       'tarball' => 'https://github.com/sni/thruk-plugin-editor/archive/refs/heads/master.tar.gz' },
+    { name => 'omd',          'tarball' => 'https://github.com/sni/thruk-plugin-omd/archive/refs/heads/master.tar.gz' },
+    { name => 'pansnaps',     'tarball' => 'https://github.com/ConSol/thruk-plugin-pansnaps/archive/refs/heads/master.tar.gz' },
+    { name => 'woshsh',       'tarball' => 'https://github.com/sni/thruk-plugin-woshsh/archive/refs/heads/master.tar.gz' },
+    { name => 'node-control', 'tarball' => 'https://github.com/sni/thruk-plugin-node-control/archive/refs/heads/master.tar.gz' },
 ];
 my $filter = $ARGV[0];
 my $extra_tests = [
   't/081-modules.t',
   't/083-xss.t',
+  't/085-json_xs.t',
+  't/087-trailing_whitespace.t',
+  't/090-io.t',
+  't/092-backticks.t',
   't/088-remove_after.t',
+  't/092-clean_debug.t',
+  't/092-private_subs.t',
+  't/092-stash-config.t',
+  't/092-thruk-view-json.t',
   't/092-todo.t',
+  't/094-plugin-root-path.t',
   't/094-template_encoding.t',
   't/099-Perl-Critic.t',
   't/900-javascript_syntax.t',
+  glob('t/data/800-plugins/*.t'),
 ];
 
 TestUtils::test_command({
@@ -42,6 +53,7 @@ TestUtils::test_command({
     exit    => 0,
 });
 
+my $failed = {};
 for my $p (@{$plugins}) {
     next if($filter && $p->{'name'} ne $filter);
 
@@ -90,13 +102,14 @@ for my $p (@{$plugins}) {
         next if($p->{'skip_tests'} && $testfile =~ $p->{'skip_tests'});
         my $testsource = Thruk::Utils::IO::read($testfile);
         Thruk::Config::set_config_env();
-        subtest $testfile => sub {
+        my $rc = subtest $testfile => sub {
             # required for ex.: t/092-todo.t
             local @ARGV = (sprintf("plugins/plugins-available/%s", $p->{'name'}));
             $testsource =~ s/^\Quse warnings;\E//gmx;
             no warnings qw(redefine);
             eval("#line 1 $testfile\n".$testsource);
         };
+        $failed->{$p->{'name'}}->{$testfile} = 1 unless $rc;
     }
 
     # remove additional test config again
@@ -120,6 +133,13 @@ for my $p (@{$plugins}) {
             like    => ['/disabled plugin/' ],
             exit    => 0,
         });
+    }
+}
+
+# show summary
+for my $p (sort keys %{$failed}) {
+    for my $file (sort keys %{$failed->{$p}}) {
+        fail("failed plugin: $p at test $file");
     }
 }
 

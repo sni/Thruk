@@ -24,7 +24,7 @@
   </div>
 </div>
 [% IF pb_options.defined("show_console") && pb_options.show_console %]
-<div class="continue_[% pb_options.id %] my-0" style="display: none; height:[% pb_options.height %]px;"><button onclick="reloadPage(); return false;">job finished, continue</button></div>
+<div class="continue_[% pb_options.id %] my-0" style="display: none; height:[% pb_options.height %]px;"><button onclick="reloadPage(null, null, true); return false;">job finished, continue</button></div>
 <textarea id="console_[% pb_options.id %]" class="CONSOLE w-[80%] h-[600px] my-2" readonly>
 </textarea>
 [% END %]
@@ -91,7 +91,7 @@
                 [% IF c.req.uri.match("job.cgi") %]
                 window.history.go(-1);
                 [% ELSE %]
-                reloadPage();
+                reloadPage(null, null, true);
                 [% END %]
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -99,7 +99,7 @@
                 [% IF c.req.uri.match("job.cgi") %]
                 window.history.go(-1);
                 [% ELSE %]
-                reloadPage();
+                reloadPage(null, null, true);
                 [% END %]
             }
         });
@@ -114,7 +114,7 @@
         if(last_time_[% pb_options.id %] != 0 && datestr%2 != 0 && val < 100) {
             last_time_[% pb_options.id %] = last_time_[% pb_options.id %] + 1;
             jQuery("#bar_[% pb_options.id %]" ).css("width", ""+(val + [% pb_options.percent_per_second %])+"%");
-            jQuery("#[% pb_options.id %] DIV.job_time").html(last_time_[% pb_options.id %] + "s" + last_message_[% pb_options.id %]);
+            jQuery("#[% pb_options.id %] DIV.job_time").html(Math.round(last_time_[% pb_options.id %]) + "s" + last_message_[% pb_options.id %]);
             return;
         }
         if(is_loading_[% pb_options.id %]) { return; }
@@ -140,7 +140,7 @@
                     jQuery("#over_[% pb_options.id %]").html(title);
                     last_overmsg_[% pb_options.id %] = title;
                     last_time_[% pb_options.id %] = data.time;
-                    jQuery("#[% pb_options.id %] DIV.job_time").html(data.time + "s"+last_message_[% pb_options.id %]);
+                    jQuery("#[% pb_options.id %] DIV.job_time").html(Math.round(data.time) + "s"+last_message_[% pb_options.id %]);
                 }
                 if(data.output != null) {
                     var textconsole = jQuery("#console_[% pb_options.id %]");
@@ -163,7 +163,7 @@
                 jQuery("#[% pb_options.id %]").hide();
                 jQuery(".continue_[% pb_options.id %]").css("display", "");
             [% ELSE %]
-                reloadPage();
+                reloadPage(null, null, true);
             [% END %]
             return;
         } else {
@@ -183,5 +183,5 @@
 </script>
 
 [% IF pb_options.defined("show_console") && pb_options.show_console %]
-<div class="continue_[% pb_options.id %] my-2" style="display: none;"><button onclick="reloadPage(); return false;">job finished, continue</button></div>
+<div class="continue_[% pb_options.id %] my-2" style="display: none;"><button onclick="reloadPage(null, null, true); return false;">job finished, continue</button></div>
 [% END %]
