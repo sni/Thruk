@@ -504,12 +504,16 @@ function setBtnSpinner(btn, skipTimeout) {
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
     } else {
-        jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
+        jQuery(btn).addClass("relative");
+        jQuery(btn).prepend('<div class="spinner mr-1 absolute left-2"><\/div>');
     }
     var disableTimer = window.setTimeout(function() {
         // disable delayed, otherwise chrome won't send the form
         setBtnDisabled(btn);
     }, 300);
+    jQuery(window).on('beforeunload unload', function(e){
+        setBtnDisabled(btn); // set as soon as possible
+    });
     jQuery(btn).data("distimer", disableTimer);
     var el = jQuery(btn).first();
     if(el.tagName == "A") {
@@ -521,7 +525,7 @@ function setBtnSpinner(btn, skipTimeout) {
         var timer = window.setTimeout(function() {
             // seomthing didn't work, reset
             setBtnError(btn, "timeout while processing the request");
-        }, 30000);
+        }, 60000);
         jQuery(btn).data("timer", timer);
     }
 }
@@ -8346,7 +8350,12 @@ var ajax_search = {
             while(tmpElem && tmpElem.parentNode) {
                 tmpElem = tmpElem.parentNode;
                 if(tmpElem.tagName == 'FORM') {
-                    tmpElem.submit();
+                    var btn = tmpElem.querySelector('[type="submit"]');
+                    if(tmpElem.onsubmit && btn) {
+                        btn.click(); // click to trigger onsubmit event
+                    } else {
+                        tmpElem.submit();
+                    }
                     return false;
                 }
             }

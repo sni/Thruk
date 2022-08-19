@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <div class="flexcol mx-auto w-fit max-w-full mt-5">
-  <form action="conf.cgi" method="GET" class="lg:self-center">
+  <form action="conf.cgi" method="GET" class="lg:self-center" onsubmit="return(setFormBtnSpinner(this))">
     <input type="hidden" name="sub" value="objects">
     <div class="card overflow-hidden">
       <div class="head p-0 justify-between">
@@ -19,7 +19,7 @@
             onclick="ajax_search.init(this, '[% type | html %]', {url:'conf.cgi?action=json&amp;long=1&amp;type=[% type | html %]', templates:'both', add_prefix:true})"
             placeholder="select [% type | html %] to change..."
             >
-          <input type="submit" name="send" value="show" class="w-32">
+          <button type="submit" name="send" class="w-32">show</button>
         </div>
         [% IF show_secondary_select %]
           <div class="body flexrow gap-1 flex-nowrap pt-0">
