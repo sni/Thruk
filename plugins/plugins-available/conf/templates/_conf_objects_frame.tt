@@ -24,7 +24,7 @@
         [% IF show_secondary_select %]
           <div class="body flexrow gap-1 flex-nowrap pt-0">
             <input
-              class="w-full"
+              class="w-full placeholderALERT"
               type="text"
               name="data.name2"
               id="data.name2"

@@ -183,6 +183,9 @@
     @apply bg-gradient-to-br from-[color:var(--text-mixed-gradient-from)] textALERT via-current to-[color:var(--text-mixed-gradient-from)] bg-clip-text fill-transparent;
     -webkit-text-fill-color: transparent;
   }
+  .placeholderALERT {
+    @apply !placeholder-[color:var(--text-alert)];
+  }
 
   .OK, .YES, .ENABLED {
     @apply !bg-[color:var(--badge-ok-bg)] !text-[color:var(--badge-ok-fg)];
