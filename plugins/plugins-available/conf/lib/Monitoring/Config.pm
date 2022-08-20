@@ -795,7 +795,7 @@ sub get_services_for_host {
         if(defined $name) {
             if(defined $svc_config->{'host_name'}) {
                 for my $hst (@{$svc_config->{'host_name'}}) {
-                    if(Thruk::Base::wildcard_match($name, $hst)) {
+                    if(Thruk::Base::wildcard_match($host_name, $hst)) {
                         $services->{'host'}->{$name} = $svc;
                         last;
                     }
