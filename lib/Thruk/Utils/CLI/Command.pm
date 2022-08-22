@@ -10,7 +10,7 @@ The command command displays the expanded command for a given host or service
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] command <hostname> [<service_description>]
+  Usage: thruk [globaloptions] command [-n] <hostname> [<service_description>]
 
 =head1 OPTIONS
 
@@ -46,6 +46,18 @@ sub cmd {
     }
 
     $c->stats->profile(begin => "_cmd_command($action)");
+
+    # parse options
+    my $opt = {};
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptionsFromArray($commandoptions,
+       "n"       => \$opt->{'naked_command'},
+    ) or do {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    };
+
     my $hostname    = shift @{$commandoptions};
     my $description = shift @{$commandoptions};
 
@@ -86,7 +98,13 @@ sub cmd {
         }
     }
 
-    my $command = $c->db->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
+    my $command = $c->db->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'}, 'obfuscate' => 0 );
+
+    if($opt->{'naked_command'}) {
+        _warn($command->{'note'}) if $command->{'note'};
+        return($command->{'line_expanded'}."\n", 0);
+    }
+
     my $msg;
     $msg .= 'Note:             '.$command->{'note'}."\n" if $command->{'note'};
     $msg .= 'Check Command:    '.$command->{'line'}."\n";

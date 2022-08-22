@@ -809,11 +809,13 @@ sub expand_command {
         $expanded = $commands->[0]->{'line'};
     }
 
-    my $rc;
+    my($rc, $obfuscated, $orig);
     eval {
-        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args});
-        $expanded = $self->_obfuscate({string => $expanded, host => $host, service => $service, args => \@com_args});
-        $command_name = $self->_obfuscate({string => $command_name, host => $host, service => $service, args => \@com_args});
+        ($expanded,$rc, $obfuscated) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args, obfuscate => $data{'obfuscate'}});
+        $orig = $expanded;
+        $expanded = $self->_obfuscate({string => $expanded, host => $host, service => $service, args => \@com_args}) if(!defined $data{'obfuscate'} || $data{'obfuscate'});
+        $obfuscated = 1 if $orig ne $expanded;
+        $command_name = $self->_obfuscate({string => $command_name, host => $host, service => $service, args => \@com_args}) if(!defined $data{'obfuscate'} || $data{'obfuscate'});
     };
 
     # does it still contain macros?
@@ -827,11 +829,17 @@ sub expand_command {
 
     # unescape $$
     $expanded =~ s{\$\$}{\$}gmx;
+    $orig     =~ s{\$\$}{\$}gmx;
 
     my $return = {
         'line'          => $command_name,
         'line_expanded' => $expanded,
+        'obfuscated'    => $obfuscated ? 1 : 0,
+        'line_orig'     => $orig, # not obfuscated
         'note'          => $note,
+        'host'          => $host    ? ($host->{'host_name'} // $host->{'name'}) : '',
+        'service'       => $service ? $service->{'description'} : '',
+        'backend'       => Thruk::Utils::Filter::peer_name($obj) // '',
     };
     return $return;
 }
@@ -1213,6 +1221,7 @@ sub _replace_macros {
 
     my $string  = $args->{'string'};
     my $macros  = $self->_get_macros($args);
+    $macros->{'obfuscate'} = $args->{'obfuscate'} if defined $args->{'obfuscate'};
     return $self->_get_replaced_string($string, $macros);
 }
 
@@ -1229,6 +1238,7 @@ returns replaced string
 sub _get_replaced_string {
     my( $self, $string, $macros, $skip_args ) = @_;
     my $rc  = 1;
+    my $obfuscated = 0;
     my $res = "";
     return($res, $rc) unless defined $string;
     for my $block (split/(\$[\w\d_:\-]+\$)/mx, $string) {
@@ -1241,9 +1251,10 @@ sub _get_replaced_string {
                     if($skip_args) {
                         $replacement = $block;
                     } else {
-                        my $sub_rc;
-                        ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
+                        my($sub_rc, $sub_obfuscated);
+                        ($replacement, $sub_rc, $sub_obfuscated) = $self->_get_replaced_string($replacement, $macros, 1);
                         $rc = 0 unless $sub_rc;
+                        $obfuscated = 1 if $sub_obfuscated;
                     }
                 }
                 $block = $replacement;
@@ -1254,9 +1265,11 @@ sub _get_replaced_string {
         $res .= $block;
     }
 
+    my $orig = $res;
     $res = $self->_get_obfuscated_string($res, $macros);
+    $obfuscated = 1 if $orig ne $res;
 
-    return($res, $rc);
+    return($res, $rc, $obfuscated);
 }
 
 ########################################
@@ -1281,6 +1294,11 @@ replace sensitive data with ***
 
 sub _get_obfuscated_string {
     my( $self, $string, $macros ) = @_;
+
+    if(defined $macros->{'obfuscate'} && !$macros->{'obfuscate'}) {
+        return $string;
+    }
+
     if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
         eval {
             ## no critic

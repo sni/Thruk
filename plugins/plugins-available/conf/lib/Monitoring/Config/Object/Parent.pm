@@ -228,13 +228,12 @@ return the objects name
 
 =cut
 sub get_name {
-    my $self = shift;
+    my($self, $full) = @_;
     if($self->is_template()) {
         return $self->get_template_name();
     }
-    return $self->get_primary_name();
+    return $self->get_primary_name($full);
 }
-
 
 ##########################################################
 
@@ -335,19 +334,6 @@ sub get_primary_name {
         push @{$secondary}, [ $key, $conf->{$key} ];
     }
     return([$primary, $secondary]);
-}
-
-##########################################################
-
-=head2 get_primary_name_as_text
-
-return the primary name as text
-
-=cut
-
-sub get_primary_name_as_text {
-    my($self, $fallback) = @_;
-    return $fallback;
 }
 
 ##########################################################

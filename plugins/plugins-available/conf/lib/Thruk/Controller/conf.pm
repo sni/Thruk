@@ -1771,7 +1771,7 @@ sub _get_context_object {
             $obj = $objs->[0];
         }
         elsif(!defined $obj) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'No such object. <a href="conf.cgi?sub=objects&action=new&amp;type='.Thruk::Utils::Filter::escape_html($c->stash->{'type'}).'&amp;data.name='.Thruk::Utils::Filter::escape_html($c->stash->{'data_name'}).'">Create it.</a>', escape => 0 } );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'No such object. <a class="link" href="conf.cgi?sub=objects&action=new&amp;type='.Thruk::Utils::Filter::escape_html($c->stash->{'type'}).'&amp;data.name='.Thruk::Utils::Filter::escape_html($c->stash->{'data_name'}).'">Create it<i class="fa-solid fa-plus text-sm align-middle"></i></a>', escape => 0 } );
         }
     }
 
@@ -2205,13 +2205,13 @@ sub _clone_refs {
         return;
     }
 
-    my $cloned_name = $orig->get_name();
+    my $cloned_name = $orig->get_name(1);
     if($new_name eq $cloned_name) {
         Thruk::Utils::set_message( $c, 'fail_message', 'New name must be different' );
         return;
     }
 
-    $c->{'obj_db'}->clone_refs($orig, $obj, $cloned_name, $new_name, $clone_refs);
+    $c->{'obj_db'}->clone_refs($orig, $obj, $orig->get_name(), $new_name, $clone_refs);
 
     return;
 }
