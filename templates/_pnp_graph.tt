@@ -54,6 +54,7 @@
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
       <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph" class="mx-auto">
       <div id="pnperr" style="display:none" class="textALERT text-center py-2">Could not retrieve graph data</div>
+      <iframe id="pnp_iframe" src="" class="w-full h-[270px] p-0 m-0 mx-auto hidden"></iframe>
     </a>
   </div>
 </div>

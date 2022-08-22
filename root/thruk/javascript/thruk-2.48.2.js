@@ -8605,16 +8605,20 @@ function set_png_img(start, end, id, source) {
 
     jQuery('#pnpwaitimg').css('display', 'block');
     jQuery('#pnpimg').css('opacity', '0.3');
+    jQuery("#pnp_iframe").addClass("hidden");
 
     jQuery('#pnpimg').one("load", function() {
-      jQuery('#pnpimg').css('opacity' , '');
-      jQuery('#pnperr').css('display' , 'none');
-      jQuery('#pnpwaitimg').css({'display': 'none'});
+        jQuery('#pnpimg').css('opacity' , '');
+        jQuery('#pnperr').css('display' , 'none');
+        jQuery('#pnpwaitimg').css({'display': 'none'});
     })
     .one("error", function(err) {
-      jQuery('#pnpwaitimg').css('display', 'none');
-      jQuery('#pnpimg').css('display' , 'none');
-      jQuery('#pnperr').css('display' , '');
+        jQuery('#pnpwaitimg').css('display', 'none');
+        jQuery('#pnpimg').css('display' , 'none');
+        jQuery('#pnperr').css('display' , '');
+
+        // show error url in an iframe, maybe it contains useful information
+        jQuery("#pnp_iframe").attr('src', newUrl).removeClass("hidden");
     });
 
     jQuery('#pnperr').css('display', 'none');
