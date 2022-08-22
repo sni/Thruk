@@ -12,12 +12,13 @@ next 3.x:
             - mobile
             - wml
             - statusmap
+          - add light/dark theme
           - add collapsable side navigation
           - add delete icon to comments/downtimes popup
-          - add authoritive backend switch
           - add copy button for expanded command line
 
 2.48.3   Fri Aug 12 19:01:13 CEST 2022
+          - add authoritive backend switch
           - add short links option for custom links
           - replace markup link links in comments and downtimes
           - Reporting:
