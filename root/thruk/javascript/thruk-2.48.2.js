@@ -504,8 +504,12 @@ function setBtnSpinner(btn, skipTimeout) {
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
     } else {
-        jQuery(btn).addClass("relative");
-        jQuery(btn).prepend('<div class="spinner mr-1 absolute left-2"><\/div>');
+        if(jQuery(btn).hasClass("button") || jQuery(btn).is("button")) {
+            jQuery(btn).addClass("relative");
+            jQuery(btn).prepend('<div class="spinner mr-1 absolute left-2"><\/div>');
+        } else {
+            jQuery(btn).prepend('<div class="spinner mr-1"><\/div>');
+        }
     }
     var disableTimer = window.setTimeout(function() {
         // disable delayed, otherwise chrome won't send the form
