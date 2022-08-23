@@ -26,8 +26,10 @@ The command command displays the expanded command for a given host or service
 
 use warnings;
 use strict;
+use Getopt::Long ();
 
 use Thruk::Utils::CLI ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 
