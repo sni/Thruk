@@ -96,7 +96,7 @@
           <td class='[% class %] backend_[% peer_key %] peer_name text-center'>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% class %] name'>
-          <div class="status col_host_name flex min-w-max">
+          <div class="status col_host_name flex items-center min-w-max">
             <div class="flex-1">
               <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key | html %]" title="[% h.address | html %] - [% h.alias | html %]">[% h.display_name | html %]</a>
             </div>
@@ -151,7 +151,7 @@
               [% END %]
             [% END %]
           >
-            <div class="status col_plugin_output flex truncate">
+            <div class="status col_plugin_output flex items-center truncate">
               [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
                 <div class="status col_plugin_output has_long_plugin_output font-bold underline flex-1 truncate">[% plugin_output %]</div>
               [% ELSE %]

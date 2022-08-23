@@ -92,7 +92,7 @@
             [% hoststate = 'UNREACHABLE' %]
           [% END %]
           <td class='host_name col_host_name [% hoststate %]'>
-            <div class="status col_host_name flex min-w-max">
+            <div class="status col_host_name flex items-center min-w-max">
               <div class="flex-1">
                 <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% s.host_display_name | html %]</a>
               </div>
@@ -104,7 +104,7 @@
         <td class='backend_[% peer_key %] peer_name text-center'>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='description'>
-          <div class="status col_description flex min-w-max">
+          <div class="status col_description flex items-center min-w-max">
             <div class="flex-1">
               <a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% IF use_service_description %][% s.description | html %][% ELSE %][% s.display_name | html %][% END %]</a>
             </div>
@@ -161,7 +161,7 @@
               [% END %]
             [% END %]
             >
-            <div class="status col_plugin_output flex truncate">
+            <div class="status col_plugin_output flex items-center truncate">
               [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
                 <div class="status col_plugin_output has_long_plugin_output font-bold underline flex-1 truncate">[% plugin_output %]</div>
               [% ELSE %]
