@@ -260,8 +260,12 @@ jQuery("#queue_graph").bind("plothover", function (event, pos, item) {
   if (item) {
     var x = item.datapoint[0].toFixed(2),
     y = item.datapoint[1].toFixed(2);
+    var suffix = "";
+    if(item.series.label == "moving average") {
+      suffix = "/s";
+    }
 
-    jQuery("#tooltip").html(item.series.label + ": " + y)
+    jQuery("#tooltip").html(item.series.label + ": " + y+suffix)
       .css({top: item.pageY+5, left: item.pageX+5})
       .fadeIn(200);
   } else {
