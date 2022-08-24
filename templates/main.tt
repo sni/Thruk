@@ -71,46 +71,46 @@
 -->
 </script>
 
-<div class="flexcol flex-grow place-items-center min-h-full">
-  <div class="mb-10">
-    <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
+<div class="mb-10 mx-auto w-fit">
+  <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
+</div>
+
+<div class="card min-w-[420px] max-w-[500px] w-full mt-5 mx-auto">
+  <div class="head justify-center">
+    <h3>Thruk Monitoring Webinterface</h3>
   </div>
-  <div class="card w-[500px] mt-5">
-    <div class="head justify-center">
-      <h3>Thruk Monitoring Webinterface</h3>
-    </div>
-    <div class="body">
-      <table class="cellspacing w-fit mx-auto">
+  <div class="body">
+    <table class="cellspacing w-fit mx-auto">
+      <tr>
+        <th>Thruk Version</th>
+        <td>[% thrukversion %]</td>
+      </tr>
+      [% IF c.config.extra_version %]
         <tr>
-          <th>Thruk Version</th>
-          <td>[% thrukversion %]</td>
+          <th>OMD Version</th>
+          <td>[% c.config.extra_version %]</td>
         </tr>
-        [% IF c.config.extra_version %]
-          <tr>
-            <th>OMD Version</th>
-            <td>[% c.config.extra_version %]</td>
-          </tr>
-        [% END %]
-        <tr>
-          <th>Release</th>
-          <td>[% c.config.released %]</td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            <div class="flex gap-x-2">
-              <button><a href="http://www.thruk.org/download.html?version=[% thrukversion %]" target="_blank">Check for updates</a></button>
-              <button><a href="[% url_prefix %]changes.html">Read what's new in Thruk</a></button>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
+      [% END %]
+      <tr>
+        <th>Release</th>
+        <td>[% c.config.released %]</td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div class="flex gap-x-2">
+            <button><a href="http://www.thruk.org/download.html?version=[% thrukversion %]" target="_blank">Check for updates</a></button>
+            <button><a href="[% url_prefix %]changes.html">Read what's new in Thruk</a></button>
+          </div>
+        </td>
+      </tr>
+    </table>
   </div>
-  <div class="logos">
-    <div class="flexrow place-content-center gap-12 mt-10">
-      <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" title="Thruk" alt="Thruk"></a>
-      <a href="http://github.com/sni/Thruk" target="_blank"><img class="w-32 h-auto" src="[% url_prefix %]themes/[% theme %]/images/GitHub_Logo.png" alt="Github.com Logo"></a>
-    </div>
+</div>
+
+<div class="logos">
+  <div class="flexrow place-content-center gap-12 mt-10">
+    <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" title="Thruk" alt="Thruk"></a>
+    <a href="http://github.com/sni/Thruk" target="_blank"><img class="w-32 h-auto" src="[% url_prefix %]themes/[% theme %]/images/GitHub_Logo.png" alt="Github.com Logo"></a>
   </div>
 </div>
 

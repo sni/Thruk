@@ -21,7 +21,7 @@
   <div class="basis-1/3 flex"></div>
 </div>
 
-<div class="card w-full mt-2 min-w-[800px]">
+<div class="card w-full mt-2 min-w-[420px]">
   <div class="mainTableHeader">
     <div class="relative">
       <button

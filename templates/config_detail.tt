@@ -50,8 +50,8 @@
 
 <h1 class="mt-5">Configuration</h1>
 
-<div class="card w-full min-w-[800px] mt-5 overflow-hidden">
-  <div class="head p-0 justify-between overflow-x-auto">
+<div class="card w-full min-w-[420px] mt-5 overflow-hidden">
+  <div class="head p-0 justify-between overflow-x-auto h-auto">
     <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Hosts' %] active[% END %]"><a class="block" href="config.cgi?type=hosts">Hosts</a></span>
     <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Host Groups' %] active[% END %]"><a class="block" href="config.cgi?type=hostgroups">Host Groups</a></span>
     <span class="tabs min-w-[140px] w-52 text-center[% IF dataTitle == 'Services' %] active[% END %]"><a class="block" href="config.cgi?type=services">Services</a></span>
