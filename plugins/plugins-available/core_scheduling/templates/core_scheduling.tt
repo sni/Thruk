@@ -112,6 +112,32 @@
             <td class="text-right pl-2 pt-5">[% sprintf("%.2f", concurrent_rate) %]</td>
             <td></td>
           </tr>
+          <tr>
+            <th class="text-right pt-5 align-top">Interval Length</th>
+            <td class="text-right pl-2 pt-5">
+              [% IF interval_lengths.keys.size == 1 %]
+                [% FOREACH i = interval_lengths.keys.nsort %]
+                  [% duration(i, 6) %]
+                [% END %]
+              [% ELSE %]
+                [% FOREACH i = interval_lengths.keys.nsort %]
+                  <div class="flexrow flex-nowrap">
+                    <div class="w-10 text-left">
+                      [% duration(i, 6) %]
+                    </div>
+                    <div class="max-w-[120px] truncate overflow-hidden">
+                      [% names = [] %]
+                      [% FOREACH s = interval_lengths.$i.keys.sort %]
+                        [% names.push(peer_name(s)) %]
+                      [% END %]
+                      [% names.sort().join(", ") %]
+                    </div>
+                  </div>
+                [% END %]
+              [% END %]
+            </td>
+            <td></td>
+          </tr>
         </table>
       </div>
     </div>
@@ -204,6 +230,14 @@ function updateGraphDelayed() {
 function updateGraph(reschedule) {
   window.clearTimeout(updateTimer);
   updateInterval = jQuery('#update_interval').val()*1000;
+
+  // only update if visible, recheck every second
+  if(document.visibilityState && document.visibilityState != 'visible') {
+      jQuery("#now_label").html("<i class='fa-solid fa-circle-pause' style='color:#990000;'><\/i><div>paused<\/div>");
+      updateTimer = window.setTimeout(updateGraph, 1000);
+      return;
+  }
+
   if(reschedule) {
     setBtnSpinner('#reschedule_btn');
   }
@@ -231,7 +265,7 @@ function updateGraph(reschedule) {
 
         var o = queue_plot.pointOffset({ x: standard_grid['markings'][0]['xaxis']['from'], y: 0});
         var d = new Date(standard_grid['markings'][0]['xaxis']['from']);
-        jQuery('#queue_graph').append("<div id='now_label' style='position:absolute;left:"+(o.left+4)+"px;top:20px;color:#990000;font-size:smaller'>now ("+d.strftime("%H:%M:%S")+")</div>");
+        jQuery('#queue_graph').append("<div id='now_label' class='flexrow flex-nowrap gap-1 absolute' style='left:"+(o.left+4)+"px;top:20px;color:#990000;font-size:smaller'>now ("+d.strftime("%H:%M:%S")+")</div>");
 
         if(data['message'] != undefined) {
             thruk_message(0, data['message']);

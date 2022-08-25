@@ -80,6 +80,7 @@ sub core_scheduling_page {
     my $interval_sum       = 0;
     my $check_rate         = 0;
     my $concurrent_rate    = 0;
+    my $interval_lengths   = {};
 
     my $data = $c->db->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     for my $d (@{$data}) {
@@ -90,6 +91,7 @@ sub core_scheduling_page {
         my $interval_length = $c->stash->{'pi_detail'}->{$d->{'peer_key'}}->{'interval_length'} // 60;
         my $check_interval  = $d->{'check_interval'} * $interval_length;
         my $check_interval_minutes = $check_interval/60;
+        $interval_lengths->{$interval_length}->{$d->{'peer_key'}} = 1;
 
         $intervals->{$check_interval_minutes}++;
         $check_rate += 1/($check_interval_minutes);
@@ -189,6 +191,7 @@ sub core_scheduling_page {
     $c->stash->{'count_in_check_per'} = $count_in_check_per;
 
     $c->stash->{'intervals'}          = $intervals;
+    $c->stash->{'interval_lengths'}   = $interval_lengths;
     $c->stash->{'interval_avg'}       = $count_all > 0 ? $interval_sum / $count_all : 0;
     $c->stash->{'check_rate'}         = $check_rate / 60;
     $c->stash->{'concurrent_rate'}    = $concurrent_rate;
