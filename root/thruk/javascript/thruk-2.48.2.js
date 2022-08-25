@@ -4075,6 +4075,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
     });
     jQuery('#'+pane_prefix+'_columns_table tbody').sortable({
         items                : '> tr',
+        handle              : '.js-drag-handle',
         placeholder          : 'column-sortable-placeholder',
         update               : function( event, ui ) {
             /* drag/drop changes the checkbox state, so set checked flag assuming that a moved column should be visible */
@@ -4146,55 +4147,61 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
         evt.preventDefault();
         evt.stopImmediatePropagation();
         evt.stopPropagation();
-        var th = evt.target;
-        var text   = (th.innerText || '').replace(/\s*$/, '');
-        th.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
-        window.setTimeout(function() {
-            jQuery(th).find('INPUT').focus();
-            var input = jQuery(th).find('INPUT')[0];
-            setCaretToPos(input, text.length);
-            jQuery(input).on('keydown blur', function (e) {
-                /* submit on enter/return */
-                if(e.keyCode == 13 || e.type == "blur") {
-                    e.preventDefault();
-                    th.innerHTML = escapeHTML(input.value);
-                    var col  = get_column_from_classname(th);
-                    var orig = jQuery('#'+pane_prefix+'_col_'+col)[0].title;
+        var td = evt.target;
+        startColumnNamePopupEdit(pane_prefix, td);
+    });
+}
 
-                    var cols = default_columns[pane_prefix];
-                    if(additionalParams[pane_prefix+'columns']) {
-                        cols = additionalParams[pane_prefix+'columns'];
-                    }
-                    cols = cols.split(/,/);
-                    for(var x = 0; x < cols.length; x++) {
-                        var tmp = cols[x].split(/:/, 2);
-                        if(tmp[0] == col) {
-                            if(orig != input.value) {
-                                cols[x] = tmp[0]+':'+input.value;
-                            } else {
-                                cols[x] = tmp[0];
-                            }
+function startColumnNamePopupEdit(pane_prefix, td) {
+    var text   = (td.innerText || '').replace(/\s*$/, '');
+    td.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
+    window.setTimeout(function() {
+        jQuery(td).find('INPUT').focus();
+        var input = jQuery(td).find('INPUT')[0];
+        setCaretToPos(input, text.length);
+        jQuery(input).on('keydown blur', function (e) {
+            /* submit on enter/return */
+            if(e.keyCode == 13 || e.type == "blur") {
+                e.preventDefault();
+                td.innerHTML = escapeHTML(input.value);
+                var col  = get_column_from_classname(td);
+                var orig = jQuery('#'+pane_prefix+'_col_'+col)[0].title;
+
+                var cols = default_columns[pane_prefix];
+                if(additionalParams[pane_prefix+'columns']) {
+                    cols = additionalParams[pane_prefix+'columns'];
+                }
+                cols = cols.split(/,/);
+                for(var x = 0; x < cols.length; x++) {
+                    var tmp = cols[x].split(/:/, 2);
+                    if(tmp[0] == col) {
+                        if(orig != input.value) {
+                            cols[x] = tmp[0]+':'+input.value;
+                        } else {
+                            cols[x] = tmp[0];
                         }
                     }
-
-                    var header = jQuery('.'+pane_prefix+'_table').find('th.status.col_'+col)[0];
-                    var childs = removeChilds(header);
-                    header.innerHTML = input.value+" ";
-                    addChilds(header, childs, 1);
-
-                    var newVal = cols.join(',');
-                    jQuery('#'+pane_prefix+'columns').val(newVal);
-                    additionalParams[pane_prefix+'columns'] = newVal;
-                    updateUrl();
                 }
-                /* cancel on escape */
-                if(e.keyCode == 27) {
-                    e.preventDefault();
-                    th.innerHTML = text+" ";
-                }
-            });
-        }, 100);
-    });
+
+                var header = jQuery('.'+pane_prefix+'_table').find('th.status.col_'+col)[0];
+                var childs = removeChilds(header);
+                header.innerHTML = input.value+" ";
+                addChilds(header, childs, 1);
+
+                var newVal = cols.join(',');
+                jQuery('#'+pane_prefix+'columns').val(newVal);
+                additionalParams[pane_prefix+'columns'] = newVal;
+                updateUrl();
+            }
+            /* cancel on escape */
+            if(e.keyCode == 27) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                td.innerHTML = text+" ";
+            }
+        });
+    }, 100);
 }
 
 // remove and return all child nodes

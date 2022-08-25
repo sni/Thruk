@@ -38,9 +38,9 @@
         <tbody class="rowhover">
           [% FOREACH col = table_columns.$paneprefix %]
             <tr>
-              <td><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; escape_html(col.title); END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field | html %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
-              <td class="clickable col_[% col.field | html %] js-column-renameable" id="[% paneprefix %]_col_[% col.field | html %]n" width="90%">[% col.title | html %]</td>
-              <td class="clickable cursor-move w-5"><i class="uil uil-draggabledots opacity-75"></i></td>
+              <td class="clickable cursor-move w-5 pr-1 js-drag-handle"><i class="uil uil-draggabledots opacity-75"></i></td>
+              <td class="cursor-text px-1 col_[% col.field | html %] js-column-renameable" id="[% paneprefix %]_col_[% col.field | html %]n" width="90%" title="double click to rename column">[% col.title | html %]</td>
+              <td class="pl-0"><input type="checkbox" value="[% col.field | html %]" title="[% IF col.defined('orig'); col.orig; ELSE; escape_html(col.title); END %]" class="[% paneprefix %]_col" id="[% paneprefix %]_col_[% col.field | html %]" name="[% paneprefix %]_columns_select" onchange="updateStatusColumns('[% paneprefix %]');"[% IF col.checked %] checked[% END %]></td>
             </tr>
           [% END %]
         </tbody>
