@@ -2885,7 +2885,7 @@ function reset_table_row_classes(table, c1, c2) {
 
 /* set icon src and refresh page */
 function refresh_button() {
-    reloadPage(50, true);
+    reloadPage(50, true, true);
 }
 
 /* reverse a string */
