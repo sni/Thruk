@@ -5,7 +5,7 @@
   [% END %]
 [% END %]
 
-<div id="reload-timer" class="hidden absolute top-[-11px] left-0 h-2 w-48 bg-[color:var(--border-error)] opacity-50 rounded-r-lg transform transition-all ease-linear scale-x-100 origin-left"></div>
+<div id="reload-timer" class="hidden absolute top-[-11px] left-0 h-2 w-48 bg-[color:var(--button-green-bg)] opacity-50 rounded-r-lg transform transition-all ease-linear scale-x-100 origin-left"></div>
 [% IF !hide_backends_chooser && sites != "" && show_sitepanel != "off" %]
   [% IF show_sitepanel == 'list' %]
     <div class="buttongroup backends [% IF param_backend.list.size > 3 %]hidden lg:flex[% END %]">
