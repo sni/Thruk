@@ -87,12 +87,16 @@ sub core_scheduling_page {
         next unless $d->{'has_been_checked'};
         next unless $d->{'active_checks_enabled'};
 
-        $intervals->{$d->{'check_interval'}}++;
-        $check_rate += 1/$d->{'check_interval'};
-        $interval_sum += $d->{'check_interval'};
+        my $interval_length = $c->stash->{'pi_detail'}->{$d->{'peer_key'}}->{'interval_length'};
+        my $check_interval  = $d->{'check_interval'} * $interval_length;
+        my $check_interval_minutes = $check_interval/60;
+
+        $intervals->{$check_interval_minutes}++;
+        $check_rate += 1/($check_interval_minutes);
+        $interval_sum += $check_interval_minutes;
         $count_all++;
 
-        $concurrent_rate += $d->{'execution_time'} / ($d->{'check_interval'} * 60);
+        $concurrent_rate += $d->{'execution_time'} / $check_interval;
 
         my $time = $d->{'next_check'};
         next unless $d->{'in_check_period'};
