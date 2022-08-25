@@ -87,7 +87,7 @@ sub core_scheduling_page {
         next unless $d->{'has_been_checked'};
         next unless $d->{'active_checks_enabled'};
 
-        my $interval_length = $c->stash->{'pi_detail'}->{$d->{'peer_key'}}->{'interval_length'};
+        my $interval_length = $c->stash->{'pi_detail'}->{$d->{'peer_key'}}->{'interval_length'} // 60;
         my $check_interval  = $d->{'check_interval'} * $interval_length;
         my $check_interval_minutes = $check_interval/60;
 
