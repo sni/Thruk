@@ -53,6 +53,7 @@ sub new {
         'host_object_attributes'    => $data->{'host_object_attributes'}    || {},
         'host_name'                 => $data->{'host_name'},
         'service_object_attributes' => $data->{'service_object_attributes'} || {},
+        'data'                      => $data->{'data'}          || {}, # can be used to store arbitrary data
         'create_obj'                => $data->{'create_obj'}    || 0,
         'create_obj_ok'             => 1,
         'scheduled_downtime_depth'  => 0,
