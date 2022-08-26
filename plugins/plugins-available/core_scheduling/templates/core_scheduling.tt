@@ -175,13 +175,32 @@ var standard_legend = {
     margin: [10, 40]
 };
 var queue_options = {
-    xaxis: { mode: "time",
-         timezone: "browser"
+    xaxis: {
+        mode:     "time",
+        timezone: "browser"
     },
     yaxes: [{
-               min: 0,
-               tickFormatter: function(val, axis) { return(val < axis.max ? val : "#"); },
-               labelWidth: 15
+        min:           0,
+        tickFormatter: function(val, axis) {
+          if(val >= axis.max) { return('#'); }
+          val = Math.round(val);
+          if(val >= 10000) {
+            val = val / 1000;
+            val = Math.round(val)+'k';
+            return(val);
+          }
+          if(val >= 1000) {
+            val = val / 1000;
+            if(val != Math.round(val)) {
+              val = Number(val).toFixed(1)+'k';
+            } else {
+              val = val+'k';
+            }
+            return(val);
+          }
+          return(val);
+        },
+        labelWidth:   20
     }],
     grid:      standard_grid,
     legend:    standard_legend
