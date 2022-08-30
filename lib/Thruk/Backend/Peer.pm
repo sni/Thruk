@@ -432,7 +432,10 @@ return job data
 =cut
 sub job_data {
     my($self, $c, $jobid) = @_;
-    my $data;
+    require Thruk::Utils::External;
+    my $data = Thruk::Utils::External::read_job($c, $jobid);
+    return($data) if $data;
+
     if($self->{'type'} eq 'http') {
         if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
             require Thruk::Utils;
@@ -465,10 +468,6 @@ sub job_data {
         my @args = @_;
         shift @args;
         return($http_peer->job_data(@args));
-    }
-    else {
-        require Thruk::Utils::External;
-        $data = Thruk::Utils::External::read_job($c, $jobid);
     }
     return($data);
 }
