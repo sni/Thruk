@@ -5,6 +5,8 @@ use strict;
 use Carp;
 use Scalar::Util qw/weaken/;
 
+use Thruk::Backend::Manager ();
+
 ## no lint
 use Thruk::Backend::Provider::Livestatus ();
 ## use lint

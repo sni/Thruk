@@ -10,7 +10,6 @@ use Storable qw/dclone/;
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
 use Monitoring::Config::Object::Parent ();
-use Thruk::Backend::Manager ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
