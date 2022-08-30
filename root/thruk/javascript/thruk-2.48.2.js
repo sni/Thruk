@@ -3421,10 +3421,12 @@ function sendJSError(scripturl, text) {
 function showJobOutputPopup(jobid, peerid) {
     var url = url_prefix+"cgi-bin/job.cgi?job="+jobid+"&peer="+peerid+"&modal=1";
     openModalWindowUrl(url, function(text, status, req) {
-        if(status == "error") {
-            jQuery('#modalFG DIV.spinner').show();
-            jQuery('#modalFG .textALERT').text("retrying...");
+        if(req && req.status == 404) {
+        }
+        else if(status == "error") {
             window.setTimeout(function() {
+                jQuery('#modalFG DIV.spinner').show();
+                jQuery('#modalFG .textALERT').text("retrying...");
                 // only show if not closed meanwhile
                 if(document.getElementById('modalFG')) {
                     closeModalWindow();
