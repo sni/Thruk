@@ -59,3 +59,4 @@
     delay: 1
   - include_role:
       name: thruk_logcache_mysql
+  - shell: sudo su - demo -c "git add . && git commit -m 'setup complete'"

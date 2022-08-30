@@ -8,3 +8,10 @@
     path: /etc/sudoers
     regexp: '^{{site}}.*yum'
     line: "{{site}}  ALL=(ALL) NOPASSWD: /usr/bin/omd, NOPASSWD: /usr/bin/dnf, NOPASSWD:SETENV: /usr/bin/apt-get"
+- name: initialize git home
+  shell:
+    cmd: git init && git add . && git commit -m 'init'
+    chdir: "/omd/sites/{{site}}"
+    creates: "/omd/sites/{{site}}/.git"
+  become: yes
+  become_user: "{{site}}"
