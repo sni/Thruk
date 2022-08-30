@@ -264,11 +264,11 @@ sub logcache {
 
 ##########################################################
 
-=head2 cmd
+=head2 get_http_fallback_peer
 
-  cmd($c, $cmd, [$background_options])
+  get_http_fallback_peer()
 
-return result of cmd
+return http peer from fallback addr
 
 =cut
 

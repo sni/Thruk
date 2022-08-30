@@ -143,7 +143,7 @@ sub init {
         if(lc($remotepeer->{'type'}) eq 'http') {
             $self->{'remotepeer'} = $remotepeer;
         } else {
-            my $http_peer = $peer->get_http_fallback_peer();
+            my $http_peer = $remotepeer->get_http_fallback_peer();
             $self->{'remotepeer'} = $httppeer if $http_peer;
         }
     }
