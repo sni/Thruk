@@ -38,7 +38,7 @@
     [% END %]
     [% UNLESS minimal %]
       <header class="header">
-        <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center">
+        <div class="h-[50px] min-w-fit flexrow flex-nowrap items-center overflow-y-hidden">
           <button id="mainNavBtn" class="big iconOnly w-10 h-10 ml-[-10px] clickable min-w-[30px]"><i class="fa-solid fa-bars"></i></button>
           <div class="flex-grow h-min relative">
             [% IF c.user_exists %][% PROCESS _header_sites.tt %][% END %]

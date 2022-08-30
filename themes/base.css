@@ -318,7 +318,9 @@ BODY {
 }
 
 header.header {
-  @apply sticky block top-0 z-30 px-5 headerBG h-[50px] shrink-0 overflow-x-auto;
+  @apply sticky block top-0 z-30 px-5 headerBG h-[50px] shrink-0 overflow-x-auto overflow-y-hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
   IMG.collapsed-only {
     @apply hidden;
   }
