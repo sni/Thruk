@@ -277,17 +277,26 @@ sub get_peer_by_name {
 
 =head2 get_http_peers
 
-  get_http_peers()
+  get_http_peers([$with_fallbacks])
 
 returns all configured peers which have a http connection type
 
 =cut
 
 sub get_http_peers {
-    my($self) = @_;
+    my($self, $with_fallbacks) = @_;
     my $http_peers = [];
     for my $peer (@{$self->get_peers()}) {
-        push @{$http_peers}, $peer if $peer->{'type'} eq 'http';
+        if($peer->{'type'} eq 'http') {
+            push @{$http_peers}, $peer;
+        } elsif($with_fallbacks) {
+            for my $addr (@{$peer->peer_list()}) {
+                if($addr =~ m/^https?:/mx) {
+                    push @{$http_peers}, $peer;
+                    last;
+                }
+            }
+        }
     }
     return $http_peers;
 }

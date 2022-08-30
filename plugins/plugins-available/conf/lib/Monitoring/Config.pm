@@ -144,13 +144,8 @@ sub init {
         if(lc($remotepeer->{'type'}) eq 'http') {
             $self->{'remotepeer'} = $remotepeer;
         } else {
-            # check if there is any http source set
-            for my $src (@{$remotepeer->{'peer_list'}}) {
-                if($src =~ m/^https?:/mx) {
-                    $self->{'remotepeer'} = Thruk::Backend::Manager::fork_http_peer($remotepeer, $src);
-                    last;
-                }
-            }
+            my $http_peer = $peer->get_http_fallback_peer();
+            $self->{'remotepeer'} = $httppeer if $http_peer;
         }
     }
     $self->{'stats'} = $stats if defined $stats;

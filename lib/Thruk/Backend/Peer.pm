@@ -269,6 +269,31 @@ sub logcache {
 return result of cmd
 
 =cut
+
+sub get_http_fallback_peer {
+    my($self) = @_;
+    return($self->{'_http_fallback_peer'}) if exists $self->{'_http_fallback_peer'};
+    $self->{'_http_fallback_peer'} = undef;
+
+    # check if there is any http source set
+    for my $src (@{$self->peer_list}) {
+        if($src =~ m/^https?:/mx) {
+            $self->{'_http_fallback_peer'} = Thruk::Backend::Manager::fork_http_peer($self, $src);
+            last;
+        }
+    }
+    return($self->{'_http_fallback_peer'});
+}
+
+##########################################################
+
+=head2 cmd
+
+  cmd($c, $cmd, [$background_options])
+
+return result of cmd
+
+=cut
 sub cmd {
     my($self, $c, $cmd, $background_options) = @_;
     my($rc, $out) = (0, "");
@@ -316,7 +341,12 @@ sub cmd {
             }
         }
 
-    } else {
+    } elsif(my $http_peer = $self->get_http_fallback_peer()) {
+        my @args = @_;
+        shift @args;
+        return($http_peer->cmd(@args))
+    }
+    else {
         if($background_options) {
             require Thruk::Utils::External;
             $out = Thruk::Utils::External::cmd($c, $background_options);
@@ -370,7 +400,12 @@ sub rpc {
             @res = @{$self->{'class'}->request($sub, \@args, { timeout => 120 })};
         }
 
-    } else {
+    } elsif(my $http_peer = $self->get_http_fallback_peer()) {
+        my @args = @_;
+        shift @args;
+        return($http_peer->rpc(@args));
+    }
+    else {
         my $pkg_name     = $sub;
         $pkg_name        =~ s%::[^:]+$%%mx;
         my $function_ref = \&{$sub};
@@ -426,7 +461,12 @@ sub job_data {
         } else {
             ($data) = @{$self->{'class'}->request("Thruk::Utils::External::read_job", ['Thruk::Context', $jobid])};
         }
-    } else {
+    } elsif(my $http_peer = $self->get_http_fallback_peer()) {
+        my @args = @_;
+        shift @args;
+        return($http_peer->job_data(@args));
+    }
+    else {
         require Thruk::Utils::External;
         $data = Thruk::Utils::External::read_job($c, $jobid);
     }
