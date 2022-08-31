@@ -144,7 +144,7 @@ sub init {
             $self->{'remotepeer'} = $remotepeer;
         } else {
             my $http_peer = $remotepeer->get_http_fallback_peer();
-            $self->{'remotepeer'} = $httppeer if $http_peer;
+            $self->{'remotepeer'} = $http_peer if $http_peer;
         }
     }
     $self->{'stats'} = $stats if defined $stats;
