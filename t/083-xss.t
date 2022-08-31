@@ -99,6 +99,8 @@ sub check_templates {
         next if $tag !~ m/\[%/gmx;
         # extract attributes from this tag
         my $str = $tag; # not copying the string seems to miss some matches
+        $str =~ s/\s*ELSE\s*;\s*//gmx;
+        $str =~ s/\s*;\s*END\s*//gmx;
         my @attributes = $str =~ m%([\w\-]+)=("[^"]*"|'[^']*')%sgmx;
         while(my ($key,$value) = splice(@attributes,0,2)) {
             next unless $value =~ m/\[%/mx;
@@ -119,6 +121,7 @@ sub check_templates {
                 next if $var eq '';
                 next if $var eq 'END';
                 next if $var eq 'ELSE';
+                next if $var =~ m/\w+\s*=\s*/gmx;
 
                 if($key =~ m/^(href|src)$/mx) {
                     if($var =~ m/

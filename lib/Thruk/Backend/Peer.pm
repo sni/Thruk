@@ -346,7 +346,7 @@ sub cmd {
     } elsif(my $http_peer = $self->get_http_fallback_peer()) {
         my @args = @_;
         shift @args;
-        return($http_peer->cmd(@args))
+        return($http_peer->cmd(@args));
     }
     else {
         if($background_options) {
@@ -433,7 +433,9 @@ return job data
 
 =cut
 sub job_data {
-    my($self, $c, $jobid) = @_;
+    my(@args) = @_;
+    my($self, $c, $jobid) = @args;
+
     require Thruk::Utils::External;
     my $data = Thruk::Utils::External::read_job($c, $jobid);
     return($data) if $data;
@@ -467,7 +469,6 @@ sub job_data {
             ($data) = @{$self->{'class'}->request("Thruk::Utils::External::read_job", ['Thruk::Context', $jobid])};
         }
     } elsif(my $http_peer = $self->get_http_fallback_peer()) {
-        my @args = @_;
         shift @args;
         return($http_peer->job_data(@args));
     }
