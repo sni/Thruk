@@ -62,6 +62,7 @@ sub check_templates {
             next if $c =~ m/^fa\-/gmx;
             next if $c =~ m/^uil\-/gmx;
             next if $c eq '';
+            next if $c eq '-';
             if(!defined $available_classes->{$c}) {
                 $failed++;
                 fail(sprintf("%s uses undefined css class: %s in %s at line %d", $file, $c, $tag, $linenr));
