@@ -200,7 +200,7 @@
         </td>
         <td class="p-0 pl-px align-top">
           [% IF !empty && service_stats.warning_and_unhandled > 0 %]<a class="itemblock importantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, hoststatustypes => 3, serviceprops => 10 }) %]'>[% service_stats.warning_and_unhandled %] Unhandled Problems</a>[% END %]
-          [% IF !empty && service_stats.warning_on_down_host > 0  %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 12 }) %]'>[% service_stats.warning_on_down_host %] on Problem Hosts</a>[% END %]
+          [% IF !empty && service_stats.warning_on_down_host > 0  %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, hoststatustypes => 12 }) %]'>[% service_stats.warning_on_down_host %] on Problem Hosts</a>[% END %]
           [% IF !empty && service_stats.warning_and_scheduled > 0 %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 1 }) %]'>[% service_stats.warning_and_scheduled %] Scheduled</a>[% END %]
           [% IF !empty && service_stats.warning_and_ack > 0       %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 4, serviceprops => 4 }) %]'>[% service_stats.warning_and_ack %] Acknowledged</a>[% END %]
           [% IF strict_passive_mode %]
@@ -212,7 +212,7 @@
         </td>
         <td class="p-0 pl-px align-top">
           [% IF !empty && service_stats.unknown_and_unhandled > 0 %]<a class="itemblock importantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, hoststatustypes => 3, serviceprops => 10 }) %]'>[% service_stats.unknown_and_unhandled %] Unhandled Problems</a>[% END %]
-          [% IF !empty && service_stats.unknown_on_down_host > 0  %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 12 }) %]'>[% service_stats.unknown_on_down_host %] on Problem Hosts</a>[% END %]
+          [% IF !empty && service_stats.unknown_on_down_host > 0  %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, hoststatustypes => 12 }) %]'>[% service_stats.unknown_on_down_host %] on Problem Hosts</a>[% END %]
           [% IF !empty && service_stats.unknown_and_scheduled > 0 %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 1 }) %]'>[% service_stats.unknown_and_scheduled %] Scheduled</a>[% END %]
           [% IF !empty && service_stats.unknown_and_ack > 0       %]<a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicestatustypes => 8, serviceprops => 4 }) %]'>[% service_stats.unknown_and_ack %] Acknowledged</a>[% END %]
           [% IF strict_passive_mode %]
