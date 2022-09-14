@@ -372,12 +372,12 @@ TH {
 }
 
 TR:nth-child(odd) TD.tableRowSelected{
-  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
+  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING), &.col_host_name {
     @apply bg-[color:var(--row-selected-odd-bg)] text-[color:var(--row-selected-fg)] !important;
   }
 }
 TR:nth-child(even) TD.tableRowSelected {
-  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING) {
+  &:not(.OK):not(.UNKNOWN):not(.UP):not(.WARNING):not(.UNKNOWN):not(.DOWN):not(.CRITICAL):not(.UNREACHABLE):not(.PENDING), &.col_host_name {
     @apply bg-[color:var(--row-selected-even-bg)] text-[color:var(--row-selected-fg)] !important;
   }
 }
