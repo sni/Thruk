@@ -814,6 +814,8 @@ alias for /contacts?name=<name>
 external commands are documented in detail on a separate commands page.
 list of supported commands:
 
+ - link:rest_commands.html#post-contactsnamecmdchange_contact_host_notification_timeperiod[change_contact_host_notification_timeperiod]
+ - link:rest_commands.html#post-contactsnamecmdchange_contact_svc_notification_timeperiod[change_contact_svc_notification_timeperiod]
  - link:rest_commands.html#post-contactsnamecmdchange_custom_contact_var[change_custom_contact_var]
  - link:rest_commands.html#post-contactsnamecmddisable_contact_host_notifications[disable_contact_host_notifications]
  - link:rest_commands.html#post-contactsnamecmddisable_contact_svc_notifications[disable_contact_svc_notifications]
@@ -952,8 +954,10 @@ list of supported commands:
  - link:rest_commands.html#post-hostsnamecmdadd_host_comment[add_host_comment]
  - link:rest_commands.html#post-hostsnamecmdchange_custom_host_var[change_custom_host_var]
  - link:rest_commands.html#post-hostsnamecmdchange_host_check_command[change_host_check_command]
+ - link:rest_commands.html#post-hostsnamecmdchange_host_check_timeperiod[change_host_check_timeperiod]
  - link:rest_commands.html#post-hostsnamecmdchange_host_event_handler[change_host_event_handler]
  - link:rest_commands.html#post-hostsnamecmdchange_host_modattr[change_host_modattr]
+ - link:rest_commands.html#post-hostsnamecmdchange_host_notification_timeperiod[change_host_notification_timeperiod]
  - link:rest_commands.html#post-hostsnamecmdchange_max_host_check_attempts[change_max_host_check_attempts]
  - link:rest_commands.html#post-hostsnamecmdchange_normal_host_check_interval[change_normal_host_check_interval]
  - link:rest_commands.html#post-hostsnamecmdchange_retry_host_check_interval[change_retry_host_check_interval]
@@ -1320,8 +1324,10 @@ list of supported commands:
  - link:rest_commands.html#post-serviceshostservicecmdchange_normal_svc_check_interval[change_normal_svc_check_interval]
  - link:rest_commands.html#post-serviceshostservicecmdchange_retry_svc_check_interval[change_retry_svc_check_interval]
  - link:rest_commands.html#post-serviceshostservicecmdchange_svc_check_command[change_svc_check_command]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_svc_check_timeperiod[change_svc_check_timeperiod]
  - link:rest_commands.html#post-serviceshostservicecmdchange_svc_event_handler[change_svc_event_handler]
  - link:rest_commands.html#post-serviceshostservicecmdchange_svc_modattr[change_svc_modattr]
+ - link:rest_commands.html#post-serviceshostservicecmdchange_svc_notification_timeperiod[change_svc_notification_timeperiod]
  - link:rest_commands.html#post-serviceshostservicecmddel_active_service_downtimes[del_active_service_downtimes]
  - link:rest_commands.html#post-serviceshostservicecmddel_all_svc_comments[del_all_svc_comments]
  - link:rest_commands.html#post-serviceshostservicecmddelay_svc_notification[delay_svc_notification]
@@ -1538,6 +1544,7 @@ list of supported commands:
  - link:rest_commands.html#post-systemcmdchange_global_host_event_handler[change_global_host_event_handler]
  - link:rest_commands.html#post-systemcmdchange_global_svc_event_handler[change_global_svc_event_handler]
  - link:rest_commands.html#post-systemcmddel_downtime_by_host_name[del_downtime_by_host_name]
+ - link:rest_commands.html#post-systemcmddel_downtime_by_hostgroup_name[del_downtime_by_hostgroup_name]
  - link:rest_commands.html#post-systemcmddel_downtime_by_start_time_comment[del_downtime_by_start_time_comment]
  - link:rest_commands.html#post-systemcmddel_host_comment[del_host_comment]
  - link:rest_commands.html#post-systemcmddel_host_downtime[del_host_downtime]
@@ -2093,3 +2100,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

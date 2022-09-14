@@ -343,6 +343,15 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_command.html for details.
 
+# REST PATH: POST /hosts/<name>/cmd/change_host_check_timeperiod
+# Changes the valid check period for the specified host.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_timeperiod.html for details.
+
 # REST PATH: POST /hosts/<name>/cmd/change_host_event_handler
 # Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
 #
@@ -358,6 +367,15 @@ __DATA__
 # This command does not require any arguments.
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
+
+# REST PATH: POST /hosts/<name>/cmd/change_host_notification_timeperiod
+# Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_host_notification_timeperiod.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_max_host_check_attempts
 # Changes the maximum number of check attempts (retries) for a particular host.
@@ -792,6 +810,15 @@ __DATA__
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_command.html for details.
 
+# REST PATH: POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
+# Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_timeperiod.html for details.
+
 # REST PATH: POST /services/<host>/<service>/cmd/change_svc_event_handler
 # Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.
 #
@@ -807,6 +834,15 @@ __DATA__
 # This command does not require any arguments.
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
+
+# REST PATH: POST /services/<host>/<service>/cmd/change_svc_notification_timeperiod
+# Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_svc_notification_timeperiod.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/del_active_service_downtimes
 # Removes all currently active downtimes for this service.
@@ -1004,6 +1040,19 @@ __DATA__
 #   * comment
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
+
+# REST PATH: POST /system/cmd/del_downtime_by_hostgroup_name
+# This command deletes all downtimes matching the specified filters.
+#
+# Optional arguments:
+#
+#   * hostgroup_name
+#   * hostname
+#   * service_desc
+#   * start_time
+#   * comment
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_hostgroup_name.html for details.
 
 # REST PATH: POST /system/cmd/del_downtime_by_start_time_comment
 # This command deletes all downtimes matching the specified filters.
@@ -1254,6 +1303,24 @@ __DATA__
 #   * comment_author
 #
 # See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_contact_host_notification_timeperiod
+# Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_host_notification_timeperiod.html for details.
+
+# REST PATH: POST /contacts/<name>/cmd/change_contact_svc_notification_timeperiod
+# Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+#
+# Required arguments:
+#
+#   * timeperiod
+#
+# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_svc_notification_timeperiod.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/change_custom_contact_var
 # Changes the value of a custom contact variable.
@@ -1587,6 +1654,7 @@ __DATA__
 
 {"all_host_service":{
   "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","nr":-1,"required":[]},
+  "del_downtime_by_hostgroup_name":{"args":["hostgroup_name","hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_hostgroup_name","nr":-1,"required":[]},
   "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","nr":-1,"required":[]}
 },
 "contactgroups":{
@@ -1596,6 +1664,8 @@ __DATA__
   "enable_contactgroup_svc_notifications":{"args":[],"docs":"Enables service notifications for all contacts in a particular contactgroup.","name":"enable_contactgroup_svc_notifications","nr":-1,"required":[]}
 },
 "contacts":{
+  "change_contact_host_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_contact_host_notification_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_contact_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_contact_svc_notification_timeperiod","nr":-1,"required":["timeperiod"]},
   "change_custom_contact_var":{"args":["name","value"],"docs":"Changes the value of a custom contact variable.","name":"change_custom_contact_var","nr":-1,"required":["name","value"]},
   "disable_contact_host_notifications":{"args":[],"docs":"Disables host notifications for a particular contact.","name":"disable_contact_host_notifications","nr":-1,"required":[]},
   "disable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"disable_contact_svc_notifications","nr":-1,"required":[]},
@@ -1624,8 +1694,10 @@ __DATA__
   "add_host_comment":{"args":["persistent_comment","comment_author","comment_data"],"name":"add_host_comment","nr":"1","required":["comment_data"]},
   "change_custom_host_var":{"args":["name","value"],"docs":"Changes the value of a custom host variable.","name":"change_custom_host_var","nr":-1,"required":["name","value"]},
   "change_host_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular host to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_host_check_command","nr":-1,"required":["checkcommand"]},
+  "change_host_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the valid check period for the specified host.","name":"change_host_check_timeperiod","nr":-1,"required":["timeperiod"]},
   "change_host_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_host_event_handler","nr":-1,"required":["eventhandler"]},
   "change_host_modattr":{"args":[],"name":"change_host_modattr","nr":"154","required":[]},
+  "change_host_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_host_notification_timeperiod","nr":-1,"required":["timeperiod"]},
   "change_max_host_check_attempts":{"args":["interval"],"docs":"Changes the maximum number of check attempts (retries) for a particular host.","name":"change_max_host_check_attempts","nr":-1,"required":["interval"]},
   "change_normal_host_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular host.","name":"change_normal_host_check_interval","nr":-1,"required":["interval"]},
   "change_retry_host_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular host.","name":"change_retry_host_check_interval","nr":-1,"required":["interval"]},
@@ -1690,8 +1762,10 @@ __DATA__
   "change_normal_svc_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular service","name":"change_normal_svc_check_interval","nr":-1,"required":["interval"]},
   "change_retry_svc_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular service.","name":"change_retry_svc_check_interval","nr":-1,"required":["interval"]},
   "change_svc_check_command":{"args":["checkcommand"],"docs":"Changes the check command for a particular service to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_command","nr":-1,"required":["checkcommand"]},
+  "change_svc_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_timeperiod","nr":-1,"required":["timeperiod"]},
   "change_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_svc_event_handler","nr":-1,"required":["eventhandler"]},
   "change_svc_modattr":{"args":[],"name":"change_svc_modattr","nr":"155","required":[]},
+  "change_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_notification_timeperiod","nr":-1,"required":["timeperiod"]},
   "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
   "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
