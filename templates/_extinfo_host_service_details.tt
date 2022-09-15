@@ -112,7 +112,8 @@ END
       [% END %]
       <div class="inline-block">
         (for [% IF obj.last_state_change %][% duration(date.now - obj.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
-        [% IF obj.acknowledged %] (Has been acknowledged) [% END %]
+        [% IF obj.acknowledged %] (<i class="fa-solid fa-person-digging"></i> has been acknowledged) [% END %]
+        [% IF obj.scheduled_downtime_depth > 0 %] (<i class="fa-solid fa-moon align-sub"></i>in maintenance) [% END %]
       </div>
     </td>
   </tr>
@@ -290,7 +291,7 @@ END
         [% IF downtimes.size > 0 %]
           [% FOREACH d = downtimes %]
             [% IF d.start_time > date.now; continue; END %]
-            (<a href="#downtimes">[% date_format(c, d.start_time) %] - [% date_format(c, d.end_time) %]</a>)
+            (<a class="link js-modal-command-link" href="cmd.cgi?cmd_typ=[% IF type == "host" %]78[% ELSE %]79[% END %]&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]">[% date_format(c, d.start_time) %] - [% date_format(c, d.end_time) %]</a>)
           [% END %]
         [% END %]
       [% ELSE %]
