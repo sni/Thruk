@@ -59,7 +59,7 @@ sub index {
     }
 
     # service filter
-    if($service ne 'all') {
+    if($service ne 'all' && ($service ne '' || $host ne '')) {
         push @{$filter}, { service_description => $service };
     }
 
