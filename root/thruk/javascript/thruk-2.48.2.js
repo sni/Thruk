@@ -2511,6 +2511,13 @@ function duration(seconds) {
 /* toggle checkbox by id */
 function toggleCheckBox(id) {
   var box = document.getElementById(id);
+  if(!box) {
+    box = jQuery(id)[0];
+  }
+  if(!box) {
+    if(thruk_debug_js) { alert("ERROR: no element in toggleCheckBox() for: " + id ); }
+    return;
+  }
   if(box.checked) {
     box.checked = false;
   } else {
