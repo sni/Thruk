@@ -137,6 +137,7 @@ my $base_defaults = {
     'force_persistent_ack'                  => 0,
     'force_persistent_comments'             => 0,
     'downtime_duration'                     => 7200,
+    'has_expire_acks'                       => 1,
     'expire_ack_duration'                   => 86400,
     'show_custom_vars'                      => [],
     'expose_custom_vars'                    => [],
@@ -311,7 +312,7 @@ sub get_default_stash {
         'remote_user'               => '?',
         'infoBoxTitle'              => '',
         'has_proc_info'             => 0,
-        'has_expire_acks'           => 0,
+        'has_expire_acks'           => 1,
         'no_auto_reload'            => 0,
         'die_on_errors'             => 0,        # used in cmd.cgi
         'errorMessage'              => 0,        # used in errors

@@ -574,15 +574,6 @@ sub add_defaults {
         }
     }
 
-    ###############################
-    # expire acks?
-    $c->stash->{'has_expire_acks'} = 0;
-    $c->stash->{'has_expire_acks'} = 1 if $c->stash->{'enable_icinga_features'}
-                                       or $c->stash->{'enable_shinken_features'};
-
-    $c->stash->{'navigation'} = "";
-    Thruk::Utils::Menu::read_navigation($c);
-
     # config edit buttons?
     $c->stash->{'show_config_edit_buttons'} = 0;
     if($c->config->{'use_feature_configtool'} && $c->check_user_roles("admin")) {
@@ -609,16 +600,21 @@ sub add_defaults {
         }
     }
 
-    $c->stash->{'has_lmd'} = $c->config->{'use_lmd_core'} ? 1 : 0;
-
     ###############################
+    $c->stash->{'has_lmd'} = $c->config->{'use_lmd_core'} ? 1 : 0;
+    $c->stash->{'has_expire_acks'} = $c->config->{'has_expire_acks'} // 1;
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
 
+    ###############################
     # now double check if this user is allowed to use api keys
     if(!$c->config->{'api_keys_enabled'} && $c->req->header('X-Thruk-Auth-Key')) {
         $c->error("this account is not allowed to use api keys.");
         return;
     }
+
+    ###############################
+    $c->stash->{'navigation'} = "";
+    Thruk::Utils::Menu::read_navigation($c);
 
     ###############################
     $c->stats->profile(end => "AddDefaults::add_defaults");
