@@ -22,6 +22,7 @@
         [% ELSIF col == "Duration"      %]<cell width='15'>Duration</cell>
         [% ELSIF col == "Status Information"       %]<cell width='80'>Status Information</cell>
         [% ELSIF col == "Extra Status Information" %]<cell width='80'>Extra Status Information</cell>
+        [% ELSIF col == "Comments"      %]<cell width='80'>Comments</cell>
         [% ELSE %]<cell width='30'>[% escape_xml(col) %]</cell>
         [% END %]
         [% END %]
@@ -63,6 +64,19 @@
         [% ELSIF col == "Duration"                 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
         [% ELSIF col == "Status Information"       %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>
         [% ELSIF col == "Extra Status Information" %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>
+        [% ELSIF col == "Comments"      %]
+          <cell>
+            [%- IF comments_by_host.defined(peer_key) && comments_by_host.$peer_key.defined(h.name) -%]
+              [%- host_name = h.name; first = 1; -%]
+              [%- FOREACH com = comments_by_host.$peer_key.$host_name -%]
+                [%- IF com.defined("start_time") -%]
+                  [% IF !first; ", "; END; first = 0; %]Downtime: [% escape_xml(com.author) %]: [% escape_xml(com.comment) %] ([% format_date(com.start_time, datetime_format) %] - [% format_date(com.end_time, datetime_format) %])
+                [%- ELSIF com.entry_type == 1 || com.entry_type == 4 -%]
+                  [%- IF com.entry_type == 1 %][% IF !first; ", "; END; first = 0; %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% escape_xml(com.author) | html %]: [% escape_xml(com.comment) -%]
+                [%- END -%]
+              [%- END -%]
+            [%- END -%]
+          </cell>
         [% ELSE %]
           [% cust_vars = get_custom_vars(c, h) %]
           [% col = col.replace('^_', '') %]

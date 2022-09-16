@@ -189,7 +189,7 @@
             [% host_name = h.name %]
             [% FOREACH com = comments_by_host.$peer_key.$host_name %]
               [% IF com.defined("start_time") %]
-                Downtime: [% com.author %]: [% com.comment %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
+                Downtime: [% com.author | html %]: [% com.comment | html %] ([% date_format(c, com.start_time) %] - [% date_format(c, com.end_time) %])<br>
               [% ELSIF com.entry_type == 1 || com.entry_type == 4 %]
                 [% IF com.entry_type == 1 %]Comment[% ELSIF com.entry_type == 4 %]Acknowledgement[% END %]: [% com.author | html %]: [% com.comment | html %]<br>
               [% END %]

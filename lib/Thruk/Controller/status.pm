@@ -448,7 +448,7 @@ sub _process_details_page {
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($selected_columns) {
-        Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/mx || $c->req->parameters->{'autoShow'});
+        Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/imx || $c->req->parameters->{'autoShow'});
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
@@ -538,6 +538,7 @@ sub _process_details_page {
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, [''], 'service');
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
         $c->stash->{'template'} = 'excel/status_detail.tt';
@@ -599,7 +600,7 @@ sub _process_hostdetails_page {
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($selected_columns) {
-        Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/mx || $c->req->parameters->{'autoShow'});
+        Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/imx || $c->req->parameters->{'autoShow'});
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
@@ -660,6 +661,7 @@ sub _process_hostdetails_page {
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
         my $filename = 'status.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
         $c->stash->{'data'}     = $hosts;
@@ -1179,6 +1181,7 @@ sub _process_combined_page {
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'hosts'}     = $hosts;
         $c->stash->{'services'}  = $services;
