@@ -1997,6 +1997,15 @@ ex.:
   downtime_max_duration = 4w
 
 
+=== has_expire_acks
+{% include new_since.ad version="3.00" %}
+Show expire acknowledgement form.
+
+ex.:
+
+  has_expire_acks = 1
+
+
 === expire_ack_duration
 Default duration of acknowledgements with expire date. Default is one
 day.
