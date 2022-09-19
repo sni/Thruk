@@ -2238,7 +2238,7 @@ var TP = {
         TP.log('[global] full reload');
         // save current dashboards to a cookie, otherwise we would display something else after the reload
         Ext.getCmp('tabbar').getState();
-        reloadPage();
+        reloadPage(50, false, true);
     },
     log: function(str) {
         //debug(str); /* makes too much noise */
