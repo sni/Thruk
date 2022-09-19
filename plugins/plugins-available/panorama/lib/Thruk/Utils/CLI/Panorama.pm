@@ -100,6 +100,7 @@ sub cmd {
             $output = encode_json($dashboard);
             $output .= "\n";
         } else {
+            _fatal("cannot open dashboard: ".($nr == -1 ? $file : $nr));
             $rc = 1;
         }
     }
