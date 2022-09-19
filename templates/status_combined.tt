@@ -73,7 +73,7 @@
       </div>
       <div></div>
     </div>
-    <div class="mainTable">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
       [% PROCESS _status_hostdetail_table.tt data=hosts paneprefix='hst_' sortprefix='_hst' %]
     </div>
 
@@ -131,7 +131,7 @@
       </div>
       <div></div>
     </div>
-    <div class="mainTable">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
       [% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]
     </div>
 

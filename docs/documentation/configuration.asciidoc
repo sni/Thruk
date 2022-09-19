@@ -869,6 +869,14 @@ ex.:
   problems_limit = 500
 
 
+=== main_table_full
+{% include new_since.ad version="3.00" %}
+Set default for showing main data table at full size or not.
+
+ex.:
+
+ main_table_full = 0
+
 
 == Display Settings
 

@@ -1,4 +1,5 @@
-﻿<div class="w-fit">
+﻿<div class="flex flex-nowrap gap-x-2 items-center">
+  <button class="iconOnly" onclick="toggleMainTableFullscreen(); return false;" title="toggle main table fullscreen"><i class="uil uil-arrows-shrink-v text-lg"></i></button>
   <form action="[% IF original_url; base_url(c, original_url); END %]" method="GET">
     [% FOREACH par = c.request.parameters.keys %]
       [% NEXT IF !c.request.parameters.defined(par) %]

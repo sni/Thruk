@@ -1,6 +1,6 @@
 ﻿<div class="grow flexcol gap-1 items-center">
   <div class="card w-fit min-w-[500px] mt-5 overflow-hidden">
-    <div class="mainTable">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
       <table class="mainTable striped">
         <thead>
           <tr>

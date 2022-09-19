@@ -1,7 +1,7 @@
 ﻿[% USE date %]
 
 <div class="card min-w-[420px] w-full mt-5 overflow-hidden">
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     <table class="mainTable striped">
       <thead>
         <tr>

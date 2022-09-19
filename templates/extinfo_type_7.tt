@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     <table class="mainTable striped">
       <thead title="click to sort">
         <tr>

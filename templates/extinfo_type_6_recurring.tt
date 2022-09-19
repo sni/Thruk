@@ -27,7 +27,7 @@
       </div>
     [% END %]
   </div>
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     [% PROCESS _downtimes_recurring_table.tt downtimes = downtimes type='all' names=1 %]
   </div>
   <div class="mainTableFooter">

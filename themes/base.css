@@ -1120,7 +1120,7 @@ TABLE.rowhover > TBODY > TR, TBODY.rowhover > TR {
 }
 
 DIV.mainTableHeader {
-  @apply flex px-1.5 py-1;
+  @apply flex px-1.5 py-1 sticky top-[-20px] z-10 bgTable mt-0 rounded-t-lg;
   >DIV:first-of-type {
     @apply flex flex-1 self-center;
   }
@@ -1139,6 +1139,10 @@ DIV.mainTable {
     @apply borderDefault;
   }
   max-height: calc(100vh - 260px);
+
+  &.fullsize {
+    max-height: unset;
+  }
 }
 
 TABLE.mainTable {

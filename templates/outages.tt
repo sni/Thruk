@@ -6,7 +6,7 @@
   <h1 class="mt-5">Blocking Outages</h1>
 
   <div class="card min-w-[420px] w-full mt-2 overflow-hidden">
-    <div class="mainTable border-t-0">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %] border-t-0">
       <table class="mainTable striped">
         <thead>
           <tr>

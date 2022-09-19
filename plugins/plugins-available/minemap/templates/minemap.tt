@@ -30,7 +30,7 @@
     <div>[% PROCESS _pager_per_page.tt %]</div>
   </div>
 
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     <table class='mainTable sticky-2d striped w-fit' id="statusTable">
       <thead>
         <tr>

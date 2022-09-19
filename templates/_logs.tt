@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div class="mainTable border-t-0" style="max-height: calc(100vh - 220px);">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %] border-t-0" style="max-height: calc(100vh - 220px);">
     [% SET last_hour = '' %]
     [% FOREACH l = data %]
       [% this_hour = format_date(l.time, '%Y-%m-%d  %H') _ ':00' %]

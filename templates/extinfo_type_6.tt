@@ -52,7 +52,7 @@
       [% PROCESS _pager_per_page.tt %]
     </div>
   </div>
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     [% PROCESS _downtimes_table.tt downtimes=data type='service' names=1 %]
   </div>
   <div class="mainTableFooter">

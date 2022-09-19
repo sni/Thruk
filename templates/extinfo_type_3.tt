@@ -52,7 +52,7 @@
       [% PROCESS _pager_per_page.tt %]
     </div>
   </div>
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     [% PROCESS _comments_table.tt comments=data names=1 type="service" %]
   </div>
   <div class="mainTableFooter">

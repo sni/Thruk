@@ -92,7 +92,7 @@
       [% PROCESS _pager_per_page.tt %]
     </div>
   </div>
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     [% PROCESS _status_hostdetail_table.tt %]
   </div>
   <div class="mainTableFooter">

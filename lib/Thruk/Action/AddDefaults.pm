@@ -192,6 +192,9 @@ sub begin {
         }
     }
 
+    # main table cookie set?
+    $c->stash->{'main_table_full'} = $c->cookies('thruk_main_table_full') // $c->config->{'thruk_main_table_full'} // 0;
+
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
     # make usercontent folder based on env var if set. But only if it exists. Fallback to standard folder
     # otherwise except it doesn't exist either. Then better take the later if both do not exist.

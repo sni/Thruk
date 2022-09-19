@@ -63,7 +63,7 @@
       </div>
     </div>
 
-    <div class="mainTable" style="max-height: calc(100vh - 210px);">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]" style="max-height: calc(100vh - 210px);">
       [% FOR g IN data %]
         <div>
           <div class="p-2">

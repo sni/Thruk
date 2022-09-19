@@ -1187,6 +1187,16 @@ function is_el_subelement(obj_a, obj_b) {
     return false;
 }
 
+function toggleMainTableFullscreen() {
+    if(jQuery("DIV.mainTable").hasClass("fullsize")) {
+        jQuery("DIV.mainTable").removeClass("fullsize");
+        cookieSave('thruk_main_table_full', 0);
+    } else {
+        jQuery("DIV.mainTable").addClass("fullsize");
+        cookieSave('thruk_main_table_full', 1);
+    }
+}
+
 /* save settings in a cookie */
 function prefSubmitSound(url, value) {
   cookieSave('thruk_sounds', value);

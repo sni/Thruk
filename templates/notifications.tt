@@ -113,7 +113,7 @@
       [% PROCESS _pager_per_page.tt %]
     </div>
   </div>
-  <div class="mainTable">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     <table class="mainTable striped">
       <thead>
         <tr>

@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <div class="mainTable border-t-0">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %] border-t-0">
       <table class="mainTable striped" id="statusTable">
         <thead>
           <tr>

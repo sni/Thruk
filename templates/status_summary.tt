@@ -63,7 +63,7 @@
       </div>
     </div>
 
-    <div class="mainTable">
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
 
       [% FOR group IN data %]
         [% groupname = group.name %]

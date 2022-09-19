@@ -33,7 +33,7 @@
     <div class="grow"></div>
     <a href="reports2.cgi?action=edit&amp;report=new" class="button green w-40 mx-2">create new report</a>
   </div>
-  <div class="mainTable"  style="display: none;">
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]"  style="display: none;">
     <table class="mainTable js-striped" id="reportsTable">
       <thead>
         <tr>
