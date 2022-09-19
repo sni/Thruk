@@ -1031,3 +1031,12 @@ TP.getPanelMacros = function(panel) {
     }
     return(macros);
 }
+
+// refresh handler for icon widgets which don't have a state (reset state in case it has been set somehow)
+TP.refreshHandlerNoStateIcon = function(newStatus, skipUpdate) {
+    newStatus = 0;
+    delete this.downtime;
+    delete this.acknowledged;
+    delete this.hostProblem;
+    this.callParent([newStatus]);
+}
