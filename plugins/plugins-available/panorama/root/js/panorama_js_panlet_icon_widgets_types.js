@@ -540,7 +540,14 @@ Ext.define('TP.TextLabelWidget', {
         panel.xdata.layout.y        = 0;
     },
     getGeneralItems: function() { return; },
-    refreshHandler: TP.refreshHandlerNoStateIcon
+    refreshHandler: function() { return; },
+    applyXdata: function(xdata) {
+        delete this.downtime;
+        delete this.acknowledged;
+        delete this.hostProblem;
+        delete xdata.state;
+        this.callParent([xdata]);
+    }
 });
 
 /* Static Image */
@@ -618,7 +625,14 @@ Ext.define('TP.StaticIcon', {
     },
     getDetails: function() { return([]); },
     getName: function() { return(""); },
-    refreshHandler: TP.refreshHandlerNoStateIcon,
+    refreshHandler: function() {},
+    applyXdata: function(xdata) {
+        delete this.downtime;
+        delete this.acknowledged;
+        delete this.hostProblem;
+        delete xdata.state;
+        this.callParent([xdata]);
+    },
     setRenderItem: function(xdata, forceRecreate) {
         if(xdata == undefined) { xdata = this.xdata; }
         xdata.appearance = { type: 'icon'};
