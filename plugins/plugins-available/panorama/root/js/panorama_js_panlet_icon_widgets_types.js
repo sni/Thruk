@@ -540,14 +540,7 @@ Ext.define('TP.TextLabelWidget', {
         panel.xdata.layout.y        = 0;
     },
     getGeneralItems: function() { return; },
-    refreshHandler: function() { return; },
-    applyXdata: function(xdata) {
-        delete this.downtime;
-        delete this.acknowledged;
-        delete this.hostProblem;
-        delete xdata.state;
-        this.callParent([xdata]);
-    }
+    refreshHandler: function() { return; }
 });
 
 /* Static Image */
