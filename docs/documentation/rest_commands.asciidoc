@@ -388,16 +388,6 @@ Required arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_custom_host_var.html for details.
 
-=== POST /hosts/<name>/cmd/change_host_check_command
-
-Changes the check command for a particular host to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * checkcommand
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_command.html for details.
-
 === POST /hosts/<name>/cmd/change_host_check_timeperiod
 
 Changes the valid check period for the specified host.
@@ -407,16 +397,6 @@ Required arguments:
   * timeperiod
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_timeperiod.html for details.
-
-=== POST /hosts/<name>/cmd/change_host_event_handler
-
-Changes the event handler command for a particular host to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * eventhandler
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_host_event_handler.html for details.
 
 === POST /hosts/<name>/cmd/change_host_modattr
 
@@ -1040,16 +1020,6 @@ Required arguments:
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_retry_svc_check_interval.html for details.
 
-=== POST /services/<host>/<service>/cmd/change_svc_check_command
-
-Changes the check command for a particular service to be that specified by the 'check_command' option. The 'check_command' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * checkcommand
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_command.html for details.
-
 === POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
 
 Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
@@ -1059,16 +1029,6 @@ Required arguments:
   * timeperiod
 
 See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_timeperiod.html for details.
-
-=== POST /services/<host>/<service>/cmd/change_svc_event_handler
-
-Changes the event handler command for a particular service to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.
-
-Required arguments:
-
-  * eventhandler
-
-See http://www.naemon.org/documentation/developer/externalcommands/change_svc_event_handler.html for details.
 
 === POST /services/<host>/<service>/cmd/change_svc_modattr
 
