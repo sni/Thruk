@@ -34,6 +34,8 @@ for my $cmd (sort keys %{$commands}) {
     next if $cmd =~ m/CHANGE_CONTACT_MOD\w*ATTR/mx; # not implemented in core
     next if $cmd =~ m/CHANGE_.*_TIMEPERIOD/mx; # segfaults
     next if $cmd =~ m/DEL_DOWNTIME_BY_HOSTGROUP_NAME/mx; # segfaults
+    next if $cmd =~ m/CHANGE_.*_CHECK_COMMAND/mx; # not implemented in core
+    next if $cmd =~ m/CHANGE_.*_EVENT_HANDLER/mx; # not implemented in core
     for my $t (keys %{$cmd_data}) {
         if($cmd_data->{$t}->{lc $cmd}) {
             $found = 1;
