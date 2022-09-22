@@ -1,5 +1,5 @@
 ﻿[% IF has_refs && action != "editor" %]
-<div class="card overflow-hidden mt-3 w-full">
+<div class="card overflow-hidden w-full">
   <div class="head">
     <h3>References</h3>
   </div>

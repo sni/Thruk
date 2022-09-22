@@ -85,7 +85,7 @@
                 <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()">
                   <th class='status col_name'>Host</th>
                   <th class='status col_state'>Services</th>
-                  <th class='status col_actions'>Actions</th>
+                  <th class='status col_actions text-center'>Actions</th>
                   [% start_with = 3 %]
                   [% FOREACH col = default_columns.$paneprefix %]
                     [% IF loop.index >= start_with %]
@@ -136,7 +136,7 @@
                       </div>
                     </td>
                     <td>
-                      <div class="flex gap-x-1 justify-end">
+                      <div class="flex gap-x-1 justify-center">
                         [% IF h.notes_url_expanded %]
                           <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i></a>
                         [% END %]

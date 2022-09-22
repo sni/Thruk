@@ -877,6 +877,9 @@ DIV.progressbar {
   I, A {
     @apply !textALERT;
   }
+  I:hover{
+    @apply !opacity-100;
+  }
 }
 
 BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=submit] {
@@ -991,12 +994,11 @@ DIV.accordion {
 
 .fa-trash, .uil-trash-alt {
   @apply hover:textALERT;
-}
-A, BUTTON {
-  &:has(I.fa-trash), &:has(I.uil-trash-alt) {
-    @apply hover:textALERT;
+  &:hover {
+    @apply !opacity-100;
   }
 }
+
 
 /*******************************************************************************
  * tables

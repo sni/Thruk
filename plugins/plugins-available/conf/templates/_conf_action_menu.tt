@@ -1,5 +1,5 @@
 ﻿[% IF action != "editor" %]
-  <div class="card overflow-hidden">
+  <div class="card overflow-hidden w-full">
     <div class="head">
       <h3>Actions</h3>
     </div>
@@ -87,7 +87,7 @@
           </form>
         </div>
         [% END %]
-        <div class="hover-red">
+        <div class="hover-red-text">
           <form action='conf.cgi' method='POST'>
             <input type='hidden' name='sub' value='objects'>
             <input type='hidden' name='action' value='delete'>
