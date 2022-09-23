@@ -1445,6 +1445,7 @@ var TP = {
                     // first insert sub dashboards if there are some
                     for(var key in subReqs) {
                         TP.insertStatusResponseData(subReqs[key].tab, data.data.sub[key], subReqs[key].ref);
+                        TP.iconUpdateRunning[key] = false;
                     }
                     // then calculate own status
                     if(!tab.renewInProgress) {
