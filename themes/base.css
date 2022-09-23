@@ -1499,6 +1499,9 @@ IMG.action_icon {
 DIV.actionbox {
   >DIV {
     @apply whitespace-nowrap px-2 py-1 hover:hoverBG;
+    A {
+      @apply flex items-center;
+    }
   }
   >DIV.active {
     @apply hoverBG;

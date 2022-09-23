@@ -43,13 +43,9 @@
     <td class="pl-2">
       <input type="text" class="attrkey new_attr" name="newattr" id="newattr" value="new attribute..." onfocus="this.click()" onclick="ajax_search.init(this, 'attribute', { url:'conf.cgi?action=json&amp;type=attribute&amp;obj=[% type | html %]', autosubmit:false, empty: true, emptytxt: 'new attribute...', emptyclass:'new_attr', filter:new_attr_filter[% IF obj.defined("has_custom") %], emptymsg:'add custom variable'[% END %], onselect:function() { on_attr_select(); return false; }, onemptyclick: function() { on_empty_click(); } })">
     </td>
-    <td colspan=4></td>
-  </tr>
-
-  <tr>
-    <th class="pl-2 align-bottom">comments</th>
-    <td colspan=4 class="align-top pr-2">
-      <button class="mx-auto" onclick="openModalWindow(document.getElementById('new_attribute_pane')); return false;">
+    <td class="w-6"></td>
+    <td colspan=3>
+      <button title="Select one or multiple attributes that you want to add" onclick="openModalWindow(document.getElementById('new_attribute_pane')); return false;">
         <i class="uil uil-plus"></i>
         add new attribute
       </button>
@@ -65,13 +61,18 @@
       });
       -->
       </script>
+    </td>
+  </tr>
 
+  <tr>
+    <th class="pl-2 align-bottom">comments</th>
+    <td colspan=4 class="align-top pr-2">
       <div class="card w-[800px]" id="new_attribute_pane" style="display:none">
         <div class="head justify-between">
           <h3>Add New Attributes</h3>
           <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
         </div>
-        <table class="body">
+        <table class="body cellspacing-x">
           [% FOREACH key_cat = obj.get_default_keys() %]
             <tr>
               <th>[% key_cat.name %]</th>
@@ -86,10 +87,7 @@
           [% END %]
         </table>
         <div class="footer justify-center">
-          <button class="green" onclick="closeModalWindow(); return false;">
-            <i class="fa-solid fa-check"></i>
-            finish
-          </button>
+          <button class="green" onclick="closeModalWindow(); return false;">continue</button>
         </div>
       </div>
     </td>

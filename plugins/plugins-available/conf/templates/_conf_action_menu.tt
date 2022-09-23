@@ -5,13 +5,13 @@
     </div>
     <div class="actionbox">
       [% IF type != "apply" %]
-        <div>
+        <div class="flex flex-nowrap">
           <a href="conf.cgi?sub=objects&amp;action=new&amp;type=[% type | uri %]">
             <i class="fa-solid fa-plus"></i>
             Create a new [% type | html %]
           </a>
           [% IF type == "host" || type == "service" || type == "contact" %]
-            <a href="conf.cgi?sub=objects&amp;action=new&amp;type=[% type | uri %]&amp;template=1" class="ml-3">
+            <a href="conf.cgi?sub=objects&amp;action=new&amp;type=[% type | uri %]&amp;template=1" class="ml-1.5">
               (new template)
             </a>
           [% END %]
@@ -20,28 +20,28 @@
       [% IF show_object && object.get_id() != "new" %]
         <hr class="mt-0.5 pt-0.5">
         <div>
-          <a class="flex" href="status.cgi?style=[% IF type == "host" %]host[% END %]detail&dfl_s0_type=[% type | html %]&dfl_s0_op=%3D&dfl_s0_value=[% object.get_name() | html %]">
+          <a href="status.cgi?style=[% IF type == "host" %]host[% END %]detail&dfl_s0_type=[% type | html %]&dfl_s0_op=%3D&dfl_s0_value=[% object.get_name() | html %]">
             <i class="fa-solid fa-magnifying-glass-arrow-right"></i>
             Show live objects
           </a>
         </div>
         [% IF type == 'host' && !object.is_template() %]
         <div>
-          <a class="flex" href="conf.cgi?sub=objects&amp;action=listservices&amp;data.id=[% object.get_id() %]">
-            <i class="fa-solid fa-bars small"></i>
+          <a href="conf.cgi?sub=objects&amp;action=listservices&amp;data.id=[% object.get_id() %]">
+            <i class="fa-solid fa-bars"></i>
             Show services for this host
           </a>
         </div>
         [% END %]
         <div>
-          <a class="flex" href="conf.cgi?sub=objects&amp;action=listref&amp;data.id=[% object.get_id() %]">
+          <a href="conf.cgi?sub=objects&amp;action=listref&amp;data.id=[% object.get_id() %]">
             <i class="fa-solid fa-arrows-turn-to-dots"></i>
             Show references
           </a>
         </div>
         [% IF has_history %]
         <div>
-          <a class="flex" href='conf.cgi?sub=objects&amp;action=history&data.id=[% object.get_id() %]'>
+          <a href='conf.cgi?sub=objects&amp;action=history&data.id=[% object.get_id() %]'>
             <i class="fa-solid fa-code-commit"></i>
             Git Blame
           </a>
@@ -54,7 +54,7 @@
             <input type='hidden' name='action' value='clone'>
             <input type='hidden' name='data.id' value="[% object.get_id() %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+            <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
               <i class="fa-solid fa-clone"></i>
               Clone this [% type | html %]
             </a>
@@ -67,7 +67,7 @@
             <input type='hidden' name='action' value='enable'>
             <input type='hidden' name='data.id' value="[% object.get_id() %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+            <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
               <i class="fa-solid fa-circle-play"></i>
               Enable this [% type | html %]
             </a>
@@ -80,7 +80,7 @@
             <input type='hidden' name='action' value='disable'>
             <input type='hidden' name='data.id' value="[% object.get_id() %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+            <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
               <i class="fa-solid fa-circle-pause"></i>
               Disable this [% type | html %] temporarily
             </a>
@@ -93,7 +93,7 @@
             <input type='hidden' name='action' value='delete'>
             <input type='hidden' name='data.id' value="[% object.get_id() %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+            <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
               <i class="fa-solid fa-trash"></i>
               Delete this [% type | html %]
             </a>
@@ -105,21 +105,21 @@
             <input type='hidden' name='action' value='revert'>
             <input type='hidden' name='data.id' value="[% object.get_id() %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <a class="flex" href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
+            <a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]" onClick="jQuery(this).closest('FORM').submit(); return false;">
               <i class="fa-solid fa-reply-all"></i>
               Revert this [% type | html %]
             </a>
           </form>
         </div>
         <div>
-          <a class="flex" href="conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]">
+          <a href="conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]">
             <i class="fa-solid fa-truck-fast"></i>
             Move [% type | html %] to file
           </a>
         </div>
         [% IF type == 'contact' %]
         <div>
-          <a class="flex" href="conf.cgi?sub=users&amp;action=change&amp;data.username=[% object.get_name() | uri %]">
+          <a href="conf.cgi?sub=users&amp;action=change&amp;data.username=[% object.get_name() | uri %]">
             <i class="fa-solid fa-user-pen"></i>
             Edit CGI Permissions
           </a>
@@ -130,20 +130,20 @@
         <hr class="mt-0.5 pt-0.5">
         [% END %]
         <div>
-          <a class="flex" href="conf.cgi?sub=objects&amp;action=browser[% IF file_link %]#[% file_link | uri %][% END %]">
+          <a href="conf.cgi?sub=objects&amp;action=browser[% IF file_link %]#[% file_link | uri %][% END %]">
             <i class="fa-solid fa-folder-open"></i>
             Browse filesystem
           </a>
         </div>
         <div>
-          <a class="flex" href="conf.cgi?sub=objects&amp;action=tree">
+          <a href="conf.cgi?sub=objects&amp;action=tree">
             <i class="fa-solid fa-folder-tree"></i>
             Objects Tree
           </a>
         </div>
         [% IF has_history %]
         <div>
-          <a class="flex" href="conf.cgi?sub=objects&amp;action=history">
+          <a href="conf.cgi?sub=objects&amp;action=history">
             <i class="fa-solid fa-clock-rotate-left"></i>
             History
           </a>

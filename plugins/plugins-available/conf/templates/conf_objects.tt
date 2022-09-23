@@ -70,7 +70,7 @@
           </div>
           <div class="w-40 flexrow justify-end sub_1">
             [% IF ! readonly %]
-            <button class="w-20">apply</button>
+            <button class="w-20" title="Apply changes to this object">apply</button>
             [% END %]
           </div>
         </div>
@@ -168,7 +168,7 @@
               [% IF object.get_id() != 'new' && ! bare %]
               <input type="submit" name="send" value="raw edit" class="sub_1 w-40">
               [% END %]
-              <button class="w-40 green">apply</button>
+              <button class="w-40 green" title="Apply changes to this object">apply</button>
           </div>
         [% END %]
       </div>
