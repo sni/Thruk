@@ -10,6 +10,7 @@ Ext.define('TP.Pantab', {
     autoRender:  true,
     autoShow:    false,
     locked:      start_unlocked, // lock it by default
+    curMask:     null,
     initComponent: function() {
         if(this.xdata == undefined) {
             this.xdata = {};
@@ -1379,13 +1380,13 @@ Ext.define('TP.Pantab', {
         if(!tab.isActiveTab()) {
             return;
         }
-        if(tab.mask) {
+        if(tab.curMask) {
             return;
         }
-        tab.mask = Ext.getBody().mask(txt);
+        tab.curMask = Ext.getBody().mask(txt);
         return;
     },
-    removeMask: function(txt) {
+    removeMask: function() {
         var tab = this;
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
@@ -1393,10 +1394,10 @@ Ext.define('TP.Pantab', {
         if(!tab.body) {
             return;
         }
-        if(!tab.mask) {
+        if(!tab.curMask) {
             return;
         }
-        tab.mask = undefined;
+        tab.curMask = null;
         Ext.getBody().unmask();
     }
 });
