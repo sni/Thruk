@@ -314,7 +314,15 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
     var menu    = link.match(/menu:\/\/(.+)$/);
     if(special && special[1]) {
         link = undefined;
-        if(special[1].match(/^[a-zA-Z_\-\d]+$/)) {
+        if(special[1] == 'show_details') {
+            link = TP.getIconDetailsLink(panel);
+        }
+        else if(special[1] == 'refresh') {
+            var el = panel.getEl();
+            TP.updateAllIcons(panel.tab, panel.id, undefined, el);
+            el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
+        }
+        else if(special[1].match(/^[a-zA-Z_\-\d]+$/)) {
             // is that tab already open?
             var tabbar = Ext.getCmp('tabbar');
             var tab_id = "pantab_"+special[1];
@@ -328,14 +336,6 @@ TP.iconClickHandlerExec = function(id, link, panel, target, config, extraOptions
                 }
                 TP.add_pantab({ id: tab_id, replace_id: replace });
             }
-        }
-        else if(special[1] == 'show_details') {
-            link = TP.getIconDetailsLink(panel);
-        }
-        else if(special[1] == 'refresh') {
-            var el = panel.getEl();
-            TP.updateAllIcons(panel.tab, panel.id, undefined, el);
-            el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
         } else {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
         }
