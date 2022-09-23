@@ -558,7 +558,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 xtype:      'textfield',
                 name:       'title',
                 flex:        1,
-                listeners: { change: function(This, newValue, oldValue, eOpts) { document.title = newValue; } }
+                listeners: { change: function(This, newValue, oldValue, eOpts) {} }
             },
             { xtype: 'label', text:  'File:', style: 'margin-left: 10px; margin-right: 2px; text-align: right;', cls: 'x-form-item-label' },
             {
@@ -1032,7 +1032,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
-                        document.title = tab.xdata.title;
                         if(closeAfterEdit) { tab.destroy(); }
                     }
                 }, {
@@ -1131,8 +1130,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var values = u_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabbar.xdata, values);
-
-                        document.title = tab.xdata.title;
 
                         // some forms do use empty names, do not store them
                         delete tab.xdata[""];
