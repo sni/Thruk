@@ -1456,16 +1456,16 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
         for(var key2 in macros.perfdata[key]) {
             var keyname = '.'+key;
             if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
-            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
+            perf_data += '<tr><td><\/td><td><u>perfdata'+keyname+'.'+key2+'<\/u><\/td><td>'+macros.perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
 
     var trend_data = '';
     if(macros.trend && macros.trend.against) {
         trend_data += '<tr><th>Trend Icon Data:<\/th><td colspan=2><\/td><\/tr>'
-        trend_data += '<tr><td><\/td><td><i>trend.compare<\/i><\/td><td>'+macros.trend.compare+'<\/td><\/tr>'
-        trend_data += '<tr><td><\/td><td><i>trend.against<\/i><\/td><td>'+macros.trend.against+'<\/td><\/tr>'
-        trend_data += '<tr><td><\/td><td><i>trend.result<\/i><\/td><td>'+macros.trend.result+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><u>trend.compare<\/u><\/td><td>'+macros.trend.compare+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><u>trend.against<\/u><\/td><td>'+macros.trend.against+'<\/td><\/tr>'
+        trend_data += '<tr><td><\/td><td><u>trend.result<\/u><\/td><td>'+macros.trend.result+'<\/td><\/tr>'
     }
 
     var extra_items = "";
@@ -1474,7 +1474,7 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
             extra_items += '<tr><th>'+extra[x].name+':<\/th><td colspan=2><\/td><\/tr>';
             var data = extra[x].items;
             for(var y=0; y<data.length; y++) {
-                extra_items += '<tr><td><\/td><td><i>{{ '+data[y]+' }}<\/i><\/td><td><\/td><\/tr>';
+                extra_items += '<tr><td><\/td><td><u>{{ '+data[y]+' }}<\/u><\/td><td><\/td><\/tr>';
             }
         }
     }
@@ -1482,45 +1482,45 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
             xtype:   'label',
             cls:     'labelhelp',
             html:    '<p>Use HTML to format your label<br>'
-                    +'Ex.: <i>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
+                    +'Ex.: <u>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/u>, Newlines: <u>&lt;br&gt;<\/u><\/p>'
                     +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
-                    +'Ex.: <i>Host {{name}}: {{plugin_output}}<\/i><\/p>'
+                    +'Ex.: <u>Host {{name}}: {{plugin_output}}<\/u><\/p>'
                     +'<p>You may also do calculations inside placeholders like this:<br>'
-                    +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
+                    +'Ex.: <u>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/u><\/p>'
                     +'<p>use sprintf to format numbers:<br>'
-                    +'Ex.: <i>{{sprintf("%.2f %s",perfdata.rta.val, perfdata.rta.unit)}}<\/i><\/p>'
+                    +'Ex.: <u>{{sprintf("%.2f %s",perfdata.rta.val, perfdata.rta.unit)}}<\/u><\/p>'
                     +'<p>use strftime to format timestamps:<br>'
-                    +'Ex.: <i>{{strftime("%Y-%m-%d",last_check)}}<\/i><\/p>'
+                    +'Ex.: <u>{{strftime("%Y-%m-%d",last_check)}}<\/u><\/p>'
                     +'<p>conditionals are possible:<br>'
-                    +'Ex.: <i>{{ if(acknowledged) {...} else {...} }}<\/i><\/p>'
+                    +'Ex.: <u>{{ if(acknowledged) {...} else {...} }}<\/u><\/p>'
 
                     +'<p>There are different variables available depending on the type of icon/widget:<br>'
-                    +'<table><tr><th>Groups/Filters:<\/th><td><i>name<\/i><\/td><td>Groupname<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>alias<\/i><\/td><td>Group alias<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.ok<\/i><\/td><td>total number of ok services<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>total number of warning services<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>total number of critical services<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>total number of unknown services<\/td><\/tr>'
+                    +'<table><tr><th>Groups/Filters:<\/th><td><u>name<\/u><\/td><td>Groupname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>alias<\/u><\/td><td>Group alias<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.services.ok<\/u><\/td><td>total number of ok services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.services.warning<\/u><\/td><td>total number of warning services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.services.critical<\/u><\/td><td>total number of critical services<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.services.unknown<\/u><\/td><td>total number of unknown services<\/td><\/tr>'
 
-                    +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>total number of up hosts<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>total number of down hosts<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>total number of unreachable hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.hosts.up<\/u><\/td><td>total number of up hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.hosts.down<\/u><\/td><td>total number of down hosts<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>totals.hosts.unreachable<\/u><\/td><td>total number of unreachable hosts<\/td><\/tr>'
 
-                    +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>alias<\/i><\/td><td>Host alias<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>scheduled_downtime_depth<\/i><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>acknowledged<\/i><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>last_check<\/i><\/td><td>Timestamp of last check<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>last_state_change<\/i><\/td><td>Timestamp of last state change<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>last_notification<\/i><\/td><td>Timestamp of last notification<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>long_plugin_output<\/i><\/td><td>Plugin Output<\/td><\/tr>'
+                    +'<tr><th>Hosts:<\/th><td><u>name<\/u><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>alias<\/u><\/td><td>Host alias<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>state<\/u><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>performance_data<\/u><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>has_been_checked<\/u><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>scheduled_downtime_depth<\/u><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>acknowledged<\/u><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>last_check<\/u><\/td><td>Timestamp of last check<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>last_state_change<\/u><\/td><td>Timestamp of last state change<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>last_notification<\/u><\/td><td>Timestamp of last notification<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>plugin_output<\/u><\/td><td>Plugin Output<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>long_plugin_output<\/u><\/td><td>Plugin Output<\/td><\/tr>'
 
-                    +'<tr><th>Services:<\/th><td><i>host_name<\/i><\/td><td>Hostname<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>description<\/i><\/td><td>Servicename<\/td><\/tr>'
+                    +'<tr><th>Services:<\/th><td><u>host_name<\/u><\/td><td>Hostname<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>description<\/u><\/td><td>Servicename<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>(other attributes are identical to hosts)<\/td><\/tr>'
 
                     +trend_data
@@ -1529,25 +1529,25 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                     +perf_data
 
                     +'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/i><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/i><\/td><td>availability for the last 24 hours<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/i><\/td><td>availability for the last 7 days<\/td><\/tr>'
-                    +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
-                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/u><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/u><\/td><td>availability for the last 24 hours<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/u><\/td><td>availability for the last 7 days<\/td><\/tr>'
+                    +'<tr><td><\/td><td><u>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/u><\/td><td>availability for the last 31 days<\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><u>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/u><\/td><\/tr>'
                     +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
-                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", s: "cu"})) }}%<\/i><\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><u>{{ sprintf("%.2f", availability({d: "24h", s: "cu"})) }}%<\/u><\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>service availablility with only critical and unknown assumed as unavailable<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>avail. options are: d: &lt;duration&gt;, tm: &lt;timeperiod&gt;, s: &lt;servicesstates&gt;, h: &lt;hoststates&gt;, downtime: false<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>host states are d (down), u (unreachable)<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>service states are w (warning), c (critical) and u (unknown)<\/td><\/tr>'
                     +'<tr><td><\/td><td colspan=2>downtimes are assumed to be available unless downtime: false is set<\/td><\/tr>'
-                    +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8", s: "cu", downtime: false})) }}%<\/i><\/td><\/tr>'
+                    +'<tr><td><\/td><td colspan=2><u>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8", s: "cu", downtime: false})) }}%<\/u><\/td><\/tr>'
                     +extra_items
 
                     +'<\/table>',
                 listeners: {
                     afterrender: function(This) {
-                        var examples = This.el.dom.getElementsByTagName('i');
+                        var examples = This.el.dom.getElementsByTagName('u');
                         Ext.Array.each(examples, function(el, i) {
                             el.className = "clickable";
                             el.onclick   = function(i) {

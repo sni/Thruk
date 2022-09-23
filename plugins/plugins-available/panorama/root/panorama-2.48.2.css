@@ -925,3 +925,12 @@ I.round {
 I.yellow {
   background-color: #FFDE00;
 }
+
+U.clickable {
+  text-decoration: none;
+  color: black;
+}
+
+U.clickable:hover {
+  text-decoration: underline;
+}
