@@ -79,7 +79,7 @@ nytprof.out
 sizeme.db
 test_hook.sh
 bp/\d+\.tbp
-^panorama/\d+\.tab
+^panorama/.*.tab
 root/tests/
 script/Makefile.options
 ^bp/.*\.pm
