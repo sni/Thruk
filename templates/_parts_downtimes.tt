@@ -1,12 +1,12 @@
 ﻿<table class="[% type | html %]downtimes cellspacing-x innercellborder">
   <thead>
-    <tr class="rowOdd">
+    <tr class="rowOdd border-b">
       <th class="pl-2">Start Time</th>
       <th>End Time</th>
       <th>Author</th>
       <th>Comment</th>
       [% UNLESS command_disabled(c, 78) && command_disabled(c, 79) %]
-        <th></th>
+        <th class="text-center w-7">Actions</th>
       [% END %]
     </tr>
   </thead>
@@ -18,8 +18,8 @@
       <td class="align-top whitespace-normal">[% escape_quotes(d.author) %]</td>
       <td class="align-top whitespace-normal">[% IF escape_html_tags %][% escape_html(d.comment) | replace_links %][% ELSE %][% d.comment | replace_links %][% END %]</td>
       [% UNLESS command_disabled(c, 78) && command_disabled(c, 79) %]
-        <td class="align-top">
-          <form class="flex ml-1" action='cmd.cgi' method='POST' onsubmit="setFormBtnSpinner(this); submitFormInBackground(this, function(form) { fade(jQuery(form).parents('TR'), 500, true); }); return false;">
+        <td class="align-top w-7">
+          <form class="flex" action='cmd.cgi' method='POST' onsubmit="setFormBtnSpinner(this); submitFormInBackground(this, function(form) { fade(jQuery(form).parents('TR'), 500, true); }); return false;">
             [% IF d.service_description == "" %]
             <input type='hidden' name='cmd_typ' value='78'>
             [% ELSE %]
@@ -32,7 +32,7 @@
             <input type='hidden' name='service' value="[% d.service_description | html %]">
             <input type='hidden' name='backend' value="[% d.peer_key %]">
             <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-            <button class="iconOnly submit">
+            <button class="iconOnly submit mx-auto">
               <i class="fa-solid fa-trash text-base" title='Delete This Downtime'></i>
             </button>
           </form>
