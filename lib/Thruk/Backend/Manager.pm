@@ -598,10 +598,11 @@ calculate host statistics from services query
 sub get_host_stats_by_servicequery {
     my($self, @args) = @_;
     my %args = @args;
-    $args{'columns'} = [qw/host_name host_check_type host_has_been_checked host_scheduled_downtime_depth host_state
+    $args{'columns'} = [qw/host_name host_check_type host_has_been_checked host_scheduled_downtime_depth host_state host_state_type
                            host_acknowledged host_is_flapping host_event_handler_enabled host_accept_passive_checks
                            host_active_checks_enabled host_flap_detection_enabled host_notifications_enabled host_childs
                           /];
+    my $hard_states_only = delete $args{'hard_states_only'};
     @args = %args;
     my $services = $self->_do_on_peers('get_services', \@args );
     my $data = $self->_set_result_defaults('get_host_stats', []);
@@ -609,6 +610,11 @@ sub get_host_stats_by_servicequery {
     for my $s (@{$services}) {
         next if $uniq->{$s->{'host_name'}};
         $uniq->{$s->{'host_name'}} = 1;
+        my $host_state = $s->{'host_state'};
+        if($hard_states_only && $s->{'host_state_type'} != 1) {
+            # soft states count as up
+            $host_state = 0;
+        }
         $data->{'total'}++;
         $data->{'total_active'}++                      if $s->{'host_check_type'} == 0;
         $data->{'total_passive'}++                     if $s->{'host_check_type'} == 1;
@@ -616,25 +622,25 @@ sub get_host_stats_by_servicequery {
         $data->{'plain_pending'}++                     if $s->{'host_has_been_checked'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
         $data->{'pending_and_disabled'}++              if $s->{'host_has_been_checked'} == 0 && $s->{'host_active_checks_enabled'} == 0;
         $data->{'pending_and_scheduled'}++             if $s->{'host_has_been_checked'} == 0 && $s->{'host_scheduled_downtime_depth'} > 0;
-        $data->{'up'}++                                if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0;
-        $data->{'plain_up'}++                          if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
-        $data->{'up_and_disabled_active'}++            if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_active_checks_enabled'} == 0;
-        $data->{'up_and_disabled_passive'}++           if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_active_checks_enabled'} == 0;
-        $data->{'up_and_scheduled'}++                  if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 0 && $s->{'host_scheduled_downtime_depth'} > 0;
-        $data->{'down'}++                              if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1;
-        $data->{'plain_down'}++                        if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
-        $data->{'down_and_ack'}++                      if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_acknowledged'} == 1;
-        $data->{'down_and_scheduled'}++                if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_scheduled_downtime_depth'} > 0;
-        $data->{'down_and_disabled_active'}++          if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_active_checks_enabled'} == 0;
-        $data->{'down_and_disabled_passive'}++         if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_active_checks_enabled'} == 0;
-        $data->{'down_and_unhandled'}++                if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 1 && $s->{'host_active_checks_enabled'} == 1 && $s->{'host_acknowledged'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0;
-        $data->{'unreachable'}++                       if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2;
-        $data->{'plain_unreachable'}++                 if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
-        $data->{'unreachable_and_ack'}++               if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_acknowledged'} == 1;
-        $data->{'unreachable_and_scheduled'}++         if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_scheduled_downtime_depth'} > 0;
-        $data->{'unreachable_and_disabled_active'}++   if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_active_checks_enabled'} == 0;
-        $data->{'unreachable_and_disabled_passive'}++  if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_active_checks_enabled'} == 0;
-        $data->{'unreachable_and_unhandled'}++         if $s->{'host_has_been_checked'} == 1 && $s->{'host_state'} == 2 && $s->{'host_active_checks_enabled'} == 1 && $s->{'host_acknowledged'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0;
+        $data->{'up'}++                                if $s->{'host_has_been_checked'} == 1 && $host_state == 0;
+        $data->{'plain_up'}++                          if $s->{'host_has_been_checked'} == 1 && $host_state == 0 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'up_and_disabled_active'}++            if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $host_state == 0 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'up_and_disabled_passive'}++           if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $host_state == 0 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'up_and_scheduled'}++                  if $s->{'host_has_been_checked'} == 1 && $host_state == 0 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'down'}++                              if $s->{'host_has_been_checked'} == 1 && $host_state == 1;
+        $data->{'plain_down'}++                        if $s->{'host_has_been_checked'} == 1 && $host_state == 1 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'down_and_ack'}++                      if $s->{'host_has_been_checked'} == 1 && $host_state == 1 && $s->{'host_acknowledged'} == 1;
+        $data->{'down_and_scheduled'}++                if $s->{'host_has_been_checked'} == 1 && $host_state == 1 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'down_and_disabled_active'}++          if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $host_state == 1 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'down_and_disabled_passive'}++         if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $host_state == 1 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'down_and_unhandled'}++                if $s->{'host_has_been_checked'} == 1 && $host_state == 1 && $s->{'host_active_checks_enabled'} == 1 && $s->{'host_acknowledged'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0;
+        $data->{'unreachable'}++                       if $s->{'host_has_been_checked'} == 1 && $host_state == 2;
+        $data->{'plain_unreachable'}++                 if $s->{'host_has_been_checked'} == 1 && $host_state == 2 && $s->{'host_scheduled_downtime_depth'} == 0 && $s->{'host_acknowledged'} == 0;
+        $data->{'unreachable_and_ack'}++               if $s->{'host_has_been_checked'} == 1 && $host_state == 2 && $s->{'host_acknowledged'} == 1;
+        $data->{'unreachable_and_scheduled'}++         if $s->{'host_has_been_checked'} == 1 && $host_state == 2 && $s->{'host_scheduled_downtime_depth'} > 0;
+        $data->{'unreachable_and_disabled_active'}++   if $s->{'host_check_type'} == 0 && $s->{'host_has_been_checked'} == 1 && $host_state == 2 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'unreachable_and_disabled_passive'}++  if $s->{'host_check_type'} == 1 && $s->{'host_has_been_checked'} == 1 && $host_state == 2 && $s->{'host_active_checks_enabled'} == 0;
+        $data->{'unreachable_and_unhandled'}++         if $s->{'host_has_been_checked'} == 1 && $host_state == 2 && $s->{'host_active_checks_enabled'} == 1 && $s->{'host_acknowledged'} == 0 && $s->{'host_scheduled_downtime_depth'} == 0;
         $data->{'flapping'}++                          if $s->{'host_is_flapping'} == 1;
         $data->{'flapping_disabled'}++                 if $s->{'host_flap_detection_enabled'} == 0;
         $data->{'notifications_disabled'}++            if $s->{'host_notifications_enabled'} == 0;
@@ -642,7 +648,7 @@ sub get_host_stats_by_servicequery {
         $data->{'active_checks_disabled_active'}++     if $s->{'host_check_type'} == 0 && $s->{'host_active_checks_enabled'} == 0;
         $data->{'active_checks_disabled_passive'}++    if $s->{'host_check_type'} == 1 && $s->{'host_active_checks_enabled'} == 0;
         $data->{'passive_checks_disabled'}++           if $s->{'host_accept_passive_checks'} == 0;
-        $data->{'outages'}++                           if $s->{'host_state'} == 1 && scalar @{$s->{'host_childs'}} > 0;
+        $data->{'outages'}++                           if $host_state == 1 && scalar @{$s->{'host_childs'}} > 0;
     }
     return($data);
 }
