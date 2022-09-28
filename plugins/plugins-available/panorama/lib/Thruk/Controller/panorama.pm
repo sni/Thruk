@@ -3451,12 +3451,14 @@ sub _summarize_query {
                                 downtime_up => 0, downtime_down => 0, downtime_unreachable => 0,
                               },
                 };
+
+    my $hard_states_only = $state_type == HARD_STATE;
     if($incl_hst) {
         my $host_sum;
         if(!$has_service_filter) {
-            $host_sum = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+            $host_sum = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], hard_states_only => $hard_states_only);
         } else {
-            $host_sum = $c->db->get_host_stats_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+            $host_sum = $c->db->get_host_stats_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], hard_states_only => $hard_states_only);
         }
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k} = $host_sum->{$k};
@@ -3470,7 +3472,7 @@ sub _summarize_query {
         }
     }
     if($incl_svc) {
-        my $service_sum = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+        my $service_sum = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], hard_states_only => $hard_states_only);
         for my $k (qw/ok warning critical unknown pending/) {
             $sum->{'services'}->{$k} = $service_sum->{$k};
             $sum->{'services'}->{'plain_'.$k} = $service_sum->{'plain_'.$k};

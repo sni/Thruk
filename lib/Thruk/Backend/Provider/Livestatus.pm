@@ -1050,6 +1050,11 @@ sub get_host_stats {
         return($options{'data'}->[0], 'SUM');
     }
 
+    if($options{'hard_states_only'}) {
+        delete $options{'hard_states_only'};
+        return($self->_get_host_stats_hard());
+    }
+
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststats')) {
         my $rows = $class->hashref_array();
@@ -1097,6 +1102,60 @@ sub get_host_stats {
     ];
     $class->reset_filter()->stats($stats)->save_filter('hoststats');
     return($self->get_host_stats(%options));
+}
+
+##########################################################
+# same as get_host_stats, but counts soft states as ok
+sub _get_host_stats_hard {
+    my($self, %options) = @_;
+
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststats_hard')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("_get_host_stats_hard() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+        'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
+        'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
+        'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}]}},
+        'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'up_and_disabled_active'            => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'up_and_disabled_passive'           => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'down'                              => { -isa => { -and => [ 'state_type' => 1, 'state' => 1 ]}},
+        'plain_down'                        => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'down_and_ack'                      => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
+        'down_and_scheduled'                => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'down_and_disabled_active'          => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'down_and_disabled_passive'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'down_and_unhandled'                => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+        'unreachable'                       => { -isa => { -and => [ 'state_type' => 1, 'state' => 2 ]}},
+        'plain_unreachable'                 => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unreachable_and_ack'               => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
+        'unreachable_and_scheduled'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unreachable_and_disabled_active'   => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'unreachable_and_disabled_passive'  => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+        'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
+        'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
+        'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
+        'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
+        'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
+        'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('hoststats_hard');
+    return($self->_get_host_stats_hard(%options));
 }
 
 ##########################################################
@@ -1200,6 +1259,11 @@ sub get_service_stats {
         return($options{'data'}->[0], 'SUM');
     }
 
+    if($options{'hard_states_only'}) {
+        delete $options{'hard_states_only'};
+        return($self->_get_service_stats_hard());
+    }
+
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestats')) {
         my $rows = $class->hashref_array();
@@ -1256,6 +1320,69 @@ sub get_service_stats {
     ];
     $class->reset_filter()->stats($stats)->save_filter('servicestats');
     return($self->get_service_stats(%options));
+}
+
+##########################################################
+# same as get_service_stats, but counts soft states as up
+sub _get_service_stats_hard {
+    my($self, %options) = @_;
+
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestats_hard')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("_get_service_stats_hard() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    my $stats = [
+        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+        'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
+        'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
+        'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+        'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
+        'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'ok'                                => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1 ]}},
+        'plain_ok'                          => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'ok_and_scheduled'                  => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'ok_and_disabled_active'            => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'ok_and_disabled_passive'           => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'warning'                           => { -isa => { -and => [ 'state_type' => 1, 'state' => 1 ]}},
+        'plain_warning'                     => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'warning_and_scheduled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'warning_and_disabled_active'       => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'warning_and_disabled_passive'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'warning_and_ack'                   => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
+        'warning_on_down_host'              => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
+        'warning_and_unhandled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'critical'                          => { -isa => { -and => [ 'state_type' => 1, 'state' => 2 ]}},
+        'plain_critical'                    => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'critical_and_scheduled'            => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'critical_and_disabled_active'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'critical_and_disabled_passive'     => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'critical_and_ack'                  => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
+        'critical_on_down_host'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
+        'critical_and_unhandled'            => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'unknown'                           => { -isa => { -and => [ 'state_type' => 1, 'state' => 3 ]}},
+        'plain_unknown'                     => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+        'unknown_and_scheduled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+        'unknown_and_disabled_active'       => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+        'unknown_and_disabled_passive'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+        'unknown_and_ack'                   => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'acknowledged' => 1 ]}},
+        'unknown_on_down_host'              => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
+        'unknown_and_unhandled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+        'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
+        'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
+        'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
+        'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
+        'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
+    ];
+    $class->reset_filter()->stats($stats)->save_filter('servicestats_hard');
+    return($self->_get_service_stats_hard(%options));
 }
 
 ##########################################################
