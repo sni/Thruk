@@ -106,7 +106,7 @@ $y = $y + 20;
 $x = 20;
 for my $d (@{$public}) {
     last if $shown >= $maximum_number;
-    next if $d->{'nr'} == $dashboard->{'nr'}; # avoid recursion
+    next if $d->{'nr'} eq $dashboard->{'nr'}; # avoid recursion
     if($x > 800) {
         $x = 20;
         $y = $y + 90;
