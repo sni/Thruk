@@ -1,0 +1,45 @@
+# title:  utf8-test
+# user:   thrukadmin
+# groups: [{"*" : "read-only"}]
+
+$dashboard = load_data();
+
+$dashboard->{'panlet_2'} = {
+    "xdata" => {
+        "appearance" => {
+            "type" => "icon"
+        },
+        "cls" => "TP.HostServicesStatusIcon",
+        "general" => {
+            "host" => "test"
+        },
+        "label" => {
+            "labeltext" => "codelabelöäüß€"
+        }
+    }
+};
+
+# update every 10 seconds
+$dashboard->{'ts'}                          = time()-time()%10;
+$dashboard->{'tab'}->{'xdata'}->{'refresh'} = 10;
+
+__DATA__
+
+{
+    "tab" : {
+        "xdata" : {
+            "state_type" : "hard",
+        }
+    },
+    "panlet_1" : {
+        "xdata" : {
+            "cls" : "TP.TextLabelWidget",
+            "general" : {
+                "text" : "",
+            },
+            "label" : {
+                "labeltext" : "datalabelöäüß€",
+            }
+        }
+    }
+}

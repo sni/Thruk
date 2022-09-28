@@ -34,7 +34,8 @@ sub load_dashboard {
     $c->stats->profile(begin => "Utils::Panorama::Scripted::load_dashboard($file)");
 
     my $dashboard = {};
-    my($code, $data) = split(/__DATA__/mx, decode_utf8(join("", Thruk::Utils::IO::read($file)), 2));
+    my($code, $data) = split(/__DATA__/mx, join("", Thruk::Utils::IO::read($file)), 2);
+    $code = decode_utf8($code); # only decode code part, data part is decoded twice otherwise
     if($code =~ m/^\{/mx) {
         _warn(sprintf("dashboard %s is executable but seems to be a normal json data file. Remove executable bit: chmod -x %s", $file, $file));
         return;
