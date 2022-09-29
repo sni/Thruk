@@ -1,3 +1,4 @@
+#!perl
 # title:  utf8-test
 # user:   thrukadmin
 # groups: [{"*" : "read-only"}]
