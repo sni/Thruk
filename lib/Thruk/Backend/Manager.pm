@@ -558,7 +558,7 @@ wrapper around get_performance_stats
 sub get_performance_stats {
     my($self, @args) = @_;
     # inject last_program_starts
-    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    push @args, ('last_program_starts', $self->{'last_program_starts'}//{});
     return $self->_do_on_peers('get_performance_stats', \@args );
 }
 
@@ -575,7 +575,7 @@ wrapper around get_hosts
 sub get_hosts {
     my($self, @args) = @_;
     # inject last_program_starts
-    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    push @args, ('last_program_starts', $self->{'last_program_starts'}//{});
     return $self->_do_on_peers('get_hosts', \@args );
 }
 
@@ -592,7 +592,7 @@ wrapper around get_services
 sub get_services {
     my($self, @args) = @_;
     # inject last_program_starts
-    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    push @args, ('last_program_starts', $self->{'last_program_starts'}//{});
     return $self->_do_on_peers('get_services', \@args );
 }
 
