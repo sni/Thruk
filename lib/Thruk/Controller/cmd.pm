@@ -753,9 +753,10 @@ sub do_send_command {
         # send the command only to those backends which actually have that object.
         # this prevents ugly log entries when naemon core cannot find the corresponding object
         if(scalar @{$backends_list} > 1) {
-            $backends_list = get_affected_backends($c, $required_fields, $backends_list);
+            my $error;
+            ($backends_list, $error) = get_affected_backends($c, $required_fields, $backends_list);
             if(scalar @{$backends_list} == 0) {
-                Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty." );
+                Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty. ".$error );
                 return;
             }
         }
@@ -1006,34 +1007,40 @@ sub _set_host_service_from_down_com_ids {
 sub get_affected_backends {
     my($c, $required_fields, $backends) = @_;
 
-    my $data;
+    my($data, $filter, $error);
     if(defined $required_fields->{'hostgroup'}) {
         $data = $c->db->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), name => $required_fields->{'hostgroup'}],
                                            columns => [qw/name/] );
+        $filter = "hostgroup=".$required_fields->{'hostgroup'};
     }
     elsif(defined $required_fields->{'servicegroup'}) {
         $data = $c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $required_fields->{'servicegroup'}],
                                               columns => [qw/name/] );
+        $filter = "servicegroup=".$required_fields->{'serviceroup'};
     }
     elsif(defined $required_fields->{'service'}) {
         $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), description => $required_fields->{'service'}, host_name => $required_fields->{'host'}],
                                          columns => [qw/host_name description/] );
+        $filter = "host=".$required_fields->{'host'}." service=".$required_fields->{'service'};
     }
     elsif(defined $required_fields->{'host'}) {
         $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $required_fields->{'host'}],
                                       columns => [qw/name/] );
+        $filter = "host=".$required_fields->{'host'};
     }
     elsif(defined $required_fields->{'contact'}) {
         $data = $c->db->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' ), name => $required_fields->{'contact'}],
                                       columns => [qw/name/] );
+        $filter = "contact=".$required_fields->{'contact'};
     }
     elsif(defined $required_fields->{'contactgroup'}) {
         $data = $c->db->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ), name => $required_fields->{'contactgroup'}],
                                       columns => [qw/name/] );
+        $filter = "contactgroup=".$required_fields->{'contactgroup'};
     }
 
     # return original list unless we have some data
-    return($backends) unless $data;
+    return($backends, $error) unless $data;
 
     # extract affected backends
     my $affected_backends = {};
@@ -1042,7 +1049,23 @@ sub get_affected_backends {
             $affected_backends->{$peer_key} = 1;
         }
     }
-    return([keys %{$affected_backends}]);
+
+    my $backend_list = [keys %{$affected_backends}];
+    if(scalar @{$backend_list} == 0) {
+        $error = "no object found by filter: ".$filter;
+        my $failed = $c->stash->{'failed_backends'} // $Thruk::Globals::c->stash->{'failed_backends'};
+        if($failed && ref $failed eq 'HASH') {
+            my @failed_backends;
+            for my $peer_key (sort keys %{$failed}) {
+                my $peer = $c->db->get_peer_by_key($peer_key);
+                push @failed_backends, (defined $peer ? $peer->peer_name() : $peer_key);
+            }
+            if(scalar @failed_backends > 0) {
+                $error .= " (the following sites could not be reached: ".join(", ", @failed_backends).")";
+            }
+        }
+    }
+    return($backend_list, $error);
 }
 
 ######################################

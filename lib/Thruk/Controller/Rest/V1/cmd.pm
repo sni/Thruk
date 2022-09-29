@@ -208,9 +208,10 @@ sub _rest_get_external_command {
 
     my($backends) = $c->db->select_backends('send_command');
     if(scalar @{$backends} > 1) {
-        $backends= Thruk::Controller::cmd::get_affected_backends($c, $required_fields, $backends);
+        my $error;
+        ($backends, $error) = Thruk::Controller::cmd::get_affected_backends($c, $required_fields, $backends);
         if(scalar @{$backends} == 0) {
-            return({ 'message' => 'cannot send command, affected backend list is empty.', code => 400 });
+            return({ 'message' => 'cannot send command, affected backend list is empty. '.$error, code => 400 });
         }
     }
 
