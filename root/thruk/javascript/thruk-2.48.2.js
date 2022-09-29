@@ -8391,22 +8391,30 @@ var ajax_search = {
            )
            || ajax_search.autosubmit == true
            ) {
-            var tmpElem = input;
-            while(tmpElem && tmpElem.parentNode) {
-                tmpElem = tmpElem.parentNode;
-                if(tmpElem.tagName == 'FORM') {
-                    var btn = tmpElem.querySelector('[type="submit"]');
-                    if(tmpElem.onsubmit && btn) {
-                        btn.click(); // click to trigger onsubmit event
-                    } else {
-                        tmpElem.submit();
-                    }
-                    return false;
-                }
-            }
+            ajax_search.submit();
             return false;
         } else {
             return false;
+        }
+    },
+
+    submit: function() {
+        var input   = document.getElementById(ajax_search.input_field);
+        var tmpElem = input;
+        while(tmpElem && tmpElem.parentNode) {
+            tmpElem = tmpElem.parentNode;
+            if(tmpElem.tagName == 'FORM') {
+                var btn = tmpElem.querySelector('[type="submit"]');
+                if(tmpElem.onsubmit && btn) {
+                    btn.click(); // click to trigger onsubmit event
+                    window.setTimeout(function() {
+                        btn.click(); // firefox seem to need an extra click, ex.: when pressing enter in the filter box
+                    }, 100);
+                } else {
+                    tmpElem.submit();
+                }
+                return false;
+            }
         }
     },
 
@@ -8464,6 +8472,13 @@ var ajax_search = {
         // return or enter
         if(keyCode == 13 || keyCode == 108) {
             if(ajax_search.cur_select == -1) {
+                if(evt.target.tagName == "INPUT") {
+                    // submit form when pressing enter in an input field
+                    ajax_search.hide_results();
+                    ajax_search.submit();
+                    evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
+                    return false;
+                }
                 return true;
             }
             if(ajax_search.set_result(ajax_search.res[ajax_search.cur_select])) {
