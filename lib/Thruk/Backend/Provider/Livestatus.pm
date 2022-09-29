@@ -1052,7 +1052,7 @@ sub get_host_stats {
 
     if($options{'hard_states_only'}) {
         delete $options{'hard_states_only'};
-        return($self->_get_host_stats_hard());
+        return($self->_get_host_stats_hard(%options));
     }
 
     my $class = $self->_get_class('hosts', \%options);
@@ -1261,7 +1261,7 @@ sub get_service_stats {
 
     if($options{'hard_states_only'}) {
         delete $options{'hard_states_only'};
-        return($self->_get_service_stats_hard());
+        return($self->_get_service_stats_hard(%options));
     }
 
     my $class = $self->_get_class('services', \%options);
