@@ -655,6 +655,41 @@ sub get_host_stats_by_servicequery {
 
 ########################################
 
+=head2 get_all_child_hosts
+
+  get_all_child_hosts
+
+returns list of all recursive child hosts
+
+=cut
+
+sub get_all_child_hosts {
+    my($self, $host) = @_;
+    my %args;
+    $args{'last_program_starts'} = $self->{'last_program_starts'}//{};
+    $args{'columns'} = [qw/name childs/];
+    $args{'filter'}  = [{ childs => { '!=' => '' }}];
+    my @args = %args;
+    my $data = $self->_do_on_peers('get_hosts', \@args );
+    $data = Thruk::Base::array2hash($data, 'name');
+    my $hosts = {};
+    _add_child_host($data->{$host}, $hosts, $data);
+
+    return([sort keys %{$hosts}]);
+}
+
+sub _add_child_host {
+    my($h, $hosts, $data) = @_;
+    for my $child (@{$h->{'childs'}}) {
+        next if $hosts->{$child};
+        $hosts->{$child} = 1;
+        _add_child_host($data->{$child}, $hosts, $data);
+    }
+    return;
+}
+
+########################################
+
 =head2 get_contactgroups_by_contact
 
   get_contactgroups_by_contact
