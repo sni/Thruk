@@ -403,6 +403,7 @@ sub _update_docs {
                         my $help = Thruk::Utils::IO::json_lock_retrieve($c->{'config'}->{'var_path'}.'/thruk.stats.help');
                         $desc = $help->{$doc->[0]};
                     }
+                    next if $doc->[0] eq 'page_profiles';
                     _warn("no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
                     $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
                 }
