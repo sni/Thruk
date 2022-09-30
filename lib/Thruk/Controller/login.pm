@@ -73,7 +73,7 @@ sub index {
 
     # remove known keywords from referer
     $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession)\&//gmx;
-    $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession)\&/$1/gmx if $keywords;
+    $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession)\&.*$/$1/gmx if $keywords;
 
     $c->stash->{'referer'} = $referer;
 
