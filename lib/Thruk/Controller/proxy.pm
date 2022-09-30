@@ -138,7 +138,7 @@ sub _cleanup_response {
     }
 
     my $replace_prefix;
-    if($url =~ m%^(.*/(pnp|pnp4nagios|grafana|thruk)/)%mx) {
+    if($url =~ m%^(.*/(pnp|pnp4nagios|grafana|thruk))/%mx) { # must be without trailing slash. Breaks grafanas root_url otherwise
         $replace_prefix = $1;
     }
     my $site         = $peer->{'key'};
