@@ -71,7 +71,7 @@
           <a class="flex js-modal-command-link" href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
             <i class="fa-solid fa-moon"></i>Schedule downtime for this host
           </a>
-          <a class="flex ml-1" href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&hostserviceoptions=1">(and all services)</a>
+          <a class="flex ml-1 js-modal-command-link" href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&hostserviceoptions=1">(and all services)</a>
         </div>
       [% END %]
       [% UNLESS command_disabled(c, '86') %]
