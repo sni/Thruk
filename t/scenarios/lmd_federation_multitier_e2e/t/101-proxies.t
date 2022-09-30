@@ -53,7 +53,7 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
         next if $url =~ m/tier1d/mx; # does not work with basic auth
         next if $url =~ m/tier2d/mx; # does not work with basic auth
         TestUtils::test_page(
-            'waitfor'        => '(grafana\-app|\/pnp4nagios\/index\.php\/image)',
+            'waitfor'        => '(grafanaBootData|grafana\-app|\/pnp4nagios\/index\.php\/image)',
             'url'            => $url,
             'skip_html_lint' => 1
         );
