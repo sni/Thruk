@@ -64,6 +64,7 @@
       </div>
     </div>
   [% END %]
+  [% DEFAULT errorDebugInfo = [] %]
   [% IF errorDebugInfo.list.size > 0 %]
     <div class='card w-fit min-w-[400px] mx-auto mt-2'>
       <div class="head">

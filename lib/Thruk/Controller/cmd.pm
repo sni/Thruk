@@ -659,6 +659,7 @@ sub do_send_command {
     if($@) {
         if($@ =~ m/error\ \-\ (.*?)\ at\ /gmx) {
             push @{$c->stash->{'form_errors'}}, { message => $1 };
+            return;
         } else {
             _error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
         }
@@ -713,6 +714,7 @@ sub do_send_command {
     }
 
     my($backends_list) = $c->db->select_backends('send_command');
+    my $joined_backends = join(',', @{$backends_list});
     for my $cmd_line ( split /\n/mx, $cmd ) {
         utf8::decode($cmd_line);
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
@@ -729,7 +731,6 @@ sub do_send_command {
             }
         }
 
-        my $joined_backends = join(',', @{$backends_list});
         push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;
 
         # add log comment if removing downtimes and comments by id
@@ -739,6 +740,11 @@ sub do_send_command {
         if($cmd_typ == 2 or $cmd_typ == 78) {
             $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
         }
+    }
+
+    # recursive options require some extra handling
+    if($cmd_typ == 55) {
+        return unless add_recursive_service_downtimes($c, $c->stash->{'commands2send'}, $start_time_unix, $end_time_unix, $joined_backends);
     }
 
     # remove comments added by require_comments_for_disable_cmds
@@ -1071,6 +1077,60 @@ sub add_remove_comments_commands_from_disabled_commands {
         }
     }
     return;
+}
+
+######################################
+
+=head2 add_recursive_service_downtimes
+
+    adds child host downtimes if required
+
+=cut
+sub add_recursive_service_downtimes {
+    my($c, $commands2send, $start_time_unix, $end_time_unix, $joined_backends) = @_;
+
+    if($c->req->parameters->{'childoptions'}) {
+        my $hostlist = $c->db->get_all_child_hosts($c->req->parameters->{'host'});
+        # check cmd permissions for all child hosts
+        for my $hst (@{$hostlist}) {
+            if(!$c->check_cmd_permissions('host', $hst)) {
+                _debug("missing command permissions for host: ".$hst);
+                Thruk::Utils::set_message( $c, 'fail_message', "propagating downtimes to child hosts requires permissions to all affected hosts.");
+                return;
+            }
+            if($c->req->parameters->{'hostserviceoptions'}) {
+                # check cmd permissions for all services on all child hosts
+                if(!$c->check_cmd_permissions('host_services', $hst)) {
+                    _debug("missing command permissions for all services on host: ".$hst);
+                    Thruk::Utils::set_message( $c, 'fail_message', "propagating downtimes to services requires permissions to all affected services.");
+                    return;
+                }
+                # add service propagate command
+                push @{$c->stash->{'commands2send'}->{$joined_backends}},
+                        sprintf('COMMAND [%d] SCHEDULE_HOST_SVC_DOWNTIME;%s;%d;%d;%d;%d;%d;%s;%s',
+                            time(),
+                            $hst,
+                            $start_time_unix,
+                            $end_time_unix,
+                            $c->req->parameters->{'fixed'} ? 1 : 0,
+                            $c->req->parameters->{'trigger'},
+                            ($c->req->parameters->{'hours'}*3600 + $c->req->parameters->{'minutes'}*60),
+                            $c->req->parameters->{'com_author'},
+                            $c->req->parameters->{'com_data'},
+                        );
+            }
+        }
+    }
+    if($c->req->parameters->{'hostserviceoptions'}) {
+        # check cmd permissions for all services on this host
+        if(!$c->check_cmd_permissions('host_services', $c->req->parameters->{'host'})) {
+            _debug("missing command permissions for all services on host: ".$c->req->parameters->{'host'});
+            Thruk::Utils::set_message( $c, 'fail_message', "propagating downtimes to services requires permissions to all affected services.");
+            return;
+        }
+    }
+
+    return 1;
 }
 
 ######################################

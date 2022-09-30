@@ -388,18 +388,24 @@ sub check_permissions {
     my $count = 0;
     if($type eq 'host') {
         my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), name => $value ]);
-        $count = 1 if defined $hosts and scalar @{$hosts} > 0;
+        $count = 1 if defined $hosts && scalar @{$hosts} > 0;
     }
     elsif($type eq 'service') {
         my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), description => $value, host_name => $value2 ]);
-        $count = 1 if defined $services and scalar @{$services} > 0;
+        $count = 1 if defined $services && scalar @{$services} > 0;
+    }
+    elsif($type eq 'host_services') {
+        my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value2), host_name => $value ]);
+        my $services2 = $c->db->get_service_names(filter => [                                                               host_name => $value ]);
+        # authorization permitted when the amount of services is the same number as services with authorization
+        $count = 1 if defined $services1 && defined $services2 && scalar @{$services1} == scalar @{$services2};
     }
     elsif($type eq 'hostgroup') {
         my $hosts1 = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), groups => { '>=' => $value } ]);
         my $hosts2 = $c->db->get_host_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of hosts is the same number as hosts with authorization
-        if(defined $hosts1 and defined $hosts2 and scalar @{$hosts1} == scalar @{$hosts2} and scalar @{$hosts1} != 0) {
+        if(defined $hosts1 && defined $hosts2 && scalar @{$hosts1} == scalar @{$hosts2} && scalar @{$hosts1} != 0) {
             $count = 1;
         }
     }
@@ -408,7 +414,7 @@ sub check_permissions {
         my $services2 = $c->db->get_service_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of services is the same number as services with authorization
-        if(defined $services1 and defined $services2 and scalar @{$services1} == scalar @{$services2} and scalar @{$services1} != 0) {
+        if(defined $services1 && defined $services2 && scalar @{$services1} == scalar @{$services2} && scalar @{$services1} != 0) {
             $count = 1;
         }
     }
@@ -440,7 +446,10 @@ sub check_permissions {
 
  check_cmd_permissions('system')
  check_cmd_permissions('host', $hostname)
+ check_cmd_permissions('all_hosts')
  check_cmd_permissions('service', $servicename, $hostname)
+ check_cmd_permissions('host_services', $hostname)
+ check_cmd_permissions('all_services')
  check_cmd_permissions('hostgroup', $hostgroupname)
  check_cmd_permissions('servicegroup', $servicegroupname)
  check_cmd_permissions('contact', $contactname)
@@ -479,6 +488,10 @@ sub check_cmd_permissions {
     elsif($type eq 'service') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
         return 1 if $self->check_permissions($c, 'service', $value, $value2, 1);
+    }
+    elsif($type eq 'host_services') {
+        return 1 if $self->check_user_roles('authorized_for_all_service_commands');
+        return 1 if $self->check_permissions($c, 'host_services', $value, 1);
     }
     elsif($type eq 'all_services') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
