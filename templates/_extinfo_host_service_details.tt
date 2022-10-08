@@ -79,7 +79,7 @@ END
     <tr>
       <th class="align-top">[% IF type == "service" %]Service Groups[% ELSIF type == "host" %]Host Groups[% END %]</th>
       <td class='whitespace-normal'>
-        [% FOREACH group IN obj.groups.sort %][% IF !loop.first() %], [% END %]<a class="link" href="status.cgi?[% type %]group=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
+        [% FOREACH group IN obj.groups.sort %][% IF !loop.first() %], [% END %]<a class="link" href="status.cgi?[% type | html %]group=[% group | uri %]&amp;style=overview">[% group | html %]</a>[% END %]
       </td>
     </tr>
   [% END %]
