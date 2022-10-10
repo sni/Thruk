@@ -23,7 +23,11 @@ export PATH=$PATH:$DIR
 INPUT="$INPUT&from=$START&to=$END"
 
 if [ -n "$OMD_ROOT" ]; then
-    export NODE_PATH=$OMD_ROOT/node_modules/
+    if [ -d "$OMD_ROOT/node_modules/" ]; then
+        export NODE_PATH=$OMD_ROOT/node_modules/
+    elif [ -d "$OMD_ROOT/lib/node/node_modules/" ]; then
+        export NODE_PATH=$OMD_ROOT/lib/node/node_modules/
+    fi
 fi
 if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
     node $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
