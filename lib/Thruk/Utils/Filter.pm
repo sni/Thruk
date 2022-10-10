@@ -1573,14 +1573,21 @@ sub replace_links {
 
     # markup link: [link text](https://url...)
     $txt =~ s/\[([^\]]+)\]\((\w+:[^\)]+)\)
-             /<a class="link" href="$2" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
-             /gmx;
+             /&_replace_link($1, $2)
+             /gxe;
 
     # standard text link: https;//link.domain/...
     $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
              /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
              /gmx;
     return($txt);
+}
+
+########################################
+sub _replace_link {
+    my($name, $url) = @_;
+    $url =~ s/\ /%20/gmx;
+    return('<a class="link" href="'.$url.'" target="_blank"><i class="uil uil-external-link-alt text-sm"></i>'.$name.'</a>');
 }
 
 ########################################
