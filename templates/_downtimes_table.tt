@@ -36,7 +36,7 @@
       [% END %]
       <td align='center' class='[% class %]'>[% date_format(c, d.entry_time) %]</td>
       <td class='[% class %]'>[% d.author %]</td>
-      <td class='[% class %]' style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(d.comment) | replace_links %][% ELSE %][% d.comment %][% END %]</td>
+      <td class='[% class %]' style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(d.comment) | replace_links %][% ELSE %][% d.comment | replace_links %][% END %]</td>
       <td align='center' class='[% class %]'>[% date_format(c, d.start_time) %]</td>
       <td align='center' class='[% class %]'>[% date_format(c, d.end_time) %]</td>
       <td align='center' class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
