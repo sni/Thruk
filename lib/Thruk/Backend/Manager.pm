@@ -1676,7 +1676,7 @@ sub _do_on_peers {
     if($c->config->{'thruk_author'}) {
         my $replace = 0;
         for my $key (@{$get_results_for}) {
-            if($c->stash->{'pi_detail'}->{$key}->{'data_source_version'} && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'} =~ m/Livestatus\ r2\./mx) {
+            if(Thruk::Utils::Filter::is_icinga2($key)) {
                 $replace = 1;
                 last;
             }

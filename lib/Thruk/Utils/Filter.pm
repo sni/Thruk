@@ -1580,4 +1580,31 @@ sub _replace_dollars {
     return($txt);
 }
 
+########################################
+
+=head2 is_icinga2
+
+  is_icinga2($peer_key)
+
+returns true if peer from given key is icinga 2
+
+=cut
+sub is_icinga2 {
+    my($peer_key) = @_;
+
+    my $c = $Thruk::Globals::c or die("not initialized!");
+
+    if($c->stash->{'pi_detail'}->{$peer_key}->{'data_source_version'}) {
+        if($c->stash->{'pi_detail'}->{$peer_key}->{'data_source_version'} =~ m/^r2\./mx) {
+            return(1);
+        }
+        if($c->stash->{'pi_detail'}->{$peer_key}->{'data_source_version'} =~ m/icinga2/mx) {
+            return(1);
+        }
+    }
+    return;
+}
+
+########################################
+
 1;

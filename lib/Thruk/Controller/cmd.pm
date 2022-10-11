@@ -1162,6 +1162,20 @@ sub add_recursive_service_downtimes {
         }
     }
 
+    # icinga2 handles SCHEDULE_HOST_SVC_DOWNTIME differently and also creates a host downtime instead of just services
+    # so remove the host downtime command if all backends are icinga2
+    if($c->req->parameters->{'hostserviceoptions'}) {
+        my $icinga2 = 1;
+        for my $peer_key (split/,/, $joined_backends) {
+            if(!Thruk::Utils::Filter::is_icinga2($peer_key)) {
+                $icinga2 = 0;
+            }
+        }
+        if($icinga2) {
+            $c->stash->{'commands2send'}->{$joined_backends} = [ grep(!/SCHEDULE.*?_HOST_DOWNTIME/mx, @{$c->stash->{'commands2send'}->{$joined_backends}}) ];
+        }
+    }
+
     return 1;
 }
 
