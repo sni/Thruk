@@ -1574,7 +1574,7 @@ sub replace_links {
     # markup link: [link text](https://url...)
     $txt =~ s/\[([^\]]+)\]\((\w+:[^\)]+)\)
              /&_replace_link($1, $2)
-             /gxe;
+             /gxme;
 
     # standard text link: https;//link.domain/...
     $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
