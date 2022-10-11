@@ -25,8 +25,8 @@ INPUT="$INPUT&from=$START&to=$END"
 if [ -n "$OMD_ROOT" ]; then
     if [ -d "$OMD_ROOT/node_modules/" ]; then
         export NODE_PATH=$OMD_ROOT/node_modules/
-    elif [ -d "$OMD_ROOT/lib/node/node_modules/" ]; then
-        export NODE_PATH=$OMD_ROOT/lib/node/node_modules/
+    elif [ -d "$OMD_ROOT/lib/node_modules/" ]; then
+        export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
 fi
 if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
