@@ -162,7 +162,7 @@
   </div>
 [% END %]
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 overflow-hidden">
   <div class="head justify-between">
     <h3>Host Comments</h3>
     [% IF c.check_cmd_permissions('host', host.name) %]
@@ -195,7 +195,7 @@
   </div>
 </div>
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 overflow-hidden">
   <div class="head justify-between">
     <h3>Host Downtimes</h3>
     [% IF c.check_cmd_permissions('host', host.name) %]

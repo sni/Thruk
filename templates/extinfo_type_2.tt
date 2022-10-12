@@ -164,7 +164,7 @@
   </div>
 [% END %]
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 overflow-hidden">
   <div class="head justify-between">
     <h3>Service Comments</h3>
     [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
@@ -197,7 +197,7 @@
   </div>
 </div>
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 overflow-hidden">
   <div class="head justify-between">
     <h3>Service Downtimes</h3>
     [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
