@@ -1617,6 +1617,9 @@ sub is_icinga2 {
     my $c = $Thruk::Globals::c or die("not initialized!");
 
     if($c->stash->{'pi_detail'}->{$peer_key}->{'data_source_version'}) {
+        if($c->stash->{'pi_detail'}->{$peer_key}->{'data_source_version'} =~ m/^Livestatus\s+r2\./mx) {
+            return(1);
+        }
         if($c->stash->{'pi_detail'}->{$peer_key}->{'data_source_version'} =~ m/^r2\./mx) {
             return(1);
         }
