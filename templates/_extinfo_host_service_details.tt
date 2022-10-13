@@ -216,9 +216,9 @@ END
         [% FOREACH parent IN obj.depends_exec %]
           [% IF !loop.first() %], [% END %]
           [% IF type == "host" %]
-            <a href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
+            <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
           [% ELSE %]
-            <a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != obj.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
+            <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != obj.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
           [% END %]
         [% END %])
       [% END %]
@@ -248,9 +248,9 @@ END
         [% FOREACH parent IN obj.depends_parents %]
           [% IF !loop.first() %], [% END %]
           [% IF type == "host" %]
-            <a href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
+            <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
           [% ELSE %]
-            <a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != obj.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
+            <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != obj.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
           [% END %]
         [% END %]
         )
@@ -260,9 +260,9 @@ END
         [% FOREACH parent IN obj.depends_notify %]
           [% IF !loop.first() %], [% END %]
           [% IF type == "host" %]
-            <a href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
+            <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
           [% ELSE %]
-            <a href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != obj.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
+            <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != obj.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
           [% END %]
         [% END %])
       [% END %]
@@ -307,7 +307,7 @@ END
       [% ELSE %]
         <div class='badge NO'>NO</div>
       [% END %]
-      (<a href="config.cgi?type=timeperiods&jump=[% obj.check_period | uri %]">[% obj.check_period | html %]</a>)
+      (<a class="link" href="config.cgi?type=timeperiods&jump=[% obj.check_period | uri %]">[% obj.check_period | html %]</a>)
     </td>
   </tr>
   <tr>
@@ -318,7 +318,7 @@ END
       [% ELSE %]
         <div class='badge NO'>NO</div>
       [% END %]
-      (<a href="config.cgi?type=timeperiods&jump=[% obj.notification_period | uri %]">[% obj.notification_period | html %]</a>)
+      (<a class="link" href="config.cgi?type=timeperiods&jump=[% obj.notification_period | uri %]">[% obj.notification_period | html %]</a>)
     </td>
   </tr>
   <tr>
