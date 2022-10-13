@@ -1166,7 +1166,7 @@ sub add_recursive_service_downtimes {
     # so remove the host downtime command if all backends are icinga2
     if($c->req->parameters->{'hostserviceoptions'}) {
         my $icinga2 = 1;
-        for my $peer_key (split/,/, $joined_backends) {
+        for my $peer_key (split/,/mx, $joined_backends) {
             if(!Thruk::Utils::Filter::is_icinga2($peer_key)) {
                 $icinga2 = 0;
             }
