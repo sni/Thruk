@@ -1,4 +1,9 @@
 user_pref("network.negotiate-auth.trusted-uris", ".test.local");
 user_pref("browser.startup.homepage", "http://omd.test.local/demo/thruk/");
+user_pref("browser.startup.homepage_welcome_url", "http://omd.test.local/demo/thruk/");
 user_pref("browser.shell.checkDefaultBrowser", "false");
 user_pref("general.warnOnAboutConfig", "false");
+user_pref("toolkit.telemetry.reportingpolicy.firstRun", false);
+user_pref("trailhead.firstrun.didSeeAboutWelcome", true);
+user_pref("browser.aboutwelcome.enabled", false);
+user_pref("browser.startup.homepage_override.once, "");
