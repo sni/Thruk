@@ -990,7 +990,7 @@ sub get_affected_backends {
     elsif(defined $required_fields->{'servicegroup'}) {
         $data = $c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $required_fields->{'servicegroup'}],
                                               columns => [qw/name/] );
-        $filter = "servicegroup=".$required_fields->{'serviceroup'};
+        $filter = "servicegroup=".$required_fields->{'servicegroup'};
     }
     elsif(defined $required_fields->{'service'}) {
         $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), description => $required_fields->{'service'}, host_name => $required_fields->{'host'}],
