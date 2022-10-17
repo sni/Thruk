@@ -1,5 +1,16 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+2.50     Mon Oct 17 09:44:22 CEST 2022
+          - improve creating links containing spaces
+          - add workaround for icinga 2 external commands
+          - add support for recursive propagated service downtimes on child hosts
+          - support exporting comments to excel
+          - panorama:
+            - fix reading utf8 data parts from dynamic dashboards
+            - improve support for hard states only dashboards (fixes #1196)
+            - fix show details link
+            - fix unlock mask not disappearing
+
 2.48.3   Fri Aug 12 19:01:13 CEST 2022
           - add short links option for custom links
           - replace markup link links in comments and downtimes
