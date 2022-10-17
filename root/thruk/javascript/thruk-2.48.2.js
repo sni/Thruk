@@ -1913,10 +1913,22 @@ function create_site_panel_popup_tree() {
     return(panel);
 }
 
-function create_site_panel_popup_tree_populate() {
+function create_site_panel_popup_tree_populate(retried) {
     jQuery(".tree_peer_btn").hide();
     if(!has_jquery_ui()) {
         load_jquery_ui(create_site_panel_popup_tree_populate);
+        return;
+    }
+
+    if(!jQuery("#site_panel_sections").fancytree) {
+        // sometimes chrome fails to load the fancytree dependency
+        if(!retried) {
+            window.setTimeout(function() {
+                create_site_panel_popup_tree_populate(true);
+            }, 1000);
+            return;
+        }
+        reloadPage(500, false, true);
         return;
     }
 
