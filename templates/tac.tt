@@ -52,7 +52,7 @@
   </div>
 
   <div class="flexrow justify-between">
-    <div class="card min-w-[420px] overflow-hidden">
+    <div class="card min-w-[420px] h-auto overflow-hidden">
       <div class="head">
         <h3>Network Outages</h3>
       </div>
