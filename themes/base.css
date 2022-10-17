@@ -1350,7 +1350,9 @@ UL.ui-fancytree {
   }
 
   span.fancytree-checkbox {
-    @apply bg-none text-base;
+    @apply bg-none;
+    font-size: 18px;
+    line-height: 1.4rem;
     font-family: "unicons-line";
     color: initial;
     &::before { content: "\eaa2"; } /* unchecked */
