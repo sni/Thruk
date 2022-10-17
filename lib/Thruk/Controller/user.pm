@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Authentication::User ();
 use Thruk::Utils::APIKeys ();
 
 =head1 NAME
@@ -153,6 +154,12 @@ sub user_page {
     }
 
     Thruk::Utils::ssi_include($c, 'user');
+
+    if($c->req->parameters->{'clear_auth_cache'}) {
+        $c->stash->{'profile_user'} = Thruk::Authentication::User->new($c, $c->stash->{'remote_user'})->set_dynamic_attributes($c);
+        Thruk::Utils::set_message( $c, 'success_message', 'Auth cache cleared successfully.' );
+        return $c->redirect_to('user.cgi');
+    }
 
     $c->stash->{profile_user}    = $c->user;
     $c->stash->{api_keys}        = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
