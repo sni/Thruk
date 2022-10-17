@@ -13,4 +13,5 @@
 [%+ END %]
 [% IF show_sitepanel == 'tree' %]
 <script src="[% url_prefix %]vendor/jstree-3.3.8/jstree.min.js"></script>
+<script src="[% url_prefix %]vendor/fancytree-2.36.1/jquery.fancytree-all-deps.min.js"></script>
 [% END %]
