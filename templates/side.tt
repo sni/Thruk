@@ -59,7 +59,7 @@
                         <input type='hidden' name='s0_op' value='~' id="s0_to" />
                         <input type='hidden' name='s0_type' value='search' />
                         <input type='hidden' name='add_default_service_filter' value='1' />
-                        <input type='search' name='s0_value' class="deletable autosubmit w-full" id="s0_value" placeholder="search..." />
+                        <input type='search' name='s0_value' class="deletable autosubmit w-full my-[1px]" id="s0_value" placeholder="search..." />
                       </fieldset>
                     </form>
                   </div>
