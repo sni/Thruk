@@ -22,7 +22,7 @@ Support
   * Mailing list on [Google Groups](https://groups.google.com/group/thruk).
   * File a bug in [GitHub Issues](https://github.com/sni/Thruk/issues).
   * [Tweet](https://twitter.com/ThrukGUI/) us with other feedback.
-  * Chat with developers on [IRC Freenode #thruk](irc://freenode.net/thruk) ([Webchat](http://webchat.freenode.net/?channels=thruk)).
+  * Chat with developers on [IRC Libera #thruk](irc://irc.libera.chat/thruk) ([Webchat](https://web.libera.chat/?nick=Guest?#thruk)).
 
 
 Main Features / Advantages
