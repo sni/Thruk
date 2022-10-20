@@ -379,9 +379,9 @@ sub do_filter {
     $prefix = 'dfl_' unless $prefix ne '';
     $c->stash->{'searches'}->{$prefix} = $searches;
 
-    $c->stash->{'show_filter_table'} = 0;
+    $c->stash->{'filter_active'} = 0;
     if($hostfilter || $servicefilter || $hostgroupfilter || $servicegroupfilter) {
-        $c->stash->{'show_filter_table'} = 1;
+        $c->stash->{'filter_active'} = 1;
     }
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);

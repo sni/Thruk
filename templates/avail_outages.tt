@@ -30,7 +30,7 @@
         </div>
       [% END %]
       <div class="mt-5">
-        [% PROCESS _status_filter.tt show_filter_table=1 style="service" substyle="service" nav=0 entries=0 show_substyle_selector=0 show_column_select=0 %]
+        [% PROCESS _status_filter.tt filter_active=1 style="service" substyle="service" nav=0 entries=0 show_substyle_selector=0 show_column_select=0 %]
       </div>
     </div>
 
