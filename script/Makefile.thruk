@@ -239,6 +239,9 @@ deb: $(NAME)-$(VERSION).tar.gz
 	debuild -rfakeroot -i -us -uc -b
 	rm -rf $(NAME)-$(VERSION)
 
+fmt:
+	./script/thruk_format_perl_modules
+
 themes:
 	for theme in themes/themes-available/*/Makefile; do \
 		make -C $$(dirname $$theme); \

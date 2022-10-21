@@ -5,6 +5,8 @@ use strict;
 use POSIX ();
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::Status ();
 
 =head1 NAME
 
