@@ -12,6 +12,9 @@ use Thruk::Utils::IO ();
 
 use base 'Thruk::Backend::Provider::Base';
 
+# contains most stats column definitions
+$Thruk::Backend::Provider::Livestatus::stats_columns = {};
+
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -1043,6 +1046,43 @@ sub get_contact_names {
 returns the host statistics for the tac page
 
 =cut
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'host_stats'} = [
+    'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+    'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
+    'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
+    'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+    'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'up_and_disabled_active'            => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'up_and_disabled_passive'           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
+    'plain_down'                        => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'down_and_ack'                      => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
+    'down_and_scheduled'                => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'down_and_disabled_active'          => { -isa => { -and => [ 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'down_and_disabled_passive'         => { -isa => { -and => [ 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
+    'plain_unreachable'                 => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'unreachable_and_ack'               => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+    'unreachable_and_scheduled'         => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'unreachable_and_disabled_active'   => { -isa => { -and => [ 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'unreachable_and_disabled_passive'  => { -isa => { -and => [ 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
+    'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
+    'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
+    'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
+    'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
+    'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
+];
 sub get_host_stats {
     my($self, %options) = @_;
 
@@ -1061,51 +1101,52 @@ sub get_host_stats {
         unless(wantarray) {
             confess("get_host_stats() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
-        'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
-        'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
-        'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
-        'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'up_and_disabled_active'            => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'up_and_disabled_passive'           => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
-        'plain_down'                        => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'down_and_ack'                      => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
-        'down_and_scheduled'                => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'down_and_disabled_active'          => { -isa => { -and => [ 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'down_and_disabled_passive'         => { -isa => { -and => [ 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
-        'plain_unreachable'                 => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unreachable_and_ack'               => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
-        'unreachable_and_scheduled'         => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unreachable_and_disabled_active'   => { -isa => { -and => [ 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'unreachable_and_disabled_passive'  => { -isa => { -and => [ 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
-        'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
-        'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
-        'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
-        'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
-        'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('hoststats');
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'host_stats'})->save_filter('hoststats');
     return($self->get_host_stats(%options));
 }
 
 ##########################################################
 # same as get_host_stats, but counts soft states as ok
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'host_stats_hard'} = [
+    'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+    'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
+    'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
+    'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}]}},
+    'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'up_and_disabled_active'            => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'up_and_disabled_passive'           => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'down'                              => { -isa => { -and => [ 'state_type' => 1, 'state' => 1 ]}},
+    'plain_down'                        => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'down_and_ack'                      => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
+    'down_and_scheduled'                => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'down_and_disabled_active'          => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'down_and_disabled_passive'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'down_and_unhandled'                => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    'unreachable'                       => { -isa => { -and => [ 'state_type' => 1, 'state' => 2 ]}},
+    'plain_unreachable'                 => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'unreachable_and_ack'               => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
+    'unreachable_and_scheduled'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'unreachable_and_disabled_active'   => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'unreachable_and_disabled_passive'  => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'unreachable_and_unhandled'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
+    'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
+    'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
+    'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
+    'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
+    'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
+];
 sub _get_host_stats_hard {
     my($self, %options) = @_;
 
@@ -1115,46 +1156,12 @@ sub _get_host_stats_hard {
         unless(wantarray) {
             confess("_get_host_stats_hard() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
-        'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
-        'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
-        'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}]}},
-        'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'up_and_disabled_active'            => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'up_and_disabled_passive'           => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'down'                              => { -isa => { -and => [ 'state_type' => 1, 'state' => 1 ]}},
-        'plain_down'                        => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'down_and_ack'                      => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
-        'down_and_scheduled'                => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'down_and_disabled_active'          => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'down_and_disabled_passive'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'down_and_unhandled'                => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'unreachable'                       => { -isa => { -and => [ 'state_type' => 1, 'state' => 2 ]}},
-        'plain_unreachable'                 => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unreachable_and_ack'               => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
-        'unreachable_and_scheduled'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unreachable_and_disabled_active'   => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'unreachable_and_disabled_passive'  => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
-        'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
-        'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
-        'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
-        'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
-        'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('hoststats_hard');
+
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'host_stats_hard'})->save_filter('hoststats_hard');
     return($self->_get_host_stats_hard(%options));
 }
 
@@ -1167,6 +1174,16 @@ sub _get_host_stats_hard {
 returns the host statistics used on the service/host details page
 
 =cut
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'host_totals_stats'} = [
+    'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'up'                                => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1 ]}},
+    'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
+    'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
+    'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+];
 sub get_host_totals_stats {
     my($self, %options) = @_;
 
@@ -1180,20 +1197,11 @@ sub get_host_totals_stats {
         unless(wantarray) {
             confess("get_host_totals_stats() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    # unhandled are required for playing sounds on details page
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'up'                                => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1 ]}},
-        'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
-        'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
-        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('hoststatstotals');
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'host_totals_stats'})->save_filter('hoststatstotals');
     return($self->get_host_totals_stats(%options));
 }
 
@@ -1206,6 +1214,24 @@ sub get_host_totals_stats {
 same as get_host_stats but less numbers and therefore faster
 
 =cut
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'host_less_stats'} = [
+    'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+    'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
+    'plain_down'                        => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'down_and_ack'                      => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
+    'down_and_scheduled'                => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+    'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
+    'plain_unreachable'                 => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'unreachable_and_ack'               => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+    'unreachable_and_scheduled'         => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
+];
 sub get_host_less_stats {
     my($self, %options) = @_;
 
@@ -1219,28 +1245,13 @@ sub get_host_less_stats {
         unless(wantarray) {
             confess("get_host_less_stats() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'up'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
-        'plain_up'                          => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'up_and_scheduled'                  => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'down'                              => { -isa => { -and => [ 'state' => 1 ]}},
-        'plain_down'                        => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'down_and_ack'                      => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
-        'down_and_scheduled'                => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'down_and_unhandled'                => { -isa => { -and => [ 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-        'unreachable'                       => { -isa => { -and => [ 'state' => 2 ]}},
-        'plain_unreachable'                 => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unreachable_and_ack'               => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
-        'unreachable_and_scheduled'         => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unreachable_and_unhandled'         => { -isa => { -and => [ 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('hoststatsless');
-    return($self->get_host_stats(%options));
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'host_less_stats'})->save_filter('hoststatsless');
+
+    return($self->get_host_less_stats(%options));
 }
 
 ##########################################################
@@ -1252,6 +1263,52 @@ sub get_host_less_stats {
 returns the services statistics for the tac page
 
 =cut
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'service_stats'} = [
+    'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+    'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
+    'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
+    'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
+    'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'ok'                                => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1 ]}},
+    'plain_ok'                          => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'ok_and_scheduled'                  => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'ok_and_disabled_active'            => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'ok_and_disabled_passive'           => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+    'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'warning_and_disabled_active'       => { -isa => { -and => [ 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'warning_and_disabled_passive'      => { -isa => { -and => [ 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'warning_and_ack'                   => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
+    'warning_on_down_host'              => { -isa => { -and => [ 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
+    'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+    'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'critical_and_disabled_active'      => { -isa => { -and => [ 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'critical_and_disabled_passive'     => { -isa => { -and => [ 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+    'critical_on_down_host'             => { -isa => { -and => [ 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
+    'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+    'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'unknown_and_disabled_active'       => { -isa => { -and => [ 'state' => 3, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'unknown_and_disabled_passive'      => { -isa => { -and => [ 'state' => 3, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
+    'unknown_on_down_host'              => { -isa => { -and => [ 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
+    'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
+    'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
+    'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
+    'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
+    'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
+];
 sub get_service_stats {
     my($self, %options) = @_;
 
@@ -1270,60 +1327,62 @@ sub get_service_stats {
         unless(wantarray) {
             confess("get_service_stats() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
-        'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
-        'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
-        'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
-        'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'ok'                                => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1 ]}},
-        'plain_ok'                          => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'ok_and_scheduled'                  => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'ok_and_disabled_active'            => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'ok_and_disabled_passive'           => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
-        'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'warning_and_disabled_active'       => { -isa => { -and => [ 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'warning_and_disabled_passive'      => { -isa => { -and => [ 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'warning_and_ack'                   => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 1 ]}},
-        'warning_on_down_host'              => { -isa => { -and => [ 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
-        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
-        'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'critical_and_disabled_active'      => { -isa => { -and => [ 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'critical_and_disabled_passive'     => { -isa => { -and => [ 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
-        'critical_on_down_host'             => { -isa => { -and => [ 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
-        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
-        'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unknown_and_disabled_active'       => { -isa => { -and => [ 'state' => 3, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'unknown_and_disabled_passive'      => { -isa => { -and => [ 'state' => 3, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
-        'unknown_on_down_host'              => { -isa => { -and => [ 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
-        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
-        'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
-        'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
-        'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
-        'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('servicestats');
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'service_stats'})->save_filter('servicestats');
     return($self->get_service_stats(%options));
 }
 
 ##########################################################
 # same as get_service_stats, but counts soft states as up
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'service_stats_hard'} = [
+    'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+    'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
+    'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
+    'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
+    'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'ok'                                => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1 ]}},
+    'plain_ok'                          => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'ok_and_scheduled'                  => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'ok_and_disabled_active'            => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'ok_and_disabled_passive'           => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'warning'                           => { -isa => { -and => [ 'state_type' => 1, 'state' => 1 ]}},
+    'plain_warning'                     => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'warning_and_scheduled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'warning_and_disabled_active'       => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'warning_and_disabled_passive'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'warning_and_ack'                   => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
+    'warning_on_down_host'              => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
+    'warning_and_unhandled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'critical'                          => { -isa => { -and => [ 'state_type' => 1, 'state' => 2 ]}},
+    'plain_critical'                    => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'critical_and_scheduled'            => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'critical_and_disabled_active'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'critical_and_disabled_passive'     => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'critical_and_ack'                  => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
+    'critical_on_down_host'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
+    'critical_and_unhandled'            => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'unknown'                           => { -isa => { -and => [ 'state_type' => 1, 'state' => 3 ]}},
+    'plain_unknown'                     => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'unknown_and_scheduled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'unknown_and_disabled_active'       => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
+    'unknown_and_disabled_passive'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
+    'unknown_and_ack'                   => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'acknowledged' => 1 ]}},
+    'unknown_on_down_host'              => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
+    'unknown_and_unhandled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
+    'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
+    'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
+    'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
+    'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
+];
 sub _get_service_stats_hard {
     my($self, %options) = @_;
 
@@ -1333,55 +1392,11 @@ sub _get_service_stats_hard {
         unless(wantarray) {
             confess("_get_service_stats_hard() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
-        'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
-        'active_checks_disabled_active'     => { -isa => { -and => [ 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'total_passive'                     => { -isa => { -and => [ 'check_type' => 1 ]}},
-        'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'plain_pending'                     => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'pending_and_disabled'              => { -isa => { -and => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]}},
-        'pending_and_scheduled'             => { -isa => { -and => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'ok'                                => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1 ]}},
-        'plain_ok'                          => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'ok_and_scheduled'                  => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'ok_and_disabled_active'            => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'ok_and_disabled_passive'           => { -isa => { -and => [ { -or => [ 'state_type' => 0, 'state' => 0 ]}, 'has_been_checked' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'warning'                           => { -isa => { -and => [ 'state_type' => 1, 'state' => 1 ]}},
-        'plain_warning'                     => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'warning_and_scheduled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'warning_and_disabled_active'       => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'warning_and_disabled_passive'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'warning_and_ack'                   => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 1 ]}},
-        'warning_on_down_host'              => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]}},
-        'warning_and_unhandled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'critical'                          => { -isa => { -and => [ 'state_type' => 1, 'state' => 2 ]}},
-        'plain_critical'                    => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'critical_and_scheduled'            => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'critical_and_disabled_active'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'critical_and_disabled_passive'     => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'critical_and_ack'                  => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 1 ]}},
-        'critical_on_down_host'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]}},
-        'critical_and_unhandled'            => { -isa => { -and => [ 'state_type' => 1, 'state' => 2, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'unknown'                           => { -isa => { -and => [ 'state_type' => 1, 'state' => 3 ]}},
-        'plain_unknown'                     => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unknown_and_scheduled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unknown_and_disabled_active'       => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'check_type' => 0, 'active_checks_enabled' => 0 ]}},
-        'unknown_and_disabled_passive'      => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
-        'unknown_and_ack'                   => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'acknowledged' => 1 ]}},
-        'unknown_on_down_host'              => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]}},
-        'unknown_and_unhandled'             => { -isa => { -and => [ 'state_type' => 1, 'state' => 3, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'flapping'                          => { -isa => { -and => [ 'is_flapping' => 1 ]}},
-        'flapping_disabled'                 => { -isa => { -and => [ 'flap_detection_enabled' => 0 ]}},
-        'notifications_disabled'            => { -isa => { -and => [ 'notifications_enabled' => 0 ]}},
-        'eventhandler_disabled'             => { -isa => { -and => [ 'event_handler_enabled' => 0 ]}},
-        'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('servicestats_hard');
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'service_stats_hard'})->save_filter('servicestats_hard');
     return($self->_get_service_stats_hard(%options));
 }
 
@@ -1394,6 +1409,18 @@ sub _get_service_stats_hard {
 returns the services statistics used on the service/host details page
 
 =cut
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'service_totals_stats'} = [
+    'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+    'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+    'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+    'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+    'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+];
 sub get_service_totals_stats {
     my($self, %options) = @_;
 
@@ -1407,22 +1434,11 @@ sub get_service_totals_stats {
         unless(wantarray) {
             confess("get_service_totals_stats() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    # unhandled are required for playing sounds on details page
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
-        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
-        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
-        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
-        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('servicestatstotals');
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'service_totals_stats'})->save_filter('servicestatstotals');
     return($self->get_service_totals_stats(%options));
 }
 
@@ -1435,6 +1451,28 @@ sub get_service_totals_stats {
 same as get_service_stats but less numbers and therefore faster
 
 =cut
+
+# unhandled are required for playing sounds on details page
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'service_less_stats'} = [
+    'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
+    'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
+    'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
+    'plain_ok'                          => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
+    'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
+    'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
+    'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+    'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
+    'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
+    'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
+    'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
+    'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
+];
 sub get_service_less_stats {
     my($self, %options) = @_;
 
@@ -1448,31 +1486,11 @@ sub get_service_less_stats {
         unless(wantarray) {
             confess("get_service_less_stats() should not be called in scalar context");
         }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
         return(\%{$rows->[0]}, 'SUM');
     }
 
-    # unhandled are required for playing sounds on details page
-    my $stats = [
-        'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
-        'pending'                           => { -isa => { -and => [ 'has_been_checked' => 0 ]}},
-        'ok'                                => { -isa => { -and => [ 'has_been_checked' => 1, 'state' => 0 ]}},
-        'plain_ok'                          => { -isa => { -and => [ 'state' => 0, 'has_been_checked' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'warning'                           => { -isa => { -and => [ 'state' => 1 ]}},
-        'plain_warning'                     => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'warning_and_scheduled'             => { -isa => { -and => [ 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'warning_and_unhandled'             => { -isa => { -and => [ 'state' => 1, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'critical'                          => { -isa => { -and => [ 'state' => 2 ]}},
-        'plain_critical'                    => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'critical_and_ack'                  => { -isa => { -and => [ 'state' => 2, 'acknowledged' => 1 ]}},
-        'critical_and_scheduled'            => { -isa => { -and => [ 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'critical_and_unhandled'            => { -isa => { -and => [ 'state' => 2, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-        'unknown'                           => { -isa => { -and => [ 'state' => 3 ]}},
-        'plain_unknown'                     => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => 0, 'acknowledged' => 0 ]}},
-        'unknown_and_ack'                   => { -isa => { -and => [ 'state' => 3, 'acknowledged' => 1 ]}},
-        'unknown_and_scheduled'             => { -isa => { -and => [ 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]}},
-        'unknown_and_unhandled'             => { -isa => { -and => [ 'state' => 3, 'host_state' => 0, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ]}},
-    ];
-    $class->reset_filter()->stats($stats)->save_filter('servicestatsless');
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'service_less_stats'})->save_filter('servicestatsless');
     return($self->get_service_less_stats(%options));
 }
 
@@ -1495,9 +1513,9 @@ sub get_performance_stats {
     }
 
     my $now    = time();
-    my $min1   = $now - 60;
-    my $min5   = $now - 300;
-    my $min15  = $now - 900;
+    my $min1   = $now -   60;
+    my $min5   = $now -  300;
+    my $min15  = $now -  900;
     my $min60  = $now - 3600;
     my $minall = $options{'last_program_starts'}->{$self->peer_key()} || 0;
 
@@ -1505,17 +1523,17 @@ sub get_performance_stats {
     for my $type (qw{hosts services}) {
         my $stats = [
             $type.'_active_sum'      => { -isa => { -and => [ 'check_type' => 0 ]}},
-            $type.'_active_1_sum'    => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]}},
-            $type.'_active_5_sum'    => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]}},
-            $type.'_active_15_sum'   => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]}},
-            $type.'_active_60_sum'   => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]}},
+            $type.'_active_1_sum'    => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1   }]}},
+            $type.'_active_5_sum'    => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5   }]}},
+            $type.'_active_15_sum'   => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15  }]}},
+            $type.'_active_60_sum'   => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60  }]}},
             $type.'_active_all_sum'  => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]}},
 
             $type.'_passive_sum'     => { -isa => { -and => [ 'check_type' => 1 ]}},
-            $type.'_passive_1_sum'   => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]}},
-            $type.'_passive_5_sum'   => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]}},
-            $type.'_passive_15_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]}},
-            $type.'_passive_60_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]}},
+            $type.'_passive_1_sum'   => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1   }]}},
+            $type.'_passive_5_sum'   => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5   }]}},
+            $type.'_passive_15_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15  }]}},
+            $type.'_passive_60_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60  }]}},
             $type.'_passive_all_sum' => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]}},
         ];
         $options{'filter'} = $options{$type.'_filter'};

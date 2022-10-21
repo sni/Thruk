@@ -701,6 +701,39 @@ sub _add_child_host {
 
 ########################################
 
+=head2 get_host_stats_by_backend
+
+  get_hosts
+
+wrapper around get_hosts
+
+=cut
+
+sub get_host_stats_by_backend {
+    my($self, @args) = @_;
+    my $res = {};
+    if($ENV{'THRUK_USE_LMD'}) {
+        push @args, "columns", ["peer_key"];
+        $res = $self->_do_on_peers('get_host_less_stats', \@args );
+        # add peer name
+        for my $key (keys %{$res}) {
+            $res->{$key}->{'peer_name'} = Thruk::Utils::Filter::peer_name($res->{$key}) // '';
+        }
+    } else {
+        # without LMD we have to ask all backends
+        my($result, $type, $totalsize) = $self->_do_on_peers('get_host_less_stats', \@args, undef, undef, 1);
+        # add peer name
+        for my $key (keys %{$result}) {
+            $res->{$key} = $result->{$key};
+            $res->{$key}->{'peer_key'}  = $key;
+            $res->{$key}->{'peer_name'} = Thruk::Utils::Filter::peer_name($res->{$key}) // '';
+        }
+    }
+    return($res);
+}
+
+########################################
+
 =head2 get_contactgroups_by_contact
 
   get_contactgroups_by_contact
@@ -1492,7 +1525,7 @@ returns a result for a function called for all peers
 =cut
 
 sub _do_on_peers {
-    my( $self, $function, $arg, $force_serial, $backends) = @_;
+    my( $self, $function, $arg, $force_serial, $backends, $raw_result) = @_;
     my $c = $Thruk::Globals::c;
     confess("no context") unless $c;
 
@@ -1611,6 +1644,9 @@ sub _do_on_peers {
             #confess($msg);
         }
     }
+
+    return($result, $type, $totalsize) if $raw_result;
+
     $type = '' unless defined $type;
     $type = lc $type;
 
@@ -1723,7 +1759,11 @@ sub _do_on_peers {
         }
     }
 
-    $data = $self->_set_result_defaults($function, $data);
+    if($type eq 'group_stats' || ($function =~ /stats/mx && $arg{'columns'})) {
+        $data = $self->_set_result_group_stats($function, $data, $arg{'columns'});
+    } else {
+        $data = $self->_set_result_defaults($function, $data);
+    }
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
@@ -2678,6 +2718,11 @@ sub _set_result_defaults {
         return($data);
     }
 
+    my $stats_name;
+    if($function =~ m/get_(.*)$/mx) {
+        $stats_name = $1;
+    }
+
     # set some defaults if no backends where selected
     if($function eq "get_performance_stats") {
         $data = {};
@@ -2694,31 +2739,10 @@ sub _set_result_defaults {
             }
         }
     }
-    elsif($function =~ m/get_service_.*stats/mx) {
+    elsif($Thruk::Backend::Provider::Livestatus::stats_columns->{$stats_name}) {
         $data = {};
-        for my $key (qw{
-                        total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
-                        warning warning_and_disabled warning_and_scheduled warning_and_ack warning_on_down_host warning_and_unhandled critical
-                        critical_and_disabled critical_and_scheduled critical_and_ack critical_on_down_host critical_and_unhandled
-                        unknown unknown_and_disabled unknown_and_scheduled unknown_and_ack unknown_on_down_host unknown_and_unhandled
-                        flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled
-                        critical_and_disabled_active critical_and_disabled_passive warning_and_disabled_active warning_and_disabled_passive
-                        unknown_and_disabled_active unknown_and_disabled_passive ok_and_disabled_active ok_and_disabled_passive
-                        active_checks_disabled_active active_checks_disabled_passive
-                     }) {
-            $data->{$key} = 0;
-        }
-    }
-    elsif($function =~ m/get_host_.*stats/mx) {
-        $data = {};
-        for my $key (qw{
-                        total total_active total_passive
-                        pending plain_pending pending_and_disabled pending_and_scheduled
-                        up plain_up up_and_disabled_active up_and_disabled_passive up_and_scheduled
-                        down plain_down down_and_ack down_and_scheduled down_and_disabled_active down_and_disabled_passive down_and_unhandled
-                        unreachable plain_unreachable unreachable_and_ack unreachable_and_scheduled unreachable_and_disabled_active unreachable_and_disabled_passive unreachable_and_unhandled
-                        flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled_active active_checks_disabled_passive passive_checks_disabled outages
-                     }) {
+        for my $key (@{$Thruk::Backend::Provider::Livestatus::stats_columns->{$stats_name}}) {
+            next if ref $key;
             $data->{$key} = 0;
         }
     }
@@ -2734,6 +2758,29 @@ sub _set_result_defaults {
         }
     }
     return $data;
+}
+
+########################################
+
+=head2 _set_result_group_stats
+
+  _set_result_group_stats()
+
+set defaults for some results
+
+=cut
+
+sub _set_result_group_stats {
+    my($self, $function, $data, $columns) = @_;
+
+    my $group_key = join(",", @{$columns});
+
+    my $res = {};
+    for my $row (@{$data}) {
+        $res->{$row->{$group_key}} = $row;
+    }
+
+    return($res);
 }
 
 ########################################

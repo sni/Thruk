@@ -774,8 +774,11 @@ sub _send {
         # for querys with column header, no seperate columns will be returned
         if($statement =~ m/^Columns:\ (.*)$/mx) {
             ($statement,$keys) = $self->_extract_keys_from_columns_header($statement);
-        } elsif($statement =~ m/^Stats:\ (.*)$/mx or $statement =~ m/^StatsGroupBy:\ (.*)$/mx) {
+        }
+        if($statement =~ m/^Stats:\ (.*)$/mx or $statement =~ m/^StatsGroupBy:\ (.*)$/mx) {
+            my $has_columns = defined $keys ? join(",", @{$keys}) : undef;
             ($statement,$keys) = extract_keys_from_stats_statement($statement);
+            unshift @{$keys}, $has_columns if $has_columns;
         }
 
         # Offset header (currently naemon only)
