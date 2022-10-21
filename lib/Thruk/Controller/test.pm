@@ -32,7 +32,7 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
-    $c->stash->{'template'}            = 'main.tt';
+    $c->stash->{'template'}            = 'main_legacy.tt';
     $c->stash->{'allowed_frame_links'} = [];
 
     my $action = $c->req->parameters->{'action'} || '';
