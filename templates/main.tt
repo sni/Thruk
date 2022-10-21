@@ -13,7 +13,6 @@
   }
   .my-card {
     min-width: 264px;
-    margin: .5rem;
     flex: 1 1 calc(25% - 1rem);
   }
 
@@ -58,7 +57,7 @@
 </div>
 -->
 
-<div class="flex flex-wrap mt-10">
+<div class="flex flex-wrap mt-10 gap-4">
 
   <div class="my-card">
     <div class="mini-grid">
@@ -175,7 +174,7 @@
 
 </div>
 
-<div class="flex flex-wrap">
+<div class="flex flex-wrap gap-4 mt-4">
   <div class="my-card min-w-[370px]">
     <div class="card w-auto h-full overflow-hidden">
       <div class="head">
@@ -258,7 +257,7 @@
 </div>
 
 
-<div class="flex gap-x-2 justify-center w-full mt-5">
+<div class="flex gap-x-2 justify-center w-full mt-4">
   <button><a class="w-36" href="http://www.thruk.org/download.html?version=[% thrukversion %]" target="_blank">Check for updates</a></button>
   <button><a class="w-36" href="[% url_prefix %]changes.html">Changelog</a></button>
 </div>
