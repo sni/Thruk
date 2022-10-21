@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next 3.x:
+          - complete design rework
           - deprecated configuration options:
             - use_pager
             - use_frames
