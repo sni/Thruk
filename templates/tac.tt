@@ -62,7 +62,7 @@
         </tr>
         [% IF !empty && host_stats.outages > 0 %]
         <tr>
-          <td class="p-0"><a class="itemblock importantProblem" href='outages.cgi'>[% host_stats.outages %] Blocking Outages</a></td>
+          <td class="p-0 importantProblem h-8"><a class="block w-full p-2 itemblock" href='outages.cgi'>[% host_stats.outages %] Blocking Outages</a></td>
         </tr>
         [% END %]
       </table>
