@@ -79,6 +79,7 @@ lib/Thruk/Controller/config.pm
 lib/Thruk/Controller/error.pm
 lib/Thruk/Controller/extinfo.pm
 lib/Thruk/Controller/login.pm
+lib/Thruk/Controller/main.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/proxy.pm
@@ -834,6 +835,8 @@ root/thruk/usercontent/sounds/unknown.mp3
 root/thruk/usercontent/sounds/warning.mp3
 root/thruk/vendor/bestiejs-1.3.5/platform.js
 root/thruk/vendor/bigscreen-2.0.4.js
+root/thruk/vendor/billboard-3.5.1/billboard.css
+root/thruk/vendor/billboard-3.5.1/billboard.pkgd.min.js
 root/thruk/vendor/dagre-0.4.6/dagre.min.js
 root/thruk/vendor/daterangepicker-3.0.5/daterangepicker.css
 root/thruk/vendor/daterangepicker-3.0.5/daterangepicker.js
@@ -2903,6 +2906,7 @@ templates/get_variable.tt
 templates/job_popup.tt
 templates/login.tt
 templates/main.tt
+templates/main_legacy.tt
 templates/notifications.tt
 templates/outages.tt
 templates/passthrough.tt

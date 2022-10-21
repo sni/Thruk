@@ -177,6 +177,7 @@ sub _build_app {
         '/thruk/cgi-bin/summary.cgi'       => 'Thruk::Controller::summary::index',
         '/thruk/cgi-bin/tac.cgi'           => 'Thruk::Controller::tac::index',
         '/thruk/cgi-bin/trends.cgi'        => 'Thruk::Controller::trends::index',
+        '/thruk/cgi-bin/main.cgi'          => 'Thruk::Controller::main::index',
         '/thruk/cgi-bin/test.cgi'          => 'Thruk::Controller::test::index',
         '/thruk/cgi-bin/error.cgi'         => 'Thruk::Controller::error::index',
         '/thruk/cgi-bin/docs.cgi'          => 'Thruk::Controller::Root::thruk_docs',

@@ -1,0 +1,433 @@
+﻿[% PROCESS _header.tt
+    js           => [ "vendor/billboard-3.5.1/billboard.pkgd.min.js" ],
+    css          => [ "vendor/billboard-3.5.1/billboard.css" ]
+%]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+<style>
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-gap: 20px;
+  }
+  .my-card {
+    min-width: 264px;
+    margin: .5rem;
+    flex: 1 1 calc(25% - 1rem);
+  }
+
+  /* only for DARK MODE
+  .bb-chart-arc .bb-gauge-value, .bb text, .bb .bb-button {
+    fill: #eee;
+  }*/
+
+</style>
+
+<h1>[% page_title %]</h1>
+
+<div class="ml-2">
+  [% PROCESS _status_filter.tt small_button=1 entries="" show_substyle_selector=1 %]
+</div>
+
+<div class="flex flex-wrap mt-2">
+
+  <div class="my-card">
+    <div class="mini-grid">
+      <div class="card w-auto">
+        <div class="head">
+          <h3>Total Hosts</h3>
+        </div>
+        <div class="flex justify-center h-[75px]">
+          <div class="self-center">
+            <span class="text-2xl font-bold">[% host_stats.total %]</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card w-auto">
+        <div class="head">
+          <h3>Total Services</h3>
+        </div>
+        <div class="flex justify-center h-[75px]">
+          <div class="self-center">
+            <span class="text-2xl font-bold">[% service_stats.total %]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mini-grid mt-5">
+      <div class="card w-auto">
+        <div class="head">
+          <h3>Total Backends</h3>
+        </div>
+        <div class="flex justify-center h-[75px]">
+          <div class="self-center">
+            <span class="text-2xl font-bold">[% backend_stats.enabled %]</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card w-auto">
+        <div class="head">
+          <h3>Total Contacts</h3>
+        </div>
+        <div class="flex justify-center h-[75px]">
+          <div class="self-center">
+            <span class="text-2xl font-bold">[% contacts %]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="my-card">
+    <div class="card overviewcard w-auto">
+      <div class="head">
+        <h3>Hosts</h3>
+      </div>
+      <div id="hosts-gaugeChart">
+      </div>
+    </div>
+  </div>
+
+  <div class="my-card">
+    <div class="card overviewcard w-auto">
+      <div class="head">
+        <h3>Services</h3>
+      </div>
+      <div id="services-gaugeChart">
+      </div>
+    </div>
+  </div>
+
+  [% IF backend_stats.enabled > 1 %]
+  <div class="my-card">
+    <div class="card overviewcard w-auto">
+      <div class="head">
+        <h3>Available backends</h3>
+      </div>
+      <div id="backends-gaugeChart">
+      </div>
+    </div>
+  </div>
+  [% END %]
+
+  <div class="my-card">
+    <div class="card w-auto">
+      <div class="head">
+        <h3>Hosts per Backend</h3>
+      </div>
+      <div id="hostloc-pieChart">
+      </div>
+    </div>
+  </div>
+
+  <div class="my-card">
+    <div class="card w-auto h-full">
+      <div class="head">
+        <h3>Top 5 Hostgroups</h3>
+      </div>
+      <div id="hostgroups-barChart">
+      </div>
+    </div>
+  </div>
+
+  <div class="my-card">
+    <div class="card w-auto">
+      <div class="head">
+        <h3>Notifications</h3>
+      </div>
+      <div id="notifications-barChart">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="flex flex-wrap">
+  <div class="my-card min-w-[370px]">
+    <div class="card w-auto h-full overflow-hidden">
+      <div class="head">
+        <h3>Unhandled Host Problems</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="cellspacing-x">
+          <thead>
+            <tr>
+              <th class="px-2 pt-2">Host</th>
+              <th class="px-2 pt-2 text-center">State</th>
+              <th class="px-2 pt-2">Output</th>
+              <th class="px-2 pt-2">Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            [% FOR h = problemhosts %]
+            <tr>
+              <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% h.name | html %]</a></td>
+              <td class="flex justify-center"><div class="badge DOWN">DOWN</div></td>
+              <td class="truncate w-1/2 max-w-0">[% h.plugin_output %]</td>
+              <td>[% duration(date.now - h.last_hard_state_change) %]</td>
+            </tr>
+            [% END %]
+            [% IF problemhosts.size == 0 %]
+              <tr>
+                <td class='text-center' colspan="4">Currently no hosts with unhandled problems</td>
+              </tr>
+            [% END %]
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="my-card min-w-[370px]">
+    <div class="card w-auto h-full overflow-hidden">
+      <div class="head">
+        <h3>Unhandled Service Problems</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="cellspacing-x">
+          <thead>
+            <tr>
+              <th class="px-2 pt-2">Host</th>
+              <th class="px-2 pt-2">Service</th>
+              <th class="px-2 pt-2 text-center">State</th>
+              <th class="px-2 pt-2">Output</th>
+              <th class="px-2 pt-2">Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            [% FOR s = problemservices %]
+              [% IF s.state == 1 %]
+                [% state = 'WARNING' %]
+              [% ELSIF s.state == 2 %]
+                [% state = 'CRITICAL' %]
+              [% ELSIF s.state == 3 %]
+                [% state = 'UNKNOWN' %]
+              [% END %]
+            <tr>
+              <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]">[% s.host_name | html %]</a></td>
+              <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% s.description | html %]</a></td>
+              <td class="flex justify-center"><div class="badge [% state %]">[% state %]</div></td>
+              <td class="truncate w-1/2 max-w-0">[% s.plugin_output %]</td>
+              <td>[% duration(date.now - s.last_hard_state_change) %]</td>
+            </tr>
+            [% END %]
+            [% IF problemservices.size == 0 %]
+              <tr>
+                <td class='text-center' colspan="5">Currently no services with unhandled problems</td>
+              </tr>
+            [% END %]
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="flex gap-x-2 justify-center w-full mt-5">
+  <button><a class="w-36" href="http://www.thruk.org/download.html?version=[% thrukversion %]" target="_blank">Check for updates</a></button>
+  <button><a class="w-36" href="[% url_prefix %]changes.html">Changelog</a></button>
+</div>
+
+
+
+
+<script>
+  //backends gauge
+  [% IF backend_stats.enabled > 1 %]
+  var backends = bb.generate({
+    data: {
+      columns: [
+        [% IF backend_stats.running > 0 %]
+          ["UP", [% backend_stats.running %]],
+        [% END %]
+        [% IF backend_stats.down > 0 %]
+          ["DOWN", [% backend_stats.down %]]
+        [% END %]
+        [% IF backend_stats.enabled == 0 %]
+          ["ENABLED", 0]
+        [% END %]
+      ],
+      type: "gauge",
+    },
+    gauge: {
+      max: [% backend_stats.enabled %],
+      label: {
+        format: function(value, ratio) {
+          return value;
+        }
+      }
+    },
+    color: {
+        pattern: ['#60B044','#FF0000']
+      },
+    size: {
+      height: 210
+    },
+    bindto: "#backends-gaugeChart"
+  });
+  [% END %]
+
+  //hosts gauge
+  [% SET empty_hosts = 0 %]
+  [% SET empty_hosts = 1 UNLESS host_stats %]
+  [% IF empty_hosts || (host_stats.total-host_stats.pending) == 0 %]
+    [% host_health = 0 %]
+  [% ELSE %]
+    [% host_health = host_stats.up / (host_stats.total-host_stats.pending) * 100 %]
+  [% END %]
+  var hosts = bb.generate({
+    data: {
+      columns: [
+        ["Hosts", [% host_health %]]
+      ],
+      type: "gauge",
+    },
+    gauge: {},
+    color: {
+      pattern: [
+        "#FF0000",
+        "#F6C600",
+        "#60B044"
+      ],
+      threshold: {
+        values: [
+          40,
+          85,
+          100
+        ]
+      }
+    },
+    size: {
+      height: 210
+    },
+    interaction: {
+      enabled: false
+    },
+    bindto: "#hosts-gaugeChart"
+  });
+
+  //services gauge
+  [% SET empty_services = 0 %]
+  [% SET empty_services = 1 UNLESS service_stats %]
+  [% IF empty_services || (service_stats.total-service_stats.pending) == 0 %]
+    [% service_health = 0 %]
+  [% ELSE %]
+    [% service_health = (service_stats.ok + service_stats.warning + service_stats.unknown) / ((service_stats.total-service_stats.pending)) * 100 %]
+  [% END %]
+  var services = bb.generate({
+    data: {
+      columns: [
+        ["Services", [% service_health %]]
+      ],
+      type: "gauge",
+    },
+    gauge: {},
+    color: {
+      pattern: [
+        "#FF0000",
+        "#F6C600",
+        "#60B044"
+      ],
+      threshold: {
+        values: [
+          40,
+          85,
+          100
+        ]
+      }
+    },
+    size: {
+      height: 210
+    },
+    interaction: {
+      enabled: false
+    },
+    bindto: "#services-gaugeChart"
+  });
+
+  //hostloc
+  var hostloc = bb.generate({
+    data: {
+      columns: // backgroundColor: ["#03fc1c", "#ffc636","#f97316","#ef4444","#737373"],
+      [% json_encode(hosts_by_backend) %],
+      type: "pie"
+    },
+    size: {
+      height: 210
+    },
+    interaction: {
+      enabled: true,
+      brighten: false //DOESNT WORK FOR SOME REASON
+    },
+    bindto: "#hostloc-pieChart"
+  });
+
+  //hostgroups
+
+  var hostgroups = bb.generate({
+    data: {
+      x: "x",
+      columns: [
+        ["x", "Number of hosts"],
+        [% IF hostgroups.size > 0 %]
+        [% FOR hostgroup = hostgroups %]
+          [ "[% hostgroup.name %]", [% hostgroup.value %] ][% IF !loop.last %],[% END %]
+        [% END %]
+        [% ELSE %]
+          ["NO DATA", 0]
+        [% END %]
+      ],
+      type: "bar",
+    },
+    bar: {
+      padding: 5,
+    },
+    size: {
+      height: 210
+    },
+    axis: {
+      x: {
+        type: "category",
+      }
+    },
+    interaction: {
+      enabled: true,
+      brighten: false //DOESNT WORK FOR SOME REASON
+    },
+    bindto: "#hostgroups-barChart"
+  });
+
+  var test = bb.generate({
+  data: {
+    x: "x",
+    columns: [
+      ["x",[% FOR notification = notifications %]"[% notification.date %]",[% END %]],
+      ["Notifications",[% FOR notification = notifications %]"[% notification.count %]",[% END %]]
+    ],
+    type: "bar",
+  },
+  size: {
+      height: 210
+    },
+  axis: {
+    x: {
+      type: "timeseries",
+      tick: {
+        format: "%H:%M"
+      },
+      padding: {
+        right: 15,
+        unit: "px"
+      }
+    }
+  },
+  bindto: "#notifications-barChart"
+});
+
+</script>

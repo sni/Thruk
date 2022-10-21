@@ -17,7 +17,7 @@
     var newurl  = new String(window.location.hash);
     newurl      = newurl.replace(/^#+/, '');
     if(newurl == '') {
-      return;
+        return(false);
     }
     var oldurl  = new String(window.location);
     oldurl      = oldurl.replace(/#.*$/, '');
@@ -32,12 +32,12 @@
         }
     }
     if(!pageurl) {
-        return;
+        return(false);
     }
     pageurl = pageurl.replace(/"/g, '&quot;');
     if(pageurl.match(/\/[% product_prefix %]\//)) {
-      jQuery("BODY").css("display", "none"); // prevent flickering
-      window.location = pageurl;
+        jQuery("BODY").css("display", "none"); // prevent flickering
+        window.location = pageurl;
     } else {
       // external url requires iframe
       // check permissions against allowed_frame_links
@@ -56,11 +56,14 @@
         thruk_message(1, 'Url not allowed to be displayed in frame. Check allowed_frame_links configuration.');
       }
     }
+    return(true);
   }
   [% IF c.config.start_page != '' %]
     window.location.hash = '#[% c.config.start_page %]';
   [% END %]
-  redirect_legacy_hash_url();
+  if(!redirect_legacy_hash_url()) {
+    window.location = "./cgi-bin/main.cgi";
+  }
 
   window.onhashchange = function(e) {
     if(e == null || e.newURL == null) {
