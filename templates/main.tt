@@ -38,7 +38,7 @@
         </span>
         <div id="edit_menu" style="display: none;" class="context_menu w-[160px] left-0 top-[40px]">
           <ul class="w-full">
-            <li><a href="#" onclick="return false;"><i class="uil uil-plus text-xs"></i>Create New View</a></li>
+            <li><a href="#" onclick="return false;"><i class="fa-solid fa-plus text-xs"></i>Create New View</a></li>
             <li><a href="#" onclick="return false;"><i class="fa-solid fa-trash text-xs"></i>Remove Current View</a></li>
           </ul>
         </div>
