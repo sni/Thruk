@@ -48,17 +48,25 @@ sub index {
             $hostgroups->{$group}++;
         }
     }
+
+    ############################################################################
+    # hostgroups
     my $top5_hg = [];
-    my @hashkeys_hg = reverse sort { $hostgroups->{$a} <=> $hostgroups->{$b} } keys %$hostgroups;
+    my @hashkeys_hg = sort { $hostgroups->{$b} <=> $hostgroups->{$a} } keys %$hostgroups;
     splice(@hashkeys_hg, 5) if scalar(@hashkeys_hg) > 5;
 
     for my $key (@hashkeys_hg) {
         push(@{$top5_hg}, { 'name' => $key, 'value' => $hostgroups->{$key} } )
     }
 
+    $c->stash->{'hostgroups'} = $top5_hg;
+
+    ############################################################################
     # notifications
     my $start = time() - 90000; # last 25h
-    my $notificationData = $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { 'type' => "SERVICE ALERT" }, { 'state_type' => "SOFT" }, { time => { '>=' => $start }}  ], sort => {ASC => 'time'}, limit => 1000000); # not using a limit here, makes mysql not use an index
+    my $notificationData = $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { -or => [ { 'type' => "HOST NOTIFICATION" }, { 'type' => "SERVICE NOTIFICATION" }  ] } , { time => { '>=' => $start }}  ],
+                                            limit  => 1000000, # not using a limit here, makes mysql not use an index
+                            );
 
     my $notificationHash = {};
     my $time = $start;
@@ -73,16 +81,23 @@ sub index {
         $notificationHash->{$date}++;
     }
 
-    my $notifications = [];
-    for my $key (sort keys %$notificationHash) {
-        push(@{$notifications}, { 'date' => $key, 'count' => $notificationHash->{$key} });
+    my $notifications = [["x"], ["Notifications"]];
+    my @keys = sort keys %{$notificationHash};
+    @keys = splice(@keys, 1);
+    for my $key (@keys) {
+        push(@{$notifications->[0]}, $key);
+        push(@{$notifications->[1]}, $notificationHash->{$key});
     }
-    shift @$notifications if scalar(@$notifications) > 1;
+    $c->stash->{'notifications'} = $notifications;
 
+    ############################################################################
     # host and service problems
     my $problemhosts    = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['name','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' },  limit => 5 );
     my $problemservices = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'state_type' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['host_name','description','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' }, limit => 5 );
+    $c->stash->{'problemhosts'} = $problemhosts;
+    $c->stash->{'problemservices'} = $problemservices;
 
+    ############################################################################
     my $backend_stats = {};
     $backend_stats->{'enabled'} = 0;
     $backend_stats->{'running'} = 0;
@@ -103,26 +118,21 @@ sub index {
     }
     $c->stash->{'backend_stats'} = $backend_stats;
 
-    $c->stash->{'problemhosts'} = $problemhosts;
-    $c->stash->{'problemservices'} = $problemservices;
-
-    # hostgroups
-    $c->stash->{'hostgroups'} = $top5_hg;
-
-    $c->stash->{'notifications'} = $notifications;
-
     $c->stash->{'host_stats'} = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
     $c->stash->{'contacts'} = scalar @{$c->db->get_contacts(columns => ['name'])};
 
+    ############################################################################
     # host by backend
     my $hosts_by_backend = [];
     my $hosts_by_backend_data = $c->db->get_host_stats_by_backend(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
     for my $row (values %{$hosts_by_backend_data}) {
         push @{$hosts_by_backend}, [$row->{'peer_name'}, $row->{'total'} ];
     }
+    @{$hosts_by_backend} = sort { $b->[1] <=> $a->[1] } @{$hosts_by_backend};
     $c->stash->{'hosts_by_backend'} = $hosts_by_backend;
 
+    ############################################################################
     my $style = $c->req->parameters->{'style'} || 'main';
     if($style ne 'main' ) {
         return if Thruk::Utils::Status::redirect_view($c, $style);

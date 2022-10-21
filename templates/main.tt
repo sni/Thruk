@@ -26,11 +26,39 @@
 
 <h1>[% page_title %]</h1>
 
-<div class="ml-2">
-  [% PROCESS _status_filter.tt small_button=1 entries="" show_substyle_selector=1 %]
+<div class="card w-full absolute top-0 left-0 rounded-none shadow-none border-t border-b">
+  <div class="head border-b-0 flexrow flex-nowrap gap-0 justify-between">
+    <div class="ml-6 w-32">
+      [% PROCESS _status_filter.tt entries="" show_substyle_selector=1 %]
+    </div>
+    <div class="flexrow flex-nowrap gap-0 w-min">
+      <span class="tabs min-w-[140px] h-[42px] w-52 px-2 text-center font-medium text-base active"><a class="block" href="main.cgi">All Hosts</a></span>
+      <div class="relative">
+        <span class="tabs px-2 mt-px text-center font-medium text-base border-none hover:border-none">
+          <button class="iconOnly" onclick="showElement('edit_menu', undefined, true); return false;" title="add new view"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+        </span>
+        <div id="edit_menu" style="display: none;" class="context_menu w-[160px] left-0 top-[40px]">
+          <ul class="w-full">
+            <li><a href="#" onclick="return false;"><i class="uil uil-plus text-xs"></i>Create New View</a></li>
+            <li><a href="#" onclick="return false;"><i class="fa-solid fa-trash text-xs"></i>Remove Current View</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="w-32">&nbsp;</div>
+  </div>
 </div>
 
-<div class="flex flex-wrap mt-2">
+<!--
+<div class="buttongroup mx-auto">
+  <button class="w-52 active">Test</button>
+  <button class="w-52">Test</button>
+  <button class="w-52">Test</button>
+  <button class="" onclick="return false;" title="add new view"><i class="uil uil-plus text-lg"></i></button>
+</div>
+-->
+
+<div class="flex flex-wrap mt-10">
 
   <div class="my-card">
     <div class="mini-grid">
@@ -103,26 +131,27 @@
   </div>
 
   [% IF backend_stats.enabled > 1 %]
-  <div class="my-card">
-    <div class="card overviewcard w-auto">
-      <div class="head">
-        <h3>Available backends</h3>
-      </div>
-      <div id="backends-gaugeChart">
+    <div class="my-card">
+      <div class="card overviewcard w-auto">
+        <div class="head">
+          <h3>Available Backends</h3>
+        </div>
+        <div id="backends-gaugeChart">
+        </div>
       </div>
     </div>
-  </div>
+    [% IF backend_stats.enabled - backend_stats.down > 1 %]
+    <div class="my-card">
+      <div class="card w-auto">
+        <div class="head">
+          <h3>Hosts per Backend</h3>
+        </div>
+        <div id="hostloc-pieChart">
+        </div>
+      </div>
+    </div>
+    [% END %]
   [% END %]
-
-  <div class="my-card">
-    <div class="card w-auto">
-      <div class="head">
-        <h3>Hosts per Backend</h3>
-      </div>
-      <div id="hostloc-pieChart">
-      </div>
-    </div>
-  </div>
 
   <div class="my-card">
     <div class="card w-auto h-full">
@@ -238,19 +267,19 @@
 
 
 <script>
-  //backends gauge
+  //avail backends
   [% IF backend_stats.enabled > 1 %]
   var backends = bb.generate({
     data: {
       columns: [
         [% IF backend_stats.running > 0 %]
-          ["UP", [% backend_stats.running %]],
+          ["Up", [% backend_stats.running %]],
         [% END %]
         [% IF backend_stats.down > 0 %]
-          ["DOWN", [% backend_stats.down %]]
+          ["Down", [% backend_stats.down %]]
         [% END %]
         [% IF backend_stats.enabled == 0 %]
-          ["ENABLED", 0]
+          ["Enabled", 0]
         [% END %]
       ],
       type: "gauge",
@@ -271,6 +300,37 @@
     },
     bindto: "#backends-gaugeChart"
   });
+
+  //hosts per backend
+  var hostloc = bb.generate({
+    data: {
+      columns: // backgroundColor: ["#03fc1c", "#ffc636","#f97316","#ef4444","#737373"],
+      [% json_encode(hosts_by_backend) %],
+      type: "pie"
+    },
+    pie : {
+      label: {
+        format: function(value, ratio, id) {
+          return value;
+        }
+      }
+    },
+    tooltip: {
+      format: {
+        value: function(value, ratio, id) {
+		      return value;
+        }
+      }
+    },
+    size: {
+      height: 210
+    },
+    interaction: {
+      enabled: true,
+      brighten: false //DOESNT WORK FOR SOME REASON
+    },
+    bindto: "#hostloc-pieChart"
+  });
   [% END %]
 
   //hosts gauge
@@ -284,7 +344,7 @@
   var hosts = bb.generate({
     data: {
       columns: [
-        ["Hosts", [% host_health %]]
+        ["Hosts UP", [% host_health %]]
       ],
       type: "gauge",
     },
@@ -323,7 +383,7 @@
   var services = bb.generate({
     data: {
       columns: [
-        ["Services", [% service_health %]]
+        ["Services OK", [% service_health %]]
       ],
       type: "gauge",
     },
@@ -351,25 +411,8 @@
     bindto: "#services-gaugeChart"
   });
 
-  //hostloc
-  var hostloc = bb.generate({
-    data: {
-      columns: // backgroundColor: ["#03fc1c", "#ffc636","#f97316","#ef4444","#737373"],
-      [% json_encode(hosts_by_backend) %],
-      type: "pie"
-    },
-    size: {
-      height: 210
-    },
-    interaction: {
-      enabled: true,
-      brighten: false //DOESNT WORK FOR SOME REASON
-    },
-    bindto: "#hostloc-pieChart"
-  });
 
   //hostgroups
-
   var hostgroups = bb.generate({
     data: {
       x: "x",
@@ -403,14 +446,14 @@
     bindto: "#hostgroups-barChart"
   });
 
-  var test = bb.generate({
+  var notifications = bb.generate({
   data: {
     x: "x",
-    columns: [
-      ["x",[% FOR notification = notifications %]"[% notification.date %]",[% END %]],
-      ["Notifications",[% FOR notification = notifications %]"[% notification.count %]",[% END %]]
-    ],
+    columns: [% json_encode(notifications) %],
     type: "bar",
+    onclick: function(d, element) {
+      window.open("notifications.cgi",'_blank');
+    }
   },
   size: {
       height: 210

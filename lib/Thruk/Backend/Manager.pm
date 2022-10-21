@@ -2739,7 +2739,7 @@ sub _set_result_defaults {
             }
         }
     }
-    elsif($Thruk::Backend::Provider::Livestatus::stats_columns->{$stats_name}) {
+    elsif($stats_name && $Thruk::Backend::Provider::Livestatus::stats_columns->{$stats_name}) {
         $data = {};
         for my $key (@{$Thruk::Backend::Provider::Livestatus::stats_columns->{$stats_name}}) {
             next if ref $key;

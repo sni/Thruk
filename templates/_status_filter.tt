@@ -49,6 +49,9 @@
                 <optgroup label="Tac">
                   <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
                 </optgroup>
+                <optgroup label="Main">
+                  <option value="main"[% IF style == 'main' %] selected[% END %]>Main Dashboard</option>
+                </optgroup>
                 [% FOREACH groupname = additional_views.keys.sort %]
                   <optgroup label="[% groupname | html %]">
                     [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
