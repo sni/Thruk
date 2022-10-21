@@ -54,7 +54,7 @@ sub index {
     ############################################################################
     # hostgroups
     my $top5_hg = [];
-    my @hashkeys_hg = sort { $hostgroups->{$b} <=> $hostgroups->{$a} } keys %$hostgroups;
+    my @hashkeys_hg = sort { $hostgroups->{$b} <=> $hostgroups->{$a} } keys %{$hostgroups};
     splice(@hashkeys_hg, 5) if scalar(@hashkeys_hg) > 5;
 
     for my $key (@hashkeys_hg) {

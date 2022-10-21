@@ -281,7 +281,7 @@
           ["Enabled", 0]
         [% END %]
       ],
-      type: "gauge",
+      type: "gauge"
     },
     gauge: {
       max: [% backend_stats.enabled %],
@@ -345,7 +345,7 @@
       columns: [
         ["Hosts UP", [% host_health %]]
       ],
-      type: "gauge",
+      type: "gauge"
     },
     gauge: {},
     color: {
@@ -384,7 +384,7 @@
       columns: [
         ["Services OK", [% service_health %]]
       ],
-      type: "gauge",
+      type: "gauge"
     },
     gauge: {},
     color: {
@@ -425,17 +425,17 @@
           ["NO DATA", 0]
         [% END %]
       ],
-      type: "bar",
+      type: "bar"
     },
     bar: {
-      padding: 5,
+      padding: 5
     },
     size: {
       height: 210
     },
     axis: {
       x: {
-        type: "category",
+        type: "category"
       }
     },
     interaction: {

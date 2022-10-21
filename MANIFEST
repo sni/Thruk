@@ -1972,6 +1972,7 @@ t/300-controller_cookie_auth.t
 t/300-controller_error.t
 t/300-controller_extinfo.t
 t/300-controller_history.t
+t/300-controller_main.t
 t/300-controller_notifications.t
 t/300-controller_outages.t
 t/300-controller_parts.t
