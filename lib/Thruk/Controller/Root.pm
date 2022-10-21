@@ -100,7 +100,7 @@ sub thruk_main_html {
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
     $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';
     $c->stash->{'page'}                    = 'splashpage';
-    $c->stash->{'template'}                = 'main.tt';
+    $c->stash->{'template'}                = 'main_legacy.tt';
     $c->stash->{'no_auto_reload'}          = 1;
     $c->stash->{'inject_stats'}            = 0;
     $c->stash->{'allowed_frame_links'}     = [@{$c->config->{'allowed_frame_links'}//[]}, $c->config->{'documentation_link'}];
