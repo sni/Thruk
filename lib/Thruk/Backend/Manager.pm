@@ -721,7 +721,7 @@ sub get_host_stats_by_backend {
         }
     } else {
         # without LMD we have to ask all backends
-        my($result, $type, $totalsize) = $self->_do_on_peers('get_host_less_stats', \@args, undef, undef, 1);
+        my($result) = $self->_do_on_peers('get_host_less_stats', \@args, undef, undef, 1);
         # add peer name
         for my $key (keys %{$result}) {
             $res->{$key} = $result->{$key};
