@@ -266,6 +266,36 @@
 
 
 <script>
+
+  function getToolTipTemplate(data) {
+    var template = '<table class="{=CLASS_TOOLTIP}"><tbody>{=TITLE}';
+    if(data != null) {
+      jQuery(data).each(function(i, row) {
+        if(row.value > 0) {
+          template += getToolTipTemplateRow(row.name, row.value, row.color, '');
+        }
+      });
+      template += '{{}}';
+    } else {
+      template += '{{'+getToolTipTemplateRow()+'}}';
+    }
+    template += '<\/tbody><\/table>test';
+    return(template);
+  }
+
+  function getToolTipTemplateRow(name, value, color, cls) {
+    cls   = cls   != null ? cls   : '{=CLASS_TOOLTIP_NAME}';
+    color = color != null ? color : '{=COLOR}';
+    name  = name  != null ? name  : '{=NAME}';
+    value = value != null ? value : '{=VALUE}';
+    return(''
+      +'<tr class="'+cls+'">'
+      +'<td class="name"><span style="background-color:'+color+'"></span>'+name+'<\/td>'
+      +'<td class="value text-right">'+value+'<\/td>'
+      +'<\/tr>'
+    );
+  }
+
   //avail backends
   [% IF backend_stats.available > 1 %]
     var backends = bb.generate({
@@ -351,7 +381,17 @@
       height: 210
     },
     interaction: {
-      enabled: false
+      enabled: true
+    },
+    tooltip: {
+      contents: {
+        template: getToolTipTemplate([
+                    {name:'Up',          value: [% host_stats.up %],          color: '#60B044'},
+                    {name:'Down',        value: [% host_stats.down %],        color: '#FF0000'},
+                    {name:'Unreachable', value: [% host_stats.unreachable %], color: '#FF0000'},
+                    {name:'Pending',     value: [% host_stats.pending %],     color: '#d1d5db'}
+                  ])
+      }
     },
     bindto: "#hosts-gaugeChart"
   });
@@ -390,7 +430,18 @@
       height: 210
     },
     interaction: {
-      enabled: false
+      enabled: true
+    },
+    tooltip: {
+      contents: {
+        template: getToolTipTemplate([
+                    {name:'OK',       value: [% service_stats.ok %],       color: '#60B044'},
+                    {name:'Warning',  value: [% service_stats.warning %],  color: '#F6C600'},
+                    {name:'Unknown',  value: [% service_stats.unknown %],  color: '#ff7f0e'},
+                    {name:'Critical', value: [% service_stats.critical %], color: '#FF0000'},
+                    {name:'Pending',  value: [% service_stats.pending %],  color: '#d1d5db'}
+                  ])
+      }
     },
     bindto: "#services-gaugeChart"
   });

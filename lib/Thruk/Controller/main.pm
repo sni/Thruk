@@ -5,6 +5,7 @@ use strict;
 use POSIX ();
 
 use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Status ();
 
