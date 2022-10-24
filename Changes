@@ -18,6 +18,7 @@ next 3.x:
           - add delete icon to comments/downtimes popup
           - add copy button for expanded command line
           - enable expire acknowledgements by default
+          - make bookmarks sortable
 
 2.50     Mon Oct 17 09:44:22 CEST 2022
           - improve creating links containing spaces

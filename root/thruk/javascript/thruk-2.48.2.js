@@ -2001,13 +2001,13 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
         items                : 'BUTTON',
         helper               : 'clone',
         tolerance            : 'pointer',
+        placeholder          : 'sortable-placeholder',
         cursor               : 'pointer',
         cancel               : '', // would conflict with buttons otherwise
         forcePlaceholderSize : false,
         forceHelperSize      : false,
         axis                 : 'x',
         distance             : 5,
-        placeholder          : "site_panel_bookmark_placeholder",
         update               : function(event, ui) {
             var order = [];
             jQuery("#site_panel_bookmark_list > BUTTON").each(function(i, el) {
@@ -4014,6 +4014,7 @@ function initTableRowSorting(tblId) {
         items                : 'TR.sortable',
         helper               : 'clone',
         tolerance            : 'pointer',
+        placeholder          : 'sortable-placeholder',
         update               : function( event, ui ) {
         }
     });
@@ -4035,6 +4036,7 @@ function initExcelExportSorting() {
         items                : 'TR.sortable_row',
         helper               : 'clone',
         tolerance            : 'pointer',
+        placeholder          : 'sortable-placeholder',
         update               : function( event, ui ) {
             updateExcelPermanentLink();
         }
@@ -4060,6 +4062,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
             items                : '> th',
             helper               : 'clone',
             tolerance            : 'pointer',
+            placeholder          : 'sortable-placeholder',
             update               : function( event, ui ) {
                 var oldIndexes = [];
                 var rowsToSort = {};
@@ -4107,7 +4110,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
     jQuery('#'+pane_prefix+'_columns_table tbody').sortable({
         items                : '> tr',
         handle              : '.js-drag-handle',
-        placeholder          : 'column-sortable-placeholder',
+        placeholder          : 'sortable-placeholder',
         update               : function( event, ui ) {
             /* drag/drop changes the checkbox state, so set checked flag assuming that a moved column should be visible */
             window.setTimeout(function() {

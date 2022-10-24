@@ -1661,3 +1661,13 @@ DIV.linedwrap {
 DIV.linedtextarea {
   width: 100%;
 }
+
+/*******************************************************************************
+* lined text editor popup
+*/
+.sortable-placeholder {
+  background-color: var(--row-selected-even-bg) !important;
+  TR, TD, DIV {
+    background-color: var(--row-selected-even-bg) !important;
+  }
+}

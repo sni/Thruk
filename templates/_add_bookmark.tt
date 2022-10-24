@@ -1,10 +1,10 @@
 ﻿<div class="flex relative">
-  <button class="round small" title="Manager user bookmarks" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><i class="uil uil-bookmark"></i></button>
+  <button class="round small" title="Manager user bookmarks" onclick="resetRefresh(); initBookSorting(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><i class="uil uil-bookmark"></i></button>
 
-  <div class="card shadow-float absolute z-20 top-7 w-[550px] overflow-hidden" style="display: none;" id="add_bookmark">
+  <div class="card shadow-float absolute z-20 top-7 w-[600px] overflow-hidden" style="display: none;" id="add_bookmark">
     <div class="head p-0">
       <span class="tabs text-sm active" id="sub_2" onclick="set_sub(2)">Add New</span>
-      <span class="tabs text-sm" id="sub_1" onclick="set_sub(1)">Remove Bookmarks</span>
+      <span class="tabs text-sm" id="sub_1" onclick="set_sub(1)">Manage Bookmarks</span>
       <button class="iconOnly medium absolute right-2 top-2" onClick="toggleElement('add_bookmark'); return false;"><i class="uil uil-times"></i></button>
     </div>
 
@@ -92,61 +92,72 @@
       </script>
 
       <table class="body rowhover innercellborder sub_1" style="display:none;">
-        <tr class="no-hover">
-          <th colspan="4">User Bookmarks</th>
-        </tr>
-      [% nr = 0 %]
-      [% IF user_data.exists('bookmarks') %]
-        [% FOREACH section = user_data.bookmarks.keys.sort %]
-            [% FOREACH link = user_data.bookmarks.$section %]
-            <tr id="bm[% nr %]">
-              <td class="truncate max-w-[100px]">[% section | html %]</td>
-              <td class="truncate max-w-[100px]">[% link.0 | html %]</td>
-              <td class="truncate max-w-[200px]">[% link.1 | html %]</td>
-              <td class="w-6">
-                <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarks">
-                <button class="iconOnly pl-1" onClick="removeBookmark([% nr %]); return false;">
-                  <i class="fa-solid fa-trash" title="remove this bookmark"></i>
-                </button>
-              </td>
-            </tr>
-            [% nr = nr + 1 %]
-            [% END %]
-        [% END %]
-      [% END %]
-      [% IF nr == 0 %]
-        <tr>
-          <td colspan="4">no bookmarks yet</td>
-        </tr>
-      [% END %]
-      [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
-        [% nr = 0 %]
-        <tr class="no-hover">
-          <th class="pt-2" colspan="4">Public Bookmarks</th>
-        </tr>
-        [% IF global_user_data.exists('bookmarks') %]
-          [% FOREACH section = global_user_data.bookmarks.keys.sort %]
-            [% FOREACH link = global_user_data.bookmarks.$section %]
-            <tr id="bmp[% nr %]">
-              <td class="truncate max-w-[100px]">[% section | html %]</td>
-              <td class="truncate max-w-[100px]">[% link.0 | html %]</td>
-              <td class="truncate max-w-[200px]">[% link.1 | html %]</td>
-              <td class="w-6">
-                <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarksp">
-                <button class="iconOnly pl-1" onClick="removeBookmark('p'+[% nr %]); return false;">
-                  <i class="fa-solid fa-trash" title="remove this bookmark"></i>
-                </button>
-              </td>
-            </tr>
-            [% nr = nr + 1 %]
+        <thead>
+          <tr class="no-hover">
+            <th colspan="5">User Bookmarks</th>
+          </tr>
+        </thead>
+        <tbody id="user_bookmarks">
+          [% nr = 0 %]
+          [% IF user_data.exists('bookmarks') %]
+            [% FOREACH section = user_data.bookmarks.keys.sort %]
+                [% FOREACH link = user_data.bookmarks.$section %]
+                <tr id="bm[% nr %]" class="sortable">
+                  <td class="cursor-move w-6"><i class="uil uil-draggabledots"></i></td>
+                  <td class="truncate max-w-[100px]">[% section | html %]</td>
+                  <td class="truncate max-w-[100px]">[% link.0 | html %]</td>
+                  <td class="truncate max-w-[200px] w-auto">[% link.1 | html %]</td>
+                  <td class="w-6">
+                    <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarks">
+                    <button class="iconOnly pl-1" onClick="removeBookmark([% nr %]); return false;">
+                      <i class="fa-solid fa-trash" title="remove this bookmark"></i>
+                    </button>
+                  </td>
+                </tr>
+                [% nr = nr + 1 %]
+                [% END %]
             [% END %]
           [% END %]
-        [% END %]
-      [% IF nr == 0 %]
-        <tr>
-          <td colspan="4">no public bookmarks yet</td>
-        </tr>
-      [% END %]
+          [% IF nr == 0 %]
+            <tr>
+              <td colspan="5">no bookmarks yet</td>
+            </tr>
+          [% END %]
+        </tbody>
+
+      [% IF c.check_user_roles('authorized_for_public_bookmarks') %]
+        [% nr = 0 %]
+        <thead>
+          <tr class="no-hover">
+            <th class="pt-2" colspan="5">Public Bookmarks</th>
+          </tr>
+        </thead>
+        <tbody id="public_bookmarks">
+          [% IF global_user_data.exists('bookmarks') %]
+            [% FOREACH section = global_user_data.bookmarks.keys.sort %]
+              [% FOREACH link = global_user_data.bookmarks.$section %]
+              <tr id="bmp[% nr %]" class="sortable">
+                <td class="cursor-move w-6"><i class="uil uil-draggabledots"></i></td>
+                <td class="truncate max-w-[100px]">[% section | html %]</td>
+                <td class="truncate max-w-[100px]">[% link.0 | html %]</td>
+                <td class="truncate max-w-[200px]">[% link.1 | html %]</td>
+                <td class="w-6">
+                  <input type="hidden" value="[% section | html %]::[% link.0 | html %]" name="bookmarksp">
+                  <button class="iconOnly pl-1" onClick="removeBookmark('p'+[% nr %]); return false;">
+                    <i class="fa-solid fa-trash" title="remove this bookmark"></i>
+                  </button>
+                </td>
+              </tr>
+              [% nr = nr + 1 %]
+              [% END %]
+            [% END %]
+          [% END %]
+          [% IF nr == 0 %]
+            <tr>
+              <td colspan="4">no public bookmarks yet</td>
+            </tr>
+          [% END %]
+        </tbody>
       [% END %]
 
         <tr class="no-hover">
@@ -161,3 +172,16 @@
     </div>
   </div>
 </div>
+
+<script>
+  function initBookSorting() {
+      if(!has_jquery_ui()) {
+        load_jquery_ui(function() {
+          initBookSorting();
+        });
+        return;
+      }
+      initTableRowSorting("user_bookmarks");
+      initTableRowSorting("public_bookmarks");
+  }
+</script>

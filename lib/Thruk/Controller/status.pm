@@ -1317,8 +1317,8 @@ sub _process_bookmarks {
 
     my $referer       = $c->req->parameters->{'referer'} || 'status.cgi';
     my $bookmark      = $c->req->parameters->{'bookmark'};
-    my $bookmarks     = $c->req->parameters->{'bookmarks'};
-    my $bookmarksp    = $c->req->parameters->{'bookmarksp'};
+    my $bookmarks     = $c->req->parameters->{'bookmarks'}  // [];
+    my $bookmarksp    = $c->req->parameters->{'bookmarksp'} // [];
     my $section       = $c->req->parameters->{'section'};
     my $newname       = $c->req->parameters->{'newname'};
     my $button        = $c->req->parameters->{'addb'};
@@ -1363,6 +1363,7 @@ sub _process_bookmarks {
                 Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
             }
             $keepp->{$section}->{$newname} = 1;
+            push @{$bookmarksp}, $section.'::'.$newname;
         } else {
             $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
             push @{$data->{'bookmarks'}->{$section}}, $new_bookmark;
@@ -1370,6 +1371,7 @@ sub _process_bookmarks {
                 Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
             }
             $keep->{$section}->{$newname} = 1;
+            push @{$bookmarks}, $section.'::'.$newname;
         }
         $done++;
     }
@@ -1379,21 +1381,31 @@ sub _process_bookmarks {
         or ( defined $save   and $save   eq 'save changes' )) {
         for my $bookmark (@{Thruk::Base::list($bookmarks)}) {
             next unless defined $bookmark;
-            my($section, $name) = split(/::/mx, $bookmark ,2);
+            my($section, $name) = split(/::/mx, $bookmark, 2);
             next unless defined $name;
             $keep->{$section}->{$name} = 1;
+        }
+
+        my $order = {};
+        my $x = 0;
+        for my $b (@{Thruk::Base::list($bookmarks)}) {
+            my($section, $name) = split(/::/mx, $b, 2);
+            $order->{$section}->{$name} = $x++;
         }
 
         my $new  = {};
         my $dups = {};
         for my $section (keys %{$data->{'bookmarks'}}) {
+            # reverse ensures the last bookmark with same name superseeds
             for my $link ( reverse @{$data->{'bookmarks'}->{$section}} ) {
                 next unless exists $keep->{$section}->{$link->[0]};
                 next if     exists $dups->{$section}->{$link->[0]};
                 push @{$new->{$section}}, $link;
                 $dups->{$section}->{$link->[0]} = 1;
             }
-            @{$new->{$section}} = reverse @{$new->{$section}} if defined $new->{$section}; # ensures the last bookmark with same name superseeds
+
+            # sort
+            @{$new->{$section}} = sort { $order->{$section}->{$a->[0]} <=> $order->{$section}->{$b->[0]} } @{$new->{$section}} if defined $new->{$section};
         }
 
         $data->{'bookmarks'} = $new;
@@ -1405,20 +1417,28 @@ sub _process_bookmarks {
         if($c->check_user_roles('authorized_for_public_bookmarks')) {
             for my $bookmark (@{Thruk::Base::list($bookmarksp)}) {
                 next unless defined $bookmark;
-                my($section, $name) = split(/::/mx, $bookmark ,2);
+                my($section, $name) = split(/::/mx, $bookmark, 2);
                 $keepp->{$section}->{$name} = 1;
+            }
+
+            my $order = {};
+            my $x = 0;
+            for my $b (@{Thruk::Base::list($bookmarksp)}) {
+                my($section, $name) = split(/::/mx, $b, 2);
+                $order->{$section}->{$name} = $x++;
             }
 
             $new  = {};
             $dups = {};
             for my $section (keys %{$global->{'bookmarks'}}) {
+                # reverse ensures the last bookmark with same name superseeds
                 for my $link ( reverse @{$global->{'bookmarks'}->{$section}} ) {
                     next unless exists $keepp->{$section}->{$link->[0]};
                     next if     exists $dups->{$section}->{$link->[0]};
                     push @{$new->{$section}}, $link;
                     $dups->{$section}->{$link->[0]} = 1;
                 }
-                @{$new->{$section}} = reverse @{$new->{$section}} if defined $new->{$section}; # ensures the last bookmark with same name superseeds
+                @{$new->{$section}} = sort { $order->{$section}->{$a->[0]} <=> $order->{$section}->{$b->[0]} } @{$new->{$section}} if defined $new->{$section};
             }
 
             $global->{'bookmarks'} = $new;
