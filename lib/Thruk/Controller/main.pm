@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use POSIX ();
 
-use Thruk::Action::AddDefaults ();
+use Thruk::Constants qw/:add_defaults :peer_states/;
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Status ();
 
@@ -37,9 +37,18 @@ sub index {
     $c->stash->{'page'}          = 'main';
     $c->stash->{'template'}      = 'main.tt';
 
-    #working
+    ############################################################################
+    # contact statistics
+    $c->stash->{'contacts'} = scalar @{$c->db->get_contacts(columns => ['name'])};
+
+    ############################################################################
+    # host statistics
     my $host_stats = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
+    $c->stash->{'host_stats'} = $host_stats;
+
+    # service statistics
     my $service_stats = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
+    $c->stash->{'service_stats'} = $service_stats;
 
     # for hostgroups
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter], columns => ['groups']);
@@ -100,29 +109,31 @@ sub index {
     $c->stash->{'problemservices'} = $problemservices;
 
     ############################################################################
-    my $backend_stats = {};
-    $backend_stats->{'enabled'} = 0;
-    $backend_stats->{'running'} = 0;
-    $backend_stats->{'down'} = 0;
-    my $backendsArr = $c->stash->{'backends'};
-    for my $pd (@{$backendsArr}){
-        if ($c->stash->{'backend_detail'}->{$pd}->{'running'} ) {
+    # backend statistics
+    my $backend_stats = {
+        'available' => 0,
+        'enabled'   => 0,
+        'running'   => 0,
+        'down'      => 0,
+    };
+    for my $pd (@{$c->stash->{'backends'}}){
+        $backend_stats->{'available'}++;
+        if($c->stash->{'backend_detail'}->{$pd}->{'running'}) {
             $backend_stats->{'running'}++;
             $backend_stats->{'enabled'}++;
-        }
-        elsif ($c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2 ){
+        } elsif($c->stash->{'backend_detail'}->{$pd}->{'disabled'} == HIDDEN_USER) {
             $backend_stats->{'disabled'}++;
-        }
-        else {
+        } elsif($c->stash->{'backend_detail'}->{$pd}->{'disabled'} == UNREACHABLE) {
             $backend_stats->{'down'}++;
             $backend_stats->{'enabled'}++;
         }
     }
-    $c->stash->{'backend_stats'} = $backend_stats;
-
-    $c->stash->{'host_stats'} = $host_stats;
-    $c->stash->{'service_stats'} = $service_stats;
-    $c->stash->{'contacts'} = scalar @{$c->db->get_contacts(columns => ['name'])};
+    my $backend_gauge_data = [];
+    push @{$backend_gauge_data}, ["Up",      $backend_stats->{'running'}] if $backend_stats->{'running'};
+    push @{$backend_gauge_data}, ["Down",    $backend_stats->{'down'}]    if $backend_stats->{'down'};
+    push @{$backend_gauge_data}, ["Enabled", 0]                           if $backend_stats->{'enabled'} == 0;
+    $c->stash->{'backend_gauge_data'} = $backend_gauge_data;
+    $c->stash->{'backend_stats'}      = $backend_stats;
 
     ############################################################################
     # host by backend

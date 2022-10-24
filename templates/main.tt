@@ -129,7 +129,7 @@
     </div>
   </div>
 
-  [% IF backend_stats.enabled > 1 %]
+  [% IF backend_stats.available > 1 %]
     <div class="my-card">
       <div class="card overviewcard w-auto">
         <div class="head">
@@ -267,69 +267,54 @@
 
 <script>
   //avail backends
-  [% IF backend_stats.enabled > 1 %]
-  var backends = bb.generate({
-    data: {
-      columns: [
-        [% IF backend_stats.running > 0 %]
-          ["Up", [% backend_stats.running %]],
-        [% END %]
-        [% IF backend_stats.down > 0 %]
-          ["Down", [% backend_stats.down %]]
-        [% END %]
-        [% IF backend_stats.enabled == 0 %]
-          ["Enabled", 0]
-        [% END %]
-      ],
-      type: "gauge"
-    },
-    gauge: {
-      max: [% backend_stats.enabled %],
-      label: {
-        format: function(value, ratio) {
-          return value;
-        }
-      }
-    },
-    color: {
-        pattern: ['#60B044','#FF0000']
+  [% IF backend_stats.available > 1 %]
+    var backends = bb.generate({
+      data: {
+        columns: [% json_encode(backend_gauge_data) %],
+        type: "gauge"
       },
-    size: {
-      height: 210
-    },
-    bindto: "#backends-gaugeChart"
-  });
+      gauge: {
+        max: [% backend_stats.enabled %],
+        label: {
+          format: function(value, ratio) { return value; }
+        }
+      },
+      color: {
+          pattern: ['#60B044','#FF0000']
+        },
+      size: {
+        height: 210
+      },
+      bindto: "#backends-gaugeChart"
+    });
 
-  //hosts per backend
-  var hostloc = bb.generate({
-    data: {
-      columns: // backgroundColor: ["#03fc1c", "#ffc636","#f97316","#ef4444","#737373"],
-      [% json_encode(hosts_by_backend) %],
-      type: "pie"
-    },
-    pie : {
-      label: {
-        format: function(value, ratio, id) {
-          return value;
-        }
-      }
-    },
-    tooltip: {
-      format: {
-        value: function(value, ratio, id) {
-		      return value;
-        }
-      }
-    },
-    size: {
-      height: 210
-    },
-    interaction: {
-      enabled: true,
-      brighten: false //DOESNT WORK FOR SOME REASON
-    },
-    bindto: "#hostloc-pieChart"
-  });
+    [% IF backend_stats.enabled - backend_stats.down > 1 %]
+      //hosts per backend
+      var hostloc = bb.generate({
+        data: {
+          columns: [% json_encode(hosts_by_backend) %],
+          type: "pie"
+        },
+        pie : {
+          label: {
+            format: function(value, ratio, id) { return value; }
+          }
+        },
+        tooltip: {
+          format: {
+            value: function(value, ratio, id) { return value; }
+          }
+        },
+        size: {
+          height: 210
+        },
+        interaction: {
+          enabled: true,
+          brighten: false //DOESNT WORK FOR SOME REASON
+        },
+        bindto: "#hostloc-pieChart"
+      });
+    [% END %]
   [% END %]
 
   //hosts gauge
