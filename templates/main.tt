@@ -157,8 +157,7 @@
       <div class="head">
         <h3>Top 5 Hostgroups</h3>
       </div>
-      <div id="hostgroups-barChart">
-      </div>
+      <div id="hostgroups-barChart"></div>
     </div>
   </div>
 
@@ -167,8 +166,9 @@
       <div class="head">
         <h3>Notifications</h3>
       </div>
-      <div id="notifications-barChart">
-      </div>
+      <a href="notifications.cgi?start=&end=" id="notifications-link" class="relative">
+        <div id="notifications-barChart"></div>
+      </a>
     </div>
   </div>
 
@@ -430,13 +430,22 @@
     bindto: "#hostgroups-barChart"
   });
 
+  var linkHideTimer;
   var notifications = bb.generate({
   data: {
     x: "x",
     columns: [% json_encode(notifications) %],
     type: "bar",
-    onclick: function(d, element) {
-      window.open("notifications.cgi",'_blank');
+    onover: function(d, element) {
+      window.clearTimeout(linkHideTimer);
+      var start = Math.round(d.x.getTime()/1000);
+      var end   = start + 3600;
+      jQuery("#notifications-link").attr("href", "notifications.cgi?start="+encodeURIComponent(start)+"&end="+encodeURIComponent(end));
+    },
+    onout: function(d, element) {
+      linkHideTimer = window.setTimeout(function() {
+        jQuery("#notifications-link").attr("href", "notifications.cgi?start=&end=");
+      }, 50);
     }
   },
   size: {
