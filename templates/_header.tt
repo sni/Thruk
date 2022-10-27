@@ -67,7 +67,7 @@
             [% IF c.user_exists %]
               <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="uil uil-cog"></i></button>
               [% IF cookie_auth && show_logout_button %]
-                <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top' style="display: initial;">
+                <form action="[% IF c.config.logout_link; c.config.logout_link; ELSE %][% url_prefix %]cgi-bin/login.cgi?logout[% END %]" method='POST' target='_top' style="display: initial;">
                   <button class="noprint big primary round" title="sign out"><i class="uil uil-signout"></i></button>
                 </form>
               [% END %]
