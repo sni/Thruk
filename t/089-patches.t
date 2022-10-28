@@ -1,11 +1,15 @@
 use warnings;
 use strict;
+use Carp qw/longmess/;
 use Test::More;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Test skipped, $ENV{NO_PATCH_TEST} was set' if $ENV{NO_PATCH_TEST};
 plan tests => 16;
 
+$SIG{ALRM} = sub {
+    BAIL_OUT(longmess("timeout"));
+};
 alarm(120);
 
 # create a tmp directory
@@ -15,7 +19,7 @@ END {
     `rm -rf tmppatches`;
 }
 
-my $rsync = 'rsync -av --exclude=".git" --exclude="tmppatches/" --exclude="tmp" --exclude="blib" --exclude="var" --exclude="themes" --exclude="plugins" --exclude="logs" --exclude="docs" --exclude="debian" . tmppatches/.';
+my $rsync = 'rsync -av --exclude=".git" --exclude="tmppatches/" --exclude="tmp" --exclude="tmp_*" --exclude="blib" --exclude="var" --exclude="themes" --exclude="plugins" --exclude="logs" --exclude="docs" --exclude="debian" . tmppatches/.';
 `$rsync`;
 is($?, 0, 'rsync ok: '.$rsync);
 
