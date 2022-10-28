@@ -1,6 +1,7 @@
 SHELL=/bin/bash
 NAME=$(notdir $(abspath .))
 N_PREFIX=$(shell pwd)/node
+NODEVERSION=16
 
 build: stylesheets/$(NAME).css
 
@@ -8,7 +9,7 @@ stylesheets/$(NAME).css: node_modules src/$(NAME).css
 	mkdir -p stylesheets
 	NODE_ENV=production \
 	N_PREFIX=$(N_PREFIX) \
-		./node_modules/.bin/n exec stable \
+		./node_modules/.bin/n exec $(NODEVERSION) \
 			npx tailwindcss -o stylesheets/${NAME}.css --input ./src/${NAME}.css --postcss ./postcss.config.js --minify
 	touch stylesheets/${NAME}.css
 
@@ -16,14 +17,14 @@ dev: node_modules
 	mkdir -p stylesheets
 	NODE_ENV=dev \
 	N_PREFIX=$(N_PREFIX) \
-		./node_modules/.bin/n exec stable \
+		./node_modules/.bin/n exec $(NODEVERSION) \
 			npx tailwindcss -o stylesheets/${NAME}.css --input ./src/${NAME}.css --postcss ./postcss.config.js
 
 watch: node_modules
 	mkdir -p stylesheets
 	NODE_ENV=dev \
 	N_PREFIX=$(N_PREFIX) \
-		./node_modules/.bin/n exec stable \
+		./node_modules/.bin/n exec $(NODEVERSION) \
 			npx tailwindcss -o stylesheets/${NAME}.css --input ./src/${NAME}.css --postcss ./postcss.config.js --watch
 
 node: node_modules/.bin/n
@@ -31,11 +32,11 @@ node: node_modules/.bin/n
 node_modules/.bin/n:
 	npm install n
 	N_PREFIX=$(N_PREFIX) \
-		./node_modules/.bin/n stable
+		./node_modules/.bin/n $(NODEVERSION)
 
 node_modules: node
 	N_PREFIX=$(N_PREFIX) \
-		./node_modules/.bin/n exec stable npm i -D \
+		./node_modules/.bin/n exec $(NODEVERSION) npm i -D \
 			tailwindcss@latest \
 			postcss@latest \
 			autoprefixer@latest \
