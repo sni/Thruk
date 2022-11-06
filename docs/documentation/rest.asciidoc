@@ -270,6 +270,105 @@ Rename columns by appending `:name` like this:
 ------
 
 
+=== Performance Data Columns
+
+Thruk will expand performance data into separate columns for host/service queries.
+
+Ex.: a host with the check_icmp check has the performance data put into the coresponding columns, so the following (shorted) json will be returned.
+
+There are 2 columns for each performance value. One with the value itself and one with the unit.
+
+There is also a hash containing the expanded performance values.
+
+Those columns can be used for filtering or to only select specific performance data columns.
+
+------
+  %> thruk r /hosts?limit=1
+
+[
+   {
+...
+      "name" : "icmp checked host",
+...
+      "perf_data" : "rta=0.030ms;3000.000;5000.000;0; pl=0%;80;100;;",
+      "perf_data_expanded" : [
+         {
+            "crit" : "5000.000",
+            "max" : "",
+            "min" : "0",
+            "name" : "rta",
+            "orig" : "rta=0.030ms;3000.000;5000.000;0;",
+            "parent" : "",
+            "unit" : "ms",
+            "value" : "0.030",
+            "warn" : "3000.000"
+         },
+         {
+            "crit" : "100",
+            "max" : "",
+            "min" : "",
+            "name" : "pl",
+            "orig" : "pl=0%;80;100;;",
+            "parent" : "",
+            "unit" : "%",
+            "value" : "0",
+            "warn" : "80"
+         }
+      ],
+      "pl" : "0",
+      "pl_unit" : "%",
+      "rta" : "0.030",
+      "rta_unit" : "ms"
+...
+   }
+]
+------
+
+[TIP]
+.Filter by performance values
+=======
+Those columns can also be used for filtering. Ex. get all hosts having packing loss greater zero.
+
+`%> thruk r '/hosts?columns=pl,name&pl[gte]=0'`
+=======
+
+
+=== Custom Data Columns
+
+Thruk will expand custom data values into separate columns for host/service queries.
+
+Those columns can be used for filtering or to only select specific custom values.
+
+------
+  %> thruk r '/hosts?limit=1&_WORKER=local'
+[
+   {
+...
+      "_THRUK_BP_ID" : "666",
+      "_THRUK_NODE_ID" : "node1",
+      "_WORKER" : "local",
+      "custom_variable_names" : [
+         "THRUK_BP_ID",
+         "THRUK_NODE_ID",
+         "WORKER"
+      ],
+      "custom_variable_values" : [
+         "666",
+         "node1",
+         "local"
+      ],
+      "custom_variables" : {
+         "THRUK_BP_ID" : "666",
+         "THRUK_NODE_ID" : "node1",
+         "WORKER" : "local"
+      },
+...
+      "name" : "host with custom variables",
+...
+   }
+]
+------
+
 == Aggregation Functions
 
 Aggregation functions can be used to get statistical information.
