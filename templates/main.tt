@@ -458,7 +458,7 @@
           [ "[% hostgroup.name %]", [% hostgroup.value %] ][% IF !loop.last %],[% END %]
         [% END %]
         [% ELSE %]
-          ["NO DATA", 0]
+          ["no hostgroups defined", 0]
         [% END %]
       ],
       type: "bar"
