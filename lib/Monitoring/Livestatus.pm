@@ -67,6 +67,7 @@ path to the UNIX socket of check_mk livestatus
 
 =item server
 
+server address when using a TCP connection
 
 =item peer
 
@@ -1003,7 +1004,8 @@ adds the peers name, addr and key to the result set:
 
 =head2 Backend
 
-send the query only to some specific backends. Only
+send the query only to some specific backends.
+Only useful when using multiple backends.
 
  my $hosts = $ml->selectall_arrayref(
    "GET hosts\nColumns: name alias state",
