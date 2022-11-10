@@ -221,6 +221,8 @@ function init_page() {
         }
     });
 
+    checkMainTableMaxHeight();
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
@@ -1194,6 +1196,22 @@ function toggleMainTableFullscreen() {
     } else {
         jQuery("DIV.mainTable").addClass("fullsize");
         cookieSave('thruk_main_table_full', 1);
+    }
+    checkMainTableMaxHeight();
+}
+
+function checkMainTableMaxHeight() {
+    if(jQuery("DIV.mainTable").hasClass("fullsize")) {
+        var old = jQuery("DIV.mainTable").css('max-height');
+        if(old != "" && old !== "none") {
+            jQuery("DIV.mainTable").data('max-height', old);
+        }
+        jQuery("DIV.mainTable").css('max-height', '');
+    } else {
+        var restore = jQuery("DIV.mainTable").data('max-height');
+        if(restore) {
+            jQuery("DIV.mainTable").css('max-height', restore);
+        }
     }
 }
 
