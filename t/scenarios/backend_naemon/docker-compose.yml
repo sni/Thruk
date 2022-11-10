@@ -1,5 +1,7 @@
-site:
+services:
+  omd:
     build: omd/
+    platform: linux/amd64
     ports:
         - "127.0.0.3:60080:80"
         - "127.0.0.3:60443:443"
