@@ -915,7 +915,6 @@ sub _process_backends_page {
             $json->{'data'} = $test[0]->{(keys %{$test[0]})[0]};
         } else {
             my $error = $@;
-            $error =~ s/\s+at\s\/.*//gmx;
             $error = 'got no valid result' if $error eq '';
             $json = { ok => 0, error => $error };
         }

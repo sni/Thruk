@@ -46,23 +46,7 @@
 
 [% IF thruk_author %]
   [% IF stacktrace %]
-    <div class="card mx-auto mt-2 max-w-full">
-      <div class="head justify-between">
-        <h3>Stacktrace</h3>
-        <div class="flexrow gap-1">
-          <button class="hoverable p-2 iconOnly" onclick='toggleElement("rawstack");toggleElement("nicestack"); return false;' title="show raw stacktrace">
-            <i class="fa-solid fa-code"></i>
-          </button>
-          <button class="hoverable p-2 iconOnly" onclick='hideElement("rawstack");showElement("nicestack");nice_stacktrace_expand(); return false;' title="expand stacktrace">
-            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-          </button>
-        </div>
-      </div>
-      <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2 overflow-auto">[% escape_html(stacktrace) %]</div>
-      <div id="nicestack">
-        [% nice_stacktrace(escape_html(stacktrace)) %]
-      </div>
-    </div>
+    [% PROCESS _stacktrace.tt stacktrace=stacktrace %]
   [% END %]
   [% DEFAULT errorDebugInfo = [] %]
   [% IF errorDebugInfo.list.size > 0 %]

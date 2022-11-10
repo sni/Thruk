@@ -147,7 +147,7 @@
             });
           } else {
             jQuery('.testimg_e_'+loopid).removeClass("hidden").attr("title", 'connection test failed: '+data.error)
-            thruk_message(1, "<pre class='max-w-[85vw] text-left'>"+data.error + ' ('+peer+')</pre>');
+            thruk_message(1, "<pre class='max-w-[85vw] text-left overflow-auto'>"+data.error + ' ('+peer+')</pre>', 0);
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
