@@ -142,6 +142,10 @@
   --stats-time-backend:       var(--color-sky-400);
   --stats-time-controler:     var(--color-yellow-400);
   --stats-time-view:          var(--color-orange-400);
+
+  --dashboard-series-1:       var(--color-sky-600);
+  --dashboard-series-2:       var(--color-orange-500);
+  --dashboard-series-3:       var(--color-purple-600);
 }
 
  @layer base {

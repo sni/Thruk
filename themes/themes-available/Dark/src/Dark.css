@@ -163,3 +163,20 @@
 BODY.loginpage {
  @apply bg-gradient-to-t from-[#111] via-[#444] to-[#111];
 }
+
+/*******************************************************************************
+* dashboard main.cgi
+*/
+.bb-chart-arc .bb-gauge-value, .bb text, .bb .bb-button, .bb-chart-arcs .bb-chart-arcs-gauge-min, .bb-chart-arcs .bb-chart-arcs-gauge-max {
+  fill: var(--text-card) !important;
+}
+.bb-chart-arc path, .bb-chart-arcs-background {
+  stroke: var(--card-bg) !important;
+  stroke-width: 0px;
+}
+.bb-axis > path, .bb-axis line {
+  stroke: var(--text-body) !important;
+}
+.bb-tooltip {
+  color: #333 !important;
+}

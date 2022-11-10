@@ -16,11 +16,6 @@
     flex: 1 1 calc(25% - 1rem);
   }
 
-  /* only for DARK MODE
-  .bb-chart-arc .bb-gauge-value, .bb text, .bb .bb-button {
-    fill: #eee;
-  }*/
-
 </style>
 
 <h1>[% page_title %]</h1>
@@ -310,8 +305,8 @@
         }
       },
       color: {
-          pattern: ['#60B044','#FF0000']
-        },
+          pattern: ['var(--badge-ok-bg)','var(--badge-critical-bg)']
+      },
       size: {
         height: 210
       },
@@ -334,6 +329,9 @@
           format: {
             value: function(value, ratio, id) { return value; }
           }
+        },
+        color: {
+          pattern: ['var(--dashboard-series-1','var(--dashboard-series-2)']
         },
         size: {
           height: 210
@@ -365,14 +363,14 @@
     gauge: {},
     color: {
       pattern: [
-        "#FF0000",
-        "#F6C600",
-        "#60B044"
+        "var(--badge-critical-bg)",
+        "var(--badge-warning-bg)",
+        "var(--badge-ok-bg)"
       ],
       threshold: {
         values: [
-          40,
-          85,
+          75,
+          90,
           100
         ]
       }
@@ -386,10 +384,10 @@
     tooltip: {
       contents: {
         template: getToolTipTemplate([
-                    {name:'Up',          value: [% host_stats.up %],          color: '#60B044'},
-                    {name:'Down',        value: [% host_stats.down %],        color: '#FF0000'},
-                    {name:'Unreachable', value: [% host_stats.unreachable %], color: '#FF0000'},
-                    {name:'Pending',     value: [% host_stats.pending %],     color: '#d1d5db'}
+                    {name:'Up',          value: [% host_stats.up %],          color: 'var(--badge-ok-bg)'},
+                    {name:'Down',        value: [% host_stats.down %],        color: 'var(--badge-down-bg)'},
+                    {name:'Unreachable', value: [% host_stats.unreachable %], color: 'var(--badge-unreachable-bg)'},
+                    {name:'Pending',     value: [% host_stats.pending %],     color: 'var(--badge-pending-bg)'}
                   ])
       }
     },
@@ -414,14 +412,14 @@
     gauge: {},
     color: {
       pattern: [
-        "#FF0000",
-        "#F6C600",
-        "#60B044"
+        "var(--badge-critical-bg)",
+        "var(--badge-warning-bg)",
+        "var(--badge-ok-bg)"
       ],
       threshold: {
         values: [
-          40,
-          85,
+          75,
+          90,
           100
         ]
       }
@@ -435,11 +433,11 @@
     tooltip: {
       contents: {
         template: getToolTipTemplate([
-                    {name:'OK',       value: [% service_stats.ok %],       color: '#60B044'},
-                    {name:'Warning',  value: [% service_stats.warning %],  color: '#F6C600'},
-                    {name:'Unknown',  value: [% service_stats.unknown %],  color: '#ff7f0e'},
-                    {name:'Critical', value: [% service_stats.critical %], color: '#FF0000'},
-                    {name:'Pending',  value: [% service_stats.pending %],  color: '#d1d5db'}
+                    {name:'OK',       value: [% service_stats.ok %],       color: 'var(--badge-ok-bg)'},
+                    {name:'Warning',  value: [% service_stats.warning %],  color: 'var(--badge-warning-bg)'},
+                    {name:'Unknown',  value: [% service_stats.unknown %],  color: 'var(--badge-unknown-bg)'},
+                    {name:'Critical', value: [% service_stats.critical %], color: 'var(--badge-critical-bg)'},
+                    {name:'Pending',  value: [% service_stats.pending %],  color: 'var(--badge-pending-bg)'}
                   ])
       }
     },
@@ -465,6 +463,9 @@
     },
     bar: {
       padding: 5
+    },
+    color: {
+      pattern: ['var(--dashboard-series-1)','var(--dashboard-series-2)','var(--badge-ok-bg)','var(--badge-critical-bg)','var(--dashboard-series-3)']
     },
     size: {
       height: 210
@@ -498,6 +499,9 @@
         jQuery("#notifications-link").attr("href", "notifications.cgi?start=&end=");
       }, 50);
     }
+  },
+  color: {
+    pattern: ['var(--dashboard-series-1)']
   },
   size: {
       height: 210
