@@ -1277,7 +1277,7 @@ sub get_remote_thruk_url {
     if($peer->{'fed_info'}) {
         $url = $peer->{'fed_info'}->{'addr'}->[scalar @{$peer->{'fed_info'}->{'addr'}}-1];
     }
-    if($peer->{'type'} eq 'http') {
+    if($peer->{'type'} eq 'http' && (!$url || $url !~ /^https?:/mx)) {
         $url = $peer->{'addr'};
     }
     if($url) {
