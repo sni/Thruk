@@ -7,7 +7,7 @@
     <div class="card overflow-hidden">
       <div class="actionbox">
         <div>
-          <a href="[% c.config.use_feature_core_scheduling %]?action=scheduling">Core Scheduling Graph</a><br>
+          <a href="[% c.config.use_feature_core_scheduling %]?action=scheduling">Core Scheduling Graph</a>
         </div>
       </div>
     </div>
