@@ -4,6 +4,8 @@
     warn: false
 - name: "run set_admin_password"
   shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
+- name: "stop site"
+  shell: "omd stop {{ site }}"
 - name: "disable TMPFS"
   shell: "omd config {{ site }} set TMPFS off"
 - name: "check if xinetd file exists"
