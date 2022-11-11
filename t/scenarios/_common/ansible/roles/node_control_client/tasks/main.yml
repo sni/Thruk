@@ -8,6 +8,21 @@
     path: /etc/sudoers
     regexp: '^{{site}}.*yum'
     line: "{{site}}  ALL=(ALL) NOPASSWD: /usr/bin/omd, NOPASSWD: /usr/bin/dnf, NOPASSWD:SETENV: /usr/bin/apt-get"
+- name: initialize git config name
+  shell:
+    cmd: "git config --global user.name {{ site }}"
+  become: yes
+  become_user: "{{site}}"
+- name: initialize git config email
+  shell:
+    cmd: "git config --global user.email {{ site }}@localhost"
+  become: yes
+  become_user: "{{site}}"
+- name: initialize git config default branch
+  shell:
+    cmd: "git config --global init.defaultBranch main"
+  become: yes
+  become_user: "{{site}}"
 - name: initialize git home
   shell:
     cmd: git init && git add . && git commit -m 'init'
