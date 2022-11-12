@@ -27,7 +27,7 @@ Installation
 Installation of a theme is easy:
 
 .Installation
-. Unpack the plugin in 'themes-available' directory.
+. Unpack the theme in 'themes-available' directory.
 . Create a symlink in 'themes-enabled' which points to the theme.
 . Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
 
@@ -63,7 +63,7 @@ Light
 
 
 Dark
-~~~~~~~
+~~~~
 
 ----
  Author:      Thruk Team
@@ -85,21 +85,18 @@ Write your own themes
 The directory structure of a theme contains just a few folders and you
 don't need all of them for every theme.
 
-TIP: Let me know if you want to get your theme listed here.
-
 ----
-  theme/
+  MyTheme/
   ├── images
-  │   └── logos -> ../../Classic/images/logos
   └── stylesheets
 ----
 
 .Structure
 * 'images' containts all images needed by this theme. Make sure you
   have at least the basic images.
-* 'logos' contains all logos, should be a symlink to your logos folder
-  unless you have special logos in this theme.
 * 'stylesheets' contain your css files.
 
-TIP: Easiest way would be to copy an existing theme and change it to your
-needs.
+
+TIP: There is a repository for a custom theme template and example here: https://github.com/sni/thruk-custom-themes-example
+
+Let me know if you want to get your theme listed here.
