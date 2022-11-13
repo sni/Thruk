@@ -43,15 +43,6 @@
   </div>
 </div>
 
-<!--
-<div class="buttongroup mx-auto">
-  <button class="w-52 active">Test</button>
-  <button class="w-52">Test</button>
-  <button class="w-52">Test</button>
-  <button class="" onclick="return false;" title="add new view"><i class="uil uil-plus text-lg"></i></button>
-</div>
--->
-
 <div class="flex flex-wrap mt-10 gap-4">
 
   <div class="my-card">
@@ -330,9 +321,11 @@
             value: function(value, ratio, id) { return value; }
           }
         },
+        /*
         color: {
           pattern: ['var(--dashboard-series-1','var(--dashboard-series-2)']
         },
+        */
         size: {
           height: 210
         },
