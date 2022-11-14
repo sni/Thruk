@@ -52,10 +52,12 @@ sub index {
     $c->stash->{'service_stats'} = $service_stats;
 
     # for hostgroups
-    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter], columns => ['groups']);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter], columns => ['name', 'groups']);
     my $hostgroups = {};
 
+    my $host_lookup = {};
     for my $host ( @{$hosts} ) {
+        $host_lookup->{$host->{'name'}} = 1;
         for my $group ( @{$host->{'groups'}} ) {
             $hostgroups->{$group}++;
         }
@@ -75,11 +77,8 @@ sub index {
 
     ############################################################################
     # notifications
-    my $start = time() - 90000; # last 25h
-    my $notificationData = $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { -or => [ { 'type' => "HOST NOTIFICATION" }, { 'type' => "SERVICE NOTIFICATION" }  ] } , { time => { '>=' => $start }}  ],
-                                            limit  => 1000000, # not using a limit here, makes mysql not use an index
-                            );
-
+    my $start            = time() - 90000; # last 25h
+    my $notificationData = _notifications_data($c, $start);
     my $notificationHash = {};
     my $time = $start;
     while ($time <= time()) {
@@ -88,9 +87,16 @@ sub index {
         $time += 3600;
     }
 
-    for my $notification ( @{$notificationData} ) {
-        my $date = POSIX::strftime("%F %H:00", localtime($notification->{'time'}));
-        $notificationHash->{$date}++;
+    my($selected_backends) = $c->db->select_backends('get_logs', []);
+    for my $ts ( sort keys %{$notificationData} ) {
+        my $date = POSIX::strftime("%F %H:00", localtime($ts));
+        for my $backend (@{$selected_backends}) {
+            next unless $notificationData->{$ts}->{$backend};
+            for my $n ( @{$notificationData->{$ts}->{$backend}} ) {
+                next unless(!$hostfilter || $host_lookup->{$n->{'host_name'}});
+                $notificationHash->{$date}++;
+            }
+        }
     }
 
     my $notifications = [["x"], ["Notifications"]];
@@ -158,6 +164,49 @@ sub index {
     Thruk::Utils::ssi_include($c);
 
     return 1;
+}
+
+##########################################################
+sub _notifications_data {
+    my($c, $start) = @_;
+
+    my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/notifications.cache');
+    my $cached = $cache->get->{'notifications'} || {};
+
+    # update cache every 60sec
+    my $age = $cache->age();
+    if(defined $age && $age < 60) { return($cached); }
+    $cache->touch(); # update timestamp to avoid multiple parallel updates
+
+    # clear old entries
+    for my $ts (sort keys %{$cached}) {
+        if($ts < $start) {
+            delete $cached->{$ts};
+        }
+        if($ts > $start) {
+            $start = $ts + 3600;
+        }
+    }
+
+    my $now = time();
+    my $hour_current = $now - ($now % 3600);
+    delete $cached->{$hour_current};
+
+    my $data = $c->db->get_logs(
+        filter   => [
+                    { time => { '>=' => $start }},
+                    class => 3,
+                ],
+        columns  => [qw/time host_name/],
+        limit    => 1000000, # not using a limit here, makes mysql not use an index
+        backends => ['ALL'],
+    );
+    for my $n ( @{$data} ) {
+        my $hour = $n->{'time'} - ($n->{'time'} % 3600);
+        push @{$cached->{$hour}->{$n->{'peer_key'}}}, $n;
+    }
+    $cache->set('notifications', $cached);
+    return($cached);
 }
 
 ##########################################################

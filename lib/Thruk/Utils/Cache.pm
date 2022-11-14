@@ -153,6 +153,37 @@ sub clear {
 
 ##############################################
 
+=head2 age
+
+  age()
+
+returns the cache age in seconds
+
+=cut
+sub age {
+    my($self) = @_;
+    return unless $self->{'_stat'};
+    return(time() - $self->{'_stat'}->[9]);
+}
+
+##############################################
+
+=head2 touch
+
+  touch()
+
+update file stat to current date
+
+=cut
+sub touch {
+    my($self) = @_;
+    my $mtime = time();
+    utime($mtime, $mtime, $self->{'_cachefile'});
+    return;
+}
+
+##############################################
+
 =head2 _update
 
   _update()
