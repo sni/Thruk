@@ -728,6 +728,16 @@ function openModalWindowUrl(url, callback) {
 var modalElement  = null;
 var modalElementP = null;
 function openModalWindow(content) {
+    if(!has_jquery_ui()) {
+        load_jquery_ui(function() {
+            openModalWindow(content);
+        });
+        return;
+    }
+    if(document.getElementById(content)) {
+        content = document.getElementById(content);
+        content.style.display = "";
+    }
     jQuery(document.body).append('<div id="modalBG" class="modalBG"><\/div>');
     if(content && content.tagName) {
         modalElementP = content.parentNode;

@@ -7,6 +7,10 @@
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
 <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 [% END %]
+[% DEFAULT extra_params = [] %]
+[% FOREACH ep IN extra_params %]
+  <input type="hidden" name="[% ep.name | html %]" value="[% ep.value | html %]">
+[% END %]
 
 <div class="relative">
   [% DEFAULT small_button = "" %]

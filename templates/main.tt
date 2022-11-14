@@ -23,23 +23,66 @@
 <div class="card w-full absolute top-0 left-0 rounded-none shadow-none border-t border-b">
   <div class="head border-b-0 flexrow flex-nowrap gap-0 justify-between">
     <div class="ml-6 w-32">
-      [% PROCESS _status_filter.tt entries="" show_substyle_selector=1 %]
+      [% PROCESS _status_filter.tt entries="" show_substyle_selector=1 extra_params = [{ name => 'v', value => currentview.name }] %]
     </div>
     <div class="flexrow flex-nowrap gap-0 w-min">
-      <span class="tabs min-w-[140px] h-[42px] w-52 px-2 text-center font-medium text-base active"><a class="block" href="main.cgi">All Hosts</a></span>
+      [% FOREACH mp IN mainviews %]
+      <span class="tabs min-w-[140px] h-[42px] w-52 px-2 text-center font-medium text-base [% IF mp.name == currentview.name %]active[% END %]">
+        <a class="block" href="main.cgi?v=[% mp.name | uri %]">
+          [% mp.name | html %]
+        </a>
+      </span>
+      [% END %]
       <div class="relative">
         <span class="tabs px-2 mt-px text-center font-medium text-base border-none hover:border-none">
           <button class="iconOnly" onclick="showElement('edit_menu', undefined, true); return false;" title="add new view"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
         </span>
         <div id="edit_menu" style="display: none;" class="context_menu w-[160px] left-0 top-[40px]">
           <ul class="w-full">
-            <li><a href="#" onclick="return false;"><i class="fa-solid fa-plus text-xs"></i>Create New View</a></li>
-            <li><a href="#" onclick="return false;"><i class="fa-solid fa-trash text-xs"></i>Remove Current View</a></li>
+            <li><a href="#" onclick="openModalWindow('new_view')"><i class="fa-solid fa-plus text-xs"></i>Create New View</a></li>
+            <li>
+              <form action='main.cgi' method='POST'>
+                <input type='hidden' name='remove' value='1'>
+                <input type='hidden' name='v' value='[% currentview.name %]'>
+                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                <a href="#" onClick="[% IF currentview.locked %]return false;[% ELSE %]jQuery(this).closest('FORM').submit(); return false;[% END %]" [% IF currentview.locked %]class="disabled"[% END %] >
+                  <i class="fa-solid fa-trash text-xs"></i>Remove Current View</a>
+                </a>
+              </form>
+            </li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="w-32">&nbsp;</div>
+    <div class="w-32">
+      [% IF mp.name == currentview.name && !mp.locked && view_save_required %]
+        <form action="[% uri_with(c, {}) %]" method="POST" onsubmit="setFormBtnSpinner(this)">
+          <input type='hidden' name='save' value='1'>
+          <button class="green" type="submit"><i class="uil uil-save"></i> save changes</button>
+        </form>
+      [% END %]
+    </div>
+  </div>
+</div>
+
+<div class="card" id='new_view' style="display: none;">
+  <div class="head justify-between">
+    <h3>Create New View</h3>
+    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+  </div>
+  <div class="body">
+    <form action="[% uri_with(c, { v => 'undef' }) %]" method="POST" onsubmit="setFormBtnSpinner(this)">
+      <input type="hidden" name="new" value="1">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <div class='flexrow flex-nowrap gap-x-2'>
+        <label class="px-2">Name</label>
+        <input type="text" name="name" class="w-40" required>
+        <button class="green" type="submit">
+          <i class="uil uil-save"></i>
+          Create
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 

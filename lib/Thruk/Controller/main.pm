@@ -30,13 +30,104 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
-    return 1 if $c->stash->{'has_error'};
-
     $c->stash->{'title'}         = 'Thruk';
     $c->stash->{'infoBoxTitle'}  = 'Landing Page';
     $c->stash->{'page'}          = 'main';
     $c->stash->{'template'}      = 'main.tt';
+
+    my $userdata    = Thruk::Utils::get_user_data($c);
+    my $defaultView = { name => 'All Hosts', filter => undef, locked => 1 };
+    my $views       = $userdata->{'main_views'} || [];
+    if(scalar $views == 0) {
+        $views = [$defaultView];
+    }
+    $c->stash->{'mainviews'}   = $views;
+
+    if($c->req->parameters->{'v'}) {
+        for my $v (@{$views}) {
+            if($v->{'name'} eq $c->req->parameters->{'v'}) {
+                $c->stash->{'currentview'} = $v;
+                last;
+            }
+        }
+    }
+    $c->stash->{'currentview'} = $views->[0] unless $c->stash->{'currentview'};
+
+    ############################################################################
+    # remove existing view
+    if($c->req->parameters->{'remove'}) {
+        return unless Thruk::Utils::check_csrf($c);
+        if($c->stash->{'currentview'}->{'locked'}) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'this view cannot be removed' });
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi?v=".Thruk::Utils::Filter::as_url_arg($c->stash->{'currentview'}->{'name'}));
+        }
+
+        my $newviews = [];
+        for my $v (@{$views}) {
+            if($v->{'name'} ne $c->stash->{'currentview'}->{'name'}) {
+                push @{$newviews}, $v;
+            }
+        }
+        $userdata->{'main_views'} = $newviews;
+        if(Thruk::Utils::store_user_data($c, $userdata)) {
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'view removed successfully' });
+        }
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi");
+    }
+
+    ############################################################################
+    # create new view
+    my $f = _get_filter_from_params($c->req->parameters);
+    if($c->req->parameters->{'new'}) {
+        return unless Thruk::Utils::check_csrf($c);
+        push @{$views}, {
+            name   => $c->req->parameters->{'name'},
+            filter => $f,
+            locked => 0,
+        };
+        $userdata->{'main_views'} = $views;
+        if(Thruk::Utils::store_user_data($c, $userdata)) {
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'new view created' });
+        }
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi?v=".Thruk::Utils::Filter::as_url_arg($c->req->parameters->{'name'}));
+    }
+
+    ############################################################################
+    # update existing view
+    if($c->req->parameters->{'save'}) {
+        return unless Thruk::Utils::check_csrf($c);
+        if($c->stash->{'currentview'}->{'locked'}) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'this view cannot be changed' });
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi?v=".Thruk::Utils::Filter::as_url_arg($c->stash->{'currentview'}->{'name'}));
+        }
+        $c->stash->{'currentview'}->{'filter'} = $f;
+        $userdata->{'main_views'} = $views;
+        if(Thruk::Utils::store_user_data($c, $userdata)) {
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'view saved' });
+        }
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi?v=".Thruk::Utils::Filter::as_url_arg($c->req->parameters->{'v'}));
+    }
+
+
+    ############################################################################
+    # show save button?
+    $c->stash->{'view_save_required'} = 0;
+    if($c->stash->{'currentview'}->{'filter'} && !_compare_filter($c->stash->{'currentview'}->{'filter'}, $f)) {
+        $c->stash->{'view_save_required'} = 1;
+    }
+
+    ############################################################################
+    # merge current filter into params unless already set
+    if($c->stash->{'currentview'}->{'filter'} && !defined $c->req->parameters->{'dfl_s0_hoststatustypes'}) {
+        for my $key (sort keys %{$c->stash->{'currentview'}->{'filter'}}) {
+            $c->req->parameters->{$key} = $c->stash->{'currentview'}->{'filter'}->{$key};
+        }
+        $c->stash->{'view_save_required'} = 0;
+    }
+
+    ############################################################################
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    return 1 if $c->stash->{'has_error'};
 
     ############################################################################
     # contact statistics
@@ -207,6 +298,31 @@ sub _notifications_data {
     }
     $cache->set('notifications', $cached);
     return($cached);
+}
+
+##########################################################
+sub _get_filter_from_params {
+    my($params) = @_;
+    my $f = {};
+    for my $key (keys %{$params}) {
+        if($key =~ m/^dfl_(.*)$/mx) {
+            $f->{$key} = $params->{$key};
+        }
+    }
+    delete $f->{'dfl_columns'};
+    return($f);
+}
+
+##########################################################
+sub _compare_filter {
+    my($f1, $f2) = @_;
+    my $json = Cpanel::JSON::XS->new->utf8;
+    $json = $json->canonical; # keys will be randomly ordered otherwise
+
+    my $d1 = $json->encode($f1);
+    my $d2 = $json->encode($f2);
+
+    return($d1 eq $d2);
 }
 
 ##########################################################
