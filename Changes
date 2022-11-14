@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next 3.x:
+3.00     Mon Nov 14 14:50:14 CET 2022
           - complete design rework
           - deprecated configuration options:
             - use_pager
@@ -14,6 +14,7 @@ next 3.x:
             - wml
             - statusmap
           - add light/dark theme
+          - add new main landing page dashboard
           - add collapsable side navigation
           - add delete icon to comments/downtimes popup
           - add copy button for expanded command line
