@@ -41,10 +41,10 @@ sub index {
     my $userdata    = Thruk::Utils::get_user_data($c);
     my $defaultView = { name => 'All Hosts', filter => undef, locked => 1 };
     my $views       = $userdata->{'main_views'} || [];
-    if(scalar $views == 0) {
+    if(scalar @{$views} == 0) {
         $views = [$defaultView];
     }
-    $c->stash->{'mainviews'}   = $views;
+    $c->stash->{'mainviews'} = $views;
 
     if($c->req->parameters->{'v'}) {
         for my $v (@{$views}) {
