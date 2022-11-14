@@ -506,7 +506,7 @@ function setBtnSpinner(btn, skipTimeout) {
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
     } else {
-        if(jQuery(btn).hasClass("button") || jQuery(btn).is("button")) {
+        if(!jQuery(btn).hasClass("iconOnly") && (jQuery(btn).hasClass("button") || jQuery(btn).is("button"))) {
             jQuery(btn).addClass("relative");
             jQuery(btn).prepend('<div class="spinner mr-1 absolute left-2"><\/div>');
         } else {
