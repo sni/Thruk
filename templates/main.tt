@@ -21,13 +21,13 @@
 <h1>[% page_title %]</h1>
 
 <div class="card w-full absolute top-0 left-0 rounded-none shadow-none border-t border-b">
-  <div class="head border-b-0 flexrow flex-nowrap gap-0 justify-between">
+  <div class="head border-b-0 flexrow flex-nowrap gap-0 justify-between" id="view_tabs">
     <div class="ml-6 w-32">
       [% PROCESS _status_filter.tt entries="" show_substyle_selector=1 extra_params = [{ name => 'v', value => currentview.name }] %]
     </div>
     <div class="flexrow flex-nowrap gap-0 w-min">
       [% FOREACH mp IN mainviews %]
-      <span class="tabs min-w-[140px] h-[42px] w-52 px-2 text-center font-medium text-base [% IF mp.name == currentview.name %]active[% END %]">
+      <span class="tabs sortable min-w-[140px] h-[42px] w-52 px-2 text-center font-medium text-base [% IF mp.name == currentview.name %]active[% END %]" data-name="[% mp.name | html %]">
         <a class="block" href="main.cgi?v=[% mp.name | uri %]">
           [% mp.name | html %]
         </a>
@@ -54,13 +54,14 @@
         </div>
       </div>
     </div>
-    <div class="w-32">
+    <div class="w-32 flex justify-end min-w-fit">
       [% IF mp.name == currentview.name && !mp.locked && view_save_required %]
         <form action="[% uri_with(c, {}) %]" method="POST" onsubmit="setFormBtnSpinner(this)">
           <input type='hidden' name='save' value='1'>
-          <button class="green" type="submit"><i class="uil uil-save"></i> save changes</button>
+          <button class="green ml-6" type="submit"><i class="uil uil-save"></i> save changes</button>
         </form>
       [% END %]
+      <div class="spinner ml-2 mr-6 hidden" id="tabsavespinner" title="tabs order is beeing saved"></div>
     </div>
   </div>
 </div>
@@ -555,6 +556,33 @@
     }
   },
   bindto: "#notifications-barChart"
+});
+
+
+jQuery('#view_tabs').sortable({
+  items                : 'SPAN.tabs.sortable',
+  helper               : 'clone',
+  tolerance            : 'pointer',
+  placeholder          : 'sortable-placeholder',
+  update               : function(event, ui) {
+    var order = [];
+    jQuery('#view_tabs').find("SPAN.tabs.sortable").each(function(i, el) {
+        order.push(el.dataset["name"]);
+    });
+    jQuery("#tabsavespinner").removeClass("hidden");
+    jQuery.ajax({
+        url: url_prefix + 'cgi-bin/main.cgi',
+        type: 'POST',
+        data: {
+          reorder:  '1',
+          order:     order
+        },
+        success: function() {
+          jQuery("#tabsavespinner").addClass("hidden");
+        },
+        error:     ajax_xhr_error_logonly
+    });
+  }
 });
 
 </script>

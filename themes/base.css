@@ -1675,3 +1675,7 @@ DIV.linedtextarea {
     background-color: var(--row-selected-even-bg) !important;
   }
 }
+SPAN.sortable-placeholder {
+  @apply block min-w-[50px];
+  background-color: var(--row-selected-even-bg) !important;
+}

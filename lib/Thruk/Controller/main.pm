@@ -34,6 +34,7 @@ sub index {
     $c->stash->{'infoBoxTitle'}  = 'Landing Page';
     $c->stash->{'page'}          = 'main';
     $c->stash->{'template'}      = 'main.tt';
+    $c->stash->{has_jquery_ui}   = 1;
 
     my $userdata    = Thruk::Utils::get_user_data($c);
     my $defaultView = { name => 'All Hosts', filter => undef, locked => 1 };
@@ -108,6 +109,22 @@ sub index {
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi?v=".Thruk::Utils::Filter::as_url_arg($c->req->parameters->{'v'}));
     }
 
+    if($c->req->parameters->{'reorder'}) {
+        my $order = $c->req->parameters->{'order[]'};
+        select(STDERR); $| = 1; select(STDOUT); $| = 1; use Data::Dumper; print STDERR Dumper($order);
+        my $newviews = [];
+        for my $tab (@{$order}) {
+            for my $v (@{$views}) {
+                if($v->{'name'} eq $tab) {
+                    push @{$newviews}, $v;
+                    last;
+                }
+            }
+        }
+        $userdata->{'main_views'} = $newviews;
+        Thruk::Utils::store_user_data($c, $userdata);
+        return($c->render(json => {'success' => 1}));
+    }
 
     ############################################################################
     # show save button?
