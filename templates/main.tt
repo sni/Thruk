@@ -43,7 +43,7 @@
             <li>
               <form action='main.cgi' method='POST'>
                 <input type='hidden' name='remove' value='1'>
-                <input type='hidden' name='v' value='[% currentview.name %]'>
+                <input type='hidden' name='v' value="[% currentview.name | html %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 <a href="#" onClick="[% IF currentview.locked %]return false;[% ELSE %]jQuery(this).closest('FORM').submit(); return false;[% END %]" [% IF currentview.locked %]class="disabled"[% END %] >
                   <i class="fa-solid fa-trash text-xs"></i>Remove Current View</a>
@@ -58,6 +58,7 @@
       [% IF mp.name == currentview.name && !mp.locked && view_save_required %]
         <form action="[% uri_with(c, {}) %]" method="POST" onsubmit="setFormBtnSpinner(this)">
           <input type='hidden' name='save' value='1'>
+          <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
           <button class="green ml-6" type="submit"><i class="uil uil-save"></i> save changes</button>
         </form>
       [% END %]

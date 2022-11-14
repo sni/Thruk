@@ -2,11 +2,13 @@ package Thruk::Controller::main;
 
 use warnings;
 use strict;
+use Cpanel::JSON::XS ();
 use POSIX ();
 
 use Thruk::Constants qw/:add_defaults :peer_states/;
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Cache ();
 use Thruk::Utils::Status ();
 
 =head1 NAME
