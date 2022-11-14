@@ -111,7 +111,6 @@ sub index {
 
     if($c->req->parameters->{'reorder'}) {
         my $order = $c->req->parameters->{'order[]'};
-        select(STDERR); $| = 1; select(STDOUT); $| = 1; use Data::Dumper; print STDERR Dumper($order);
         my $newviews = [];
         for my $tab (@{$order}) {
             for my $v (@{$views}) {
