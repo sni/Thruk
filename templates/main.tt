@@ -55,7 +55,7 @@
       </div>
     </div>
     <div class="w-32 flex justify-end min-w-fit">
-      [% IF mp.name == currentview.name && !mp.locked && view_save_required %]
+      [% IF !currentview.locked && view_save_required %]
         <form action="[% uri_with(c, {}) %]" method="POST" onsubmit="setFormBtnSpinner(this)">
           <input type='hidden' name='save' value='1'>
           <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">

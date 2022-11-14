@@ -130,13 +130,13 @@ sub index {
     ############################################################################
     # show save button?
     $c->stash->{'view_save_required'} = 0;
-    if($c->stash->{'currentview'}->{'filter'} && !_compare_filter($c->stash->{'currentview'}->{'filter'}, $f)) {
+    if(defined $c->stash->{'currentview'}->{'filter'} && !_compare_filter($c->stash->{'currentview'}->{'filter'}, $f)) {
         $c->stash->{'view_save_required'} = 1;
     }
 
     ############################################################################
     # merge current filter into params unless already set
-    if($c->stash->{'currentview'}->{'filter'} && !defined $c->req->parameters->{'dfl_s0_hoststatustypes'}) {
+    if(defined $c->stash->{'currentview'}->{'filter'} && !defined $c->req->parameters->{'dfl_s0_hoststatustypes'}) {
         for my $key (sort keys %{$c->stash->{'currentview'}->{'filter'}}) {
             $c->req->parameters->{$key} = $c->stash->{'currentview'}->{'filter'}->{$key};
         }
