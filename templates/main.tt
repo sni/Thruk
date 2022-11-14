@@ -46,7 +46,7 @@
                 <input type='hidden' name='v' value="[% currentview.name | html %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 <a href="#" onClick="[% IF currentview.locked %]return false;[% ELSE %]jQuery(this).closest('FORM').submit(); return false;[% END %]" [% IF currentview.locked %]class="disabled"[% END %] >
-                  <i class="fa-solid fa-trash text-xs"></i>Remove Current View</a>
+                  <i class="fa-solid fa-trash text-xs"></i>Remove Current View
                 </a>
               </form>
             </li>
