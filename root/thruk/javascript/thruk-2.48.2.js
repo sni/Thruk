@@ -223,6 +223,10 @@ function init_page() {
 
     checkMainTableMaxHeight();
 
+    jQuery(window).on('beforeunload unload', function(e){
+        thrukState.unloading = true;
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
@@ -1648,6 +1652,9 @@ function reloadPageDo(withReloadButton, freshReload) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
+            if(thrukState && thrukState.unloading) {
+                return;
+            }
             isReloading = false;
             // show error response if its a valid error page
             if(jqXHR.responseText && jqXHR.responseText.match(/init_page\(\)/)) {
