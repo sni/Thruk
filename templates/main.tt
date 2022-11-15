@@ -143,7 +143,7 @@
   <div class="my-card">
     <div class="card overviewcard w-auto">
       <div class="head">
-        <h3>Hosts</h3>
+        <h3><a href="status.cgi?hostgroup=all&style=hostdetail" class="link">Hosts</a></h3>
       </div>
       <div id="hosts-gaugeChart">
       </div>
@@ -153,7 +153,7 @@
   <div class="my-card">
     <div class="card overviewcard w-auto">
       <div class="head">
-        <h3>Services</h3>
+        <h3><a href="status.cgi" class="link">Services</a></h3>
       </div>
       <div id="services-gaugeChart">
       </div>
@@ -186,7 +186,7 @@
   <div class="my-card">
     <div class="card w-auto h-full">
       <div class="head">
-        <h3>Top 5 Hostgroups</h3>
+        <h3><a href="status.cgi?style=hostoverview" class="link">Top 5 Hostgroups</a></h3>
       </div>
       <div id="hostgroups-barChart"></div>
     </div>
@@ -195,7 +195,7 @@
   <div class="my-card">
     <div class="card w-auto">
       <div class="head">
-        <h3>Notifications</h3>
+        <h3><a class="link" href="notifications.cgi">Notifications</a></h3>
       </div>
       <a href="notifications.cgi?start=&end=" id="notifications-link" class="relative">
         <div id="notifications-barChart"></div>
@@ -209,7 +209,7 @@
   <div class="my-card min-w-[370px]">
     <div class="card w-auto h-full overflow-hidden">
       <div class="head">
-        <h3>Unhandled Host Problems</h3>
+        <h3><a href="status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42" class="link">Unhandled Host Problems</a></h3>
       </div>
       <div class="overflow-x-auto">
         <table class="cellspacing-x">
@@ -244,7 +244,7 @@
   <div class="my-card min-w-[370px]">
     <div class="card w-auto h-full overflow-hidden">
       <div class="head">
-        <h3>Unhandled Service Problems</h3>
+        <h3><a class="link" href="status.cgi?host=all&type=detail&hostprops=10&hoststatustypes=3&serviceprops=42&servicestatustypes=28">Unhandled Service Problems</a></h3>
       </div>
       <div class="overflow-x-auto">
         <table class="cellspacing-x">
@@ -560,31 +560,40 @@
 });
 
 
-jQuery('#view_tabs').sortable({
-  items                : 'SPAN.tabs.sortable',
-  helper               : 'clone',
-  tolerance            : 'pointer',
-  placeholder          : 'sortable-placeholder',
-  update               : function(event, ui) {
-    var order = [];
-    jQuery('#view_tabs').find("SPAN.tabs.sortable").each(function(i, el) {
-        order.push(el.dataset["name"]);
+function initTabSorting() {
+  if(!has_jquery_ui()) {
+    load_jquery_ui(function() {
+        initTabSorting();
     });
-    jQuery("#tabsavespinner").removeClass("hidden");
-    jQuery.ajax({
-        url: url_prefix + 'cgi-bin/main.cgi',
-        type: 'POST',
-        data: {
-          reorder:  '1',
-          order:     order
-        },
-        success: function() {
-          jQuery("#tabsavespinner").addClass("hidden");
-        },
-        error:     ajax_xhr_error_logonly
-    });
+    return;
   }
-});
+
+  jQuery('#view_tabs').sortable({
+    items                : 'SPAN.tabs.sortable',
+    helper               : 'clone',
+    tolerance            : 'pointer',
+    placeholder          : 'sortable-placeholder',
+    update               : function(event, ui) {
+      var order = [];
+      jQuery('#view_tabs').find("SPAN.tabs.sortable").each(function(i, el) {
+          order.push(el.dataset["name"]);
+      });
+      jQuery("#tabsavespinner").removeClass("hidden");
+      jQuery.ajax({
+          url: url_prefix + 'cgi-bin/main.cgi',
+          type: 'POST',
+          data: {
+            reorder:  '1',
+            order:     order
+          },
+          success: function() {
+            jQuery("#tabsavespinner").addClass("hidden");
+          },
+          error:     ajax_xhr_error_logonly
+      });
+    }
+  });
+}
 
 </script>
 
