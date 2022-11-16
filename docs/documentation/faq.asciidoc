@@ -101,10 +101,6 @@ Finally reload Apache:
 === How to change the side menu
 This is covered in the link:menu.html[advanced menu] section.
 
-=== How can I integrate Nagvis Maps
-
-There is an example in the link:menu.html#nagvis-maps[menu] documentation.
-
 === How can I integrate Nagvis Maps in the Panorama Dashboard
 
 Choose 'Generic Url Panlet' from the 'New Panlet' list. Then enter
