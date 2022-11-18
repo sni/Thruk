@@ -126,6 +126,9 @@ export PERL5LIB=/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5
     --with-httpd-conf="%{_sysconfdir}/%{apachedir}/conf.d" \
     --with-htmlurl="/thruk"
 %{__make} %{?_smp_mflags} all
+# make sure themes are built as this point
+test -f themes/themes-available/Light/stylesheets/Light.css || %{__make} themes
+test -f themes/themes-available/Light/stylesheets/Light.css || exit 1
 
 # replace /usr/bin/env according to https://fedoraproject.org/wiki/Packaging:Guidelines#Shebang_lines
 sed -e 's%/usr/bin/env perl%/usr/bin/perl%' -i \
