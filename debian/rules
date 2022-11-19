@@ -30,9 +30,8 @@ override_dh_auto_configure:
 	echo $(HTTPDCONF)/thruk.conf                   >> debian/thruk-base.install
 	echo $(HTTPDCONF)/thruk_cookie_auth_vhost.conf >> debian/thruk-base.install
 	# make sure themes are built as this point
-	test -f debian/tmp/themes/themes-available/Light/stylesheets/Light.css || ls -la
-	test -f debian/tmp/themes/themes-available/Light/stylesheets/Light.css || make themes
-	test -f debian/tmp/themes/themes-available/Light/stylesheets/Light.css || exit 1
+	test -f themes/themes-available/Light/stylesheets/Light.css || make themes
+	test -f themes/themes-available/Light/stylesheets/Light.css || exit 1
 
 override_dh_auto_install: local_auto_install $(FIXPHANTOMJS)
 
