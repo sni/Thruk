@@ -5355,7 +5355,7 @@ function perf_table_data(dataset) {
     var perfdata      = dataset.perfdata;
     var check_command = dataset.checkCommand;
     var pnp_url       = dataset.pnpUrl;
-    var is_host       = dataset.isHost;
+    var is_host       = dataset.isHost === 'true';
     var no_title      = dataset.noTitle;
 
     if(is_host == undefined) { is_host = false; }
@@ -5433,6 +5433,7 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
             var cls = 'green';
             if(state == 1) { cls = 'yellow'; }
             if(state == 2) { cls = 'red'; }
+            if(state == 3) { cls = 'orange'; }
             if(state == 4) { cls = 'gray'; }
             perc = Math.round(perc / 100 * size);
             var warn_perc_min = null;
