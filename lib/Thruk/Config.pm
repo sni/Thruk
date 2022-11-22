@@ -514,7 +514,7 @@ sub set_default_config {
     }
     elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
         $config->{'extra_version'}      = Thruk::Utils::IO::read($config->{'project_root'}.'/naemon-version');
-        $config->{'extra_version_link'} = 'https://www.naemon.org';
+        $config->{'extra_version_link'} = 'https://www.naemon.io';
         chomp($config->{'extra_version'});
     }
     $config->{'extra_version'}      = '' unless defined $config->{'extra_version'};

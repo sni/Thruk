@@ -689,7 +689,7 @@ Optional arguments:
 === GET /commands
 
 lists livestatus commands.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#commands for details.
 
 === GET /commands/<name>
 
@@ -699,7 +699,7 @@ alias for /commands?name=<name>
 === GET /commands/<name>/config
 
 Returns configuration for given command.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#command
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#command
 
 === POST /commands/<name>/config
 
@@ -716,7 +716,7 @@ Deletes given command from configuration.
 === GET /comments
 
 lists livestatus comments.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#comments for details.
 
 === GET /comments/<id>
 
@@ -864,7 +864,7 @@ Saves stashed configuration changes to disk.
 === GET /contactgroups
 
 lists livestatus contactgroups.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#contactgroups for details.
 
 === GET /contactgroups/<name>
 
@@ -884,7 +884,7 @@ list of supported commands:
 === GET /contactgroups/<name>/config
 
 Returns configuration for given contactgroup.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contactgroup
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#contactgroup
 
 === POST /contactgroups/<name>/config
 
@@ -901,7 +901,7 @@ Deletes given contactgroup from configuration.
 === GET /contacts
 
 lists livestatus contacts.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#contacts for details.
 
 === GET /contacts/<name>
 
@@ -924,7 +924,7 @@ list of supported commands:
 === GET /contacts/<name>/config
 
 Returns configuration for given contact.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#contact
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#contact
 
 === POST /contacts/<name>/config
 
@@ -941,7 +941,7 @@ Deletes given contact from configuration.
 === GET /downtimes
 
 lists livestatus downtimes.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#downtimes for details.
 
 === GET /downtimes/<id>
 
@@ -951,7 +951,7 @@ alias for /downtimes?id=<id>
 === GET /hostgroups
 
 lists livestatus hostgroups.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#hostgroups for details.
 
 === GET /hostgroups/<name>
 
@@ -981,7 +981,7 @@ list of supported commands:
 === GET /hostgroups/<name>/config
 
 Returns configuration for given hostgroup.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#hostgroup
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#hostgroup
 
 === POST /hostgroups/<name>/config
 
@@ -1031,7 +1031,7 @@ alias for /hosts/stats?groups[gte]=<name>
 === GET /hosts
 
 lists livestatus hosts.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for details.
 
 === GET /hosts/<name>
 
@@ -1112,7 +1112,7 @@ displays commandline for check command of given hosts.
 === GET /hosts/<name>/config
 
 Returns configuration for given host.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#host
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#host
 
 === POST /hosts/<name>/config
 
@@ -1300,7 +1300,7 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 === GET /logs
 
 lists livestatus logs.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#log for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#log for details.
 
 === GET /notifications
 
@@ -1310,17 +1310,17 @@ alias for /logs?class=3
 === GET /processinfo
 
 lists livestatus sites status.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#status for details.
 
 === GET /processinfo/stats
 
 lists livestatus sites statistics.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#status for details.
 
 === GET /servicegroups
 
 lists livestatus servicegroups.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#servicegroups for details.
 
 === GET /servicegroups/<name>
 
@@ -1350,7 +1350,7 @@ list of supported commands:
 === GET /servicegroups/<name>/config
 
 Returns configuration for given servicegroup.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#servicegroup
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#servicegroup
 
 === POST /servicegroups/<name>/config
 
@@ -1400,7 +1400,7 @@ alias for /services/stats?service_groups[gte]=<name>
 === GET /services
 
 lists livestatus services.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#services for details.
 there is an alias /services.
 
 === GET /services/<host>/<service>
@@ -1465,7 +1465,7 @@ displays commandline for check command of given services.
 === GET /services/<host>/<service>/config
 
 Returns configuration for given service.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#service
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#service
 
 === POST /services/<host>/<service>/config
 
@@ -2172,7 +2172,7 @@ alias for /thruk/users?id=<id>
 === GET /timeperiods
 
 lists livestatus timeperiods.
-see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#timeperiods for details.
 
 === GET /timeperiods/<name>
 
@@ -2182,7 +2182,7 @@ alias for /timeperiods?name=<name>
 === GET /timeperiods/<name>/config
 
 Returns configuration for given timeperiod.
-You will find available attributes here: http://www.naemon.org/documentation/usersguide/objectdefinitions.html#timeperiod
+You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#timeperiod
 
 === POST /timeperiods/<name>/config
 

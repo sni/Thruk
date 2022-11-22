@@ -292,7 +292,7 @@ __DATA__
 #   * persistent_comment
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/acknowledge_host_problem.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/acknowledge_host_problem_expire
 # Sends the ACKNOWLEDGE_HOST_PROBLEM_EXPIRE command.
@@ -309,7 +309,7 @@ __DATA__
 #   * end_time
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_host_problem_expire.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/acknowledge_host_problem_expire.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/add_host_comment
 # Sends the ADD_HOST_COMMENT command.
@@ -323,7 +323,7 @@ __DATA__
 #   * persistent_comment
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/add_host_comment.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/add_host_comment.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_custom_host_var
 # Changes the value of a custom host variable.
@@ -333,7 +333,7 @@ __DATA__
 #   * name
 #   * value
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_custom_host_var.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_custom_host_var.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_host_check_timeperiod
 # Changes the valid check period for the specified host.
@@ -342,14 +342,14 @@ __DATA__
 #
 #   * timeperiod
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_host_check_timeperiod.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_host_check_timeperiod.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_host_modattr
 # Sends the CHANGE_HOST_MODATTR command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_host_modattr.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_host_modattr.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_host_notification_timeperiod
 # Changes the host notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
@@ -358,7 +358,7 @@ __DATA__
 #
 #   * timeperiod
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_host_notification_timeperiod.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_host_notification_timeperiod.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_max_host_check_attempts
 # Changes the maximum number of check attempts (retries) for a particular host.
@@ -367,7 +367,7 @@ __DATA__
 #
 #   * interval
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_max_host_check_attempts.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_max_host_check_attempts.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_normal_host_check_interval
 # Changes the normal (regularly scheduled) check interval for a particular host.
@@ -376,7 +376,7 @@ __DATA__
 #
 #   * interval
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_normal_host_check_interval.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_normal_host_check_interval.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/change_retry_host_check_interval
 # Changes the retry check interval for a particular host.
@@ -385,7 +385,7 @@ __DATA__
 #
 #   * interval
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_retry_host_check_interval.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_retry_host_check_interval.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/del_active_host_downtimes
 # Removes all currently active downtimes for this host.
@@ -397,7 +397,7 @@ __DATA__
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_all_host_comments.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_all_host_comments.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/delay_host_notification
 # Sends the DELAY_HOST_NOTIFICATION command.
@@ -406,133 +406,133 @@ __DATA__
 #
 #   * notification_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/delay_host_notification.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/delay_host_notification.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_all_notifications_beyond_host
 # Sends the DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_all_notifications_beyond_host.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_all_notifications_beyond_host.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_and_child_notifications
 # Sends the DISABLE_HOST_AND_CHILD_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_and_child_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_and_child_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_check
 # Sends the DISABLE_HOST_CHECK command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_check.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_event_handler
 # Sends the DISABLE_HOST_EVENT_HANDLER command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_event_handler.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_event_handler.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_flap_detection
 # Sends the DISABLE_HOST_FLAP_DETECTION command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_flap_detection.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_flap_detection.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_notifications
 # Sends the DISABLE_HOST_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_svc_checks
 # Sends the DISABLE_HOST_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_svc_checks.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_host_svc_notifications
 # Sends the DISABLE_HOST_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_svc_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/disable_passive_host_checks
 # Sends the DISABLE_PASSIVE_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_passive_host_checks.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_all_notifications_beyond_host
 # Sends the ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_all_notifications_beyond_host.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_all_notifications_beyond_host.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_and_child_notifications
 # Sends the ENABLE_HOST_AND_CHILD_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_and_child_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_and_child_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_check
 # Sends the ENABLE_HOST_CHECK command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_check.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_event_handler
 # Sends the ENABLE_HOST_EVENT_HANDLER command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_event_handler.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_event_handler.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_flap_detection
 # Sends the ENABLE_HOST_FLAP_DETECTION command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_flap_detection.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_flap_detection.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_notifications
 # Sends the ENABLE_HOST_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_svc_checks
 # Sends the ENABLE_HOST_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_svc_checks.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_host_svc_notifications
 # Sends the ENABLE_HOST_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_svc_notifications.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/enable_passive_host_checks
 # Sends the ENABLE_PASSIVE_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_passive_host_checks.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/process_host_check_result
 # Sends the PROCESS_HOST_CHECK_RESULT command.
@@ -546,14 +546,14 @@ __DATA__
 #
 #   * performance_data
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/process_host_check_result.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/process_host_check_result.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/remove_host_acknowledgement
 # Sends the REMOVE_HOST_ACKNOWLEDGEMENT command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/remove_host_acknowledgement.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/remove_host_acknowledgement.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_and_propagate_host_downtime
 # Sends the SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME command.
@@ -571,7 +571,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_host_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_and_propagate_host_downtime.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_and_propagate_triggered_host_downtime
 # Sends the SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME command.
@@ -589,7 +589,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_and_propagate_triggered_host_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_and_propagate_triggered_host_downtime.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_forced_host_check
 # Sends the SCHEDULE_FORCED_HOST_CHECK command.
@@ -598,7 +598,7 @@ __DATA__
 #
 #   * start_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_forced_host_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_forced_host_check.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_forced_host_svc_checks
 # Sends the SCHEDULE_FORCED_HOST_SVC_CHECKS command.
@@ -607,7 +607,7 @@ __DATA__
 #
 #   * start_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_forced_host_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_forced_host_svc_checks.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_host_check
 # Sends the SCHEDULE_HOST_CHECK command.
@@ -616,7 +616,7 @@ __DATA__
 #
 #   * start_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_host_check.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_host_downtime
 # Sends the SCHEDULE_HOST_DOWNTIME command.
@@ -634,7 +634,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_host_downtime.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_host_svc_checks
 # Sends the SCHEDULE_HOST_SVC_CHECKS command.
@@ -643,7 +643,7 @@ __DATA__
 #
 #   * start_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_host_svc_checks.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/schedule_host_svc_downtime
 # Sends the SCHEDULE_HOST_SVC_DOWNTIME command.
@@ -661,7 +661,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_host_svc_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_host_svc_downtime.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/send_custom_host_notification
 # Sends the SEND_CUSTOM_HOST_NOTIFICATION command.
@@ -675,7 +675,7 @@ __DATA__
 #   * options
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/send_custom_host_notification.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/send_custom_host_notification.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/set_host_notification_number
 # Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state.
@@ -684,21 +684,21 @@ __DATA__
 #
 #   * number
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/set_host_notification_number.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/set_host_notification_number.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/start_obsessing_over_host
 # Sends the START_OBSESSING_OVER_HOST command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_host.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_obsessing_over_host.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/stop_obsessing_over_host
 # Sends the STOP_OBSESSING_OVER_HOST command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_host.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_obsessing_over_host.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/acknowledge_svc_problem
 # Sends the ACKNOWLEDGE_SVC_PROBLEM command.
@@ -714,7 +714,7 @@ __DATA__
 #   * persistent_comment
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/acknowledge_svc_problem.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/acknowledge_svc_problem_expire
 # Sends the ACKNOWLEDGE_SVC_PROBLEM_EXPIRE command.
@@ -731,7 +731,7 @@ __DATA__
 #   * end_time
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/acknowledge_svc_problem_expire.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/acknowledge_svc_problem_expire.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/add_svc_comment
 # Sends the ADD_SVC_COMMENT command.
@@ -745,7 +745,7 @@ __DATA__
 #   * persistent_comment
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/add_svc_comment.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/add_svc_comment.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_custom_svc_var
 # Changes the value of a custom service variable.
@@ -755,7 +755,7 @@ __DATA__
 #   * name
 #   * value
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_custom_svc_var.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_custom_svc_var.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_max_svc_check_attempts
 # Changes the maximum number of check attempts (retries) for a particular service.
@@ -764,7 +764,7 @@ __DATA__
 #
 #   * attempts
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_max_svc_check_attempts.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_max_svc_check_attempts.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_normal_svc_check_interval
 # Changes the normal (regularly scheduled) check interval for a particular service
@@ -773,7 +773,7 @@ __DATA__
 #
 #   * interval
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_normal_svc_check_interval.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_normal_svc_check_interval.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_retry_svc_check_interval
 # Changes the retry check interval for a particular service.
@@ -782,7 +782,7 @@ __DATA__
 #
 #   * interval
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_retry_svc_check_interval.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_retry_svc_check_interval.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
 # Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
@@ -791,14 +791,14 @@ __DATA__
 #
 #   * timeperiod
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_svc_check_timeperiod.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_svc_check_timeperiod.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_svc_modattr
 # Sends the CHANGE_SVC_MODATTR command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_svc_modattr.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_svc_modattr.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_svc_notification_timeperiod
 # Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
@@ -807,7 +807,7 @@ __DATA__
 #
 #   * timeperiod
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_svc_notification_timeperiod.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_svc_notification_timeperiod.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/del_active_service_downtimes
 # Removes all currently active downtimes for this service.
@@ -819,7 +819,7 @@ __DATA__
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_all_svc_comments.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_all_svc_comments.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/delay_svc_notification
 # Sends the DELAY_SVC_NOTIFICATION command.
@@ -828,77 +828,77 @@ __DATA__
 #
 #   * notification_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/delay_svc_notification.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/delay_svc_notification.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/disable_passive_svc_checks
 # Sends the DISABLE_PASSIVE_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_passive_svc_checks.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/disable_svc_check
 # Sends the DISABLE_SVC_CHECK command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_svc_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_svc_check.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/disable_svc_event_handler
 # Sends the DISABLE_SVC_EVENT_HANDLER command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_svc_event_handler.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_svc_event_handler.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/disable_svc_flap_detection
 # Sends the DISABLE_SVC_FLAP_DETECTION command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_svc_flap_detection.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_svc_flap_detection.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/disable_svc_notifications
 # Sends the DISABLE_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_svc_notifications.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/enable_passive_svc_checks
 # Sends the ENABLE_PASSIVE_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_passive_svc_checks.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/enable_svc_check
 # Sends the ENABLE_SVC_CHECK command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_svc_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_svc_check.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/enable_svc_event_handler
 # Sends the ENABLE_SVC_EVENT_HANDLER command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_svc_event_handler.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_svc_event_handler.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/enable_svc_flap_detection
 # Sends the ENABLE_SVC_FLAP_DETECTION command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_svc_flap_detection.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_svc_flap_detection.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/enable_svc_notifications
 # Sends the ENABLE_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_svc_notifications.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/process_service_check_result
 # Sends the PROCESS_SERVICE_CHECK_RESULT command.
@@ -912,14 +912,14 @@ __DATA__
 #
 #   * performance_data
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/process_service_check_result.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/process_service_check_result.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/remove_svc_acknowledgement
 # Sends the REMOVE_SVC_ACKNOWLEDGEMENT command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/remove_svc_acknowledgement.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/remove_svc_acknowledgement.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/schedule_forced_svc_check
 # Sends the SCHEDULE_FORCED_SVC_CHECK command.
@@ -928,7 +928,7 @@ __DATA__
 #
 #   * start_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_forced_svc_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_forced_svc_check.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/schedule_svc_check
 # Sends the SCHEDULE_SVC_CHECK command.
@@ -937,7 +937,7 @@ __DATA__
 #
 #   * start_time
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_svc_check.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_svc_check.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/schedule_svc_downtime
 # Sends the SCHEDULE_SVC_DOWNTIME command.
@@ -955,7 +955,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_svc_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_svc_downtime.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/send_custom_svc_notification
 # Sends the SEND_CUSTOM_SVC_NOTIFICATION command.
@@ -969,7 +969,7 @@ __DATA__
 #   * options
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/send_custom_svc_notification.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/send_custom_svc_notification.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/set_svc_notification_number
 # Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state.
@@ -978,21 +978,21 @@ __DATA__
 #
 #   * number
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/set_svc_notification_number.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/set_svc_notification_number.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/start_obsessing_over_svc
 # Sends the START_OBSESSING_OVER_SVC command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_svc.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_obsessing_over_svc.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/stop_obsessing_over_svc
 # Sends the STOP_OBSESSING_OVER_SVC command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_obsessing_over_svc.html for details.
 
 # REST PATH: POST /system/cmd/del_downtime_by_host_name
 # This command deletes all downtimes matching the specified filters.
@@ -1004,7 +1004,7 @@ __DATA__
 #   * start_time
 #   * comment
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_downtime_by_host_name.html for details.
 
 # REST PATH: POST /system/cmd/del_downtime_by_hostgroup_name
 # This command deletes all downtimes matching the specified filters.
@@ -1017,7 +1017,7 @@ __DATA__
 #   * start_time
 #   * comment
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_hostgroup_name.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_downtime_by_hostgroup_name.html for details.
 
 # REST PATH: POST /system/cmd/del_downtime_by_start_time_comment
 # This command deletes all downtimes matching the specified filters.
@@ -1027,91 +1027,91 @@ __DATA__
 #   * start_time
 #   * comment
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_downtime_by_start_time_comment.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_downtime_by_start_time_comment.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_host_checks
 # Sends the DISABLE_HOSTGROUP_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_hostgroup_host_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_host_notifications
 # Sends the DISABLE_HOSTGROUP_HOST_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_hostgroup_host_notifications.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_passive_host_checks
 # Disables passive checks for all hosts in a particular hostgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_hostgroup_passive_host_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_passive_svc_checks
 # Disables passive checks for all services associated with hosts in a particular hostgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_hostgroup_passive_svc_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_svc_checks
 # Sends the DISABLE_HOSTGROUP_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_hostgroup_svc_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_svc_notifications
 # Sends the DISABLE_HOSTGROUP_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_hostgroup_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_hostgroup_svc_notifications.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/enable_hostgroup_host_checks
 # Sends the ENABLE_HOSTGROUP_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_hostgroup_host_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/enable_hostgroup_host_notifications
 # Sends the ENABLE_HOSTGROUP_HOST_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_hostgroup_host_notifications.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/enable_hostgroup_passive_host_checks
 # Enables passive checks for all hosts in a particular hostgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_hostgroup_passive_host_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/enable_hostgroup_passive_svc_checks
 # Enables passive checks for all services associated with hosts in a particular hostgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_hostgroup_passive_svc_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/enable_hostgroup_svc_checks
 # Sends the ENABLE_HOSTGROUP_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_hostgroup_svc_checks.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/enable_hostgroup_svc_notifications
 # Sends the ENABLE_HOSTGROUP_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_hostgroup_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_hostgroup_svc_notifications.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/schedule_hostgroup_host_downtime
 # Sends the SCHEDULE_HOSTGROUP_HOST_DOWNTIME command.
@@ -1129,7 +1129,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_host_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_hostgroup_host_downtime.html for details.
 
 # REST PATH: POST /hostgroups/<name>/cmd/schedule_hostgroup_svc_downtime
 # Sends the SCHEDULE_HOSTGROUP_SVC_DOWNTIME command.
@@ -1147,91 +1147,91 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_hostgroup_svc_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_hostgroup_svc_downtime.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/disable_servicegroup_host_checks
 # Sends the DISABLE_SERVICEGROUP_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_servicegroup_host_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/disable_servicegroup_host_notifications
 # Sends the DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_servicegroup_host_notifications.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/disable_servicegroup_passive_host_checks
 # Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_servicegroup_passive_host_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/disable_servicegroup_passive_svc_checks
 # Disables the acceptance and processing of passive checks for all services in a particular servicegroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_servicegroup_passive_svc_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/disable_servicegroup_svc_checks
 # Sends the DISABLE_SERVICEGROUP_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_servicegroup_svc_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/disable_servicegroup_svc_notifications
 # Sends the DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_servicegroup_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_servicegroup_svc_notifications.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/enable_servicegroup_host_checks
 # Sends the ENABLE_SERVICEGROUP_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_servicegroup_host_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/enable_servicegroup_host_notifications
 # Sends the ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_servicegroup_host_notifications.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/enable_servicegroup_passive_host_checks
 # Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_servicegroup_passive_host_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/enable_servicegroup_passive_svc_checks
 # Enables the acceptance and processing of passive checks for all services in a particular servicegroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_servicegroup_passive_svc_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/enable_servicegroup_svc_checks
 # Sends the ENABLE_SERVICEGROUP_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_servicegroup_svc_checks.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/enable_servicegroup_svc_notifications
 # Sends the ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_servicegroup_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_servicegroup_svc_notifications.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/schedule_servicegroup_host_downtime
 # Sends the SCHEDULE_SERVICEGROUP_HOST_DOWNTIME command.
@@ -1249,7 +1249,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_host_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_servicegroup_host_downtime.html for details.
 
 # REST PATH: POST /servicegroups/<name>/cmd/schedule_servicegroup_svc_downtime
 # Sends the SCHEDULE_SERVICEGROUP_SVC_DOWNTIME command.
@@ -1267,7 +1267,7 @@ __DATA__
 #   * duration
 #   * comment_author
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/schedule_servicegroup_svc_downtime.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/change_contact_host_notification_timeperiod
 # Changes the host notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's host notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
@@ -1276,7 +1276,7 @@ __DATA__
 #
 #   * timeperiod
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_host_notification_timeperiod.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_contact_host_notification_timeperiod.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/change_contact_svc_notification_timeperiod
 # Changes the service notification timeperiod for a particular contact to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the contact's service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
@@ -1285,7 +1285,7 @@ __DATA__
 #
 #   * timeperiod
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_contact_svc_notification_timeperiod.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_contact_svc_notification_timeperiod.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/change_custom_contact_var
 # Changes the value of a custom contact variable.
@@ -1295,63 +1295,63 @@ __DATA__
 #   * name
 #   * value
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_custom_contact_var.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_custom_contact_var.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/disable_contact_host_notifications
 # Disables host notifications for a particular contact.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_contact_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_contact_host_notifications.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/disable_contact_svc_notifications
 # Disables service notifications for a particular contact.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_contact_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_contact_svc_notifications.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/enable_contact_host_notifications
 # Enables host notifications for a particular contact.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_contact_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_contact_host_notifications.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/enable_contact_svc_notifications
 # Disables service notifications for a particular contact.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_contact_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_contact_svc_notifications.html for details.
 
 # REST PATH: POST /contactgroups/<name>/cmd/disable_contactgroup_host_notifications
 # Disables host notifications for all contacts in a particular contactgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_contactgroup_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_contactgroup_host_notifications.html for details.
 
 # REST PATH: POST /contactgroups/<name>/cmd/disable_contactgroup_svc_notifications
 # Disables service notifications for all contacts in a particular contactgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_contactgroup_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_contactgroup_svc_notifications.html for details.
 
 # REST PATH: POST /contactgroups/<name>/cmd/enable_contactgroup_host_notifications
 # Enables host notifications for all contacts in a particular contactgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_host_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_contactgroup_host_notifications.html for details.
 
 # REST PATH: POST /contactgroups/<name>/cmd/enable_contactgroup_svc_notifications
 # Enables service notifications for all contacts in a particular contactgroup.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_contactgroup_svc_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_contactgroup_svc_notifications.html for details.
 
 # REST PATH: POST /system/cmd/change_global_host_event_handler
 # Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.
@@ -1360,7 +1360,7 @@ __DATA__
 #
 #   * eventhandler
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_global_host_event_handler.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_global_host_event_handler.html for details.
 
 # REST PATH: POST /system/cmd/change_global_svc_event_handler
 # Changes the global service event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.
@@ -1369,7 +1369,7 @@ __DATA__
 #
 #   * eventhandler
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/change_global_svc_event_handler.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/change_global_svc_event_handler.html for details.
 
 # REST PATH: POST /system/cmd/del_host_comment
 # Sends the DEL_HOST_COMMENT command.
@@ -1378,7 +1378,7 @@ __DATA__
 #
 #   * comment_id
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_host_comment.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_host_comment.html for details.
 
 # REST PATH: POST /system/cmd/del_host_downtime
 # Sends the DEL_HOST_DOWNTIME command.
@@ -1387,7 +1387,7 @@ __DATA__
 #
 #   * downtime_id
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_host_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_host_downtime.html for details.
 
 # REST PATH: POST /system/cmd/del_svc_comment
 # Sends the DEL_SVC_COMMENT command.
@@ -1396,7 +1396,7 @@ __DATA__
 #
 #   * comment_id
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_svc_comment.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_svc_comment.html for details.
 
 # REST PATH: POST /system/cmd/del_svc_downtime
 # Sends the DEL_SVC_DOWNTIME command.
@@ -1405,217 +1405,217 @@ __DATA__
 #
 #   * downtime_id
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/del_svc_downtime.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/del_svc_downtime.html for details.
 
 # REST PATH: POST /system/cmd/disable_event_handlers
 # Sends the DISABLE_EVENT_HANDLERS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_event_handlers.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_event_handlers.html for details.
 
 # REST PATH: POST /system/cmd/disable_flap_detection
 # Sends the DISABLE_FLAP_DETECTION command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_flap_detection.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_flap_detection.html for details.
 
 # REST PATH: POST /system/cmd/disable_host_freshness_checks
 # Disables freshness checks of all hosts on a program-wide basis.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_host_freshness_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_host_freshness_checks.html for details.
 
 # REST PATH: POST /system/cmd/disable_notifications
 # Sends the DISABLE_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_notifications.html for details.
 
 # REST PATH: POST /system/cmd/disable_performance_data
 # Sends the DISABLE_PERFORMANCE_DATA command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_performance_data.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_performance_data.html for details.
 
 # REST PATH: POST /system/cmd/disable_service_freshness_checks
 # Disables freshness checks of all services on a program-wide basis.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/disable_service_freshness_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/disable_service_freshness_checks.html for details.
 
 # REST PATH: POST /system/cmd/enable_event_handlers
 # Sends the ENABLE_EVENT_HANDLERS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_event_handlers.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_event_handlers.html for details.
 
 # REST PATH: POST /system/cmd/enable_flap_detection
 # Sends the ENABLE_FLAP_DETECTION command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_flap_detection.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_flap_detection.html for details.
 
 # REST PATH: POST /system/cmd/enable_host_freshness_checks
 # Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_host_freshness_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_host_freshness_checks.html for details.
 
 # REST PATH: POST /system/cmd/enable_notifications
 # Sends the ENABLE_NOTIFICATIONS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_notifications.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_notifications.html for details.
 
 # REST PATH: POST /system/cmd/enable_performance_data
 # Sends the ENABLE_PERFORMANCE_DATA command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_performance_data.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_performance_data.html for details.
 
 # REST PATH: POST /system/cmd/enable_service_freshness_checks
 # Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/enable_service_freshness_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/enable_service_freshness_checks.html for details.
 
 # REST PATH: POST /system/cmd/read_state_information
 # Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/read_state_information.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/read_state_information.html for details.
 
 # REST PATH: POST /system/cmd/restart_process
 # Sends the RESTART_PROCESS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/restart_process.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/restart_process.html for details.
 
 # REST PATH: POST /system/cmd/restart_program
 # Restarts the Naemon process.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/restart_program.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/restart_program.html for details.
 
 # REST PATH: POST /system/cmd/save_state_information
 # Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/save_state_information.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/save_state_information.html for details.
 
 # REST PATH: POST /system/cmd/shutdown_process
 # Sends the SHUTDOWN_PROCESS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/shutdown_process.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/shutdown_process.html for details.
 
 # REST PATH: POST /system/cmd/shutdown_program
 # Shuts down the Naemon process.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/shutdown_program.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/shutdown_program.html for details.
 
 # REST PATH: POST /system/cmd/start_accepting_passive_host_checks
 # Sends the START_ACCEPTING_PASSIVE_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_accepting_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_accepting_passive_host_checks.html for details.
 
 # REST PATH: POST /system/cmd/start_accepting_passive_svc_checks
 # Sends the START_ACCEPTING_PASSIVE_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_accepting_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_accepting_passive_svc_checks.html for details.
 
 # REST PATH: POST /system/cmd/start_executing_host_checks
 # Sends the START_EXECUTING_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_executing_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_executing_host_checks.html for details.
 
 # REST PATH: POST /system/cmd/start_executing_svc_checks
 # Sends the START_EXECUTING_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_executing_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_executing_svc_checks.html for details.
 
 # REST PATH: POST /system/cmd/start_obsessing_over_host_checks
 # Sends the START_OBSESSING_OVER_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_obsessing_over_host_checks.html for details.
 
 # REST PATH: POST /system/cmd/start_obsessing_over_svc_checks
 # Sends the START_OBSESSING_OVER_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/start_obsessing_over_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/start_obsessing_over_svc_checks.html for details.
 
 # REST PATH: POST /system/cmd/stop_accepting_passive_host_checks
 # Sends the STOP_ACCEPTING_PASSIVE_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_accepting_passive_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_accepting_passive_host_checks.html for details.
 
 # REST PATH: POST /system/cmd/stop_accepting_passive_svc_checks
 # Sends the STOP_ACCEPTING_PASSIVE_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_accepting_passive_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_accepting_passive_svc_checks.html for details.
 
 # REST PATH: POST /system/cmd/stop_executing_host_checks
 # Sends the STOP_EXECUTING_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_executing_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_executing_host_checks.html for details.
 
 # REST PATH: POST /system/cmd/stop_executing_svc_checks
 # Sends the STOP_EXECUTING_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_executing_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_executing_svc_checks.html for details.
 
 # REST PATH: POST /system/cmd/stop_obsessing_over_host_checks
 # Sends the STOP_OBSESSING_OVER_HOST_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_host_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_obsessing_over_host_checks.html for details.
 
 # REST PATH: POST /system/cmd/stop_obsessing_over_svc_checks
 # Sends the STOP_OBSESSING_OVER_SVC_CHECKS command.
 #
 # This command does not require any arguments.
 #
-# See http://www.naemon.org/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
+# See http://www.naemon.io/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
 
 {"all_host_service":{
   "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","nr":-1,"required":[]},

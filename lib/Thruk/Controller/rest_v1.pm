@@ -1662,7 +1662,7 @@ sub _rest_get_sites {
 ##########################################################
 # REST PATH: GET /hosts
 # lists livestatus hosts.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#hosts for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for details.
 register_rest_path_v1('GET', qr%^/hosts?$%mx, \&_rest_get_livestatus_hosts);
 sub _rest_get_livestatus_hosts {
     my($c) = @_;
@@ -1741,7 +1741,7 @@ sub _rest_get_livestatus_hosts_by_name {
 ##########################################################
 # REST PATH: GET /hostgroups
 # lists livestatus hostgroups.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#hostgroups for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#hostgroups for details.
 register_rest_path_v1('GET', qr%^/hostgroups?$%mx, \&_rest_get_livestatus_hostgroups);
 sub _rest_get_livestatus_hostgroups {
     my($c) = @_;
@@ -1772,7 +1772,7 @@ sub _rest_get_livestatus_hostgroup_stats {
 ##########################################################
 # REST PATH: GET /services
 # lists livestatus services.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#services for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#services for details.
 # there is an alias /services.
 register_rest_path_v1('GET', qr%^/services?$%mx, \&_rest_get_livestatus_services);
 sub _rest_get_livestatus_services {
@@ -1841,7 +1841,7 @@ sub _rest_get_livestatus_services_totals {
 ##########################################################
 # REST PATH: GET /servicegroups
 # lists livestatus servicegroups.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#servicegroups for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#servicegroups for details.
 register_rest_path_v1('GET', qr%^/servicegroups?$%mx, \&_rest_get_livestatus_servicegroups);
 sub _rest_get_livestatus_servicegroups {
     my($c) = @_;
@@ -1872,7 +1872,7 @@ sub _rest_get_livestatus_servicegroup_stats {
 ##########################################################
 # REST PATH: GET /contacts
 # lists livestatus contacts.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#contacts for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#contacts for details.
 register_rest_path_v1('GET', qr%^/contacts?$%mx, \&_rest_get_livestatus_contacts);
 sub _rest_get_livestatus_contacts {
     my($c) = @_;
@@ -1895,7 +1895,7 @@ sub _rest_get_livestatus_contacts_by_name {
 ##########################################################
 # REST PATH: GET /contactgroups
 # lists livestatus contactgroups.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#contactgroups for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#contactgroups for details.
 register_rest_path_v1('GET', qr%^/contactgroups?$%mx, \&_rest_get_livestatus_contactgroups);
 sub _rest_get_livestatus_contactgroups {
     my($c) = @_;
@@ -1916,7 +1916,7 @@ sub _rest_get_livestatus_contactgroups_by_name {
 ##########################################################
 # REST PATH: GET /timeperiods
 # lists livestatus timeperiods.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#timeperiods for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#timeperiods for details.
 register_rest_path_v1('GET', qr%^/timeperiods?$%mx, \&_rest_get_livestatus_timeperiods);
 sub _rest_get_livestatus_timeperiods {
     my($c) = @_;
@@ -1937,7 +1937,7 @@ sub _rest_get_livestatus_timeperiods_by_name {
 ##########################################################
 # REST PATH: GET /commands
 # lists livestatus commands.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#commands for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#commands for details.
 register_rest_path_v1('GET', qr%^/commands?$%mx, \&_rest_get_livestatus_commands, ['admin']);
 sub _rest_get_livestatus_commands {
     my($c) = @_;
@@ -1958,7 +1958,7 @@ sub _rest_get_livestatus_commands_by_name {
 ##########################################################
 # REST PATH: GET /comments
 # lists livestatus comments.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#comments for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#comments for details.
 register_rest_path_v1('GET', qr%^/comments?$%mx, \&_rest_get_livestatus_comments);
 sub _rest_get_livestatus_comments {
     my($c) = @_;
@@ -1979,7 +1979,7 @@ sub _rest_get_livestatus_comments_by_id {
 ##########################################################
 # REST PATH: GET /downtimes
 # lists livestatus downtimes.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#downtimes for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#downtimes for details.
 register_rest_path_v1('GET', qr%^/downtimes?$%mx, \&_rest_get_livestatus_downtimes);
 sub _rest_get_livestatus_downtimes {
     my($c) = @_;
@@ -2000,7 +2000,7 @@ sub _rest_get_livestatus_downtimes_by_id {
 ##########################################################
 # REST PATH: GET /logs
 # lists livestatus logs.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#log for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#log for details.
 register_rest_path_v1('GET', qr%^/logs?$%mx, \&_rest_get_livestatus_logs);
 sub _rest_get_livestatus_logs {
     my($c) = @_;
@@ -2060,7 +2060,7 @@ sub _rest_get_livestatus_host_alerts {
 ##########################################################
 # REST PATH: GET /processinfo
 # lists livestatus sites status.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#status for details.
 register_rest_path_v1('GET', qr%^/processinfos?$%mx, \&_rest_get_livestatus_processinfos);
 sub _rest_get_livestatus_processinfos {
     my($c) = @_;
@@ -2072,7 +2072,7 @@ sub _rest_get_livestatus_processinfos {
 ##########################################################
 # REST PATH: GET /processinfo/stats
 # lists livestatus sites statistics.
-# see https://www.naemon.org/documentation/usersguide/livestatus.html#status for details.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#status for details.
 register_rest_path_v1('GET', qr%^/processinfos?/stats$%mx, \&_rest_get_livestatus_processinfos_stats);
 sub _rest_get_livestatus_processinfos_stats {
     my($c) = @_;
