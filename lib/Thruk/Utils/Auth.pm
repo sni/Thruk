@@ -100,6 +100,10 @@ sub get_auth_filter {
         return();
     }
 
+    elsif($type eq 'columns') {
+        return();
+    }
+
     # contacts authorization
     elsif($type eq 'contacts') {
         return('name' => $c->user->get('username'));
