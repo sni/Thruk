@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix internal server error when adding second bookmark (#1220)
+
 3.00     Mon Nov 14 14:50:14 CET 2022
           - complete design rework
           - deprecated configuration options:

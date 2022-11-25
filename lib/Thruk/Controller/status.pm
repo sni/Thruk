@@ -1317,8 +1317,8 @@ sub _process_bookmarks {
 
     my $referer       = $c->req->parameters->{'referer'} || 'status.cgi';
     my $bookmark      = $c->req->parameters->{'bookmark'};
-    my $bookmarks     = $c->req->parameters->{'bookmarks'}  // [];
-    my $bookmarksp    = $c->req->parameters->{'bookmarksp'} // [];
+    my $bookmarks     = Thruk::Utils::list($c->req->parameters->{'bookmarks'}  // []);
+    my $bookmarksp    = Thruk::Utils::list($c->req->parameters->{'bookmarksp'} // []);
     my $section       = $c->req->parameters->{'section'};
     my $newname       = $c->req->parameters->{'newname'};
     my $button        = $c->req->parameters->{'addb'};
