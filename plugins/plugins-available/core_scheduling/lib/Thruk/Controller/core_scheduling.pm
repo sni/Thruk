@@ -90,18 +90,22 @@ sub core_scheduling_page {
 
         my $interval_length = $c->stash->{'pi_detail'}->{$d->{'peer_key'}}->{'interval_length'} // 60;
         my $check_interval  = $d->{'check_interval'} * $interval_length;
-        my $check_interval_minutes = $check_interval/60;
         $interval_lengths->{$interval_length}->{$d->{'peer_key'}} = 1;
 
-        $intervals->{$check_interval_minutes}++;
-        $check_rate += 1/($check_interval_minutes);
-        $interval_sum += $check_interval_minutes;
+        $intervals->{$check_interval}++;
+        $check_rate += 1/($check_interval);
+        $interval_sum += $check_interval;
         $count_all++;
 
         $concurrent_rate += $d->{'execution_time'} / $check_interval;
 
         my $time = $d->{'next_check'};
         next unless $d->{'in_check_period'};
+
+        $count_in_check_per++;
+        $latency_sum        += $d->{'latency'};
+        $execution_time_sum += $d->{'execution_time'};
+
         next unless $time > $now - $look_back;
         next unless $time < $now + $look_ahead;
         $time = ($time - ($time % $group_seconds))*1000;
@@ -121,9 +125,6 @@ sub core_scheduling_page {
                 $grouped->{$time}->{'hosts'}++;
             }
         }
-        $count_in_check_per++;
-        $latency_sum        += $d->{'latency'};
-        $execution_time_sum += $d->{'execution_time'};
     }
 
     my $queue = [
@@ -193,7 +194,7 @@ sub core_scheduling_page {
     $c->stash->{'intervals'}          = $intervals;
     $c->stash->{'interval_lengths'}   = $interval_lengths;
     $c->stash->{'interval_avg'}       = $count_all > 0 ? $interval_sum / $count_all : 0;
-    $c->stash->{'check_rate'}         = $check_rate / 60;
+    $c->stash->{'check_rate'}         = $check_rate;
     $c->stash->{'concurrent_rate'}    = $concurrent_rate;
     $c->stash->{'count_all'}          = $count_all;
     $c->stash->{'perf_stats'}         = $perf_stats;

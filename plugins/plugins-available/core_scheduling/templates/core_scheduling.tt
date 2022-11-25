@@ -69,12 +69,12 @@
         </tr>
         [% FOREACH interval = intervals.keys.nsort %]
           <tr>
-            <th class="text-right">[% interval %] min</th>
+            <th class="text-right">[% duration(interval, 4) %]</th>
             <td class="text-right">[% intervals.$interval %]</td>
           </tr>
         [% END %]
         <tr>
-          <th class="text-right border-t borderDefault">Average: [% sprintf("%.2f", interval_avg) %] min</th>
+          <th class="text-right border-t borderDefault">Average: [% duration(interval_avg, 4) %]</th>
           <td class="text-right border-t borderDefault">[% count_all %]</td>
         </tr>
       </table>

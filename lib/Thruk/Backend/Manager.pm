@@ -508,6 +508,7 @@ sub get_scheduling_queue {
             next unless $s->{'host_check_interval'};
             my $host = {
                 host_name               => $s->{'host_name'},
+                peer_key                => $s->{'peer_key'},
                 description             => '',
                 active_checks_enabled   => $s->{'host_active_checks_enabled'},
                 check_options           => $s->{'host_check_options'},
