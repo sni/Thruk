@@ -33,7 +33,7 @@ if(my($param) = grep {/^\-+(v+)/} @ARGV) {
 # use -d for debug mode for backwards compatibility
 if(grep {/^\-d/} @ARGV) {
     @ARGV = grep {!/^\-d/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 3 if $ENV{'THRUK_VERBOSE'} < 3;
+    $ENV{'THRUK_VERBOSE'} = 3 if(!defined $ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < 3);
 }
 
 my $bin = $0;
