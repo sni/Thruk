@@ -1,0 +1,68 @@
+﻿[% USE date %]
+[% IF obj.defined("description") %]
+  [% typename    = "service" %]
+  [% state       = servicestatetext(obj) %]
+[% ELSE %]
+  [% typename    = "host" %]
+  [% state       = hoststatetext(obj) %]
+[% END %]
+[% stateclass    = state %]
+[% peer_key      = obj.peer_key %]
+[% program_start = pi_detail.$peer_key.program_start %]
+
+<table class="cellspacing table-fixed">
+  <tr>
+    <th class="w-40">Status</th>
+    <td><div class="badge [% stateclass | html %] mr-2">[% state %]</div>(since [% IF obj.last_state_change %][% duration(date.now - obj.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td>
+  </tr>
+  [% IF obj.state != 0 %]
+    <tr>
+      <th>Current Attempt</th>
+      <td><span>[% obj.current_attempt %]/[% obj.max_check_attempts %]</span><span class="ml-2">([% IF obj.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</span></td>
+    </tr>
+    <tr>
+      <th>Last Check Time</th>
+      <td>[% IF obj.has_been_checked == 0 %]never[% ELSE %][% date_format(c, obj.last_check) %][% END %]</td>
+    </tr>
+    <tr>
+      <th>Next Scheduled Check</th>
+      <td>
+        [% IF obj.next_check %]
+          [% date_format(c, obj.next_check) %]
+        [% ELSE %]
+          N/A
+        [% END %]
+        [% IF obj.is_executing > 0 %]<div class="spinner js-autohide" title="This [% typename | html %] is currently executing its servicecheck"></div>
+        [% END %]
+      </td>
+    </tr>
+    <tr>
+      <th>In Scheduled Downtime?</th>
+      <td>[% IF obj.scheduled_downtime_depth > 0 %]<div class='badge WARNING'>ACTIVE</div>[% ELSE %]<div class='badge YES'>NONE</div>[% END %]</td>
+    </tr>
+    <tr>
+      <th>Acknowledged?</th>
+      <td>[% IF obj.acknowledged %]<div class='badge WARNING'>ACTIVE</div>[% ELSE %]<div class='badge YES'>NONE</div>[% END %]</td>
+    </tr>
+  [% END %]
+  <tr>
+    <th>Plugin Output:<br></th>
+    <td class="truncate max-w-full">
+      [% IF obj.has_been_checked == 0 %][% typename | html %] has not been checked yet[% END %]
+      [% IF escape_html_tags %]
+          [% nl2br(escape_html(obj.plugin_output)) %]<br>
+          [% nl2br(escape_html(obj.long_plugin_output)) %]
+      [% ELSE %]
+        [% nl2br(obj.plugin_output) %]<br>
+        [% nl2br(obj.long_plugin_output) %]
+      [% END %]
+    </td>
+  </tr>
+</table>
+<div class="flex justify-center my-2">
+  [% IF obj.defined("description") %]
+    <a class="button w-60" href="extinfo.cgi?type=2&host=[% obj.host_name | uri %]&service=[% obj.description | uri %]">View Full Service Details</a>
+  [% ELSE %]
+    <a class="button w-60" href="extinfo.cgi?type=1&host=[% obj.name | uri %]">View Full Host Details</a>
+  [% END %]
+</div>

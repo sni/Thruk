@@ -264,8 +264,17 @@ sub parts_cgi {
         my $svc      = $c->req->parameters->{'service'};
         my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $svc } ], extra_columns => [qw/long_plugin_output/] );
         return $c->detach('/error/index/18') unless $services->[0];
-        $c->stash->{'s'}         = $services->[0];
-        $c->stash->{'template'}  = '_parts_service_info_popup.tt';
+        $c->stash->{'obj'}       = $services->[0];
+        $c->stash->{'template'}  = '_parts_host_service_info_popup.tt';
+        return;
+    }
+
+    if($part eq '_host_info_popup') {
+        my $host  = $c->req->parameters->{'host'};
+        my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { host_name => $host } ], extra_columns => [qw/long_plugin_output/] );
+        return $c->detach('/error/index/18') unless $hosts->[0];
+        $c->stash->{'obj'}       = $hosts->[0];
+        $c->stash->{'template'}  = '_parts_host_service_info_popup.tt';
         return;
     }
 

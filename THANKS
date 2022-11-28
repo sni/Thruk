@@ -141,3 +141,7 @@ unicons
 font-awesome
   - https://fontawesome.com/
   - CC BY 4.0
+
+visjs
+  - https://github.com/visjs/vis-network
+  - MIT

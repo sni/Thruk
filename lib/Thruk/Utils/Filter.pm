@@ -56,6 +56,18 @@ sub throw {
     die($string);
 }
 
+##############################################
+
+=head2 type
+
+  type($any)
+
+returns ref
+
+=cut
+sub type {
+    return(CORE::ref($_[0]));
+}
 
 ##############################################
 

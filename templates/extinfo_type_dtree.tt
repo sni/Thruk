@@ -1,0 +1,107 @@
+﻿[% PROCESS _header.tt js=[ "vendor/visjs/v9.1.2/vis-network.min.js" ] %]
+
+<div class="card w-full h-full flexcol gap-0 flex-nowrap">
+  <div class="head" style="flex: 0 0 40px;"><h3>Dependency Tree: [% host | html %][% IF service %] - [% service | html; END %]</h3></div>
+  <div class="body w-full h-full">
+    <div id="mynetwork" class="w-full h-full overflow-hidden"></div>
+  </div>
+</div>
+
+<script>
+
+function replaceCssVariable(data) {
+  if(Array.isArray(data)) {
+    data.forEach(function(v, i) {
+      data[i] = replaceCssVariable(v);
+    });
+  }
+  else if(typeof(data) == "object") {
+    for(var key in data) {
+      data[key] = replaceCssVariable(data[key]);
+    }
+  }
+  else if(typeof(data) == "string") {
+    var matches = data.match(/\s*var\s*\(\s*(\-\-[^\)]+)\s*\)/);
+    if(matches && matches[1]) {
+      return(getComputedStyle(document.documentElement).getPropertyValue(matches[1]));
+    }
+  }
+  return(data);
+}
+
+var nodes = new vis.DataSet(replaceCssVariable([% json_encode(nodes) %]));
+var edges = [% json_encode(edges) %];
+var network = null;
+function draw() {
+  if (network != null) {
+    network.destroy();
+    network = null;
+  }
+
+  // create a network
+  var container = document.getElementById("mynetwork");
+  var data = { nodes, edges };
+  var options = {
+    layout: {
+      hierarchical: {
+        direction: "UD",
+        sortMethod: "directed"
+      }
+    },
+    physics: {
+      hierarchicalRepulsion: {
+        avoidOverlap: 1
+      }
+    },
+    interaction: {
+      dragNodes: false,
+      selectable: false,
+      hover: true
+    },
+    nodes: {
+      color: {
+          border: replaceCssVariable('var(--border-dark)')
+      },
+      labelHighlightBold: false,
+      widthConstraint: {
+          minimum: 140,
+          maximum: 140
+      }
+    },
+    edges: {
+      color: {
+          border: replaceCssVariable('var(--border-dark)')
+      },
+      arrows: 'to',
+      hoverWidth: 0
+    }
+  };
+  network = new vis.Network(container, data, options);
+
+  network.on("click", function(params) {
+    var n = this.getNodeAt(params.pointer.DOM);
+    if(!n) { return; }
+    var node = nodes.get(n);
+    var host_name   = node.data.host_name;
+    var description = node.data.description;
+    var peer_key    = node.data.peer_key;
+
+    overcard({
+      'body': '<div class="service_popup_content"><\/div>',
+      'caption': host_name+(description ? ' - '+description : ''),
+      'width': 600
+    });
+    fetch_svc_info_popup(this, host_name, description, peer_key);
+  });
+  network.on("hoverNode", function(params) {
+    jQuery(container).addClass("clickable");
+  });
+  network.on("blurNode", function(params) {
+    jQuery(container).removeClass("clickable");
+  });
+}
+draw();
+
+</script>
+
+[% PROCESS _footer.tt %]

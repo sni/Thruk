@@ -4021,10 +4021,10 @@ function fetch_long_plugin_output(target, host, service, backend, escape_html) {
     }
 }
 
-/* callback to show service popup */
+/* callback to show service (or host) popup */
 function fetch_svc_info_popup(el, host, svc, peer_key) {
     jQuery('.service_popup_content').html("<div class='spinner w-10 h-10 border-4'><\/div>");
-    var url = url_prefix+'cgi-bin/parts.cgi?part=_service_info_popup';
+    var url = url_prefix+'cgi-bin/parts.cgi?part='+(svc ? '_service_info_popup' : '_host_info_popup');
     jQuery('.service_popup_content').load(url, {
         host:    host,
         service: svc,

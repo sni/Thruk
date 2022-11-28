@@ -48,6 +48,9 @@ sub index {
     if( $type eq 'grafana' ) {
         return(_process_grafana_page($c));
     }
+    elsif( $type eq 'dtree' ) {
+        return(_process_dtree_page($c));
+    }
     elsif(!Thruk::Backend::Manager::looks_like_number($type) || $type == 0 ) {
         $infoBoxTitle = 'Process Information';
         return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
@@ -854,6 +857,135 @@ sub _process_perf_info_cluster_page {
     }
     $c->stash->{template} = 'extinfo_type_4_cluster_status.tt';
     return 1;
+}
+
+##########################################################
+# create the dependency tree page
+sub _process_dtree_page {
+    my($c) = @_;
+
+    my $hostname    = $c->req->parameters->{'host'}    // '';
+    my $servicename = $c->req->parameters->{'service'} // '';
+
+    my $obj;
+    if($servicename) {
+        my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename } ]);
+        $obj = $services->[0];
+    } else {
+        my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ]);
+        $obj = $hosts->[0];
+    }
+
+    my($nodes, $edges) = ({}, []);
+    _fill_dependencies($c, $obj, $nodes, $edges);
+
+    $c->stash->{'edges'}           = $edges;
+    $c->stash->{'nodes'}           = _dtree_nodes($nodes);
+
+    $c->stash->{'host'}            = $hostname;
+    $c->stash->{'service'}         = $servicename;
+    $c->stash->{'title'}           = 'Dependency Tree';
+    $c->stash->{'infoBoxTitle'}    = 'Dependency Tree';
+    return 1;
+}
+
+##########################################################
+sub _fill_dependencies {
+    my($c, $obj, $nodes, $edges) = @_;
+
+    my($depends, $name, $id);
+    if($obj->{'description'}) {
+        $name = $obj->{'host_name'}.';'.$obj->{'description'};
+        $depends = Thruk::Utils::merge_service_dependencies($obj, [[$obj->{'host_name'}]], $obj->{'parents'}, $obj->{'depends_exec'}, $obj->{'depends_notify'});
+        $nodes->{$name} = $obj;
+    } else {
+        $name = $obj->{'name'};
+        $depends = Thruk::Utils::merge_host_dependencies($obj->{'parents'}, $obj->{'depends_notify'}, $obj->{'depends_exec'});
+        $nodes->{$name} = $obj;
+    }
+    $id = "n".(scalar keys %{$nodes});
+    $obj->{'node_id'} = $id;
+
+    $obj->{'depends'} = [];
+    for my $dep (@{$depends}) {
+        $dep = Thruk::Utils::list($dep);
+        if(scalar @{$dep} == 1) {
+            # host dependency
+            my $depname = $dep->[0];
+            my $hst = $nodes->{$depname};
+            if(!$hst) {
+                my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $depname ] );
+                $hst = $hosts->[0];
+            }
+            _fill_dependencies($c, $hst, $nodes, $edges);
+            push @{$edges}, { from => $id, to => $hst->{'node_id'} };
+        } else {
+            # service dependency
+            my $depname = $dep->[0].';'.$dep->[1];
+            my $svc = $nodes->{$depname};
+            if(!$svc) {
+                my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $dep->[0] }, { 'description' => $dep->[1] } ]);
+                $svc = $services->[0];
+            }
+            _fill_dependencies($c, $svc, $nodes, $edges);
+            push @{$edges}, { from => $id, to => $svc->{'node_id'} };
+        }
+    }
+
+    return;
+}
+
+##########################################################
+sub _dtree_nodes {
+    my($objs) = @_;
+    my $nodes = [];
+    for my $key (sort keys %{$objs}) {
+        my $o = $objs->{$key};
+        my($name, $state);
+        my $data = {
+            peer_key => $o->{'peer_key'},
+        };
+        my $shape = "ellipse";
+        if($o->{'description'}) {
+            $name = $o->{'host_name'}.' - '.$o->{'description'};
+            if(!$o->{'has_been_checked'}) { $state = "pending"; }
+            elsif($o->{'state'} == 0)     { $state = "ok"; }
+            elsif($o->{'state'} == 1)     { $state = "warning"; }
+            elsif($o->{'state'} == 2)     { $state = "critical"; }
+            elsif($o->{'state'} == 3)     { $state = "unknown"; }
+            $data = {
+                host_name   => $o->{'host_name'},
+                description => $o->{'description'},
+            };
+        } else {
+            $name  = $o->{'name'};
+            $shape = "box";
+            if(!$o->{'has_been_checked'}) { $state = "pending"; }
+            elsif($o->{'state'} == 0)     { $state = "up"; }
+            elsif($o->{'state'} == 1)     { $state = "down"; }
+            elsif($o->{'state'} == 2)     { $state = "unreachable"; }
+            $data = {
+                host_name   => $o->{'name'},
+            };
+        }
+        push @{$nodes}, {
+            id    => $o->{'node_id'},
+            label => $name,
+            color => {
+                background => 'var(--badge-'.$state.'-bg)',
+                hover => {
+                    border => 'var(--border-active)',
+                    background => 'var(--badge-'.$state.'-bg)',
+                },
+            },
+            font => {
+                color => 'var(--badge-'.$state.'-fg)',
+            },
+            shape => $shape,
+            data => $data,
+        };
+    }
+    return($nodes);
 }
 
 ##########################################################
