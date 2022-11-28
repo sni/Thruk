@@ -178,15 +178,15 @@ test -f %{buildroot}/usr/share/thruk/root/thruk/cache/thruk-panorama-*.js || exi
 %pre base
 # save themes, plugins and ssi so we don't reenable them on every update
 rm -rf /tmp/thruk_update
-if [ -d /etc/thruk/themes/themes-enabled/. -a -e /etc/thruk/themes/themes-enabled/* ]; then
+if [ -d /etc/thruk/themes/themes-enabled/. -a -n "$(ls -A /etc/thruk/themes/themes-enabled/)" ]; then
   mkdir -p /tmp/thruk_update/themes
   cp -rp /etc/thruk/themes/themes-enabled/* /tmp/thruk_update/themes/
 fi
-if [ -d /etc/thruk/plugins/plugins-enabled/. -a -e /etc/thruk/plugins/plugins-enabled/* ]; then
+if [ -d /etc/thruk/plugins/plugins-enabled/. -a -n "$(ls -A /etc/thruk/plugins/plugins-enabled/)" ]; then
   mkdir -p /tmp/thruk_update/plugins
   cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
 fi
-if [ -d /etc/thruk/ssi/. -a -e /etc/thruk/ssi/* ]; then
+if [ -d /etc/thruk/ssi/. -a -n "$(ls -A /etc/thruk/ssi/)" ]; then
   mkdir -p /tmp/thruk_update/ssi
   cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
 fi
