@@ -2740,6 +2740,9 @@ sub _config_reload {
     my $pkey = $peer->peer_key();
     my $wait = 1;
 
+    my $cmd = $c->stash->{'peer_conftool'}->{'obj_reload_cmd'};
+    $cmd = $cmd.' 2>&1' if($cmd && $cmd !~ m|>|mx);
+
     my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
     if(!$last_reload) {
         my $processinfo = $c->db->get_processinfo(backends => $pkey);
@@ -2747,14 +2750,14 @@ sub _config_reload {
         sleep(1) if int($last_reload) == int(time());
     }
 
-    if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
+    if($cmd) {
         if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
             $c->{'obj_db'}->{'last_changed'} = 0;
             $c->{'obj_db'}->{'needs_commit'} = 0;
             Thruk::Utils::Conf::store_model_retention($c, $pkey);
         }
-        elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
+        elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $cmd)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
             $c->{'obj_db'}->{'last_changed'} = 0;
             $c->{'obj_db'}->{'needs_commit'} = 0;
