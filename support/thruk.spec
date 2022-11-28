@@ -330,7 +330,9 @@ case "$*" in
     rmdir /usr/share/thruk/plugins/plugins-available 2>/dev/null
     rmdir /usr/share/thruk/plugins 2>/dev/null
     rmdir /usr/share/thruk 2>/dev/null
-    %{insserv_cleanup}
+    %if 0%{?insserv_cleanup}
+      %{insserv_cleanup}
+    %endif
     # remove broken/old symlinks
     for link in /etc/thruk/themes/themes-available/*;   do test -e $link/. || rm -f $link; done
     for link in /etc/thruk/themes/themes-enabled/*;     do test -e $link/. || rm -f $link; done
