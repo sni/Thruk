@@ -6,12 +6,20 @@
       - git-core
       - make
     state: present
+  register: result
+  retries: 30
+  until: result is succeeded
+  delay: 10
 - name: "glibc-langpack-en when rhel >= 8"
   yum:
     name:
       - glibc-langpack-en
     state: present
   when: ansible_distribution_version|int >= 8
+  register: result
+  retries: 30
+  until: result is succeeded
+  delay: 10
 - name: "install File::ChangeNotify"
   shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"
 - name: "git clone omd_utils"

@@ -4,11 +4,16 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - yum:
+  - name: "yum install krb5 client"
+    yum:
       name:
         - mod_auth_gssapi
         - krb5-workstation
       state: present
+    register: result
+    retries: 30
+    until: result is succeeded
+    delay: 10
   - shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - shell: "omd config demo set GRAFANA on"
   - shell: "omd config demo set INFLUXDB on"

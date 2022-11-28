@@ -1,10 +1,15 @@
-- yum:
+- name: "yum install local test perl depdendencies"
+  yum:
     name:
       - perl-Test-Harness
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - diffutils
     state: present
+  register: result
+  retries: 30
+  until: result is succeeded
+  delay: 10
 - lineinfile:
     path: /etc/locale.conf
     regexp: '^LANG='

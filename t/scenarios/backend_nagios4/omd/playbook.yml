@@ -14,6 +14,10 @@
         - gcc-c++
         - libstdc++-static
       state: present
+    register: result
+    retries: 30
+    until: result is succeeded
+    delay: 10
   - name: "set APACHE_MODE own"
     shell: omd config demo set APACHE_MODE own
   - name: "set LIVESTATUS_TCP on"

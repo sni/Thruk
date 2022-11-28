@@ -3,10 +3,15 @@
   roles:
     - role: common
   tasks:
-  - yum:
+  - name: "yum install postgresql"
+    yum:
       name:
       - postgresql
       state: present
+    register: result
+    retries: 30
+    until: result is succeeded
+    delay: 10
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga2
   - shell: omd config demo set LIVESTATUS_TCP on

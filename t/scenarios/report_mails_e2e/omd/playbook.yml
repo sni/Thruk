@@ -4,9 +4,14 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - yum:
+  - name: "yum install sendmail"
+    yum:
       name: sendmail
       state: present
+    register: result
+    retries: 30
+    until: result is succeeded
+    delay: 10
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set LIVESTATUS_TCP on
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg

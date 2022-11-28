@@ -6,6 +6,10 @@
       - perl-File-Which
       - perl-IPC-Cmd
     state: present
+  register: result
+  retries: 30
+  until: result is succeeded
+  delay: 10
 - name: "install Monitoring::Generator::TestConfig"
   shell: "sudo su - {{ site }} -c 'cpanm -n Monitoring::Generator::TestConfig'"
 - name: "run create_monitoring_test_config.pl"

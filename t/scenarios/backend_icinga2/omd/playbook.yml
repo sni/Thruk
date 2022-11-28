@@ -3,11 +3,6 @@
   roles:
     - role: common
   tasks:
-  - yum:
-      name:
-        - boost-atomic
-        - boost-chrono
-      state: present
   - shell: omd config demo set APACHE_MODE own
   - shell: omd config demo set CORE icinga2
   - shell: omd config demo set LIVESTATUS_TCP on
