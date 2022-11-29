@@ -540,6 +540,12 @@ sub _process_host_page {
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, {'host' => $host});
 
+    # show info about a stale host
+    my($nodes, $edges) = ({}, []);
+    _fill_dependencies($c, $host, $nodes, $edges);
+    $c->stash->{'stale_hint'}   = _check_stale_check($c, $host, $nodes);
+    $c->stash->{'parent_nodes'} = $nodes;
+
     return 1;
 }
 
@@ -652,11 +658,8 @@ sub _process_service_page {
 
     # generate command line
     if($c->stash->{'show_full_commandline'} == 2 ||
-       $c->stash->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
-        if(defined $service) {
-            my $command            = $c->db->expand_command('host' => $service, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
-            $c->stash->{'command'} = $command;
-        }
+       ($c->stash->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ))) {
+        $c->stash->{'command'} = $c->db->expand_command('host' => $service, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
     }
 
     # object source
@@ -681,6 +684,12 @@ sub _process_service_page {
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service, add_host => 1});
+
+    # show info about a stale service
+    my($nodes, $edges) = ({}, []);
+    _fill_dependencies($c, $service, $nodes, $edges);
+    $c->stash->{'stale_hint'}   = _check_stale_check($c, $service, $nodes);
+    $c->stash->{'parent_nodes'} = $nodes;
 
     return 1;
 }
@@ -896,17 +905,18 @@ sub _fill_dependencies {
     my($depends, $name, $id);
     if($obj->{'description'}) {
         $name = $obj->{'host_name'}.';'.$obj->{'description'};
+        return if $nodes->{$name};
         $depends = Thruk::Utils::merge_service_dependencies($obj, [[$obj->{'host_name'}]], $obj->{'parents'}, $obj->{'depends_exec'}, $obj->{'depends_notify'});
         $nodes->{$name} = $obj;
     } else {
         $name = $obj->{'name'};
+        return if $nodes->{$name};
         $depends = Thruk::Utils::merge_host_dependencies($obj->{'parents'}, $obj->{'depends_notify'}, $obj->{'depends_exec'});
         $nodes->{$name} = $obj;
     }
     $id = "n".(scalar keys %{$nodes});
     $obj->{'node_id'} = $id;
 
-    $obj->{'depends'} = [];
     for my $dep (@{$depends}) {
         $dep = Thruk::Utils::list($dep);
         if(scalar @{$dep} == 1) {
@@ -986,6 +996,40 @@ sub _dtree_nodes {
         };
     }
     return($nodes);
+}
+
+##########################################################
+sub _check_stale_check {
+    my($c, $obj, $nodes) = @_;
+
+    # not yet checked at all
+    return(0) unless $obj->{'has_been_checked'};
+
+    # active checks disabled?
+    return(0) unless $obj->{'active_checks_enabled'};
+
+    # active checks?
+    return(0) unless $obj->{'check_type'} == 0;
+
+    # do dependencies exist
+    return(0) unless scalar @{$obj->{'depends_exec'}} > 0;
+
+    my $peer_key       = $obj->{'peer_key'};
+    my $check_interval = $obj->{'check_interval'} * $c->stash->{'pi_detail'}->{$peer_key}->{'interval_length'};
+
+    # wait at least twice of the normal check interval
+    if($obj->{'last_check'} > time() - $check_interval * 2) {
+        return(0);
+    }
+
+    # did any of the parents fail?
+    my $worst = 0;
+    for my $parent (values %{$nodes}) {
+        $worst = $parent->{'state'} if $parent->{'state'} > $worst;
+    }
+    return(0) if $worst == 0;
+
+    return(1);
 }
 
 ##########################################################

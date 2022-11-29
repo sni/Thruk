@@ -1,7 +1,20 @@
 ﻿[% PROCESS _header.tt js=[ "vendor/visjs/v9.1.2/vis-network.min.js" ] %]
 
+[% IF service %]
+[% typename = "service" %]
+[% backlink = uri_with(c, { type => 2 }) %]
+[% ELSE %]
+[% typename = "host" %]
+[% backlink = uri_with(c, { type => 1 }) %]
+[% END %]
 <div class="card w-full h-full flexcol gap-0 flex-nowrap">
-  <div class="head" style="flex: 0 0 40px;"><h3>Dependency Tree: [% host | html %][% IF service %] - [% service | html; END %]</h3></div>
+  <div class="head justify-between" style="flex: 0 0 40px;">
+    <a href="[% backlink %]" class="button header-button rounded w-[70px]" title="Go back to [% typename %]">
+      <i class="uil uil-angle-double-left"></i>Back
+    </a>
+    <h3><a href="[% backlink %]" class="link" title="Go back to [% typename %]">Dependency Tree: [% host | html %][% IF service %] - [% service | html; END %]</a></h3>
+    <div class="w-[70px]"></div>
+  </div>
   <div class="body w-full h-full">
     <div id="mynetwork" class="w-full h-full overflow-hidden"></div>
   </div>
@@ -63,15 +76,11 @@ function draw() {
           border: replaceCssVariable('var(--border-dark)')
       },
       labelHighlightBold: false,
-      widthConstraint: {
-          minimum: 140,
-          maximum: 140
-      }
+      widthConstraint: 140,
+      heightConstraint: 40
     },
     edges: {
-      color: {
-          border: replaceCssVariable('var(--border-dark)')
-      },
+      color: replaceCssVariable('var(--border-dark)'),
       arrows: 'to',
       hoverWidth: 0
     }
