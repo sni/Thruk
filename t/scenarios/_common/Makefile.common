@@ -13,6 +13,7 @@ else
   DOCKER_COMPOSE_TTY=-T
   DOCKER_COMPOSE_LOGS=--no-color
 endif
+export COMPOSE_HTTP_TIMEOUT=180
 
 wait_start:
 	$(THRUK) cache clean
@@ -67,6 +68,9 @@ test_docker_logs_verbose:
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 
 failed_test: non_interactive_only
+	$(MAKE) failed_test_info
+
+failed_test_info:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
 	-docker ps
@@ -92,6 +96,7 @@ failed_test: non_interactive_only
 			fi; \
 		done; \
 	done
+	-test -e thruk.conf && $(THRUK) -vvv -l
 	-$(MAKE) extra_failed_test
 	exit 1
 

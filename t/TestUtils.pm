@@ -304,11 +304,14 @@ sub test_page {
                     fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
                     bail_out_req('request failed', $request, 1);
                 }
-                $return->{'content'} = $request->content;
+                if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+                    fail('Request '.$location.' should not redirect to job page again. Original url: '.$opts->{'url'});
+                    bail_out_req('request failed', $request, 1);
+                }
             } else {
                 sleep(0.3);
                 $now = time();
-                $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
+                $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'}, $opts->{'method'});
                 $return->{'content'} = $request->content;
             }
         }
