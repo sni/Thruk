@@ -59,7 +59,7 @@
                       <i class="fa-solid fa-copy small" title='Clone Broadcast'></i>
                     </a>
                     <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit">
-                      <i class="fa-solid fa-pencil small" title='Clone Broadcast'></i>
+                      <i class="fa-solid fa-pencil small" title='Edit Broadcast'></i>
                     </a>
                     <form action="broadcast.cgi" method="POST">
                       <input type="hidden" name="id" value="[% b.basefile %]">
