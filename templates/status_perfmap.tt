@@ -15,130 +15,124 @@
     </div>
   [% END %]
 
-  <div class="flex flex-row mt-5">
-    <div class="basis-1/3">
-      [% PROCESS _status_filter.tt %]
-    </div>
+  <h1 class="mx-auto">
+    [% IF custom_title != '' %][% custom_title %]
+    [% ELSE %]Performance Data Overview
+    [% END %]
+  </h1>
 
-    <div class="basis-1/3">
-      <h1>
-        [% IF custom_title != '' %][% custom_title %]
-        [% ELSE %]Performance Data Overview
-        [% END %]
-      </h1>
+  <div class="flexrow sm:flex-nowrap my-2 gap-y-1">
+    <div class="flex basis-1/3 self-end gap-1">
+      [% PROCESS _add_bookmark.tt %]
+      [% PROCESS _show_link.tt %]
+      [% PROCESS _json_export.tt %]
+      [% columns=[ 'Hostname', 'Service', 'Status' ] %]
+      [% FOREACH key IN sortedkeys %][% columns.push(key) %][% END %]
+      [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
     </div>
-
-    <div class="basis-1/3"></div>
   </div>
+[% END %]
 
-  <div class="flexrow py-2 w-full flex-nowrap">
-    <div class="flex basis-1/4">
-      <div class="flex place-items-end gap-1">
-        [% PROCESS _add_bookmark.tt %]
-        [% PROCESS _show_link.tt %]
-        [% PROCESS _json_export.tt %]
-        [% columns=[ 'Hostname', 'Service', 'Status' ] %]
-        [% FOREACH key IN sortedkeys %][% columns.push(key) %][% END %]
-        [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
+
+<div class="card w-full min-w-[420px]">
+  [% UNLESS minimal %]
+    <div class="mainTableHeader">
+      <div>
+        <div class="flex flex-nowrap gap-x-2 items-center">
+          [% PROCESS _status_filter.tt %]
+        </div>
       </div>
-    </div>
-    <div class="flex flex-grow justify-center">
-      <div class="flex place-items-end">
-      [% PROCESS _pager.tt %]
+      <div>
+        [% PROCESS _pager.tt %]
       </div>
-    </div>
-    <div class="basis-1/4 flex justify-end">
-      <div class="flex place-items-end gap-2">
+      <div>
         [% PROCESS _pager_per_page.tt %]
       </div>
     </div>
-  </div>
-
-[% END %]
-
-
-<table class="mainTable">
-  <thead title="click to sort">
-    <tr>
-      <th>
-        <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="1">Host</a>
-      </th>
-      <th>
-        <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="2">Service</a>
-      </th>
-      <th>
-        <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="3">Status</a>
-      </th>
-      [% FOREACH key IN sortedkeys %]
-        <th>
-          <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="[% key  %]">[% key %]</a>
-        </th>
-      [% END %]
-    </tr>
-  </thead>
-  <tbody>
-    [% FOREACH s IN data %]
-      [% SET hostclass = 'statusOdd'  IF loop.even %]
-      [% SET hostclass = 'statusEven' IF loop.odd %]
-      [% IF s.host_state == 1 %]
-        [% hostclass = 'DOWN' %]
-      [% ELSIF s.host_state == 2 %]
-        [% hostclass = 'UNREACHABLE' %]
-      [% END %]
-      [% SET serviceclass = 'statusOdd'  IF loop.even %]
-      [% SET serviceclass = 'statusEven' IF loop.odd %]
-      [% IF s.has_been_checked == 0 %]
-        [% state = 'PENDING' %]
-      [% ELSIF s.state == 0 %]
-        [% state = 'OK' %]
-      [% ELSIF s.state == 1 %]
-        [% state = 'WARNING' %]
-      [% ELSIF s.state == 2 %]
-        [% state = 'CRITICAL' %]
-      [% ELSIF s.state == 3 %]
-        [% state = 'UNKNOWN' %]
-      [% END %]
-      <tr>
-        <td class='[% hostclass %]'>
-          <div class="flex">
-            <div class="flex-1">
-              <a href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% s.host_display_name | html %]</a>
-            </div>
-            [% SET host_comment_count = 0 %]
-            [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
-            [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
-          </div>
-        </td>
-        <td class='[% serviceclass %] description'>
-          <div class="flex">
-            <div class="flex-1">
-              <a href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]">[% IF use_service_description %][% s.description | html %][% ELSE %][% s.display_name | html %][% END %]</a>
-            </div>
-            [% SET comment_count = s.comments.size %]
-            [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
-          </div>
-        </td>
-        <td class='state [% state %]'>
-          <div class='text-center'>[% state %]</div>
-        </td>
-        [% IF s.perf.keys.size == 0 %]
-          <td class='[% serviceclass %]' colspan=[% sortedkeys.size %]>[% s.plugin_output %]</td>
-        [% ELSE %]
+  [% END %]
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
+    <table class="mainTable">
+      <thead title="click to sort">
+        <tr>
+          <th>
+            <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="1">Host</a>
+          </th>
+          <th>
+            <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="2">Service</a>
+          </th>
+          <th>
+            <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="3">Status</a>
+          </th>
           [% FOREACH key IN sortedkeys %]
-          <td class='[% serviceclass %]' style="min-width:60px;">[% IF s.perf.exists(key) %][% s.$key %][% END %]</td>
+            <th>
+              <a class='sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="[% key  %]">[% key %]</a>
+            </th>
           [% END %]
+        </tr>
+      </thead>
+      <tbody>
+        [% FOREACH s IN data %]
+          [% SET hostclass = 'statusOdd'  IF loop.even %]
+          [% SET hostclass = 'statusEven' IF loop.odd %]
+          [% IF s.host_state == 1 %]
+            [% hostclass = 'DOWN' %]
+          [% ELSIF s.host_state == 2 %]
+            [% hostclass = 'UNREACHABLE' %]
+          [% END %]
+          [% SET serviceclass = 'statusOdd'  IF loop.even %]
+          [% SET serviceclass = 'statusEven' IF loop.odd %]
+          [% IF s.has_been_checked == 0 %]
+            [% state = 'PENDING' %]
+          [% ELSIF s.state == 0 %]
+            [% state = 'OK' %]
+          [% ELSIF s.state == 1 %]
+            [% state = 'WARNING' %]
+          [% ELSIF s.state == 2 %]
+            [% state = 'CRITICAL' %]
+          [% ELSIF s.state == 3 %]
+            [% state = 'UNKNOWN' %]
+          [% END %]
+          <tr>
+            <td class='[% hostclass %]'>
+              <div class="flex">
+                <div class="flex-1">
+                  <a href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% s.host_display_name | html %]</a>
+                </div>
+                [% SET host_comment_count = 0 %]
+                [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
+                [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+              </div>
+            </td>
+            <td class='[% serviceclass %] description'>
+              <div class="flex">
+                <div class="flex-1">
+                  <a href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]">[% IF use_service_description %][% s.description | html %][% ELSE %][% s.display_name | html %][% END %]</a>
+                </div>
+                [% SET comment_count = s.comments.size %]
+                [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
+              </div>
+            </td>
+            <td class='state [% state %]'>
+              <div class='text-center'>[% state %]</div>
+            </td>
+            [% IF s.perf.keys.size == 0 %]
+              <td class='[% serviceclass %]' colspan=[% sortedkeys.size %]>[% s.plugin_output %]</td>
+            [% ELSE %]
+              [% FOREACH key IN sortedkeys %]
+              <td class='[% serviceclass %]' style="min-width:60px;">[% IF s.perf.exists(key) %][% s.$key %][% END %]</td>
+              [% END %]
+            [% END %]
+          </tr>
         [% END %]
-      </tr>
-    [% END %]
-  </tbody>
-</table>
-
-[% UNLESS minimal %]
-  <div class="flexrow py-2 w-full flex-nowrap">
-    <div class="basis-1/4">[% PROCESS _pager_total_items.tt %]</div>
-    <div class="flex flex-grow justify-center">[% PROCESS _pager.tt %]</div>
-    <div class="basis-1/4 flex justify-end">[% PROCESS _pager_per_page.tt %]</div>
+      </tbody>
+    </table>
   </div>
-[% END %]
+
+  [% UNLESS minimal %]
+    <div class="mainTableFooter">
+      [% PROCESS _pager_total_items.tt %]
+    </div>
+  [% END %]
+</div>
 
 [% PROCESS _footer.tt %]
