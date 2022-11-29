@@ -1,4 +1,4 @@
-FROM  consol/omd-labs-centos:nightly
+FROM  consol/omd-labs-rocky:nightly
 
 # uncomment to test against latest daily
 #RUN rpm -Uvh "https://labs.consol.de/repo/testing/rhel7/i386/labs-consol-testing.rhel7.noarch.rpm"

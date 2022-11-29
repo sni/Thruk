@@ -1,4 +1,4 @@
-FROM  consol/omd-labs-centos:nightly
+FROM  consol/omd-labs-rocky:nightly
 
 COPY utf8.conf /root/
 COPY add_user.sh /root/
