@@ -136,13 +136,14 @@ sub set_object_model {
             $error = 'Got multiple errors!';
         }
         if($c->{'obj_db'}->{'needs_update'}) {
-            $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refreshdata' => 1 }).'">refresh</a> objects.';
+            $error = 'Config has been changed externally. Need to <a class="link textCard" href="'.Thruk::Utils::Filter::uri_with($c, { 'refreshdata' => 1 }).'">refresh</a> objects.';
         }
-        Thruk::Utils::set_message( $c,
-                                  'fail_message',
-                                  $error,
-                                  ($errnum == 1 && !$c->{'obj_db'}->{'needs_update'}) ? undef : join("\n", @{$c->{'obj_db'}->{'errors'}}),
-                                );
+        Thruk::Utils::set_message($c, {
+                                  style   => 'fail_message',
+                                  msg     => $error,
+                                  details => ($errnum == 1 && !$c->{'obj_db'}->{'needs_update'}) ? undef : join("\n", @{$c->{'obj_db'}->{'errors'}}),
+                                  escape  => 0,
+        });
     } elsif($refresh) {
         Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
     }
