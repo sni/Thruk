@@ -1011,6 +1011,8 @@ sub _check_stale_check {
     # active checks?
     return(0) unless $obj->{'check_type'} == 0;
 
+    return(0) unless $obj->{'in_check_period'};
+
     # do dependencies exist
     return(0) unless scalar @{$obj->{'depends_exec'}} > 0;
 

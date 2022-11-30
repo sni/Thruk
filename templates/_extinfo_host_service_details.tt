@@ -17,22 +17,43 @@ END
 %]
 
 [% BLOCK parent_obj %]
-<div class="badge CRITICAL">
   [% IF parent.list.size == 1 %]
-    <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">[% parent | html %]</a>
+    <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">
+    [% pID = parent %]
+    [% pObj = parent_nodes.$pID %]
+    [% state = hoststatetext(pObj) %]
   [% ELSE %]
-    <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">[% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]</a>
+    <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">
+    [% pID = parent.0 _ ';' _ parent.1 %]
+    [% pObj = parent_nodes.$pID %]
+    [% state = servicestatetext(pObj) %]
   [% END %]
-  <i class="fa-solid fa-person-digging"></i>
-  <i class="fa-solid fa-moon align-sub"></i>
-</div>
+
+  [% name = BLOCK %]
+    [% IF parent.list.size == 1 %]
+      [% parent | html %]
+    [% ELSE %]
+      [% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]
+    [% END %]
+  [% END %]
+
+  [% IF color && pObj.state != 0 %]
+    <div class="badge [% state %] ">
+      [% name %]
+      [% IF pObj.acknowledged %]<i class="fa-solid fa-person-digging"></i>[% END %]
+      [% IF pObj.scheduled_downtime_depth %]<i class="fa-solid fa-moon align-sub"></i>[% END %]
+    </div>
+  [% ELSE %]
+    [% name %]
+  [% END %]
+  </a>
 [% END %]
 
 [% IF stale_hint %]
-<div class="card alert red w-full relative shadow-none flexrow gap-2 flex-nowrap justify-center m-2">
+<div class="card alert w-auto red relative shadow-none flexcol gap-1 flex-nowrap justify-center p-2 m-2">
   <h3>Stale [% type | html %] detected</h3>
   <div>
-   - This [% type | html %] has not been checked recently. Have a look at the
+    This [% type | html %] has not been checked recently. Have a look at the
     <a href="[% uri_with(c, { type => 'dtree' }) %]" class="link font-bold">dependency tree <i class="uil uil-share-alt align-middle"></i></a>
     to get a hint.
   </div>
@@ -59,13 +80,14 @@ END
       <div class="flex gap-x-2">
         <div>
           [% IF svc_name != "" %]
-            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
+            [% PROCESS parent_obj color=1 parent=hst_name %]
             [% IF obj.host_name != obj.host_display_name %]
               (<a class="link" href="extinfo.cgi?type=1&amp;host=[% obj.host_name | uri %]">[% obj.host_display_name | html %]</a> -
               [% obj.host_address %])
             [% ELSE %]
               ([% obj.host_address %])
             [% END %]
+
           [% ELSE %]
             <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
             [% IF obj.name != obj.display_name %]
@@ -94,7 +116,7 @@ END
     <tr>
       <th class="align-top"><a href="[% uri_with(c, { type => 'dtree' }) %]" class="link">Dependencies <i class="uil uil-share-alt align-middle"></i></a></th>
       <td class='whitespace-normal'>
-        [% FOREACH parent IN obj.depends.sort %][% IF !loop.first() %], [% END %][% PROCESS parent_obj parent = parent %][% END %]
+        [% FOREACH parent IN obj.depends.sort %][% IF !loop.first() %], [% END %][% PROCESS parent_obj color=1 parent = parent %][% END %]
       </td>
     </tr>
   [% END %]
@@ -111,7 +133,7 @@ END
       <tr>
         <th class="align-top"><a href="[% uri_with(c, { type => 'dtree' }) %]" class="link">Parents <i class="uil uil-share-alt align-middle"></i></a></th>
         <td>
-          [% FOREACH parent IN obj.parents.sort %][% IF !loop.first() %], [% END %]<a class="link" href="status.cgi?host=[% parent | uri %]">[% parent | html %]</a>[% END %]
+          [% FOREACH parent IN obj.parents.sort %][% IF !loop.first() %], [% END %][% PROCESS parent_obj color=1 parent = parent %][% END %]
         </td>
       </tr>
     [% END %]
@@ -235,7 +257,7 @@ END
       [% END %]
       [% IF obj.is_executing > 0 %]<div class="spinner" title="This [% type | html %] is currently executing its [% type | html %]check"></div>[% END %]
       [% IF obj.depends_exec.size > 0 %]
-        (dependency: [% FOREACH parent IN obj.depends_exec %][% IF !loop.first() %], [% END %][% PROCESS parent_obj parent = parent %][% END %])
+        (dependency: [% FOREACH parent IN obj.depends_exec %][% IF !loop.first() %], [% END %][% PROCESS parent_obj color=0 parent = parent %][% END %])
       [% END %]
     </td>
   </tr>
@@ -259,10 +281,10 @@ END
         [% END %]
       [% END %]
       [% IF obj.exists('depends_parents') && obj.depends_parents.size > 0 %]
-        (parents: [% FOREACH parent IN obj.depends_parents %][% IF !loop.first() %], [% END %][% PROCESS parent_obj parent = parent %][% END %])
+        (parents: [% FOREACH parent IN obj.depends_parents %][% IF !loop.first() %], [% END %][% PROCESS parent_obj color=0 parent = parent %][% END %])
       [% END %]
       [% IF obj.depends_notify.size > 0 %]
-        (dependency: [% FOREACH parent IN obj.depends_notify %][% IF !loop.first() %], [% END %][% PROCESS parent_obj parent = parent %][% END %])
+        (dependency: [% FOREACH parent IN obj.depends_notify %][% IF !loop.first() %], [% END %][% PROCESS parent_obj color=0 parent = parent %][% END %])
       [% END %]
     </td>
   </tr>
