@@ -2362,7 +2362,6 @@ sub _file_editor {
         $c->stash->{'file_name'}     = $file->{'display'};
         $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
         $c->stash->{'file_content'}  = decode_utf8($file->get_new_file_content());
-        $c->stash->{'template'}      = $c->config->{'use_feature_editor'} ? 'conf_objects_fancyeditor.tt' : 'conf_objects_fileeditor.tt';
     }
     elsif(_is_extra_file($filename, $c->config->{'Thruk::Plugin::ConfigTool'}->{'edit_files'})) {
         $file = Monitoring::Config::File->new($filename, [], $c->{'obj_db'}->{'coretype'}, 1);
@@ -2375,10 +2374,21 @@ sub _file_editor {
             my $content                  = Thruk::Utils::IO::read($filename);
             $c->stash->{'file_content'}  = decode_utf8($content);
         }
-        $c->stash->{'template'}      = $c->config->{'use_feature_editor'} ? 'conf_objects_fancyeditor.tt' : 'conf_objects_fileeditor.tt';
         $c->stash->{'subtitle'}      = "";
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
+        return;
+    }
+
+    if($c->config->{'use_feature_editor'}) {
+        $c->stash->{'plugin_editor_path'} = $c->config->{'plugin_editor_path'};
+        if($c->stash->{'plugin_editor_path'}) {
+            $c->stash->{'template'} = 'conf_objects_fancyeditor.tt';
+        } else {
+            $c->stash->{'template'} = 'conf_objects_fileeditor.tt';
+        }
+    } else {
+        $c->stash->{'template'} = 'conf_objects_fileeditor.tt';
     }
     return;
 }

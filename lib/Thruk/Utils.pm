@@ -2872,6 +2872,7 @@ sub get_plugin_name {
     $pkg =~ s|::|/|gmx;
     $pkg .= '.pm';
     $file =~ s|/lib/\Q$pkg\E$||gmx;
+    $file =~ s|/routes||gmx;
     $file =~ s|^.*/||gmx;
     return($file);
 }
