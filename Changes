@@ -530,7 +530,7 @@ next:
             - fix save button in chrome (#786)
             - fix displaying configured eventhandler
           - LMD:
-            - only restart lmd on timeouts when neccessary
+            - only restart lmd on timeouts when necessary
             - support lmd federation mode
             - support lmd tls livestatus connections
           - Mobile:

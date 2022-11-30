@@ -81,7 +81,7 @@ for my $t (split/,/mx, $options->{'time'}) {
     push @times, { on => [$h1, $m1], off => [$h2, $m2] };
 }
 
-# swap start/end if neccessary
+# swap start/end if necessary
 if($start > $end) { my $tmp = $start; $start = $end; $end = $tmp; }
 
 # expand days

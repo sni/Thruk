@@ -857,7 +857,7 @@ sub get_nodes_grouped_by_state {
 
     check_update_index($c, [$bps])
 
-runs index update if neccessary.
+runs index update if necessary.
 
 =cut
 sub check_update_index {

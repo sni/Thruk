@@ -1701,7 +1701,7 @@ sub _update_logcache_optimize {
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
     if(!$options->{'force'} && scalar @times > 0 && $times[0] && $times[0] > time()-86400) {
-        _info("no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force");
+        _info("no optimize necessary, last optimize: ".(scalar localtime $times[0]).", use -f to force");
         return(-1);
     }
     my $start = time();

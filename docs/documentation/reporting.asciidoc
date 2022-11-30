@@ -63,7 +63,7 @@ send one report at multiple times.
 
 ==== Debugging Reports
 
-Sometimes it may be neccessary to create a report in debug mode in order to
+Sometimes it may be necessary to create a report in debug mode in order to
 save information to reproduce the report for developers.
 
 In order to create debug information for a report, open the reports page and

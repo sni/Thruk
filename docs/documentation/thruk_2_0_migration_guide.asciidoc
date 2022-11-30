@@ -8,7 +8,7 @@ Thruk 2 Plugin Migration Guide
 
 With Thruk 2.0 does not use the Catalyst framework anymore and is now based on
 the much faster and lighter Plack framework. With this some small changes are
-neccessary to existing plugins. The plugins shiped with Thruk are adopted
+necessary to existing plugins. The plugins shiped with Thruk are adopted
 already and might be a good example of how they look now.
 
 

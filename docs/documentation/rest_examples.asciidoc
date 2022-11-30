@@ -53,7 +53,7 @@ or by sending a http request, for example with curl:
 ------
 
 Note that you don't have to set all parameters, only the required ones are
-neccessary. You can use relative arguments for the start- and end-time. For
+necessary. You can use relative arguments for the start- and end-time. For
 example `now` will be replaced with the current timestamp while `+60m` will
 be 60 minutes in the future.
 
