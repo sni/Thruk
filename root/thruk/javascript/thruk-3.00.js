@@ -1573,7 +1573,7 @@ function updateUrl() {
 /* reloads the current page and adds some parameter from a hash */
 var isReloading = false;
 var reloadPageTimer;
-function reloadPage(delay, withReloadButton, freshReload) {
+function reloadPage(delay, withReloadButton, freshReload, preCheckUrl, preCheckRetrySeconds) {
     if(!delay) { delay = 50; }
     if(withReloadButton) {
         if(delay < 500) {
@@ -1597,7 +1597,7 @@ function reloadPage(delay, withReloadButton, freshReload) {
     }
     window.clearTimeout(reloadPageTimer);
     reloadPageTimer = window.setTimeout(function() {
-        reloadPageDo(withReloadButton, freshReload);
+        reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetrySeconds);
     }, delay);
 }
 
@@ -1609,7 +1609,7 @@ function resetRefreshButton() {
     jQuery("#refresh_button").attr("title", "reload page");
 }
 
-function reloadPageDo(withReloadButton, freshReload) {
+function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetrySeconds) {
     if(isReloading) { return; } // prevent  multiple simultanious reloads
     if(withReloadButton) {
         resetRefreshButton();
@@ -1630,7 +1630,11 @@ function reloadPageDo(withReloadButton, freshReload) {
     }
 
     if(freshReload) {
-        redirect_url(newUrl);
+        if(preCheckUrl) {
+            redirect_url_after_preCheck(newUrl, preCheckUrl, preCheckRetrySeconds);
+        } else {
+            redirect_url(newUrl);
+        }
         return;
     }
 
@@ -1698,6 +1702,27 @@ function redirect_url(url) {
 }
 function window_location_replace(url) {
     window.location.replace(url);
+}
+
+/* redirect to new url, but only after precheck url succeeds */
+function redirect_url_after_preCheck(newUrl, preCheckUrl, preCheckRetrySeconds) {
+    if(!preCheckRetrySeconds) { preCheckRetrySeconds = 30; }
+    jQuery.ajax({
+        url: preCheckUrl,
+        type: 'POST',
+        data: {},
+        success: function() {
+            console.log("precheck success, redirecting...");
+            redirect_url(newUrl);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
+            console.log("precheck failed, retry in "+preCheckRetrySeconds+"sec");
+            window.setTimeout(function() {
+                redirect_url_after_preCheck(newUrl, preCheckUrl, preCheckRetrySeconds);
+            }, (preCheckRetrySeconds*1000))
+        }
+    });
 }
 
 function get_site_panel_backend_button(id, onclick, section, extraClass) {
