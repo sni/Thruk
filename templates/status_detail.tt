@@ -55,18 +55,7 @@
       </h1>
     </div>
     <div class="basis-1/3 flex justify-end">
-      [% IF custom_vars.size > 0 %]
-        <table class="w-fit cellspacing-x">
-          [% FOREACH cust = custom_vars %]
-          <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
-            <td class="align-top">
-              <a class="link italic text-xs" href="status.cgi?style=detail&dfl_s0_type=custom variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]">[% cust.0 | html %]</a>
-            </td>
-            <td class="text-xs">[% cust.1 %]</td>
-          </tr>
-          [% END %]
-        </table>
-      [% END %]
+      [% PROCESS _customvar_box.tt %]
     </div>
   </div>
 

@@ -51,25 +51,7 @@
       </div>
     </div>
 
-    [% IF custom_vars.size > 0 %]
-      <div class="mt-5 px-2">
-        <table>
-          [% FOREACH cust = custom_vars %]
-          <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
-            <td class="align-top">
-              <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]">
-                <font size="-1"><i>[% cust.0 | html %]</i></font>
-              </a>
-            </td>
-            <td>
-              <font size="-1">[% cust.1 %]</font>
-            </td>
-          </tr>
-          [% END %]
-        </table>
-      </div>
-    [% END %]
-
+    [% PROCESS _customvar_box.tt %]
   </div>
 
   <div class="flexcol order-1 2xl:order-2">

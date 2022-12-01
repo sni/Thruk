@@ -1,0 +1,16 @@
+﻿[% IF custom_vars.size > 0 %]
+  <div class="card mt-5 min-w-[350px]">
+    <table class="body cellspacing-x">
+      [% FOREACH cust = custom_vars %]
+      <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
+        <td class="align-top">
+          <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]">
+            [% cust.0 | html %]
+          </a>
+        </td>
+        <td>[% cust.1 %]</td>
+      </tr>
+      [% END %]
+    </table>
+  </div>
+[% END %]
