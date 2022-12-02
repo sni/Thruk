@@ -2,10 +2,11 @@
 <div id="pageStats" class="card clickable z-50 fixed bottom-0 right-0 m-2" onclick="stopRefresh(); toggleElement('stats_details_card', undefined, true); return false;">
   <div class="progressbar py-1 px-2">
     <div class="description textBody font-semibold" style="width: 90px;">Time: [% sprintf("%.3fs", time_total) %]</div>
-    <div class="bar flex" style="height: 12px; width: 100px;">
+    <div class="bar flex relative" style="height: 12px; width: 100px;">
       <div style="height: 12px; background: var(--stats-time-backend); width: [% sprintf("%d", total_backend_waited / total * 200) %]px"></div>
       <div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></div>
       <div style="height: 12px; background: var(--stats-time-view); width: [% sprintf("%d", total_render_waited / total * 200) %]px"></div>
+      [% IF total_backend_queries > 0 %]<div class="absolute opacity-80 bg-transparent right-1 top-0 leading-3">Queries: [% total_backend_queries %]</div>[% END %]
     </div>
   </div>
 </div>

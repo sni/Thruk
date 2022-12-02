@@ -287,6 +287,7 @@ sub get_default_stash {
     my($c, $pre) = @_;
     my $base_config = get_base_config();
     my $stash = {
+        'total_backend_queries'     => 0,
         'total_backend_waited'      => 0,
         'total_render_waited'       => 0,
         'inject_stats'              => 1,

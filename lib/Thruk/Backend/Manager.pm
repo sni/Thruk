@@ -1920,6 +1920,7 @@ sub _get_result_lmd {
 
     my $elapsed = tv_interval($t1);
     $c->stash->{'total_backend_waited'} += $elapsed;
+    $c->stash->{'total_backend_queries'}++;
 
     my $meta = $peer->{'live'}->{'backend_obj'}->{'meta_data'};
     if($meta) {
@@ -2016,6 +2017,7 @@ sub _get_result_serial {
 
     my $elapsed = tv_interval($t1);
     $c->stash->{'total_backend_waited'} += $elapsed;
+    $c->stash->{'total_backend_queries'}++;
 
     $c->stats->profile( end => "_get_result_serial($function)");
     return($result, $type, $totalsize);
@@ -2065,6 +2067,7 @@ sub _get_result_parallel {
 
     my @timessorted = reverse sort { $times->{$a} <=> $times->{$b} } keys(%{$times});
     $c->stash->{'total_backend_waited'} += $times->{$timessorted[0]};
+    $c->stash->{'total_backend_queries'}++;
     $c->stats->profile( comment => sprintf("slowest site: %s -> %.4f", $timessorted[0], $times->{$timessorted[0]}));
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
