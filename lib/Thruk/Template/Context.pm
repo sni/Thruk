@@ -13,6 +13,11 @@ my @stack    = ();
 sub process {
     my($self, @args) = @_;
 
+    if(!$Thruk::Globals::tt_profiling) {
+        my @return = wantarray ? $self->SUPER::process(@args) : scalar $self->SUPER::process(@args);
+        return wantarray ? @return : $return[0];
+    }
+
     my $template = $args[0];
     if(UNIVERSAL::isa($template, "Template::Document")) {
         $template = $template->name || $template;

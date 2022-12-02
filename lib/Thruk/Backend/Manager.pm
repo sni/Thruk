@@ -1919,10 +1919,9 @@ sub _get_result_lmd {
     ($result, $type, $totalsize) = @res;
 
     my $elapsed = tv_interval($t1);
-    $c->stash->{'total_backend_waited'} += $elapsed;
-    $c->stash->{'total_backend_queries'}++;
-
     my $meta = $peer->{'live'}->{'backend_obj'}->{'meta_data'};
+    _add_query_stats($c, $elapsed, $function, $arg, $meta);
+
     if($meta) {
         $c->stash->{'lmd_ok'} = 1;
     }
@@ -2016,8 +2015,7 @@ sub _get_result_serial {
     }
 
     my $elapsed = tv_interval($t1);
-    $c->stash->{'total_backend_waited'} += $elapsed;
-    $c->stash->{'total_backend_queries'}++;
+    _add_query_stats($c, $elapsed, $function, $arg);
 
     $c->stats->profile( end => "_get_result_serial($function)");
     return($result, $type, $totalsize);
@@ -2036,6 +2034,7 @@ returns result for given function and args using the worker pool
 sub _get_result_parallel {
     my($self, $peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
+    my $t1 = [gettimeofday];
     my $c = $Thruk::Globals::c;
 
     $c->stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")");
@@ -2065,10 +2064,12 @@ sub _get_result_parallel {
         }
     }
 
+    my $elapsed = tv_interval($t1);
     my @timessorted = reverse sort { $times->{$a} <=> $times->{$b} } keys(%{$times});
-    $c->stash->{'total_backend_waited'} += $times->{$timessorted[0]};
-    $c->stash->{'total_backend_queries'}++;
-    $c->stats->profile( comment => sprintf("slowest site: %s -> %.4f", $timessorted[0], $times->{$timessorted[0]}));
+    my $slowest = sprintf("slowest site: %s -> %.4f", $timessorted[0], $times->{$timessorted[0]});
+    _add_query_stats($c, $elapsed, $function, $arg, undef, $slowest);
+
+    $c->stats->profile( comment => $slowest);
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
@@ -2907,6 +2908,31 @@ sub fork_http_peer {
     $options->{'type'}              = 'http';
     $peer = Thruk::Backend::Peer->new($options, $peer->{'thruk_config'}, {});
     return $peer;
+}
+
+########################################
+sub _add_query_stats {
+    my($c, $elapsed, $function, $args, $meta, $comment) = @_;
+    return unless $ENV{'THRUK_PERFORMANCE_DEBUG'};
+
+    $c->stash->{'total_backend_waited'} += $elapsed;
+    $c->stash->{'total_backend_queries'}++;
+    $c->stash->{'db_profiles'} = [] unless $c->stash->{'db_profiles'};
+    my $profile = {
+        function          => $function,
+        affected_backends => $c->stash->{'num_selected_backends'},
+        duration          => $elapsed,
+        meta              => $meta,
+        stack             => Carp::longmess($function),
+        query             => delete $ENV{'LS_LAST_QUERY'},
+        comment           => $comment,
+    };
+    if(ref $args eq 'ARRAY' && scalar @{$args} % 2 == 0) {
+        my %arg = @{$args};
+        $profile->{'filter'} = $arg{'filter'} if defined $arg{'filter'};
+    }
+    push @{$c->stash->{'db_profiles'}}, $profile;
+    return;
 }
 
 ########################################

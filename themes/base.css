@@ -1025,8 +1025,12 @@ TH {
 }
 
 TABLE.cellborder {
-  TD, TH {
-    @apply border borderDefault;
+  > TBODY {
+    > TR {
+      > TD, > TH {
+        @apply border borderDefault;
+      }
+    }
   }
 }
 
@@ -1678,4 +1682,23 @@ DIV.linedtextarea {
 SPAN.sortable-placeholder {
   @apply block min-w-[50px];
   background-color: var(--row-selected-even-bg) !important;
+}
+
+/*******************************************************************************
+* stack trace popup
+*/
+.stack-embedded {
+  TD.stack-message {
+    @apply !max-w-[490px] !min-w-[490px];
+  }
+  TD.stack-location {
+    @apply !max-w-[300px] !min-w-[300px];
+  }
+}
+TABLE.db-profile {
+  >TBODY {
+    >TR.active > TD {
+      background-color: var(--row-selected-even-bg) !important;
+    }
+  }
 }

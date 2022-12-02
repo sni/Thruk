@@ -1,0 +1,66 @@
+﻿<table class='cellborder rowhover db-profile' style='width: 800px;'>
+  <thead>
+    <tr>
+      <th>function</th>
+      <th class="text-right">backends</th>
+      <th class="text-right">duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% DEFAULT row_id = 0 %]
+    [% FOREACH pf = profiles %]
+      [% row_id = row_id + 1 %]
+      [% perc = pf.duration / total_duration %]
+      <tr class="clickable js-profile-row" onclick='toggleAllClassExceptSelf(this, "TR.js-profile-row", "active"); jQuery(".js-pstack-details").css("display","none"); if(jQuery(this).hasClass("active")) { jQuery(".js-pstack-[% row_id %]").css("display","").addClass("active"); }'>
+        <td>[% pf.function %]</td>
+        <td class="text-right">[% IF pf.defined('affected_backends'); pf.affected_backends; END %]</td>
+        <td class="text-right">[% sprintf("%.5fs", pf.duration) %]</td>
+        <td class="text-right relative" style="width: 50px;">
+          <div style='width: [% sprintf("%.0f", 100 * perc) %]%; height: 20px;' class='WARNING absolute top-0 right-0'></div>
+          <span class='absolute top-0 right-0' style='margin-right: 3px;'>[% sprintf("%.1f", perc*100) %]%</span>
+        </td>
+      </tr>
+      [% IF pf.defined("comment") %]
+        <tr style='display:none;' class='js-pstack-details js-pstack-[% row_id %]'>
+          <td colspan="4" class="border-b-0">
+            <div class="card m-2" style="width: 790px">
+              <div class="head">
+                <h3>Comment</h3>
+              </div>
+              <div class="body max-w-full overflow-auto">[% pf.comment | html %]</div>
+            </div>
+          </td>
+        </tr>
+      [% END %]
+      [% IF pf.defined("query") %]
+        <tr style='display:none;' class='js-pstack-details js-pstack-[% row_id %]'>
+          <td colspan="4" class="border-b-0">
+            <div class="card m-2" style="width: 790px">
+              <div class="head">
+                <h3>Query</h3>
+              </div>
+              <div class="body whitespace-pre max-w-full overflow-auto">[% pf.query | html %]</div>
+            </div>
+          </td>
+        </tr>
+      [% END %]
+      [% IF pf.defined("stack") %]
+        <tr style='display:none;' class='js-pstack-details js-pstack-[% row_id %]'>
+          <td colspan="4" class="border-t-0 mb-2">
+            <div style="width: 790px;" class="m-2 stack-embedded">
+              [% PROCESS _stacktrace.tt stacktrace=pf.stack %]
+            </div>
+          </td>
+        </tr>
+      [% END %]
+    [% END %]
+  </tbody>
+  <tfoot>
+    <tr>
+      <th class="font-bold">total</th>
+      <td></td>
+      <th class="text-right font-bold">[% sprintf("%.5fs", total_duration) %]</th>
+      <td></td>
+    </tr>
+  </tfoot>
+</table>

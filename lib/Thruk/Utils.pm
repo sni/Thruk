@@ -3777,4 +3777,49 @@ sub page_data {
 
 ##############################################
 
+=head2 render_db_profile
+
+  render_db_profile($c, $profiles)
+
+return rendered db query profiles
+
+=cut
+sub render_db_profile {
+    my($c, $name, $db_profiles) = @_;
+    return([]) unless $db_profiles;
+    return([]) unless @{$db_profiles} > 0;
+
+    my $total_duration = 0;
+    for my $p (@{$db_profiles}) {
+        $total_duration += $p->{duration};
+    }
+
+    my $stash = {
+        profiles       => $db_profiles,
+        total_duration => $total_duration,
+    };
+    # more stash variables to set?
+    $stash = { %{$c->stash}, %{$stash} };
+    my $data;
+    require Thruk::Views::ToolkitRenderer;
+    eval {
+        local $Thruk::Globals::tt_profiling = 0;
+        Thruk::Views::ToolkitRenderer::render($c, '_db_stats.tt', $stash, \$data);
+    };
+    if($@) {
+        _warn($@);
+        return([]);
+    }
+
+    my $profile = {
+        name => $name,
+        text => "text",
+        html => $data,
+    };
+
+    return($profile);
+}
+
+##############################################
+
 1;

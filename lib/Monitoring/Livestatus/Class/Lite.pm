@@ -64,6 +64,7 @@ Set peer for live tests.
 use warnings;
 use strict;
 use Carp qw/croak confess/;
+use utf8;
 
 use Monitoring::Livestatus ();
 
@@ -397,6 +398,13 @@ sub filter_statement {
 sub _execute {
     my($self) = @_;
     my $statement = $self->statement();
+    {
+        my $st = $statement;
+        utf8::encode($st); # avoid Wide character in setenv
+        ## no critic
+        $ENV{'LS_LAST_QUERY'} = $st;
+        ## use critic
+    }
     my $options   = $self->{'_options'};
     $options->{'slice'} = {};
 

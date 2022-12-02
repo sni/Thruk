@@ -1189,6 +1189,16 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
   }
 }
 
+/* remove class for all found by selector except given element which is toggled */
+function toggleAllClassExceptSelf(el, selector, clsName) {
+    jQuery(selector).each(function(i, item) {
+        if(item != el) {
+            jQuery(item).removeClass(clsName);
+        }
+    });
+    jQuery(el).toggleClass(clsName);
+}
+
 /* return true if obj A is a subelement from obj B */
 function is_el_subelement(obj_a, obj_b) {
     if(obj_a == obj_b) {

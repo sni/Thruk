@@ -1465,7 +1465,7 @@ sub nice_stacktrace {
             $rowNum++;
             $msg =~ s/(Thruk::Context=HASH\(.*?\))/<i title="$1">\$c<\/i>/gmx;
             chomp($line);
-            push @{$nice}, CORE::sprintf("<tr class='%s'><td class='max-w-[60vw] truncate'>%s</td><td class='truncate' style='max-width: 300px;' title='%s line %d'>%s:%d</td></tr>\n", $class, $msg, $original, $nr, $file, $nr);
+            push @{$nice}, CORE::sprintf("<tr class='%s'><td class='max-w-[60vw] truncate stack-message'>%s</td><td class='truncate stack-location' style='max-width: 300px;' title='%s line %d'>%s:%d</td></tr>\n", $class, $msg, $original, $nr, $file, $nr);
             $has_stack = 1;
         } else {
             if($in_stack) {

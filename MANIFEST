@@ -2692,6 +2692,7 @@ templates/_common_js_bugs.tt
 templates/_common_js_files.tt
 templates/_cron_edit.tt
 templates/_customvar_box.tt
+templates/_db_stats.tt
 templates/_downtimes_recurring_table.tt
 templates/_downtimes_table.tt
 templates/_error_report.tt

@@ -22,7 +22,7 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     sites.up sites.disabled sites.down pb_options.lineheight desc refresh_rate
     h.current_notification_number s.current_notification_number how_far_back audiofile
     host.$host_icon_image_alt host_comment_count param_name state_color last_col
-    crit.text crit.value icon pic pnpdata onchange
+    crit.text crit.value icon pic pnpdata onchange row_id
     day monthday hour hours min key helpkey colprefix columns_name
     has_bp bp.fullid r.fullid hex rd.file b.basefile
     host_health_pic service_health_pic health_perc service_perc

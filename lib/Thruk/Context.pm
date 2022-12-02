@@ -907,6 +907,9 @@ sub finalize_request {
         if($inject || $save_for_later) {
             # inject current page stats into html
             $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report()});
+            if($c->stash->{'db_profiles'} && $c->user && $c->user->check_user_roles('admin')) {
+                $c->add_profile(Thruk::Utils::render_db_profile($c, 'Req '.$Thruk::Globals::COUNT.' DB', $c->stash->{'db_profiles'}));
+            }
             if($Thruk::Globals::tt_profiling) {
                 require Thruk::Template::Context;
                 $c->add_profile(Thruk::Template::Context::get_profiles());
