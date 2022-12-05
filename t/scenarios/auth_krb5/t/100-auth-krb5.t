@@ -51,8 +51,7 @@ for my $site (qw/local remote/) {
 
 ###############################################################################
 # test graph export
-#for my $site (qw/local remote/) {
-for my $site (qw/local/) {
+for my $site (qw/local/) { # remote does not work if cookie auth is disabled on remote site
   for my $hst (qw/pnp grafana/) {
     TestUtils::test_page(
       'url'     => '/thruk/r/extinfo.cgi?type=grafana&host='.$site.'-'.$hst.'&service=Load',
