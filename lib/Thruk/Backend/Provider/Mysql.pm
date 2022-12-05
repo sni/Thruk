@@ -1708,7 +1708,6 @@ sub _update_logcache_optimize {
 
     _infos("update logs table order...");
     $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     _info("done");
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
@@ -1726,6 +1725,7 @@ sub _update_logcache_optimize {
 
     $dbh->commit || confess $dbh->errstr;
     my $duration = time() - $start;
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(5,'reorder_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     $dbh->commit || confess $dbh->errstr;
     return(-1);
