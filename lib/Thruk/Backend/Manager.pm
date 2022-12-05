@@ -2923,10 +2923,10 @@ sub _add_query_stats {
         affected_backends => $c->stash->{'num_selected_backends'},
         duration          => $elapsed,
         meta              => $meta,
-        stack             => Carp::longmess($function),
         query             => delete $ENV{'LS_LAST_QUERY'},
         comment           => $comment,
     };
+    $profile->{'stack'} = Carp::longmess($function) if $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1;
     if(ref $args eq 'ARRAY' && scalar @{$args} % 2 == 0) {
         my %arg = @{$args};
         $profile->{'filter'} = $arg{'filter'} if defined $arg{'filter'};
