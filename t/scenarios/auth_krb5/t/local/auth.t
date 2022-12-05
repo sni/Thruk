@@ -107,6 +107,6 @@ for my $site (qw/local/) {
     });
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s --negotiate -u : "http://omd.test.local/demo/thruk/r/thruk/whoami"',
-        like => ['/You are not authorized/'], # rest api is api key or session only when using krb
+        like => ['/"id" : "omdadmin"/'],
     });
 };
