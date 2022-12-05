@@ -134,9 +134,9 @@ sub index {
             'failed'      => Cpanel::JSON::XS::true,
          };
     } elsif($path_info =~ m/\.cgi$/mx) {
-        my $uri = $c->env->{'thruk.request.url'};
-        $uri =~ s/^.*?\/r\//\/cgi-bin\//gmx;
-        my $sub_c = $c->sub_request($uri, undef, undef, 1);
+        my $uri = $c->env->{'thruk.request.url'} // $c->req->url();
+        $uri =~ s/^.*?\/r\/(v1\/|)/\/cgi-bin\//gmx;
+        my $sub_c = $c->sub_request($uri, undef, undef, 1, 7);
         $c->res->status($sub_c->res->code);
         $c->res->headers($sub_c->res->headers);
         $c->res->body($sub_c->res->content);

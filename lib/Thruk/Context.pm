@@ -697,9 +697,10 @@ $c->sub_request(<url>, [<method>], [<postdata>], [<rendered>])
 
 =cut
 sub sub_request {
-    my($c, $url, $method, $postdata, $rendered) = @_;
+    my($c, $url, $method, $postdata, $rendered, $max_follow) = @_;
     $method = 'GET' unless $method;
     $method = uc($method);
+    $max_follow = 0 unless $max_follow;
     my $orig_url = $url;
     $c->stats->profile(begin => "sub_request: ".$method." ".$orig_url);
     local $Thruk::Globals::c = $c unless $Thruk::Globals::c;
@@ -752,6 +753,19 @@ sub sub_request {
         Thruk::Views::ToolkitRenderer::render_tt($sub_c);
     }
     $c->stats->profile(end => "sub_request: ".$method." ".$orig_url);
+
+    if($sub_c->res->code == 302) {
+        my $location = $sub_c->res->headers->{'location'};
+        $location =~ s%^(/\w+|)/thruk/%/%mx;
+        if($max_follow > 1) {
+            _debug2("sub_request following redirect to ".$location);
+            $max_follow--;
+            return(sub_request($c, $location, $method, $postdata, $rendered, $max_follow));
+        } else {
+            _debug2("sub_request max redirects reached for ".$location);
+        }
+    }
+
     return $sub_c if $rendered;
     return $rc;
 }
