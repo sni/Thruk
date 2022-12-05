@@ -2094,6 +2094,7 @@ t/data/test_spaces.conf
 t/data/user_overrides/thruk.conf
 t/helper/create_test_logs
 t/perlcriticrc
+t/scenarios/_common/ansible/install_role.sh
 t/scenarios/_common/ansible/roles/common/tasks/main.yml
 t/scenarios/_common/ansible/roles/common/vars/main.yml
 t/scenarios/_common/ansible/roles/grafana_node_puppeteer/tasks/main.yml
@@ -2113,6 +2114,10 @@ t/scenarios/_common/ansible/roles/thruk_logcache_mysql/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_logcache_mysql/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_plugin_editor/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_plugin_editor/vars/main.yml
+t/scenarios/_common/ansible/tasks/omd_config.yml
+t/scenarios/_common/base_images/rocky-nightly/Dockerfile
+t/scenarios/_common/docker-compose.yml
+t/scenarios/_common/Makefile
 t/scenarios/_common/Makefile.common
 t/scenarios/_common/t/999-docker-logs.t
 t/scenarios/_common/t/999-perl-zombies.t

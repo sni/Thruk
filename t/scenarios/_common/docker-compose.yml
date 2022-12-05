@@ -1,0 +1,6 @@
+services:
+  rocky-nightly:
+    build:
+      context: .
+      dockerfile: base_images/rocky-nightly/Dockerfile
+    image: local/thruk-labs-rocky:nightly

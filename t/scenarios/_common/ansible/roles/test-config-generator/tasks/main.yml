@@ -1,3 +1,5 @@
+- stat: path=/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
+  register: manifest_path
 - name: "install perl / git dependencies"
   yum:
     name:
@@ -10,7 +12,16 @@
   retries: 30
   until: result is succeeded
   delay: 10
+  # hack because ansibles takes over 10seconds, even if it does not install anything
+  when: not manifest_path.stat.exists
+
 - name: "install Monitoring::Generator::TestConfig"
   shell: "sudo su - {{ site }} -c 'cpanm -n Monitoring::Generator::TestConfig'"
+  args:
+    creates: "/omd/sites/{{ site }}/local/lib/perl5/lib/perl5/Monitoring/Generator/TestConfig.pm"
+
+- stat: path=/thruk
+  register: thruk_path
 - name: "run create_monitoring_test_config.pl"
   shell: "sudo su - {{ site }} -c 'create_monitoring_test_config.pl'"
+  when: thruk_path.stat.exists

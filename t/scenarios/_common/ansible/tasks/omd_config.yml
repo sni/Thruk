@@ -1,0 +1,6 @@
+- name: "check current {{ var }} value"
+  register: cur_value
+  shell: "grep '{{ var }}=' /opt/omd/sites/{{ site }}/etc/omd/site.conf"
+- name: "omd config {{ var }}={{ val }}"
+  shell: omd config {{ site }}  set {{ var }} {{ val }}
+  when: not cur_value.stdout is search("='" + val + "'")

@@ -120,7 +120,7 @@ web:
 
 preprepare:
 
-prepare:
+prepare: base_images
 	$(MAKE) preprepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker-compose build
@@ -151,10 +151,14 @@ clean_docker_killall:
 	-docker network prune -f
 	-[ $$(docker ps -q | wc -l) -eq 0 ] || docker kill $$(docker ps -q)
 
+base_images:
+	if $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep local/ >/dev/null); then make -C ../_common build; fi
+
 update:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker-compose pull
-	for IMG in $$(grep FROM */Dockerfile | awk '{ print $$2 }' | sort -u); do docker pull $$IMG; done
+	for IMG in $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep -v local/ | sort -u); do docker pull $$IMG; done
+	if $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep local/ >/dev/null); then make -C ../_common update; fi
 	@echo "### $@: $$(date "+%FT%T.%N")"
 
 extra_wait_start:

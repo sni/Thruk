@@ -5,23 +5,44 @@
     - role: thruk_developer
     - role: test-config-generator
   tasks:
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set CORE naemon
-  - shell: omd config demo set LIVESTATUS_TCP on
-  - copy:
+  - include_tasks: "{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}/../tasks/omd_config.yml"
+    vars:
+      var:  "APACHE_MODE"
+      val:  "own"
+      site: "demo"
+
+  - include_tasks: "{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}/../tasks/omd_config.yml"
+    vars:
+      var:  "CORE"
+      val:  "naemon"
+      site: "demo"
+
+  - include_tasks: "{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}/../tasks/omd_config.yml"
+    vars:
+      var:  "LIVESTATUS_TCP"
+      val:  "on"
+      site: "demo"
+
+  - name: "copy example.cfg"
+    copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       owner: demo
       group: demo
-  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
-  - file:
+
+  - name: "create secret.key"
+    shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
       path: /omd/sites/demo/var/thruk/secret.key
       mode: 0600
       owner: demo
       group: demo
-  - copy:
+
+  - name: "copy test.cfg"
+    copy:
       src: /root/test.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
- 
+
