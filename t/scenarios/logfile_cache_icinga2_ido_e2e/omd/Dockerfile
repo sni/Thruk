@@ -1,4 +1,4 @@
-FROM  consol/omd-labs-rocky:nightly
+FROM  local/thruk-labs-rocky:nightly
 
 COPY utf8.conf /root/
 COPY add_user.sh /root/
