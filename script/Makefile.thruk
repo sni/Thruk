@@ -16,12 +16,28 @@ dailydist: cleandist
 	# run in own make process, otherwise VERSION variable would not be updated
 	$(MAKE) newversion
 	$(MAKE) dist
+	$(MAKE) remove_npm_dependency
 	$(MAKE) resetdaily
 	ls -la *.gz
 
 releasedist: cleandist dist
+	$(MAKE) remove_npm_dependency
 	git describe --tag --exact-match
 	ls -la *.gz
+
+remove_npm_dependency:
+	# make sure css files exist
+	test -f themes/themes-available/Light/stylesheets/Light.css
+	test -f themes/themes-available/Dark/stylesheets/Dark.css
+	tar xf thruk-$(VERSION).tar.gz
+	sed -s 's/, npm//' \
+		-i thruk-$(VERSION)/support/thruk.spec \
+		-i thruk-$(VERSION)/debian/thruk.dsc \
+		-i thruk-$(VERSION)/debian/control
+	rm thruk-$(VERSION).tar.gz
+	tar cf thruk-$(VERSION).tar thruk-$(VERSION)
+	rm -rf thruk-$(VERSION)
+	gzip --best thruk-$(VERSION).tar
 
 cleandist:
 	rm -f *.gz
