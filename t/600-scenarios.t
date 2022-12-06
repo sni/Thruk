@@ -45,7 +45,7 @@ for my $dir (@{$scenarios}) {
         }
         chdir($dir);
         my $archive = [];
-        for my $step (qw/clean update prepare wait_start test_verbose clean/) {
+        for my $step (qw/prepare wait_start test_verbose clean/) {
             my($rc,$out) = _run($dir, $step, $archive);
             if($rc != 0) {
                 _run($dir, "clean", $archive);
