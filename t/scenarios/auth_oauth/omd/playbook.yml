@@ -28,9 +28,13 @@
     retries: 30
     until: result is succeeded
     delay: 10
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set GRAFANA on
-  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        GRAFANA=on
+        LIVESTATUS_TCP=on
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg

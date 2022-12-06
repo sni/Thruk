@@ -4,7 +4,11 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - shell: omd config demo set APACHE_MODE own
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
   - shell: ln -s /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
   - copy:

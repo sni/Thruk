@@ -5,23 +5,13 @@
     - role: thruk_developer
     - role: test-config-generator
   tasks:
-  - include_tasks: "{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}/../tasks/omd_config.yml"
-    vars:
-      var:  "APACHE_MODE"
-      val:  "own"
-      site: "demo"
-
-  - include_tasks: "{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}/../tasks/omd_config.yml"
-    vars:
-      var:  "CORE"
-      val:  "naemon"
-      site: "demo"
-
-  - include_tasks: "{{ lookup('env', 'ANSIBLE_ROLES_PATH') }}/../tasks/omd_config.yml"
-    vars:
-      var:  "LIVESTATUS_TCP"
-      val:  "on"
-      site: "demo"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=naemon
+        LIVESTATUS_TCP=on
 
   - name: "copy example.cfg"
     copy:

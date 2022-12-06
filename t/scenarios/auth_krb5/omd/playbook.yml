@@ -15,13 +15,17 @@
     retries: 30
     until: result is succeeded
     delay: 10
-  - shell: "omd config demo set APACHE_MODE own"
-  - shell: "omd config demo set THRUK_COOKIE_AUTH sso-support"
-  - shell: "omd config demo set GRAFANA on"
-  - shell: "omd config demo set INFLUXDB on"
-  - shell: "omd config demo set MOD_GEARMAN on"
-  - shell: "omd config demo set NAGFLUX on"
-  - shell: "omd config demo set PNP4NAGIOS gearman"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        THRUK_COOKIE_AUTH=sso-support
+        GRAFANA=on
+        INFLUXDB=on
+        MOD_GEARMAN=on
+        NAGFLUX=on
+        PNP4NAGIOS=gearman
   - lineinfile:
       path: /omd/sites/demo/etc/mod-gearman/server.cfg
       regexp: '^perfdata='

@@ -3,10 +3,14 @@
   roles:
     - role: common
   tasks:
-  - shell: "omd config demo set PNP4NAGIOS off"
-  - shell: "omd config demo set GRAFANA on"
-  - shell: "omd config demo set NAGFLUX on"
-  - shell: "omd config demo set INFLUXDB on"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        PNP4NAGIOS=off
+        GRAFANA=on
+        NAGFLUX=on
+        INFLUXDB=on
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"

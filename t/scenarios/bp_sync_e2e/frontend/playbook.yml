@@ -10,10 +10,14 @@
   - shell: sudo su - demo -c "cp -rp .ssh /mnt/shared/"
   - shell: "cp -p /omd/sites/demo/.ssh/config /mnt/shared/.ssh"
   - shell: "chown -R demo: /mnt/shared/"
-  - shell: "omd config demo set CORE none"
-  - shell: "omd config demo set APACHE_MODE own"
-  - shell: "omd config demo set GRAFANA on"
-  - shell: "omd config demo set INFLUXDB_HTTP_TCP_PORT backend:8086"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        CORE=none
+        APACHE_MODE=own
+        GRAFANA=on
+        INFLUXDB_HTTP_TCP_PORT=backend:8086
   - file:
       src: /omd/sites/demo/etc/influxdb/grafana_datasources.yml
       dest: /opt/omd/sites/demo/etc/grafana/provisioning/datasources/backend_influxdb.yml

@@ -43,8 +43,12 @@
   - shell: ldapadd -H ldap://127.0.0.1:9000/ -w manager -x -D cn=Manager,dc=test,dc=local -f "/etc/openldap/ldif/group.ldif"
   - shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f "/etc/openldap/ldif/cn=config_anonymous_bind.ldif"
 
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        LIVESTATUS_TCP=on
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
   - shell: ln -s /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
   - copy:

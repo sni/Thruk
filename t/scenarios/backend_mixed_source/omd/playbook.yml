@@ -5,9 +5,13 @@
     - role: thruk_developer
     - role: test-config-generator
   tasks:
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set CORE naemon
-  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=naemon
+        LIVESTATUS_TCP=on
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg

@@ -12,8 +12,12 @@
     retries: 30
     until: result is succeeded
     delay: 10
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        LIVESTATUS_TCP=on
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
   - shell: ln -s /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
   - copy:

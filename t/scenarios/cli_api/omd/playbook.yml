@@ -10,8 +10,12 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       owner: demo
       group: demo
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set LIVESTATUS_TCP on
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        LIVESTATUS_TCP=on
   - copy:
       src: /root/1.rpt
       dest: /omd/sites/demo/var/thruk/reports/

@@ -1,8 +1,10 @@
 - name: "make sure site {{ site }} is stopped"
   shell: "sudo su - {{ site }} -c 'omd stop'"
-- name: "thruk enable mysql for site {{ site }}"
-  shell: "sudo su - {{ site }} -c 'omd config set MYSQL on'"
-- name: "thruk enable logcache for site {{ site }}"
-  shell: "sudo su - {{ site }} -c 'omd config set THRUK_LOGCACHE on'"
+- name: "thruk enable mysql /logcache for site {{ site }}"
+  shell: "omd config demo change"
+  args:
+    stdin: |
+      MYSQL=on
+      THRUK_LOGCACHE=on
 - name: "run initial import to avoid error when cron and playbook runs import simultaneously"
   shell: "sudo su - {{ site }} -c 'omd start core; omd start mysql; thruk logcache import -yf; omd stop; omd umount'"

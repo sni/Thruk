@@ -18,12 +18,13 @@
     retries: 30
     until: result is succeeded
     delay: 10
-  - name: "set APACHE_MODE own"
-    shell: omd config demo set APACHE_MODE own
-  - name: "set LIVESTATUS_TCP on"
-    shell: omd config demo set LIVESTATUS_TCP on
-  - name: "set PNP4NAGIOS off"
-    shell: omd config demo set PNP4NAGIOS off
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        LIVESTATUS_TCP=on
+        PNP4NAGIOS=off
   - name: "copy example files"
     copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg

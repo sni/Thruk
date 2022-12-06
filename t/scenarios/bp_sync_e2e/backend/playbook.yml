@@ -4,11 +4,15 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - shell: "omd config demo set LIVESTATUS_TCP on"
-  - shell: "omd config demo set NAGFLUX on"
-  - shell: "omd config demo set INFLUXDB on"
-  - shell: "omd config demo set PNP4NAGIOS off"
-  - shell: "omd config demo set INFLUXDB_HTTP_TCP_PORT :8086"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        LIVESTATUS_TCP=on
+        NAGFLUX=on
+        INFLUXDB=on
+        PNP4NAGIOS=off
+        INFLUXDB_HTTP_TCP_PORT=:8086
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"

@@ -12,11 +12,15 @@
     retries: 30
     until: result is succeeded
     delay: 10
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set CORE icinga2
-  - shell: omd config demo set LIVESTATUS_TCP on
-  - shell: omd config demo set MYSQL on
-  - shell: omd config demo set ICINGA2_IDO mysql
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=icinga2
+        LIVESTATUS_TCP=on
+        MYSQL=on
+        ICINGA2_IDO=mysql
   - shell: sudo su - demo -c "icinga2 feature disable compatlog"
   - shell: sed -i -e 's/^skip-networking/#skip-networking\nbind-address = 0.0.0.0\n/g' /opt/omd/sites/demo/.my.cnf
   - shell: sudo su - demo -c "icinga2 feature enable ido-pgsql"

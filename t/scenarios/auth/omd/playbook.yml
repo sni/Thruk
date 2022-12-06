@@ -5,11 +5,15 @@
     - role: local_tests
     - role: thruk_developer
   tasks:
-  - shell: "omd config demo set APACHE_MODE own"
-  - shell: "omd config demo set GRAFANA on"
-  - shell: "omd config demo set NAGFLUX on"
-  - shell: "omd config demo set INFLUXDB on"
-  - shell: "omd config demo set PNP4NAGIOS off"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        GRAFANA=on
+        NAGFLUX=on
+        INFLUXDB=on
+        PNP4NAGIOS=off
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"

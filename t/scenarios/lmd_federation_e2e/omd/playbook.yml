@@ -4,7 +4,11 @@
     - role: common
   tasks:
 # demo site, directly connected
-  - shell: "omd config demo set LIVESTATUS_TCP on"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        LIVESTATUS_TCP=on
 
 # create additional sites
   - shell: "omd create {{item}}"
@@ -51,12 +55,20 @@
       group: demo2
 
 # demo 3 site
-  - shell: "omd config demo3 set LIVESTATUS_TCP on"
-  - shell: "omd config demo3 set LIVESTATUS_TCP_PORT 7001"
+  - name: "omd config change"
+    shell: "omd config demo3 change"
+    args:
+      stdin: |
+        LIVESTATUS_TCP=on
+        LIVESTATUS_TCP_PORT=7001
 
 # demo 4 site
-  - shell: "omd config demo4 set LIVESTATUS_TCP on"
-  - shell: "omd config demo4 set LIVESTATUS_TCP_PORT 7002"
+  - name: "omd config change"
+    shell: "omd config demo4 change"
+    args:
+      stdin: |
+        LIVESTATUS_TCP=on
+        LIVESTATUS_TCP_PORT=7002
   - shell: echo "testkey" > /omd/sites/demo4/var/thruk/secret.key
   - file:
       path: /omd/sites/demo4/var/thruk/secret.key
@@ -79,8 +91,12 @@
       group: demo5
 
 # demo 6 site
-  - shell: "omd config demo6 set LIVESTATUS_TCP on"
-  - shell: "omd config demo6 set LIVESTATUS_TCP_PORT 7003"
+  - name: "omd config change"
+    shell: "omd config demo6 change"
+    args:
+      stdin: |
+        LIVESTATUS_TCP=on
+        LIVESTATUS_TCP_PORT=7003
   - shell: echo "testkey" > /omd/sites/demo6/var/thruk/secret.key
   - file:
       path: /omd/sites/demo6/var/thruk/secret.key
@@ -89,8 +105,12 @@
       group: demo6
 
 # demo 7 site
-  - shell: "omd config demo7 set LIVESTATUS_TCP on"
-  - shell: "omd config demo7 set LIVESTATUS_TCP_PORT 7004"
+  - name: "omd config change"
+    shell: "omd config demo6 change"
+    args:
+      stdin: |
+        LIVESTATUS_TCP=on
+        LIVESTATUS_TCP_PORT=7004
   - shell: echo "testkey" > /omd/sites/demo7/var/thruk/secret.key
   - file:
       path: /omd/sites/demo7/var/thruk/secret.key

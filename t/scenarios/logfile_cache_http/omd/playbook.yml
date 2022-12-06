@@ -4,9 +4,13 @@
     - role: common
     - role: thruk_developer
   tasks:
-  - shell: omd config demo set APACHE_MODE own
-  - shell: omd config demo set CORE none
-  - shell: omd config demo set PNP4NAGIOS off
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=none
+        PNP4NAGIOS=off
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
