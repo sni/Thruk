@@ -153,15 +153,13 @@ sub index {
 
     ############################################################################
     # host statistics
-    my $host_stats = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
-    $c->stash->{'host_stats'} = $host_stats;
+    $c->stash->{'host_stats'} = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
 
     # service statistics
-    my $service_stats = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
-    $c->stash->{'service_stats'} = $service_stats;
+    $c->stash->{'service_stats'} = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
 
     # for hostgroups
-    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter], columns => ['name', 'groups']);
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, groups => { '!=', '' } ], columns => ['name', 'groups']);
     my $hostgroups = {};
 
     my $host_lookup = {};

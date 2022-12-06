@@ -1563,9 +1563,11 @@ sub _do_on_peers {
             if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
                 die($err);
             }
+            $c->stats->profile( begin => "_do_on_peers, check lmd proc");
             require Thruk::Utils::LMD;
             Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
             sleep(1);
+            $c->stats->profile( end => "_do_on_peers, check lmd proc");
             # then retry again
             eval {
                 ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
