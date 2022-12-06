@@ -6,11 +6,6 @@
   shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
 - name: "stop site"
   shell: "omd stop {{ site }}"
-- name: "disable TMPFS"
-  shell: "omd config {{site}} change"
-  args:
-    stdin: |
-        TMPFS=off
 - name: "check if xinetd file exists"
   stat:
     path: /opt/omd/sites/{{ site }}/etc/naemon/xinetd.conf

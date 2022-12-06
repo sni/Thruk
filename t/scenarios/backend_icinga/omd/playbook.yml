@@ -3,13 +3,12 @@
   roles:
     - role: common
   tasks:
-  - name: "omd config change"
-    shell: "omd config demo change"
-    args:
-      stdin: |
-        APACHE_MODE=own
-        CORE=icinga
-        LIVESTATUS_TCP=on
+  - name: "omd config set APACHE_MODE own"
+    shell: "omd config demo set APACHE_MODE own"
+  - name: "omd config set CORE icinga"
+    shell: "omd config demo set CORE icinga"
+  - name: "omd config set LIVESTATUS_TCP on"
+    shell: "omd config demo set LIVESTATUS_TCP on"
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
