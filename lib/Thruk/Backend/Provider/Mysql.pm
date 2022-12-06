@@ -468,6 +468,10 @@ sub get_logs {
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
 
+    ## no critic
+    $ENV{'THRUK_DB_LAST_QUERY'} = $sql;
+    ## use critic
+
     # logfiles into tmp file
     my($fh, $filename);
     if($options{'file'}) {

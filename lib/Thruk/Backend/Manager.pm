@@ -2923,7 +2923,7 @@ sub _add_query_stats {
         affected_backends => $c->stash->{'num_selected_backends'},
         duration          => $elapsed,
         meta              => $meta,
-        query             => delete $ENV{'LS_LAST_QUERY'},
+        query             => delete $ENV{'THRUK_DB_LAST_QUERY'},
         comment           => $comment,
     };
     $profile->{'stack'} = Carp::longmess($function) if $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1;

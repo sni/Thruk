@@ -402,7 +402,7 @@ sub _execute {
         my $st = $statement;
         utf8::encode($st); # avoid Wide character in setenv
         ## no critic
-        $ENV{'LS_LAST_QUERY'} = $st;
+        $ENV{'THRUK_DB_LAST_QUERY'} = $st;
         ## use critic
     }
     my $options   = $self->{'_options'};
