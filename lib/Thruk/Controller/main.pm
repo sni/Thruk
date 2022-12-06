@@ -186,40 +186,11 @@ sub index {
 
     ############################################################################
     # notifications
-    my $start            = time() - 90000; # last 25h
-    my $notificationData = _notifications_data($c, $start);
-    my $notificationHash = {};
-    my $time = $start;
-    while ($time <= time()) {
-        my $curDate = POSIX::strftime("%F %H:00", localtime($time));
-        $notificationHash->{$curDate} = 0;
-        $time += 3600;
-    }
-
-    my($selected_backends) = $c->db->select_backends('get_logs', []);
-    for my $ts ( sort keys %{$notificationData} ) {
-        my $date = POSIX::strftime("%F %H:00", localtime($ts));
-        for my $backend (@{$selected_backends}) {
-            next unless $notificationData->{$ts}->{$backend};
-            for my $n ( @{$notificationData->{$ts}->{$backend}} ) {
-                next unless(!$hostfilter || $host_lookup->{$n->{'host_name'}});
-                $notificationHash->{$date}++;
-            }
-        }
-    }
-
-    my $notifications = [["x"], ["Notifications"]];
-    my @keys = sort keys %{$notificationHash};
-    @keys = splice(@keys, 1);
-    for my $key (@keys) {
-        push(@{$notifications->[0]}, $key);
-        push(@{$notifications->[1]}, $notificationHash->{$key});
-    }
-    $c->stash->{'notifications'} = $notifications;
+    $c->stash->{'notifications'} = _notifications($c, $hostfilter, $host_lookup);
 
     ############################################################################
     # host and service problems
-    my $problemhosts    = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['name','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' },  limit => 5 );
+    my $problemhosts    = $c->db->get_hosts(   filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    $hostfilter,    'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['name','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' },  limit => 5 );
     my $problemservices = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'state_type' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['host_name','description','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' }, limit => 5 );
     $c->stash->{'problemhosts'} = $problemhosts;
     $c->stash->{'problemservices'} = $problemservices;
@@ -276,6 +247,41 @@ sub index {
 }
 
 ##########################################################
+sub _notifications {
+    my($c, $hostfilter, $host_lookup) = @_;
+    my $start            = time() - 90000; # last 25h
+    my $notificationData = _notifications_data($c, $start);
+    my $notificationHash = {};
+    my $time = $start;
+    while ($time <= time()) {
+        my $curDate = POSIX::strftime("%F %H:00", localtime($time));
+        $notificationHash->{$curDate} = 0;
+        $time += 3600;
+    }
+
+    my($selected_backends) = $c->db->select_backends('get_logs', []);
+    for my $ts ( sort keys %{$notificationData} ) {
+        my $date = POSIX::strftime("%F %H:00", localtime($ts));
+        for my $backend (@{$selected_backends}) {
+            next unless $notificationData->{$ts}->{$backend};
+            for my $n ( @{$notificationData->{$ts}->{$backend}} ) {
+                next unless(!$hostfilter || $host_lookup->{$n->{'host_name'}});
+                $notificationHash->{$date}++;
+            }
+        }
+    }
+
+    my $notifications = [["x"], ["Notifications"]];
+    my @keys = sort keys %{$notificationHash};
+    @keys = splice(@keys, 1);
+    for my $key (@keys) {
+        push(@{$notifications->[0]}, $key);
+        push(@{$notifications->[1]}, $notificationHash->{$key});
+    }
+    return($notifications);
+}
+
+##########################################################
 sub _notifications_data {
     my($c, $start) = @_;
 
@@ -284,7 +290,23 @@ sub _notifications_data {
 
     # update cache every 60sec
     my $age = $cache->age();
-    if(defined $age && $age < 60) { return($cached); }
+    if(!defined $age || $age > 60) {
+        require Thruk::Utils::External;
+        my $job = Thruk::Utils::External::perl($c, {
+                    expr       => 'Thruk::Controller::main::_notifications_update_cache($c, '.$start.')',
+                    background => 1,
+                    clean      => 1,
+        });
+}
+
+    return($cached);
+}
+
+##########################################################
+sub _notifications_update_cache {
+    my($c, $start) = @_;
+    my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/notifications.cache');
+    my $cached = $cache->get->{'notifications'} || {};
     $cache->touch(); # update timestamp to avoid multiple parallel updates
 
     # clear old entries
@@ -315,7 +337,7 @@ sub _notifications_data {
         push @{$cached->{$hour}->{$n->{'peer_key'}}}, $n;
     }
     $cache->set('notifications', $cached);
-    return($cached);
+    return($cached, 0);
 }
 
 ##########################################################

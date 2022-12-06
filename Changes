@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - fix internal server error when adding second bookmark (#1220)
+          - improve log access on start page
           - panorama:
             - improve full page reload if site is temporarily not available
 
