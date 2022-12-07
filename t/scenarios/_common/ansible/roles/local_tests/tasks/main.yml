@@ -1,3 +1,11 @@
+- stat: path=/usr/share/doc/diffutils
+  register: diff_path
+- stat: path=/usr/share/doc/perl-Test-Harness
+  register: TH_path
+- stat: path=/usr/share/doc/perl-ExtUtils-Manifest
+  register: EM_path
+- stat: path=/usr/share/doc/perl-ExtUtils-Install
+  register: EI_path
 - name: "yum install local test perl depdendencies"
   yum:
     name:
@@ -10,6 +18,8 @@
   retries: 30
   until: result is succeeded
   delay: 10
+  # hack because ansibles takes over 10seconds, even if it does not install anything
+  when: not diff_path.stat.exists or not TH_path.stat.exists or not EM_path.stat.exists or not EI_path.stat.exists
 - lineinfile:
     path: /etc/locale.conf
     regexp: '^LANG='

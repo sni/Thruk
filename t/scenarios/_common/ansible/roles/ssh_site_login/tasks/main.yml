@@ -1,7 +1,11 @@
+- stat: path=/usr/bin/passwd
+  register: passwd_path
 - package:
     name:
       - passwd
     state: present
+  # hack because ansibles takes over 10seconds, even if it does not install anything
+  when: not passwd_path.stat.exists
 - shell: sudo su - {{ site }} -c "mkdir .ssh && chmod 700 .ssh && ssh-keygen -t rsa -f .ssh/id_rsa -N '' && cp .ssh/id_rsa.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys"
 - name: create .ssh/config
   copy:
