@@ -1,8 +1,13 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
-          - fix internal server error when adding second bookmark (#1220)
+          - show notice if dependencies fail
+          - add dependency graph for hosts/services
+          - add colored badge on extinfo page if host or parents fail
           - improve log access on start page
+          - improve custom variables box style to match the other cards
+          - fix internal server error when adding second bookmark (#1220)
+          - fix embedded 3rd party links if startpage is set
           - panorama:
             - improve full page reload if site is temporarily not available
 
