@@ -58,11 +58,12 @@
     }
     return(true);
   }
-  [% IF c.config.start_page != '' %]
-    window.location.hash = '#[% c.config.start_page %]';
-  [% END %]
   if(!redirect_legacy_hash_url()) {
-    window.location = "./cgi-bin/main.cgi";
+    [% IF c.config.start_page != '' %]
+      window.location.hash = '[% c.config.start_page %]';
+    [% ELSE %]
+      window.location = "./cgi-bin/main.cgi";
+    [% END %]
   }
 
   window.onhashchange = function(e) {
