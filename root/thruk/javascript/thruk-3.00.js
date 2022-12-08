@@ -9125,12 +9125,12 @@ function overcard(options) {
     var container = doc.getElementById(containerId);
     if(!container) {
         var containerHTML = ""
-            +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen" id="'+containerId+'">'
+            +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen overflow-hidden" id="'+containerId+'">'
             +'<div class="head justify-between">'
             +'<h3 id="'+containerId+'_head"><\/h3>'
             +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
             +'<\/div>'
-            +'<div class="'+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
+            +'<div class="overflow-y-auto max-h-[88vh] '+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
             +'<\/div>';
         jQuery(containerHTML).appendTo(jQuery("MAIN", doc));
         container = doc.getElementById(containerId);
