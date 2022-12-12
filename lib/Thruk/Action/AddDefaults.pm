@@ -101,7 +101,7 @@ sub begin {
     $c->stash->{hidetop} = $c->req->parameters->{'hidetop'} // '';
 
     # hide navigation
-    $c->stash->{show_nav} = $c->req->parameters->{'nav'} // 1;
+    $c->stash->{show_nav} = (defined $c->req->parameters->{'nav'} && $c->req->parameters->{'nav'} eq '0') ? 0 : 1;
 
     # minmal custom monitor screen
     $c->stash->{minimal} = $c->req->parameters->{'minimal'} || '';
