@@ -106,7 +106,7 @@
 
 # demo 7 site
   - name: "omd config change"
-    shell: "omd config demo6 change"
+    shell: "omd config demo7 change"
     args:
       stdin: |
         LIVESTATUS_TCP=on
