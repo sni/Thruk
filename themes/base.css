@@ -558,6 +558,7 @@ A I.fa-solid, A I.uil {
   @apply w-fit h-[calc(100vh-50px)] z-50 mt-[50px] hidden absolute;
 }
 BODY:not(.topnav) {
+  /* make side navigation go into hover mode at 1024px screen width */
   #navbar {
     @apply lg:h-screen lg:mt-0 lg:block lg:relative;
   }
