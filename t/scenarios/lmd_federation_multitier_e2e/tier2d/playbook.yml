@@ -3,11 +3,8 @@
   roles:
     - role: common
   tasks:
-  - name: "omd config change"
-    shell: "omd config demo change"
-    args:
-      stdin: |
-        THRUK_COOKIE_AUTH=off
+  - name: "omd config "
+    shell: "omd config demo set THRUK_COOKIE_AUTH off"
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
