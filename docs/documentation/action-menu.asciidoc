@@ -104,6 +104,23 @@ itself can be a function again to create more dynamic menus.
 All defined functions are running in the same namespace, so make sure your functions use uniq names over all your menus. Best practice is to use the filename as prefix.
 =======
 
+[TIP]
+.user data
+=======
+{% include new_since.ad version="3.02" %}
+
+The current user with its roles and groups is available in the `thruk_user` variable and can be used to make your menu depend on user attributes.
+ex.:
+
+  {
+    "name":"thrukadmin",
+    "groups":["example"],
+    "roles":["authorized_for_admin","authorized_for_all_host_commands",,...],
+    "can_submit_commands":true,
+    "readonly":false
+  }
+=======
+
 A very simple example:
 
 .action_menus/js_basic_menu.js
@@ -223,6 +240,27 @@ server actions.
   "label":"service restart",
   "action":"server://restart_service",
   "onclick": "return(confirm('Really restart service?'));"
+}
+{% endraw %}
+.....
+
+
+=== Hide Menu Item for Readonly Users
+
+{% include new_since.ad version="3.02" %}
+With the hidden attribute items can be made invisible.
+server actions.
+In this example the item is made hidden if the user has the readonly role.
+
+.action_menus/hidden_items.json
+.....
+{% raw %}
+{
+  "icon":"uil-redo",
+  "label":"service restart",
+  "action":"server://restart_service",
+  "onclick": "return(confirm('Really restart service?'));",
+  "hidden": thruk_user.readonly
 }
 {% endraw %}
 .....

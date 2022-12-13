@@ -2235,6 +2235,7 @@ A menu has the following attributes:
                           - an unicon icon when startin with `uil-` (link:https://iconscout.com/unicons/explore/line[list of unicon icons])
                           - a font-awesome icon when startin with `fa-` (link:https://fontawesome.com/search?o=r&m=free&s=solid[list of font awesome icons])
      ** `title`         title of the menu, will be display on mouse over.
+     ** `hidden`        menu will be hidden if true.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
      ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
 
@@ -2259,6 +2260,7 @@ The menu item can have the following attributes:
      ** `onclick`       confirmation dialog or any other callback, ex: "return(confirm('Really restart service?'));"
      ** `close_timeout` timeout till the result popup will close, defaults to 5 seconds if ok or 30 seconds if failed. Set to zero to never close the result popup.
      ** `disabled`      menu item will be disabled.
+     ** `hidden`        menu item will be hidden if true.
      ** `html`          raw html code instead of any other logic.
      ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
 

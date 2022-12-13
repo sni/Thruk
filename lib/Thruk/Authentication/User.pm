@@ -3,6 +3,7 @@ package Thruk::Authentication::User;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cpanel::JSON::XS ();
 
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();

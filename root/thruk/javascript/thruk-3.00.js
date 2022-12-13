@@ -4844,6 +4844,10 @@ function print_action_menu(src, options) {
                 }
             });
 
+            if(el.hidden) {
+                jQuery(item).addClass("hidden");
+            }
+
             scriptTag.parentNode.appendChild(item);
             if(show_title && icon.title) {
                 var title = document.createTextNode(replace_macros(icon.title, undefined, options));
@@ -5101,6 +5105,11 @@ function actionGetMenuItem(el, id, backend, host, service) {
         // must be added as callback, otherwise the order of the binds gets mixed up and "onclick confirms" would be called after the click itself
         check_server_action(id, link, backend, host, service, undefined, undefined, undefined, el);
     });
+
+    if(el.hidden) {
+        jQuery(item).addClass("hidden");
+    }
+
     return(item);
 }
 
