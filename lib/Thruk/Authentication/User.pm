@@ -600,4 +600,23 @@ sub has_group {
     return(1);
 }
 
+=head2 js_data
+
+ js_data()
+
+ returns user data exposed to javascript
+
+=cut
+
+sub js_data {
+    my($self) = @_;
+    return({
+        name                => $self->{'username'},
+        groups              => $self->{'groups'},
+        roles               => $self->{'roles'},
+        can_submit_commands => $self->{'can_submit_commands'} ? Cpanel::JSON::XS::true  : Cpanel::JSON::XS::false,
+        readonly            => $self->{'can_submit_commands'} ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
+    });
+}
+
 1;

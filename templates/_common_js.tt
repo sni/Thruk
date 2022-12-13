@@ -28,6 +28,7 @@
 [% IF c.user_exists %]
   var remote_user         = '[% remote_user %]';
   var remote_groups       = [% json_encode(c.user.groups) %];
+  var thruk_user          = [% json_encode(c.user.js_data) %];
 [% END %]
   var omd_site            = '[% omd_site %]';
   var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';
