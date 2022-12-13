@@ -98,7 +98,6 @@ sub begin {
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;
     }
-    $c->stash->{hidetop} = $c->req->parameters->{'hidetop'} // '';
 
     # hide navigation
     $c->stash->{show_nav} = (defined $c->req->parameters->{'nav'} && $c->req->parameters->{'nav'} eq '0') ? 0 : 1;
@@ -240,7 +239,7 @@ sub end {
         }
     }
 
-    $c->stash->{hidetop} = $c->stash->{hidetop} // $c->config->{hidetop} // 'auto';
+    $c->stash->{hidetop} = $c->req->parameters->{hidetop} // $c->stash->{hidetop} // $c->config->{hide_top} // 'auto';
     if($c->stash->{hidetop} eq 'auto' || $c->stash->{hidetop} eq '') {
         $c->stash->{hidetop} = 1;
         if($c->cookies('thruk_screen')) {
