@@ -139,6 +139,7 @@ prepare: base_images
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"
+	docker-compose down -v --rmi all
 	docker-compose kill -s INT
 	docker-compose kill
 	docker-compose rm -f
