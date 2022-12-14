@@ -376,7 +376,14 @@ sub add_defaults {
     $safe = ADD_DEFAULTS unless defined $safe;
 
     confess("no c?") unless defined $c;
-    $c->stats->profile(begin => "AddDefaults::add_defaults");
+    my $safe_name = "";
+    for my $name (keys %Thruk::Constants::add_defaults) {
+        if($Thruk::Constants::add_defaults{$name} == $safe) {
+            $safe_name = $name;
+            last;
+        }
+    }
+    $c->stats->profile(begin => "AddDefaults::add_defaults(".$safe_name.")");
 
     ###############################
     # user / group specific config?
@@ -619,7 +626,7 @@ sub add_defaults {
     Thruk::Utils::Menu::read_navigation($c);
 
     ###############################
-    $c->stats->profile(end => "AddDefaults::add_defaults");
+    $c->stats->profile(end => "AddDefaults::add_defaults(".$safe_name.")");
     return 1;
 }
 

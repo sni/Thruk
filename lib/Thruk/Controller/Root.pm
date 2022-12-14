@@ -200,7 +200,11 @@ page: /thruk/cgi-bin/job.cgi
 
 sub job_cgi {
     my( $c ) = @_;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    # use cached and safe defaults
+    eval {
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
+    };
+    _debug("adding defaults failed: ".$@) if $@;
     require Thruk::Utils::External;
     return Thruk::Utils::External::job_page($c);
 }

@@ -60,7 +60,7 @@ $EXPORT_TAGS{peer_states} = [keys %peer_states];
 
 ###################################################
 # available AddDefaults variants
-my %add_defaults = (
+our %add_defaults = (
     ADD_DEFAULTS        => 0,
     ADD_SAFE_DEFAULTS   => 1,
     ADD_CACHED_DEFAULTS => 2,
