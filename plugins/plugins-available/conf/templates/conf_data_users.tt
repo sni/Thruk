@@ -137,7 +137,11 @@
               <tr>
                 <th class="w-48 align-top">Authoritive Backends</th>
                 <td>
-                  <div class="truncate max-w-[400px]">[% FOREACH peer_key IN profile_user.contact_src_peer %][% IF !loop.first %], [% END %]<span title="[% peer_key %]">[% peer_name(peer_key) %]</span>[% END %]</div>
+                  <div class="truncate max-w-[400px]">
+                    [% FOREACH peer_key IN profile_user.contact_src_peer %][% IF !loop.first %], [% END %]<span title="[% peer_key %]">[% peer_name(peer_key) %]</span>[% END %]
+                    [% IF profile_user.contact_src_peer.size == 0 %]all backends
+                    [% END %]
+                  </div>
                 </td>
               </tr>
               <tr>
