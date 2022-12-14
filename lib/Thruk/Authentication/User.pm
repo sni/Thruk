@@ -124,18 +124,6 @@ sub set_dynamic_attributes {
 
     $self->_apply_user_data($c, $data);
 
-    $self->{'alias'}                   = $data->{'alias'} // $self->{'alias'};
-    $self->{'email'}                   = $data->{'email'} // $self->{'email'};
-    $self->{'roles_from_groups'}       = $data->{'roles_by_group'};
-    $self->{'groups'}                  = $data->{'contactgroups'} || [];
-    $self->{'can_submit_commands'}     = $data->{'can_submit_commands'};
-    $self->{'can_submit_commands_src'} = $data->{'can_submit_commands_src'};
-    $self->{'contact_src_peer'}        = $data->{'contact_src_peer'} // [];
-    $self->{'timestamp'}               = $data->{'timestamp'};
-    for my $role (@{$data->{'roles'}}) {
-        push @{$self->{'roles'}}, $role;
-    }
-
     $self->clean_roles($roles);
 
     if($self->check_user_roles('admin')) {
@@ -263,36 +251,49 @@ sub _apply_user_data {
         }
     }
 
+    push @{$self->{'roles'}}, @{$roles};
+
     # override can_submit_commands from cgi.cfg
-    if(grep /authorized_for_all_host_commands/mx, @{$roles}) {
+    if(grep /authorized_for_all_host_commands/mx, @{$self->{'roles'}}) {
         $can_submit_commands     = 1;
-        $can_submit_commands_src = "all_host_commands role";
+        $can_submit_commands_src = "authorized_for_all_host_commands role";
     }
-    elsif(grep /authorized_for_all_service_commands/mx, @{$roles}) {
+    elsif(grep /authorized_for_all_service_commands/mx, @{$self->{'roles'}}) {
         $can_submit_commands     = 1;
-        $can_submit_commands_src = "all_service_commands role";
+        $can_submit_commands_src = "authorized_for_all_service_commands role";
     }
-    elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
+    elsif(grep /authorized_for_system_commands/mx, @{$self->{'roles'}}) {
         $can_submit_commands     = 1;
-        $can_submit_commands_src = "system_commands role";
+        $can_submit_commands_src = "authorized_for_system_commands role";
     }
-    elsif(grep /authorized_for_read_only/mx, @{$roles}) {
+    elsif(grep /authorized_for_read_only/mx, @{$self->{'roles'}}) {
         # read_only role already supplied via cgi.cfg, enforce
         $can_submit_commands = 0;
-        $can_submit_commands_src = "read only role";
+        $can_submit_commands_src = "authorized_for_read_only role";
     }
 
     _debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
-        if(!grep /authorized_for_read_only/mx, @{$roles}) {
+        if(!grep /authorized_for_read_only/mx, @{$self->{'roles'}}) {
             push @{$roles}, 'authorized_for_read_only';
         }
     }
+
 
     $data->{'roles'}                   = Thruk::Base::array_uniq($roles);
     $data->{'can_submit_commands'}     = $can_submit_commands;
     $data->{'can_submit_commands_src'} = $can_submit_commands_src;
     $data->{'roles_by_group'}          = $roles_by_group;
+
+    $self->{'alias'}                   = $data->{'alias'} // $self->{'alias'};
+    $self->{'email'}                   = $data->{'email'} // $self->{'email'};
+    $self->{'roles_from_groups'}       = $data->{'roles_by_group'};
+    $self->{'groups'}                  = $data->{'contactgroups'} || [];
+    $self->{'can_submit_commands'}     = $data->{'can_submit_commands'};
+    $self->{'can_submit_commands_src'} = $data->{'can_submit_commands_src'};
+    $self->{'contact_src_peer'}        = $data->{'contact_src_peer'} // [];
+    $self->{'timestamp'}               = $data->{'timestamp'};
+    push @{$self->{'roles'}}, @{$roles};
 
     return;
 }
