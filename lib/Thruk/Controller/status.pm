@@ -1066,7 +1066,7 @@ sub _process_summary_page {
 sub _process_combined_page {
     my( $c ) = @_;
 
-    $c->stash->{hidetop}                = 1 unless $c->stash->{hidetop} ne '';
+    $c->stash->{hidetop}                = 1 unless defined $c->stash->{hidetop};
     $c->stash->{show_substyle_selector} = 0;
     $c->stash->{'show_column_select'}   = 1;
     $c->stash->{show_top_pane}          = 0;

@@ -82,7 +82,7 @@ sub index {
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
     $c->stash->{show_top_pane} = $id ? 0 : 1;
-    $c->stash->{hidetop} = 1 if($c->stash->{hidetop} eq '' && $action ne 'show');
+    $c->stash->{hidetop} = 1 if(!defined $c->stash->{hidetop} && $action ne 'show');
 
     Thruk::Utils::ssi_include($c);
 

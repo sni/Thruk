@@ -145,6 +145,7 @@ sub begin {
             }
         }
     }
+    $c->stash->{hidetop} = $c->req->parameters->{hidetop} if defined $c->req->parameters->{hidetop};
 
     $c->stash->{'action_menus_inserted'} = {};
 
@@ -239,7 +240,7 @@ sub end {
         }
     }
 
-    $c->stash->{hidetop} = $c->req->parameters->{hidetop} // $c->stash->{hidetop} // $c->config->{hide_top} // 'auto';
+    $c->stash->{hidetop} = $c->stash->{hidetop} // $c->config->{hide_top} // 'auto';
     if($c->stash->{hidetop} eq 'auto' || $c->stash->{hidetop} eq '') {
         $c->stash->{hidetop} = 1;
         if($c->cookies('thruk_screen')) {
