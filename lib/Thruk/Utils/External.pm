@@ -70,8 +70,8 @@ sub cmd {
     my($id,$dir) = init_external($c);
     return unless $id;
 
-    my $parent_res = _fork_twice($c, $id, $dir, $conf);
-    return $parent_res if $parent_res;
+    my($is_parent, $parent_res) = _fork_twice($c, $id, $dir, $conf);
+    return $parent_res if $is_parent;
 
     do_child_stuff($c, $dir, $id);
     $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
@@ -125,8 +125,8 @@ sub perl {
     my ($id,$dir) = init_external($c);
     return unless $id;
 
-    my $parent_res = _fork_twice($c, $id, $dir, $conf);
-    return $parent_res if $parent_res;
+    my($is_parent, $parent_res) = _fork_twice($c, $id, $dir, $conf);
+    return $parent_res if $is_parent;
 
     if(defined $conf->{'backends'}) {
         $c->db->disable_backends();
@@ -562,6 +562,11 @@ sub get_result {
             html => -e $htmlfile ? Thruk::Utils::IO::read($htmlfile) : undef,
             text => $text,
         };
+        my $dbfile = $p;
+        $dbfile =~ s/\.log\./.db./gmx;
+        if(-f $dbfile) {
+            push @{$profiles}, Thruk::Utils::IO::json_lock_retrieve($dbfile);
+        }
     }
 
     return($out,$err,$time,$dir,$stash,$rc,$profiles,$start[9],$end[9],$perl_res);
@@ -708,9 +713,13 @@ sub save_profile {
     eval {
         $profile = $c->stats->report()."\n";
     };
-    $profile = $@."\n" if $@;
+    my $err = $@;
+    $profile = $err."\n" if $err;
+    return if($c->stats->{'total_time'} == 0 && !$err);
     Thruk::Utils::IO::write($file, $profile);
     $c->stats->{'_saved_to'} = $file;
+
+    Thruk::Utils::IO::write($file, Carp::longmess("saved"), undef, 1);
 
     $profile = "";
     eval {
@@ -719,6 +728,13 @@ sub save_profile {
     $profile = $@."\n" if $@;
     $file =~ s/profile\.log/profile.html/gmx;
     Thruk::Utils::IO::write($file, $profile);
+
+    if($c->stash->{'db_profiles'} && $c->user && $c->user->check_user_roles('admin')) {
+        $file =~ s/profile\.html/profile.db/gmx;
+        my $db_profile = Thruk::Utils::render_db_profile($c, 'Job '.$ENV{'THRUK_JOB_ID'}.' DB', $c->stash->{'db_profiles'});
+        Thruk::Utils::IO::json_lock_store($file, $db_profile, { pretty => 1 });
+        delete $c->stash->{'db_profiles'};
+    }
 
     return;
 }
@@ -739,11 +755,12 @@ sub do_child_stuff {
 
     _decouple_fcgid();
 
-    $c->stats->clear();
+    $c->stats->clear(); # start new stats session
     $c->stash->{'total_backend_waited'} = 0;
     $c->stash->{'total_render_waited'}  = 0;
     $c->stats->profile(begin => 'External Job: '.$id) if $id;
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s', (scalar localtime), $c->config->{'hostname'}, $$));
+    delete $c->stash->{'db_profiles'};
 
     delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
@@ -1015,6 +1032,7 @@ sub _finished_job_page {
     my($c, $stash, $forward, $out) = @_;
     if(defined $stash and keys %{$stash} > 0) {
         my $cleanup = $stash->{'job_conf'}->{'clean'} ? 1 : 0;
+           $cleanup = 0 if $ENV{'TEST_AUTHOR'};
         $c->res->headers->header( @{$stash->{'res_header'}} ) if defined $stash->{'res_header'};
         $c->res->headers->content_type($stash->{'res_ctype'}) if defined $stash->{'res_ctype'};
         if(defined $stash->{'file_name'}) {
@@ -1117,7 +1135,7 @@ sub _fork_twice {
     if($pid) {
         my $parent_res = do_parent_stuff($c, $dir, $id, $conf);
         waitpid($pid, 0);
-        return $parent_res;
+        return(1, $parent_res);
     }
 
     # fork twice to completly detach
@@ -1129,7 +1147,7 @@ sub _fork_twice {
         exit;
     }
 
-    return;
+    return(0, undef);
 }
 
 ##############################################

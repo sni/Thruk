@@ -2915,7 +2915,7 @@ sub fork_http_peer {
 ########################################
 sub _add_query_stats {
     my($c, $elapsed, $function, $args, $meta, $comment) = @_;
-    return unless $ENV{'THRUK_PERFORMANCE_DEBUG'};
+    return unless($ENV{'THRUK_PERFORMANCE_DEBUG'} || $ENV{'THRUK_JOB_ID'});
 
     $c->stash->{'total_backend_waited'} += $elapsed;
     $c->stash->{'total_backend_queries'}++;

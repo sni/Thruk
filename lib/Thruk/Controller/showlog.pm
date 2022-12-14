@@ -28,7 +28,7 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     return if Thruk::Utils::External::render_page_in_background($c);
 
