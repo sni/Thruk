@@ -532,7 +532,7 @@ sub get_result {
         }
     }
     if(!defined $end[9]) {
-        $end[9] = time();
+        $end[9] = Time::HiRes::time();
         $err    = 'job was killed';
         _error('killed job: '.$dir);
         my $folder = Thruk::Utils::IO::cmd("ls -la $dir");
@@ -718,8 +718,6 @@ sub save_profile {
     return if($c->stats->{'total_time'} == 0 && !$err);
     Thruk::Utils::IO::write($file, $profile);
     $c->stats->{'_saved_to'} = $file;
-
-    Thruk::Utils::IO::write($file, Carp::longmess("saved"), undef, 1);
 
     $profile = "";
     eval {

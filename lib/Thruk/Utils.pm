@@ -3815,6 +3815,7 @@ sub render_db_profile {
         name => $name,
         text => "text",
         html => $data,
+        time => Time::HiRes::time(),
     };
 
     return($profile);

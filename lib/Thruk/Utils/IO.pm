@@ -183,7 +183,11 @@ sub write {
     open(my $fh, $mode, $path) or confess('cannot create file '.$path.': '.$!);
     print $fh $content;
     &close($fh, $path) or confess("cannot close file ".$path.": ".$!);
-    utime($mtime, $mtime, $path) if $mtime;
+    if(Time::HiRes->can('utime')) {
+        Time::HiRes::utime($mtime, $mtime, $path) if $mtime;
+    } else {
+        utime($mtime, $mtime, $path) if $mtime;
+    }
     return 1;
 }
 
@@ -826,7 +830,7 @@ create file if not exists and update timestamp
 =cut
 sub touch {
     my($file) = @_;
-    &write($file, "", time(), 1);
+    &write($file, "", Time::HiRes::time(), 1);
     return;
 }
 
