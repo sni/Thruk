@@ -2928,7 +2928,7 @@ sub _add_query_stats {
         query             => delete $ENV{'THRUK_DB_LAST_QUERY'},
         comment           => $comment,
     };
-    $profile->{'stack'} = Carp::longmess($function) if $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1;
+    $profile->{'stack'} = Carp::longmess($function) if(defined $ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1);
     if(ref $args eq 'ARRAY' && scalar @{$args} % 2 == 0) {
         my %arg = @{$args};
         $profile->{'filter'} = $arg{'filter'} if defined $arg{'filter'};
