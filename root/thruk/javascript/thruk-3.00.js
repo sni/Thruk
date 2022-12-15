@@ -1716,7 +1716,9 @@ function window_location_replace(url) {
 
 /* redirect to new url, but only after precheck url succeeds */
 function redirect_url_after_preCheck(newUrl, preCheckUrl, preCheckRetrySeconds) {
-    if(!preCheckRetrySeconds) { preCheckRetrySeconds = 30; }
+    if(!preCheckRetrySeconds || !jQuery.isNumeric(preCheckRetrySeconds)) {
+        preCheckRetrySeconds = 30;
+    }
     jQuery.ajax({
         url: preCheckUrl,
         type: 'POST',
@@ -4565,7 +4567,7 @@ function submitFormInBackground(form, cb, extraData) {
 
 function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
     var form = jQuery(btn).parents('FORM');
-    submitFormInBackground(form, reloadPage, extraData);
+    submitFormInBackground(form, function() { reloadPage() }, extraData);
     setBtnSpinner(btn, skipTimeout);
     return(false);
 }
