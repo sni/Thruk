@@ -231,7 +231,7 @@ my $base_defaults = {
     },
     'physical_logo_path'                    => [],
     'all_in_one_javascript'                 => [
-                'vendor/jquery-3.5.1.min.js',
+                'vendor/jquery-3.6.2.min.js',
                 'javascript/thruk-'.$VERSION.'.js',
                 'vendor/daterangepicker-3.0.5/moment.min.js',
                 'vendor/daterangepicker-3.0.5/daterangepicker.js',
@@ -240,7 +240,7 @@ my $base_defaults = {
     ],
     'jquery_ui'                             => '1.13.1',
     'all_in_one_javascript_panorama'        => [
-                'vendor/jquery-3.5.1.min.js',
+                'vendor/jquery-3.6.2.min.js',
                 'javascript/thruk-'.$VERSION.'.js',
                 'vendor/extjs_ux/form/MultiSelect.js',
                 'vendor/extjs_ux/form/ItemSelector.js',

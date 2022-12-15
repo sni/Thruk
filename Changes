@@ -12,6 +12,8 @@ next:
           - fix embedded 3rd party links if startpage is set
           - panorama:
             - improve full page reload if site is temporarily not available
+          - internals:
+            - update jquery to 3.6.2
 
 3.00     Mon Nov 14 14:50:14 CET 2022
           - complete design rework
