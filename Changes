@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.02     Thu Dec 15 20:56:30 CET 2022
           - show notice if dependencies fail
           - add dependency graph for hosts/services
           - add colored badge on extinfo page if host or parents fail
