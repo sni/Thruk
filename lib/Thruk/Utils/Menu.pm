@@ -99,9 +99,7 @@ sub add_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $link{'links'}  = [] unless defined $link{'links'};
-    $link{'target'} = _get_menu_target() unless defined $link{'target'};
-    $link{'href'}   = _get_menu_link($link{'href'}, $link{'target'});
-    $link{'html'}   = $link{'html'};
+    _set_menu_link(\%link);
     push(@{$last_section->{'links'}}, \%link);
     return;
 }
@@ -120,11 +118,9 @@ sub add_sub_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
-    $link{'target'}  = _get_menu_target() unless defined $link{'target'};
     $link{'links'}   = [] unless defined $link{'links'};
-    $link{'href'}    = _get_menu_link($link{'href'}, $link{'target'});
+    _set_menu_link(\%link);
     $link{'name'}    = "" unless defined $link{'name'};
-    $link{'html'}   = $link{'html'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -144,8 +140,7 @@ sub add_sub_sub_link {
     my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link     = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
     my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
-    $link{'target'}   = _get_menu_target() unless defined $link{'target'};
-    $link{'href'}     = _get_menu_link($link{'href'}, $link{'target'});
+    _set_menu_link(\%link);
     $link{'name'}     = "" unless defined $link{'name'};
     push(@{$last_sub_link->{'links'}}, \%link);
     return;
@@ -165,8 +160,7 @@ sub add_search {
     my %search = @_;
     my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $search{'search'} = 1;
-    $search{'target'} = _get_menu_target() unless defined $search{'target'};
-    $search{'href'}   = _get_menu_link($search{'href'});
+    _set_menu_link(\%search);
     push(@{$last_section->{'links'}}, \%search);
     return;
 }
@@ -401,9 +395,7 @@ sub _renew_navigation {
             }
 
             $link->{'links'}  = [] unless defined $link->{'links'};
-            $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
-            $link->{'href'}   = _get_menu_link($link->{'href'}, $link->{'target'});
-            $link->{'html'}   = $link->{'html'};
+            _set_menu_link($link);
 
             my $added = 0;
             if($link->{'before'}) {
@@ -456,9 +448,7 @@ sub _renew_navigation {
             }
 
             $link->{'links'}  = [] unless defined $link->{'links'};
-            $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
-            $link->{'href'}   = _get_menu_link($link->{'href'}, $link->{'target'});
-            $link->{'html'}   = $link->{'html'};
+            _set_menu_link($link);
 
             push(@{$sublink->{'links'}}, $link);
         }
@@ -515,14 +505,6 @@ sub _renew_navigation {
 }
 
 ##############################################
-
-=head2 _get_menu_target
-
-  _get_menu_target()
-
-returns the current prefered target
-
-=cut
 sub _get_menu_target {
     my $c = $Thruk::Globals::c;
 
@@ -535,26 +517,29 @@ sub _set_menu_target {
 }
 
 ##############################################
-
-=head2 _get_menu_link
-
-  _get_menu_link()
-
-returns the link with prefix
-
-=cut
-sub _get_menu_link {
-    my($link, $target) = @_;
-    return '' unless defined $link;
+sub _set_menu_link {
+    my($link) = @_;
     my $c = $Thruk::Globals::c;
+
+    $link->{'href'}   = $link->{'href'}   // '';
+    $link->{'target'} = $link->{'target'} // '';
+
+    my $href = $link->{'href'};
+    return unless $href;
+
     my $product = $c->config->{'product_prefix'};
-    if($link =~ s|^\Q/thruk/\E||mx || $link =~ s|^\Q$product\E/||mx) {
-        return($c->stash->{'url_prefix'}.$link);
+    if($href =~ s|^\Q/thruk/\E||mx || $href =~ s|^\Q$product\E/||mx) {
+        $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
+        $link->{'href'}   = $c->stash->{'url_prefix'}.$href;
+        return;
     }
-    if(!$target) {
-        return($c->stash->{'url_prefix'}.'#'.$link);
+    my $target = $link->{'target'} // _get_menu_target();
+    if(!$target || $target eq 'main') {
+        $link->{'target'} = '';
+        $link->{'href'}   = $c->stash->{'url_prefix'}.'#'.$href;
+        push @{$c->stash->{'allowed_frame_links'}}, $href;
     }
-    return $link;
+    return;
 }
 
 

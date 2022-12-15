@@ -41,11 +41,11 @@
     } else {
       // external url requires iframe
       // check permissions against allowed_frame_links
+      var page = new URL(pageurl);
       var allowed = false;
-      var pagehost = pageurl.replace(/^https?:/, '').replace(/^\/\//, '').replace(/\/.*$/, '');
       jQuery(allowed_frame_links).each(function(i, u) {
-        u = u.replace(/^https?:/, '').replace(/^\/\//, '').replace(/\/.*$/, '');
-        if(pagehost.match(u)) {
+        var test = new URL(u, location);
+        if(page.hostname == test.hostname) {
           allowed = true;
         }
       });
@@ -53,7 +53,7 @@
         jQuery("#mainframe").html('<iframe src="'+pageurl+'" class="h-full w-full border-0"><\/iframe>');
         jQuery("FOOTER").remove();
       } else {
-        thruk_message(1, 'Url not allowed to be displayed in frame. Check allowed_frame_links configuration.');
+        thruk_message(1, 'This URL is not allowed to be embedded. Check <a href="https://thruk.org/documentation/configuration.html#_allowed_frame_links" target="_blank" class="textBody link"><i class="uil uil-external-link-alt text-sm"></i>allowed_frame_links</a> configuration.');
       }
     }
     return(true);

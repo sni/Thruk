@@ -103,7 +103,7 @@ sub thruk_main_html {
     $c->stash->{'template'}                = 'main_legacy.tt';
     $c->stash->{'no_auto_reload'}          = 1;
     $c->stash->{'inject_stats'}            = 0;
-    $c->stash->{'allowed_frame_links'}     = [@{$c->config->{'allowed_frame_links'}//[]}, $c->config->{'documentation_link'}];
+    $c->stash->{'allowed_frame_links'}     = [@{$c->stash->{'allowed_frame_links'}//[]}, @{$c->config->{'allowed_frame_links'}//[]}, $c->config->{'documentation_link'}];
     return 1;
 }
 
