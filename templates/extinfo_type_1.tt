@@ -89,7 +89,7 @@
           [% END %]
           [% IF host.notes_url_expanded %]
               <div>
-                <a href='[% host.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
+                <a href='[% l = set_target_link(host.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'>
                   <i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i>
                 </a>
               </div>
@@ -105,7 +105,7 @@
             [% IF host.action_url_expanded %]
               [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
               <div>
-                <a href='[% action_url %]' target='[% c.config.action_url_target %]'>
+                <a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'>
                   <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
                 </a>
               </div>

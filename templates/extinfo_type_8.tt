@@ -17,7 +17,7 @@
   <div class="flexcol text-center">
     [% IF servicegroup.action_url %]
       <div>
-        <a class="link" href='[% servicegroup.action_url %]' target='[% c.config.action_url_target %]' title='Perform Additional Actions On This Servicegroup'>
+        <a class="link" href='[% l = set_target_link(servicegroup.action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]' title='Perform Additional Actions On This Servicegroup'>
           <i class="fa-solid fa-chart-line text-4xl w-fit h-fit"></i><br>
           <font size="-1"><i>Extra Actions</i></font>
         </a>
@@ -26,7 +26,7 @@
 
     [% IF servicegroup.notes_url %]
       <div>
-        <a class="link" href='[% servicegroup.notes_url %]' target='[% c.config.notes_url_target %]' title='View Additional Notes For This Servicegroup'>
+        <a class="link" href='[% l = set_target_link(servicegroup.notes_url, c.config.notes_url_target); l.0 %]' target='[% l.1 %]' title='View Additional Notes For This Servicegroup'>
           <i class="fa-solid fa-clipboard text-4xl w-fit h-fit"></i><br>
           <font size="-1"><i>Extra Notes</i></font>
         </a>

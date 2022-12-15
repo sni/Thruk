@@ -138,11 +138,11 @@
                     <td>
                       <div class="flex gap-x-1 justify-center">
                         [% IF h.notes_url_expanded %]
-                          <a href='[% h.notes_url_expanded %]' target='[% c.config.notes_url_target %]'><i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i></a>
+                          <a href='[% l = set_target_link(h.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i></a>
                         [% END %]
                         [% IF h.action_url_expanded %]
                           [% action_url = proxifiy_url(c, h, get_action_url(c, 2, 1, h.action_url_expanded, h)) %]
-                          <a href='[% action_url %]' target='[% c.config.action_url_target %]'><i class="fa-solid fa-chart-line clickable" title='Show Performance Chart'></i></a>
+                          <a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-chart-line clickable" title='Show Performance Chart'></i></a>
                         [% END %]
                         <a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]"><i class="fa-solid fa-magnifying-glass-arrow-right" title='View Extended Information For This Host'></i></a>
                         <a href="status.cgi?host=[% h.name | uri %]"><i class="fa-solid fa-bars" title='View Service Details For This Host'></i></a>

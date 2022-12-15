@@ -11,6 +11,7 @@ next:
           - fix internal server error when adding second bookmark (#1220)
           - fix embedded 3rd party links if startpage is set
           - fix embedded 3rd party links if target is set to main frame
+          - fix setting action_url_target/notes_url_target to main
           - panorama:
             - improve full page reload if site is temporarily not available
           - internals:

@@ -505,40 +505,11 @@ sub _renew_navigation {
 }
 
 ##############################################
-sub _get_menu_target {
-    my $c = $Thruk::Globals::c;
-
-    return($c->{'_menu_target'} ||= _set_menu_target($c));
-}
-sub _set_menu_target {
-    my($c) = @_;
-    return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
-    return('_self');
-}
-
-##############################################
 sub _set_menu_link {
     my($link) = @_;
-    my $c = $Thruk::Globals::c;
-
-    $link->{'href'}   = $link->{'href'}   // '';
-    $link->{'target'} = $link->{'target'} // '';
-
-    my $href = $link->{'href'};
-    return unless $href;
-
-    my $product = $c->config->{'product_prefix'};
-    if($href =~ s|^\Q/thruk/\E||mx || $href =~ s|^\Q$product\E/||mx) {
-        $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
-        $link->{'href'}   = $c->stash->{'url_prefix'}.$href;
-        return;
-    }
-    my $target = $link->{'target'} // _get_menu_target();
-    if(!$target || $target eq 'main') {
-        $link->{'target'} = '';
-        $link->{'href'}   = $c->stash->{'url_prefix'}.'#'.$href;
-        push @{$c->stash->{'allowed_frame_links'}}, $href;
-    }
+    my($href, $target) = Thruk::Utils::Filter::set_target_link($link->{'href'}, $link->{'target'});
+    $link->{'href'}   = $href;
+    $link->{'target'} = $target;
     return;
 }
 

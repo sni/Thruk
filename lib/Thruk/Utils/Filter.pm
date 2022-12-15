@@ -1616,6 +1616,52 @@ sub _replace_dollars {
 
 ########################################
 
+=head2 set_target_link
+
+  set_target_link($href, $target)
+
+returns updated url/target.
+
+=cut
+sub set_target_link {
+    my($href, $target) = @_;
+    my $c = $Thruk::Globals::c or die("not initialized!");
+
+    $href   = $href   // '';
+    $target = $target // '';
+
+    return($href, $target) unless $href;
+
+    my $product = $c->config->{'product_prefix'};
+    if($href =~ s|^\Q/thruk/\E||mx || $href =~ s|^\Q$product\E/||mx) {
+        $target = _get_menu_target() unless defined $target;
+        $href   = $c->stash->{'url_prefix'}.$href;
+        return($href, $target);
+    }
+    $target = $target // _get_menu_target();
+    if(!$target || $target eq 'main') {
+        $target = '';
+        $href   = $c->stash->{'url_prefix'}.'#'.$href;
+        push @{$c->stash->{'allowed_frame_links'}}, $href;
+    }
+
+    return($href, $target);
+}
+
+##############################################
+sub _get_menu_target {
+    my $c = $Thruk::Globals::c;
+
+    return($c->{'_menu_target'} ||= _set_menu_target($c));
+}
+sub _set_menu_target {
+    my($c) = @_;
+    return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
+    return('_self');
+}
+
+########################################
+
 =head2 is_icinga2
 
   is_icinga2($peer_key)
