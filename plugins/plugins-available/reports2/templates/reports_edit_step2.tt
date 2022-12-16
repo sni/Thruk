@@ -295,7 +295,7 @@
   [% ELSIF type == 'formlist' %]
     [% parent = fh %]
     [% parentvalue = value %]
-    <table class="cellspacing-y multiformlist" [% IF parent.draggable %]id="[% tblID = "table_" _ random_id(); tblID %]"[% END %]>
+    <table class="cellspacing-y multiformlist" id="[% tblID = "table_" _ random_id(); tblID %]">
       <tbody>
         <tr>
           [% IF parent.draggable %]
@@ -309,7 +309,7 @@
           [% END %]
         </tr>
         [% IF parent.multiple %]
-        <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')[% END %]" style="display: none;" id="formlist_row_0">
+        <tr[% IF parent.draggable %] class="sortable clickable" onmouseover="initTableRowSorting('[% tblID %]')"[% END %] style="display: none;" id="formlist_row_0">
           [% IF parent.draggable %]
             <td class="cursor-move"><i class="uil uil-draggabledots"></i></td>
           [% END %]
