@@ -1014,7 +1014,7 @@ sub _check_stale_check {
     return(0) unless $obj->{'in_check_period'};
 
     # do dependencies exist
-    return(0) unless scalar @{$obj->{'depends_exec'}} > 0;
+    return(0) unless(scalar @{$obj->{'depends_exec'}} > 0 || scalar @{$obj->{'parents'}} > 0);
 
     my $peer_key       = $obj->{'peer_key'};
     my $check_interval = $obj->{'check_interval'} * $c->stash->{'pi_detail'}->{$peer_key}->{'interval_length'};
