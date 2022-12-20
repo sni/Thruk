@@ -91,5 +91,3 @@
   - name: "thruk bp commit"
     shell: sudo su - demo -c "test -s /mnt/var/thruk_bp_generated.cfg || thruk bp commit"
   - shell: sudo su - demo -c "thruk cron install"
-  #- shell: yum -y install strace
-  #- shell: sudo su - demo -c "sed -i etc/init.d/apache -e 's%\(\$APACHE_BIN -f.*\)%rm -f tmp/trace.log/*; nohup strace -f -s 2000 -tt -ff -o tmp/trace.log \1 \&%'"
