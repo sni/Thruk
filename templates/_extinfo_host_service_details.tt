@@ -17,34 +17,43 @@ END
 %]
 
 [% BLOCK parent_obj %]
+  [% pObj = 0 %]
   [% IF parent.list.size == 1 %]
     <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">
     [% pID = parent %]
-    [% pObj = parent_nodes.$pID %]
-    [% state = hoststatetext(pObj) %]
+    [% IF parent_nodes.defined(pID) %]
+      [% pObj = parent_nodes.$pID %]
+      [% state = hoststatetext(pObj) %]
+    [% END %]
   [% ELSE %]
     <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">
     [% pID = parent.0 _ ';' _ parent.1 %]
-    [% pObj = parent_nodes.$pID %]
-    [% state = servicestatetext(pObj) %]
-  [% END %]
-
-  [% name = BLOCK %]
-    [% IF parent.list.size == 1 %]
-      [% parent | html %]
-    [% ELSE %]
-      [% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]
+    [% IF parent_nodes.defined(pID) %]
+      [% pObj = parent_nodes.$pID %]
+      [% state = servicestatetext(pObj) %]
     [% END %]
   [% END %]
 
-  [% IF color && pObj.state != 0 %]
-    <div class="badge [% state %] ">
+  [% IF pObj %]
+    [% name = BLOCK %]
+      [% IF parent.list.size == 1 %]
+        [% parent | html %]
+      [% ELSE %]
+        [% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]
+      [% END %]
+    [% END %]
+
+    [% IF color && pObj.state != 0 %]
+      <div class="badge [% state %] ">
+        [% name %]
+        [% IF pObj.acknowledged %]<i class="fa-solid fa-person-digging"></i>[% END %]
+        [% IF pObj.scheduled_downtime_depth %]<i class="fa-solid fa-moon align-sub"></i>[% END %]
+      </div>
+    [% ELSE %]
       [% name %]
-      [% IF pObj.acknowledged %]<i class="fa-solid fa-person-digging"></i>[% END %]
-      [% IF pObj.scheduled_downtime_depth %]<i class="fa-solid fa-moon align-sub"></i>[% END %]
-    </div>
+    [% END %]
   [% ELSE %]
-    [% name %]
+    <i class="fa-solid fa-exclamation round small yellow" title="could not find this object in parents list."></i>[% pID %]
   [% END %]
   </a>
 [% END %]

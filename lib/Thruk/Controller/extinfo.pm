@@ -901,6 +901,7 @@ sub _process_dtree_page {
 ##########################################################
 sub _fill_dependencies {
     my($c, $obj, $nodes, $edges) = @_;
+    return unless defined $obj;
 
     my($depends, $name, $id);
     if($obj->{'description'}) {
