@@ -373,18 +373,11 @@ sub end {
 =cut
 
 sub add_defaults {
-    my ($c, $safe, $no_config_adjustments) = @_;
-    $safe = ADD_DEFAULTS unless defined $safe;
-
+    my ($c, $flags, $no_config_adjustments) = @_;
     confess("no c?") unless defined $c;
-    my $safe_name = "";
-    for my $name (keys %Thruk::Constants::add_defaults) {
-        if($Thruk::Constants::add_defaults{$name} == $safe) {
-            $safe_name = $name;
-            last;
-        }
-    }
-    $c->stats->profile(begin => "AddDefaults::add_defaults(".$safe_name.")");
+
+    my($flags_hash, $flags_name) = _get_flags($flags);
+    $c->stats->profile(begin => "AddDefaults::add_defaults(".$flags_name.")");
 
     ###############################
     # user / group specific config?
@@ -414,7 +407,7 @@ sub add_defaults {
                 require Thruk::Backend::Manager;
                 $c->{'db'} = Thruk::Backend::Manager->new($pool);
             }
-            add_defaults($c, $safe, 1);
+            add_defaults($c, $flags, 1);
         }
     }
 
@@ -511,8 +504,8 @@ sub add_defaults {
         $c->stats->profile(begin => "AddDefaults::get_proc_info");
         my $last_program_restart = 0;
         my $retries = 3;
-        $retries = 1 if $safe; # but only once on safe/cached pages
-        local $ENV{'LIVESTATUS_RETRIES'} = 0 if $safe; # skip default retries
+        $retries = 1 if $flags; # but only once on safe/cached pages
+        local $ENV{'LIVESTATUS_RETRIES'} = 0 if $flags; # skip default retries
 
         my $err;
         for my $x (1..$retries) {
@@ -520,11 +513,11 @@ sub add_defaults {
             $c->db->reset_failed_backends($c);
 
             eval {
-                $last_program_restart = set_processinfo($c, $safe, $cached_data);
+                $last_program_restart = set_processinfo($c, $flags, $cached_data);
             };
             $err = $@;
             last unless $err;
-            _debug(sprintf("retry %d/%d (safe: %d), data source error: %s", $x, $retries, $safe, $err));
+            _debug(sprintf("retry %d/%d (flags: %s), data source error: %s", $x, $retries, $flags_name, $err));
             last if $x == $retries;
             sleep 1;
         }
@@ -536,7 +529,7 @@ sub add_defaults {
             } else {
                 _debug("data source error: $err");
             }
-            return 1 if $safe == ADD_SAFE_DEFAULTS;
+            return 1 if $flags_hash->{ADD_SAFE_DEFAULTS};
             return $c->detach('/error/index/9');
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
@@ -627,7 +620,7 @@ sub add_defaults {
     Thruk::Utils::Menu::read_navigation($c);
 
     ###############################
-    $c->stats->profile(end => "AddDefaults::add_defaults(".$safe_name.")");
+    $c->stats->profile(end => "AddDefaults::add_defaults(".$flags_name.")");
     return 1;
 }
 
@@ -905,18 +898,18 @@ set process info into stash
 
 =cut
 sub set_processinfo {
-    my($c, $safe, $cached_data) = @_;
+    my($c, $flags, $cached_data) = @_;
     my $last_program_restart = 0;
-    $safe = ADD_DEFAULTS unless defined $safe;
+    my($flags_hash, $flags_name) = _get_flags($flags);
 
-    $c->stats->profile(begin => "AddDefaults::set_processinfo");
+    $c->stats->profile(begin => "AddDefaults::set_processinfo(".$flags_name.")");
 
     # cached process info?
     my $processinfo;
     $cached_data->{'processinfo'} = {} unless defined $cached_data->{'processinfo'};
     my $fetch = 0;
     my($selected) = $c->db->select_backends('get_status');
-    if($safe) { # cached or safe
+    if($flags) { # cached or safe
         $processinfo = $cached_data->{'processinfo'};
         for my $key (@{$selected}) {
             if(!defined $processinfo->{$key} || !defined $processinfo->{$key}->{'program_start'}) {
@@ -927,7 +920,7 @@ sub set_processinfo {
     } else {
         $fetch = 1;
     }
-    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $safe == ADD_CACHED_DEFAULTS;
+    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $flags_hash->{ADD_CACHED_DEFAULTS};
     $fetch = 1 if $c->config->{'lmd_remote'};
     $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
@@ -978,7 +971,7 @@ sub set_processinfo {
         }
     }
 
-    $c->stats->profile(end => "AddDefaults::set_processinfo");
+    $c->stats->profile(end => "AddDefaults::set_processinfo(".$flags_name.")");
 
     return($last_program_restart);
 }
@@ -1389,5 +1382,24 @@ sub set_custom_title {
 }
 
 ########################################
+sub _get_flags {
+    my($flags) = @_;
+    my $flags_hash = {};
+    $flags = ADD_DEFAULTS unless defined $flags;
+    $flags = Thruk::Utils::list($flags);
+    my $flags_name = [];
+    for my $s (@{$flags}) {
+        for my $name (keys %Thruk::Constants::add_defaults) {
+            if($Thruk::Constants::add_defaults{$name} == $s) {
+                $flags_hash->{$name} = 1;
+                $name =~ s/ADD_(.*?)S/$1/gmx;
+                push @{$flags_name}, $name;
+                last;
+            }
+        }
+    }
+    $flags_name = join(",", @{$flags_name});
+    return($flags_hash, $flags_name);
+}
 
 1;
