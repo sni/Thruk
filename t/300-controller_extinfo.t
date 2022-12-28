@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 260;
+    plan tests => 261;
 }
 
 BEGIN {
@@ -13,7 +13,10 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-BEGIN { use_ok 'Thruk::Controller::extinfo' }
+BEGIN {
+    use_ok 'Thruk::Controller::extinfo';
+    use_ok 'Thruk::Utils::Encode';
+}
 
 my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
@@ -39,7 +42,7 @@ my $pages = [
         'type'          => 6,
         'recurring'     => 'save',
         'target'        => 'host',
-        'host'          => $host,
+        'host'          => Thruk::Utils::Encode::encode_utf8($host),
         'comment'       => 'automatic downtime',
         'send_type_1'   => 'month',
         'send_day_1'    => 1,
@@ -61,7 +64,7 @@ my $pages = [
         'type'      => 6,
         'recurring' => 'remove',
         'target'    => 'host',
-        'host'      => $host,
+        'host'      => Thruk::Utils::Encode::encode_utf8($host),
         'nr'        => 999,
       },
       redirect => 1,

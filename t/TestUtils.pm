@@ -241,11 +241,11 @@ sub test_page {
         $opts->{'method'} = uc($opts->{'method'});
         local $Data::Dumper::Indent = 0;
         local $Data::Dumper::Varname = $opts->{'method'};
-        ok($opts->{'url'}, $opts->{'method'}.' '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
+        ok($opts->{'url'}, $opts->{'method'}.' '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}).' '.Dumper($opts->{'post'}));
     } else {
         $opts->{'method'} = 'GET' unless $opts->{'method'};
         $opts->{'method'} = uc($opts->{'method'});
-        ok($opts->{'url'}, $opts->{'method'}.' '.$opts->{'url'});
+        ok($opts->{'url'}, $opts->{'method'}.' '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}));
     }
 
     my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'}, $opts->{'method'});
@@ -370,7 +370,7 @@ sub test_page {
         }
     }
     else {
-        ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or bail_out_req('request failed', $request, 1);
+        ok( $request->is_success, 'Request '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}).' should succeed' ) or bail_out_req('request failed', $request, 1);
     }
 
     # text that should appear
@@ -402,7 +402,7 @@ sub test_page {
         skip "skipped memory check", 1 if $ENV{'TEST_SKIP_MEMORY'};
         require Thruk::Backend::Pool;
         my $rsize = Thruk::Utils::IO::get_memory_usage($$);
-        ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
+        ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}));
     }
 
     # html valitidy
