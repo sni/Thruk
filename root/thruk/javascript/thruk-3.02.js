@@ -721,8 +721,10 @@ function openModalWindowUrl(url, callback) {
             jQuery('#modalFG DIV.spinner').hide();
         } else {
             init_page();
-            jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
-            jQuery('#modalFG H3, #modalFG .head').css("cursor", "move");
+            if(jQuery('#modalFG .card').draggable) {
+                jQuery('#modalFG .card').draggable({ handle: "H3, .head" });
+                jQuery('#modalFG H3, #modalFG .head').css("cursor", "move");
+            }
         }
         if(callback) { callback(text, status, req); }
     });

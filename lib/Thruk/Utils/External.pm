@@ -651,6 +651,11 @@ sub job_page {
 
         # other errors
         if((defined $err && $err ne '') && (!defined $rc || $rc != 0 || (!$out && !$stash))) {
+            if($c->req->parameters->{'modal'}) {
+                $c->stash->{text}     = $err;
+                $c->stash->{template} = 'passthrough.tt';
+                return;
+            }
             return $c->detach_error({
                 msg               => 'Background Job Failed',
                 descr             => 'background job failed, look at your logfile for details. ( job id: '.$job.' )',
