@@ -20,7 +20,7 @@
     [% PROCESS _header_broadcast.tt %]
     [% PROCESS _message.tt %]
 
-    <div class="w-[300px] card rounded-xl shadow-float h-fit z-10 p-8 flexcol flex-nowrap gap-y-0 loginmask">
+    <div class="min-w-[300px] card rounded-xl shadow-float h-fit z-10 p-8 flexcol flex-nowrap gap-y-0 loginmask">
       <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk" class="mb-5 mx-auto"></a>
       [% IF c.config.basic_auth_enabled %]
         <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
