@@ -70,6 +70,7 @@ sub index {
     if($referer =~ m|\Q/$product_prefix\E$|mx) {
         $referer = $referer.'/';
     }
+    my $query = $keywords || $c->req->uri->query;
 
     # remove known keywords from referer
     $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&//gmx;
@@ -139,7 +140,7 @@ sub index {
 
     $c->res->code(401);
 
-    if(($keywords && $keywords =~ m|/thruk/r/|mx) || $c->want_json_response()) {
+    if(($query && $query =~ m|/thruk/r/|mx) || $c->want_json_response()) {
         # respond with json error for the rest api
         my $details = $c->stash->{'thruk_message_details'} || "no or invalid credentials used.";
         $details =~ s/^.*~~//mx;
