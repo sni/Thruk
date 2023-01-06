@@ -72,12 +72,18 @@ sub index {
     }
 
     # remove known keywords from referer
-    $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession)\&//gmx;
-    $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession)\&.*$/$1/gmx if $keywords;
+    $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&//gmx;
+    $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&.*$/$1/gmx if $keywords;
 
-    $c->stash->{'referer'} = $referer;
+    $c->stash->{'referer'}       = $referer;
+    $c->stash->{'clean_cookies'} = 0;
 
     if($keywords) {
+        if($keywords eq 'nocookie') {
+            # clean all cookies
+            _invalidate_current_session($c, $cookie_path, "login page clears all cookies");
+            $c->stash->{'clean_cookies'} = 1; # make html page clear all cookies
+        }
         if($keywords eq 'logout') {
             _invalidate_current_session($c, $cookie_path, "user logout");
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );

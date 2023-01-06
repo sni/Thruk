@@ -197,9 +197,9 @@ sub process {
 
     # did we get a cookie
     if($cookies eq '' || $cookies !~ $cookie_regex) {
-        _debug("no cookie $path") if $verbose;
+        _debug("no cookie: $path") if $verbose;
         return "/loginok/".$guest."/".$path if $guest;
-        return $loginurl."?".$path;
+        return $loginurl."?nocookie&".$path;
     }
     my $auth = $1;
 
