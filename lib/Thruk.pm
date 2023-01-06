@@ -523,6 +523,15 @@ sub _init_cache {
 # exit or not and print the stacktrace if not.
 sub _check_exit_reason {
     my($sig) = @_;
+
+    if($sig eq 'TERM' || $sig eq 'INT') {
+        # sometime we receive sigpipes, ex. in log4perl END
+        # no need for duplicate stacks
+        ## no critic
+        $SIG{'PIPE'} = 'IGNORE';
+        ## use critic
+    }
+
     my $reason = longmess();
     my $now    = time();
 
