@@ -336,34 +336,36 @@ sub report_send {
 
     if($ENV{'THRUK_MAIL_TEST'}) {
         $msg->send_by_testfile($ENV{'THRUK_MAIL_TEST'});
+        $c->stats->profile(end => "Utils::Reports::report_send()");
         return 1;
-    } else {
-        my @send_args = ();
-        my $send_type = $c->config->{'Thruk::Plugin::Reports2'}->{mail_type};
-        if($send_type) {
-            @send_args = ($send_type);
-            my $send_scalar_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_args};
-            if($send_scalar_args) {
-                push @send_args, @{Thruk::Base::list($send_scalar_args)};
+    }
+
+    my @send_args = ();
+    my $send_type = $c->config->{'Thruk::Plugin::Reports2'}->{mail_type};
+    if($send_type) {
+        @send_args = ($send_type);
+        my $send_scalar_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_args};
+        if($send_scalar_args) {
+            push @send_args, @{Thruk::Base::list($send_scalar_args)};
+        }
+        my $send_named_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_named_args};
+        if($send_named_args) {
+            if(ref($send_named_args) eq 'HASH') {
+                push @send_args, %{$send_named_args};
             }
-            my $send_named_args = $c->config->{'Thruk::Plugin::Reports2'}->{mail_named_args};
-            if($send_named_args) {
-                if(ref($send_named_args) eq 'HASH') {
-                    push @send_args, %{$send_named_args};
-                }
-                elsif(ref $send_named_args) {
-                    # what to do?
-                    die 'cant handle mail arg of ref ' . ref($send_named_args);
-                }
-                else {
-                    push @send_args, $send_named_args;
-                }
+            elsif(ref $send_named_args) {
+                # what to do?
+                die 'cant handle mail arg of ref ' . ref($send_named_args);
+            }
+            else {
+                push @send_args, $send_named_args;
             }
         }
-        return 1 if $msg->send(@send_args);
     }
+    my $rc = $msg->send(@send_args);
     $c->stats->profile(end => "Utils::Reports::report_send()");
-    return 0;
+
+    return $rc ? 1 : 0;
 }
 
 ##########################################################
