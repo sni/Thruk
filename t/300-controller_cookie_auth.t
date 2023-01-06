@@ -42,5 +42,5 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd   => './script/thruk_auth',
     stdin => '///____/thruk/cgi-bin/tac.cgi',
-    like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?thruk\/cgi\-bin\/tac\.cgi$/'],
+    like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?nocookie&thruk\/cgi\-bin\/tac\.cgi$/'],
 });

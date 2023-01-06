@@ -972,9 +972,13 @@ sub _external_request {
     if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/thruk\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
         die("login failed: ".Dumper($req)) unless $retry;
         my $referer = uri_unescape($1);
+        $referer =~ s/^nocookie&//gmx;
+        $referer = '/'.$referer;
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
-        my $r = _external_request($req->{'_headers'}->{'location'}, undef, undef, $agent);
-           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, undef, 0);
+        my $login_page = $req->{'_headers'}->{'location'};
+        my $r = _external_request($login_page, undef, undef, $agent);
+        $login_page =~ s/nocookie&//gmx;
+           $r = _external_request($login_page, undef, { password => $pass, login => $user, submit => 'login', referer => $referer }, $agent, undef, 0);
         $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, 0);
     }
     return $req;

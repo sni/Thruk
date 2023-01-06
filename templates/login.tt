@@ -76,7 +76,7 @@
         var val = window.location.search + window.location.hash;
         val = val.replace(/\/thruk\/#/, '/thruk/');
         val = val.replace(/^\?/, '');
-        val = val.replace(/^(logout|expired|invalid|problem|locked|setsession)&/, '');
+        val = val.replace(/^(logout|expired|invalid|problem|locked|setsession|nocookie)&/, '');
         val = val.replace(/^\/*/, '/');
         if(val != '') {
           jQuery("INPUT[name='referer']").val(val);
