@@ -62,6 +62,7 @@ Values:
 
 - 1: Activates minimal mode
 - 2: Activates minimal mode but keeps backend sites panel
+- 3: Activates minimal mode and hides filter and pager
 
 
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1

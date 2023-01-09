@@ -16,7 +16,7 @@
   <!-- Produced by Thruk (http://www.thruk.org).
       Copyright (c) 2009-present Thruk Developer Team.
   -->
-  <body class="h-screen w-screen overflow-visible [% IF menu_states.exists('cl') && menu_states.cl == 2 %]topnav[% END %] [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %]" id='[% page %]'>
+  <body class="h-screen w-screen overflow-visible [% IF menu_states.exists('cl') && menu_states.cl == 2 %]topnav[% END %] [% page %][% IF real_page %] page_[% real_page | html +%][%+ END %][% IF extrabodyclass +%] [%+ extrabodyclass | html %][% END %][% IF iframed %] iframed[% END %][% IF minimal ==3 %] minimal3[% END %]" id='[% page %]'>
   [% PROCESS _common_js.tt %]
   [% IF ssi_header; ssi_header | evaltt; END %]
   <div style="display:none;" id="search-results"></div>
