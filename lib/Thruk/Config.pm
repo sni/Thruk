@@ -194,6 +194,7 @@ my $base_defaults = {
     'grafana_default_panelId'               => 1,
     'graph_replace'                         => ['s/[^\w\-]/_/gmx'],
     'http_backend_reverse_proxy'            => 1,
+    'logcache'                              => undef,
     'logcache_delta_updates'                => 0,
     'logcache_clean_duration'               => '2y',
     'logcache_compact_duration'             => '10w',
