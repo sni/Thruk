@@ -15,7 +15,7 @@ dailyversion: newversion
 dailydist: cleandist
 	# run in own make process, otherwise VERSION variable would not be updated
 	$(MAKE) newversion
-	$(MAKE) dist
+	$(MAKE) dist > /dev/null
 	$(MAKE) remove_npm_dependency
 	$(MAKE) resetdaily
 	ls -la *.gz
@@ -46,7 +46,7 @@ resetdaily:
 	git reset --hard HEAD
 	git checkout .
 	rm -f root/thruk/cache/*
-	yes n | perl Makefile.PL || yes n | perl Makefile.PL
+	yes n | perl Makefile.PL | grep -v 'loaded\.' || yes n | perl Makefile.PL
 
 versionprecheck:
 	[ -e .git ] || { echo "changing versions only works in git clones!"; exit 1; }
@@ -252,7 +252,7 @@ rpm: $(NAME)-$(VERSION).tar.gz
 	rpmbuild -ta $(NAME)-$(VERSION).tar.gz
 
 deb: $(NAME)-$(VERSION).tar.gz
-	tar zxvf $(NAME)-$(VERSION).tar.gz
+	tar zxf $(NAME)-$(VERSION).tar.gz
 	debuild -rfakeroot -i -us -uc -b
 	rm -rf $(NAME)-$(VERSION)
 
