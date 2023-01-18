@@ -178,15 +178,15 @@ test -f %{buildroot}/usr/share/thruk/root/thruk/cache/thruk-panorama-*.js || exi
 %pre base
 # save themes, plugins and ssi so we don't reenable them on every update
 rm -rf /tmp/thruk_update
-if [ -d /etc/thruk/themes/themes-enabled/. -a -n "$(ls -A /etc/thruk/themes/themes-enabled/)" ]; then
+if test -d /etc/thruk/themes/themes-enabled/. && test -n "$(ls -A /etc/thruk/themes/themes-enabled/)"; then
   mkdir -p /tmp/thruk_update/themes
   cp -rp /etc/thruk/themes/themes-enabled/* /tmp/thruk_update/themes/
 fi
-if [ -d /etc/thruk/plugins/plugins-enabled/. -a -n "$(ls -A /etc/thruk/plugins/plugins-enabled/)" ]; then
+if test -d /etc/thruk/plugins/plugins-enabled/. && test -n "$(ls -A /etc/thruk/plugins/plugins-enabled/)"; then
   mkdir -p /tmp/thruk_update/plugins
   cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
 fi
-if [ -d /etc/thruk/ssi/. -a -n "$(ls -A /etc/thruk/ssi/)" ]; then
+if test -d /etc/thruk/ssi/. && test -n "$(ls -A /etc/thruk/ssi/)"; then
   mkdir -p /tmp/thruk_update/ssi
   cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
 fi
@@ -271,7 +271,7 @@ exit 0
 # restore themes and plugins
 if [ -d /tmp/thruk_update/themes/. ]; then
   # do not remove the new default theme
-  test -h /tmp/thruk_update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light 
+  test -h /tmp/thruk_update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light
   test -h /tmp/thruk_update/themes/Dark  || mv /etc/thruk/themes/themes-enabled/Dark  /etc/thruk/themes/themes-enabled/.Dark
   rm -f /etc/thruk/themes/themes-enabled/*
   cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
