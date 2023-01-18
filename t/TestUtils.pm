@@ -932,14 +932,15 @@ sub _external_request {
     }
 
     our($cookie_jar, $cookie_file);
-    my $ua = Thruk::UserAgent->new({
+    our $ua;
+    $ua = Thruk::UserAgent->new({
         keep_alive   => 1,
         max_redirect => 0,
         timeout      => 60,
         requests_redirectable => [],
     }, {
         use_curl     => $has_curl,
-    });
+    }) unless $ua;
     $ua->env_proxy;
     $ua->cookie_jar($cookie_jar);
     $ua->agent( $agent ) if $agent;
