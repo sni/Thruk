@@ -1388,7 +1388,7 @@ sub _rest_get_thruk_config {
         next if $key eq 'secret_key';
         if($key eq 'logcache') {
             my $val = $c->config->{$key};
-            $val =~ s|//.*?@|//...:...@|gmx;
+            $val =~ s|//.*?@|//...:...@|gmx if defined $val;
             $data->{$key} = $val;
         } else {
             $data->{$key} = $c->config->{$key};
