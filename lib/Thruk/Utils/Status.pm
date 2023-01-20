@@ -2176,7 +2176,7 @@ sub serveraction {
     }
     # tokenize cmd
     my @cmdline = split(/"?((?<!")\S+(?<!")|[^"]+)"?\s*/mx, $c->config->{'action_menu_actions'}->{$action});
-    @cmdline = grep{$_}@cmdline;
+    @cmdline = grep{$_ ne ''}@cmdline;
     my $cmd = shift @cmdline;
     # expand ~ in $cmd
     my @cmd = glob($cmd);
