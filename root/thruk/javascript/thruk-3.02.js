@@ -50,38 +50,8 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 function init_page() {
     current_backend_states = {};
     for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
-    jQuery('input.deletable').each(function(i, el) {
-        // do not add twice
-        if(el && el.parentNode && jQuery(el.parentNode).hasClass("deleteicon")) {
-            return;
-        }
-        var extraClass = "";
-        if(jQuery(el).hasClass("w-full")) { extraClass = "w-full"; }
-        jQuery(el)
-            .wrap('<div class="deleteicon '+extraClass+'" />')
-            .after(jQuery('<button type="reset" style="display:none;">&times;</button>')
-                .click(function() {
-                    var This = this;
-                    jQuery(This).hide();
-                    jQuery(This).prev("INPUT").val("").trigger("change").trigger("keyup");
-                    if(jQuery(This).hasClass("autosubmit")) {
-                        window.setTimeout(function() {
-                            jQuery(This).parents("FORM").submit();
-                        }, 200);
-                    }
-                })
-            )
-            .on("keyup focus change", function() {
-                var This = this;
-                jQuery(This).next("BUTTON").each(function(x, b) {
-                    if(jQuery(This).val() == "") {
-                        jQuery(b).hide();
-                    } else {
-                        jQuery(b).show();
-                    }
-                });
-            });
-    });
+
+    init_deletable_inputs();
 
     var urlArgs  = toQueryParams();
     if(sort_options && sort_options.type != null && urlArgs.sorttype == null) {
@@ -252,6 +222,40 @@ function initLastUserInteraction() {
     });
 }
 
+function init_deletable_inputs() {
+    jQuery('input.deletable').each(function(i, el) {
+        // do not add twice
+        if(el && el.parentNode && jQuery(el.parentNode).hasClass("deleteicon")) {
+            return;
+        }
+        var extraClass = "";
+        if(jQuery(el).hasClass("w-full")) { extraClass = "w-full"; }
+        jQuery(el)
+            .wrap('<div class="deleteicon '+extraClass+'" />')
+            .after(jQuery('<button type="reset" style="display:none;">&times;</button>')
+                .click(function() {
+                    var This = this;
+                    jQuery(This).hide();
+                    jQuery(This).prev("INPUT").val("").trigger("change").trigger("keyup");
+                    if(jQuery(This).hasClass("autosubmit")) {
+                        window.setTimeout(function() {
+                            jQuery(This).parents("FORM").submit();
+                        }, 200);
+                    }
+                })
+            )
+            .on("keyup focus change", function() {
+                var This = this;
+                jQuery(This).next("BUTTON").each(function(x, b) {
+                    if(jQuery(This).val() == "") {
+                        jQuery(b).hide();
+                    } else {
+                        jQuery(b).show();
+                    }
+                });
+            });
+    });
+}
 
 function applyScroll(scrollTo) {
     if(!scrollTo || !scrollTo.split) {
@@ -8953,6 +8957,7 @@ function init_tool_list_wizard(id, type) {
     var templates = tmp[3] ? true : false;
 
     openModalWindow(document.getElementById((id + 'dialog')));
+    init_deletable_inputs();
 
     // initialize selected members
     selected_members       = new Array();
