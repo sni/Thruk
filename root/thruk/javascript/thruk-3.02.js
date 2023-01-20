@@ -2958,34 +2958,6 @@ function escapeHTML(text) {
     return jQuery("<div>").text(text).html();
 }
 
-/* reset table row classes */
-function reset_table_row_classes(table, c1, c2) {
-    var x = 1;
-    jQuery('TABLE#'+table+' TR').each(function(i, row) {
-        if(jQuery(row).css('display') == 'none') {
-            // skip hidden rows
-            return true;
-        }
-        jQuery(row).removeClass(c1);
-        jQuery(row).removeClass(c2);
-        x++;
-        var newclass = c2;
-        if(x%2 == 0) {
-            newclass = c1;
-        }
-        jQuery(row).addClass(newclass);
-        jQuery(row).children().each(function(i, elem) {
-            if(elem.tagName == 'TD') {
-                if(jQuery(elem).hasClass(c1) || jQuery(elem).hasClass(c2)) {
-                    jQuery(elem).removeClass(c1);
-                    jQuery(elem).removeClass(c2);
-                    jQuery(elem).addClass(newclass);
-                }
-            }
-        });
-    });
-}
-
 /* set icon src and refresh page */
 function refresh_button() {
     reloadPage(50, true, true);

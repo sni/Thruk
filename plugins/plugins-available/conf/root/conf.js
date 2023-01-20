@@ -52,8 +52,6 @@ function add_conf_attribute(table, key, rt) {
         jQuery('.obj_' + running_number).attr('name', 'obj.'+value);
     }
 
-    reset_table_row_classes(table, 'dataEven', 'dataOdd');
-
     // otherwise button icons are missing
     init_conf_tool_buttons();
 
@@ -87,7 +85,6 @@ function remove_conf_attribute(key, nr) {
 
     var p = row.parentNode;
     p.removeChild(row);
-    reset_table_row_classes(table.id, 'dataEven', 'dataOdd');
     return false;
 }
 
