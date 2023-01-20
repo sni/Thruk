@@ -8079,14 +8079,16 @@ var ajax_search = {
          */
         if(immediately != undefined) {
             hideElement(ajax_search.result_pan);
-            var input = document.getElementById(ajax_search.input_field);
-            if(setfocus) {
-                ajax_search.stop_events = true;
-                window.setTimeout(function() { ajax_search.stop_events=false; }, 200);
-                input.focus();
-            } else {
-                if(input && input.value == "") {
-                    jQuery(input).removeClass("expanded");
+            if(ajax_search.input_field) {
+                var input = document.getElementById(ajax_search.input_field);
+                if(setfocus) {
+                    ajax_search.stop_events = true;
+                    window.setTimeout(function() { ajax_search.stop_events=false; }, 200);
+                    input.focus();
+                } else {
+                    if(input && input.value == "") {
+                        jQuery(input).removeClass("expanded");
+                    }
                 }
             }
         }
@@ -8094,9 +8096,11 @@ var ajax_search = {
             ajax_search.hideTimer = window.setTimeout(function() {
                 if(ajax_search.dont_hide==false) {
                     fade(ajax_search.result_pan, 300);
-                    var input = document.getElementById(ajax_search.input_field);
-                    if(input && input.value == "") {
-                        jQuery(input).removeClass("expanded");
+                    if(ajax_search.input_field) {
+                        var input = document.getElementById(ajax_search.input_field);
+                        if(input && input.value == "") {
+                            jQuery(input).removeClass("expanded");
+                        }
                     }
                 }
             }, 150);
