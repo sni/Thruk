@@ -1635,7 +1635,8 @@ ex.:
 
 
 === logcache_clean_duration
-Default duration when running `thruk logcache clean`.
+Default duration when running `thruk logcache clean`. See the
+link:timedefinitions.html[time definitions] page for available options.
 
 ex.:
 
