@@ -117,6 +117,14 @@ It is possible to display custom variables into their own column. Thruk will
 automatically add all custom variables which are listed in the `show_custom_vars`
 configuration option to the list of available columns.
 
+Note that you need to add the custom variable to `show_custom_vars` or
+`expose_custom_vars`, a simple `*` is not enough.
+
+ex.:
+
+  default_host_columns = name,state,cust_LOCATION:Location
+  show_custom_vars = _LOCATION
+
 == Rename Columns
 The columns header can be renamed by doubleclicking the header text or by
 changing the configuration directly.
@@ -125,5 +133,3 @@ Simply add a colon followed by the new name.
 ex.:
 
   default_host_columns = name,state:Host Status,comments
-
-
