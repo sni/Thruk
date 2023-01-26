@@ -48,7 +48,7 @@
   /* set up editor */
   window.onload = function() {
     editor.setTheme("ace/theme/clouds");
-    editor.session.setMode("ace/mode/nagios");
+    editor.session.setMode("ace/mode/naemon");
     editor.setOptions({
       enableLiveAutocompletion: true,
       highlightActiveLine: true
