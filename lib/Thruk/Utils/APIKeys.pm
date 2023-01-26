@@ -16,6 +16,7 @@ use Carp qw/confess/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Crypt ();
+use Thruk::Utils::Log qw/:all/;
 
 my $hashed_key_file_regex = qr/^([a-zA-Z0-9]+)(\.[A-Z]+\-\d+|)$/mx;
 my $private_key_regex     = qr/^([a-zA-Z0-9]+)(|_\d{1})$/mx;
@@ -257,7 +258,11 @@ sub read_key {
     $data->{'digest'}     = $type;
     $data->{'superuser'}  = 1 if delete $data->{'system'}; # migrate system keys
     if(-s $file.'.stats') {
-        my $stats = Thruk::Utils::IO::json_lock_retrieve($file.'.stats');
+        my $stats = {};
+        eval {
+            $stats = Thruk::Utils::IO::json_lock_retrieve($file.'.stats');
+        };
+        _debug("failed to read stats file: ".$@) if $@;
         $data = { %{$stats}, %{$data} };
     }
     return($data);
