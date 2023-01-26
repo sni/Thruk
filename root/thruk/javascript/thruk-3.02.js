@@ -1300,6 +1300,7 @@ function cookieRemoveAll(name) {
     if(String(document.location.hostname).match(/^\d+\.\d+\.\d+\.\d+$/)) {
         jQuery.each(paths, function(key2, path) {
             document.cookie = name+"=del; path="+path+";domain="+String(document.location.hostname)+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+            document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
         });
         return;
     }
@@ -1314,25 +1315,47 @@ function cookieRemoveAll(name) {
         }
         jQuery.each(paths, function(key2, path) {
             document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+            document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
         });
     });
 }
 
 /* return cookie value */
 var cookies;
-function readCookie(name,c,C,i){
-    if(cookies){ return cookies[name]; }
+function readCookie(name, refresh){
+    if(cookies && !refresh){ return cookies[name]; }
 
-    c = document.cookie.split('; ');
+    var c = document.cookie.split('; ');
     cookies = {};
 
-    for(i=c.length-1; i>=0; i--){
-       C = c[i].split('=');
+    for(var i=c.length-1; i>=0; i--){
+       var C = c[i].split('=');
        cookies[C[0]] = C[1];
     }
 
     return cookies[name];
 }
+
+function showMessageFromCookie() {
+    var cookie = readCookie('thruk_message', true);
+    if(!cookie) {
+        return;
+    }
+    cookieRemove('thruk_message');
+    var tmp = splitN(cookie, "~~", 2);
+    var cls = tmp[0];
+    var msg = tmp[1];
+    var rc  = 0;
+    if(cls == "fail_message") {
+        rc = 1;
+    }
+    if(cls == "success_message") {
+        rc = 0;
+    }
+    msg = decodeURIComponent(msg);
+    thruk_message(rc, msg);
+}
+
 
 /* page refresh rate */
 var remainingRefresh;
@@ -3722,15 +3745,16 @@ function thruk_message(rc, message, close_timeout) {
     var cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
-        + '<div id="thruk_message" class="card shadow-float fixed p-1 z-50 min-w-[600px] max-w-[90vw] top-14 left-1/2 transform -translate-x-1/2">'
-        + '  <div class="flexrow flex-nowrap gap-2 justify-center">'
-        + '    <div class="w-5"></div>'
-        + '    <div class="flex-grow text-center font-semibold whitespace-nowrap">'
-        + '      <span class="' + cls + '">' + message;
+        + '<div id="thruk_message">'
+        + '  <div>'
+        + '    <div class="w-5">';
     if(rc != 0) {
         html +=   '<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>';
     }
     html += ''
+        + '    </div>'
+        + '    <div class="flex-grow text-center font-semibold whitespace-nowrap">'
+        + '      <span class="' + cls + '">' + message
         + '      </span>'
         + '    </div>'
         + '    <div class="w-5">'
@@ -3739,7 +3763,9 @@ function thruk_message(rc, message, close_timeout) {
         + '  </div>'
         + '</div>';
 
-    jQuery("body").append(html);
+    // append to <main> if possible or body otherwise
+    var container = jQuery("main") || jQuery("body");
+    container.append(html);
     var fade_away_in = 5000;
     if(rc != 0) {
         fade_away_in = 30000;
@@ -3869,11 +3895,12 @@ function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, l
     } else {
         thruk_message(1, prefix + msg, closeTimeout);
     }
+    return(msg);
 }
 
 // extract error message from js request
 function getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown) {
-    var cookie = readCookie('thruk_message');
+    var cookie = readCookie('thruk_message', true);
     var matches;
     var msg;
     if(!cookie && responseText && responseText.match) {
@@ -3887,6 +3914,10 @@ function getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown) {
     if(cookie) {
         cookieRemove('thruk_message');
         msg = cookie;
+        var tmp = splitN(msg, "~~", 2);
+        if(tmp[1]) {
+            msg = decodeURIComponent(tmp[1]);
+        }
     }
     else if(msg) {}
     else if(errorThrown && jqXHR && textStatus) {
