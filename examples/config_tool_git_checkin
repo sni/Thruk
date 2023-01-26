@@ -4,11 +4,14 @@
 #
 # in order to make this work, you have to initialize a git repository in your object
 # configuration folder:
-# 
+#
 # %> cd etc/core/conf.d && git init
 #
 # then set this script as 'pre_obj_save_cmd' and 'post_obj_save_cmd'
 # in the '<Component Thruk::Plugin::ConfigTool>' section of your thruk_local.conf.
+#
+# this script can also be used als post_save_cmd in the editor plugin.
+#
 
 if [ "x$OMD_ROOT" = 'x' ]; then
   echo "this script is designed for OMD, please run under OMD environment or adjust accordingly"
@@ -23,9 +26,18 @@ echo "[$(date)] $0 $1 start"
 set -x
 
 ACTION=$1
-cd $OMD_ROOT/etc/core/conf.d/
 
-git add -A .
+EXTRA_ARGS=""
+if [ "$THRUK_EDITOR_FILENAME" != "" ]; then
+  FOLDER=$(dirname $THRUK_EDITOR_FILENAME)
+  FILE=$(basename $THRUK_EDITOR_FILENAME)
+  cd $FODLER
+  git add $FILE
+else
+  cd $OMD_ROOT/etc/core/conf.d/
+  git add -A .
+  EXTRA_ARGS="-a"
+fi
 
 if [ "$ACTION" == "pre" ]; then
   msg="automatic commit of local cli changes"
@@ -47,7 +59,7 @@ elif [ "$ACTION" == "post" ]; then
   fi
 fi
 
-git commit -q -a -m "$(echo -e $msg)" >/dev/null
+git commit -q $EXTRA_ARGS -m "$(echo -e $msg)" >/dev/null
 
 echo "[$(date)] $0 $1 done"
 
