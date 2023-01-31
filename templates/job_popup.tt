@@ -1,4 +1,4 @@
-﻿<div class="card shadow-float">
+﻿<div class="card shadow-float min-w-[500px]">
   <div class="head justify-between">
     <h3>[% IF job.defined("message"); job.message; ELSE; "Job: " _ job.id; END %]</h3>
     <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
@@ -9,7 +9,7 @@
       [% IF job.defined("stderr"); job.stderr; END %]
     </div>
   <div class='footer'>
-    <button class='w-24 mx-auto' onclick='return(closeModalWindow());'>OK</button>
+    <button class='w-24 mx-auto' onclick='return(closeModalWindow());' title="job will continue in background">Close</button>
   </div>
 </div>
 
