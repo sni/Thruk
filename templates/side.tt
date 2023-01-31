@@ -13,7 +13,7 @@
       [% cookie_section_name = section.name.replace(' ', '_') | lower %]
         <li>
           <a class="navsectiontitle navitem">
-            <i class="uil [% IF section.defined('icon') %][% section.icon | html %][% ELSE %]uil-folder[% END %] text-base h-fit"></i>
+            <i class="uil [% IF section.defined('icon') && section.icon != "" %][% section.icon | html %][% ELSE %]uil-folder[% END %] text-base h-fit"></i>
             <span>[% section.name | html %]</span>
             <i class="uil uil-angle-down h-fit ml-auto text-2xl"></i>
           </a>
