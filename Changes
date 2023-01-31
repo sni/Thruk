@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add minimal=3 mode on status pages to hide pager and filter
+          - Logcache:
+            - check disk space before running table optimize
 
 3.02     Thu Dec 15 20:56:30 CET 2022
           - show notice if dependencies fail

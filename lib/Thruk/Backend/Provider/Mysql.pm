@@ -1263,7 +1263,7 @@ sub _import_logs {
                 $count = $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix);
             }
             elsif($mode eq 'optimize') {
-                $count = $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $options);
+                $count = $peer->logcache->_update_logcache_optimize($c, $peer, $prefix, $options);
             } else {
                 die("unknown mode: ".$mode."\n");
             }
@@ -1698,8 +1698,9 @@ sub _update_logcache_auth {
 
 ##########################################################
 sub _update_logcache_optimize {
-    my($self, $c, $peer, $dbh, $prefix, $options) = @_;
+    my($self, $c, $peer, $prefix, $options) = @_;
 
+    my $dbh = $peer->logcache->_dbh;
     return(-1) unless _tables_exist($dbh, $prefix);
 
     # update sort order / optimize every day
@@ -1712,15 +1713,22 @@ sub _update_logcache_optimize {
 
     _infos("update logs table order...");
     $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+    $dbh->commit || confess $dbh->errstr;
     _info("done");
 
     unless ($c->config->{'logcache_pxc_strict_mode'}) {
         # repair / optimize tables
+
+        my $optimize = $self->_check_db_fs($c, $peer, $prefix);
+        $dbh = $peer->logcache->_dbh; # reconnect
+
         _debug("optimizing / repairing tables");
         for my $table (@Thruk::Backend::Provider::Mysql::tables) {
             _infos($table.'...');
             $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
-            $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
+            if($optimize) {
+                $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
+            }
             $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
             $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
             _info("OK");
@@ -2584,6 +2592,72 @@ sub _check_index {
     _debug("done");
     $c->stats->profile(end => "update index statistics");
     return;
+}
+
+##########################################################
+sub _check_db_fs {
+    my($self, $c, $peer, $prefix) =  @_;
+
+    _debug2("[%s] checking required disk space", $prefix);
+
+    # fetch mysql datadir
+    my $dbh = $self->_dbh();
+    my $res  = $dbh->selectall_arrayref("SHOW VARIABLES LIKE 'datadir'", { Slice => {} });
+    if(scalar @{$res} != 1) {
+        _debug2("[%s] cannot fetch datadir variable.", $prefix);
+        return 1;
+    }
+    my $datadir = $res->[0]->{'Value'};
+
+    # fetch mysql hostname
+    $res  = $dbh->selectall_arrayref('SELECT @@hostname', { Slice => {} });
+    if(scalar @{$res} != 1) {
+        _debug2("[%s] cannot fetch hostname variable.", $prefix);
+        return 1;
+    }
+    my $dbhost = $res->[0]->{'@@hostname'};
+
+    _debug("[%s] db runs on %s with datadir %s", $prefix, $dbhost, $datadir);
+
+    chomp(my $hostname = Thruk::Utils::IO::cmd("hostname"));
+    chomp(my $fqdn     = Thruk::Utils::IO::cmd("hostname --fqdn"));
+
+    # not on the same host, no chance to access the filesystem
+    if($dbhost ne $hostname && $dbhost ne $fqdn) {
+        _debug2("[%s] database is not on the same host, cannot check filesystem. (%s != %s)", $prefix, $dbhost, $fqdn);
+        return 1;
+    }
+
+    # try to get free disk space
+    my($rc, $diskspace) = Thruk::Utils::IO::cmd("df $datadir 2>&1");
+    if($rc != 0) {
+        _debug2("[%s] cannot check filesystem available space: %s", $prefix, $diskspace);
+        return 1;
+    }
+    chomp($diskspace);
+
+    my @lines = split(/\n/mx, $diskspace);
+    my(undef, undef, undef, $disk_available) = split(/\s+/mx, $lines[scalar @lines -1]);
+    if(!$disk_available || $disk_available !~ m/^\d+$/mx) {
+        _debug2("[%s] cannot check filesystem available space.", $prefix);
+        return 1;
+    }
+
+    my @stats = $self->_log_stats($c, $prefix);
+    if(scalar @stats != 1) {
+        _debug2("[%s] cannot fetch log stats", $prefix);
+        return 1;
+    }
+
+    # add 20% safety
+    my $required = 1.2 * ($stats[0]->{'data_size'} + $stats[0]->{'index_size'});
+    if($required > $disk_available) {
+        _warn("[%s] not enough disk space for table optimization: required: %5.1f %2s, available: %5.1f %2s", $prefix, Thruk::Utils::reduce_number($required, "B"), Thruk::Utils::reduce_number($disk_available, "B"));
+        return;
+    }
+
+    _debug("[%s] disk space sufficient for table optimization: required: %5.1f %2s, available: %5.1f %2s", $prefix, Thruk::Utils::reduce_number($required, "B"), Thruk::Utils::reduce_number($disk_available, "B"));
+    return 1;
 }
 
 ##########################################################
