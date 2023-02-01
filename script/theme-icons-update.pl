@@ -88,7 +88,7 @@ for my $file (@files) {
     for my $m (@matches) {
         $m =~ s/\[%[^%]*?%\]/ /gmx;
         my @classes = split(/\s+/, ($m =~ m/<i[^<]+class=['"]+(.*?(?:uil|fa-solid)\s.*)['"]+/gmxi)[0]);
-        map { $_ =~ s/"//gmx } @classes;
+        map { $_ =~ s/"|'//gmx } @classes;
         @classes = grep(/^(fa|uil|small|big|large|red|green|yellow|round)/, @classes);
         my $uniq = join(" ", sort grep(!/(small|big|large|round)/, @classes));
         if(!$icons->{$uniq}) {
