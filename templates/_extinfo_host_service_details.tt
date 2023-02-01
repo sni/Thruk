@@ -53,7 +53,7 @@ END
       [% name %]
     [% END %]
   [% ELSE %]
-    <i class="fa-solid fa-exclamation round small yellow" title="could not find this object in parents list."></i>[% pID %]
+    [% pID %]
   [% END %]
   </a>
 [% END %]

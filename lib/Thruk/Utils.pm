@@ -3379,9 +3379,10 @@ sub merge_service_dependencies {
         next unless $l;
         for my $el (@{$l}) {
             if(ref $el eq 'ARRAY') {
-                push @{$depends}, $el;
+                @{$el} = grep(!/^$/mx,@{$el});
+                push @{$depends}, $el if scalar @{$el} == 2;
             } else {
-                push @{$depends}, [$service->{'host_name'}, $el];
+                push @{$depends}, [$service->{'host_name'}, $el] if(defined $el && $el ne "");
             }
         }
     }
@@ -3406,6 +3407,10 @@ sub merge_host_dependencies {
         push @{$depends}, @{$l};
     }
     $depends = Thruk::Base::array_uniq($depends);
+
+    # remore empty strings from the list
+    @{$depends} = grep(!/^$/mx,@{$depends});
+
     return($depends);
 }
 

@@ -1318,6 +1318,9 @@ return string for given service
 =cut
 sub servicestatetext {
     my($svc) = @_;
+    if(ref $svc ne "HASH") {
+        return("PENDING");
+    }
     if(!$svc->{'has_been_checked'}) {
         return("PENDING");
     }
@@ -1335,6 +1338,9 @@ return string for given host
 =cut
 sub hoststatetext {
     my($hst) = @_;
+    if(ref $hst ne "HASH") {
+        return("PENDING");
+    }
     if(!$hst->{'has_been_checked'}) {
         return("PENDING");
     }
