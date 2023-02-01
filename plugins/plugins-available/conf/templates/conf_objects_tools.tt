@@ -26,7 +26,7 @@
               [% ELSE %]
                 <div class="flexrow justify-between flex-nowrap whitespace-nowrap p-2">
                   <div class="w-40"></div>
-                  <div><i class="uil uil-exclamation round yellow mr-1"></i>found [% results.size %] possible improvements:</div>
+                  <div><i class="fa-solid fa-exclamation round small yellow mr-1"></i>found [% results.size %] possible improvements:</div>
                   <div class="w-40 flex justify-end">
                     [% IF toolobj.defined("fix_all_serial") && toolobj.defined("fix_all_serial") %]
                       [% PROCESS _button btn = {

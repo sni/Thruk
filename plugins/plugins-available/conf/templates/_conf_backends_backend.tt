@@ -31,7 +31,7 @@
   </td>
   <td>
     <div class="hidden spinner testimg_c_[% x %]_[% loop.index %]" title="checking connection"></div>
-    <i class="uil uil-exclamation round yellow hidden testimg_e_[% x %]_[% loop.index %]"></i>
+    <i class="fa-solid fa-exclamation round small yellow hidden testimg_e_[% x %]_[% loop.index %]"></i>
     <i class="fa-solid fa-check round green small hidden testimg_o_[% x %]_[% loop.index %]"></i>
   </td>
 </tr>

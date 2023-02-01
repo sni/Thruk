@@ -78,7 +78,7 @@
       <div><a class="flex" href="#"><i class="fa-solid fa-magnifying-glass-plus"></i>fa-solid fa-magnifying-glass-plus</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-maximize"></i>fa-solid fa-maximize</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-moon"></i>fa-solid fa-moon</a></div>
-      <div><a class="flex" href="#"><i class="fa-solid fa-pencil"></i>fa-solid fa-pencil</a></div>
+      <div><a class="flex" href="#"><i class="fa-solid fa-pencil small"></i>fa-solid fa-pencil small</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-person-digging"></i>fa-solid fa-person-digging</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-plus"></i>fa-solid fa-plus</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-power-off round small red"></i>fa-solid fa-power-off round small red</a></div>
@@ -124,7 +124,6 @@
       <div><a class="flex" href="#"><i class="uil uil-dialpad"></i>uil uil-dialpad</a></div>
       <div><a class="flex" href="#"><i class="uil uil-draggabledots"></i>uil uil-draggabledots</a></div>
       <div><a class="flex" href="#"><i class="uil uil-envelope-add"></i>uil uil-envelope-add</a></div>
-      <div><a class="flex" href="#"><i class="uil uil-exclamation round yellow"></i>uil uil-exclamation round yellow</a></div>
       <div><a class="flex" href="#"><i class="uil uil-external-link-alt"></i>uil uil-external-link-alt</a></div>
       <div><a class="flex" href="#"><i class="uil uil-eye-slash"></i>uil uil-eye-slash</a></div>
       <div><a class="flex" href="#"><i class="uil uil-fast-mail"></i>uil uil-fast-mail</a></div>
@@ -134,7 +133,7 @@
       <div><a class="flex" href="#"><i class="uil uil-folder"></i>uil uil-folder</a></div>
       <div><a class="flex" href="#"><i class="uil uil-folder-minus"></i>uil uil-folder-minus</a></div>
       <div><a class="flex" href="#"><i class="uil uil-folder-open"></i>uil uil-folder-open</a></div>
-      <div><a class="flex" href="#"><i class="uil uil-info round"></i>uil uil-info round</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-info"></i>uil uil-info</a></div>
       <div><a class="flex" href="#"><i class="uil uil-key-skeleton"></i>uil uil-key-skeleton</a></div>
       <div><a class="flex" href="#"><i class="uil uil-left-arrow-to-left small"></i>uil uil-left-arrow-to-left small</a></div>
       <div><a class="flex" href="#"><i class="uil uil-lightbulb"></i>uil uil-lightbulb</a></div>
@@ -170,8 +169,6 @@
       <div><a class="flex" href="#"><i class="uil uil-volume"></i>uil uil-volume</a></div>
       <div><a class="flex" href="#"><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
       <div><a class="flex" href="#"><i class="uil uil-web-section-alt"></i>uil uil-web-section-alt</a></div>
-      <div><a class="flex" href="#"><i class="uil-exclamation round yellow"></i>uil-exclamation round yellow</a></div>
-      <div><a class="flex" href="#"><i class="uil-info round"></i>uil-info round</a></div>
 <!-- end of "do not change manually" -->
       <div>
         <a>

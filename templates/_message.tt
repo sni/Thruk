@@ -3,7 +3,7 @@
 <div id="thruk_message">
   <div>
     <div class="w-5">
-      [% IF message.0 == 'fail_message' %]<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>[% END %]
+      [% IF message.0 == 'fail_message' %]<i class="fa-solid fa-exclamation round small yellow ml-2" title="Errors detected"></i>[% END %]
     </div>
     <div class="flex-grow text-center font-semibold whitespace-nowrap">
       <span class="[% message.0 | html %]">[% message.1 %]</span>

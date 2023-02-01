@@ -23,7 +23,7 @@
             [% IF n.annotation == "info" %]
               <i class="uil uil-info round gray" title="Info"></i>
             [% ELSIF n.annotation == "warning" %]
-              <i class="uil uil-exclamation round yellow" title="Warning"></i>
+              <i class="fa-solid fa-exclamation round small yellow" title="Warning"></i>
             [% END %]
             [% replace_macros(replace_macros(n.text, n.frontmatter), n.macros) %]
           </div>

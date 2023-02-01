@@ -111,7 +111,7 @@
         </tr>
         [% IF force_delete %]
           <tr>
-            <td colspan=2 class="text-center textHINT"><i class="uil uil-exclamation round yellow"></i> These references should be checked manually.</td>
+            <td colspan=2 class="text-center textHINT"><i class="fa-solid fa-exclamation round small yellow"></i> These references should be checked manually.</td>
           </tr>
         [% END %]
         [% IF show_renamed %]

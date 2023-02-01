@@ -509,7 +509,7 @@ function return_false() {
 function setBtnSpinner(btn, skipTimeout) {
     jQuery(btn).find("I").css("display", "none");
     jQuery(btn).find('div.spinner').remove();
-    jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find('I.fa-exclamation').remove();
     jQuery(btn).find('I.fa-check').remove();
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<div class="spinner mr-1"><\/div>');
@@ -565,13 +565,13 @@ function setBtnNoSpinner(btn) {
 function setBtnError(btn, title) {
     setBtnClearTimer(btn);
     jQuery(btn).find('div.spinner').remove();
-    jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find('I.fa-exclamation').remove();
     jQuery(btn).find('I.fa-check').remove();
     jQuery(btn).find("I").css("display", "none");
     if(jQuery(btn).find("I").length > 0) {
-        jQuery(btn).find("I").after('<I class="uil uil-exclamation round yellow small mr-1"><\/I>');
+        jQuery(btn).find("I").after('<I class="fa-solid fa-exclamation round small yellow small mr-1"><\/I>');
     } else {
-        jQuery(btn).prepend('<I class="uil uil-exclamation round yellow small mr-1"><\/I>');
+        jQuery(btn).prepend('<I class="fa-solid fa-exclamation round small yellow small mr-1"><\/I>');
     }
     setBtnEnabled(btn);
     jQuery(btn).prop('title', title)
@@ -585,7 +585,7 @@ function setBtnError(btn, title) {
 function setBtnSuccess(btn, title) {
     setBtnClearTimer(btn);
     jQuery(btn).find('div.spinner').remove();
-    jQuery(btn).find('I.uil-exclamation').remove();
+    jQuery(btn).find('I.fa-exclamation').remove();
     jQuery(btn).find("I").css("display", "none");
     if(jQuery(btn).find("I").length > 0) {
         jQuery(btn).find("I").after('<I class="fa-solid fa-check round small green mr-1"><\/I>');
@@ -1644,7 +1644,7 @@ function resetRefreshButton() {
     jQuery("#refresh_button").removeClass("red");
     jQuery("#refresh_button").removeClass("fa-spin fa-spin-reverse");
     jQuery("#refresh_button").find("I").css("display", "");
-    jQuery("#refresh_button").find('I.uil-exclamation').remove();
+    jQuery("#refresh_button").find('I.fa-exclamation').remove();
     jQuery("#refresh_button").attr("title", "reload page");
 }
 
@@ -1708,7 +1708,7 @@ function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetryS
                 resetRefreshButton();
                 jQuery("#refresh_button").addClass("red");
                 jQuery("#refresh_button").find("I").css("display", "none");
-                jQuery("#refresh_button").prepend('<I class="uil uil-exclamation"><\/I>');
+                jQuery("#refresh_button").prepend('<I class="fa-solid fa-exclamation"><\/I>');
                 jQuery("#refresh_button").attr("title", "refreshing page failed: "+textStatus+"\nlast contact: "+duration(((new Date()).getTime()-thrukState.lastPageLoaded)/1000)+" ago");
                 thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
                 if(typeof refresh_rate == "number" && refresh_rate > 0) {
@@ -3749,7 +3749,7 @@ function thruk_message(rc, message, close_timeout) {
         + '  <div>'
         + '    <div class="w-5">';
     if(rc != 0) {
-        html +=   '<i class="uil uil-exclamation round yellow ml-2" title="Errors detected"></i>';
+        html +=   '<i class="fa-solid fa-exclamation round small yellow ml-2" title="Errors detected"></i>';
     }
     html += ''
         + '    </div>'
@@ -4867,7 +4867,7 @@ function print_action_menu(src, options) {
         });
     }
     catch(err) {
-        jQuery(scriptTag.parentNode).append('<i class="uil uil-exclamation round yellow" title="'+err+'"><\/i>');
+        jQuery(scriptTag.parentNode).append('<i class="fa-solid fa-exclamation round small yellow" title="'+err+'"><\/i>');
     }
 }
 

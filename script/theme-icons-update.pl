@@ -83,17 +83,19 @@ my $icons = {};
 for my $file (@files) {
     next if $file =~ m/theme_preview/mx;
     my $content = Thruk::Utils::IO::read($file);
-    my @matches = $content =~ m/<i[^<]+class=['"]+.*?(?:uil|fa-solid)\s.*?['"]+[^>]*>/gmxi;
+    my @matches = $content =~ m/<i\s+[^<]*class=['"]+.*?(?:uil|fa-solid)\s.*?['"]+[^>]*>/gmxi;
     next if scalar @matches == 0;
     for my $m (@matches) {
         $m =~ s/\[%[^%]*?%\]/ /gmx;
-        my @classes = split(/\s+/, ($m =~ m/<i[^<]+class=['"]+(.*?(?:uil|fa-solid)\s.*)['"]+/gmxi)[0]);
-        map { $_ =~ s/"|'//gmx } @classes;
+        my @classes = split(/\s+/, ($m =~ m/<i\s+[^<]*class=['"]+(.*?(?:uil|fa-solid)\s.*)['"]+/gmxi)[0]);
+        map { $_ =~ s/"//gmx } @classes;
         @classes = grep(/^(fa|uil|small|big|large|red|green|yellow|round)/, @classes);
         my $uniq = join(" ", sort grep(!/(small|big|large|round)/, @classes));
+        $uniq =~ s/'//gmx;
         if(!$icons->{$uniq}) {
+            my $class = join(" ", @classes);
             $icons->{$uniq} = {
-                'class' => join(" ", @classes),
+                'class' => $class,
                 'used'  => 0,
             };
         }

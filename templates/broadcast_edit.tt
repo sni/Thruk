@@ -87,7 +87,7 @@
                 <div class="flex flex-nowrap gap-x-1">
                   <input type="radio" name="annotation" value=""[% IF !broadcast.annotation %] checked[% END %]>None
                   <input type="radio" name="annotation" value="info"[% IF broadcast.annotation == "info" %] checked[% END %] class="ml-2"><i class="uil uil-info round gray" title="Info"></i>
-                  <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %] class="ml-2"><i class="uil uil-exclamation round yellow" title="Warning"></i>
+                  <input type="radio" name="annotation" value="warning"[% IF broadcast.annotation == "warning" %] checked[% END %] class="ml-2"><i class="fa-solid fa-exclamation round small yellow" title="Warning"></i>
                 </div>
               </td>
             </tr>
@@ -231,7 +231,7 @@
     val            = replace_macros(val, tmp[1]);
     val            = replace_macros(val, [% json_encode(broadcast.macros) %]);
     if(annotation == "warning") {
-      val = '<i class="uil uil-exclamation round yellow" title="Warning"><\/i>' + val;
+      val = '<i class="fa-solid fa-exclamation round small yellow" title="Warning"><\/i>' + val;
     }
     if(annotation == "info") {
       val = '<i class="uil uil-info round gray" title="Info"><\/i>' + val;

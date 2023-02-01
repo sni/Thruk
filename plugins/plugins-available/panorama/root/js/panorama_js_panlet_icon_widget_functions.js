@@ -494,7 +494,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
         }
     }
     if(!menu) {
-        return([{"icon": "uil uil-exclamation round yellow", "title": "no such menu: "+str}]);
+        return([{"icon": "fa-solid fa-exclamation round small yellow", "title": "no such menu: "+str}]);
     }
     if(menuData) {
     }
@@ -504,7 +504,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
             menuData = window[menu["function"]](args);
         } catch(e) {
             console.error(e);
-            return([{"icon": "uil uil-exclamation round yellow", "title": "failed to run js menu: "+e}]);
+            return([{"icon": "fa-solid fa-exclamation round small yellow", "title": "failed to run js menu: "+e}]);
         }
     } else {
         try {
@@ -512,7 +512,7 @@ TP.parseActionMenuItemsStr = function(str, id, panel, target, extraOptions, plai
         } catch(e) {
             console.error(str);
             console.error(e);
-            return([{"icon": "uil uil-exclamation round yellow", "title": "failed to parse json string: "+e}]);
+            return([{"icon": "fa-solid fa-exclamation round small yellow", "title": "failed to parse json string: "+e}]);
         }
     }
     if(!menuData['menu'] || plain) {

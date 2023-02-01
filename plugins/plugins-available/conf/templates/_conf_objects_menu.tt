@@ -23,7 +23,7 @@
     <i id="apply_config_changes_icon" style="display: [% IF last_changed || needs_commit %][% ELSE %]none[% END %];" class='uil uil-save' title='Config has changed and needs to be applied'></i>
     Apply
     [% IF parse_errors.size > 0 %]
-    <i class="uil uil-exclamation round yellow" title='Config Errors Detected'></i>
+    <i class="fa-solid fa-exclamation round small yellow" title='Config Errors Detected'></i>
     [% END %]
   </a>
 </span>
