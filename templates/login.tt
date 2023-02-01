@@ -94,7 +94,7 @@
             src: window.location.toString().replace(/^http:/, "https:"),
             width: "1px",
             height: "1px",
-            style: "position: absolute; top: -1px; left: 1px;"
+            style: "position: absolute; top: -1px; left: 1px; width: 1px; height: 1px;"
           }));
         }
       -->
