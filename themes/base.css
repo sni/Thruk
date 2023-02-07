@@ -675,6 +675,22 @@ BODY.topNavOpen {
     @apply rounded bg-[color:var(--navbar-item-hover-bg)] text-[color:var(--navbar-item-hover-fg)];
   }
 }
+.nav-container {
+  .navitem {
+    @apply card overflow-hidden absolute !hidden p-0 ml-[-4px] mt-[10px] rounded-t-none;
+    DIV {
+      @apply flex hoverable px-1 py-0.5;
+      A {
+        @apply block link;
+      }
+    }
+  }
+  &:hover {
+    .navitem {
+      @apply !block;
+    }
+  }
+}
 .navsectiontitle {
   @apply
     flex
