@@ -282,6 +282,11 @@ sub parts_cgi {
         return;
     }
 
+    if($part eq '_summary_prompt') {
+        $c->stash->{'template'}  = '_parts_summary_prompt.tt';
+        return;
+    }
+
     return $c->detach('/error/index/25');
 }
 

@@ -642,26 +642,23 @@ function conf_tool_cleanup(btn, link, hide) {
     return(false);
 }
 
-var summary_cb;
-var summary_form;
-function conf_prompt_change_summary(remoteform, callback) {
+function conf_prompt_change_summary(remoteform, submit_callback) {
     if(!show_commit_summary_prompt) {
-        return(callback());
+        return(submit_callback());
     }
-    summary_cb   = callback;
-    summary_form = remoteform;
-    openModalWindow(document.getElementById("summary-dialog-form"));
+
+    openModalWindowUrl('parts.cgi?part=_summary_prompt', function() {
+        jQuery("#summary-dialog-form BUTTON.js-ok").one("click", function() {
+            var input = jQuery("<input>", { type: "hidden", name: "summary", value: jQuery("#summary-text").val() });
+            jQuery(remoteform).append(jQuery(input));
+
+            var input = jQuery("<input>", { type: "hidden", name: "summarydesc", value: jQuery("#summary-desc").val() });
+            jQuery(remoteform).append(jQuery(input));
+
+            closeModalWindow();
+            return(submit_callback());
+        });
+    });
 
     return(true);
-}
-
-function conf_prompt_change_summary_submit() {
-    var input = jQuery("<input>", { type: "hidden", name: "summary", value: jQuery("#summary-text").val() });
-    jQuery(summary_form).append(jQuery(input));
-
-    var input = jQuery("<input>", { type: "hidden", name: "summarydesc", value: jQuery("#summary-desc").val() });
-    jQuery(summary_form).append(jQuery(input));
-
-    closeModalWindow();
-    return(summary_cb());
 }

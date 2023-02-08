@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 58;
+    plan tests => 67;
 }
 
 BEGIN {
@@ -23,6 +23,7 @@ my $pages = [
    { url => '/thruk/cgi-bin/parts.cgi?part=_service_comments&host='.$host.'&service='.$service, like => 'Author' },
    { url => '/thruk/cgi-bin/parts.cgi?part=_service_downtimes&host='.$host.'&service='.$service, like => 'Author' },
    { url => '/thruk/cgi-bin/parts.cgi?part=_service_info_popup&host='.$host.'&service='.$service, like => 'View Full Service Details' },
+   { url => '/thruk/cgi-bin/parts.cgi?part=_summary_prompt', like => 'Enter Change Summary' },
 ];
 
 for my $url (@{$pages}) {
