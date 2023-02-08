@@ -816,8 +816,11 @@ sub _process_perf_info_page {
         }
     }
 
-    $c->stash->{'stats'}      = $c->db->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-    $c->stash->{'perf_stats'} = $c->db->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    my $stats = $c->db->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+    my $perf_stats = $c->db->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    
+    $c->stash->{'stats'} = $stats;
+    $c->stash->{'perf_stats'} = $perf_stats;
 
     # add logfile cache statistics
     $c->stash->{'has_logcache'}   = 0;
@@ -838,6 +841,13 @@ sub _process_perf_info_page {
     if($ENV{'THRUK_USE_LMD'}) {
         # sort them the same way as lmd stats
         $c->stash->{'lmd_stats'} = [sort { $a->{'name'} cmp $b->{'name'} } @{$c->db->lmd_stats($c)}];
+    }
+
+    if( defined $view_mode and $view_mode eq 'json' ) {
+        return $c->render(json => {
+            "stats" => $stats,
+            "perf_stats" => $perf_stats
+        });
     }
 
     return 1;
