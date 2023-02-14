@@ -107,11 +107,14 @@ sub cmd {
 
     my $start  = ($opt->{'start'} || $now-86400);
     my $end    = ($opt->{'end'}   || $now);
-    # if no start / end given, round to nearest 10 seconds which makes caching more effective
-    if(!$opt->{'start'} && !$opt->{'end'}) {
-        $start = $start - $start % 10;
-        $end   = $end   - $end   % 10;
-    }
+
+    $start = Thruk::Utils::parse_date($c, $start);
+    $end   = Thruk::Utils::parse_date($c, $end);
+
+    # round to nearest 10 seconds which makes caching more effective
+    $start = $start - $start % 10;
+    $end   = $end   - $end   % 10;
+
     my $format = $opt->{'format'} || 'png';
     my $width  = $opt->{'width'}  || 800;
     my $height = $opt->{'height'} || 300;
