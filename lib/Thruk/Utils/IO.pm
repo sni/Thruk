@@ -673,7 +673,7 @@ sub save_logs_to_tempfile {
 =head2 cmd
 
   cmd($command)
-  cmd($c, $command [, $stdin] [, $print_prefix] [, $detached])
+  cmd($c, $command [, $stdin] [, $print_prefix] [, $detached] [, $no_decode] [, $timeout])
 
 run command and return exit code and output
 
@@ -684,10 +684,34 @@ optional print_prefix will print the result on the fly with given prefix.
 
 optional detached will run the command detached in the background
 
+optional no_decode will skip decoding
+
+optional timeout will kill the command after the timeout (seconds)
+
 =cut
 
 sub cmd {
-    my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode) = @_;
+    my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout) = @_;
+
+    if($timeout) {
+        setpgrp();
+        alarm($timeout);
+        local $SIG{'ALRM'} = sub { die("timeout"); };
+        my @res;
+        eval {
+            @res = cmd($c, $cmd, $stdin, $print_prefix, $detached, $no_decode);
+        };
+        my $err = $@;
+        alarm(0);
+        if($err) {
+            _warn(longmess("command timed out after ".$timeout." seconds")) if $c;
+            local $SIG{INT}  = 'IGNORE';
+            kill("-INT", $$);
+            return;
+        }
+        return(@res);
+    }
+
     if(defined $c && !defined $cmd) {
         $cmd = $c;
         $c = $Thruk::Globals::c || undef;
