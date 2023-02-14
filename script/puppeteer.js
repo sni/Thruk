@@ -28,6 +28,14 @@ var sessionid = process.argv[6];
   const page = await browser.newPage();
   page.setViewport({width: Number(width), height: Number(height)});
   await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
+  page.on('response', (response) => {
+    const status = response.status();
+    if(status >= 500 && status <= 520) {
+      console.error("url "+response.url()+" failed with status: "+status+". Aborting...");
+      process.exit(2);
+    }
+    console.debug("response:", response.url(), response.status());
+  })
   await page.goto(url);
   if(url.match(/histou\.js\?/) || url.match(/\/grafana\//)) {
     await Promise.race([
