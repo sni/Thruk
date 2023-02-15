@@ -92,7 +92,9 @@ sub self_check {
             };
             next;
         }
+        $c->stats->profile(begin => "selfcheck: $t");
         push @{$results}, &{$available_checks->{$t}}($c);
+        $c->stats->profile(end => "selfcheck: $t");
     }
 
     # aggregate results
@@ -120,11 +122,13 @@ sub self_check {
 
     # append performance data from /thruk/metrics
     if($selected->{'all'}) {
+        $c->stats->profile(begin => "selfcheck: metrics");
         require Thruk::Utils::CLI::Rest;
         my $res = Thruk::Utils::CLI::Rest::cmd($c, undef, ['-o', ' ', '/thruk/metrics']);
         if($res->{'rc'} == 0 && $res->{'output'}) {
             $details .= $res->{'output'};
         }
+        $c->stats->profile(end => "selfcheck: metrics");
     }
 
     return($rc, $msg, $details);

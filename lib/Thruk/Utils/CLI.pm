@@ -338,6 +338,7 @@ sub _run_do {
     }
 
     _debug2("_run(): building response");
+    my $t0 = [Time::HiRes::gettimeofday];
 
     # catch prints when not attached to a terminal and redirect them to our logger
     local $| = 1;
@@ -348,7 +349,8 @@ sub _run_do {
     # remove print wrapper
     Thruk::Utils::Log::wrap_stdout2log_stop();
 
-    _debug("_run(): building local response done, exit code ".$result->{'rc'});
+    my $elapsed = Time::HiRes::tv_interval($t0);
+    _debug("_run(): building local response done (exitcode: %d, duration: %.3fs)", $result->{'rc'}, $elapsed);
     my $response = $c->res;
 
     _debug("".$c->stats->report) if Thruk::Base->verbose >= 3;
