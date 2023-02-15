@@ -48,7 +48,7 @@ for my $site (qw/local/) {
     `/usr/bin/printf "export THRUK_TEST_NO_LOG=.\n" >> .thruk`; # do not errors for the next requests
     TestUtils::test_command({
         cmd  => '/usr/bin/env omd reload apache',
-        like => ['/Reloading dedicated Apache/'],
+        like => ['/Reloading apache/'],
     });
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
@@ -65,7 +65,7 @@ for my $site (qw/local/) {
     `>.thruk`; # clear skipping log
     TestUtils::test_command({
         cmd  => '/usr/bin/env omd reload apache',
-        like => ['/Reloading dedicated Apache/'],
+        like => ['/Reloading apache/'],
     });
 };
 
