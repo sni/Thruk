@@ -511,8 +511,7 @@ sub get_cgi_user_list {
     my($c) = @_;
 
     # get users from core contacts
-    my $contacts = $c->db->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
-                                             remove_duplicates => 1);
+    my $contacts = $c->db->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ], columns => [qw/name alias/]);
     my $all_contacts = {};
     for my $contact (@{$contacts}) {
         $all_contacts->{$contact->{'name'}} = { name => $contact->{'name'}, alias => $contact->{'alias'}};
