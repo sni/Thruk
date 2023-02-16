@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 48;
+plan tests => 53;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -35,6 +35,12 @@ my $curl = '/usr/bin/env curl -ks --header "X-Thruk-Auth-Key: '.$data->{'private
 TestUtils::test_command({
     cmd     => $curl.' "https://127.0.0.1/demo/grafana/"',
     waitfor => '"login":"\(api\)"',
+});
+
+# wait till histou/influx is ready
+TestUtils::test_command({
+    cmd     => $curl.' "http://127.0.0.1/demo/histou/index.php?host=test&service=Ping&annotations=true&callback=jQuery36108434547110946526_1676536465838"',
+    waitfor => 'test\ Ping\ check_ping\ pl',
 });
 
 # fails directly after first start, so do it twice
