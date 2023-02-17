@@ -2,6 +2,9 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add minimal=3 mode on status pages to hide pager and filter
+          - main landing page:
+            - performance tweak
+            - fix notifications chart
           - Logcache:
             - check disk space before running table optimize
 
