@@ -148,14 +148,14 @@ sub index {
 
     ############################################################################
     # contact statistics
-    $c->stash->{'contacts'} = scalar @{$c->db->get_contacts(columns => ['name'])};
+    $c->stash->{'contacts'} = _get_contacts($c);
 
     ############################################################################
     # host statistics
-    $c->stash->{'host_stats'} = $c->db->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
+    $c->stash->{'host_stats'} = $c->db->get_host_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
 
     # service statistics
-    $c->stash->{'service_stats'} = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
+    $c->stash->{'service_stats'} = $c->db->get_service_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
 
     ############################################################################
     # for hostgroups
@@ -185,7 +185,7 @@ sub index {
 
     ############################################################################
     # notifications
-    $c->stash->{'notifications'} = _notifications($c, $hostfilter, $host_lookup);
+    $c->stash->{'notifications'} = _get_notifications($c, $hostfilter, $host_lookup);
 
     $c->stash->{'notification_pattern'} = "";
     if($hostfilter && $c->stash->{'hosts_with_notifications'} && scalar keys %{$c->stash->{'hosts_with_notifications'}} < 30) {
@@ -253,14 +253,14 @@ sub index {
 }
 
 ##########################################################
-sub _notifications {
+sub _get_notifications {
     my($c, $hostfilter, $host_lookup) = @_;
+    $c->stats->profile(begin => "_get_notifications");
     my $start            = time() - 90000; # last 25h
     my $notificationData = _notifications_data($c, $start);
     my $notificationHash = {};
     my $time = $start;
     while ($time <= time()) {
-        #my $curDate = POSIX::strftime("%F %H:00", localtime($time));
         my $curDate = ($time - ($time % 3600)) * 1000;
         $notificationHash->{$curDate} = 0;
         $time += 3600;
@@ -270,7 +270,6 @@ sub _notifications {
 
     my($selected_backends) = $c->db->select_backends('get_logs', []);
     for my $ts ( sort keys %{$notificationData} ) {
-        #my $date = POSIX::strftime("%F %H:00", localtime($ts));
         my $date = ($ts - ($ts % 3600))*1000;
         for my $backend (@{$selected_backends}) {
             next unless $notificationData->{$ts}->{$backend};
@@ -296,6 +295,7 @@ sub _notifications {
         push(@{$notifications->[0]}, 0+$key);
         push(@{$notifications->[1]}, $notificationHash->{$key});
     }
+    $c->stats->profile(end => "_get_notifications");
     return($notifications);
 }
 
@@ -304,7 +304,7 @@ sub _notifications_data {
     my($c, $start) = @_;
 
     my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/notifications.cache');
-    my $cached = $cache->get->{'notifications'} || {};
+    my $cached = $cache->get("notifications") || {};
 
     # update cache every 60sec
     my $age = $cache->age();
@@ -326,7 +326,7 @@ sub _notifications_data {
 sub _notifications_update_cache {
     my($c, $start) = @_;
     my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/notifications.cache');
-    my $cached = $cache->get->{'notifications'} || {};
+    my $cached = $cache->get("notifications") || {};
     $cache->touch(); # update timestamp to avoid multiple parallel updates
 
     # always update full hours
@@ -366,7 +366,7 @@ sub _notifications_update_cache {
         my $hour = $n->{'time'} - ($n->{'time'} % 3600);
         push @{$cached->{$hour}->{$n->{'peer_key'}}}, $n;
     }
-    $cache->set('notifications', $cached);
+    $cache->set("notifications", $cached);
     return($cached, 0);
 }
 
@@ -393,6 +393,46 @@ sub _compare_filter {
     my $d2 = $json->encode($f2);
 
     return($d1 eq $d2);
+}
+
+##########################################################
+sub _get_contacts {
+    my($c) = @_;
+    $c->stats->profile(begin => "_get_contacts");
+    my($selected_backends) = $c->db->select_backends('get_contacts', []);
+    my $required_backends = [];
+
+    my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/contact_stats.cache');
+    my $cached = $cache->get() || {};
+    for my $peer_key (@{$selected_backends}) {
+        if(!defined $cached->{$peer_key} || !defined $c->stash->{'pi_detail'}->{$peer_key} || $cached->{$peer_key}->{'program_start'} < $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'}) {
+            push @{$required_backends}, $peer_key;
+        }
+    }
+
+    if(scalar @{$required_backends} > 0) {
+        my $contacts = $c->db->get_contacts(columns => ['name'], backends => $required_backends );
+        for my $peer_key (@{$required_backends}) {
+            $cached->{$peer_key} = {
+                program_start => $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'},
+                contacts      => {},
+            }
+        }
+        for my $contact (@{$contacts}) {
+            $cached->{$contact->{'peer_key'}}->{'contacts'}->{$contact->{'name'}} = 1;
+        }
+        $cache->set($cached);
+    }
+
+    my $uniq = {};
+    for my $peer_key (@{$selected_backends}) {
+        for my $name (keys %{$cached->{$peer_key}->{'contacts'}}) {
+            $uniq->{$name} = 1;
+        }
+    }
+
+    $c->stats->profile(end => "_get_contacts");
+    return(scalar keys %{$uniq});
 }
 
 ##########################################################
