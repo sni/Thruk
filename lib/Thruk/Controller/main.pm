@@ -136,7 +136,7 @@ sub index {
 
     ############################################################################
     # merge current filter into params unless already set
-    if(defined $c->stash->{'currentview'}->{'filter'} && !defined $c->req->parameters->{'dfl_s0_hoststatustypes'}) {
+    if(defined $c->stash->{'currentview'}->{'filter'} && (!defined $f || scalar keys %{$f} == 0)) {
         for my $key (sort keys %{$c->stash->{'currentview'}->{'filter'}}) {
             $c->req->parameters->{$key} = $c->stash->{'currentview'}->{'filter'}->{$key};
         }
