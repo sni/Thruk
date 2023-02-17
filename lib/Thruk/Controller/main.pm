@@ -3,7 +3,6 @@ package Thruk::Controller::main;
 use warnings;
 use strict;
 use Cpanel::JSON::XS ();
-use POSIX ();
 
 use Thruk::Constants qw/:add_defaults :peer_states/;
 use Thruk::Utils ();
@@ -158,33 +157,40 @@ sub index {
     # service statistics
     $c->stash->{'service_stats'} = $c->db->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
 
+    ############################################################################
     # for hostgroups
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, groups => { '!=', '' } ], columns => ['name', 'groups']);
     my $hostgroups = {};
-
-    my $host_lookup = {};
     for my $host ( @{$hosts} ) {
-        $host_lookup->{$host->{'name'}} = 1;
         for my $group ( @{$host->{'groups'}} ) {
             $hostgroups->{$group}++;
         }
     }
-
-    ############################################################################
-    # hostgroups
     my $top5_hg = [];
     my @hashkeys_hg = sort { $hostgroups->{$b} <=> $hostgroups->{$a} } keys %{$hostgroups};
     splice(@hashkeys_hg, 5) if scalar(@hashkeys_hg) > 5;
-
     for my $key (@hashkeys_hg) {
         push(@{$top5_hg}, { 'name' => $key, 'value' => $hostgroups->{$key} } )
     }
-
     $c->stash->{'hostgroups'} = $top5_hg;
+
+    ############################################################################
+    my $host_lookup = {};
+    if($hostfilter) {
+        my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, ], columns => ['name']);
+        for my $host ( @{$hosts} ) {
+            $host_lookup->{$host->{'name'}} = 1;
+        }
+    }
 
     ############################################################################
     # notifications
     $c->stash->{'notifications'} = _notifications($c, $hostfilter, $host_lookup);
+
+    $c->stash->{'notification_pattern'} = "";
+    if($hostfilter && $c->stash->{'hosts_with_notifications'} && scalar keys %{$c->stash->{'hosts_with_notifications'}} < 30) {
+        $c->stash->{'notification_pattern'} = join('|', sort keys %{$c->stash->{'hosts_with_notifications'}});
+    }
 
     ############################################################################
     # host and service problems
@@ -222,13 +228,15 @@ sub index {
 
     ############################################################################
     # host by backend
-    my $hosts_by_backend = [];
-    my $hosts_by_backend_data = $c->db->get_host_stats_by_backend(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
-    for my $row (values %{$hosts_by_backend_data}) {
-        push @{$hosts_by_backend}, [$row->{'peer_name'}, $row->{'total'} ];
+    if($backend_stats->{'available'} > 1) {
+        my $hosts_by_backend = [];
+        my $hosts_by_backend_data = $c->db->get_host_stats_by_backend(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
+        for my $row (values %{$hosts_by_backend_data}) {
+            push @{$hosts_by_backend}, [$row->{'peer_name'}, $row->{'total'} ];
+        }
+        @{$hosts_by_backend} = sort { $b->[1] <=> $a->[1] } @{$hosts_by_backend};
+        $c->stash->{'hosts_by_backend'} = $hosts_by_backend;
     }
-    @{$hosts_by_backend} = sort { $b->[1] <=> $a->[1] } @{$hosts_by_backend};
-    $c->stash->{'hosts_by_backend'} = $hosts_by_backend;
 
     ############################################################################
     my $style = $c->req->parameters->{'style'} || 'main';
@@ -252,28 +260,40 @@ sub _notifications {
     my $notificationHash = {};
     my $time = $start;
     while ($time <= time()) {
-        my $curDate = POSIX::strftime("%F %H:00", localtime($time));
+        #my $curDate = POSIX::strftime("%F %H:00", localtime($time));
+        my $curDate = ($time - ($time % 3600)) * 1000;
         $notificationHash->{$curDate} = 0;
         $time += 3600;
     }
 
+    my $hosts_with_notifications = {};
+
     my($selected_backends) = $c->db->select_backends('get_logs', []);
     for my $ts ( sort keys %{$notificationData} ) {
-        my $date = POSIX::strftime("%F %H:00", localtime($ts));
+        #my $date = POSIX::strftime("%F %H:00", localtime($ts));
+        my $date = ($ts - ($ts % 3600))*1000;
         for my $backend (@{$selected_backends}) {
             next unless $notificationData->{$ts}->{$backend};
             for my $n ( @{$notificationData->{$ts}->{$backend}} ) {
-                next unless(!$hostfilter || $host_lookup->{$n->{'host_name'}});
-                $notificationHash->{$date}++;
+                if(!$hostfilter) {
+                    $notificationHash->{$date}++;
+                    next;
+                }
+                if($host_lookup->{$n->{'host_name'}}) {
+                    $hosts_with_notifications->{$n->{'host_name'}} = 1;
+                    $notificationHash->{$date}++;
+                }
             }
         }
     }
+
+    $c->stash->{'hosts_with_notifications'} = $hosts_with_notifications;
 
     my $notifications = [["x"], ["Notifications"]];
     my @keys = sort keys %{$notificationHash};
     @keys = splice(@keys, 1);
     for my $key (@keys) {
-        push(@{$notifications->[0]}, $key);
+        push(@{$notifications->[0]}, 0+$key);
         push(@{$notifications->[1]}, $notificationHash->{$key});
     }
     return($notifications);
@@ -288,7 +308,9 @@ sub _notifications_data {
 
     # update cache every 60sec
     my $age = $cache->age();
-    if(!defined $age || $age > 60) {
+    $c->stash->{'notifications_age'} = defined $age ? $age : "";
+    if(!defined $age || $age > 50) {
+        $cache->touch(); # update timestamp to avoid multiple parallel updates
         require Thruk::Utils::External;
         my $job = Thruk::Utils::External::perl($c, {
                     expr       => 'Thruk::Controller::main::_notifications_update_cache($c, '.$start.')',
@@ -307,19 +329,23 @@ sub _notifications_update_cache {
     my $cached = $cache->get->{'notifications'} || {};
     $cache->touch(); # update timestamp to avoid multiple parallel updates
 
+    # always update full hours
+    $start = $start - ($start % 3600);
+
     # clear old entries
     for my $ts (sort keys %{$cached}) {
         if($ts < $start) {
             delete $cached->{$ts};
         }
-        if($ts > $start) {
-            $start = $ts + 3600;
-        }
     }
 
-    my $now = time();
-    my $hour_current = $now - ($now % 3600);
-    delete $cached->{$hour_current};
+    # remove last available hour from cache
+    my @keys = sort keys %{$cached};
+    if(scalar @keys > 0) {
+        my $last = pop(@keys);
+        delete $cached->{$last};
+        $start = $last;
+    }
 
     my $data = $c->db->get_logs(
         filter   => [
@@ -330,6 +356,12 @@ sub _notifications_update_cache {
         limit    => 1000000, # not using a limit here, makes mysql not use an index
         backends => ['ALL'],
     );
+
+    # clean all cache entries which will be updated now
+    for my $i (1..30) {
+        delete $cached->{$start + ($i * 3600)};
+    }
+
     for my $n ( @{$data} ) {
         my $hour = $n->{'time'} - ($n->{'time'} % 3600);
         push @{$cached->{$hour}->{$n->{'peer_key'}}}, $n;

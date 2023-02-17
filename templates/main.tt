@@ -196,6 +196,7 @@
     <div class="card w-auto">
       <div class="head">
         <h3><a class="link" href="notifications.cgi">Notifications</a></h3>
+        [% IF notifications_age && notifications_age > 30 %]<div class="ml-4 textHINTsoft" title="last update: [% date_format(c, date.now - notifications_age) %]">updated [% duration(notifications_age, 6) %] ago</div>[% END %]
       </div>
       <a href="notifications.cgi?start=&end=" id="notifications-link" class="relative">
         <div id="notifications-barChart"></div>
@@ -530,7 +531,11 @@
       window.clearTimeout(linkHideTimer);
       var start = Math.round(d.x.getTime()/1000);
       var end   = start + 3600;
-      jQuery("#notifications-link").attr("href", "notifications.cgi?start="+encodeURIComponent(start)+"&end="+encodeURIComponent(end));
+      var hostfilter = "";
+      [% IF notification_pattern %]
+        hostfilter = "&pattern="+encodeURIComponent("[% notification_pattern | html %]");
+      [% END %]
+      jQuery("#notifications-link").attr("href", "notifications.cgi?start="+encodeURIComponent(start)+"&end="+encodeURIComponent(end)+hostfilter);
     },
     onout: function(d, element) {
       linkHideTimer = window.setTimeout(function() {
@@ -547,6 +552,7 @@
   axis: {
     x: {
       type: "timeseries",
+      localtime: false,
       tick: {
         format: "%H:%M"
       },
