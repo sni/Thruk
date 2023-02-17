@@ -3578,6 +3578,7 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
             head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
         } else {
             head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
+            jQuery('#'+divid).addClass("textALERT");
         }
     }
 }

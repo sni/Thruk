@@ -220,6 +220,9 @@
 
   .CONSOLE {
     @apply !bg-[color:var(--console-bg)] !text-[color:var(--console-fg)] font-mono;
+    &.textALERT {
+      @apply !text-[color:var(--text-alert)];
+    }
   }
 
   .button_peerUP {
