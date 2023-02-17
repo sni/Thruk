@@ -22,6 +22,7 @@ close($fh);
 
 ok(!-f $file, "file does not exist yet: ".$file);
 my $cache = Thruk::Utils::Cache->new($file);
+$cache->set({});
 ok(-f $file, "file does been created: ".$file);
 
 ###############################################################################
