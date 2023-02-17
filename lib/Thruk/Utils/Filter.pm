@@ -1639,7 +1639,8 @@ sub set_target_link {
     return($href, $target) unless $href;
 
     my $product = $c->config->{'product_prefix'};
-    if($href =~ s|^\Q/thruk/\E||mx || $href =~ s|^\Q$product\E/||mx) {
+    my $prefix  = $c->stash->{'url_prefix'};
+    if($href =~ s|^\Q/thruk/\E||mx || $href =~ s|^\Q$product\E/||mx || $href =~ s|^\Q$prefix\E||mx) {
         $target = _get_menu_target() unless defined $target;
         $href   = $c->stash->{'url_prefix'}.$href;
         return($href, $target);

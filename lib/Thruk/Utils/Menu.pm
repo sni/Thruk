@@ -313,7 +313,7 @@ sub is_user {
 
   _renew_navigation()
 
-returns the current prefered target
+updates menu, returns nothing
 
 =cut
 sub _renew_navigation {
