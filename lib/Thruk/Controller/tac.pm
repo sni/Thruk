@@ -27,7 +27,7 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return 1 if $c->stash->{'has_error'};
 
     $c->stash->{'audiofile'}     = '';

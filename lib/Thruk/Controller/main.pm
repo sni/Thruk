@@ -143,7 +143,7 @@ sub index {
     }
 
     ############################################################################
-    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return 1 if $c->stash->{'has_error'};
 
     ############################################################################
