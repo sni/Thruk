@@ -13,8 +13,7 @@ Cache Utilities Collection for Thruk
 use warnings;
 use strict;
 use Carp qw/confess/;
-use File::Copy qw(move);
-use Storable qw(nstore retrieve);
+use Storable qw(retrieve);
 
 use Thruk::Utils::IO ();
 
@@ -218,11 +217,9 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
-    nstore($self->{'_data'}, $self->{'_cachefile'}.'.'.$$) or die("saving tmp cache file ".$self->{'_cachefile'}.'.'.$$." failed: $!");
-    my @stat = stat($self->{'_cachefile'}.'.'.$$) or die("cannot stat ".$self->{'_cachefile'}.'.'.$$.": ".$!);
+    Thruk::Utils::IO::json_lock_store($self->{'_cachefile'}, $self->{'_data'});
+    my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
     $self->{'_stat'} = \@stat;
-    move($self->{'_cachefile'}.'.'.$$, $self->{'_cachefile'});
-    Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
     return;
 }
 
@@ -239,10 +236,18 @@ sub _retrieve {
     my($self) = @_;
     my $data;
     eval {
-        $data = retrieve($self->{'_cachefile'});
+        $data = Thruk::Utils::IO::json_lock_retrieve($self->{'_cachefile'});
     };
-    if($@) {
-        my $err = $@;
+    my $err = $@;
+    if($err) {
+        # try old storable format
+        eval {
+            $data = retrieve($self->{'_cachefile'});
+        };
+        # clear error if read succeeded
+        $err = undef unless $@;
+    }
+    if($err) {
         $self->clear();
         $self->{'_data'} = {};
         $self->_store();
