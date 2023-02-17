@@ -20,7 +20,6 @@ use Encode qw(encode_utf8 decode_utf8 encode);
 use File::Copy;
 use MIME::Lite;
 use POSIX ();
-use Storable qw/dclone/;
 use Time::HiRes qw/sleep time/;
 
 use Thruk::Action::AddDefaults ();
@@ -1279,7 +1278,7 @@ writes report to disk
 =cut
 sub store_report_data {
     my($c, $nr, $r) = @_;
-    my $report = dclone($r);
+    my $report = Thruk::Utils::IO::dclone($r);
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     if($nr eq 'new') {

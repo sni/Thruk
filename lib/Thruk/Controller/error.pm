@@ -264,7 +264,7 @@ sub index {
     # redirected from $c->detach_error()
     my $log_req;
     if($c->stash->{'error_data'}) {
-        $c->stash->{'raw_error_data'} = Thruk::Utils::dclone($c->stash->{'error_data'});
+        $c->stash->{'raw_error_data'} = Thruk::Utils::IO::dclone($c->stash->{'error_data'});
         if(!$c->stash->{'error_data'}->{'skip_escape'}) {
             my $stack = delete $c->stash->{'error_data'}->{'stacktrace'};
             Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});

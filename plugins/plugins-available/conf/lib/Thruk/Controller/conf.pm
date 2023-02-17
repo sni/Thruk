@@ -6,7 +6,6 @@ use Data::Dumper qw/Dumper/;
 use Encode qw/decode_utf8 encode_utf8/;
 use File::Copy;
 use Socket qw/inet_ntoa/;
-use Storable qw/dclone/;
 
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
@@ -925,7 +924,7 @@ sub _process_backends_page {
     my $peers    = $c->db->get_peers(1);
     $peers = [{}] if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
-        my $b = Thruk::Utils::dclone($p->{'peer_config'});
+        my $b = Thruk::Utils::IO::dclone($p->{'peer_config'});
         next if(!$b->{'_LINE'} && $p->{'federation'});
         $b->{'name'}        = $b->{'name'} // '';
         $b->{'type'}        = lc($b->{'type'} // 'livestatus');
@@ -1938,7 +1937,7 @@ sub _object_revert {
         }
         if(defined $oldobj) {
             $c->stash->{'obj_model_changed'} = 1;
-            $c->{'obj_db'}->update_object($obj, dclone($oldobj->{'conf'}), join("\n", @{$oldobj->{'comments'}}));
+            $c->{'obj_db'}->update_object($obj, Thruk::Utils::IO::dclone($oldobj->{'conf'}), join("\n", @{$oldobj->{'comments'}}));
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' reverted successfully' );
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'Cannot revert new objects, you can just delete them.' );
@@ -2176,7 +2175,7 @@ sub _object_clone {
     if($obj->{'file'}->{'readonly'}) { $c->stash->{'new_file'} = ''; }
     my $newobj = Monitoring::Config::Object->new(
         type     => $obj->get_type(),
-        conf     => dclone($obj->{'conf'}),
+        conf     => Thruk::Utils::IO::dclone($obj->{'conf'}),
         coretype => $c->{'obj_db'}->{'coretype'},
     );
     my $name = $newobj->get_name()." clone";

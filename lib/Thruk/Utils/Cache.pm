@@ -12,7 +12,6 @@ Cache Utilities Collection for Thruk
 
 use warnings;
 use strict;
-use Carp qw/confess/;
 use Storable qw(retrieve);
 
 use Thruk::Utils::IO ();
@@ -37,27 +36,7 @@ sub new {
         '_stat'         => [],
     };
     bless $self, $class;
-    $self->_update();
     return $self;
-}
-
-
-##############################################
-
-=head2 cache
-
-  cache()
-
-return cache
-
-=cut
-sub cache {
-    #my($class, $file)...
-    my(undef, $file) = @_;
-    our $instance;
-    if($file) { $instance = __PACKAGE__->new($file); }
-    if(!$instance) { confess('uninitialized'); }
-    return $instance;
 }
 
 ##############################################

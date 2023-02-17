@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp;
 use Scalar::Util qw/weaken/;
-use Storable qw(dclone);
 
 use Monitoring::Config ();
 use Monitoring::Config::Help ();
@@ -12,6 +11,7 @@ use Monitoring::Config::Object ();
 use Thruk::Base ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Crypt ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -440,7 +440,7 @@ sub get_computed_config {
     my $cache = $self->{'cache'}->{'computed'}->{$self->{'id'}};
     return(@{$cache}) if defined $cache;
 
-    my $conf = dclone($self->{'conf'});
+    my $conf = Thruk::Utils::IO::dclone($self->{'conf'});
     my $templates = $self->get_used_templates($objects);
     for my $tname (@{$templates}) {
         my $t = $objects->get_template_by_name($self->{'type'}, $tname);
@@ -457,7 +457,7 @@ sub get_computed_config {
                 {
                     if(scalar @{$conf->{$key}} > 0 && $conf->{$key}->[0] && substr($conf->{$key}->[0], 0, 1) eq '+') {
                         # merge uniq list elements together
-                        my $list           = dclone($tconf->{$key});
+                        my $list           = Thruk::Utils::IO::dclone($tconf->{$key});
                         $tconf->{$key}->[0] =~ s/^\+//gmx;
                         $conf->{$key}->[0] = substr($conf->{$key}->[0], 1) if(substr($conf->{$key}->[0],0,1) eq '+');
                         @{$conf->{$key}}   = sort @{Thruk::Base::array_uniq([@{$list}, @{$conf->{$key}}])};

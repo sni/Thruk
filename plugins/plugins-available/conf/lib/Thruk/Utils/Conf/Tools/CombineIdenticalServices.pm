@@ -2,10 +2,10 @@ package Thruk::Utils::Conf::Tools::CombineIdenticalServices;
 
 use warnings;
 use strict;
-use Storable qw/dclone/;
 
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Crypt ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -51,7 +51,7 @@ sub get_list {
 
     my $uniq_services = {};
     for my $obj (@{$c->{'obj_db'}->get_objects_by_type('service')}) {
-        my $conf = dclone($obj->{'conf'});
+        my $conf = Thruk::Utils::IO::dclone($obj->{'conf'});
         delete $conf->{'host_name'};
         delete $conf->{'hostgroup_name'};
         my $hash = _make_hash($conf);
@@ -92,7 +92,7 @@ sub cleanup {
         next unless($ident eq 'all' || $data->{'ident'} eq $ident);
         my $master_service = $data->{'obj'};
         my $master_id      = $data->{'id'};
-        my $master_conf    = dclone($master_service->{'conf'});
+        my $master_conf    = Thruk::Utils::IO::dclone($master_service->{'conf'});
         $master_conf->{'host_name'}      = [] unless defined $master_conf->{'host_name'};
         $master_conf->{'hostgroup_name'} = [] unless defined $master_conf->{'hostgroup_name'};
         for my $merge_id (@{$data->{'merge'}}) {

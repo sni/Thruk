@@ -5,7 +5,6 @@ use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use POSIX ();
-use Storable qw/dclone/;
 
 use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Utils::IO ();
@@ -387,7 +386,7 @@ sub get_hosts {
     return($options{'data'}) if($options{'data'});
 
     if($options{'options'}->{'callbacks'}) {
-        %options = %{dclone(\%options)};
+        %options = %{Thruk::Utils::IO::dclone(\%options)};
         $self->_replace_callbacks($options{'options'}->{'callbacks'});
     }
 

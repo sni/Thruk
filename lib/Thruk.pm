@@ -43,7 +43,7 @@ BEGIN {
 use Thruk::Base qw/:all/;
 use Thruk::Config;
 use Thruk::Constants ':add_defaults';
-use Thruk::Utils::Cache qw/cache/;
+use Thruk::Utils::Cache ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Timezone ();
@@ -129,7 +129,7 @@ sub _build_app {
         confess("$key not defined in config,\n".Dumper($config)) unless defined $config->{$key};
     }
 
-    _init_cache();
+    $self->cache();
 
     ###################################################
     # load and parse cgi.cfg into $c->config
@@ -512,10 +512,18 @@ sub obj_db_model {
 }
 
 ###################################################
-# init cache
-sub _init_cache {
+
+=head2 cache
+
+return global cache
+
+=cut
+sub cache {
+    my($self) = @_;
+    return $self->{'_cache'} if $self->{'_cache'};
     Thruk::Utils::IO::mkdir(Thruk->config->{'tmp_path'});
-    return Thruk::Utils::Cache->cache(Thruk->config->{'tmp_path'}.'/thruk.cache');
+    $self->{'_cache'} = Thruk::Utils::Cache->new(Thruk->config->{'tmp_path'}.'/thruk.cache');
+    return;
 }
 
 ###################################################

@@ -2905,7 +2905,7 @@ create http backend based on livestatus backend which has multiple sources inclu
 
 sub fork_http_peer {
     my($peer, $httpsrc) = @_;
-    my $options = Thruk::Utils::dclone($peer->{'peer_config'});
+    my $options = Thruk::Utils::IO::dclone($peer->{'peer_config'});
     $options->{'options'}->{'peer'} = $httpsrc;
     $options->{'type'}              = 'http';
     $peer = Thruk::Backend::Peer->new($options, $peer->{'thruk_config'}, {});

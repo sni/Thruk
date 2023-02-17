@@ -290,7 +290,7 @@ sub update_status {
         };
         if(scalar @{$bp->filter()} > 0 || scalar @{$self->{'filter'}} > 0) {
             my $need_update = delete $bp->{'need_update'};
-            $filter_args = Thruk::Utils::dclone($filter_args);
+            $filter_args = Thruk::Utils::IO::dclone($filter_args);
             $bp->{'need_update'} = $need_update;
             $filter_args->{'bp'}->{'need_update'} = $need_update;
             for my $f (sort @{$bp->filter()}) {

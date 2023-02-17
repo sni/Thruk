@@ -2,11 +2,11 @@ package Thruk::Utils::Conf::Tools::PerformanceDataTemplates;
 
 use warnings;
 use strict;
-use Storable qw/dclone/;
 
 use Thruk::Config 'noautoload';
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Conf ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -263,7 +263,7 @@ sub cleanup {
         else {
             die("unknown action: ".$data->{'action'});
         }
-        $c->{'obj_db'}->update_object($data->{'obj'}, dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
+        $c->{'obj_db'}->update_object($data->{'obj'}, Thruk::Utils::IO::dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
     }
     return;
 }

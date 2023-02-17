@@ -2,7 +2,6 @@ use warnings;
 use strict;
 use Data::Dumper;
 use File::Temp ();
-use Storable qw/ dclone /;
 use Test::More;
 use utf8;
 
@@ -175,7 +174,7 @@ my $exp_keys = [
 is_deeply($keys, $exp_keys, 'sort keys') or diag("got:\n".Dumper($keys)."\nexpected:\n".Dumper($exp_keys));
 ###########################################################
 # compare that with configs read from text blob
-my $cloneconf = dclone($obj->{'conf'});
+my $cloneconf = Thruk::Utils::IO::dclone($obj->{'conf'});
 $parsedfile->update_objects_from_text('');
 is(scalar @{$parsedfile->{'objects'}}, 0, 'emptied objects');
 my $text      = Thruk::Utils::IO::read($parsedfile->{'path'});
@@ -337,7 +336,7 @@ my @comments = split/\n/mx,"
 ###############################################################################
 ###BLAH by BLUB
 #";
-my $orig_comments = dclone(\@comments);
+my $orig_comments = Thruk::Utils::IO::dclone(\@comments);
 my $com = Monitoring::Config::Object::format_comments(\@comments);
 is_deeply($orig_comments, \@comments, 'comments shouldn\'t change');
 

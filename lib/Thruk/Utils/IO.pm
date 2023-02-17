@@ -30,6 +30,14 @@ use Thruk::Utils::Log qw/:all/;
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
 
 ##############################################
+eval {
+    require Clone;
+};
+if($@) {
+    require Storable;
+}
+
+##############################################
 =head1 METHODS
 
 =head2 close
@@ -456,6 +464,7 @@ sub json_store {
     my $json = Cpanel::JSON::XS->new->utf8;
     $json = $json->pretty if $options->{'pretty'};
     $json = $json->canonical; # keys will be randomly ordered otherwise
+    $json = $json->convert_blessed;
 
     my $write_out;
     if($options->{'changed_only'}) {
@@ -1061,6 +1070,26 @@ sub _fuser {
     my($file) = @_;
     my $out = cmd(['fuser', '-v', $file]);
     return($out);
+}
+
+##############################################
+
+=head2 dclone
+
+    dclone($obj)
+
+deep clones any object
+
+=cut
+sub dclone {
+    my($obj) = @_;
+    return unless defined $obj;
+
+    # use faster Clone module if available
+    return(Clone::clone($obj)) if $INC{'Clone.pm'};
+
+    # else use Storable
+    return(Storable::dclone($obj));
 }
 
 ##############################################

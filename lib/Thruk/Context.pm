@@ -812,7 +812,7 @@ replace $c->config with a deepcopy of it
 =cut
 sub clone_user_config {
     my($c) = @_;
-    $c->{'config'} = Thruk::Utils::dclone($c->{'config'});
+    $c->{'config'} = Thruk::Utils::IO::dclone($c->{'config'});
     $c->{'config'}->{'cloned'} = 1;
     return;
 }

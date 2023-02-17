@@ -13,7 +13,6 @@ Menu Utilities Collection for Thruk
 use warnings;
 use strict;
 use Carp;
-use Storable qw/dclone/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
@@ -328,11 +327,11 @@ sub _renew_navigation {
     our $orig_additional_items;
     our $orig_additional_subitems;
     if(!defined $orig_additional_items) {
-        $orig_additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
-        $orig_additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+        $orig_additional_items    = defined $Thruk::Utils::Menu::additional_items    ? Thruk::Utils::IO::dclone($Thruk::Utils::Menu::additional_items)    : [];
+        $orig_additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? Thruk::Utils::IO::dclone($Thruk::Utils::Menu::additional_subitems) : [];
     }
-    $Thruk::Utils::Menu::additional_items    = dclone($orig_additional_items);
-    $Thruk::Utils::Menu::additional_subitems = dclone($orig_additional_subitems);
+    $Thruk::Utils::Menu::additional_items    = Thruk::Utils::IO::dclone($orig_additional_items);
+    $Thruk::Utils::Menu::additional_subitems = Thruk::Utils::IO::dclone($orig_additional_subitems);
     $Thruk::Utils::Menu::removed_items = {};
 
     ## no critic

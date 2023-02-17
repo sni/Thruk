@@ -6,7 +6,6 @@ use File::Copy qw/copy/;
 use File::Temp qw/tempdir/;
 use IO::Socket::INET;
 use IO::Socket::UNIX;
-use Storable qw/dclone/;
 use Test::More;
 use utf8;
 
@@ -209,7 +208,7 @@ is_deeply($service->{'conf'},
 
 ###########################################################
 # change test service
-my $newdata = dclone($service->{'conf'});
+my $newdata = Thruk::Utils::IO::dclone($service->{'conf'});
 $newdata->{'notification_interval'} = 1;
 $c->{'obj_db'}->update_object($service, $newdata);
 

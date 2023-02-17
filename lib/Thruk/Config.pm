@@ -5,7 +5,6 @@ use strict;
 use Carp qw/confess/;
 use Cwd ();
 use POSIX ();
-use Storable ();
 
 use Thruk::Base ();
 use Thruk::Utils::IO ();
@@ -376,7 +375,7 @@ return basic config hash and sets environment
 sub set_config_env {
     my @files = @_;
 
-    my $conf    = Storable::dclone(get_base_config());
+    my $conf    = Thruk::Utils::IO::dclone(get_base_config());
     my $configs = _load_config_files(\@files);
 
     ###################################################

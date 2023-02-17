@@ -6,6 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -217,7 +218,7 @@ sub _rest_get_external_command {
 
     my $commands = {};
     for my $b (@{$backends}) {
-        $commands->{$b} = Thruk::Utils::dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
+        $commands->{$b} = Thruk::Utils::IO::dclone($cmd_list); # must be cloned, otherwise add_remove_comments_commands_from_disabled_commands appends command multiple times
     }
 
     # handle custom commands

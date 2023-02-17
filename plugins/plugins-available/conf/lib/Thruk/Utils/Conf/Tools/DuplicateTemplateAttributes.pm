@@ -2,9 +2,9 @@ package Thruk::Utils::Conf::Tools::DuplicateTemplateAttributes;
 
 use warnings;
 use strict;
-use Storable qw/dclone/;
 
 use Thruk::Utils::Conf ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
@@ -52,7 +52,7 @@ sub get_list {
     for my $type (qw/host service contact/) {
         my $templates = {};
         for my $tmp (@{$c->{'obj_db'}->get_templates_by_type($type)}) {
-            my $resolved = dclone($tmp->get_resolved_config($c->{'obj_db'}));
+            my $resolved = Thruk::Utils::IO::dclone($tmp->get_resolved_config($c->{'obj_db'}));
             delete $resolved->{'register'};
             delete $resolved->{'name'};
             $templates->{$tmp->get_template_name()} = {
@@ -116,7 +116,7 @@ sub cleanup {
             if(!grep(/\Q$data->{'template'}\E/mx, @{$data->{'obj'}->{'conf'}->{'use'}})) {
                 push @{$data->{'obj'}->{'conf'}->{'use'}}, $data->{'template'};
             }
-            $c->{'obj_db'}->update_object($data->{'obj'}, dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
+            $c->{'obj_db'}->update_object($data->{'obj'}, Thruk::Utils::IO::dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
         }
     }
     return;

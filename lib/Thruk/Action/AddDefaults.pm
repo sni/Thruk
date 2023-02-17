@@ -1291,7 +1291,7 @@ sub check_federation_peers {
                 id      => $key,
                 type    => $parent->{'peer_config'}->{'type'},
                 section => $section,
-                options => $parent->{'peer_config'}->{'type'} eq 'http' ? Thruk::Utils::dclone($parent->{'peer_config'}->{'options'}) : {},
+                options => $parent->{'peer_config'}->{'type'} eq 'http' ? Thruk::Utils::IO::dclone($parent->{'peer_config'}->{'options'}) : {},
             };
             delete $subpeerconfig->{'options'}->{'name'};
             delete $subpeerconfig->{'options'}->{'peer'};

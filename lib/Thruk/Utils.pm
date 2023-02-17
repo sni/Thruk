@@ -27,13 +27,6 @@ use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
-eval {
-    require Clone;
-};
-if($@) {
-    require Storable;
-}
-
 ##############################################
 =head1 METHODS
 
@@ -3427,7 +3420,7 @@ sub dump_params {
     my($params, $max_length, $flat) = @_;
     $max_length = 250 unless defined $max_length;
     $flat       = 1   unless defined $flat;
-    $params = dclone($params) if ref $params;
+    $params = Thruk::Utils::IO::dclone($params) if ref $params;
     local $Data::Dumper::Indent = 0 if $flat;
     my $dump = ref $params ? Dumper($params) : $params;
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
@@ -3449,14 +3442,7 @@ deep clones any object
 
 =cut
 sub dclone {
-    my($obj) = @_;
-    return unless defined $obj;
-
-    # use faster Clone module if available
-    return(Clone::clone($obj)) if $INC{'Clone.pm'};
-
-    # else use Storable
-    return(Storable::dclone($obj));
+    return(Thruk::Utils::IO::dclone(@_));
 }
 
 ##############################################

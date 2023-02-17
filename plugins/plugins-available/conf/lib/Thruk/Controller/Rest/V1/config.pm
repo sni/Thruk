@@ -3,11 +3,11 @@ package Thruk::Controller::Rest::V1::config;
 use warnings;
 use strict;
 use Cpanel::JSON::XS ();
-use Storable qw/dclone/;
 use Time::HiRes ();
 
 use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -645,10 +645,10 @@ sub _add_object {
         $o->get_computed_config($c->{'obj_db'});
         my($conf_keys, $config) = $o->get_computed_config($c->{'obj_db'});
         my $templates = $o->get_used_templates($c->{'obj_db'});
-        $conf = dclone($config);
+        $conf = Thruk::Utils::IO::dclone($config);
         $conf->{':TEMPLATES'} = Thruk::Base::array_uniq($templates);
     } else {
-        $conf = dclone($o->{'conf'});
+        $conf = Thruk::Utils::IO::dclone($o->{'conf'});
     }
     $conf->{':ID'}        = $o->{'id'};
     $conf->{':TYPE'}      = $o->{'type'};

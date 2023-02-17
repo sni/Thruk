@@ -5,7 +5,6 @@ use strict;
 use Carp;
 use Data::Dumper;
 use Encode qw/decode_utf8/;
-use Storable qw/dclone/;
 
 use Monitoring::Config::File ();
 use Monitoring::Config::Object ();
@@ -1300,7 +1299,7 @@ sub clone_refs {
                                 next;
                             }
                             push @{$ref->{'conf'}->{$attr}}, $new_name;
-                            $self->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
+                            $self->update_object($ref, Thruk::Utils::IO::dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
                         }
                     }
                 }
