@@ -110,6 +110,7 @@ dump complete cache
 =cut
 sub dump {
     my($self) = @_;
+    $self->_update();
     return($self->{'_data'});
 }
 
