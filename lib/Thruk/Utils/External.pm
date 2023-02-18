@@ -16,10 +16,10 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
+use Storable ();
 use Time::HiRes qw/time/;
 
 use Thruk::Action::AddDefaults ();
-use Thruk::Utils::Cache ();
 use Thruk::Utils::Crypt ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Views::ToolkitRenderer ();
@@ -193,8 +193,8 @@ sub perl {
 
         # save stash
         _clean_unstorable_refs($c->stash);
-        Thruk::Utils::Cache->new($dir."/stash")->set($c->stash);
-        Thruk::Utils::IO::json_lock_store($dir."/stash.dump", $c->stash, {pretty => 1}) if Thruk::Base->debug;
+        Storable::store(\%{$c->stash}, $dir."/stash");
+        Thruk::Utils::IO::write($dir."/stash.dump", Dumper($c->stash)) if Thruk::Base->debug;
         die($err) if $err; # die again after cleanup
     };
     $err = $@ unless $err;
@@ -538,7 +538,7 @@ sub get_result {
 
     my $time = $end[9] - $start[9];
 
-    my $stash = -f $dir."/stash" ? Thruk::Utils::Cache->new($dir."/stash")->get() : undef;
+    my $stash = -f $dir."/stash" ? Storable::retrieve($dir."/stash") : undef;
 
     my $rc = Thruk::Utils::IO::saferead($dir."/rc") // -1;
     chomp($rc);
