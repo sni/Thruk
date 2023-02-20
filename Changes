@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.04     Mon Feb 20 09:28:17 CET 2023
           - add minimal=3 mode on status pages to hide pager and filter
           - main landing page:
             - performance tweak
