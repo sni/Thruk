@@ -1485,6 +1485,7 @@ sub get_perf_image {
         }
         $c->stash->{'last_graph_type'} = 'grafana';
         $grafanaurl =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $grafanaurl =~ s|/d/|/d-solo/|gmx;
         # grafana panel ids usually start at 1 (or 2 with old versions)
         delete $options->{'source'} if(defined $options->{'source'} && $options->{'source'} eq 'null');
         $options->{'source'} = ($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1') unless defined $options->{'source'};
@@ -1777,12 +1778,13 @@ sub get_action_url {
         $action_url =~ s/&/&amp;/gmx;
         return($action_url);
     }
-    elsif($action_url =~ m/\/histou\.js\?/mx) {
+    elsif($action_url =~ m/\/histou\.js\?/mx || $action_url =~ m/\/grafana\//mx) {
         my $custvars = get_custom_vars($c, $obj, $obj_prefix);
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $popup_url =~ s|/d/|/d-solo/|gmx;
         $popup_url .= '&amp;panelId='.($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1');
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);

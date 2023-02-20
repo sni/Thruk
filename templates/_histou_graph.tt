@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-[% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/') %]
+[% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/').replace('/d/', '/d-solo/') %]
 <script>
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";
@@ -8,36 +8,68 @@
 
   /* try to fetch sources */
   var source_url = histou_url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&');
-  jQuery.ajax({
-    url: source_url,
-    type: 'POST',
-    xhrFields: {
-      withCredentials: true
-    },
-    success: function(data) {
-      data = data.replace(/^[\s\S]*<br>\{/, '{');
-      data = data.replace(/<br><\/pre>$/, '');
-      data = data.replace(/\n/g, '');
-      eval('data = '+data+";");
-      var sources    = [];
-      var has_graphs = false;
-      jQuery('#histou_source_select').find('option').remove();
-      jQuery(data.rows).each(function(i, row) {
-          jQuery(row.panels).each(function(j, panel) {
-            var title = panel.title;
-            title = title.replace('[% escape_js(hst) %] ', '');
-            title = title.replace('[% escape_js(svc) %] ', '');
-            jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+title+'<\/option>');
-            has_graphs = true;
-          });
+  if(source_url.match("/histou/index.php")) {
+    jQuery.ajax({
+      url: source_url,
+      type: 'POST',
+      xhrFields: {
+        withCredentials: true
+      },
+      success: function(data) {
+        data = data.replace(/^[\s\S]*<br>\{/, '{');
+        data = data.replace(/<br><\/pre>$/, '');
+        data = data.replace(/\n/g, '');
+        eval('data = '+data+";");
+        var has_graphs = 0;
+        jQuery('#histou_source_select').find('option').remove();
+        jQuery(data.rows).each(function(i, row) {
+            jQuery(row.panels).each(function(j, panel) {
+              var title = panel.title;
+              title = title.replace('[% escape_js(hst) %] ', '');
+              title = title.replace('[% escape_js(svc) %] ', '');
+              jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+title+'<\/option>');
+              has_graphs++;
+            });
+        });
+        if(has_graphs > 1) {
+          jQuery('#histou_source_select').show();
+        } else {
+          jQuery('#histou_source_select').hide();
+        }
+      },
+      error: ajax_xhr_error_logonly
+    });
+  } else {
+    // extract panels from plain grafana dashboard
+    var matches = source_url.match(/(?:d|dashboard)\/([^\/]+)\//);
+    if(matches[1]) {
+      var dashboard_id = matches[1];
+      var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
+      jQuery.ajax({
+        url: api_url,
+        type: 'GET',
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          var has_graphs = 0;
+          jQuery('#histou_source_select').find('option').remove();
+          if(data && data["dashboard"] && data["dashboard"]["panels"]) {
+            jQuery(data.dashboard.panels).each(function(j, panel) {
+              jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+panel.title+'<\/option>');
+              has_graphs++;
+            });
+          }
+          if(has_graphs > 1) {
+            jQuery('#histou_source_select').show();
+          } else {
+            jQuery('#histou_source_select').hide();
+          }
+        },
+        error: ajax_xhr_error_logonly
       });
-      /* only useful for multiple sources */
-      if(has_graphs) {
-        jQuery('#histou_source_select').show();
-      }
-    },
-    error: ajax_xhr_error_logonly
-  });
+    }
+  }
 </script>
 <div class="card w-full max-w-[800px] mx-auto overflow-hidden">
   <div class="head justify-between">
