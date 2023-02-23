@@ -60,12 +60,12 @@ TP.get_group_status = function(options) {
         totals.hosts.unreachable = group.hosts.plain_unreachable;
         totals.hosts.pending     = group.hosts.plain_pending;
         if(incl_ack) {
-            totals.hosts.down        = group.hosts.ack_down;
-            totals.hosts.unreachable = group.hosts.ack_unreachable;
+            totals.hosts.down        += group.hosts.ack_down;
+            totals.hosts.unreachable += group.hosts.ack_unreachable;
         }
         if(incl_downtimes) {
-            totals.hosts.down        = group.hosts.downtime_down;
-            totals.hosts.unreachable = group.hosts.downtime_unreachable;
+            totals.hosts.down        += group.hosts.downtime_down;
+            totals.hosts.unreachable += group.hosts.downtime_unreachable;
         }
     }
 
