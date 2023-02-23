@@ -630,8 +630,10 @@ sub save_runtime_file {
 
     if($merge_states) {
         for my $id (keys %{$runtime}, keys %{$merge_states}) {
+            my $saveid = $id;
+            $saveid =~ s/^pantab_.*?_(panlet_\d+)$/$1/gmx;
             for my $key (@runtime_keys) {
-                $runtime->{$id}->{$key} = $merge_states->{$id}->{$key} if defined $merge_states->{$id}->{$key};
+                $runtime->{$saveid}->{$key} = $merge_states->{$id}->{$key} if defined $merge_states->{$id}->{$key};
             }
         }
     }
