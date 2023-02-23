@@ -1677,7 +1677,8 @@ var TP = {
             if(p.xdata && p.xdata.general) {
                 /* custom filter */
                 if(p.xdata.general.filter) {
-                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter, p.xdata.general.backends]);
+                    var backends = TP.getActiveBackendsPanel(tab, p);
+                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter, backends]);
                     if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
                     if(req.filter[filter] == undefined) { req.filter[filter] = []; }
                     req.filter[filter].push(p.id);
