@@ -32,12 +32,12 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd  => '/bin/bash -c "omd stop demo crontab 2>&1"',
-    like => ['/Removing Crontab/'],
+    like => ['/Stopping crontab/'],
 });
 
 TestUtils::test_command({
     cmd  => '/bin/bash -c "omd stop demo 2>&1"',
-    like => ['/Removing Crontab/'],
+    like => ['/Stopping crontab/'],
 });
 
 TestUtils::test_command({
@@ -88,5 +88,5 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd  => '/bin/bash -c "omd start demo 2>&1"',
-    like => ['/Initializing Crontab/'],
+    like => ['/Starting crontab/'],
 });
