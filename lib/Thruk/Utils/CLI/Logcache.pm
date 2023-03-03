@@ -33,6 +33,8 @@ The logcache command creates/updates the mysql/mariadb logfile cache.
         - update                    Delta update all logfiles since last import/update.
                  [-w|--worker=<nr>] Use this number of worker processes to update all sites.
                                     Defaults to 'auto' which trys to find a suitable number automatically.
+                 [--blocksize=...]  sets the amount of logfiles fetched in one
+                                    update block. Default: 1d
         - stats                     Display logcache statistics.
         - authupdate                Update authentication data.
         - optimize                  Run table optimize.
@@ -100,7 +102,11 @@ sub cmd {
     };
 
     my $blocksize;
-    if($mode eq 'import') {
+    if($mode eq 'update') {
+        if($opt->{'blocksize'}) {
+            $blocksize = Thruk::Utils::expand_duration($opt->{'blocksize'});
+        }
+    } elsif($mode eq 'import') {
         if($opt->{'blocksize'}) {
             $blocksize = Thruk::Utils::expand_duration($opt->{'blocksize'});
         } else {
