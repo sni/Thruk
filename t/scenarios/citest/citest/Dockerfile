@@ -1,4 +1,4 @@
-FROM  ubuntu:18.04
+FROM  ubuntu:20.04
 
 COPY speedup.sh /tmp/speedup.sh
 RUN /tmp/speedup.sh
