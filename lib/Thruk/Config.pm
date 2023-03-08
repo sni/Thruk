@@ -222,12 +222,14 @@ my $base_defaults = {
     'auth_oauth'                            => {
                 'provider'                      => [],
     },
-    'uri_filter'     => {
+    'base_uri_filter' => { # always applied
                 'bookmark'                      => undef,
                 'referer'                       => undef,
-                'scrollTo'                      => undef,
                 'autoShow'                      => undef,
                 '_'                             => undef,
+    },
+    'uri_filter'     => { # applied if nothing specified
+                'scrollTo'                      => undef,
     },
     'physical_logo_path'                    => [],
     'all_in_one_javascript'                 => [

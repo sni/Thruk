@@ -330,7 +330,7 @@ sub full_uri {
     my($c, $full) = @_;
     $full = 0 unless $full;
     confess("no c") unless defined $c;
-    my $uri = ''.uri_with($c, $c->config->{'uri_filter'}, 1);
+    my $uri = ''.uri_with($c, undef, 1);
 
     # uri always contains /thruk/, so replace it with our product prefix
     my $url_prefix = $c->stash->{'url_prefix'} || $c->config->{'url_prefix'};
@@ -365,26 +365,27 @@ sub base_url {
 
 =head2 short_uri
 
-  short_uri($c, $filter)
+  short_uri($c, [ $filter, $keep_absolute, $baseurl, $skip_escape ])
 
-returns a html escaped correct uri but only the url part
+returns a html escaped correct uri but only the url part (redirects to uri_with but applies default filter)
 
 ex.: status.cgi?params...
 
 =cut
 sub short_uri {
-    my($c, $data) = @_;
+    my($c, $data, $keep_absolute, $baseurl, $skip_escape) = @_;
     my $filter = {};
-    my %uri_filter = %{$c->config->{'uri_filter'}};
-    for my $key (sort keys %uri_filter) {
-        $filter->{$key} = $uri_filter{$key};
-    }
     if(defined $data) {
         for my $key (sort keys %{$data}) {
             $filter->{$key} = $data->{$key};
         }
+    } else {
+        my %uri_filter = %{$c->config->{'uri_filter'}};
+        for my $key (sort keys %uri_filter) {
+            $filter->{$key} = $uri_filter{$key};
+        }
     }
-    return(uri_with($c, $filter));
+    return(uri_with($c, $filter, $keep_absolute, $baseurl, $skip_escape));
 }
 
 
@@ -410,6 +411,11 @@ sub uri_with {
         $uri = URI->new($baseurl);
     } else {
         $uri = $c->stash->{original_uri} ? URI->new($c->stash->{original_uri}) : $c->req->uri;
+    }
+
+    my %uri_filter = %{$c->config->{'base_uri_filter'}};
+    for my $key (sort keys %uri_filter) {
+        $data->{$key} = $uri_filter{$key} unless exists $data->{$key};
     }
 
     my @old_param = $uri->query_form();
