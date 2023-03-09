@@ -787,6 +787,16 @@ sub get_exposed_custom_vars {
             $vars->{$var} = 1;
         }
     }
+    for my $src (qw/default_service_columns default_host_columns/) {
+        next unless $config->{$src};
+        my @dfl = split(/\s*,\s*/mx, $config->{$src});
+        for my $d (@dfl) {
+            if($d =~ m/^cust_([a-zA-Z0-9]+?)(:.*|)$/mx) {
+                my $var  = $1;
+                $vars->{$var} = 1;
+            }
+        }
+    }
     return([sort keys %{$vars}]);
 }
 
