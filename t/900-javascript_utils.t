@@ -1,43 +1,41 @@
 use warnings;
 use strict;
 use File::Temp qw/tempfile/;
+use Log::Log4perl qw(:easy);
 use Test::More;
 
 use Thruk::Utils::IO ();
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
-eval "use Test::JavaScript";
-plan skip_all => 'Test::JavaScript required' if $@;
+eval "use WWW::Mechanize::Chrome";
+plan skip_all => 'WWW::Mechanize::Chrome required' if $@;
 
-#################################################
-# create minimal window object
-js_ok("
-var window = {
-  navigator: {userAgent:'test'},
-  document:  {
-    createElement:function(){
-        return({
-            getElementsByTagName:function(){ return([])},
-            appendChild:function(){},
-            setAttribute:function(){}
-        });
-    },
-    createDocumentFragment:function(){return({})},
-    createComment:function(){},
-    getElementById:function(){},
-    documentElement:{
-        insertBefore:function(){},
-        removeChild:function(){}
-    }
-  },
-  addEventListener: function() {}
-};
-var document = window.document;
-thruk_debug_js = true;
-function jQuery() { return({
-  focus: function() {}
-})};
-", 'set window object') or BAIL_OUT("$0: failed to create window object");
+eval "use Protocol::WebSocket::Frame";
+plan skip_all => 'Protocol::WebSocket::Frame required' if $@;
+# cannot eval larger files otherwise
+$Protocol::WebSocket::Frame::MAX_PAYLOAD_SIZE = 0;
+ok($Protocol::WebSocket::Frame::MAX_PAYLOAD_SIZE == 0, "payload size is reduced now");
+
+my($chrome, $diagnosis) = WWW::Mechanize::Chrome->find_executable();
+plan skip_all => 'WWW::Mechanize::Chrome requires chrome: '.$diagnosis if !$chrome;
+
+Log::Log4perl->easy_init($ERROR);
+my $mech = WWW::Mechanize::Chrome->new(
+    headless         => 1,
+    separate_session => 1,
+    tab              => 'current',
+    launch_arg       => ["--password-store=basic", "--remote-allow-origins=*" ],
+);
+$mech->get_local($0);
+my $console = $mech->add_listener('Runtime.consoleAPICalled', sub {
+  return if(scalar @_ == 0);
+  diag(join ", ",
+      map { $_->{value} // $_->{description} }
+      @{ $_[0]->{params}->{args} }
+  );
+});
+
+js_ok("function diag(txt) { console.log(txt); }", 'added diag function');
 
 #################################################
 js_ok("url_prefix='/'", 'set url prefix');
@@ -56,10 +54,6 @@ for my $f (@functions) {
 
 #################################################
 # some more functions
-js_ok("var top = { location: '' };", "defined top fake object");
-js_ok("var location = '';"         , "defined location fake object");
-js_ok("window.location = '';"      , "defined window.location fake object");
-js_ok("function cookieRemoveAll() {};" , "override cookie function");
 _eval_extracted_js('templates/login.tt');
 @functions = Thruk::Utils::IO::read_as_list('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\w+)/gmx;
 js_eval_ok('t/data/javascript_tests_login_tt.js');
@@ -68,6 +62,7 @@ for my $f (@functions) {
 }
 
 #################################################
+$mech->close();
 done_testing();
 
 
@@ -90,3 +85,54 @@ sub _eval_extracted_js {
 }
 
 #################################################
+sub js_ok {
+  my($src, $msg) = @_;
+  $mech->eval_in_page($src);
+  my @err = $mech->js_errors();
+  for my $e (@err) {
+    _diag_js_error($e);
+  }
+  $mech->clear_js_errors();
+  ok(scalar @err == 0, $msg);
+}
+
+#################################################
+sub js_eval_ok {
+  my($file) = @_;
+  my $src = Thruk::Utils::IO::read($file);
+  js_ok($src, $file);
+}
+
+#################################################
+sub js_is {
+  my($src, $expect, $msg) = @_;
+  my($val, $type) = $mech->eval_in_page($src);
+  my @err = $mech->js_errors();
+  if(scalar @err != 0) {
+    fail("failed to evaluate: ".$src);
+  }
+  for my $e (@err) {
+    _diag_js_error($e);
+  }
+  $mech->clear_js_errors();
+  is($val, $expect, $msg);
+}
+
+#################################################
+sub _diag_js_error {
+  my($e) = @_;
+  if($e->{'message'}) {
+    diag($e->{'message'});
+    return;
+  }
+  if($e->{'exceptionDetails'}) {
+    diag(sprintf("[%s:%d:%d] %s: %s",
+      $e->{'exceptionDetails'}->{url},
+      $e->{'exceptionDetails'}->{lineNumber},
+      $e->{'exceptionDetails'}->{columnNumber},
+      $e->{'exceptionDetails'}->{text},
+      $e->{'exceptionDetails'}->{exception}->{description},
+    ));
+    return;
+  }
+}

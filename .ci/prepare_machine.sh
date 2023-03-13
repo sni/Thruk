@@ -64,6 +64,8 @@ apt-get -y install \
     libplack-perl \
     libcrypt-rijndael-perl \
     libconfig-general-perl \
+    libwww-mechanize-perl \
+    chromium-browser \
 
 echo "deb http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main" >> /etc/apt/sources.list
 wget -q "http://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | apt-key add -
