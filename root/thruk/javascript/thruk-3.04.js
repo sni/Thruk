@@ -6976,7 +6976,7 @@ function new_filter(filter_pane_id) {
 
     // replace ids and names
     jQuery(newObj).find("*").each(function(i, el) {
-        if(el.id) {
+        if(el.id || el.name) {
             replaceIdAndNames(el, pane_prefix+new_prefix);
         }
     });
