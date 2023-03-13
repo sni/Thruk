@@ -47,7 +47,8 @@ js_eval_ok($jsfiles[0]);
 
 #################################################
 # tests from javascript_tests file
-my @functions = Thruk::Utils::IO::read_as_list('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+my @functions = Thruk::Utils::IO::read('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+ok(scalar @functions > 0, "read ".(scalar @functions)." functions from javascript_test.js");
 js_eval_ok('t/data/javascript_tests.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");
