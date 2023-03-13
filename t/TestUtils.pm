@@ -37,6 +37,11 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT    = qw(request ctx_request);
 our @EXPORT_OK = qw(request ctx_request);
+our %EXPORT_TAGS = ( all => \@EXPORT_OK );
+
+my @js_functions = qw/js_init js_ok js_eval_ok js_eval_extracted js_is js_deinit/;
+push @EXPORT_OK, @js_functions;
+$EXPORT_TAGS{js} = \@js_functions;
 
 my $use_html_lint;
 my $lint;
@@ -1178,6 +1183,119 @@ sub get_matches_with_meta {
         };
     }
     return(\@matches);
+}
+
+#################################################
+sub js_init {
+    eval "use WWW::Mechanize::Chrome";
+    plan skip_all => 'WWW::Mechanize::Chrome required' if $@;
+
+    # cannot eval larger files otherwise
+    eval "use Protocol::WebSocket::Frame";
+    plan skip_all => 'Protocol::WebSocket::Frame required' if $@;
+    $Protocol::WebSocket::Frame::MAX_PAYLOAD_SIZE = 0;
+    ok($Protocol::WebSocket::Frame::MAX_PAYLOAD_SIZE == 0, "reduced websocket payload size");
+
+    my($chrome, $diagnosis) = WWW::Mechanize::Chrome->find_executable();
+    plan skip_all => 'WWW::Mechanize::Chrome requires chrome: '.$diagnosis if !$chrome;
+
+    use Log::Log4perl qw(:easy);
+    Log::Log4perl->easy_init($ERROR);
+    our $mech = WWW::Mechanize::Chrome->new(
+        headless         => 1,
+        separate_session => 1,
+        tab              => 'current',
+        launch_arg       => ["--password-store=basic", "--remote-allow-origins=*"],
+    );
+    $mech->get_local($0);
+
+    my $console = $mech->add_listener('Runtime.consoleAPICalled', sub {
+        return if(scalar @_ == 0);
+        diag(join ", ",
+            map { $_->{value} // $_->{description} }
+            @{ $_[0]->{params}->{args} }
+        );
+    });
+
+    js_ok("function diag(txt) { console.log(txt); }", 'added diag function');
+}
+
+#################################################
+sub js_deinit {
+    our $mech;
+    $mech->close();
+}
+
+#################################################
+sub js_ok {
+  my($src, $msg) = @_;
+  our $mech;
+  ok(1, $msg);
+  $mech->eval_in_page($src, returnByValue => Cpanel::JSON::XS::false);
+  my @err = $mech->js_errors();
+  for my $e (@err) {
+    _js_diag_error($e);
+  }
+  $mech->clear_js_errors();
+  ok(scalar @err == 0, "js errors clean");
+}
+
+#################################################
+sub js_eval_ok {
+  my($file) = @_;
+  my $src = Thruk::Utils::IO::read($file);
+  js_ok($src, $file);
+}
+
+#################################################
+sub js_is {
+  my($src, $expect, $msg) = @_;
+  our $mech;
+  my($val, $type) = $mech->eval_in_page($src);
+  my @err = $mech->js_errors();
+  if(scalar @err != 0) {
+    fail("failed to evaluate: ".$src);
+  }
+  for my $e (@err) {
+    _js_diag_error($e);
+  }
+  $mech->clear_js_errors();
+  is($val, $expect, $msg);
+}
+
+#################################################
+sub _js_diag_error {
+  my($e) = @_;
+  if($e->{'message'}) {
+    diag($e->{'message'});
+    return;
+  }
+  if($e->{'exceptionDetails'}) {
+    diag(sprintf("[%s:%d:%d] %s: %s",
+      $e->{'exceptionDetails'}->{url},
+      $e->{'exceptionDetails'}->{lineNumber},
+      $e->{'exceptionDetails'}->{columnNumber},
+      $e->{'exceptionDetails'}->{text},
+      $e->{'exceptionDetails'}->{exception}->{description},
+    ));
+    return;
+  }
+}
+
+#################################################
+sub js_eval_extracted {
+    my($file) = @_;
+    ok(1, "extracting from ".$file);
+    my $cont = Thruk::Utils::IO::read($file);
+    my @codes = $cont =~ m/<script[^>]*text\/javascript.*?>(.*?)<\/script>/gsmxi;
+    my $jscode = join("\n", @codes);
+    $jscode =~ s/\[\%\s*product_prefix\s*\%\]/thruk/gmx;
+    my($fh, $filename) = tempfile();
+    print $fh $jscode;
+    close($fh);
+    js_eval_ok($filename);
+    unlink($filename);
+    return;
 }
 
 #################################################

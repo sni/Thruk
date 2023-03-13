@@ -1,86 +1,21 @@
 use warnings;
 use strict;
 use File::Temp qw/tempfile/;
-use Log::Log4perl ();
 use Test::More;
 
 use Thruk ();
 
 use lib('t');
+use TestUtils qw/:js/;
 
-require TestUtils;
-import TestUtils;
+plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+$ENV{'THRUK_QUIET'} = 1;
 
-BEGIN {
-    plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
-    eval "use Test::JavaScript";
-    plan skip_all => 'Test::JavaScript required' if $@;
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    $ENV{'THRUK_QUIET'} = 1;
-}
+js_init();
 
-#################################################
-# create minimal window object
-js_ok("
-var window = {
-  navigator: {userAgent:'test'},
-  document:  {
-    createElement:function(){
-        return({
-            getElementsByTagName:function(){ return([])},
-            appendChild:function(){},
-            setAttribute:function(){}
-        });
-    },
-    createDocumentFragment:function(){return({})},
-    createComment:function(){},
-    getElementById:function(){},
-    getElementsByTagName:function(t){
-        if(t == 'html') {return([{}])};
-        if(t == 'script') {return([{src:'ext-all.js'}])};
-        return([]);
-    },
-    documentElement:{
-        style: {},
-        insertBefore:function(){},
-        removeChild:function(){}
-    },
-    addEventListener: function(){},
-    removeEventListener: function(){}
-  },
-  DOMParser: function(){ return({
-    parseFromString: function(){ return({
-            getElementsByTagName:function(){ return([])},
-        })
-    }
-  })},
-  location: { hash: '' },
-  addEventListener:    function(){},
-  removeEventListener: function(){},
-  setTimeout:          function(){},
-  clearTimeout:        function(){},
-  setInterva:          function(){},
-  clearInterval:       function(){}
-};
-var navigator  = window.navigator;
-var document   = window.document;
-DOMParser      = window.DOMParser;
-setTimeout     = function(){};
-clearTimeout   = function(){};
-setInterval    = function(){};
-clearInterval  = function(){};
-XMLHttpRequest = function(){ return({
-    open: function(){},
-    send: function(){}
-})};
-self           = {};
-top            = {};
-url_prefix     = '/thruk';
-thruk_debug_js = true;
-thruk_onerror  = function() {};
-", 'set window object') or BAIL_OUT("failed to create window object");
+js_ok("document.getElementsByTagName('body')[0].innerHTML = '<script src=\"\"></script>';", "add script tag");
 my @jsfiles = glob('root/thruk/vendor/extjs-*/ext-all-debug.js');
-ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 
 #################################################
@@ -95,7 +30,6 @@ for my $file (@{$config->{'all_in_one_javascript_panorama'}}) {
     }
     next if $testfile =~ m|OpenLayers|mx;
     next if $testfile =~ m|jquery|mxi;
-    ok($testfile, $testfile);
     js_eval_ok($testfile) or BAIL_OUT("failed to load ".$testfile);
 }
 
@@ -135,11 +69,12 @@ js_eval_ok($filename) && unlink($filename);
 
 #################################################
 # tests from javascript_tests file
-Log::Log4perl::get_logger("JavaScript::SpiderMonkey")->level("ERROR"); # JavaScript::SpiderMonkey uses DEBUG, so set loglevel to error
-my @functions = Thruk::Utils::IO::read_as_list('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+my @functions = Thruk::Utils::IO::read('t/xt/panorama/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
+ok(scalar @functions > 0, "read ".(scalar @functions)." functions from javascript_test.js");
 js_eval_ok('t/xt/panorama/javascript_tests.js');
 for my $f (@functions) {
     js_is("$f()", '1', "$f()");
 }
 
+js_deinit();
 done_testing();
