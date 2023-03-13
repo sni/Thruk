@@ -126,7 +126,7 @@ sub duration {
     my $hours   = 0;
     my $minutes = 0;
     my $seconds = 0;
-    if($options == 1 || $options == 4 || $options == 5 || $options == 6) {
+    if($options == 4 || $options == 5 || $options == 6) {
         if($duration >= (365*86400)) {
             $years     = int($duration/(365*86400));
             $duration = $duration%(365*86400);
@@ -160,6 +160,7 @@ sub duration {
     }
     elsif($options == 4) {
         my @res;
+        if($years   > 0) { push @res, $years."y"; }
         if($days    > 0) { push @res, $days."d"; }
         if($hours   > 0) { push @res, $hours."h"; }
         if($minutes > 0) { push @res, $minutes."m"; }
@@ -169,8 +170,9 @@ sub duration {
     }
     elsif($options == 5) {
         my @res;
-        if($days    > 0) { push @res, $days."days"; }
-        if($hours   > 0) { push @res, $hours."hours"; }
+        if($years   > 0) { push @res, $years."year"._plural_s($years); }
+        if($days    > 0) { push @res, $days."day"._plural_s($days); }
+        if($hours   > 0) { push @res, $hours."hour"._plural_s($hours); }
         if($minutes > 0) { push @res, $minutes."min"; }
         if($seconds > 0) { push @res, $seconds."sec"; }
         if(scalar @res == 0) { push @res, "0sec"; }
@@ -1702,5 +1704,13 @@ sub is_icinga2 {
 }
 
 ########################################
+sub _plural_s {
+    my($nr) = @_;
+    return "" if $nr == 1;
+    return("s");
+}
+
+########################################
+
 
 1;

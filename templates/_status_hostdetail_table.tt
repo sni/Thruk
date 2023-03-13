@@ -107,7 +107,9 @@
           <div class='status col_state text-center'>[% status %]</div>
         </td>
         <td class='[% class %] last_check text-center'>[% last_check(c, h.last_check) %]</td>
-        <td class='[% class %] duration text-center'>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
+        <td class='duration' title="[% IF h.last_state_change %][% format_date(h.last_state_change, datetime_format_long) %][% ELSE %]host has never changed its state yet.[% END %]">
+          [% IF h.last_state_change %][% duration(date.now - h.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %]
+        </td>
         [% IF show_host_attempts %]
           [% current_attempt = h.current_attempt %]
           [% IF h.state_type == 1 && h.current_attempt == 1 && h.state != 0 %][% current_attempt = h.max_check_attempts %][% END %]

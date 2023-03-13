@@ -117,8 +117,8 @@
         <td class='last_check'>
           <div class="status col_last_check text-center">[% last_check(c, s.last_check) %]</div>
         </td>
-        <td class='duration'>
-          <div class='status col_duration text-center'>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</div>
+        <td class='duration' title="[% IF s.last_state_change %][% format_date(s.last_state_change, datetime_format_long) %][% ELSE %]service has never changed its state yet.[% END %]">
+          <div class='status col_duration text-center'>[% IF s.last_state_change %][% duration(date.now - s.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %]</div>
         </td>
         <td class='current_attempt'>
           <div class="status col_current_attempt text-center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</div>
