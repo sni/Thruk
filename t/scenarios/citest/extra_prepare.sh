@@ -15,3 +15,5 @@ sudo su naemon -c -- bash -c 'cd ~/thruk && perl Makefile.PL'
 
 echo "CREATE USER IF NOT EXISTS 'naemon'@'%' IDENTIFIED BY 'naemon';" | mysql
 echo "GRANT ALL PRIVILEGES ON *.* TO 'naemon'@'%';" | mysql
+chmod g+rx /var/run/mysqld
+adduser naemon mysql
