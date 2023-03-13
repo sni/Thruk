@@ -632,6 +632,12 @@ sub do_send_command {
         return $c->detach('/error/index/12');
     }
 
+    # apply extra escapes, required since naemon-livestatus >= 1.4.0
+    for my $key (qw/host service/) {
+        next unless defined $c->req->parameters->{$key};
+        $c->req->parameters->{$key} = _escape_obj_slashes($c->req->parameters->{$key});
+    }
+
     local $c->{'errored'} = 0;
     my $cmd;
     eval {
@@ -1221,6 +1227,12 @@ sub _set_request_param_defaults {
     return;
 }
 
+######################################
+sub _escape_obj_slashes {
+    my($str) = @_;
+    $str =~ s/\\/\\\\/gmx;
+    return($str);
+}
 ######################################
 
 
