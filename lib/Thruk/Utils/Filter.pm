@@ -104,8 +104,8 @@ format: 0d 0h 29m 43s
         1    => 0d 0h 0m 15s  (default)
         2    =>   0min 14sec
         3    =>       0m 04s
-        4    =>          15m (trimmed)
-        5    =>        15min (trimmed)
+        4    =>          15m (trimmed all non-zero)
+        5    =>        15min (trimmed all non-zero)
         6    =>        2y 5d (highest 2)
 
 =cut

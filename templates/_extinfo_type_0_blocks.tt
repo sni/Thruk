@@ -67,7 +67,7 @@
     [% FOREACH pd IN tmpbackends %]
     <td>
       [% IF backend_detail.$pd.running %]
-          [% duration(date.now - pi_detail.$pd.program_start) %]
+          [% duration(date.now - pi_detail.$pd.program_start, 6) %]
       [% END %]
     </td>
     [% END %]

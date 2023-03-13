@@ -13,7 +13,7 @@
 <table class="cellspacing table-fixed">
   <tr>
     <th class="w-40">Status</th>
-    <td><div class="badge [% stateclass | html %] mr-2">[% state %]</div>(since [% IF obj.last_state_change %][% duration(date.now - obj.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td>
+    <td><div class="badge [% stateclass | html %] mr-2">[% state %]</div>(since [% IF obj.last_state_change %][% duration(date.now - obj.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %])</td>
   </tr>
   [% IF obj.state != 0 %]
     <tr>

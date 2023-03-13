@@ -37,7 +37,7 @@
                 N/A
                 [% END %]
               </td>
-              <td class="text-center">[% duration(date.now - host.last_state_change) %]</td>
+              <td class="text-center">[% duration(date.now - host.last_state_change, 6) %]</td>
               <td class="text-center">[% host.affected_hosts %]</td>
               <td class="text-center">[% host.affected_services %]</td>
               <td>

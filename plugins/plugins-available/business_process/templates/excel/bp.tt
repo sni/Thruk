@@ -42,7 +42,7 @@
           [% ELSIF col == "Name"                     %]<cell>[% escape_xml(b.name) %][% IF b.draft %](DRAFT)[% END %]</cell>
           [% ELSIF col == "Status"                   %]<format bg_color='[% state_color %]'><cell>[% state %]</cell></format>
           [% ELSIF col == "Last Check"               %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell type='date_time'>[% IF b.last_check == 0 %][% ELSE %][% format_date(b.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell></format>
-          [% ELSIF col == "Duration"                 %]<cell>[% IF b.last_check %][% duration(date.now - b.last_check) %][% ELSE %][% END %]</cell>
+          [% ELSIF col == "Duration"                 %]<cell>[% IF b.last_check %][% duration(date.now - b.last_check, 6) %][% ELSE %][% END %]</cell>
           [% ELSIF col == "Status Information"       %]<cell>[% escape_xml(b.status_text) %]</cell>
           [% ELSE %]
             [% val = "";

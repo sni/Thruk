@@ -93,7 +93,7 @@
             [% END %]
             <td class="[% statusClass %] text-center">[% statusText %]</td>
             <td class="text-center">[% IF bp.draft %][% ELSE %][% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %][% END %]</td>
-            <td class="text-center">[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %][% END %]</td>
+            <td class="text-center">[% IF bp.draft %][% ELSE %][% IF bp.last_state_change %][% duration(date.now - bp.last_state_change, 6) %][% END %][% END %]</td>
             [% output = bp.status_text.split("\n") %]
             <td class="truncate max-w-sm"[% IF output.size > 1 %]
               onclick="overcard({ 'body': this.abbr, 'caption': '[% escape_js(bp.name) | html %]', 'width': 600 })" abbr="[% escape_html(nl2br(bp.status_text)) %]"
