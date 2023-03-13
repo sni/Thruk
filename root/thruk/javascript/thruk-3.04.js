@@ -4795,6 +4795,27 @@ function has_jquery_ui() {
     return false;
 }
 
+// returns true if url is allowed by allowed_frame_urls
+function is_frame_url_allowed(url, allowed_frame_links) {
+    var page = new URL(url);
+    for(var i=0; i<allowed_frame_links.length; i++) {
+        var u = allowed_frame_links[i];
+        if(u.includes("*") || !u.match(/^https?:/)) {
+            var matcher = String(u).replace(/\.\*/g, '*').replace(/\./g, '\\.').replace(/\*/gi, '.*');
+            var re = new RegExp("^"+matcher, 'g');
+            if(re.test(page.hostname) || re.test(page.href)) {
+                return(true);
+            }
+        } else {
+            var test = new URL(u, window.location);
+            if(page.hostname == test.hostname && page.protocol == test.protocol) {
+                return(true);
+            }
+        }
+    };
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

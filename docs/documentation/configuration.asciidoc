@@ -380,11 +380,15 @@ You can link to /thruk/frame.html?link=http://wiki.my-company.com/page/blah
 Your wiki will then be displayed with the Thruk navigation frame.
 Useful for other addons, so they don't have to display a own
 navigation.
+Wildcards are allowed since v3.06.
 
 ex.:
 
   allowed_frame_links = http://intranet.my-company.com
   allowed_frame_links = https://wiki.my-company.com
+  allowed_frame_links = *.my-company.com                # allow all links from my-company.com
+  allowed_frame_links = https://*                       # allow all https links from anywhere
+  allowed_frame_links = *                               # allow everything (not recommended)
 
 
 === max_process_memory

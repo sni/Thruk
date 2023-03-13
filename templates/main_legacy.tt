@@ -41,15 +41,7 @@
     } else {
       // external url requires iframe
       // check permissions against allowed_frame_links
-      var page = new URL(pageurl);
-      var allowed = false;
-      jQuery(allowed_frame_links).each(function(i, u) {
-        var test = new URL(u, location);
-        if(page.hostname == test.hostname) {
-          allowed = true;
-        }
-      });
-      if(allowed) {
+      if(is_frame_url_allowed(pageurl, allowed_frame_links)) {
         jQuery("#mainframe").html('<iframe src="'+pageurl+'" class="h-full w-full border-0"><\/iframe>');
         jQuery("FOOTER").remove();
       } else {
