@@ -156,6 +156,7 @@ sub check_templates {
                                     |encode_json_obj\(
                                     |json_encode\(
                                     |date_format\(
+                                    |format_date\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
