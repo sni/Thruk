@@ -1,8 +1,5 @@
 FROM  ubuntu:20.04
 
-COPY speedup.sh /tmp/speedup.sh
-RUN /tmp/speedup.sh
-
 RUN apt-get update; \
     DEBIAN_FRONTEND=noninteractive \
     apt-get -y install \
@@ -15,6 +12,9 @@ RUN apt-get update; \
         vim \
     ; \
     apt-get clean
+
+COPY speedup.sh /tmp/speedup.sh
+RUN /tmp/speedup.sh
 
 COPY prepare_machine.sh /tmp/prepare_machine.sh
 RUN mkdir -p /tmp/install

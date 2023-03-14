@@ -2,8 +2,10 @@ use warnings;
 use strict;
 use Cwd ();
 use Test::More;
+use File::Temp qw/tempfile/;
 
 use Thruk::Base ();
+use Thruk::Utils::IO ();
 
 plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
@@ -66,11 +68,19 @@ $m->{'_peer'} = $m;
 #####################################################################
 my($tempfile) = $m->get_logs(file => 1, collection => $prefix, sort => { 'ASC' => 'time'});
 is(-f $tempfile, 1, $tempfile.' exists');
+my $cont = Thruk::Utils::IO::read($files->[0]);
+Thruk::Utils::Encode::decode_any($cont);
+Thruk::Utils::Encode::remove_utf8_surrogates($cont);
+utf8::encode($cont);
+my($fh, $file2) = tempfile();
+CORE::close($fh);
+Thruk::Utils::IO::write($file2, $cont);
 TestUtils::test_command({
-    cmd   => '/usr/bin/diff -u '.$tempfile.' '.$files->[0],
+    cmd   => '/usr/bin/diff -u '.$tempfile.' '.$file2,
     like => ['/^$/'],
 });
 unlink($tempfile);
+unlink($file2);
 
 #####################################################################
 # clean up

@@ -50,6 +50,20 @@ sub ensure_utf8 {
 
 ##########################################################
 
+=head2 remove_utf8_surrogates
+
+    remove_utf8_surrogates($str)
+
+replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
+
+=cut
+sub remove_utf8_surrogates {
+    $_[0] =~ s/[\x{D800}-\x{DFFF}]/\x{fffd}/gmxi;
+    return $_[0];
+}
+
+##########################################################
+
 =head2 encode_utf8
 
     encode_utf8($str)

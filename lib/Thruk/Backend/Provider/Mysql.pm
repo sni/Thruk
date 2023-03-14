@@ -2190,6 +2190,7 @@ sub _import_logcache_from_file {
             while(my $line = <$fh>) {
                 chomp($line);
                 &Thruk::Utils::Encode::decode_any($line);
+                &Thruk::Utils::Encode::remove_utf8_surrogates($line);
                 my $original_line = $line;
                 my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
                 next unless($l && $l->{'time'});
@@ -2298,6 +2299,7 @@ sub _insert_logs {
     #&timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
         next unless $l->{'message'};
+        &Thruk::Utils::Encode::remove_utf8_surrogates($l->{'message'});
         if($mode == MODE_UPDATE) {
             next if defined $duplicate_lookup->{$l->{'message'}};
         }
