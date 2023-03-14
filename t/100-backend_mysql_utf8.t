@@ -1,10 +1,11 @@
 use warnings;
 use strict;
 use Cwd ();
-use Test::More;
 use File::Temp qw/tempfile/;
+use Test::More;
 
 use Thruk::Base ();
+use Thruk::Utils::Encode ();
 use Thruk::Utils::IO ();
 
 plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
