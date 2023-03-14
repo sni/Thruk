@@ -1204,10 +1204,13 @@ sub js_init {
     our $mech = WWW::Mechanize::Chrome->new(
         headless         => 1,
         separate_session => 1,
+        incognito        => 1,
         tab              => 'current',
         launch_arg       => ["--password-store=basic", "--remote-allow-origins=*"],
     );
-    $mech->get_local($0);
+    $mech->get_local(".");
+    $mech->update_html("");
+    $mech->clear_js_errors();
 
     my $console = $mech->add_listener('Runtime.consoleAPICalled', sub {
         return if(scalar @_ == 0);
@@ -1218,6 +1221,7 @@ sub js_init {
     });
 
     js_ok("function diag(txt) { console.log(txt); }", 'added diag function');
+    return($mech);
 }
 
 #################################################
@@ -1228,16 +1232,20 @@ sub js_deinit {
 
 #################################################
 sub js_ok {
-  my($src, $msg) = @_;
-  our $mech;
-  ok(1, $msg);
-  $mech->eval_in_page($src, returnByValue => Cpanel::JSON::XS::false);
-  my @err = $mech->js_errors();
-  for my $e (@err) {
-    _js_diag_error($e);
-  }
-  $mech->clear_js_errors();
-  ok(scalar @err == 0, "js errors clean");
+    my($src, $msg) = @_;
+    our $mech;
+    ok(1, $msg);
+    local $SIG{ALRM} = sub { die("timeout while waiting for js eval") };
+    alarm(120);
+    $mech->clear_js_errors();
+    $mech->eval_in_page($src, returnByValue => Cpanel::JSON::XS::false);
+    my @err = $mech->js_errors();
+    for my $e (@err) {
+      _js_diag_error($e);
+    }
+    $mech->clear_js_errors();
+    ok(scalar @err == 0, "js errors clean");
+    alarm(0);
 }
 
 #################################################
@@ -1249,18 +1257,22 @@ sub js_eval_ok {
 
 #################################################
 sub js_is {
-  my($src, $expect, $msg) = @_;
-  our $mech;
-  my($val, $type) = $mech->eval_in_page($src);
-  my @err = $mech->js_errors();
-  if(scalar @err != 0) {
-    fail("failed to evaluate: ".$src);
-  }
-  for my $e (@err) {
-    _js_diag_error($e);
-  }
-  $mech->clear_js_errors();
-  is($val, $expect, $msg);
+    my($src, $expect, $msg) = @_;
+    our $mech;
+    local $SIG{ALRM} = sub { die("timeout while waiting for js eval") };
+    alarm(120);
+    $mech->clear_js_errors();
+    my($val, $type) = $mech->eval_in_page($src);
+    my @err = $mech->js_errors();
+    if(scalar @err != 0) {
+      fail("failed to evaluate: ".$src);
+    }
+    for my $e (@err) {
+      _js_diag_error($e);
+    }
+    $mech->clear_js_errors();
+    is($val, $expect, $msg);
+    alarm(0);
 }
 
 #################################################
@@ -1272,7 +1284,7 @@ sub _js_diag_error {
   }
   if($e->{'exceptionDetails'}) {
     diag(sprintf("[%s:%d:%d] %s: %s",
-      $e->{'exceptionDetails'}->{url},
+      $e->{'exceptionDetails'}->{url}//'<anonymous>',
       $e->{'exceptionDetails'}->{lineNumber},
       $e->{'exceptionDetails'}->{columnNumber},
       $e->{'exceptionDetails'}->{text},
@@ -1280,6 +1292,14 @@ sub _js_diag_error {
     ));
     return;
   }
+  if($e->{'args'}) {
+    diag(join ", ",
+        map { $_->{value} // $_->{description} }
+        @{$e->{args}}
+    );
+    return;
+  }
+  diag("unknown error: ".Dumper($e));
 }
 
 #################################################
@@ -1287,9 +1307,10 @@ sub js_eval_extracted {
     my($file) = @_;
     ok(1, "extracting from ".$file);
     my $cont = Thruk::Utils::IO::read($file);
-    my @codes = $cont =~ m/<script[^>]*text\/javascript.*?>(.*?)<\/script>/gsmxi;
+    my @codes = $cont =~ m/<script[^>]*?>(.*?)<\/script>/gsmxi;
     my $jscode = join("\n", @codes);
     $jscode =~ s/\[\%\s*product_prefix\s*\%\]/thruk/gmx;
+    $jscode =~ s/\[\%\#.*?\#\%\]//gmx;
     my($fh, $filename) = tempfile();
     print $fh $jscode;
     close($fh);

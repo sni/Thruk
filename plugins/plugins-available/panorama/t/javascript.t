@@ -12,10 +12,19 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 $ENV{'THRUK_QUIET'} = 1;
 
-js_init();
+my $mech = js_init();
 
-js_ok("document.getElementsByTagName('body')[0].innerHTML = '<script src=\"\"></script>';", "add script tag");
-my @jsfiles = glob('root/thruk/vendor/extjs-*/ext-all-debug.js');
+#################################################
+# load jquery js source
+my @jsfiles = glob('root/thruk/vendor/jquery-*.min.js');
+ok($jsfiles[0], "found jquery source");
+js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load jquery");
+
+#################################################
+# load ext js source
+js_ok("document.getElementsByTagName('body')[0].innerHTML += '<script src=\"\"></script>';", "add script tag");
+@jsfiles = glob('root/thruk/vendor/extjs-*/ext-all-debug.js');
+ok($jsfiles[0], "found extjs source");
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 
 #################################################
@@ -55,6 +64,19 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
     my $content = Thruk::Utils::IO::read($file);
     ok($content =~ m/\n$/s, "file $file must end with a newline");
 }
+
+#################################################
+# set start page
+$tst = TestUtils::test_page(
+    'url'           => '/thruk/cgi-bin/panorama.cgi',
+    'like'          => 'thruk_version.*=',
+);
+$mech->update_html($tst->{'content'});
+($fh, $filename) = tempfile();
+print $fh $tst->{'content'};
+close($fh);
+js_eval_extracted($filename);
+
 #################################################
 # add dynamic js
 $tst = TestUtils::test_page(
