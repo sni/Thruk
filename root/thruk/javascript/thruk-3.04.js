@@ -4798,6 +4798,9 @@ function has_jquery_ui() {
 // returns true if url is allowed by allowed_frame_urls
 function is_frame_url_allowed(url, allowed_frame_links) {
     var page = new URL(url);
+    if(window.location.hostname == page.hostname) {
+        return(true);
+    }
     for(var i=0; i<allowed_frame_links.length; i++) {
         var u = allowed_frame_links[i];
         if(u.includes("*") || !u.match(/^https?:/)) {
