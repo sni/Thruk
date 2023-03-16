@@ -1,4 +1,4 @@
-FROM consol/debian-xfce-vnc:nightly
+FROM ghcr.io/consol/omd-labs-docker/debian-xfce-vnc:nightly
 ENV REFRESHED_AT 2019-03-25
 
 USER 0

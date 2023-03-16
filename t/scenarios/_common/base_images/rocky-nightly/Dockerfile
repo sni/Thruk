@@ -1,4 +1,4 @@
-FROM  consol/omd-labs-rocky:nightly
+FROM ghcr.io/consol/omd-labs-docker/omd-labs-rocky:nightly
 
 COPY ansible /root/ansible/
 ENV  ANSIBLE_ROLES_PATH /root/ansible/roles
