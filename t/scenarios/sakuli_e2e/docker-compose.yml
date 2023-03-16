@@ -10,7 +10,7 @@ services:
     volumes:
         - ../../../:/thruk:ro
   sakuli:
-    image: consol/sakuli-ubuntu-xfce:dev
+    image: ghcr.io/consol/sakuli/sakuli-ubuntu-xfce:dev
     environment:
         - JVM_HEAP_XMX=512
         - TZ=Europe/Berlin
