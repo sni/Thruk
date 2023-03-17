@@ -590,7 +590,9 @@ sub sanitize_values {
 
         if(!defined $defaults->{$key}) {
             if(substr($key, 0, 1) eq '_') {
+                delete $data->{$key};
                 $key = uc $key; # custom vars are all uppercase
+                $value = pop(@{$value}) if ref $value eq 'ARRAY';
                 $data->{$key} = $value;
             }
             elsif($self->{'type'} eq 'timeperiod') {

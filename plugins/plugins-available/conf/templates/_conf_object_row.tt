@@ -14,7 +14,7 @@
     <div class="flexrow flex-nowrap gap-1">
       <input
         type="text"
-        class="obj_[% key %][% IF has_wizard %] wizard[% END %] grow"
+        class="obj_[% key %][% IF has_wizard %] wizard[% END %] grow js-attr-value"
         name="obj.[% key %]"
         id="id_[% key %][% nr %]"
         value="[% IF obj_conf.defined(key) %][% value | html %][% END %]"

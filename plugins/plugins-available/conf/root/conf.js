@@ -30,13 +30,13 @@ function add_conf_attribute(table, key, rt) {
     newObj.cells[2].innerHTML = unescape(unescapeHTML(fields[key].input).replace(/&quot;/g, '"'));
     newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_key'+running_number);
     newObj.cells[3].abbr      = unescape(unescapeHTML(fields[key].help).replace(/&quot;/g, '"'));
+    newObj.cells[3].dataset["name"] = key;
 
     if(key == 'customvariable' || key == 'exception') {
         if(key == 'customvariable' && value.substr(0,1) != '_') {
             value = "_"+value.toUpperCase();
         }
-        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"jQuery('.obj_" + running_number + "').attr('name', 'obj.'+this.value)\" id='id_customvariable0_key'>";
-        newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_'+running_number);
+        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"conf_update_attr_customvar_name(this)\">";
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/class="obj_customvariable"/g, 'class="obj_customvariable obj_'+running_number+'"');
     }
     if(key == 'customvariable') {
@@ -491,25 +491,20 @@ function on_attr_select() {
 }
 
 /* new attribute onselect */
-function on_empty_click(inp) {
+function on_empty_click() {
     var input = document.getElementById(ajax_search.input_field);
-    var v = input.value;
+    var name = input.value.toUpperCase();
+    if(name.substr(0,1) != '_') {
+        name = '_' + name;
+    }
+
+    // create new attribute
     input.value = 'customvariable';
-    var newid = on_attr_select();
-    if(!newid) { return(false); }
-    newid = newid.replace(/^#/, '');
-    var newin = document.getElementById(newid);
-    var tr = newin.parentNode.parentNode;
-    var td = tr.cells[0].firstChild;
-    td.value = v.toUpperCase();
-    if(td.value.substr(0,1) != '_') {
-        td.value = '_' + td.value;
-    }
-    var value_input_id = newid.replace(/_key$/, '');
-    var value_input    = document.getElementById(value_input_id);
-    if(value_input) {
-        value_input.name = 'obj.'+td.value;
-    }
+    on_attr_select();
+
+    var prevRow = jQuery(input).closest("TR").prev();
+    jQuery(prevRow).find("INPUT.attrkey").val(name).trigger("change");
+
     return false;
 }
 
@@ -661,4 +656,13 @@ function conf_prompt_change_summary(remoteform, submit_callback) {
     });
 
     return(true);
+}
+
+function conf_update_attr_customvar_name(inp) {
+    var row = jQuery(inp).parents("TR");
+    var type = jQuery(row).find("TD.js-help-icon").data("name");
+    if(type == "customvar" || type == "customvariable") {
+        inp.value = inp.value.toUpperCase();
+    }
+    jQuery(row).find("INPUT.js-attr-value").attr("name", "obj."+inp.value)
 }
