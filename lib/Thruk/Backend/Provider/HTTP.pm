@@ -480,6 +480,22 @@ sub get_contactgroups {
 
 ##########################################################
 
+=head2 get_contactgroup_names
+
+  get_contactgroup_names
+
+returns a list of contactgroup names
+
+=cut
+sub get_contactgroup_names {
+    my($self, @options) = @_;
+    my $res = $self->_req('get_contactgroup_names', \@options);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
+}
+
+##########################################################
+
 =head2 get_logs
 
   get_logs

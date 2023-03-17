@@ -6845,7 +6845,7 @@ function set_filter_name(search_prefix, checkbox_prefix, filtervalue) {
 }
 
 function getFilterTypeOptions() {
-    var important = new Array(/* when changed, update _status_filter.tt && panorama_js_form_filter.js too! */
+    var important = new Array(/* when changed, update: _status_filter_single.tt, panorama_js_form_filter.js, thruk.js, Status.pm too! */
         'Search',
         'Host',
         'Service',
@@ -6859,6 +6859,7 @@ function getFilterTypeOptions() {
         'Command',
         'Comment',
         'Contact',
+        'Contactgroup',
         'Current Attempt',
         'Custom Variable',
         'Dependency',
@@ -7145,6 +7146,7 @@ function verify_op(event) {
          && selValue != 'servicegroup'
          && selValue != 'timeperiod'
          && selValue != 'contact'
+         && selValue != 'contactgroup'
          && selValue != 'custom variable'
          && selValue != 'command'
          && selValue != 'action menu'

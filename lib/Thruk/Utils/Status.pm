@@ -1019,6 +1019,20 @@ sub single_search {
                 push @servicetotalsfilter, { contacts => { $listop => $value } };
             }
         }
+        elsif ( $filter->{'type'} eq 'contactgroup' ) {
+            if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
+                my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'contactgroup');
+                push @hostfilter,          $hfilter;
+                push @hosttotalsfilter,    $hfilter;
+                push @servicefilter,       $sfilter;
+                push @servicetotalsfilter, $sfilter;
+            } else {
+                push @hostfilter,          { contact_groups => { $listop => $value } };
+                push @hosttotalsfilter,    { contact_groups => { $listop => $value } };
+                push @servicefilter,       { contact_groups => { $listop => $value } };
+                push @servicetotalsfilter, { contact_groups => { $listop => $value } };
+            }
+        }
         elsif ( $filter->{'type'} eq 'next check' ) {
             my $date;
             if($value eq "N/A" or $value eq "") {
@@ -1708,12 +1722,15 @@ sub get_groups_filter {
         elsif($type eq 'contacts') {
             $cache->{$type} = $c->db->get_contact_names() unless defined $cache->{$type};
         }
+        elsif($type eq 'contactgroup') {
+            $cache->{$type} = $c->db->get_contactgroup_names() unless defined $cache->{$type};
+        }
         ## no critic
         @names = grep(/$value/i, @{$cache->{$type}});
         ## use critic
         if(scalar @names == 0) { @names = (''); }
     } else {
-        my $groups;
+        my $groups = [];
         if($type eq 'hostgroup') {
             $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
         }
@@ -1722,6 +1739,9 @@ sub get_groups_filter {
         }
         elsif($type eq 'contacts') {
             $groups = $c->db->get_contacts( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        elsif($type eq 'contactgroup') {
+            $groups = $c->db->get_contactgroups( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
         }
         @names = sort keys %{ Thruk::Base::array2hash([@{$groups}], 'name') };
         if(scalar @names == 0) { @names = (''); }
@@ -1739,6 +1759,10 @@ sub get_groups_filter {
     elsif($type eq 'contacts') {
         push @hostfilter,    { -or => { contacts => { $group_op => \@names } } };
         push @servicefilter, { -or => { contacts => { $group_op => \@names } } };
+    }
+    elsif($type eq 'contactgroup') {
+        push @hostfilter,    { -or => { contact_groups => { $group_op => \@names } } };
+        push @servicefilter, { -or => { contact_groups => { $group_op => \@names } } };
     }
     elsif($type eq 'servicegroup') {
         push @servicefilter, { -or => { groups => { $group_op => \@names } } };

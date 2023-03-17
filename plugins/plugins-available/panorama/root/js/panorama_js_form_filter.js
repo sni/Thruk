@@ -141,6 +141,7 @@ Ext.define('TP.formFilterSelect', {
             'command':             ['~','!~','=','!='],
             'comment':             ['~','!~','=','!='],
             'contact':             ['~','!~','=','!='],
+            'contactgroup':        ['~','!~','=','!='],
             'current attempt':     ['=','!=','<=','>='],
             'custom variable':     ['~','!~','=','!='],
             'dependency':          ['~','!~','=','!='],

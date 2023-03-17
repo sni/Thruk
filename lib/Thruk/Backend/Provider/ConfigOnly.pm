@@ -191,6 +191,20 @@ sub get_contactgroups {
 
 ##########################################################
 
+=head2 get_contactgroup_names
+
+  get_contactgroup_names
+
+returns a list of contactgroup names
+
+=cut
+
+sub get_contactgroup_names {
+    return;
+}
+
+##########################################################
+
 =head2 get_contacts
 
   get_contacts

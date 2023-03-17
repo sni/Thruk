@@ -376,6 +376,15 @@ sub get_contactgroups {
 
 ##########################################################
 
+=head2 get_contactgroup_names
+
+=cut
+sub get_contactgroup_names {
+    confess("not implemented");
+}
+
+##########################################################
+
 =head2 get_logs
 
   get_logs

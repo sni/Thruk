@@ -1041,6 +1041,33 @@ sub get_contact_names {
 
 ##########################################################
 
+=head2 get_contactgroup_names
+
+  get_contactgroup_names
+
+returns a list of contactgroup names
+
+=cut
+sub get_contactgroup_names {
+    my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('contactgroups', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+
+    unless(wantarray) {
+        confess("get_contactgroup_names() should not be called in scalar context");
+    }
+    return($keys, 'uniq');
+}
+
+##########################################################
+
 =head2 get_host_stats
 
   get_host_stats

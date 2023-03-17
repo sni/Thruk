@@ -285,6 +285,21 @@ sub get_contactgroups {
 
 ##########################################################
 
+=head2 get_contactgroup_names
+
+  get_contactgroup_names
+
+returns a list of contactgroup names
+
+=cut
+
+sub get_contactgroup_names {
+    my $self = shift;
+    confess("unimplemented");
+}
+
+##########################################################
+
 =head2 get_contacts
 
   get_contacts
