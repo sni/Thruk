@@ -1014,6 +1014,9 @@ sub _livestatus_options {
             elsif($type eq 'servicegroups') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns;
             }
+            elsif($type eq 'contacts') {
+                $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_contact_columns;
+            }
         }
     }
 
