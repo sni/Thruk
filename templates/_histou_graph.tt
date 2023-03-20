@@ -42,7 +42,7 @@
   } else {
     // extract panels from plain grafana dashboard
     var matches = source_url.match(/(?:d|dashboard)\/([^\/]+)\//);
-    if(matches[1]) {
+    if(matches && matches[1]) {
       var dashboard_id = matches[1];
       var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
       jQuery.ajax({
