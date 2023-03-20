@@ -741,6 +741,23 @@ returns a list of comments
 sub get_comments {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "comments");
+        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+    }
+
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
+        ($size, $limit) = $self->_get_query_size('comments', \%options, 'service_description', 'host_name', 'service_description');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
+    }
+
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             author comment entry_time entry_type expires
@@ -751,7 +768,17 @@ sub get_comments {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
-    return $self->_get_table('comments', \%options);
+    my $data = $self->_get_table('comments', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
+    unless(wantarray) {
+        confess("get_comments() should not be called in scalar context");
+    }
+    return($data, undef, $size);
 }
 
 ##########################################################
@@ -766,6 +793,23 @@ returns a list of downtimes
 sub get_downtimes {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options, "downtimes");
+        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+    }
+
+    # try to reduce the amount of transfered data
+    my($size, $limit);
+    if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
+        ($size, $limit) = $self->_get_query_size('downtimes', \%options, 'service_description', 'host_name', 'service_description');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit;
+        }
+    }
+
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             author comment end_time entry_time fixed host_name
@@ -777,7 +821,15 @@ sub get_downtimes {
     }
     my $data = $self->_get_table('downtimes', \%options);
 
-    return $data;
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
+    unless(wantarray) {
+        confess("get_downtimes() should not be called in scalar context");
+    }
+    return($data, undef, $size);
 }
 
 ##########################################################
