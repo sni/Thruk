@@ -98,7 +98,7 @@
         <td class='[% class %] name'>
           <div class="status col_host_name flex items-center min-w-max">
             <div class="flex-1">
-              <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key | html %]" title="[% h.address | html %] - [% h.alias | html %]">[% h.display_name | html %]</a>
+              <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key | html %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
             </div>
                 [% PROCESS _status_host_attributes hostprefix="" host=h host_comment_count=comment_count with_status=1 %]
           </div>
@@ -148,7 +148,7 @@
               [% IF on_demand_long_plugin_output %]
                 onclick="return(show_plugin_output_popup(this, '[% escape_js(h.name) %]', '', '[% escape_js(h.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
               [% ELSE %]
-                onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(h.display_name)) %]', 'width': 600 }));"
+                onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_host(h))) %]', 'width': 600 }));"
                 abbr="[% escape_html(plugin_output) %]&lt;br&gt;[% escape_html(nl2br(long_plugin_output)) %]"
               [% END %]
             [% END %]

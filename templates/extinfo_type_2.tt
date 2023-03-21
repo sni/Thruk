@@ -61,7 +61,7 @@
   <div class="flexcol order-1 2xl:order-2">
     <div class="card min-w-min mx-auto">
       <div class="head justify-between">
-        <h3>Service [% service.description | html %] on <a class="link" href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% service.host_name | html %]</a></h3>
+        <h3>Service [% _service(service) | html %] on <a class="link" href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% _shost(service) | html %]</a></h3>
         <div class="flexrow gap-x-1">
           [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <div class="mt-5 px-2">

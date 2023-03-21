@@ -43,9 +43,13 @@
   [%  FOREACH com = comments %]
     <tr class='[% IF names %] clickable[% END %] js-downtime-row' id="[% IF com.service_description == '' %]hst[% ELSE %]svc[% END %]_[% com.id %]_[% com.peer_key %]">
       [% IF names %]
-        <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]">[% com.host_name | html %]</a></td>
+        <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]">[% _host(com.host_name) | html %]</a></td>
         [% IF type == 'service' %]
-          <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]">[% com.service_description | html %]</a></td>
+          [% IF com.service_description != "" %]
+            <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]">[% _service(com.host_name, com.service_description) | html %]</a></td>
+          [% ELSE %]
+            <td></td>
+          [% END %]
         [% END %]
         [% IF backends.size > 1 %]
           <td class='text-center'>[% peer_name(com) %]</td>
@@ -53,7 +57,7 @@
       [% END %]
       <td class='text-center'>[% date_format(c, com.entry_time) %]</td>
       <td >[% com.author %]</td>
-      <td style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(com.comment) | replace_links %][% ELSE %][% com.comment | replace_links %][% END %]</td>
+      <td class='whitespace-nowrap truncate w-1/2 max-w-xs'>[% IF escape_html_tags %][% escape_html(com.comment) | replace_links %][% ELSE %][% com.comment | replace_links %][% END %]</td>
       <td class='text-center'>[% com.id %]</td>
       <td class='text-center'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
       <td >[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>

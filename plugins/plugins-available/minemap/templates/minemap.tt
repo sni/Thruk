@@ -37,7 +37,7 @@
           <th class="vert"></th>
           [% FOREACH svc = services.keys.sort %]
           <th class='vert w-7' title="[% svc | html %]">
-            <div class="vertical max-h-[180px] truncate"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% svc | html %]</a></div>
+            <div class="vertical max-h-[180px] truncate"><a href='[% uri_with(c, service => svc, style => 'detail').replace("minemap.cgi", "status.cgi") %]&amp;complex='>[% _service(services.$svc) | html %]</a></div>
           </th>
           [% END %]
         </tr>
@@ -57,7 +57,7 @@
           <th class='[% hostclass %]'>
             <div class="flex">
               <div class="flex-1 truncate max-w-[180px]">
-                <a href="[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex=">[% hst.host_name | html %]</a>
+                <a href="[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex=">[% _shost(hst) | html %]</a>
               </div>
               [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 %]
             </div>
@@ -79,7 +79,7 @@
                     [% icon_bg_class = 'bg' _ state %]
                 [% END %]
 
-                <td class='[% svcbg %] clickable text-center p-0' onclick="overcard({ 'body': '<div class=&quot;service_popup_content&quot;><\/div>', 'caption': '[% escape_js(s.host_name) | html %] - [% escape_js(s.description) | html %]','width': 600}); fetch_svc_info_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]');">
+                <td class='[% svcbg %] clickable text-center p-0' onclick="overcard({ 'body': '<div class=&quot;service_popup_content&quot;><\/div>', 'caption': '[% escape_js(_shost(s)) | html %] - [% escape_js(_service(s)) | html %]','width': 600}); fetch_svc_info_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% s.peer_key | uri %]');">
                   [% IF s.acknowledged %]
                     <i class="fa-solid fa-person-digging clickable" title="This service problem has been acknowledged"></i>
                     [% svcbg = icon_bg_class %]

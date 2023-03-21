@@ -16,9 +16,11 @@
 
 <h1 class='py-4'>Scheduling Queue</h1>
 
-<div class="card w-full min-w-[420px] overflow-auto">
+<div class="card w-full min-w-[420px]">
   <div class="mainTableHeader">
-    <div></div>
+    <div>
+      [% PROCESS _status_filter.tt %]
+    </div>
     <div>
       [% PROCESS _pager.tt %]
     </div>
@@ -53,11 +55,11 @@
         [% SET class = 'queueOdd'  IF loop.odd %]
         <tr class='[% class %]'>
 
-          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% q.host_name | uri %]">[% q.host_name | html %]</a></td>
-
-          [% IF q.description %]
-          <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]">[% q.description | html %]</a></td>
+          [% IF q.defined("description") %]
+          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% q.host_name | uri %]">[% _shost(q) | html %]</a></td>
+          <td class='[% class %]'><a href="extinfo.cgi?type=2&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]">[% _service(q) | html %]</a></td>
           [% ELSE %]
+          <td class='[% class %]'><a href="extinfo.cgi?type=1&amp;host=[% q.name | uri %]">[% _host(q) | html %]</a></td>
           <td class='[% class %]'></td>
           [% END %]
 
@@ -84,7 +86,7 @@
 
           <td class='[% class %]'>
             <div class="flex gap-1 justify-center">
-              [% IF q.description %]
+              [% IF q.defined("description") %]
                 [% IF q.active_checks_enabled %]
                   [% UNLESS command_disabled(c, '6') %]
                   <a href="cmd.cgi?cmd_typ=6&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]">
@@ -106,19 +108,19 @@
               [% ELSE %]
                 [% IF q.active_checks_enabled %]
                   [% UNLESS command_disabled(c, '4') %]
-                  <a href="cmd.cgi?cmd_typ=4&amp;host=[% q.host_name | uri %]">
+                  <a href="cmd.cgi?cmd_typ=4&amp;host=[% q.name | uri %]">
                     <i class="fa-solid fa-xmark round small red" title='Disable Active Checks Of This Host'></i>
                   </a>
                   [% END %]
                 [% ELSE %]
                   [% UNLESS command_disabled(c, '47') %]
-                  <a href="cmd.cgi?cmd_typ=47&amp;host=[% q.host_name | uri %]">
+                  <a href="cmd.cgi?cmd_typ=47&amp;host=[% q.name | uri %]">
                     <i class="fa-solid fa-check round small green" title="Enable Active Checks Of This Host"></i>
                   </a>
                   [% END %]
                 [% END %]
                 [% UNLESS command_disabled(c, '96') %]
-                <a class="button iconOnly medium" href="cmd.cgi?cmd_typ=96&amp;host=[% q.host_name | uri %]&amp;force_check">
+                <a class="button iconOnly medium" href="cmd.cgi?cmd_typ=96&amp;host=[% q.name | uri %]&amp;force_check">
                   <i class="fa-solid fa-clock" title="Re-schedule This Host Check"></i>
                 </a>
                 [% END %]

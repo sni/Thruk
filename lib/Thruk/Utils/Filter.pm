@@ -1711,6 +1711,93 @@ sub _plural_s {
 }
 
 ########################################
+sub _host {
+    my($obj) = @_;
+    my $c = $Thruk::Globals::c;
+    if(ref $obj eq 'HASH') {
+        if(!defined $c->config->{'host_name_source'}) {
+            return($obj->{'display_name'} // $obj->{'name'} // "?");
+        }
+        return(_obj_name($obj, $c->config->{'host_name_source'}) // $obj->{'display_name'} // $obj->{'name'} // "?");
+    }
+    elsif($c->stash->{'host_extra_info'} && $c->stash->{'host_extra_info'}->{$obj}) {
+        return(_host($c->stash->{'host_extra_info'}->{$obj}));
+    }
+    elsif($c->stash->{'service_extra_info'} && $c->stash->{'service_extra_info'}->{$obj}) {
+        my $svc = (values(%{$c->stash->{'service_extra_info'}->{$obj}}))[0];
+        return(_shost($svc)) if $svc;
+    }
+    return($obj);
+}
+
+########################################
+# same as _host, but use host from a service object (prefix attributes with host_)
+sub _shost {
+    my($obj) = @_;
+    my $c = $Thruk::Globals::c;
+    if(ref $obj eq 'HASH') {
+        if(!defined $c->config->{'host_name_source'}) {
+            return($obj->{'host_display_name'} // $obj->{'host_name'} // "?");
+        }
+        return(_obj_name($obj, $c->config->{'host_name_source'}, 'host_') // $obj->{'host_display_name'} // $obj->{'host_name'} // "?");
+    }
+    elsif($c->stash->{'host_extra_info'} && $c->stash->{'host_extra_info'}->{$obj}) {
+        return(_host($c->stash->{'host_extra_info'}->{$obj}));
+    }
+    elsif($c->stash->{'service_extra_info'} && $c->stash->{'service_extra_info'}->{$obj}) {
+        my $svc = (values(%{$c->stash->{'service_extra_info'}->{$obj}}))[0];
+        return(_shost($svc)) if $svc;
+    }
+    return($obj);
+}
+
+########################################
+sub _service {
+    my($obj, $desc) = @_;
+    my $c = $Thruk::Globals::c;
+    if(ref $obj eq 'HASH') {
+        if(!defined $c->config->{'service_description_source'}) {
+            if($c->config->{'use_service_description'}) {
+                return($obj->{'description'} // "?");
+            }
+            return($obj->{'display_name'} // $obj->{'description'} // "?");
+        }
+        return(_obj_name($obj, $c->config->{'service_description_source'}) // $obj->{'display_name'} // $obj->{'description'} // "?");
+    }
+    elsif($desc && $c->stash->{'service_extra_info'} && $c->stash->{'service_extra_info'}->{$obj} && $c->stash->{'service_extra_info'}->{$obj}->{$desc}) {
+        return(_service($c->stash->{'service_extra_info'}->{$obj}->{$desc}));
+    }
+    return($obj);
+}
+
+########################################
+sub _obj_name {
+    my($obj, $config, $attr_prefix) = @_;
+    $attr_prefix = "" unless $attr_prefix;
+    for my $src (@{$config}) {
+        my $name;
+        if($src =~ m/^_/mxo) {
+            next unless $obj->{$attr_prefix."custom_variable_names"};
+            my $src2 = $src;
+            $src2 =~ s/^_//gmx;
+            my $x = 0;
+            for my $var (@{$obj->{$attr_prefix."custom_variable_names"}}) {
+                if($var eq $src2) {
+                    $name = $obj->{$attr_prefix."custom_variable_values"}->[$x];
+                    last;
+                }
+                $x++;
+            }
+            return($name) if defined $name;
+        } else {
+            $name = $obj->{$attr_prefix.$src};
+        }
+        return($name) if defined $name;
+    }
+    return;
+}
+
+########################################
 
 
 1;

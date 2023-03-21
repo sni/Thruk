@@ -4,6 +4,7 @@ next:
           - support native grafana dashboards in action_url
           - add variables from default columns to exposed variables automatically
           - add filter by contactgroups
+          - add host_name_source / service_description_source options to get names from different attributes or custom variables
 
 3.04     Mon Feb 20 09:28:17 CET 2023
           - add minimal=3 mode on status pages to hide pager and filter

@@ -2087,10 +2087,37 @@ ex.:
 
 === use_service_description
 Use service's description instead of display name.
+**DEPRECATED** use `service_description_source` instead.
 
 ex.:
 
   use_service_description = 1
+
+
+=== host_name_source
+Set alternative source of host name display. Listed attributes will be tried
+in given order and first non-empty value wins. Custom variables are possible
+ex.: _NAME, name will first try the _NAME custom variable and use the host.name as fallback.
+Useful attributes are ex.: name, alias, address, display_name or custom variables
+
+Note: hosts will always be ordered by host_name
+
+ex.:
+
+  host_name_source = display_name, name
+
+
+=== service_description_source
+Set alternative source of service description display. Listed attributes will be tried
+in given order and first non-empty value wins. Custom variables are possible
+ex.: _NAME, description will first try the _NAME custom variable and use the service.description as fallback.
+Useful attributes are ex.: description, display_name or custom variables
+
+Note: services will always be ordered by description.
+
+ex.:
+
+  service_description_source = display_name, description
 
 
 === use_feature_trends

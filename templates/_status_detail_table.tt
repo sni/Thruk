@@ -94,7 +94,7 @@
           <td class='host_name col_host_name [% hoststate %]'>
             <div class="status col_host_name flex items-center min-w-max">
               <div class="flex-1">
-                <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% s.host_display_name | html %]</a>
+                <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% _shost(s) | html %]</a>
               </div>
               [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
             </div>
@@ -106,7 +106,7 @@
         <td class='description'>
           <div class="status col_description flex items-center min-w-max">
             <div class="flex-1">
-              <a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% IF use_service_description %][% s.description | html %][% ELSE %][% s.display_name | html %][% END %]</a>
+              <a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% _service(s) | html %]</a>
             </div>
             [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
           </div>
@@ -156,7 +156,7 @@
               [% IF on_demand_long_plugin_output %]
                 onclick="return(show_plugin_output_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% escape_js(s.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
               [% ELSE %]
-                onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(s.host_display_name)) %] - [% escape_html(escape_js(s.display_name)) %]', 'width': 600 }));"
+                onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_shost(s))) %] - [% escape_html(escape_js(_service(s))) %]', 'width': 600 }));"
                 abbr="[% escape_html(plugin_output) %]&lt;br&gt;[% escape_html(nl2br(long_plugin_output)) %]"
               [% END %]
             [% END %]

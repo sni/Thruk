@@ -17,6 +17,7 @@ END
 %]
 
 [% BLOCK parent_obj %]
+  [% hObj = 0 %]
   [% pObj = 0 %]
   [% IF parent.list.size == 1 %]
     <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">
@@ -33,13 +34,18 @@ END
       [% state = servicestatetext(pObj) %]
     [% END %]
   [% END %]
+  [% IF !pObj %]
+    [% IF obj.host_name == pID %]
+      [% hObj = obj %]
+    [% END %]
+  [% END %]
 
   [% IF pObj %]
     [% name = BLOCK %]
       [% IF parent.list.size == 1 %]
-        [% parent | html %]
+        [% _host(pObj) | html %]
       [% ELSE %]
-        [% IF parent.0 != service.host_name %][% parent.0 | html %] - [% END %][% parent.1 | html %]
+        [% IF parent.0 != service.host_name %][% _shost(pObj) | html %] - [% END %][% _service(pObj) | html %]
       [% END %]
     [% END %]
 
@@ -48,6 +54,18 @@ END
         [% name %]
         [% IF pObj.acknowledged %]<i class="fa-solid fa-person-digging"></i>[% END %]
         [% IF pObj.scheduled_downtime_depth %]<i class="fa-solid fa-moon align-sub"></i>[% END %]
+      </div>
+    [% ELSE %]
+      [% name %]
+    [% END %]
+  [% ELSIF hObj %]
+    [% name = BLOCK %][% _shost(hObj) | html %][% END %]
+
+    [% IF color && hObj.host_state != 0 %]
+      <div class="badge [% state %] ">
+        [% name %]
+        [% IF hObj.host_acknowledged %]<i class="fa-solid fa-person-digging"></i>[% END %]
+        [% IF hObj.host_scheduled_downtime_depth %]<i class="fa-solid fa-moon align-sub"></i>[% END %]
       </div>
     [% ELSE %]
       [% name %]
@@ -75,7 +93,7 @@ END
       <th>Service</th>
       <td>
         <div class="flex gap-x-2">
-          [% IF use_service_description %][% obj.description | html %][% ELSE %][% obj.display_name | html %][% END %]
+          [% _service(obj) | html %]
           [% IF service.icon_image_expanded %]
             <img src='[% logo_path_prefix %][% service.icon_image_expanded %]'[% IF service.icon_image_alt %] alt="[% service.icon_image_alt | html %]" title="[% service.icon_image_alt | html %]"[% END %] width="20" height="20">
           [% END %]
@@ -89,22 +107,9 @@ END
       <div class="flex gap-x-2">
         <div>
           [% IF svc_name != "" %]
-            [% PROCESS parent_obj color=1 parent=hst_name %]
-            [% IF obj.host_name != obj.host_display_name %]
-              (<a class="link" href="extinfo.cgi?type=1&amp;host=[% obj.host_name | uri %]">[% obj.host_display_name | html %]</a> -
-              [% obj.host_address %])
-            [% ELSE %]
-              ([% obj.host_address %])
-            [% END %]
-
+            [% PROCESS parent_obj color=1 parent=hst_name %] ([% obj.host_address %])
           [% ELSE %]
-            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% hst_name | html %]</a>
-            [% IF obj.name != obj.display_name %]
-              (<a class="link" href="extinfo.cgi?type=1&amp;host=[% obj.name | uri %]">[% obj.display_name | html %]</a> -
-              [% obj.address %])
-            [% ELSE %]
-              ([% obj.address %])
-            [% END %]
+            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% _host(obj) | html %]</a> ([% obj.address %])
           [% END %]
         </div>
         [% IF type == "host" %]

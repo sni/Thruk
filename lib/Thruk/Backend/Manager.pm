@@ -495,43 +495,16 @@ sub get_scheduling_queue {
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}],
                                                  }, $options{'servicefilter'}],
-                                        columns => [qw/host_name description active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked in_check_period latency execution_time/,
-                                                    $options{'servicefilter'} ? qw/host_active_checks_enabled host_check_options host_last_check host_next_check host_check_interval host_is_executing host_has_been_checked host_in_check_period host_latency host_execution_time/ :()],
-                                      );
+                                        columns => $options{'servicecolumns'},
+                                       );
     my($hosts);
-    if($options{'servicefilter'}) {
-        # extract hosts from services
-        my $uniq = {};
-        for my $s (@{$services}) {
-            next if defined $uniq->{$s->{'host_name'}};
-            next unless ($s->{'host_active_checks_enabled'} == 1 || $s->{'host_check_options'} != 0);
-            next unless $s->{'host_check_interval'};
-            my $host = {
-                host_name               => $s->{'host_name'},
-                peer_key                => $s->{'peer_key'},
-                description             => '',
-                active_checks_enabled   => $s->{'host_active_checks_enabled'},
-                check_options           => $s->{'host_check_options'},
-                last_check              => $s->{'host_last_check'},
-                next_check              => $s->{'host_next_check'},
-                check_interval          => $s->{'host_check_interval'},
-                is_executing            => $s->{'host_is_executing'},
-                has_been_checked        => $s->{'host_has_been_checked'},
-                in_check_period         => $s->{'host_in_check_period'},
-                latency                 => $s->{'host_latency'},
-                execution_time          => $s->{'host_execution_time'},
-            };
-            $uniq->{$s->{'host_name'}} = $host;
-        }
-        $hosts = [values %{$uniq}];
-    } else {
-        ($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                             { 'check_options' => { '!=' => '0' }}],
-                                                  }, $options{'hostfilter'}],
-                                         options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
-                                         columns => [qw/name active_checks_enabled check_options last_check next_check check_interval is_executing has_been_checked in_check_period latency execution_time/],
-                                        );
+    if(!$options{'servicefilter'}) {
+        ($hosts)    = $self->get_hosts(filter  => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                                   { '-or' => [{ 'active_checks_enabled' => '1' },
+                                                              { 'check_options' => { '!=' => '0' }}],
+                                                   }, $options{'hostfilter'}],
+                                        columns => $options{'hostcolumns'},
+                                      );
     }
 
     my $queue = [];

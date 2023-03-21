@@ -200,6 +200,12 @@ sub _process_comments_page {
         return $c->render(json => $comments);
     }
 
+    # add extra information required to set hostname / service description
+    if($c->config->{'host_name_source'} || $c->config->{'service_description_source'}) {
+        _set_host_extra_info_from_com_down($c, $comments);
+        _set_service_extra_info_from_com_down($c, $comments);
+    }
+
     return 1;
 }
 
@@ -248,6 +254,12 @@ sub _process_downtimes_page {
     }
     if($view_mode eq 'json') {
         return $c->render(json => $downtimes);
+    }
+
+    # add extra information required to set hostname / service description
+    if($c->config->{'host_name_source'} || $c->config->{'service_description_source'}) {
+        _set_host_extra_info_from_com_down($c, $downtimes);
+        _set_service_extra_info_from_com_down($c, $downtimes);
     }
 
     return 1;
@@ -716,6 +728,15 @@ sub _process_servicegroup_cmd_page {
 sub _process_scheduling_page {
     my( $c ) = @_;
 
+    my $style = $c->req->parameters->{'style'} || 'queue';
+    if($style ne 'queue') {
+        return if Thruk::Utils::Status::redirect_view($c, $style);
+    }
+
+    # do the filtering
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
+    return if $c->stash->{'has_error'};
+
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 7;
 
@@ -730,9 +751,19 @@ sub _process_scheduling_page {
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    $c->db->get_scheduling_queue($c,  sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
+    $c->db->get_scheduling_queue($c,
+                                 hostfilter     => $hostfilter,
+                                 servicefilter  => $servicefilter,
+                                 sort           => { $order => $sortoptions->{$sortoption}->[0] },
+                                 pager          => 1,
+                                );
 
+    Thruk::Utils::Status::set_default_stash($c);
     $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
+    $c->stash->{'style'}       = 'queue';
+    $c->stash->{'substyle'}    = 'service';
+    $c->stash->{'show_substyle_selector'} = 0;
+    $c->stash->{'extra_params'} = [{ "name" => "type", "value" => "7" }];
 
     return 1;
 }
@@ -1180,5 +1211,60 @@ sub _process_perf_info_logcache_details {
     return 1;
 }
 
+##########################################################
+sub _set_host_extra_info_from_com_down {
+    my($c, $comments) = @_;
+
+    my $uniq = {};
+    for my $com (@{$comments}) {
+        $uniq->{$com->{'host_name'}} = 1;
+    }
+    my @uniq = sort keys %{$uniq};
+    my $hostfilter = [];
+    if(scalar @uniq <= 100) {
+        my @hostfilter;
+        for my $hst (@uniq) {
+            push @hostfilter, {'name' => $hst};
+        }
+        $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+    }
+
+    my $data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'comments' => {'!=' => '' } }, $hostfilter ] );
+    my $hosts = {};
+    for my $d (@{$data}) {
+        $hosts->{$d->{'name'}} = $d;
+    }
+    $c->stash->{'host_extra_info'} = $hosts;
+    return;
+}
+
+##########################################################
+sub _set_service_extra_info_from_com_down {
+    my($c, $comments) = @_;
+
+    my $uniq = {};
+    for my $com (@{$comments}) {
+        $uniq->{$com->{'host_name'}} = 1;
+    }
+    my @uniq = sort keys %{$uniq};
+    my $hostfilter = [];
+    if(scalar @uniq <= 100) {
+        my @hostfilter;
+        for my $hst (@uniq) {
+            push @hostfilter, {'host_name' => $hst};
+        }
+        $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+    }
+
+    my $data = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'comments' => {'!=' => '' } }, $hostfilter ] );
+    my $services = {};
+    for my $d (@{$data}) {
+        $services->{$d->{'host_name'}}->{$d->{'description'}} = $d;
+    }
+    $c->stash->{'service_extra_info'} = $services;
+    return;
+}
+
+##########################################################
 
 1;

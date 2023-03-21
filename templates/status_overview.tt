@@ -103,7 +103,7 @@
                     <td class='name'>
                       <div class="flex min-w-max">
                         <div class="flex-1">
-                          <a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% h.display_name | html %]</a>
+                          <a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% _host(h) | html %]</a>
                         </div>
                         [% IF h.icon_image_expanded %]
                           <div class="flex pl-1.5">

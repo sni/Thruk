@@ -107,7 +107,7 @@
                     <td class='[% hoststate %] name'>
                       <div class="flex min-w-max">
                         <div class="flex-1">
-                          <a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% h.display_name | html %]</a>
+                          <a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% _host(h) | html %]</a>
                         </div>
                         [% IF h.icon_image_expanded %]
                           <div class="flex pl-1.5">
@@ -131,7 +131,7 @@
                           [% ELSIF s.state == 3 %]
                             [% SET s_status = 'UNKNOWN' %]
                           [% END %]
-                          <a href="extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]" class='[% s_status %] badge'>[% IF use_service_description %][% s.description | html %][% ELSE %][% s.display_name | html %][% END %]</a>
+                          <a href="extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]" class='[% s_status %] badge'>[% _service(s) | html %]</a>
                         [% END %]
                       </div>
                     </td>

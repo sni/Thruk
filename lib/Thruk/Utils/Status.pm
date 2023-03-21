@@ -2155,7 +2155,7 @@ sub get_service_matrix {
     my $hosts         = {};
     for my $svc (@{$services}) {
         next unless defined $uniq_hosts->{$svc->{'host_name'}};
-        $uniq_services->{$svc->{'description'}} = 1;
+        $uniq_services->{$svc->{'description'}} = $svc;
         $hosts->{$svc->{'host_name'}} = $svc;
         $matrix->{$svc->{'host_name'}}->{$svc->{'description'}} = $svc;
     }

@@ -57,7 +57,7 @@
   <div class="flexcol order-1 2xl:order-2">
     <div class="card min-w-min mx-auto">
       <div class="head justify-between">
-        <h3>Host: [% host.name | html %]</h3>
+        <h3>Host: [% _host(host) | html %]</h3>
         <div class="flex gap-x-1">
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <div class="mr-3">

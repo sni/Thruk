@@ -82,7 +82,13 @@ sub core_scheduling_page {
     my $concurrent_rate    = 0;
     my $interval_lengths   = {};
 
-    my $data = $c->db->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
+    my $base_columns = [qw/active_checks_enabled check_interval execution_time has_been_checked in_check_period is_executing latency next_check/];
+    my $data = $c->db->get_scheduling_queue($c,
+                                             hostfilter     => $hostfilter,
+                                             hostcolumns    => $base_columns,
+                                             servicefilter  => $servicefilter,
+                                             servicecolumns => [@{$base_columns}, qw/description/],
+                                            );
     for my $d (@{$data}) {
         next unless $d->{'check_interval'};
         next unless $d->{'has_been_checked'};

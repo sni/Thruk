@@ -99,7 +99,6 @@ my $base_defaults = {
     'use_feature_recurring_downtime'        => 1,
     'use_feature_bp'                        => 0,
     'use_feature_core_scheduling'           => 0,
-    'use_service_description'               => 0,
     'use_bookmark_titles'                   => 0,
     'use_dynamic_titles'                    => 1,
     'show_long_plugin_output'               => 'popup',
@@ -154,6 +153,8 @@ my $base_defaults = {
     'thruk_bin'                             => -f 'script/thruk' ? 'script/thruk' : '/usr/bin/thruk',
     'thruk_init'                            => '/etc/init.d/thruk',
     'thruk_shell'                           => '/bin/bash -l -c',
+    'host_name_source'                      => undef,
+    'service_description_source'            => undef,
     'first_day_of_week'                     => 0,
     'weekdays'                              => {
                 '0'                             => 'Sunday',
@@ -440,6 +441,10 @@ sub set_default_config {
     # ensure comma separated lists
     for my $key (qw/csrf_allowed_hosts show_custom_vars expose_custom_vars/) {
         $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
+    }
+    # ensure comma separated lists for optional settings
+    for my $key (qw/host_name_source service_description_source/) {
+        $config->{$key} = Thruk::Base::comma_separated_list($config->{$key}) if defined $config->{$key};
     }
 
     ###################################################

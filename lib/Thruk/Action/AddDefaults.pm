@@ -43,7 +43,7 @@ my @stash_config_keys = qw/
     use_feature_trends show_error_reports skip_js_errors perf_bar_mode
     bug_email_rcpt first_day_of_week sitepanel perf_bar_pnp_popup
     status_color_background show_logout_button use_feature_recurring_downtime
-    use_service_description force_sticky_ack force_send_notification force_persistent_ack
+    force_sticky_ack force_send_notification force_persistent_ack
     force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
     thruk_author
 /;
