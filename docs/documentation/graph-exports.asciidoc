@@ -33,5 +33,5 @@ The export is possible with the `.../extinfo.cgi?type=grafana&options_see_below.
 Fetch a exported graph via curl:
 
 ------
-  %> curl -k https://user:password@your_webserver/thruk/cgi-bin/extinfo.cgi?host=localhost&service=Ping&from=-1d&to=now
+  %> curl -k 'https://user:password@your_webserver/thruk/cgi-bin/extinfo.cgi?type=grafana&host=localhost&service=Ping&from=-1d&to=now'
 ------
