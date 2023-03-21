@@ -157,6 +157,7 @@ sub check_templates {
                                     |json_encode\(
                                     |date_format\(
                                     |format_date\(
+                                    |hoststate2text\(
                                     /mx) {
                         $escaped = 1;
                         my $escaped_var = $var;
