@@ -234,6 +234,10 @@ function init_deletable_inputs() {
             .wrap('<div class="deleteicon '+extraClass+'" />')
             .after(jQuery('<button type="reset" style="display:none;">&times;</button>')
                 .click(function() {
+                    evt = (evt) ? evt : ((window.event) ? event : null);
+                    if(evt.preventDefault) {
+                        evt.preventDefault();
+                    }
                     var This = this;
                     jQuery(This).hide();
                     jQuery(This).prev("INPUT").val("").trigger("change").trigger("keyup");
