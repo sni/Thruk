@@ -2095,6 +2095,7 @@ ex.:
 
 
 === host_name_source
+{% include new_since.ad version="3.06" %}
 Set alternative source of host name display. Listed attributes will be tried
 in given order and first non-empty value wins. Custom variables are possible
 ex.: _NAME, name will first try the _NAME custom variable and use the host.name as fallback.
@@ -2108,6 +2109,7 @@ ex.:
 
 
 === service_description_source
+{% include new_since.ad version="3.06" %}
 Set alternative source of service description display. Listed attributes will be tried
 in given order and first non-empty value wins. Custom variables are possible
 ex.: _NAME, description will first try the _NAME custom variable and use the service.description as fallback.
