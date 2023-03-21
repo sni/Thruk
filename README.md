@@ -51,7 +51,7 @@ Main Features / Advantages
 License
 -------
 
-Thruk is Copyright (c) 2009-2019 by Sven Nierlein and others.
+Thruk is Copyright (c) 2009-present by Sven Nierlein and others.
 This is free software; you can redistribute it and/or modify it under the
 same terms as the Perl5 programming language system
 itself:
