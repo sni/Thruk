@@ -62,7 +62,7 @@ END
     [% name = BLOCK %][% _shost(hObj) | html %][% END %]
 
     [% IF color && hObj.host_state != 0 %]
-      <div class="badge [% state %] ">
+      <div class="badge [% hoststate2text(hObj.host_state) %] ">
         [% name %]
         [% IF hObj.host_acknowledged %]<i class="fa-solid fa-person-digging"></i>[% END %]
         [% IF hObj.host_scheduled_downtime_depth %]<i class="fa-solid fa-moon align-sub"></i>[% END %]
