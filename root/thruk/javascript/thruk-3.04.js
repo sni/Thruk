@@ -501,6 +501,10 @@ function toogleIconImage(icon) {
 }
 
 function setFormBtnSpinner(form) {
+    if(window.event && window.event.submitter && window.event.submitter.tagName == "BUTTON") {
+        setBtnSpinner(window.event.submitter);
+        return;
+    }
     jQuery(form).find("[type=submit], BUTTON.submit").each(function(i, btn) {
         setBtnSpinner(btn);
     });
