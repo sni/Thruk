@@ -1376,7 +1376,9 @@ function setRefreshRate(rate) {
       var newRate = 20;
       if(refresh_rate < 20) { newRate = refresh_rate; }
       // check lastUserInteraction date to not refresh while user is interacting with the page
-      if(thrukState.lastUserInteraction > ((new Date).getTime() - 20000)) {
+      var maxIdle = 20000;
+      if(refresh_rate * 1000 < maxIdle) { maxIdle = refresh_rate * 1000; }
+      if(thrukState.lastUserInteraction > ((new Date).getTime() - maxIdle)) {
           rate = newRate;
       }
       // background tab, do not refresh unnecessarily unless focus was gone a few moments ago (3min), but refresh at least every 3 hours
@@ -1390,10 +1392,16 @@ function setRefreshRate(rate) {
         rate = newRate;
       }
       // do not refresh when dev tools are open
+      /* does not work properly
       if((window.outerHeight-window.innerHeight)>250 || (window.outerWidth-window.innerWidth)>250) {
         jQuery("#refresh_label").html(" <span class='textALERT'>(dev tools open, paused)<\/span>");
         rate = newRate;
       }
+      */
+     // new rate should not exceed initial value
+     if(rate > refresh_rate) {
+        rate = refresh_rate;
+     }
   }
   remainingRefresh = rate;
   curRefreshVal = rate;
