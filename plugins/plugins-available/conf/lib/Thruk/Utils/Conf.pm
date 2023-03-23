@@ -257,8 +257,7 @@ read config file
 =cut
 
 sub read_conf {
-    my $file = shift;
-    my $data = shift;
+    my($file, $data) = @_;
 
     my $arrays_defined = {};
 
@@ -280,9 +279,22 @@ sub read_conf {
         }
 
         next if $in_block;
-        if($line =~ m/\s*(\w+)\s*=\s*(.*)\s*(\#.*|)$/mx) {
-            my $key   = $1;
-            my $value = $2;
+
+        my($key, $value);
+        if($line =~ m/\s*(\w+)\s*=\s*"([^"]*)"\s*(\#.*|)$/mx) {
+            $key   = $1;
+            $value = $2;
+        }
+        elsif($line =~ m/\s*(\w+)\s*=\s*'([^']*)'\s*(\#.*|)$/mx) {
+            $key   = $1;
+            $value = $2;
+        }
+        elsif($line =~ m/\s*(\w+)\s*=\s*(.*?)\s*(\#.*|)$/mx) {
+            $key   = $1;
+            $value = $2;
+        }
+
+        if($key) {
             if(defined $data->{$key}) {
                 if(   $data->{$key}->[0] eq 'ARRAY'
                    or $data->{$key}->[0] eq 'MULTI_LIST') {
@@ -319,8 +331,7 @@ merge config file with data
 =cut
 
 sub merge_conf {
-    my $text = shift;
-    my $data = shift;
+    my($text, $data) = @_;
 
     my $keys_placed = {};
     my $new = "";
@@ -345,6 +356,9 @@ sub merge_conf {
                     $value = join(',', @{$data->{$key}});
                 } else {
                     $value = $data->{$key};
+                    if($value =~ m/\#/mx) {
+                        $value = '"'.$value.'"';
+                    }
                 }
                 $new .= $key."=".$value;
                 delete $data->{$key};
