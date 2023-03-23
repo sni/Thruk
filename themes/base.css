@@ -1515,6 +1515,9 @@ I.action_icon {
     }
   }
 }
+IMG {
+  @apply overflow-hidden; /* crop alt text for missing images */
+}
 IMG.action_icon {
   &.clickable {
     &.active {
