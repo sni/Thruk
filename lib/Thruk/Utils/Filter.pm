@@ -1715,7 +1715,7 @@ sub _host {
     my($obj) = @_;
     my $c = $Thruk::Globals::c;
     if(ref $obj eq 'HASH') {
-        if(!defined $c->config->{'host_name_source'}) {
+        if(!defined $c->config->{'host_name_source'} || scalar @{$c->config->{'host_name_source'}} == 0) {
             return($obj->{'display_name'} // $obj->{'name'} // "?");
         }
         return(_obj_name($obj, $c->config->{'host_name_source'}) // $obj->{'display_name'} // $obj->{'name'} // "?");
@@ -1736,7 +1736,7 @@ sub _shost {
     my($obj) = @_;
     my $c = $Thruk::Globals::c;
     if(ref $obj eq 'HASH') {
-        if(!defined $c->config->{'host_name_source'}) {
+        if(!defined $c->config->{'host_name_source'} || scalar @{$c->config->{'host_name_source'}} == 0) {
             return($obj->{'host_display_name'} // $obj->{'host_name'} // "?");
         }
         return(_obj_name($obj, $c->config->{'host_name_source'}, 'host_') // $obj->{'host_display_name'} // $obj->{'host_name'} // "?");
@@ -1756,7 +1756,7 @@ sub _service {
     my($obj, $desc) = @_;
     my $c = $Thruk::Globals::c;
     if(ref $obj eq 'HASH') {
-        if(!defined $c->config->{'service_description_source'}) {
+        if(!defined $c->config->{'service_description_source'} ||  scalar @{$c->config->{'service_description_source'}} == 0) {
             if($c->config->{'use_service_description'}) {
                 return($obj->{'description'} // "?");
             }
