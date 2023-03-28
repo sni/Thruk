@@ -250,9 +250,11 @@ sub login_successful {
                             $userdata->{'login'}->{'last_failed'}->{'forwarded_for'} ? ' ('.$userdata->{'login'}->{'last_failed'}->{'forwarded_for'} : '',
             ));
         }
-        delete $userdata->{'login'};
-        Thruk::Utils::store_user_data($c, $userdata, $login);
+        delete $userdata->{'login'}->{'failed'};
+        delete $userdata->{'login'}->{'last_failed'};
     }
+    $userdata->{'login'}->{'last_success'} = { time => time(), ip => $c->req->address, forwarded_for => $c->env->{'HTTP_X_FORWARDED_FOR'} };
+    Thruk::Utils::store_user_data($c, $userdata, $login);
 
     _audit_log("login", "user login, session started (".$type.")");
 

@@ -1569,6 +1569,7 @@ sub _get_userdata {
                 $userdata->{$key} = $profile->{'settings'}->{$key};
             }
             $userdata->{'locked'} = $profile->{'settings'}->{'login'}->{'locked'} ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false;
+            $userdata->{'last_login'} = $profile->{'settings'}->{'login'}->{'last_success'}->{'time'};
         }
         for my $key (qw/groups roles email alias can_submit_commands/) {
             $userdata->{$key} = $profile->{$key};

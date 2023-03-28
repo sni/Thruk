@@ -2153,6 +2153,7 @@ lists thruk user profiles.
 |groups                            | list of contactgroups
 |has_thruk_profile                 | flag wether this account has a thruk profile or not
 |id                                | username
+|last_login                        | timestamp of last successfull login
 |locked                            | flag wether account is locked or not
 |roles                             | list of roles for this user
 |tz                                | users selected timezone
