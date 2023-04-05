@@ -928,7 +928,8 @@ function setNavigationStyle(val) {
 /* initialize navigation buttons */
 function initNavigation() {
     // make them toggle
-    jQuery('A.navsectiontitle').off("click").click(function() {
+    jQuery('A.navsectiontitle').off("click").on("click", function() {
+        if(preventDblEvents(this)) { return; }
         var title = this.text.trim().toLowerCase().replace(/ /g, '_');
         if(jQuery('#nav-container').hasClass('collapsed')) { return; }
         jQuery(this).parent().children("UL.navsectionlinks").slideToggle('fast', function() {
@@ -937,12 +938,12 @@ function initNavigation() {
         });
     });
 
-    jQuery('UL.navsectionlinks A').off("click").click(function() {
+    jQuery('UL.navsectionlinks A').off("click").on("click", function() {
         jQuery('UL.navsectionlinks A').removeClass("active");
         jQuery(this).addClass("active");
     });
 
-    jQuery('I.navsectionsubtoggle').off("click").click(function() {
+    jQuery('I.navsectionsubtoggle').off("click").on("click", function() {
         var title   = jQuery(this).prev("A").text().trim().toLowerCase().replace(/ /g, '_');
         var section = jQuery(this).parent("LI").parents("LI").first().find('A').first().text().trim().toLowerCase().replace(/ /g, '_');
         title = section+'.'+title;
@@ -953,7 +954,8 @@ function initNavigation() {
     });
 
     // button to collapse side menu
-    jQuery('.js-menu-collapse').off("click").click(function() {
+    jQuery('.js-menu-collapse').off("click").on("click", function() {
+        if(preventDblEvents(this)) { return; }
         jQuery('#nav-container').toggleClass('collapsed');
         if(jQuery('#nav-container').hasClass('collapsed')) {
             setNavigationStyle(1);
@@ -962,7 +964,8 @@ function initNavigation() {
         }
     });
     // button to enable overlay menu
-    jQuery('.js-menu-hide').off("click").click(function() {
+    jQuery('.js-menu-hide').off("click").on("click", function() {
+        if(preventDblEvents(this)) { return; }
         jQuery('BODY').toggleClass('topnav');
         if(jQuery('BODY').hasClass('topnav')) {
             setNavigationStyle(2);
@@ -971,7 +974,8 @@ function initNavigation() {
         }
     });
     // toggle overlay menu button display
-    jQuery('#mainNavBtn').off("click").click(function() {
+    jQuery('#mainNavBtn').off("click").on("click", function() {
+        if(preventDblEvents(this)) { return; }
         toggleClass('BODY', 'topNavOpen');
         showElement("navbar");
         jQuery('#nav-container').removeClass('collapsed');
@@ -987,6 +991,17 @@ function initNavigation() {
     if(jQuery('#nav-container').hasClass('collapsed')) {
         jQuery("UL.navsectionlinks").css("display", "");
     }
+}
+
+function preventDblEvents(el) {
+    if(jQuery(el).prop('disabled')) {
+        return true;
+    }
+    jQuery(el).prop('disabled', true);
+    window.setTimeout(function() {
+        jQuery(el).prop('disabled', false);
+    }, 100);
+    return false;
 }
 
 function switchTheme(sel) {
