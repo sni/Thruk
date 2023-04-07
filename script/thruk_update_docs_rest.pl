@@ -315,6 +315,11 @@ sub _update_docs {
     # fake panorama maintmode
     Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
 
+    my $login = "thrukadmin";
+    my $userdata = Thruk::Utils::get_user_data($c, $login);
+    $userdata->{'login'}->{'last_success'} = { time => time(), ip => "127.0.0.1", forwarded_for => "" };
+    Thruk::Utils::store_user_data($c, $userdata, $login);
+
     # set fake logcache
     $c->config->{'logcache'} = 'mysql://user:pw@localhost:3306/thruk' unless $c->config->{'logcache'};
 
