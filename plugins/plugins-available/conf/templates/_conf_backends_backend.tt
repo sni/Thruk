@@ -22,7 +22,7 @@
 </tr>
 [% FOREACH addr IN b.addr.list %]
 <tr class="backend_conf_[% x %] backend_connection">
-  <th class="px-2 align-top">Connection</th>
+  <th class="px-2">[% IF loop.first %]Connection[% END %]</th>
   <td>
     <div class="flexrow gap-px w-full flex-nowrap">
       <input type="text" name="peer[% x %]" value="[% addr | html %]" class="grow peer_[% x %]_[% loop.index %]" placeholder="server:6557 or socket">
