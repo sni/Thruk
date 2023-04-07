@@ -131,6 +131,8 @@ sub duration {
             $years     = int($duration/(365*86400));
             $duration = $duration%(365*86400);
         }
+    }
+    if($options == 4 || $options == 5 || $options == 6 || $options == 1) {
         if($duration >= 86400) {
             $days     = int($duration/86400);
             $duration = $duration%86400;

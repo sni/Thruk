@@ -228,7 +228,7 @@
               <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% h.name | html %]</a></td>
               <td class="flex justify-center"><div class="badge DOWN">DOWN</div></td>
               <td class="truncate w-1/2 max-w-0">[% h.plugin_output %]</td>
-              <td>[% duration(date.now - h.last_hard_state_change) %]</td>
+              <td>[% duration(date.now - h.last_hard_state_change, 6) %]</td>
             </tr>
             [% END %]
             [% IF problemhosts.size == 0 %]
@@ -272,7 +272,7 @@
               <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% s.description | html %]</a></td>
               <td class="flex justify-center"><div class="badge [% state %]">[% state %]</div></td>
               <td class="truncate w-1/2 max-w-0">[% s.plugin_output %]</td>
-              <td>[% duration(date.now - s.last_hard_state_change) %]</td>
+              <td>[% duration(date.now - s.last_hard_state_change, 6) %]</td>
             </tr>
             [% END %]
             [% IF problemservices.size == 0 %]
