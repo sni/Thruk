@@ -1220,6 +1220,10 @@ sub _authorize_function {
     elsif($function eq 'get_comments')          { return _extend_filter($c, $opt, 'filter', 'comments'); }
     elsif($function eq 'get_downtimes')         { return _extend_filter($c, $opt, 'filter', 'downtimes'); }
     elsif($function eq 'get_commands')          { return _extend_filter($c, $opt, 'filter', 'commands'); }
+    elsif($function eq 'get_contacts')          { return _extend_filter($c, $opt, 'filter', 'contacts'); }
+    elsif($function eq 'get_contact_names')     { return _extend_filter($c, $opt, 'filter', 'contacts'); }
+    elsif($function eq 'get_contactgroups')     { return _extend_filter($c, $opt, 'filter', 'contactgroups'); }
+    elsif($function eq 'get_contactgroup_names'){ return _extend_filter($c, $opt, 'filter', 'contactgroups'); }
     elsif($function eq 'get_logs' || $function eq 'get_logs_start_end') {
         return _extend_filter($c, $opt, 'filter', 'log');
     } elsif($function eq 'get_timeperiods' || $function eq 'get_timeperiod_names') {

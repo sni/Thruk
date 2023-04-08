@@ -2204,6 +2204,7 @@ t/scenarios/backend_http_readonly/t/300-controller_showlog.t
 t/scenarios/backend_http_readonly/t/300-controller_status.t
 t/scenarios/backend_http_readonly/t/300-controller_tac.t
 t/scenarios/backend_http_readonly/t/301-config-tool.t
+t/scenarios/backend_http_readonly/t/301-main.t
 t/scenarios/backend_http_readonly/t/301-proxy.t
 t/scenarios/backend_http_readonly/t/301-status.t
 t/scenarios/backend_http_readonly/t/local/lmd.t
