@@ -272,10 +272,10 @@ sub report_send {
     }
     my $msg = MIME::Lite->new();
     $msg->build(
-             From    => $from,
-             To      => $to,
-             Cc      => $cc,
-             Bcc     => $bcc,
+             From    => $from // '',
+             To      => $to   // '',
+             Cc      => $cc   // '',
+             Bcc     => $bcc  // '',
              Subject => encode("MIME-B", decode_utf8($subject)),
              Type    => 'multipart/mixed',
     );
