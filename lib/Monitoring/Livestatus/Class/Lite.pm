@@ -121,6 +121,7 @@ sub new {
         key       => $self->{'key'},
         ca_file   => $self->{'ca_file'},
         verify    => $self->{'verify'},
+        verifycn_name => $self->{'verifycn_name'},
     };
     $backend_args->{'retries_on_connection_error'} = $self->{'retries_on_connection_error'} if defined $self->{'retries_on_connection_error'};
     $self->{backend_obj} = Monitoring::Livestatus->new(%{$backend_args});

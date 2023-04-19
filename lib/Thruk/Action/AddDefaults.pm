@@ -1392,7 +1392,7 @@ sub _get_flags {
         for my $name (keys %Thruk::Constants::add_defaults) {
             if($Thruk::Constants::add_defaults{$name} == $s) {
                 $flags_hash->{$name} = 1;
-                $name =~ s/ADD_(.*?)S/$1/gmx;
+                $name =~ s/ADD_(.+?)S/$1/gmx;
                 push @{$flags_name}, $name;
                 last;
             }

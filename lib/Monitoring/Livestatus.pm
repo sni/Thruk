@@ -162,6 +162,7 @@ sub new {
       'key'                         => undef,
       'ca_file'                     => undef,
       'verify'                      => undef,
+      'verifycn_name'               => undef,
     };
 
     my %old_key = (

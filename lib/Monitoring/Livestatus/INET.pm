@@ -66,11 +66,14 @@ sub _open {
     my $tls = 0;
     my $peer_addr = $self->{'peer'};
     if($peer_addr =~ s|tls://||mx) {
+        #$IO::Socket::SSL::DEBUG = 2 if $ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2;
+        #$IO::Socket::SSL::DEBUG = 3 if $ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 3;
         $options->{'PeerAddr'} = $peer_addr;
         $options->{'SSL_cert_file'}   = $self->{'cert'};
         $options->{'SSL_key_file'}    = $self->{'key'};
         $options->{'SSL_ca_file'}     = $self->{'ca_file'};
         $options->{'SSL_verify_mode'} = 0 if(defined $self->{'verify'} && $self->{'verify'} == 0);
+        $options->{'SSL_verifycn_name'} = $self->{'verifycn_name'};
         $tls = 1;
     }
 
@@ -81,7 +84,7 @@ sub _open {
             $sock = IO::Socket::IP->new(%{$options});
         }
         if(!defined $sock || !$sock->connected()) {
-            my $msg = "failed to connect to $peer_addr: $!";
+            my $msg = "failed to connect to $peer_addr: ".($tls ? IO::Socket::SSL::errstr() : $!);
             if($self->{'errors_are_fatal'}) {
                 confess($msg);
             }
@@ -93,10 +96,11 @@ sub _open {
         setsockopt($sock, IPPROTO_TCP, TCP_NODELAY, 1);
 
     };
+    my $err = $@;
 
-    if($@) {
+    if($err) {
         $Monitoring::Livestatus::ErrorCode    = 500;
-        $Monitoring::Livestatus::ErrorMessage = $@;
+        $Monitoring::Livestatus::ErrorMessage = $err;
         return;
     }
 

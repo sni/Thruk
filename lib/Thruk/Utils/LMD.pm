@@ -471,6 +471,7 @@ sub write_lmd_config {
         $site_config .= "tlsKey         = '".$peer->{'peer_config'}->{'options'}->{'key'}."'\n"      if $peer->{'peer_config'}->{'options'}->{'key'};
         $site_config .= "tlsCA          = '".$peer->{'peer_config'}->{'options'}->{'ca_file'}."'\n"  if $peer->{'peer_config'}->{'options'}->{'ca_file'};
         $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'peer_config'}->{'options'}->{'verify'} && $peer->{'peer_config'}->{'options'}->{'verify'} == 0);
+        $site_config .= "tlsServerName  = '".$peer->{'peer_config'}->{'options'}->{'verifycn_name'}."'\n"  if $peer->{'peer_config'}->{'options'}->{'verifycn_name'};
         $site_config .= "proxy          = '".$peer->{'peer_config'}->{'options'}->{'proxy'}."'\n"    if $peer->{'peer_config'}->{'options'}->{'proxy'};
         if($peer->{'peer_config'}->{'lmd_options'}) {
             for my $key (sort keys %{$peer->{'peer_config'}->{'lmd_options'}}) {
