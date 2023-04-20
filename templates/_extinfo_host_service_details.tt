@@ -90,7 +90,7 @@ END
 <table class="cellspacing-x">
   [% IF type == "service" %]
     <tr>
-      <th>Service</th>
+      <th class="w-0">Service</th>
       <td>
         <div class="flex gap-x-2">
           [% _service(obj) | html %]
@@ -180,14 +180,14 @@ END
     <th class="align-top">
       <div
         class="link hoverable rounded clickable font-normal moreStatusOutputButton"
-        style="display: none;"
+        style="visibility: hidden;"
         onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');"
         >
         (toggle full plugin output)
       </div>
     </th>
     <td class='detail_plugin_output whitespace-normal'>
-      <span class="detail_plugin_outputBlock mightOverflowBlock max-w-[500px] max-h-[300px] lg:max-w-[1000px] lg:max-h-[600px]">
+      <span class="detail_plugin_outputBlock mightOverflowBlock max-w-[500px] max-h-[300px] min-[2200px]:max-w-[1000px] min-[2200px]:max-h-[600px]">
         [% IF obj.has_been_checked == 0 %]obj has not been checked yet[% END %]
         [% IF escape_html_tags %][% nl2br(escape_html(obj.plugin_output)) %][% ELSE %][% nl2br(obj.plugin_output) %][% END %]
         [% IF obj.long_plugin_output %]
@@ -196,7 +196,7 @@ END
       </span>
       <div
         class="link text-center hoverable rounded clickable font-normal moreStatusOutputButton"
-        style="display: none;"
+        style="visibility: hidden;"
         onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');"
         >
         (toggle full plugin output)
@@ -460,10 +460,31 @@ END
 
 <script>
   <!--
-  jQuery(document).ready(function() {
-    if(jQuery(".detail_plugin_outputBlock").innerWidth() >= 1000 || jQuery(".detail_plugin_outputBlock").innerHeight() >= 600) {
-      jQuery(".moreStatusOutputButton").show();
+  /* set overflow size for pluginoutput */
+  function setPluginOutputOverflowSize() {
+    var block = jQuery(".detail_plugin_outputBlock")[0];
+    if(!block) {
+      return;
     }
+
+    block.style.maxWidth  = "";
+    block.style.maxHeight = "";
+    jQuery(".moreStatusOutputButton").css("visibility", "hidden");
+    var tdWidth  = Math.floor(jQuery(block).parents("TD").innerWidth()) - 16;
+    var tdHeight = Math.floor(jQuery(block).parents("TD").innerHeight());
+    block.style.setProperty("max-width", tdWidth+"px", "important");
+    if(block.offsetWidth < block.scrollWidth) {
+      jQuery(".moreStatusOutputButton").css("visibility", "");
+    }
+
+    block.style.setProperty("max-height", tdHeight+"px", "important");
+    if(block.offsetHeight < block.scrollHeight) {
+      jQuery(".moreStatusOutputButton").css("visibility", "");
+    }
+  }
+  jQuery(document).ready(function() {
+    setPluginOutputOverflowSize();
   });
+  window.onresize = setPluginOutputOverflowSize;
   -->
   </script>

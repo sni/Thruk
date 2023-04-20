@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - support native grafana dashboards in action_url
+          - improve extinfo host/service details layout
           - add variables from default columns to exposed variables automatically
           - add filter by contactgroups
           - add host_name_source / service_description_source options to get names from different attributes or custom variables

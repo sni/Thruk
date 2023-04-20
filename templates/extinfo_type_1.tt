@@ -6,7 +6,7 @@
 [% SET peer_key = host.peer_key %]
 
 <div class="flexrow justify-between">
-  <div class="order-3 2xl:order-1">
+  <div class="order-3 min-[1700px]:order-1">
     <div class="hidden lg:block">
       [% PROCESS _infobox.tt %]
     </div>
@@ -27,7 +27,7 @@
         </form>
       </div>
     [% END %]
-    <div class="2xl:hidden block mt-5">
+    <div class="min-[1700px]:hidden block mt-5">
       [% PROCESS _host_command_box.tt %]
     </div>
     <div class="card mt-5 min-w-[350px] overflow-hidden">
@@ -54,8 +54,8 @@
     [% PROCESS _customvar_box.tt %]
   </div>
 
-  <div class="flexcol order-1 2xl:order-2">
-    <div class="card min-w-min mx-auto">
+  <div class="flexcol flex-grow order-1 min-[1700px]:order-2">
+    <div class="card w-full">
       <div class="head justify-between">
         <h3>Host: [% _host(host) | html %]</h3>
         <div class="flex gap-x-1">
@@ -116,6 +116,7 @@
         [% PROCESS _extinfo_host_service_details.tt obj=host %]
       </div>
     </div>
+
     [% IF pnp_url %]
       <div>[% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]</div>
     [% ELSIF histou_url %]
@@ -128,7 +129,7 @@
     [% END %]
   </div>
 
-  <div class="hidden 2xl:block order-2 2xl:order-3">
+  <div class="hidden min-[1700px]:block order-2 min-[1700px]:order-3">
     [% PROCESS _host_command_box.tt %]
   </div>
 </div>
