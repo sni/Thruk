@@ -20,6 +20,10 @@ The command command displays the expanded command for a given host or service
 
     print help and exit
 
+=item B<-n>
+
+    print resulting command only
+
 =back
 
 =cut
@@ -124,7 +128,9 @@ Display expanded command for test service on host localhost
 
   %> thruk command localhost test
 
-Submitting external commands is possible via the 'url' command. See 'thruk url help' for some examples.
+
+Note: This command is for retrieving expanded check command lines only.
+Submitting external commands is possible via the 'url' command or the rest api. See 'thruk url help' for some examples.
 
 =cut
 
