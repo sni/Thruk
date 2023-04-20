@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - support lexical/advanced filter
           - support native grafana dashboards in action_url
           - improve extinfo host/service details layout
           - add variables from default columns to exposed variables automatically

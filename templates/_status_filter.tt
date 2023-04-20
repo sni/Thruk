@@ -24,55 +24,66 @@
       <div class="head flexrow flex-nowrap justify-between w-[450px] border-b-0">
         <h3>Display Filter</h3>
         <div class="flex gap-x-2 items-center">
-          <div>
-            [% IF show_substyle_selector == 1 %]
-              <select name="style">
-                <optgroup label="Host">
-                  <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
-                  <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
-                  <option value="hostsummary"[% IF  style == 'summary'  && substyle == 'host' || style == 'hostsummary'  %] selected[% END %]>Summary</option>
-                  <option value="hostgrid"[% IF     style == 'grid'     && substyle == 'host' || style == 'hostgrid'     %] selected[% END %]>Grid</option>
-                </optgroup>
-                <optgroup label="Service">
-                  <option value="detail"[% IF          style == 'detail'          %] selected[% END %]>Detail</option>
-                  <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
-                  <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
-                  <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
-                  [% has_service_filter = 0 %]
-                  [% FOREACH search = searches.$paneprefix %]
-                    [% FOREACH s = search.text_filter %]
-                      [% IF s.type == 'service' || s.type == 'search' %][% has_service_filter = 1 %][% END %]
+          [% IF ! has_lex_filter %]
+            <div>
+              <a href="#" onclick="toggleFilterAdvanced('[% paneprefix %]_all_filter_card'); return false;" class="link block hoverable p-1 rounded-lg">(toggle advanced filter)</a>
+            </div>
+            <div class="js-filterpane">
+              [% IF show_substyle_selector == 1 %]
+                <select name="style">
+                  <optgroup label="Host">
+                    <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
+                    <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
+                    <option value="hostsummary"[% IF  style == 'summary'  && substyle == 'host' || style == 'hostsummary'  %] selected[% END %]>Summary</option>
+                    <option value="hostgrid"[% IF     style == 'grid'     && substyle == 'host' || style == 'hostgrid'     %] selected[% END %]>Grid</option>
+                  </optgroup>
+                  <optgroup label="Service">
+                    <option value="detail"[% IF          style == 'detail'          %] selected[% END %]>Detail</option>
+                    <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
+                    <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
+                    <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
+                    [% has_service_filter = 0 %]
+                    [% FOREACH search = searches.$paneprefix %]
+                      [% FOREACH s = search.text_filter %]
+                        [% IF s.type == 'service' || s.type == 'search' %][% has_service_filter = 1 %][% END %]
+                      [% END %]
                     [% END %]
-                  [% END %]
-                  [% IF style == 'perfmap' || has_service_filter %]
-                    <option value="perfmap"[% IF         style == 'perfmap' && substyle == 'service'                                %] selected[% END %]>Performancedata</option>
-                  [% ELSE %]
-                    <option value="perfmap" disabled>Performancedata</option>
-                  [% END %]
-                </optgroup>
-                <optgroup label="Tac">
-                  <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
-                </optgroup>
-                <optgroup label="Main">
-                  <option value="main"[% IF style == 'main' %] selected[% END %]>Main Dashboard</option>
-                </optgroup>
-                [% FOREACH groupname = additional_views.keys.sort %]
-                  <optgroup label="[% groupname | html %]">
-                    [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
-                      [% opt = additional_views.$groupname.options.$optname %]
-                      <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name | html %]</option>
+                    [% IF style == 'perfmap' || has_service_filter %]
+                      <option value="perfmap"[% IF         style == 'perfmap' && substyle == 'service'                                %] selected[% END %]>Performancedata</option>
+                    [% ELSE %]
+                      <option value="perfmap" disabled>Performancedata</option>
                     [% END %]
                   </optgroup>
-                [% END %]
-              </select>
-            [% END %]
-          </div>
-          <button class="iconOnly" type="submit" name="update" title="accept">
-            <i class="fa-solid fa-check round small green"></i>
+                  <optgroup label="Tac">
+                    <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
+                  </optgroup>
+                  <optgroup label="Main">
+                    <option value="main"[% IF style == 'main' %] selected[% END %]>Main Dashboard</option>
+                  </optgroup>
+                  [% FOREACH groupname = additional_views.keys.sort %]
+                    <optgroup label="[% groupname | html %]">
+                      [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
+                        [% opt = additional_views.$groupname.options.$optname %]
+                        <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name | html %]</option>
+                      [% END %]
+                    </optgroup>
+                  [% END %]
+                </select>
+              [% END %]
+            </div>
+            <button class="iconOnly js-filterpane" type="submit" name="update" title="accept">
+              <i class="fa-solid fa-check round small green"></i>
+            </button>
+          [% END %]
+          <button class="js-advancedfilter" type="submit" name="update"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
+            <i class="uil uil-corner-down-right-alt"></i>
+            run query
           </button>
+          <span class="textHINTsoft js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>(ctrl+enter)</span>
         </div>
       </div>
-      <div class="w-full flexrow flex-nowrap gap-0 border-t borderDefault">
+      [% IF ! has_lex_filter %]
+      <div class="w-full flexrow flex-nowrap gap-0 border-t borderDefault js-filterpane">
         <div id="[% paneprefix %]filter_pane" class="flexrow flex-wrap gap-0">
           [% FOREACH search = searches.$paneprefix %]
             [% SET prefix = 's' _ loop.index %]
@@ -85,6 +96,10 @@
             <span>or</span>
           </div>
         </div>
+      </div>
+      [% END %]
+      <div class="body min-w-[800px] border-t borderDefault flexcol js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
+        <textarea placeholder="ex.: host ~ name && duration &gt;= 10m" class="min-h-[200px] js-ctrlentersubmit" wrap="hard" name="[% paneprefix %]q">[% IF has_lex_filter %][% has_lex_filter %][% ELSE %][% filter2text("service", searches.$paneprefix) %][% END %]</textarea>
       </div>
     </div>
   </div>

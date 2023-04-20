@@ -22,6 +22,7 @@ use URI::Escape qw/uri_escape/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 ##############################################
 # use faster HTML::Escape if available
@@ -1797,6 +1798,20 @@ sub _obj_name {
         return($name) if defined $name;
     }
     return;
+}
+
+########################################
+
+=head2 filter2text
+
+  filter2text($type, $filter)
+
+returns text/lexical filter for structured filter
+
+=cut
+sub filter2text {
+    my $c = $Thruk::Globals::c;
+    return(Thruk::Utils::Status::filter2text($c, @_));
 }
 
 ########################################

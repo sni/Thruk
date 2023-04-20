@@ -181,6 +181,12 @@ function init_page() {
         applyRowStripes(el);
     });
 
+    jQuery(".js-ctrlentersubmit").off("keydown").on("keydown", function(e) {
+        if((e.keyCode == 10 || e.keyCode == 13) && (e.ctrlKey || e.metaKey)) {
+            jQuery(this).parents("FORM").find("BUTTON").click();
+        }
+    });
+
     initLastUserInteraction();
     initNavigation();
 
@@ -1136,6 +1142,23 @@ function checkXYinElement(obj, x, y) {
     // hilight checked area
     //hilight_area(x1, y1, x2, y2, 1000, inside ? 'green' : 'red');
     return(inside);
+}
+
+function toggleFilterAdvanced(id) {
+    var txt = jQuery('#'+id).find(".js-advancedfilter").find("TEXTAREA")[0];
+    if(!txt) {
+        if(thruk_debug_js) { alert("ERROR: got no textarea for id in toggleFilterAdvanced(): " + id); }
+        return;
+    }
+    if(txt.dataset["orig"]) {
+        jQuery('#'+id).find(".js-filterpane").show();
+        jQuery('#'+id).find(".js-advancedfilter").hide();
+        txt.dataset["orig"] = "";
+    } else {
+        txt.dataset["orig"] = txt.value;
+        jQuery('#'+id).find(".js-filterpane").hide();
+        jQuery('#'+id).find(".js-advancedfilter").show();
+    }
 }
 
 function toggleFilterPopup(id) {
@@ -7710,7 +7733,7 @@ var ajax_search = {
         if(options.add_prefix != undefined) {
             ajax_search.add_prefix = options.add_prefix;
         }
-        ajax_search.emptymsg = 'no results found';
+        ajax_search.emptymsg = 'press enter to search';
         if(options.emptymsg != undefined) {
             ajax_search.emptymsg = options.emptymsg;
         }

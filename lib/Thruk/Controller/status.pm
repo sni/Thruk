@@ -458,11 +458,6 @@ sub _process_details_page {
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
     return 1 if $c->stash->{'has_error'};
 
-    if($c->req->parameters->{'q'}) {
-        $c->stash->{'has_service_filter'}= 1;
-        $servicefilter = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'});
-    }
-
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;

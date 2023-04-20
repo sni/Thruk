@@ -52,6 +52,7 @@ sub set_default_stash {
     $c->stash->{'audiofile'}            = '';
     $c->stash->{'has_service_filter'}   = 0;
     $c->stash->{'show_column_select'}   = 0;
+    $c->stash->{'has_lex_filter'}       = 0;
 
     Thruk::Utils::page_data($c, []) unless defined $c->stash->{'pager'};
 
@@ -318,17 +319,20 @@ sub do_filter {
     my $servicefilter;
     my $hostgroupfilter;
     my $servicegroupfilter;
-    my $searches;
+    my $searches = [];
 
     # flag whether there are service only filters or not
     $c->stash->{'has_service_filter'} = 0;
+
+    # flag whether this was a lexical query
+    $c->stash->{'has_lex_filter'} = 0;
 
     $prefix = 'dfl_' unless defined $prefix;
 
     # rewrite prefix
     if(!$params->{$prefix.'s0_type'} && !$params->{$prefix.'s0_hostprops'}) {
         for my $prfx ($prefix, qw/dfl_ ovr_ grd_ svc_ hst_/) {
-            if(exists $params->{$prfx.'s0_type'}) {
+            if(exists $params->{$prfx.'s0_type'} || exists $params->{$prfx.'q'}) {
                 if($prefix ne $prfx) {
                     for my $key (sort keys %{$params}) {
                         my $newkey = $key;
@@ -339,6 +343,33 @@ sub do_filter {
                 last;
             }
         }
+    }
+
+    # redirect query like searches from menu search
+    if($params->{'s0_type'} && $params->{'s0_type'} eq 'search' && $params->{'s0_value'} && $params->{'s0_value'} =~ m/^.+[=~!<>]+/mx) {
+        $params->{'q'} = delete $params->{'s0_value'};
+        delete $params->{'s0_type'};
+    }
+
+    my $q = $params->{'q'} || $params->{$prefix.'q'};
+    if($q) {
+        $c->stash->{'has_service_filter'} = 1;
+        $c->stash->{'has_lex_filter'} = $q;
+        $c->stash->{'filter_active'} = 1;
+        eval {
+            $servicefilter = parse_lexical_filter($q);
+        };
+        my $err = $@;
+        if($err) {
+            _debug("lex filter failed: %s", $err);
+            $err =~ s/\ at\ [a-zA-Z\/\.]+?\ line\ \d+\.$//gmx;
+            Thruk::Utils::set_message($c, 'fail_message', $err);
+            $c->stash->{'has_error'} = 1;
+        }
+        if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {
+            fill_totals_box( $c, undef, $servicefilter );
+        }
+        return(undef, $servicefilter, undef, undef, $c->stash->{'has_service_filter'});
     }
 
     unless ( exists $params->{$prefix.'s0_hoststatustypes'}
@@ -2647,6 +2678,8 @@ sub parse_lexical_filter {
                             | '[^']*'
                             | "[^"]*"
                             | [=\!~><]+
+                            | \&\&
+                            | \|\|
                         )\s*//mx) {
             $token = $1;
             if(!defined $key) {
@@ -2660,6 +2693,8 @@ sub parse_lexical_filter {
                 if($key eq ')') {
                     return($filter);
                 }
+                $key = 'and' if $key eq '&&';
+                $key = 'or' if $key eq '||';
                 if(lc($key) eq 'and' || lc($key) eq 'or') {
                     if(scalar @{$filter} == 0) { die("unexpected ".uc($key)." at ".${$string}); }
                     $combine = lc($key);
@@ -2807,5 +2842,100 @@ sub set_custom_title {
     require Thruk::Action::AddDefaults;
     return(Thruk::Action::AddDefaults::set_custom_title(@_));
 }
+
+##############################################
+
+=head2 filter2text
+
+  filter2text($c, $type, $filter)
+
+returns text/lexical filter for structured filter
+
+=cut
+sub filter2text {
+    my($c, $type, $filter) = @_;
+
+    my @subs;
+    for my $f (@{$filter}) {
+        my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $f);
+        push @subs, _filtertext($servicefilter);
+    }
+    return(_filtercombine("or", @subs));
+}
+
+##############################################
+sub _filtertext {
+    my($filter) = @_;
+    return "" unless defined $filter;
+    if(ref $filter eq 'HASH') {
+        my @keys = keys %{$filter};
+        if(scalar @keys == 1) {
+            if($keys[0] eq '-and') {
+                my @subs =  _filtertext($filter->{'-and'});
+                return(_filtercombine("and", @subs));
+            }
+            if($keys[0] eq '-or') {
+                my @subs =  _filtertext($filter->{'-or'});
+                return(_filtercombine("or", @subs));
+            }
+        }
+        my @subs;
+        for my $k (@keys) {
+            my $v = $filter->{$k};
+            if(ref $v eq 'HASH') {
+                my @ops = keys(%{$v});
+                my $op = $ops[0];
+                push @subs, sprintf("%s %s %s", $k, $op, _filterval($v->{$op}));
+            } else {
+                push @subs, sprintf("%s = %s", $k, _filterval($v))
+            }
+        }
+        return(_filtercombine("and", @subs));
+    }
+    if(ref $filter eq 'ARRAY') {
+        my @subs;
+        for(my $x = 0; $x < scalar @{$filter}; $x++) {
+            my $v = $filter->[$x];
+            next unless defined $v;
+            if(ref $v) {
+                push @subs, _filtertext($v);
+                next;
+            } else {
+                if($x < scalar @{$filter}) {
+                    my $n = $filter->[$x+1];
+                    push @subs, _filtertext({ $v => $n });
+                    $x++;
+                    next;
+                }
+            }
+        }
+        return(_filtercombine("and", @subs));
+    }
+    confess("cannot handle filter");
+}
+
+##############################################
+sub _filtercombine {
+    my($op, @filter) = @_;
+    if(scalar @filter == 0) {
+        die("empty should be removed");
+    }
+    if(scalar @filter == 1) {
+        return $filter[0];
+    }
+    return "(".join(" ".$op." ", @filter).")";
+}
+
+##############################################
+
+sub _filterval {
+    my($val) = @_;
+    if($val =~ m/^[\d\.]+$/mx) {
+        return($val);
+    }
+    return(sprintf("'%s'", $val));
+}
+
+##############################################
 
 1;
