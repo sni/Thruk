@@ -929,7 +929,7 @@ sub _process_backends_page {
         $b->{'name'}        = $b->{'name'} // '';
         $b->{'type'}        = lc($b->{'type'} // 'livestatus');
         $b->{'id'}          = $p->{'key'}  // substr(Thruk::Utils::Crypt::hexdigest(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5);
-        $b->{'addr'}        = $p->peer_list()  || '';
+        $b->{'addr'}        = ref $p ne "HASH" ? $p->peer_list() : '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
         $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';
         $b->{'remote_name'} = $b->{'options'}->{'remote_name'} || '';
