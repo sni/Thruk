@@ -239,7 +239,7 @@ function init_deletable_inputs() {
         jQuery(el)
             .wrap('<div class="deleteicon '+extraClass+'" />')
             .after(jQuery('<button type="reset" style="display:none;">&times;</button>')
-                .click(function() {
+                .click(function(evt) {
                     evt = (evt) ? evt : ((window.event) ? event : null);
                     if(evt.preventDefault) {
                         evt.preventDefault();
