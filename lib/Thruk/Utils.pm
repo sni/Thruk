@@ -214,7 +214,7 @@ sub is_valid_regular_expression {
         chomp($err);
         $err =~ s/\Q; marked by <-- HERE in \Em\/.*?\Q<-- HERE\E.*?\/\ at\ .*?\ line\ \d+\.//gmx;
         my $error_message = "invalid regular expression: ".Thruk::Utils::Filter::escape_html($err);
-        set_message($c, { style => 'fail_message', msg => $error_message, escape => 0});
+        set_message($c, { style => 'fail_message', msg => $error_message, escape => 0}) if $c;
         return;
     }
     return 1;
@@ -3166,7 +3166,7 @@ sub expand_relative_timefilter {
             if($duration ne $val) {
                 $val = time() + $duration;
             }
-        } elsif($val =~ m/(today|now|yesterday)/mxo || $val =~ m/(this|last|next)(week|day|month|year)/mxo) {
+        } elsif($val =~ m/(today|now|yesterday)/imxo || $val =~ m/(this|last|next)(week|day|month|year)/imxo) {
             $val = _parse_date($val);
         }
     }

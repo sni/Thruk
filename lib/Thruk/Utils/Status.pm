@@ -878,15 +878,14 @@ sub single_search {
         my $value  = $filter->{'value'} // '';
 
         my $op     = '=';
-        my $rop    = '=';
         my $listop = '>=';
         my $dateop = '=';
         my $joinop = "-or";
         if( $filter->{'op'} eq '!~' ) { $op = '!~~'; $joinop = "-and"; $listop = '!>='; }
         if( $filter->{'op'} eq '~'  ) { $op = '~~'; }
         if( $filter->{'op'} eq '!=' ) { $op = '!='; $joinop = "-and"; $listop = '!>='; $dateop = '!='; }
-        if( $filter->{'op'} eq '>=' ) { $op = '>='; $rop = '<='; $dateop = '>='; }
-        if( $filter->{'op'} eq '<=' ) { $op = '<='; $rop = '>='; $dateop = '<='; }
+        if( $filter->{'op'} eq '>=' ) { $op = '>='; $dateop = '>='; }
+        if( $filter->{'op'} eq '<=' ) { $op = '<='; $dateop = '<='; }
 
         # regular expression filter are supported in LMD
         if($ENV{'THRUK_USE_LMD'}) {
@@ -1197,37 +1196,9 @@ sub single_search {
             push @servicefilter,       $sfilter;
         }
         elsif ( $filter->{'type'} eq 'duration' ) {
-            my $now = time();
-            $value = Thruk::Utils::expand_duration($value);
-            if(    ($op eq '>=' and ($now - $c->stash->{'last_program_restart'}) >= $value)
-                or ($op eq '<=' and ($now - $c->stash->{'last_program_restart'}) <= $value)
-                or ($op eq '!=' and ($now - $c->stash->{'last_program_restart'}) != $value)
-                or ($op eq '='  and ($now - $c->stash->{'last_program_restart'}) == $value)
-               ) {
-                push @hostfilter,    { -or => [{ -and => [ last_state_change => { '!=' => 0 },
-                                                          last_state_change => { $rop => $now - $value },
-                                                        ],
-                                              },
-                                              { last_state_change => { '=' => 0 } },
-                                              ],
-                                     };
-                push @servicefilter, { -or => [{ -and => [ last_state_change => { '!=' => 0 },
-                                                          last_state_change => { $rop => $now - $value },
-                                                        ],
-                                              },
-                                              { last_state_change => { '=' => 0 } },
-                                              ],
-                                     };
-            } else {
-                push @hostfilter,    { -and => [ last_state_change => { '!=' => 0 },
-                                                 last_state_change => { $rop => $now - $value },
-                                               ],
-                                     };
-                push @servicefilter, { -and => [ last_state_change => { '!=' => 0 },
-                                                 last_state_change => { $rop => $now - $value },
-                                               ],
-                                     };
-            }
+            my($tmp_hostf, $tmp_svcf) = _expand_duration_filter($op, $value);
+            push @hostfilter,    @{$tmp_hostf} if $tmp_hostf;
+            push @servicefilter, @{$tmp_svcf}  if $tmp_svcf;
         }
         elsif ( $filter->{'type'} eq 'notification period' ) {
             push @hostfilter,    { notification_period => { $op => $value } };
@@ -2714,9 +2685,26 @@ sub parse_lexical_filter {
                 $val = $token;
                 if(substr($val, 0, 1) eq '"') { $val = substr($val, 1, -1); }
                 if(substr($val, 0, 1) eq "'") { $val = substr($val, 1, -1); }
-                # expand relative time filter for some operators
-                $val = Thruk::Utils::expand_relative_timefilter($key, $op, $val);
-                push @{$filter}, { $key => { $op => $val } };
+
+                if($op eq '~~' || $op eq '!~~') {
+                    if(!Thruk::Utils::is_valid_regular_expression(undef, $val)) {
+                        die("invalid regex in ".$val);
+                    }
+                }
+
+                # some keys require special handling
+                $key = "host_name"   if $key eq 'host';
+                $key = "description" if $key eq 'service';
+
+                if($key eq 'duration') {
+                    my($tmp_hostf, $tmp_svcf) = _expand_duration_filter($op, $val);
+                    push @{$filter}, @{$tmp_svcf} if $tmp_svcf;
+                } else {
+                    # expand relative time filter for some operators
+                    $val = Thruk::Utils::expand_relative_timefilter($key, $op, $val);
+
+                    push @{$filter}, { $key => { $op => $val } };
+                }
                 undef $key;
                 undef $op;
                 undef $val;
@@ -2937,6 +2925,52 @@ sub _filterval {
         return($val);
     }
     return(sprintf("'%s'", $val));
+}
+
+##############################################
+sub _expand_duration_filter {
+    my($op, $value) = @_;
+    my $c = $Thruk::Globals::c;
+    my $now = time();
+    my(@hostfilter, @servicefilter);
+
+    my $rop    = '=';
+    if( $op eq '>=' ) { $rop = '<='; }
+    if( $op eq '<=' ) { $rop = '>='; }
+    if( $op eq '>' )  { $rop = '<'; }
+    if( $op eq '<' )  { $rop = '>'; }
+
+    $value = Thruk::Utils::expand_duration($value);
+    if(    ($op eq '>=' and ($now - $c->stash->{'last_program_restart'}) >= $value)
+        or ($op eq '<=' and ($now - $c->stash->{'last_program_restart'}) <= $value)
+        or ($op eq '!=' and ($now - $c->stash->{'last_program_restart'}) != $value)
+        or ($op eq '='  and ($now - $c->stash->{'last_program_restart'}) == $value)
+        ) {
+        push @hostfilter,    { -or => [{ -and => [ last_state_change => { '!=' => 0 },
+                                                    last_state_change => { $rop => $now - $value },
+                                                ],
+                                        },
+                                        { last_state_change => { '=' => 0 } },
+                                        ],
+                                };
+        push @servicefilter, { -or => [{ -and => [ last_state_change => { '!=' => 0 },
+                                                    last_state_change => { $rop => $now - $value },
+                                                ],
+                                        },
+                                        { last_state_change => { '=' => 0 } },
+                                        ],
+                                };
+    } else {
+        push @hostfilter,    { -and => [ last_state_change => { '!=' => 0 },
+                                            last_state_change => { $rop => $now - $value },
+                                        ],
+                                };
+        push @servicefilter, { -and => [ last_state_change => { '!=' => 0 },
+                                            last_state_change => { $rop => $now - $value },
+                                        ],
+                                };
+    }
+    return(\@hostfilter, \@servicefilter);
 }
 
 ##############################################

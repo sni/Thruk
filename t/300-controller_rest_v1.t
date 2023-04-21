@@ -166,7 +166,7 @@ TestUtils::test_page(
     $filter = Thruk::Controller::rest_v1::_livestatus_filter($c);
     $expect = [[{
         '-and' => [
-                { 'host' => { '=' => 'test' } },
+                { 'host_name' => { '=' => 'test' } },
                 { 'time' => { '>' => '1'    } },
                 { 'time' => { '<' => '10'   } }
             ]
