@@ -209,12 +209,11 @@ sub is_valid_regular_expression {
     return 1 unless defined $expression;
     local $SIG{__DIE__} = '';
     eval { "test" =~ m/$expression/mx; };
-    if($@) {
-        my $error_message = "invalid regular expression: ".Thruk::Utils::Filter::escape_html($@);
-        $error_message =~ s/\s+at\s+.*$//gmx;
-        $error_message =~ s/in\s+regex\;/in regex<br \/>/gmx;
-        $error_message =~ s/HERE\s+in\s+m\//HERE in <br \/>/gmx;
-        $error_message =~ s/\/$//gmx;
+    my $err = $@;
+    if($err) {
+        chomp($err);
+        $err =~ s/\Q; marked by <-- HERE in \Em\/.*?\Q<-- HERE\E.*?\/\ at\ .*?\ line\ \d+\.//gmx;
+        my $error_message = "invalid regular expression: ".Thruk::Utils::Filter::escape_html($err);
         set_message($c, { style => 'fail_message', msg => $error_message, escape => 0});
         return;
     }

@@ -411,7 +411,7 @@ sub do_filter {
     $c->stash->{'searches'}->{$prefix} = $searches;
 
     $c->stash->{'filter_active'} = 0;
-    if($hostfilter || $servicefilter || $hostgroupfilter || $servicegroupfilter) {
+    if($hostfilter || $servicefilter || $hostgroupfilter || $servicegroupfilter || $c->stash->{'has_error'}) {
         $c->stash->{'filter_active'} = 1;
     }
 
@@ -930,6 +930,8 @@ sub single_search {
         if ( $filter->{'type'} eq 'search' ) {
             # skip empty searches
             next if $value eq '';
+
+            next if $errors > 0; # no need to search for comments if the query is invalid already
 
             my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
             if(defined $num && $num == 0) {
@@ -2860,7 +2862,7 @@ sub filter2text {
         my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $f);
         push @subs, _filtertext($servicefilter);
     }
-    return(_filtercombine("or", @subs));
+    return(_filtercombine("or", @subs) // "");
 }
 
 ##############################################
@@ -2917,8 +2919,9 @@ sub _filtertext {
 ##############################################
 sub _filtercombine {
     my($op, @filter) = @_;
+    @filter = grep defined, @filter;
     if(scalar @filter == 0) {
-        die("empty should be removed");
+        return;
     }
     if(scalar @filter == 1) {
         return $filter[0];
