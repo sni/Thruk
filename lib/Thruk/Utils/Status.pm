@@ -2883,7 +2883,7 @@ sub _filtertext {
                 if(ref $v eq 'ARRAY' && scalar @{$v} == 1) {
                     $v = $v->[0];
                 }
-                push @subs, sprintf("%s = %s", $k, _filterval($v))
+                push @subs, sprintf("%s = %s", $k, _filterval($v));
             }
         }
         return(_filtercombine("and", @subs));
