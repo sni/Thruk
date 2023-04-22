@@ -37,6 +37,8 @@ sub index {
     $c->stash->{'template'}      = 'main.tt';
     $c->stash->{has_jquery_ui}   = 1;
 
+    Thruk::Utils::Status::set_default_stash($c);
+
     my $userdata    = Thruk::Utils::get_user_data($c);
     my $defaultView = { name => 'All Hosts', filter => undef, locked => 1 };
     my $views       = $userdata->{'main_views'} || [];

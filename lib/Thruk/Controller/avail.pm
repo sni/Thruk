@@ -32,6 +32,8 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
+    Thruk::Utils::Status::set_default_stash($c);
+
     if(!$c->config->{'avail_modules_loaded'}) {
         load Monitoring::Availability;
         load Thruk::Utils::Avail;

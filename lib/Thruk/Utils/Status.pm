@@ -33,26 +33,26 @@ sets some default stash variables
 sub set_default_stash {
     my( $c ) = @_;
 
-    $c->stash->{'hoststatustypes'}      = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hoststatustypes'}    || '');
-    $c->stash->{'hostprops'}            = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostprops'}          || '');
-    $c->stash->{'servicestatustypes'}   = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicestatustypes'} || '');
-    $c->stash->{'serviceprops'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'serviceprops'}       || '');
-    $c->stash->{'nav'}                  = Thruk::Utils::Filter::escape_html($c->req->parameters->{'nav'}                || '');
-    $c->stash->{'entries'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'entries'}            || '');
-    $c->stash->{'sortoption'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption'}         || '');
-    $c->stash->{'sortoption_hst'}       = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_hst'}     || '');
-    $c->stash->{'sortoption_svc'}       = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_svc'}     || '');
-    $c->stash->{'hostgroup'}            = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostgroup'}          || '');
-    $c->stash->{'servicegroup'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicegroup'}       || '');
-    $c->stash->{'host'}                 = Thruk::Utils::Filter::escape_html($c->req->parameters->{'host'}               || '');
-    $c->stash->{'service'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'service'}            || '');
-    $c->stash->{'style'}                = '';
-    $c->stash->{'has_error'}            = 0;
-    $c->stash->{show_substyle_selector} = 1;
-    $c->stash->{'audiofile'}            = '';
-    $c->stash->{'has_service_filter'}   = 0;
-    $c->stash->{'show_column_select'}   = 0;
-    $c->stash->{'has_lex_filter'}       = 0;
+    $c->stash->{'audiofile'}              = '';
+    $c->stash->{'entries'}                = Thruk::Utils::Filter::escape_html($c->req->parameters->{'entries'}            || '');
+    $c->stash->{'has_error'}              = 0;
+    $c->stash->{'has_lex_filter'}         = 0;
+    $c->stash->{'has_service_filter'}     = 0;
+    $c->stash->{'host'}                   = Thruk::Utils::Filter::escape_html($c->req->parameters->{'host'}               || '');
+    $c->stash->{'hostgroup'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostgroup'}          || '');
+    $c->stash->{'hostprops'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostprops'}          || '');
+    $c->stash->{'hoststatustypes'}        = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hoststatustypes'}    || '');
+    $c->stash->{'nav'}                    = Thruk::Utils::Filter::escape_html($c->req->parameters->{'nav'}                || '');
+    $c->stash->{'service'}                = Thruk::Utils::Filter::escape_html($c->req->parameters->{'service'}            || '');
+    $c->stash->{'servicegroup'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicegroup'}       || '');
+    $c->stash->{'serviceprops'}           = Thruk::Utils::Filter::escape_html($c->req->parameters->{'serviceprops'}       || '');
+    $c->stash->{'servicestatustypes'}     = Thruk::Utils::Filter::escape_html($c->req->parameters->{'servicestatustypes'} || '');
+    $c->stash->{'show_column_select'}     = 0;
+    $c->stash->{'show_substyle_selector'} = 1;
+    $c->stash->{'sortoption_hst'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_hst'}     || '');
+    $c->stash->{'sortoption_svc'}         = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption_svc'}     || '');
+    $c->stash->{'sortoption'}             = Thruk::Utils::Filter::escape_html($c->req->parameters->{'sortoption'}         || '');
+    $c->stash->{'style'}                  = '';
 
     Thruk::Utils::page_data($c, []) unless defined $c->stash->{'pager'};
 
