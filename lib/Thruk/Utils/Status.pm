@@ -2875,8 +2875,14 @@ sub _filtertext {
             if(ref $v eq 'HASH') {
                 my @ops = keys(%{$v});
                 my $op = $ops[0];
+                if(ref $v->{$op} eq 'ARRAY' && scalar @{$v->{$op}} == 1) {
+                    $v->{$op} = $v->{$op}->[0];
+                }
                 push @subs, sprintf("%s %s %s", $k, $op, _filterval($v->{$op}));
             } else {
+                if(ref $v eq 'ARRAY' && scalar @{$v} == 1) {
+                    $v = $v->[0];
+                }
                 push @subs, sprintf("%s = %s", $k, _filterval($v))
             }
         }
