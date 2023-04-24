@@ -950,6 +950,21 @@ ex.:
 
   navframesize = 190
 
+
+[TIP]
+=======
+To achieve a similar effect in Thruk 3.x you can create a ssi file, ex.:
+`ssi/common-header-navsize.ssi` and put this in there:
+```
+<style>
+#nav-container {
+  width: 300px !important;
+}
+</style>
+```
+=======
+
+
 === use_new_command_box
 
 **DEPRECATED:** setting this has no effect with Thruk 3.x or later.
