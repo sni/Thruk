@@ -2865,7 +2865,10 @@ sub _filtertext {
                 return(_filtercombine("and", @subs));
             }
             if($keys[0] eq '-or') {
-                my @subs =  _filtertext($filter->{'-or'});
+                my @subs;
+                for my $f (@{$filter->{'-or'}}) {
+                    push @subs, _filtertext($f);
+                }
                 return(_filtercombine("or", @subs));
             }
         }
