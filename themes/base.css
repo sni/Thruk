@@ -1548,7 +1548,7 @@ DIV.actionbox {
   A {
     @apply link;
   }
-  I {
+  I, IMG {
     @apply mr-1;
     font-size: 18px;
   }
