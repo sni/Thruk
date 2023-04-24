@@ -2865,11 +2865,8 @@ sub _filtertext {
                 return(_filtercombine("and", @subs));
             }
             if($keys[0] eq '-or') {
-                my @subs;
-                for my $f (@{$filter->{'-or'}}) {
-                    push @subs, _filtertext($f);
-                }
-                return(_filtercombine("or", @subs));
+                my $subs = _filterexpandlist($filter->{'-or'});
+                return(_filtercombine("or", @{$subs}));
             }
         }
         my @subs;
@@ -2892,25 +2889,32 @@ sub _filtertext {
         return(_filtercombine("and", @subs));
     }
     if(ref $filter eq 'ARRAY') {
-        my @subs;
-        for(my $x = 0; $x < scalar @{$filter}; $x++) {
-            my $v = $filter->[$x];
-            next unless defined $v;
-            if(ref $v) {
-                push @subs, _filtertext($v);
-                next;
-            } else {
-                if($x < scalar @{$filter}) {
-                    my $n = $filter->[$x+1];
-                    push @subs, _filtertext({ $v => $n });
-                    $x++;
-                    next;
-                }
-            }
-        }
-        return(_filtercombine("and", @subs));
+        my $subs = _filterexpandlist($filter);
+        return(_filtercombine("and", @{$subs}));
     }
     confess("cannot handle filter");
+}
+
+##############################################
+sub _filterexpandlist {
+    my($filter) = @_;
+    my @subs;
+    for(my $x = 0; $x < scalar @{$filter}; $x++) {
+        my $v = $filter->[$x];
+        next unless defined $v;
+        if(ref $v) {
+            push @subs, _filtertext($v);
+            next;
+        } else {
+            if($x < scalar @{$filter}) {
+                my $n = $filter->[$x+1];
+                push @subs, _filtertext({ $v => $n });
+                $x++;
+                next;
+            }
+        }
+    }
+    return \@subs;
 }
 
 ##############################################

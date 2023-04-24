@@ -183,7 +183,7 @@ function init_page() {
 
     jQuery(".js-ctrlentersubmit").off("keydown").on("keydown", function(e) {
         if((e.keyCode == 10 || e.keyCode == 13) && (e.ctrlKey || e.metaKey)) {
-            jQuery(this).parents("FORM").find("BUTTON").click();
+            jQuery(this).parents("FORM").find("BUTTON:visible").click();
         }
     });
 
@@ -1150,14 +1150,16 @@ function toggleFilterAdvanced(id) {
         if(thruk_debug_js) { alert("ERROR: got no textarea for id in toggleFilterAdvanced(): " + id); }
         return;
     }
-    if(txt.dataset["orig"]) {
+    if(txt.dataset["mode"] && txt.dataset["mode"] == "query") {
         jQuery('#'+id).find(".js-filterpane").show();
         jQuery('#'+id).find(".js-advancedfilter").hide();
-        txt.dataset["orig"] = "";
+        txt.dataset["mode"] = "filter";
+        jQuery('#'+id).find(".js-advancedfilter").find("TEXTAREA").attr('disabled', true);
     } else {
-        txt.dataset["orig"] = txt.value;
+        txt.dataset["mode"] = "query";
         jQuery('#'+id).find(".js-filterpane").hide();
         jQuery('#'+id).find(".js-advancedfilter").show();
+        jQuery('#'+id).find(".js-advancedfilter").find("TEXTAREA").attr('disabled', false);
     }
 }
 
@@ -7299,6 +7301,9 @@ function remove_empty_form_params(form) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
     }
     if(f["name"].match(/^(host|service)_columns$/)) {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+    }
+    if(f["name"].match(/_columns$/) && f["value"] == "") {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
     }
     if(f["name"].match(/^(referer|bookmarks?|section)$/)) {
