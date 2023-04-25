@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 45;
+plan tests => 46;
 
 BEGIN {
     use lib('t');
@@ -158,7 +158,7 @@ sub _round_timestamps {
     my $txt = Thruk::Utils::Status::search2text($c, "service", $got);
     my $ext_text = "((host_name = 'localhost' and (description ~~ 'http' or display_name ~~ 'http')) or host_name = 'test')";
     is($txt, $ext_text, "search2text worked")
-}
+};
 
 ################################################################################
 {
@@ -188,4 +188,14 @@ sub _round_timestamps {
     my $txt = Thruk::Utils::Status::search2text($c, "service", $got);
     my $ext_text = "host_groups ~~ 'test'";
     is($txt, $ext_text, "search2text worked")
-}
+};
+
+################################################################################
+{
+    my $filter = [
+          { '-or' => { 'host_groups' => { '>=' => [ 'test' ] } } }
+    ];
+    my $txt = Thruk::Utils::Status::filter2text($c, "service", $filter);
+    my $ext_text = "host_groups >= 'test'";
+    is($txt, $ext_text, "search2text worked")
+};

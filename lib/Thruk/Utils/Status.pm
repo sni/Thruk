@@ -2846,19 +2846,19 @@ sub search2text {
     my($c, $type, $search) = @_;
 
     my $txt;
-    eval {
-        my @subs;
-        for my $s (@{$search}) {
-            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $s);
+    my @subs;
+    for my $s (@{$search}) {
+        my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $s);
+        eval {
             push @subs, _filtertext($servicefilter);
+        };
+        my $err = $@;
+        if($err) {
+            require Data::Dumper;
+            confess("failed to expand search: ".$err."\n".Data::Dumper::Dumper($servicefilter));
         }
-        $txt = _filtercombine("or", @subs) // "";
-    };
-    my $err = $@;
-    if($err) {
-        require Data::Dumper;
-        confess("failed to expand search: ".$err."\n".Data::Dumper::Dumper($search));
     }
+    $txt = _filtercombine("or", @subs) // "";
     return($txt);
 }
 
@@ -2899,7 +2899,7 @@ sub _filtertext {
                 return(_filtercombine("and", @subs));
             }
             if($keys[0] eq '-or') {
-                my $subs = _filterexpandlist($filter->{'-or'});
+                my $subs = _filterexpandlist(ref $filter->{'-or'} eq 'ARRAY' ? $filter->{'-or'} : [$filter->{'-or'}]);
                 return(_filtercombine("or", @{$subs}));
             }
         }
