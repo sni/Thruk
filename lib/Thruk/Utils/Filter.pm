@@ -1802,16 +1802,16 @@ sub _obj_name {
 
 ########################################
 
-=head2 filter2text
+=head2 search2text
 
-  filter2text($type, $filter)
+  search2text($type, $filter)
 
 returns text/lexical filter for structured filter
 
 =cut
-sub filter2text {
+sub search2text {
     my $c = $Thruk::Globals::c;
-    return(Thruk::Utils::Status::filter2text($c, @_));
+    return(Thruk::Utils::Status::search2text($c, @_));
 }
 
 ########################################

@@ -2835,6 +2835,35 @@ sub set_custom_title {
 
 ##############################################
 
+=head2 search2text
+
+  search2text($c, $type, $search)
+
+returns text/lexical filter for status search
+
+=cut
+sub search2text {
+    my($c, $type, $search) = @_;
+
+    my $txt;
+    eval {
+        my @subs;
+        for my $s (@{$search}) {
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $s);
+            push @subs, _filtertext($servicefilter);
+        }
+        $txt = _filtercombine("or", @subs) // "";
+    };
+    my $err = $@;
+    if($err) {
+        require Data::Dumper;
+        confess("failed to expand search: ".$err."\n".Data::Dumper($search));
+    }
+    return($txt);
+}
+
+##############################################
+
 =head2 filter2text
 
   filter2text($c, $type, $filter)
@@ -2845,12 +2874,17 @@ returns text/lexical filter for structured filter
 sub filter2text {
     my($c, $type, $filter) = @_;
 
-    my @subs;
-    for my $f (@{$filter}) {
-        my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $f);
-        push @subs, _filtertext($servicefilter);
+    my $txt;
+    eval {
+        $txt = _filtertext($filter);
+        $txt =~ s/^\((.*)\)$/$1/gmx; # remove outermose brackets
+    };
+    my $err = $@;
+    if($err) {
+        require Data::Dumper;
+        confess("failed to expand filter: ".$err."\n".Data::Dumper($filter));
     }
-    return(_filtercombine("or", @subs) // "");
+    return($txt);
 }
 
 ##############################################
@@ -2898,6 +2932,7 @@ sub _filtertext {
 ##############################################
 sub _filterexpandlist {
     my($filter) = @_;
+    die("not an array ref") unless ref $filter eq 'ARRAY';
     my @subs;
     for(my $x = 0; $x < scalar @{$filter}; $x++) {
         my $v = $filter->[$x];
