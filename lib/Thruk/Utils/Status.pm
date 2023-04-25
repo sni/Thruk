@@ -2857,7 +2857,7 @@ sub search2text {
     my $err = $@;
     if($err) {
         require Data::Dumper;
-        confess("failed to expand search: ".$err."\n".Data::Dumper($search));
+        confess("failed to expand search: ".$err."\n".Data::Dumper::Dumper($search));
     }
     return($txt);
 }
@@ -2882,7 +2882,7 @@ sub filter2text {
     my $err = $@;
     if($err) {
         require Data::Dumper;
-        confess("failed to expand filter: ".$err."\n".Data::Dumper($filter));
+        confess("failed to expand filter: ".$err."\n".Data::Dumper::Dumper($filter));
     }
     return($txt);
 }
