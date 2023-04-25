@@ -23,7 +23,7 @@
     <div class="card z-30 absolute shadow-float w-auto max-w-[95%]" style="display:none;" id="[% paneprefix %]_all_filter_card" onclick="resetRefresh()">
       <div class="head flexrow flex-nowrap justify-between w-[450px] border-b-0">
         <h3>Display Filter</h3>
-        <div class="flex gap-x-2 items-center">
+        <div class="flexrow justify-between flex-nowrap gap-x-2 items-center w-full">
           [% IF ! has_lex_filter %]
             <div>
               <a href="#" onclick="toggleFilterAdvanced('[% paneprefix %]_all_filter_card'); return false;" class="link block hoverable p-1 rounded-lg">(toggle advanced filter)</a>
@@ -75,11 +75,10 @@
               <i class="fa-solid fa-check round small green"></i>
             </button>
           [% END %]
-          <button class="js-advancedfilter" type="submit" name="update" [% IF ! has_lex_filter %] style="display: none;"[% END %]>
-            <i class="uil uil-corner-down-right-alt"></i>
-            run query
-          </button>
-          <span class="textHINTsoft js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>(ctrl+enter)</span>
+          <div class="js-advancedfilter flexrow gap-x-1"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
+            <div class="textHINTsoft flex items-center js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>(ctrl+enter)</div>
+            <button class="js-advancedfilter" type="submit" name="update"><i class="uil uil-corner-down-right-alt"></i> run query </button>
+          </div>
         </div>
       </div>
       [% IF ! has_lex_filter %]

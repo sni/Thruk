@@ -1155,11 +1155,15 @@ function toggleFilterAdvanced(id) {
         jQuery('#'+id).find(".js-advancedfilter").hide();
         txt.dataset["mode"] = "filter";
         jQuery('#'+id).find(".js-advancedfilter").find("TEXTAREA").attr('disabled', true);
+
+        jQuery('#'+id).find(".js-filterpane").parents("DIV.head").removeClass("w-full");
     } else {
         txt.dataset["mode"] = "query";
         jQuery('#'+id).find(".js-filterpane").hide();
         jQuery('#'+id).find(".js-advancedfilter").show();
         jQuery('#'+id).find(".js-advancedfilter").find("TEXTAREA").attr('disabled', false);
+
+        jQuery('#'+id).find(".js-filterpane").parents("DIV.head").addClass("w-full");
     }
 }
 
