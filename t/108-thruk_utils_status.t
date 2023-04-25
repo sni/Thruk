@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 46;
+plan tests => 47;
 
 BEGIN {
     use lib('t');
@@ -162,7 +162,8 @@ sub _round_timestamps {
 
 ################################################################################
 {
-    my $params = {'dfl_s0_hostprops' => '0','dfl_s0_hoststatustypes' => '15','dfl_s0_op' => '~','dfl_s0_serviceprops' => '0','dfl_s0_servicestatustypes' => '31','dfl_s0_type' => 'hostgroup','dfl_s0_value' => 'test','dfl_s0_value_sel' => '5','style' => 'detail'};
+    local $ENV{'THRUK_USE_LMD'} = undef;
+    my $params = {'dfl_s0_hostprops' => '0','dfl_s0_hoststatustypes' => '15','dfl_s0_op' => '~','dfl_s0_serviceprops' => '0','dfl_s0_servicestatustypes' => '31','dfl_s0_type' => 'hostgroup','dfl_s0_value' => 'test123noneexisting','dfl_s0_value_sel' => '5','style' => 'detail'};
     my $exp = [
           {
             'host_prop_filtername' => 'Any',
@@ -178,7 +179,7 @@ sub _round_timestamps {
                                  'op' => '~',
                                  'type' => 'hostgroup',
                                  'val_pre' => '',
-                                 'value' => 'test'
+                                 'value' => 'test123noneexisting'
                                }
                              ]
           }
@@ -186,7 +187,7 @@ sub _round_timestamps {
     my $got = Thruk::Utils::Status::get_searches($c, '', $params);
     is_deeply($got, $exp, "parsed search items from params");
     my $txt = Thruk::Utils::Status::search2text($c, "service", $got);
-    my $ext_text = "host_groups ~~ 'test'";
+    my $ext_text = "host_groups >= 'test123noneexisting'";
     is($txt, $ext_text, "search2text worked")
 };
 
@@ -197,5 +198,15 @@ sub _round_timestamps {
     ];
     my $txt = Thruk::Utils::Status::filter2text($c, "service", $filter);
     my $ext_text = "host_groups >= 'test'";
+    is($txt, $ext_text, "search2text worked")
+};
+
+################################################################################
+{
+    my $filter = [
+          { 'name' => ["a", "b", "c"] }
+    ];
+    my $txt = Thruk::Utils::Status::filter2text($c, "service", $filter);
+    my $ext_text = "name = 'a' and name = 'b' and name = 'c'";
     is($txt, $ext_text, "search2text worked")
 };

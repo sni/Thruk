@@ -1732,7 +1732,7 @@ sub get_groups_filter {
         ## no critic
         @names = grep(/$value/i, @{$cache->{$type}});
         ## use critic
-        if(scalar @names == 0) { @names = (''); }
+        if(scalar @names == 0) { @names = ($value); }
     } else {
         my $groups = [];
         if($type eq 'hostgroup') {
@@ -1748,7 +1748,7 @@ sub get_groups_filter {
             $groups = $c->db->get_contactgroups( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
         }
         @names = sort keys %{ Thruk::Base::array2hash([@{$groups}], 'name') };
-        if(scalar @names == 0) { @names = (''); }
+        if(scalar @names == 0) { @names = ($value); }
     }
 
     my $group_op = '!>=';
@@ -2912,12 +2912,24 @@ sub _filtertext {
                 if(ref $v->{$op} eq 'ARRAY' && scalar @{$v->{$op}} == 1) {
                     $v->{$op} = $v->{$op}->[0];
                 }
-                push @subs, sprintf("%s %s %s", $k, $op, _filterval($v->{$op}));
+                if(ref $v->{$op} eq 'ARRAY') {
+                    for my $e (@{$v->{$op}}) {
+                        push @subs, sprintf("%s %s %s", $k, $op, _filterval($e));
+                    }
+                } else {
+                    push @subs, sprintf("%s %s %s", $k, $op, _filterval($v->{$op}));
+                }
             } else {
                 if(ref $v eq 'ARRAY' && scalar @{$v} == 1) {
                     $v = $v->[0];
                 }
-                push @subs, sprintf("%s = %s", $k, _filterval($v));
+                if(ref $v eq 'ARRAY') {
+                    for my $e (@{$v}) {
+                        push @subs, sprintf("%s = %s", $k, _filterval($e));
+                    }
+                } else {
+                    push @subs, sprintf("%s = %s", $k, _filterval($v));
+                }
             }
         }
         return(_filtercombine("and", @subs));
@@ -2969,6 +2981,9 @@ sub _filtercombine {
 
 sub _filterval {
     my($val) = @_;
+    if(ref $val) {
+        confess("no refs allowed here");
+    }
     if($val =~ m/^[\d\.]+$/mx) {
         return($val);
     }
