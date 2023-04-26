@@ -1,10 +1,12 @@
 ﻿[% PROCESS _blocks.tt %]
 
+<div class="overflow-auto">
 [% orig_perfdata = perfdata %]
 [% tmp = split_perfdata(perfdata) %]
 [% IF tmp.size > 0 && tmp.0.size > 0 %]
   [% splited = tmp.0; has_parents = tmp.1; has_warn = tmp.2; has_crit = tmp.3; has_min = tmp.4; has_max = tmp.5; %]
   [% last_parent = '' %]
+  <div class="w-min">
   <table id="perfdata_human" class="cellborder cellspacing rowhover">
     <tr>
       [% IF has_parents %]<th></th>[% END %]
@@ -35,9 +37,9 @@
     </tr>
     [% END %]
   </table>
+  </div>
   <div id="perfdata_raw" style="display:none;">
     [% perfdata = orig_perfdata %]
-    [% PROCESS _perfdata_table add_link="1" %]
     [% orig_perfdata | html %]
   </div>
 [% ELSE %]
@@ -48,3 +50,4 @@
   </script>
   [% orig_perfdata | html %]
 [% END %]
+</div>

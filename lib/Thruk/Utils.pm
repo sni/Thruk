@@ -91,10 +91,25 @@ return number with thousands seperator
 =cut
 sub format_number {
     my($number) = @_;
+    my $abs = $number;
+    if(!$abs) {
+        return $number;
+    }
+    if($abs < 0) { $abs = $abs * -1; }
     for ($number) {
         /\./mx
         ? s/(?<=\d)(?=(\d{3})+(?:\.))/,/gmx
         : s/(?<=\d)(?=(\d{3})+(?!\d))/,/gmx;
+    }
+    # shorten decimals for larger numbers
+    if($abs > 1000) {
+        $number =~ s/(\.\d{2})\d*/$1/gmx;
+    }
+    if($abs > 10000) {
+        $number =~ s/(\.\d{1})\d*/$1/gmx;
+    }
+    if($abs > 100000) { # no fractions here
+        $number =~ s/\.\d*//gmx;
     }
     return $number;
 }

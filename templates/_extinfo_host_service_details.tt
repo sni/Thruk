@@ -224,7 +224,7 @@ END
       </div>
       [% END %]
     </th>
-    <td class="py-0">
+    <td class="py-0 whitespace-normal">
       [% IF obj.perf_data %]
         [% perf_svc=svc_name; IF perf_svc == ""; perf_svc='_HOST_'; END %]
         [% PROCESS _perfdata_human.tt
@@ -465,6 +465,14 @@ END
     var block = jQuery(".detail_plugin_outputBlock")[0];
     if(!block) {
       return;
+    }
+
+    var perf = jQuery("#perfdata_human")[0];
+    if(perf) {
+      perf.style.display = "none";
+      var width  = Math.floor(jQuery(perf).parents("TD").first().innerWidth()) - 16;
+      jQuery(perf).parents("DIV").first().css("max-width", width+"px");
+      perf.style.display = "";
     }
 
     block.style.maxWidth  = "";
