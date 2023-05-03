@@ -139,6 +139,7 @@
           [% ELSE %]
             [% long_plugin_output = remove_html_comments(h.long_plugin_output) %]
           [% END %]
+          [% orig_plugin_output = plugin_output %]
           [% IF escape_html_tags %]
             [% long_plugin_output = escape_html(long_plugin_output) %]
             [% plugin_output      = escape_html(plugin_output) %]
@@ -165,7 +166,7 @@
                 <br>[% nl2br(long_plugin_output) %]
               [% END %]
               <div>
-                [% PROCESS _perfdata_table add_link="1" state=h.state plugin_output=plugin_output perfdata=h.perf_data check_command=h.check_command hst=h.name svc="_HOST_" pnp_url=get_pnp_url(c, h, 1) %]
+                [% PROCESS _perfdata_table add_link="1" state=h.state plugin_output=orig_plugin_output perfdata=h.perf_data check_command=h.check_command hst=h.name svc="_HOST_" pnp_url=get_pnp_url(c, h, 1) %]
               </div>
             </div>
           </td>
