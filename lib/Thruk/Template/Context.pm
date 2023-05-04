@@ -51,8 +51,8 @@ sub process {
         for my $template (sort { $totals->{$b}->[1] <=> $totals->{$a}->[1] } keys %{$totals}) {
             my($count, $cumulative, $exclusive) = @{$totals->{$template}};
             my $percent = $total_time > 0 ? $exclusive/$total_time : 0;
-            $out  .= sprintf("%-3s %4d %% %6.3f %6.3f %s\n", $count, $percent, $cumulative, $exclusive, $template);
-            $html .= sprintf("<tr><td>%s</td><td class='text-right'>%d</td><td class='text-right'>%6.3fs</td><td class='text-right'>%6.3fs</td>\n", $template, $count, $cumulative, $exclusive);
+            $out  .= sprintf("%-3s %4d %% %6.3f %6.3f %s\n", $count//0, $percent, $cumulative, $exclusive, $template);
+            $html .= sprintf("<tr><td>%s</td><td class='text-right'>%d</td><td class='text-right'>%6.3fs</td><td class='text-right'>%6.3fs</td>\n", $template, $count//0, $cumulative, $exclusive);
             $html .= "<td class='text-right relative' style='width: 50px'>";
             $html .= "<div style='width: ".sprintf("%.0f", 100*$percent)."%; height: 20px;' class='WARNING absolute top-0 right-0'></div>";
             $html .= "<span class='absolute top-0 right-0' style='margin-right: 3px;'>".sprintf("%.1f", $percent*100)."%</span>";
