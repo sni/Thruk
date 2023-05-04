@@ -8,7 +8,7 @@
     <div class="flex-grow text-center font-semibold whitespace-nowrap">
       <span class="[% message.0 | html %]">[% message.1 %]</span>
       [% IF message.2 %]
-        <div class="mt-1"><a class="link" href="#" onclick="showElement('message_details'); hideElement(this.parentNode); return false;">show details...</a></div>
+        <div class="mt-1"><a class="link" href="#" onclick="showElement('message_details'); hideElement(this.parentNode); window.clearInterval(thruk_message_fade_timer); return false;">show details...</a></div>
       [% END %]
     </div>
     <div class="w-5">

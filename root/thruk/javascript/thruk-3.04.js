@@ -3803,6 +3803,8 @@ var thruk_message_fade_timer;
 function thruk_message(rc, message, close_timeout) {
     jQuery('#thruk_message').remove();
     window.clearInterval(thruk_message_fade_timer);
+    var lines = message.split("\n");
+    message = lines.shift();
     var cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
@@ -3816,12 +3818,30 @@ function thruk_message(rc, message, close_timeout) {
         + '    </div>'
         + '    <div class="flex-grow text-center font-semibold whitespace-nowrap">'
         + '      <span class="' + cls + '">' + message
-        + '      </span>'
+        + '      </span>';
+
+    if(lines.length > 0) {
+    html += ''
+        + '    <div class="mt-1"><a class="link" href="#" onclick="showElement(\'message_details\'); hideElement(this.parentNode); window.clearInterval(thruk_message_fade_timer); return false;">show details...</a></div>';
+    }
+
+    html += ''
         + '    </div>'
         + '    <div class="w-5">'
         + '      <button class="iconOnly medium" title="close this message" onclick="fade(\'thruk_message\', 500, true);return false;"><i class="uil uil-times"></i></button>'
         + '    </div>'
-        + '  </div>'
+        + '  </div>';
+
+    if(lines.length > 0) {
+        html += ''
+            + '    <div class="w-full flex justify-center">'
+            + '      <pre class="'+cls+'" style="display:none;" id="message_details">'
+            + lines.join("<br>")
+            + '      </pre>'
+            + '    </div>';
+    }
+
+    html += ''
         + '</div>';
 
     // append to <main> if possible or body otherwise
