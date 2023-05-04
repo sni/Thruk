@@ -8,7 +8,7 @@
             [% cust.0 | html %]
           </a>
         </td>
-        <td>[% cust.1 %]</td>
+        <td>[% cust.1 | replace_links %]</td>
       </tr>
       [% END %]
     </table>
