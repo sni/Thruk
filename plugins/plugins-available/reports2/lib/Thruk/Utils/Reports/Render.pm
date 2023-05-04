@@ -401,6 +401,9 @@ sub get_url {
     my $result = $res[1];
     if(!defined $result || $result->{'code'} != 200) {
         my $err = $res[2] || 'code '.($result->{'code'} // 'unknown');
+        if(ref $err eq 'HTTP::Response') {
+            $err = sprintf("%s\nresponse:\n%s", $err->status_line(), $err->as_string());
+        }
         die(sprintf("url report from url %s failed: %s\n", $url, $err));
     }
     if(defined $result && $result->{'code'} == 200 && defined $result->{'headers'}) {
