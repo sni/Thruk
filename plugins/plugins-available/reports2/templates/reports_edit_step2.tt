@@ -46,7 +46,7 @@
   [% ELSIF type == 'textarea' %]
     <textarea name="params.[% key %]" wrap="hard" class="w-full">[% value | html %]</textarea>
   [% ELSIF type == 'yes_no' %]
-    <select name="params.[% key %]" class="w-full">
+    <select name="params.[% key %]" class="w-56">
       <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
       <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
     </select>
@@ -85,7 +85,7 @@
     [% t1=date.now; IF r.params.defined("t1"); t1 = r.params.t1; END %]
     [% t2=date.now; IF r.params.defined("t2"); t2 = r.params.t2; END %]
     [% custom=1; IF value == "custom"; custom=2; END %]
-    [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value custom=custom name="params." _ key t1=t1 t2=t2 current=0 show_hint=1 %]
+    [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value custom=custom name="params." _ key t1=t1 t2=t2 current=0 show_hint=1 width="w-56" %]
   [% ELSIF type == 'breakdowns' %]
     <select name="params.[% key %]" class="w-56">
       <option value="months"[% IF value == 'months' %] selected[% END %]>Months</option>
@@ -372,7 +372,7 @@
   [% PROCESS $temp block = 'edit_types' %]
   [% PROCESS custom_reports_edit_step2.tt %]
     [% IF key %]
-    <input type="text" name="params.[% key %]" value="[% escape_html(value) %]">
+    <input type="text" name="params.[% key %]" value="[% escape_html(value) %]" class="w-full">
     [% END %]
   [% END %]
 [% END %]

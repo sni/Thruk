@@ -61,7 +61,7 @@
           <td>
             [% t1 = date.now - 86400 %]
             [% t2 = date.now %]
-            [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" custom=1 name="timeperiod" t1=t1 t2=t2 current=0 show_hint=1 %]
+            [% PROCESS _timeperiods_select_options.tt selected_timeperiod="" custom=1 name="timeperiod" t1=t1 t2=t2 current=0 show_hint=1 width="w-full" %]
           </td>
         </tr>
         <tr>

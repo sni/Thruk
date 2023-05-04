@@ -136,7 +136,7 @@
                 <td>
                   [% IF service %]
                     <input type='hidden' name='initialassumedhoststate' value="[% initialassumedhoststate | html %]">
-                    <select name='initialassumedservicestate'>
+                    <select name='initialassumedservicestate' class="w-[135px]">
                       <option value="0"[% IF  initialassumedservicestate ==  0 %] selected[% END %]>Unspecified</option>
                       <option value="-1"[% IF initialassumedservicestate == -1 %] selected[% END %]>Current State</option>
                       <option value="6"[% IF  initialassumedservicestate ==  6 %] selected[% END %]>Service Ok</option>
@@ -146,7 +146,7 @@
                     </select>
                   [% ELSE %]
                     <input type='hidden' name='initialassumedservicestate' value="[% initialassumedservicestate | html %]">
-                    <select name='initialassumedhoststate'>
+                    <select name='initialassumedhoststate' class="w-[135px]">
                       <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
                       <option value="-1"[% IF initialassumedhoststate == -1 %] selected[% END %]>Current State</option>
                       <option value="3"[% IF  initialassumedhoststate ==  3 %] selected[% END %]>Host Up</option>
@@ -165,7 +165,7 @@
               </tr>
               <tr>
                 <td>
-                  [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 %]
+                  [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 width="w-[135px]" %]
                 </td>
                 <td>
                   <select name='zoom'>
