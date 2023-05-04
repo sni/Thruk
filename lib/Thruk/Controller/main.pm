@@ -40,12 +40,21 @@ sub index {
     Thruk::Utils::Status::set_default_stash($c);
 
     my $userdata    = Thruk::Utils::get_user_data($c);
-    my $defaultView = { name => 'All Hosts', filter => undef, locked => 1 };
-    my $views       = $userdata->{'main_views'} || [];
+    my $defaultView = {
+        'name'   => 'All Hosts',
+        'filter' => _get_default_filter($c) // undef, # results in odd number otherwise
+        'locked' => 1,
+    };
+
+    # strip locked ones from user data, they should have never been saved
+    my $views = $userdata->{'main_views'} || [];
+    @{$views} = grep { ! $_->{'locked'} } @{$views};
+
     if(scalar @{$views} == 0) {
         $views = [$defaultView];
     }
     $c->stash->{'mainviews'} = $views;
+    unshift @{$views}, $defaultView;
 
     if($c->req->parameters->{'v'}) {
         for my $v (@{$views}) {
@@ -105,6 +114,8 @@ sub index {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/main.cgi?v=".Thruk::Utils::Filter::as_url_arg($c->stash->{'currentview'}->{'name'}));
         }
         $c->stash->{'currentview'}->{'filter'} = $f;
+        # only save unlocked views
+        @{$views} = grep { ! $_->{'locked'} } @{$views};
         $userdata->{'main_views'} = $views;
         if(Thruk::Utils::store_user_data($c, $userdata)) {
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'view saved' });
@@ -435,6 +446,22 @@ sub _get_contacts {
 
     $c->stats->profile(end => "_get_contacts");
     return(scalar keys %{$uniq});
+}
+
+##########################################################
+sub _get_default_filter {
+    my($c) = @_;
+    my $default = $c->config->{'default_main_filter'};
+    return unless $default;
+    my($key, $op, $val) = $default =~ m/^\s*(\w+)\s+([\S]+)\s+(.*)\s*$/gmx;
+    my $remoteuser = $c->stash->{'remote_user'};
+    $val =~ s/\$REMOTE_USER\$/$remoteuser/gmx;
+    return({
+        "dfl_s0_op"      => $op,
+        "dfl_s0_type"    => $key,
+        "dfl_s0_val_pre" => "",
+        "dfl_s0_value"   => $val,
+    });
 }
 
 ##########################################################

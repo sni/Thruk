@@ -815,6 +815,20 @@ ex.:
   default_service_filter = !^test_
 
 
+=== default_main_filter
+{% include new_since.ad version="3.06" %}
+The default main filter can be use to apply a filter to the "All Hosts" view on
+the main landing page. You can use a special variable $REMOTE_USER$ which will
+be replace by the current user. The following example will apply a filter
+on the contact with the current user name, so the dashboard will show
+only hosts/service where the user is contact for, even if the user has global
+admin permissions.
+
+ex.:
+
+  default_main_filter = contact = $REMOTE_USER$
+
+
 == Paging Settings
 
 

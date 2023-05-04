@@ -7,6 +7,7 @@ next:
           - add variables from default columns to exposed variables automatically
           - add filter by contactgroups
           - add host_name_source / service_description_source options to get names from different attributes or custom variables
+          - add default_main_filter option to apply filter for "All Hosts" view
           - fix navigation clicks not working occasionally
           - Rest
             - add last_login to /r/thruk/users
