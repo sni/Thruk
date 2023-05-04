@@ -343,6 +343,34 @@ sub get_events {
 
 ##########################################################
 
+=head2 get_url_with_retries
+
+  get_url_with_retries($retries, $delay)
+
+calls get_url but retries on errors
+
+=cut
+sub get_url_with_retries {
+    my $c       = $Thruk::Globals::c or die("not initialized!");
+    my $retries = $c->stash->{'param'}->{'retries'} // 3;
+    my $delay   = $c->stash->{'param'}->{'delay'} // 60;
+    my $err;
+    for my $x (1..$retries) {
+        eval {
+            get_url();
+        };
+        $err = $@;
+        last unless $err;
+        my $short_err = [split(/\n/mx, $err)];
+        last if $x == $retries;
+        _warn(sprintf("get_url retry %d/%d failed: %s, retrying in %d seconds", $x, $retries, $short_err->[0], $delay));
+        sleep($delay);
+    }
+    die($err);
+}
+
+##########################################################
+
 =head2 get_url
 
   get_url()

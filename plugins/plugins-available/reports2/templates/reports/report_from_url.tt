@@ -4,7 +4,9 @@
     required_fields = [
         { 'language' => [ 'Language',            'language',    'en'                      ,'',                              1 ] },
         { 'url'      => [ 'Report from Url',     'url',         '',                       '(will be attached to report)',   1 ] },
-        { 'theme'    => [ 'Used Theme',          'themes',      c.config.default_theme,   '(html only)' ] },
+        { 'retries'  => [ 'Retries',             'int',          3,                       '(number of retries)' ] },
+        { 'delay'    => [ 'Delay',               'int',          60,                      '(delay in seconds after errors)' ] },
+        { 'theme'    => [ 'Used Theme',          'themes',       c.config.default_theme,  '(html only)' ] },
         { 'minimal'  => [ 'Minmal Layout',       'yes_no',      'yes',                    '(html only)' ] },
         { 'nav'      => [ 'Include Navigation',  'yes_no',      'no',                     '(html only)' ] },
         { 'js'       => [ 'Include Javascript',  'yes_no',      'no',                     '(html only)' ] },
@@ -18,5 +20,5 @@
 
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
-  [% get_url(); %]
+  [% get_url_with_retries(); %]
 [% END %]
