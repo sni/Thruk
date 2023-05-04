@@ -10,7 +10,8 @@ The report command creates reports from the command line.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] report [mail] [nr]
+  Usage: thruk [globaloptions] report [mail] [<nr>]
+         thruk [globaloptions] report list
 
 =head1 OPTIONS
 
@@ -19,6 +20,10 @@ The report command creates reports from the command line.
 =item B<help>
 
     print help and exit
+
+=item B<list>
+
+    list available reports
 
 =back
 
@@ -53,6 +58,19 @@ sub cmd {
     if(scalar @{$commandoptions} >= 1 && $commandoptions->[0] eq 'mail') {
         $mail = 1;
         shift @{$commandoptions};
+    }
+
+    if(scalar @{$commandoptions} >= 1 && $commandoptions->[0] eq 'list') {
+        require Thruk::Utils;
+        require Thruk::Utils::Reports;
+        my $reports = Thruk::Utils::Reports::get_report_list($c);
+        my $output = Thruk::Utils::text_table(
+            keys => [qw/nr name user to/],
+            data => $reports,
+        );
+
+        $c->stats->profile(end => "_cmd_report()");
+        return($output, 0);
     }
 
     if(scalar @{$commandoptions} == 0) {
