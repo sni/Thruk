@@ -24,7 +24,7 @@
   [% END %]
 
   <div class="flex pl-1.5 gap-px">
-    [% IF host.$host_is_executing > 0             %]<div id="[% paneprefix %]r[% loop.index %]_h_exec"><div class="spinner js-autohide not-clickable" title="This host is currently executing its hostcheck"></div></div>[% ELSE%]<div id="[% paneprefix %]r[% loop.index %]_h_exec"></div>[% END %]
+    [% IF host.$host_is_executing > 0             %]<div id="[% paneprefix %]r[% loop.index %]_h_exec" class="flex overflow-hidden"><div class="spinner js-autohide not-clickable" title="This host is currently executing its hostcheck"></div></div>[% ELSE%]<div id="[% paneprefix %]r[% loop.index %]_h_exec"></div>[% END %]
     [% IF host.$host_notifications_enabled == 0   %]<i class="fa-solid fa-bell-slash not-clickable" title="Notifications for this host have been disabled"></i>[% END %]
     [% IF ! has_bp %]
     [% IF strict_passive_mode %]
@@ -84,7 +84,7 @@
   [% END %]
 
   <div class="flex pl-1.5 gap-px">
-    [% IF service.is_executing > 0             %]<div class="flex" id="[% paneprefix %]r[% loop.index %]_s_exec"><div class="spinner js-autohide not-clickable w-5 h-5" title="This service is currently executing its servicecheck"></div></div>[% ELSE %]<div class="flex" id="[% paneprefix %]r[% loop.index %]_s_exec"></div>[% END %]
+    [% IF service.is_executing > 0             %]<div class="flex overflow-hidden" id="[% paneprefix %]r[% loop.index %]_s_exec"><div class="spinner js-autohide not-clickable w-5 h-5" title="This service is currently executing its servicecheck"></div></div>[% ELSE %]<div class="flex" id="[% paneprefix %]r[% loop.index %]_s_exec"></div>[% END %]
     [% IF service.notifications_enabled == 0   %]<i class="fa-solid fa-bell-slash not-clickable" title="Notifications for this service have been disabled"></i>[% END %]
     [% IF ! has_bp %]
       [% IF strict_passive_mode %]
