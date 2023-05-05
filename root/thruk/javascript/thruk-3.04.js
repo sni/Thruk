@@ -1465,7 +1465,7 @@ function setRefreshRate(rate) {
             obj.innerHTML = "<span id='refresh_rate_info'>"+msg+"<\/span> <input type='button' class='inline-block' value='stop' onClick='stopRefresh()'>";
         }
     }
-    if(rate == 0) {
+    if(rate <= 0) {
       var has_auto_reload_fn = false;
       try {
         if(auto_reload_fn && typeof(auto_reload_fn) == 'function') {
@@ -1513,6 +1513,7 @@ function stopRefresh(silent) {
   refreshPage = 0;
   if(!silent) {
     jQuery("#refresh_label").html(" <span class='textALERT'>(stopped)<\/span>");
+    refresh_rate = null; // disable reset
   }
   window.clearTimeout(thrukState.refreshTimer);
   setRefreshRate(silent ? -1 : 0);
