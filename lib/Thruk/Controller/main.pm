@@ -301,15 +301,19 @@ sub _get_notifications {
 
     $c->stash->{'hosts_with_notifications'} = $hosts_with_notifications;
 
+    my($label, $ts) = ({});
     my $notifications = [["x"], ["Notifications"]];
     my @keys = sort keys %{$notificationHash};
     @keys = splice(@keys, 1);
     for my $key (@keys) {
         push(@{$notifications->[0]}, 0+$key);
         push(@{$notifications->[1]}, $notificationHash->{$key});
+        $ts = 0+$key/1000;
+        $label->{$ts} = Thruk::Utils::format_date($ts, "%H:%M");
     }
+    $label->{$ts+3600} = Thruk::Utils::format_date($ts+3600, "%H:%M");
     $c->stats->profile(end => "_get_notifications");
-    return($notifications);
+    return({data => $notifications, label => $label});
 }
 
 ##########################################################

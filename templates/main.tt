@@ -522,10 +522,11 @@
   });
 
   var linkHideTimer;
+  var notificationsLabels = [% json_encode(notifications.label) %];
   var notifications = bb.generate({
   data: {
     x: "x",
-    columns: [% json_encode(notifications) %],
+    columns: [% json_encode(notifications.data) %],
     type: "bar",
     onover: function(d, element) {
       window.clearTimeout(linkHideTimer);
@@ -547,18 +548,30 @@
     pattern: ['var(--dashboard-series-1)']
   },
   size: {
-      height: 210
-    },
+    height: 210
+  },
   axis: {
     x: {
       type: "timeseries",
-      localtime: false,
+      localtime: true,
       tick: {
-        format: "%H:%M"
+        tooltip: true,
+        format: function(x, a) {
+          var ts = x.getTime()/1000;
+          return notificationsLabels[ts];
+        }
       },
       padding: {
         right: 15,
         unit: "px"
+      }
+    }
+  },
+  tooltip: {
+    format: {
+      title: function(x) {
+          var ts = x.getTime()/1000;
+          return notificationsLabels[ts]+" - "+notificationsLabels[ts+3600];
       }
     }
   },
