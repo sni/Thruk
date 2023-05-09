@@ -1085,7 +1085,7 @@ sub _read_static_content_file {
     }
 
     croak("_read_static_content_file(".($baseurl//'').", ".($report_base_url||'').", $url) $file: $!") if $ENV{'TEST_AUTHOR'};
-    _info("_read_static_content_file(".($baseurl//'').", ".($report_base_url||'').", $url) $file: $!");
+    _debug("_read_static_content_file(".($baseurl//'').", ".($report_base_url||'').", $url) $file: $!");
     return(404, { result => ''}) if wantarray;
     return '';
 }

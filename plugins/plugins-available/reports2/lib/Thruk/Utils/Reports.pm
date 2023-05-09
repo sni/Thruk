@@ -178,6 +178,13 @@ sub report_show {
 
 generate and send the report
 
+return values are:
+
+   -2 : nothing to do, report runs on another cluster node already
+    0 : report failed
+    1 : report sucessful and mail was sent
+    2 : report generated, no mail send because of thresholds not hit
+
 =cut
 sub report_send {
     my($c, $nr, $skip_generate, $to, $cc, $subject, $desc) = @_;
@@ -361,7 +368,17 @@ sub report_send {
             }
         }
     }
-    my $rc = $msg->send(@send_args);
+    my $rc;
+    eval {
+        $rc = $msg->send(@send_args);
+    };
+    my $err = $@;
+    if($err) {
+        chomp($err);
+        my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
+        _report_die($c, $nr, "sending email failed: $err", $logfile);
+        return(0);
+    }
     $c->stats->profile(end => "Utils::Reports::report_send()");
 
     return $rc ? 1 : 0;
@@ -1878,6 +1895,7 @@ sub _report_die {
     if($ENV{'THRUK_CRON'} || (Thruk::Base->mode eq 'CLI')) {
         return;
     }
+
     return $c->detach('/error/index/13');
 }
 
