@@ -227,6 +227,9 @@ sub index {
         } elsif($c->stash->{'backend_detail'}->{$pd}->{'disabled'} == UNREACHABLE) {
             $backend_stats->{'down'}++;
             $backend_stats->{'enabled'}++;
+        } elsif($c->stash->{'backend_detail'}->{$pd}->{'running'} == 0) {
+            $backend_stats->{'down'}++;
+            $backend_stats->{'enabled'}++;
         }
     }
     my $backend_gauge_data = [];
