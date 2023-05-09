@@ -50,11 +50,8 @@ sub index {
     my $views = $userdata->{'main_views'} || [];
     @{$views} = grep { ! $_->{'locked'} } @{$views};
 
-    if(scalar @{$views} == 0) {
-        $views = [$defaultView];
-    }
-    $c->stash->{'mainviews'} = $views;
     unshift @{$views}, $defaultView;
+    $c->stash->{'mainviews'} = $views;
 
     if($c->req->parameters->{'v'}) {
         for my $v (@{$views}) {
