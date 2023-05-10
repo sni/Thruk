@@ -345,8 +345,8 @@ sub do_filter {
         }
     }
 
-    # redirect query like searches from menu search
-    if($params->{'s0_type'} && $params->{'s0_type'} eq 'search' && $params->{'s0_value'} && $params->{'s0_value'} =~ m/^.+[=~!<>]+/mx) {
+    # redirect lexical query like searches from menu search
+    if($params->{'s0_type'} && $params->{'s0_type'} eq 'search' && $params->{'s0_value'} && $params->{'s0_value'} =~ m/^.+([=~!<>]|like|unlike)+/mx) {
         $params->{'q'} = delete $params->{'s0_value'};
         delete $params->{'s0_type'};
     }
@@ -2650,7 +2650,7 @@ sub parse_lexical_filter {
                             | [\d\w\^~\.\-_\*]+
                             | '[^']*'
                             | "[^"]*"
-                            | [=\!~><]+
+                            | (?:[=\!~><]+|like|unlike)
                             | \&\&
                             | \|\|
                         )\s*//mx) {
@@ -2677,8 +2677,10 @@ sub parse_lexical_filter {
             }
             elsif(!defined $op) {
                 $op = $token;
-                if($op eq '~')  { $op = '~~'; }
-                if($op eq '!~') { $op = '!~~'; }
+                if($op eq 'like')   { $op =  '~~'; }
+                if($op eq '~')      { $op =  '~~'; }
+                if($op eq '!~')     { $op = '!~~'; }
+                if($op eq 'unlike') { $op = '!~~'; }
                 next;
             }
             elsif(!defined $val) {
@@ -2848,7 +2850,7 @@ sub search2text {
     my $txt;
     my @subs;
     for my $s (@{$search}) {
-        my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $s);
+        my($hostfilter, $servicefilter) = single_search($c, $s);
         eval {
             push @subs, _filtertext($servicefilter);
         };
