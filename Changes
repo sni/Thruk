@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - DEPRECATION WARNING: next release will drop support for phantomjs in favor of puppeteer
           - support lexical/advanced filter
           - support native grafana dashboards in action_url
           - improve extinfo host/service details layout
