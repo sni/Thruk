@@ -3089,7 +3089,10 @@ function setCaretToLine(input, line) {
 /* get cursor position in text input */
 function getCaret(el) {
     if (el.selectionStart) {
-        return el.selectionStart;
+        if(el.selectionStart == el.selectionEnd) {
+            return el.selectionStart;
+        }
+        return 0;
     } else if (document.selection) {
         el.focus();
 
@@ -4902,6 +4905,277 @@ function is_frame_url_allowed(url, allowed_frame_links) {
         }
     };
     return(false);
+}
+
+function initAutoCompleteQuery(el) {
+    var completions = {
+        "keywords": [
+            "host",
+            "service",
+            "accept_passive_checks",
+            "acknowledged",
+            "acknowledgement_type",
+            "action_url_expanded",
+            "action_url",
+            "active_checks_enabled",
+            "check_command",
+            "check_interval",
+            "check_options",
+            "check_period",
+            "check_type",
+            "checks_enabled",
+            "contact_groups",
+            "contacts",
+            "current_attempt",
+            "current_notification_number",
+            "description",
+            "display_name",
+            "duration",
+            "event_handler_enabled",
+            "event_handler",
+            "execution_time",
+            "first_notification_delay",
+            "flap_detection_enabled",
+            "groups",
+            "has_been_checked",
+            "high_flap_threshold",
+            "icon_image_alt",
+            "icon_image_expanded",
+            "icon_image",
+            "in_check_period",
+            "in_notification_period",
+            "initial_state",
+            "is_executing",
+            "is_flapping",
+            "last_check",
+            "last_hard_state_change",
+            "last_hard_state",
+            "last_notification",
+            "last_state_change",
+            "last_state",
+            "last_time_critical",
+            "last_time_ok",
+            "last_time_unknown",
+            "last_time_warning",
+            "latency",
+            "long_plugin_output",
+            "low_flap_threshold",
+            "max_check_attempts",
+            "modified_attributes_list",
+            "modified_attributes",
+            "next_check",
+            "next_notification",
+            "notes_expanded",
+            "notes_url_expanded",
+            "notes_url",
+            "notes",
+            "notification_interval",
+            "notification_period",
+            "notifications_enabled",
+            "obsess_over_service",
+            "percent_state_change",
+            "perf_data",
+            "plugin_output",
+            "process_performance_data",
+            "retry_interval",
+            "scheduled_downtime_depth",
+            "state_type",
+            "state",
+        ],
+    };
+    jQuery(el).off("blur").on("blur", function(evt) {
+        jQuery('#code_completion').remove();
+        return;
+    });
+    jQuery(el).off("keydown").on("keydown", function(evt) {
+        var container = jQuery("#code_completion")[0];
+        var keyCode       = evt.keyCode;
+        var navigateLeft  = keyCode == 37;
+        var navigateUp    = keyCode == 38;
+        var navigateRight = keyCode == 39;
+        var navigateDown  = keyCode == 40;
+        var navigateRet   = keyCode == 13;
+
+        // apply on ctrl+enter
+        if((evt.keyCode == 10 || evt.keyCode == 13) && (evt.ctrlKey || evt.metaKey)) {
+            jQuery(this).parents("FORM").find("BUTTON:visible").click();
+        }
+
+        if((!evt.ctrlKey && !evt.metaKey) && container && (navigateUp || navigateDown || navigateRight || navigateRet)) {
+            evt.preventDefault();
+            evt.stopImmediatePropagation();
+            evt.stopPropagation();
+            if(navigateRight || navigateRet) {
+                jQuery("#code_completion").find("LI.res.ajax_search_selected").click();
+                jQuery("#code_completion").find("LI.res.active").click();
+            }
+            var res = jQuery("#code_completion").find("LI.res");
+            if(navigateUp) {
+                jQuery(res).each(function(i, li) {
+                    if(jQuery(li).hasClass("ajax_search_selected") || jQuery(li).hasClass("active")) {
+                        jQuery(li).removeClass("ajax_search_selected");
+                        jQuery(li).removeClass("active");
+                        if(i == 0) {
+                            jQuery(res[res.length-1]).addClass("ajax_search_selected");
+                        } else {
+                            jQuery(res[i-1]).addClass("ajax_search_selected");
+                        }
+                        return false;
+                    }
+                });
+                var hasSome = jQuery("#code_completion").find("LI.res.ajax_search_selected");
+                if(hasSome.length == 0) {
+                    jQuery(res[res.length-1]).addClass("ajax_search_selected");
+                }
+                hasSome = jQuery("#code_completion").find("LI.res.ajax_search_selected");
+                if(hasSome[0]) { hasSome[0].scrollIntoView(); }
+            }
+            if(navigateDown) {
+                jQuery(res).each(function(i, li) {
+                    if(jQuery(li).hasClass("ajax_search_selected") || jQuery(li).hasClass("active")) {
+                        jQuery(li).removeClass("ajax_search_selected");
+                        jQuery(li).removeClass("active");
+                        if(i == res.length -1) {
+                            jQuery(res[0]).addClass("ajax_search_selected");
+                        } else {
+                            jQuery(res[i+1]).addClass("ajax_search_selected");
+                        }
+                        return false;
+                    }
+                });
+                var hasSome = jQuery("#code_completion").find("LI.res.ajax_search_selected");
+                if(hasSome.length == 0) {
+                    jQuery(res[0]).addClass("ajax_search_selected");
+                }
+                hasSome = jQuery("#code_completion").find("LI.res.ajax_search_selected");
+                if(hasSome[0]) { hasSome[0].scrollIntoView(); }
+            }
+            return;
+        }
+    });
+
+    jQuery(el).off("keyup").on("keyup", function(evt) {
+        var container = jQuery("#code_completion")[0];
+        var keyCode = evt.keyCode;
+        var keyBackspace = keyCode == 8;
+        var keyDel       = keyCode == 46;
+        var navigateEsc  = keyCode == 27;
+
+        // close suggestions on escape
+        if(container && navigateEsc) {
+            evt.preventDefault();
+            evt.stopImmediatePropagation();
+            evt.stopPropagation();
+            jQuery('#code_completion').remove();
+            return;
+        }
+
+        // if no suggestion is open yet and input was no regular character
+        if(evt.ctrlKey || evt.metaKey) { return; }
+        if(!container && !(keyCode >= 65 && keyCode <= 90) && !keyBackspace && !keyDel) {
+            return;
+        }
+        var txt     = jQuery(el).val();
+        var txtPos = getCaret(el);
+        if(txtPos == 0) {
+            jQuery('#code_completion').remove();
+            return;
+        }
+        var before = txt.substr(0, txtPos);
+        var after  = txt.substr(txtPos);
+        var token  = before.split(/\s+/);
+        if(token.length == 0 || token[token.length-1] == "") {
+            jQuery('#code_completion').remove();
+            return;
+        }
+        var completeFor = token[token.length-1];
+        if(container && container.dataset["lastToken"] && container.dataset["lastToken"] == completeFor) {
+            return;
+        }
+        var completionsFound = [];
+        var keywords = completions["keywords"].sort()
+
+        // add keywords which start with the search pattern
+        jQuery(keywords).each(function(i, v) {
+            if(v.indexOf(completeFor) === 0) {
+                completionsFound.push(v);
+            }
+        });
+        // add keywords matching anywhere
+        jQuery(keywords).each(function(i, v) {
+            if(v.match(completeFor) && v.indexOf(completeFor) !== 0) {
+                completionsFound.push(v);
+            }
+        });
+        if(completionsFound.length <= 0) {
+            jQuery('#code_completion').remove();
+            return;
+        }
+        jQuery('#code_completion').remove();
+
+        var lines      = before.split(/\r\n|\r|\n/);
+        var newlines   = lines.length - 1;
+        var lineHeight = parseInt(getComputedStyle(el).lineHeight);
+        var pos        = jQuery(el).offset();
+        var fontSize   = parseInt(getComputedStyle(el).fontSize);
+        var fontFamily = getComputedStyle(el).fontFamily;
+        var textSize   = measureText(lines[newlines], fontSize, fontFamily);
+
+        jQuery('<div>', {
+            id: "code_completion",
+            style: "top: 0px; left: 0px; min-width: 200px; min-height: 20px; max-height: 40%;",
+            class: "typeahead overflow-y-auto"
+        }).appendTo("body");
+        container = jQuery("#code_completion")[0];
+        container.dataset["lastToken"] = completeFor;
+        jQuery('<ul>', {}).appendTo(container);
+
+        // add each search result
+        var list = jQuery("#code_completion").find("UL");
+        jQuery(completionsFound).each(function(i, e) {
+            var li = jQuery('<li class="res">'+e+'</li>', {}).appendTo(list);
+            // add click handler to select/apply result
+            jQuery(li).off("click").on("click", function() {
+                var txt = before.substr(0, before.length-completeFor.length)+e;
+                jQuery(el).val(txt+after);
+                setCaretToPos(el, txt.length);
+                jQuery('#code_completion').remove();
+                return;
+            })
+        });
+
+        // activate first match
+        jQuery("#code_completion").find("LI.res").first().addClass("active");
+
+        container.style.left = (Math.floor(pos.left)+textSize.width+8) + "px";
+
+        var h = jQuery(container).outerHeight();
+        var top  = Math.floor(pos.top) - h + (newlines*lineHeight);
+        if(top < 0) {
+            top  = Math.floor(pos.top) + ((newlines+1)*lineHeight) + 4;
+        }
+        container.style.top = top+"px";
+    });
+}
+
+// return size for given text
+function measureText(pText, pFontSize, pFont) {
+    var lDiv = document.createElement('div');
+    document.body.appendChild(lDiv);
+
+    lDiv.style.fontSize = "" + pFontSize + "px";
+    lDiv.style.fontFamily = pFont;
+    lDiv.style.position = "absolute";
+    lDiv.style.left = -1000;
+    lDiv.style.top = -1000;
+    lDiv.textContent = pText;
+    var lResult = {
+        width: lDiv.clientWidth,
+        height: lDiv.clientHeight
+    };
+    document.body.removeChild(lDiv);
+    lDiv = null;
+    return lResult;
 }
 
 /*******************************************************************************

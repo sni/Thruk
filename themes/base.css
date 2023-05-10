@@ -1422,7 +1422,7 @@ UL.ui-fancytree {
 /*******************************************************************************
  * search results
  */
-DIV#search-results {
+DIV#search-results, DIV.typeahead {
   @apply card shadow-float z-[60] absolute border borderDark top-0 left-0 w-40 whitespace-nowrap overflow-hidden;
 
   UL {
@@ -1430,6 +1430,9 @@ DIV#search-results {
   }
   LI {
     @apply px-1 py-0.5;
+    &.active {
+      @apply hoverBG;
+    }
     &.res {
       @apply hover:hoverBG hover:cursor-pointer;
     }
