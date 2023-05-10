@@ -369,7 +369,9 @@ sub do_filter {
         if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {
             fill_totals_box( $c, undef, $servicefilter );
         }
-        return(undef, $servicefilter, undef, undef, $c->stash->{'has_service_filter'});
+        $prefix = 'dfl_' unless $prefix ne '';
+        $c->stash->{'searches'}->{$prefix} = $searches;
+        return($servicefilter, $servicefilter, $servicefilter, $servicefilter, $c->stash->{'has_service_filter'});
     }
 
     unless ( exists $params->{$prefix.'s0_hoststatustypes'}

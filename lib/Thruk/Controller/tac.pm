@@ -27,6 +27,9 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
+    # set some defaults
+    Thruk::Utils::Status::set_default_stash($c);
+
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return 1 if $c->stash->{'has_error'};
 
@@ -38,9 +41,6 @@ sub index {
     $c->stash->{'infoBoxTitle'}  = 'Tactical Monitoring Overview';
     $c->stash->{'page'}          = 'tac';
     $c->stash->{'template'}      = 'tac.tt';
-
-    # set some defaults
-    Thruk::Utils::Status::set_default_stash($c);
 
     my $style = $c->req->parameters->{'style'} || 'tac';
     if($style ne 'tac' ) {

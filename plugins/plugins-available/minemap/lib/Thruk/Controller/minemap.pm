@@ -38,6 +38,18 @@ sub index {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
+    $c->stash->{style}         = 'minemap';
+    $c->stash->{substyle}      = 'service';
+    $c->stash->{title}         = 'Mine Map';
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{page}          = 'status';
+    $c->stash->{template}      = 'minemap.tt';
+    $c->stash->{infoBoxTitle}  = 'Mine Map';
+
+    $c->stash->{services}     = {};
+    $c->stash->{hostnames}    = {};
+    $c->stash->{matrix}       = {};
+
     # do the filter
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
@@ -46,13 +58,6 @@ sub index {
     $c->stash->{services}     = $uniq_services;
     $c->stash->{hostnames}    = $hosts;
     $c->stash->{matrix}       = $matrix;
-    $c->stash->{style}         = 'minemap';
-    $c->stash->{substyle}      = 'service';
-    $c->stash->{title}         = 'Mine Map';
-    $c->stash->{show_top_pane} = 1;
-    $c->stash->{page}          = 'status';
-    $c->stash->{template}      = 'minemap.tt';
-    $c->stash->{infoBoxTitle}  = 'Mine Map';
 
     Thruk::Utils::ssi_include($c);
 

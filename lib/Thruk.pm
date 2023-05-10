@@ -190,6 +190,12 @@ sub _build_app {
         [ '^/thruk/cgi-bin/proxy.cgi/.*'     ,'Thruk::Controller::proxy::index' ],
     ];
 
+    Thruk::Utils::Status::add_view({'group' => 'Main',
+                                    'name'  => 'Main Dashboard',
+                                    'value' => 'main',
+                                    'url'   => 'main.cgi',
+    });
+
     Thruk::Utils::Status::add_view({'group' => 'Tac',
                                     'name'  => 'Tactical Overview',
                                     'value' => 'tac',

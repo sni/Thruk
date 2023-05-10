@@ -24,11 +24,13 @@
       <div class="head flexrow flex-nowrap justify-between w-[450px] border-b-0">
         <h3>Display Filter</h3>
         <div class="flexrow justify-between flex-nowrap gap-x-2 items-center w-full">
-          [% IF ! has_lex_filter %]
+          <div class="flexrow gap-1">
+            [% IF ! has_lex_filter %]
             <div>
               <a href="#" onclick="toggleFilterAdvanced('[% paneprefix %]_all_filter_card'); return false;" class="link block hoverable p-1 rounded-lg">(toggle advanced filter)</a>
             </div>
-            <div class="js-filterpane">
+            [% END %]
+            <div>
               [% IF show_substyle_selector == 1 %]
                 <select name="style">
                   <optgroup label="Host">
@@ -54,12 +56,6 @@
                       <option value="perfmap" disabled>Performancedata</option>
                     [% END %]
                   </optgroup>
-                  <optgroup label="Tac">
-                    <option value="tac"[% IF style == 'tac' %] selected[% END %]>Tactical Overview</option>
-                  </optgroup>
-                  <optgroup label="Main">
-                    <option value="main"[% IF style == 'main' %] selected[% END %]>Main Dashboard</option>
-                  </optgroup>
                   [% FOREACH groupname = additional_views.keys.sort %]
                     <optgroup label="[% groupname | html %]">
                       [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
@@ -71,6 +67,8 @@
                 </select>
               [% END %]
             </div>
+          </div>
+          [% IF ! has_lex_filter %]
             <button class="iconOnly js-filterpane" type="submit" name="update" title="accept">
               <i class="fa-solid fa-check round small green"></i>
             </button>
@@ -98,7 +96,7 @@
       </div>
       [% END %]
       <div class="body min-w-[800px] border-t borderDefault flexcol js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
-        <textarea placeholder="ex.: host ~ name && duration &gt;= 10m" class="min-h-[200px] js-ctrlentersubmit" wrap="hard" name="[% paneprefix %]q"[% IF ! has_lex_filter %] disabled[% END %]>[% IF has_lex_filter %][% has_lex_filter.replace(" ", "&nbsp;") %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix) %][% END %]</textarea>
+        <textarea placeholder="ex.: host ~ name && duration &gt;= 10m" class="min-h-[200px] js-ctrlentersubmit" wrap="hard" name="[% paneprefix %]q"[% IF ! has_lex_filter %] disabled[% END %]>[% IF has_lex_filter %][% has_lex_filter %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix) %][% END %]</textarea>
       </div>
     </div>
   </div>

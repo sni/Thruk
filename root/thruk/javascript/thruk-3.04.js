@@ -1552,7 +1552,11 @@ function toQueryParams(str) {
         if (p.length == 1) {
             val = undefined;
         } else {
-            val = decodeURIComponent(p[1].replace(/\+/g, " "));
+            raw = p[1].replace(/\+/g, " ");
+            raw = raw.replace(/%0D%0A/g, "\n");
+            raw = raw.replace(/%0A/g, "\n");
+            raw = raw.replace(/%C2%A0/g, " ");
+            val = decodeURIComponent(raw);
         }
         if(vars[p[0]] != undefined) {
             if(is_array(vars[p[0]])) {

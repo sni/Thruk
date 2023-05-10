@@ -68,6 +68,7 @@ sub url {
 sub _url {
     my($self) = @_;
     my $url = uri_unescape("".$self->uri);
+    $url =~ s/\n/%0a/gmx; # newlines get lost otherwise on redirects
     return unless $url;
     return($self->encoding->decode($url));
 }
