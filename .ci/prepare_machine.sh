@@ -16,7 +16,6 @@ apt-get -y install \
     perl-doc \
     libperl-dev \
     cpanminus \
-    phantomjs \
     tofrodos \
     apache2 \
     apache2-utils \

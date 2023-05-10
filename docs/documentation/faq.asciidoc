@@ -91,7 +91,7 @@ of the file.
 You may also wish to modify your `/etc/thruk/thruk_local.conf` to use an updated `cookie_auth_restricted_url`:
 ---
   cookie_auth_restricted_url = https://localhost/thruk/cgi-bin/restricted.cgi
-  
+
 ---
 
 Finally reload Apache:
@@ -234,12 +234,17 @@ folder.
 
 
 === wkhtmltopdf
-wkhtmltopdf is no longer required and has been replaced by phantomjs.
+wkhtmltopdf is no longer required and has been replaced by puppeteer.
 
 
 === phantomjs
-phantomjs is required to create PDF reports with the reports2 plugin. You can get
-phantomjs from http://phantomjs.org/ if it's not available for your system.
+phantomjs is no longer required and has been replaced by puppeteer.
+
+
+=== puppeteer
+puppeteer is required to create PDF reports with the reports2 plugin. You can read
+more about puppeteer on https://pptr.dev/ OMD starting with version 5 has puppeteer
+already included.
 
 
 === How can I enable the business process addon.

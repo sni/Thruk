@@ -161,9 +161,6 @@ mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
 touch plugin-reporting.files
 # files file cannot be empty
 echo "%%defattr(-,root,root)" >> plugin-reporting.files
-if test -e %{buildroot}%{_datadir}/thruk/script/phantomjs; then
-  echo "%{_datadir}/thruk/script/phantomjs" >> plugin-reporting.files
-fi
 
 %if %{?_unitdir:1}0
 rm %{buildroot}%{_initrddir}/thruk
@@ -455,7 +452,6 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk.psgi
 %attr(0755,root,root) %{_datadir}/thruk/script/grafana_export.sh
-%attr(0644,root,root) %{_datadir}/thruk/script/html2pdf.js
 %attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
 %attr(0644,root,root) %{_datadir}/thruk/script/puppeteer.js
 %attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh

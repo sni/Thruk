@@ -7,7 +7,6 @@ PERLVER=$(shell perl -e 'use Config; print $$Config{version}')
 HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
 SHELL=bash
 export PERL5LIB=/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5
-FIXPHANTOMJS=$(shell if [ -f script/phantomjs ]; then echo "fix_phantomjs_location"; else echo ""; fi )
 
 override_dh_auto_configure:
 	dh_auto_configure -- --prefix=/usr \
@@ -33,7 +32,7 @@ override_dh_auto_configure:
 	test -f themes/themes-available/Light/stylesheets/Light.css || make themes
 	test -f themes/themes-available/Light/stylesheets/Light.css || exit 1
 
-override_dh_auto_install: local_auto_install $(FIXPHANTOMJS)
+override_dh_auto_install: local_auto_install
 
 local_auto_install:
 	dh_auto_install
@@ -41,31 +40,11 @@ local_auto_install:
 	sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base
 	test -f debian/tmp/usr/share/thruk/root/thruk/cache/thruk-panorama-*.js || exit 1
 
-fix_phantomjs_location:
-	# fix location of phantomjs
-	mkdir -p debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/thruk
-	mv debian/tmp/usr/share/thruk/script/phantomjs debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/thruk/
-	sed -e 's|/usr/share/thruk/script/phantomjs|/usr/lib/'$(DEB_HOST_MULTIARCH)'/thruk/phantomjs|' \
-		-i debian/tmp/etc/thruk/thruk.conf
-	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs" >> debian/thruk-plugin-reporting.install
-	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: sqlite"  >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libpng"  >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: zlib"    >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: libjpeg" >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs: openssl" >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library libjpeg usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"  >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library libpng usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"   >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library openssl usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"  >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library sqlite usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"   >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: embedded-library zlib usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"     >> debian/thruk-plugin-reporting.lintian-overrides
-	echo "thruk-plugin-reporting: hardening-no-relro usr/lib/$(DEB_HOST_MULTIARCH)/thruk/phantomjs"        >> debian/thruk-plugin-reporting.lintian-overrides
-	sed -e 's|phantomjs,||' -i debian/control
-
 override_dh_gencontrol:
 	dh_gencontrol -- -Vextra:Depends=perlapi-$(PERLVER)
 
 override_dh_strip:
-	dh_strip --exclude=phantomjs
+	dh_strip
 
 override_dh_auto_test:
 

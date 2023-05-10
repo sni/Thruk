@@ -32,15 +32,12 @@ fi
 if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
     node $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
     rc=$?
-else
-    [ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
-    EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
-    $PHANTOMJS $EXTRAOPTIONS "$DIR/html2pdf.js" "$INPUT" "$TEMPFILE.png" --width=$WIDTH --height=$HEIGHT $PHANTOMJSSCRIPTOPTIONS 2>&1
-    rc=$?
+    if [ -e "$TEMPFILE.png" ]; then
+        mv "$TEMPFILE.png" "$TEMPFILE"
+    fi
+    exit $rc
 fi
 
-if [ -e "$TEMPFILE.png" ]; then
-    mv "$TEMPFILE.png" "$TEMPFILE"
-fi
-
-exit $rc
+echo "ERROR: puppeteer not found"
+echo "(phantomjs is no longer support and required)"
+exit 1

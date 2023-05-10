@@ -1731,7 +1731,7 @@ sub _verify_fields {
 
 ##########################################################
 sub _convert_to_pdf {
-    my($c, $reportdata, $attachment, $nr, $logfile, $nodelay) = @_;
+    my($c, $reportdata, $attachment, $nr, $logfile, $is_report) = @_;
     $c->stats->profile(begin => "_convert_to_pdf()");
 
     my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
@@ -1760,18 +1760,7 @@ sub _convert_to_pdf {
         return;
     }
 
-    my $phantomjs = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} || 'phantomjs';
-    my $autoscale = 0;
-    if($c->stash->{'param'}->{'pdf'}) {
-        $autoscale = 1;
-    }
-
-    my $phantomjsscriptoptions  = '';
-       $phantomjsscriptoptions .= ' --autoscale=1' if $autoscale;
-       $phantomjsscriptoptions .= ' --nodelay=1'   if $nodelay;
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} = $phantomjsscriptoptions if $phantomjsscriptoptions;
-    my $cmd = $c->config->{home}.'/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$phantomjs.'"';
-    _debug("converting env: PHANTOMJSSCRIPTOPTIONS: %s", $ENV{PHANTOMJSSCRIPTOPTIONS}//'');
+    my $cmd = $c->config->{home}.'/script/html2pdf.sh "file://'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.($is_report//0).'"';
     _debug("converting to pdf: ".$cmd);
     my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 

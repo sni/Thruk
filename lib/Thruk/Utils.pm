@@ -1557,7 +1557,6 @@ sub get_perf_image {
 
     # create fake session
     my($sessionid) = get_fake_session($c);
-    local $ENV{PHANTOMJSSCRIPTOPTIONS} = '--cookie=thruk_auth,'.$sessionid.' --format='.$options->{'format'};
     local $ENV{THRUK_SESSION_ID} = $sessionid;
 
     # call login hook, because it might transfer our sessions to remote graphers
@@ -3833,6 +3832,32 @@ sub render_db_profile {
     };
 
     return($profile);
+}
+
+##############################################
+
+=head2 has_node_module
+
+  has_node_module($c, $module_name)
+
+return true if npm module is installed
+
+=cut
+sub has_node_module {
+    my($c, $module_name) = @_;
+    return unless Thruk::Base::has_binary("node");
+    return unless Thruk::Base::has_binary("npm");
+
+    my($out, $rc) = Thruk::Utils::IO::cmd($c, ["npm", "ls", "-g"]);
+    if($out =~ m/$module_name/mx) {
+        return 1;
+    }
+
+    ($out, $rc) = Thruk::Utils::IO::cmd($c, ["npm", "ls"]);
+    if($out =~ m/$module_name/mx) {
+        return 1;
+    }
+    return;
 }
 
 ##############################################

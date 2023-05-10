@@ -112,7 +112,7 @@ function render_total_sla_graph(nr, title, data, sla, graph_min_sla, type, label
 
     var height = data.length * 20;
     if(height < 300) { height = 300; }
-    if(height > 650) { height = 650; }
+    if(height > 800) { height = 800; }
     jQuery("#flotgraph"+nr).css('height', height+"px");
 
     var ticks = [];

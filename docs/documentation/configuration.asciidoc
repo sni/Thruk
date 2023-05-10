@@ -2959,7 +2959,7 @@ drop down selection.
 == Component Thruk::Plugin::Reports2
 
 The 'Reports2' plugin creates sla reports in html or pdf format. You
-probably have to download the link:/documentation/faq.html#phantomjs[phantomjs binary] in a recent version.
+probably have to install link:/documentation/faq.html#puppeteer[puppeteer] in a recent version.
 
 ex.:
 
@@ -2967,7 +2967,6 @@ ex.:
     report_nice_level      = 5
     max_concurrent_reports = 2
     report_base_url        = http://host.local/thruk/cgi-bin/
-    phantomjs              = /usr/bin/phantomjs
     pnp_export             = script/pnp_export.sh
     grafana_export         = script/grafana_export.sh
     report_from_email      = User Name <example@mail.com>
@@ -2987,9 +2986,9 @@ they will be queued up. Default is 2.
 Url used to replace relative links in html reports.
 
 === phantomjs
-`phantomjs` is used to convert html pages into pdf.
-See the link:/documentation/faq.html#phantomjs[FAQ] for download
-links and further information.
+`phantomjs` is deprecated and no longer use. It has been replaced
+with puppeteer. See the link:/documentation/faq.html#puppeteer[FAQ]
+for further information.
 
 === pnp_export
 pnp_export defines a script which exports a PNP4nagios graph into a

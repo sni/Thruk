@@ -491,6 +491,23 @@ sub wildcard_match {
     return;
 }
 
+########################################
+
+=head2 has_binary
+
+    has_binary($bin)
+
+returns true if binary is found in path
+
+=cut
+sub has_binary {
+    my($bin) = @_;
+    for my $p (split/:/mx, $ENV{'PATH'}) {
+        return 1 if -x $p."/".$bin;
+    }
+    return;
+}
+
 ##############################################
 
 =head1 SEE ALSO

@@ -19,6 +19,7 @@ DIV.footer {
   height: 10px;
   border-top: 1px solid grey;
   padding-top: 5px;
+  margin-right: 10px;
   text-align: center;
   font-size: 12px;
 }
@@ -39,9 +40,10 @@ DIV.subtitle {
   border-bottom: 1px solid grey;
   padding-top: 20px;
   padding-bottom: 5px;
+  margin-right: 10px;
   font-size: 20px;
   overflow: hidden;
-  width: 535px;
+  width: auto;
   white-space: nowrap;
 }
 
@@ -49,10 +51,12 @@ DIV.subtitle {
 /* Cover Design */
 TD.header DIV.title {
   position: relative;
+  width: auto;
+  width: 159mm;
   height: 200px;
   background: rgb(99,147,193);
-  background: linear-gradient(90deg, rgba(99,147,193,1) 0%, rgba(207,231,250,1) 90%, rgba(207,231,250,1) 100%);
   border-radius: 5px;
+  background: linear-gradient(90deg, rgba(99,147,193,1) 0%, rgba(207,231,250,1) 90%, rgba(207,231,250,1) 100%);
 }
 DIV.cover TD.header DIV.titletext {
   font-size: 30px;
@@ -73,8 +77,8 @@ DIV.cover DIV.footer {
 }
 DIV.cover DIV.content DIV.date {
   position: absolute;
-  top: 300px;
-  right: 45px;
+  top: 10px;
+  right: 10px;
   color: #595959;
   font-weight: bold;
 }
@@ -139,7 +143,7 @@ DIV.logoptions {
   padding-bottom: 4px;
   padding-top: 1px;
   white-space: nowrap;
-  width: 535px;
+  width: auto;
 }
 SPAN.logtype {
   width: 220px;
@@ -182,7 +186,7 @@ TD.sla_nok, SPAN.sla_nok {
   color: red;
 }
 DIV.flotgraph {
-  width:530px;
+  width:auto;
   height:300px;
 }
 DIV.axis_y {
@@ -227,37 +231,41 @@ IMG.grafanaimage {
 }
 
 /* page sizing */
-BODY {
+BODY, HTML {
   margin: 0;
+  padding: 0;
   border:0;
-  width: 619px;
+  width: 210mm;
 }
 DIV.page {
-  border: 1px solid white;
-  height: 874px;
+  border: 0;
+  margin: 0;
+  padding: 17mm 24mm 17mm 24mm;
+  width: auto;
+  height: 260mm;
   page-break-after: always;
   position: relative;
   overflow: hidden;
 }
 TABLE.page {
-  height: 810px;
+  height: 100%;
+  width: 100%;
   border-spacing: 0px;
   border-collapse: collapse;
   border: 0;
-  margin: 40px;
+  padding: 0;
+  margin: 0;
 }
 DIV.content {
+  position: relative;
   overflow: hidden;
-  width: 535px;
+  width: 100%;
 }
 
 /* preview styles */
 BODY.preview DIV.page {
   border: 1px solid grey;
   margin: 10px;
-}
-BODY.preview {
-  width:639px;
 }
 BODY.preview {
   background-color: #CCCCCC;
@@ -315,27 +323,5 @@ I.fa-solid {
   line-height: 16px;
   margin-top: -4px;
 }
-
-/* debug styles */
-/*
-HTML BODY DIV.page {
-    border-collapse:collapse !important;
-    border:1px solid red !important;
-}
-HTML BODY TABLE.page {
-    border-collapse:collapse;
-    border:1px solid green;
-}
-
-HTML BODY TD.footer {
-    border-collapse:collapse;
-    border:1px solid blue;
-}
-
-HTML BODY DIV.footer {
-    border-collapse:collapse;
-    border:1px solid orange;
-}
-*/
 
 </style>

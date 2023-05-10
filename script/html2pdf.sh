@@ -2,7 +2,7 @@
 #
 # usage:
 #
-# html2pdf.sh <html inputfile> <pdf outputfile> [<logfile>] [<phantomjs binary>]
+# html2pdf.sh <html inputfile> <pdf outputfile> [<logfile>]
 #
 
 # read rc files if exist
@@ -19,31 +19,23 @@ fi
 
 INPUT=$1
 OUTPUT=$2
-PHANTOMJS=$4
+IS_REPORT=$4
 
-[ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
-# workaround for
-# "DSO support routines:DLFCN_LOAD:could not load the shared library:dso_dlfcn.c:185:filename(libssl_conf.so): libssl_conf.so: cannot open shared object file: No such file or directory"
-# issue on debian 10
-[ -z $OPENSSL_CONF ] && OPENSSL_CONF=""
-export OPENSSL_CONF
-
-EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
-
-rm -f $OUTPUT
-$PHANTOMJS $EXTRAOPTIONS "$DIR/html2pdf.js" "$INPUT" "$OUTPUT" $PHANTOMJSSCRIPTOPTIONS 2>&1
-rc=$?
-
-# ensure file is not owned by root
-if [ -e "$OUTPUT" -a $UID == 0 ]; then
-    usr=`ls -la "$INPUT" | awk '{ print $3 }'`
-    grp=`ls -la "$INPUT" | awk '{ print $4 }'`
-    chown $usr:$grp $OUTPUT
+if [ -n "$OMD_ROOT" ]; then
+    if [ -d "$OMD_ROOT/node_modules/" ]; then
+        export NODE_PATH=$OMD_ROOT/node_modules/
+    elif [ -d "$OMD_ROOT/lib/node_modules/" ]; then
+        export NODE_PATH=$OMD_ROOT/lib/node_modules/
+    fi
+fi
+if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
+    node $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "" $IS_REPORT 2>&1
+    mv "${OUTPUT}.pdf" "${OUTPUT}"
+    rc=$?
+    exit $rc
 fi
 
-if [ ! -e "$OUTPUT" -a $rc -eq 0 ]; then
-    rc=1
-fi
-
-exit $rc
+echo "ERROR: puppeteer not found"
+echo "(phantomjs is no longer support and required)"
+exit 1

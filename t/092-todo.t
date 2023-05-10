@@ -18,8 +18,6 @@ for my $cmd (@{$cmds}) {
     chomp($line);
     next if($filter && $line !~ m%$filter%mx);
 
-    next if $line =~ m/\/phantomjs$/mx;
-
     # skip those
     if(   $line =~ m|/vendor/|mx
        or $line =~ m|/cache/|mx

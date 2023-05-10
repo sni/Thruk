@@ -1,49 +1,49 @@
 --- a/thruk.conf	2022-05-09 10:20:08.778669282 +0200
 +++ b/thruk.conf	2022-05-09 10:20:41.574328573 +0200
 @@ -105,7 +105,7 @@
- 
+
  ######################################
  # location of your cgi.cfg
 -cgi.cfg             = cgi.cfg
 +cgi.cfg             = @SYSCONFDIR@/cgi.cfg
- 
+
  ######################################
  # use trends, shows trend links
 @@ -208,11 +208,11 @@
- 
+
  ######################################
  # temporary directory, used for template cache...
 -#tmp_path = /tmp
 +tmp_path = @TMPDIR@
- 
+
  ######################################
  # var directory, used to store user settings
 -#var_path = ./var
 +var_path = @LOCALSTATEDIR@
- 
+
  ######################################
  # mode used when creating or saving files
 @@ -221,18 +221,18 @@
- 
+
  ######################################
  # files owners for new / changed files
 -#thruk_user=thruk
 -#thruk_group=thruk
 +thruk_user=@THRUKUSER@
 +thruk_group=@THRUKGROUP@
- 
+
  ######################################
  # server side includes
 -#ssi_path = ssi/
 +ssi_path = @SYSCONFDIR@/ssi/
- 
+
  ######################################
  # path to your plugins
  # see documentation for further steps if
  # you change the plugin path
 -#plugin_path = plugins/
 +plugin_path = @SYSCONFDIR@/plugins/
- 
+
  ######################################
  # url to fetch new plugins from
 @@ -242,7 +242,7 @@
@@ -52,16 +52,16 @@
  # you change the themes path
 -#themes_path = themes/
 +themes_path = @SYSCONFDIR@/themes/
- 
+
  ######################################
  # custom templates
 @@ -250,7 +250,7 @@
- 
+
  ######################################
  # log4perl config
 -#log4perl_conf = ./log4perl.conf
 +log4perl_conf = @SYSCONFDIR@/log4perl.conf
- 
+
  ######################################
  # verbosity / debug level
 @@ -622,23 +622,23 @@
@@ -70,27 +70,27 @@
  # be writable by Thruk.
 -cron_file          = /tmp/thruk_cron.tmp
 +cron_file          = @TMPDIR@/thruk_cron.tmp
- 
+
  # The pre edit cmd can be used to do run a command just before thruk
  # will edit the crontab.
 -cron_pre_edit_cmd  = /usr/bin/crontab -l > /tmp/thruk_cron.tmp
 +cron_pre_edit_cmd  = /usr/bin/crontab -l > @TMPDIR@/thruk_cron.tmp
- 
+
  # The post edit cmd is necessary for OMD where you need to reload the
  # crontab after editing.
 -cron_post_edit_cmd = /usr/bin/crontab /tmp/thruk_cron.tmp && rm -f /tmp/thruk_cron.tmp
 +cron_post_edit_cmd = /usr/bin/crontab @TMPDIR@/thruk_cron.tmp && rm -f @TMPDIR@/thruk_cron.tmp
- 
+
  #####################################
  # path setting
  # Path to your thruk executable. Will be used in cronjobs.
 -#thruk_bin = /usr/bin/thruk
 +thruk_bin = @BINDIR@/thruk
- 
+
  # Path to your thruk init script. Will be used to restart thruk.
 -#thruk_init = /etc/init.d/thruk
 +thruk_init = @INITDIR@/thruk
- 
+
  # Set first day of week. Used in reports.
  # Sunday: 0
 @@ -891,6 +891,20 @@
@@ -117,31 +117,22 @@
 @@ -950,9 +964,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
- 
+
 -    thruk    = ./thruk_local.conf
 -    cgi.cfg  = ./cgi.cfg
 -    #htpasswd = ./htpasswd
 +    thruk    = @SYSCONFDIR@/thruk_local.conf
 +    cgi.cfg  = @SYSCONFDIR@/cgi.cfg
 +    htpasswd = @SYSCONFDIR@/htpasswd
- 
+
      #pre_obj_save_cmd    =
      #post_obj_save_cmd   =
-@@ -1018,7 +1032,7 @@
-     #report_base_url=http://host.local/thruk/cgi-bin/
- 
-     # phantomjs is used to convert html pages into pdf
--    #phantomjs = /path/to/phantomjs
-+    phantomjs = @DATADIR@/script/phantomjs
- 
-     # pnp export script is used to export pnp graphs into reports
-     #pnp_export = /path/to/pnp_export.sh
 @@ -1121,7 +1135,7 @@
- 
+
  #####################################
  # Action Menus
 -#action_menu_items_folder = ./action_menus/
 +action_menu_items_folder = @SYSCONFDIR@/action_menus/
- 
+
  <action_menu_items>
      #hostmenu = {\

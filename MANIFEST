@@ -1826,7 +1826,6 @@ script/disable_debug_timer.sh
 script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
 script/grafana_export.sh
-script/html2pdf.js
 script/html2pdf.sh
 script/Makefile.thruk
 script/nagexp

@@ -51,7 +51,7 @@ sub index {
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
     $c->stash->{has_debug_options}     = 1;
-    $c->stash->{'phantomjs'}           = 1;
+    $c->stash->{'puppeteer'}           = 1;
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{'filtered'}            = 0;
     $c->stash->{'plugin_name'}         = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
@@ -159,9 +159,8 @@ sub index {
         }
     }
 
-    if($c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'}) {
-        $c->stash->{'phantomjs'} = 0;
-        $c->stash->{'phantomjs_file'} = $c->config->{'Thruk::Plugin::Reports2'}->{'phantomjs'};
+    if(!$ENV{'OMD_ROOT'} && !Thruk::Utils::has_node_module($c, 'puppeteer-core')) {
+        $c->stash->{'puppeteer'} = 0;
     }
 
     # show list of configured reports

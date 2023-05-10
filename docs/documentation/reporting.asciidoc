@@ -51,7 +51,7 @@ perfectly documented at http://template-toolkit.org/docs/manual/index.html
 
 ==== Converting
 
-The generated HTML report will be converted into a pdf file using phantomjs.
+The generated HTML report will be converted into a pdf file using puppeteer.
 
 
 ==== Sending Reports By Mail
