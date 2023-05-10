@@ -118,7 +118,7 @@ sub render {
     };
     $c->stats->profile(end => "render: ".$template);
     if($output) {
-        ${$output} =~ s/^\s+//sgmxo unless $c->stash->{no_tt_trim};
+        ${$output} =~ s/^\s+</</sgmxo unless $c->stash->{no_tt_trim};
         my $ctype = $c->res->headers->content_type || '';
         if($ctype !~ m|^image/|mx) {
             utf8::encode(${$output});
