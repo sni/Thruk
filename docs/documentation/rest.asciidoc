@@ -2035,6 +2035,7 @@ list of reports.
 |backends                          | list of backends used in this report
 |cc                                | email cc address if this report is send by mail
 |desc                              | report description
+|error                             | contains error messages (optional)
 |failed                            | flag wheter the report failed to generate last time
 |is_public                         | flag wheter the report is public or not
 |name                              | name of the report
@@ -2063,6 +2064,7 @@ report for given number.
 |backends                          | list of selected backends.
 |cc                                | carbon-copy for report email.
 |desc                              | description.
+|error                             | contains error messages (optional)
 |failed                            | failed flag.
 |is_public                         | flag for public reports.
 |name                              | name of the report.

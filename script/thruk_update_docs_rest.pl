@@ -312,6 +312,8 @@ sub _update_docs {
     Thruk::Utils::IO::json_lock_store($api_key->{'file'}.".stats", { last_used => time(), last_from => "127.0.0.1" });
     # fake error message
     Thruk::Utils::IO::json_lock_patch('var/downtimes/9999.tsk', { error => "test" });
+    # fake error message
+    Thruk::Utils::IO::json_lock_patch('var/reports/9999.rpt', { error => "test" });
     # fake panorama maintmode
     Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
 
