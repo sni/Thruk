@@ -5073,6 +5073,11 @@ function codeComplete(el, token, idx, after, before, completionFn) {
         jQuery('#code_completion').remove();
         return;
     }
+    // token matches to only left completion already
+    if(completionsFound.length == 1 && completeFor == completionsFound[0]) {
+        jQuery('#code_completion').remove();
+        return;
+    }
     jQuery('#code_completion').remove();
 
     var lines      = before.split(/\r\n|\r|\n/);
@@ -5113,9 +5118,13 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     container.style.left = (Math.floor(pos.left)+textSize.width+8) + "px";
 
     var h = jQuery(container).outerHeight();
-    var top  = Math.floor(pos.top) - h + (newlines*lineHeight);
-    if(top < 0) {
-        top  = Math.floor(pos.top) + ((newlines+1)*lineHeight) + 4;
+
+    // try below cursor first
+    var top          = Math.floor(pos.top) + ((newlines+1)*lineHeight) + 4;
+    var screenHeight = jQuery(window).height();
+    if(top + h > screenHeight) {
+        // if it does not fit, place above
+        top  = Math.floor(pos.top) - h + (newlines*lineHeight);
     }
     container.style.top = top+"px";
 }
