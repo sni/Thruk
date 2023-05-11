@@ -214,7 +214,7 @@
     @apply !bg-[color:var(--badge-unreachable-bg)] !text-[color:var(--badge-unreachable-fg)];
   }
 
-  .PENDING {
+  .PENDING, .CUSTOM, .ACKNOWLEDGEMENT {
     @apply !bg-[color:var(--badge-pending-bg)] !text-[color:var(--badge-pending-fg)];
   }
 

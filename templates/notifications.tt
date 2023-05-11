@@ -137,12 +137,10 @@
           <td>
             [% IF n.service_description %]
             <a class="link" href="extinfo.cgi?type=2&amp;host=[% n.host_name | uri %]&amp;service=[% n.service_description | uri %]&amp;backend=[% n.peer_key %]">[% n.service_description | html %]</a>
-            [% ELSE %]
-            N/A
             [% END %]
           </td>
           [% IF backends.size > 1 %]
-          <td>[% n.peer_name %]</td>
+          <td>[% peer_name(n) %]</td>
           [% END %]
           <td class='[% statusclass %]'>[% level %]</td>
           <td>[% date_format(c, n.time) %]</td>

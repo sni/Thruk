@@ -24,7 +24,7 @@
         [% FOREACH col = columns %]
         [% IF    col == "Host"        %]<cell>[% escape_xml(n.host_name) %]</cell>
         [% ELSIF col == "Service"     %]<cell>[% escape_xml(n.service_description) %]</cell>
-        [% ELSIF col == "Site"        %]<cell>[% escape_xml(n.peer_name) %]</cell>
+        [% ELSIF col == "Site"        %]<cell>[% escape_xml(peer_name(n)) %]</cell>
         [% ELSIF col == "Type"        %]<format bg_color='[% state_color %]'><cell>[% level %]</cell></format>
         [% ELSIF col == "Time"        %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(n.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>
         [% ELSIF col == "Contact"     %]<cell>[% escape_xml(n.contact_name) %]</cell>
