@@ -152,7 +152,7 @@
 <!--
   var hst_Hash = [% get_cmd_submit_hash(hosts, 'hst') %];
   var svc_Hash = [% get_cmd_submit_hash(services, 'svc') %];
-  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
+  start_hide_activity_icons_timer();
 -->
 </script>
 [% END %]

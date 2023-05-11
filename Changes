@@ -9,6 +9,7 @@ next:
           - add filter by contactgroups
           - add host_name_source / service_description_source options to get names from different attributes or custom variables
           - add default_main_filter option to apply filter for "All Hosts" view
+          - add config option is_executing_timeout
           - fix navigation clicks not working occasionally
           - Rest
             - add last_login to /r/thruk/users

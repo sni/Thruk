@@ -2982,6 +2982,11 @@ function hide_activity_icons() {
     jQuery('.js-autohide').css("visibility", "hidden");
 }
 
+function start_hide_activity_icons_timer() {
+    window.clearTimeout(hide_activity_icons_timer);
+    hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", is_executing_timeout);
+}
+
 /* verify time */
 var verification_errors = new Object();
 function verify_time(id, duration_id) {

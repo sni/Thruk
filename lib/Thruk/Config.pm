@@ -59,6 +59,7 @@ my $base_defaults = {
     'connection_pool_size'                  => undef,
     'product_prefix'                        => 'thruk',
     'maximum_search_boxes'                  => 9,
+    'is_executing_timeout'                  => 5,
     'search_long_plugin_output'             => 1,
     'shown_inline_pnp'                      => 1,
     'use_feature_trends'                    => 1,

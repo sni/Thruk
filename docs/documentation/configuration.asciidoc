@@ -1226,6 +1226,14 @@ ex.:
   show_contacts = 1
 
 
+=== is_executing_timeout
+Seconds after which the "is_executing" icons disappear.
+
+ex.:
+
+  is_executing_timeout = 5
+
+
 === show_host_attempts
 
 Show check attempts for hosts too. The default is to show
