@@ -933,7 +933,7 @@ sub set_processinfo {
 
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
-        $processinfo = $c->db->get_processinfo() unless $c->config->{'lmd_remote'};
+        $processinfo = $c->db->get_processinfo(debug_hint => 'set_processinfo') unless $c->config->{'lmd_remote'};
         if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0) {
             # may happen when no backends are selected or the current selected backends comes from a federation http
             $processinfo = {};
@@ -1254,7 +1254,7 @@ sub check_federation_peers {
     return($processinfo, $cached_data) if $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'};
     my $all_sites_info;
     eval {
-        $all_sites_info = $c->db->get_sites(backend => ["ALL"], sort => {'ASC' => 'peer_name'});
+        $all_sites_info = $c->db->get_sites(backend => ["ALL"], sort => {'ASC' => 'peer_name'}, debug_hint => "check_federation_peers");
     };
     if($@) {
         # may fail for older lmd releases which don't have parent or section information
