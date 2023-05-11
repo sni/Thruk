@@ -21,7 +21,7 @@
   [% END %]
   <div class="absolute w-[90vw]">
     <div class="card z-30 absolute shadow-float w-auto max-w-[95%]" style="display:none;" id="[% paneprefix %]_all_filter_card" onclick="resetRefresh()">
-      <div class="head flexrow flex-nowrap justify-between w-[450px] border-b-0">
+      <div class="head flexrow flex-nowrap justify-between w-[450px] border-b-0[% IF has_lex_filter %] w-full[% END %]">
         <h3>Display Filter</h3>
         <div class="flexrow justify-between flex-nowrap gap-x-2 items-center w-full">
           <div class="flexrow gap-1">
