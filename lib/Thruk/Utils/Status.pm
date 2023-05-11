@@ -2643,6 +2643,7 @@ sub parse_lexical_filter {
             }
         }
     }
+    ${$string} =~ s/\s+as\s+\w+$//mx;
     my $supported_operator = {
         '='      => 1,
         '=='     => 1,
