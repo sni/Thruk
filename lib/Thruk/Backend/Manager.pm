@@ -2922,7 +2922,7 @@ returns db query results and caches them by peer key until backend got restarted
 =cut
 
 sub caching_query {
-    my($self, $cache_file, $function, $columns) = @_;
+    my($self, $cache_file, $function, $args) = @_;
     my $c = $Thruk::Globals::c;
 
     $c->stats->profile(begin => "caching_query: ".$function);
@@ -2938,12 +2938,9 @@ sub caching_query {
     }
 
     if(scalar @{$required_backends} > 0) {
-        my @args = (
-            "backends",
-            $required_backends,
-            "columns",
-            $columns,
-        );
+        $args = {} unless defined $args;
+        $args->{'backends'} = $required_backends;
+        my @args = %{$args};
         my $data = $self->_do_on_peers($function, \@args);
         for my $peer_key (@{$required_backends}) {
             $cached->{$peer_key} = {

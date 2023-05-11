@@ -162,14 +162,24 @@ sub index {
 
     ############################################################################
     # host statistics
-    $c->stash->{'host_stats'} = $c->db->get_host_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
+    $c->stash->{'host_stats'} = $c->db->get_host_totals_stats(
+            filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
+            debug_hint => "hosts gauge"
+    );
 
     # service statistics
-    $c->stash->{'service_stats'} = $c->db->get_service_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
+    $c->stash->{'service_stats'} = $c->db->get_service_totals_stats(
+            filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
+            debug_hint => "services gauge"
+    );
 
     ############################################################################
     # for hostgroups
-    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, groups => { '!=', '' } ], columns => ['name', 'groups']);
+    my $hosts = $c->db->get_hosts(
+        filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, groups => { '!=', '' } ],
+        columns => ['name', 'groups'],
+        debug_hint => 'top hostgroups',
+    );
     my $hostgroups = {};
     for my $host ( @{$hosts} ) {
         for my $group ( @{$host->{'groups'}} ) {
@@ -187,7 +197,11 @@ sub index {
     ############################################################################
     my $host_lookup = {};
     if($hostfilter) {
-        my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, ], columns => ['name']);
+        my $hosts = $c->db->get_hosts(
+            filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, ],
+            columns    => ['name'],
+            debug_hint => 'host lookup',
+        );
         for my $host ( @{$hosts} ) {
             $host_lookup->{$host->{'name'}} = 1;
         }
@@ -204,8 +218,20 @@ sub index {
 
     ############################################################################
     # host and service problems
-    my $problemhosts    = $c->db->get_hosts(   filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    $hostfilter,    'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['name','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' },  limit => 5 );
-    my $problemservices = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'state_type' => 1, 'scheduled_downtime_depth' => 0 ], columns => ['host_name','description','state','plugin_output','last_hard_state_change'], sort => { ASC => 'last_hard_state_change' }, limit => 5 );
+    my $problemhosts    = $c->db->get_hosts(
+        filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    $hostfilter,    'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ],
+        columns    => ['name','state','plugin_output','last_hard_state_change'],
+        sort       => { ASC => 'last_hard_state_change' },
+        limit      => 5,
+        debug_hint => 'host problems',
+     );
+    my $problemservices = $c->db->get_services(
+        filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'state_type' => 1, 'scheduled_downtime_depth' => 0 ],
+        columns    => ['host_name','description','state','plugin_output','last_hard_state_change'],
+        sort       => { ASC => 'last_hard_state_change' },
+        limit      => 5,
+        debug_hint => 'service problems',
+    );
     $c->stash->{'problemhosts'} = $problemhosts;
     $c->stash->{'problemservices'} = $problemservices;
 
@@ -241,9 +267,12 @@ sub index {
 
     ############################################################################
     # host by backend
-    if($backend_stats->{'available'} > 1) {
+    if($backend_stats->{'enabled'} - $backend_stats->{'down'} > 1) {
         my $hosts_by_backend = [];
-        my $hosts_by_backend_data = $c->db->get_host_stats_by_backend(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
+        my $hosts_by_backend_data = $c->db->get_host_stats_by_backend(
+            filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
+            debug_hint => "hosts by backend",
+        );
         for my $row (values %{$hosts_by_backend_data}) {
             push @{$hosts_by_backend}, [$row->{'peer_name'}, $row->{'total'} ];
         }
@@ -365,13 +394,14 @@ sub _notifications_update_cache {
     }
 
     my $data = $c->db->get_logs(
-        filter   => [
-                    { time => { '>=' => $start }},
-                    class => 3,
-                ],
-        columns  => [qw/time host_name/],
-        limit    => 1000000, # not using a limit here, makes mysql not use an index
-        backends => ['ALL'],
+        filter     => [
+                      { time => { '>=' => $start }},
+                      class => 3,
+                  ],
+        columns    => [qw/time host_name/],
+        limit      => 1000000, # not using a limit here, makes mysql not use an index
+        backends   => ['ALL'],
+        debug_hint => 'notifications',
     );
 
     # clean all cache entries which will be updated now
@@ -420,7 +450,10 @@ sub _get_contacts {
     my $data = $c->db->caching_query(
         $c->config->{'var_path'}.'/caching_query.contact_names.cache',
         'get_contacts',
-        [qw/name/],
+        {
+            columns    => [qw/name/],
+            debug_hint => 'total contacts',
+        }
     );
 
     my $uniq = {};
