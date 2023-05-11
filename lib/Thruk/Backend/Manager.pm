@@ -10,6 +10,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Backend::Peer ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::Cache ();
 use Thruk::Utils::Log qw/:all/;
 
 #use Thruk::Timer qw/timing_breakpoint/;

@@ -164,13 +164,13 @@ sub index {
     # host statistics
     $c->stash->{'host_stats'} = $c->db->get_host_totals_stats(
             filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter],
-            debug_hint => "hosts gauge"
+            debug_hint => "hosts gauge",
     );
 
     # service statistics
     $c->stash->{'service_stats'} = $c->db->get_service_totals_stats(
             filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
-            debug_hint => "services gauge"
+            debug_hint => "services gauge",
     );
 
     ############################################################################
@@ -453,7 +453,7 @@ sub _get_contacts {
         {
             columns    => [qw/name/],
             debug_hint => 'total contacts',
-        }
+        },
     );
 
     my $uniq = {};

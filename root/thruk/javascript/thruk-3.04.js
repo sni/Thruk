@@ -4945,7 +4945,10 @@ function measureText(pText, pFontSize, pFont) {
 
 function initAutoCompleteQuery(el, completionFn) {
     jQuery(el).off("blur").on("blur", function(evt) {
-        jQuery('#code_completion').remove();
+        // delay removal, otherwise a click on the result would not trigger anymore
+        window.setTimeout(function() {
+            jQuery('#code_completion').remove();
+        }, 100);
         return;
     });
     jQuery(el).off("keydown").on("keydown", function(evt) {
@@ -5082,10 +5085,7 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     // add keywords first which start with the exact search pattern
     jQuery(keywords).each(function(i, v) {
         if(v.indexOf(completeFor) === 0) {
-            completionsFound.push([
-                v,
-                v.replace(completeFor, "<b class='hint'>"+completeFor+"</b>"),
-            ]);
+            completionsFound.push([v, v.replace(completeFor, "<b class='hint'>"+completeFor+"</b>")]);
         }
     });
     // add keywords matching all characters anywhere
@@ -5298,7 +5298,7 @@ var queryCodeCompletions = function(token, idx) {
                 data: {
                     format:    "search",
                     type:      "custom variable",
-                    prefix:    "1",
+                    prefix:    "1"
                 },
                 type: 'POST',
                 success: function(data) {
