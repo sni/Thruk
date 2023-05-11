@@ -85,17 +85,21 @@ sub cmd {
     }
     elsif($command eq 'clear' || $command eq 'clean' || $command eq 'drop') {
         $data->{'rc'} = 0;
+        my $cache_paths = [
+            $c->config->{'tmp_path'}.'/thruk.cache',
+            $c->config->{'var_path'}.'/*.cache',
+            $c->config->{'var_path'}.'/localconfcache',
+        ];
         if($commandoptions && $commandoptions->[0] && $commandoptions->[0] eq 'all') {
-            my($rc, $out) = Thruk::Utils::IO::cmd('rm -rf '.$c->config->{'tmp_path'});
-            if($rc) {
-                $data->{'output'} = "failed to remove ".$c->config->{'tmp_path'}.": ".$out;
-            } else {
-                $data->{'output'} = "tmp folder ".$c->config->{'tmp_path'}." removed\n";
-            }
-        } else {
-            unlink($c->config->{'tmp_path'}.'/thruk.cache');
-            $data->{'output'} = "cache cleared\n";
+            push @{$cache_paths}, $c->config->{'tmp_path'};
         }
+        for my $p (@{$cache_paths}) {
+            my($rc, $out) = Thruk::Utils::IO::cmd('rm -rf '.$p);
+            if($rc) {
+                _error("failed to remove ".$p.": ".$out);
+            }
+        }
+        $data->{'output'} = "cache cleared\n";
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
