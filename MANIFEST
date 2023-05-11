@@ -2583,6 +2583,7 @@ templates/_extinfo_host_service_details.tt
 templates/_extinfo_type_0_blocks.tt
 templates/_extinfo_type_0_table.tt
 templates/_favicon.tt
+templates/_filter_advanced.tt
 templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt

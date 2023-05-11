@@ -96,13 +96,7 @@
       </div>
       [% END %]
       <div class="body min-w-[800px] border-t borderDefault flexcol js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
-        <textarea
-          placeholder="ex.: host ~ name && duration &gt;= 10m"
-          class="min-h-[200px] js-ctrlentersubmit font-mono"
-          wrap="hard"
-          name="[% paneprefix %]q"[% IF ! has_lex_filter %] disabled[% END %]
-          onfocus="initAutoCompleteQuery(this, queryCodeCompletions)"
-        >[% IF has_lex_filter %][% has_lex_filter %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix) %][% END %]</textarea>
+        [% WRAPPER _filter_advanced.tt disabled=!has_lex_filter %][% IF has_lex_filter %][% has_lex_filter %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix) %][% END %][% END %]
       </div>
     </div>
   </div>

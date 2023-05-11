@@ -8181,6 +8181,28 @@ var ajax_search = {
             jQuery(input).addClass("expanded");
         }
 
+        if(jQuery(input).hasClass("js-suggest-advanced")) {
+            jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "");
+            jQuery(input).on("keydown", function(evt) {
+                if(input.value == "" && (evt.keyCode === 40 || evt.keyCode === 32)) {
+                    jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter").css("display", "").attr({disabled: false}).focus();
+                    jQuery(input).css("display", "none");
+                    jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "none");
+                    window.setTimeout(function() {
+                        // remove that space again (added "later" by the keyup event)
+                        jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter").val("");
+                    }, 50);
+                }
+            });
+            jQuery(input).on("keyup", function(evt) {
+                if(input.value == "") {
+                    jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "");
+                } else {
+                    jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "none");
+                }
+            });
+        }
+
         ajax_search.show_all = false;
         var panel = document.getElementById(ajax_search.result_pan);
         if(panel) {
