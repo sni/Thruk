@@ -334,7 +334,7 @@ sub _notifications_data {
                     background => 1,
                     clean      => 1,
         });
-}
+    }
 
     return($cached);
 }
@@ -416,35 +416,17 @@ sub _compare_filter {
 sub _get_contacts {
     my($c) = @_;
     $c->stats->profile(begin => "_get_contacts");
-    my($selected_backends) = $c->db->select_backends('get_contacts', []);
-    my $required_backends = [];
 
-    my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/contact_stats.cache');
-    my $cached = $cache->get() || {};
-    for my $peer_key (@{$selected_backends}) {
-        if(!defined $cached->{$peer_key} || !defined $c->stash->{'pi_detail'}->{$peer_key} || !defined $cached->{$peer_key}->{'program_start'} || !defined $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'} || $cached->{$peer_key}->{'program_start'} < $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'}) {
-            push @{$required_backends}, $peer_key;
-        }
-    }
-
-    if(scalar @{$required_backends} > 0) {
-        my $contacts = $c->db->get_contacts(columns => ['name'], backends => $required_backends );
-        for my $peer_key (@{$required_backends}) {
-            $cached->{$peer_key} = {
-                program_start => $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'},
-                contacts      => {},
-            }
-        }
-        for my $contact (@{$contacts}) {
-            $cached->{$contact->{'peer_key'}}->{'contacts'}->{$contact->{'name'}} = 1;
-        }
-        $cache->set($cached);
-    }
+    my $data = $c->db->caching_query(
+        $c->config->{'var_path'}.'/caching_query.contact_names.cache',
+        'get_contacts',
+        [qw/name/],
+    );
 
     my $uniq = {};
-    for my $peer_key (@{$selected_backends}) {
-        for my $name (keys %{$cached->{$peer_key}->{'contacts'}}) {
-            $uniq->{$name} = 1;
+    for my $peer_key (sort keys %{$data}) {
+        for my $row (@{$data->{$peer_key}}) {
+            $uniq->{$row->{'name'}} = 1;
         }
     }
 

@@ -2912,4 +2912,60 @@ sub _add_query_stats {
 
 ########################################
 
+=head2 caching_query
+
+  caching_query($cache_file, $function, $columns)
+
+returns db query results and caches them by peer key until backend got restarted
+
+=cut
+
+sub caching_query {
+    my($self, $cache_file, $function, $columns) = @_;
+    my $c = $Thruk::Globals::c;
+
+    $c->stats->profile(begin => "caching_query: ".$function);
+    my($selected_backends) = $c->db->select_backends($function, []);
+    my $required_backends = [];
+
+    my $cache  = Thruk::Utils::Cache->new($cache_file);
+    my $cached = $cache->get() || {};
+    for my $peer_key (@{$selected_backends}) {
+        if(!defined $cached->{$peer_key} || !defined $c->stash->{'pi_detail'}->{$peer_key} || !defined $cached->{$peer_key}->{'program_start'} || !defined $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'} || $cached->{$peer_key}->{'program_start'} < $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'}) {
+            push @{$required_backends}, $peer_key;
+        }
+    }
+
+    if(scalar @{$required_backends} > 0) {
+        my @args = (
+            "backends",
+            $required_backends,
+            "columns",
+            $columns,
+        );
+        my $data = $self->_do_on_peers($function, \@args);
+        for my $peer_key (@{$required_backends}) {
+            $cached->{$peer_key} = {
+                program_start => $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'},
+                data          => [],
+            }
+        }
+        for my $row (@{$data}) {
+            push @{$cached->{$row->{'peer_key'}}->{'data'}}, $row;
+        }
+        $cache->set($cached);
+    }
+
+    # create result set from all selected backends
+    my $res = {};
+    for my $peer_key (@{$selected_backends}) {
+        $res->{$peer_key} = $cached->{$peer_key}->{'data'};
+    }
+
+    $c->stats->profile(end => "caching_query: ".$function);
+    return($res);
+}
+
+########################################
+
 1;
