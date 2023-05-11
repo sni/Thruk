@@ -5052,27 +5052,60 @@ function initAutoCompleteQuery(el, completionFn) {
         if(container && container.dataset["lastToken"] && container.dataset["lastToken"] == completeFor) {
             return;
         }
-        codeComplete(el, txt.split(/\s+/), token.length-1, after, before, completionFn);
+
+        // remove empty token at the end
+        var splitted = txt.split(/\s+/);
+        while(splitted.length > 0 && splitted[splitted.length-1] == "") {
+            splitted.pop();
+        }
+        codeComplete(el, splitted, token.length-1, after, before, completionFn);
     });
 }
 
 function codeComplete(el, token, idx, after, before, completionFn) {
     var completionsFound = [];
     // what to complete
-    var keywords = completionFn(token, idx);
+    var keywords = completionFn;
+    // keywords are a callback
+    if(typeof keywords === "function") {
+        keywords = completionFn(token, idx);
+    }
+    // callback returned a callback as well
+    if(typeof keywords === "function") {
+        keywords(function(res) {
+            codeComplete(el, token, idx, after, before, res);
+        });
+        return;
+    }
     var completeFor = token[idx];
 
-    // add keywords which start with the search pattern
+    // add keywords first which start with the exact search pattern
     jQuery(keywords).each(function(i, v) {
         if(v.indexOf(completeFor) === 0) {
-            completionsFound.push(v);
+            completionsFound.push([
+                v,
+                v.replace(completeFor, "<b class='hint'>"+completeFor+"</b>"),
+            ]);
         }
     });
-    // add keywords matching anywhere
+    // add keywords matching all characters anywhere
     jQuery(keywords).each(function(i, v) {
-        if(v.match(completeFor) && v.indexOf(completeFor) !== 0) {
-            completionsFound.push(v);
+        if(v.indexOf(completeFor) === 0) {
+            // already on the list
+            return true;
         }
+        var test = v;
+        var replaced = "";
+        for(var i = 0; i < completeFor.length; i++) {
+            var c = completeFor.charAt(i);
+            var n = test.indexOf(c);
+            if(n == -1) {
+                return true;
+            }
+            replaced = replaced + test.substr(0, n) +  "<b class='hint'>"+c+"</b>";
+            test = test.substr(n+1);
+        }
+        completionsFound.push([v, replaced+test]);
     });
     if(completionsFound.length <= 0) {
         jQuery('#code_completion').remove();
@@ -5106,10 +5139,10 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     var list = jQuery("#code_completion").find("UL");
     jQuery(completionsFound).each(function(i, e) {
         var li = jQuery('<li class="res"></li>', {}).appendTo(list);
-        li.html(e.replace(completeFor, "<b class='hint'>"+completeFor+"</b>"))
+        li.html(e[1]);
         // add click handler to select/apply result
-        jQuery(li).off("click").on("click", function() {
-            var txt = before.substr(0, before.length-completeFor.length)+e;
+        jQuery(li).on("click", function() {
+            var txt = before.substr(0, before.length-completeFor.length)+e[0];
             jQuery(el).val(txt+after);
             setCaretToPos(el, txt.length);
             jQuery('#code_completion').remove();
@@ -5134,127 +5167,156 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     container.style.top = top+"px";
 }
 
+var queryCodeCompletionData = {
+    "keywords": [
+        "host",
+        "service",
+        "accept_passive_checks",
+        "acknowledged",
+        "acknowledgement_type",
+        "action_url_expanded",
+        "action_url",
+        "active_checks_enabled",
+        "check_command",
+        "check_interval",
+        "check_options",
+        "check_period",
+        "check_type",
+        "checks_enabled",
+        "contact_groups",
+        "contacts",
+        "current_attempt",
+        "current_notification_number",
+        "description",
+        "display_name",
+        "duration",
+        "event_handler_enabled",
+        "event_handler",
+        "execution_time",
+        "first_notification_delay",
+        "flap_detection_enabled",
+        "groups",
+        "has_been_checked",
+        "high_flap_threshold",
+        "icon_image_alt",
+        "icon_image_expanded",
+        "icon_image",
+        "in_check_period",
+        "in_notification_period",
+        "initial_state",
+        "is_executing",
+        "is_flapping",
+        "last_check",
+        "last_hard_state_change",
+        "last_hard_state",
+        "last_notification",
+        "last_state_change",
+        "last_state",
+        "last_time_critical",
+        "last_time_ok",
+        "last_time_unknown",
+        "last_time_warning",
+        "latency",
+        "long_plugin_output",
+        "low_flap_threshold",
+        "max_check_attempts",
+        "modified_attributes_list",
+        "modified_attributes",
+        "next_check",
+        "next_notification",
+        "notes_expanded",
+        "notes_url_expanded",
+        "notes_url",
+        "notes",
+        "notification_interval",
+        "notification_period",
+        "notifications_enabled",
+        "obsess_over_service",
+        "percent_state_change",
+        "perf_data",
+        "plugin_output",
+        "process_performance_data",
+        "retry_interval",
+        "scheduled_downtime_depth",
+        "state_type",
+        "state"
+    ],
+    "operator": [
+        "=",
+        "!=",
+        "~",
+        "!~",
+        "like",
+        "unlike",
+        ">=",
+        "<="
+    ],
+    "logic": [
+        "and",
+        "or"
+    ],
+    "views": [
+        "detail",
+        "hostdetail",
+        "hostgrid",
+        "hostoverview",
+        "hostsummary",
+        "main",
+        "minemap",
+        "perfmap",
+        "servicegrid",
+        "serviceoverview",
+        "servicesummary",
+        "tac"
+    ]
+};
 var queryCodeCompletions = function(token, idx) {
-    var completions = {
-        "keywords": [
-            "host",
-            "service",
-            "accept_passive_checks",
-            "acknowledged",
-            "acknowledgement_type",
-            "action_url_expanded",
-            "action_url",
-            "active_checks_enabled",
-            "check_command",
-            "check_interval",
-            "check_options",
-            "check_period",
-            "check_type",
-            "checks_enabled",
-            "contact_groups",
-            "contacts",
-            "current_attempt",
-            "current_notification_number",
-            "description",
-            "display_name",
-            "duration",
-            "event_handler_enabled",
-            "event_handler",
-            "execution_time",
-            "first_notification_delay",
-            "flap_detection_enabled",
-            "groups",
-            "has_been_checked",
-            "high_flap_threshold",
-            "icon_image_alt",
-            "icon_image_expanded",
-            "icon_image",
-            "in_check_period",
-            "in_notification_period",
-            "initial_state",
-            "is_executing",
-            "is_flapping",
-            "last_check",
-            "last_hard_state_change",
-            "last_hard_state",
-            "last_notification",
-            "last_state_change",
-            "last_state",
-            "last_time_critical",
-            "last_time_ok",
-            "last_time_unknown",
-            "last_time_warning",
-            "latency",
-            "long_plugin_output",
-            "low_flap_threshold",
-            "max_check_attempts",
-            "modified_attributes_list",
-            "modified_attributes",
-            "next_check",
-            "next_notification",
-            "notes_expanded",
-            "notes_url_expanded",
-            "notes_url",
-            "notes",
-            "notification_interval",
-            "notification_period",
-            "notifications_enabled",
-            "obsess_over_service",
-            "percent_state_change",
-            "perf_data",
-            "plugin_output",
-            "process_performance_data",
-            "retry_interval",
-            "scheduled_downtime_depth",
-            "state_type",
-            "state"
-        ],
-        "operator": [
-            "=",
-            "!=",
-            "~",
-            "!~",
-            "like",
-            "unlike",
-            ">=",
-            "<="
-        ],
-        "logic": [
-            "and",
-            "or"
-        ],
-        "views": [
-            "detail",
-            "hostdetail",
-            "hostgrid",
-            "hostoverview",
-            "hostsummary",
-            "main",
-            "minemap",
-            "perfmap",
-            "servicegrid",
-            "serviceoverview",
-            "servicesummary",
-            "tac"
-        ]
-    };
     // previous token is "as" and its the last item, complete for views
     if(token.length-1 == idx && token[idx-1] == "as") {
-        return(completions["views"].sort());
+        return(queryCodeCompletionData["views"].sort());
     }
     // previous token is a keyword, so complete with operator
-    if(token.length >= 1 && (array_contains(completions["keywords"], token[idx-1]) || String(token[idx-1]).match(/^_/) )) {
-        return(completions["operator"]);
+    if(token.length >= 1 && (array_contains(queryCodeCompletionData["keywords"], token[idx-1]) || String(token[idx-1]).match(/^_/) )) {
+        return(queryCodeCompletionData["operator"]);
     }
     // previous token is a operator, nothing to complete
-    if(token.length >= 1 && array_contains(completions["operator"], token[idx-1])) {
+    if(token.length >= 1 && array_contains(queryCodeCompletionData["operator"], token[idx-1])) {
         return([]);
     }
     // second to last token is a operator, complete with logic operator
-    if(token.length >= 2 && array_contains(completions["operator"], token[idx-2])) {
-        return(completions["logic"]);
+    if(token.length >= 2 && array_contains(queryCodeCompletionData["operator"], token[idx-2])) {
+        return(queryCodeCompletionData["logic"]);
     }
-    return(completions["keywords"].sort());
+    // token is a keyword and starts with underscore -> expand to custom variable names
+    if(token.length >= 1 && String(token[idx]).match(/^_/)) {
+        if(queryCodeCompletionData["custom"]) {
+            return(queryCodeCompletionData["custom"]);
+        }
+        return(function(updateFn) {
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/status.cgi',
+                data: {
+                    format:    "search",
+                    type:      "custom variable",
+                    prefix:    "1",
+                },
+                type: 'POST',
+                success: function(data) {
+                    if(data && data[0] && data[0].data) {
+                        var vars = data[0].data.sort();
+                        // prepend _ again
+                        var cust = [];
+                        jQuery(vars).each(function(i, n) {
+                            cust.push("_"+n);
+                        });
+                        queryCodeCompletionData["custom"] = cust;
+                        updateFn(cust);
+                    }
+                }
+            });
+        });
+    }
+    return(queryCodeCompletionData["keywords"].sort());
 }
 
 /*******************************************************************************
@@ -8190,6 +8252,9 @@ var ajax_search = {
             jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "");
             jQuery(input).on("keydown", function(evt) {
                 if(input.value == "" && (evt.keyCode === 40 || evt.keyCode === 32)) {
+                    evt.preventDefault();
+                    evt.stopImmediatePropagation();
+                    evt.stopPropagation();
                     jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter").css("display", "").attr({disabled: false}).focus();
                     jQuery(input).css("display", "none");
                     jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "none");

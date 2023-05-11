@@ -291,7 +291,7 @@ sub _process_raw_request {
         my $data = [];
         my $exposed_only = $c->req->parameters->{'exposed_only'} || 0;
         if($type eq 'custom variable' || !$c->check_user_roles("authorized_for_configuration_information")) {
-            $data = Thruk::Utils::Status::get_custom_variable_names($c, 'all', $exposed_only, $filter);
+            $data = Thruk::Utils::Status::get_custom_variable_names($c, 'all', $exposed_only, $filter, $c->req->parameters->{'prefix'});
         }
         if($type eq 'custom value') {
             my $allowed = $data;

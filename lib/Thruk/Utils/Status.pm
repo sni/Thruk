@@ -2643,6 +2643,7 @@ sub parse_lexical_filter {
             }
         }
     }
+    ${$string} =~ s/\s+$//gmx;
     ${$string} =~ s/\s+as\s+\w+$//mx;
     my $supported_operator = {
         '='      => 1,
@@ -2776,13 +2777,13 @@ sub _lexical_combine {
 
 =head2 get_custom_variable_names
 
-  get_custom_variable_names($c, $type, $exposed_only, $filter)
+  get_custom_variable_names($c, $type, $exposed_only, $filter, $prefix)
 
 returns list of available custom variables. $type can be 'host', 'service' or 'all'.
 
 =cut
 sub get_custom_variable_names {
-    my($c, $type, $exposed_only, $filter) = @_;
+    my($c, $type, $exposed_only, $filter, $prefix) = @_;
 
     my $data = [];
     my $vars = {};
@@ -2795,7 +2796,17 @@ sub get_custom_variable_names {
     if($type eq 'service' || $type eq 'all') {
         $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' )], columns => ['custom_variable_names'] );
     }
-    for my $obj (@{$hosts}, @{$services}) {
+    for my $obj (@{$hosts}) {
+        next unless ref $obj->{custom_variable_names} eq 'ARRAY';
+        for my $key (@{$obj->{custom_variable_names}}) {
+            if($prefix) {
+                $vars->{"HOST".$key} = 1;
+            } else {
+                $vars->{$key} = 1;
+            }
+        }
+    }
+    for my $obj (@{$services}) {
         next unless ref $obj->{custom_variable_names} eq 'ARRAY';
         for my $key (@{$obj->{custom_variable_names}}) {
             $vars->{$key} = 1;
