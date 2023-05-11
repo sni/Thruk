@@ -2718,6 +2718,16 @@ sub parse_lexical_filter {
                 # some keys require special handling
                 $key = "host_name"   if $key eq 'host';
                 $key = "description" if $key eq 'service';
+                if($key =~ m/^_HOST/mx) {
+                    $key =~ s/^_HOST//gmx;
+                    $val = $key." ".$val;
+                    $key = "host_custom_variables";
+                }
+                elsif($key =~ m/^_/mx) {
+                    $key =~ s/^_//gmx;
+                    $val = $key." ".$val;
+                    $key = "custom_variables";
+                }
 
                 if($key eq 'duration') {
                     my($tmp_hostf, $tmp_svcf) = _expand_duration_filter($op, $val);

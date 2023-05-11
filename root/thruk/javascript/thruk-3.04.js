@@ -5243,7 +5243,7 @@ var queryCodeCompletions = function(token, idx) {
         return(completions["views"].sort());
     }
     // previous token is a keyword, so complete with operator
-    if(token.length >= 1 && array_contains(completions["keywords"], token[idx-1])) {
+    if(token.length >= 1 && (array_contains(completions["keywords"], token[idx-1]) || String(token[idx-1]).match(/^_/) )) {
         return(completions["operator"]);
     }
     // previous token is a operator, nothing to complete
