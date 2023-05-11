@@ -2643,6 +2643,21 @@ sub parse_lexical_filter {
             }
         }
     }
+    my $supported_operator = {
+        '='      => 1,
+        '=='     => 1,
+        '!='     => 1,
+        '~'      => 1,
+        '~~'     => 1,
+        '!~'     => 1,
+        '!~~'    => 1,
+        '>'      => 1,
+        '<'      => 1,
+        '<='     => 1,
+        '<'      => 1,
+        'like'   => 1,
+        'unlike' => 1,
+    };
     my $filter = [];
     my($token,$key,$op,$val,$combine);
     while(${$string} ne '') {
@@ -2683,6 +2698,9 @@ sub parse_lexical_filter {
                 if($op eq '~')      { $op =  '~~'; }
                 if($op eq '!~')     { $op = '!~~'; }
                 if($op eq 'unlike') { $op = '!~~'; }
+                if(!$supported_operator->{$op}) {
+                    die("unknown operator ".$token);
+                }
                 next;
             }
             elsif(!defined $val) {
