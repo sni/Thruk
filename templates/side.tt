@@ -50,7 +50,7 @@
                 </li>
               [% ELSIF link.defined("search") && link.search %]
                 <li>
-                  <div>
+                  <div class="js-advanced-toggle">
                     <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]" class="pl-6 pr-[10px]">
                       <fieldset>
                         [% IF link.defined("name") &&  link.name != "" %]
@@ -61,6 +61,7 @@
                         <input type='hidden' name='s0_type' value='search' />
                         <input type='hidden' name='add_default_service_filter' value='1' />
                         <input type='search' name='s0_value' class="deletable autosubmit js-suggest-advanced w-full my-[1px]" id="s0_value" placeholder="search..." />
+                        <input type='search' name='q' onfocus="initAutoCompleteQuery(this, queryCodeCompletions)" class="w-full js-advancedfilter" placeholder="advanced search..." autocomplete="off" style="display: none;" disabled />
                       </fieldset>
                     </form>
                   </div>
