@@ -2904,7 +2904,8 @@ sub _add_query_stats {
     $profile->{'stack'} = Carp::longmess($function) if(defined $ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1);
     if(ref $args eq 'ARRAY' && scalar @{$args} % 2 == 0) {
         my %arg = @{$args};
-        $profile->{'filter'} = $arg{'filter'} if defined $arg{'filter'};
+        $profile->{'filter'}     = $arg{'filter'}     if defined $arg{'filter'};
+        $profile->{'debug_hint'} = $arg{'debug_hint'} if defined $arg{'debug_hint'};
     }
     push @{$c->stash->{'db_profiles'}}, $profile;
     return;

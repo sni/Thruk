@@ -12,7 +12,14 @@
       [% row_id = row_id + 1 %]
       [% perc = pf.duration / total_duration %]
       <tr class="clickable js-profile-row" onclick='toggleAllClassExceptSelf(this, "TR.js-profile-row", "active"); jQuery(".js-pstack-details").css("display","none"); if(jQuery(this).hasClass("active")) { jQuery(".js-pstack-[% row_id %]").css("display","").addClass("active"); }'>
-        <td>[% pf.function %]</td>
+        <td>
+          <div class="flexrow gap-x-1 justify-between">
+            <span>[% pf.function %]</span>
+            [% IF pf.defined("debug_hint") %]
+            <span class="textHINTsoft">[% pf.debug_hint %]</span>
+            [% END %]
+          </div>
+        </td>
         <td class="text-right">[% IF pf.defined('affected_backends'); pf.affected_backends; END %]</td>
         <td class="text-right">[% sprintf("%.5fs", pf.duration) %]</td>
         <td class="text-right relative" style="width: 50px;">
