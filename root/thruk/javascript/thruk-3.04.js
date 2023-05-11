@@ -1497,7 +1497,7 @@ function setRefreshRate(rate) {
   }
 }
 
-/* reset refresh interval */
+/* reset refresh interval to initial value (is refresh is enabled) */
 function resetRefresh() {
   window.clearTimeout(thrukState.refreshTimer);
   if( typeof refresh_rate == "number" ) {
@@ -8061,6 +8061,7 @@ var ajax_search = {
      * }
      */
     init: function(elem, type, options) {
+        resetRefresh();
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
@@ -8412,6 +8413,7 @@ var ajax_search = {
     },
 
     refresh_data: function() {
+        resetRefresh();
         window.clearTimeout(ajax_search.refresh_timer);
         ajax_search.updating = true;
         var panel = document.getElementById(ajax_search.result_pan);
@@ -8498,6 +8500,7 @@ var ajax_search = {
 
     /* hide the search results */
     hide_results: function(event, immediately, setfocus) {
+        resetRefresh();
         if(ajax_search.dont_hide) { return; }
         if(event && event.target) {
         }
@@ -8570,6 +8573,7 @@ var ajax_search = {
 
     /* wrapper around suggest_do() to avoid multiple running searches */
     suggest: function(evt) {
+        resetRefresh();
         window.clearTimeout(ajax_search.timer);
         // dont suggest on enter
         evt = (evt) ? evt : ((window.event) ? event : null);
@@ -8736,6 +8740,7 @@ var ajax_search = {
 
     /* present the results */
     show_results: function(results, pattern, selected) {
+        resetRefresh();
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
@@ -8789,12 +8794,12 @@ var ajax_search = {
                             var parts = name.split(/(<b>.*?<\/b>)/);
                             jQuery.each(parts, function(index2, part) {
                                 if(!part.match(/^<b>/)) {
-                                    parts[index2] = part.replace(re, "<b>$1<\/b>");
+                                    parts[index2] = part.replace(re, "<b class='hint'>$1<\/b>");
                                 }
                             });
                             name = parts.join("");
                         } else {
-                            name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
+                            name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b class='hint'>" + sub_pattern + "<\/b>");
                         }
                     });
                     var classname = "";
@@ -8886,6 +8891,7 @@ var ajax_search = {
 
     /* set the value into the input field */
     set_result: function(value) {
+        resetRefresh();
         if(value == 'more' || (value == undefined && ajax_search.res.length == ajax_search.cur_select)) {
             window.clearTimeout(ajax_search.hideTimer);
             var panel = document.getElementById(ajax_search.result_pan);
@@ -8984,6 +8990,7 @@ var ajax_search = {
 
     /* eventhandler for arrow keys */
     arrow_keys: function(evt) {
+        resetRefresh();
         evt              = (evt) ? evt : ((window.event) ? event : null);
         if(!evt) { return false; }
         var input        = document.getElementById(ajax_search.input_field);
