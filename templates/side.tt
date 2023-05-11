@@ -56,6 +56,7 @@
                         [% IF link.defined("name") &&  link.name != "" %]
                         <span class="searchlabel">[% link.name | html %]</span>
                         [% END %]
+                        <input type='hidden' name='style' value='detail' />
                         <input type='hidden' name='s0_op' value='~' id="s0_to" />
                         <input type='hidden' name='s0_type' value='search' />
                         <input type='hidden' name='add_default_service_filter' value='1' />

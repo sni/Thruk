@@ -50,6 +50,7 @@
               <div class="flex items-center">
                 <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi">
                   <fieldset>
+                    <input type='hidden' name='style' value='detail' />
                     <input type='hidden' name='s0_op' value='~' />
                     <input type='hidden' name='s0_type' value='search' />
                     <input type='hidden' name='add_default_service_filter' value='1' />
