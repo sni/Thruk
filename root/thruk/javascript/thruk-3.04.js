@@ -8550,7 +8550,7 @@ var ajax_search = {
                     window.setTimeout(function() { ajax_search.stop_events=false; }, 200);
                     input.focus();
                 } else {
-                    if(input && input.value == "") {
+                    if(input && input.value == "" && input !== document.activeElement) {
                         jQuery(input).removeClass("expanded");
                     }
                 }
@@ -8562,7 +8562,7 @@ var ajax_search = {
                     fade(ajax_search.result_pan, 300);
                     if(ajax_search.input_field) {
                         var input = document.getElementById(ajax_search.input_field);
-                        if(input && input.value == "") {
+                        if(input && input.value == "" && input !== document.activeElement) {
                             jQuery(input).removeClass("expanded");
                         }
                     }
