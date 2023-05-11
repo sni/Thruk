@@ -1451,6 +1451,9 @@ DIV#search-results, DIV.typeahead {
     &.error {
       @apply textALERT font-semibold;
     }
+    B.hint {
+      @apply textActive1 font-semibold;
+    }
   }
   .disabled {
     @apply ml-5 textHINT opacity-100;

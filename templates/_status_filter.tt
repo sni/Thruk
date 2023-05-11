@@ -101,7 +101,7 @@
           class="min-h-[200px] js-ctrlentersubmit font-mono"
           wrap="hard"
           name="[% paneprefix %]q"[% IF ! has_lex_filter %] disabled[% END %]
-          onfocus="initAutoCompleteQuery(this)"
+          onfocus="initAutoCompleteQuery(this, queryCodeCompletions)"
         >[% IF has_lex_filter %][% has_lex_filter %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix) %][% END %]</textarea>
       </div>
     </div>

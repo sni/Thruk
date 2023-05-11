@@ -4907,82 +4907,38 @@ function is_frame_url_allowed(url, allowed_frame_links) {
     return(false);
 }
 
-function initAutoCompleteQuery(el) {
-    var completions = {
-        "keywords": [
-            "host",
-            "service",
-            "accept_passive_checks",
-            "acknowledged",
-            "acknowledgement_type",
-            "action_url_expanded",
-            "action_url",
-            "active_checks_enabled",
-            "check_command",
-            "check_interval",
-            "check_options",
-            "check_period",
-            "check_type",
-            "checks_enabled",
-            "contact_groups",
-            "contacts",
-            "current_attempt",
-            "current_notification_number",
-            "description",
-            "display_name",
-            "duration",
-            "event_handler_enabled",
-            "event_handler",
-            "execution_time",
-            "first_notification_delay",
-            "flap_detection_enabled",
-            "groups",
-            "has_been_checked",
-            "high_flap_threshold",
-            "icon_image_alt",
-            "icon_image_expanded",
-            "icon_image",
-            "in_check_period",
-            "in_notification_period",
-            "initial_state",
-            "is_executing",
-            "is_flapping",
-            "last_check",
-            "last_hard_state_change",
-            "last_hard_state",
-            "last_notification",
-            "last_state_change",
-            "last_state",
-            "last_time_critical",
-            "last_time_ok",
-            "last_time_unknown",
-            "last_time_warning",
-            "latency",
-            "long_plugin_output",
-            "low_flap_threshold",
-            "max_check_attempts",
-            "modified_attributes_list",
-            "modified_attributes",
-            "next_check",
-            "next_notification",
-            "notes_expanded",
-            "notes_url_expanded",
-            "notes_url",
-            "notes",
-            "notification_interval",
-            "notification_period",
-            "notifications_enabled",
-            "obsess_over_service",
-            "percent_state_change",
-            "perf_data",
-            "plugin_output",
-            "process_performance_data",
-            "retry_interval",
-            "scheduled_downtime_depth",
-            "state_type",
-            "state"
-        ]
+// return size (width/height) for given text
+function measureText(pText, pFontSize, pFont) {
+    var lDiv = document.createElement('div');
+    document.body.appendChild(lDiv);
+
+    lDiv.style.fontSize = "" + pFontSize + "px";
+    lDiv.style.fontFamily = pFont;
+    lDiv.style.position = "absolute";
+    lDiv.style.left = -1000;
+    lDiv.style.top = -1000;
+    lDiv.textContent = pText;
+    var lResult = {
+        width: lDiv.clientWidth,
+        height: lDiv.clientHeight
     };
+    document.body.removeChild(lDiv);
+    lDiv = null;
+    return lResult;
+}
+
+/*******************************************************************************
+ *   ,ad8888ba,   ,ad8888ba,   88b           d88 88888888ba  88          88888888888 888888888888 88   ,ad8888ba,   888b      88
+ *  d8"'    `"8b d8"'    `"8b  888b         d888 88      "8b 88          88               88      88  d8"'    `"8b  8888b     88
+ * d8'          d8'        `8b 88`8b       d8'88 88      ,8P 88          88               88      88 d8'        `8b 88 `8b    88
+ * 88           88          88 88 `8b     d8' 88 88aaaaaa8P' 88          88aaaaa          88      88 88          88 88  `8b   88
+ * 88           88          88 88  `8b   d8'  88 88""""""'   88          88"""""          88      88 88          88 88   `8b  88
+ * Y8,          Y8,        ,8P 88   `8b d8'   88 88          88          88               88      88 Y8,        ,8P 88    `8b 88
+ *  Y8a.    .a8P Y8a.    .a8P  88    `888'    88 88          88          88               88      88  Y8a.    .a8P  88     `8888
+ *   `"Y8888Y"'   `"Y8888Y"'   88     `8'     88 88          88888888888 88888888888      88      88   `"Y8888Y"'   88      `888
+*******************************************************************************/
+
+function initAutoCompleteQuery(el, completionFn) {
     jQuery(el).off("blur").on("blur", function(evt) {
         jQuery('#code_completion').remove();
         return;
@@ -4990,7 +4946,6 @@ function initAutoCompleteQuery(el) {
     jQuery(el).off("keydown").on("keydown", function(evt) {
         var container = jQuery("#code_completion")[0];
         var keyCode       = evt.keyCode;
-        var navigateLeft  = keyCode == 37;
         var navigateUp    = keyCode == 38;
         var navigateRight = keyCode == 39;
         var navigateDown  = keyCode == 40;
@@ -5075,7 +5030,7 @@ function initAutoCompleteQuery(el) {
         if(!container && !(keyCode >= 65 && keyCode <= 90) && !keyBackspace && !keyDel) {
             return;
         }
-        var txt     = jQuery(el).val();
+        var txt    = jQuery(el).val();
         var txtPos = getCaret(el);
         if(txtPos == 0) {
             jQuery('#code_completion').remove();
@@ -5092,90 +5047,200 @@ function initAutoCompleteQuery(el) {
         if(container && container.dataset["lastToken"] && container.dataset["lastToken"] == completeFor) {
             return;
         }
-        var completionsFound = [];
-        var keywords = completions["keywords"].sort()
-
-        // add keywords which start with the search pattern
-        jQuery(keywords).each(function(i, v) {
-            if(v.indexOf(completeFor) === 0) {
-                completionsFound.push(v);
-            }
-        });
-        // add keywords matching anywhere
-        jQuery(keywords).each(function(i, v) {
-            if(v.match(completeFor) && v.indexOf(completeFor) !== 0) {
-                completionsFound.push(v);
-            }
-        });
-        if(completionsFound.length <= 0) {
-            jQuery('#code_completion').remove();
-            return;
-        }
-        jQuery('#code_completion').remove();
-
-        var lines      = before.split(/\r\n|\r|\n/);
-        var newlines   = lines.length - 1;
-        var lineHeight = parseInt(getComputedStyle(el).lineHeight);
-        var pos        = jQuery(el).offset();
-        var fontSize   = parseInt(getComputedStyle(el).fontSize);
-        var fontFamily = getComputedStyle(el).fontFamily;
-        var textSize   = measureText(lines[newlines], fontSize, fontFamily);
-
-        jQuery('<div>', {
-            id: "code_completion",
-            style: "top: 0px; left: 0px; min-width: 200px; min-height: 20px; max-height: 40%;",
-            class: "typeahead overflow-y-auto"
-        }).appendTo("body");
-        container = jQuery("#code_completion")[0];
-        container.dataset["lastToken"] = completeFor;
-        jQuery('<ul>', {}).appendTo(container);
-
-        // add each search result
-        var list = jQuery("#code_completion").find("UL");
-        jQuery(completionsFound).each(function(i, e) {
-            var li = jQuery('<li class="res">'+e+'</li>', {}).appendTo(list);
-            // add click handler to select/apply result
-            jQuery(li).off("click").on("click", function() {
-                var txt = before.substr(0, before.length-completeFor.length)+e;
-                jQuery(el).val(txt+after);
-                setCaretToPos(el, txt.length);
-                jQuery('#code_completion').remove();
-                return;
-            })
-        });
-
-        // activate first match
-        jQuery("#code_completion").find("LI.res").first().addClass("active");
-
-        container.style.left = (Math.floor(pos.left)+textSize.width+8) + "px";
-
-        var h = jQuery(container).outerHeight();
-        var top  = Math.floor(pos.top) - h + (newlines*lineHeight);
-        if(top < 0) {
-            top  = Math.floor(pos.top) + ((newlines+1)*lineHeight) + 4;
-        }
-        container.style.top = top+"px";
+        codeComplete(el, txt.split(/\s+/), token.length-1, after, before, completionFn);
     });
 }
 
-// return size for given text
-function measureText(pText, pFontSize, pFont) {
-    var lDiv = document.createElement('div');
-    document.body.appendChild(lDiv);
+function codeComplete(el, token, idx, after, before, completionFn) {
+    var completionsFound = [];
+    // what to complete
+    var keywords = completionFn(token, idx);
+    var completeFor = token[idx];
 
-    lDiv.style.fontSize = "" + pFontSize + "px";
-    lDiv.style.fontFamily = pFont;
-    lDiv.style.position = "absolute";
-    lDiv.style.left = -1000;
-    lDiv.style.top = -1000;
-    lDiv.textContent = pText;
-    var lResult = {
-        width: lDiv.clientWidth,
-        height: lDiv.clientHeight
+    // add keywords which start with the search pattern
+    jQuery(keywords).each(function(i, v) {
+        if(v.indexOf(completeFor) === 0) {
+            completionsFound.push(v);
+        }
+    });
+    // add keywords matching anywhere
+    jQuery(keywords).each(function(i, v) {
+        if(v.match(completeFor) && v.indexOf(completeFor) !== 0) {
+            completionsFound.push(v);
+        }
+    });
+    if(completionsFound.length <= 0) {
+        jQuery('#code_completion').remove();
+        return;
+    }
+    jQuery('#code_completion').remove();
+
+    var lines      = before.split(/\r\n|\r|\n/);
+    var newlines   = lines.length - 1;
+    var lineHeight = parseInt(getComputedStyle(el).lineHeight);
+    var pos        = jQuery(el).offset();
+    var fontSize   = parseInt(getComputedStyle(el).fontSize);
+    var fontFamily = getComputedStyle(el).fontFamily;
+    var textSize   = measureText(lines[newlines], fontSize, fontFamily);
+
+    jQuery('<div>', {
+        id: "code_completion",
+        style: "top: 0px; left: 0px; min-width: 200px; min-height: 20px; max-height: 40%;",
+        class: "typeahead overflow-y-auto"
+    }).appendTo("body");
+    var container = jQuery("#code_completion")[0];
+    container.dataset["lastToken"] = completeFor;
+    jQuery('<ul>', {}).appendTo(container);
+
+    // add each search result
+    var list = jQuery("#code_completion").find("UL");
+    jQuery(completionsFound).each(function(i, e) {
+        var li = jQuery('<li class="res"></li>', {}).appendTo(list);
+        li.html(e.replace(completeFor, "<b class='hint'>"+completeFor+"</b>"))
+        // add click handler to select/apply result
+        jQuery(li).off("click").on("click", function() {
+            var txt = before.substr(0, before.length-completeFor.length)+e;
+            jQuery(el).val(txt+after);
+            setCaretToPos(el, txt.length);
+            jQuery('#code_completion').remove();
+            return;
+        })
+    });
+
+    // activate first match
+    jQuery("#code_completion").find("LI.res").first().addClass("active");
+
+    container.style.left = (Math.floor(pos.left)+textSize.width+8) + "px";
+
+    var h = jQuery(container).outerHeight();
+    var top  = Math.floor(pos.top) - h + (newlines*lineHeight);
+    if(top < 0) {
+        top  = Math.floor(pos.top) + ((newlines+1)*lineHeight) + 4;
+    }
+    container.style.top = top+"px";
+}
+
+var queryCodeCompletions = function(token, idx) {
+    var completions = {
+        "keywords": [
+            "host",
+            "service",
+            "accept_passive_checks",
+            "acknowledged",
+            "acknowledgement_type",
+            "action_url_expanded",
+            "action_url",
+            "active_checks_enabled",
+            "check_command",
+            "check_interval",
+            "check_options",
+            "check_period",
+            "check_type",
+            "checks_enabled",
+            "contact_groups",
+            "contacts",
+            "current_attempt",
+            "current_notification_number",
+            "description",
+            "display_name",
+            "duration",
+            "event_handler_enabled",
+            "event_handler",
+            "execution_time",
+            "first_notification_delay",
+            "flap_detection_enabled",
+            "groups",
+            "has_been_checked",
+            "high_flap_threshold",
+            "icon_image_alt",
+            "icon_image_expanded",
+            "icon_image",
+            "in_check_period",
+            "in_notification_period",
+            "initial_state",
+            "is_executing",
+            "is_flapping",
+            "last_check",
+            "last_hard_state_change",
+            "last_hard_state",
+            "last_notification",
+            "last_state_change",
+            "last_state",
+            "last_time_critical",
+            "last_time_ok",
+            "last_time_unknown",
+            "last_time_warning",
+            "latency",
+            "long_plugin_output",
+            "low_flap_threshold",
+            "max_check_attempts",
+            "modified_attributes_list",
+            "modified_attributes",
+            "next_check",
+            "next_notification",
+            "notes_expanded",
+            "notes_url_expanded",
+            "notes_url",
+            "notes",
+            "notification_interval",
+            "notification_period",
+            "notifications_enabled",
+            "obsess_over_service",
+            "percent_state_change",
+            "perf_data",
+            "plugin_output",
+            "process_performance_data",
+            "retry_interval",
+            "scheduled_downtime_depth",
+            "state_type",
+            "state"
+        ],
+        "operator": [
+            "=",
+            "!=",
+            "~",
+            "!~",
+            "like",
+            "unlike",
+            ">=",
+            "<="
+        ],
+        "logic": [
+            "and",
+            "or"
+        ],
+        "views": [
+            "detail",
+            "hostdetail",
+            "hostgrid",
+            "hostoverview",
+            "hostsummary",
+            "main",
+            "minemap",
+            "perfmap",
+            "servicegrid",
+            "serviceoverview",
+            "servicesummary",
+            "tac"
+        ]
     };
-    document.body.removeChild(lDiv);
-    lDiv = null;
-    return lResult;
+    // previous token is "as" and its the last item, complete for views
+    if(token.length-1 == idx && token[idx-1] == "as") {
+        return(completions["views"].sort());
+    }
+    // previous token is a keyword, so complete with operator
+    if(token.length >= 1 && array_contains(completions["keywords"], token[idx-1])) {
+        return(completions["operator"]);
+    }
+    // previous token is a operator, nothing to complete
+    if(token.length >= 1 && array_contains(completions["operator"], token[idx-1])) {
+        return([]);
+    }
+    // second to last token is a operator, complete with logic operator
+    if(token.length >= 2 && array_contains(completions["operator"], token[idx-2])) {
+        return(completions["logic"]);
+    }
+    return(completions["keywords"].sort());
 }
 
 /*******************************************************************************

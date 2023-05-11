@@ -215,6 +215,13 @@ sub begin {
         }
     }
 
+    for my $key (qw/q dfl_q/) {
+        my $q = $c->req->parameters->{$key};
+        if($q && $q =~ s/\s+as\s+(\w+)$//gmx) {
+            $c->req->parameters->{'style'} = $1;
+        }
+    }
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }
