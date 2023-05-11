@@ -8188,6 +8188,7 @@ var ajax_search = {
                     jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter").css("display", "").attr({disabled: false}).focus();
                     jQuery(input).css("display", "none");
                     jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "none");
+                    jQuery(input).closest("DIV.js-advanced-toggle").find("INPUT").not(".js-advancedfilter").attr({disabled: true}).focus();
                     window.setTimeout(function() {
                         // remove that space again (added "later" by the keyup event)
                         jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter").val("");
@@ -8583,6 +8584,7 @@ var ajax_search = {
                 } else {
                     if(input && input.value == "" && input !== document.activeElement) {
                         jQuery(input).removeClass("expanded");
+                        jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "none");
                     }
                 }
             }
@@ -8595,6 +8597,7 @@ var ajax_search = {
                         var input = document.getElementById(ajax_search.input_field);
                         if(input && input.value == "" && input !== document.activeElement) {
                             jQuery(input).removeClass("expanded");
+                            jQuery(input).closest("DIV.js-advanced-toggle").find(".js-advancedfilter-hint").css("display", "none");
                         }
                     }
                 }
