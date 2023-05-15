@@ -2733,10 +2733,12 @@ sub parse_lexical_filter {
                 if($key eq 'duration') {
                     my($tmp_hostf, $tmp_svcf) = _expand_duration_filter($op, $val);
                     push @{$filter}, @{$tmp_svcf} if $tmp_svcf;
+                } elsif($key eq 'execution_time' || $key eq 'latency') {
+                    $val = Thruk::Utils::expand_duration($val);
+                    push @{$filter}, { $key => { $op => $val } };
                 } else {
                     # expand relative time filter for some operators
                     $val = Thruk::Utils::expand_relative_timefilter($key, $op, $val);
-
                     push @{$filter}, { $key => { $op => $val } };
                 }
                 undef $key;
