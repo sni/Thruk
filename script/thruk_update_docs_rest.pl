@@ -159,6 +159,7 @@ sub _update_cmds {
             my $cmd = {
                 name => lc $name,
             };
+
             my @args;
             if($arg) {
                 if($arg =~ m/"\s*,([^\)]+)\)/gmx) {
@@ -216,7 +217,11 @@ sub _update_cmds {
                 shift @required_args;
                 $cmds->{'servicegroups'}->{$cmd->{'name'}} = $cmd;
             } else {
-                $cmds->{'system'}->{$cmd->{'name'}} = $cmd;
+                my $cat = "system";
+                if($args[0] && $args[0] =~ m/^(downtime_id|comment_id)$/mx) {
+                    $cat = "all_host_service";
+                }
+                $cmds->{$cat}->{$cmd->{'name'}} = $cmd;
             }
             $cmd->{'args'}     = \@args;
             $cmd->{'required'} = \@required_args;

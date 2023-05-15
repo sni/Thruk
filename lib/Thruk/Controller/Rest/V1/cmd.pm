@@ -1030,6 +1030,42 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/del_downtime_by_start_time_comment.html for details.
 
+# REST PATH: POST /system/cmd/del_host_comment
+# Sends the DEL_HOST_COMMENT command.
+#
+# Required arguments:
+#
+#   * comment_id
+#
+# See http://www.naemon.io/documentation/developer/externalcommands/del_host_comment.html for details.
+
+# REST PATH: POST /system/cmd/del_host_downtime
+# Sends the DEL_HOST_DOWNTIME command.
+#
+# Required arguments:
+#
+#   * downtime_id
+#
+# See http://www.naemon.io/documentation/developer/externalcommands/del_host_downtime.html for details.
+
+# REST PATH: POST /system/cmd/del_svc_comment
+# Sends the DEL_SVC_COMMENT command.
+#
+# Required arguments:
+#
+#   * comment_id
+#
+# See http://www.naemon.io/documentation/developer/externalcommands/del_svc_comment.html for details.
+
+# REST PATH: POST /system/cmd/del_svc_downtime
+# Sends the DEL_SVC_DOWNTIME command.
+#
+# Required arguments:
+#
+#   * downtime_id
+#
+# See http://www.naemon.io/documentation/developer/externalcommands/del_svc_downtime.html for details.
+
 # REST PATH: POST /hostgroups/<name>/cmd/disable_hostgroup_host_checks
 # Sends the DISABLE_HOSTGROUP_HOST_CHECKS command.
 #
@@ -1372,42 +1408,6 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/change_global_svc_event_handler.html for details.
 
-# REST PATH: POST /system/cmd/del_host_comment
-# Sends the DEL_HOST_COMMENT command.
-#
-# Required arguments:
-#
-#   * comment_id
-#
-# See http://www.naemon.io/documentation/developer/externalcommands/del_host_comment.html for details.
-
-# REST PATH: POST /system/cmd/del_host_downtime
-# Sends the DEL_HOST_DOWNTIME command.
-#
-# Required arguments:
-#
-#   * downtime_id
-#
-# See http://www.naemon.io/documentation/developer/externalcommands/del_host_downtime.html for details.
-
-# REST PATH: POST /system/cmd/del_svc_comment
-# Sends the DEL_SVC_COMMENT command.
-#
-# Required arguments:
-#
-#   * comment_id
-#
-# See http://www.naemon.io/documentation/developer/externalcommands/del_svc_comment.html for details.
-
-# REST PATH: POST /system/cmd/del_svc_downtime
-# Sends the DEL_SVC_DOWNTIME command.
-#
-# Required arguments:
-#
-#   * downtime_id
-#
-# See http://www.naemon.io/documentation/developer/externalcommands/del_svc_downtime.html for details.
-
 # REST PATH: POST /system/cmd/disable_event_handlers
 # Sends the DISABLE_EVENT_HANDLERS command.
 #
@@ -1621,7 +1621,11 @@ __DATA__
 {"all_host_service":{
   "del_downtime_by_host_name":{"args":["hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_host_name","nr":-1,"required":[]},
   "del_downtime_by_hostgroup_name":{"args":["hostgroup_name","hostname","service_desc","start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_hostgroup_name","nr":-1,"required":[]},
-  "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","nr":-1,"required":[]}
+  "del_downtime_by_start_time_comment":{"args":["start_time","comment"],"docs":"This command deletes all downtimes matching the specified filters.","name":"del_downtime_by_start_time_comment","nr":-1,"required":[]},
+  "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","nr":"2","required":["comment_id"]},
+  "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","nr":"78","required":["downtime_id"]},
+  "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","nr":"4","required":["comment_id"]},
+  "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","nr":"79","required":["downtime_id"]}
 },
 "contactgroups":{
   "disable_contactgroup_host_notifications":{"args":[],"docs":"Disables host notifications for all contacts in a particular contactgroup.","name":"disable_contactgroup_host_notifications","nr":-1,"required":[]},
@@ -1754,10 +1758,6 @@ __DATA__
 "system":{
   "change_global_host_event_handler":{"args":["eventhandler"],"docs":"Changes the global host event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_host_event_handler","nr":-1,"required":["eventhandler"]},
   "change_global_svc_event_handler":{"args":["eventhandler"],"docs":"Changes the global service event handler command to be that specified by the 'event_handler_command' option. The 'event_handler_command' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started.","name":"change_global_svc_event_handler","nr":-1,"required":["eventhandler"]},
-  "del_host_comment":{"args":["comment_id"],"name":"del_host_comment","nr":"2","required":["comment_id"]},
-  "del_host_downtime":{"args":["downtime_id"],"name":"del_host_downtime","nr":"78","required":["downtime_id"]},
-  "del_svc_comment":{"args":["comment_id"],"name":"del_svc_comment","nr":"4","required":["comment_id"]},
-  "del_svc_downtime":{"args":["downtime_id"],"name":"del_svc_downtime","nr":"79","required":["downtime_id"]},
   "disable_event_handlers":{"args":[],"name":"disable_event_handlers","nr":"42","required":[]},
   "disable_flap_detection":{"args":[],"name":"disable_flap_detection","nr":"62","required":[]},
   "disable_host_freshness_checks":{"args":[],"docs":"Disables freshness checks of all hosts on a program-wide basis.","name":"disable_host_freshness_checks","nr":-1,"required":[]},
