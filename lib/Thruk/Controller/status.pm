@@ -1257,7 +1257,7 @@ sub _process_perfmap_page {
             if(defined $val && defined $1) { # $val && required, triggers unused var in t/086-Test-Vars.t otherwise
                 $svc->{'perf'}->{$key} = 1;
                 $keys->{$key} = 1;
-                $svc->{$key} = $1.$2;
+                $svc->{$key} = $1.$2 unless defined $svc->{$key}; # flatten performance data into service unless that key already exists
                 $svc->{$key.'_sort'} = $1;
             }
         }
