@@ -215,11 +215,11 @@ sub begin {
         }
     }
 
-    for my $key (qw/q dfl_q/) {
+    for my $key (qw/q dfl_q s0_value/) {
         my $q = $c->req->parameters->{$key};
         next unless $q;
         $q =~ s/\s*$//gmx;
-        if($q =~ s/\s+as\s+(\w+)$//gmx) {
+        if($q =~ s/^\w+.*\s+as\s+(\w+)$//gmx) {
             $c->req->parameters->{'style'} = $1;
         }
     }
