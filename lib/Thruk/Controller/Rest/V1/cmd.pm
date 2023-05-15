@@ -243,6 +243,38 @@ sub _rest_get_external_command {
         }
     }
 
+    if($cmd->{'name'} eq 'del_downtime') {
+        $commands = {};
+        my $id   = $c->req->parameters->{'downtime_id'};
+        if(defined $description) {
+            my $data = $c->db->get_downtimes(filter => [{ host_name => $name, service_description => $description, id => $id }], backend => $backends);
+            for my $d (@{$data}) {
+                push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_DOWNTIME;%d", time(), $d->{'id'});
+            }
+        } else {
+            my $data = $c->db->get_downtimes(filter => [{ host_name => $name, id => $id }], backend => $backends);
+            for my $d (@{$data}) {
+                push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_DOWNTIME;%d", time(), $d->{'id'});
+            }
+        }
+    }
+
+    if($cmd->{'name'} eq 'del_comment') {
+        $commands = {};
+        my $id   = $c->req->parameters->{'comment_id'};
+        if(defined $description) {
+            my $data = $c->db->get_comments(filter => [{ host_name => $name, service_description => $description, id => $id }], backend => $backends);
+            for my $d (@{$data}) {
+                push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d", time(), $d->{'id'});
+            }
+        } else {
+            my $data = $c->db->get_comments(filter => [{ host_name => $name, id => $id }], backend => $backends);
+            for my $d (@{$data}) {
+                push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d", time(), $d->{'id'});
+            }
+        }
+    }
+
     Thruk::Controller::cmd::add_remove_comments_commands_from_disabled_commands($c, $commands, $cmd->{'nr'}, $name, $description);
     Thruk::Controller::cmd::bulk_send($c, $commands);
     if($c->stash->{'last_command_error'}) {
@@ -400,6 +432,20 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/del_all_host_comments.html for details.
 
+# REST PATH: POST /hosts/<name>/cmd/del_comment
+# Removes downtime by id for this host.
+#
+# Required arguments:
+#
+#   * comment_id
+#
+# REST PATH: POST /hosts/<name>/cmd/del_downtime
+# Removes downtime by id for this host.
+#
+# Required arguments:
+#
+#   * downtime_id
+#
 # REST PATH: POST /hosts/<name>/cmd/delay_host_notification
 # Sends the DELAY_HOST_NOTIFICATION command.
 #
@@ -822,6 +868,20 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/del_all_svc_comments.html for details.
 
+# REST PATH: POST /services/<host>/<service>/cmd/del_comment
+# Removes downtime by id for this service.
+#
+# Required arguments:
+#
+#   * comment_id
+#
+# REST PATH: POST /services/<host>/<service>/cmd/del_downtime
+# Removes downtime by id for this service.
+#
+# Required arguments:
+#
+#   * downtime_id
+#
 # REST PATH: POST /services/<host>/<service>/cmd/delay_svc_notification
 # Sends the DELAY_SVC_NOTIFICATION command.
 #
@@ -1671,6 +1731,8 @@ __DATA__
   "change_retry_host_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular host.","name":"change_retry_host_check_interval","nr":-1,"required":["interval"]},
   "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_host_comments":{"args":[],"name":"del_all_host_comments","nr":"20","required":[]},
+  "del_comment":{"args":["comment_id"],"docs":"Removes downtime by id for this host.","name":"del_comment","nr":-1,"required":["comment_id"],"thrukcmd":1},
+  "del_downtime":{"args":["downtime_id"],"docs":"Removes downtime by id for this host.","name":"del_downtime","nr":-1,"required":["downtime_id"],"thrukcmd":1},
   "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","nr":"10","required":["notification_time"]},
   "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","nr":"27","required":[]},
   "disable_host_and_child_notifications":{"args":[],"name":"disable_host_and_child_notifications","nr":"25","required":[],"requires_comment":1},
@@ -1734,6 +1796,8 @@ __DATA__
   "change_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_notification_timeperiod","nr":-1,"required":["timeperiod"]},
   "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
+  "del_comment":{"args":["comment_id"],"docs":"Removes downtime by id for this service.","name":"del_comment","nr":-1,"required":["comment_id"],"thrukcmd":1},
+  "del_downtime":{"args":["downtime_id"],"docs":"Removes downtime by id for this service.","name":"del_downtime","nr":-1,"required":["downtime_id"],"thrukcmd":1},
   "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
   "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","nr":"40","required":[]},
   "disable_svc_check":{"args":[],"name":"disable_svc_check","nr":"6","required":[],"requires_comment":1},

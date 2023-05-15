@@ -461,6 +461,24 @@ This command does not require any arguments.
 
 See http://www.naemon.io/documentation/developer/externalcommands/del_all_host_comments.html for details.
 
+=== POST /hosts/<name>/cmd/del_comment
+
+Removes downtime by id for this host.
+
+Required arguments:
+
+  * comment_id
+
+
+=== POST /hosts/<name>/cmd/del_downtime
+
+Removes downtime by id for this host.
+
+Required arguments:
+
+  * downtime_id
+
+
 === POST /hosts/<name>/cmd/delay_host_notification
 
 Sends the DELAY_HOST_NOTIFICATION command.
@@ -1062,6 +1080,24 @@ Sends the DEL_ALL_SVC_COMMENTS command.
 This command does not require any arguments.
 
 See http://www.naemon.io/documentation/developer/externalcommands/del_all_svc_comments.html for details.
+
+=== POST /services/<host>/<service>/cmd/del_comment
+
+Removes downtime by id for this service.
+
+Required arguments:
+
+  * comment_id
+
+
+=== POST /services/<host>/<service>/cmd/del_downtime
+
+Removes downtime by id for this service.
+
+Required arguments:
+
+  * downtime_id
+
 
 === POST /services/<host>/<service>/cmd/delay_svc_notification
 

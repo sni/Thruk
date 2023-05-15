@@ -13,6 +13,8 @@ next:
           - fix navigation clicks not working occasionally
           - Rest
             - add last_login to /r/thruk/users
+            - add host/service del_comment/del_downtime endpoints
+            - change required permissions for del_*_comment del_*_downtime
 
 3.04     Mon Feb 20 09:28:17 CET 2023
           - add minimal=3 mode on status pages to hide pager and filter
