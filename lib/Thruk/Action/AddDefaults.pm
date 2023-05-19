@@ -494,7 +494,14 @@ sub add_defaults {
 
     ###############################
     # read cached data
-    my $cached_data = $c->cache->get->{'global'} || {};
+    my $cached_data = {};
+    {
+        my $cache = $c->cache;
+        if($cache) {
+            my $cached = $c->cache->get;
+            $cached_data = $cached->{'global'} || {};
+        }
+    }
 
     ###############################
     if(!$c->config->{'_lmd_federtion_checked'} && ($ENV{'THRUK_USE_LMD'} || $c->config->{'lmd_remote'})) {
