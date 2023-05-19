@@ -43,6 +43,8 @@ for my $type (sort keys %{$cmds}) {
     for my $cmd (sort keys %{$cmds->{$type}}) {
         next if $cmd eq 'acknowledge_host_problem_expire';
         next if $cmd eq 'acknowledge_svc_problem_expire';
+        next if $cmd eq 'del_comment';
+        next if $cmd eq 'del_downtime';
         next if $cmd =~ m/^shutdown_pro/mx;
         next if $cmd =~ m/^restart_pro/mx;
         my $test = {
