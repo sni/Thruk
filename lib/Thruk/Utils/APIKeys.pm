@@ -130,7 +130,7 @@ returns private, hashed key and filename
 
 =cut
 sub create_key {
-    my($c, $username, $comment, $roles, $superuser) = @_;
+    my($c, $username, $comment, $roles, $superuser, $force_user) = @_;
 
     my $privatekey = Thruk::Utils::Crypt::random_uuid([$username, $comment, time()]);
     my($hashed_key, $digest_nr, $digest_name) = Thruk::Utils::Crypt::hexdigest($privatekey);
@@ -145,6 +145,7 @@ sub create_key {
     if($superuser) {
         delete $data->{'user'};
         $data->{'superuser'} = 1;
+        $data->{'force_user'} = $force_user if $force_user;
     }
     if(defined $roles) {
         $data->{'roles'} = $roles;
@@ -197,6 +198,7 @@ sub create_key_from_req_params {
            ($c->req->parameters->{'comment'} // ''),
             $roles,
             $c->req->parameters->{'superuser'} ? 1 : 0,
+            $c->req->parameters->{'force_user'},
     );
     return($private_key, $hashed_key, $filename);
 }
@@ -257,6 +259,7 @@ sub read_key {
     $data->{'file'}       = $file;
     $data->{'digest'}     = $type;
     $data->{'superuser'}  = 1 if delete $data->{'system'}; # migrate system keys
+    delete $data->{'force_user'} unless $data->{'superuser'};
     if(-s $file.'.stats') {
         my $stats = {};
         eval {
@@ -265,6 +268,7 @@ sub read_key {
         _debug("failed to read stats file: ".$@) if $@;
         $data = { %{$stats}, %{$data} };
     }
+
     return($data);
 }
 

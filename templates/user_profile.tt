@@ -165,20 +165,34 @@
           <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
           <div class="flexrow gap-1">
             <input type="text" name="comment" value="" placeholder="comment" class="grow">
-            <button class="w-44" onclick="setBtnSpinner(this);"><i class="uil uil-plus"></i>Create New API Key</button>
+            <button class="w-44 green" onclick="setBtnSpinner(this);"><i class="uil uil-save"></i>Save New API Key</button>
           </div>
-          <div class="pt-1">
-            <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %]>
-            <label for="superuser" title="Enable to create a global shared api key, which is not bound to this user." class="font-semibold [% IF !c.check_user_roles("admin") %]disabled[% END %]">Superuser Key</label>
+          <div class="pt-1 flex gap-1 min-h-[32px] items-center">
+            <input type="checkbox" id="superuser" name="superuser" value="1"[% IF !c.check_user_roles("admin") %] disabled [% END %] onchange="if(this.checked) { showElement('force_user'); } else { hideElement('force_user'); } ">
+            <label for="superuser" title="Enable to create a global shared api key, which is not bound to this user." class="font-semibold clickable hoverable [% IF !c.check_user_roles("admin") %]disabled[% END %]">Superuser Key</label>
             <a class="link ml-5" href="https://thruk.org/documentation/rest.html#api-key" target="_blank">(<i class="uil uil-external-link-alt"></i> read more about superuser keys)</a>
+            <input id="force_user" type="text" name="force_user" value="" placeholder="force user name" class="ml-5 w-56" style="display: none;">
           </div>
 
           <div class="pt-1">
-            <input type="hidden" name="restrict_only" value="1">
-            <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { showElement('restricted_roles'); } else { hideElement('restricted_roles'); } ">
-            <b><label for="restrict" title="Enable to select roles. Otherwise this API key will get the same roles as the user itself." class="clickable hoverable">Select Roles</label></b><br>
+            <div class="flexrow flex-nowrap gap-1 mb-2">
+              <input type="hidden" name="restrict_only" value="1">
+              <input type="checkbox" id="restrict" name="restrict" value="1" onchange="if(this.checked) { jQuery('.js-restricted_roles').show(); } else { jQuery('.js-restricted_roles').hide(); } ">
+              <label for="restrict" title="Enable to select roles. Otherwise this API key will get the same roles as the user itself." class="font-semibold clickable hoverable">Select Roles</label>
+            </div>
+            <div style="display: none;" class="flexrow flex-nowrap gap-x-2 mb-2 items-center js-restricted_roles">
+              <span class="ml-5">Quick:</span>
+              <div class="buttongroup">
+                <button class="min-w-[70px]" onclick="setRoles(''); return false;">None</button>
+                <button class="min-w-[70px]" onclick="setRoles('*'); return false;">All</button>
+                <button class="min-w-[70px]" onclick="setRoles('authorized_for_read_only'); return false;">Read-Only</button>
+                <button class="min-w-[70px]" onclick="setRoles('authorized_for_admin'); return false;">Admin</button>
+                <button class="min-w-[70px]" onclick="setRoles('authorized_for_all_host_commands,authorized_for_all_hosts,authorized_for_all_service_commands,authorized_for_all_services'); return false;">All-Commands</button>
+                <button class="min-w-[70px]" onclick="setRoles('authorized_for_all_hosts,authorized_for_all_services,authorized_for_read_only'); return false;">All-Read-Only</button>
+              </div>
+            </div>
 
-            <div id="restricted_roles" style="display: none;" class="flexcol gap-px">
+            <div style="display: none;" class="flexcol gap-px js-restricted_roles">
               [% FOREACH r = available_roles %]
               <div>
                 <input type="checkbox" id="role.[% r | html %]" name="roles" value="[% r | html %]"[% IF !c.user.check_role_permissions(r) %] disabled[% END %][% IF c.check_user_roles(r) %] checked[% END %]>
@@ -200,6 +214,7 @@
       <tr>
         <th class="text-center">Superuser</th>
         <th>Role Restriction</th>
+        <th>Force User</th>
         <th>Comment</th>
         <th>Created At</th>
         <th>Last Used</th>
@@ -224,6 +239,7 @@
               &lt;no restriction&gt;
             [% END %]
         </td>
+        <td class="align-top">[% IF key.exists('force_user') %][% key.force_user %][% ELSE %][% END %]</td>
         <td class="align-top truncate max-w-[300px]">[% IF key.exists('comment') %][% key.comment | html %][% END %]</td>
         <td class="align-top">[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
         <td class="align-top">[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
@@ -263,6 +279,18 @@
   [% IF new_private_key %]
   set_sub(2, "apikeys");
   [% END %]
+
+  function setRoles(roles) {
+    jQuery('input:checkbox[name="roles"]').prop('checked', false);
+    jQuery.each(roles.split(","), function(n, r) {
+      jQuery('input:checkbox[name="roles"][value="'+r+'"]').prop('checked', true);
+    });
+    if(roles == "*") {
+      jQuery('input:checkbox[name="roles"]').prop('checked', true);
+      jQuery('input:checkbox[name="roles"][value="authorized_for_read_only"]').prop('checked', false);
+    }
+    return false;
+  }
   -->
 </script>
 

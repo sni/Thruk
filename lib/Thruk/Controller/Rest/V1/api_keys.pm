@@ -78,9 +78,10 @@ Thruk::Controller::rest_v1::register_rest_path_v1(['DELETE'], qr%^/thruk/api_key
 # Optional arguments:
 #
 #   * comment
-#   * superuser (flag to create superuser api key)
-#   * username (requires admin privileges)
-#   * roles (restrict roles to given list)
+#   * superuser  (flag to create superuser api key)
+#   * username   (requires admin privileges, assigns key to specific user)
+#   * roles      (restrict roles to given list)
+#   * force_user (sets username in combination with super user flag)
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/api_keys?$%mx, \&_rest_get_thruk_api_key_new);
 sub _rest_get_thruk_api_key_new {
     my($c) = @_;

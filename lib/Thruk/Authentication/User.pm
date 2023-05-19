@@ -84,13 +84,13 @@ sub new {
 
 =head2 set_dynamic_attributes
 
-  set_dynamic_attributes($c, [$skip_db_access], [$roles])
+  set_dynamic_attributes($c, [$skip_db_access], [$roles], [$force_roles])
 
 sets attributes based on livestatus data
 
 =cut
 sub set_dynamic_attributes {
-    my($self, $c, $skip_db_access,$roles) = @_;
+    my($self, $c, $skip_db_access,$roles, $force_roles) = @_;
     $c->stats->profile(begin => "User::set_dynamic_attributes");
 
     my $username = $self->{'username'};
@@ -98,7 +98,7 @@ sub set_dynamic_attributes {
 
     # internal technical users do not have any dynamic attributes
     if($self->{'internal'}) {
-        $self->clean_roles($roles);
+        $self->clean_roles($roles, $force_roles);
         $c->stats->profile(end => "User::set_dynamic_attributes");
         return $self;
     }
@@ -124,7 +124,7 @@ sub set_dynamic_attributes {
 
     $self->_apply_user_data($c, $data);
 
-    $self->clean_roles($roles);
+    $self->clean_roles($roles, $force_roles);
 
     if($self->check_user_roles('admin')) {
         $self->grant('admin');
@@ -150,7 +150,11 @@ limit roles to given list (using the intersection of user roles and list)
 
 =cut
 sub clean_roles {
-    my($self, $roles) = @_;
+    my($self, $roles, $force_roles) = @_;
+    if($force_roles) {
+        $self->{'roles'} = Thruk::Base::array_uniq($force_roles);
+        return $force_roles;
+    }
     return($self->{'roles'}) unless defined $roles;
 
     my $readonly;

@@ -1710,6 +1710,7 @@ lists api keys
 |created                           | unixtimestamp of when the key was created
 |digest                            | used hash algorithm
 |file                              | path to stored file
+|force_user                        | super user keys can enforce a specific user
 |hashed_key                        | hashed private key
 |last_from                         | ip address of last usage
 |last_used                         | unixtimestamp of last usage
@@ -1726,9 +1727,10 @@ create new api key.
 Optional arguments:
 
   * comment
-  * superuser (flag to create superuser api key)
-  * username (requires admin privileges)
-  * roles (restrict roles to given list)
+  * superuser  (flag to create superuser api key)
+  * username   (requires admin privileges, assigns key to specific user)
+  * roles      (restrict roles to given list)
+  * force_user (sets username in combination with super user flag)
 
 === GET /thruk/api_keys/<id>
 

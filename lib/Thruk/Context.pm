@@ -313,7 +313,7 @@ sub authenticate {
     my $internal  = $options{'internal'};
     my $auth_src  = $options{'auth_src'};
     my($original_username, $roles);
-    my($sessionid, $sessiondata);
+    my($sessionid, $sessiondata, $force_roles);
     if(defined $username) {
         confess("auth_src required") unless defined $auth_src;
         $original_username = $username;
@@ -325,7 +325,7 @@ sub authenticate {
             _set_stash_user($c, $user, $auth_src);
             return($user);
         }
-        ($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata) = _request_username($c, $options{'apikey'});
+        ($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata, $force_roles) = _request_username($c, $options{'apikey'});
 
         # transform username upper/lower case?
         $original_username = $username;
@@ -347,7 +347,7 @@ sub authenticate {
     }
     _set_stash_user($c, $user, $auth_src);
     $c->{'user'}->{'original_username'} = $original_username;
-    $user->set_dynamic_attributes($c, $options{'skip_db_access'},$roles);
+    $user->set_dynamic_attributes($c, $options{'skip_db_access'},$roles, $force_roles);
     _debug(sprintf("authenticated as '%s' - auth src '%s'", $user->{'username'}, $auth_src)) if Thruk::Base->verbose;
 
     # set session id for all requests
@@ -386,13 +386,13 @@ sub _set_stash_user {
 
 get username from env
 
-returns $username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata
+returns $username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata, $force_roles
 
 =cut
 sub _request_username {
     my($c, $apikey) = @_;
 
-    my($username, $auth_src, $superuser, $internal, $roles, $sessiondata);
+    my($username, $auth_src, $superuser, $internal, $roles, $sessiondata, $force_roles);
     my $env       = $c->env;
     $apikey       = $c->req->header('X-Thruk-Auth-Key') unless defined $apikey;
     my $sessionid = $c->cookies('thruk_auth');
@@ -425,11 +425,12 @@ sub _request_username {
             $username = $data->{'user'};
             if($data->{'superuser'}) {
                 $superuser = 1;
-                $username  = $c->req->header('X-Thruk-Auth-User') || $c->config->{'default_user_name'};
+                $username  = $data->{'force_user'} || $c->req->header('X-Thruk-Auth-User') || $c->config->{'default_user_name'};
                 if(!$username) {
                     $username  = '(api)';
                     $internal  = 1;
                 }
+                $force_roles = $data->{'roles'} if $data->{'force_user'};
             }
             $roles    = $data->{'roles'};
             $auth_src = "api_key";
@@ -476,7 +477,7 @@ sub _request_username {
         return;
     }
 
-    return($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata);
+    return($username, $auth_src, $roles, $superuser, $internal, $sessionid, $sessiondata, $force_roles);
 }
 
 =head2 user_exists

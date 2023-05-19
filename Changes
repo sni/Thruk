@@ -11,6 +11,7 @@ next:
           - add default_main_filter option to apply filter for "All Hosts" view
           - add config option is_executing_timeout
           - fix navigation clicks not working occasionally
+          - add force_user option to super user api keys
           - Rest
             - add last_login to /r/thruk/users
             - add host/service del_comment/del_downtime endpoints
