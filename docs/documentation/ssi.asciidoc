@@ -96,3 +96,31 @@ Show alert box on all pages:
   This alert will be visible on pages.
 </div>
 ------
+
+
+Style custom variables box:
+
+.common-header.ssi:
+------
+<style>
+.cust_var {
+    font-style: normal;
+    font-size:13px;
+    line-height:11px;
+}
+.cust_var td:first-child {
+    text-transform: lowercase;
+    font-weight: 600;
+    color: var(--text-th) !important;
+}
+.cust_var td:first-child::first-letter {
+    text-transform: uppercase;
+}
+.cust_var:first-child td {
+    padding-top:8px;
+}
+.cust_var:last-child td {
+    padding-bottom:4px;
+}
+</style>
+------
