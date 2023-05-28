@@ -29,15 +29,10 @@ if [ -n "$OMD_ROOT" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
 fi
-if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
-    node $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
-    rc=$?
-    if [ -e "$TEMPFILE.png" ]; then
-        mv "$TEMPFILE.png" "$TEMPFILE"
-    fi
-    exit $rc
-fi
 
-echo "ERROR: puppeteer not found"
-echo "(phantomjs is no longer support and required)"
-exit 1
+node $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
+rc=$?
+if [ -e "$TEMPFILE.png" ]; then
+    mv "$TEMPFILE.png" "$TEMPFILE"
+fi
+exit $rc

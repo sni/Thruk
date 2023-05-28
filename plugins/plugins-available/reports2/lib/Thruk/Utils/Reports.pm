@@ -1764,20 +1764,16 @@ sub _convert_to_pdf {
     _debug("converting to pdf: ".$cmd);
     my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
-    # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
         my $error = Thruk::Utils::IO::read($logfile);
         if($error eq "") { $error = $out; }
-        if($error =~ m/QPainter::begin/mx) {
-            $out = Thruk::Utils::IO::cmd($cmd);
-        }
-        if($error eq "") {
-            $error = "failed to produce a pdf file without any error message.\npwd: ".Cwd::getcwd()."\ncmdline:\n$cmd";
-        }
-        if(!-e $attachment.'.pdf') {
+        if($error =~ m/internal\/modules\/cjs\/loader\.js/mx) {
+            $error =~ s/^internal\/modules\/cjs\/loader\.js:\d+\s*throw\s*err;\s*\^\s*Error:/Node Error:/sgmx; # remove useless info from node errors
+            Thruk::Utils::IO::write($logfile, $error);
+        } else {
             Thruk::Utils::IO::write($logfile, $error, undef, 1) unless -s $logfile;
-            die('report failed: '.$error);
         }
+        die('report failed: '.$error);
     }
 
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);

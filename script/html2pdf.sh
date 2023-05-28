@@ -29,13 +29,8 @@ if [ -n "$OMD_ROOT" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
 fi
-if [ -n "$NODE_PATH" ] && [ -d "$NODE_PATH" ]; then
-    node $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "" $IS_REPORT 2>&1
-    mv "${OUTPUT}.pdf" "${OUTPUT}"
-    rc=$?
-    exit $rc
-fi
 
-echo "ERROR: puppeteer not found"
-echo "(phantomjs is no longer support and required)"
-exit 1
+node $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "" $IS_REPORT 2>&1
+mv "${OUTPUT}.pdf" "${OUTPUT}"
+rc=$?
+exit $rc

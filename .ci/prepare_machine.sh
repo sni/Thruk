@@ -65,6 +65,7 @@ apt-get -y install \
     libconfig-general-perl \
     libwww-mechanize-perl \
     chromium-browser \
+    npm \
 
 echo "deb http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main" >> /etc/apt/sources.list
 wget -q "http://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | apt-key add -
@@ -82,6 +83,8 @@ if [ -e support/thruk_templates.cfg ]; then
 else
     :
 fi
+
+npm i -g puppeteer
 
 # ensure we have a test database in place for tests
 /etc/init.d/mysql start
