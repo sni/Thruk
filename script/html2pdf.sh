@@ -33,6 +33,9 @@ if [ -n "$OMD_ROOT" ]; then
 fi
 if [ -z "$NODE_PATH" ] && [ -d /var/lib/thruk/puppeteer/node_modules ]; then
     export NODE_PATH=/var/lib/thruk/puppeteer/node_modules
+    if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
+        export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/puppeteer/chromium/chrome/*/chrome*/chrome | head -n 1)
+    fi
 fi
 
 node $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "" $IS_REPORT 2>&1

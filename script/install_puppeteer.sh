@@ -28,7 +28,7 @@ fi
 MISSING=$(ldd $DEST/chromium/chrome/*/chrome-*/chrome | grep "=> not found")
 if [ -n "$MISSING" ]; then
     if test -x /usr/bin/yum; then
-        yum -y install alsa-lib atk at-spi2-atk libdrm libXcomposite libXdamage libxkbcommon libXrandr mesa-libgbm nss
+        yum -y install alsa-lib atk at-spi2-atk libdrm libXcomposite libXdamage libxkbcommon libXrandr mesa-libgbm nss cups-libs pango cairo
     elif test -x /usr/bin/dnf; then
         yum -y install alsa-lib atk at-spi2-atk cups-libs libdrm libXcomposite libXdamage libxkbcommon libXrandr mesa-libgbm nss
     elif test -x /usr/bin/dnf; then
