@@ -84,8 +84,6 @@ else
     :
 fi
 
-npm i -g puppeteer
-
 # ensure we have a test database in place for tests
 /etc/init.d/mysql start
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot

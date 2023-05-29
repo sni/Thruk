@@ -29,6 +29,9 @@ if [ -n "$OMD_ROOT" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
 fi
+if [ -z "$NODE_PATH" ] && [ -d /var/lib/thruk/puppeteer/node_modules ]; then
+    export NODE_PATH=/var/lib/thruk/puppeteer/node_modules
+fi
 
 node $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
 rc=$?

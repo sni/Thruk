@@ -29,6 +29,9 @@ if [ -n "$OMD_ROOT" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
 fi
+if [ -z "$NODE_PATH" ] && [ -d /var/lib/thruk/puppeteer/node_modules ]; then
+    export NODE_PATH=/var/lib/thruk/puppeteer/node_modules
+fi
 
 node $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "" $IS_REPORT 2>&1
 mv "${OUTPUT}.pdf" "${OUTPUT}"
