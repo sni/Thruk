@@ -1768,7 +1768,7 @@ sub _convert_to_pdf {
         my $error = Thruk::Utils::IO::read($logfile);
         if($error eq "") { $error = $out; }
         if($error =~ m/internal\/modules\/cjs\/loader\.js/mx) {
-            $error =~ s/^internal\/modules\/cjs\/loader\.js:\d+\s*throw\s*err;\s*\^\s*Error:/Node Error:/sgmx; # remove useless info from node errors
+            $error =~ s/^.*?internal\/modules\/cjs\/loader(\.js:\d+|:\d*)\s*throw\s*err;\s*\^\s*Error:/Node Error:/sgmx; # remove useless info from node errors
             Thruk::Utils::IO::write($logfile, $error);
         } else {
             Thruk::Utils::IO::write($logfile, $error, undef, 1) unless -s $logfile;
