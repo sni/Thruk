@@ -18,7 +18,7 @@ var is_report = process.argv[7];
 
 (async () => {
   const browser = await puppeteer.launch({
-          headless: true,
+          headless: "1", // keep old headless mode for now but disabled deprecation warning
           ignoreHTTPSErrors: true,
           args: [
               '--no-sandbox',
