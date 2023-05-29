@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# usage: ./install_puppeteer.sh
+#
+# installs puppeteer into /var/lib/thruk/puppeteer so it can be used to render PDFs
+#
 
 DEST=$1
 if [ -z "$DEST" ]; then
@@ -16,7 +21,23 @@ cd $DEST
 export PUPPETEER_DOWNLOAD_PATH=$DEST/chromium
 echo "module.exports = {}" > .puppeteerrc.cjs
 mkdir -p node_modules
-npm i progress puppeteer
+
+# check node version, must be at least 16
+NODE_VERSION=$(node -v 2>/dev/null | sed -e 's/^v//' -e 's/\..*$//g')
+if [ -z $NODE_VERSION ]; then
+    echo "failed to detect node version"
+    exit 1
+fi
+
+NPM="npm"
+if [ $NODE_VERSION -lt 16 ]; then
+    npm i n
+    export N_PREFIX=$(pwd)/node
+    ./node_modules/.bin/n 16
+    NPM="./node_modules/.bin/n exec 16 npm"
+fi
+
+$NPM i progress puppeteer
 set +e
 
 if [ -n "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
