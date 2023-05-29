@@ -2,8 +2,10 @@
 
 # read rc files if exist
 unset PROFILEDOTD
-[ -e ~/.profile ] && . ~/.profile
-[ -e ~/.thruk   ] && . ~/.thruk
+[ -e /etc/thruk/thruk.env  ] && . /etc/thruk/thruk.env
+[ -e ~/etc/thruk/thruk.env ] && . ~/etc/thruk/thruk.env
+[ -e ~/.thruk              ] && . ~/.thruk
+[ -e ~/.profile            ] && . ~/.profile
 
 BASEDIR=$(dirname $0)/..
 

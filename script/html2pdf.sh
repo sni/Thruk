@@ -6,8 +6,10 @@
 #
 
 # read rc files if exist
-[ -e ~/.thruk   ] && . ~/.thruk
-[ -e ~/.profile ] && . ~/.profile
+[ -e /etc/thruk/thruk.env  ] && . /etc/thruk/thruk.env
+[ -e ~/etc/thruk/thruk.env ] && . ~/etc/thruk/thruk.env
+[ -e ~/.thruk              ] && . ~/.thruk
+[ -e ~/.profile            ] && . ~/.profile
 
 DIR=$(dirname "$BASH_SOURCE")
 export PATH=$PATH:$DIR

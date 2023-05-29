@@ -7,8 +7,10 @@
 # grafana_export.sh <imgwidth> <imgheight> <start> <end> <grafanaurl> <tempfile>
 
 # read rc files if exist
-[ -e ~/.thruk   ] && . ~/.thruk
-[ -e ~/.profile ] && . ~/.profile
+[ -e /etc/thruk/thruk.env  ] && . /etc/thruk/thruk.env
+[ -e ~/etc/thruk/thruk.env ] && . ~/etc/thruk/thruk.env
+[ -e ~/.thruk              ] && . ~/.thruk
+[ -e ~/.profile            ] && . ~/.profile
 
 WIDTH=$1
 HEIGHT=$2

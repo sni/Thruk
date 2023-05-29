@@ -255,6 +255,15 @@ This will install puppeteer into /var/lib/thruk/puppeteer
 
 It requires node and npm to be installed.
 
+In case chromium is installed on the system already, you can set
+
+  #> export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+before running the installer to skip the download. Then add
+the system path to ex.: /etc/thruk/thruk.env
+
+  #> export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 
 === How can I enable the business process addon.
 It works out of the box with OMD. If not using OMD, some manual steps

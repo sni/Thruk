@@ -19,6 +19,12 @@ mkdir -p node_modules
 npm i progress puppeteer
 set +e
 
+if [ -n "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
+    echo ""
+    echo "puppeteer successfully installed in $DEST"
+    exit 0
+fi
+
 MISSING=$(ldd $DEST/chromium/chrome/*/chrome-*/chrome | grep "=> not found")
 if [ -n "$MISSING" ]; then
     if test -x /usr/bin/yum; then
