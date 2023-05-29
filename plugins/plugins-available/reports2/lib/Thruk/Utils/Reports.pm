@@ -14,7 +14,7 @@ use warnings;
 use strict;
 use Carp;
 use Class::Inspector;
-use Cwd ();
+use Cwd qw/abs_path/;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8 encode);
 use File::Copy;
@@ -1760,7 +1760,7 @@ sub _convert_to_pdf {
         return;
     }
 
-    my $cmd = $c->config->{home}.'/script/html2pdf.sh "file://'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.($is_report//0).'"';
+    my $cmd = $c->config->{home}.'/script/html2pdf.sh "file://'.abs_path($htmlfile).'" "'.$attachment.'.pdf" "'.$logfile.'" "'.($is_report//0).'"';
     _debug("converting to pdf: ".$cmd);
     my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
