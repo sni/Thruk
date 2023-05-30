@@ -159,7 +159,7 @@ sub index {
         }
     }
 
-    if(!$ENV{'OMD_ROOT'} && !-d $c->config->{'var_path'}."/puppeteer" && !Thruk::Utils::has_node_module($c, 'puppeteer-core')) {
+    if(!$ENV{'OMD_ROOT'} && !-d $c->config->{'var_path'}."/puppeteer" && !Thruk::Utils::has_node_module($c, 'puppeteer')) {
         $c->stash->{'puppeteer'} = 0;
     }
 

@@ -3837,12 +3837,12 @@ sub has_node_module {
     return unless Thruk::Base::has_binary("node");
     return unless Thruk::Base::has_binary("npm");
 
-    my($out, $rc) = Thruk::Utils::IO::cmd($c, ["npm", "ls", "-g"]);
+    my($rc, $out) = Thruk::Utils::IO::cmd($c, ["npm", "ls", "-g"]);
     if($out =~ m/$module_name/mx) {
         return 1;
     }
 
-    ($out, $rc) = Thruk::Utils::IO::cmd($c, ["npm", "ls"]);
+    ($rc, $out) = Thruk::Utils::IO::cmd($c, ["npm", "ls"]);
     if($out =~ m/$module_name/mx) {
         return 1;
     }
