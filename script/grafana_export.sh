@@ -32,16 +32,16 @@ if [ -n "$OMD_ROOT" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
 fi
-if [ -z "$NODE_PATH" ] && [ -d /var/lib/thruk/puppeteer/node_modules ]; then
-    export NODE_PATH=/var/lib/thruk/puppeteer/node_modules
+if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
+    export NODE_PATH="/var/lib/thruk/puppeteer/node_modules"
     if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
         export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/puppeteer/chromium/chrome/*/chrome*/chrome | head -n 1)
     fi
-    if [ -d /var/lib/thruk/puppeteer/node ]; then
+    if [ -d "/var/lib/thruk/puppeteer/node" ]; then
         NODE="/var/lib/thruk/puppeteer/node/bin/node"
     fi
 fi
-
+ 
 $NODE $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
 rc=$?
 if [ -e "$TEMPFILE.png" ]; then

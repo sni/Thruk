@@ -43,7 +43,7 @@ if [ -z $NODE_VERSION ]; then
 fi
 
 if [ $NODE_VERSION -lt $USE_NODE ]; then
-    export N_PREFIX=$(pwd)/node
+    export N_PREFIX=$DEST/node
     echo "system node version $(node -v) too old, installing $USE_NODE into $N_PREFIX"
     INSTALL_NODE=1
 fi
