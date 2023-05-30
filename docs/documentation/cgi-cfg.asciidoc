@@ -114,6 +114,9 @@ ex.:
 
   authorized_for_admin = thrukadmin
 
+Note: For historical reasons, any use which has the `authorized_for_system_information` and the `authorized_for_configuration_information` role will also gain the admin role.
+This is considered deprecated and might change in the future.
+
 
 === authorized_for_system_information
 List of usernames who have access to the system and process
