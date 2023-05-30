@@ -50,7 +50,9 @@ fi
 
 if [ -x /usr/bin/chromium ]; then
     echo "using system chrome from /usr/bin/chromium"
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+else
+    export PUPPETEER_DOWNLOAD_PATH=$DEST/chromium
 fi
 
 ###########################################################
@@ -58,7 +60,6 @@ fi
 set -e
 mkdir -p $DEST
 cd $DEST
-export PUPPETEER_DOWNLOAD_PATH=$DEST/chromium
 echo "module.exports = {}" > .puppeteerrc.cjs
 mkdir -p node_modules
 
