@@ -116,21 +116,6 @@ sub format_number {
 
 ##############################################
 
-=head2 format_disk_size
-
-  my $string = format_disk_size($number)
-
-return human readable disk size
-
-=cut
-sub format_disk_size {
-    my($number) = @_;
-    my $str = sprintf("%.1f%s", reduce_number($number, "B", 1024));
-    return $str;
-}
-
-##############################################
-
 =head2 format_cronentry
 
   my $cron_string = format_cronentry($cron_entry)
@@ -2581,7 +2566,7 @@ sub which {
 
   reduce_number($number, $unit, [$divisor])
 
-return reduced number, ex 1024B -> 1KB
+return reduced number, ex 1024B -> 1KiB
 
 =cut
 
@@ -2591,11 +2576,15 @@ sub reduce_number {
     my $unitprefix = '';
 
     my $divs = [
+        [ 'P', 5 ],
         [ 'T', 4 ],
         [ 'G', 3 ],
         [ 'M', 2 ],
         [ 'K', 1 ],
     ];
+    if($divisor == 1024 && $number > 1024) {
+        $unit = "i".$unit;
+    }
     for my $div (@{$divs}) {
         my $pow   = $div->[1];
         my $limit = $divisor ** $pow;

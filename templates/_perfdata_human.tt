@@ -26,11 +26,11 @@
       <td class="text-right">[% IF last_parent != p.parent %][% p.parent %][% last_parent = p.parent %][% ELSE %][% END %]</td>
       [% END %]
       <td class="text-left">[% p.name | html %]</td>
-      <td class="text-right">[% format_number(p.value) %][% p.unit | html %]</td>
-      [% IF has_warn %]<td>[% format_number(p.warn) %]</td>[% END %]
-      [% IF has_crit %]<td>[% format_number(p.crit) %]</td>[% END %]
-      [% IF has_min  %]<td>[% format_number(p.min) %]</td>[% END %]
-      [% IF has_max  %]<td>[% format_number(p.max) %]</td>[% END %]
+      <td class="text-right">[% format_perf_number(p.value, p.unit, 1) %]</td>
+      [% IF has_warn %]<td>[% format_perf_number(p.warn, p.unit) %]</td>[% END %]
+      [% IF has_crit %]<td>[% format_perf_number(p.crit, p.unit) %]</td>[% END %]
+      [% IF has_min  %]<td>[% format_perf_number(p.min, p.unit) %]</td>[% END %]
+      [% IF has_max  %]<td>[% format_perf_number(p.max, p.unit) %]</td>[% END %]
       <td class="py-0">
         [% PROCESS _perfdata_table add_link="1" perfdata=p.orig state=4 %]
       </td>
