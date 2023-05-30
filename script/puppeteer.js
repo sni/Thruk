@@ -28,11 +28,8 @@ var is_report = process.argv[7];
   });
   const page = await browser.newPage();
   page.setViewport({width: Number(width), height: Number(height)});
-  // might fail for file:// urls etc...
-  try {
+  if(url.match(/^https?:/)) {
     await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
-  } catch(e) {
-    console.debug(e)
   }
   page.on('response', (response) => {
     const status = response.status();

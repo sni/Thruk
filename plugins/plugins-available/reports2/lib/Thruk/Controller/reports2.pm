@@ -510,6 +510,12 @@ sub report_email {
     } else {
         $c->stash->{attach}  = 'report.pdf';
     }
+    if(defined $r->{'params'}->{'pdf'} && $r->{'params'}->{'pdf'} eq 'no') {
+        my $attachment = $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.html';
+        if(-s $attachment) {
+            $c->stash->{size} = -s $attachment;
+        }
+    }
     $c->stash->{subject} = $r->{'subject'} || 'Report: '.$r->{'name'};
     $c->stash->{r}       = $r;
 
