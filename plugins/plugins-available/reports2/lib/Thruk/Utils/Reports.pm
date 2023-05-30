@@ -658,13 +658,15 @@ sub generate_report {
 
     # convert to pdf
     if($Thruk::Utils::PDF::ctype eq 'text/html') {
+        my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
         if(!$options->{'params'}->{'pdf'} || $options->{'params'}->{'pdf'} eq 'yes') {
             $Thruk::Utils::PDF::ctype = "html2pdf";
+            move($attachment, $htmlfile);
+            Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
+            _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
+        } else {
+            copy($attachment, $htmlfile);
         }
-        my $htmlfile = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
-        move($attachment, $htmlfile);
-        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
-        _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
     }
     elsif($Thruk::Utils::PDF::ctype eq 'html2pdf') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
