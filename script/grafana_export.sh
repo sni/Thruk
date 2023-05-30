@@ -35,7 +35,10 @@ fi
 if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
     export NODE_PATH="/var/lib/thruk/puppeteer/node_modules"
     if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
-        export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/puppeteer/chromium/chrome/*/chrome*/chrome | head -n 1)
+        export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/puppeteer/chromium/chrome/*/chrome*/chrome 2>/dev/null | head -n 1)
+    fi
+    if [ -z "$PUPPETEER_EXECUTABLE_PATH" -a -x /usr/bin/chromium ]; then
+        export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     fi
     if [ -d "/var/lib/thruk/puppeteer/node" ]; then
         NODE="/var/lib/thruk/puppeteer/node/bin/node"

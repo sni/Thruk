@@ -255,12 +255,18 @@ This will install puppeteer into /var/lib/thruk/puppeteer
 
 It requires node and npm to be installed.
 
-In case chromium is installed on the system already, you can set
+Thruk will use the system chromium if it is installed befor running
+the puppet installer.
+If no chromium is installed, puppeteer will download chromium
+into /var/lib/thruk/puppeteer/chromium.
+
+You can disable downloading chromium by setting this into the
+environment before running the installer.
 
   #> export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
-before running the installer to skip the download. Then add
-the system path to ex.: /etc/thruk/thruk.env
+You then need to tell puppeteer which chromium it should use, ex by
+putting this into: /etc/thruk/thruk.env
 
   #> export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 

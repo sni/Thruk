@@ -48,6 +48,11 @@ if [ $NODE_VERSION -lt $USE_NODE ]; then
     INSTALL_NODE=1
 fi
 
+if [ -x /usr/bin/chromium ]; then
+    echo "using system chrome from /usr/bin/chromium"
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+fi
+
 ###########################################################
 # do installation
 set -e
