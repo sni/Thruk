@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Rest
+            - add comments_info / downtimes_info to /r/hosts and /r/services
+
 3.06     Wed May 24 14:12:18 CEST 2023
           - DEPRECATION WARNING: next release will drop support for phantomjs in favor of puppeteer
           - support lexical/advanced filter

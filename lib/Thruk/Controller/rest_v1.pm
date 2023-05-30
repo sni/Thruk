@@ -990,6 +990,8 @@ sub _livestatus_options {
                 # if all requested columns are default columns, we can pass the columns to livestatus
                 my $found = 1;
                 for my $col (@{$columns}) {
+                    $col = "comments_with_info"   if $col eq 'comments_info';
+                    $col =  "downtimes_with_info" if $col eq 'downtimes_info';
                     if(!$ref_columns->{$col}) {
                         $found = 0;
                         last;
@@ -1004,12 +1006,14 @@ sub _livestatus_options {
         if(!$options->{'columns'}) {
             if($type eq 'hosts') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_host_columns;
+                push @{$options->{'extra_columns'}}, qw/comments_info downtimes_info/;
             }
             elsif($type eq 'hostgroups') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns;
             }
             elsif($type eq 'services') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_service_columns;
+                push @{$options->{'extra_columns'}}, qw/comments_info downtimes_info/;
             }
             elsif($type eq 'servicegroups') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns;
@@ -1174,6 +1178,12 @@ sub _expand_perfdata_and_custom_vars {
                 $row->{$name.'_unit'} = $p->{'unit'};
             }
             $row->{'host_perf_data_expanded'} = $perfdata;
+        }
+        if($row->{'comments_with_info'}) {
+            _add_comment_downtimes($row, 'comments_info', $row->{'comments_with_info'});
+        }
+        if($row->{'downtimes_with_info'}) {
+            _add_comment_downtimes($row, 'downtimes_info', $row->{'downtimes_with_info'});
         }
     }
     return($data);
@@ -2295,6 +2305,19 @@ sub _is_failed {
     if(ref $data eq 'HASH' && $data->{'code'} && $data->{'message'}) {
         return 1;
     }
+    return;
+}
+
+##########################################################
+sub _add_comment_downtimes {
+    my($row, $target_column, $list) = @_;
+    $row->{$target_column} = "";
+    return unless($list && ref $list eq 'ARRAY');
+    my $res = [];
+    for my $d (@{$list}) {
+        push @{$res}, sprintf("id:%d author:%s: text:%s", $d->[0], $d->[1], $d->[2])
+    }
+    $row->{$target_column} = join(", ", @{$res});
     return;
 }
 
