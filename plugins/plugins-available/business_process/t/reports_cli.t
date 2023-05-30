@@ -79,7 +79,7 @@ for my $report (@{$test_pdf_reports}) {
 
     # make sure sla reports contain the graph
     if($report->{'template'} =~ m/^sla_/mx) {
-        push @{$like}, '/Width 530/';
+        push @{$like}, '/Width 610/';
         push @{$like}, '/Height 300/';
     }
 
