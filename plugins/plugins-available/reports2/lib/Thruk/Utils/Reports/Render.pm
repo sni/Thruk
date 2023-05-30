@@ -914,7 +914,12 @@ sub _replace_img {
 ##########################################################
 sub _replace_css {
     my($baseurl, $report_base_url, $url, $skip_style_tag) = @_;
+    _debug("_replace_css: %s", $url);
     my $css = _read_static_content_file($baseurl, $report_base_url, $url);
+
+    # clean up font-face urls to reduce required disk space
+    $css =~ s/(\@font\-face\s*\{)(.*?)(\})/&_replace_css_font_face($1, $2, $3)/sgemxi;
+
     $css =~ s/\@import\s*url\s*\(("|')([^'"]*\.css[^"']*)("|')/&_replace_css($url, $report_base_url,$2, 1)/gemxi;
     $css =~ s/(url\()
               ([^)]*)
@@ -925,6 +930,57 @@ sub _replace_css {
     $text .= $css;
     $text .= "\n-->\n</style>\n";
     return $text;
+}
+
+##########################################################
+# strip down multiple font-face urls to a single one
+sub _replace_css_font_face {
+    my($pre, $styles, $post) = @_;
+    $styles =~ s/\n/ /sgmx;
+    my @data = split(/\s*;\s*/mx, $styles);
+    my @keep;
+    my %urls;
+    for my $d (@data) {
+        if($d =~ m/^src:\s*(.*)/gmx) {
+            my $sources = $1;
+            my @src = split(/\s*,\s*/mx, $sources);
+            for my $s (@src) {
+                my($u, $f);
+                if($s =~ m/url\s*\((.*?)\)/mx) {
+                    $u = $1;
+                }
+                if($s =~ m/format\s*\((.*?)\)/mx) {
+                    $f = $1;
+                }
+                if($f && $u) {
+                    $f =~ s/"//gmx;
+                    $f =~ s/'//gmx;
+                    $u =~ s/"//gmx;
+                    $u =~ s/'//gmx;
+                    $urls{$f} = $u;
+                }
+            }
+            next;
+        }
+        push @keep, $d.";";
+    }
+
+    # choose best font-face url format, but only one
+    my $found = 0;
+    for my $f (qw/woff2 woff/) {
+        if($urls{$f}) {
+            $found = 1;
+            push @keep, sprintf("src:url('%s') format('%s');", $urls{$f}, $f);
+            last;
+        }
+    }
+    if(!$found) {
+        my $f = (keys(%urls))[0];
+        push @keep, sprintf("src:url('%s') format('%s');", $urls{$f}, $f);
+    }
+    $styles = join("\n", @keep);
+
+    return($pre."\n".$styles."\n".$post."\n");
 }
 
 ##########################################################
