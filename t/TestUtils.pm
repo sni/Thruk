@@ -802,7 +802,7 @@ sub test_command {
     # exit code?
     $test->{'exit'} = 0 unless exists $test->{'exit'};
     if(defined $test->{'exit'} and $test->{'exit'} != -1) {
-        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".$stdout."\n"._caller_info()); $return = 0 };
+        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".($stdout//'')."\n"._caller_info()); $return = 0 };
     }
 
     # matches on stdout?
