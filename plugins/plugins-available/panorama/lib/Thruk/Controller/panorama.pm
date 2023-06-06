@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
+use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;
 use Encode qw(encode_utf8);
 use File::Copy qw/move copy/;
@@ -703,6 +704,14 @@ sub _task_upload {
 
     my $upload = $c->req->uploads->{$type};
     my $folder = $c->stash->{'usercontent_folder'}.'/'.$location;
+
+    # make sure folder is a subfolder of the usercontent folder
+    my $abs_user   = abs_path($c->stash->{'usercontent_folder'});
+    my $abs_target = abs_path($folder);
+    if($abs_target !~ m/^\Q$abs_user\E/mx) {
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload must be a subfolder of the user content folder.', success => Cpanel::JSON::XS::false });
+        return;
+    }
 
     if(!-w $folder.'/.') {
         # must be text/html result, otherwise extjs form result handler dies
