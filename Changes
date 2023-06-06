@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+3.06-2   Tue Jun  6 10:25:20 CEST 2023
+          - panorama:
+            - fix folder validation (CVE-2023-34096)
+
 3.06     Wed May 24 14:12:18 CEST 2023
           - DEPRECATION WARNING: next release will drop support for phantomjs in favor of puppeteer
           - support lexical/advanced filter
