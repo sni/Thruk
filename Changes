@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-3.06-2   Tue Jun  6 10:25:20 CEST 2023
+3.06.2   Tue Jun  6 10:25:20 CEST 2023
           - panorama:
             - fix folder validation (CVE-2023-34096)
           - reports:
