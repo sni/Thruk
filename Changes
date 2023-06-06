@@ -4,6 +4,13 @@ next:
           - DEPRECATION WARNING: gaining admin role from system_commands and configuration_information role
             is deprecated now and will be removed in the future.
           - improve display of large byte numbers in human perf data table
+3.06-2   Tue Jun  6 10:25:20 CEST 2023
+          - panorama:
+            - fix folder validation (CVE-2023-34096)
+          - reports:
+            - fix showing correct attachmenet size for html reports
+            - remove duplicate css include
+            - only use one css font-face source
           - Rest
             - add comments_info / downtimes_info to /r/hosts and /r/services
 
