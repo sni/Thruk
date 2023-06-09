@@ -38,9 +38,9 @@
             [% FOREACH b = all_broadcasts %]
               <tr>
                 <td>
-                  <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit">
+                  <a href="broadcast.cgi?id=[% b.basefile | html %]&amp;action=edit">
                     [% IF b.name %]
-                      [% b.name %]
+                      [% b.name | html %]
                     [% ELSE %]
                       [% b.raw_text.split('<br>').0.substr(0, 100) | html %]
                     [% END %]
@@ -51,18 +51,18 @@
                 <td class="text-center">[% IF b.hide_before_ts > 0; date_format(c, b.hide_before_ts); END %]</td>
                 <td class="text-center">[% IF b.expires_ts > 0; date_format(c, b.expires_ts); END %]</td>
                 <td class="text-center">[% IF b.loginpage %]Yes[% END %]</td>
-                <td class="max-w-sm truncate">[% b.contacts.join(', ') %]</td>
-                <td class="max-w-sm truncate">[% b.contactgroups.join(', ') %]</td>
+                <td class="max-w-sm truncate">[% b.contacts.join(', ') | html %]</td>
+                <td class="max-w-sm truncate">[% b.contactgroups.join(', ') | html %]</td>
                 <td>
                   <div class="flex gap-1 justify-center">
-                    <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=clone">
+                    <a href="broadcast.cgi?id=[% b.basefile | html %]&amp;action=clone">
                       <i class="fa-solid fa-copy small" title='Clone Broadcast'></i>
                     </a>
-                    <a href="broadcast.cgi?id=[% b.basefile %]&amp;action=edit">
+                    <a href="broadcast.cgi?id=[% b.basefile | html %]&amp;action=edit">
                       <i class="fa-solid fa-pencil small" title='Edit Broadcast'></i>
                     </a>
                     <form action="broadcast.cgi" method="POST">
-                      <input type="hidden" name="id" value="[% b.basefile %]">
+                      <input type="hidden" name="id" value="[% b.basefile | html %]">
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                       <button type="submit" onclick="return confirm('Do you really want to delete this broadcast?')" title="Delete broadcast" class="iconOnly">
