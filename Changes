@@ -9,7 +9,7 @@ next:
           - panorama:
             - fix folder validation (CVE-2023-34096)
           - reports:
-            - fix showing correct attachmenet size for html reports
+            - fix showing correct attachment size for html reports
             - remove duplicate css include
             - only use one css font-face source
           - Rest
