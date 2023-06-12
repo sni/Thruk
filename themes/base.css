@@ -78,11 +78,13 @@
   --console-bg:               var(--color-black);
 
   --peer-up-bg:               var(--color-green-500);
-  --peer-up-fg:               var(--color-white);
+  --peer-up-fg:               var(--color-gray-700);
+  --peer-down-bg:             var(--color-red-500);
+  --peer-down-fg:             var(--color-gray-700);
   --peer-dis-bg:              var(--color-truegray-300);
-  --peer-dis-fg:              var(--color-white);
+  --peer-dis-fg:              var(--color-gray-700);
   --peer-hid-bg:              var(--color-truegray-200);
-  --peer-hid-fg:              var(--color-white);
+  --peer-hid-fg:              var(--color-gray-500);
 
   --progessbar-fg:            var(--color-sky-500);
   --progessbar-bg:            var(--color-gray-200);
@@ -200,7 +202,7 @@
   .UNKNOWN {
     @apply !bg-[color:var(--badge-unknown-bg)] !text-[color:var(--badge-unknown-fg)];
   }
-  .CRITICAL, .NO, .DISABLED, .button_peerDOWN {
+  .CRITICAL, .NO, .DISABLED {
     @apply !bg-[color:var(--badge-critical-bg)] !text-[color:var(--badge-critical-fg)];
   }
 
@@ -227,6 +229,9 @@
 
   .button_peerUP {
     @apply !bg-[color:var(--peer-up-bg)] !text-[color:var(--peer-up-fg)];
+  }
+  .button_peerDOWN {
+    @apply !bg-[color:var(--peer-down-bg)] !text-[color:var(--peer-down-fg)];
   }
   .button_peerDIS {
     @apply !bg-[color:var(--peer-dis-bg)] !text-[color:var(--peer-dis-fg)];
@@ -1324,7 +1329,7 @@ DIV.spinner {
  * site panel / backends
  */
 #site_panel .button_peer, div.backends BUTTON, #site_panel .btn_sites {
-  @apply px-0.5 w-24 block truncate h-max !text-[color:var(--button-fg)] hover:!text-[color:var(--button-hover-fg)] hover:brightness-90;
+  @apply px-0.5 w-24 block truncate h-max hover:!text-[color:var(--button-hover-fg)] hover:brightness-90;
 }
 UL.ui-fancytree {
   IMG {
