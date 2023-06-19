@@ -49,7 +49,7 @@ sub get_report_list {
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
             my $nr = $1;
-            next if $number_filter && $nr != $number_filter;
+            next if $number_filter && $nr ne $number_filter;
             my $r  = read_report_file($c, $nr, undef, $noauth, 1);
             next unless $r;
             if($r->{'var'} and $r->{'var'}->{'job'}) {
