@@ -106,6 +106,8 @@ sub index {
         $arg1 = 9 if $all_down;
     }
 
+    my $skip_stack_trace = 0;
+
     my $errors = {
         '99'  => {
             'mess' => '',
@@ -248,6 +250,12 @@ sub index {
             'dscr'    => 'When authenticating by the secret key via X-Thruk-Auth-Key header, you need to set the X-Thruk-Auth-User header as well.',
             'code'    => 400, # bad request
         },
+        '29'  => {
+            'mess'             => 'Background Job Canceled',
+            'dscr'             => 'Background Job has been canceled',
+            'code'             => 410, # gone
+            'skip_stack_trace' => 1,
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
@@ -256,6 +264,7 @@ sub index {
         $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
         $c->stash->{errorDetails}      .= $errors->{$arg1}->{'details'} if defined $errors->{$arg1}->{'details'};
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
+        $skip_stack_trace = $errors->{$arg1}->{'skip_stack_trace'} if defined $errors->{$arg1}->{'skip_stack_trace'};
     }
 
     my $errorDetails = join("\n", @{$c->error});
@@ -355,6 +364,8 @@ sub index {
         $json->{'description'} = $c->stash->{errorDescription} if $c->stash->{errorDescription};
         return $c->render(json => $json);
     }
+
+    $c->stash->{stacktrace} = "" if $skip_stack_trace;
 
     if(Thruk::Base->mode_cli() && (!defined $log_req || $log_req)) {
         _error($c->stash->{'raw_error_data'}->{'msg'} // $c->stash->{errorMessage});
