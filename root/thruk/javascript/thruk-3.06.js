@@ -1756,7 +1756,7 @@ function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetryS
                 // chrome does not set scroll immediately on page load, wait some milliseconds and set again
                 window.setTimeout(function() {
                     applyScroll(scrollTo);
-                }, 50);
+                }, 150);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {

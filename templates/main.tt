@@ -299,35 +299,43 @@
 
 <script>
 
-  function getToolTipTemplate(data) {
-    var template = '<table class="{=CLASS_TOOLTIP}"><tbody>{=TITLE}';
-    if(data != null) {
-      jQuery(data).each(function(i, row) {
-        if(row.value > 0) {
-          template += getToolTipTemplateRow(row.name, row.value, row.color, '');
-        }
-      });
-      template += '{{}}';
-    } else {
-      template += '{{'+getToolTipTemplateRow()+'}}';
-    }
-    template += '<\/tbody><\/table>test';
-    return(template);
+function getToolTipTemplate(data) {
+  var template = '<table class="{=CLASS_TOOLTIP}"><tbody>{=TITLE}';
+  if(data != null) {
+    jQuery(data).each(function(i, row) {
+      if(row.value > 0) {
+        template += getToolTipTemplateRow(row.name, row.value, row.color, '');
+      }
+    });
+    template += '{{}}';
+  } else {
+    template += '{{'+getToolTipTemplateRow()+'}}';
   }
+  template += '<\/tbody><\/table>';
+  return(template);
+}
 
-  function getToolTipTemplateRow(name, value, color, cls) {
-    cls   = cls   != null ? cls   : '{=CLASS_TOOLTIP_NAME}';
-    color = color != null ? color : '{=COLOR}';
-    name  = name  != null ? name  : '{=NAME}';
-    value = value != null ? value : '{=VALUE}';
-    return(''
-      +'<tr class="'+cls+'">'
-      +'<td class="name"><span style="background-color:'+color+'"></span>'+name+'<\/td>'
-      +'<td class="value text-right">'+value+'<\/td>'
-      +'<\/tr>'
-    );
+function getToolTipTemplateRow(name, value, color, cls) {
+  cls   = cls   != null ? cls   : '{=CLASS_TOOLTIP_NAME}';
+  color = color != null ? color : '{=COLOR}';
+  name  = name  != null ? name  : '{=NAME}';
+  value = value != null ? value : '{=VALUE}';
+  return(''
+    +'<tr class="'+cls+'">'
+    +'<td class="name"><span style="background-color:'+color+'"></span>'+name+'<\/td>'
+    +'<td class="value text-right">'+value+'<\/td>'
+    +'<\/tr>'
+  );
+}
+
+function initGraphs() {
+  // chrome sometimes draws panels to big on refresh, delay rendering graphs until the cards have a sane size
+  if(jQuery("#hosts-gaugeChart").innerWidth() > jQuery(document).innerWidth() * 0.8) {
+    window.setTimeout(function() {
+      initGraphs();
+    }, 50);
+    return;
   }
-
   //avail backends
   [% IF backend_stats.available > 1 %]
     var backends = bb.generate({
@@ -524,60 +532,60 @@
   var linkHideTimer;
   var notificationsLabels = [% json_encode(notifications.label) %];
   var notifications = bb.generate({
-  data: {
-    x: "x",
-    columns: [% json_encode(notifications.data) %],
-    type: "bar",
-    onover: function(d, element) {
-      window.clearTimeout(linkHideTimer);
-      var start = Math.round(d.x.getTime()/1000);
-      var end   = start + 3600;
-      var hostfilter = "";
-      [% IF notification_pattern %]
-        hostfilter = "&pattern="+encodeURIComponent("[% notification_pattern | html %]");
-      [% END %]
-      jQuery("#notifications-link").attr("href", "notifications.cgi?start="+encodeURIComponent(start)+"&end="+encodeURIComponent(end)+hostfilter);
-    },
-    onout: function(d, element) {
-      linkHideTimer = window.setTimeout(function() {
-        jQuery("#notifications-link").attr("href", "notifications.cgi?start=&end=");
-      }, 50);
-    }
-  },
-  color: {
-    pattern: ['var(--dashboard-series-1)']
-  },
-  size: {
-    height: 210
-  },
-  axis: {
-    x: {
-      type: "timeseries",
-      localtime: true,
-      tick: {
-        tooltip: true,
-        format: function(x, a) {
-          var ts = x.getTime()/1000;
-          return notificationsLabels[ts];
-        }
+    data: {
+      x: "x",
+      columns: [% json_encode(notifications.data) %],
+      type: "bar",
+      onover: function(d, element) {
+        window.clearTimeout(linkHideTimer);
+        var start = Math.round(d.x.getTime()/1000);
+        var end   = start + 3600;
+        var hostfilter = "";
+        [% IF notification_pattern %]
+          hostfilter = "&pattern="+encodeURIComponent("[% notification_pattern | html %]");
+        [% END %]
+        jQuery("#notifications-link").attr("href", "notifications.cgi?start="+encodeURIComponent(start)+"&end="+encodeURIComponent(end)+hostfilter);
       },
-      padding: {
-        right: 15,
-        unit: "px"
+      onout: function(d, element) {
+        linkHideTimer = window.setTimeout(function() {
+          jQuery("#notifications-link").attr("href", "notifications.cgi?start=&end=");
+        }, 50);
       }
-    }
-  },
-  tooltip: {
-    format: {
-      title: function(x) {
-          var ts = x.getTime()/1000;
-          return notificationsLabels[ts]+" - "+notificationsLabels[ts+3600];
+    },
+    color: {
+      pattern: ['var(--dashboard-series-1)']
+    },
+    size: {
+      height: 210
+    },
+    axis: {
+      x: {
+        type: "timeseries",
+        localtime: true,
+        tick: {
+          tooltip: true,
+          format: function(x, a) {
+            var ts = x.getTime()/1000;
+            return notificationsLabels[ts];
+          }
+        },
+        padding: {
+          right: 15,
+          unit: "px"
+        }
       }
-    }
-  },
-  bindto: "#notifications-barChart"
-});
-
+    },
+    tooltip: {
+      format: {
+        title: function(x) {
+            var ts = x.getTime()/1000;
+            return notificationsLabels[ts]+" - "+notificationsLabels[ts+3600];
+        }
+      }
+    },
+    bindto: "#notifications-barChart"
+  });
+}
 
 function initTabSorting() {
   if(!has_jquery_ui()) {
@@ -613,6 +621,10 @@ function initTabSorting() {
     }
   });
 }
+
+jQuery(document).ready(function() {
+  initGraphs();
+})
 
 </script>
 
