@@ -170,7 +170,7 @@ END
         [% END %]
       [% END %]
       <div class="inline-block">
-        (for [% IF obj.last_state_change %][% duration(date.now - obj.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %])
+        <span title="[% date_format(c, obj.last_state_change) %]">(for [% IF obj.last_state_change %][% duration(date.now - obj.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %])</span>
         [% IF obj.acknowledged %] (<i class="fa-solid fa-person-digging"></i> has been acknowledged) [% END %]
         [% IF obj.scheduled_downtime_depth > 0 %] (<i class="fa-solid fa-moon align-sub"></i>in maintenance) [% END %]
       </div>
