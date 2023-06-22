@@ -5,6 +5,7 @@ next:
             is deprecated now and will be removed in the future.
           - improve display of large byte numbers in human perf data table
           - fix main home page graphs layout breaking on refresh in chrome (#1238)
+          - fix custom time selection showing unix timestamp (#1288)
 
 3.06-2   Tue Jun  6 10:25:20 CEST 2023
           - panorama:

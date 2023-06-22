@@ -1837,4 +1837,21 @@ sub format_perf_number {
     return(Thruk::Utils::format_number($number).($always_show_unit ? $unit : ""));
 }
 
+########################################
+
+=head2 prefer_date_if_timestamp
+
+  prefer_date_if_timestamp($ts)
+
+returns date if ts is a unix timestamp or original ts otherwise
+
+=cut
+sub prefer_date_if_timestamp {
+    my($ts) = @_;
+    if($ts !~ m/^\d+$/mx) {
+        return($ts);
+    }
+    return(Thruk::Utils::format_date($ts, '%Y-%m-%d %H:%M:%S'));
+}
+
 1;
