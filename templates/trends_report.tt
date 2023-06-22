@@ -167,7 +167,7 @@
                 <td>
                   [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod custom=2 name="timeperiod" t1=t1 t2=t2 current=1 show_hint=0 width="w-[135px]" %]
                 </td>
-                <td>
+                <td class="align-top">
                   <select name='zoom'>
                     <option value="[% zoom | html %]" selected>[% zoom | html %]</option>
                     <option value="+2">+2</option>
