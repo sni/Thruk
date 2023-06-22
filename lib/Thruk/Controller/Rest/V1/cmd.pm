@@ -80,12 +80,13 @@ sub _rest_get_external_command {
         $name     = shift @args;
         $cmd_name = shift @args;
         $cmd      = $cmd_data->{$type.'s'}->{$cmd_name} // $cmd_data->{$type.'s'}->{lc($cmd_name)};
-        push @cmd_args, $name;
         $required_fields->{$type} = $name;
 
         if(!$c->check_cmd_permissions($type, $name)) {
             return({ 'message' => 'you are not allowed to run this command', 'description' => 'you don\' have command permissions for '.$type.' '.$name, code => 403 });
         }
+        $name =~ s#\\#\\\\#gmx;
+        push @cmd_args, $name;
     }
     elsif($type =~ m/^(service)$/mx) {
         $name        = shift @args;
@@ -94,11 +95,13 @@ sub _rest_get_external_command {
         $cmd         = $cmd_data->{$type.'s'}->{$cmd_name} // $cmd_data->{$type.'s'}->{lc($cmd_name)};
         $required_fields->{'host'} = $name;
         $required_fields->{$type} = $description;
-        push @cmd_args, $name;
-        push @cmd_args, $description;
         if(!$c->check_cmd_permissions($type, $description, $name)) {
             return({ 'message' => 'you are not allowed to run this command', 'description' => 'you don\' have command permissions for '.$type.' '.$description.' on host '.$name, code => 403 });
         }
+        $description =~ s#\\#\\\\#gmx;
+        $name        =~ s#\\#\\\\#gmx;
+        push @cmd_args, $name;
+        push @cmd_args, $description;
     } else {
         $cmd_name = shift @args;
         $cmd      = $cmd_data->{'all_host_service'}->{$cmd_name} // $cmd_data->{'all_host_service'}->{lc($cmd_name)};
