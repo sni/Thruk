@@ -723,6 +723,9 @@ sub do_send_command {
     my $joined_backends = join(',', @{$backends_list});
     for my $cmd_line ( split /\n/mx, $cmd ) {
         utf8::decode($cmd_line);
+        $cmd_line =~ s/^\s+//gmx;
+        $cmd_line =~ s/\s+$//gmx;
+        next if $cmd_line eq "";
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
 
         # if the backend list contains multiple entries,
