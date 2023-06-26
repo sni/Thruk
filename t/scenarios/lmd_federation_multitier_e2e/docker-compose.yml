@@ -32,6 +32,7 @@ services:
         - "127.0.0.3:60444:443"
     environment:
         - PREFIX=tier1b
+        - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
@@ -49,6 +50,7 @@ services:
         - "127.0.0.3:60445:443"
     environment:
         - PREFIX=tier1c
+        - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
@@ -97,6 +99,7 @@ services:
     build: tier2b/
     environment:
         - PREFIX=tier2b
+        - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
@@ -125,6 +128,7 @@ services:
     build: tier2d/
     environment:
         - PREFIX=tier2d
+        - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
@@ -139,6 +143,7 @@ services:
     build: tier2e/
     environment:
         - PREFIX=tier2e
+        - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
         - .:/scenario:ro
         - ../../../:/thruk:ro
