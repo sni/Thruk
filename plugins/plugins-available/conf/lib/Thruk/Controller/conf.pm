@@ -2805,15 +2805,18 @@ sub _config_reload {
 sub _nice_check_output {
     my($c) = @_;
     $c->stash->{'original_output'} = $c->stash->{'output'};
-    $c->stash->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
-    $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->stash->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
-    $c->stash->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
-    $c->stash->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
-    $c->stash->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->stash->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->stash->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
+    $c->stash->{'output'} =~ s/^Website:.*?\n//gmx;
+    $c->stash->{'output'} =~ s/^Copyright.*?\n//gmx;
+    $c->stash->{'output'} =~ s/^License.*?\n\n//gmx;
+    $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<span class="textHINT font-bold">$1<\/span>/gmx;
+    $c->stash->{'output'} =~ s/(Error\s*:.*)$/<span class="textALERT font-bold">$1<\/span>/gmx;
+    $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<span class="textALERT font-bold">$1<\/span>/gmx;
+    $c->stash->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+(?:on|at)\s+line\s+(\d+)\))/<a class="link dotted" href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
+    $c->stash->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a class="link dotted" href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
+    $c->stash->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a class="link dotted" href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
+    $c->stash->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a class="link dotted textHINT" href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->stash->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a class="link dotted textALERT" href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->stash->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a class="link dotted textALERT" href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
     $c->stash->{'output'} = "<pre>".$c->stash->{'output'}."</pre>";
     return;
 }

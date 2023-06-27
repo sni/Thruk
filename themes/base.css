@@ -471,6 +471,9 @@ HR {
 @layer base {
   .link:not(I) {
     @apply hover:no-underline hover:textActive1;
+    &.dotted {
+      @apply border-b-2 border-dotted borderDark;
+    }
   }
 }
 
