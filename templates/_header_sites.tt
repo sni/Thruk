@@ -58,7 +58,7 @@
         [% IF backend_chooser != 'switch' %]
           <div class="flex flex-nowrap gap-1 items-center">
             <span>Toogle:</span>
-            <button class="w-10" onclick="toggleAllLocalSites(true);">Local</button>
+            <button class="w-10" onclick="toggleAllSections(true, true);">Local</button>
             <button class="w-10" onclick="toggleAllSections(true);">All</button>
             <input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();">
           </div>

@@ -2148,8 +2148,7 @@ function create_site_panel_popup_tree_populate(retried) {
                 // root elements
                 toggleBackend(data.node.key.replace(/^\//, ""), state, true);
             }
-            updateSitePanelCheckBox();
-            resetRefresh();
+            postToggleBackend();
         }
     });
 
@@ -2408,7 +2407,7 @@ function setBackends(backends, sections, btn) {
     for(var section in sectionsEnabled) {
         toggleSection(section.split('/'),1);
     }
-    updateSitePanelCheckBox();
+    postToggleBackend();
 }
 
 /* toggle site panel */
@@ -2435,8 +2434,10 @@ function checkSitePanelChanged() {
 /* toggle queries for this backend */
 var backends_toggled = false;
 function toggleBackend(backend, state, skip_update) {
-  resetRefresh();
-  var button = jQuery('.button_peer[data-id="'+backend+'"]');
+  if(skip_update == undefined || !skip_update) {
+    resetRefresh();
+  }
+  var button = jQuery('#button_'+backend);
   if(state == undefined) { state = -1; }
 
   if(backend_chooser == 'switch') {
@@ -2477,25 +2478,32 @@ function toggleBackend(backend, state, skip_update) {
   jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP button_peerDOWN").addClass(newClass);
 
   backends_toggled = true;
-  /* save current selected backends in session cookie */
-  cookieSave('thruk_backends', toQueryString(current_backend_states));
-  // remove &backends=... from url, they would overwrite cookie settings
-  removeParams['backends'] = true;
-
-  var delay = 1.5;
-  if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
-  if(show_sitepanel == 'collapsed') { delay = 20; }
-  if(show_sitepanel == 'tree')      { delay = 30; }
-  if(show_sitepanel == 'list') {
-    reloadPage(delay*1000, true, true);
-  } else {
-    setRefreshRate(delay);
-  }
 
   if(skip_update == undefined || !skip_update) {
-    updateSitePanelCheckBox();
+    postToggleBackend();
   }
   return;
+}
+
+function postToggleBackend() {
+    resetRefresh();
+
+    /* save current selected backends in session cookie */
+    cookieSave('thruk_backends', toQueryString(current_backend_states));
+    // remove &backends=... from url, they would overwrite cookie settings
+    removeParams['backends'] = true;
+
+    var delay = 1.5;
+    if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
+    if(show_sitepanel == 'collapsed') { delay = 20; }
+    if(show_sitepanel == 'tree')      { delay = 30; }
+    if(show_sitepanel == 'list') {
+      reloadPage(delay*1000, true, true);
+    } else {
+      setRefreshRate(delay);
+    }
+
+    updateSitePanelCheckBox();
 }
 
 /* toggle subsection */
@@ -2546,44 +2554,22 @@ function toggleSection(sections, first_state) {
         toggleBackend(b.dataset.id, first_state, true);
     });
 
-    updateSitePanelCheckBox();
+    postToggleBackend();
 }
 
 /* toggle all backends for all sections */
-function toggleAllSections(reverse) {
-    var state = 0;
-    if(jQuery('#all_backends').prop('checked')) {
-        state = 1;
-    }
-    if(reverse != undefined) {
-        if(state == 0) { state = 1; } else { state = 0; }
-    }
-    var visibleOnly = false;
-    if(jQuery("#site_panel_search").val()) {
-        visibleOnly = true;
-    }
-    jQuery('HEADER .button_peer').each(function(i, b) {
-        if(visibleOnly && !jQuery(b).is(":visible")) {
-            toggleBackend(b.dataset.id, 0, true);
-            return(true);
-        }
-        toggleBackend(b.dataset.id, state, true);
-    });
-
-    updateSitePanelCheckBox();
-}
-
-/* toggle all backends which have a local connection */
-function toggleAllLocalSites(reverse) {
+function toggleAllSections(reverse, localOnly) {
     var visibleOnly = false;
     if(jQuery("#site_panel_search").val()) {
         visibleOnly = true;
     }
     var state = -1;
     jQuery('HEADER .button_peer').each(function(i, b) {
-        var peer = initial_backends[b.dataset.id];
-        if(!peer || !peer["local"]) {
-            return true;
+        if(localOnly) {
+            var peer = initial_backends[b.dataset.id];
+            if(!peer || !peer["local"]) {
+                return true;
+            }
         }
         if(visibleOnly && !jQuery(b).is(":visible")) {
             toggleBackend(b.dataset.id, 0, true);
@@ -2604,7 +2590,7 @@ function toggleAllLocalSites(reverse) {
         toggleBackend(b.dataset.id, state, true);
     });
 
-    updateSitePanelCheckBox();
+    postToggleBackend();
 }
 
 /* update all site panel checkboxes and section button */
