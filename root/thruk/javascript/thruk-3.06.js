@@ -2573,6 +2573,40 @@ function toggleAllSections(reverse) {
     updateSitePanelCheckBox();
 }
 
+/* toggle all backends which have a local connection */
+function toggleAllLocalSites(reverse) {
+    var visibleOnly = false;
+    if(jQuery("#site_panel_search").val()) {
+        visibleOnly = true;
+    }
+    var state = -1;
+    jQuery('HEADER .button_peer').each(function(i, b) {
+        var peer = initial_backends[b.dataset.id];
+        if(!peer || !peer["local"]) {
+            return true;
+        }
+        if(visibleOnly && !jQuery(b).is(":visible")) {
+            toggleBackend(b.dataset.id, 0, true);
+            return(true);
+        }
+
+        if(state === -1) {
+            var disabled = jQuery("#button_"+b.dataset.id).hasClass("button_peerDIS");
+            state = 1;
+            if(disabled) {
+                state = 0;
+            }
+            if(reverse != undefined) {
+                if(state == 0) { state = 1; } else { state = 0; }
+            }
+        }
+
+        toggleBackend(b.dataset.id, state, true);
+    });
+
+    updateSitePanelCheckBox();
+}
+
 /* update all site panel checkboxes and section button */
 function updateSitePanelCheckBox() {
     /* count totals */

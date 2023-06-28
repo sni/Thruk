@@ -108,6 +108,22 @@ sub peer_list {
 
 ##########################################################
 
+=head2 is_local
+
+returns true if backend is local
+
+=cut
+
+sub is_local {
+    my($self) = @_;
+    for my $addr (@{$self->peer_list()}) {
+        return 1 if $addr !~ m/:/mx;
+    }
+    return;
+}
+
+##########################################################
+
 =head2 create_backend
 
   create_backend()

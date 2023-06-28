@@ -805,6 +805,7 @@ sub update_site_panel_hashes {
             $initial_backends->{$back}->{'version'}          = $c->stash->{'pi_detail'}->{$back}->{'program_version'};
             $initial_backends->{$back}->{'data_src_version'} = $c->stash->{'pi_detail'}->{$back}->{'data_source_version'};
             $initial_backends->{$back}->{'program_start'}    = $c->stash->{'pi_detail'}->{$back}->{'program_start'};
+            $initial_backends->{$back}->{'local'}            = $peer->is_local();
         }
     }
 

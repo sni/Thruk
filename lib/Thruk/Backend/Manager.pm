@@ -229,12 +229,7 @@ sub get_local_peers {
 
     my @peers;
     for my $b (@{$self->pool->{'objects'}}) {
-        for my $addr (@{$b->peer_list()}) {
-            if($addr !~ m/:/mx) {
-                push @peers, $b;
-                last;
-            }
-        }
+        push @peers, $b if $b->is_local();
     }
     return \@peers;
 }
