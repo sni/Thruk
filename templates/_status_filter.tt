@@ -32,7 +32,7 @@
             [% END %]
             <div>
               [% IF show_substyle_selector == 1 %]
-                <select name="style">
+                <select name="style" class="max-w-[140px]">
                   <optgroup label="Host">
                     <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
                     <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
