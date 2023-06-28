@@ -2355,6 +2355,7 @@ function site_panel_bookmark_save() {
         success: function(data) {
             setBtnSuccess("#site_panel_bookmark_new_save", "bookmark saved");
             jQuery("#site_panel_bookmark_new_save").attr('disabled', false).html("save");
+            jQuery("#site_panel_bookmark_delete").attr('disabled', false).addClass("hover-red");
             create_site_panel_popup_tree_make_bookmarks_sortable();
             jQuery("#site_panel_bookmark_new").val("").hide();
             jQuery("#site_panel_bookmark_new_save").hide();
