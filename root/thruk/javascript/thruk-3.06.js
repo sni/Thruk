@@ -867,7 +867,7 @@ function check_side_nav_active_item(ctx) {
     if(found) { return; }
 
     // compare some main args
-    var keyArgs = ["type", "style"];
+    var keyArgs = ["type", "style", "title"];
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
@@ -890,6 +890,7 @@ function check_side_nav_active_item(ctx) {
             }
         }
     });
+    if(found) { return; }
 
     // compare only main page
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
