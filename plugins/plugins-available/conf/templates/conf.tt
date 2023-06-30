@@ -1,6 +1,6 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
-<div class="card w-[480px] mt-5 mx-auto">
+<div class="card w-[480px] mt-5 mx-auto overflow-hidden">
   <div class="head">
     <h3>General Configuration</h3>
   </div>
@@ -50,7 +50,7 @@
 </div>
 
 
-<div class="card w-[480px] mt-5 mx-auto">
+<div class="card w-[480px] mt-5 mx-auto overflow-hidden">
   <div class="head">
     <h3>Site Configuration</h3>
   </div>
