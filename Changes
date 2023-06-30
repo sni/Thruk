@@ -4,6 +4,7 @@ next:
           - DEPRECATION WARNING: gaining admin role from system_commands and configuration_information role
             is deprecated now and will be removed in the future.
           - improve display of large byte numbers in human perf data table
+          - replace links in plugin output
           - fix main home page graphs layout breaking on refresh in chrome (#1238)
           - fix custom time selection showing unix timestamp (#1288)
           - fix sending commands via rest api if service contains backslashes (#1282)

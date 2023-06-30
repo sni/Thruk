@@ -1605,10 +1605,11 @@ sub replace_links {
              /&_replace_link($1, $2)
              /gxme;
 
-    # standard text link: https;//link.domain/...
-    $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
-             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
+    # standard text link: https://link.domain/...
+    $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|<br>|$)
+             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>$2
              /gmx;
+
     return($txt);
 }
 

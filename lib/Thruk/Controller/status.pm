@@ -1615,17 +1615,24 @@ sub _long_plugin_output {
     my $host    = $c->req->parameters->{'host'};
     my $service = $c->req->parameters->{'service'};
 
+	my $columns = [qw/has_been_checked plugin_output long_plugin_output/];
     my $objs;
     if($service) {
-        $objs = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ], columns => [qw/long_plugin_output/] );
+        $objs = $c->db->get_services(
+            filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ],
+            columns => $columns,
+        );
     } else {
-        $objs = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ], columns => [qw/long_plugin_output/] );
+        $objs = $c->db->get_hosts(
+            filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ],
+            columns => $columns,
+        );
     }
     my $obj = $objs->[0];
     return(1, 'no such object') unless $obj;
 
-    $c->stash->{text}     = Thruk::Utils::Filter::remove_html_comments($obj->{'long_plugin_output'});
-    $c->stash->{template} = 'passthrough.tt';
+    $c->stash->{obj}      = $obj;
+    $c->stash->{template} = '_plugin_output.tt';
 
     return 1;
 }

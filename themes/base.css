@@ -469,17 +469,26 @@ HR {
 }
 
 @layer base {
+  .dotted {
+    @apply border-b-2 border-dotted borderDark;
+  }
   .link:not(I) {
     @apply hover:no-underline hover:textActive1;
-    &.dotted {
-      @apply border-b-2 border-dotted borderDark;
-    }
   }
 }
 
 a.pager.small-pager{
   @media screen and (max-width: 785px) {
     @apply !hidden;
+  }
+}
+
+#extinfo .col_plugin_output, #extinfo .detail_plugin_output, TD.plugin_output, #overcard_body {
+  a {
+    @apply dotted hover:no-underline hover:textActive1;
+  }
+  a.link {
+    @apply border-b-0;
   }
 }
 

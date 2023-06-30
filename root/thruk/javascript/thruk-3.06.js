@@ -4136,28 +4136,23 @@ function show_plugin_output_popup(target, host, service, backend, escape_html, o
         caption += " - "+decodeURIComponent(service);
     }
     caption = escapeHTML(caption);
-    overcard(jQuery.extend({ 'bodyCls': 'p-2', 'body': "<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>", 'caption': caption}, overcard_options));
+    overcard(jQuery.extend({ 'bodyCls': 'p-2', 'body': "<div class='plugin_output'>", 'caption': caption}, overcard_options));
     jQuery('#overcard .plugin_output').html("<div class='spinner w-8 h-8'><\/div>");
 
-    var url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/services/'+encodeURIComponent(host)+"/"+encodeURIComponent(service)+"?columns=plugin_output,long_plugin_output"
-    if(service == '') {
-        url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/hosts/'+encodeURIComponent(host)+"?columns=plugin_output,long_plugin_output"
-    }
-    jQuery.get(url, {}, function(data, status, req) {
+    var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1';
+    var data = {
+        "host":          host,
+        "service":       service,
+        "backend":       backend
+    };
+    jQuery.post(url, data, function(data, status, req) {
+        console.log(data);
         jQuery('#overcard .plugin_output').html("");
-        if(!data || !data[0]) {
+        if(!data) {
             jQuery('#overcard .plugin_output').html("failed to fetch details: "+status);
             return;
         }
-        if(escape_html) {
-            var text = jQuery("<div>").text(data[0]["plugin_output"]).html().replace(/\\n/g, "<br>");
-            jQuery('#overcard .plugin_output').html(text);
-            var text = jQuery("<div>").text(data[0]["long_plugin_output"]).html().replace(/\\n/g, "<br>");
-            jQuery('#overcard .long_plugin_output').html(text);
-        } else {
-            jQuery('#overcard .plugin_output').html(data[0]["plugin_output"].replace(/\\n/g, "<br>"));
-            jQuery('#overcard .long_plugin_output').html(data[0]["long_plugin_output"].replace(/\\n/g, "<br>"));
-        }
+        jQuery('#overcard .plugin_output').html(data);
     });
 }
 

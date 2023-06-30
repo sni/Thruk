@@ -2610,6 +2610,7 @@ templates/_parts_host_service_info_popup.tt
 templates/_parts_summary_prompt.tt
 templates/_perfdata_human.tt
 templates/_permission_edit.tt
+templates/_plugin_output.tt
 templates/_pnp_graph.tt
 templates/_profiles.tt
 templates/_progressbar.tt
