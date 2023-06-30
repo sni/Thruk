@@ -67,8 +67,9 @@ create folder and ensure permissions and ownership
 
 sub mkdir {
     for my $dirname (@_) {
-        unless(-d $dirname) {
-            CORE::mkdir($dirname) or confess("failed to create ".$dirname.": ".$!);
+        if(!CORE::mkdir($dirname)) {
+            my $err = $!;
+            confess("failed to create ".$dirname.": ".$err) unless -d $dirname;
         }
         ensure_permissions('dir', $dirname);
     }
