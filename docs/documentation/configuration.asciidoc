@@ -1268,11 +1268,11 @@ ex.:
 
 Replaces the string "INC12345" with the link:
 
-```<a href="https://tickets.company.com/ticket/12345">12345</a>```
+  <a href="https://tickets.company.com/ticket/12345">12345</a>
 
 Replaces the string "GH#123" with the link:
 
-```<a href="https://github.com/sni/Thruk/issues/123">123</a>```
+  <a href="https://github.com/sni/Thruk/issues/123">123</a>
 
 
 === perf_bar_mode
