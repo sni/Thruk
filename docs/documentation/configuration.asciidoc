@@ -1250,11 +1250,12 @@ Define pattern to be replaced with links in comments, downtimes and plugin outpu
 Syntax is: | regex pattern | [link name](link target) |
 Can be set multiple times.
 
-Simple links and markdown style links will be replaced automatically. So links in the
-form:
+Simple links and markdown style links will be replaced automatically.
+So links in the form:
 
-  ```https://linktarget/...``` or 
-  ```[link text](https://target...)```
+  https://linktarget/...
+    or
+  [link text](https://target...)
 
 will just work. No need to disabled `escape_html` just to show some links.
 
