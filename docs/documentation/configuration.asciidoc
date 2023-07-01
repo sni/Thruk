@@ -1246,9 +1246,13 @@ ex.:
 
 === short_link
 
-Define pattern to be replaced with links in comments and downtimes.
+Define pattern to be replaced with links in comments, downtimes and plugin output.
 Syntax is: | regex pattern | [link name](link target) |
 Can be set multiple times.
+
+Simple links and markdown style links will be replaced automatically. So links in the
+form of `https://linktarget/...` or `[link text](https://target...)` will just work.
+No need to disabled `escape_html` just to show some links.
 
 ex.:
   short_link = |INC(\d+)|[$1](https://tickets.company.com/ticket/$1)|
