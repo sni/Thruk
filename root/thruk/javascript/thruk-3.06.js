@@ -4156,28 +4156,6 @@ function show_plugin_output_popup(target, host, service, backend, escape_html, o
     });
 }
 
-function fetch_long_plugin_output(target, host, service, backend, escape_html) {
-    jQuery('.long_plugin_output').html("<div class='spinner w-8 h-8'><\/div>");
-    var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1';
-    if(escape_html) {
-        jQuery.post(url, {
-            host:    host,
-            service: svc,
-            backend: peer_key
-        }, function(text, status, req) {
-            text = jQuery("<div>").text(text).html().replace(/\\n/g, "<br>");
-            jQuery('.long_plugin_output').html(text)
-        });
-    } else {
-        jQuery('.long_plugin_output').load(url, {
-            host:    host,
-            service: svc,
-            backend: peer_key
-        }, function(text, status, req) {
-        });
-    }
-}
-
 /* callback to show service (or host) popup */
 function fetch_svc_info_popup(el, host, svc, peer_key) {
     jQuery('.service_popup_content').html("<div class='spinner w-10 h-10 border-4'><\/div>");
