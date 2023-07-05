@@ -314,7 +314,7 @@ sub _reschedule_backend {
                 if($d->{'description'}) {
                     $cmd_line .= sprintf('SCHEDULE_FORCED_SVC_CHECK;%s;%s;%lu', $d->{'host_name'}, $d->{'description'}, $ts);
                 } else {
-                    $cmd_line .= sprintf('SCHEDULE_FORCED_HOST_CHECK;%s;%lu', $d->{'host_name'}, $ts);
+                    $cmd_line .= sprintf('SCHEDULE_FORCED_HOST_CHECK;%s;%lu', ($d->{'host_name'}//$d->{'name'}), $ts);
                 }
                 $c->stash->{scheduled}++;
                 push @{$cmds}, $cmd_line;

@@ -133,7 +133,7 @@
       <div><a class="flex" href="#"><i class="uil uil-folder"></i>uil uil-folder</a></div>
       <div><a class="flex" href="#"><i class="uil uil-folder-minus"></i>uil uil-folder-minus</a></div>
       <div><a class="flex" href="#"><i class="uil uil-folder-open"></i>uil uil-folder-open</a></div>
-      <div><a class="flex" href="#"><i class="uil uil-info"></i>uil uil-info</a></div>
+      <div><a class="flex" href="#"><i class="uil uil-info round"></i>uil uil-info round</a></div>
       <div><a class="flex" href="#"><i class="uil uil-key-skeleton"></i>uil uil-key-skeleton</a></div>
       <div><a class="flex" href="#"><i class="uil uil-left-arrow-to-left small"></i>uil uil-left-arrow-to-left small</a></div>
       <div><a class="flex" href="#"><i class="uil uil-lightbulb"></i>uil uil-lightbulb</a></div>
@@ -277,36 +277,6 @@
       </div>
     </div>
 
-    <div class="grid gap-3 grid-cols-2 h-fit w-fit">
-      <div class="card alert red relative w-36">
-        <div class="head">
-          <h3>red alert</h3>
-        </div>
-        <div class="body text-left">div.card.red.alert</div>
-      </div>
-
-      <div class="card alert yellow relative w-36">
-        <div class="head">
-          <h3>yellow alert</h3>
-        </div>
-        <div class="body text-left">div.card.yellow.alert</div>
-      </div>
-
-      <div class="card alert orange relative w-36">
-        <div class="head">
-          <h3>orange alert</h3>
-        </div>
-        <div class="body text-left">div.card.orange.alert</div>
-      </div>
-
-      <div class="card alert green relative w-36">
-        <div class="head">
-          <h3>green alert</h3>
-        </div>
-        <div class="body text-left">div.card.green.alert</div>
-      </div>
-    </div>
-
     <div class="card w-fit">
       <div class="head">
         <h3>Buttons</h3>
@@ -407,6 +377,32 @@
       </div>
     </div>
 
+    <div class="card w-fit">
+      <div class="head">
+        <h3>Peer Buttons</h3>
+      </div>
+      <div class="backends">
+        <table class="w-full innercellborder cellspacing text-center">
+          <tr>
+            <th>Up</th>
+            <td><button class="button_peer button_peerUP w-30">Up</button></td>
+          </tr>
+          <tr>
+            <th>Down</th>
+            <td><button class="button_peer button_peerDOWN w-30">Down</button></td>
+          </tr>
+          <tr>
+            <th>Disabled</th>
+            <td><button class="button_peer button_peerDIS w-30">Disabled</button></td>
+          </tr>
+          <tr>
+            <th>Hidden</th>
+            <td><button class="button_peer button_peerHID w-30">Hidden</button></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
     <div class="card">
       <div class="head">
         <h3>Forms</h3>
@@ -478,6 +474,36 @@
             </tr>
           </table>
         </form>
+      </div>
+    </div>
+
+    <div class="grid gap-3 grid-cols-2 h-fit w-fit">
+      <div class="card alert red relative w-36">
+        <div class="head">
+          <h3>red alert</h3>
+        </div>
+        <div class="body text-left">div.card.red.alert</div>
+      </div>
+
+      <div class="card alert yellow relative w-36">
+        <div class="head">
+          <h3>yellow alert</h3>
+        </div>
+        <div class="body text-left">div.card.yellow.alert</div>
+      </div>
+
+      <div class="card alert orange relative w-36">
+        <div class="head">
+          <h3>orange alert</h3>
+        </div>
+        <div class="body text-left">div.card.orange.alert</div>
+      </div>
+
+      <div class="card alert green relative w-36">
+        <div class="head">
+          <h3>green alert</h3>
+        </div>
+        <div class="body text-left">div.card.green.alert</div>
       </div>
     </div>
 

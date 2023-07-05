@@ -38,7 +38,11 @@
 
       /* init first view */
       if(window.location.hash != '') {
-          setdir(window.location.hash.replace(/^#/, '').replace(/\/[^\/]*\.cfg$/,'/'));
+          file = window.location.hash.replace(/^#/, '')
+          console.log(file);
+          file = unescape(file);
+          file = file.replace(/\/[^\/]*\.cfg$/,'/');
+          setdir(file);
       } else {
           setdir(root);
       }

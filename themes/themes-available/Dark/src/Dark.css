@@ -75,11 +75,13 @@
   --console-bg:               var(--color-black);
 
   --peer-up-bg:               var(--color-green-600);
-  --peer-up-fg:               var(--text-body);
+  --peer-up-fg:               #f2f2f2;
+  --peer-down-bg:             var(--color-red-700);
+  --peer-down-fg:             #f2f2f2;
   --peer-dis-bg:              #777;
-  --peer-dis-fg:              var(--text-body);
-  --peer-hid-bg:              var(--color-truegray-200);
-  --peer-hid-fg:              var(--text-body);
+  --peer-dis-fg:              #f2f2f2;
+  --peer-hid-bg:              #666;
+  --peer-hid-fg:              #f2f2f2;
 
   --progessbar-fg:            var(--color-sky-800);
   --progessbar-bg:            var(--color-warmgray-500);

@@ -996,12 +996,12 @@ sub logline_icon {
 
     elsif($type eq 'SERVICE FLAPPING ALERT') {
            if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service started flapping"; }
-        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service stoppedflapping"; }
+        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service stopped flapping"; }
         elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "fa-solid fa-shuffle";        $desc = "Service flap detection disabled"; }
     }
     elsif($type eq 'HOST FLAPPING ALERT') {
            if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host started flapping"; }
-        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host stoppedflapping"; }
+        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host stopped flapping"; }
         elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "fa-solid fa-shuffle";      $desc = "Host flap detection disabled"; }
     }
     elsif($type eq 'SERVICE DOWNTIME ALERT') {
@@ -1605,10 +1605,11 @@ sub replace_links {
              /&_replace_link($1, $2)
              /gxme;
 
-    # standard text link: https;//link.domain/...
-    $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|$)
-             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>
+    # standard text link: https://link.domain/...
+    $txt =~ s/(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|<br>|$)
+             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>$2
              /gmx;
+
     return($txt);
 }
 
@@ -1835,6 +1836,23 @@ sub format_perf_number {
     }
 
     return(Thruk::Utils::format_number($number).($always_show_unit ? $unit : ""));
+}
+
+########################################
+
+=head2 prefer_date_if_timestamp
+
+  prefer_date_if_timestamp($ts)
+
+returns date if ts is a unix timestamp or original ts otherwise
+
+=cut
+sub prefer_date_if_timestamp {
+    my($ts) = @_;
+    if($ts !~ m/^\d+$/mx) {
+        return($ts);
+    }
+    return(Thruk::Utils::format_date($ts, '%Y-%m-%d %H:%M:%S'));
 }
 
 1;

@@ -867,7 +867,7 @@ function check_side_nav_active_item(ctx) {
     if(found) { return; }
 
     // compare some main args
-    var keyArgs = ["type", "style"];
+    var keyArgs = ["type", "style", "title"];
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
@@ -890,6 +890,7 @@ function check_side_nav_active_item(ctx) {
             }
         }
     });
+    if(found) { return; }
 
     // compare only main page
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
@@ -1756,7 +1757,7 @@ function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetryS
                 // chrome does not set scroll immediately on page load, wait some milliseconds and set again
                 window.setTimeout(function() {
                     applyScroll(scrollTo);
-                }, 50);
+                }, 150);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
@@ -2148,8 +2149,7 @@ function create_site_panel_popup_tree_populate(retried) {
                 // root elements
                 toggleBackend(data.node.key.replace(/^\//, ""), state, true);
             }
-            updateSitePanelCheckBox();
-            resetRefresh();
+            postToggleBackend();
         }
     });
 
@@ -2356,6 +2356,7 @@ function site_panel_bookmark_save() {
         success: function(data) {
             setBtnSuccess("#site_panel_bookmark_new_save", "bookmark saved");
             jQuery("#site_panel_bookmark_new_save").attr('disabled', false).html("save");
+            jQuery("#site_panel_bookmark_delete").attr('disabled', false).addClass("hover-red");
             create_site_panel_popup_tree_make_bookmarks_sortable();
             jQuery("#site_panel_bookmark_new").val("").hide();
             jQuery("#site_panel_bookmark_new_save").hide();
@@ -2408,7 +2409,7 @@ function setBackends(backends, sections, btn) {
     for(var section in sectionsEnabled) {
         toggleSection(section.split('/'),1);
     }
-    updateSitePanelCheckBox();
+    postToggleBackend();
 }
 
 /* toggle site panel */
@@ -2435,8 +2436,10 @@ function checkSitePanelChanged() {
 /* toggle queries for this backend */
 var backends_toggled = false;
 function toggleBackend(backend, state, skip_update) {
-  resetRefresh();
-  var button = jQuery('.button_peer[data-id="'+backend+'"]');
+  if(skip_update == undefined || !skip_update) {
+    resetRefresh();
+  }
+  var button = jQuery('#button_'+backend);
   if(state == undefined) { state = -1; }
 
   if(backend_chooser == 'switch') {
@@ -2477,25 +2480,32 @@ function toggleBackend(backend, state, skip_update) {
   jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP button_peerDOWN").addClass(newClass);
 
   backends_toggled = true;
-  /* save current selected backends in session cookie */
-  cookieSave('thruk_backends', toQueryString(current_backend_states));
-  // remove &backends=... from url, they would overwrite cookie settings
-  removeParams['backends'] = true;
-
-  var delay = 1.5;
-  if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
-  if(show_sitepanel == 'collapsed') { delay = 20; }
-  if(show_sitepanel == 'tree')      { delay = 30; }
-  if(show_sitepanel == 'list') {
-    reloadPage(delay*1000, true, true);
-  } else {
-    setRefreshRate(delay);
-  }
 
   if(skip_update == undefined || !skip_update) {
-    updateSitePanelCheckBox();
+    postToggleBackend();
   }
   return;
+}
+
+function postToggleBackend() {
+    resetRefresh();
+
+    /* save current selected backends in session cookie */
+    cookieSave('thruk_backends', toQueryString(current_backend_states));
+    // remove &backends=... from url, they would overwrite cookie settings
+    removeParams['backends'] = true;
+
+    var delay = 1.5;
+    if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }
+    if(show_sitepanel == 'collapsed') { delay = 20; }
+    if(show_sitepanel == 'tree')      { delay = 30; }
+    if(show_sitepanel == 'list') {
+      reloadPage(delay*1000, true, true);
+    } else {
+      setRefreshRate(delay);
+    }
+
+    updateSitePanelCheckBox();
 }
 
 /* toggle subsection */
@@ -2546,31 +2556,43 @@ function toggleSection(sections, first_state) {
         toggleBackend(b.dataset.id, first_state, true);
     });
 
-    updateSitePanelCheckBox();
+    postToggleBackend();
 }
 
 /* toggle all backends for all sections */
-function toggleAllSections(reverse) {
-    var state = 0;
-    if(jQuery('#all_backends').prop('checked')) {
-        state = 1;
-    }
-    if(reverse != undefined) {
-        if(state == 0) { state = 1; } else { state = 0; }
-    }
+function toggleAllSections(reverse, localOnly) {
     var visibleOnly = false;
     if(jQuery("#site_panel_search").val()) {
         visibleOnly = true;
     }
+    var state = -1;
     jQuery('HEADER .button_peer').each(function(i, b) {
+        if(localOnly) {
+            var peer = initial_backends[b.dataset.id];
+            if(!peer || !peer["local"]) {
+                return true;
+            }
+        }
         if(visibleOnly && !jQuery(b).is(":visible")) {
             toggleBackend(b.dataset.id, 0, true);
             return(true);
         }
+
+        if(state === -1) {
+            var disabled = jQuery("#button_"+b.dataset.id).hasClass("button_peerDIS");
+            state = 1;
+            if(disabled) {
+                state = 0;
+            }
+            if(reverse != undefined) {
+                if(state == 0) { state = 1; } else { state = 0; }
+            }
+        }
+
         toggleBackend(b.dataset.id, state, true);
     });
 
-    updateSitePanelCheckBox();
+    postToggleBackend();
 }
 
 /* update all site panel checkboxes and section button */
@@ -4114,51 +4136,24 @@ function show_plugin_output_popup(target, host, service, backend, escape_html, o
         caption += " - "+decodeURIComponent(service);
     }
     caption = escapeHTML(caption);
-    overcard(jQuery.extend({ 'bodyCls': 'p-2', 'body': "<div class='plugin_output'><\/div><div class='long_plugin_output'><\/div>", 'caption': caption}, overcard_options));
+    overcard(jQuery.extend({ 'bodyCls': 'p-2', 'body': "<div class='plugin_output'>", 'caption': caption}, overcard_options));
     jQuery('#overcard .plugin_output').html("<div class='spinner w-8 h-8'><\/div>");
 
-    var url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/services/'+encodeURIComponent(host)+"/"+encodeURIComponent(service)+"?columns=plugin_output,long_plugin_output"
-    if(service == '') {
-        url = url_prefix+'r/sites/'+encodeURIComponent(backend)+'/hosts/'+encodeURIComponent(host)+"?columns=plugin_output,long_plugin_output"
-    }
-    jQuery.get(url, {}, function(data, status, req) {
+    var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1';
+    var data = {
+        "host":          host,
+        "service":       service,
+        "backend":       backend
+    };
+    jQuery.post(url, data, function(data, status, req) {
+        console.log(data);
         jQuery('#overcard .plugin_output').html("");
-        if(!data || !data[0]) {
+        if(!data) {
             jQuery('#overcard .plugin_output').html("failed to fetch details: "+status);
             return;
         }
-        if(escape_html) {
-            var text = jQuery("<div>").text(data[0]["plugin_output"]).html().replace(/\\n/g, "<br>");
-            jQuery('#overcard .plugin_output').html(text);
-            var text = jQuery("<div>").text(data[0]["long_plugin_output"]).html().replace(/\\n/g, "<br>");
-            jQuery('#overcard .long_plugin_output').html(text);
-        } else {
-            jQuery('#overcard .plugin_output').html(data[0]["plugin_output"].replace(/\\n/g, "<br>"));
-            jQuery('#overcard .long_plugin_output').html(data[0]["long_plugin_output"].replace(/\\n/g, "<br>"));
-        }
+        jQuery('#overcard .plugin_output').html(data);
     });
-}
-
-function fetch_long_plugin_output(target, host, service, backend, escape_html) {
-    jQuery('.long_plugin_output').html("<div class='spinner w-8 h-8'><\/div>");
-    var url = url_prefix+'cgi-bin/status.cgi?long_plugin_output=1';
-    if(escape_html) {
-        jQuery.post(url, {
-            host:    host,
-            service: svc,
-            backend: peer_key
-        }, function(text, status, req) {
-            text = jQuery("<div>").text(text).html().replace(/\\n/g, "<br>");
-            jQuery('.long_plugin_output').html(text)
-        });
-    } else {
-        jQuery('.long_plugin_output').load(url, {
-            host:    host,
-            service: svc,
-            backend: peer_key
-        }, function(text, status, req) {
-        });
-    }
 }
 
 /* callback to show service (or host) popup */

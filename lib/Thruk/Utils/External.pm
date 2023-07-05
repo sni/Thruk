@@ -502,6 +502,7 @@ sub get_result {
 
     my $out = Thruk::Utils::IO::saferead($dir."/stdout") // '';
     my $err = Thruk::Utils::IO::saferead($dir."/stderr") // '';
+    my $killed = "";
 
     # remove known harmless errors
     $err =~ s|Warning:.*?during\ global\ destruction\.\n||gmx;
@@ -514,7 +515,10 @@ sub get_result {
     my @end;
     my $retries = 10;
     while($retries > 0) {
-        if(-f $dir."/stdout") {
+        if(-f $dir."/killed") {
+            @end = Time::HiRes::stat($dir."/killed");
+            $killed = "job has been killed";
+        } elsif(-f $dir."/stdout") {
             @end = Time::HiRes::stat($dir."/stdout");
         } elsif(-f $dir."/stderr") {
             @end = Time::HiRes::stat($dir."/stderr");
@@ -565,7 +569,7 @@ sub get_result {
         }
     }
 
-    return($out,$err,$time,$dir,$stash,$rc,$profiles,$start[9],$end[9],$perl_res);
+    return($out,$err,$time,$dir,$stash,$rc,$profiles,$start[9],$end[9],$perl_res,$killed);
 }
 
 ##############################################
@@ -635,7 +639,7 @@ sub job_page {
         $c->stash->{template}             = 'waiting_for_job.tt';
     } else {
         # job finished, display result
-        my($out,$err,$time,$dir,$stash,$rc,$profile) = get_result($c, $job);
+        my($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res,$killed) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
         $c->add_profile($profile) if $profile;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
@@ -644,6 +648,8 @@ sub job_page {
         if($stash && $stash->{'error_data'}) {
             return($c->detach_error($c->stash->{'raw_error_data'}//$stash->{'error_data'}));
         }
+
+        return $c->detach('/error/index/29') if $killed;
 
         # other errors
         if((defined $err && $err ne '') && (!defined $rc || $rc != 0 || (!$out && !$stash))) {
