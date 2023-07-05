@@ -996,12 +996,12 @@ sub logline_icon {
 
     elsif($type eq 'SERVICE FLAPPING ALERT') {
            if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service started flapping"; }
-        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service stoppedflapping"; }
+        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";        $desc = "Service stopped flapping"; }
         elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "fa-solid fa-shuffle";        $desc = "Service flap detection disabled"; }
     }
     elsif($type eq 'HOST FLAPPING ALERT') {
            if($log->{'message'} =~ m/;STARTED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host started flapping"; }
-        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host stoppedflapping"; }
+        elsif($log->{'message'} =~ m/;STOPPED;/mx)     { $pic = "fa-solid fa-shuffle";      $desc = "Host stopped flapping"; }
         elsif($log->{'message'} =~ m/;DISABLED;/mx)    { $pic = "fa-solid fa-shuffle";      $desc = "Host flap detection disabled"; }
     }
     elsif($type eq 'SERVICE DOWNTIME ALERT') {
