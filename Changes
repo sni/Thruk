@@ -9,7 +9,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fix main home page graphs layout breaking on refresh in chrome (#1238)
           - fix custom time selection showing unix timestamp (#1288)
           - fix sending commands via rest api if service contains backslashes (#1282)
-          - fix sending commands which of multiple sub commands (#1289)
+          - fix sending commands contain multiple sub commands (#1289)
 
 3.06-2   Tue Jun  6 10:25:20 CEST 2023
           - panorama:
