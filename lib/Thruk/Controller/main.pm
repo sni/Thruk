@@ -455,6 +455,7 @@ sub _get_contacts {
             debug_hint => 'total contacts',
         },
         sub { return $_[0]->{'name'}; },
+        1,
     );
 
     my $uniq = {};

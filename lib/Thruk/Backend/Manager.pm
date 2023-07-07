@@ -2911,22 +2911,31 @@ sub _add_query_stats {
 
 =head2 caching_query
 
-  caching_query($cache_file, $function, $args, $convert_in)
+  caching_query($cache_file, $function, $args, $convert_in, $store_separate)
 
 returns db query results and caches them by peer key until backend got restarted
 
 =cut
 
 sub caching_query {
-    my($self, $cache_file, $function, $args, $convert_in, $convert_out) = @_;
+    my($self, $cache_file, $function, $args, $convert_in, $store_separate) = @_;
     my $c = $Thruk::Globals::c;
 
     $c->stats->profile(begin => "caching_query: ".$function);
     my($selected_backends) = $c->db->select_backends($function, []);
     my $required_backends = [];
 
-    my $cache  = Thruk::Utils::Cache->new($cache_file);
-    my $cached = $cache->get() || {};
+    my $cache;
+    my $cached = {};
+    if($store_separate) {
+        for my $peer_key (@{$selected_backends}) {
+            my $cache  = Thruk::Utils::Cache->new($cache_file."/".$peer_key.".cache");
+            $cached->{$peer_key} = $cache->get() || {};
+        }
+    } else {
+        $cache  = Thruk::Utils::Cache->new($cache_file);
+        my $cached = $cache->get() || {};
+    }
     for my $peer_key (@{$selected_backends}) {
         if(!defined $cached->{$peer_key} || !defined $c->stash->{'pi_detail'}->{$peer_key} || !defined $cached->{$peer_key}->{'program_start'} || !defined $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'} || $cached->{$peer_key}->{'program_start'} < $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'}) {
             push @{$required_backends}, $peer_key;
@@ -2952,7 +2961,29 @@ sub caching_query {
                 push @{$cached->{$row->{'peer_key'}}->{'data'}}, $row;
             }
         }
-        $cache->set($cached);
+
+        if($store_separate) {
+            for my $peer_key (@{$required_backends}) {
+                my $cache  = Thruk::Utils::Cache->new($cache_file."/".$peer_key.".cache");
+                $cache->set($cached->{$peer_key});
+            }
+            # simply remove all files older than 24h
+            my $yesterday = time() - 86400;
+            for my $file (glob($cache_file."/*.cache")) {
+                my @stat = stat($file);
+                if($stat[9] < $yesterday) {
+                    unlink($file);
+                }
+            }
+        } else {
+            # remove old backends
+            my $all_peer_keys = {};
+            for my $key (@{$c->db->peer_order}) { $all_peer_keys->{$key} = 1; }
+            for my $key (keys %{$cached}) {
+                delete $cached->{$key} unless $all_peer_keys->{$key};
+            }
+            $cache->set($cached);
+        }
     }
 
     # create result set from all selected backends
