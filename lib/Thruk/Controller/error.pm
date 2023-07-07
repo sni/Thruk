@@ -341,8 +341,12 @@ sub index {
     $c->stash->{'real_page'}    = 'error';
     $c->stash->{'infoBoxTitle'} = "Error"  unless $c->stash->{'infoBoxTitle'};
 
-    $c->stash->{'navigation'}  = "";
-    Thruk::Utils::Menu::read_navigation($c);
+    if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
+        if(!$c->stash->{'skip_navigation'}) {
+            $c->stash->{'navigation'}  = "";
+            Thruk::Utils::Menu::read_navigation($c);
+        }
+    }
 
     # do not cache errors
     $c->res->code($code);
