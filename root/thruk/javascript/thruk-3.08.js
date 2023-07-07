@@ -1686,24 +1686,30 @@ function reloadPage(delay, withReloadButton, freshReload, preCheckUrl, preCheckR
             resetRefreshButton();
             jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
             withReloadButton = false;
+            triggerReloadTimer(500);
         } else {
-            var timer = jQuery('#reload-timer')[0];
-            jQuery(timer).addClass("hidden");
-            jQuery(timer).removeClass("scale-x-0");
-            jQuery(timer).addClass("scale-x-100");
-            timer.style.setProperty("transition-duration", delay+"ms", "important");
-            window.setTimeout(function() {
-                jQuery(timer).removeClass("hidden");
-            }, 20);
-            window.setTimeout(function() {
-                jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
-            }, 50);
+            triggerReloadTimer(delay);
         }
     }
     window.clearTimeout(reloadPageTimer);
     reloadPageTimer = window.setTimeout(function() {
         reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetrySeconds);
     }, delay);
+}
+
+function triggerReloadTimer(delay) {
+    if(!delay) { delay = 500; }
+    var timer = jQuery('#reload-timer')[0];
+    jQuery(timer).addClass("hidden");
+    jQuery(timer).removeClass("scale-x-0");
+    jQuery(timer).addClass("scale-x-100");
+    timer.style.setProperty("transition-duration", delay+"ms", "important");
+    window.setTimeout(function() {
+        jQuery(timer).removeClass("hidden");
+    }, 20);
+    window.setTimeout(function() {
+        jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
+    }, 50);
 }
 
 function resetRefreshButton() {
@@ -2426,7 +2432,7 @@ function checkSitePanelChanged() {
         // immediately reload if there were changes
         if(backends_toggled) {
             removeParams['backends'] = true;
-            reloadPage(50, true);
+            reloadPage(50, true, true);
         }
     }
 
