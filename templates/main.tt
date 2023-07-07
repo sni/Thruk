@@ -141,7 +141,7 @@
   </div>
 
   <div class="my-card">
-    <div class="card overviewcard w-auto">
+    <div class="card w-auto min-h-[250px]">
       <div class="head">
         <h3><a href="status.cgi?hostgroup=all&style=hostdetail" class="link">Hosts</a></h3>
       </div>
@@ -151,7 +151,7 @@
   </div>
 
   <div class="my-card">
-    <div class="card overviewcard w-auto">
+    <div class="card w-auto min-h-[250px]">
       <div class="head">
         <h3><a href="status.cgi" class="link">Services</a></h3>
       </div>
@@ -162,7 +162,7 @@
 
   [% IF backend_stats.available > 1 %]
     <div class="my-card">
-      <div class="card overviewcard w-auto">
+      <div class="card w-auto min-h-[250px]">
         <div class="head">
           <h3>Available Backends</h3>
         </div>
@@ -172,7 +172,7 @@
     </div>
     [% IF backend_stats.enabled - backend_stats.down > 1 %]
     <div class="my-card">
-      <div class="card w-auto">
+      <div class="card w-auto min-h-[250px]">
         <div class="head">
           <h3>Hosts per Backend</h3>
         </div>
@@ -184,7 +184,7 @@
   [% END %]
 
   <div class="my-card">
-    <div class="card w-auto h-full">
+    <div class="card w-auto h-full min-h-[250px]">
       <div class="head">
         <h3><a href="status.cgi?style=hostoverview" class="link">Top 5 Hostgroups</a></h3>
       </div>
@@ -193,7 +193,7 @@
   </div>
 
   <div class="my-card">
-    <div class="card w-auto">
+    <div class="card w-auto min-h-[250px]">
       <div class="head">
         <h3><a class="link" href="notifications.cgi">Notifications</a></h3>
         [% IF notifications_age && notifications_age > 30 %]<div class="ml-4 textHINTsoft" title="last update: [% date_format(c, date.now - notifications_age) %]">updated [% duration(notifications_age, 6) %] ago</div>[% END %]
