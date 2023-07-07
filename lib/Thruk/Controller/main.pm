@@ -454,12 +454,13 @@ sub _get_contacts {
             columns    => [qw/name/],
             debug_hint => 'total contacts',
         },
+        sub { return $_[0]->{'name'}; },
     );
 
     my $uniq = {};
     for my $peer_key (sort keys %{$data}) {
-        for my $row (@{$data->{$peer_key}}) {
-            $uniq->{$row->{'name'}} = 1;
+        for my $name (@{$data->{$peer_key}}) {
+            $uniq->{$name} = 1;
         }
     }
 

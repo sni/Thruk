@@ -2911,14 +2911,14 @@ sub _add_query_stats {
 
 =head2 caching_query
 
-  caching_query($cache_file, $function, $columns)
+  caching_query($cache_file, $function, $args, $convert_in)
 
 returns db query results and caches them by peer key until backend got restarted
 
 =cut
 
 sub caching_query {
-    my($self, $cache_file, $function, $args) = @_;
+    my($self, $cache_file, $function, $args, $convert_in, $convert_out) = @_;
     my $c = $Thruk::Globals::c;
 
     $c->stats->profile(begin => "caching_query: ".$function);
@@ -2945,7 +2945,12 @@ sub caching_query {
             }
         }
         for my $row (@{$data}) {
-            push @{$cached->{$row->{'peer_key'}}->{'data'}}, $row;
+            if($convert_in) {
+                my $peer_key = delete $row->{'peer_key'};
+                push @{$cached->{$peer_key}->{'data'}}, &{$convert_in}($row);
+            } else {
+                push @{$cached->{$row->{'peer_key'}}->{'data'}}, $row;
+            }
         }
         $cache->set($cached);
     }
