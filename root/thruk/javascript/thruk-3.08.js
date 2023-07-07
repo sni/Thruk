@@ -2439,7 +2439,7 @@ function toggleBackend(backend, state, skip_update) {
   if(skip_update == undefined || !skip_update) {
     resetRefresh();
   }
-  var button = jQuery('#button_'+backend);
+  var button = jQuery("[data-id='"+backend+"']");
   if(state == undefined) { state = -1; }
 
   if(backend_chooser == 'switch') {

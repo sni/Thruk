@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix selecting backends
+
 3.08     Sat Jul  1 11:29:49 CEST 2023
           - DEPRECATION WARNING: gaining admin role from system_commands and configuration_information role
             is deprecated now and will be removed in the future.
