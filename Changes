@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - fix selecting backends
+          - fix flickering on main page during reload
+          - improve visual feedback on page reload
 
 3.08     Sat Jul  1 11:29:49 CEST 2023
           - DEPRECATION WARNING: gaining admin role from system_commands and configuration_information role
