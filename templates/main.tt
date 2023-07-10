@@ -384,7 +384,7 @@ function initGraphs() {
         },
         [% IF backend_stats.enabled - backend_stats.down > 20 %]
         legend: {
-          hide: true,
+          hide: true
         },
         [% END %]
         bindto: "#hostloc-pieChart"
