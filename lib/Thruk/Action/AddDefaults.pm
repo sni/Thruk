@@ -1181,6 +1181,36 @@ sub set_enabled_backends {
 }
 
 ########################################
+
+=head2 has_backends_set
+
+  has_backends_set($c)
+
+    returns 1 if user has set custom backends
+
+=cut
+sub has_backends_set {
+    my($c) = @_;
+    my $num_backends = scalar @{$c->db->get_peers()};
+    my $cookie_src   = $c->stash->{'backend_cookie_src'} // 'thruk_backends';
+    if($num_backends <= 1) {
+        return;
+    }
+    if(defined $c->cookies($cookie_src)) {
+        return(1);
+    }
+    my $backend  = $c->req->parameters->{'backend'} || $c->req->parameters->{'backends'};
+    if(defined $backend) {
+        return(1);
+    }
+    if(defined $ENV{'THRUK_BACKENDS'}) {
+        return(1);
+    }
+
+    return;
+}
+
+########################################
 sub _set_disabled_by_section {
     my($c, $backend, $disabled_backends) = @_;
     $backend =~ s/\/$//gmx;

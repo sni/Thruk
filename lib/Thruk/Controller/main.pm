@@ -447,16 +447,35 @@ sub _get_contacts {
     my($c) = @_;
     $c->stats->profile(begin => "_get_contacts");
 
+    my $backends = Thruk::Action::AddDefaults::has_backends_set($c) ? undef : $c->db->authoritive_peer_keys();
+
     my $data = $c->db->caching_query(
         $c->config->{'var_path'}.'/caching_query.contact_names.cache',
         'get_contacts',
         {
             columns    => [qw/name/],
             debug_hint => 'total contacts',
+            backends   => $backends,
         },
         sub { return $_[0]->{'name'}; },
         1,
     );
+
+    # take shortcut if its only one backend
+    my $key;
+    if($backends && scalar @{$backends} == 1) {
+        $key = (keys %{$data})[0];
+    }
+    elsif(scalar keys %{$data} == 1) {
+        $key = (keys %{$data})[0];
+    }
+
+    if($key) {
+        my $num = scalar @{$data->{$key}};
+
+        $c->stats->profile(end => "_get_contacts");
+        return($num);
+    }
 
     my $uniq = {};
     for my $peer_key (sort keys %{$data}) {
