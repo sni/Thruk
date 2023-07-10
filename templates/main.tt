@@ -375,11 +375,6 @@ function initGraphs() {
             value: function(value, ratio, id) { return value; }
           }
         },
-        /*
-        color: {
-          pattern: ['var(--dashboard-series-1','var(--dashboard-series-2)']
-        },
-        */
         size: {
           height: 210
         },
@@ -387,6 +382,11 @@ function initGraphs() {
           enabled: true,
           brighten: false //DOESNT WORK FOR SOME REASON
         },
+        [% IF backend_stats.enabled - backend_stats.down > 20 %]
+        legend: {
+          hide: true,
+        },
+        [% END %]
         bindto: "#hostloc-pieChart"
       });
     [% END %]
