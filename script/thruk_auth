@@ -178,6 +178,10 @@ sub process {
         my $auth = $extra->[1];
         # use session cache for a few seconds
         if(defined $sessioncache->{$auth} && ($sessioncachetimeout == 0 || ($sessioncachetimeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout))) {
+            if($sessioncache->{$auth}->{'failed'}) {
+                _debug("basic auth login failed by cache hit: ".substr($auth, 0, 6)."...") if $verbose > 1;
+                return $loginurl."?invalid&".$path;
+            }
             _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
             return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
         }
@@ -190,11 +194,16 @@ sub process {
                     'login' => $session->{'username'},
                     'time'  => $now,
             };
-            #unlink($session->{'file'}); # session file never got created
             return "/loginok/".$session->{'username'}."/".$path;
-        } else {
-            _debug("basic auth login failed") if $verbose;
         }
+
+        _debug("basic auth login failed") if $verbose;
+        # cache failed login as well to prevent ddos attack with wrong credentials
+        $sessioncache->{$auth} = {
+                'failed' => 1,
+                'time'   => $now,
+        };
+        return $loginurl."?invalid&".$path;
     }
 
     # did we get a cookie
@@ -207,6 +216,10 @@ sub process {
 
     # use session cache for a few seconds
     if(defined $sessioncache->{$auth} && ($sessioncachetimeout == 0 || ($sessioncachetimeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout))) {
+        if($sessioncache->{$auth}->{'failed'}) {
+            _debug("login failed by cache hit") if $verbose > 1;
+            return $loginurl."?invalid&".$path;
+        }
         _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
         return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
     }
@@ -244,6 +257,10 @@ sub process {
     my $basicauth = $session->{'hash'};
     if($sessioncachetimeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
+        if($sessioncache->{$auth}->{'failed'}) {
+            _debug("session not ok by cache hit") if $verbose > 1;
+            return $loginurl."?invalid&".$path;
+        }
         _debug("session ok (not revalidated)") if $verbose > 1;
     }
     else {
