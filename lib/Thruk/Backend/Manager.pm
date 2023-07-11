@@ -2922,7 +2922,7 @@ sub caching_query {
     my $c = $Thruk::Globals::c;
 
     $c->stats->profile(begin => "caching_query: ".$function);
-    my($selected_backends) = $c->db->select_backends($function, []);
+    my($selected_backends) = $args->{'backend'} || $c->db->select_backends($function, []);
     my $required_backends = [];
 
     my $cache;
