@@ -391,7 +391,7 @@ sub _notifications_data {
         $c->stats->profile(begin => "_notifications_data bg refresh");
         $cache->touch(); # update timestamp to avoid multiple parallel updates
         require Thruk::Utils::External;
-        my $job = Thruk::Utils::External::perl($c, {
+        Thruk::Utils::External::perl($c, {
                     expr       => 'Thruk::Controller::main::_notifications_update_cache($c, '.$start.')',
                     background => 1,
                     clean      => 1,
