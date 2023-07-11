@@ -377,14 +377,18 @@ sub _get_notifications {
 ##########################################################
 sub _notifications_data {
     my($c, $start) = @_;
+    $c->stats->profile(begin => "_notifications_data read cache");
 
     my $cache  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/notifications.cache');
     my $cached = $cache->get("notifications") || {};
+
+    $c->stats->profile(end => "_notifications_data read cache");
 
     # update cache every 60sec
     my $age = $cache->age();
     $c->stash->{'notifications_age'} = defined $age ? $age : "";
     if(!defined $age || $age > 50) {
+        $c->stats->profile(begin => "_notifications_data bg refresh");
         $cache->touch(); # update timestamp to avoid multiple parallel updates
         require Thruk::Utils::External;
         my $job = Thruk::Utils::External::perl($c, {
@@ -392,6 +396,7 @@ sub _notifications_data {
                     background => 1,
                     clean      => 1,
         });
+        $c->stats->profile(end => "_notifications_data bg refresh");
     }
 
     return($cached);
