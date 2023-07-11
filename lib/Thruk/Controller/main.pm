@@ -174,18 +174,8 @@ sub index {
     );
 
     ############################################################################
-    # for hostgroups
-    my $hosts = $c->db->get_hosts(
-        filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter, groups => { '!=', '' } ],
-        columns => ['name', 'groups'],
-        debug_hint => 'top hostgroups',
-    );
-    my $hostgroups = {};
-    for my $host ( @{$hosts} ) {
-        for my $group ( @{$host->{'groups'}} ) {
-            $hostgroups->{$group}++;
-        }
-    }
+    # top 5 hostgroups
+    my $hostgroups = _get_top5_hostgroups($c, $hostfilter);
     my $top5_hg = [];
     my @hashkeys_hg = sort { $hostgroups->{$b} <=> $hostgroups->{$a} || $a cmp $b } keys %{$hostgroups};
     splice(@hashkeys_hg, 5) if scalar(@hashkeys_hg) > 5;
@@ -292,6 +282,45 @@ sub index {
     Thruk::Utils::ssi_include($c);
 
     return 1;
+}
+
+##########################################################
+sub _get_top5_hostgroups {
+    my($c, $hostfilter) = @_;
+
+    my $auth_filter = Thruk::Utils::Auth::get_auth_filter($c, 'hosts');
+    if(!$auth_filter && !$hostfilter) {
+        return _get_top5_hostgroups_sums($c);
+    }
+    my $hosts = $c->db->get_hosts(
+        filter => [ $auth_filter, $hostfilter, groups => { '!=', '' } ],
+        columns => ['name', 'groups'],
+        debug_hint => 'top hostgroups',
+    );
+    my $hostgroups = {};
+    for my $host ( @{$hosts} ) {
+        for my $group ( @{$host->{'groups'}} ) {
+            $hostgroups->{$group}++;
+        }
+    }
+    return $hostgroups;
+}
+
+##########################################################
+sub _get_top5_hostgroups_sums {
+    my($c) = @_;
+
+    my $data = $c->db->get_hostgroups(
+        columns => [qw/name num_hosts/],
+        debug_hint => 'top hostgroups sums',
+    );
+
+    my $hostgroups = {};
+    for my $group (@{$data}) {
+        $hostgroups->{$group->{'name'}} = $group->{'num_hosts'};
+    }
+
+    return $hostgroups;
 }
 
 ##########################################################

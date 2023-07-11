@@ -2202,13 +2202,12 @@ sub _merge_hostgroup_answer {
         for my $row ( @{ $data->{$key} } ) {
             if( !defined $groups->{ $row->{'name'} } ) {
                 $groups->{ $row->{'name'} } = $row;
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $row->{'members'} } ] if $row->{'members'};
-            }
-            else {
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
+                $groups->{ $row->{'name'} }->{'backends_hash'} = { $key => $name };
+                next;
             }
 
-            if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
+            $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
+            $groups->{ $row->{'name'} }->{'num_hosts'} += $row->{'num_hosts'} if defined $row->{'num_hosts'};
             $groups->{ $row->{'name'} }->{'backends_hash'}->{$key} = $name;
         }
     }
@@ -2245,12 +2244,11 @@ sub _merge_servicegroup_answer {
         for my $row ( @{ $data->{$key} } ) {
             if( !defined $groups->{ $row->{'name'} } ) {
                 $groups->{ $row->{'name'} } = $row;
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $row->{'members'} } ] if $row->{'members'};
+                $groups->{ $row->{'name'} }->{'backends_hash'} = { $key => $name };
+                next;
             }
-            else {
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
-            }
-            if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
+
+            $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
             $groups->{$row->{'name'}}->{'backends_hash'}->{$key} = $name;
         }
     }
