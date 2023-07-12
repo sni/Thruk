@@ -40,8 +40,8 @@
           <div class="spinner w-5 h-5" title="waiting for initial response"></div>
         [% ELSIF n.last_error != "" %]
           <i class="fa-solid fa-exclamation round small yellow" title="[% n.last_error | html %]"></i>
-        [% ELSIF date.now - n.last_contact < c.config.cluster_node_stale_timeout %]
-          <i class="fa-solid fa-exclamation round small yellow" title="error"></i>
+        [% ELSIF date.now - n.last_contact > c.config.cluster_node_stale_timeout %]
+          <i class="fa-solid fa-exclamation round small yellow" title="error - last contact [% date.now - n.last_contact |html %]s ago (threshold: [% c.config.cluster_node_stale_timeout %]s)"></i>
         [% ELSE %]
           <i class="fa-solid fa-check round green" title="ok"></i>
         [% END %]
@@ -64,7 +64,7 @@
           [% ELSE %]
             [% IF n.last_contact > 0 %]
               [% IF date.now - n.last_contact < 120 %]
-                [% date.now - n.last_contact %]s ago
+                [% date.now - n.last_contact | html %]s ago
               [% ELSE %]
                 [% date_format(c, n.last_contact) %]
               [% END %]
