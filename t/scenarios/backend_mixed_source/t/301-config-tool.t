@@ -28,7 +28,7 @@ _test_page({
 });
 _test_page({
     url     => 'GET /hosts/<name>',
-    like    => ['"rta_unit" : "ms",', '"rta" : "\d+\.\d+', ''],
+    like    => ['"rta_unit" : "ms",', '"rta" : \d+\.\d+', ''],
 });
 _test_page({
 # verify configuration from config tool

@@ -52,10 +52,10 @@ my $pages = [{
         waitfor      => '"rta"',
     }, {
         url          => '/services?columns=rta&rta[gt]=0',
-        like         => ['"rta" : "0.\d+'],
+        like         => ['"rta" : 0.\d+'],
     }, {
         url          => '/services?columns=rta&rta[gt]=0&_WORKER[ne]=test&_HOSTWORKER[ne]=test',
-        like         => ['"rta" : "0.\d+'],
+        like         => ['"rta" : 0.\d+'],
     }, {
         url          => '/logs?q=***type = "EXTERNAL COMMAND"***',
         like         => ['EXTERNAL COMMAND'],
