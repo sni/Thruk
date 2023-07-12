@@ -18,6 +18,7 @@ use Data::Dumper ();
 use Date::Calc qw/Localtime Today/;
 use Encode qw/decode_utf8/;
 use POSIX ();
+use Scalar::Util qw/looks_like_number/;
 use URI::Escape qw/uri_escape/;
 
 use Thruk::Utils ();
@@ -1114,17 +1115,23 @@ sub split_perfdata {
         }
         $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $warn;
         $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $crit;
-        push @{$data}, {
-            'parent'    => $last_parent,
-            'name'      => $key,
-            'value'     => $var,
-            'unit'      => $unit,
-            'min'       => $min,
-            'max'       => $max,
-            'warn'      => $warn,
-            'crit'      => $crit,
-            'orig'      => $orig,
-        } if defined $var;
+        if(defined $var) {
+            my $entry = {
+                'parent'    => $last_parent,
+                'name'      => $key,
+                'value'     => $var,
+                'unit'      => $unit,
+                'min'       => $min,
+                'max'       => $max,
+                'warn'      => $warn,
+                'crit'      => $crit,
+                'orig'      => $orig,
+            };
+            for my $key (qw/value min max warn crit/) {
+                $entry->{$key} = 0+$entry->{$key} if looks_like_number($entry->{$key});
+            }
+            push @{$data}, $entry;
+        }
         $has_warn = 1 if(defined $warn && $warn ne '');
         $has_crit = 1 if(defined $crit && $crit ne '');
         $has_min  = 1 if(defined $min  && $min  ne '');
