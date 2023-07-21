@@ -1,8 +1,15 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.08.3   Fri Jul 21 13:06:06 CEST 2023
+          - improve landing page performance
+          - fix replacing links in plugin output containing spaces
+          - fix cluster status icon
+          - fix lexical query parser (#1296)
+          - fix search preview highlighting (#1295)
+          - auth: cache failed basic auth logins
           - Rest
             - make performance data numbers instead of strings
+            - add missing !>= operator
 
 3.08.2   Sat Jul  8 09:56:31 CEST 2023
           - fix selecting backends
