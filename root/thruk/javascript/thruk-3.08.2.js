@@ -3083,6 +3083,11 @@ function escapeHTML(text) {
     return jQuery("<div>").text(text).html();
 }
 
+/* return escaped regex string */
+function escapeRegex(text) {
+    return text.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
 /* set icon src and refresh page */
 function refresh_button() {
     reloadPage(50, true, true);
@@ -8893,19 +8898,18 @@ var ajax_search = {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display || data.name || "";
                     jQuery.each(pattern, function(index, sub_pattern) {
-                        if(ajax_search.regex_matching && sub_pattern != "*") {
-                            var re = new RegExp('('+sub_pattern+')', "gi");
-                            // only replace parts of the string which are not bold yet
-                            var parts = name.split(/(<b[^>]*>.*?<\/b>)/);
-                            jQuery.each(parts, function(index2, part) {
-                                if(!part.match(/^<b>/)) {
-                                    parts[index2] = part.replace(re, "<b class='hint'>$1<\/b>");
-                                }
-                            });
-                            name = parts.join("");
-                        } else {
-                            name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b class='hint'>" + sub_pattern + "<\/b>");
+                        if(!ajax_search.regex_matching && sub_pattern != "*") {
+                            sub_pattern = escapeRegex(sub_pattern);
                         }
+                        var re = new RegExp('('+sub_pattern+')', "gi");
+                        // only replace parts of the string which are not bold yet
+                        var parts = name.split(/(<b[^>]*>.*?<\/b>)/);
+                        jQuery.each(parts, function(index2, part) {
+                            if(!part.match(/^<b>/)) {
+                                parts[index2] = part.replace(re, "<b class='hint'>$1<\/b>");
+                            }
+                        });
+                        name = parts.join("");
                     });
                     var classname = "";
                     if(selected != -1 && selected == x) {
