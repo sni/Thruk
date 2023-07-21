@@ -94,12 +94,14 @@
           [% IF service.action_url_expanded %]
             [% action_url = proxifiy_url(c, service, get_action_url(c, 2, 1, service.action_url_expanded, service)) %]
             <div>
-              <a href='[% action_url %]' target='_blank'><i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i></a>
+              <a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'>
+                <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
+              </a>
             </div>
           [% END %]
           [% IF service.notes_url_expanded %]
             <div>
-              <a href='[% service.notes_url_expanded %]' target='[% c.config.notes_url_target %]'>
+              <a href='[% l = set_target_link(service.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'>
                 <i class="fa-solid fa-clipboard clickable" title='View Extra Service Notes'></i>
               </a>
             </div>

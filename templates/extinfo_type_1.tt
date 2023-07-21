@@ -87,29 +87,29 @@
               <img class="inline-block" src="[% url_prefix %]plugins/[% shinken_features_path %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio | html %]">
             </div>
           [% END %]
+          [% IF host.action_url_expanded %]
+            [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
+            <div>
+              <a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'>
+                <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
+              </a>
+            </div>
+          [% END %]
           [% IF host.notes_url_expanded %]
-              <div>
-                <a href='[% l = set_target_link(host.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'>
-                  <i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i>
-                </a>
-              </div>
-            [% END %]
-            [% has_bp = has_business_process(host) %]
-            [% IF has_bp %]
-              <div>
-                <a href="bp.cgi?action=details&bp=[% has_bp %]">
-                  <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
-                </a>
-              </div>
-            [% END %]
-            [% IF host.action_url_expanded %]
-              [% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.action_url_expanded, host)) %]
-              <div>
-                <a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'>
-                  <i class="fa-solid fa-chart-line clickable text-xl" title='Show Performance Chart'></i>
-                </a>
-              </div>
-            [% END %]
+            <div>
+              <a href='[% l = set_target_link(host.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'>
+                <i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i>
+              </a>
+            </div>
+          [% END %]
+          [% has_bp = has_business_process(host) %]
+          [% IF has_bp %]
+            <div>
+              <a href="bp.cgi?action=details&bp=[% has_bp %]">
+                <i class="fa-solid fa-sitemap clickable text-xl" title='Show Business Process'></i>
+              </a>
+            </div>
+          [% END %]
         </div>
       </div>
       <div>
