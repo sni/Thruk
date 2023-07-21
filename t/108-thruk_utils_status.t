@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 47;
+plan tests => 49;
 
 BEGIN {
     use lib('t');
@@ -63,6 +63,9 @@ _test_filter('last_check <= "lastyear"', 'Filter: last_check <= '.Thruk::Utils::
 _test_filter('(host_groups ~~ "g1" AND host_groups ~~ "g2")  OR (host_name = "h1" and display_name ~~ ".*dn.*")',
              "Filter: host_groups ~~ g1\nFilter: host_groups ~~ g2\nAnd: 2\nFilter: host_name = h1\nFilter: display_name ~~ .*dn.*\nAnd: 2\nOr: 2",
              "(host_groups ~~ 'g1' and host_groups ~~ 'g2') or (host_name = 'h1' and display_name ~~ '.*dn.*')");
+_test_filter('(host_name = 1) or (host_name = 2) or (host_name = 3)',
+             "Filter: host_name = 1\nFilter: host_name = 2\nFilter: host_name = 3\nOr: 3",
+             "host_name = 1 or host_name = 2 or host_name = 3");
 
 sub _test_filter {
     my($filter, $expect, $exp_ftext) = @_;

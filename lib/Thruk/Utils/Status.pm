@@ -2771,7 +2771,7 @@ sub _lexical_combine {
         push @{$prev2->{'-'.$combine}},  $prev1;
         push @{$filter}, $prev2;
     } else {
-        push @{$filter}, { '-'.$combine => [$prev2, $prev1]};
+        return([{ '-'.$combine => [@{$filter}, $prev2, $prev1] }]);
     }
     return($filter);
 }
