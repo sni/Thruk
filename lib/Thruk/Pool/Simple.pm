@@ -36,7 +36,7 @@ sub add_bulk {
     #&timing_breakpoint('Pool::Simple::add_bulk');
     my @encoded;
     for my $job (@{$jobs}) {
-        push @encoded, encode_json(ref $job ? $job : [$job]);
+        push @encoded, encode_json((ref $job && ref $job eq 'ARRAY') ? $job : [$job]);
     }
     #&timing_breakpoint('Pool::Simple::add_bulk encoded');
     $self->{workq}->enqueue(@encoded);
@@ -81,6 +81,7 @@ END {
 sub _handle_work {
     my($self) = @_;
     local $SIG{'KILL'} = sub { exit; };
+    local $SIG{'INT'} = sub { exit; };
     while(my $job = $self->{workq}->dequeue()) {
         #&timing_breakpoint('Pool::Simple::_handle_work waited');
         my @res;

@@ -1,0 +1,397 @@
+#!/bin/bash
+
+# read rc files if exist
+unset PROFILEDOTD
+[ -e /etc/thruk/thruk.env  ] && . /etc/thruk/thruk.env
+[ -e ~/etc/thruk/thruk.env ] && . ~/etc/thruk/thruk.env
+[ -e ~/.thruk              ] && . ~/.thruk
+[ -e ~/.profile            ] && . ~/.profile
+
+BASEDIR=$(dirname $0)/..
+
+# git version
+if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
+  export PERL5LIB="$BASEDIR/lib:$PERL5LIB";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+
+# omd
+elif [ "$OMD_ROOT" != "" ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+
+# pkg installation
+else
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 33
+
+##############################################
+use strict;
+use warnings;
+use Pod::Usage;
+use Getopt::Long;
+use IO::Select ();
+use IPC::Open3 qw/open3/;
+use Thruk::Utils::CLI;
+use Thruk::Utils::IO ();
+use Thruk::Utils::Log qw/:all/;
+
+##############################################
+exit(main());
+
+our $sshpid;
+sub END {
+    if($sshpid) {
+        CORE::kill(2, $sshpid)
+    }
+}
+
+##############################################
+sub main {
+    my $opt ={
+        'help'          => 0,
+        'hostfilter'    => undef,
+        'servicefilter' => undef,
+        'backend'       => undef,
+        'worker'        => 1,
+        'target'        => [],
+        'verbose'       => 0,
+        'timeout'       => 30,
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    GetOptions (
+    "h|help"          => \$opt->{'help'},
+    "hostfilter=s"    => \$opt->{'hostfilter'},
+    "servicefilter=s" => \$opt->{'servicefilter'},
+    "b|backend=s"     => \$opt->{'backend'},
+    "w|worker=i"      => \$opt->{'worker'},
+    "t|timeout=i"     => \$opt->{'timeout'},
+    "v|verbose"       => sub { $opt->{'verbose'}++ },
+    "<>"              => sub { push @{$opt->{'target'}}, $_[0]; },
+    ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+    pod2usage( { -verbose => 2,  -exit => 3 } ) if($opt->{'help'} || scalar @{$opt->{'target'}} != 1);
+
+    $ENV{'THRUK_VERBOSE'} = $opt->{'verbose'};
+    Thruk::Config::set_config_env();
+
+    my $options;
+    $options->{'backends'} = [$opt->{'backend'}] if $opt->{'backend'};
+    my $cli     = Thruk::Utils::CLI->new($options);
+    my $c       = $cli->get_c();
+    Thruk::Action::AddDefaults::add_defaults($c);
+
+    $sshpid = _start_ssh_master($c, $opt);
+    _debug("ssh control master started, pid:%d", $sshpid);
+
+    if(_run_checks($c, $opt)) {
+        return(0);
+    }
+    return(1);
+}
+
+##############################################
+sub _run_checks {
+    my($c, $opt) = @_;
+
+    our $jobs = [];
+    our $failed = 0;
+    our $summary = {};
+
+    my $last48hour    = time() - 2*86400;
+    my $hostfilter    = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
+    my $servicefilter = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
+    if($opt->{'hostfilter'}) {
+        push @{$hostfilter},    { name      => { '~~' => $opt->{'hostfilter'} }};
+        push @{$servicefilter}, { host_name => { '~~' => $opt->{'hostfilter'} }};
+    }
+    if($opt->{'servicefilter'}) {
+        push @{$servicefilter}, { description => { '~~' => $opt->{'servicefilter'} }};
+    }
+    if(!$opt->{'servicefilter'}) {
+        my $hosts = $c->db->get_hosts(filter => [$hostfilter], columns => [qw/name/]);
+        push @{$jobs}, @{$hosts};
+    }
+    my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name description/]);
+    push @{$jobs}, @{$services};
+
+    $SIG{'INT'} = sub {
+        _warn("got ctrl+c, printing summary so far before exiting...");
+        _print_summary();
+        CORE::kill(2, $sshpid) if $sshpid;
+        exit(1);
+    };
+
+    $|=1; #enable autoflush
+    my $num_jobs = scalar @{$jobs};
+    my $numsize  = length("$num_jobs");
+    my $nr       = 0;
+    Thruk::Utils::scale_out(
+        scale  => $opt->{'worker'},
+        jobs   => $jobs,
+        worker => sub {
+            my($obj) = @_;
+            local $SIG{'INT'} = "DEFAULT";
+            my $err;
+            eval {
+                ($err) = _check_object($c, $opt, $obj);
+            };
+            $err = $@ if $@;
+            if($err) {
+                _error($err);
+            }
+            return($err, $obj);
+        },
+        collect => sub {
+            my($item) = @_;
+            my($err, $obj) = @{$item};
+            if($err) {
+                $failed++;
+                if($obj->{'name'}) {
+                    $summary->{$obj->{'name'}}->{"__HOST__"} = 1;
+                } else {
+                    $summary->{$obj->{'host_name'}}->{"description"} = 1;
+                }
+            }
+            printf("\033[JStatus: %0".$numsize."d/%d\033[G", ++$nr, $num_jobs);
+        },
+    );
+
+    return _print_summary();
+}
+
+##############################################
+sub _print_summary {
+    our $summary;
+    our $failed;
+    our $jobs;
+    _info("=========================");
+    _info("Checks failed on these hosts / services:");
+    for my $hst (sort keys %{$summary}) {
+        _info("- %s", $hst);
+        if($summary->{$hst}->{"__HOST__"}) {
+            delete $summary->{$hst}->{"__HOST__"};
+            _info("  - host check");
+        }
+        for my $svc (sort keys %{$summary->{$hst}}) {
+            _info("  - %s", $svc);
+        }
+    }
+
+    _info("=========================");
+    if($failed == 0) {
+        _info("%d/%d checks failed", $failed, scalar @{$jobs});
+        return(1);
+    }
+    _warn("%d/%d checks failed", $failed, scalar @{$jobs});
+    return;
+}
+
+##############################################
+sub _check_object {
+    my($c, $opt, $obj) = @_;
+
+    my($chkobj, $command, $name);
+    # host check
+    if($obj->{'name'}) {
+        $name = $obj->{'name'};
+        $chkobj = $c->db->get_hosts(filter => [{ name => $obj->{'name'} }], backend => [$obj->{'peer_key'}]);
+        if(scalar @{$chkobj} != 1) {
+            return sprintf("found %d hosts for name %s", scalar @{$chkobj}, $name);
+        }
+        $chkobj = $chkobj->[0];
+        $command = $c->db->expand_command('host' => $chkobj, 'source' => $c->config->{'show_full_commandline_source'}, 'obfuscate' => 0 );
+    } else {
+        $name = sprintf("%s -%s", $obj->{'host_name'}, $obj->{'description'});
+        $chkobj = $c->db->get_services(filter => [{ host_name => $obj->{'host_name'}, description => $obj->{'description'} }], backend => [$obj->{'peer_key'}]);
+        if(scalar @{$chkobj} != 1) {
+            return sprintf("found %d services for name %s", scalar @{$chkobj}, $name);
+        }
+        $chkobj = $chkobj->[0];
+        my $hosts = $c->db->get_hosts(filter => [{ name => $obj->{'host_name'} }], backend => [$obj->{'peer_key'}]);
+        $command = $c->db->expand_command('host' => $hosts->[0], 'service' => $chkobj, 'source' => $c->config->{'show_full_commandline_source'}, 'obfuscate' => 0 );
+    }
+
+    if($command->{'note'}) {
+        return sprintf("failed to expand check command (%s): %s",  $name, $command->{'note'});
+    }
+    if(!$command->{'line_expanded'}) {
+        return sprintf("got no command line for %s",  $name);
+    }
+    my($rc, $output, $err) = _check_command($c, $opt, $command);
+    return $err if $err;
+    $output = "" unless $output;
+    $output =~ s/\n.*$//sgmx; # limit to first line
+    $output =~ s/^(.*?)\|.*$/$1/gmx; # strip perf data
+    if(_compare_result($c, $opt, $name, $chkobj, $rc, $output)) {
+        # everything fine
+        return;
+    }
+
+    # changes detected
+    _info("-" x 80);
+    _info("expected rc: %3s - output: %s", $chkobj->{'state'}, _shorten($chkobj->{'plugin_output'}, 80));
+    _info("actual   rc: %3s - output: %s", $rc, _shorten($output, 80));
+
+    return sprintf("%s: %s has different exit code or output", $chkobj->{'name'} ? 'host' : 'service', $name);
+}
+
+##############################################
+sub _compare_result {
+    my($c, $opt, $name, $chkobj, $rc, $output) = @_;
+    # translate host status
+    if($chkobj->{'name'}) {
+        if($chkobj->{'state'} == 0 && $rc != 0) {
+            return;
+        }
+        if($chkobj->{'state'} != 0 && $rc == 0) {
+            return;
+        }
+    } else {
+        if($rc != $chkobj->{'state'}) {
+            return;
+        }
+    }
+
+    my $plugin_output = _make_plugin_output_comparable($chkobj->{'plugin_output'});
+    my $tmp_output    = _make_plugin_output_comparable($output);
+    if($plugin_output ne $tmp_output) {
+        return;
+    }
+
+    return 1;
+}
+
+##############################################
+sub _make_plugin_output_comparable {
+    my($output) = @_;
+
+    # replace numbers
+    $output =~ s/\d+/<NUM>/gmx;
+
+    return($output);
+}
+
+##############################################
+sub _shorten {
+    my($str, $len) = @_;
+    if(length($str) > $len) {
+        return(substr($str, 0, $len)."...");
+    }
+    return($str);
+}
+
+##############################################
+sub _check_command {
+    my($c, $opt, $command) = @_;
+
+    my $target = $opt->{'target'}->[0];
+    my $cmd = [
+        "ssh",
+        "-o", "PasswordAuthentication=no",
+        "-o", "PreferredAuthentications=publickey",
+        "-o", "IdentitiesOnly=yes",
+        "-o", "ControlMaster=no",
+        "-o", "ControlPath=.ssh-wrk-$target.0",
+        "-o", "StrictHostKeyChecking=no",
+        $target,
+        $command->{'line_expanded'},
+    ];
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, undef, undef, $opt->{'timeout'}, 1);
+    return($rc, $output, undef);
+}
+
+##############################################
+sub _start_ssh_master {
+    my($c, $opt) = @_;
+
+    my $pid = fork();
+    if($pid == -1) { die("fork failed"); }
+    if($pid) { return($pid); }
+
+    undef $Thruk::Globals::c;
+    my $target = $opt->{'target'}->[0];
+    my $ctrl_path = ".ssh-wrk-$target.0";
+    unlink($ctrl_path);
+    my $cmd = [
+        "-N",
+        "-o", "PasswordAuthentication=no",
+        "-o", "PreferredAuthentications=publickey",
+        "-o", "IdentitiesOnly=yes",
+        "-o", "ControlMaster=yes",
+        "-o", "ControlPath=".$ctrl_path,
+        "-o", "StrictHostKeyChecking=no",
+        $target,
+    ];
+    my($wtr, $rdr, $err);
+    _debug("starting: ssh ".join(" ", @{$cmd}));
+    $pid = open3($wtr, $rdr, $err, "ssh", @{$cmd});
+    $SIG{'INT'} = sub {
+        CORE::kill(2, $pid) if $pid;
+        exit(1);
+    };
+    my $sel = IO::Select->new;
+    $sel->add($rdr);
+    $sel->add($err);
+    while(my @ready = $sel->can_read) {
+        for my $fh (@ready) {
+            my $line;
+            my $len = sysread $fh, $line, 8192;
+            if(!defined $len){
+                die "Error from child: $!\n";
+            } elsif ($len == 0){
+                $sel->remove($fh);
+                next;
+            } else {
+                my $prefix = (defined $rdr && $fh == $rdr) ? "OUT" : "ERR";
+                for my $l (split/\n/mx, $line) {
+                    _debug("SSHMASTER %s: %s", $prefix, $l);
+                }
+            }
+        }
+    }
+    CORE::kill(2, $pid);
+}
+
+##############################################
+
+=head1 NAME
+
+worker_command_tester - Test all command lines on a worker host
+
+=head1 SYNOPSIS
+
+Usage: worker_command_tester [options] user@targetmachine
+
+=head1 DESCRIPTION
+
+Runs all commands on given host and prints if they differ from the existing output.
+Useful when testing a new mod-gearman worker for missing firewall
+exceptions and similar.
+
+=head1 OPTIONS
+
+    -b|--backend            specify backend if there are multiple connected
+       --hostfilter         filter hostnames by regular expression
+       --servicefilter      filter service names by regular expression
+    -w|--worker             specify the number of parallel checks
+    -t|--timeout            specify timeout (in seconds) for each check
+    -v|--verbose            print additional debug information
+
+=head1 EXAMPLE
+
+    OMD[test]:~$ ./share/thruk/examples/worker_command_tester --hostfilter=localhost test@workerhost
+
+=head1 AUTHOR
+
+2023, Sven Nierlein, <sven@nierlein.de>
+
+=cut

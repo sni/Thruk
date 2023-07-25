@@ -701,7 +701,7 @@ optional timeout will kill the command after the timeout (seconds)
 =cut
 
 sub cmd {
-    my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout) = @_;
+    my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout, $no_touch_signals) = @_;
 
     if($timeout) {
         setpgrp();
@@ -728,9 +728,9 @@ sub cmd {
     }
     $c->stats->profile(begin => "IO::cmd") if $c;
 
-    local $SIG{INT}  = 'DEFAULT';
-    local $SIG{TERM} = 'DEFAULT';
-    local $SIG{PIPE} = 'DEFAULT';
+    local $SIG{INT}  = 'DEFAULT' unless $no_touch_signals;
+    local $SIG{TERM} = 'DEFAULT' unless $no_touch_signals;
+    local $SIG{PIPE} = 'DEFAULT' unless $no_touch_signals;
     local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;
     my $groups = [];
     if($c && $c->user_exists) {
