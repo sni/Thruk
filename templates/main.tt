@@ -20,7 +20,7 @@
 
 <h1>[% page_title %]</h1>
 
-<div class="card w-full absolute top-0 left-0 rounded-none shadow-none border-t border-b">
+<div class="card w-full absolute top-0 left-0 rounded-none shadow-none border-t border-b borderDefault">
   <div class="head border-b-0 flexrow flex-nowrap gap-0 justify-between" id="view_tabs">
     <div class="ml-6 w-32">
       [% PROCESS _status_filter.tt entries="" show_substyle_selector=1 extra_params = [{ name => 'v', value => currentview.name }] %]

@@ -1315,7 +1315,7 @@ DIV.deleteicon {
 }
 
 DIV.singlefilterpane {
-  @apply border-l border-b;
+  @apply border-l border-b borderDefault;
   &:first-child {
     @apply border-l-0;
   }

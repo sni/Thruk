@@ -87,8 +87,8 @@
   --progessbar-bg:            var(--color-warmgray-500);
 
   --row-selected-fg:          var(--color-gray-700);
-  --row-selected-even-bg:     var(--color-yellow-100);
-  --row-selected-odd-bg:      var(--color-yellow-200);
+  --row-selected-even-bg:     var(--color-yellow-200);
+  --row-selected-odd-bg:      var(--color-yellow-300);
 
   --tooltip-fg:               var(--text-body);
   --tooltip-bg:               #888;
@@ -157,6 +157,15 @@
 ::-moz-selection {
   background: #0c62a3; /* Gecko Browsers */
   color: var(--text-body);
+}
+
+.jstree-default .jstree-clicked { /* override highlight blue of editor plugin */
+  background: #0c62a3 !important;
+  color: var(--text-body) !important;
+}
+
+.tableRowSelected I.fa-solid {
+  color: var(--row-selected-fg)
 }
 
 /*******************************************************************************
