@@ -36,6 +36,7 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ##############################################
 use strict;
 use warnings;
+use POSIX ();
 use Pod::Usage;
 use Getopt::Long;
 use IO::Select ();
@@ -43,14 +44,21 @@ use IPC::Open3 qw/open3/;
 use Thruk::Utils::CLI;
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Filter ();
+
+# must come after the other modules
+use Thread::Queue ();
 
 ##############################################
+my $max_session_per_worker = 10;
+our @sshpids;
+my $sockets_queue = Thread::Queue->new();
+
 exit(main());
 
-our $sshpid;
 sub END {
-    if($sshpid) {
-        CORE::kill(2, $sshpid)
+    if(scalar @sshpids > 0) {
+        CORE::kill(2, @sshpids)
     }
 }
 
@@ -61,7 +69,7 @@ sub main {
         'hostfilter'    => undef,
         'servicefilter' => undef,
         'backend'       => undef,
-        'worker'        => 1,
+        'worker'        => 'auto',
         'target'        => [],
         'verbose'       => 0,
         'timeout'       => 30,
@@ -89,10 +97,23 @@ sub main {
     my $c       = $cli->get_c();
     Thruk::Action::AddDefaults::add_defaults($c);
 
-    $sshpid = _start_ssh_master($c, $opt);
-    _debug("ssh control master started, pid:%d", $sshpid);
+    if($opt->{'worker'} eq 'auto') {
+        $opt->{'worker'} = 10;
+    }
 
-    if(_run_checks($c, $opt)) {
+    for my $x (1..(POSIX::ceil($opt->{'worker'} / $max_session_per_worker ))) {
+        my $pid = _start_ssh_master($c, $opt, $x-1);
+        _debug("ssh control master %d started, pid:%d", $x-1, $pid);
+        push @sshpids, $pid;
+        my $ctrl_path = sprintf(".ssh-wrk-%s.%d", $opt->{'target'}->[0], $x-1);
+        for(1..$max_session_per_worker) {
+            $sockets_queue->enqueue($ctrl_path);
+        }
+    }
+
+    my $rc = _run_checks($c, $opt);
+    $sockets_queue->end();
+    if($rc) {
         return(0);
     }
     return(1);
@@ -102,34 +123,18 @@ sub main {
 sub _run_checks {
     my($c, $opt) = @_;
 
-    our $jobs = [];
-    our $failed = 0;
+    our $jobs    = _get_jobs($c, $opt);
+    our $failed  = 0;
     our $summary = {};
-
-    my $last48hour    = time() - 2*86400;
-    my $hostfilter    = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
-    my $servicefilter = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
-    if($opt->{'hostfilter'}) {
-        push @{$hostfilter},    { name      => { '~~' => $opt->{'hostfilter'} }};
-        push @{$servicefilter}, { host_name => { '~~' => $opt->{'hostfilter'} }};
-    }
-    if($opt->{'servicefilter'}) {
-        push @{$servicefilter}, { description => { '~~' => $opt->{'servicefilter'} }};
-    }
-    if(!$opt->{'servicefilter'}) {
-        my $hosts = $c->db->get_hosts(filter => [$hostfilter], columns => [qw/name/]);
-        push @{$jobs}, @{$hosts};
-    }
-    my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name description/]);
-    push @{$jobs}, @{$services};
 
     $SIG{'INT'} = sub {
         _warn("got ctrl+c, printing summary so far before exiting...");
         _print_summary();
-        CORE::kill(2, $sshpid) if $sshpid;
+        CORE::kill(2, @sshpids) if scalar @sshpids > 0;
         exit(1);
     };
 
+    my $t1 = time();
     $|=1; #enable autoflush
     my $num_jobs = scalar @{$jobs};
     my $numsize  = length("$num_jobs");
@@ -161,11 +166,74 @@ sub _run_checks {
                     $summary->{$obj->{'host_name'}}->{"description"} = 1;
                 }
             }
-            printf("\033[JStatus: %0".$numsize."d/%d\033[G", ++$nr, $num_jobs);
+            $nr++;
+            my $elapsed = time() - $t1;
+            my($rem, $end, $perc, $rate) = ("", "", 0, 0);
+            if($elapsed > 0) {
+                $perc = ($nr/$num_jobs) * 100;
+                my $rem_jobs = $num_jobs - $nr;
+                $rate = $nr / $elapsed;
+                if($rem_jobs > 0) {
+                    $rem = ($elapsed / $nr) * $rem_jobs;
+                    $end = time() + $rem;
+                    $rem = Thruk::Utils::Filter::duration($rem, 6);
+                    $end = Thruk::Utils::Filter::date_format($c, $end);
+                }
+            }
+            printf("\033[JStatus: %0".$numsize."d/%d (%0.1f%%) check rate: %.1f/s | remaining duration: %s | expected end: %s \033[G",
+                $nr,
+                $num_jobs,
+                $perc,
+                $rate,
+                $rem,
+                $end,
+            );
         },
     );
 
     return _print_summary();
+}
+
+##############################################
+sub _get_jobs {
+    my($c, $opt) = @_;
+    my $jobs         = [];
+    my $all_commands = {};
+    my $commands = $c->db->get_commands();
+    _info("fetched %d commands", scalar @{$commands});
+    for my $cmd (@{$commands}) {
+        $all_commands->{$cmd->{'peer_key'}}->{$cmd->{'name'}} = $cmd;
+    }
+
+    my $last48hour    = time() - 2*86400;
+    my $hostfilter    = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
+    my $servicefilter = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
+    if($opt->{'hostfilter'}) {
+        push @{$hostfilter},    { name      => { '~~' => $opt->{'hostfilter'} }};
+        push @{$servicefilter}, { host_name => { '~~' => $opt->{'hostfilter'} }};
+    }
+    if($opt->{'servicefilter'}) {
+        push @{$servicefilter}, { description => { '~~' => $opt->{'servicefilter'} }};
+    }
+    if(!$opt->{'servicefilter'}) {
+        my $hosts = $c->db->get_hosts(filter => [$hostfilter], columns => [qw/name check_command/]);
+        push @{$jobs}, @{$hosts};
+        _info("fetched %d hosts", scalar @{$hosts});
+    }
+    my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name description check_command/]);
+    push @{$jobs}, @{$services};
+    _info("fetched %d services", scalar @{$services});
+
+    # insert commands
+    for my $obj (@{$jobs}) {
+        my $check_command = $obj->{'check_command'};
+        $check_command =~ s/\!.*$//gmx;
+        my $cmd = $all_commands->{$obj->{'peer_key'}}->{$check_command};
+        die("cannot find command definition for: ".$check_command) unless $cmd;
+        $obj->{'command'} = $cmd;
+    }
+
+    return($jobs);
 }
 
 ##############################################
@@ -208,7 +276,7 @@ sub _check_object {
             return sprintf("found %d hosts for name %s", scalar @{$chkobj}, $name);
         }
         $chkobj = $chkobj->[0];
-        $command = $c->db->expand_command('host' => $chkobj, 'source' => $c->config->{'show_full_commandline_source'}, 'obfuscate' => 0 );
+        $command = $c->db->expand_command('host' => $chkobj, 'command' => $obj->{'command'}, 'obfuscate' => 0 );
     } else {
         $name = sprintf("%s -%s", $obj->{'host_name'}, $obj->{'description'});
         $chkobj = $c->db->get_services(filter => [{ host_name => $obj->{'host_name'}, description => $obj->{'description'} }], backend => [$obj->{'peer_key'}]);
@@ -217,7 +285,7 @@ sub _check_object {
         }
         $chkobj = $chkobj->[0];
         my $hosts = $c->db->get_hosts(filter => [{ name => $obj->{'host_name'} }], backend => [$obj->{'peer_key'}]);
-        $command = $c->db->expand_command('host' => $hosts->[0], 'service' => $chkobj, 'source' => $c->config->{'show_full_commandline_source'}, 'obfuscate' => 0 );
+        $command = $c->db->expand_command('host' => $hosts->[0], 'service' => $chkobj, 'command' => $obj->{'command'}, 'obfuscate' => 0 );
     }
 
     if($command->{'note'}) {
@@ -237,8 +305,9 @@ sub _check_object {
     }
 
     # changes detected
-    _info("-" x 80);
-    _info("expected rc: %3s - output: %s", $chkobj->{'state'}, _shorten($chkobj->{'plugin_output'}, 80));
+    _info("-" x 105);
+    _info("check command: %s", $command->{'line_expanded'});
+    _info("expected rc: %3s - output: %s (last_check: %s)", $chkobj->{'state'}, _shorten($chkobj->{'plugin_output'}, 80), Thruk::Utils::Filter::date_format($c, $chkobj->{'last_check'}));
     _info("actual   rc: %3s - output: %s", $rc, _shorten($output, 80));
 
     return sprintf("%s: %s has different exit code or output", $chkobj->{'name'} ? 'host' : 'service', $name);
@@ -277,6 +346,10 @@ sub _make_plugin_output_comparable {
     # replace numbers
     $output =~ s/\d+/<NUM>/gmx;
 
+    # replace dns errors, they might be slightly different
+    $output =~ s/\QNo address associated with hostname\E/<DNS LOOKUP ERROR>/gmx; # rhel 9
+    $output =~ s/\QName or service not known\E/<DNS LOOKUP ERROR>/gmx; # rhel 7
+
     return($output);
 }
 
@@ -293,25 +366,34 @@ sub _shorten {
 sub _check_command {
     my($c, $opt, $command) = @_;
 
+    my $ctrl_path = $sockets_queue->dequeue_timed(3); # get next free ctrl path
+    die("got no ctrl path in time") unless $ctrl_path;
     my $target = $opt->{'target'}->[0];
     my $cmd = [
+        "timeout",
+        $opt->{'timeout'},
         "ssh",
         "-o", "PasswordAuthentication=no",
         "-o", "PreferredAuthentications=publickey",
         "-o", "IdentitiesOnly=yes",
         "-o", "ControlMaster=no",
-        "-o", "ControlPath=.ssh-wrk-$target.0",
+        "-o", "ControlPath=".$ctrl_path,
         "-o", "StrictHostKeyChecking=no",
         $target,
         $command->{'line_expanded'},
     ];
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, undef, undef, $opt->{'timeout'}, 1);
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, undef, undef, undef, 1);
+    if($rc == 124) {
+        $rc     = 3;
+        $output = sprintf("check timed out after %d seconds", $opt->{'timeout'});
+    }
+    $sockets_queue->enqueue($ctrl_path); # put it back
     return($rc, $output, undef);
 }
 
 ##############################################
 sub _start_ssh_master {
-    my($c, $opt) = @_;
+    my($c, $opt, $nr) = @_;
 
     my $pid = fork();
     if($pid == -1) { die("fork failed"); }
@@ -319,7 +401,7 @@ sub _start_ssh_master {
 
     undef $Thruk::Globals::c;
     my $target = $opt->{'target'}->[0];
-    my $ctrl_path = ".ssh-wrk-$target.0";
+    my $ctrl_path = ".ssh-wrk-$target.".$nr;
     unlink($ctrl_path);
     my $cmd = [
         "-N",

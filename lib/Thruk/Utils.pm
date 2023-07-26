@@ -3667,6 +3667,7 @@ sub scale_out {
 
     return if scalar @{$opt{'jobs'}} == 0;
 
+    # skip threads if there is only one worker
     if($opt{'scale'} == 1 || scalar @{$opt{'jobs'}} == 1) {
         my $res = [];
         for my $job (@{$opt{'jobs'}}) {
