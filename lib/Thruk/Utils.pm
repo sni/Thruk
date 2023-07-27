@@ -3665,17 +3665,19 @@ scale out worker, run jobs and returns result from collect sub.
 sub scale_out {
     my %opt = @_;
 
-    return if scalar @{$opt{'jobs'}} == 0;
+    if(!$opt{'prepare_only'}) {
+        return if scalar @{$opt{'jobs'}} == 0;
 
-    # skip threads if there is only one worker
-    if($opt{'scale'} == 1 || scalar @{$opt{'jobs'}} == 1) {
-        my $res = [];
-        for my $job (@{$opt{'jobs'}}) {
-            my $item = [&{$opt{'worker'}}(ref $job eq 'ARRAY' ? @{$job} : $job)];
-            $item = &{$opt{'collect'}}($item);
-            push @{$res}, $item if $item;
+        # skip threads if there is only one worker
+        if($opt{'scale'} == 1 || scalar @{$opt{'jobs'}} == 1) {
+            my $res = [];
+            for my $job (@{$opt{'jobs'}}) {
+                my $item = [&{$opt{'worker'}}(ref $job eq 'ARRAY' ? @{$job} : $job)];
+                $item = &{$opt{'collect'}}($item);
+                push @{$res}, $item if $item;
+            }
+            return(@{$res});
         }
-        return(@{$res});
     }
 
     require Thruk::Pool::Simple;
@@ -3683,6 +3685,7 @@ sub scale_out {
         size    => $opt{'scale'},
         handler => $opt{'worker'},
     );
+    return $pool if $opt{'prepare_only'};
     $pool->add_bulk($opt{'jobs'});
     return($pool->remove_all($opt{'collect'}));
 }

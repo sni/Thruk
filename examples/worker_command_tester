@@ -53,6 +53,7 @@ use Thruk::Pool::Simple ();
 # must come after the other modules
 use Thread::Queue ();
 
+$|=1; #enable autoflush
 our $max_session_per_worker = 10;
 our @sshpids;
 my $sockets_queue = Thread::Queue->new();
@@ -153,10 +154,15 @@ sub run {
 sub _run_checks {
     my($self) = @_;
 
+    my $pool = Thruk::Utils::scale_out(
+        scale        => $self->{'opt'}->{'worker'},
+        worker       => sub { return($self->_worker(@_)); },
+        prepare_only => 1,
+    );
+
     $self->{'jobs_hash'} = {};
-    our $jobs     = $self->_get_jobs();
+    my $jobs     = $self->_get_jobs();
     my $jobs_hash = $self->{'jobs_hash'};
-    my $summary   = $self->{'summary'};
     if(scalar keys %{$jobs_hash} == 0) {
         for my $job (@{$jobs}) {
             if($job->{name}) {
@@ -175,65 +181,63 @@ sub _run_checks {
     };
 
     my $t1 = time();
-    $|=1; #enable autoflush
     my $num_jobs = scalar @{$jobs};
     my $numsize  = length("$num_jobs");
     my $nr       = 0;
-    Thruk::Utils::scale_out(
-        scale  => $self->{'opt'}->{'worker'},
-        jobs   => $jobs,
-        worker => sub { return($self->_worker(@_)); },
-        collect => sub {
-            my($item) = @_;
-            my($err, $obj) = @{$item};
-            if($err) {
-                $self->{'stats'}->{'failed'}++;
-                if($obj->{'name'}) {
-                    $summary->{$obj->{'name'}}->{"__HOST__"} = 1;
-                } else {
-                    $summary->{$obj->{'host_name'}}->{$obj->{'description'}} = 1;
-                }
-            }
-            $nr++;
-            my $elapsed = time() - $t1;
-            my($rem, $end, $perc, $rate) = ("", "", 0, 0);
-            if($elapsed > 0) {
-                $perc = ($nr/$num_jobs) * 100;
-                my $rem_jobs = $num_jobs - $nr;
-                $rate = $nr / $elapsed;
-                if($rem_jobs > 0) {
-                    $rem = ($elapsed / $nr) * $rem_jobs;
-                    $end = time() + $rem;
-                    $rem = Thruk::Utils::Filter::duration($rem, 6);
-                    $end = Thruk::Utils::Filter::date_format($self->{'c'}, $end);
-                }
-            }
-            printf("\033[JStatus: %0".$numsize."d/%d (%0.1f%%) check rate: %.1f/s | remaining duration: %s | expected end: %s \033[G",
-                $nr,
-                $num_jobs,
-                $perc,
-                $rate,
-                $rem,
-                $end,
-            );
 
-            # clean up and save continue file information
-            my $host_name;
+    $pool->add_bulk($jobs);
+    $pool->remove_all(sub {
+        my($item) = @_;
+        my $summary = $self->{'summary'};
+        my($err, $obj) = @{$item};
+        if($err) {
+            $self->{'stats'}->{'failed'}++;
             if($obj->{'name'}) {
-                delete $jobs_hash->{$obj->{peer_key}}->{$obj->{name}}->{'__HOST__'};
-                $host_name = $obj->{name};
+                $summary->{$obj->{'name'}}->{"__HOST__"} = 1;
             } else {
-                delete $jobs_hash->{$obj->{peer_key}}->{$obj->{host_name}}->{$obj->{description}};
-                $host_name = $obj->{host_name};
+                $summary->{$obj->{'host_name'}}->{$obj->{'description'}} = 1;
             }
-            if(scalar keys %{$jobs_hash->{$obj->{peer_key}}->{$host_name}} == 0) {
-                delete $jobs_hash->{$obj->{peer_key}}->{$host_name};
+        }
+        $nr++;
+        my $elapsed = time() - $t1;
+        my($rem, $end, $perc, $rate) = ("", "", 0, 0);
+        if($elapsed > 0) {
+            $perc = ($nr/$num_jobs) * 100;
+            my $rem_jobs = $num_jobs - $nr;
+            $rate = $nr / $elapsed;
+            if($rem_jobs > 0) {
+                $rem = ($elapsed / $nr) * $rem_jobs;
+                $end = time() + $rem;
+                $rem = Thruk::Utils::Filter::duration($rem, 6);
+                $end = Thruk::Utils::Filter::date_format($self->{'c'}, $end);
             }
-            if($nr%500 == 0) {
-                $self->_save_continue_file();
-            }
-        },
-    );
+        }
+        printf("\033[JStatus: %0".$numsize."d/%d (%0.1f%%) check rate: %.1f/s | remaining duration: %s | expected end: %s \033[G",
+            $nr,
+            $num_jobs,
+            $perc,
+            $rate,
+            $rem,
+            $end,
+        );
+
+        # clean up and save continue file information
+        my $host_name;
+        if($obj->{'name'}) {
+            delete $jobs_hash->{$obj->{peer_key}}->{$obj->{name}}->{'__HOST__'};
+            $host_name = $obj->{name};
+        } else {
+            delete $jobs_hash->{$obj->{peer_key}}->{$obj->{host_name}}->{$obj->{description}};
+            $host_name = $obj->{host_name};
+        }
+        if(scalar keys %{$jobs_hash->{$obj->{peer_key}}->{$host_name}} == 0) {
+            delete $jobs_hash->{$obj->{peer_key}}->{$host_name};
+        }
+        if($nr%500 == 0) {
+            $self->_save_continue_file();
+        }
+
+    });
 
     unlink($self->{'continue_file'});
     my $rc = $self->_print_summary();
@@ -525,8 +529,7 @@ sub _check_command {
     die("got no ctrl path in time") unless $ctrl_path;
     my $target = $self->{'opt'}->{'target'}->[0];
     my $cmd = [
-        "timeout",
-        $self->{'opt'}->{'timeout'},
+        "timeout", "--kill-after=".($self->{'opt'}->{'timeout'}+2), $self->{'opt'}->{'timeout'},
         "ssh",
         "-o", "PasswordAuthentication=no",
         "-o", "PreferredAuthentications=publickey",
