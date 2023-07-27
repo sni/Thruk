@@ -85,6 +85,7 @@ sub run {
     my($self) = @_;
     my $opt ={
         'help'          => 0,
+        'hostsonly'     => undef,
         'hostfilter'    => undef,
         'servicefilter' => undef,
         'backend'       => undef,
@@ -100,6 +101,7 @@ sub run {
     GetOptions (
     "h|help"          => \$opt->{'help'},
     "hostfilter=s"    => \$opt->{'hostfilter'},
+    "hostsonly"       => \$opt->{'hostsonly'},
     "servicefilter=s" => \$opt->{'servicefilter'},
     "b|backend=s"     => \$opt->{'backend'},
     "w|worker=i"      => \$opt->{'worker'},
@@ -355,9 +357,11 @@ sub _get_jobs {
         push @{$jobs}, @{$hosts};
         _info("fetched %d hosts", scalar @{$hosts});
     }
-    my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name description check_command/]);
-    push @{$jobs}, @{$services};
-    _info("fetched %d services", scalar @{$services});
+    if(!$opt->{'hostsonly'}) {
+        my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name description check_command/]);
+        push @{$jobs}, @{$services};
+        _info("fetched %d services", scalar @{$services});
+    }
 
     # insert commands
     for my $obj (@{$jobs}) {
@@ -635,6 +639,7 @@ exceptions and similar.
 =head1 OPTIONS
 
     -b|--backend            specify backend if there are multiple connected
+       --hostsonly          only run hostchecks and skip services
        --hostfilter         filter hostnames by regular expression
        --servicefilter      filter service names by regular expression
     -w|--worker             specify the number of parallel checks
@@ -645,7 +650,11 @@ exceptions and similar.
 
 =head1 EXAMPLE
 
-    OMD[test]:~$ ./share/thruk/examples/worker_command_tester --hostfilter=localhost test@workerhost
+    # run checks from testhost only
+    OMD[test]:~$ ./share/thruk/examples/worker_command_tester --hostfilter=testhost test@workerhost
+
+    # run host checks only and write errors into a logfile
+    OMD[test]:~$ ./share/thruk/examples/worker_command_tester --hostsonly test@workerhost 2> >(tee errors.log)
 
 =head1 AUTHOR
 
