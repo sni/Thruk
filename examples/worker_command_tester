@@ -144,7 +144,16 @@ sub run {
         }
     }
 
-    my $rc = $self->_run_checks();
+    # test ssh connection
+    my($rc, $output, $err) = $self->_check_command({'line_expanded' => 'id' });
+    if($rc != 0) {
+        _error("ssh connection failed with rc %d", $rc);
+        _error("%s", $output) if $output;
+        _error("%s", $err) if $err;
+        exit(1);
+    }
+
+    $rc = $self->_run_checks();
     $sockets_queue->end();
     if($rc) {
         return(0);
@@ -535,7 +544,6 @@ sub _check_command {
     die("got no ctrl path in time") unless $ctrl_path;
     my $target = $self->{'opt'}->{'target'}->[0];
     my $cmd = [
-        "timeout", "--kill-after=".($self->{'opt'}->{'timeout'}+2), $self->{'opt'}->{'timeout'},
         "ssh",
         "-o", "PasswordAuthentication=no",
         "-o", "PreferredAuthentications=publickey",
@@ -544,10 +552,10 @@ sub _check_command {
         "-o", "ControlPath=".$ctrl_path,
         "-o", "StrictHostKeyChecking=no",
         $target,
-        $command->{'line_expanded'},
+        "./bin/mod_gearman_worker --job_timeout=".$self->{'opt'}->{'timeout'}." testcmd ".$command->{'line_expanded'},
     ];
     my($rc, $output) = Thruk::Utils::IO::cmd($self->{'c'}, $cmd, undef, undef, undef, undef, undef, 1);
-    if($rc == 124) {
+    if($rc == 2 && $output =~ m/\Qtest run into timeout after\E/) {
         $rc     = 3;
         $output = sprintf("check timed out after %d seconds", $self->{'opt'}->{'timeout'});
     }
