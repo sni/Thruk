@@ -89,3 +89,7 @@ fi
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot
 
 chown -R naemon: .
+
+# free some disk space again
+apt-get clean
+df -h
