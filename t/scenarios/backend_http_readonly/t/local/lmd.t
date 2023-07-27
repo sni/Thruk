@@ -27,7 +27,7 @@ TestUtils::test_command({
     # start LMD
     TestUtils::test_command({
         cmd    => '/usr/bin/env omd start lmd',
-        like   => ['/Starting LMD.*OK/'],
+        like   => ['/starting lmd.*ok/i'],
     });
 
     # wait till backends are online
@@ -50,7 +50,7 @@ TestUtils::test_command({
     # stop LMD
     TestUtils::test_command({
         cmd    => '/usr/bin/env omd stop lmd',
-        like   => ['/Stopping LMD.*OK/'],
+        like   => ['/stopping lmd.*ok/i'],
     });
     # disable LMD
     TestUtils::test_command({
