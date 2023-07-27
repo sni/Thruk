@@ -68,7 +68,7 @@ sub END {
 sub new {
     my ($class, %arg) = @_;
     my $self = {
-        continue_file => '.worker.test.continue.json',
+        continue_file => sprintf('/tmp/.worker.test.continue.%d.json', $>),
         summary       => {},
         stats         => {
             failed => 0,
@@ -109,6 +109,11 @@ sub run {
     "<>"              => sub { push @{$opt->{'target'}}, $_[0]; },
     ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
     pod2usage( { -verbose => 2,  -exit => 3 } ) if($opt->{'help'} || scalar @{$opt->{'target'}} != 1);
+
+    if($opt->{'retry'} && $opt->{'continue'}) {
+        _error("retry file and continue option set, use either of them, not both.");
+        exit(1);
+    }
 
     $ENV{'THRUK_VERBOSE'} = $opt->{'verbose'};
     Thruk::Config::set_config_env();
@@ -232,6 +237,7 @@ sub _run_checks {
 
     unlink($self->{'continue_file'});
     my $rc = $self->_print_summary();
+    $self->_save_retry_file();
     $self->_end(1);
     return $rc;
 }
@@ -255,7 +261,19 @@ sub _save_continue_file {
         jobs    => $self->{'jobs_hash'},
         summary => $self->{'summary'},
         stats   => $self->{'stats'},
-});
+    });
+}
+
+##############################################
+sub _save_retry_file {
+    my($self) = @_;
+    _debug("saving retry file");
+
+    my $retry_file = $self->{'opt'}->{'retry'} || sprintf("/tmp/.worker.test.retry.%d.%s.json", $>, (POSIX::strftime("%Y%m%d_%H%M%S", localtime)));
+    Thruk::Utils::IO::json_store($retry_file, {
+        summary => $self->{'summary'},
+    });
+    _warn("retry failed checks with: %s ... --retry=%s", $0, $retry_file);
 }
 
 ##############################################
@@ -277,21 +295,35 @@ sub _worker {
 ##############################################
 sub _get_jobs {
     my($self) = @_;
-    my $jobs         = [];
+    my $jobs = [];
 
-    if($self->{'opt'}->{'continue'} && -e $self->{'continue_file'}) {
-        my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'continue_file'});
-        $self->{'jobs_hash'} = $data->{'jobs'};
-        $self->{'stats'}     = $data->{'stats'};
-        $self->{'summary'}   = $data->{'summary'};
-        my $jobs_hash = $self->{'jobs_hash'};
-        for my $peer_key (sort keys %{$jobs_hash}) {
-            for my $host_name (sort keys %{$jobs_hash->{$peer_key}}) {
-                push @{$jobs}, values %{$jobs_hash->{$peer_key}->{$host_name}};
+    if($self->{'opt'}->{'continue'}) {
+        if(! -e $self->{'continue_file'}) {
+            _info("no continue file found, starting fresh");
+        } else {
+            my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'continue_file'});
+            $self->{'jobs_hash'} = $data->{'jobs'};
+            $self->{'stats'}     = $data->{'stats'};
+            $self->{'summary'}   = $data->{'summary'};
+            my $jobs_hash = $self->{'jobs_hash'};
+            for my $peer_key (sort keys %{$jobs_hash}) {
+                for my $host_name (sort keys %{$jobs_hash->{$peer_key}}) {
+                    push @{$jobs}, values %{$jobs_hash->{$peer_key}->{$host_name}};
+                }
             }
+            _warn("continuing remaining %d checks", scalar @{$jobs});
+            return $jobs;
         }
-        _warn("continuing remaining %d checks", scalar @{$jobs});
-        return $jobs;
+    }
+
+    my $retries;
+    if($self->{'opt'}->{'retry'}) {
+        if(! -e $self->{'opt'}->{'retry'}) {
+            _error("error reading retry file %s: %s", $self->{'opt'}->{'retry'}, $!);
+            exit(1);
+        }
+        my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'opt'}->{'retry'});
+        $retries = $data->{'summary'};
     }
 
     my $all_commands = {};
@@ -329,6 +361,19 @@ sub _get_jobs {
         my $cmd = $all_commands->{$obj->{'peer_key'}}->{$check_command};
         die("cannot find command definition for: ".$check_command) unless $cmd;
         $obj->{'command'} = $cmd;
+    }
+
+    if($retries) {
+        my @filtered;
+        for my $obj (@{$jobs}) {
+            if($obj->{'name'}) {
+                push @filtered, $obj if($retries->{$obj->{'name'}}->{"__HOST__"});
+            } else {
+                push @filtered, $obj if($retries->{$obj->{'host_name'}}->{$obj->{'description'}});
+            }
+        }
+        $jobs = \@filtered;
+        _info("retrying %d checks from %s", scalar @{$jobs}, $self->{'opt'}->{'retry'});
     }
 
     $self->{'stats'}->{'total'} = scalar @{$jobs};
@@ -590,7 +635,7 @@ exceptions and similar.
     -w|--worker             specify the number of parallel checks
     -t|--timeout            specify timeout (in seconds) for each check
     -c|--continue           try to continue previuous run
-    -r|--retry              use retry file and verify failed runs
+    -r|--retry=<file>       use retry file and verify failed runs
     -v|--verbose            print additional debug information
 
 =head1 EXAMPLE
