@@ -55,6 +55,7 @@
   </thead>
   <tbody>
     [% SET lasthost = '' %]
+    [% SET prev_host_empty = '' %]
     [% FOREACH s = data %]
       [% IF s.has_been_checked == 0 %]
         [% state = 'PENDING' %]
@@ -81,6 +82,7 @@
 
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
         [% IF lasthost == s.host_name %]
+          [% SET prev_host_empty = "yes" %]
         <td class='host_name col_host_name border-t-0 border-b-0 bgTable'></td>
         [% ELSE %]
           [% SET host_comment_count = 0 %]
@@ -91,7 +93,12 @@
           [% ELSIF s.host_state == 2 %]
             [% hoststate = 'UNREACHABLE' %]
           [% END %]
-          <td class='host_name col_host_name [% hoststate %]'>
+          [% IF prev_host_empty == "yes" %]
+            [% SET prev_host_empty = " rowOdd" %]
+          [% ELSE %]
+            [% SET prev_host_empty = '' %]
+          [% END %]
+          <td class='host_name col_host_name [% hoststate %][% prev_host_empty %]'>
             <div class="status col_host_name flex items-center min-w-max">
               <div class="flex-1">
                 <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% _shost(s) | html %]</a>
