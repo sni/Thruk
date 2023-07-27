@@ -36,6 +36,7 @@ for my $file (@files) {
     next if $file eq 'examples/query2testobjects';       # there is an extra test for this
     next if $file eq 'examples/config_tool_git_checkin'; # cannot be tested easily
     next if $file eq 'examples/get_logs';                # cannot be tested easily
+    next if $file eq 'examples/worker_command_tester';   # cannot be tested easily
     next unless -x $file;
     check_example($file);
 }
