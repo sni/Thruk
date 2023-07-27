@@ -62,9 +62,9 @@
     <div class="card w-full">
       <div class="head justify-between">
         <h3>Service [% _service(service) | html %] on <a class="link" href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% _shost(service) | html %]</a></h3>
-        <div class="flexrow gap-x-1">
+        <div class="flex gap-x-3 items-center">
           [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
-            <div class="mt-5 px-2">
+            <div>
               [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
               [% IF menu.defined('err') && menu.err %]
                 <i class="fa-solid fa-exclamation round small yellow" title="[% menu.err | html %]"></i>

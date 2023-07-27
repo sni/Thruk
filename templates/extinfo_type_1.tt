@@ -58,9 +58,9 @@
     <div class="card w-full">
       <div class="head justify-between">
         <h3>Host: [% _host(host) | html %]</h3>
-        <div class="flex gap-x-1">
+        <div class="flex gap-x-3 items-center">
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
-            <div class="mr-3">
+            <div>
               [% menu = get_action_menu(c, cust_vars.THRUK_ACTION_MENU) %]
               [% IF menu.defined('err') && menu.err %]
                 <i class="fa-solid fa-exclamation round small yellow" title="[% menu.err | html %]"></i>
