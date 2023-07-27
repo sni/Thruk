@@ -197,6 +197,10 @@ sub _run_checks {
             } else {
                 $summary->{$obj->{'host_name'}}->{$obj->{'description'}} = 1;
             }
+            _info("-" x 105);
+            for my $l (@{$err}) {
+                _info("%s", $l);
+            }
         }
         $nr++;
         my $elapsed = time() - $t1;
@@ -233,7 +237,7 @@ sub _run_checks {
         if(scalar keys %{$jobs_hash->{$obj->{peer_key}}->{$host_name}} == 0) {
             delete $jobs_hash->{$obj->{peer_key}}->{$host_name};
         }
-        if($nr%500 == 0) {
+        if($nr%5000 == 0) {
             $self->_save_continue_file();
         }
 
@@ -289,10 +293,7 @@ sub _worker {
     eval {
         ($err) = $self->_check_object($obj);
     };
-    $err = $@ if $@;
-    if($err) {
-        _error($err);
-    }
+    $err = [$@] if $@;
     return($err, $obj);
 }
 
@@ -340,8 +341,8 @@ sub _get_jobs {
     }
 
     my $last48hour    = time() - 2*86400;
-    my $hostfilter    = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
-    my $servicefilter = [ { active_checks_enabled => 1, last_check => { '>=' => $last48hour } } ];
+    my $hostfilter    = [ { active_checks_enabled => 1, has_been_checked => 1, last_check => { '>=' => $last48hour } } ];
+    my $servicefilter = [ { active_checks_enabled => 1, has_been_checked => 1, last_check => { '>=' => $last48hour } } ];
     if($opt->{'hostfilter'}) {
         push @{$hostfilter},    { name      => { '~~' => $opt->{'hostfilter'} }};
         push @{$servicefilter}, { host_name => { '~~' => $opt->{'hostfilter'} }};
@@ -425,7 +426,7 @@ sub _check_object {
         $name = $obj->{'name'};
         $chkobj = $c->db->get_hosts(filter => [{ name => $obj->{'name'} }], backend => [$obj->{'peer_key'}]);
         if(scalar @{$chkobj} != 1) {
-            return sprintf("found %d hosts for name %s", scalar @{$chkobj}, $name);
+            return([sprintf("found %d hosts for name %s", scalar @{$chkobj}, $name)]);
         }
         $chkobj = $chkobj->[0];
         $command = $c->db->expand_command('host' => $chkobj, 'command' => $obj->{'command'}, 'obfuscate' => 0 );
@@ -433,7 +434,7 @@ sub _check_object {
         $name = sprintf("%s - %s", $obj->{'host_name'}, $obj->{'description'});
         $chkobj = $c->db->get_services(filter => [{ host_name => $obj->{'host_name'}, description => $obj->{'description'} }], backend => [$obj->{'peer_key'}]);
         if(scalar @{$chkobj} != 1) {
-            return sprintf("found %d services for name %s", scalar @{$chkobj}, $name);
+            return([sprintf("found %d services for name %s", scalar @{$chkobj}, $name)]);
         }
         $chkobj = $chkobj->[0];
         my $hosts = $c->db->get_hosts(filter => [{ name => $obj->{'host_name'} }], backend => [$obj->{'peer_key'}]);
@@ -441,12 +442,13 @@ sub _check_object {
     }
 
     if($command->{'note'}) {
-        _info("-" x 105);
-        _info("check command: %s", $command->{'line_expanded'});
-        return sprintf("failed to expand check command (%s): %s",  $name, $command->{'note'});
+        return([
+            sprintf("check command: %s", $command->{'line_expanded'}),
+            sprintf("failed to expand check command (%s): %s",  $name, $command->{'note'}),
+        ]);
     }
     if(!$command->{'line_expanded'}) {
-        return sprintf("got no command line for %s",  $name);
+        return([sprintf("got no command line for %s",  $name)]);
     }
     my($rc, $output, $err) = $self->_check_command($command);
     return $err if $err;
@@ -459,12 +461,12 @@ sub _check_object {
     }
 
     # changes detected
-    _info("-" x 105);
-    _info("check command: %s", $command->{'line_expanded'});
-    _info("expected rc: %3s - output: %s (last_check: %s)", $chkobj->{'state'}, _shorten($chkobj->{'plugin_output'}, 80), Thruk::Utils::Filter::date_format($c, $chkobj->{'last_check'}));
-    _info("actual   rc: %3s - output: %s", $rc, _shorten($output, 80));
-
-    return sprintf("%s: %s has different exit code or output", $chkobj->{'name'} ? 'host' : 'service', $name);
+    return([
+        sprintf("check command: %s", $command->{'line_expanded'}),
+        sprintf("expected rc: %3s - output: %s (last_check: %s)", $chkobj->{'state'}, _shorten($chkobj->{'plugin_output'}, 80), Thruk::Utils::Filter::date_format($c, $chkobj->{'last_check'})),
+        sprintf("actual   rc: %3s - output: %s", $rc, _shorten($output, 80)),
+        sprintf("%s: %s has different exit code or output", $chkobj->{'name'} ? 'host' : 'service', $name),
+    ]);
 }
 
 ##############################################
