@@ -57,6 +57,8 @@ $|=1; #enable autoflush
 our $max_session_per_worker = 10;
 our @sshpids;
 my $sockets_queue = Thread::Queue->new();
+our $exec;
+our $terminal = -t STDOUT;
 
 ##############################################
 sub END {
@@ -90,6 +92,7 @@ sub run {
         'servicefilter' => undef,
         'backend'       => undef,
         'worker'        => 'auto',
+        'exec'          => 'gearman',
         'target'        => [],
         'verbose'       => 0,
         'timeout'       => 30,
@@ -105,6 +108,7 @@ sub run {
     "servicefilter=s" => \$opt->{'servicefilter'},
     "b|backend=s"     => \$opt->{'backend'},
     "w|worker=i"      => \$opt->{'worker'},
+    "e|exec=s"        => \$opt->{'exec'},
     "t|timeout=i"     => \$opt->{'timeout'},
     "c|continue"      => \$opt->{'continue'},
     "r|retry=s"       => \$opt->{'retry'},
@@ -117,6 +121,11 @@ sub run {
         _error("retry file and continue option set, use either of them, not both.");
         exit(1);
     }
+    if($opt->{'exec'} ne 'gearman' && $opt->{'exec'} ne 'shell') {
+        _error("exec can be either 'gearman' or 'shell'");
+        exit(1);
+    }
+    $exec = $opt->{'exec'};
 
     $ENV{'THRUK_VERBOSE'} = $opt->{'verbose'};
     Thruk::Config::set_config_env();
@@ -234,7 +243,7 @@ sub _run_checks {
             $rate,
             $rem,
             $end,
-        );
+        ) if $terminal;
 
         # clean up and save continue file information
         my $host_name;
@@ -288,6 +297,7 @@ sub _save_retry_file {
     my($self) = @_;
     _debug("saving retry file");
 
+    return if scalar keys %{$self->{'summary'}} == 0;
     my $retry_file = $self->{'opt'}->{'retry'} || sprintf("/tmp/.worker.test.retry.%d.%s.json", $>, (POSIX::strftime("%Y%m%d_%H%M%S", localtime)));
     Thruk::Utils::IO::json_store($retry_file, {
         summary => $self->{'summary'},
@@ -467,6 +477,7 @@ sub _check_object {
     return $err if $err;
     $output = "" unless $output;
     $output =~ s/\n.*$//sgmx; # limit to first line
+    $output =~ s/\\n.*$//sgmx; # limit to first line
     $output =~ s/^(.*?)\|.*$/$1/gmx; # strip perf data
     if($self->_compare_result($name, $chkobj, $rc, $output)) {
         # everything fine
@@ -543,7 +554,8 @@ sub _check_command {
     my $ctrl_path = $sockets_queue->dequeue_timed(3); # get next free ctrl path
     die("got no ctrl path in time") unless $ctrl_path;
     my $target = $self->{'opt'}->{'target'}->[0];
-    my $cmd = [
+    my $cmd = [];
+    my $ssh_options = [
         "ssh",
         "-o", "PasswordAuthentication=no",
         "-o", "PreferredAuthentications=publickey",
@@ -552,10 +564,27 @@ sub _check_command {
         "-o", "ControlPath=".$ctrl_path,
         "-o", "StrictHostKeyChecking=no",
         $target,
-        "./bin/mod_gearman_worker --job_timeout=".$self->{'opt'}->{'timeout'}." testcmd ".$command->{'line_expanded'},
     ];
+
+    my $line_expanded = $command->{'line_expanded'};
+    if($exec eq 'gearman') {
+        $line_expanded =~ s/"/\\"/gmx;
+        $line_expanded = '"'.$line_expanded.'"';
+        $cmd = [
+            @{$ssh_options},
+            "./bin/mod_gearman_worker --job_timeout=".$self->{'opt'}->{'timeout'}." testcmd ".$line_expanded,
+        ];
+    }
+    elsif($exec eq 'shell') {
+        $cmd = [
+            "timeout", "--kill-after=".($self->{'opt'}->{'timeout'}+2), $self->{'opt'}->{'timeout'},
+            @{$ssh_options},
+            $line_expanded,
+        ];
+    }
+
     my($rc, $output) = Thruk::Utils::IO::cmd($self->{'c'}, $cmd, undef, undef, undef, undef, undef, 1);
-    if($rc == 2 && $output =~ m/\Qtest run into timeout after\E/) {
+    if(($rc == 2 && $output =~ m/\Qtest run into timeout after\E/) || $rc == 124) {
         $rc     = 3;
         $output = sprintf("check timed out after %d seconds", $self->{'opt'}->{'timeout'});
     }
@@ -651,6 +680,7 @@ exceptions and similar.
        --hostfilter         filter hostnames by regular expression
        --servicefilter      filter service names by regular expression
     -w|--worker             specify the number of parallel checks
+    -e|--exec               specify plugin execution, supported values: gearman, shell
     -t|--timeout            specify timeout (in seconds) for each check
     -c|--continue           try to continue previuous run
     -r|--retry=<file>       use retry file and verify failed runs
