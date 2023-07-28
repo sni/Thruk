@@ -408,10 +408,10 @@ sub _print_summary {
     for my $hst (sort keys %{$summary}) {
         _info("- %s", $hst);
         if($summary->{$hst}->{"__HOST__"}) {
-            delete $summary->{$hst}->{"__HOST__"};
             _info("  - host check");
         }
         for my $svc (sort keys %{$summary->{$hst}}) {
+            next if $svc eq "__HOST__";
             _info("  - %s", $svc);
         }
     }
