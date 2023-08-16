@@ -8905,7 +8905,7 @@ var ajax_search = {
                         // only replace parts of the string which are not bold yet
                         var parts = name.split(/(<b[^>]*>.*?<\/b>)/);
                         jQuery.each(parts, function(index2, part) {
-                            if(!part.match(/^<b>/)) {
+                            if(!part.match(/^<b class='hint'>/)) {
                                 parts[index2] = part.replace(re, "<b class='hint'>$1<\/b>");
                             }
                         });
