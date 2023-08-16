@@ -164,8 +164,18 @@
   color: var(--text-body) !important;
 }
 
-.tableRowSelected I.fa-solid {
-  color: var(--row-selected-fg)
+@layer base {
+  LI.ajax_search_selected { /* override text in highlighted search results */
+    @apply hover:text-[color:var(--text-body)] text-[color:var(--row-selected-fg)];
+  }
+}
+
+.tableRowSelected I.fa-solid { /* override icons when rows selected */
+  color: var(--row-selected-fg);
+}
+.tableRowSelected DIV.spinner { /* override spinner with dark text when rows selected */
+  border-color: var(--row-selected-fg);
+  border-right-color: transparent;
 }
 
 /*******************************************************************************
