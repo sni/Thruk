@@ -2635,6 +2635,8 @@ sub parse_lexical_filter {
         my $copy = $string;
         $string = \$copy;
     }
+    ${$string} =~ s/^\s+//gmx;
+    ${$string} =~ s/\s+$//gmx;
     if(${$string} =~ m/^(.{3})/mx) {
         my $separator = $1;
         if(substr($separator,0,1) eq substr($separator,1,1) && substr($separator,0,1) eq substr($separator,2,1)) {
