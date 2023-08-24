@@ -2911,7 +2911,7 @@ sub search2text {
             confess("failed to expand search: ".$err."\n".Data::Dumper::Dumper($servicefilter));
         }
     }
-    $txt = _filtercombine("or", \@subs, , $intend ? 2 : undef) // "";
+    $txt = _filtercombine("or", \@subs, $intend ? 2 : undef) // "";
     return($txt);
 }
 
