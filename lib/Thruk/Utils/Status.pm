@@ -13,6 +13,7 @@ Status Utilities Collection for Thruk
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cpanel::JSON::XS ();
 use URI::Escape qw/uri_unescape/;
 
 use Thruk::Utils ();
@@ -416,6 +417,9 @@ sub do_filter {
     if($hostfilter || $servicefilter || $hostgroupfilter || $servicegroupfilter || $c->stash->{'has_error'}) {
         $c->stash->{'filter_active'} = 1;
     }
+
+    $servicefilter = _improve_filter($servicefilter) if $servicefilter;
+    $hostfilter    = _improve_filter($hostfilter)    if $hostfilter;
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
 }
@@ -3095,5 +3099,83 @@ sub _expand_duration_filter {
 }
 
 ##############################################
+# try to remove useless cruft and intendion
+sub _improve_filter {
+    my($filter) = @_;
+
+    # reduce useless intendion from hashes
+    if(ref $filter eq 'HASH') {
+        my @keys = keys %{$filter};
+        if(scalar @keys == 1) {
+            my $key = $keys[0];
+            if($key eq '-or' || $key eq '-and') {
+                if(ref $filter->{$key} eq 'ARRAY' && scalar @{$filter->{$key}} == 1) {
+                    $filter = $filter->{$key}->[0];
+                }
+            }
+        }
+    }
+
+    # reduce useless intendion from lists
+    if(ref $filter eq 'ARRAY' && scalar @{$filter} == 1) {
+        $filter = $filter->[0];
+    }
+
+    # try to combine identical nested filters
+    if(ref $filter eq 'HASH') {
+        my @keys = keys %{$filter};
+        if(scalar @keys == 1) {
+            my $key = $keys[0];
+            if($key eq '-or' && ref $filter->{$key} eq 'ARRAY') {
+                # make sure all sub filter are -and groups
+                my $ok = 1;
+                for my $f (@{$filter->{$key}}) {
+                    if(ref $f ne 'HASH' || scalar keys %{$f} != 1 || !defined $f->{'-and'}) {
+                        $ok = 0;
+                        last;
+                    }
+                }
+                if($ok) {
+                    # iterate over the sub filter and move all identical filter up one level
+                    my @global;
+                    my $json = Cpanel::JSON::XS->new->utf8->canonical;
+                    my $num = scalar @{$filter->{$key}->[0]->{'-and'}};
+                    for(my $x = 0; $x < $num; $x++) {
+                        my $enc = $json->encode($filter->{$key}->[0]->{'-and'}->[0]);
+                        my $missed = 0;
+                        for my $f (@{$filter->{$key}}) {
+                            my $enc2 = $json->encode($f->{'-and'}->[0]);
+                            if($enc2 ne $enc) {
+                                $missed = 1;
+                                last;
+                            }
+                        }
+                        # found identical filter
+                        if(!$missed) {
+                            # push on global filter and remove on the sublevel
+                            push @global, $filter->{$key}->[0]->{'-and'}->[0];
+                            for my $f (@{$filter->{$key}}) {
+                                shift(@{$f->{'-and'}});
+                            }
+                        } else {
+                            # break on first mismatch
+                            last;
+                        }
+                    }
+                    if(scalar @global > 0) {
+                        $filter = {
+                            '-and' => [
+                                { '-and' => \@global },
+                                { '-or'  => $filter->{'-or'} },
+                            ],
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+    return $filter;
+}
 
 1;
