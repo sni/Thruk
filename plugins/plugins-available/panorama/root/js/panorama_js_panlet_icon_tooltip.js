@@ -352,25 +352,29 @@ Ext.onReady(function() {
             } else {
                 TP.iconTip.lastData = undefined;
                 TP.iconTip.lastUrl  = link;
-                Ext.Ajax.request({
-                    url:     link,
-                    method: 'POST',
-                    callback: function(options, success, response) {
-                        if(!success) {
-                            TP.iconTip.lastUrl = undefined;
-                            if(response.status == 0) {
-                                TP.Msg.msg("fail_message~~fetching details failed");
+                // delay requesting details a bit, otherwise we would trigger tons of requests when moving the mouse over different icons
+                window.clearTimeout(TP.popupReq);
+                TP.popupReq =  window.setTimeout(function() {
+                    Ext.Ajax.request({
+                        url:     link,
+                        method: 'POST',
+                        callback: function(options, success, response) {
+                            if(!success) {
+                                TP.iconTip.lastUrl = undefined;
+                                if(response.status == 0) {
+                                    TP.Msg.msg("fail_message~~fetching details failed");
+                                } else {
+                                    TP.Msg.msg("fail_message~~fetching details failed: "+response.status+' - '+response.statusText);
+                                }
                             } else {
-                                TP.Msg.msg("fail_message~~fetching details failed: "+response.status+' - '+response.statusText);
+                                var data = TP.getResponse(undefined, response);
+                                TP.iconTip.lastData = data;
+                                TP.renderTipDetails(TP.iconTip.lastData);
                             }
-                        } else {
-                            var data = TP.getResponse(undefined, response);
-                            TP.iconTip.lastData = data;
-                            TP.renderTipDetails(TP.iconTip.lastData);
+                            TP.iconTip.detailsTarget.body.unmask();
                         }
-                        TP.iconTip.detailsTarget.body.unmask();
-                    }
-                });
+                    });
+                }, 300)
             }
         }
     };
