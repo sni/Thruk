@@ -2640,7 +2640,7 @@ sub _check_db_fs {
     }
 
     # try to get free disk space
-    my($rc, $diskspace) = Thruk::Utils::IO::cmd("df $datadir 2>&1");
+    my($rc, $diskspace) = Thruk::Utils::IO::cmd("df -k $datadir 2>&1"); # use -k to force 1k blocks
     if($rc != 0) {
         _debug2("[%s] cannot check filesystem available space: %s", $prefix, $diskspace);
         return 1;
@@ -2653,6 +2653,7 @@ sub _check_db_fs {
         _debug2("[%s] cannot check filesystem available space.", $prefix);
         return 1;
     }
+    $disk_available = $disk_available * 1024;
 
     my @stats = $self->_log_stats($c, $prefix);
     if(scalar @stats != 1) {
