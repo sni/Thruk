@@ -2897,7 +2897,7 @@ sub search2text {
     for my $s (@{$search}) {
         my($hostfilter, $servicefilter) = single_search($c, $s);
         eval {
-            push @subs, _filtertext($servicefilter);
+            push @subs, _filtertext($servicefilter, 2);
         };
         my $err = $@;
         if($err) {
@@ -2905,7 +2905,7 @@ sub search2text {
             confess("failed to expand search: ".$err."\n".Data::Dumper::Dumper($servicefilter));
         }
     }
-    $txt = _filtercombine("or", @subs) // "";
+    $txt = _filtercombine("or", \@subs, 2) // "";
     return($txt);
 }
 
@@ -2923,7 +2923,7 @@ sub filter2text {
 
     my $txt;
     eval {
-        $txt = _filtertext($filter);
+        $txt = _filtertext($filter, 2);
         $txt =~ s/^\((.*)\)$/$1/gmx; # remove outermose brackets
     };
     my $err = $@;
@@ -2936,18 +2936,19 @@ sub filter2text {
 
 ##############################################
 sub _filtertext {
-    my($filter) = @_;
+    my($filter, $intend) = @_;
+    $intend = $intend + 2 if $intend;
     return "" unless defined $filter;
     if(ref $filter eq 'HASH') {
         my @keys = keys %{$filter};
         if(scalar @keys == 1) {
             if($keys[0] eq '-and') {
-                my @subs =  _filtertext($filter->{'-and'});
-                return(_filtercombine("and", @subs));
+                my @subs =  _filtertext($filter->{'-and'}, $intend);
+                return(_filtercombine("and", \@subs, $intend));
             }
             if($keys[0] eq '-or') {
                 my $subs = _filterexpandlist(ref $filter->{'-or'} eq 'ARRAY' ? $filter->{'-or'} : [$filter->{'-or'}]);
-                return(_filtercombine("or", @{$subs}));
+                return(_filtercombine("or", $subs, $intend));
             }
         }
         my @subs;
@@ -2979,11 +2980,11 @@ sub _filtertext {
                 }
             }
         }
-        return(_filtercombine("and", @subs));
+        return(_filtercombine("and", \@subs, $intend));
     }
     if(ref $filter eq 'ARRAY') {
         my $subs = _filterexpandlist($filter);
-        return(_filtercombine("and", @{$subs}));
+        return(_filtercombine("and", $subs, $intend));
     }
     confess("cannot handle filter");
 }
@@ -3013,13 +3014,21 @@ sub _filterexpandlist {
 
 ##############################################
 sub _filtercombine {
-    my($op, @filter) = @_;
+    my($op, $filter, $with_newlines) = @_;
+    my @filter = @{$filter};
     @filter = grep defined, @filter;
     if(scalar @filter == 0) {
         return;
     }
     if(scalar @filter == 1) {
         return $filter[0];
+    }
+    if($with_newlines) {
+        my $space = " " x ($with_newlines - 2);
+        if($with_newlines >= 4) {
+            return $space."(\n".$space.join("\n  ".$space.$op." ", @filter)."\n".$space.")";
+        }
+        return $space."(\n".$space.join("\n  ".$space.$op."\n".$space, @filter)."\n".$space.")";
     }
     return "(".join(" ".$op." ", @filter).")";
 }
