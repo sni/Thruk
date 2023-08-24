@@ -213,9 +213,9 @@ sub _run_checks {
         if($err) {
             $self->{'stats'}->{'failed'}++;
             if($obj->{'name'}) {
-                $summary->{$obj->{'name'}}->{"__HOST__"} = 1;
+                $summary->{$obj->{'name'}}->{"__HOST__"} = {'address' => $obj->{'host_address'} // $obj->{'address'} };
             } else {
-                $summary->{$obj->{'host_name'}}->{$obj->{'description'}} = 1;
+                $summary->{$obj->{'host_name'}}->{$obj->{'description'}} = {'address' => $obj->{'host_address'} // $obj->{'address'} };
             }
             _info("-" x 105);
             for my $l (@{$err}) {
@@ -372,12 +372,12 @@ sub _get_jobs {
         push @{$servicefilter}, { description => { '~~' => $opt->{'servicefilter'} }};
     }
     if(!$opt->{'servicefilter'}) {
-        my $hosts = $c->db->get_hosts(filter => [$hostfilter], columns => [qw/name check_command/]);
+        my $hosts = $c->db->get_hosts(filter => [$hostfilter], columns => [qw/name address check_command/]);
         push @{$jobs}, @{$hosts};
         _info("fetched %d hosts", scalar @{$hosts});
     }
     if(!$opt->{'hostsonly'}) {
-        my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name description check_command/]);
+        my $services = $c->db->get_services(filter => [$servicefilter], columns => [qw/host_name host_address description check_command/]);
         push @{$jobs}, @{$services};
         _info("fetched %d services", scalar @{$services});
     }
@@ -416,7 +416,8 @@ sub _print_summary {
     _info("Checks failed on these hosts / services:");
     my $summary = $self->{'summary'};
     for my $hst (sort keys %{$summary}) {
-        _info("- %s", $hst);
+        my @first = (sort keys %{$summary->{$hst}});
+        _info("- %s   (address: %s)", $hst, $summary->{$hst}->{$first[0]}->{'address'});
         if($summary->{$hst}->{"__HOST__"}) {
             _info("  - host check");
         }
