@@ -96,7 +96,7 @@
       </div>
       [% END %]
       <div class="body min-w-[800px] border-t borderDefault flexcol js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
-        [% WRAPPER _filter_advanced.tt disabled=!has_lex_filter %][% IF has_lex_filter %][% has_lex_filter %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix) %][% END %][% END %]
+        [% WRAPPER _filter_advanced.tt disabled=!has_lex_filter %][% IF has_lex_filter %][% has_lex_filter %][% ELSIF ! has_error %][% search2text("service", searches.$paneprefix, 1) %][% END %][% END %]
       </div>
     </div>
   </div>

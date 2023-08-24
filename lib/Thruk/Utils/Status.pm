@@ -2896,14 +2896,14 @@ returns text/lexical filter for status search
 
 =cut
 sub search2text {
-    my($c, $type, $search) = @_;
+    my($c, $type, $search, $intend) = @_;
 
     my $txt;
     my @subs;
     for my $s (@{$search}) {
         my($hostfilter, $servicefilter) = single_search($c, $s);
         eval {
-            push @subs, _filtertext($servicefilter, 2);
+            push @subs, _filtertext($servicefilter, $intend ? 2 : undef);
         };
         my $err = $@;
         if($err) {
@@ -2911,7 +2911,7 @@ sub search2text {
             confess("failed to expand search: ".$err."\n".Data::Dumper::Dumper($servicefilter));
         }
     }
-    $txt = _filtercombine("or", \@subs, 2) // "";
+    $txt = _filtercombine("or", \@subs, , $intend ? 2 : undef) // "";
     return($txt);
 }
 
@@ -2925,11 +2925,11 @@ returns text/lexical filter for structured filter
 
 =cut
 sub filter2text {
-    my($c, $type, $filter) = @_;
+    my($c, $type, $filter, $intend) = @_;
 
     my $txt;
     eval {
-        $txt = _filtertext($filter, 2);
+        $txt = _filtertext($filter, $intend ? 2 : undef);
         $txt =~ s/^\((.*)\)$/$1/gmx; # remove outermose brackets
     };
     my $err = $@;
@@ -2943,6 +2943,7 @@ sub filter2text {
 ##############################################
 sub _filtertext {
     my($filter, $intend) = @_;
+
     $intend = $intend + 2 if $intend;
     return "" unless defined $filter;
     if(ref $filter eq 'HASH') {
