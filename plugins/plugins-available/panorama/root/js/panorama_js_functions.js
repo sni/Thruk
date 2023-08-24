@@ -1329,13 +1329,14 @@ var TP = {
             return(TP.updateAllIconsBulkDo(tab, id, xdata, reschedule, callback));
         }
 
-        // fetch 50 icons at a time, otherwise we might get timeouts from the backends
+        // fetch 20 icons at a time, otherwise we might get timeouts from the backends
         var bucket  = {}
         var items   = 0;
+        var items_per_bucket = 20;
         for(var nr=0; nr<panels.length; nr++) {
             items++;
             bucket[panels[nr].id] = true;
-            if(items >= 50) {
+            if(items >= items_per_bucket) {
                 if(nr == panels.length-1) {
                     // run the last bulk with callback and update sub dashboards
                     TP.updateAllIconsBulkDo(tab, bucket, xdata, reschedule, callback, true);
