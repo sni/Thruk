@@ -41,7 +41,7 @@ $Monitoring::Config::Object::Serviceescalation::Defaults = {
     'hostgroups'             => { type => 'ALIAS', 'name' => 'hostgroup_name' },
 };
 
-$Monitoring::Config::Object::Serviceescalation::primary_keys = [ 'host_name', [ 'hostgroup_name' ] ];
+$Monitoring::Config::Object::Serviceescalation::primary_keys = [ 'host_name', [ 'hostgroup_name', 'first_notification', 'last_notification' ] ];
 $Monitoring::Config::Object::Serviceescalation::Defaults::standard_keys = [ 'host_name', 'service_description', 'contact_groups', 'first_notification', 'last_notification', 'escalation_period', 'escalation_options' ];
 
 ##########################################################
