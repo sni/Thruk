@@ -39,6 +39,7 @@ sub set_default_stash {
     $c->stash->{'has_error'}              = 0;
     $c->stash->{'has_lex_filter'}         = 0;
     $c->stash->{'has_service_filter'}     = 0;
+    $c->stash->{'explore'}                = 0;
     $c->stash->{'host'}                   = Thruk::Utils::Filter::escape_html($c->req->parameters->{'host'}               || '');
     $c->stash->{'hostgroup'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostgroup'}          || '');
     $c->stash->{'hostprops'}              = Thruk::Utils::Filter::escape_html($c->req->parameters->{'hostprops'}          || '');

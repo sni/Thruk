@@ -67,6 +67,9 @@
                 </select>
               [% END %]
             </div>
+            <div class="js-advancedfilter"[% IF ! has_lex_filter %] style="display: none;"[% END %]>
+              <a href="status.cgi?style=detail&explore=1&q=" onmouseover="appendFormValue(this, 'q', 'textarea[name=[% paneprefix %]q]')" class="link block hoverable p-1 rounded-lg">(switch to explorer)</a>
+            </div>
           </div>
           [% IF ! has_lex_filter %]
             <button class="iconOnly js-filterpane" type="submit" name="update" title="accept">

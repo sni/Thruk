@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add explore mode to advanced status filter
           - fix livestatus error on landing page (#1299)
 
 3.08.3   Fri Jul 21 13:06:06 CEST 2023

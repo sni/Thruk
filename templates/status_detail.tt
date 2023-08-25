@@ -7,36 +7,62 @@
 [% PROCESS _status_cmd_pane.tt %]
 [% UNLESS minimal %]
 
-  [% WRAPPER _status_totals_header.tt %]
-    <div class="card overflow-hidden">
-      <div class="actionbox less-padding">
-        [% IF hostgroup %]
-        <div><a href="status.cgi?hostgroup=all&amp;style=detail">View Service Status Detail For All Host Groups</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail">View Host Status Detail For This Host Group</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid">View Status Grid For This Host Group</a></div>
-        [% ELSIF servicegroup %]
-        <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview">View Status Overview For This Service Group</a></div>
-        <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary">View Status Summary For This Service Group</a></div>
-        <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid">View Service Status Grid For This Service Group</a></div>
-        <div><a href="status.cgi?servicegroup=all&amp;style=detail">View Service Status Detail For All Service Groups</a></div>
-        [% ELSIF host == 'all' %]
-        <div><a href="history.cgi?host=all&amp;nosystem=1">View History For all hosts</a></div>
-        <div><a href="notifications.cgi?host=all">View Notifications For All Hosts</a></div>
-        <div><a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Hosts</a></div>
-        [% ELSIF host != '' %]
-        <div><a href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
-        <div><a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
-        <div><a href="status.cgi?host=all">View Service Status Detail For All Hosts</a></div>
-        [% ELSE %]
-        <div><a href="status.cgi?hostgroup=all&amp;style=detail">View Service Status Detail For All Host Groups</a></div>
-        <div><a href="status.cgi?hostgroup=all&amp;style=overview">View Status Overview For All Host Groups</a></div>
-        <div><a href="status.cgi?hostgroup=all&amp;style=summary">View Status Summary For All Host Groups</a></div>
-        <div><a href="status.cgi?hostgroup=all&amp;style=grid">View Status Grid For All Host Groups</a></div>
-        [% END %]
+  [% IF explore %]
+  <form action="" method="GET" style="display: initial;" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this) &amp;&amp; setFormBtnSpinner(this));">
+    [%# make sure IE can submit form by pressing enter #%]
+    <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
+    <input type="hidden" name="explore" value="1">
+    <input type="hidden" name="style" value="detail">
+    <input type="hidden" name="nav" value="[% show_nav | html %]">
+    [% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
+    <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
+
+    <div class="card overflow-hidden w-full">
+      <div class="head flexrow flex-nowrap justify-between border-b-0 w-full">
+        <h3>Display Filter</h3>
+        <div class="flexrow gap-x-1">
+          <div class="textHINTsoft flex items-center js-advancedfilter">(ctrl+enter)</div>
+          <button class="js-advancedfilter" type="submit" name="update"><i class="uil uil-corner-down-right-alt"></i> run query </button>
+        </div>
+      </div>
+      <div class="body min-w-[800px] border-t borderDefault flexcol js-advancedfilter">
+        [% WRAPPER _filter_advanced.tt disabled=0 %][% IF has_lex_filter; has_lex_filter; END %][% END %]
       </div>
     </div>
+  </form>
+  [% END %]
+  [% IF !explore %]
+    [% WRAPPER _status_totals_header.tt %]
+      <div class="card overflow-hidden">
+        <div class="actionbox less-padding">
+          [% IF hostgroup %]
+          <div><a href="status.cgi?hostgroup=all&amp;style=detail">View Service Status Detail For All Host Groups</a></div>
+          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail">View Host Status Detail For This Host Group</a></div>
+          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a></div>
+          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a></div>
+          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid">View Status Grid For This Host Group</a></div>
+          [% ELSIF servicegroup %]
+          <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview">View Status Overview For This Service Group</a></div>
+          <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary">View Status Summary For This Service Group</a></div>
+          <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid">View Service Status Grid For This Service Group</a></div>
+          <div><a href="status.cgi?servicegroup=all&amp;style=detail">View Service Status Detail For All Service Groups</a></div>
+          [% ELSIF host == 'all' %]
+          <div><a href="history.cgi?host=all&amp;nosystem=1">View History For all hosts</a></div>
+          <div><a href="notifications.cgi?host=all">View Notifications For All Hosts</a></div>
+          <div><a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Hosts</a></div>
+          [% ELSIF host != '' %]
+          <div><a href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
+          <div><a href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
+          <div><a href="status.cgi?host=all">View Service Status Detail For All Hosts</a></div>
+          [% ELSE %]
+          <div><a href="status.cgi?hostgroup=all&amp;style=detail">View Service Status Detail For All Host Groups</a></div>
+          <div><a href="status.cgi?hostgroup=all&amp;style=overview">View Status Overview For All Host Groups</a></div>
+          <div><a href="status.cgi?hostgroup=all&amp;style=summary">View Status Summary For All Host Groups</a></div>
+          <div><a href="status.cgi?hostgroup=all&amp;style=grid">View Status Grid For All Host Groups</a></div>
+          [% END %]
+        </div>
+      </div>
+    [% END %]
   [% END %]
 
   <div class="flex flex-row mt-2">
@@ -101,7 +127,9 @@
     <div>
       <div class="flex flex-nowrap gap-x-2 items-center">
         [% PROCESS _status_column_select.tt colprefix="svc" columns_name="service" %]
+        [% IF ! explore %]
         [% PROCESS _status_filter.tt %]
+        [% END %]
       </div>
     </div>
     <div>
@@ -123,6 +151,12 @@
 <script>
   var dfl_Hash = [% get_cmd_submit_hash(data, 'svc') %];
   start_hide_activity_icons_timer();
+
+  [% IF explore %]
+  jQuery(document).ready(function() {
+    jQuery("TEXTAREA").focus();
+  });
+  [% END %]
 </script>
 [% END %]
 

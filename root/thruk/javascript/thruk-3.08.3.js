@@ -1145,6 +1145,13 @@ function checkXYinElement(obj, x, y) {
     return(inside);
 }
 
+function appendFormValue(link, param, selector) {
+    var data  = jQuery(link).parents('FORM').find(selector).val();
+    var re    = new RegExp("\&"+param+"=.*$");
+    link.href = link.href.replace(re, "");
+    link.href = link.href + "&"+ param +"="+encodeURIComponent(data);
+}
+
 function toggleFilterAdvanced(id) {
     var txt = jQuery('#'+id).find(".js-advancedfilter").find("TEXTAREA")[0];
     if(!txt) {

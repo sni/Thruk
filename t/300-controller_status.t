@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1282;
+    plan tests => 1293;
 }
 
 BEGIN {
@@ -113,6 +113,9 @@ my $pages = [
 
 # Performance Map
     '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service,
+
+# Explore Page
+    '/thruk/cgi-bin/status.cgi?style=detail&explore=1',
 
 # Bugs
     # Paging all when nothing found -> div by zero

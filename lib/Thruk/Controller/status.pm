@@ -438,6 +438,7 @@ sub _process_details_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
+    $c->stash->{'explore'} = 1 if $c->req->parameters->{'explore'};
     $c->stash->{'show_column_select'} = 1;
 
     my $has_columns = 0;
