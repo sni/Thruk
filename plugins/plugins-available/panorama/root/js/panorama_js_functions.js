@@ -1324,15 +1324,15 @@ var TP = {
             return;
         }
 
+        // fetch 20 icons at a time, otherwise we might get timeouts from the backends
+        var items_per_bucket = 20;
         var panels = TP.getAllPanel(tab);
-        if(panels.length < 50 || id != undefined) {
+        if(panels.length <= items_per_bucket || id != undefined) {
             return(TP.updateAllIconsBulkDo(tab, id, xdata, reschedule, callback));
         }
 
-        // fetch 20 icons at a time, otherwise we might get timeouts from the backends
         var bucket  = {}
         var items   = 0;
-        var items_per_bucket = 20;
         for(var nr=0; nr<panels.length; nr++) {
             items++;
             bucket[panels[nr].id] = true;
