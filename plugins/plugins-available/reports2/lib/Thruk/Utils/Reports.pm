@@ -240,6 +240,7 @@ sub report_send {
         _error($@);
         return $c->detach('/error/index/13');
     }
+    $mailtext = Thruk::Base::trim_whitespace($mailtext);
 
     # extract mail header
     my $mailbody    = "";
@@ -277,6 +278,7 @@ sub report_send {
     if($subj_prepend && $subject !~ /^\s*\Q$subj_prepend\E/mx) {
         $subject = $subj_prepend . $subject;
     }
+
     my $msg = MIME::Lite->new();
     $msg->build(
              From    => $from // '',
