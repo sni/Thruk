@@ -2629,13 +2629,13 @@ sub _get_search_ids {
 
 =head2 parse_lexical_filter
 
-  parse_lexical_filter($string, [$keep_custom_fields])
+  parse_lexical_filter($string, [$keep_custom_fields], [$require_close_brackets])
 
 parse lexical filter from string. returns filter structure.
 
 =cut
 sub parse_lexical_filter {
-    my($string, $keep_custom_fields) = @_;
+    my($string, $keep_custom_fields, $require_close_brackets) = @_;
     if(ref $string ne 'SCALAR') {
         my $copy = $string;
         $string = \$copy;
@@ -2686,7 +2686,7 @@ sub parse_lexical_filter {
                 $key = $token;
                 if($key eq '(') {
                     undef $key;
-                    my $f = parse_lexical_filter($string, $keep_custom_fields);
+                    my $f = parse_lexical_filter($string, $keep_custom_fields, 1);
                     push @{$filter}, $f;
                     next;
                 }
@@ -2764,6 +2764,9 @@ sub parse_lexical_filter {
             die("parse error at ".${$string});
         }
     }
+    die("unexpected end of query after ".$key) if $key;
+    die("unexpected end of query after ".$op)  if $op;
+    die("expected closing bracket")  if $require_close_brackets;
     if($combine) {
         $filter = _lexical_combine($combine, $filter);
         undef $combine;

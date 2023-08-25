@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 49;
+plan tests => 57;
 
 BEGIN {
     use lib('t');
@@ -213,3 +213,21 @@ sub _round_timestamps {
     my $ext_text = "name = 'a' and name = 'b' and name = 'c'";
     is($txt, $ext_text, "search2text worked")
 };
+
+################################################################################
+# test broken filter
+my $broken = [
+    ['_CITY = "Munich" and rta', "/unexpected end of query after/"],
+    ['_CITY = "Munich and rta', "/parse error at/"],
+    ['_CITY = "Munich" ( and rta', "/unexpected AND at/"],
+    ['_CITY = "Munich" ( rta = 1', "/expected closing bracket/"],
+];
+for my $b (@{$broken}) {
+    my $f;
+    eval {
+        $f = Thruk::Utils::Status::parse_lexical_filter($b->[0]);
+    };
+    my $err = $@;
+    like($err, $b->[1], "query failed to parse");
+    is($f, undef, "no filter returned");
+}
