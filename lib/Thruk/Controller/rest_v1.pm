@@ -537,7 +537,7 @@ sub _get_filter {
 sub _append_lexical_filter {
     my($filter, $string) = @_;
     return unless $string;
-    push @{$filter}, Thruk::Utils::Status::parse_lexical_filter($string);
+    push @{$filter}, Thruk::Utils::Status::parse_lexical_filter($string, 1);
     return;
 }
 

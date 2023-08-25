@@ -2629,13 +2629,13 @@ sub _get_search_ids {
 
 =head2 parse_lexical_filter
 
-  parse_lexical_filter($string)
+  parse_lexical_filter($string, [$keep_custom_fields])
 
 parse lexical filter from string. returns filter structure.
 
 =cut
 sub parse_lexical_filter {
-    my($string) = @_;
+    my($string, $keep_custom_fields) = @_;
     if(ref $string ne 'SCALAR') {
         my $copy = $string;
         $string = \$copy;
@@ -2686,7 +2686,7 @@ sub parse_lexical_filter {
                 $key = $token;
                 if($key eq '(') {
                     undef $key;
-                    my $f = parse_lexical_filter($string);
+                    my $f = parse_lexical_filter($string, $keep_custom_fields);
                     push @{$filter}, $f;
                     next;
                 }
@@ -2725,17 +2725,19 @@ sub parse_lexical_filter {
                 }
 
                 # some keys require special handling
-                $key = "host_name"   if $key eq 'host';
-                $key = "description" if $key eq 'service';
-                if($key =~ m/^_HOST/mx) {
-                    $key =~ s/^_HOST//gmx;
-                    $val = $key." ".$val;
-                    $key = "host_custom_variables";
-                }
-                elsif($key =~ m/^_/mx) {
-                    $key =~ s/^_//gmx;
-                    $val = $key." ".$val;
-                    $key = "custom_variables";
+                if(!$keep_custom_fields) {
+                    $key = "host_name"   if $key eq 'host';
+                    $key = "description" if $key eq 'service';
+                    if($key =~ m/^_HOST/mx) {
+                        $key =~ s/^_HOST//gmx;
+                        $val = $key." ".$val;
+                        $key = "host_custom_variables";
+                    }
+                    elsif($key =~ m/^_/mx) {
+                        $key =~ s/^_//gmx;
+                        $val = $key." ".$val;
+                        $key = "custom_variables";
+                    }
                 }
 
                 if($key eq 'duration') {
