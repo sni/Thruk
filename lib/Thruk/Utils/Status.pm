@@ -3131,7 +3131,7 @@ sub _improve_filter {
                 # make sure all sub filter are -and groups
                 my $ok = 1;
                 for my $f (@{$filter->{$key}}) {
-                    if(ref $f ne 'HASH' || scalar keys %{$f} != 1 || !defined $f->{'-and'}) {
+                    if(ref $f ne 'HASH' || scalar keys %{$f} != 1 || !defined $f->{'-and'} || ref $f->{'-and'} ne 'ARRAY') {
                         $ok = 0;
                         last;
                     }
