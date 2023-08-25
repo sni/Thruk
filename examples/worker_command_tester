@@ -548,7 +548,7 @@ sub _compare_result {
 sub _make_plugin_output_comparable {
     my($output) = @_;
 
-    # trime whitespace
+    # trim whitespace
     $output =~ s/^\s+//gmx;
     $output =~ s/\s+$//gmx;
 
