@@ -569,6 +569,7 @@ sub _apply_filter {
     # did we have filter for not existing keys
     my $missing_keys = [];
     for my $key (keys %{$missed}) {
+        next if $key =~ m/^_/mx; # skip custom vars here
         if(scalar keys %{$missed->{$key}} == scalar @{$data}) {
             push @{$missing_keys}, $key;
         }

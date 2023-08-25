@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 255;
+    plan tests => 295;
 
     use lib('t');
     require TestUtils;
@@ -174,4 +174,36 @@ for my $test (@{$pages}) {
     is(ref $tstdata, 'HASH', "got error result") or TestUtils::bail_out_req("expected HASH result", $page->{'response'}, 1);
     is($tstdata->{'failed'}, Cpanel::JSON::XS::true, "query should fail");
     like($tstdata->{'description'}, qr(alias column names cannot be used in filter), "query should fail");
+};
+
+################################################################################
+# test query on custom variables
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name&q=***_WORKER = "local"***',
+        'content_type' => 'application/json; charset=utf-8',
+        'method'       => 'GET',
+        'like'         => ['Test Business Process'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/cgi-bin/status.cgi?explore=1&style=detail&dfl_q=_WORKER+%3D+"local"',
+        'method'       => 'GET',
+        'like'         => ['Test Business Process', 'Explore Services'],
+    );
+};
+
+################################################################################
+# test query on custom variables
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name&q=***_WORKER != "local"***',
+        'content_type' => 'application/json; charset=utf-8',
+        'method'       => 'GET',
+        'like'         => ['localhost'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/cgi-bin/status.cgi?explore=1&style=detail&dfl_q=_WORKER+!%3D+"local"',
+        'method'       => 'GET',
+        'like'         => ['localhost', 'Explore Services'],
+    );
 };

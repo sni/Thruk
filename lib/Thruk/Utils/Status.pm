@@ -2725,9 +2725,9 @@ sub parse_lexical_filter {
                 }
 
                 # some keys require special handling
+                $key = "host_name"   if $key eq 'host';
+                $key = "description" if $key eq 'service';
                 if(!$keep_custom_fields) {
-                    $key = "host_name"   if $key eq 'host';
-                    $key = "description" if $key eq 'service';
                     if($key =~ m/^_HOST/mx) {
                         $key =~ s/^_HOST//gmx;
                         $val = $key." ".$val;

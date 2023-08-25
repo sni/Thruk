@@ -7,7 +7,7 @@ use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 531;
+    plan tests => 532;
 }
 
 BEGIN {
@@ -169,6 +169,16 @@ TestUtils::test_page(
                 { 'host_name' => { '=' => 'test' } },
                 { 'time' => { '>' => '1'    } },
                 { 'time' => { '<' => '10'   } }
+            ]
+    }]];
+    is_deeply($filter, $expect, "simple livestatus filter");
+
+    _set_params($c, { q => '_CITY = "Munich" and rta > 1'});
+    $filter = Thruk::Controller::rest_v1::_livestatus_filter($c);
+    $expect = [[{
+        '-and' => [
+                { '_CITY' => { '=' => 'Munich' } },
+                { 'rta'   => { '>' => '1' } },
             ]
     }]];
     is_deeply($filter, $expect, "simple livestatus filter");
