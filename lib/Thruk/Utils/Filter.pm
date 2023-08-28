@@ -1862,4 +1862,50 @@ sub prefer_date_if_timestamp {
     return(Thruk::Utils::format_date($ts, '%Y-%m-%d %H:%M:%S'));
 }
 
+########################################
+
+=head2 list_intersect
+
+  list_intersect($lista, $listb)
+
+returns all elements from lista which are also in listb
+
+=cut
+
+sub list_intersect {
+    my($lista, $listb) = @_;
+    my @intersect;
+
+    my $lookup = Thruk::Base::array2hash($listb);
+    for my $el (@{$lista}) {
+        push @intersect, $el if $lookup->{$el};
+    }
+
+    return(\@intersect);
+}
+
+########################################
+
+=head2 list_not_intersect
+
+  list_not_intersect($lista, $listb)
+
+returns all elements from lista which are not in listb
+
+=cut
+
+sub list_not_intersect {
+    my($lista, $listb) = @_;
+    my @list;
+
+    my $lookup = Thruk::Base::array2hash($listb);
+    for my $el (@{$lista}) {
+        push @list, $el unless $lookup->{$el};
+    }
+
+    return(\@list);
+}
+
+########################################
+
 1;

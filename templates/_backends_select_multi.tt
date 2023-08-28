@@ -36,39 +36,24 @@
 
 <script>
 <!--
-  selected_backends   = new Array();
-  selected_backends_h = new Object();
-  var options = [];
-  [% FOREACH b = backends %]
-    [% FOREACH rb = selected_backends %]
-      [% IF rb == b %]
-        selected_backends.push('[% b %]');
-        selected_backends_h['[% b %]'] = 1;
-        options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
-      [% END %]
-    [% END %]
+  selected_backends = new Array();
+  var options       = [];
+
+  [% FOREACH b = list_intersect(selected_backends, backends) %]
+    selected_backends.push('[% b %]');
+    options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
   [% END %]
 
   set_select_options('[% param_name %]', options);
   reset_original_options('[% param_name %]');
 
   // initialize available backends
-  available_backends   = new Array();
-  available_backends_h = new Object();
-  var options = [];
+  available_backends = new Array();
+  var options        = [];
 
-  [% FOREACH b = backends %]
-    [% found = 0 %]
-    [% FOREACH rb = selected_backends %]
-      [% IF rb == b %]
-        [% found = 1 %]
-      [% END %]
-    [% END %]
-    [% IF found == 0 %]
-      available_backends.push('[% b %]');
-      available_backends_h['[% b %]'] = 1;
-      options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
-    [% END %]
+  [% FOREACH b = list_not_intersect(backends, selected_backends) %]
+    available_backends.push('[% b %]');
+    options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
   [% END %]
 
   set_select_options('available_backends', options);
