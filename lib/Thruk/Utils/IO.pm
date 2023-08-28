@@ -23,9 +23,8 @@ use IPC::Open3 qw/open3/;
 use POSIX ":sys_wait_h";
 use Time::HiRes qw/sleep/;
 
-use Thruk::Utils::Log qw/:all/;
-
 use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Utils::Log qw/:all/;
 
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
 

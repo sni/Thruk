@@ -7,7 +7,6 @@ use Data::Dumper;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Base ();
-
 use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {

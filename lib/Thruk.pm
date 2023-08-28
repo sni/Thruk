@@ -17,9 +17,10 @@ use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;    $Data::Dumper::Sortkeys = 1;
 use Module::Load qw/load/;
 
+use Thruk::Timer qw/timing_breakpoint/;
+
 ###################################################
 # load timing class
-use Thruk::Timer qw/timing_breakpoint/;
 &timing_breakpoint('starting thruk');
 
 ###################################################

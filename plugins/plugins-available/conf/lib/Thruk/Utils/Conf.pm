@@ -10,13 +10,12 @@ use Time::HiRes qw(stat);
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Constants qw/:peer_states/;
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Conf::Defaults ();
 use Thruk::Utils::Crypt ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
-
-use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 

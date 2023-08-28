@@ -169,7 +169,7 @@ sub _parse_file {
         $test =~ s|sprintf\("[^"]*"||gmx;
         $test =~ s|_trace\("[^"]*"||gmx;
         $test =~ s|_debug\("[^"]*"||gmx;
-        $test =~ s|timing_breakpoint\(||gmx;
+        $test =~ s|timing_breakpoint\([^\)]*||gmx;
         $test =~ s%/[^/]+/%%gmx;                # m/.../mx
         $test =~ s/s\|[^\|]+\|[^\|]+\|//gmx;    # s|...|...|mx
         $test =~ s/s\%[^\%]+\%[^\%]+\%//gmx;    # s%...%...%mx
@@ -472,7 +472,7 @@ sub _update_file {
             next;
         }
 
-        if($line =~ m/^\Q\use Thruk::Timer\E/mx) {
+        if($line =~ m/^\s*\Q\use Thruk::Timer\E/mx) {
             $newcont .= $line."\n";
             next;
         }

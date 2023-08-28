@@ -7,12 +7,11 @@ use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use POSIX ();
 
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 use parent 'Thruk::Backend::Provider::Base';
-
-use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 

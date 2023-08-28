@@ -7,6 +7,7 @@ use Data::Dumper qw/Dumper/;
 use POSIX ();
 
 use Monitoring::Livestatus::Class::Lite ();
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::IO ();
 
 use base 'Thruk::Backend::Provider::Base';
@@ -14,7 +15,6 @@ use base 'Thruk::Backend::Provider::Base';
 # contains most stats column definitions
 $Thruk::Backend::Provider::Livestatus::stats_columns = {};
 
-use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 

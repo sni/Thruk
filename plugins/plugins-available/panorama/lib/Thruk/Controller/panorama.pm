@@ -12,6 +12,7 @@ use Module::Load qw/load/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Broadcast ();
 use Thruk::Utils::Cache ();
@@ -32,7 +33,6 @@ Thruk Controller.
 
 =cut
 
-use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 

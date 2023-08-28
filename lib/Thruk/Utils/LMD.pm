@@ -17,10 +17,9 @@ use File::Copy qw/copy move/;
 use POSIX ();
 use Time::HiRes ();
 
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
-
-use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 =head1 METHODS

@@ -12,11 +12,11 @@ use Thruk::Backend::Peer ();
 use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Base ();
 use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::IO ();
 
 use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
 
-use Thruk::Timer qw/timing_breakpoint/;
 &timing_breakpoint('starting pool');
 
 

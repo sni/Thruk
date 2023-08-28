@@ -12,6 +12,7 @@ use Monitoring::Config::Object ();
 use Thruk::Action::AddDefaults ();
 use Thruk::Authentication::User ();
 use Thruk::Backend::Peer ();
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Conf::Defaults ();
@@ -21,8 +22,6 @@ use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Plugin ();
 use Thruk::Utils::References ();
 use Thruk::Utils::Status ();
-
-use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 

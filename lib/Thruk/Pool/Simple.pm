@@ -6,9 +6,8 @@ use Cpanel::JSON::XS qw/decode_json encode_json/;
 use Thread::Queue ();
 use threads qw/yield/;
 
-use Thruk::Utils::Log qw/:all/;
-
 use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Utils::Log qw/:all/;
 
 sub new {
     my ($class, %arg) = @_;
