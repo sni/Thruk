@@ -26,11 +26,12 @@ sub _print_header_once {
                     "thread", "ttime", "Δtime", "tmem", "Δmem", "message", "caller");
         printf(STDERR ("-"x140)."\n");
     }
+    return;
 }
 
 sub timing_breakpoint {
-    return unless $ENV{'THRUK_TIMER'};
     my($msg, $reset, $lvl) = @_;
+    return unless $ENV{'THRUK_TIMER'};
     my @caller  = caller($lvl || 0);
 
     &_print_header_once();

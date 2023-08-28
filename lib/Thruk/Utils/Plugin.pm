@@ -19,8 +19,6 @@ use Thruk::Utils::CLI ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
-use Thruk::Timer qw/timing_breakpoint/;
-
 ##############################################
 
 =head1 METHODS

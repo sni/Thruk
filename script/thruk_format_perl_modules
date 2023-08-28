@@ -169,6 +169,7 @@ sub _parse_file {
         $test =~ s|sprintf\("[^"]*"||gmx;
         $test =~ s|_trace\("[^"]*"||gmx;
         $test =~ s|_debug\("[^"]*"||gmx;
+        $test =~ s|timing_breakpoint\(||gmx;
         $test =~ s%/[^/]+/%%gmx;                # m/.../mx
         $test =~ s/s\|[^\|]+\|[^\|]+\|//gmx;    # s|...|...|mx
         $test =~ s/s\%[^\%]+\%[^\%]+\%//gmx;    # s%...%...%mx
@@ -353,6 +354,7 @@ sub _parse_file {
             next if $m eq 'Thruk::Utils::Conf::Tools'; # not a module, but collection of tools
             next if $m eq 'Thruk::Utils::PDF';         # virtual module, does not exist
             next if $m eq 'Thruk::Globals';            # virtual module, does not exist
+            next if $m eq 'Thruk::Timer';              # handled specially
             if($file =~ m/thruk_format_perl_modules/mx) {
                 next if $m eq 'Thruk';
                 next if $m eq 'Digest';

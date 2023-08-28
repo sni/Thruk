@@ -20,10 +20,6 @@ Generic Access to Thruks Config
 
 =cut
 
-###################################################
-# load timing class
-use Thruk::Timer qw/timing_breakpoint/;
-
 ######################################
 
 our $VERSION = '3.08.3';
