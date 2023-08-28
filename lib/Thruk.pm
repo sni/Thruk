@@ -387,10 +387,14 @@ sub _dispatcher {
         }
     }
 
+    &timing_breakpoint("_dispatcher render done");
+
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_dispatcher: ".$url);
 
     $c->finalize_request($res);
+
+    &timing_breakpoint("_dispatcher finalize done");
 
     $Thruk::Globals::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
