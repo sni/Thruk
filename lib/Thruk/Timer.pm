@@ -14,18 +14,27 @@ my $lasttime    = $starttime;
 my $lastmemory  = 0;
 my $has_threads = 0;
 my $has_memory  = 1;
+my $header_once = 0;
 require Thruk::Utils::IO;
 
-# do not print column header during tests
-if(!$INC{'Test/More.pm'} && !$ENV{'THRUK_STRACE_DEBUG'}) {
-    printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s\n",
-                "thread", "ttime", "Δtime", "tmem", "Δmem", "message", "caller");
-    printf(STDERR ("-"x140)."\n");
+sub _print_header_once {
+    return if $header_once;
+    $header_once = 1;
+    # do not print column header during tests
+    if(!$INC{'Test/More.pm'} && !$ENV{'THRUK_STRACE_DEBUG'}) {
+        printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s\n",
+                    "thread", "ttime", "Δtime", "tmem", "Δmem", "message", "caller");
+        printf(STDERR ("-"x140)."\n");
+    }
 }
 
 sub timing_breakpoint {
+    return unless $ENV{'THRUK_TIMER'};
     my($msg, $reset, $lvl) = @_;
     my @caller  = caller($lvl || 0);
+
+    &_print_header_once();
+
     my $tmp     = [gettimeofday];
 
     if($reset) { $lasttime = $tmp; }

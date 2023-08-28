@@ -25,7 +25,7 @@ use Time::HiRes qw/sleep/;
 
 use Thruk::Utils::Log qw/:all/;
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::MAX_LOCK_RETRIES = 20;
 
@@ -755,7 +755,7 @@ sub cmd {
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
-        #&timing_breakpoint('IO::cmd: '.$prog.' <args...>');
+        &timing_breakpoint('IO::cmd: '.$prog.' <args...>');
         _debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
@@ -791,7 +791,7 @@ sub cmd {
         unshift @{$cmd}, $prog;
     } else {
         confess("stdin not supported for string commands") if $stdin;
-        #&timing_breakpoint('IO::cmd: '.$cmd);
+        &timing_breakpoint('IO::cmd: '.$cmd);
         _debug( "running cmd: ". $cmd ) if $c;
 
         # background process?
@@ -818,7 +818,7 @@ sub cmd {
     }
     _debug( "rc:     ". $rc )     if $c;
     _debug( "output: ". $output ) if $c;
-    #&timing_breakpoint('IO::cmd done');
+    &timing_breakpoint('IO::cmd done');
     $c->stats->profile(end => "IO::cmd") if $c;
     return($rc, $output) if wantarray;
     return($output);

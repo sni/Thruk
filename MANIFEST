@@ -1823,8 +1823,6 @@ root/thruk/vendor/unicons/fonts/thinline/unicons-thinline.woff2
 root/thruk/vendor/unicons/Makefile
 root/thruk/vendor/visjs/v9.1.2/vis-network.min.js
 script/check_thruk_rest
-script/disable_debug_timer.sh
-script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
 script/grafana_export.sh
 script/html2pdf.sh

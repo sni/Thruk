@@ -37,9 +37,16 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 
+my $use_timer = 0;
 BEGIN {
-    #use Thruk::Timer qw/timing_breakpoint/;
-    #&timing_breakpoint('./script/thruk');
+    for my $a (@ARGV) {
+        if($a eq '-T') {
+            $ENV{'THRUK_TIMER'} = 1;
+            last;
+        }
+    }
+    use Thruk::Timer qw/timing_breakpoint/;
+    &timing_breakpoint('./script/thruk');
 };
 use Getopt::Long ();
 
@@ -55,6 +62,7 @@ Getopt::Long::Configure('pass_through');
 Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
    "v|verbose"          => sub { $ENV{'THRUK_VERBOSE_ARG_SET'}=1; $options->{'verbose'}++ },
+   "T"                  => sub {  }, # already processed
    "q|quiet"            => \$options->{'quiet'},
    "V|version"          => \$options->{'version'},
    "r|remote-url=s"     => \$options->{'remoteurl'},

@@ -55,6 +55,13 @@ Specify location of config files.
 ==== THRUK_VERBOSE
 Set debug level.
 
+==== THRUK_TIMER
+Enable debug timer on STDERR.
+
+==== THRUK_STRACE_DEBUG
+Enable debug timer output as "write" system call so it can be traced with
+strace.
+
 ==== THRUK_DEMO_MODE
 Put Thruk into demo mode which forbids any config saves.
 

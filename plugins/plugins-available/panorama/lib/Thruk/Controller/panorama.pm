@@ -32,7 +32,7 @@ Thruk Controller.
 
 =cut
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 
@@ -42,7 +42,7 @@ Thruk Controller.
 sub index {
     my ( $c ) = @_;
 
-    #&timing_breakpoint('panorama::index');
+    &timing_breakpoint('panorama::index');
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'panorama_modules_loaded'}) {
@@ -256,9 +256,9 @@ sub index {
         return $c->redirect_to("panorama.cgi");
     }
 
-    #&timing_breakpoint('loading _js');
+    &timing_breakpoint('loading _js');
     _js($c, 1);
-    #&timing_breakpoint('loading _js done');
+    &timing_breakpoint('loading _js done');
 
     $c->stash->{template} = 'panorama.tt';
     return 1;

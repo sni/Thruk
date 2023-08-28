@@ -16,7 +16,7 @@ use Thruk::Utils::Crypt ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -955,19 +955,19 @@ sub get_backends_with_obj_config {
     my $backends = {};
     my $firstpeer;
 
-    #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
+    &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
 
     my $fetch = _get_peer_keys_without_configtool($c);
     $fetch = [grep(/^$peerfilter$/mx, @{$fetch})] if $peerfilter;
     if(scalar @{$fetch} > 0 && !$ENV{'THRUK_USE_LMD'}) {
-        #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config II');
+        &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config II');
         eval {
-            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo a');
+            &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo a');
             $c->db->get_processinfo(backend => $fetch, force_type => 'http');
-            #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
+            &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config get_processinfo b');
         };
     }
-    #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
+    &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
 
     my $param_backend = $c->stash->{'param_backend'} || '';
     $c->stash->{'param_backend'} = '';
@@ -1044,7 +1044,7 @@ sub get_backends_with_obj_config {
 
     $c->stash->{'backend_chooser'} = 'switch';
 
-    #&timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config done');
+    &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config done');
     return $backends;
 }
 
@@ -1053,7 +1053,7 @@ sub _get_peer_keys_without_configtool {
     my($c) = @_;
     my @peers = @{$c->db->get_peers(1)};
     my @fetch;
-    #&timing_breakpoint('_get_peer_keys_without_configtool');
+    &timing_breakpoint('_get_peer_keys_without_configtool');
     for my $peer (@peers) {
         next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
         for my $addr (@{$peer->peer_list()}) {
@@ -1071,7 +1071,7 @@ sub _get_peer_keys_without_configtool {
             $peer->{'configtool'}->{'remote'} = $prev_remote if defined $prev_remote;
         }
     }
-    #&timing_breakpoint('_get_peer_keys_without_configtool done');
+    &timing_breakpoint('_get_peer_keys_without_configtool done');
     return \@fetch;
 }
 

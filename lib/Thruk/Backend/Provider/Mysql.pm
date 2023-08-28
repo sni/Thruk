@@ -12,7 +12,7 @@ use Thruk::Utils::Log qw/:all/;
 
 use parent 'Thruk::Backend::Provider::Base';
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -145,7 +145,7 @@ close database connection
 sub _disconnect {
     my($self) = @_;
     if(defined $self->{'mysql'}) {
-        #&timing_breakpoint('disconnect');
+        &timing_breakpoint('disconnect');
         $self->{'mysql'}->disconnect();
         delete $self->{'mysql'};
     }
@@ -162,7 +162,7 @@ try to connect to database and return database handle
 sub _dbh {
     my($self) = @_;
     if(!defined $self->{'mysql'}) {
-        #&timing_breakpoint('connecting '.$self->{'dbname'}.' '.($self->{'dbsock'} || $self->{'dbhost'}).($self->{'dbport'} ? ':'.$self->{'dbport'} : ''));
+        &timing_breakpoint('connecting '.$self->{'dbname'}.' '.($self->{'dbsock'} || $self->{'dbhost'}).($self->{'dbport'} ? ':'.$self->{'dbport'} : ''));
         if(!$self->{'modules_loaded'}) {
             load DBI;
             load File::Temp, qw/tempfile/;
@@ -175,7 +175,7 @@ sub _dbh {
         $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1, mysql_local_infile => 1});
         $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
         $self->{'mysql'}->do("SET myisam_stats_method=nulls_ignored");
-        #&timing_breakpoint('connected');
+        &timing_breakpoint('connected');
     }
     return $self->{'mysql'};
 }
@@ -1310,7 +1310,7 @@ sub _import_logs {
 sub _update_logcache {
     my($self, $c, $mode, $peer, $dbh, $prefix, $blocksize, $files, $forcestart,$force) = @_;
 
-    #&timing_breakpoint('_update_logcache');
+    &timing_breakpoint('_update_logcache');
     unless(defined $blocksize) {
         $blocksize = 86400;
         if($mode eq 'clean') {
@@ -2066,7 +2066,7 @@ sub _import_peer_logfiles {
 
         my $logs = [];
         my $file = $peer->{'class'}->{'fetch_command'} ? 1 : undef;
-        #&timing_breakpoint('_get_logs');
+        &timing_breakpoint('_get_logs');
         eval {
             # get logs from peer
             ($logs) = $peer->{'class'}->get_logs(nocache => 1,
@@ -2077,11 +2077,11 @@ sub _import_peer_logfiles {
                                                  columns => \@columns,
                                                  file => $file,
                                                 );
-            #&timing_breakpoint('_get_logs done');
+            &timing_breakpoint('_get_logs done');
             if($mode eq 'update') {
                 # get already stored logs to filter duplicates
                 $duplicate_lookup = $self->_fill_lookup_logs($prefix,$time,($time+$blocksize));
-                #&timing_breakpoint('_fill_lookup_logs_logs done');
+                &timing_breakpoint('_fill_lookup_logs_logs done');
             }
             _infoc(":");
         };
@@ -2121,7 +2121,7 @@ sub _import_peer_logfiles {
             $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
         }
         _debug("done");
-        #&timing_breakpoint('_import_peer_logfiles enable index done');
+        &timing_breakpoint('_import_peer_logfiles enable index done');
     }
 
     return $log_count;
@@ -2130,7 +2130,7 @@ sub _import_peer_logfiles {
 ##########################################################
 sub _enable_index {
     my($dbh,$prefix) = @_;
-    #&timing_breakpoint('_import_peer_logfiles enable index');
+    &timing_breakpoint('_import_peer_logfiles enable index');
     $dbh->do('SET foreign_key_checks = 1');
     $dbh->do('SET unique_checks = 1');
     $dbh->do('ALTER TABLE `'.$prefix.'_log` ENABLE KEYS');
@@ -2305,7 +2305,7 @@ sub _insert_logs {
         ($fh, $datafilename) = tempfile();
         $fh->binmode (":encoding(utf-8)");
     }
-    #&timing_breakpoint('_insert_logs');
+    &timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
         next unless $l->{'message'};
         &Thruk::Utils::Encode::remove_utf8_surrogates($l->{'message'});
@@ -2354,17 +2354,17 @@ sub _insert_logs {
 
         # commit every 1000th to avoid to large blocks
         if($use_extended_inserts && $log_count%1000 == 0) {
-            #&timing_breakpoint('_insert_logs logs calculated');
+            &timing_breakpoint('_insert_logs logs calculated');
             $self->_safe_insert($dbh, $stm, \@values);
             @values = ();
-            #&timing_breakpoint('_insert_logs logs inserted');
+            &timing_breakpoint('_insert_logs logs inserted');
             $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);
         }
     }
     if($use_extended_inserts) {
         $self->_safe_insert($dbh, $stm, \@values);
     } else {
-        #&timing_breakpoint('_insert_logs load data local');
+        &timing_breakpoint('_insert_logs load data local');
         CORE::close($fh);
         my $stm = sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE `%s_log` FIELDS TERMINATED BY '\0' ENCLOSED BY '' (time,class,type,state,state_type,contact_id,host_id,service_id,message)", $datafilename, $prefix);
         eval {
@@ -2379,7 +2379,7 @@ sub _insert_logs {
             return(_insert_logs($self,$dbh,$mode,$logs,$host_lookup,$service_lookup,$duplicate_lookup,$prefix,$contact_lookup,$c,1));
         }
         $dbh->commit || confess $dbh->errstr;
-        #&timing_breakpoint('_insert_logs load data local done');
+        &timing_breakpoint('_insert_logs load data local done');
     }
 
     $self->_safe_insert_stash($dbh, $prefix, $foreign_key_stash);

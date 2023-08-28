@@ -23,7 +23,7 @@ Thruk Controller.
 
 =cut
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 use constant {

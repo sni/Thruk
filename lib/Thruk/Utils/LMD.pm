@@ -20,7 +20,7 @@ use Time::HiRes ();
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 =head1 METHODS
@@ -131,7 +131,7 @@ sub check_proc {
 
     confess($err) if $err;
 
-    #&timing_breakpoint('check_proc');
+    &timing_breakpoint('check_proc');
     return($pid);
 }
 
@@ -268,7 +268,7 @@ sub check_initial_start {
 
     return if $config->{'lmd_remote'};
 
-    #&timing_breakpoint("lmd check_initial_start");
+    &timing_breakpoint("lmd check_initial_start");
 
     local $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
     if($background) {
@@ -280,7 +280,7 @@ sub check_initial_start {
     check_proc($config, $c, 0);
     check_changed_lmd_config($c, $config);
 
-    #&timing_breakpoint("lmd check_initial_start done");
+    &timing_breakpoint("lmd check_initial_start done");
 
     return;
 }

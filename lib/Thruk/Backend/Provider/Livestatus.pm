@@ -14,7 +14,7 @@ use base 'Thruk::Backend::Provider::Base';
 # contains most stats column definitions
 $Thruk::Backend::Provider::Livestatus::stats_columns = {};
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -396,7 +396,7 @@ sub get_hosts {
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "hosts");
-        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+        &timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
     }
 
     # try to reduce the amount of transfered data
@@ -569,7 +569,7 @@ sub get_services {
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "services");
-        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+        &timing_breakpoint('optimized get_services') if $self->{'optimized'};
     }
 
     # try to reduce the amount of transfered data
@@ -745,7 +745,7 @@ sub get_comments {
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "comments");
-        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+        &timing_breakpoint('optimized get_services') if $self->{'optimized'};
     }
 
     # try to reduce the amount of transfered data
@@ -797,7 +797,7 @@ sub get_downtimes {
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "downtimes");
-        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+        &timing_breakpoint('optimized get_services') if $self->{'optimized'};
     }
 
     # try to reduce the amount of transfered data
@@ -848,7 +848,7 @@ sub get_contactgroups {
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "contactgroups");
-        #&timing_breakpoint('optimized get_contactgroups') if $self->{'optimized'};
+        &timing_breakpoint('optimized get_contactgroups') if $self->{'optimized'};
     }
 
     # try to reduce the amount of transfered data
@@ -1030,7 +1030,7 @@ sub get_contacts {
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "contacts");
-        #&timing_breakpoint('optimized get_contacts') if $self->{'optimized'};
+        &timing_breakpoint('optimized get_contacts') if $self->{'optimized'};
     }
 
     # try to reduce the amount of transfered data

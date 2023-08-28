@@ -22,7 +22,7 @@ use Thruk::Utils::Plugin ();
 use Thruk::Utils::References ();
 use Thruk::Utils::Status ();
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -49,7 +49,7 @@ sub index {
 
     # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-    #&timing_breakpoint('index start');
+    &timing_breakpoint('index start');
 
     my $subcat = $c->req->parameters->{'sub'}    || '';
     my $action = $c->req->parameters->{'action'} || 'show';
@@ -113,7 +113,7 @@ sub index {
     $c->stash->{has_obj_conf}    = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
     $c->stash->{backend_chooser} = 'switch';
 
-    #&timing_breakpoint('index starting subs');
+    &timing_breakpoint('index starting subs');
     # set default
     $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
 
@@ -152,7 +152,7 @@ sub index {
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
     }
 
-    #&timing_breakpoint('index done');
+    &timing_breakpoint('index done');
     return 1;
 }
 
@@ -2842,7 +2842,7 @@ sub _check_external_reload {
 sub _gather_references {
     my($c, $obj, $include_outside) = @_;
 
-    #&timing_breakpoint('_gather_references');
+    &timing_breakpoint('_gather_references');
 
     my($incoming, $outgoing) = $c->{'obj_db'}->gather_references($obj);
 
@@ -2856,7 +2856,7 @@ sub _gather_references {
     $c->stash->{'outgoing'} = $outgoing;
     $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing} || scalar keys %{$c->stash->{'other_refs'}});
 
-    #&timing_breakpoint('_gather_references done');
+    &timing_breakpoint('_gather_references done');
 
     return({incoming => $incoming, outgoing => $outgoing});
 }

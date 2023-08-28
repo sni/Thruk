@@ -22,7 +22,7 @@ Generic Access to Thruks Config
 
 ###################################################
 # load timing class
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 ######################################
 

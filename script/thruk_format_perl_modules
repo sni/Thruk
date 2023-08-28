@@ -470,7 +470,7 @@ sub _update_file {
             next;
         }
 
-        if($line =~ m/^\Q\#use Thruk::Timer\E/mx) {
+        if($line =~ m/^\Q\use Thruk::Timer\E/mx) {
             $newcont .= $line."\n";
             next;
         }

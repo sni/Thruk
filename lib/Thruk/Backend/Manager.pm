@@ -13,7 +13,7 @@ use Thruk::Utils::Auth ();
 use Thruk::Utils::Cache ();
 use Thruk::Utils::Log qw/:all/;
 
-#use Thruk::Timer qw/timing_breakpoint/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;
 
@@ -1573,7 +1573,7 @@ sub _do_on_peers {
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
 
-    #&timing_breakpoint('_get_result: '.$function);
+    &timing_breakpoint('_get_result: '.$function);
     if(!defined $result && $num_selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
@@ -1979,7 +1979,7 @@ sub _get_result_serial {
             $type       = $typ;
             $result->{ $key } = $data;
         }
-        #&timing_breakpoint('_get_result_serial fetched: '.$key);
+        &timing_breakpoint('_get_result_serial fetched: '.$key);
         $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
         my $peer = $self->get_peer_by_key($key);
         $peer->{'last_error'} = $last_error;

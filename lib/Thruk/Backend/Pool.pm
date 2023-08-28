@@ -16,8 +16,8 @@ use Thruk::Utils::IO ();
 
 use Plack::Util::Accessor qw(peers peer_order lmd_peer thread_pool);
 
-#use Thruk::Timer qw/timing_breakpoint/;
-#&timing_breakpoint('starting pool');
+use Thruk::Timer qw/timing_breakpoint/;
+&timing_breakpoint('starting pool');
 
 
 =head1 NAME
@@ -54,7 +54,7 @@ sub new {
     };
     bless $self, $class;
 
-    #&timing_breakpoint('creating pool');
+    &timing_breakpoint('creating pool');
 
     eval {
         require Thruk::Utils::XS;
@@ -164,7 +164,7 @@ sub new {
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
         }
-        #&timing_breakpoint('peers created');
+        &timing_breakpoint('peers created');
         if($pool_size > 1) {
             printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::IO::get_memory_usage(), $pool_size) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
             ## no critic
@@ -185,7 +185,7 @@ sub new {
         }
     }
 
-    #&timing_breakpoint('creating pool done');
+    &timing_breakpoint('creating pool done');
     return($self);
 }
 

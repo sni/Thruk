@@ -19,8 +19,8 @@ use Module::Load qw/load/;
 
 ###################################################
 # load timing class
-#use Thruk::Timer qw/timing_breakpoint/;
-#&timing_breakpoint('starting thruk');
+use Thruk::Timer qw/timing_breakpoint/;
+&timing_breakpoint('starting thruk');
 
 ###################################################
 # clean up env
@@ -121,7 +121,7 @@ sub _build_app {
         $self->{'pool'}->set_logger(Thruk::Utils::Log->log(), 1);
     }
 
-    #&timing_breakpoint('startup()');
+    &timing_breakpoint('startup()');
 
     $self->{'errors'} = [];
 
@@ -137,7 +137,7 @@ sub _build_app {
         die("\n\n*****\nfailed to load cgi config: ".($config->{'cgi.cfg'} // 'none')."\n*****\n\n");
     }
     $self->_add_additional_roles();
-    #&timing_breakpoint('startup() cgi.cfg parsed');
+    &timing_breakpoint('startup() cgi.cfg parsed');
 
     Thruk::Utils::Timezone::set_timezone($config);
     &_create_secret_file();
@@ -243,7 +243,7 @@ sub _build_app {
     if($ENV{'OMD_ROOT'}) {
         $self->_cleanup_plugin_cron_files();
     }
-    #&timing_breakpoint('startup() plugins loaded');
+    &timing_breakpoint('startup() plugins loaded');
 
     ###################################################
     my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
@@ -256,7 +256,7 @@ sub _build_app {
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");
 
-    #&timing_breakpoint('start done');
+    &timing_breakpoint('start done');
 
     return(\&{_dispatcher});
 }
@@ -266,7 +266,7 @@ sub _dispatcher {
     my($env) = @_;
 
     $Thruk::Globals::COUNT++;
-    #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
+    &timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
     # connection keep alive breaks IE in development server
     if(Thruk::Base->mode() eq 'DEVSERVER' || Thruk::Base->mode() eq 'TEST') {
         delete $env->{'HTTP_CONNECTION'};
@@ -310,7 +310,7 @@ sub _dispatcher {
         }
         $c->{'errored'} = 1;
     }
-    #&timing_breakpoint("_dispatcher begin done");
+    &timing_breakpoint("_dispatcher begin done");
 
     ###############################################
     # route cgi request
@@ -446,10 +446,10 @@ sub find_route_match {
 sub db {
     my($self) = @_;
     return($self->{'db'}) if $self->{'db'};
-    #&timing_breakpoint('creating $c->db');
+    &timing_breakpoint('creating $c->db');
     require Thruk::Backend::Manager;
     $self->{'db'} = Thruk::Backend::Manager->new($self->pool);
-    #&timing_breakpoint('creating $c->db done');
+    &timing_breakpoint('creating $c->db done');
     return($self->{'db'});
 }
 
