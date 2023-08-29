@@ -1876,8 +1876,8 @@ sub list_intersect {
     my($lista, $listb) = @_;
     my @intersect;
 
-    my $lookup = Thruk::Base::array2hash($listb);
-    for my $el (@{$lista}) {
+    my $lookup = Thruk::Base::array2hash(Thruk::Base::list($listb));
+    for my $el (@{Thruk::Base::list($lista)}) {
         push @intersect, $el if $lookup->{$el};
     }
 
@@ -1898,8 +1898,8 @@ sub list_not_intersect {
     my($lista, $listb) = @_;
     my @list;
 
-    my $lookup = Thruk::Base::array2hash($listb);
-    for my $el (@{$lista}) {
+    my $lookup = Thruk::Base::array2hash(Thruk::Base::list($listb));
+    for my $el (@{Thruk::Base::list($lista)}) {
         push @list, $el unless $lookup->{$el};
     }
 
