@@ -200,6 +200,7 @@ function init_page() {
     checkMainTableMaxHeight();
 
     jQuery(window).on('beforeunload unload', function(e){
+        triggerUnloadTimer();
         thrukState.unloading = true;
     });
 
@@ -1693,7 +1694,7 @@ function reloadPage(delay, withReloadButton, freshReload, preCheckUrl, preCheckR
             resetRefreshButton();
             jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
             withReloadButton = false;
-            triggerReloadTimer(500);
+            triggerUnloadTimer();
         } else {
             triggerReloadTimer(delay);
         }
@@ -1716,6 +1717,29 @@ function triggerReloadTimer(delay) {
     }, 20);
     window.setTimeout(function() {
         jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
+    }, 50);
+}
+
+var triggerUnloadTimerOnce = false;
+function triggerUnloadTimer() {
+    if(triggerUnloadTimerOnce) {
+        // do not trigger twice
+        return;
+    }
+    triggerUnloadTimerOnce = true;
+    var delay = 15000;
+    jQuery('#reload-timer').addClass("hidden");
+    jQuery('#unload-timer-parent').removeClass("hidden");
+    var timer = jQuery('#unload-timer')[0];
+    jQuery(timer).addClass("hidden");
+    jQuery(timer).removeClass("scale-x-100");
+    jQuery(timer).addClass("scale-x-0");
+    timer.style.setProperty("transition-duration", delay+"ms", "important");
+    window.setTimeout(function() {
+        jQuery(timer).removeClass("hidden");
+    }, 20);
+    window.setTimeout(function() {
+        jQuery(timer).addClass("scale-x-100").removeClass("scale-x-0");
     }, 50);
 }
 

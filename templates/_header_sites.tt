@@ -5,7 +5,11 @@
   [% END %]
 [% END %]
 
-<div id="reload-timer" class="hidden absolute top-[-11px] left-0 h-2 w-48 bg-[color:var(--button-green-bg)] opacity-50 rounded-r-lg transform transition-all ease-linear scale-x-100 origin-left"></div>
+<div id="reload-timer" class="hidden absolute top-[-11px] left-0 h-2 w-48   bg-[color:var(--button-green-bg)] opacity-50 rounded-r-lg transform transition-all ease-linear scale-x-100 origin-left"></div>
+<div id="unload-timer-parent" class="hidden absolute top-[-11px] left-0 h-2 w-full opacity-50 flexrow flex-nowrap gap-0">
+  <div class="h-full w-32 bg-[color:var(--button-green-bg)] flex-none"></div>
+  <div id="unload-timer" class="hidden h-2 w-full  bg-[color:var(--button-green-bg)] transform transition-all ease-linear scale-x-0 origin-left"></div>
+</div>
 [% IF !hide_backends_chooser && sites != "" && show_sitepanel != "off" %]
   [% IF show_sitepanel == 'list' %]
     <div class="buttongroup backends [% IF param_backend.list.size > 3 %]hidden lg:flex[% END %]">
