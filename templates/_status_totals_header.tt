@@ -6,7 +6,14 @@
     </div>
     <div class="flexrow gap-x-1 grow flex-wrap md:flex-nowrap">
       <div class="flex grow lg:justify-center">
-        [% PROCESS _host_status_details_box.tt %]
+        <div class="flexcol">
+          [% PROCESS _host_status_details_box.tt %]
+          [% IF show_top_pane %]
+            <button class="2xl:block hidden mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
+              <i class="uil uil-angle-up" title="Hide top row"></i>
+            </button>
+          [% END %]
+        </div>
       </div>
       <div>
         [% PROCESS _service_status_details_box.tt %]
@@ -15,7 +22,7 @@
   </div>
 
   [% IF show_top_pane %]
-    <button class="mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
+    <button class="2xl:hidden mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
       <i class="uil uil-angle-up" title="Hide top row"></i>
     </button>
     <button class="mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane_down">
