@@ -12,9 +12,14 @@
       <div class="card min-w-[350px] overflow-hidden">
         <div class="actionbox less-padding">
           [% IF service != '' and host != 'all' %]
-          <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
-          [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a></div>[% END %]
-          <div><a class="flex" href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
+            [% IF service != 'all' %]
+              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
+              [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a></div>[% END %]
+              <div><a class="flex" href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
+            [% ELSE %]
+              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View All Notifications For This Host</a></div>
+              [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]">View Trends For This Host</a></div>[% END %]
+            [% END %]
           [% ELSIF host != 'all' %]
           <div><a class="flex" href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a></div>
           <div><a class="flex" href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
@@ -83,7 +88,11 @@
 
 <h1 class="mt-5">
   [% IF service != '' and host != '' %]
-  Service '[% service | html %]' On Host '[% host | html %]'
+    [% IF service != 'all' %]
+      Service '[% service | html %]' On Host '[% host | html %]'
+    [% ELSE %]
+      All Services On Host '[% host | html %]'
+    [% END %]
   [% ELSIF host != '' %]
   Host '[% host | html %]'
   [% ELSE %]

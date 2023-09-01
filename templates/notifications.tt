@@ -27,7 +27,7 @@
               <td>
                 <select name='type'>
                   <option value="0"[%     IF type == 0     %] selected[% END %]>All notifications</option>
-                  [% IF service == '' %]
+                  [% IF service == '' || service == 'all' %]
                   <option value="1"[%     IF type == 1     %] selected[% END %]>All service notifications</option>
                   <option value="2"[%     IF type == 2     %] selected[% END %]>All host notifications</option>
                   [% END %]
@@ -88,7 +88,11 @@
   [% ELSIF contact != '' %]
     Contact '[% contact | html %]'
   [% ELSIF host != '' and service != '' %]
-    Service '[% service | html %]' On Host '[% host | html %]'
+    [% IF service != '' and service != 'all' %]
+      Service '[% service | html %]' On Host '[% host | html %]'
+    [% ELSE %]
+      All Services On Host '[% host | html %]'
+    [% END %]
   [% ELSIF host == 'all'  %]
     All Hosts and Services
   [% ELSIF host != ''  %]
@@ -155,7 +159,7 @@
               <div class='textALERT text-center'>
                 [% IF contact != '' %]
                   No notifications have been recorded for this contact in the current timeperiod
-                [% ELSIF host != '' and service != '' %]
+                [% ELSIF host != '' and service != 'all' %]
                   No notifications have been recorded for this service in the current timeperiod
                 [% ELSIF host != '' && host != 'all' %]
                   No notifications have been recorded for this host in the current timeperiod

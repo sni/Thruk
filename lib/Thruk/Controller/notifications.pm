@@ -54,7 +54,7 @@ sub index {
         $c->stash->{infoBoxTitle}   = 'Host Notifications';
         push @{$filter}, { host_name => $host } if $host ne 'all';
     }
-    if($service ne '') {
+    if($service ne '' && $service ne 'all') {
         $c->stash->{infoBoxTitle}   = 'Service Notifications';
         push @{$filter}, { service_description => $service };
     }
