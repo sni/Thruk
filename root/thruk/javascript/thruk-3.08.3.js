@@ -48,6 +48,7 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
  * - might be called multiple times, make sure events are not bound twice
  */
 function init_page() {
+    triggerUnloadTimerOnce = true;
     current_backend_states = {};
     for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
 
