@@ -63,7 +63,9 @@
   </div>
   <div class="mainTableHeader">
     <div>
-      [% PROCESS _table_search_field.tt ids=["configtable"] %]
+      [% IF  !pager || pager.total_pages <= 1 %]
+        [% PROCESS _table_search_field.tt ids=["configtable"] %]
+      [% END %]
     </div>
     <div>
       [% PROCESS _pager.tt %]
