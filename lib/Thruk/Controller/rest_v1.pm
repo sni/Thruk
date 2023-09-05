@@ -991,8 +991,8 @@ sub _livestatus_options {
                 # if all requested columns are default columns, we can pass the columns to livestatus
                 my $found = 1;
                 for my $col (@{$columns}) {
-                    $col = "comments_with_info"   if $col eq 'comments_info';
-                    $col =  "downtimes_with_info" if $col eq 'downtimes_info';
+                    $col = "comments_with_info"  if $col eq 'comments_info';
+                    $col = "downtimes_with_info" if $col eq 'downtimes_info';
                     if(!$ref_columns->{$col}) {
                         $found = 0;
                         last;
@@ -1007,14 +1007,12 @@ sub _livestatus_options {
         if(!$options->{'columns'}) {
             if($type eq 'hosts') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_host_columns;
-                push @{$options->{'extra_columns'}}, qw/comments_info downtimes_info/;
             }
             elsif($type eq 'hostgroups') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns;
             }
             elsif($type eq 'services') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_service_columns;
-                push @{$options->{'extra_columns'}}, qw/comments_info downtimes_info/;
             }
             elsif($type eq 'servicegroups') {
                 $options->{'extra_columns'} = $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns;
