@@ -7,6 +7,8 @@ next:
           - fix requesting unknown columns (#1301)
           - Reports:
             - fix missing subject in report mails
+          - Rest
+            - add .../avail endpoint for hosts / services
 
 3.08.3   Fri Jul 21 13:06:06 CEST 2023
           - improve landing page performance

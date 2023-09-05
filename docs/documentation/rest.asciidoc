@@ -1043,6 +1043,34 @@ alias for /hosts?name=<name>
 lists alerts for given host.
 alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
 
+=== GET /hosts/<name>/availability
+
+list availability for this host.
+
+Optional arguments:
+
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|scheduled_time_down               | total seconds in state down (during downtimes)
+|scheduled_time_indeterminate      | total seconds unknown (during downtimes)
+|scheduled_time_unreachable        | total seconds in state unreachable (during downtimes)
+|scheduled_time_up                 | total seconds in state up (during downtimes)
+|time_down                         | total seconds in state down
+|time_indeterminate_nodata         | total seconds without any data
+|time_indeterminate_notrunning     | total seconds during core not running
+|time_indeterminate_outside_timeperiod | total seconds outside the given timeperiod
+|time_unreachable                  | total seconds in state unreachable
+|time_up                           | total seconds in state up
+|===========================================
+
+
 === POST /hosts/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
@@ -1409,6 +1437,37 @@ there is an alias /services.
 
 lists services for given host and name.
 alias for /services?host_name=<host_name>&description=<service>
+
+=== GET /services/<host>/<service>/availability
+
+list of outages for this service.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Description
+|scheduled_time_critical           | total seconds in state critical (during downtimes)
+|scheduled_time_indeterminate      | total seconds unknown (during downtimes)
+|scheduled_time_ok                 | total seconds in state ok (during downtimes)
+|scheduled_time_unknown            | total seconds in state unknown (during downtimes)
+|scheduled_time_warning            | total seconds in state warning (during downtimes)
+|time_critical                     | total seconds in state critical
+|time_indeterminate_nodata         | total seconds without any data
+|time_indeterminate_notrunning     | total seconds during core not running
+|time_indeterminate_outside_timeperiod | total seconds outside the given timeperiod
+|time_ok                           | total seconds in state ok
+|time_unknown                      | total seconds in state unknown
+|time_warning                      | total seconds in state warning
+|===========================================
+
 
 === POST /services/<host>/<service>/cmd/...
 
