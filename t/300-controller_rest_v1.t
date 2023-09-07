@@ -1,8 +1,8 @@
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
-use URI::Escape qw/uri_escape/;
 use Test::More;
+use URI::Escape qw/uri_escape/;
 
 use Thruk::Utils::IO ();
 
