@@ -1,6 +1,7 @@
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use URI::Escape qw/uri_escape/;
 use Test::More;
 
 use Thruk::Utils::IO ();
@@ -37,10 +38,10 @@ my $list_pages = [
     '/downtimes',
     '/hostgroups',
     '/hosts',
-    '/hosts/'.$host,
-    '/hosts/'.$host.'/services',
+    '/hosts/'.uri_escape($host),
+    '/hosts/'.uri_escape($host).'/services',
     '/hosts/outages',
-    '/hosts/'.$host.'/outages',
+    '/hosts/'.uri_escape($host).'/outages',
     '/logs',
     '/alerts',
     '/notifications',
@@ -48,8 +49,8 @@ my $list_pages = [
     '/servicegroups',
     '/services',
     '/services/outages',
-    '/services/'.$host.'/'.$service,
-    '/services/'.$host.'/'.$service.'/outages',
+    '/services/'.uri_escape($host).'/'.uri_escape($service),
+    '/services/'.uri_escape($host).'/'.uri_escape($service).'/outages',
     '/timeperiods',
     '/lmd/sites',
     '/thruk/bp',
@@ -69,11 +70,11 @@ my $hash_pages = [
     '/checks/stats',
     '/hosts/stats',
     '/hosts/totals',
-    '/hosts/'.$host.'/availability',
+    '/hosts/'.uri_escape($host).'/availability',
     '/processinfo/stats',
     '/services/stats',
     '/services/totals',
-    '/services/'.$host.'/'.$service.'/availability',
+    '/services/'.uri_escape($host).'/'.uri_escape($service).'/availability',
     '/thruk',
     '/thruk/config',
     '/thruk/stats',
