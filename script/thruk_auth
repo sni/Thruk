@@ -222,7 +222,7 @@ sub process {
     my $auth = $1;
 
     # use session cache for a few seconds
-    my $cache_timeout = (defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'failed'} ? $sessionfailtimeout : $sessioncachetimeout;
+    my $cache_timeout = (defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'failed'}) ? $sessionfailtimeout : $sessioncachetimeout;
     if(defined $sessioncache->{$auth} && ($cache_timeout == 0 || ($cache_timeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $cache_timeout))) {
         if($sessioncache->{$auth}->{'failed'}) {
             _debug("login failed by cache hit") if $verbose > 1;
@@ -263,7 +263,6 @@ sub process {
 
     # revalidation disabled
     my $basicauth = $session->{'hash'};
-    my $cache_timeout = (defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'failed'} ? $sessionfailtimeout : $sessioncachetimeout;
     if($cache_timeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
         if($sessioncache->{$auth}->{'failed'}) {
