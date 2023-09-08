@@ -59,7 +59,8 @@ my $secret_file         = $config->{'var_path'}.'/secret.key';
 my $urlprefix           = $config->{'url_prefix'};
 my $loginurl            = $config->{'cookie_auth_login_url'}       || $urlprefix."cgi-bin/login.cgi";
 my $sessiontimeout      = $config->{'cookie_auth_session_timeout'} || 86400;
-my $sessioncachetimeout = defined $config->{'cookie_auth_session_cache_timeout'} ? $config->{'cookie_auth_session_cache_timeout'} : 30;
+my $sessioncachetimeout = $config->{'cookie_auth_session_cache_timeout'} // 30;
+my $sessionfailtimeout  = $config->{'cookie_auth_session_cache_fail_timeout'} // 30;
 my $sessioncache        = {};
 my $login_timeout       = $config->{'cookie_auth_login_timeout'} // 10;
 $loginurl               = "/redirect/".$loginurl;
@@ -77,7 +78,11 @@ if($verbose) {
     $ENV{'THRUK_VERBOSE'} = $verbose if(!defined $ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $verbose);
     ## use critic
     Thruk::Utils::Log::set_screen_logger($config, 1, "[thruk_auth] ");
-    _info("thruk auth started: sessioncachetime: %ds - sessiontimeout: %ds", $sessioncachetimeout, $sessiontimeout);
+    _info("thruk auth started: sessioncachetime: %ds | sessioncachefail: %ds | sessiontimeout: %ds",
+        $sessioncachetimeout,
+        $sessionfailtimeout,
+        $sessiontimeout,
+    );
 }
 
 ##########################################################
@@ -177,7 +182,9 @@ sub process {
     if($extra->[1]) {
         my $auth = $extra->[1];
         # use session cache for a few seconds
-        if(defined $sessioncache->{$auth} && ($sessioncachetimeout == 0 || ($sessioncachetimeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout))) {
+        my $cached        = $sessioncache->{$auth};
+        my $cache_timeout = (defined $cached && $cached->{'failed'}) ? $sessionfailtimeout : $sessioncachetimeout;
+        if(defined $cached && ($cache_timeout == 0 || ($cache_timeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $cache_timeout))) {
             if($sessioncache->{$auth}->{'failed'}) {
                 _debug("basic auth login failed by cache hit: ".substr($auth, 0, 6)."...") if $verbose > 1;
                 return $loginurl."?invalid&".$path;
@@ -215,7 +222,8 @@ sub process {
     my $auth = $1;
 
     # use session cache for a few seconds
-    if(defined $sessioncache->{$auth} && ($sessioncachetimeout == 0 || ($sessioncachetimeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $sessioncachetimeout))) {
+    my $cache_timeout = (defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'failed'} ? $sessionfailtimeout : $sessioncachetimeout;
+    if(defined $sessioncache->{$auth} && ($cache_timeout == 0 || ($cache_timeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $cache_timeout))) {
         if($sessioncache->{$auth}->{'failed'}) {
             _debug("login failed by cache hit") if $verbose > 1;
             return $loginurl."?invalid&".$path;
@@ -255,7 +263,7 @@ sub process {
 
     # revalidation disabled
     my $basicauth = $session->{'hash'};
-    if($sessioncachetimeout == 0 || !defined $basicauth || $basicauth eq 'none') {
+    if($cache_timeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
         if($sessioncache->{$auth}->{'failed'}) {
             _debug("session not ok by cache hit") if $verbose > 1;

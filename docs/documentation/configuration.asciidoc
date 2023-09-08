@@ -1866,11 +1866,23 @@ ex.:
 Specifies the amount of seconds in which subsequent requests won't
 verify authentication again. Set to zero to disable storing encrypted
 credentials in the filesystem and disabling revalidation of active
-sessions.
+sessions (sessions will never invalidate).
 
 ex.:
 
   cookie_auth_session_cache_timeout = 30
+
+
+=== cookie_auth_session_cache_fail_timeout
+Just like successful logins are cached for a few
+seconds (cookie_auth_session_cache_timeout), failed logins are cached as well
+to prevent denial of service attacks with invalid credentials. `cookie_auth_session_cache_fail_timeout` sets the amount
+of seconds to cache failed logins. Set this to zero disabled invalidation of the
+cache.
+
+ex.:
+
+  cookie_auth_session_cache_fail_timeout = 30
 
 
 === cookie_auth_login_timeout
