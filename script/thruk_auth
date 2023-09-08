@@ -263,6 +263,7 @@ sub process {
 
     # revalidation disabled
     my $basicauth = $session->{'hash'};
+    my $cache_timeout = (defined $sessioncache->{$auth} && $sessioncache->{$auth}->{'failed'} ? $sessionfailtimeout : $sessioncachetimeout;
     if($cache_timeout == 0 || !defined $basicauth || $basicauth eq 'none') {
         # no validation enabled
         if($sessioncache->{$auth}->{'failed'}) {
