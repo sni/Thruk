@@ -202,7 +202,7 @@ sub _parse_file {
         if($test =~ m/^\s*
                       (use|load|package|require)
                       \s+
-                      ([^\s;\(,]+)       # pkg name
+                      ([^\s;\(,]+)      # pkg name
                       \s*
                       (.*)$             # import arguments
                     /mx) {
@@ -240,7 +240,7 @@ sub _parse_file {
                     $lastblock->{'modules'}->{$mod} = $arg eq '();' ? 0 : 2;
                     next;
                 }
-                next if $mod =~ m/^5/mx;
+                next if $mod =~ m/^5/mx and $file !~ m|lib/Thruk/Config.pm$|gmx;
                 next if $mod eq 'constant';
 
                 if($mod eq 'lib') {
@@ -415,7 +415,13 @@ sub _update_file {
                         last;
                     }
 
-                    # strict/warnings go first
+                    # add perl dependency first
+                    for my $m (sort keys %{$mods}) {
+                        next unless $m =~ m/^5/mx;
+                        $newcont .= $mods->{$m}."\n\n";
+                    }
+
+                    # then add strict/warnings
                     my $has_mods = 0;
                     for my $m (qw/lib warnings strict/) {
                         next unless defined $mods->{$m};
@@ -427,6 +433,7 @@ sub _update_file {
                     for my $m (sort keys %{$mods}) {
                         next if $m =~ m/^(lib|strict|warnings|base|parent|Plack::Util::Accessor)$/mx;
                         next if $m =~ m/^(Thruk|Monitoring)/mx;
+                        next if $m =~ m/^5/mx;
                         if($mods->{$m} eq '') {
                             $newcont .= sprintf("use %s ();\n", $m);
                         } else {
