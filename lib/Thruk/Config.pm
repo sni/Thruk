@@ -1,5 +1,7 @@
 package Thruk::Config;
 
+use 5.016_000;
+
 use warnings;
 use strict;
 use Carp qw/confess/;
