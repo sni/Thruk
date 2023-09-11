@@ -46,6 +46,7 @@ for my $file (@{$files}) {
     delete $subs->{$mod};
     next if _is_core_module($mod);
     $all_used->{$mod} = 1;
+    next if $mod =~ /^5\./;            # perl itself
     next if $mod eq 'IO::Socket::SSL'; # optional
     next if $mod eq 'Net::SSLeay';     # optional
     next if $mod eq 'Mozilla::CA';     # optional
