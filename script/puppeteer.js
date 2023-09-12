@@ -67,6 +67,7 @@ var is_report = process.argv[7];
     if(is_report == 1) {
       await page.emulateMediaType("print");
       await page.pdf({
+        timeout: 600000, // se timeout to 10min
         format: 'A4',
         width: '210mm',
         height: '297mm',
@@ -85,6 +86,7 @@ var is_report = process.argv[7];
       // other pages
       await page.emulateMediaType("screen");
       await page.pdf({
+        timeout: 600000, // se timeout to 10min
         width: '1600px',
         height: '1200px',
         displayHeaderFooter: true,

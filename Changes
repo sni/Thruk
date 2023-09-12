@@ -7,6 +7,7 @@ next:
           - fix using custom variables in queries
           - fix requesting unknown columns (#1301)
           - Reports:
+            - increase pdf render timout
             - fix missing subject in report mails
           - Rest
             - add .../avail endpoint for hosts / services
