@@ -13,7 +13,6 @@ TP.cp = new Ext.state.HttpProvider({
 TP.cp.loadData([% json_encode(extstate) %]);
 Ext.state.Manager.setProvider(TP.cp);
 
-TP.unloading = false;
 if(TP.initial_active_tab == undefined && get_hash(1)) {
     TP.initial_active_tab = TP.nr2TabId(get_hash(1));
 }
@@ -128,4 +127,9 @@ Ext.onReady(function() {
         'DOMMouseScroll': TP.setBaseHTMLScroll,
         'scroll': TP.setBaseHTMLScroll
     });
+
+    jQuery(window).on('beforeunload unload', function(e){
+        thrukState.unloading = true;
+    });
+
 });

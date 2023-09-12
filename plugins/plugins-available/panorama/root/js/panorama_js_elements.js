@@ -302,7 +302,6 @@ TP.Msg = function() {
     }
     return {
         msg : function(s, close_timeout, container, title, onCloseCB) {
-            if(TP.unloading) { return; }
             if(!msgCt){
                 msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div', 'class': "popup-msg"}, true);
             }
@@ -326,12 +325,16 @@ TP.Msg = function() {
                 }
             }
             TP.log('msg: '+title+' - '+p[1]);
+
+            if(thrukState.unloading) { return; }
+
             var m = Ext.DomHelper.append((container || msgCt), createBox(p[0], title, p[1]), true);
             var btn = new Ext.Element(m.dom.firstChild);
             btn.on("click", function() {
                 if(onCloseCB) { onCloseCB(); }
                 m.ghost("t", { remove: true});
             });
+
             m.show();
             m.hide();
             m.slideIn('t');
