@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - add explore mode to advanced status filter
           - add option to set different cache timeout for failed logins (cookie_auth_session_cache_fail_timeout)
+          - reset page refresh timer on page interaction
           - fix livestatus error on landing page (#1299)
           - fix using custom variables in queries
           - fix requesting unknown columns (#1301)

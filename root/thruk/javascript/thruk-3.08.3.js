@@ -383,6 +383,8 @@ function cleanUnderscore(str) {
 
 function updateLastUserInteraction() {
     thrukState.lastUserInteraction = (new Date()).getTime();
+    //also reset refresh timer
+    resetRefresh();
 }
 
 /* save scroll value */
