@@ -353,15 +353,23 @@ Ext.onReady(function() {
                 TP.iconTip.lastData = undefined;
                 TP.iconTip.lastUrl  = link;
                 // delay requesting details a bit, otherwise we would trigger tons of requests when moving the mouse over different icons
-                window.clearTimeout(TP.popupReq);
-                TP.popupReq =  window.setTimeout(function() {
-                    Ext.Ajax.request({
+                window.clearTimeout(TP.popupReqTimer);
+                TP.popupReqTimer =  window.setTimeout(function() {
+                    if(TP.popupReq && TP.popupReq.xhr) {
+                        // cancel previous request
+                        TP.popupReq.aborted = true;
+                        TP.popupReq.xhr.abort();
+                    }
+                    TP.popupReq = Ext.Ajax.request({
                         url:     link,
                         method: 'POST',
                         callback: function(options, success, response) {
+                            delete TP.popupReq;
                             if(!success) {
                                 TP.iconTip.lastUrl = undefined;
-                                if(response.status == 0) {
+                                if(response.request && response.request.aborted) {
+                                    // request has been canceled, no need to log anything
+                                } else if(response.status == 0) {
                                     TP.Msg.msg("fail_message~~fetching details failed");
                                 } else {
                                     TP.Msg.msg("fail_message~~fetching details failed: "+response.status+' - '+response.statusText);
