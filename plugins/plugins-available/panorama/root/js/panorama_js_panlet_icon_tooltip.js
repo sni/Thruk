@@ -73,14 +73,14 @@ Ext.onReady(function() {
                     if(!TP.iconTipTarget || !TP.iconTipTarget.el) {
                         return(false);
                     }
-                    var pos = TP.iconTipTarget.getPosition();
-                    var size = TP.iconTipTarget.getSize();
-                    if(   cursorX < pos[0] || cursorX > pos[0]+size.width
-                       || cursorY < pos[1] || cursorY > pos[1]+size.height) {
-                        if(TP.iconTip) {
-                            TP.iconTip.last_id = "";
+                    if(!TP.isInside([cursorX, cursorY], TP.iconTipTarget)) {
+                        if(!TP.iconTipTarget.labelEl || !TP.isInside([cursorX, cursorY], TP.iconTipTarget.labelEl)) {
+                            if(TP.iconTip) {
+                                TP.iconTip.last_id = "";
+                            }
+                            This.cancelPopup();
+                            return(false);
                         }
-                        return(false);
                     }
                 }
                 return true;
@@ -115,7 +115,7 @@ Ext.onReady(function() {
                 });
                 This.el.on('mouseout', function() {
                     if(TP.iconSettingsWindow) { return; }
-                    This.delayHide();
+                    This.cancelPopup();
                 });
                 if(TP.iconSettingsWindow && position == "automatic") {
                     this.alignToSettingsWindow();
@@ -173,6 +173,15 @@ Ext.onReady(function() {
         setFixedPosition: function(x, y) {
             TP.suppressIconTipForce = false;
             this.showAt([x, y]);
+        },
+        cancelPopup: function() {
+            window.clearTimeout(TP.popupReqTimer);
+            TP.iconTip.delayHide();
+            if(TP.popupReq && TP.popupReq.xhr) {
+                // cancel current request
+                TP.popupReq.aborted = true;
+                TP.popupReq.xhr.abort();
+            }
         }
     });
 
@@ -323,8 +332,13 @@ Ext.onReady(function() {
             TP.iconTip.alignToSettingsWindow();
         }
         img.el.dom.onmouseout = function() {
-            TP.iconTip.delayHide();
+            TP.iconTip.cancelPopup();
         };
+        if(img.labelEl) {
+            img.labelEl.el.dom.onmouseout = function() {
+                TP.iconTip.cancelPopup();
+            };
+        }
         if(link && TP.iconTip.panel) {
             var style = 'detail';
             if(!(TP.iconTip.panel.iconType == 'servicegroup' || TP.iconTip.panel.xdata.general.incl_svc) || TP.iconTip.panel.iconType == 'host') {
@@ -382,7 +396,7 @@ Ext.onReady(function() {
                             TP.iconTip.detailsTarget.body.unmask();
                         }
                     });
-                }, 300)
+                }, 500)
             }
         }
     };
@@ -518,6 +532,19 @@ TP.renderTipDetails = function(data) {
     }
     TP.iconTip.syncShadow();
     return;
+}
+
+TP.isInside = function(cursor, target) {
+    if(!target) { return(false); }
+    if(!target.getPosition) { return(false); }
+
+    var pos  = target.getPosition();
+    var size = target.getSize();
+    if(   cursor[0] < pos[0] || cursor[0] > pos[0]+size.width
+       || cursor[1] < pos[1] || cursor[1] > pos[1]+size.height) {
+        return(false);
+    }
+    return(true);
 }
 
 // save cursor position
