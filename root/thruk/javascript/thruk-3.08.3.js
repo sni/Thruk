@@ -1716,10 +1716,10 @@ function triggerReloadTimer(delay) {
     timer.style.setProperty("transition-duration", delay+"ms", "important");
     window.setTimeout(function() {
         jQuery(timer).removeClass("hidden");
+        window.setTimeout(function() {
+            jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
+        }, 40);
     }, 40);
-    window.setTimeout(function() {
-        jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
-    }, 80);
 }
 
 var triggerUnloadTimerOnce = false;
@@ -1738,10 +1738,10 @@ function triggerUnloadTimer() {
     timer.style.setProperty("transition-duration", delay+"ms", "important");
     window.setTimeout(function() {
         jQuery(timer).removeClass("hidden");
+        window.setTimeout(function() {
+            jQuery(timer).addClass("scale-x-100").removeClass("scale-x-0");
+        }, 40);
     }, 40);
-    window.setTimeout(function() {
-        jQuery(timer).addClass("scale-x-100").removeClass("scale-x-0");
-    }, 80);
 }
 
 function resetRefreshButton() {
