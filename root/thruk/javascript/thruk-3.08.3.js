@@ -1712,15 +1712,14 @@ function triggerReloadTimer(delay) {
     if(!delay) { delay = 500; }
     var timer = jQuery('#reload-timer')[0];
     jQuery(timer).addClass("hidden");
-    jQuery(timer).removeClass("scale-x-0");
-    jQuery(timer).addClass("scale-x-100");
+    jQuery(timer).removeClass("scale-x-0").addClass("scale-x-100");
     timer.style.setProperty("transition-duration", delay+"ms", "important");
     window.setTimeout(function() {
         jQuery(timer).removeClass("hidden");
-    }, 20);
+    }, 40);
     window.setTimeout(function() {
         jQuery(timer).addClass("scale-x-0").removeClass("scale-x-100");
-    }, 50);
+    }, 80);
 }
 
 var triggerUnloadTimerOnce = false;
@@ -1732,18 +1731,17 @@ function triggerUnloadTimer() {
     triggerUnloadTimerOnce = true;
     var delay = 15000;
     jQuery('#reload-timer').addClass("hidden");
-    jQuery('#unload-timer-parent').removeClass("hidden");
     var timer = jQuery('#unload-timer')[0];
     jQuery(timer).addClass("hidden");
-    jQuery(timer).removeClass("scale-x-100");
-    jQuery(timer).addClass("scale-x-0");
+    jQuery('#unload-timer-parent').removeClass("hidden");
+    jQuery(timer).removeClass("scale-x-100").addClass("scale-x-0");
     timer.style.setProperty("transition-duration", delay+"ms", "important");
     window.setTimeout(function() {
         jQuery(timer).removeClass("hidden");
-    }, 20);
+    }, 40);
     window.setTimeout(function() {
         jQuery(timer).addClass("scale-x-100").removeClass("scale-x-0");
-    }, 50);
+    }, 80);
 }
 
 function resetRefreshButton() {
@@ -6916,13 +6914,12 @@ function collectFormData(form_id) {
         form_ref.value += '&scrollTo=' + getPageScroll();
     }
 
-    if(value == 1 ) { // reschedule
-        var btn = document.getElementById(form_id);
-        if(btn) {
-            submit_form_id = form_id;
-            window.setTimeout(submit_form, 100);
-            return(false);
-        }
+    // visible feedback
+    var btn = document.getElementById(form_id);
+    if(btn) {
+        submit_form_id = form_id;
+        window.setTimeout(submit_form, 100);
+        return(false);
     }
 
     return(true);
@@ -6955,8 +6952,9 @@ function getPageScroll() {
 
 /* submit a form by id */
 function submit_form() {
-    var btn = document.getElementById(submit_form_id);
-    btn.submit();
+    var form  = document.getElementById(submit_form_id);
+    setFormBtnSpinner(form);
+    form.submit();
 }
 
 function submitFormIfChanged(el) {
