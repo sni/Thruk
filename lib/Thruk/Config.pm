@@ -258,6 +258,7 @@ my $base_defaults = {
                 'vendor/geoext2-2.0.2/src/GeoExt/data/LayerStore.js',
                 'vendor/geoext2-2.0.2/src/GeoExt/panel/Map.js',
     ],
+    'link_target' => [],
 };
 
 ######################################
