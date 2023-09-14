@@ -1716,36 +1716,6 @@ sub _is_frame_url_allowed {
     return undef;
 }
 
-
-=begin comment
-
-function is_frame_url_allowed(url, allowed_frame_links) {
-    var page = new URL(url);
-    if(window.location.hostname == page.hostname) {
-        return(true);
-    }
-    for(var i=0; i<allowed_frame_links.length; i++) {
-        var u = allowed_frame_links[i];
-        if(u.includes("*") || !u.match(/^https?:/)) {
-            var matcher = String(u).replace(/\.\*/g, '*').replace(/\./g, '\\.').replace(/\*/gi, '.*');
-            var re = new RegExp("^"+matcher, 'g');
-            if(re.test(page.hostname) || re.test(page.href)) {
-                return(true);
-            }
-        } else {
-            var test = new URL(u, window.location);
-            if(page.hostname == test.hostname && page.protocol == test.protocol) {
-                return(true);
-            }
-        }
-    };
-    return(false);
-}
-
-=end comment
-
-=cut
-
 ##############################################
 sub _find_target_for_link {
     my ($href) = @_;
