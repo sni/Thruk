@@ -1661,17 +1661,105 @@ sub set_target_link {
     my $prefix  = $c->stash->{'url_prefix'};
     if($href =~ s|^\Q/thruk/\E||mx || $href =~ s|^\Q$product\E/||mx || $href =~ s|^\Q$prefix\E||mx) {
         $target = _get_menu_target() unless defined $target;
-        $href   = $c->stash->{'url_prefix'}.$href;
+        $href   = "${prefix}${href}";
         return($href, $target);
     }
-    $target = $target // _get_menu_target();
+
+    $target = _find_target_for_link($href) // $target;
+    $target //= _get_menu_target();
+
     if(!$target || $target eq 'main') {
-        $target = '';
-        $href   = $c->stash->{'url_prefix'}.'#'.$href;
-        push @{$c->stash->{'allowed_frame_links'}}, $href;
+        if(_is_frame_url_allowed($href)) {
+            $target = '';
+            $href   = $prefix.'#'.$href;
+            push @{$c->stash->{'allowed_frame_links'}}, $href;
+        } else {
+            $target = '_blank';
+        }
     }
 
     return($href, $target);
+}
+
+
+##############################################
+sub _is_frame_url_allowed {
+    my($url) = @_;
+    return 1 unless $url;
+    my $c = $Thruk::Globals::c or die("not initialized!");
+
+    $url = URI->new($url);
+    my $req = $c->req->uri;
+
+    # same origin is allowed
+    if($url->scheme =~ /^http/ and ( $req->host eq $url->host )) {
+        return 1;
+    }
+
+    for my $allowed (@{ $c->config->{allowed_frame_links} // []}) {
+        if($allowed =~ /\*/ or $allowed !~ /^https?:/) {
+            my $matcher = $allowed;
+            $matcher =~ s/\Q.*/*/g;
+            $matcher =~ s/\./\./g;
+            $matcher =~ s/\*/.*/g;
+            if($url->host =~ /^$matcher/g or $url->as_string =~ /^$matcher/g) {
+                return 1
+            }
+        } else {
+            my $new = URL->new_abs($allowed, $req);
+            if($new->hostname eq $url->hostname and $new->protocol eq $url->protocol) {
+                return 1;
+            }
+        }
+    }
+
+    return undef;
+}
+
+
+=begin comment
+
+function is_frame_url_allowed(url, allowed_frame_links) {
+    var page = new URL(url);
+    if(window.location.hostname == page.hostname) {
+        return(true);
+    }
+    for(var i=0; i<allowed_frame_links.length; i++) {
+        var u = allowed_frame_links[i];
+        if(u.includes("*") || !u.match(/^https?:/)) {
+            var matcher = String(u).replace(/\.\*/g, '*').replace(/\./g, '\\.').replace(/\*/gi, '.*');
+            var re = new RegExp("^"+matcher, 'g');
+            if(re.test(page.hostname) || re.test(page.href)) {
+                return(true);
+            }
+        } else {
+            var test = new URL(u, window.location);
+            if(page.hostname == test.hostname && page.protocol == test.protocol) {
+                return(true);
+            }
+        }
+    };
+    return(false);
+}
+
+=end comment
+
+=cut
+
+##############################################
+sub _find_target_for_link {
+    my ($href) = @_;
+    my $c = $Thruk::Globals::c or die("not initialized!");
+    my @targets = @{ $c->config->{link_target} };
+    for my $t (@targets) {
+        my ($target, $regex) = split ' ', $t, 2;
+        _error("cannot parse '$t': $target not defined") unless $target;
+        _error("cannot parse '$t': $regex not defined") unless $regex;
+        next if(!$target or !$regex);
+        if($href =~ /$regex/) {
+            return $target;
+        }
+    }
 }
 
 ##############################################
