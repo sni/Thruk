@@ -390,6 +390,16 @@ ex.:
   allowed_frame_links = https://*                       # allow all https links from anywhere
   allowed_frame_links = *                               # allow everything (not recommended)
 
+=== link_target
+
+TBD
+
+ex.:
+
+  # link_target = $target $regex
+  link_target = main ^https?://wiki.example.com/foo
+  link_target = _blank ^https?://cannot-run-in-frame.example.com/bar
+
 
 === max_process_memory
 
