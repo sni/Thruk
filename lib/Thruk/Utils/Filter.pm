@@ -1692,18 +1692,18 @@ sub _is_frame_url_allowed {
     my $req = $c->req->uri;
 
     # same origin is allowed
-    if($url->scheme =~ /^http/ and ( $req->host eq $url->host )) {
+    if(($url->scheme // "") =~ /\Ahttp/mx and ( $req->host eq $url->host )) {
         return 1;
     }
 
     for my $allowed (@{ $c->config->{allowed_frame_links} // []}) {
-        if($allowed =~ /\*/ or $allowed !~ /^https?:/) {
+        if($allowed =~ /\*/mx or $allowed !~ /\Ahttps?:/mx) {
             my $matcher = $allowed;
-            $matcher =~ s/\Q.*/*/g;
-            $matcher =~ s/\./\./g;
-            $matcher =~ s/\*/.*/g;
-            if($url->host =~ /^$matcher/g or $url->as_string =~ /^$matcher/g) {
-                return 1
+            $matcher =~ s/\Q.*/*/gmx;
+            $matcher =~ s/\./\./gmx;
+            $matcher =~ s/\*/.*/gmx;
+            if($url->host =~ /\A$matcher/mx or $url->as_string =~ /\A$matcher/mx) {
+                return 1;
             }
         } else {
             my $new = URL->new_abs($allowed, $req);
@@ -1713,7 +1713,7 @@ sub _is_frame_url_allowed {
         }
     }
 
-    return undef;
+    return;
 }
 
 ##############################################
@@ -1725,11 +1725,12 @@ sub _find_target_for_link {
         my ($target, $regex) = split ' ', $t, 2;
         _error("cannot parse '$t': $target not defined") unless $target;
         _error("cannot parse '$t': $regex not defined") unless $regex;
-        next if(!$target or !$regex);
-        if($href =~ /$regex/) {
+        next if (!$target || !$regex);
+        if($href =~ /$regex/) { ## no critic
             return $target;
         }
     }
+    return;
 }
 
 ##############################################
