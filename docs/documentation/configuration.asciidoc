@@ -392,13 +392,18 @@ ex.:
 
 === link_target
 
-TBD
+List of (target, regex) pairs. When Thruk generates links (for example for the
+action_url of a service) the URL is matched against the regex. If the regex
+matches the URL then the 'target' is used for the links target attribute. Target
+'main' is special, if the link matches `allowed_frame_links`, it creates a link
+that is, when clicked on, opened inside a frame in Thruk. If it doesn't match
+`allowed_frame_links` the target '_blank' is used.
 
 ex.:
 
-  # link_target = $target $regex
-  link_target = main ^https?://wiki.example.com/foo
+  allowed_frame_links = example.com
   link_target = _blank ^https?://cannot-run-in-frame.example.com/bar
+  link_target = main ^https?://wiki.example.com/foo
 
 
 === max_process_memory
