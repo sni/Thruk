@@ -100,6 +100,8 @@ my $base_defaults = {
     'use_feature_core_scheduling'           => 0,
     'use_bookmark_titles'                   => 0,
     'use_dynamic_titles'                    => 1,
+    'link_target'                           => [],
+    'allowed_frame_links'                   => [],
     'show_long_plugin_output'               => 'popup',
     'cmd_quick_status'                      => {
                 'default'                       => 'reschedule next check',
@@ -258,7 +260,6 @@ my $base_defaults = {
                 'vendor/geoext2-2.0.2/src/GeoExt/data/LayerStore.js',
                 'vendor/geoext2-2.0.2/src/GeoExt/panel/Map.js',
     ],
-    'link_target' => [],
 };
 
 ######################################
