@@ -1032,11 +1032,13 @@ returns user profile data
 =cut
 sub get_user_data {
     my($c, $username) = @_;
+    $c->stats->profile(begin => "get_user_data");
 
     if(!defined $username) {
         $username = $c->stash->{'remote_user'};
     }
     if(!defined $username || $username eq '?') {
+        $c->stats->profile(end => "get_user_data");
         return {};
     }
     confess("username not allowed") if Thruk::Base::check_for_nasty_filename($username);
@@ -1046,6 +1048,7 @@ sub get_user_data {
     if(-s $file) {
         $user_data = read_data_file($file);
     }
+    $c->stats->profile(end => "get_user_data");
     return $user_data;
 }
 

@@ -40,6 +40,8 @@ sub get_keys {
     my $hashed_key = $filter->{'hashed_key'};
     my $all        = (defined $user || defined $superuser) ? 0 : 1;
 
+    $c->stats->profile(begin => "APIKeys::get_keys");
+
     my $keys   = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
     for my $file (glob($folder.'/*')) {
@@ -58,6 +60,7 @@ sub get_keys {
             push @{$keys}, $data;
         }
     }
+    $c->stats->profile(end => "APIKeys::get_keys");
     return($keys);
 }
 
