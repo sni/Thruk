@@ -811,6 +811,13 @@ function check_side_nav_active_item(ctx) {
     var urlArgs = toQueryParams();
     var page    = window.location.href.toString().replace(/\#.*/, '').replace(/^.*\//, '').replace(/\?.*$/, '');
 
+    // make some assumptions about status.cgi
+    if(page == "status.cgi") {
+        if(!urlArgs['style']) {
+                urlArgs['style'] = "detail";
+        }
+    }
+
     // compare complete url
     var found   = false;
     var pageUrl = window.location.href.toString();
@@ -900,7 +907,7 @@ function check_side_nav_active_item(ctx) {
     jQuery("UL.navsectionlinks A", ctx).each(function(i, el) {
         var navPage = el.href.toString().replace(/^.*\//, '').replace(/\?.*$/, '');
         if(navPage == page) {
-            if(page != "extinfo.cgi") {
+            if(page != "extinfo.cgi") { // extinfo is never linked without type
                 found = true;
                 jQuery('UL.navsectionlinks A', ctx).removeClass("active");
                 jQuery(el).addClass("active");
