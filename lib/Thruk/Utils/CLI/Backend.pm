@@ -60,10 +60,6 @@ sub cmd {
         ($backends) = $c->db->select_backends();
         $backends = Thruk::Base::array2hash($backends);
     }
-    eval {
-        $c->db->get_processinfo();
-    };
-    _debug($@) if $@;
     Thruk::Action::AddDefaults::set_possible_backends($c, {});
     my @data;
     for my $key (@{$c->stash->{'backends'}}) {

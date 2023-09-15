@@ -504,10 +504,13 @@ sub add_defaults {
     }
 
     ###############################
-    if(!$c->config->{'_lmd_federtion_checked'} && ($ENV{'THRUK_USE_LMD'} || $c->config->{'lmd_remote'})) {
+    my $safe_defaults_added_already;
+    if(!$c->config->{'_lmd_federation_checked'} && ($ENV{'THRUK_USE_LMD'} || $c->config->{'lmd_remote'})) {
         # required on first run to expand federation peers
         eval {
+            $c->db->reset_failed_backends($c);
             set_processinfo($c, ADD_SAFE_DEFAULTS, $cached_data);
+            $safe_defaults_added_already = 1;
         };
     }
     my $disabled_backends = set_enabled_backends($c);
@@ -525,6 +528,8 @@ sub add_defaults {
 
         my $err;
         for my $x (1..$retries) {
+            last if($safe_defaults_added_already && $flags);
+
             # reset failed states, otherwise retry would be useless
             $c->db->reset_failed_backends($c);
 
@@ -937,7 +942,7 @@ sub set_processinfo {
     } else {
         $fetch = 1;
     }
-    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && $flags_hash->{ADD_CACHED_DEFAULTS};
+    $fetch = 1 if $ENV{'THRUK_USE_LMD'} && !$flags_hash->{ADD_CACHED_DEFAULTS};
     $fetch = 1 if $c->config->{'lmd_remote'};
     $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
@@ -1396,7 +1401,7 @@ sub check_federation_peers {
             $peer->{$col} = $d->{$col};
         }
     }
-    $c->config->{'_lmd_federtion_checked'} = time();
+    $c->config->{'_lmd_federation_checked'} = time();
 
     if($check_lmd_config && !$c->config->{'lmd_remote'}) {
         require Thruk::Utils::LMD;
