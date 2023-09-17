@@ -515,6 +515,12 @@ function setFormBtnSpinner(form) {
         setBtnSpinner(window.event.submitter);
         return;
     }
+    // skip if there is a spinning button already
+    var existing = jQuery(form).find("DIV.spinner:visible");
+    if(existing.length >= 1) {
+        return;
+    }
+
     jQuery(form).find("[type=submit], BUTTON.submit").each(function(i, btn) {
         setBtnSpinner(btn);
     });
@@ -4674,7 +4680,40 @@ function refreshNavSections(id) {
     return(false);
 }
 
+function checkRequiredFields(form) {
+    var valid = true;
+    jQuery(form).find(":input[required]").each(function(i, el) {
+        if(jQuery(el).val() == "") {
+            valid = false;
+        }
+    });
+    return(valid);
+}
+
+function submitFormWithData(btn, extraData) {
+    var form = jQuery(btn).parents('FORM');
+    if(!checkRequiredFields(form)) {
+        return;
+    }
+    if(extraData) {
+        for(var key in extraData) {
+            // remove fields with same name
+            jQuery("INPUT[name="+key+"]").remove();
+            var el = jQuery('<input />', {
+                type:  'hidden',
+                name:   key,
+                value:  extraData[key]
+            }).appendTo(form);
+        }
+    }
+    setBtnSpinner(btn);
+    jQuery(form).submit();
+}
+
 function submitFormInBackground(form, cb, extraData) {
+    if(!checkRequiredFields(form)) {
+        return;
+    }
     var removeEls = [];
     if(extraData) {
         for(var key in extraData) {
@@ -4715,6 +4754,9 @@ function submitFormInBackground(form, cb, extraData) {
 
 function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
     var form = jQuery(btn).parents('FORM');
+    if(!checkRequiredFields(form)) {
+        return;
+    }
     submitFormInBackground(form, function() { reloadPage() }, extraData);
     setBtnSpinner(btn, skipTimeout);
     return(false);
