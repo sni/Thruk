@@ -667,12 +667,12 @@ sub add_safe_defaults {
 
 sub add_cached_defaults {
     my ($c) = @_;
-    add_defaults($c, ADD_CACHED_DEFAULTS);
+    my $rc = add_defaults($c, ADD_CACHED_DEFAULTS);
     # make sure process info is not getting too old
     if(!$c->stash->{'processinfo_time'} || $c->stash->{'processinfo_time'} < time() - 90) {
         Thruk::Action::AddDefaults::delayed_proc_info_update($c);
     }
-    return;
+    return $rc;
 }
 
 ########################################
