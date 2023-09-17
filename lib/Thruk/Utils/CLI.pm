@@ -938,6 +938,8 @@ sub _cmd_configtool {
                 if($path =~ m/^\Q$filesroot\E/mx) {
                     $file = Monitoring::Config::File->new($path, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
                     if(defined $file && !$file->readonly()) {
+                        my $dir = Thruk::Base::dirname($path);
+                        Thruk::Utils::IO::mkdir_r($dir) unless -d $dir."/.";
                         Thruk::Utils::IO::write($path, $content, $mtime);
                         $saved = 'created';
                     }
