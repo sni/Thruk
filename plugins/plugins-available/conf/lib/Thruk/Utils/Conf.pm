@@ -45,14 +45,14 @@ sub set_object_model {
     delete $c->stash->{set_object_model_err};
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, 2) unless $c->stash->{'processinfo_time'}; # Thruk::Constants::ADD_CACHED_DEFAULTS
-    $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c, $peer_key)};
+    $c->stash->{has_obj_conf} = scalar keys %{set_backends_with_obj_config($c, $peer_key)};
 
     # if this is no obj config yet, try updating process info which updates
     # configuration information from http backends
     if(!$c->stash->{has_obj_conf} || (defined $peer_key && $peer_key ne $c->stash->{'param_backend'})) {
         $c->stash->{'param_backend'} = $peer_key;
         Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
-        $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c, $peer_key)};
+        $c->stash->{has_obj_conf} = scalar keys %{set_backends_with_obj_config($c, $peer_key)};
     }
 
     if(!$c->stash->{has_obj_conf}) {
@@ -952,7 +952,6 @@ returns all backends which do have a objects configuration
 sub get_backends_with_obj_config {
     my($c, $peerfilter) = @_;
     my $backends = {};
-    my $firstpeer;
 
     &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config start');
 
@@ -967,6 +966,39 @@ sub get_backends_with_obj_config {
         };
     }
     &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config IV');
+
+    # first hide all of them
+    my @peers = @{$c->db->get_peers(1)};
+    for my $peer (@peers) {
+        my $min_key_size = 0;
+        if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
+        if($peer->{'configtool'}->{'disable'}) {
+        }
+        elsif(scalar keys %{$peer->{'configtool'}} > $min_key_size) {
+            $backends->{$peer->{'key'}} = $peer->{'configtool'};
+        }
+    }
+
+    &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config done');
+    return $backends;
+}
+
+##########################################################
+
+=head2 set_backends_with_obj_config
+
+    set_backends_with_obj_config($c, [$peerfilter]);
+
+returns all backends which do have a objects configuration and sets the first one active
+
+=cut
+sub set_backends_with_obj_config {
+    my($c, $peerfilter) = @_;
+
+    &timing_breakpoint('Thruk::Utils::Conf::set_backends_with_obj_config start');
+
+    my $backends = get_backends_with_obj_config($c, $peerfilter);
+    my $firstpeer;
 
     my $param_backend = $c->stash->{'param_backend'} || '';
     $c->stash->{'param_backend'} = '';
@@ -993,7 +1025,6 @@ sub get_backends_with_obj_config {
         if(scalar keys %{$peer->{'configtool'}} > 0) {
             next if $peer->{'configtool'}->{'disable'};
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
-            $backends->{$peer->{'key'}} = $peer->{'configtool'};
         }
     }
 
@@ -1004,7 +1035,6 @@ sub get_backends_with_obj_config {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 next if $peer->{'configtool'}->{'disable'};
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;
-                $backends->{$peer->{'key'}} = $peer->{'configtool'};
             }
         }
     }
@@ -1043,7 +1073,7 @@ sub get_backends_with_obj_config {
 
     $c->stash->{'backend_chooser'} = 'switch';
 
-    &timing_breakpoint('Thruk::Utils::Conf::get_backends_with_obj_config done');
+    &timing_breakpoint('Thruk::Utils::Conf::set_backends_with_obj_config done');
     return $backends;
 }
 

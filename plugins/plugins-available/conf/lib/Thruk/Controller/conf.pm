@@ -109,7 +109,7 @@ sub index {
     $c->stash->{sub}             = $subcat;
     $c->stash->{action}          = $action;
     $c->stash->{conf_config}     = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
-    $c->stash->{has_obj_conf}    = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
+    $c->stash->{has_obj_conf}    = scalar keys %{Thruk::Utils::Conf::set_backends_with_obj_config($c)};
     $c->stash->{backend_chooser} = 'switch';
 
     &timing_breakpoint('index starting subs');
