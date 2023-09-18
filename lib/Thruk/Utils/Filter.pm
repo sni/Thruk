@@ -1670,8 +1670,7 @@ sub set_target_link {
 
     if(!$target || $target eq 'main') {
         if(_is_frame_url_allowed($href)) {
-            $target = '';
-            $href   = $prefix.'#'.$href;
+            $target = 'embedded';
             push @{$c->stash->{'allowed_frame_links'}}, $href;
         } else {
             $target = '_blank';

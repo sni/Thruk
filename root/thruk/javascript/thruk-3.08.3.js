@@ -205,6 +205,21 @@ function init_page() {
         thrukState.unloading = true;
     });
 
+    // open embedded action/notes urls in same page (as embedded iframe)
+    jQuery("A[target=embedded]").off("click").on("click", function(e) {
+        var link = e.target;
+        if(link.tagName != "A") {
+            var links = jQuery(link).parents("A");
+            if(links && links[0]) {
+                link = links[0];
+            }
+        }
+        if(link && link.href) {
+            e.preventDefault();
+            redirect_url(url_prefix+"#"+link.href);
+        }
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
