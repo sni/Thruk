@@ -71,7 +71,7 @@ sub cmd {
     my $config_backends = {};
     if($c->config->{'use_feature_configtool'}) {
         require Thruk::Utils::Conf;
-        $config_backends = Thruk::Utils::Conf::get_backends_with_obj_config($c);
+        $config_backends = Thruk::Utils::Conf::set_backends_with_obj_config($c);
     }
 
     my $type = shift @{$commandoptions} || '';
