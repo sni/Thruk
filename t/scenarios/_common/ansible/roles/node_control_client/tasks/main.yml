@@ -2,7 +2,8 @@
   include_role:
     name: yum_retry
   vars:
-    package: tmux
+    package:
+      - tmux
 - name: add sudo permissions
   lineinfile:
     path: /etc/sudoers

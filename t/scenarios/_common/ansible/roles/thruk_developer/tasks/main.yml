@@ -14,7 +14,8 @@
   include_role:
     name: yum_retry
   vars:
-    package: glibc-langpack-en
+    package:
+      - glibc-langpack-en
   when: not locale_path.stat.exists and ansible_distribution_version|int >= 8
 
 - name: "install File::ChangeNotify"

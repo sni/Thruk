@@ -12,7 +12,8 @@
     include_role:
       name: yum_retry
     vars:
-      package: stunnel
+      package:
+        - stunnel
   - file:
       src: "/omd/sites/demo/etc/stunnel/xinetd.conf"
       dest: "/omd/sites/demo/etc/xinetd.d/stunnel"

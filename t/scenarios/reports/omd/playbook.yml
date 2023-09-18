@@ -8,7 +8,8 @@
     include_role:
       name: yum_retry
     vars:
-      package: sendmail
+      package:
+        - sendmail
   - name: "omd config change"
     shell: "omd config demo change"
     args:
