@@ -608,6 +608,7 @@ sub redirect_to {
     if($c->req->method eq 'POST' && want_json_response($c)) {
         my $data = { 'ok' => 1 };
         $data->{'message'} = $c->stash->{'thruk_message_raw'} if $c->stash->{'thruk_message_raw'};
+        $data->{'ok'} = 0 if defined $c->stash->{'thruk_message_style'} && $c->stash->{'thruk_message_style'} eq 'fail_message';
         return($c->render(json => $data));
     }
 
