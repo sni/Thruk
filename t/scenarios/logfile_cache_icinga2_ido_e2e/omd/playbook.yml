@@ -4,14 +4,10 @@
     - role: common
   tasks:
   - name: "yum install postgresql"
-    yum:
-      name:
-      - postgresql
-      state: present
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
+    include_role:
+      name: yum_retry
+    vars:
+      package: postgresql
   - name: "omd config change"
     shell: "omd config demo change"
     args:

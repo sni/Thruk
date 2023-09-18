@@ -5,13 +5,10 @@
     - role: thruk_developer
   tasks:
   - name: "yum install sendmail"
-    yum:
-      name: sendmail
-      state: present
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
+    include_role:
+      name: yum_retry
+    vars:
+      package: sendmail
   - name: "omd config change"
     shell: "omd config demo change"
     args:

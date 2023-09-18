@@ -1,36 +1,21 @@
-- stat: path=/usr/bin/make
-  register: make_path
-- stat: path=/usr/bin/git
-  register: git_path
-- stat: path=/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
-  register: manifest_path
 - name: "install perl / git dependencies"
-  yum:
-    name:
+  include_role:
+    name: yum_retry
+  vars:
+    package:
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - git-core
       - make
-    state: present
-  register: result
-  retries: 30
-  until: result is succeeded
-  delay: 10
-  # hack because ansibles takes over 10seconds, even if it does not install anything
-  when: not make_path.stat.exists or not git_path.stat.exists or not manifest_path.stat.exists
 
 - stat: path=/usr/lib/locale/en_US.utf8
   register: locale_path
 - name: "glibc-langpack-en when rhel >= 8"
-  yum:
-    name:
-      - glibc-langpack-en
-    state: present
+  include_role:
+    name: yum_retry
+  vars:
+    package: glibc-langpack-en
   when: not locale_path.stat.exists and ansible_distribution_version|int >= 8
-  register: result
-  retries: 30
-  until: result is succeeded
-  delay: 10
 
 - name: "install File::ChangeNotify"
   shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"

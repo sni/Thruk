@@ -5,19 +5,16 @@
     - role: test-config-generator
   tasks:
   - name: "install nagios4 / livestatus build dependencies"
-    yum:
-      name:
+    include_role:
+      name: yum_retry
+    vars:
+      package:
         - wget
         - gcc
         - make
         - gd-devel
         - gcc-c++
         - libstdc++-static
-      state: present
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
   - name: "omd config change"
     shell: "omd config demo change"
     args:

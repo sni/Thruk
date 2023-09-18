@@ -8,14 +8,11 @@
       dest: "/omd/sites/demo/etc/naemon/conf.d/example.cfg"
       owner: "demo"
       group: "demo"
-  - name: "yum install stunnel"
-    yum:
-      name: stunnel
-      state: latest
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
+  - name: install stunnel
+    include_role:
+      name: yum_retry
+    vars:
+      package: stunnel
   - file:
       src: "/omd/sites/demo/etc/stunnel/xinetd.conf"
       dest: "/omd/sites/demo/etc/xinetd.d/stunnel"

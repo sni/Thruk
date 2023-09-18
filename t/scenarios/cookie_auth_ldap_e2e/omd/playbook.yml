@@ -5,16 +5,13 @@
     - role: thruk_developer
   tasks:
   - name: "yum install ldap module / clients"
-    yum:
-      name:
+    include_role:
+      name: yum_retry
+    vars:
+      package:
         - mod_ldap
         - openldap-servers
         - openldap-clients
-      state: present
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
   - shell: systemctl enable slapd.service
   - lineinfile:
      path: /etc/openldap/ldap.conf

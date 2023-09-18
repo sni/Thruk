@@ -1,19 +1,12 @@
-- stat: path=/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
-  register: manifest_path
 - name: "install perl / git dependencies"
-  yum:
-    name:
+  include_role:
+    name: yum_retry
+  vars:
+    package:
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - perl-File-Which
       - perl-IPC-Cmd
-    state: present
-  register: result
-  retries: 30
-  until: result is succeeded
-  delay: 10
-  # hack because ansibles takes over 10seconds, even if it does not install anything
-  when: not manifest_path.stat.exists
 
 - name: "install Monitoring::Generator::TestConfig"
   shell: "sudo su - {{ site }} -c 'cpanm -n Monitoring::Generator::TestConfig'"

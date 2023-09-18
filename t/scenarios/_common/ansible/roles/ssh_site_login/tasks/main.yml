@@ -6,7 +6,7 @@
     state: present
   # hack because ansibles takes over 10seconds, even if it does not install anything
   when: not passwd_path.stat.exists
-- shell: sudo su - {{ site }} -c "mkdir .ssh && chmod 700 .ssh && ssh-keygen -t ed25519 -f .ssh/id_ed25519 -N '' && cp .ssh/id_ed25519.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys"
+- shell: sudo su - {{ site }} -c "mkdir -p .ssh && chmod 700 .ssh && ssh-keygen -t ed25519 -f .ssh/id_ed25519 -N '' && cp .ssh/id_ed25519.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys"
 - name: create .ssh/config
   copy:
     content: "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n  LogLevel QUIET\n"

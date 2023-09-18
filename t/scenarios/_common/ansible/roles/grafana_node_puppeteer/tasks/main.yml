@@ -1,12 +1,9 @@
 - name: "yum install npm / chrome"
-  yum:
-    name:
+  include_role:
+    name: yum_retry
+  vars:
+    package:
       - npm
       - chromium
       - libxshmfence
-    state: present
-  register: result
-  retries: 30
-  until: result is succeeded
-  delay: 10
 - shell: "sudo su - {{ site }} -c 'npm i puppeteer'"

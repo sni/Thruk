@@ -5,8 +5,10 @@
     - role: thruk_developer
   tasks:
   - name: "yum install perl depdendencies of Dancer2::Plugin::OAuth2::Server"
-    yum:
-      name:
+    include_role:
+      name: yum_retry
+    vars:
+      package:
         - gcc
         - perl-Class-Load
         - perl-URI
@@ -23,11 +25,6 @@
         - perl-Import-Into
         - perl-Ref-Util
         - perl-App-cpanminus
-      state: present
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
   - name: "omd config change"
     shell: "omd config demo change"
     args:

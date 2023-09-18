@@ -6,15 +6,12 @@
     - role: thruk_developer
   tasks:
   - name: "yum install krb5 dependencies"
-    yum:
-      name:
+    include_role:
+      name: yum_retry
+    vars:
+      package:
         - mod_auth_gssapi
         - krb5-workstation
-      state: present
-    register: result
-    retries: 30
-    until: result is succeeded
-    delay: 10
   - name: "omd config change"
     shell: "omd config demo change"
     args:

@@ -1,8 +1,8 @@
 - name: install tmux
-  package:
-    name:
-      - tmux
-    state: present
+  include_role:
+    name: yum_retry
+  vars:
+    package: tmux
 - name: add sudo permissions
   lineinfile:
     path: /etc/sudoers
