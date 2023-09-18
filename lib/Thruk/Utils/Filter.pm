@@ -1691,8 +1691,11 @@ sub _is_frame_url_allowed {
     $url = URI->new($url);
     my $req = $c->req->uri;
 
+    # relative links are allowed
+    return 1 unless $url->scheme;
+
     # same origin is allowed
-    if(($url->scheme // "") =~ /\Ahttp/mx and ( $req->host eq $url->host )) {
+    if($req->host eq $url->host) {
         return 1;
     }
 
