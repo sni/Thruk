@@ -1431,7 +1431,7 @@ function readCookie(name, refresh){
 function showMessageFromCookie() {
     var cookie = readCookie('thruk_message', true);
     if(!cookie) {
-        return;
+        return false;
     }
     cookieRemove('thruk_message');
     var tmp = splitN(cookie, "~~", 2);
@@ -1446,6 +1446,7 @@ function showMessageFromCookie() {
     }
     msg = decodeURIComponent(msg);
     thruk_message(rc, msg);
+    return true;
 }
 
 
@@ -4732,6 +4733,8 @@ function submitFormInBackground(form, cb, extraData) {
     var removeEls = [];
     if(extraData) {
         for(var key in extraData) {
+            // remove fields with same name // TODO: must be added later on
+            jQuery("INPUT[name="+key+"]").remove();
             var el = jQuery('<input />', {
                 type:  'hidden',
                 name:   key,
@@ -4768,11 +4771,15 @@ function submitFormInBackground(form, cb, extraData) {
 }
 
 function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
+    send_form_in_background_with_callback(btn, extraData, function() { reloadPage() }, skipTimeout);
+}
+
+function send_form_in_background_with_callback(btn, extraData, cb, skipTimeout) {
     var form = jQuery(btn).parents('FORM');
     if(!checkRequiredFields(form)) {
         return;
     }
-    submitFormInBackground(form, function() { reloadPage() }, extraData);
+    submitFormInBackground(form, cb, extraData);
     setBtnSpinner(btn, skipTimeout);
     return(false);
 }
