@@ -5,6 +5,8 @@ package FakeContext;
 use warnings;
 use strict;
 
+use Thruk::Stats ();
+
 sub new {
     my ($class, %args) = @_;
 
@@ -33,6 +35,10 @@ sub header {
 
 sub stash {
     return {};
+}
+
+sub stats {
+    return Thruk::Stats->new()
 }
 
 package main;
