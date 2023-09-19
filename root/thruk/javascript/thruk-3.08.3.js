@@ -4733,8 +4733,8 @@ function submitFormInBackground(form, cb, extraData) {
     var removeEls = [];
     if(extraData) {
         for(var key in extraData) {
-            // remove fields with same name // TODO: must be added later on
-            jQuery("INPUT[name="+key+"]").remove();
+            // disable fields with same name, must be enabled later on
+            jQuery("INPUT[name="+key+"]").attr({disabled: true}).addClass("js-tmp-disabled");
             var el = jQuery('<input />', {
                 type:  'hidden',
                 name:   key,
@@ -4748,6 +4748,7 @@ function submitFormInBackground(form, cb, extraData) {
     jQuery(removeEls).each(function(i, el) {
         jQuery(el).remove();
     });
+    jQuery(".js-tmp-disabled").attr({disabled: false}).removeClass("js-tmp-disabled");
     jQuery.ajax({
         url:   url,
         data: data,
