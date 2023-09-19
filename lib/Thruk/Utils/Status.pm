@@ -1665,6 +1665,11 @@ returns filter for comments
 sub get_comments_filter {
     my($c, $op, $value) = @_;
 
+    # cache filter for this request, it might be called multiple times
+    if($c->stash->{'cached_get_comments_filter'} && $c->stash->{'cached_get_comments_filter'}->{$op}->{$value}) {
+        return(@{$c->stash->{'cached_get_comments_filter'}->{$op}->{$value}});
+    }
+
     my(@hostfilter, @servicefilter);
 
     return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
@@ -1699,6 +1704,7 @@ sub get_comments_filter {
         push @servicefilter,       { $combine => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
     }
 
+    $c->stash->{'cached_get_comments_filter'}->{$op}->{$value} = [\@hostfilter, \@servicefilter, $num];
     return(\@hostfilter, \@servicefilter, $num);
 }
 
