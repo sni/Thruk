@@ -49,6 +49,36 @@
           }
         }
       });
+      jQuery("#[% id %] TR.js-indent").on("mouseover", function(evt) {
+        var row = evt.target;
+        if(row.tagName != "TR") {
+          row = jQuery(row).parents("TR")[0];
+        }
+        var indent = row.dataset["indent"];
+        jQuery("#[% id %] TR.js-indent").addClass("hoverBG");
+        var next = row;
+        while(1) {
+          jQuery(next).addClass("active-hover");
+          next = jQuery(next).next("TR");
+          if(!next || !next[0] || !next[0].dataset) {
+            break;
+          }
+          var rowIndent = next[0].dataset["indent"];
+          if(!rowIndent || rowIndent <= indent) {
+            break;
+          }
+        }
+
+      });
+      jQuery("#[% id %] TR.js-indent").on("mouseout", function(evt) {
+        jQuery("#[% id %] TR.js-indent").removeClass("active-hover");
+      });
     }
   </script>
+  <style>
+    TR.active-hover TD {
+      background-color: var(--hover-bg);
+    }
+  </style>
+}
 </div>

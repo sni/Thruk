@@ -214,7 +214,7 @@ sub _format_html_row {
     my $bold    = ($name =~ m/^\*/mx) ? 1 : 0;
        $name    =~ s/^\*//gmx;
        $name    = substr($indent.$name, 0, 78);
-    my $output  = "<tr>";
+    my $output  = "<tr class='js-indent' data-indent='".($row->{'level'}-1)."'>";
     my $onclick = '';
     if($row->{'stack'}) {
         $onclick = "onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")'";
