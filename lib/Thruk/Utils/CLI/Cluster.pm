@@ -121,7 +121,7 @@ sub cmd {
             $rc     = 2;
         }
     } elsif($mode eq 'maint' || $mode eq 'maintenance') {
-        $c->cluster->maint($c->cluster->{'node'}, 1);
+        $c->cluster->maint($c->cluster->{'node'}, time());
         $output = sprintf("OK - node %s set into maintenance mode\n", $Thruk::Globals::HOSTNAME);
     } elsif($mode eq 'activate' || $mode eq 'unmaint') {
         $c->cluster->maint($c->cluster->{'node'}, 0);

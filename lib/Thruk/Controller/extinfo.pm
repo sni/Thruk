@@ -887,7 +887,7 @@ sub _process_perf_info_cluster_page {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4&cluster=1");
         }
         if($c->req->parameters->{'maint'}) {
-            $c->cluster->maint($node, 1);
+            $c->cluster->maint($node, time());
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => sprintf('cluster node %s put into maintenance mode', $node->{'hostname'}) });
         } else {
             $c->cluster->maint($node, 0);

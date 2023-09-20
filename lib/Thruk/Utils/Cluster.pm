@@ -469,7 +469,7 @@ sub maint {
     my($self, $node, $val) = @_;
     my $c = $Thruk::Utils::Cluster::context;
     $node = $c->cluster->{'node'} unless defined $node;
-    my $old = $node->{'maintenance'} ? 1 : 0;
+    my $old = $node->{'maintenance'} || 0;
     if(defined $val) {
         confess("cluster not ready") unless($node && $node->{'node_id'});
         # is that us?

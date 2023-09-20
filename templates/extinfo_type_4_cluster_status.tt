@@ -32,8 +32,9 @@
     <tr id="row_node_[% loop.index %]">
       <td><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
       <td style="text-align: center;">
-        [% IF c.cluster.maint(n) %]
-          <i class="fa-solid fa-business-time" title="node is in maintenance mode"></i>
+        [% maint = c.cluster.maint(n) %]
+        [% IF maint %]
+          <i class="fa-solid fa-business-time" title="node is in maintenance mode[% IF maint > 1 %] (since [% date_format(c, maint) %])[% END %]"></i>
         [% ELSIF c.cluster.is_it_me(n) %]
           <i class="fa-solid fa-check round green" title="ok"></i>
         [% ELSIF n.last_contact == 0 %]
