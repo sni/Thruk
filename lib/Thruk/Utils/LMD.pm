@@ -77,6 +77,8 @@ sub check_proc {
     eval {
         # now that we have the lock, check pid again, it might have been restarted meanwhile
         if(-e $lmd_dir.'/live.sock' && ($pid = check_pid($lmd_dir.'/pid'))) {
+            Thruk::Utils::IO::file_unlock($startlock, $fh, $lock) if $fh;
+            unlink($startlock);
             return($pid);
         }
 
