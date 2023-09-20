@@ -1538,7 +1538,7 @@ function setRefreshRate(rate) {
   }
 }
 
-/* reset refresh interval to initial value (is refresh is enabled) */
+/* reset refresh interval to initial value (if refresh is enabled) */
 function resetRefresh() {
   window.clearTimeout(thrukState.refreshTimer);
   if( typeof refresh_rate == "number" ) {
@@ -1787,6 +1787,7 @@ function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetryS
         resetRefreshButton();
         jQuery("#refresh_button").addClass("fa-spin fa-spin-reverse");
     }
+    var orig_refresh = refresh_rate;
     isReloading = true;
     stopRefresh(true);
     var obj = document.getElementById('refresh_rate');
@@ -1844,7 +1845,13 @@ function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetryS
                 jQuery("#refresh_button").prepend('<I class="fa-solid fa-exclamation"><\/I>');
                 jQuery("#refresh_button").attr("title", "refreshing page failed: "+textStatus+"\nlast contact: "+duration(((new Date()).getTime()-thrukState.lastPageLoaded)/1000)+" ago");
                 thruk_xhr_error('refreshing page failed: ', '', textStatus, jqXHR, errorThrown, null, 60);
-                if(typeof refresh_rate == "number" && refresh_rate > 0) {
+                // reset loading bar
+                jQuery('#unload-timer-parent').addClass("hidden");
+                triggerUnloadTimerOnce = false;
+                // reset refresh
+                refresh_rate = orig_refresh;
+                if( typeof refresh_rate == "number" && refresh_rate > 0) {
+                    refreshPage = 1;
                     resetRefresh();
                 }
             }
