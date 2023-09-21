@@ -1556,6 +1556,9 @@ sub _do_on_peers {
                 elsif($err =~ m|(dial\s.*?connect:\s+connection\ refused)|smx) {
                     $err = $1;
                 }
+                elsif($err =~ m|(Couldn't\ connect\ to\ UNIX\-socket.*$)|mx) {
+                    $err = $1;
+                }
                 if(!$c->stash->{'lmd_ok'} && $code != 502) {
                     $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
