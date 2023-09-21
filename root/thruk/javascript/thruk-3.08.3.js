@@ -8670,6 +8670,10 @@ var ajax_search = {
                 ajax_search.autoopen = true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                if(thrukState.unloading) {
+                    ajax_search.hide_results(null, 1);
+                    return;
+                }
                 ajax_search.error=errorThrown;
                 if(ajax_search.error == undefined || ajax_search.error == "") {
                     ajax_search.error = "server unavailable";
