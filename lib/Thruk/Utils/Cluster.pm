@@ -293,6 +293,7 @@ sub run_cluster {
         if($lock ne $Thruk::Globals::NODE_ID) {
             my $msg = sprintf("action '%s' is running on node %s already", $sub, $self->node_name($lock));
             _debug($msg);
+            exit(0) if $ENV{'THRUK_CRON'}; # no need to spam the logfile with this
             return($msg);
         }
         $self->_cleanup_jobs_folder();
