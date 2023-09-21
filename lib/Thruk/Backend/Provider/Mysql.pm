@@ -1456,7 +1456,7 @@ sub _check_lock {
     $dbh->commit || confess $dbh->errstr;
     $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
 
-    if($mode eq 'import' || $ENV{'THRUK_CRON'}) {
+    if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
         our $global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }

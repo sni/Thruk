@@ -57,6 +57,11 @@ use Thruk::Utils ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
+my $lock_created = 1;
+END {
+    unlink($lock_created) if $lock_created;
+}
+
 ##############################################
 
 =head1 METHODS
@@ -151,15 +156,16 @@ sub cmd {
         return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
-    if($ENV{'THRUK_CRON'} && $mode eq 'update') {
-        return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
-    }
-
     my($backends) = $c->db->select_backends('get_logs');
-
     if(scalar @{$backends} > 1 && scalar @{$opt->{'files'}} > 0) {
         _error("you must specify a backend (-b) when importing files.");
         return("", 1);
+    }
+
+    if($ENV{'THRUK_CRON'} && $mode eq 'update') {
+        return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
+        $lock_created = $c->config->{'tmp_path'}."/logcache_import.lock";
+        Thruk::Utils::IO::write($lock_created, $$);
     }
 
     if($mode eq 'import' && !$global_options->{'yes'}) {
