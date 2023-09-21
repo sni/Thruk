@@ -1366,7 +1366,12 @@ sub _update_logcache {
     _finish_update($c, $dbh, $prefix, time() - $start, $mode) or $error .= $dbh->errstr;
 
     if($error) {
-        _error('logcache '.$mode.' failed: '.$error) unless $error =~ m/(.*\Qplease come back later\E)/mx;
+        my($short_err, undef) = Thruk::Utils::extract_connection_error($error);
+        if(defined $short_err) {
+            _debug($error);
+            $error = $short_err;
+        }
+        _error('logcache '.$mode.' failed: '.$error) unless $error =~ m/(.*\Qplease come back later\E|\QConnection refused\E)/mx;
         die($error);
     }
 

@@ -1547,18 +1547,12 @@ sub _do_on_peers {
                     $code = $1;
                     $err  = $2;
                 }
-                if($err =~ m|(failed\s+to\s+connect.*)\s+at\s+|smx) {
-                    $err = $1;
+                my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+                if(defined $short_err) {
+                    _debug($err);
+                    $err = $short_err;
                 }
-                elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|smx) {
-                    $err = $1;
-                }
-                elsif($err =~ m|(dial\s.*?connect:\s+connection\ refused)|smx) {
-                    $err = $1;
-                }
-                elsif($err =~ m|(Couldn't\ connect\ to\ UNIX\-socket.*$)|mx) {
-                    $err = $1;
-                }
+
                 if(!$c->stash->{'lmd_ok'} && $code != 502) {
                     $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
                     $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};

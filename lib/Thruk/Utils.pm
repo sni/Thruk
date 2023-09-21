@@ -3858,4 +3858,35 @@ sub has_node_module {
 
 ##############################################
 
+=head2 extract_connection_error
+
+  extract_connection_error($err)
+
+returns a short connection error along with the original error.
+Short error might be undef for unknown errors.
+
+=cut
+sub extract_connection_error {
+    my($err) = @_;
+    if($err =~ m|(failed\s+to\s+connect.*?)\s+at\s+|smx) {
+        return($1, $err);
+    }
+
+    if($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|smx) {
+        return($1, $err);
+    }
+
+    if($err =~ m|(dial\s.*?connect:\s+connection\ refused)|smx) {
+        return($1, $err);
+    }
+
+    if($err =~ m|(Couldn't\ connect\ to\ UNIX\-socket.*$)|mx) {
+        return($1, $err);
+    }
+
+    return(undef, $err);
+}
+
+##############################################
+
 1;

@@ -260,7 +260,13 @@ sub cmd {
                 };
                 $err = $@ if $@;
                 if($err) {
-                    _error("backend '".$backend."' failed: ".$err);
+                    my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+                    if(defined $short_err) {
+                        _debug($err);
+                        $err = $short_err;
+                    }
+                    $err = sprintf("backend '%s' failed: %s", $backend, $err);
+                    _error($err);
                 }
                 my $elapsed = tv_interval($t1);
                 return($log_count, $plugin_ref_count, $err, $elapsed);
@@ -299,27 +305,24 @@ sub cmd {
             ($rc, $msg) = (1, 'ERROR');
         }
 
-        my $details = scalar @{$errors} > 0 ? join("\n", @{$errors})."\n" : "";
         if($mode eq 'drop') {
-            return(sprintf("%s - droped logcache for %i site%s in %.2fs\n%s",
+            return(sprintf("%s - droped logcache for %i site%s in %.2fs\n",
                            $msg,
                            $num_sites,
                            ($num_sites == 1 ? '' : 's'),
                            ($elapsed),
-                           $details,
                            ), $rc);
         }
         if($mode eq 'optimize') {
-            return(sprintf("%s - optimized logcache for %i site%s in %.2fs\n%s",
+            return(sprintf("%s - optimized logcache for %i site%s in %.2fs\n",
                            $msg,
                            $num_sites,
                            ($num_sites == 1 ? '' : 's'),
                            ($elapsed),
-                           $details,
                            ), $rc);
         }
         if($mode eq 'compact') {
-        return(sprintf("%s - %s %i log items and removed %d%s from %i site%s %s in %.2fs (%i/s)\n%s",
+        return(sprintf("%s - %s %i log items and removed %d%s from %i site%s %s in %.2fs (%i/s)\n",
                        $msg,
                        $action,
                        $log_count,
@@ -330,10 +333,9 @@ sub cmd {
                        $res,
                        ($elapsed),
                        (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
-                       $details,
                        ), $rc);
         }
-        return(sprintf("%s - %s %i log items %sfrom %i site%s %s in %.2fs (%i/s)\n%s",
+        return(sprintf("%s - %s %i log items %sfrom %i site%s %s in %.2fs (%i/s)\n",
                        $msg,
                        $action,
                        $log_count,
@@ -343,7 +345,6 @@ sub cmd {
                        $res,
                        ($elapsed),
                        (($elapsed > 0 && $log_count > 0) ? ($log_count / ($elapsed)) : $log_count),
-                       $details,
                        ), $rc);
     }
 }
