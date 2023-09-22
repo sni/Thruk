@@ -12,6 +12,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 #################################################
 js_init();
 js_ok("url_prefix='/'", 'set url prefix');
+js_ok("jQuery=false", 'prevent reference error');
 my @jsfiles = glob('root/thruk/javascript/thruk-*.js');
 ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]);

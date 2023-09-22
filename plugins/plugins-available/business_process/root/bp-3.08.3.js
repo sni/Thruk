@@ -785,13 +785,6 @@ function bp_menu_save() {
     }
 }
 
-/* returns true if element overflows */
-jQuery.fn.overflown=function(){
-    var e=this[0];
-    if(e == undefined) { return; }
-    return e.scrollHeight>e.clientHeight || e.scrollWidth>e.clientWidth;
-};
-
 /* set status data */
 function bp_update_status(evt, node) {
     if(node == null) {

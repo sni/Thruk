@@ -14,10 +14,12 @@
   </thead>
 
   <tbody>
-    [%  FOREACH d = downtimes %]
+    [% FOREACH d = downtimes %]
       <tr id="recurring_[% d.file | html %]" class="js-downtime-row">
-        <td>[% d.target | ucfirst %]</td>
-        <td[% IF d.target != 'service' %] colspan=2[% END %]>
+        <td class="align-top">[% d.target | ucfirst %]</td>
+        <td[% IF d.target != 'service' %] colspan=2[% END %] class="align-top max-w-[500px]">
+          <div class="flexrow flex-nowrap gap-x-1 justify-between w-full">
+            <div class="overflow-hidden text-ellipsis js-overflown js-for-js-overflow-button">
           [% IF d.target == 'host' %]
             [% FOREACH hst = d.host %]
                 <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
@@ -26,7 +28,7 @@
             [% FOREACH hst = d.host %]
                 <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
             [% END %]
-            </td><td>
+            </div></div></td><td class="align-top max-w-[500px]"><div class="flexrow flex-nowrap gap-x-1 justify-between w-full"><div class="overflow-hidden text-ellipsis js-overflown js-for-js-overflow-button">
             [% IF d.host.size == 1 %]
                 [% hst = d.host.0 %]
                 [% FOREACH svc = d.service %]
@@ -47,8 +49,13 @@
                 <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
             [% END %]
           [% END %]
+          </div>
+          <div class="w-5 hidden js-overflow-button">
+            <button class="iconOnly" title="expand list" onClick="toggleOverflown(this)"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+          </div>
         </td>
-        <td>
+        <td class="align-top">
           [% IF d.schedule.size == 0 %]
             never
           [% ELSE %]
@@ -57,11 +64,11 @@
             [% END %]
           [% END %]
         </td>
-        <td>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
-        <td class="text-center">[% duration(d.duration * 60) %]</td>
-        <td>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-        <td>[% d.edited_by | html %] ([% date_format(c, d.last_changed) %])</td>
-        <td>
+        <td class="align-top">[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
+        <td class="text-center align-top">[% duration(d.duration * 60) %]</td>
+        <td class="align-top">[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
+        <td class="align-top">[% d.edited_by | html %] ([% date_format(c, d.last_changed) %])</td class="align-top">
+        <td class="align-top">
           <div class="flex gap-x-1 justify-center">
             <a href="extinfo.cgi?type=6&amp;nr=[% d.file | uri %]&amp;recurring=edit">
               <i class="fa-solid fa-pencil small" title='Edit recurring downtime'></i>

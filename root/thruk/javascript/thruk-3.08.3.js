@@ -220,6 +220,18 @@ function init_page() {
         }
     });
 
+    jQuery(".js-overflown").each(function(i, el) {
+        if(jQuery(el).overflown()) {
+            var classNames = el.className.split(' ');
+            jQuery(classNames).each(function(i, cls) {
+                if(cls.startsWith("js-for-")) {
+                    var btnClass = cls.replace("js-for-", "");
+                    jQuery(el).parents("TR").find("."+btnClass).removeClass("hidden");
+                }
+            });
+        }
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
@@ -1285,6 +1297,20 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
     }
     return false;
   }
+}
+
+/* returns true if element overflows */
+if(jQuery) { // prevent ReferenceError: jQuery is not defined during js tests
+    jQuery.fn.overflown=function(){
+        var e=this[0];
+        if(e == undefined) { return; }
+        return e.scrollHeight>e.clientHeight || e.scrollWidth>e.clientWidth;
+    };
+}
+
+function toggleOverflown(el) {
+    jQuery(el).parents('TR').find('.js-overflown').toggleClass('overflow-hidden whitespace-normal');
+    jQuery(el).find("I").toggleClass('fa-chevron-down fa-chevron-up');
 }
 
 /* remove class for all found by selector except given element which is toggled */
