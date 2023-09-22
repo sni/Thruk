@@ -90,11 +90,12 @@ sub clean_old_user_files {
     $c->stats->profile(begin => "clean_old_user_files");
     my($total, $removed) = (0, 0);
 
-    my $sdir      = $c->config->{'var_path'}.'/users';
-    my $threshold = 86400;
-    my $timeout   = time() - $threshold;
+    my $failed_timeout = time() - 86400;
+    my $old_timeout    = time() - (86400 * 365); # remove unused logins after one year
+
+    my $sdir = $c->config->{'var_path'}.'/users';
     return unless -d $sdir."/.";
-    opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
+    opendir(my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';
         $total++;
@@ -103,18 +104,26 @@ sub clean_old_user_files {
            $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
 
         next unless $mtime;
-        next unless $mtime < $timeout;
+        next unless $mtime < $failed_timeout;
 
         my $data;
         eval {
             $data = Thruk::Utils::IO::json_lock_retrieve($file);
         };
         _warn($@) if $@;
-        next if scalar keys %{$data} > 1;
-        next unless defined $data->{'login'};
-        next unless $data->{'login'}->{'failed'};
-        unlink($file);
-        $removed++;
+        # user contains a single entry which is the failed login counter
+        if(scalar keys %{$data} == 1 && defined $data->{'login'} && $data->{'login'}->{'failed'}) {
+            unlink($file);
+            $removed++;
+            next;
+        }
+
+        # remove very old user files as well
+        if($mtime < $old_timeout) {
+            unlink($file);
+            $removed++;
+            next;
+        }
     }
 
     $c->stats->profile(end => "clean_old_user_files");
