@@ -102,7 +102,12 @@ $Thruk::Backend::Provider::Livestatus::default_contact_columns = [qw/
     name alias email pager service_notification_period host_notification_period
 /];
 $Thruk::Backend::Provider::Livestatus::extra_contact_columns = [qw/
-    groups
+    id can_submit_commands groups modified_attributes_list
+    custom_variable_names custom_variable_values
+    host_notifications_enabled service_notifications_enabled
+    host_notification_commands service_notification_commands
+    in_host_notification_period in_service_notification_period
+    address1 address2 address3 address4 address5
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_logs_columns = [qw/
