@@ -299,9 +299,10 @@ sub check_recurring_downtime {
     my $errors  = 0;
     my $details = "";
     if($downtime->{'target'} eq 'host') {
+        my $data   = $c->db->get_hosts(filter => [{ 'name' => { '-or' => $downtime->{'host'}  }} ], columns => [qw/name/], backend => $backends );
+        my $lookup = Thruk::Base::array2hash($data, "name");
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->db->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name/], backend => $backends );
-            if(!$data || scalar @{$data} == 0) {
+            if(!$lookup->{$hst}) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." not found in recurring downtime ".$file."\n";
                 $errors++;
             }
@@ -309,10 +310,11 @@ sub check_recurring_downtime {
     }
     elsif($downtime->{'target'} eq 'service') {
         # check if there are host which do not match a single service or do not exist at all
+        my $data   = $c->db->get_hosts(filter => [{ 'name' => { '-or' => $downtime->{'host'}  }} ], columns => [qw/name services/], backend => $backends );
+        my $lookup = Thruk::Base::array2hash($data, "name");
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->db->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name services/], backend => $backends );
             # does the host itself exist
-            if(!$data || scalar @{$data} == 0) {
+            if(!$lookup->{$hst}) {
                 $details .= "  - ERROR: host ".$hst." not found in recurring downtime ".$file."\n";
                 $errors++;
                 next;
@@ -320,12 +322,10 @@ sub check_recurring_downtime {
             # does it match at least one service
             my $found = 0;
             for my $svc1 (@{$downtime->{'service'}}) {
-                for my $hostdata (@{$data}) {
-                    for my $svc2 (@{$hostdata->{'services'}}) {
-                        if($svc1 eq $svc2) {
-                            $found = 1;
-                            last;
-                        }
+                for my $svc2 (@{$lookup->{$hst}->{'services'}}) {
+                    if($svc1 eq $svc2) {
+                        $found = 1;
+                        last;
                     }
                 }
             }
@@ -337,23 +337,21 @@ sub check_recurring_downtime {
         }
 
         # check if each service matches at least one host
+        my $svc_lookup = {};
+        for my $hstdata (@{$data}) {
+            for my $svc (@{$hstdata->{'services'}}) {
+                $svc_lookup->{$svc} = 1;
+            }
+        }
+        my $svcdata    = $c->db->get_services(filter => [{ 'description' => { '-or' => $downtime->{'service'}  }} ], columns => [qw/description/], backend => $backends );
+        my $namelookup = Thruk::Base::array2hash($svcdata, "description");
         for my $svc (@{$downtime->{'service'}}) {
-            my $data = $c->db->get_services(filter => [{ description => $svc } ], columns => [qw/host_name/], backend => $backends );
-            if(!$data || scalar @{$data} == 0) {
+            if(!$namelookup->{$svc}) {
                 $details .= "  - ERROR: service ".$svc." not found in recurring downtime ".$file."\n";
                 $errors++;
                 next;
             }
-            my $found = 0;
-            for my $svcdata (@{$data}) {
-                for my $hst (@{$downtime->{'host'}}) {
-                    if($hst eq $svcdata->{'host_name'}) {
-                        $found = 1;
-                        last;
-                    }
-                }
-            }
-            if(!$found) {
+            if(!$svc_lookup->{$svc}) {
                 $details .= "  - ERROR: service ".$svc." does not match any of the configured hosts in recurring downtime ".$file."\n";
                 $errors++;
                 next;
@@ -361,19 +359,21 @@ sub check_recurring_downtime {
         }
     }
     elsif($downtime->{'target'} eq 'hostgroup') {
-        for my $grp (@{$downtime->{$downtime->{'target'}}}) {
-            my $data = $c->db->get_hostgroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
-            if(!$data || scalar @{$data} == 0) {
-                $details .= "  - ERROR: ".$downtime->{'target'}." ".$grp." not found in recurring downtime ".$file."\n";
+        my $data   = $c->db->get_hostgroups(filter => [{ 'name' => { '-or' => $downtime->{'hostgroup'}  }} ], columns => [qw/name/], backend => $backends );
+        my $lookup = Thruk::Base::array2hash($data, "name");
+        for my $grp (@{$downtime->{'hostgroup'}}) {
+            if(!$lookup->{$grp}) {
+                $details .= "  - ERROR: hostgroup ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
             }
         }
     }
     elsif($downtime->{'target'} eq 'servicegroup') {
+        my $data   = $c->db->get_servicegroups(filter => [{ 'name' => { '-or' => $downtime->{'servicegroup'}  }} ], columns => [qw/name/], backend => $backends );
+        my $lookup = Thruk::Base::array2hash($data, "name");
         for my $grp (@{$downtime->{$downtime->{'target'}}}) {
-            my $data = $c->db->get_servicegroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
-            if(!$data || scalar @{$data} == 0) {
-                $details .= "  - ERROR: ".$downtime->{'target'}." ".$grp." not found in recurring downtime ".$file."\n";
+            if(!$lookup->{$grp}) {
+                $details .= "  - ERROR: servicegroup ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
             }
         }
