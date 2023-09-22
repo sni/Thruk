@@ -12,18 +12,22 @@
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
       owner: "demo"
       group: "demo"
+
   - copy:
       src: "/scenario/objects.cfg"
       dest: "/omd/sites/demo/etc/naemon/conf.d/objects.cfg"
       owner: "demo"
       group: "demo"
   - shell: sed -e "s/###SITE###/{{ lookup('env','PREFIX') }}/g" -i /omd/sites/demo/etc/naemon/conf.d/objects.cfg -i /omd/sites/demo/etc/thruk/thruk_local.conf
+
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
       mode: 0600
       owner: demo
       group: demo
+
   - copy:
       src: "{{ item }}"
       dest: "/omd/sites/demo/etc/thruk/bp/"
@@ -31,25 +35,23 @@
       group: "demo"
     with_fileglob:
     - /root/*.tbp
+
   - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
-  - name: "wait for tier3a to come up"
+
+  - name: "wait for {{ item }} to come up"
     uri:
-      url: "https://tier3a.tier3.test.local/demo/thruk/cgi-bin/remote.cgi"
+      url: "https://{{ item }}.tier3.test.local/demo/thruk/cgi-bin/remote.cgi"
       validate_certs: False
       status_code: 200
     register: result
     until: result.status == 200
     retries: 180
     delay: 1
-  - name: "wait for tier3b to come up"
-    uri:
-      url: "https://tier3b.tier3.test.local/demo/thruk/cgi-bin/remote.cgi"
-      validate_certs: False
-      status_code: 200
-    register: result
-    until: result.status == 200
-    retries: 180
-    delay: 1
+    with_items:
+      - tier3a
+      - tier3b
+
   - include_role:
       name: thruk_logcache_mysql
+
   - shell: sudo su - demo -c "git add . && git commit -m 'setup complete'"
