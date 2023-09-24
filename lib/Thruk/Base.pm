@@ -248,6 +248,29 @@ sub array_remove {
 
 ########################################
 
+=head2 array_group_by
+
+  array_group_by($data, $key)
+
+create a hash of lists grouped by the key
+
+=cut
+sub array_group_by {
+    my($data, $key) = @_;
+    return {} unless defined $data;
+
+    my $grouped = {};
+    for my $d (@{$data}) {
+        my $k = $d->{$key} // '';
+        $grouped->{$k} = [] unless defined $grouped->{$k};
+        push @{$grouped->{$k}}, $d;
+    }
+
+    return($grouped);
+}
+
+########################################
+
 =head2 array2hash
 
   array2hash($data, [ $key, [ $key2 ]])
