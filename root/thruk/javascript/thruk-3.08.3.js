@@ -4818,6 +4818,27 @@ function send_form_in_background_with_callback(btn, extraData, cb, skipTimeout) 
     return(false);
 }
 
+function send_form_in_background(btn, extraData) {
+    var cb = function(form, success, data, textStatus, jqXHR) {
+        if(success) {
+            setBtnSuccess(btn);
+            var resetTimer = window.setTimeout(function() {
+                setBtnNoSpinner(btn);
+                var icons = jQuery(btn).find("I");
+                if(icons.length > 1) {
+                    jQuery(icons[1]).remove();
+                }
+            }, 3000);
+            jQuery(btn).data("timer", resetTimer);
+
+        } else {
+            var msg = getXHRerrorMsg("", textStatus, jqXHR, false);
+            setBtnError(btn, msg);
+        }
+    };
+    return(send_form_in_background_with_callback(btn, extraData, cb));
+}
+
 function broadcast_show_list(incr) {
     var broadcasts = jQuery(".js-broadcast-panel div.broadcast");
     var curIdx = 0;
