@@ -1058,7 +1058,12 @@ sub set_backends_with_obj_config {
         }
     }
     $c->stash->{'param_backend'} = $param_backend unless $c->stash->{'param_backend'};
-    if($c->stash->{'param_backend'} && $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} == DISABLED_CONF) {
+    if($c->stash->{'param_backend'}
+        && (
+            !defined $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'}
+            || $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} == DISABLED_CONF
+        )
+        ) {
         $c->stash->{'param_backend'} = '';
     }
 
