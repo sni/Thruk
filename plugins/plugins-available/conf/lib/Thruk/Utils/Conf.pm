@@ -92,6 +92,7 @@ sub set_object_model {
     }
     # currently parsing
     elsif($jobid && Thruk::Utils::External::is_running($c, $jobid, 1)) {
+        $c->stash->{"model_job"} = $jobid;
         $c->stash->{set_object_model_err} = "configuration is being parsed right now, try again in a few moments";
         $c->redirect_to("job.cgi?job=".$jobid);
         return 0;
@@ -109,6 +110,7 @@ sub set_object_model {
                 # should be parsed now
                 return set_object_model($c, 1);
             }
+            $c->stash->{"model_job"} = $c->stash->{'job_id'};
             return 0;
         }
         return 0;

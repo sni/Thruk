@@ -2,7 +2,10 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add explore mode to advanced status filter
+          - add option to set link target based on url rules (link_target)
+          - show action/notes urls with original link and open new tab by javascript
           - add option to set different cache timeout for failed logins (cookie_auth_session_cache_fail_timeout)
+          - reduce log noise for normal operations
           - reset page refresh timer on page interaction
           - maintenance removes old user files after one year
           - fix livestatus error on landing page (#1299)
