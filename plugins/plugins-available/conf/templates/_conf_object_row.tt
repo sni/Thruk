@@ -117,6 +117,7 @@
       [% IF    type == 'servicegroup' && key == 'members'        %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",servicemembers,2" %]
       [% ELSIF                           key == 'contact_groups' %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",contactgroups,1" %]
       [% ELSIF                           key == 'use'            %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ type _ ",1,templates" %]
+      [% ELSIF type == 'host'    && key == 'parents'             %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
       [% ELSIF type == 'service' && key == 'host_name'           %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
       [% ELSIF type == 'service' && key == 'parents'             %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",service_descriptions,1" %]
       [% ELSIF type == 'service' && key == 'hostgroup_name'      %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hostgroups,1" %]
