@@ -85,6 +85,8 @@ sub get_downtimes_list {
 
     return [] unless $c->config->{'use_feature_recurring_downtime'};
 
+    $c->stats->profile(begin => "RecurringDowntimes::get_downtimes_list()");
+
     my @hostfilter    = $auth ? (Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )) : [];
     my @servicefilter = $auth ? (Thruk::Utils::Auth::get_auth_filter( $c, 'services' )) : [];
 
@@ -159,6 +161,7 @@ sub get_downtimes_list {
                            or (lc join(',', @{$a->{'servicegroup'}}) cmp lc join(',', @{$b->{'servicegroup'}}))
                          } @{$downtimes};
 
+    $c->stats->profile(end => "RecurringDowntimes::get_downtimes_list()");
     return $downtimes;
 }
 
