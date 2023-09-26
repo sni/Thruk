@@ -111,6 +111,8 @@ plugins/plugins-available/omd
 plugins/plugins-available/pansnaps
 plugins/plugins-available/status-dashboard
 plugins/plugins-available/woshsh
+plugins/plugins-available/agents
+plugins/plugins-enabled/agents
 ^node_modules/
 ^package-lock.json
 ^package.json
