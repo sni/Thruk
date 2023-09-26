@@ -94,8 +94,8 @@
                 [% END %]
                 [% IF can_edit %]
                   <tr>
-                    <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                      <i class="uil uil-angle-down" title="add new schedule entry"></i> add more
+                    <td colspan=3 onclick="add_cron_row('cron_entries'); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable rounded">
+                      <i class="uil uil-angle-down text-lg leading-3" title="add new schedule entry"></i> add more
                     </td>
                   </tr>
                 [% END %]
