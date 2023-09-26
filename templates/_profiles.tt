@@ -55,7 +55,6 @@
           row = jQuery(row).parents("TR")[0];
         }
         var indent = row.dataset["indent"];
-        jQuery("#[% id %] TR.js-indent").addClass("hoverBG");
         var next = row;
         while(1) {
           jQuery(next).addClass("active-hover");
