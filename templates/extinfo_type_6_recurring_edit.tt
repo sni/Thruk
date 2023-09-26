@@ -57,8 +57,8 @@
               <div class="flexrow flex-nowrap gap-x-1">
                 <input type="text" class="w-full" id="host" name="host" value="[% rd.host.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
                 [% IF can_edit %]
-                  [% PROCESS _wizard_list.tt id="id_host_wzd" wzd_args="host,hosts,1" %]
-                  <button class="px-1" name="[% wzd_args | html %]" onclick="init_tool_list_wizard('[% id %]_btn', this.name); return false;" title="open list editor">
+                  [% PROCESS _wizard_list.tt id="id_host_wzd" wzd_args="" %]
+                  <button class="px-1" onclick="init_filter_list_wizard('id_host_wzd_', 'host', 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends'}); return false;" title="open list editor">
                     <i class="uil uil-sliders-v mx-0"></i>
                   </button>
                 [% END %]
@@ -71,8 +71,8 @@
               <div class="flexrow flex-nowrap gap-x-1">
                 <input type="text" class="w-full" id="service" name="service" value="[% rd.service.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
                 [% IF can_edit %]
-                  [% PROCESS _wizard_list.tt id="id_service_wzd" wzd_args="service,service,1" %]
-                  <button class="px-1" name="[% wzd_args | html %]" onclick="init_tool_list_wizard('[% id %]_btn', this.name); return false;" title="open list editor">
+                  [% PROCESS _wizard_list.tt id="id_service_wzd" wzd_args="" %]
+                  <button class="px-1" onclick="init_filter_list_wizard('id_service_wzd_', 'service', 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends' }); return false;" title="open list editor">
                     <i class="uil uil-sliders-v mx-0"></i>
                   </button>
                 [% END %]

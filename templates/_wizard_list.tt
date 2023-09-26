@@ -1,5 +1,6 @@
 ﻿<button id="[% id %]_btn" name="[% wzd_args | html %]" style="display: none;" onclick="init_tool_list_wizard(this.id, this.name); return false;"></button>
 
+
 <div id="[% id %]_dialog" class="card shadow-float flexcol gap-0 w-[700px]" style="display: none !important;">
   <div class="head justify-between">
     <h3>List Wizzard</h3>
@@ -14,7 +15,7 @@
       </tr>
       <tr>
         <td class="align-top w-1/2">
-          <input type="text" class="w-full rounded-b-none border-b-0 deletable" onkeyup="data_filter_select('[% id %]_available_members', this.value)">
+          <input type="text" class="w-full rounded-b-none border-b-0 deletable" onkeyup="data_filter_select('[% id %]_available_members', this.value)" id="[% id %]_available_members_filter">
           <select class="w-full h-72 rounded-none overflow-y-scroll" multiple id="[% id %]_available_members" name="[% id %]_available_members" ondblclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members')">
             <option disabled>loading...</option>
           </select>

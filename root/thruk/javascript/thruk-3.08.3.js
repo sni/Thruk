@@ -2964,6 +2964,43 @@ function data_select_move(from, to, skip_sort) {
     }
 }
 
+function data_select_remove(from) {
+    var from_sel = document.getElementsByName(from);
+    if(!from_sel || from_sel.length == 0) {
+        if(thruk_debug_js) { alert("ERROR: no element in data_select_remove() for: " + from ); }
+    }
+
+    from_sel = from_sel[0];
+
+    if(from_sel.selectedIndex < 0) {
+        return;
+    }
+
+    var elements = new Array();
+    for(var nr = 0; nr < from_sel.length; nr++) {
+        if(from_sel.options[nr].selected == true) {
+            elements.push(nr);
+            var option = from_sel.options[nr];
+            if(originalOptions[from] != undefined) {
+                jQuery.each(originalOptions[from], function(i, o) {
+                    if(o.value == option.value) {
+                        originalOptions[from].splice(i, 1);
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+    }
+
+    // reverse elements so the later remove doesn't disorder the select
+    elements.reverse();
+
+    for(var x = 0; x < elements.length; x++) {
+        from_sel.remove(elements[x]);
+    }
+}
+
 /* filter select field option */
 var originalOptions = {};
 function data_filter_select(id, filter) {
@@ -8274,6 +8311,8 @@ var ajax_search = {
     backend_select  : false,
     button_links    : [],
     search_for_cb   : undefined,
+    show_results_cb : undefined,
+    refresh_data_cb : undefined,
 
     /* initialize search
      *
@@ -8298,6 +8337,8 @@ var ajax_search = {
      *   button_links:      prepend links to buttons on top of result
      *   regex_matching:    match with regular expressions
      *   search_for_cb:     callback to alter the search input
+     *   show_results_cb:   run callback when showing results (cancels result popup if returns false)
+     *   refresh_data_cb:   run callback when refreshing data
      * }
      */
     init: function(elem, type, options) {
@@ -8396,6 +8437,16 @@ var ajax_search = {
         ajax_search.search_for_cb = undefined;
         if(options.search_for_cb != undefined) {
             ajax_search.search_for_cb = options.search_for_cb;
+        }
+
+        ajax_search.show_results_cb = undefined;
+        if(options.show_results_cb != undefined) {
+            ajax_search.show_results_cb = options.show_results_cb;
+        }
+
+        ajax_search.refresh_data_cb = undefined;
+        if(options.refresh_data_cb != undefined) {
+            ajax_search.refresh_data_cb = options.refresh_data_cb;
         }
 
         var input = document.getElementById(ajax_search.input_field);
@@ -8698,6 +8749,11 @@ var ajax_search = {
         ajax_search.base = {};
         ajax_search.suggest();
         ajax_search.initialized_q = ajax_search.get_current_input_search_pattern();
+
+        // run callback instead of showing results
+        if(ajax_search.refresh_data_cb && !ajax_search.refresh_data_cb()) {
+            return;
+        }
 
         // fill data store
         jQuery.ajax({
@@ -9013,6 +9069,10 @@ var ajax_search = {
     /* present the results */
     show_results: function(results, pattern, selected) {
         resetRefresh();
+        // run callback instead of showing results
+        if(ajax_search.show_results_cb && !ajax_search.show_results_cb(results, pattern, selected)) {
+            return;
+        }
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
@@ -9722,25 +9782,7 @@ function init_tool_list_wizard(id, args) {
     openModalWindow(document.getElementById((id + 'dialog')));
     init_deletable_inputs();
 
-    // initialize selected members
-    selected_members       = new Array();
-    var selected_members_h = new Object();
-    var options = [];
-    var list = jQuery('#'+input_id).val().split(/\s*,\s*/);
-    for(var x=0; x<list.length;x+=aggregate) {
-        if(list[x] != '') {
-            var val = list[x];
-            for(var y=1; y<aggregate;y++) {
-                val = val+','+list[x+y];
-            }
-            selected_members.push(val);
-            selected_members_h[val] = 1;
-            options.push(new Option(val, val));
-        }
-    }
-    set_select_options(id+"selected_members", options, true);
-    sortlist(id+"selected_members");
-    reset_original_options(id+"selected_members");
+    list_wizard_init_selected(input_id, id, aggregate);
 
     var strip = true;
     var url = 'status.cgi?format=search&amp;type='+type;
@@ -9797,12 +9839,92 @@ function init_tool_list_wizard(id, args) {
     }
     init_tool_list_wizard_initialized[id] = true;
 
-    jQuery('#' + id + 'accept').click(function() {
-        data_filter_select(id+'available_members', '');
-        data_filter_select(id+'selected_members', '');
+    list_wizard_init_accept(id, input_id);
+
+    return;
+}
+
+// like init_tool_list_wizard but does not prefetch available members
+function init_filter_list_wizard(prefix, input_id, search_type, search_options) {
+    openModalWindow(document.getElementById((prefix + 'dialog')));
+    init_deletable_inputs();
+
+    list_wizard_init_selected(input_id, prefix, 1);
+
+    // override move with remove
+    jQuery("#"+prefix+"remove").prop("onclick", "data_select_remove('"+prefix+"selected_members'); return false;");
+    jQuery("#"+prefix+"selected_members").prop("ondblclick", "data_select_remove('"+prefix+"selected_members'); return false;");
+
+    set_select_options(prefix+"available_members", [], true);
+    jQuery("#"+prefix+"available_members_filter").prop({"onkeyup": "", placeholder: "enter "+search_type+" filter..."});
+    jQuery("#"+prefix+"available_members_filter").on("click", function(evt) {
+        var input = evt.target;
+        search_options.refresh_data_cb = function() {
+            var loadingOpt  = document.createElement('option');
+            loadingOpt.text = "loading...";
+            loadingOpt.disabled = true;
+            set_select_options(prefix+"available_members", [loadingOpt], true);
+            return(true);
+        }
+        search_options.show_results_cb = function(results, pattern, selected) {
+            if(!results) {
+                set_select_options(prefix+"available_members", [], true);
+                return(false);
+            }
+            var options = [];
+            jQuery(results).each(function(k, set) {
+                if(set.name == search_type || set.name == search_type+"s") {
+                    jQuery(set.results).each(function(i, res) {
+                        var opt   = document.createElement('option');
+                        opt.text  = res.name;
+                        opt.value = res.name;
+                        options.push(opt);
+                    });
+                }
+            });
+            set_select_options(prefix+"available_members", options, true);
+            return(false);
+        };
+        ajax_search.init(input, search_type, search_options);
+    });
+
+    list_wizard_init_accept(prefix, input_id);
+
+    // initialize search result
+    jQuery("#"+prefix+"available_members_filter").click();
+}
+
+
+function list_wizard_init_selected(input_id, id, aggregate) {
+    // initialize selected members
+    selected_members       = new Array();
+    var selected_members_h = new Object();
+    var options = [];
+    var list = jQuery('#'+input_id).val().split(/\s*,\s*/);
+    for(var x=0; x<list.length;x+=aggregate) {
+        if(list[x] != '') {
+            var val = list[x];
+            for(var y=1; y<aggregate;y++) {
+                val = val+','+list[x+y];
+            }
+            selected_members.push(val);
+            selected_members_h[val] = 1;
+            options.push(new Option(val, val));
+        }
+    }
+    set_select_options(id+"selected_members", options, true);
+    sortlist(id+"selected_members");
+    reset_original_options(id+"selected_members");
+}
+
+
+function list_wizard_init_accept(prefix, input_id) {
+    jQuery('#' + prefix + 'accept').click(function() {
+        data_filter_select(prefix+'available_members', '');
+        data_filter_select(prefix+'selected_members', '');
 
         var newval = '';
-        var lb = document.getElementById(id+"selected_members");
+        var lb = document.getElementById(prefix+"selected_members");
         for(var i=0; i<lb.length; i++)  {
             newval += lb.options[i].value;
             if(i < lb.length-1) {
@@ -9813,8 +9935,6 @@ function init_tool_list_wizard(id, args) {
         closeModalWindow();
         return false;
     });
-
-    return;
 }
 
 /*******************************************************************************
