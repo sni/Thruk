@@ -9711,11 +9711,11 @@ function prefSubmitCounter(url, value) {
 var available_members = new Array();
 var selected_members  = new Array();
 var init_tool_list_wizard_initialized = {};
-function init_tool_list_wizard(id, type) {
+function init_tool_list_wizard(id, args) {
     id = id.substr(0, id.length -3);
-    var tmp       = type.split(/,/);
+    var tmp       = args.split(/,/);
     var input_id  = tmp[0];
-    type          = tmp[1];
+    var type      = tmp[1];
     var aggregate = Math.abs(tmp[2]);
     var templates = tmp[3] ? true : false;
 
