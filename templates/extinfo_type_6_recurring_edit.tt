@@ -23,7 +23,7 @@
           <tr class="firstrow">
             <th>Type</th>
             <td colspan=2>
-              <select name="target" id="type_select" onchange="update_recurring_type_select('type_select')"[% IF !can_edit %] disabled[% END %]>
+              <select name="target" class="w-32" id="type_select" onchange="update_recurring_type_select('type_select')"[% IF !can_edit %] disabled[% END %]>
                 <option[% IF rd.target == 'host'         %] selected[% END %]>Host</option>
                 <option[% IF rd.target == 'service'      %] selected[% END %]>Service</option>
                 <option[% IF rd.target == 'hostgroup'    %] selected[% END %]>Hostgroup</option>
@@ -54,32 +54,32 @@
           <tr id="input_host">
             <th>Host</th>
             <td colspan=2>
-              <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-full" id="host" name="host" value="[% rd.host.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
           <tr id="input_service">
             <th>Service</th>
             <td colspan=2>
-              <input type="text" id="service" name="service" value="[% rd.service.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-full" id="service" name="service" value="[% rd.service.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'service', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
           <tr id="input_hostgroup">
             <th>Hostgroup</th>
             <td colspan=2>
-              <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-full" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroup', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
           <tr id="input_servicegroup">
             <th>Servicegroup</th>
             <td colspan=2>
-              <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-full" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroup', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '\\s*,\\s*' })"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
 
           <tr>
             <th>Comment</th>
             <td colspan=2>
-              <input type="text" name="comment" value="[% rd.comment | html %]"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-full" name="comment" value="[% rd.comment | html %]"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
           <tr>
@@ -105,13 +105,13 @@
           <tr>
             <th>Duration<br>(in minutes)</th>
             <td colspan=2>
-              <input type="text" name="duration" value="[% rd.duration | html %]"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-32" name="duration" value="[% rd.duration | html %]"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
           <tr>
             <th>Type</th>
             <td colspan=2>
-              <select name='fixed'[% IF !can_edit %] disabled[% END %]>
+              <select class="w-32" name='fixed'[% IF !can_edit %] disabled[% END %]>
                 <option value="1"[% IF rd.fixed == "1" %] selected[% END %]>Fixed </option>
                 <option value="0"[% IF rd.fixed == "0" %] selected[% END %]>Flexible </option>
               </select>
@@ -120,13 +120,13 @@
           <tr>
             <th>If Flexible, Range<br>(in minutes)</th>
             <td colspan=2>
-              <input type="text" name="flex_range" value="[% rd.flex_range | html %]"[% IF !can_edit %] disabled[% END %]>
+              <input type="text" class="w-32" name="flex_range" value="[% rd.flex_range | html %]"[% IF !can_edit %] disabled[% END %]>
             </td>
           </tr>
           <tr id="input_host_options">
             <th>Child Hosts</th>
             <td colspan=2>
-              <select name="childoptions"[% IF !can_edit %] disabled[% END %]>
+              <select class="w-full" name="childoptions"[% IF !can_edit %] disabled[% END %]>
                 <option value="0"[% IF rd.childoptions == "0" %] selected[% END %]>Do nothing with child hosts</option>
                 <option value="1"[% IF rd.childoptions == "1" %] selected[% END %]>Schedule triggered downtime for all child hosts</option>
                 <option value="2"[% IF rd.childoptions == "2" %] selected[% END %]>Schedule non-triggered downtime for all child hosts</option>

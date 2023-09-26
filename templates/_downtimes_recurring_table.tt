@@ -3,7 +3,7 @@
   <thead>
     <tr>
       <th>Type</th>
-      <th colspan="2">Names</th>
+      <th>Names</th>
       <th>Schedule</th>
       <th>Type</th>
       <th class="text-center">Duration</th>
@@ -17,42 +17,43 @@
     [% FOREACH d = downtimes %]
       <tr id="recurring_[% d.file | html %]" class="js-downtime-row">
         <td class="align-top">[% d.target | ucfirst %]</td>
-        <td[% IF d.target != 'service' %] colspan=2[% END %] class="align-top max-w-[500px]">
+        <td class="align-top max-w-[500px]">
           <div class="flexrow flex-nowrap gap-x-1 justify-between w-full">
             <div class="overflow-hidden text-ellipsis js-overflown js-for-js-overflow-button">
-          [% IF d.target == 'host' %]
-            [% FOREACH hst = d.host %]
-                <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
-            [% END %]
-          [% ELSIF d.target == 'service' %]
-            [% FOREACH hst = d.host %]
-                <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
-            [% END %]
-            </div></div></td><td class="align-top max-w-[500px]"><div class="flexrow flex-nowrap gap-x-1 justify-between w-full"><div class="overflow-hidden text-ellipsis js-overflown js-for-js-overflow-button">
-            [% IF d.host.size == 1 %]
-                [% hst = d.host.0 %]
-                [% FOREACH svc = d.service %]
-                    <a class="link" href="extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]">[% svc | html %]</a>[% UNLESS loop.last %], [% END %]
+              [% IF d.target == 'host' %]
+                [% FOREACH hst = d.host %]
+                    <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
                 [% END %]
-            [% ELSE %]
-                [% FOREACH svc = d.service %]
-                    <a class="link" href='status.cgi?style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
-                    [% UNLESS loop.last %], [% END %]
+              [% ELSIF d.target == 'service' %]
+                [% FOREACH hst = d.host %]
+                    <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst | uri %]">[% hst | html %]</a>[% UNLESS loop.last %], [% END %]
                 [% END %]
-            [% END %]
-          [% ELSIF d.target == 'hostgroup' %]
-            [% FOREACH grp = d.hostgroup %]
-                <a class="link" href="status.cgi?hostgroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
-            [% END %]
-          [% ELSIF d.target == 'servicegroup' %]
-            [% FOREACH grp = d.servicegroup %]
-                <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
-            [% END %]
-          [% END %]
-          </div>
-          <div class="w-5 hidden js-overflow-button">
-            <button class="iconOnly" title="expand list" onClick="toggleOverflown(this)"><i class="fa-solid fa-chevron-down"></i></button>
-          </div>
+                <span class="w-1 h-[14px] border-l borderDefault inline-block"></span>
+
+                [% IF d.host.size == 1 %]
+                    [% hst = d.host.0 %]
+                    [% FOREACH svc = d.service %]
+                        <a class="link" href="extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]">[% svc | html %]</a>[% UNLESS loop.last %], [% END %]
+                    [% END %]
+                [% ELSE %]
+                    [% FOREACH svc = d.service %]
+                        <a class="link" href='status.cgi?style=detail&amp;dfl_s0_type=host&amp;dfl_s0_op=~&amp;dfl_s0_value=^([% d.host.join('|') %])$&amp;dfl_s0_type=service&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% svc | uri %]'>[% svc | html %]</a>
+                        [% UNLESS loop.last %], [% END %]
+                    [% END %]
+                [% END %]
+              [% ELSIF d.target == 'hostgroup' %]
+                [% FOREACH grp = d.hostgroup %]
+                    <a class="link" href="status.cgi?hostgroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
+                [% END %]
+              [% ELSIF d.target == 'servicegroup' %]
+                [% FOREACH grp = d.servicegroup %]
+                    <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
+                [% END %]
+              [% END %]
+            </div>
+            <div class="w-5 hidden js-overflow-button">
+              <button class="iconOnly" title="expand list" onClick="toggleOverflown(this)"><i class="fa-solid fa-chevron-down"></i></button>
+            </div>
           </div>
         </td>
         <td class="align-top">
