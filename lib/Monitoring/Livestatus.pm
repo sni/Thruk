@@ -1176,6 +1176,10 @@ sub _read_socket_do {
         if(!$s->can_read(20)) {
             return($self->_socket_error($statement, 'cannot read from socket socket'.($! ? ': '.$! : '')));
         }
+    } else {
+        if(!$s->can_read($self->{'query_timeout'} // 180)) {
+            return($self->_socket_error($statement, 'cannot read from socket socket'.($! ? ': '.$! : '')));
+        }
     }
     $sock->read($header, 16) || return($self->_socket_error($statement, 'reading header from socket failed'.($! ? ': '.$! : '')));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
