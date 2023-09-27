@@ -86,8 +86,22 @@
       [% IF d.exists('error') %]
         <tr>
           <td></td>
-          <td colspan=6 style="color: red; text-align: left;">
-            [% escape_html(d.error) | nl2br %]
+          <td colspan=6 class="textALERT text-left">
+            <div class="flexrow flex-nowrap gap-x-1">
+              [% IF d.exists('fixable') %]
+                <div>
+                  <form action="extinfo.cgi" method="POST">
+                    <input type="hidden" name="nr" value="[% d.file | html %]">
+                    <input type="hidden" name="type" value="6">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                    <button title="remove none-existing entries" onclick="var btn = this; return send_form_in_background(btn, {recurring: 'fix'}, function() { window.setTimeout(function() { fade(jQuery(btn).parents('TR')); }, 1000); }); return false;"><i class="uil uil-band-aid"></i> fix it</button>
+                  </form>
+                </div>
+              [% END %]
+              <div>
+                [% escape_html(d.error) | nl2br %]
+              </div>
+            </div>
           </td>
           <td></td>
         </tr>

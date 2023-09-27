@@ -293,6 +293,8 @@ verify errors in specific recurring downtime
 sub check_recurring_downtime {
     my($c, $downtime, $file) = @_;
 
+    my $fixables = {};
+
     #my($backends, $cmd_typ)...
     my($backends, undef) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
 
@@ -305,6 +307,7 @@ sub check_recurring_downtime {
             if(!$lookup->{$hst}) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." not found in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'host'}}, $hst;
             }
         }
     }
@@ -317,6 +320,7 @@ sub check_recurring_downtime {
             if(!$lookup->{$hst}) {
                 $details .= "  - ERROR: host ".$hst." not found in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'host'}}, $hst;
                 next;
             }
             # does it match at least one service
@@ -332,6 +336,7 @@ sub check_recurring_downtime {
             if(!$found) {
                 $details .= "  - ERROR: host ".$hst." does not have any of the configured services in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'host'}}, $hst;
                 next;
             }
         }
@@ -349,11 +354,13 @@ sub check_recurring_downtime {
             if(!$namelookup->{$svc}) {
                 $details .= "  - ERROR: service ".$svc." not found in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'service'}}, $svc;
                 next;
             }
             if(!$svc_lookup->{$svc}) {
                 $details .= "  - ERROR: service ".$svc." does not match any of the configured hosts in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'service'}}, $svc;
                 next;
             }
         }
@@ -365,6 +372,7 @@ sub check_recurring_downtime {
             if(!$lookup->{$grp}) {
                 $details .= "  - ERROR: hostgroup ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'hostgroup'}}, $grp;
             }
         }
     }
@@ -375,6 +383,7 @@ sub check_recurring_downtime {
             if(!$lookup->{$grp}) {
                 $details .= "  - ERROR: servicegroup ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
+                push @{$fixables->{'servicegroup'}}, $grp;
             }
         }
     }
@@ -387,7 +396,7 @@ sub check_recurring_downtime {
         }
     }
 
-    return($errors, $details);
+    return($errors, $details, $fixables);
 }
 
 ##############################################

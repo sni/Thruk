@@ -8,6 +8,7 @@ next:
           - reduce log noise for normal operations
           - reset page refresh timer on page interaction
           - maintenance removes old user files after one year
+          - add button to cleanup recurring downtimes from old hosts/services
           - fix livestatus error on landing page (#1299)
           - fix using custom variables in queries
           - fix requesting unknown columns (#1301)

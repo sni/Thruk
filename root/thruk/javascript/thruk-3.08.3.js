@@ -4855,7 +4855,8 @@ function send_form_in_background_with_callback(btn, extraData, cb, skipTimeout) 
     return(false);
 }
 
-function send_form_in_background(btn, extraData) {
+// submit form in background and set submit button icon
+function send_form_in_background(btn, extraData, successCb) {
     var cb = function(form, success, data, textStatus, jqXHR) {
         if(success) {
             setBtnSuccess(btn);
@@ -4867,6 +4868,9 @@ function send_form_in_background(btn, extraData) {
                 }
             }, 3000);
             jQuery(btn).data("timer", resetTimer);
+            if(successCb) {
+                successCb(form, success, data, textStatus, jqXHR);
+            }
 
         } else {
             var msg = getXHRerrorMsg("", textStatus, jqXHR, false);

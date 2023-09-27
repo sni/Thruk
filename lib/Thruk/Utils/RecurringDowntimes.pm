@@ -177,23 +177,50 @@ check downtime for expired hosts or services
 sub check_downtime {
     my($c, $rd, $file) = @_;
     require Thruk::Utils::SelfCheck;
-    my($err, $detail) = (0, "");
+    my($err, $detail, $fixable) = (0, "");
     eval {
-        ($err, $detail) = Thruk::Utils::SelfCheck::check_recurring_downtime($c, $rd, $file);
+        ($err, $detail, $fixable) = Thruk::Utils::SelfCheck::check_recurring_downtime($c, $rd, $file);
     };
     if($@) {
         $err++;
         $detail = "Could not check recurring downtimes from $file: ".$@;
     }
     if($err) {
-        $rd->{'error'} = $detail;
-        Thruk::Utils::RecurringDowntimes::write_downtime($c, $file, $rd);
+        $rd->{'error'}   = $detail;
+        $rd->{'fixable'} = $fixable if $fixable;
+        write_downtime($c, $file, $rd);
     }
     if($err == 0 && $rd->{'error'}) {
         delete $rd->{'error'};
-        Thruk::Utils::RecurringDowntimes::write_downtime($c, $file, $rd);
+        delete $rd->{'fixable'};
+        write_downtime($c, $file, $rd);
     }
     return($err, $detail);
+}
+
+##########################################################
+
+=head2 fix_downtime
+
+    fix_downtime($c, $dfile)
+
+return true if fixables have been fixed or undef otherwise
+
+=cut
+sub fix_downtime {
+    my($c, $dfile) = @_;
+    my $rd = read_downtime($c, $dfile);
+    return unless $rd;
+    return unless $rd->{'fixable'};
+    for my $type (sort keys %{$rd->{'fixable'}}) {
+        my $fix = $rd->{'fixable'}->{$type};
+        for my $name (@{$fix}) {
+            $rd->{$type} = Thruk::Base::array_remove($rd->{$type}, $name);
+        }
+    }
+    write_downtime($c, $dfile, $rd);
+    check_downtime($c, $rd, $dfile);
+    return 1;
 }
 
 ##########################################################

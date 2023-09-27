@@ -390,6 +390,12 @@ sub _process_recurring_downtimes_page {
         Thruk::Utils::RecurringDowntimes::update_cron_file($c);
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
+    elsif($task eq 'fix') {
+        return unless Thruk::Utils::check_csrf($c);
+        my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
+        Thruk::Utils::RecurringDowntimes::fix_downtime($c, $file);
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
+    }
 
     $c->stash->{'downtimes'} = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c, 1, 1);
     $c->stash->{template}    = 'extinfo_type_6_recurring.tt';
