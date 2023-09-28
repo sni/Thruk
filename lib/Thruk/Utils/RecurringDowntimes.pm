@@ -266,7 +266,7 @@ sub read_downtime {
         $d->{$t} = [sort @{$d->{$t}}];
     }
 
-    $d->{'orig_backends'} = $d->{'backends'};
+    $d->{'_orig_backends'} = $d->{'backends'};
     $d->{'backends'}      = Thruk::Utils::backends_hash_to_list($c, $d->{'backends'});
 
     # apply auth filter
@@ -369,8 +369,8 @@ sub write_downtime {
     my $downtime = {%{$rd}};
     $downtime->{'edited_by'}    = $user // $c->stash->{'remote_user'};
     $downtime->{'last_changed'} = time();
-    $downtime->{'backends'}     = $dontchangebackends ? $downtime->{'orig_backends'} : Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'});
-    delete $downtime->{'orig_backends'};
+    $downtime->{'backends'}     = $dontchangebackends ? $downtime->{'_orig_backends'} : Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'});
+    delete $downtime->{'_orig_backends'};
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
     return(Thruk::Utils::write_data_file($file, $downtime));
 }

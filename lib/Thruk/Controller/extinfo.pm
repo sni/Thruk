@@ -288,6 +288,10 @@ sub _process_recurring_downtimes_page {
     my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c, $host, $service, $hostgroup, $servicegroup);
     $default_rd->{'target'} = $target;
 
+    if($task eq 'task' && $c->req->parameters->{'quick_command'}) {
+        $task = $c->req->parameters->{'quick_command'};
+    }
+
     if($task eq 'save') {
         return unless Thruk::Utils::check_csrf($c);
         my $backends = Thruk::Base::list($c->req->parameters->{'d_backends'} // []);
@@ -358,10 +362,11 @@ sub _process_recurring_downtimes_page {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime saved' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
+
     if($task eq 'add' or $task eq 'edit') {
         return if _process_recurring_downtimes_page_edit($c, $nr, $default_rd);
     }
-    elsif($task eq 'remove') {
+    elsif($task eq 'remove' || $task eq 'fix') {
         return unless Thruk::Utils::check_csrf($c);
         my $numbers = [];
         if($c->req->parameters->{'selected_ids'}) {
@@ -380,20 +385,23 @@ sub _process_recurring_downtimes_page {
                 if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
                     Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'no such downtime!' });
                 } else {
-                    unlink($file);
-                    Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
+                    if($task eq 'fix') {
+                        Thruk::Utils::RecurringDowntimes::fix_downtime($c, $file);
+                        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime cleaned up' });
+                    }
+                    elsif($task eq 'remove') {
+                        unlink($file);
+                        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
+                    } else {
+                        die("no such task");
+                    }
                 }
             } else {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such downtime!' });
             }
         }
-        Thruk::Utils::RecurringDowntimes::update_cron_file($c);
-        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
-    }
-    elsif($task eq 'fix') {
-        return unless Thruk::Utils::check_csrf($c);
-        my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
-        Thruk::Utils::RecurringDowntimes::fix_downtime($c, $file);
+
+        Thruk::Utils::RecurringDowntimes::update_cron_file($c) if $task eq 'remove';
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
 

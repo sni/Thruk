@@ -1411,6 +1411,8 @@ function cookieRemoveAll(name) {
     var path  = "";
     jQuery.each(path_info.split("/"), function(key, part) {
         path = path+"/"+part;
+        path = path.replace(/\/+$/, "");
+        paths.push(path);
         paths.push(path+"/");
     });
 
@@ -1424,10 +1426,14 @@ function cookieRemoveAll(name) {
     }
 
     var domain = "";
-    jQuery.each(document.location.hostname.split(".").reverse(), function(key, hostpart) {
+    var domainParts = document.location.hostname.split(".");
+    jQuery.each(domainParts.reverse(), function(key, hostpart) {
         if(domain == "") {
             domain = hostpart;
-            return true;
+            // only skip if there are more...
+            if(domainParts.length > 1) {
+                return true;
+            }
         } else {
             domain = hostpart+"."+domain;
         }
@@ -4827,11 +4833,13 @@ function submitFormInBackground(form, cb, extraData) {
             'Accept': "application/json; charset=utf-8"
         },
         success: function(data, textStatus, jqXHR) {
+            showMessageFromCookie();
             if(cb) {
                 cb(form, true, data, textStatus, jqXHR);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
+            showMessageFromCookie();
             if(cb) {
                 cb(form, false, null, textStatus, jqXHR);
             }
@@ -7324,7 +7332,21 @@ function toggle_comment(event) {
     if(number != 1) {
         text = text + "s";
     }
-    jQuery('#quick_command')[0].options[0].text = text;
+    if(type == "recurring") {
+        var text = "remove " + number + " recurring downtime";
+        if(number != 1) {
+            text = text + "s";
+        }
+        jQuery('#quick_command')[0].options[1].text = text;
+
+        text = "auto cleanup " + number + " recurring downtime";
+        if(number != 1) {
+            text = text + "s";
+        }
+        jQuery('#quick_command')[0].options[0].text = text;
+    } else{
+        jQuery('#quick_command')[0].options[0].text = text;
+    }
     if(number > 0) {
         showElement('cmd_pane');
     } else {

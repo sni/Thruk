@@ -1,7 +1,9 @@
 ﻿<script>
 <!--
-  [%+ IF cmd_type == "downtimes" || cmd_type == "recurring" %]
+  [%+ IF cmd_type == "downtimes" %]
   type = "downtime";
+  [%+ ELSIF cmd_type == "recurring" %]
+  type = "recurring";
   [% ELSE %]
   type = "comment";
   [% END +%]
@@ -23,7 +25,7 @@
     [% IF cmd_type == "recurring" %]
       <form action="extinfo.cgi" method="POST" id="quick_cmd_form" onsubmit="setFormBtnSpinner(this)">
         <input type="hidden" name="type" value="6">
-        <input type="hidden" name="recurring" value="remove">
+        <input type="hidden" name="recurring" value="task">
     [% ELSE %]
       <form action="cmd.cgi" method="POST" id="quick_cmd_form" onsubmit="setFormBtnSpinner(this)">
     [% END %]
@@ -32,7 +34,8 @@
       <input type="hidden" name="selected_ids" id="selected_ids" value="">
       <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" class="w-full mt-2">
         [% IF c.config.cmd_quick_status.downtime && cmd_type == "recurring" %]
-        <option value="5">remove recurring downtimes</option>
+        <option value="fix">auto cleanup recurring downtimes</option>
+        <option value="remove">remove recurring downtimes</option>
         [% END %]
         [% IF c.config.cmd_quick_status.downtime && cmd_type == "downtimes" %]
         <option value="5">remove downtimes</option>
