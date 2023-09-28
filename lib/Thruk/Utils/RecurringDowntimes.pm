@@ -156,9 +156,10 @@ sub get_downtimes_list {
     # sort by target & host & service
     @{$downtimes} = sort {    $a->{'target'}                         cmp $b->{'target'}
                            or (lc join(',', @{$a->{'host'}})         cmp lc join(',', @{$b->{'host'}}))
-                           or lc $a->{'service'}                     cmp lc $b->{'service'}
+                           or (lc join(',', @{$a->{'service'}})      cmp lc join(',', @{$b->{'service'}}))
                            or (lc join(',', @{$a->{'hostgroup'}})    cmp lc join(',', @{$b->{'hostgroup'}}))
                            or (lc join(',', @{$a->{'servicegroup'}}) cmp lc join(',', @{$b->{'servicegroup'}}))
+                           or lc $a->{'file'}                        cmp lc $b->{'file'}
                          } @{$downtimes};
 
     $c->stats->profile(end => "RecurringDowntimes::get_downtimes_list()");
@@ -188,12 +189,12 @@ sub check_downtime {
     if($err) {
         $rd->{'error'}   = $detail;
         $rd->{'fixable'} = $fixable if $fixable;
-        write_downtime($c, $file, $rd);
+        write_downtime($c, $file, $rd, 1);
     }
     if($err == 0 && $rd->{'error'}) {
         delete $rd->{'error'};
         delete $rd->{'fixable'};
-        write_downtime($c, $file, $rd);
+        write_downtime($c, $file, $rd, 1);
     }
     return($err, $detail);
 }
@@ -218,7 +219,7 @@ sub fix_downtime {
             $rd->{$type} = Thruk::Base::array_remove($rd->{$type}, $name);
         }
     }
-    write_downtime($c, $dfile, $rd);
+    write_downtime($c, $dfile, $rd, 1);
     check_downtime($c, $rd, $dfile);
     return 1;
 }
@@ -360,11 +361,11 @@ sub read_downtime {
 
 =cut
 sub write_downtime {
-    my($c, $file, $rd) = @_;
+    my($c, $file, $rd, $dontchangebackends) = @_;
     my $downtime = {%{$rd}};
     $downtime->{'edited_by'}    = $c->stash->{'remote_user'};
     $downtime->{'last_changed'} = time();
-    $downtime->{'backends'}     = Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'});
+    $downtime->{'backends'}     = Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'}) unless $dontchangebackends;
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
     return(Thruk::Utils::write_data_file($file, $downtime));
 }
