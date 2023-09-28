@@ -189,12 +189,12 @@ sub check_downtime {
     if($err) {
         $rd->{'error'}   = $detail;
         $rd->{'fixable'} = $fixable if $fixable;
-        write_downtime($c, $file, $rd, 1);
+        write_downtime($c, $file, $rd, 1, '(selfcheck)');
     }
     if($err == 0 && $rd->{'error'}) {
         delete $rd->{'error'};
         delete $rd->{'fixable'};
-        write_downtime($c, $file, $rd, 1);
+        write_downtime($c, $file, $rd, 1, '(selfcheck)');
     }
     return($err, $detail);
 }
@@ -219,7 +219,10 @@ sub fix_downtime {
             $rd->{$type} = Thruk::Base::array_remove($rd->{$type}, $name);
         }
     }
-    write_downtime($c, $dfile, $rd, 1);
+
+    write_downtime($c, $dfile, $rd);
+
+    $rd = read_downtime($c, $dfile);
     check_downtime($c, $rd, $dfile);
     return 1;
 }
@@ -263,7 +266,8 @@ sub read_downtime {
         $d->{$t} = [sort @{$d->{$t}}];
     }
 
-    $d->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $d->{'backends'});
+    $d->{'orig_backends'} = $d->{'backends'};
+    $d->{'backends'}      = Thruk::Utils::backends_hash_to_list($c, $d->{'backends'});
 
     # apply auth filter
     if($auth) {
@@ -361,11 +365,12 @@ sub read_downtime {
 
 =cut
 sub write_downtime {
-    my($c, $file, $rd, $dontchangebackends) = @_;
+    my($c, $file, $rd, $dontchangebackends, $user) = @_;
     my $downtime = {%{$rd}};
-    $downtime->{'edited_by'}    = $c->stash->{'remote_user'};
+    $downtime->{'edited_by'}    = $user // $c->stash->{'remote_user'};
     $downtime->{'last_changed'} = time();
-    $downtime->{'backends'}     = Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'}) unless $dontchangebackends;
+    $downtime->{'backends'}     = $dontchangebackends ? $downtime->{'orig_backends'} : Thruk::Utils::backends_list_to_hash($c, $downtime->{'backends'});
+    delete $downtime->{'orig_backends'};
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/downtimes/');
     return(Thruk::Utils::write_data_file($file, $downtime));
 }

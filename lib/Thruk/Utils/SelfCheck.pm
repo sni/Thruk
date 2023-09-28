@@ -294,12 +294,24 @@ sub check_recurring_downtime {
     my($c, $downtime, $file) = @_;
 
     my $fixables = {};
+    my $errors   = 0;
+    my $details  = "";
 
     #my($backends, $cmd_typ)...
     my($backends, undef) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
+    my $cleaned_backends = [];
+    for my $b (@{$backends}) {
+        my $peer = $c->db->get_peer_by_key($b);
+        if($peer) {
+            push @{$cleaned_backends}, $b;
+        } else {
+            $details .= "  - ERROR: backend with id ".$b." does not exist in recurring downtime ".$file."\n";
+            $errors++;
+            push @{$fixables->{'backends'}}, $b;
+        }
+    }
+    $backends = $cleaned_backends;
 
-    my $errors  = 0;
-    my $details = "";
     if($downtime->{'target'} eq 'host') {
         my $data   = $c->db->get_hosts(filter => [{ 'name' => { '-or' => $downtime->{'host'}  }} ], columns => [qw/name/], backend => $backends );
         my $lookup = Thruk::Base::array2hash($data, "name");
