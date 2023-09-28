@@ -20,6 +20,10 @@ The downtimetask command executes recurring downtimes tasks.
 
     print help and exit
 
+=item B<autoremove>
+
+    cleanup none-existing hosts/services/groups and backends from recurring downtimes.
+
 =item B<-t / --test>
 
     do not send commands but display what would be send
@@ -63,9 +67,14 @@ sub cmd {
     Getopt::Long::Configure('pass_through');
     Getopt::Long::GetOptionsFromArray($commandoptions,
        "t|test"         => \$opt->{'testmode'},
+       "autoremove"     => \$opt->{'removemode'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
+
+    if($opt->{'removemode'} || ($commandoptions->[0] && $commandoptions->[0] eq 'autoremove')) {
+        return(_auto_fix_downtimes($c));
+    }
 
     local $ENV{'THRUK_NO_COMMANDS'} = "" if $opt->{'testmode'};
 
@@ -275,6 +284,34 @@ sub set_downtime {
     });
     return 0 if $res[0] != 200; # error is already printed
     return 1;
+}
+
+##############################################
+# fix all downtimes
+sub _auto_fix_downtimes {
+    my($c) = @_;
+
+    $c->stats->profile(begin => "_auto_fix_downtimes");
+
+    require Thruk::Utils::RecurringDowntimes;
+
+    my $fixed = 0;
+    my @files = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
+    for my $dfile (@files) {
+        next unless -f $dfile;
+        my $d = Thruk::Utils::RecurringDowntimes::read_downtime($c, $dfile);
+        next unless $d;
+        next unless $d->{'fixable'};
+        Thruk::Utils::RecurringDowntimes::fix_downtime($c, $dfile);
+        $fixed++;
+    }
+
+    $c->stats->profile(end => "_auto_fix_downtimes");
+
+    if($fixed) {
+        return(sprintf("%d downtimes cleaned up.\n", $fixed), 0);
+    }
+    return("all downtimes already cleaned up.\n", 0);
 }
 
 ##############################################
