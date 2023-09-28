@@ -9878,11 +9878,18 @@ function init_filter_list_wizard(prefix, input_id, search_type, search_options) 
     list_wizard_init_selected(input_id, prefix, 1);
 
     // override move with remove
-    jQuery("#"+prefix+"remove").prop("onclick", "data_select_remove('"+prefix+"selected_members'); return false;");
-    jQuery("#"+prefix+"selected_members").prop("ondblclick", "data_select_remove('"+prefix+"selected_members'); return false;");
+    jQuery("#"+prefix+"remove").attr({
+        onclick: "data_select_remove('"+prefix+"selected_members'); return false;"
+    });
+    jQuery("#"+prefix+"selected_members").attr({
+        ondblclick: "data_select_remove('"+prefix+"selected_members'); return false;"
+    });
 
     set_select_options(prefix+"available_members", [], true);
-    jQuery("#"+prefix+"available_members_filter").prop({"onkeyup": "", placeholder: "enter "+search_type+" filter..."});
+    jQuery("#"+prefix+"available_members_filter").attr({
+        onkeyup: "",
+        placeholder: "enter "+search_type+" filter..."
+    });
     jQuery("#"+prefix+"available_members_filter").on("click", function(evt) {
         var input = evt.target;
         search_options.refresh_data_cb = function() {
