@@ -29,6 +29,7 @@ sub _rest_get_thruk_downtimes {
     my $downtimes = Thruk::Utils::RecurringDowntimes::get_downtimes_list($c);
     for my $d (@{$downtimes}) {
         delete $d->{'_orig_backends'};
+        delete $d->{'fixable'};
     }
     return($downtimes) unless defined $nr;
 
