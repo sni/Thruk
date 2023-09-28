@@ -12,11 +12,19 @@
       <input type="hidden" name="type" value="6">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <div class="head justify-between">
-        <a href="extinfo.cgi?type=6&amp;recurring" class="button header-button rounded w-[70px]" title="Go back to recurring downtimes">
-          <i class="uil uil-angle-double-left"></i>Back
-        </a>
+        <div class="w-32">
+          <a href="extinfo.cgi?type=6&amp;recurring" class="button header-button rounded w-16" title="Go back to recurring downtimes">
+            <i class="uil uil-angle-double-left"></i>Back
+          </a>
+        </div>
         <h3>Recurring Downtime</h3>
-        <div class="w-[70px]"></div>
+        <div class="w-32 text-right">
+          [% IF rd.exists("fixable") %]
+            <button class="w-32" title="remove none-existing entries" onclick="send_form_in_background_and_reload(this, {recurring: 'fix'}); return false;">
+              <i class="uil uil-band-aid"></i> auto cleanup
+            </button>
+          [% END %]
+        </div>
       </div>
       <div class="overflow-auto">
         <table class='recurring_downtimes body cellspacing'>
