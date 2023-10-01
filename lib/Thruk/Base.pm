@@ -248,6 +248,25 @@ sub array_remove {
 
 ########################################
 
+=head2 array_contains
+
+  array_contains($el, $list)
+
+returns true if element is found in list.
+
+=cut
+
+sub array_contains {
+    my($el, $array) = @_;
+
+    for my $l (@{$array}) {
+        return 1 if $l eq $el;
+    }
+    return;
+}
+
+########################################
+
 =head2 array_group_by
 
   array_group_by($data, $key)
