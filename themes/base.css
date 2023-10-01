@@ -1015,6 +1015,12 @@ DIV.radiogroup {
   INPUT[type="radio"]:checked + label, INPUT[type="radio"] + label:hover {
     @apply bg-[color:var(--button-hover-bg)] text-[color:var(--button-hover-fg)] cursor-pointer;
   }
+  INPUT.activeENABLED[type="radio"]:checked + label {
+    @apply ENABLED
+  }
+  INPUT.activeDISABLED[type="radio"]:checked + label {
+    @apply DISABLED
+  }
 }
 
 DIV.accordion {
