@@ -3866,7 +3866,9 @@ function update_recurring_type_select(select_id) {
 }
 
 /* make table header selectable */
+var lastActiveSub;
 function set_sub(nr, hash) {
+    lastActiveSub = nr;
     for(var x=1;x<=20;x++) {
         /* reset table rows */
         if(x != nr) {
