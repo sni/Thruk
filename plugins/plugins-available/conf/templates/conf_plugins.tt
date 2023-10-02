@@ -57,7 +57,7 @@
                   </div>
                 </th>
                 <td class="align-top w-[200px] clickable" onclick="openModalWindowUrl('conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | html %]&amp;modal=1')"><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir | uri %]" alt="[% name | html %]"></td>
-                <td class='align-top whitespace-normal'>[% plugin.description %]</td>
+                <td class='align-top whitespace-normal'>[% plugin.description %][% IF plugin.depends %]<br><br>Depends: [% plugin.depends %][% END %]</td>
               </tr>
             [% END %]
           </table>

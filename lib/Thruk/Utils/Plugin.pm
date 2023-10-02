@@ -144,9 +144,15 @@ sub read_plugin_details {
     if(-e $desc_file) {
         my $description = Thruk::Utils::IO::read($desc_file);
         my $url         = "";
+        my $depends     = "";
         if($description =~ s/^Url:\s*(.*)$//gmx) { $url = $1; }
+        if($description =~ s/^Depends:\s*(.*)$//gmx) { $depends = $1; }
+        $description =~ s/\n+/\n/gmx; # remove multiple newlines
+        $description =~ s/\n*$//sgmx;  # remove newlines at the end
+        $description =~ s/\n/<br>/gmx;
         $plugin->{'description'} = $description;
         $plugin->{'url'}         = $url;
+        $plugin->{'depends'}     = $depends;
         if($description =~ s/^Version:\s*(.*)$//gmx) {
             my $version = $1;
             $version =~ s/^v//gmx;
