@@ -422,7 +422,8 @@ sub _get_connection_details {
     }
 
     for my $pd (sort keys %{$c->stash->{'backend_detail'}}) {
-        next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
+        # hide hidden backends
+        next if (defined $c->stash->{'backend_detail'}->{$pd}->{'disabled'} && $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2);
         next if $listed->{$pd};
         next unless $selected->{$pd};
         $detail .= sprintf("%-10s: %-6s %s (addr: %s)\n",
