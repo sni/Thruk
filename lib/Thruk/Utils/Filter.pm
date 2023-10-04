@@ -1261,7 +1261,7 @@ returns empty string
 
 =cut
 sub debug {
-    print STDERR Data::Dumper::Dumper(\@_);
+    print STDERR Data::Dumper::Dumper(@_);
     return("");
 }
 
