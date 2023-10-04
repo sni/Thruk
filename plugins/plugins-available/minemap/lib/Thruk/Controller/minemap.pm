@@ -45,6 +45,7 @@ sub index {
     $c->stash->{page}          = 'status';
     $c->stash->{template}      = 'minemap.tt';
     $c->stash->{infoBoxTitle}  = 'Mine Map';
+    $c->stash->{'status_search_add_default_filter'} = "host";
 
     $c->stash->{services}     = {};
     $c->stash->{hostnames}    = {};

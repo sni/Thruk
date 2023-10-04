@@ -1969,4 +1969,25 @@ sub list_not_intersect {
 
 ########################################
 
+=head2 is_empty_filter
+
+  is_empty_filter($filter)
+
+returns true if filter contains no actual filter
+
+=cut
+
+sub is_empty_filter {
+    my($filter) = @_;
+
+    return 0 if(defined $filter->{'hostprops'}          && $filter->{'hostprops'} != 0);
+    return 0 if(defined $filter->{'hoststatustypes'}    && $filter->{'hoststatustypes'} != 15);
+    return 0 if(defined $filter->{'serviceprops'}       && $filter->{'serviceprops'} != 0);
+    return 0 if(defined $filter->{'servicestatustypes'} && $filter->{'servicestatustypes'} != 31);
+
+    return(1);
+}
+
+########################################
+
 1;

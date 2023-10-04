@@ -441,6 +441,7 @@ sub _process_details_page {
     $c->stash->{'explore'} = 1 if $c->req->parameters->{'explore'};
     $c->stash->{'show_column_select'} = 1;
     $c->stash->{'auto_reload_fn'} = "explorerUpdateStatusTable" if $c->stash->{'explore'};
+    $c->stash->{'status_search_add_default_filter'} = "host";
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -587,6 +588,7 @@ sub _process_hostdetails_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
     $c->stash->{'show_column_select'} = 1;
+    $c->stash->{'status_search_add_default_filter'} = "host";
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -728,9 +730,11 @@ sub _process_overview_page {
     my $groups;
     if( $c->stash->{substyle} eq 'host' ) {
         $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
+        $c->stash->{'status_search_add_default_filter'} = "hostgroup";
     }
     else {
         $groups = $c->db->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
+        $c->stash->{'status_search_add_default_filter'} = "servicegroup";
     }
 
     # join our groups together
@@ -876,9 +880,11 @@ sub _process_grid_page {
     my $groups;
     if( $c->stash->{substyle} eq 'host' ) {
         $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
+        $c->stash->{'status_search_add_default_filter'} = "hostgroup";
     }
     else {
         $groups = $c->db->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
+        $c->stash->{'status_search_add_default_filter'} = "servicegroup";
     }
 
     # sort in hosts / services
@@ -996,6 +1002,7 @@ sub _process_summary_page {
         $all_groups->{ $group->{'name'} } = Thruk::Utils::Status::summary_set_group_defaults($group);
     }
 
+    $c->stash->{'status_search_add_default_filter'} = "servicegroup";
     if( $c->stash->{substyle} eq 'host' ) {
         # we need the hosts data
         my $host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
@@ -1009,6 +1016,7 @@ sub _process_summary_page {
                 Thruk::Utils::Status::summary_add_host_stats( "", $all_groups->{$group}, $host );
             }
         }
+        $c->stash->{'status_search_add_default_filter'} = "hostgroup";
     }
     # create a hash of all services
     my $services_data = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],

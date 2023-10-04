@@ -352,6 +352,10 @@
     [% FOREACH s = search.text_filter %]
       [% PROCESS search_filter_row s_row_data=s index=loop.index %]
     [% END %]
+    [% DEFAULT status_search_add_default_filter=0 %]
+    [% IF status_search_add_default_filter &&  search.text_filter.size == 0 && is_empty_filter(search) %]
+      [% PROCESS search_filter_row s_row_data={ type => status_search_add_default_filter, val_pre => '', op => '=', value => 'all' } index=0 %]
+    [% END %]
     <!-- NEW FILTER -->
     <tr>
       <td colspan=2 class='clickable hoverable text-center p-0 rounded-bl-lg' id="[% filterprefix %]_add_new_filter_button" onClick="add_new_filter(this.id, '[% paneprefix %]filterTable'); [% onchange %]">
