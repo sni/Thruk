@@ -47,5 +47,8 @@
       dest: /omd/sites/demo/etc/grafana/grafana.ini
       owner: demo
       group: demo
-  - shell: cpanm -n Dancer2::Plugin::OAuth2::Server
+  - name: "install Dancer2::Plugin::OAuth2::Server"
+    shell: "cpanm -n Dancer2::Plugin::OAuth2::Server"
+    environment:
+        CFLAGS: "-maes -msse2"
   - shell: sudo su - demo -c "( plackup -D -p 4444 /scenario/omd/oauth2_server/oauth2_server.pl >/dev/null 2>&1 & )"
