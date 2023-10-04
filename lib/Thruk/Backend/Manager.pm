@@ -1701,6 +1701,9 @@ sub _do_on_peers {
 
         if($arg{'pager'}) {
             my $already_paged = $ENV{'THRUK_USE_LMD'} ? 1 : 0;
+            if($arg{'pager'}->{'entries'} && scalar @{$data} > $arg{'pager'}->{'entries'}) {
+                $already_paged = 0;
+            }
             $data = Thruk::Utils::page_data($c, $data, undef, $totalsize, $already_paged);
         }
     }

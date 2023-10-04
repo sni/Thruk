@@ -8,13 +8,10 @@
 [% UNLESS minimal %]
 
   [% IF explore %]
-  <form action="" method="GET" style="display: initial;" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this) &amp;&amp; setFormBtnSpinner(this));">
-    [%# make sure IE can submit form by pressing enter #%]
-    <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
+  <form action="" method="GET" style="display: initial;" onsubmit="explorerUpdateStatusTable(); return false;" id="explorForm">
     <input type="hidden" name="explore" value="1">
     <input type="hidden" name="style" value="detail">
-    <input type="hidden" name="nav" value="[% show_nav | html %]">
-    [% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
+    <input type="hidden" name="entries" value="[% entries | html %]">
     <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
 
     <div class="card overflow-hidden w-full">
@@ -124,28 +121,30 @@
   </div>
 [% END %]
 
-<div class="card w-full min-w-[420px]">
-  <div class="mainTableHeader">
-    <div>
-      <div class="flex flex-nowrap gap-x-2 items-center">
-        [% PROCESS _status_column_select.tt colprefix="svc" columns_name="service" %]
-        [% IF ! explore %]
-        [% PROCESS _status_filter.tt %]
-        [% END %]
+<div id="statusTableContainer" class="relative">
+  <div class="card w-full min-w-[420px]" id="statusTableContent">
+    <div class="mainTableHeader">
+      <div>
+        <div class="flex flex-nowrap gap-x-2 items-center">
+          [% PROCESS _status_column_select.tt colprefix="svc" columns_name="service" %]
+          [% IF ! explore %]
+          [% PROCESS _status_filter.tt %]
+          [% END %]
+        </div>
+      </div>
+      <div>
+        [% PROCESS _pager.tt %]
+      </div>
+      <div>
+        [% PROCESS _pager_per_page.tt %]
       </div>
     </div>
-    <div>
-      [% PROCESS _pager.tt %]
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
+      [% PROCESS _status_detail_table.tt %]
     </div>
-    <div>
-      [% PROCESS _pager_per_page.tt %]
+    <div class="mainTableFooter">
+      [% PROCESS _pager_total_items.tt %]
     </div>
-  </div>
-  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
-    [% PROCESS _status_detail_table.tt %]
-  </div>
-  <div class="mainTableFooter">
-    [% PROCESS _pager_total_items.tt %]
   </div>
 </div>
 
@@ -159,6 +158,38 @@
     jQuery("TEXTAREA").focus();
   });
   [% END %]
+
+  function explorerUpdateStatusTable() {
+    var form = document.getElementById("explorForm");
+
+    // copy entries
+    var entries = jQuery("SELECT[name='entries']").val();
+    jQuery(form).find("[name='entries']").val(entries);
+
+    var data = jQuery(form).serializeArray();
+    var url  = jQuery(form).attr("action");
+    if(url == "") {
+      url = document.location.pathname;
+    }
+    url = url.replace(/\?.*$/, '')+"  #statusTableContent";
+
+    // update url from form data so reloads works as well
+    updateUrl(document.location.pathname + '?' + jQuery(form).serialize());
+
+    jQuery('#statusTableContainer').append("<div class='spinner absolute w-6 h-6 top-2 left-2 z-10'><\/div>");
+    jQuery('#statusTableContent').addClass("opacity-50");
+    jQuery('#statusTableContainer').load(url, data, function(text, status, req) {
+      start_hide_activity_icons_timer();
+      if(status == "error") {
+        jQuery('#statusTableContainer').html("failed to load status data");
+        return;
+      } else {
+        init_page();
+        initStatusTable();
+      }
+    });
+  }
+
 </script>
 [% END %]
 

@@ -1740,8 +1740,10 @@ function uriWith(uri, params, removeParams) {
 }
 
 /* update the url by using additionalParams */
-function updateUrl() {
-    var newUrl = getCurrentUrl(false);
+function updateUrl(newUrl) {
+    if(!newUrl) {
+        newUrl = getCurrentUrl(false);
+    }
     try {
         history.replaceState({}, "", newUrl);
     } catch(err) { console.log(err) }

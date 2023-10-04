@@ -440,6 +440,7 @@ sub _process_details_page {
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
     $c->stash->{'explore'} = 1 if $c->req->parameters->{'explore'};
     $c->stash->{'show_column_select'} = 1;
+    $c->stash->{'auto_reload_fn'} = "explorerUpdateStatusTable" if $c->stash->{'explore'};
 
     my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
