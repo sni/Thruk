@@ -4854,7 +4854,10 @@ function submitFormInBackground(form, cb, extraData) {
 }
 
 function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
-    send_form_in_background_with_callback(btn, extraData, function() { reloadPage() }, skipTimeout);
+    send_form_in_background_with_callback(btn, extraData, function() {
+        reloadPage();
+    }, skipTimeout);
+    return(false);
 }
 
 function send_form_in_background_with_callback(btn, extraData, cb, skipTimeout) {
