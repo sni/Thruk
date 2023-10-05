@@ -699,7 +699,7 @@ $c->sub_request(<url>, [<method>], [<postdata>], [<rendered>])
 
 =cut
 sub sub_request {
-    my($c, $url, $method, $postdata, $rendered, $max_follow) = @_;
+    my($c, $url, $method, $postdata, $rendered, $max_follow, $keep_global) = @_;
     $method = 'GET' unless $method;
     $method = uc($method);
     $max_follow = 0 unless $max_follow;
@@ -727,8 +727,7 @@ sub sub_request {
     };
     _debug2("sub_request to ".$url);
     my $sub_c = Thruk::Context->new($c->app, $env);
-    $sub_c->{'user'} = $c->user;
-    $sub_c->stash->{'remote_user'} = $c->stash->{'remote_user'};
+    _set_stash_user($sub_c, $c->user, $c->user->{'auth_src'}) if $c->user;
 
     $sub_c->req->parameters();
     if($postdata) {
@@ -749,7 +748,8 @@ sub sub_request {
     $c->stats->profile(end => $routename);
     Thruk::Action::AddDefaults::end($sub_c);
 
-    local $Thruk::Globals::c = undef;
+    local $Thruk::Globals::c = undef  if !$keep_global;
+    local $Thruk::Globals::c = $sub_c if $keep_global;
     if(!$sub_c->{'rendered'}) {
         require Thruk::Views::ToolkitRenderer;
         Thruk::Views::ToolkitRenderer::render_tt($sub_c);

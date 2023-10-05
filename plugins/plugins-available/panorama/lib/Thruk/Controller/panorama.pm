@@ -655,7 +655,14 @@ sub _task_redirect_status {
         if($url =~ m/^\w+\.cgi/mx) {
             $url = '/cgi-bin/'.$url;
         }
-        my($sub_c) = $c->sub_request($url, "POST", {}, 1);
+        my($sub_c);
+        eval {
+            ($sub_c) = $c->sub_request($url, "POST", {}, 1, undef, 1);
+        };
+        my $err = $@;
+        if($err) {
+            confess("internal sub request to ".$url." failed: ".$err);
+        }
         $c->res->status($sub_c->res->code);
         $c->res->headers($sub_c->res->headers);
         $c->res->body($sub_c->res->content);

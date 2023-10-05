@@ -48,7 +48,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?readonly=1', like => 'Thruk Panorama' },
     { url => '/thruk/usercontent/backgrounds/world.png', like => 'PNG' },
     { url => '/thruk/cgi-bin/panorama.cgi?task=textsave', post => { 'text' => 'test' } },
-    { url => '/thruk/cgi-bin/panorama.cgi?task=redirect_status', post => { 'filter' => '[{"type":"Host","val_pre":"","op":"=","value":"'.encode_utf8($host).'"}]' }, follow => 1 },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=redirect_status', post => { 'filter' => '[{"type":"Host","val_pre":"","op":"=","value":"'.encode_utf8($host).'"}]' }, like => 'Current Network Status' },
 ];
 
 for my $page (@{$pages}) {
