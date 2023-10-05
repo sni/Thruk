@@ -1018,6 +1018,9 @@ sub set_enabled_backends {
     if($c->req->parameters->{'backend'} && $c->req->parameters->{'backends'}) {
         confess("'backend' and 'backends' parameter set!");
     }
+    if($c->req->parameters->{'be'} && !$c->req->parameters->{'backend'}) {
+        $c->req->parameters->{'backend'} = delete $c->req->parameters->{'be'};
+    }
     my $backend  = $c->req->parameters->{'backend'} || $c->req->parameters->{'backends'};
     $c->stash->{'param_backend'} = $backend || '';
     my $disabled_backends = {};

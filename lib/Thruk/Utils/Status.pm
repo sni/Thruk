@@ -331,6 +331,24 @@ sub do_filter {
 
     $prefix = 'dfl_' unless defined $prefix;
 
+    # expand short names, ex used from panorama redirect_status
+    for my $key (sort keys %{$params}) {
+        if($key =~ m/^(\w+)_(s\d+)_(\w+)$/mx) {
+            my($p,$n,$k) = ($1, $2, $3);
+            if(   $k eq 'v')   { $k = 'value'; }
+            elsif($k eq 'vp')  { $k = 'val_pre'; }
+            elsif($k eq 't')   { $k = 'type'; }
+            elsif($k eq 'hst') { $k = 'hoststatustypes'; }
+            elsif($k eq 'hp')  { $k = 'hostprops'; }
+            elsif($k eq 'sst') { $k = 'servicestatustypes'; }
+            elsif($k eq 'sp')  { $k = 'serviceprops'; }
+            my $new_key = $p.'_'.$n.'_'.$k;
+            if($new_key ne $key) {
+                $params->{$new_key} = delete $params->{$key};
+            }
+        }
+    }
+
     # rewrite prefix
     if(!$params->{$prefix.'s0_type'} && !$params->{$prefix.'s0_hostprops'}) {
         for my $prfx ($prefix, qw/dfl_ ovr_ grd_ svc_ hst_/) {

@@ -663,6 +663,17 @@ sub _task_redirect_status {
         $c->stash->{'inject_stats'} = 0;
         return;
     }
+
+    # shorten url to avoid hitting max request uri limits in webservers
+    $url =~ s/(\?|&)backends=/$1be=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_type=/$1_t=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_val_pre=/$1_vp=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_value=/$1_v=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_hoststatustypes=/$1_hst=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_hostprops=/$1_hp=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_servicestatustypes=/$1_sst=/gmx;
+    $url =~ s/(\?|&dfl_s\d+)_serviceprops=/$1_sp=/gmx;
+
     return $c->redirect_to($url);
 }
 
