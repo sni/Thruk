@@ -374,9 +374,17 @@ Ext.onReady(function() {
                         TP.popupReq.aborted = true;
                         TP.popupReq.xhr.abort();
                     }
+                    // convert GET data into POST data
+                    var data = {};
+                    var matches = link.match(/^(\w+\.cgi)\?(.*)$/);
+                    if(matches && matches[1]) {
+                        link = matches[1];
+                        data = Ext.Object.fromQueryString(matches[2]);
+                    }
                     TP.popupReq = Ext.Ajax.request({
                         url:     link,
                         method: 'POST',
+                        params:  data,
                         callback: function(options, success, response) {
                             delete TP.popupReq;
                             if(!success) {

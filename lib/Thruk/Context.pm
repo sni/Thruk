@@ -742,7 +742,7 @@ sub sub_request {
     my $path_info = $sub_c->req->path_info;
 
     my($route, $routename) = $c->app->find_route_match($c, $path_info);
-    confess("no route") unless $route;
+    confess("no route for ".$path_info) unless $route;
     $sub_c->{'rendered'} = 1 unless $rendered; # prevent json encoding, we want the data reference
     $c->stats->profile(begin => $routename);
     my $rc = &{$route}($sub_c, $path_info);

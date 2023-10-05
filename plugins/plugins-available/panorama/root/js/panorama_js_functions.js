@@ -1679,6 +1679,7 @@ var TP = {
                 /* custom filter */
                 if(p.xdata.general.filter) {
                     var backends = TP.getActiveBackendsPanel(tab, p);
+                    p.xdata.general.filter = TP.cleanIconFilter(p.xdata.general.filter);
                     var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter, backends]);
                     if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
                     if(req.filter[filter] == undefined) { req.filter[filter] = []; }
@@ -2601,6 +2602,25 @@ var TP = {
             }
         }
         return(host);
+    },
+    // remove unnecessary items from filter structures, ex.: displayfield-1234 items
+    cleanIconFilter: function(filter) {
+        if(filter.match(/"displayfield\-/)) {
+            var f = Ext.JSON.decode(filter);
+            if(!Ext.isArray(f)) {
+                return(filter);
+            }
+            Ext.Array.forEach(f, function(n, i) {
+                for(var key in n) {
+                    // this one is not required and makes the filter unnecessarily big
+                    if(key.match(/^displayfield\-/)) {
+                        delete n[key];
+                    }
+                }
+            });
+            filter = Ext.JSON.encode(f);
+        }
+        return(filter);
     }
 }
 TP.log('[global] starting');

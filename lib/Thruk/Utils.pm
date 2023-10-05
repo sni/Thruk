@@ -570,7 +570,7 @@ sub ssi_include {
     $c->stash->{ssi_footer} .= read_ssi($c, $page, 'footer');
 
     $c->stash->{real_page} = "";
-    if($c->stash->{controller} =~ m/Thruk::Controller::([^:]*)::.*?$/gmx) {
+    if($c->stash->{controller} && $c->stash->{controller} =~ m/Thruk::Controller::([^:]*)::.*?$/gmx) {
         $c->stash->{real_page} = $1;
     }
 

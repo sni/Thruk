@@ -321,6 +321,12 @@ TP.filterWindow = function(ftype, base_el, panel) {
                         if(item.getForm) {
                             var form                = item.getForm();
                             var vals                = form.getFieldValues();
+                            for(var key in vals) {
+                                // this one is not required and makes the filter unnecessarily big
+                                if(key.match(/^displayfield\-/)) {
+                                    delete vals[key];
+                                }
+                            }
                             vals.hostprops          = TP.arraySum(vals.hostprops);
                             vals.serviceprops       = TP.arraySum(vals.serviceprops);
                             vals.hoststatustypes    = TP.arraySum(vals.hoststatustypes);

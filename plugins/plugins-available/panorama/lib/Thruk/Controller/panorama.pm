@@ -637,21 +637,33 @@ sub _task_status {
 sub _task_redirect_status {
     my($c) = @_;
     my $types = {};
-    if($c->req->parameters->{'filter'}) {
-        my($hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter) = _do_filter($c);
-        $c->req->parameters->{'filter'} = '';
-        $c->req->parameters->{'task'}   = '';
-        my $url = Thruk::Utils::Filter::uri_with($c, $c->req->parameters);
-        $url    =~ s/^panorama.cgi/status.cgi/gmx;
-        $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
-        $url    =~ s/\&amp;task=.*?\&amp;/&amp;/gmx;
-        $url    =~ s/\&amp;/&/gmx;
-        if($has_service_filter) {
-            $url =~ s/style=hostdetail/style=detail/gmx;
-        }
-        return $c->redirect_to($url);
+    return $c->redirect_to("status.cgi") unless $c->req->parameters->{'filter'};
+
+    my($hfilter, $sfilter, $hostgroupfilter, $servicegroupfilter, $has_service_filter) = _do_filter($c);
+    $c->req->parameters->{'filter'} = '';
+    $c->req->parameters->{'task'}   = '';
+    my $url = Thruk::Utils::Filter::uri_with($c, $c->req->parameters);
+    $url    =~ s/^panorama.cgi/status.cgi/gmx;
+    $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
+    $url    =~ s/\&amp;task=.*?\&amp;/&amp;/gmx;
+    $url    =~ s/\&amp;/&/gmx;
+    if($has_service_filter) {
+        $url =~ s/style=hostdetail/style=detail/gmx;
     }
-    return $c->redirect_to("status.cgi");
+    if($c->req->method() eq 'POST') {
+        # directly answer query, POST does not redirect
+        if($url =~ m/^\w+\.cgi/mx) {
+            $url = '/cgi-bin/'.$url;
+        }
+        my($sub_c) = $c->sub_request($url, "POST", {}, 1);
+        $c->res->status($sub_c->res->code);
+        $c->res->headers($sub_c->res->headers);
+        $c->res->body($sub_c->res->content);
+        $c->{'rendered'} = 1;
+        $c->stash->{'inject_stats'} = 0;
+        return;
+    }
+    return $c->redirect_to($url);
 }
 
 ##########################################################
