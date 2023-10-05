@@ -2337,7 +2337,7 @@ sub _all_object_links_callback {
                 next if $link eq 'servicemember';
                 next if $link eq 'icon';
                 if($key eq 'use') {
-                    for my $ref (@{$obj->{'conf'}->{$key}}) {
+                    for my $ref (@{_list($obj->{'conf'}->{$key})}) {
                         my $ref2 = "$ref";
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
@@ -2349,7 +2349,7 @@ sub _all_object_links_callback {
                     &{$cb}($file, $obj, $key, $link, $obj->{'conf'}->{$key});
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
-                    for my $ref (@{$obj->{'conf'}->{$key}}) {
+                    for my $ref (@{_list($obj->{'conf'}->{$key})}) {
                         my $ref2 = "$ref";
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
