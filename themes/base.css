@@ -138,6 +138,10 @@
   --button-green-bg:          var(--color-green-600);
   --button-green-hover-fg:    var(--color-white);
   --button-green-hover-bg:    var(--color-green-700);
+  --button-orange-fg:         var(--color-white);
+  --button-orange-bg:         var(--color-orange-600);
+  --button-orange-hover-fg:   var(--color-white);
+  --button-orange-hover-bg:   var(--color-orange-700);
   --button-disabled-fg:       var(--color-gray-500);
   --button-disabled-bg:       var(--color-gray-200);
 
@@ -940,6 +944,9 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=
     @apply bg-[color:var(--button-green-bg)] text-[color:var(--button-green-fg)] hover:bg-[color:var(--button-green-hover-bg)] hover:text-[color:var(--button-green-hover-fg)];
   }
 
+  &.orange {
+    @apply bg-[color:var(--button-orange-bg)] text-[color:var(--button-orange-fg)] hover:bg-[color:var(--button-orange-hover-bg)] hover:text-[color:var(--button-orange-hover-fg)];
+  }
   &.red {
     @apply bg-[color:var(--button-red-bg)] text-[color:var(--button-red-fg)] hover:bg-[color:var(--button-red-hover-bg)] hover:text-[color:var(--button-red-hover-fg)];
   }
