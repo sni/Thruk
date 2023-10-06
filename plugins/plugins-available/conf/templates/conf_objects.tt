@@ -192,6 +192,7 @@
       if(form_values != initial_form_values && !form.needs_reload) {
         var msg = "Not applied changes will be lost if you leave this page.";
         e.returnValue = msg;
+        triggerUnloadTimerSkipNext = true;
         return(msg);
       }
       return;

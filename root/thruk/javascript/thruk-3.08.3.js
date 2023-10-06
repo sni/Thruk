@@ -201,6 +201,10 @@ function init_page() {
     checkMainTableMaxHeight();
 
     jQuery(window).on('beforeunload unload', function(e){
+        if(triggerUnloadTimerSkipNext) {
+            triggerUnloadTimerSkipNext = false;
+            return;
+        }
         triggerUnloadTimer();
         thrukState.unloading = true;
     });
@@ -1786,6 +1790,7 @@ function triggerReloadTimer(delay) {
 }
 
 var triggerUnloadTimerOnce = false;
+var triggerUnloadTimerSkipNext = false;
 function triggerUnloadTimer() {
     if(triggerUnloadTimerOnce) {
         // do not trigger twice
