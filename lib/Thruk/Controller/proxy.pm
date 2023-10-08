@@ -175,7 +175,7 @@ sub _cleanup_response {
             $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
         } else {
             # if its thruk itself, insert a message at the top
-            if($body =~ m/site_panel_container/mx) {
+            if($body =~ m/(site_panel_container|id="mainframe")/mx) {
                 my $header = "";
                 $c->stash->{'proxy_peer'} = $peer;
                 Thruk::Views::ToolkitRenderer::render($c, "_proxy_header.tt", $c->stash, \$header);

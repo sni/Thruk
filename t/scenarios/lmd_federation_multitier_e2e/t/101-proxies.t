@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 124;
+    plan tests => 232;
 }
 
 
@@ -55,12 +55,22 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
         TestUtils::test_page(
             'waitfor'        => '(grafanaBootData|grafana\-app|\/pnp4nagios\/index\.php\/image)',
             'url'            => $url,
-            'skip_html_lint' => 1
+            'skip_html_lint' => 1,
         );
         TestUtils::test_page(
             'url'            => $url,
             'unlike'         => ['/does not exist/'],
-            'skip_html_lint' => 1
+            'skip_html_lint' => 1,
+        );
+    }
+
+    for my $backend (sort keys %{$ids}) {
+        my $url = '/thruk/cgi-bin/proxy.cgi/'.$ids->{$backend}.'/demo/thruk/cgi-bin/tac.cgi';
+        next if $backend eq 'tier1d'; # does not work with basic auth
+        next if $backend eq 'tier2d'; # does not work with basic auth
+        my $test = TestUtils::test_page(
+            'url'    => $url,
+            'like'   => ['Tactical Monitoring Overview', 'class="proxy_header"'],
         );
     }
 }
