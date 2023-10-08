@@ -1841,6 +1841,11 @@ function reloadPageDo(withReloadButton, freshReload, preCheckUrl, preCheckRetryS
         updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
     }
 
+    // setInnerHTMLWithScripts does not work with http
+    if (window.location.protocol === "http:") {
+        freshReload = true;
+    }
+
     if(freshReload) {
         if(preCheckUrl) {
             redirect_url_after_preCheck(newUrl, preCheckUrl, preCheckRetrySeconds);
