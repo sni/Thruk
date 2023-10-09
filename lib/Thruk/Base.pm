@@ -278,6 +278,7 @@ sub array_group_by {
     my($data, $key) = @_;
     return {} unless defined $data;
 
+    confess("not an array") unless ref $data eq 'ARRAY';
     my $grouped = {};
     for my $d (@{$data}) {
         my $k = $d->{$key} // '';

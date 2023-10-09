@@ -1,0 +1,29 @@
+version: "2"
+
+services:
+
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+
+  http-backend:
+    build: http-backend/
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - ../../../:/thruk:ro
+
+  livestatus-backend:
+    build: livestatus-backend/
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro

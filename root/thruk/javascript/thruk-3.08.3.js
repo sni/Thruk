@@ -152,7 +152,7 @@ function init_page() {
     jQuery("IMG.cal_popup, I.cal_popup").off("click").on("click", show_cal).addClass("clickable");
 
     /* toggle passwords */
-    jQuery("I.togglePassword").off("click").on("click", togglePasswordVisibility).addClass("clickable");
+    jQuery("I.js-toggle-password").off("click").on("click", togglePasswordVisibility).addClass("clickable");
 
     var params = toQueryParams();
     if(params["scrollTo"]) {
@@ -1800,6 +1800,9 @@ function triggerUnloadTimer() {
     var delay = 15000;
     jQuery('#reload-timer').addClass("hidden");
     var timer = jQuery('#unload-timer')[0];
+    if(!timer) {
+        return;
+    }
     jQuery(timer).addClass("hidden");
     jQuery('#unload-timer-parent').removeClass("hidden");
     jQuery(timer).removeClass("scale-x-100").addClass("scale-x-0");
@@ -5056,9 +5059,9 @@ function togglePasswordVisibility(ev) {
     el.toggleClass("uil-eye");
     el.toggleClass("uil-eye-slash");
     if(el.hasClass("uil-eye")) {
-        jQuery("DIV.togglePassword INPUT").attr('type', 'text');
+        jQuery("DIV.js-toggle-password INPUT").attr('type', 'text');
     } else {
-        jQuery("DIV.togglePassword INPUT").attr('type', 'password');
+        jQuery("DIV.js-toggle-password INPUT").attr('type', 'password');
     }
 }
 
@@ -8870,7 +8873,17 @@ var ajax_search = {
     /* hide the search results */
     hide_results: function(event, immediately, setfocus) {
         resetRefresh();
-        if(ajax_search.dont_hide) { return; }
+        if(ajax_search.dont_hide) {
+            // check again if focus is in a different input field now
+            var id = ajax_search.input_field;
+            window.setTimeout(function() {
+                var el = document.activeElement;
+                if(el && el.tagName && el.tagName == "INPUT" && el.id != id) {
+                    ajax_search.hide_results(null, true);
+                }
+            }, 200);
+            return;
+        }
         if(event && event.target) {
         }
         else {

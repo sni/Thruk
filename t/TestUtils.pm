@@ -1234,11 +1234,17 @@ sub js_deinit {
 sub js_ok {
     my($src, $msg) = @_;
     our $mech;
-    ok(1, $msg);
+    ok(1, sprintf("js_ok(%s)", $msg));
     local $SIG{ALRM} = sub { die("timeout while waiting for js eval") };
     alarm(120);
     $mech->clear_js_errors();
-    $mech->eval_in_page($src, returnByValue => Cpanel::JSON::XS::false);
+    eval {
+        $mech->eval_in_page($src, returnByValue => Cpanel::JSON::XS::false);
+    };
+    my $err = $@;
+    if($err) {
+        fail(sprintf("js ok failed for %s: %s", $msg, $err));
+    }
     my @err = $mech->js_errors();
     for my $e (@err) {
       _js_diag_error($e);

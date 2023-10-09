@@ -26,10 +26,10 @@
         <form method="POST" action="login.cgi" onsubmit="setFormBtnSpinner(this)" class="w-full">
           <input type="hidden" name="referer" value="[% referer | html %]">
           <div class="relative"><i class="uil uil-user absolute opacity-50 top-4 left-2"></i><input type="text" name="login" placeholder="User" id="loginuser" required class="w-full text-lg silent mt-2 pl-8" /></div>
-          <div class="togglePassword relative mt-2">
+          <div class="js-toggle-password relative mt-2">
             <i class="uil uil-key-skeleton opacity-50 absolute top-2 left-2"></i>
             <input type="password" name="password" placeholder="Password" required class="w-full text-lg silent px-8" />
-            <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 my-1.5 opacity-50 text-lg togglePassword"></i>
+            <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 my-1.5 opacity-50 text-lg js-toggle-password"></i>
           </div>
           <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
             <div class="w-5"><i class="uil uil-placeholder"></i></div>

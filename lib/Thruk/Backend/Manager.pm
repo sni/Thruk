@@ -2842,7 +2842,15 @@ sub rpc {
         die("only supported for http backends");
     }
     _debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
-    return($backend->{'class'}->rpc($c, $function, $args));
+    my @res;
+    eval {
+        @res = $backend->{'class'}->rpc($c, $function, $args);
+    };
+    my $err = $@;
+    if($err) {
+        die(sprintf("[%s] rpc: %s", $backend->{'name'}, $err));
+    }
+    return(@res);
 }
 
 ########################################

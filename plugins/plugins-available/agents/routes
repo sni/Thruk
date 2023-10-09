@@ -1,0 +1,17 @@
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/agents.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/agents.cgi'} = 'Thruk::Controller::agents::index';
+
+# add new menu item, but only if user has all of the
+# requested roles
+Thruk::Utils::Menu::insert_item('System', {
+                                'href'  => '/thruk/cgi-bin/agents.cgi',
+                                'name'  => 'Agents',
+                                'roles' => 'admin',
+});

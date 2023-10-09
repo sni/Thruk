@@ -1,0 +1,13 @@
+== Overview
+
+this scenario tests agent configuration in 2 ways:
+
+  hq
+  ├── http-backend
+  └── livestatus-backend
+
+The hq simply connects to both backends.
+The http backend can be fully controlled by the hq while the livestatus backend
+must be configured locally.
+
+Entry page is: https://127.0.0.3:60443/demo/

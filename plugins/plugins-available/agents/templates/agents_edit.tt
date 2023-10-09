@@ -1,0 +1,337 @@
+﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+[% PROCESS _blocks.tt %]
+
+<script>
+<!--
+  var pageLoaded = false;
+-->
+</script>
+
+[% BLOCK _check_type %]
+  <table class="h-full w-full cellspacing striped rowhover [% sub | html %] js-checks" style="display: none;">
+    <tbody>
+    [% FOREACH check = checks.$type; name = check.name %]
+      [% IF services.exists(name); s = services.$name; END %]
+      <tr>
+        <th>
+          <div class="flex items-center min-w-max justify-between">
+            <div class="text-ellipsis overflow-hidden max-w-lg">[% IF services.exists(name) %]<a href="extinfo.cgi?type=2&host=[% s.host_name | uri %]&service=[% s.description | uri %]&backend=[% s.peer_key %]" class="link">[% END %][% check.name | html %][% IF services.exists(name) %]</a>[% END %]</div>
+            [% IF services.exists(name) %]
+              [% comment_count = s.comments.size; has_bp=0; PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
+            [% END %]
+          </div>
+        </th>
+        <td>
+          [% state = 'PENDING' %]
+          [% IF type == "exists" || type == "obsolete" %]
+            [% IF services.exists(name) %]
+              [% IF s.has_been_checked == 0 %]
+                [% state = 'PENDING' %]
+              [% ELSIF s.state == 0 %]
+                [% state = 'OK' %]
+              [% ELSIF s.state == 1 %]
+                [% state = 'WARNING' %]
+              [% ELSIF s.state == 2 %]
+                [% state = 'CRITICAL' %]
+              [% ELSIF s.state == 3 %]
+                [% state = 'UNKNOWN' %]
+              [% END %]
+            [% END %]
+            <div class='text-center badge [% state %]'>[% state %]</div>
+          [% END %]
+          [% IF type == "new" %]
+            <div class='text-center badge PENDING'>new</div>
+          [% END %]
+          [% IF type == "disabled" %]
+            <div class='text-center badge PENDING'>disabled</div>
+          [% END %]
+        </td>
+        [% IF type == "exists" || type == "obsolete" %]
+        <td class='truncate w-1/2 max-w-xs'>
+          [% IF services.exists(name) %]
+            [% s.plugin_output %]
+          [% END %]
+        </td>
+        [% END %]
+        <td class="w-full">
+          [% IF type != "exists" %]
+            [% IF check.defined("info") %]
+              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
+              <div id="info_[% check.id %]" class="hidden whitespace-pre text-left">[% check.info | nl2br %]</div>
+            [% END %]
+          [% END %]
+        </td>
+        <td class="pt-px pb-px">
+          <div class="flexrow flex-nowrap gap-x-2">
+            <div class="radiogroup" style="width: 135px; height: 24px;">
+              <input type="radio" class="activeENABLED" value="on" id="[% check.id %]_on" name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]><label for="[% check.id %]_on">On</label>
+              [% IF type == "new" %]
+              <input type="radio" value="new" id="[% check.id %]_new" name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]><label for="[% check.id %]_new">New</label>
+              [% END %]
+              <input type="radio" value="off" id="[% check.id %]_off" name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]><label for="[% check.id %]_off">Off</label>
+            </div>
+          </div>
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+    [% IF checks.$type.size == 0 %]
+    <tfoot>
+      <tr>
+        <td class="text-center textHINT">[% IF agent.hostname != "new" %]no [% type %] checks.[% ELSE %]not yet scanned...[% END %]</td>
+      </tr>
+    </tfoot>
+    [% END %]
+  </table>
+[% END %]
+
+
+<div class="flexrow 2xl:justify-between h-full w-[800px]">
+  <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[500px]">
+    <div class="head justify-between" style="flex: 0 0 40px;">
+      <div class="w-[100px]">
+        <a href="agents.cgi" class="button header-button rounded w-[70px]" title="Go back to agent list"><i class="uil uil-angle-double-left"></i>Back</a>
+      </div>
+      <h3>[% IF agent.hostname != "new" %]Edit[% ELSE%]Add[% END %] Agent</h3>
+      <div class="w-40">
+        [% class = ""; IF reload_required; class=" orange"; END %]
+        [% PROCESS _button btn = {
+          form   => { action => 'conf.cgi', },
+          data   => { sub => 'objects', 'apply' => 'yes', 'reload' => 'yes', CSRFtoken => get_user_token(c), },
+          button => { class => 'js-activate-btn w-full' _ class, title => "Apply all changes and reload core", onclick => "return send_form_in_background_and_reload(this);", html => '<i class="uil uil-sync"></i>Activate Changes' },
+        }%]
+      </div>
+    </div>
+    <form action="agents.cgi" method="POST" class="flexcol gap-y-0 w-full h-[calc(100%-45px)]" onsubmit="setFormBtnSpinner(this)">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <input type="hidden" name="old_hostname" value="[% agent.hostname | html %]">
+      <input type="hidden" name="old_backend" value="[% agent.peer_key | html %]">
+      <input type="hidden" name="type" value="[% agent.type | html %]">
+      [% IF ! has_multiple_backends %]
+      <input type="hidden" name="backend" value="[% (agent.peer_key || config_backends.keys.0) | html %]">
+      [% END %]
+      <div style="flex: 0 0 140px;">
+        <table class="body cellspacing striped">
+          <tbody>
+            <tr>
+              <th>Hostname</th>
+              <td>
+                <div class="flexrow flex-nowrap gap-x-1">
+                  <input type="text" name="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" class="flex-grow" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'create new host', autosubmit:false })">
+                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Section:</span>
+                  <input type="text" name="section" value="[% agent.section | html %]" class="w-36" onfocus="this.click()" onclick="ajax_search.init(this, 'section', { url: 'agents.cgi?action=json&amp;type=section', emptymsg:'create new section', autosubmit:false })">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>IP Address</th>
+              <td>
+                <div class="flexrow flex-nowrap gap-x-1">
+                  <div class="flexrow flex-nowrap gap-x-1 grow">
+                    <input type="text" name="ip" value="[% agent.ip | html %]" placeholder="will use hostname if empty" class="flex-grow">
+                    <button class="js-ip-wzd-button" title="autofill address from hostname ip lookup."><i class="uil uil-lightbulb mr-0"></i></button>
+                  </div>
+                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Port:</span>
+                  <input type="text" name="port" value="[% agent.port | html %]" class="w-36" placeholder="8443">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Password</th>
+              <td>
+                <div class="flexrow flex-nowrap gap-x-1">
+                  <div class="js-toggle-password relative flex-grow">
+                    <input type="password" name="password" value="" class="w-full" placeholder="[% IF agent.password != '' %]password set, enter new one to change[% ELSE %]enter agent password or macro, ex.: $USER9$[% END %]" autocomplete="new-password">
+                    <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 opacity-50 text-lg js-toggle-password"></i>
+                  </div>
+                  [% IF has_multiple_backends %]
+                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Site:</span>
+                  <input type="text" name="backend" value="[% peer_name(agent) | html %]" class="w-36" onfocus="this.click()" onclick="ajax_search.init(this, 'site', { url: 'agents.cgi?action=json&amp;type=site', emptymsg:'select an existing site', autosubmit:false })" required>
+                  [% END %]
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" align="center">
+                <div class="flexrow flex-nowrap justify-evenly">
+                  <button class="submit w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> rescan</button>
+                  <button class="submit w-44 js-save-btn" name="action" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="head justify-between" style="flex: 0 0 40px;">
+        <div class="grow"></div>
+        <span class="tabs clickable text-center text-sm w-40 active" id="sub_1" onclick="set_sub(1)">Add New (<span class="js-type-1-size">[% checks.new.size %]</span>)</span>
+        <span class="tabs clickable text-center text-sm w-40" id="sub_2" onclick="set_sub(2)">Active Checks (<span class="js-type-2-size">[% checks.exists.size %]</span>)</span>
+        <span class="tabs clickable text-center text-sm w-40" id="sub_3" onclick="set_sub(3)">Obsolete Checks (<span class="js-type-3-size">[% checks.obsolete.size %]</span>)</span>
+        <span class="tabs clickable text-center text-sm w-40" id="sub_4" onclick="set_sub(4)">Unwanted Checks (<span class="js-type-4-size">[% checks.disabled.size %]</span>)</span>
+        <div class="grow"></div>
+      </div>
+      <div id="checksTable" class="h-full overflow-auto">
+        <div id="checksTableContent">
+          [% PROCESS _check_type type="new" sub="sub_1" %]
+          [% PROCESS _check_type type="exists" sub="sub_2" %]
+          [% PROCESS _check_type type="obsolete" sub="sub_3" %]
+          [% PROCESS _check_type type="disabled" sub="sub_4" %]
+        </div>
+      </div>
+      <div class="footer" style="flex: 0 0 40px;">
+        [% IF agent.hostname != "new" %]<button name="action" value="remove" class="hover-red w-32" onclick="return(confirm('really remove host: [% agent.hostname | html %]?'))"><i class="uil uil-trash-alt"></i> Delete</button>[% END %]
+      </div>
+    </form>
+  </div>
+
+  <div class="w-[350px] hidden xl:block"></div>
+</div>
+
+<script>
+<!--
+function scan_callback(form, success, data, textStatus, jqXHR) {
+  btn = jQuery(form).find("DIV.spinner").parents("BUTTON");
+  if(!success || (data && data.ok && data.ok == 0)) {
+    if(!showMessageFromCookie()) {
+      if(data && data.message) {
+        thruk_message(data.ok, data.message);
+      }
+    }
+    if(btn) {
+      setBtnError(btn[0], "scan failed: "+(data ? data.message : 'unknown error'));
+    }
+    var msg = getXHRerrorMsg("", textStatus, jqXHR);
+    jQuery("#checksTableContent").html("<div class='text-center textHINT mt-5'>"+msg+"</div>");
+    return;
+  }
+
+  btn = jQuery(form).find("DIV.spinner").parents("BUTTON");
+  if(btn) {
+    setBtnNoSpinner(btn[0]);
+  }
+  updateChecksTable(form);
+
+  jQuery(".js-rescan-btn").removeClass("green");
+}
+
+function updateChecksTable(form) {
+    var host    = jQuery(form).find("INPUT[name=hostname]").val();
+    var backend = jQuery(form).find("INPUT[name=backend]").val();
+    var type    = jQuery(form).find("INPUT[name=type]").val();
+    jQuery('#checksTable').html("<div class='spinner'><\/div>");
+    var url = "agents.cgi #checksTableContent";
+    var data = {
+      action:   'edit',
+      hostname: host,
+      backend:  backend,
+      type:     type
+    };
+    jQuery('#checksTable').load(url, data, function(text, status, req) {
+      if(status == "error") {
+        thruk_message(1, "updating checks failed");
+        var msg = getXHRerrorMsg("", status, req);
+        jQuery("#checksTable").html("<div class='text-center textHINT mt-5'>"+msg+"</div>");
+        updateChecksTotals();
+        return;
+      }
+      updateChecksTotals();
+      start_hide_activity_icons_timer();
+      if(lastActiveSub) {
+        set_sub(lastActiveSub);
+      }
+      if(pageLoaded) {
+        saveInitialFormValues();
+      }
+    });
+}
+
+var totals = {};
+function updateChecksTotals() {
+  jQuery("TABLE.js-checks TBODY").each(function(i, tbody) {
+    var num = tbody.rows.length;
+    jQuery("SPAN.js-type-"+(i+1)+"-size").text(num);
+    totals["sub_"+(i+1)] = num;
+  });
+}
+
+
+var initial_form_values;
+function saveInitialFormValues() {
+  initial_form_values = jQuery("INPUT[type='radio']").serialize();
+}
+
+function checkSaveButtonColor() {
+  var cur_form_values = jQuery("INPUT[type='radio']").serialize();
+  if(cur_form_values != initial_form_values) {
+    jQuery(".js-save-btn").addClass("green");
+  } else {
+    jQuery(".js-save-btn").removeClass("green");
+  }
+}
+
+jQuery(document).on("click", checkSaveButtonColor);
+
+jQuery(window).on('beforeunload', function(e){
+  var cur_form_values = jQuery("INPUT[type='radio']").serialize();
+  if(cur_form_values != initial_form_values) {
+    var msg = "Not applied changes will be lost if you leave this page.";
+    e.returnValue = msg;
+    triggerUnloadTimerSkipNext = true;
+    return(msg);
+  }
+  return;
+});
+
+jQuery(document).ready(function() {
+  updateChecksTotals();
+  // activate first tab with entries
+  var found = false;
+  jQuery(["sub_1", "sub_2", "sub_3", "sub_4"]).each(function(i, name) {
+    if(totals[name] > 0) {
+      set_sub(i+1);
+      found = true;
+      return(false);
+    }
+    return(true);
+  });
+  if(!found) {
+    set_sub(1);
+  }
+
+  pageLoaded = true;
+  saveInitialFormValues();
+  start_hide_activity_icons_timer();
+
+  /* command line wizard / plugins */
+  jQuery('button.js-ip-wzd-button').unbind("click").click(function() {
+      var host = jQuery("INPUT[name=hostname]").val();
+      if(host == undefined) {
+          return false;
+      }
+
+      jQuery.ajax({
+          url: 'conf.cgi',
+          data: {
+              action:   'json',
+              type:     'dig',
+              host:      host,
+              CSRFtoken: CSRFtoken
+          },
+          type: 'POST',
+          success: function(data) {
+            if(confirm("autofill with resolved addess: "+data.address)) {
+              jQuery("INPUT[name=ip]").val(data.address).effect('highlight', {}, 1000);
+            }
+          },
+          error: ajax_xhr_error_logonly
+      });
+      return false;
+  });
+});
+
+-->
+</script>
+
+
+[% PROCESS _footer.tt %]

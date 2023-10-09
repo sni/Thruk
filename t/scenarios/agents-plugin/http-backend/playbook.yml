@@ -1,0 +1,53 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+
+  - shell: rpm -Uvh "https://labs.consol.de/repo/testing/rhel9/i386/labs-consol-testing.rhel9.noarch.rpm"
+    args:
+      creates: "/etc/yum.repos.d/labs-consol-testing.repo"
+  - name: "yum install snclient"
+    include_role:
+      name: yum_retry
+    vars:
+      package:
+        - snclient
+  - copy:
+      src: "/root/snclient_local.ini"
+      dest: "/etc/snclient/snclient_local.ini"
+  - shell: "snclient &"
+
+  - name: create symlink to agents plugin
+    file:
+      src: /thruk/plugins/plugins-available/agents
+      dest: /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents
+      owner: demo
+      group: demo
+      state: link
+
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+
+  - name: add user macro
+    lineinfile:
+      path: /omd/sites/demo/etc/naemon/resource.cfg
+      regexp: '^\$USER5\$='
+      line: $USER5$=test
+
+  - copy:
+      src: "/root/agents.cfg"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.d/agents.cfg"
+      owner: "demo"
+      group: "demo"

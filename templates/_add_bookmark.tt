@@ -1,5 +1,5 @@
 ﻿<div class="flex relative">
-  <button class="round small" title="Manager user bookmarks" onclick="resetRefresh(); initBookSorting(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><i class="uil uil-bookmark"></i></button>
+  <button class="round small" title="manage user bookmarks" onclick="resetRefresh(); initBookSorting(); toggleElement('add_bookmark', undefined, true); refreshNavSections('bookmark_sections'); return false;"><i class="uil uil-bookmark"></i></button>
 
   <div class="card shadow-float absolute z-20 top-7 w-[600px] overflow-hidden" style="display: none;" id="add_bookmark">
     <div class="head p-0">

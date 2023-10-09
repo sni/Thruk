@@ -78,7 +78,7 @@ sub check_templates {
 sub _get_classes {
     my($file) = @_;
     my $content = Thruk::Utils::IO::read($file);
-    my @raw = $content =~ m/([\s,\.\w\-_:>\(\)\/\\]+)\s*\{/sgmx;
+    my @raw = $content =~ m/([\s,\.\w\-_:>\+=\[\]"'%\(\)\/\\]+)\s*\{/sgmx;
     my $classes = {};
     for my $cls (@raw) {
         # split class names by comma and >, ex.: cls1, cls2 or TABLE > .cls
@@ -88,6 +88,13 @@ sub _get_classes {
             # trim leading html tag, ex.: DIV.classname
             $c =~ s/\\//mx;
             $c =~ s/^\w+\././mx;
+            # remove trailing + label
+            $c =~ s/\s+\+\s+\w+//mx;
+            # remove [type=..]
+            $c =~ s/(\w+)\[.*?\]/$1/mx;
+            # remove :checked
+            $c =~ s/:checked//mx;
+            next if $c eq '';
             # split by dot to catch multiple classes from ex.: DIV.cls1.cls2
             for my $c1 (split/\./mx, $c) {
                 $c1 = Thruk::Base::trim_whitespace($c1);
