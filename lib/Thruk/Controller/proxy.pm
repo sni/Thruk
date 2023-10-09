@@ -177,7 +177,8 @@ sub _cleanup_response {
             # if its thruk itself, insert a message at the top
             if($body =~ m/(site_panel_container|id="mainframe")/mx) {
                 my $header = "";
-                $c->stash->{'proxy_peer'} = $peer;
+                $c->stash->{'proxy_peer'}   = $peer;
+                $c->stash->{'local_prefix'} = "###local_prefix###";
                 Thruk::Views::ToolkitRenderer::render($c, "_proxy_header.tt", $c->stash, \$header);
                 $body =~ s/<\/body>/$header<\/body>/gmx;
             }
@@ -187,6 +188,7 @@ sub _cleanup_response {
 
         # send other links to our proxy
         $body =~ s%("|')$replace_prefix%$1$proxy_prefix$replace_prefix%gmx;
+        $body =~ s%\#\#\#local_prefix\#\#\#%$url_prefix%gmx;
 
         # length has changed
         $res->headers()->remove_header('content-length');
