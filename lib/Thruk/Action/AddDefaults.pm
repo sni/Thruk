@@ -682,6 +682,20 @@ sub add_cached_defaults {
 
 ########################################
 
+=head2 delayed_proc_info_update
+
+    run process info update after the main page has been served
+
+=cut
+sub delayed_proc_info_update {
+    my($c) = @_;
+    my $cached_data = $c->cache->get->{'global'} || {};
+    set_processinfo($c, ADD_SAFE_DEFAULTS, $cached_data);
+    return;
+}
+
+########################################
+
 =head2 set_configs_stash
 
   set_configs_stash($c)
