@@ -758,6 +758,7 @@ sub get_services_for_host {
 
     $self->{'stats'}->profile(begin => "M::C::get_services_for_host()") if defined $self->{'stats'};
 
+    confess("not a host object") if ref($host) ne 'Monitoring::Config::Object::Host';
     my($host_conf_keys, $host_config) = $host->get_computed_config($self);
 
     my $services  = { 'host' => {}, 'group' => {}};

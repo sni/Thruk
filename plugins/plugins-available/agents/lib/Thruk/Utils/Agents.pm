@@ -96,31 +96,44 @@ sub update_inventory {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype)
+    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password)
 
 returns list of checks as flat list.
 
 =cut
 sub get_services_checks {
-    my($c, $backend, $hostname, $hostobj, $agenttype) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $password) = @_;
     my $checks   = [];
     return($checks) unless $hostname;
-    if(!$hostobj && !$agenttype) {
-        die("need either hostobj or agenttype");
-    }
 
     # http backends must check inventory on remote host
     # otherwise the local inventory check would result in different checks
     Thruk::Utils::Agents::set_object_model($c, $backend) unless $c->{'obj_db'};
     if($c->{'obj_db'}->is_remote()) {
         my $peer = $c->db->get_peer_by_key($backend);
+        confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype]);
+        confess("need agenttype") unless $agenttype;
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password]);
         return($res[0]);
     }
 
+    if(!$hostobj) {
+        my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
+        if($objects && scalar @{$objects} > 0) {
+            $hostobj = $objects->[0];
+        } else {
+            if(!$agenttype) {
+                confess("need either hostobj or agenttype");
+            }
+        }
+    }
+
+    my $type = $agenttype // $hostobj->{'conf'}->{'_AGENT'};
+    $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
+
     my $agent = build_agent($agenttype // $hostobj);
-    $checks = $agent->get_services_checks($c, $hostname, $hostobj);
+    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password);
     set_checks_category($c, $hostobj, $checks);
 
     return($checks);
@@ -324,6 +337,7 @@ sub set_checks_category {
 
     my $existing = {};
     for my $chk (@{$checks}) {
+        next if $chk->{'id'} eq '_host';
         my $name = $chk->{'name'};
         $existing->{$chk->{'id'}} = 1;
         my $svc = $services->{$name};
@@ -395,6 +409,7 @@ sub scan_agent {
     # otherwise the local inventory check would result in different checks
     if($c->{'obj_db'}->is_remote()) {
         my $peer = $c->db->get_peer_by_key($backend);
+        confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         $params->{'backend'} = $peer->remotekey();
         my @res = $c->db->rpc($backend, __PACKAGE__."::scan_agent", [$c, $params]);

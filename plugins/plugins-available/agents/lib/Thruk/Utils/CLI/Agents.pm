@@ -95,7 +95,7 @@ sub _check_inventory {
                                             ],
     );
     if(!$hosts || scalar @{$hosts} == 0) {
-        return(sprintf("UNKNOWN - no host found with enabled agent and name: \n".$host), 3);
+        return(sprintf("UNKNOWN - no host found with enabled agent and name: %s\n", $host), 3);
     }
 
     my $hst    = $hosts->[0];
@@ -110,7 +110,7 @@ sub _check_inventory {
     if($err) {
         return(sprintf("CRITICAL - updating inventory failed: %s\n", $err), 2);
     }
-    my($checks, $num)  = Thruk::Utils::Agents::get_agent_checks_for_host($c, $host, $hostobj);
+    my($checks, $num)  = Thruk::Utils::Agents::get_agent_checks_for_host($c, $hst->{'peer_key'}, $host, $hostobj);
 
     my $elapsed  = tv_interval($t1);
     my $perfdata = sprintf("duration=%ss", $elapsed);

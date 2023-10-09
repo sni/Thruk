@@ -90,7 +90,7 @@ sub get_config_objects {
         $hostobj->set_uniq_id($c->{'obj_db'});
         $hostobj->{'conf'}->{'host_name'} = $hostname;
         $hostobj->{'conf'}->{'alias'}     = $hostname;
-        $hostobj->{'conf'}->{'use'}       = "generic-host";
+        $hostobj->{'conf'}->{'use'}       = ['generic-host'];
         $hostobj->{'conf'}->{'address'}   = $ip || $hostname;
     } else {
         $hostobj = $objects->[0];
@@ -99,8 +99,17 @@ sub get_config_objects {
     my @list = ($hostobj);
 
     my $hostdata = $hostobj->{'conf'} // {};
-    $hostdata->{'_AGENT'}          = 'snclient';
-    $hostdata->{'_AGENT_PASSWORD'} = $password if($password ne ''); # only if changed
+
+    my $services = Thruk::Utils::Agents::get_host_agent_services($c, $hostobj);
+
+    # save services
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password);
+    my $checks_hash = Thruk::Base::array2hash($checks, "id");
+
+    confess("missing host config") unless $checks_hash->{'_host'};
+    for my $key (sort keys %{$checks_hash->{'_host'}->{'conf'}}) {
+        $hostdata->{$key} = $checks_hash->{'_host'}->{'conf'}->{$key};
+    }
     $hostdata->{'_AGENT_SECTION'}  = $section;
     $hostdata->{'_AGENT_PORT'}     = $port;
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
@@ -110,13 +119,12 @@ sub get_config_objects {
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
     }
 
-    # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $hostname, $hostobj);
-    my $checks_hash = Thruk::Base::array2hash($checks, "id");
     for my $id (sort keys %{$checks_hash}) {
+        next if $id eq '_host';
         my $type = $c->req->parameters->{'check.'.$id} // 'off';
         my $chk  = $checks_hash->{$id};
-        my $svc = $chk->{'_svc'};
+        confess("no name") unless $chk->{'name'};
+        my $svc = $services->{$chk->{'name'}};
         if(!$svc && $type eq 'on') {
             # create new one
             $svc = Monitoring::Config::Object->new( type     => 'service',
@@ -137,39 +145,7 @@ sub get_config_objects {
         }
         next unless $type eq 'on';
 
-        my $svc_password = '$_HOSTAGENT_PASSWORD$';
-        if($password ne '' && $password =~ m/^\$.*\$$/mx) {
-            $svc_password = $password;
-        }
-        my $command = sprintf("check_snclient!%s -p '%s' -u 'https://%s:%s' %s",
-                _check_nsc_web_extra_options($c),
-                $svc_password,
-                '$HOSTADDRESS$',
-                '$_HOSTAGENT_PORT$',
-                $chk->{'check'},
-        );
-        my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
-        if($chk->{'check'} eq 'inventory') {
-            $command  = sprintf("check_thruk_agents!agents check inventory '%s'", $hostname);
-            $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
-        }
-        if($chk->{'args'}) {
-            for my $arg (sort keys %{$chk->{'args'}}) {
-                $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
-            }
-        }
-
-        confess("no name") unless $chk->{'name'};
-
-        $svc->{'conf'} = {
-            'host_name'           => $hostname,
-            'service_description' => $chk->{'name'},
-            'use'                 => 'generic-service',
-            'check_interval'      => $interval,
-            'check_command'       => $command,
-            '_AGENT_AUTO_CHECK'   => $chk->{'id'},
-        };
-        $svc->{'conf'}->{'parents'} = $chk->{'parent'} if $chk->{'parent'};
+        $svc->{'conf'} = $chk->{'svc_conf'};
 
         push @list, $svc;
     }
@@ -188,18 +164,18 @@ sub get_config_objects {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj)
+    get_services_checks($c, $hostname, $hostobj, $password)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj) = @_;
+    my($self, $c, $hostname, $hostobj, $password) = @_;
     my $datafile = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
     my $checks = [];
     if(-r $datafile) {
         my $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
-        $checks = _extract_checks($c, $data->{'inventory'}) if $data->{'inventory'};
+        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password) if $data->{'inventory'};
     }
     return($checks);
 }
@@ -252,7 +228,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory) = @_;
+    my($c, $inventory, $hostname, $password) = @_;
     my $checks = [];
 
     # agent check itself
@@ -327,6 +303,52 @@ sub _extract_checks {
 
     # TODO: process
     # TODO: move into modules
+
+    # compute host configuration
+    my $hostdata = {};
+    $hostdata->{'_AGENT'} = 'snclient';
+    $password = '' unless defined $password;
+    $hostdata->{'_AGENT_PASSWORD'} = $password if($password ne ''); # only if changed
+    push @{$checks}, {
+        'id'       => '_host',
+        'conf'     => $hostdata,
+    };
+
+    # compute service configuration
+    for my $chk (@{$checks}) {
+        next if $chk->{'id'} eq '_host';
+        my $svc_password = '$_HOSTAGENT_PASSWORD$';
+        if($password ne '' && $password =~ m/^\$.*\$$/mx) {
+            $svc_password = $password;
+        }
+        my $command = sprintf("check_snclient!%s -p '%s' -u 'https://%s:%s' %s",
+                _check_nsc_web_extra_options($c),
+                $svc_password,
+                '$HOSTADDRESS$',
+                '$_HOSTAGENT_PORT$',
+                $chk->{'check'},
+        );
+        my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
+        if($chk->{'check'} eq 'inventory') {
+            $command  = sprintf("check_thruk_agents!agents check inventory '%s'", $hostname);
+            $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
+        }
+        if($chk->{'args'}) {
+            for my $arg (sort keys %{$chk->{'args'}}) {
+                $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
+            }
+        }
+
+        $chk->{'svc_conf'} = {
+            'host_name'           => $hostname,
+            'service_description' => $chk->{'name'},
+            'use'                 => ['generic-service'],
+            'check_interval'      => $interval,
+            'check_command'       => $command,
+            '_AGENT_AUTO_CHECK'   => $chk->{'id'},
+        };
+        $chk->{'svc_conf'}->{'parents'} = $chk->{'parent'} if $chk->{'parent'};
+    }
 
     return $checks;
 }

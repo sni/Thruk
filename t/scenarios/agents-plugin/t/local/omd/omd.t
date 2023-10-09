@@ -21,6 +21,7 @@ TestUtils::test_command({
 
 ###########################################################
 # create example host
+TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['Agents', 'Items Displayed'], waitfor => 'Items Displayed', follow => 1 );
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['Agents', 'Items Displayed'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=new', like => ['Add Agent', 'Save Changes'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=scan',
