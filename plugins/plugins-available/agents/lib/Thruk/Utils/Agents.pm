@@ -114,8 +114,8 @@ sub get_services_checks {
     Thruk::Utils::Agents::set_object_model($c, $backend) unless $c->{'obj_db'};
     if($c->{'obj_db'}->is_remote()) {
         my $peer = $c->db->get_peer_by_key($backend);
-        confess("no remotekey") unless $peer->{'class'}->{'remotekey'};
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->{'class'}->{'remotekey'}, $hostname, undef, $agenttype]);
+        confess("no remotekey") unless $peer->remotekey();
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype]);
         return($res[0]);
     }
 
@@ -395,8 +395,8 @@ sub scan_agent {
     # otherwise the local inventory check would result in different checks
     if($c->{'obj_db'}->is_remote()) {
         my $peer = $c->db->get_peer_by_key($backend);
-        confess("no remotekey") unless $peer->{'class'}->{'remotekey'};
-        $params->{'backend'} = $peer->{'class'}->{'remotekey'};
+        confess("no remotekey") unless $peer->remotekey();
+        $params->{'backend'} = $peer->remotekey();
         my @res = $c->db->rpc($backend, __PACKAGE__."::scan_agent", [$c, $params]);
         return($res[0]);
     }

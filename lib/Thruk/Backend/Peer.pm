@@ -85,6 +85,19 @@ sub peer_name {
 
 ##########################################################
 
+=head2 remotekey
+
+return peer key the backend uses on the remote side
+
+=cut
+
+sub remotekey {
+    my($self) = @_;
+    return($self->{'remotekey'} // $self->peer_key());
+}
+
+##########################################################
+
 =head2 peer_list
 
 return peer address list

@@ -230,6 +230,7 @@ sub get_processinfo {
         }
         $data->{$self->{'key'}} = delete $data->{$self->{'remotekey'}};
         $data->{$self->{'key'}}->{'peer_key'} = $self->{'key'};
+        $data->{$self->{'key'}}->{'remote_peer_key'} = $rkey;
     }
     return($data, $typ, $size);
 }

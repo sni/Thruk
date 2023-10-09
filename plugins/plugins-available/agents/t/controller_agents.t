@@ -12,7 +12,7 @@ BEGIN {
     # enable plugin
     `cd plugins/plugins-enabled && ln -s ../plugins-available/agents .`;
 
-    plan tests => 45;
+    plan tests => 39;
 }
 
 BEGIN {
@@ -36,7 +36,7 @@ SKIP: {
 #################################################
 # normal pages
 my $pages = [
-    { url => '/thruk/cgi-bin/agents.cgi', like => ['Agents', 'Items Displayed'] },
+    { url => '/thruk/cgi-bin/agents.cgi', like => ['Agents', 'Items Displayed'], waitfor => 'Items Displayed', follow => 1 },
     { url => '/thruk/cgi-bin/agents.cgi?action=new', like => ['Add Agent', 'Save Changes'] },
 ];
 

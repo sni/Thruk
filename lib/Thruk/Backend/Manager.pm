@@ -1624,8 +1624,7 @@ sub _do_on_peers {
         # and update last_program_starts
         # (set in Thruk::Utils::CLI::_cmd_raw)
         for my $key (keys %{$result}) {
-            my $res;
-            $res = $result->{$key}->{$key};
+            my $res = $result->{$key}->{$key};
             if($result->{$key}->{'configtool'} || $result->{$key}->{'thruk'}) {
                 $res = $result->{$key};
             }
@@ -1642,6 +1641,10 @@ sub _do_on_peers {
                     $peer->{'configtool'}->{$attr} = $configtool->{$attr};
                 }
                 $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
+
+                if($res->{'remote_peer_key'}) {
+                    $peer->{'remotekey'} = $res->{'remote_peer_key'};
+                }
             }
         }
     }
