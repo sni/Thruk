@@ -14,14 +14,10 @@
         LIVESTATUS_TCP_PORT=7001
 
   - name: create symlink to agents plugin
-    file:
-      src: /thruk/plugins/plugins-available/agents
-      dest: /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents
-      owner: demo
-      group: demo
-      state: link
+    shell: "ln -sfn /thruk/plugins/plugins-available/agents /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents"
 
-  - shell: rpm -Uvh "https://labs.consol.de/repo/testing/rhel9/i386/labs-consol-testing.rhel9.noarch.rpm"
+  - name: add labs testing repository
+    shell: rpm -Uvh "https://labs.consol.de/repo/testing/rhel9/i386/labs-consol-testing.rhel9.noarch.rpm"
     args:
       creates: "/etc/yum.repos.d/labs-consol-testing.repo"
   - name: "yum install snclient"
