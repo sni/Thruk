@@ -271,8 +271,14 @@ sub _extract_checks {
             $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
         }
         if($chk->{'args'}) {
-            for my $arg (sort keys %{$chk->{'args'}}) {
-                $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
+            if(ref $chk->{'args'} eq 'ARRAY') {
+                for my $arg (@{$chk->{'args'}}) {
+                    $command .= sprintf(" %s", $arg);
+                }
+            } else {
+                for my $arg (sort keys %{$chk->{'args'}}) {
+                    $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
+                }
             }
         }
 
@@ -294,6 +300,21 @@ sub _extract_checks {
 sub _make_info {
     my($data) = @_;
     return(Thruk::Utils::dump_params($data, 5000, 0))
+}
+
+##########################################################
+sub _make_name {
+    my($tmpl, $macros) = @_;
+    my $name = $tmpl;
+    if($macros) {
+        for my $key (sort keys %{$macros}) {
+            my $val = $macros->{$key};
+            $name =~ s|$key|$val|gmx;
+        }
+    }
+    $name =~ s/\s*$//gmx;
+    $name =~ s/^\s*//gmx;
+    return($name);
 }
 
 ##########################################################
@@ -333,18 +354,23 @@ sub _check_disable {
 ##########################################################
 sub _check_host_match {
     my($hosts) = @_;
-    $hosts = Thruk::Base::list($hosts);
-    return 1 if scalar @{$hosts} == 0;
-    my $hostname = $Thruk::Globals::HOSTNAME;
-    for my $hst (@{$hosts}) {
-        return 1 if $hst eq 'ANY';
-        return 1 if $hst eq '*';
-        return 1 if $hst eq '.*';
+    return(_check_pattern_match($Thruk::Globals::HOSTNAME, $hosts));
+}
+
+##########################################################
+sub _check_pattern_match {
+    my($str, $pattern) = @_;
+    $pattern = Thruk::Base::list($pattern);
+    return "ANY" if scalar @{$pattern} == 0;
+    for my $p (@{$pattern}) {
+        return "ANY" if $p eq 'ANY';
+        return "ANY" if $p eq '*';
+        return "ANY" if $p eq '.*';
         ## no critic
-        return 1 if $hostname =~ m/$hst/;
+        return $p if $str =~ m/$p/i;
         ## use critic
     }
-    return(0);
+    return(undef);
 }
 
 ##########################################################

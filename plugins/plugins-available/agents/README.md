@@ -50,22 +50,28 @@ For example:
 
         # include services in discovery
         <service>
-          name = snclient
-          name = apache2
-          name = postfix
-          name = ssh
-          name = exim4
-          name = mariadb
-          name = ntp
-          name = squid
+          # service name (available placeholder: %s - service name)
+          name  = service %s
+          service = snclient
+          service = apache2
+          service = postfix
+          service = ssh
+          service = exim4
+          service = mariadb
+          service = ntp
+          service = squid
 
-          #host = ANY    # restrict to specific hosts
+          # restrict to specific hosts (regular expression)
+          #host = ANY
         </service>
 
         <proc>
+          # service name (available placeholder: %u - user | %e - executable)
+          name  = ssh controlmaster %u
           match = /usr/bin/ssh.*ControlMaster=yes
           user  = mon
-          #host = ANY    # restrict to specific hosts
+          # restrict to specific hosts (regular expression)
+          #host = ANY
         </proc>
       </snclient>
     </Component>

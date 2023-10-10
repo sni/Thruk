@@ -41,6 +41,24 @@ sub get_checks {
         };
     }
 
+    if($inventory->{'uptime'}) {
+        push @{$checks}, {
+            'id'     => 'uptime',
+            'name'   => 'uptime',
+            'check'  => 'check_uptime',
+            'parent' => 'agent version',
+        };
+    }
+
+    if($inventory->{'os_version'}) {
+        push @{$checks}, {
+            'id'     => 'os_version',
+            'name'   => 'os version',
+            'check'  => 'check_os_version',
+            'parent' => 'agent version',
+        };
+    }
+
     if($inventory->{'network'}) {
         for my $net (@{$inventory->{'network'}}) {
             push @{$checks}, {
@@ -74,18 +92,18 @@ sub get_checks {
         my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
         for my $cfg (@{$configs}) {
             next unless Thruk::Agents::SNClient::_check_host_match($cfg->{'host'});
-            if($cfg->{'name'}) {
-                for my $n (@{Thruk::Base::list($cfg->{'name'})}) {
-                    $wanted->{$n} = $cfg;
-                }
+            next unless $cfg->{'service'};
+            for my $n (@{Thruk::Base::list($cfg->{'service'})}) {
+                $wanted->{$n} = $cfg;
             }
         }
         my $services = Thruk::Base::list($inventory->{'service'});
         for my $svc (@{$services}) {
             next unless $wanted->{$svc->{'name'}};
+            my $cfg = $wanted->{$svc->{'name'}};
             push @{$checks}, {
                 'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
-                'name'     => 'service '.$svc->{'name'},
+                'name'     => Thruk::Agents::SNClient::_make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
                 'check'    => 'check_service',
                 'args'     => { "service" => $svc->{'name'} },
                 'parent'   => 'agent version',
@@ -94,7 +112,64 @@ sub get_checks {
         }
     }
 
-    # TODO: process
+    if($inventory->{'process'}) {
+        my $already_checked = {};
+        my $wanted = {};
+        my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'proc'});
+        for my $cfg (@{$configs}) {
+            next unless Thruk::Agents::SNClient::_check_host_match($cfg->{'host'});
+            next unless $cfg->{'match'};
+            for my $n (@{Thruk::Base::list($cfg->{'match'})}) {
+                push @{$wanted->{$n}}, $cfg;
+            }
+        }
+        my $procs = Thruk::Base::list($inventory->{'process'});
+        for my $p (@{$procs}) {
+            my($cfg, $match, $user);
+            for my $m (sort keys %{$wanted}) {
+                $match = $m;
+                ## no critic
+                next unless $p->{'command_line'} =~ m|$m|i;
+                ## use critic
+
+                for my $cf (@{$wanted->{$m}}) {
+                    $user = Thruk::Agents::SNClient::_check_pattern_match($p->{'username'}, $cf->{'user'});
+                    next unless $user;
+                    $cfg = $cf;
+                    last;
+                }
+            }
+            next unless $cfg;
+            my $username = $user ne 'ANY' ? $p->{'username'} : "";
+            my $id       = 'proc.'.Thruk::Utils::Agents::to_id($match.'_'.($username || 'ANY'));
+            next if $already_checked->{$id};
+            $already_checked->{$id} = 1;
+            my $filter = [ "filter='command_line ~~ ".$match."'" ];
+            if($user ne 'ANY') {
+                push @{$filter}, "filter='username ~~ ".$user."'";
+            }
+            push @{$checks}, {
+                'id'       => $id,
+                'name'     => Thruk::Agents::SNClient::_make_name($cfg->{'name'} // 'proc %e %u', { '%e' => $p->{'exe'}, '%u' => $username }),
+                'check'    => 'check_process',
+                'args'     => $filter,
+                'parent'   => 'agent version',
+                'info'     => Thruk::Agents::SNClient::_make_info($p),
+            };
+        }
+    }
+
+    # external scripts
+    if($inventory->{'scripts'}) {
+        for my $script (@{$inventory->{'scripts'}}) {
+            push @{$checks}, {
+                'id'       => 'extscript.'.Thruk::Utils::Agents::to_id($script),
+                'name'     => $script,
+                'check'    => $script,
+                'parent'   => 'agent version',
+            };
+        }
+    }
 
     return $checks;
 }
