@@ -176,6 +176,7 @@ menu.conf
 META.yml
 plugins/plugins-available/agents/description.txt
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Base.pm
 plugins/plugins-available/agents/lib/Thruk/Controller/agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/Agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/CLI/Agents.pm

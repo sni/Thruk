@@ -231,78 +231,15 @@ sub _extract_checks {
     my($c, $inventory, $hostname, $password) = @_;
     my $checks = [];
 
-    # agent check itself
-    push @{$checks}, { 'id' => 'inventory', 'name' => 'agent inventory', check => 'inventory', parent => 'agent version'};
-    push @{$checks}, { 'id' => 'version', 'name' => 'agent version', check => 'check_snclient_version'};
-
-    if($inventory->{'cpu'}) {
-        push @{$checks}, { 'id' => 'cpu', 'name' => 'cpu', check => 'check_cpu', parent => 'agent version' };
+    # get available modules
+    my $modules = Thruk::Utils::find_modules('Thruk/Agents/SNClient/Checks/*.pm');
+    for my $mod (@{$modules}) {
+        require $mod;
+        $mod =~ s/\//::/gmx;
+        $mod =~ s/\.pm$//gmx;
+        $mod->import;
+        push @{$checks}, @{$mod->get_checks($c, $inventory, $hostname, $password)}
     }
-
-    if($inventory->{'memory'}) {
-        push @{$checks}, {
-            'id'     => 'mem',
-            'name'   => 'memory',
-            'check'  => 'check_memory',
-            'parent' => 'agent version',
-        };
-    }
-
-    if($inventory->{'network'}) {
-        for my $net (@{$inventory->{'network'}}) {
-            push @{$checks}, {
-                'id'       => 'net.'.Thruk::Utils::Agents::to_id($net->{'name'}),
-                'name'     => 'net '.$net->{'name'},
-                'check'    => 'check_network',
-                'args'     => { "filter" => "name=".$net->{'name'} },
-                'parent'   => 'agent version',
-                'info'     => _make_info($net),
-                'disabled' => _check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{network}),
-            };
-        }
-    }
-
-    if($inventory->{'drivesize'}) {
-        for my $drive (@{$inventory->{'drivesize'}}) {
-            push @{$checks}, {
-                'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive'}),
-                'name'     => 'disk '.$drive->{'drive'},
-                'check'    => 'check_drivesize',
-                'args'     => { "drive" => $drive->{'drive'} },
-                'parent'   => 'agent version',
-                'info'     => _make_info($drive),
-                'disabled' => _check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{drivesize}),
-            };
-        }
-    }
-
-    if($inventory->{'service'}) {
-        my $wanted = {};
-        my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
-        for my $cfg (@{$configs}) {
-            next unless _check_host_match($cfg->{'host'});
-            if($cfg->{'name'}) {
-                for my $n (@{Thruk::Base::list($cfg->{'name'})}) {
-                    $wanted->{$n} = $cfg;
-                }
-            }
-        }
-        my $services = Thruk::Base::list($inventory->{'service'});
-        for my $svc (@{$services}) {
-            next unless $wanted->{$svc->{'name'}};
-            push @{$checks}, {
-                'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
-                'name'     => 'service '.$svc->{'name'},
-                'check'    => 'check_service',
-                'args'     => { "service" => $svc->{'name'} },
-                'parent'   => 'agent version',
-                'info'     => _make_info($svc),
-            };
-        }
-    }
-
-    # TODO: process
-    # TODO: move into modules
 
     # compute host configuration
     my $hostdata = {};
