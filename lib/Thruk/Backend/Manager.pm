@@ -1602,21 +1602,8 @@ sub _do_on_peers {
             # die with a small error for know, usually an empty result means that
             # none of our backends were reachable
             die("did not get a valid response for at least any site");
-            #local $Data::Dumper::Deepcopy = 1;
-            #my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
-            #for my $b (@{$get_results_for}) {
-            #    $msg   .= $b.": ".($c->stash->{'failed_backends'}->{$b} || '')."\n";
-            #}
-            #$msg   .= "called as '".(ref $function ? Dumper($function) : $function)."\n";
-            #$msg   .= "with args: ".Dumper(\%arg);
-            #confess($msg);
         }
     }
-
-    return($result, $type, $totalsize) if $raw_result;
-
-    $type = '' unless defined $type;
-    $type = lc $type;
 
     # extract some extra data
     if($function eq 'get_processinfo' && ref $result eq 'HASH') {
@@ -1648,6 +1635,11 @@ sub _do_on_peers {
             }
         }
     }
+
+    return($result, $type, $totalsize) if $raw_result;
+
+    $type = '' unless defined $type;
+    $type = lc $type;
 
     # howto merge the answers?
     my($data, $must_resort);
