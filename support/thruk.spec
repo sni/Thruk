@@ -443,6 +443,8 @@ exit 0
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/shinken_features
 %{_datadir}/%{name}/plugins/plugins-available/core_scheduling
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/core_scheduling
+%{_datadir}/%{name}/plugins/plugins-available/agents
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/agents
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/
