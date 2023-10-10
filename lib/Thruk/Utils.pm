@@ -3203,9 +3203,12 @@ returns list of found modules
 sub find_modules {
     my($pattern) = @_;
     my $modules = {};
+    $pattern =~ s|^/||gmx;
     for my $folder (@INC) {
         next unless -d $folder;
-        for my $file (glob($folder.$pattern)) {
+        my $f = $folder;
+        $f =~ s|\/$||gmx;
+        for my $file (glob($folder.'/'.$pattern)) {
             $file =~ s|^\Q$folder/\E||gmx;
             $modules->{$file} = 1;
         }
