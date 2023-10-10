@@ -10,6 +10,24 @@
 
 [% BLOCK _check_type %]
   <table class="h-full w-full cellspacing striped rowhover [% sub | html %] js-checks" style="display: none;">
+    [% IF type == "new" %]
+      <thead>
+        <tr>
+          <td align="center" colspan="5">
+            <button class="my-2" onclick="jQuery('.js-radio-new[value=\'on\']').attr('checked', true); return false;">Accept All New Checks</button>
+          </td>
+        </tr>
+      </thead>
+    [% END %]
+    [% IF type == "obsolete" %]
+      <thead>
+        <tr>
+          <td align="center" colspan="5">
+            <button class="my-2" onclick="jQuery('.js-radio-obsolete[value=\'off\']').attr('checked', true); return false;">Remove All Obsolete Checks</button>
+          </td>
+        </tr>
+      </thead>
+    [% END %]
     <tbody>
     [% FOREACH check = checks.$type; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
@@ -65,11 +83,11 @@
         <td class="pt-px pb-px">
           <div class="flexrow flex-nowrap gap-x-2">
             <div class="radiogroup" style="width: 135px; height: 24px;">
-              <input type="radio" class="activeENABLED" value="on" id="[% check.id %]_on" name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]><label for="[% check.id %]_on">On</label>
+              <input type="radio" value="on"  class="js-radio-[% type %] activeENABLED" id="[% check.id %]_on" name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]><label for="[% check.id %]_on">On</label>
               [% IF type == "new" %]
-              <input type="radio" value="new" id="[% check.id %]_new" name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]><label for="[% check.id %]_new">New</label>
+              <input type="radio" value="new" class="js-radio-[% type %]" id="[% check.id %]_new" name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]><label for="[% check.id %]_new">New</label>
               [% END %]
-              <input type="radio" value="off" id="[% check.id %]_off" name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]><label for="[% check.id %]_off">Off</label>
+              <input type="radio" value="off" class="js-radio-[% type %]" id="[% check.id %]_off" name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]><label for="[% check.id %]_off">Off</label>
             </div>
           </div>
         </td>
@@ -155,7 +173,7 @@
             <tr>
               <td colspan="2" align="center">
                 <div class="flexrow flex-nowrap justify-evenly">
-                  <button class="submit w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> rescan</button>
+                  <button class="submit w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
                   <button class="submit w-44 js-save-btn" name="action" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
                 </div>
               </td>
