@@ -3208,7 +3208,7 @@ sub find_modules {
         next unless -d $folder;
         my $f = $folder;
         $f =~ s|\/$||gmx;
-        for my $file (glob($folder.'/'.$pattern)) {
+        for my $file (glob($f.'/'.$pattern)) {
             $file =~ s|^\Q$folder/\E||gmx;
             $modules->{$file} = 1;
         }

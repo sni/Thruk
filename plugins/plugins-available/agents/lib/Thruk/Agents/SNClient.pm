@@ -297,13 +297,13 @@ sub _extract_checks {
 }
 
 ##########################################################
-sub _make_info {
+sub make_info {
     my($data) = @_;
     return(Thruk::Utils::dump_params($data, 5000, 0))
 }
 
 ##########################################################
-sub _make_name {
+sub make_name {
     my($tmpl, $macros) = @_;
     my $name = $tmpl;
     if($macros) {
@@ -318,7 +318,15 @@ sub _make_name {
 }
 
 ##########################################################
-sub _check_disable {
+
+=head2 check_disable
+
+    check_disable($data, $config)
+
+returns if checks disabled for given config
+
+=cut
+sub check_disable {
     my($data, $conf) = @_;
     for my $attr (sort keys %{$conf}) {
         my $val = $data->{$attr} // '';
@@ -352,13 +360,29 @@ sub _check_disable {
 }
 
 ##########################################################
-sub _check_host_match {
+
+=head2 check_host_match
+
+    check_host_match($config)
+
+returns true if checks is enabled on this host
+
+=cut
+sub check_host_match {
     my($hosts) = @_;
-    return(_check_pattern_match($Thruk::Globals::HOSTNAME, $hosts));
+    return(check_pattern_match($Thruk::Globals::HOSTNAME, $hosts));
 }
 
 ##########################################################
-sub _check_pattern_match {
+
+=head2 check_pattern_match
+
+    check_pattern_match($string, $config)
+
+returns true if attribute matches given config
+
+=cut
+sub check_pattern_match {
     my($str, $pattern) = @_;
     $pattern = Thruk::Base::list($pattern);
     return "ANY" if scalar @{$pattern} == 0;

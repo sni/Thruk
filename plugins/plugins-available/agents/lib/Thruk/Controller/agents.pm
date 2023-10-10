@@ -207,8 +207,6 @@ sub _process_save {
         return _process_new($c);
     }
 
-    # TODO: add extra logic if old_backend or old_hostname is set and different
-
     return unless Thruk::Utils::Agents::set_object_model($c, $backend);
 
     my $data = {

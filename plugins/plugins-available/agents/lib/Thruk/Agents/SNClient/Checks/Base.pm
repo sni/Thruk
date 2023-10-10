@@ -3,6 +3,11 @@ package Thruk::Agents::SNClient::Checks::Base;
 use warnings;
 use strict;
 
+use Thruk::Agents::SNClient ();
+use Thruk::Base ();
+use Thruk::Utils::Agents ();
+use Thruk::Utils::Log qw/:all/;
+
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::Base - returns basic checks for snclient
@@ -67,8 +72,8 @@ sub get_checks {
                 'check'    => 'check_network',
                 'args'     => { "filter" => "name=".$net->{'name'} },
                 'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::_make_info($net),
-                'disabled' => Thruk::Agents::SNClient::_check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{network}),
+                'info'     => Thruk::Agents::SNClient::make_info($net),
+                'disabled' => Thruk::Agents::SNClient::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{network}),
             };
         }
     }
@@ -81,8 +86,8 @@ sub get_checks {
                 'check'    => 'check_drivesize',
                 'args'     => { "drive" => $drive->{'drive'} },
                 'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::_make_info($drive),
-                'disabled' => Thruk::Agents::SNClient::_check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{drivesize}),
+                'info'     => Thruk::Agents::SNClient::make_info($drive),
+                'disabled' => Thruk::Agents::SNClient::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{drivesize}),
             };
         }
     }
@@ -91,7 +96,7 @@ sub get_checks {
         my $wanted = {};
         my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
         for my $cfg (@{$configs}) {
-            next unless Thruk::Agents::SNClient::_check_host_match($cfg->{'host'});
+            next unless Thruk::Agents::SNClient::check_host_match($cfg->{'host'});
             next unless $cfg->{'service'};
             for my $n (@{Thruk::Base::list($cfg->{'service'})}) {
                 $wanted->{$n} = $cfg;
@@ -103,11 +108,11 @@ sub get_checks {
             my $cfg = $wanted->{$svc->{'name'}};
             push @{$checks}, {
                 'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
-                'name'     => Thruk::Agents::SNClient::_make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
+                'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
                 'check'    => 'check_service',
                 'args'     => { "service" => $svc->{'name'} },
                 'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::_make_info($svc),
+                'info'     => Thruk::Agents::SNClient::make_info($svc),
             };
         }
     }
@@ -117,7 +122,7 @@ sub get_checks {
         my $wanted = {};
         my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'proc'});
         for my $cfg (@{$configs}) {
-            next unless Thruk::Agents::SNClient::_check_host_match($cfg->{'host'});
+            next unless Thruk::Agents::SNClient::check_host_match($cfg->{'host'});
             next unless $cfg->{'match'};
             for my $n (@{Thruk::Base::list($cfg->{'match'})}) {
                 push @{$wanted->{$n}}, $cfg;
@@ -133,7 +138,7 @@ sub get_checks {
                 ## use critic
 
                 for my $cf (@{$wanted->{$m}}) {
-                    $user = Thruk::Agents::SNClient::_check_pattern_match($p->{'username'}, $cf->{'user'});
+                    $user = Thruk::Agents::SNClient::check_pattern_match($p->{'username'}, $cf->{'user'});
                     next unless $user;
                     $cfg = $cf;
                     last;
@@ -150,11 +155,11 @@ sub get_checks {
             }
             push @{$checks}, {
                 'id'       => $id,
-                'name'     => Thruk::Agents::SNClient::_make_name($cfg->{'name'} // 'proc %e %u', { '%e' => $p->{'exe'}, '%u' => $username }),
+                'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'proc %e %u', { '%e' => $p->{'exe'}, '%u' => $username }),
                 'check'    => 'check_process',
                 'args'     => $filter,
                 'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::_make_info($p),
+                'info'     => Thruk::Agents::SNClient::make_info($p),
             };
         }
     }
