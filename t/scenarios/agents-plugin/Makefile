@@ -18,8 +18,8 @@ wait_start_failed_extra:
 
 extra_test:
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/local_test.sh 0 /test/t/local/omd/*.t
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend-livestatus sudo -iu demo /test/t/local_test.sh 0 /test/t/local/livestatus-backend/*.t
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root livestatus-backend sudo -iu demo /test/t/local_test.sh 0 /test/t/local/livestatus-backend/*.t
 
 extra_test_verbose:
 	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/local_test.sh 1 /test/t/local/omd/*.t
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root backend-livestatus sudo -iu demo /test/t/local_test.sh 1 /test/t/local/livestatus-backend/*.t
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root livestatus-backend sudo -iu demo /test/t/local_test.sh 1 /test/t/local/livestatus-backend/*.t

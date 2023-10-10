@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 144;
+plan tests => 155;
 
 ###########################################################
 # test thruks script path
@@ -50,6 +50,7 @@ TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=save',
         redirect => 1,
         location => "/thruk/cgi-bin/agents.cgi"
 );
+TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['Activate Changes'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/conf.cgi',
         post => {
             'reload' => 'yes',

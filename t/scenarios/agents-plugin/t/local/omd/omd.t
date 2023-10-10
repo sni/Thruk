@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 138;
+plan tests => 143;
 
 ###########################################################
 # test thruks script path
@@ -18,6 +18,10 @@ TestUtils::test_command({
     cmd  => '/bin/bash -c "type thruk"',
     like => ['/\/thruk\/script\/thruk/'],
 }) or BAIL_OUT("wrong thruk path");
+
+###########################################################
+# initialize object configs
+TestUtils::test_command({ cmd => '/usr/bin/env thruk r -d "" /config/check', like => ['/Running\ configuration\ check/'] });
 
 ###########################################################
 # create example host
@@ -60,7 +64,16 @@ TestUtils::test_page( url => '/thruk/cgi-bin/conf.cgi',
 );
 
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['host-http'] );
-TestUtils::test_command({ cmd => '/usr/bin/env thruk agents check inventory host-http', like => ['/inventory\ unchanged/', '/unwanted\ checks/'] });
+# force reschedule
+TestUtils::test_page( url     => '/thruk/r/services/host-http/agent%20inventory/cmd/schedule_forced_svc_check',
+        post    => { start_time => 'now' },
+        like    => ['Command successfully submitted'],
+);
+TestUtils::test_page( url     => '/thruk/cgi-bin/extinfo.cgi?type=2&host=host-http&service=agent+inventory',
+        like    => ['Service agent inventory on'],
+        waitfor => 'inventory unchanged',
+);
+
 TestUtils::test_page( url => '/thruk/cgi-bin/status.cgi', like => ['agent inventory', 'agent version', 'net eth0'] );
 
 # cleanup again
@@ -73,7 +86,6 @@ TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=remove',
         location => "/thruk/cgi-bin/agents.cgi"
 );
 
-TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['Activate Changes'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/conf.cgi',
         post => {
             'reload' => 'yes',
