@@ -29,18 +29,28 @@
         <tr>
           <th class="w-32">Section</th>
           <th class="">Hostname</th>
-          <th class="w-32">Agent</th>
+          <th class="w-20 text-center">Status</th>
           <th class="w-32">Site</th>
+          <th class="w-32">Agent</th>
+          <th class="w-32">Version</th>
           <th class="w-32"></th>
         </tr>
       </thead>
       <tbody class="rowhover">
-        [% FOREACH h = data; agent = build_agent(h) %]
+        [% FOREACH h = data; agent = build_agent(h); hostname = h.name %]
           <tr>
             <td>[% agent.section %]</td>
             <td><a class="link" href="status.cgi?host=[% h.name | uri %]">[% h.name | html %]</a></td>
-            <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
+            <td>
+              [% state = 'PENDING' %]
+              [% IF versions.exists(hostname) %]
+                [% state = servicestatetext(versions.$hostname) %]
+              [% END %]
+              <div class='text-center badge [% state %]'>[% state %]</div>
+            </td>
             <td>[% peer_name(h) | html %]</td>
+            <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
+            <td>[% IF versions.exists(hostname) %][% versions.$hostname.plugin_output.replace('^.*\sv', 'v') | html %][% END %]</td>
             <td>
               <div class="flexrow flex-nowrap gap-x-2">
                 <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>

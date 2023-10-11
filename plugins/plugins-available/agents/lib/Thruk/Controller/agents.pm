@@ -87,6 +87,13 @@ sub _process_show {
                                  );
     $c->stash->{data} = $hosts;
 
+    my $versions = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                         'host_custom_variables' => { '~' => 'AGENT .+' },
+                                         'description' => 'agent version',
+                                        ],
+                                 );
+    $c->stash->{versions} = Thruk::Base::array2hash($versions, "host_name");
+
     # set fallback backend for start page so the apply button can be shown
     if(!$c->req->parameters->{'backend'} && !$c->stash->{'param_backend'}) {
         my $config_backends = Thruk::Utils::Conf::get_backends_with_obj_config($c);
