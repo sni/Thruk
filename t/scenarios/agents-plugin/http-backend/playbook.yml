@@ -25,12 +25,7 @@
   - shell: "snclient &"
 
   - name: create symlink to agents plugin
-    file:
-      src: /thruk/plugins/plugins-available/agents
-      dest: /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents
-      owner: demo
-      group: demo
-      state: link
+    shell: "ln -sfn /thruk/plugins/plugins-available/agents /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents"
 
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
 
