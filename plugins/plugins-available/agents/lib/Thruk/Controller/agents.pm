@@ -222,6 +222,11 @@ sub _process_save {
     my $agent   = $class->new();
     my $objects = $agent->get_config_objects($c, $data);
     for my $obj (@{$objects}) {
+        my $file = $obj->{'file'};
+        if(defined $file && $file->{'readonly'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', sprintf("cannot write to %s, file is marked readonly", $file->{'display'}));
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
+        }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
             Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
