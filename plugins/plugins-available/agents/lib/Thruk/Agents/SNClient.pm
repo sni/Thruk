@@ -114,11 +114,6 @@ sub get_config_objects {
     $hostdata->{'_AGENT_PORT'}     = $port;
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
 
-    if(!$c->{'obj_db'}->update_object($hostobj, $hostdata, "", 1)) {
-        Thruk::Utils::set_message( $c, 'fail_message', "failed to save changes.");
-        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
-    }
-
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
         my $type = $c->req->parameters->{'check.'.$id} // 'off';
