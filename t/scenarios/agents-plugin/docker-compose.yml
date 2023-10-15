@@ -22,6 +22,8 @@ services:
 
   livestatus-backend:
     build: livestatus-backend/
+    ports:
+        - "127.0.0.3:60557:7001"
     environment:
         - TZ=Europe/Berlin
     volumes:

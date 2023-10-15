@@ -18,9 +18,10 @@ Thruk::Agents::SNClient - implements snclient based agent configuration
 =cut
 
 my $settings = {
-    'type'      => 'snclient',
-    'icon'      => 'snclient.png',
-    'icon_dark' => 'snclient_dark.png',
+    'type'          => 'snclient',
+    'icon'          => 'snclient.png',
+    'icon_dark'     => 'snclient_dark.png',
+    'default_port'  => 8443,
     'check_nsc_web_extra_options' => '-t 35',
 };
 
@@ -74,7 +75,7 @@ sub get_config_objects {
     my $ip       = $data->{'ip'}       // '';
     my $section  = $data->{'section'}  // '';
     my $password = $data->{'password'} // '';
-    my $port     = $data->{'port'}     || 8443;
+    my $port     = $data->{'port'}     || $settings->{'default_port'};
 
     my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
     my $hostobj;

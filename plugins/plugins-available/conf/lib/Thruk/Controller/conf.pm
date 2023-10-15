@@ -2739,65 +2739,7 @@ sub _config_check {
 ##########################################################
 sub _config_reload {
     my($c) = @_;
-    $c->stats->profile(begin => "conf::_config_reload");
-
-    $c->stash->{'original_output'} = "";
-    my $time = time();
-    my $name = $c->stash->{'param_backend'};
-    my $peer = $c->db->get_peer_by_key($name);
-    my $pkey = $peer->peer_key();
-    my $wait = 1;
-
-    my $cmd = $c->stash->{'peer_conftool'}->{'obj_reload_cmd'};
-    $cmd = $cmd.' 2>&1' if($cmd && $cmd !~ m|>|mx);
-
-    my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
-    if(!$last_reload) {
-        my $processinfo = $c->db->get_processinfo(backends => $pkey);
-        $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
-        sleep(1) if int($last_reload) == int(time());
-    }
-
-    if($cmd) {
-        if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->{'obj_db'}->{'last_changed'} = 0;
-            $c->{'obj_db'}->{'needs_commit'} = 0;
-            Thruk::Utils::Conf::store_model_retention($c, $pkey);
-        }
-        elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $cmd)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-            $c->{'obj_db'}->{'last_changed'} = 0;
-            $c->{'obj_db'}->{'needs_commit'} = 0;
-            Thruk::Utils::Conf::store_model_retention($c, $pkey);
-        } else {
-            Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
-            $wait = 0;
-        }
-
-        _nice_check_output($c);
-    } else {
-        # restart by livestatus
-        die("no backend found by name ".$name) unless $peer;
-        my $options = {
-            'command' => sprintf("COMMAND [%d] RESTART_PROCESS", $time),
-            'backend' => [ $pkey ],
-        };
-        $c->db->send_command( %{$options} );
-        $c->stash->{'output'} = 'config reloaded by external command.';
-    }
-    $c->stats->profile(comment => "reload command issued: ".time());
-
-    # wait until core responds again
-    if($wait) {
-        if(!Thruk::Utils::wait_after_reload($c, $pkey, $last_reload)) {
-            $c->stash->{'original_output'} .= 'Warning: waiting for core reload failed.';
-            $c->stash->{'output'}          .= "\n<font color='red'>".$c->stash->{'original_output'}."</font>";
-        }
-    }
-
-    $c->stats->profile(end => "conf::_config_reload");
-    return(1, $c->stash->{'original_output'});
+    return(Thruk::Utils::Conf::config_reload($c, $c->stash->{'param_backend'}));
 }
 
 ##########################################################

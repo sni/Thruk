@@ -356,9 +356,8 @@ sub _run_do {
     _debug("".$c->stats->report) if Thruk::Base->verbose >= 3;
 
     # no output?
-    if(!defined $result->{'output'}) {
-        return $result->{'rc'};
-    }
+    confess("no return code at all") unless defined $result->{'rc'};
+    return $result->{'rc'} unless defined $result->{'output'};
 
     # fix encoding
     my $content_type = $result->{'content_type'} || $response->content_type() || 'text/plain';
@@ -922,12 +921,15 @@ sub _cmd_configtool {
         }
 
         my $changed = $opt->{'args'}->{'args'}->{'changed'};
+        my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
+        my $del_hash = Thruk::Base::array2hash($deleted);
         # changed and new files
         for my $f (@{$changed}) {
             my($path,$content, $mtime) = @{$f};
             $content = encode_utf8(Thruk::Utils::Encode::decode_any($content));
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
+            next if ($del_hash->{$f} || $del_hash->{$path}); # do not change files which will be deleted anyway
             my $saved;
             if($file && !$file->readonly()) {
                 # update file
@@ -956,7 +958,6 @@ sub _cmd_configtool {
             }
         }
         # deleted files
-        my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
         for my $f (@{$deleted}) {
             my $file = $c->{'obj_db'}->get_file_by_path($f);
             if($file && !$file->readonly()) {

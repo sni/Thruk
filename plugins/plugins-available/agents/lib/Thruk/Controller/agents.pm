@@ -112,7 +112,7 @@ sub _process_show {
 sub _process_new {
     my($c) = @_;
 
-    my $type  = _default_agent_type($c);
+    my $type  = Thruk::Utils::Agents::default_agent_type($c);
     my $agent = {
         'type'     => $type,
         'hostname' => $c->req->parameters->{'hostname'} // 'new',
@@ -131,7 +131,7 @@ sub _process_edit {
 
     my $hostname = $c->req->parameters->{'hostname'};
     my $backend  = $c->req->parameters->{'backend'};
-    my $type     = $c->req->parameters->{'type'} // _default_agent_type($c);
+    my $type     = $c->req->parameters->{'type'} // Thruk::Utils::Agents::default_agent_type($c);
 
     my $config_backends = Thruk::Utils::Conf::set_backends_with_obj_config($c);
     $c->stash->{config_backends}       = $config_backends;
@@ -173,13 +173,6 @@ sub _process_edit {
     $c->stash->{'has_jquery_ui'}  = 1;
 
     return;
-}
-
-##########################################################
-sub _default_agent_type {
-    my($c) = @_;
-    my $types = Thruk::Utils::Agents::find_agent_module_names();
-    return(lc($types->[0]));
 }
 
 ##########################################################
@@ -266,48 +259,7 @@ sub _process_remove {
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi");
     }
 
-    return unless Thruk::Utils::Agents::set_object_model($c, $backend);
-
-    my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
-    for my $hostobj (@{$objects}) {
-        my $services = $c->{'obj_db'}->get_services_for_host($hostobj);
-        my $remove_host = 1;
-        if($services && $services->{'host'}) {
-            my $removed = 0;
-            for my $name (sort keys %{$services->{'host'}}) {
-                my $svc = $services->{'host'}->{$name};
-                next unless $svc->{'conf'}->{'_AGENT_AUTO_CHECK'};
-                $c->{'obj_db'}->delete_object($svc);
-                $removed++;
-            }
-            if($removed < scalar keys %{$services->{'host'}}) {
-                $remove_host = 0;
-            }
-        }
-
-        # only remove host if it has been created here
-        if($remove_host) {
-            if($hostobj->{'conf'}->{'_AGENT'}) {
-                $c->{'obj_db'}->delete_object($hostobj);
-            }
-        } else {
-            # remove agent related custom variables but keep host
-            for my $key (sort keys %{$hostobj->{'conf'}}) {
-                if($key =~ m/^_AGENT/mx) {
-                    delete $hostobj->{'conf'}->{$key};
-                }
-            }
-            $c->{'obj_db'}->update_object($hostobj, $hostobj->{'conf'}, "", 1);
-        }
-
-        # remove inventory files
-        unlink($c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json');
-    }
-
-    if($c->{'obj_db'}->commit($c)) {
-        $c->stash->{'obj_model_changed'} = 1;
-    }
-    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
+    Thruk::Utils::Agents::remove_host($c, $hostname, $backend);
 
     Thruk::Utils::set_message( $c, 'success_message', "host $hostname removed successfully");
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi");

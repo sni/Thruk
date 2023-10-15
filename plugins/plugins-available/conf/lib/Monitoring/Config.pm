@@ -269,6 +269,7 @@ sub commit {
         unless($file->save()) {
             $rc = 0;
         } else {
+            next if ($file->{'deleted'}); # do not log files twice which will be deleted anyway
             # do some logging
             _audit_log("configtool",
                             sprintf("[config][%s][%s] %s file '%s'",

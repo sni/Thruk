@@ -108,7 +108,7 @@ sub get_services_checks {
 
     # http backends must check inventory on remote host
     # otherwise the local inventory check would result in different checks
-    Thruk::Utils::Agents::set_object_model($c, $backend) unless $c->{'obj_db'};
+    set_object_model($c, $backend) unless $c->{'obj_db'};
     if($c->{'obj_db'}->is_remote()) {
         my $peer = $c->db->get_peer_by_key($backend);
         confess("no peer found by name: ".$backend) unless $peer;
@@ -371,6 +371,95 @@ sub set_checks_category {
 
 ##########################################################
 
+=head2 remove_host
+
+    remove_host($c, $hostname, $backend)
+
+remove hosts, returns 1 if successful
+
+=cut
+sub remove_host {
+    my($c, $hostname, $backend) = @_;
+
+    return unless Thruk::Utils::Agents::set_object_model($c, $backend);
+
+    my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
+    for my $hostobj (@{$objects}) {
+        my $services = $c->{'obj_db'}->get_services_for_host($hostobj);
+        my $remove_host = 1;
+        if($services && $services->{'host'}) {
+            my $removed = 0;
+            for my $name (sort keys %{$services->{'host'}}) {
+                my $svc = $services->{'host'}->{$name};
+                next unless $svc->{'conf'}->{'_AGENT_AUTO_CHECK'};
+                $c->{'obj_db'}->delete_object($svc);
+                $removed++;
+            }
+            if($removed < scalar keys %{$services->{'host'}}) {
+                $remove_host = 0;
+            }
+        }
+
+        # only remove host if it has been created here
+        if($remove_host) {
+            if($hostobj->{'conf'}->{'_AGENT'}) {
+                $c->{'obj_db'}->delete_object($hostobj);
+            }
+        } else {
+            # remove agent related custom variables but keep host
+            for my $key (sort keys %{$hostobj->{'conf'}}) {
+                if($key =~ m/^_AGENT/mx) {
+                    delete $hostobj->{'conf'}->{$key};
+                }
+            }
+            $c->{'obj_db'}->update_object($hostobj, $hostobj->{'conf'}, "", 1);
+        }
+
+        # remove inventory files
+        unlink($c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json');
+    }
+
+    if($c->{'obj_db'}->commit($c)) {
+        $c->stash->{'obj_model_changed'} = 1;
+    }
+    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
+
+    return(1);
+}
+
+##########################################################
+
+=head2 default_agent_type
+
+    default_agent_type()
+
+returns default agent type
+
+=cut
+sub default_agent_type {
+    my($c) = @_;
+    my $types = find_agent_module_names();
+    return(lc($types->[0]));
+}
+
+##########################################################
+
+=head2 default_port
+
+    default_port()
+
+returns default port for given agent type
+
+=cut
+sub default_port {
+    my($type) = @_;
+    my $agent = get_agent_class($type);
+    my $settings = $agent->settings();
+    return($settings->{'default_port'});
+}
+
+##########################################################
+
 =head2 to_id
 
     to_id($name)
@@ -401,7 +490,7 @@ sub scan_agent {
     my $address   = $params->{'ip'};
     my $password  = $params->{'password'};
     my $backend   = $params->{'backend'};
-    my $port      = $params->{'port'} || '8443';
+    my $port      = $params->{'port'} || default_port($agenttype);
 
     return("failed to initialize object model") unless set_object_model($c, $backend);
 
