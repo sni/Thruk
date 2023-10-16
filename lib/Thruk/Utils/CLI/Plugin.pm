@@ -16,21 +16,16 @@ The cache handles thruk plugins itself.
 
 =over 4
 
-=item B<help>
+Available commands are:
 
-    print help and exit
-
-=item B<command>
-
-    Available commands are:
-
-        - list [enabled|all|installed] list all available (or enabled) plugins
-        - enable <plugin>           enable this plugin
-        - disable <plugin>          disable this plugin
-        - search [<pattern>]        search internet plugin registry for plugins
-        - update [<plugin>]         update all or specified plugin
-        - install <plugin|tarball>  install and enable this plugin
-        - remove <plugin>           uninstall and disable this plugin
+    - help                       print help and exit
+    - list [enabled|all|installed] list all available (or enabled) plugins
+    - enable <plugin>           enable this plugin
+    - disable <plugin>          disable this plugin
+    - search [<pattern>]        search internet plugin registry for plugins
+    - update [<plugin>]         update all or specified plugin
+    - install <plugin|tarball>  install and enable this plugin
+    - remove <plugin>           uninstall and disable this plugin
 
 =back
 

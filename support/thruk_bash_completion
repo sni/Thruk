@@ -1,9 +1,10 @@
 _thruk_cmd_options() {
     cmd=$1
     echo "help"
-    HELP=$(thruk $cmd help 2>&1)
-    echo "$HELP" | grep ^\ *- | grep -v '^\ *--' | awk '{print $2 }'
-    echo "$HELP" | grep '^\ *--' | awk '{print $1 }'
+    HELP=$(THRUK_BASH_COMP=1 thruk $cmd help 2>&1)
+    echo "$HELP" | grep ^\ *- | grep -v '^\ *--' | awk '{print $2 }' | tr -d "|"
+    echo "$HELP" | grep '^\ *--' | awk '{print $1 }' | tr -d "|"
+    echo "$HELP" | grep ^\ *-[a-z]* | awk '{print $1 }' | grep -v '^-$'
     return
 }
 

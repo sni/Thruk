@@ -11,6 +11,7 @@ use POSIX ();
 use Thruk::Base ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -837,6 +838,7 @@ sub _get_git_info {
     my($project_root) = @_;
     our $git_info;
     return $git_info if defined $git_info;
+    return "" if $ENV{'THRUK_BASH_COMP'}; # make bash completion faster
     if(! -d $project_root.'/.git') {
         $git_info = '';
         return $git_info;
@@ -865,11 +867,14 @@ sub _get_git_info {
 
     my(undef, $commits) = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
 
+    &timing_breakpoint('_get_git_info');
+
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
         return $git_info;
     }
     $git_info = "+".$commits."~".$branch.'~'.$hash;
+
     return $git_info;
 }
 

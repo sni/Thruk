@@ -10,18 +10,20 @@ The agents command handles agent configs.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] agents [cmd]
+  Usage: thruk [globaloptions] agents [command]
 
 =head1 OPTIONS
 
 =over 4
 
-  help              print help and exit
-  check  | -C       run checks, ex. inventory
-  show   | -S       show checks for host
-  add    | -I       add/inventory new host
-  rm     | -D       delete existing host
-  reload | -R       reload monitoring core
+Available commands are:
+
+  - help                    print help and exit
+  - check  | -C   <host>    run checks, ex. inventory
+  - show   | -S   <host>    show checks for host
+  - add    | -I   <host>    add/inventory new host
+  - rm     | -D   <host>    delete existing host
+  - reload | -R             reload monitoring core
 
   -i                interactive mode (available in edit/add mode)
   --all             show all items   (available in show mode)
