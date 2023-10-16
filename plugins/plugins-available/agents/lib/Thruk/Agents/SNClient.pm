@@ -62,13 +62,13 @@ sub settings {
 
 =head2 get_config_objects
 
-    get_config_objects($c, $data)
+    get_config_objects($c, $data, $checks_config)
 
-returns list of Monitoring::Objects for the host / services
+returns list of Monitoring::Objects for the host / services along with list of objexts to remove
 
 =cut
 sub get_config_objects {
-    my($self, $c, $data) = @_;
+    my($self, $c, $data, $checks_config) = @_;
 
     my $backend  = $data->{'backend'}  || die("missing backend");
     my $hostname = $data->{'hostname'} || die("missing hostname");
@@ -98,6 +98,7 @@ sub get_config_objects {
     }
 
     my @list = ($hostobj);
+    my @remove;
 
     my $hostdata = $hostobj->{'conf'} // {};
 
@@ -117,7 +118,7 @@ sub get_config_objects {
 
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
-        my $type = $c->req->parameters->{'check.'.$id} // 'off';
+        my $type = $checks_config->{'check.'.$id} // 'off';
         my $chk  = $checks_hash->{$id};
         confess("no name") unless $chk->{'name'};
         my $svc = $services->{$chk->{'name'}};
@@ -133,11 +134,14 @@ sub get_config_objects {
             $svc->set_uniq_id($c->{'obj_db'});
         }
 
+        if($type eq 'new') {
+            $settings->{'disabled'} = Thruk::Base::array_remove($settings->{'disabled'}, $id);
+            push @remove, $svc if $svc;
+        }
+
         if($type eq 'off') {
-            # remove service
-            $c->{'obj_db'}->delete_object($svc) if $svc;
+            push @remove, $svc if $svc;
             push @{$settings->{'disabled'}}, $id;
-            $settings->{'disabled'} = Thruk::Base::array_uniq($settings->{'disabled'});
         }
         next unless $type eq 'on';
 
@@ -147,13 +151,14 @@ sub get_config_objects {
     }
 
     my $json = Cpanel::JSON::XS->new->canonical;
+    $settings->{'disabled'} = Thruk::Base::array_uniq($settings->{'disabled'}) if $settings->{'disabled'};
     $settings = $json->encode($settings);
     if($settings ne ($hostdata->{'_AGENT_CONFIG'}//"")) {
         $hostdata->{'_AGENT_CONFIG'} = $settings;
     }
     $hostobj->{'conf'} = $hostdata;
 
-    return \@list;
+    return(\@list, \@remove);
 }
 
 ##########################################################

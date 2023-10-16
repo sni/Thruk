@@ -220,7 +220,7 @@ sub _process_save {
 
     my $class   = Thruk::Utils::Agents::get_agent_class($type);
     my $agent   = $class->new();
-    my $objects = $agent->get_config_objects($c, $data);
+    my($objects, $remove) = $agent->get_config_objects($c, $data, $c->req->parameters);
     for my $obj (@{$objects}) {
         my $file = $obj->{'file'};
         if(defined $file && $file->{'readonly'}) {
@@ -231,6 +231,9 @@ sub _process_save {
             Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
         }
+    }
+    for my $obj (@{$remove}) {
+        $c->{'obj_db'}->delete_object($obj);
     }
 
     if($c->{'obj_db'}->commit($c)) {
