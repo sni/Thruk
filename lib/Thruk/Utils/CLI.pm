@@ -601,7 +601,11 @@ sub _run_commands {
 
     # convert -l to expaned command
     if(defined $opt->{'listbackends'}) {
-        unshift @{$opt->{'commandoptions'}}, 'backend', 'list';
+        if(scalar @{$opt->{'commandoptions'}} == 0) {
+            unshift @{$opt->{'commandoptions'}}, 'backend', 'list';
+        } else {
+            push @{$opt->{'commandoptions'}}, '-l'; # make -l usable by plugins again
+        }
     }
 
     # first unknown option is the command

@@ -20,6 +20,7 @@ Available commands are:
 
   - help                    print help and exit
   - check  | -C   <host>    run checks, ex. inventory
+  - list   | -l             list agent hosts
   - show   | -S   <host>    show checks for host
   - add    | -I   <host>    add/inventory new/existing host
   - update | -II  <host>    add/inventory new/existing host and freshly apply excludes
@@ -31,6 +32,7 @@ Available commands are:
   -P | --password   set password     (available in add mode)
   -p | --port       set tcp port     (available in add mode)
        --ip         set ip address   (available in add mode)
+       --section    set section      (available in add mode)
 
 
 =back
@@ -43,6 +45,7 @@ use File::Temp ();
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Manager ();
 use Thruk::Utils ();
 use Thruk::Utils::Agents ();
 use Thruk::Utils::Auth ();
@@ -76,10 +79,12 @@ sub cmd {
         'type'        => undef,
         'reload'      => undef,
         'check'       => undef,
+        'list'        => undef,
         'show'        => undef,
         'edit'        => undef,
         'remove'      => undef,
         'fresh'       => undef,
+        'section'     => undef,
     };
     $opt->{'fresh'} = 1 if Thruk::Base::array_contains('-II', $commandoptions);
     Getopt::Long::Configure('no_ignore_case');
@@ -91,6 +96,7 @@ sub cmd {
        "p|port=i"     => \$opt->{'port'},
        "P|password=s" => \$opt->{'password'},
        "T|type=s"     => \$opt->{'type'},
+       "l|list"       => \$opt->{'list'},
        "S|show"       => \$opt->{'show'},
        "C|check"      => \$opt->{'check'},
        "R|reload"     => \$opt->{'reload'},
@@ -99,11 +105,13 @@ sub cmd {
        "E|edit"       => \$opt->{'edit'},
        "D|remove"     => \$opt->{'remove'},
        "ip=s"         => \$opt->{'address'},
+       "section=s"    => \$opt->{'section'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
     my $action;
+    if($opt->{'list'})   { $action = "list"; }
     if($opt->{'add'})    { $action = "add"; }
     if($opt->{'edit'})   { $action = "edit"; }
     if($opt->{'fresh'})  { $action = "add"; }
@@ -121,6 +129,7 @@ sub cmd {
     my($output, $rc) = ("", 0);
 
     if($action eq 'check')     { ($output, $rc) = _run_check($c, $commandoptions, $data, $opt); }
+    elsif($action eq 'list')   { ($output, $rc) = _run_list($c, $commandoptions, $opt); }
     elsif($action eq 'show')   { ($output, $rc) = _run_show($c, $commandoptions, $opt); }
     elsif($action eq 'add')    { ($output, $rc) = _run_add($c, $commandoptions, $opt, 0); }
     elsif($action eq 'edit')   { ($output, $rc) = _run_add($c, $commandoptions, $opt, 1); }
@@ -169,6 +178,62 @@ sub _run_check {
         ($output, $rc) = _check_inventory($c, $host, $opt);
     }
     return($output, $rc);
+}
+
+##############################################
+sub _run_list {
+    my($c, $commandoptions, $opt) = @_;
+
+    my $filter = shift @{$commandoptions};
+    my @result;
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                              'custom_variables' => { '~' => 'AGENT .+' },
+                                            ],
+                                 );
+    my $versions = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                         'host_custom_variables' => { '~' => 'AGENT .+' },
+                                         'description' => 'agent version',
+                                        ],
+                                 );
+    $versions = Thruk::Base::array2hash($versions, "host_name");
+
+    for my $hst (@{$hosts}) {
+        next if($filter && $hst->{'name'} !~ m/$filter/mx);
+        my $agent = Thruk::Utils::Agents::build_agent($hst);
+        my $row = {
+            'host_name' => $hst->{'name'},
+            'site'      => Thruk::Utils::Filter::peer_name($hst),
+            'section'   => $agent->{'section'},
+            'agent'     => $agent->{'type'},
+        };
+        if($versions->{$hst->{'name'}}) {
+            my $v = $versions->{$hst->{'name'}}->{'plugin_output'};
+            $v =~ s/^.*v/v/gmx;
+            $row->{'version'} = $v;
+        }
+        push @result, $row;
+    }
+
+    if(scalar @result == 0) {
+        return("no agents found matching '".$filter."'\n", 0) if $filter;
+        return("no agents found\n", 0);
+    }
+
+    # sort by section and hostname
+    my $sorted = Thruk::Backend::Manager::sort_result($c, \@result, { 'ASC' => ['section', 'host_name'] });
+
+    my $out = Thruk::Utils::text_table(
+        keys => [
+                    ['Section',  'section'],
+                    ['Hostname', 'host_name'],
+                    ['Site',     'site'],
+                    ['Agent',    'agent'],
+                    ['Version',  'version'],
+                ],
+        data => $sorted,
+    );
+
+    return($out, 0);
 }
 
 ##############################################
